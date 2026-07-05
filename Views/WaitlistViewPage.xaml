@@ -1,0 +1,157 @@
+﻿<Page
+    x:Class="MTM_Waitlist.Views.WaitlistViewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:animations="using:CommunityToolkit.WinUI.UI.Animations"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Core.Models"
+    xmlns:winui="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d">
+
+    <Grid x:Name="ContentArea">
+        <ListView
+            Padding="6,12"
+            IsItemClickEnabled="True"
+            ItemClick="ListView_ItemClick"
+            ItemsSource="{x:Bind ViewModel.Source, Mode=OneWay}"
+            SelectionMode="Single">
+
+            <!--  Adjust container item style to stretch row content full width  -->
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Margin" Value="0,0,0,8" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListViewItem">
+                                <ListViewItemPresenter
+                                    ContentMargin="0"
+                                    ContentTransitions="{TemplateBinding ContentTransitions}"
+                                    PointerOverBackground="Transparent"
+                                    PressedBackground="Transparent"
+                                    SelectedBackground="Transparent"
+                                    SelectedPointerOverBackground="Transparent"
+                                    SelectionCheckMarkVisualEnabled="False" />
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.ItemContainerStyle>
+
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:SampleOrder">
+                    <Border
+                        x:Name="CardBorder"
+                        Height="100"
+                        Padding="16"
+                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                        <!--  Clean, un-embedded layout implementation  -->
+                        <Grid VerticalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!--  Left Column: PNG Image Indicator  -->
+                            <Image
+                                Grid.Column="0"
+                                Width="60"
+                                Height="60"
+                                Margin="0,0,16,0"
+                                VerticalAlignment="Stretch"
+                                AutomationProperties.Name="{x:Bind SymbolName}"
+                                Source="{x:Bind ImageIconPath, Mode=OneWay}" />
+
+                            <!--  Middle Column: Detail Text Blocks  -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Company}" />
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind SymbolName}" />
+                            </StackPanel>
+
+                            <!--  Right Column: Action Buttons  -->
+                            <StackPanel
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                                <Button
+                                    Width="40"
+                                    Height="40"
+                                    AutomationProperties.Name="Edit"
+                                    Background="{ThemeResource SystemAccentColor}">
+                                    <FontIcon
+                                        FontSize="14"
+                                        Foreground="White"
+                                        Glyph="&#xE70F;" />
+                                </Button>
+                                <Button
+                                    Width="40"
+                                    Height="40"
+                                    AutomationProperties.Name="Cancel"
+                                    Background="{ThemeResource SystemFillColorCriticalBrush}">
+                                    <FontIcon
+                                        FontSize="14"
+                                        Foreground="White"
+                                        Glyph="&#xE10A;" />
+                                </Button>
+                                <Button
+                                    Width="40"
+                                    Height="40"
+                                    AutomationProperties.Name="Accept"
+                                    Background="{ThemeResource SystemFillColorSuccessBrush}">
+                                    <FontIcon
+                                        FontSize="14"
+                                        Foreground="White"
+                                        Glyph="&#xE10B;" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <!--  Outer Card Selection State Changes only the border brush  -->
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="SelectionStates">
+                                <VisualState x:Name="Unselected" />
+                                <VisualState x:Name="Selected">
+                                    <VisualState.Setters>
+                                        <Setter Target="CardBorder.BorderBrush" Value="{ThemeResource SystemControlHighlightAccentBrush}" />
+                                        <Setter Target="CardBorder.BorderThickness" Value="2" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!--  Floating Green Circular Action Button  -->
+        <Button
+            Width="56"
+            Height="56"
+            Margin="0,0,24,24"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            AutomationProperties.Name="Add Waitlist Item"
+            Background="{ThemeResource SystemFillColorSuccessBrush}"
+            BorderBrush="Black"
+            BorderThickness="2"
+            CornerRadius="28"
+            Style="{ThemeResource DefaultButtonStyle}">
+            <FontIcon
+                FontSize="20"
+                Foreground="White"
+                Glyph="&#xE710;" />
+        </Button>
+    </Grid>
+</Page>

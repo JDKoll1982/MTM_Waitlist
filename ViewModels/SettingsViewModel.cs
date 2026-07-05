@@ -1,0 +1,76 @@
+﻿using System.Reflection;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
+using MTM_Waitlist.Contracts.Services;
+using MTM_Waitlist.Helpers;
+using Windows.ApplicationModel;
+
+namespace MTM_Waitlist.ViewModels;
+
+public partial class SettingsViewModel : ObservableRecipient
+{
+    private readonly IThemeSelectorService _themeSelectorService;
+
+    [ObservableProperty]
+    public partial ElementTheme ElementTheme
+    {
+        get; set;
+    }
+
+    [ObservableProperty]
+    public partial string VersionDescription
+    {
+        get; set;
+    }
+
+    // FIX: A clean, type-safe string representation of the Enum for the XAML engine
+    public string SelectedThemeText => ElementTheme.ToString();
+
+    public ICommand SwitchThemeCommand
+    {
+        get;
+    }
+
+    public SettingsViewModel(IThemeSelectorService themeSelectorService)
+    {
+        _themeSelectorService = themeSelectorService;
+
+        ElementTheme = _themeSelectorService.Theme;
+        VersionDescription = GetVersionDescription();
+
+        SwitchThemeCommand = new RelayCommand<ElementTheme>(
+            async (param) =>
+            {
+                if (ElementTheme != param)
+                {
+                    ElementTheme = param;
+                    await _themeSelectorService.SetThemeAsync(param);
+                }
+            });
+    }
+
+    // FIX: This partial method is automatically invoked by the MVVM Toolkit source generator 
+    // whenever the ElementTheme property is modified, updating our custom XAML text field.
+    partial void OnElementThemeChanged(ElementTheme value)
+    {
+        OnPropertyChanged(nameof(SelectedThemeText));
+    }
+
+    private static string GetVersionDescription()
+    {
+        Version version;
+        if (RuntimeHelper.IsMSIX)
+        {
+            var packageVersion = Package.Current.Id.Version;
+            version = new(packageVersion.Major, packageVersion.Minor, packageVersion.Build, packageVersion.Revision);
+        }
+        else
+        {
+            version = Assembly.GetExecutingAssembly().GetName().Version!;
+        }
+
+        return $"{"AppDisplayName".GetLocalized()} - {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+    }
+}
