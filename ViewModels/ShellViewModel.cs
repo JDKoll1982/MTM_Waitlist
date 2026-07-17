@@ -7,6 +7,8 @@ namespace MTM_Waitlist.ViewModels;
 
 public partial class ShellViewModel : ObservableRecipient
 {
+    private readonly IBuildingSelectionService _buildingSelectionService;
+
     [ObservableProperty]
     public partial bool IsBackEnabled
     {
@@ -19,20 +21,35 @@ public partial class ShellViewModel : ObservableRecipient
         get; set;
     }
 
+    [ObservableProperty]
+    public partial string? SelectedBuilding
+    {
+        get; set;
+    }
+
+    public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
+
     public INavigationService NavigationService
     {
         get;
     }
+
     public INavigationViewService NavigationViewService
     {
         get;
     }
 
-    public ShellViewModel(INavigationService navigationService, INavigationViewService navigationViewService)
+    public ShellViewModel(INavigationService navigationService, INavigationViewService navigationViewService, IBuildingSelectionService buildingSelectionService)
     {
+        ArgumentNullException.ThrowIfNull(navigationService);
+        ArgumentNullException.ThrowIfNull(navigationViewService);
+        ArgumentNullException.ThrowIfNull(buildingSelectionService);
+
         NavigationService = navigationService;
         NavigationService.Navigated += OnNavigated;
         NavigationViewService = navigationViewService;
+        _buildingSelectionService = buildingSelectionService;
+        SelectedBuilding = _buildingSelectionService.SelectedBuilding;
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)
@@ -50,5 +67,15 @@ public partial class ShellViewModel : ObservableRecipient
         {
             Selected = selectedItem;
         }
+    }
+
+    partial void OnSelectedBuildingChanged(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        _buildingSelectionService.SelectedBuilding = value;
     }
 }

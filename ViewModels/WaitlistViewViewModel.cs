@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,29 +14,43 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 {
     private readonly INavigationService _navigationService;
     private readonly ISampleDataService _sampleDataService;
+    private readonly IBuildingSelectionService _buildingSelectionService;
+    private bool _isSubscribed;
 
     public ObservableCollection<SampleOrder> Source { get; } = new ObservableCollection<SampleOrder>();
 
-    public WaitlistViewViewModel(INavigationService navigationService, ISampleDataService sampleDataService)
+    public WaitlistViewViewModel(
+        INavigationService navigationService,
+        ISampleDataService sampleDataService,
+        IBuildingSelectionService buildingSelectionService)
     {
+        ArgumentNullException.ThrowIfNull(navigationService);
+        ArgumentNullException.ThrowIfNull(sampleDataService);
+        ArgumentNullException.ThrowIfNull(buildingSelectionService);
+
         _navigationService = navigationService;
         _sampleDataService = sampleDataService;
+        _buildingSelectionService = buildingSelectionService;
     }
 
     public async void OnNavigatedTo(object parameter)
     {
-        Source.Clear();
-
-        // TODO: Replace with real data.
-        var data = await _sampleDataService.GetContentGridDataAsync();
-        foreach (var item in data)
+        if (!_isSubscribed)
         {
-            Source.Add(item);
+            _buildingSelectionService.BuildingChanged += OnBuildingChanged;
+            _isSubscribed = true;
         }
+
+        await LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
     }
 
     public void OnNavigatedFrom()
     {
+        if (_isSubscribed)
+        {
+            _buildingSelectionService.BuildingChanged -= OnBuildingChanged;
+            _isSubscribed = false;
+        }
     }
 
     [RelayCommand]
@@ -47,6 +60,22 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         {
             _navigationService.SetListDataItemForNextConnectedAnimation(clickedItem);
             _navigationService.NavigateTo(typeof(WaitlistViewDetailViewModel).FullName!, clickedItem.OrderID);
+        }
+    }
+
+    private async void OnBuildingChanged(object? sender, EventArgs e)
+    {
+        await LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+    }
+
+    private async Task LoadOrdersAsync(string building)
+    {
+        Source.Clear();
+
+        var data = await _sampleDataService.GetContentGridDataAsync(building);
+        foreach (var item in data)
+        {
+            Source.Add(item);
         }
     }
 }

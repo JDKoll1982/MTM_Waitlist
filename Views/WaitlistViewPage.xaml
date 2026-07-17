@@ -45,7 +45,7 @@
                 <DataTemplate x:DataType="models:SampleOrder">
                     <Border
                         x:Name="CardBorder"
-                        Height="100"
+                        Height="150"
                         Padding="16"
                         Background="{ThemeResource LayerFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -62,8 +62,8 @@
                             <!--  Left Column: PNG Image Indicator  -->
                             <Image
                                 Grid.Column="0"
-                                Width="60"
-                                Height="60"
+                                Width="120"
+                                Height="120"
                                 Margin="0,0,16,0"
                                 VerticalAlignment="Stretch"
                                 AutomationProperties.Name="{x:Bind SymbolName}"
@@ -71,9 +71,14 @@
 
                             <!--  Middle Column: Detail Text Blocks  -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Company}" />
                                 <TextBlock
-                                    Margin="0,2,0,0"
+                                    Margin="12,0,12,0"
+                                    FontSize="30"
+                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                    Text="{x:Bind Company}" />
+                                <TextBlock
+                                    Margin="12,2,12,0"
+                                    FontSize="20"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                     Style="{ThemeResource CaptionTextBlockStyle}"
                                     Text="{x:Bind SymbolName}" />
@@ -86,32 +91,35 @@
                                 Orientation="Horizontal"
                                 Spacing="8">
                                 <Button
-                                    Width="40"
-                                    Height="40"
+                                    Width="60"
+                                    Height="60"
                                     AutomationProperties.Name="Edit"
-                                    Background="{ThemeResource SystemAccentColor}">
+                                    Background="{ThemeResource SystemAccentColor}"
+                                    CornerRadius="12">
                                     <FontIcon
-                                        FontSize="14"
+                                        FontSize="24"
                                         Foreground="White"
                                         Glyph="&#xE70F;" />
                                 </Button>
                                 <Button
-                                    Width="40"
-                                    Height="40"
+                                    Width="60"
+                                    Height="60"
                                     AutomationProperties.Name="Cancel"
-                                    Background="{ThemeResource SystemFillColorCriticalBrush}">
+                                    Background="{ThemeResource SystemFillColorCriticalBrush}"
+                                    CornerRadius="12">
                                     <FontIcon
-                                        FontSize="14"
+                                        FontSize="24"
                                         Foreground="White"
                                         Glyph="&#xE10A;" />
                                 </Button>
                                 <Button
-                                    Width="40"
-                                    Height="40"
+                                    Width="60"
+                                    Height="60"
                                     AutomationProperties.Name="Accept"
-                                    Background="{ThemeResource SystemFillColorSuccessBrush}">
+                                    Background="{ThemeResource SystemFillColorSuccessBrush}"
+                                    CornerRadius="12">
                                     <FontIcon
-                                        FontSize="14"
+                                        FontSize="24"
                                         Foreground="White"
                                         Glyph="&#xE10B;" />
                                 </Button>
@@ -137,19 +145,19 @@
 
         <!--  Floating Green Circular Action Button  -->
         <Button
-            Width="56"
-            Height="56"
+            Width="100"
+            Height="100"
             Margin="0,0,24,24"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             AutomationProperties.Name="Add Waitlist Item"
             Background="{ThemeResource SystemFillColorSuccessBrush}"
             BorderBrush="Black"
-            BorderThickness="2"
-            CornerRadius="28"
+            BorderThickness="4"
+            CornerRadius="50"
             Style="{ThemeResource DefaultButtonStyle}">
             <FontIcon
-                FontSize="20"
+                FontSize="40"
                 Foreground="White"
                 Glyph="&#xE710;" />
         </Button>
