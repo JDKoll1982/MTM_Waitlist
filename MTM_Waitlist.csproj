@@ -49,7 +49,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MTM_Waitlist.Core\MTM_Waitlist.Core.csproj" />
+    <Compile Remove="MTM_Waitlist.Core\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="MTM_Waitlist.Core\MTM_Waitlist.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
