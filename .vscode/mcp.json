@@ -1,0 +1,17 @@
+{
+    "servers": {
+        "oraios/serena": {
+            "type": "stdio",
+            "command": "C:\\Users\\johnk\\.local\\bin\\uvx.exe",
+            "args": [
+                "--from",
+                "git+https://github.com/oraios/serena",
+                "serena",
+                "start-mcp-server",
+                "serena@latest",
+                "--context",
+                "ide-assistant"
+            ]
+        }
+    }
+}

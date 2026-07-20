@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Navigation;
 using MTM_Waitlist.Contracts.Services;
+using MTM_Waitlist.Models;
 using MTM_Waitlist.Views;
 
 namespace MTM_Waitlist.ViewModels;
@@ -8,6 +9,7 @@ namespace MTM_Waitlist.ViewModels;
 public partial class ShellViewModel : ObservableRecipient
 {
     private readonly IBuildingSelectionService _buildingSelectionService;
+    private readonly StartupState _startupState;
 
     [ObservableProperty]
     public partial bool IsBackEnabled
@@ -29,6 +31,8 @@ public partial class ShellViewModel : ObservableRecipient
 
     public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
 
+    public bool IsDeveloperModeVisible => _startupState.IsDeveloper;
+
     public INavigationService NavigationService
     {
         get;
@@ -39,16 +43,22 @@ public partial class ShellViewModel : ObservableRecipient
         get;
     }
 
-    public ShellViewModel(INavigationService navigationService, INavigationViewService navigationViewService, IBuildingSelectionService buildingSelectionService)
+    public ShellViewModel(
+        INavigationService navigationService,
+        INavigationViewService navigationViewService,
+        IBuildingSelectionService buildingSelectionService,
+        StartupState startupState)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(navigationViewService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
+        ArgumentNullException.ThrowIfNull(startupState);
 
         NavigationService = navigationService;
         NavigationService.Navigated += OnNavigated;
         NavigationViewService = navigationViewService;
         _buildingSelectionService = buildingSelectionService;
+        _startupState = startupState;
         SelectedBuilding = _buildingSelectionService.SelectedBuilding;
     }
 

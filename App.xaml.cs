@@ -10,7 +10,6 @@ using MTM_Waitlist.Models;
 using MTM_Waitlist.Notifications;
 using MTM_Waitlist.Services;
 using MTM_Waitlist.ViewModels;
-using MTM_Waitlist.Views;
 
 namespace MTM_Waitlist;
 
@@ -47,40 +46,7 @@ public partial class App : Application
         UseContentRoot(AppContext.BaseDirectory).
         ConfigureServices((context, services) =>
         {
-            // Default Activation Handler
-            services.AddTransient<ActivationHandler<LaunchActivatedEventArgs>, DefaultActivationHandler>();
-
-            // Other Activation Handlers
-            services.AddTransient<IActivationHandler, AppNotificationActivationHandler>();
-
-            // Services
-            services.AddSingleton<IAppNotificationService, AppNotificationService>();
-            services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
-            services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
-            services.AddSingleton<IBuildingSelectionService, BuildingSelectionService>();
-            services.AddTransient<INavigationViewService, NavigationViewService>();
-            services.AddSingleton<IActivationService, ActivationService>();
-            services.AddSingleton<IPageService, PageService>();
-            services.AddSingleton<INavigationService, NavigationService>();
-
-            // Core Services
-            services.AddSingleton<ISampleDataService, SampleDataService>();
-            services.AddSingleton<IFileService, FileService>();
-
-            // Views and ViewModels
-            services.AddTransient<SettingsViewModel>();
-            services.AddTransient<SettingsPage>();
-            services.AddTransient<WaitlistViewDetailViewModel>();
-            services.AddTransient<WaitlistViewDetailPage>();
-            services.AddTransient<WaitlistViewViewModel>();
-            services.AddTransient<WaitlistViewPage>();
-            services.AddTransient<MainShellViewModel>();
-            services.AddTransient<MainShellPage>();
-            services.AddTransient<ShellPage>();
-            services.AddTransient<ShellViewModel>();
-
-            // Configuration
-            services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
+            services.AddAppServices(context);
         }).
         Build();
 

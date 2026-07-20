@@ -14,10 +14,12 @@ public class PageService : IPageService
 
     public PageService()
     {
+        Configure<SplashViewModel, SplashPage>();
         Configure<MainShellViewModel, MainShellPage>();
         Configure<WaitlistViewViewModel, WaitlistViewPage>();
         Configure<WaitlistViewDetailViewModel, WaitlistViewDetailPage>();
         Configure<SettingsViewModel, SettingsPage>();
+        Configure<DeveloperModeViewModel, DeveloperModePage>();
     }
 
     public Type GetPageType(string key)

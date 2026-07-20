@@ -14,18 +14,26 @@ namespace MTM_Waitlist.Views;
 // TODO: Update NavigationViewItem titles and icons in ShellPage.xaml.
 public sealed partial class ShellPage : Page
 {
+    private readonly IStartupShellStateService _startupShellStateService;
+
     public ShellViewModel ViewModel
     {
         get;
     }
 
-    public ShellPage(ShellViewModel viewModel)
+    public ShellPage(ShellViewModel viewModel, IStartupShellStateService startupShellStateService)
     {
         ViewModel = viewModel;
+        _startupShellStateService = startupShellStateService;
         InitializeComponent();
 
         ViewModel.NavigationService.Frame = NavigationFrame;
         ViewModel.NavigationViewService.Initialize(NavigationViewControl);
+        DeveloperModeItem.Visibility = ViewModel.IsDeveloperModeVisible
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        _startupShellStateService.StateChanged += OnStartupShellStateChanged;
+        ApplyStartupShellState();
     }
 
     private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -41,6 +49,31 @@ public sealed partial class ShellPage : Page
 
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu));
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
+
+        Unloaded += ShellPage_Unloaded;
+    }
+
+    private void OnStartupShellStateChanged(object? sender, EventArgs e)
+    {
+        _ = DispatcherQueue.TryEnqueue(() =>
+        {
+            ApplyStartupShellState();
+            DeveloperModeItem.Visibility = ViewModel.IsDeveloperModeVisible
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        });
+    }
+
+    private void ApplyStartupShellState()
+    {
+        NavigationViewControl.IsPaneVisible = _startupShellStateService.IsNavigationVisible;
+        NavigationViewControl.IsSettingsVisible = _startupShellStateService.IsNavigationVisible;
+    }
+
+    private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        _startupShellStateService.StateChanged -= OnStartupShellStateChanged;
+        Unloaded -= ShellPage_Unloaded;
     }
 
     private void NavigationViewControl_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)

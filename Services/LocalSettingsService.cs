@@ -108,4 +108,30 @@ public class LocalSettingsService : ILocalSettingsService
             await Task.Run(() => _fileService.Save(_applicationDataFolder, _localsettingsFile, _settings));
         }
     }
+
+    public async Task ResetAsync()
+    {
+        _settings = new Dictionary<string, object>();
+        _isInitialized = true;
+
+        if (RuntimeHelper.IsMSIX)
+        {
+            ApplicationData.Current.LocalSettings.Values.Clear();
+            return;
+        }
+
+        await Task.Run(() => _fileService.Delete(_applicationDataFolder, _localsettingsFile));
+    }
+
+    public async Task CorruptForTestAsync()
+    {
+        if (RuntimeHelper.IsMSIX)
+        {
+            ApplicationData.Current.LocalSettings.Values["Developer.RecoveryProbe"] = "{ invalid-json";
+            return;
+        }
+
+        Directory.CreateDirectory(_applicationDataFolder);
+        await File.WriteAllTextAsync(Path.Combine(_applicationDataFolder, _localsettingsFile), "{ invalid-json");
+    }
 }

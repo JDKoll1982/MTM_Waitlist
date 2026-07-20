@@ -12,19 +12,26 @@ public class ActivationService : IActivationService
     private readonly ActivationHandler<LaunchActivatedEventArgs> _defaultHandler;
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
     private readonly IThemeSelectorService _themeSelectorService;
+    private readonly IStartupShellStateService _startupShellStateService;
     private UIElement? _shell = null;
 
-    public ActivationService(ActivationHandler<LaunchActivatedEventArgs> defaultHandler, IEnumerable<IActivationHandler> activationHandlers, IThemeSelectorService themeSelectorService)
+    public ActivationService(
+        ActivationHandler<LaunchActivatedEventArgs> defaultHandler,
+        IEnumerable<IActivationHandler> activationHandlers,
+        IThemeSelectorService themeSelectorService,
+        IStartupShellStateService startupShellStateService)
     {
         _defaultHandler = defaultHandler;
         _activationHandlers = activationHandlers;
         _themeSelectorService = themeSelectorService;
+        _startupShellStateService = startupShellStateService;
     }
 
     public async Task ActivateAsync(object activationArgs)
     {
         // Execute tasks before activation.
         await InitializeAsync();
+        _startupShellStateService.EnterSplashMode();
 
         // Set the MainWindow Content.
         if (App.MainWindow.Content == null)

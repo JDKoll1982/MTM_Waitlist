@@ -1,0 +1,25 @@
+version: "1.0"
+name: WinUI3 Agentic Environment Initialization
+
+# Triggers automatically whenever an agentic task loop is initialized
+on_task_start:
+  steps:
+    - name: Resolve Active Tool Chains
+      run: |
+        echo "Mapping active workspace extensions..."
+        echo "Serena Repository Engine [Active]"
+        echo "Context7 Reference Engine [Active]"
+
+    - name: Verify Local .NET Environment
+      run: |
+        dotnet --version
+        echo "Target Runtime: .NET 10.0"
+
+    - name: Enforce Architecture Pre-flight
+      run: |
+        echo "Injecting mandatory repository constraint definitions..."
+        echo "Strictly targeting Microsoft.UI.Xaml namespaces."
+
+    - name: Bind Global Workspace Context
+      instruction_files:
+        - .github/copilot-instructions.md
