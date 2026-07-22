@@ -6,7 +6,7 @@
 - Implemented:
 	- Windows username is captured into startup context.
 	- Local settings path validation and configuration read probe are implemented.
-	- Recovery entry points (`Retry`, `Reset to Defaults`) are available from splash actions.
+	- Recovery entry points (`Try Again`, `Reset to Defaults`) are available from splash actions.
 	- Targeted single-setting remediation runs before the full reset fallback.
 	- Splash recovery text now distinguishes targeted repair from clearing all local settings.
 - Missing:

@@ -1,5 +1,18 @@
 # Phase 07 - Logging Pipeline and Retention
 
+## Current Implementation Status (As of 2026-07-22)
+
+- Status: In Progress
+- Implemented:
+	- Debug-only startup trace instrumentation across app launch, splash, activation service, and startup coordinator.
+	- Logging calls are non-blocking debug output (`Debug.WriteLine`) and do not block UI startup.
+- Missing:
+	- Producer-consumer startup log pipeline with background worker.
+	- Hosted VM JSONL file sink, centralized forwarding, and retention cleanup (14-day and 250 MB cap).
+	- Admin/developer destination-selection gate and cancel-to-stop behavior.
+- Evidence:
+	- `Helpers/StartupDebugLog.cs`, `App.xaml.cs`, `Services/ActivationService.cs`, `Services/StartupCoordinator.cs`, `ViewModels/SplashViewModel.cs`
+
 ## Goal
 
 Implement non-blocking startup logging with hosted VM retention rules.

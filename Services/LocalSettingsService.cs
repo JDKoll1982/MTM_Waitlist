@@ -109,6 +109,24 @@ public class LocalSettingsService : ILocalSettingsService
         }
     }
 
+    public async Task ResetSettingAsync(string key, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (RuntimeHelper.IsMSIX)
+        {
+            ApplicationData.Current.LocalSettings.Values.Remove(key);
+            return;
+        }
+
+        await InitializeAsync();
+        _settings.Remove(key);
+        await Task.Run(() => _fileService.Save(_applicationDataFolder, _localsettingsFile, _settings));
+    }
+
+    Task ILocalSettingsService.ResetSettingAsync(string key, CancellationToken cancellationToken)
+        => ResetSettingAsync(key, cancellationToken);
+
     public async Task ResetAsync()
     {
         _settings = new Dictionary<string, object>();

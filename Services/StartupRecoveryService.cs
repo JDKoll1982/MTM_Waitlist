@@ -15,6 +15,13 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
         _localSettingsService = localSettingsService;
     }
 
+    public Task ResetSettingAsync(string key, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        return _localSettingsService.ResetSettingAsync(key, cancellationToken);
+    }
+
     public Task ResetToDefaultsAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

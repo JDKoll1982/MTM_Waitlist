@@ -1,5 +1,17 @@
 # Phase 09 - Role Enforcement and Final Polish
 
+## Current Implementation Status (As of 2026-07-22)
+
+- Status: Not Started
+- Implemented:
+	- Startup state tracks a current role string and developer check helper.
+- Missing:
+	- Explicit role gates for Waitlist and Work Stations module actions.
+	- Complete startup/admin control gating enforcement matrix.
+	- Accessibility/error-copy hardening and full routing-matrix regression pass.
+- Evidence:
+	- `Models/StartupState.cs`
+
 ## Goal
 
 Enforce role boundaries and complete final startup hardening checks.

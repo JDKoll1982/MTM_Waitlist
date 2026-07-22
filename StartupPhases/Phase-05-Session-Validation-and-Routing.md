@@ -1,5 +1,19 @@
 # Phase 05 - Session Validation and Routing
 
+## Current Implementation Status (As of 2026-07-22)
+
+- Status: In Progress
+- Implemented:
+	- Startup currently routes to main shell on startup success through coordinator result routing.
+	- Splash startup sequence reaches one final route target in current baseline.
+- Missing:
+	- Server-time session validation via database function.
+	- Dual-source session token arbitration (local-first vs database).
+	- Full routing matrix coverage for all session/identity combinations.
+	- Finalized five-step user-facing startup progress strings.
+- Evidence:
+	- `Services/StartupCoordinator.cs`, `ViewModels/SplashViewModel.cs`
+
 ## Goal
 
 Complete startup routing using server-time session validation.

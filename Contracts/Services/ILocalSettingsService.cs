@@ -6,6 +6,8 @@ public interface ILocalSettingsService
 
     Task SaveSettingAsync<T>(string key, T value);
 
+    Task ResetSettingAsync(string key, CancellationToken cancellationToken = default);
+
     Task ResetAsync();
 
     Task CorruptForTestAsync();

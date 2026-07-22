@@ -4,8 +4,8 @@
 
 - Source of Truth Spec: [../StartupSpec.md](../StartupSpec.md)
 - Phase Index: [README.md](README.md)
-- Phase 01: [Phase-01-Startup-Shell-and-Splash.md](Phase-01-Startup-Shell-and-Splash.md)
-- Phase 02: [Phase-02-Environment-and-Config.md](Phase-02-Environment-and-Config.md)
+- Phase 01: [Phase-01-Startup-Shell-and-Splash-Complete.md](Phase-01-Startup-Shell-and-Splash-Complete.md)
+- Phase 02: [Phase-02-Environment-and-Config-Complete.md](Phase-02-Environment-and-Config-Complete.md)
 - Phase 03: [Phase-03-Identity-and-Workstation-Checks.md](Phase-03-Identity-and-Workstation-Checks.md)
 - Phase 04: [Phase-04-Database-Failure-UX-and-Retry.md](Phase-04-Database-Failure-UX-and-Retry.md)
 - Phase 05: [Phase-05-Session-Validation-and-Routing.md](Phase-05-Session-Validation-and-Routing.md)
@@ -16,6 +16,21 @@
 
 ## Project Overview: Startup Resilience
 This workflow documents the 9-phase implementation of the MTM Waitlist application's startup engine. The system is built on a non-blocking architecture that prioritizes identity validation, data integrity, and enterprise-grade observability.
+
+## Current Implementation Status (As of 2026-07-22)
+
+| File | Status | Notes |
+|---|---|---|
+| Phase 01 | Complete | Startup uses a standalone splash window and startup coordinator handoff. |
+| Phase 02 | Complete | Username/config load, targeted single-setting remediation, and reset actions are implemented. |
+| Phase 03 | Not Started | No database user/workstation identity checks are implemented yet. |
+| Phase 04 | Not Started | No DB timeout/retry policy or DB-down retry UX flow is implemented yet. |
+| Phase 05 | In Progress | Startup routing to main shell exists, but no session token/server-time validation matrix is implemented. |
+| Phase 06 | Not Started | Duplicate-record self-healing and repair flows are not implemented. |
+| Phase 07 | In Progress | Debug-only startup tracing exists; full async JSONL pipeline/retention/forwarding not implemented. |
+| Phase 08 | Not Started | Developer export/report workflows are not implemented. |
+| Phase 09 | Not Started | Final RBAC enforcement matrix and polish checks are not implemented. |
+| Phase Suggestions | Active Backlog | Suggestion list exists and remains actionable. |
 
 ## Clarified Decisions (Applied Across All Phases)
 
@@ -54,7 +69,7 @@ Based on the startup implementation requirements, these package versions are rec
 ## Phase 01: Startup Shell and Splash
 Establish the UI container and dependency injection (DI) foundation.
 
-- Tasks: Wire app launch to the Splash Screen route. All services must use a dedicated DI injector service.
+- Tasks: Wire app launch to a standalone Splash window startup entry point. All services must use a dedicated DI injector service.
 - Splash Standard: All user-facing text must avoid code jargon and present every startup step clearly.
 
 ## Phase 02: Environment and Configuration

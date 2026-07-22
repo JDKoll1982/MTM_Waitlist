@@ -85,4 +85,9 @@
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
+  <!-- Add this near the bottom of MTM_Waitlist.csproj to block recursive compiling -->
+  <ItemGroup>
+    <Compile Remove="MTM_Waitlist.Tests\**\*.cs" />
+    <None Include="MTM_Waitlist.Tests\**\*" />
+  </ItemGroup>
 </Project>

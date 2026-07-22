@@ -1,5 +1,17 @@
 # Phase 06 - Recovery Flows and Data Repair
 
+## Current Implementation Status (As of 2026-07-22)
+
+- Status: Not Started
+- Implemented:
+	- Full reset recovery action is present.
+- Missing:
+	- Duplicate user row detection and oldest-row cleanup logic.
+	- Startup data-repair continuation logic for identity/session data.
+	- Targeted corrupted-setting remediation path.
+- Evidence:
+	- `Services/StartupRecoveryService.cs`, `Services/StartupCoordinator.cs`
+
 ## Goal
 
 Implement startup self-healing flows for duplicate and damaged records.

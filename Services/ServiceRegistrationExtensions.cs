@@ -43,7 +43,6 @@ public static class ServiceRegistrationExtensions
 
         // Views and view models
         services.AddTransient<SplashViewModel>();
-        services.AddTransient<SplashPage>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<SettingsPage>();
         services.AddTransient<DeveloperModeViewModel>();

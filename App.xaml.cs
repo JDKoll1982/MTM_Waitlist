@@ -10,12 +10,15 @@ using MTM_Waitlist.Models;
 using MTM_Waitlist.Notifications;
 using MTM_Waitlist.Services;
 using MTM_Waitlist.ViewModels;
+using MTM_Waitlist.Views;
 
 namespace MTM_Waitlist;
 
 public partial class App : Application
 {
     private static WindowEx? _mainWindow;
+    private static SplashWindow? _splashWindow;
+    private static bool _mainWindowActivated;
 
     public IHost Host
     {
@@ -39,6 +42,7 @@ public partial class App : Application
 
     public App()
     {
+        StartupDebugLog.Info("App", "App constructor started.");
         InitializeComponent();
 
         Host = Microsoft.Extensions.Hosting.Host.
@@ -50,49 +54,139 @@ public partial class App : Application
         }).
         Build();
 
-        _ = MainWindow;
-        App.GetService<IAppNotificationService>().Initialize();
-        UnhandledException += App_UnhandledException;
+        StartupDebugLog.Info("App", "Host built.");
 
-        // FIX 1: Listen to Window closure to trigger container host termination
-        MainWindow.Closed += MainWindow_Closed;
+        try
+        {
+            App.GetService<IAppNotificationService>().Initialize();
+            StartupDebugLog.Info("App", "App notification service initialized.");
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("App", ex, "App notification service failed to initialize.");
+            throw;
+        }
+
+        UnhandledException += App_UnhandledException;
+        StartupDebugLog.Info("App", "UnhandledException handler registered.");
     }
 
-    private void MainWindow_Closed(object sender, WindowEventArgs args)
+    public static void ShowSplashWindow()
     {
-        MainWindow.Closed -= MainWindow_Closed;
+        StartupDebugLog.Info("Splash", "ShowSplashWindow called.");
 
-        _ = ShutdownAsync();
+        if (_splashWindow == null)
+        {
+            _splashWindow = new SplashWindow();
+            _splashWindow.Closed += SplashWindow_Closed;
+            StartupDebugLog.Info("Splash", "Splash window created.");
+        }
+
+        _splashWindow.Activate();
+        StartupDebugLog.Info("Splash", "Splash window activated.");
+    }
+
+    public static void ShowMainWindowAndCloseSplash()
+    {
+        StartupDebugLog.Info("MainWindow", "Activating main window and closing splash.");
+        MainWindow.Closed += MainWindow_Closed;
+        _mainWindowActivated = true;
+        MainWindow.Activate();
+        CloseSplashWindow();
+    }
+
+    private static void CloseSplashWindow()
+    {
+        if (_splashWindow == null)
+        {
+            return;
+        }
+
+        var windowToClose = _splashWindow;
+        _splashWindow = null;
+        windowToClose.Closed -= SplashWindow_Closed;
+        windowToClose.Close();
+        StartupDebugLog.Info("Splash", "Splash window closed.");
+    }
+
+    private static void SplashWindow_Closed(object sender, WindowEventArgs args)
+    {
+        StartupDebugLog.Info("Splash", $"Splash window closed event. MainWindowActivated={_mainWindowActivated}.");
+        if (!_mainWindowActivated)
+        {
+            Current.Exit();
+        }
+    }
+
+    private static void MainWindow_Closed(object sender, WindowEventArgs args)
+    {
+        StartupDebugLog.Info("MainWindow", "Main window closed event received.");
+        if (_mainWindow is null)
+        {
+            return;
+        }
+
+        _mainWindow.Closed -= MainWindow_Closed;
+
+        if (Current is App app)
+        {
+            _ = app.ShutdownAsync();
+        }
     }
 
     private async Task ShutdownAsync()
     {
+        StartupDebugLog.Info("Shutdown", "Shutdown started.");
         try
         {
             App.GetService<IAppNotificationService>().Unregister();
+            StartupDebugLog.Info("Shutdown", "App notification service unregistered.");
         }
-        catch { }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("Shutdown", ex, "Failed to unregister app notification service.");
+        }
 
         try
         {
             await Host.StopAsync().ConfigureAwait(false);
+            StartupDebugLog.Info("Shutdown", "Host stopped.");
         }
-        catch { }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("Shutdown", ex, "Failed to stop host.");
+        }
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        // Log and handle exceptions as appropriate.
+        StartupDebugLog.Info("UnhandledException", $"Unhandled exception message: {e.Message}");
     }
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        StartupDebugLog.Info("Launch", "OnLaunched started.");
         base.OnLaunched(args);
 
-        // Starts the generic background thread host runtime manager engine
-        await Host.StartAsync();
+        try
+        {
+            // Starts the generic background thread host runtime manager engine
+            await Host.StartAsync();
+            StartupDebugLog.Info("Launch", "Host started.");
 
-        App.GetService<IAppNotificationService>().Show(string.Format("AppNotificationSamplePayload".GetLocalized(), AppContext.BaseDirectory));
-        await App.GetService<IActivationService>().ActivateAsync(args);
+            App.GetService<IAppNotificationService>().Show(string.Format("AppNotificationSamplePayload".GetLocalized(), AppContext.BaseDirectory));
+            StartupDebugLog.Info("Launch", "App notification shown.");
+
+            await App.GetService<IActivationService>().ActivateAsync(args, activateMainWindow: false);
+            StartupDebugLog.Info("Launch", "Activation service completed with deferred main window activation.");
+
+            ShowSplashWindow();
+            StartupDebugLog.Info("Launch", "Splash requested from OnLaunched.");
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("Launch", ex, "Unhandled exception during launch pipeline.");
+            throw;
+        }
     }
 }

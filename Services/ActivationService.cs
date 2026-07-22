@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Activation;
 using MTM_Waitlist.Contracts.Services;
+using MTM_Waitlist.Helpers;
 using MTM_Waitlist.Views;
 
 namespace MTM_Waitlist.Services;
@@ -27,27 +28,38 @@ public class ActivationService : IActivationService
         _startupShellStateService = startupShellStateService;
     }
 
-    public async Task ActivateAsync(object activationArgs)
+    public async Task ActivateAsync(object activationArgs, bool activateMainWindow = true)
     {
+        StartupDebugLog.Info("ActivationService", "ActivateAsync started.");
+
         // Execute tasks before activation.
         await InitializeAsync();
+        StartupDebugLog.Info("ActivationService", "InitializeAsync completed.");
         _startupShellStateService.EnterSplashMode();
+        StartupDebugLog.Info("ActivationService", "Splash mode entered.");
 
         // Set the MainWindow Content.
         if (App.MainWindow.Content == null)
         {
             _shell = App.GetService<ShellPage>();
             App.MainWindow.Content = _shell ?? new Frame();
+            StartupDebugLog.Info("ActivationService", "Shell content assigned to MainWindow.");
         }
 
         // Handle activation via ActivationHandlers.
         await HandleActivationAsync(activationArgs);
+        StartupDebugLog.Info("ActivationService", "Activation handlers completed.");
 
-        // Activate the MainWindow.
-        App.MainWindow.Activate();
+        // Activate the MainWindow when requested by the startup flow.
+        if (activateMainWindow)
+        {
+            App.MainWindow.Activate();
+            StartupDebugLog.Info("ActivationService", "MainWindow activated.");
+        }
 
         // Execute tasks after activation.
         await StartupAsync();
+        StartupDebugLog.Info("ActivationService", "StartupAsync completed.");
     }
 
     private async Task HandleActivationAsync(object activationArgs)
@@ -56,11 +68,13 @@ public class ActivationService : IActivationService
 
         if (activationHandler != null)
         {
+            StartupDebugLog.Info("ActivationService", $"Using activation handler: {activationHandler.GetType().Name}.");
             await activationHandler.HandleAsync(activationArgs);
         }
 
         if (_defaultHandler.CanHandle(activationArgs))
         {
+            StartupDebugLog.Info("ActivationService", $"Using default activation handler: {_defaultHandler.GetType().Name}.");
             await _defaultHandler.HandleAsync(activationArgs);
         }
     }

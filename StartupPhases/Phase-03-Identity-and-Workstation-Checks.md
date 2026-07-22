@@ -1,5 +1,18 @@
 # Phase 03 - Identity and Workstation Checks
 
+## Current Implementation Status (As of 2026-07-22)
+
+- Status: Not Started
+- Implemented:
+	- Startup context has placeholders for username and role fields.
+- Missing:
+	- Database-backed user lookup by Windows username.
+	- Workstation lookup by hostname plus MAC.
+	- Explicit unknown workstation branch with New User action routing.
+	- Role resolution sourced from database role values.
+- Evidence:
+	- `Services/StartupCoordinator.cs`, `Models/StartupState.cs`
+
 ## Goal
 
 Implement startup identity lookups and workstation registration checks.

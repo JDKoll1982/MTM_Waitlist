@@ -1,5 +1,17 @@
 # Phase 08 - Developer Mode and Export Reports
 
+## Current Implementation Status (As of 2026-07-22)
+
+- Status: Not Started
+- Implemented:
+	- Developer mode visibility toggling exists in shell-level UI wiring.
+- Missing:
+	- Credential-gated Developer Mode access flow.
+	- Startup/runtime log viewer page.
+	- HTML diagnostic export service, naming convention, directory creation, and success toast shortcut.
+- Evidence:
+	- `Views/ShellPage.xaml.cs` (developer visibility check)
+
 ## Goal
 
 Deliver Developer Mode read and export workflows.

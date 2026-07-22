@@ -1,5 +1,17 @@
 # Phase 04 - Database Failure UX and Retry
 
+## Current Implementation Status (As of 2026-07-22)
+
+- Status: Not Started
+- Implemented:
+	- Manual retry/exit actions exist in splash UI at a general startup level.
+- Missing:
+	- Database timeout and bounded retry policy for startup DB calls.
+	- Dedicated database-down splash error state.
+	- Retry behavior scoped to DB phase only.
+- Evidence:
+	- `ViewModels/SplashViewModel.cs`, `Views/SplashView.xaml`, `Services/StartupCoordinator.cs`
+
 ## Goal
 
 Implement database failure handling exactly as defined by spec.

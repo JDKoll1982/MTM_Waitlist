@@ -15,4 +15,5 @@
     <Platform Solution="*|x86" Project="x86" />
     <Deploy />
   </Project>
+  <Project Path="MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj" />
 </Solution>
