@@ -4,18 +4,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <!-- Prevent the WinUI XAML compiler from searching for nonexistent UI files here -->
-    <SkipCompilerExecution>true</SkipCompilerExecution>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.7.0" />
     <PackageReference Include="MSTest.TestFramework" Version="3.7.0" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="MTM_Waitlist.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.csproj" />
   </ItemGroup>
 </Project>

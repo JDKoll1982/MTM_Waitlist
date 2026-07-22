@@ -24,11 +24,6 @@ You must actively leverage these servers for validation before writing code:
 - **UI Integrity & Visual States:** Ensure all UI elements adhere to Fluent Design guidelines, utilize WinUI 3 ThemeResources, handle window resizing correctly, and leverage VisualStateManager for state changes.
 - **Asynchronous Flow:** Ensure proper asynchronous handling (`async/await`) across all ViewModels and services to keep the WinUI main UI thread unblocked and responsive.
 
-## 🧪 Test-Driven Development & Backfill Mandate
-- **Active Test Project:** An MSTest suite is located at `MTM_Waitlist.Tests` targeting .NET 10 Windows SDK. Use it to validate logic.
-- **The Backfill Rule:** Before advancing any "In Progress" work, audit previously completed code (e.g., Phase 01 / Phase 02 artifacts). If missing unit tests, backfill them into the matching test folder (`Services`, `ViewModels`, or `Database`) first.
-- **No Untested Completions:** No startup phase may be marked complete without a corresponding, passing unit test file covering its core logic, boundary conditions, and mock states.
-
 ## 📍 Current Resume Anchors
 1. **Source of Truth:** Read and trust the current status table in `StartupPhases/README.md`.
 2. **Complete:** `StartupPhases/Phase-01-Startup-Shell-and-Splash-Complete.md`
@@ -43,5 +38,3 @@ You must actively leverage these servers for validation before writing code:
 
 ---
 
-## 🏁 Current Session Task
-Acknowledge the current repository state and the test suite integration. Identify the highest priority "In Progress" phase, check if its completed foundations have missing tests that require a backfill, summarize your plan, and pause for approval.
