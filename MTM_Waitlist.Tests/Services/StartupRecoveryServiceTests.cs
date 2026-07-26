@@ -9,7 +9,7 @@ namespace MTM_Waitlist.Tests.Services;
 public sealed class StartupRecoveryServiceTests
 {
     [TestMethod]
-    public async Task ResetSettingAsync_ForwardsToLocalSettingsService()
+    public async Task ResetSettingAsync_ForwardsToLocalSettingsServiceAsync()
     {
         var localSettingsService = new RecordingLocalSettingsService();
         var service = new StartupRecoveryService(localSettingsService);
@@ -21,7 +21,7 @@ public sealed class StartupRecoveryServiceTests
     }
 
     [TestMethod]
-    public async Task ResetToDefaultsAsync_ForwardsToLocalSettingsService()
+    public async Task ResetToDefaultsAsync_ForwardsToLocalSettingsServiceAsync()
     {
         var localSettingsService = new RecordingLocalSettingsService();
         var service = new StartupRecoveryService(localSettingsService);

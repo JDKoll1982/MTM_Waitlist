@@ -1,0 +1,47 @@
+name: Database Schema Validation
+
+on:
+    push:
+        paths:
+            - "Database/**/*.sql"
+            - ".github/scripts/validate-database-schema.ps1"
+            - ".github/workflows/database-schema-validation.yml"
+            - "MTM_Waitlist.csproj"
+            - "MTM_Waitlist.slnx"
+    pull_request:
+        paths:
+            - "Database/**/*.sql"
+            - ".github/scripts/validate-database-schema.ps1"
+            - ".github/workflows/database-schema-validation.yml"
+            - "MTM_Waitlist.csproj"
+            - "MTM_Waitlist.slnx"
+    workflow_dispatch:
+
+jobs:
+    validate-database-schema:
+        runs-on: windows-latest
+
+        env:
+            MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING: ${{ secrets.MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v5
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: 10.0.x
+
+            - name: Restore
+              run: dotnet restore MTM_Waitlist.slnx
+
+            - name: Build
+              run: dotnet build MTM_Waitlist.slnx -c Debug -p:Platform=x64
+
+            - name: Test
+              run: dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 -p:RuntimeIdentifier=win-x64 --framework net10.0-windows10.0.19041.0
+
+            - name: Validate database schema
+              shell: pwsh
+              run: ./.github/scripts/validate-database-schema.ps1

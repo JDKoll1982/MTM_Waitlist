@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Models;
+using MTM_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Tests.Models;
 
@@ -10,12 +11,12 @@ public sealed class StartupModelsTests
     [TestMethod]
     public void StartupResult_SuccessAndBlockedFactories_SetExpectedValues()
     {
-        var success = StartupResult.Success("MainShell", "Ready");
+        var success = StartupResult.Success(typeof(WaitlistViewViewModel).FullName!, "Ready");
         var blocked = StartupResult.Blocked("Missing config");
 
         Assert.IsTrue(success.IsSuccess);
         Assert.IsFalse(success.IsBlocked);
-        Assert.AreEqual("MainShell", success.RouteTarget);
+        Assert.AreEqual(typeof(WaitlistViewViewModel).FullName, success.RouteTarget);
         Assert.AreEqual("Ready", success.StatusMessage);
 
         Assert.IsFalse(blocked.IsSuccess);
@@ -35,7 +36,15 @@ public sealed class StartupModelsTests
         Assert.AreEqual(string.Empty, state.Username);
         Assert.AreEqual(string.Empty, state.ConfigurationFolder);
         Assert.AreEqual(string.Empty, state.ConfigurationFile);
+        Assert.AreEqual(string.Empty, state.HostnameNormalized);
+        Assert.AreEqual(string.Empty, state.MacAddressNormalized);
         Assert.AreEqual(string.Empty, state.CurrentRole);
+        Assert.IsFalse(state.IsUserMatched);
+        Assert.IsFalse(state.IsWorkstationRegistered);
+        Assert.IsFalse(state.IsSessionValid);
+        Assert.AreEqual(StartupState.SessionTokenSourceNone, state.SessionTokenSource);
+        Assert.IsFalse(state.RequireNewUserAction);
+        Assert.AreEqual(string.Empty, state.LoginHint);
         Assert.IsFalse(state.IsDeveloper);
 
         state.CurrentRole = "Developer";

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
+using System.Runtime.ExceptionServices;
 using MTM_Waitlist.Activation;
 using MTM_Waitlist.Contracts.Services;
 using MTM_Waitlist.Core.Contracts.Services;
@@ -48,12 +49,10 @@ public partial class App : Application
         Host = Microsoft.Extensions.Hosting.Host.
         CreateDefaultBuilder().
         UseContentRoot(AppContext.BaseDirectory).
-        ConfigureServices((context, services) =>
-        {
-            services.AddAppServices(context);
-        }).
+        ConfigureServices((context, services) => services.AddAppServices(context)).
         Build();
 
+        StartupDebugLog.Configure(Host.Services.GetService<IStartupLogService>());
         StartupDebugLog.Info("App", "Host built.");
 
         try
@@ -69,6 +68,10 @@ public partial class App : Application
 
         UnhandledException += App_UnhandledException;
         StartupDebugLog.Info("App", "UnhandledException handler registered.");
+
+    #if DEBUG
+        AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
+    #endif
     }
 
     public static void ShowSplashWindow()
@@ -89,10 +92,18 @@ public partial class App : Application
     public static void ShowMainWindowAndCloseSplash()
     {
         StartupDebugLog.Info("MainWindow", "Activating main window and closing splash.");
-        MainWindow.Closed += MainWindow_Closed;
-        _mainWindowActivated = true;
-        MainWindow.Activate();
-        CloseSplashWindow();
+        try
+        {
+            MainWindow.Closed += MainWindow_Closed;
+            _mainWindowActivated = true;
+            MainWindow.Activate();
+            CloseSplashWindow();
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("MainWindow", ex, "Failed while activating main window or closing splash.");
+            Current.Exit();
+        }
     }
 
     private static void CloseSplashWindow()
@@ -160,7 +171,27 @@ public partial class App : Application
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
+        if (e.Exception is not null)
+        {
+            StartupDebugLog.Error("UnhandledException", e.Exception, $"Unhandled exception message: {e.Message}");
+            return;
+        }
+
         StartupDebugLog.Info("UnhandledException", $"Unhandled exception message: {e.Message}");
+    }
+
+    private static void CurrentDomain_FirstChanceException(object? sender, FirstChanceExceptionEventArgs e)
+    {
+#if DEBUG
+        if (e.Exception is NullReferenceException nullReferenceException)
+        {
+            var stack = nullReferenceException.StackTrace ?? string.Empty;
+            if (stack.Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase))
+            {
+                StartupDebugLog.Error("FirstChance", nullReferenceException, "First-chance NullReferenceException in MTM_Waitlist stack.");
+            }
+        }
+#endif
     }
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)

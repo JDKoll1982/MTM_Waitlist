@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection;
 
 using MTM_Waitlist.Contracts.Services;
+using MTM_Waitlist.Helpers;
 
 namespace MTM_Waitlist.Services;
 
@@ -31,7 +32,10 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
     public async Task CorruptAndRestartAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        StartupDebugLog.Info("StartupRecoveryService", "CorruptAndRestartAsync started.");
+
         await _localSettingsService.CorruptForTestAsync();
+        StartupDebugLog.Info("StartupRecoveryService", "Corrupt startup data verification succeeded; launching restart.");
 
         var processPath = Environment.ProcessPath;
         if (string.IsNullOrWhiteSpace(processPath))

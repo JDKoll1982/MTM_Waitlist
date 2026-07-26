@@ -8,9 +8,15 @@
 	- Startup state container, startup coordinator contract/implementation, and startup result model are present.
 	- Splash status and action placeholders are implemented and wired to startup commands.
 	- Main window activation is deferred until startup success handoff.
+	- Splash window now opens in a compact centered footprint and does not expose title bar chrome or caption buttons.
 - Evidence:
 	- `App.xaml.cs`, `Views/SplashWindow.xaml.cs`, `Views/SplashView.xaml`, `ViewModels/SplashViewModel.cs`
 	- `Services/StartupCoordinator.cs`, `Models/StartupState.cs`, `Models/StartupResult.cs`
+
+## Sequencing Note (2026-07-26)
+
+- This completed phase is a prerequisite baseline for the Supervisor Analytics implementation in `Documents/Analytics/Plan.md`.
+- Analytics implementation starts only after startup phases 01 through 09 are complete.
 
 ## Goal
 

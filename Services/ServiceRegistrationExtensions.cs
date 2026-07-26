@@ -27,6 +27,12 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<IAppNotificationService, AppNotificationService>();
         services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
         services.AddSingleton<IStartupRecoveryService, StartupRecoveryService>();
+        services.AddSingleton<IStartupRegistrationService, StartupRegistrationService>();
+        services.AddSingleton<IStartupSessionRepository, StartupSessionRepository>();
+        services.AddSingleton<IStartupLogForwarder, StartupLogForwarder>();
+        services.AddSingleton<StartupLogService>();
+        services.AddSingleton<IStartupLogService>(provider => provider.GetRequiredService<StartupLogService>());
+        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<StartupLogService>());
         services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
         services.AddSingleton<IBuildingSelectionService, BuildingSelectionService>();
         services.AddSingleton<IStartupShellStateService, StartupShellStateService>();
@@ -43,7 +49,9 @@ public static class ServiceRegistrationExtensions
 
         // Views and view models
         services.AddTransient<SplashViewModel>();
+        services.AddTransient<LoginViewModel>();
         services.AddTransient<SettingsViewModel>();
+        services.AddTransient<LoginPage>();
         services.AddTransient<SettingsPage>();
         services.AddTransient<DeveloperModeViewModel>();
         services.AddTransient<DeveloperModePage>();
@@ -51,13 +59,14 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<WaitlistViewDetailPage>();
         services.AddTransient<WaitlistViewViewModel>();
         services.AddTransient<WaitlistViewPage>();
-        services.AddTransient<MainShellViewModel>();
-        services.AddTransient<MainShellPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();
 
         // Configuration
         services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
+        services.Configure<StartupDatabaseOptions>(context.Configuration.GetSection(nameof(StartupDatabaseOptions)));
+        services.Configure<StartupDevelopmentOptions>(context.Configuration.GetSection(nameof(StartupDevelopmentOptions)));
+        services.Configure<StartupLoggingOptions>(context.Configuration.GetSection(nameof(StartupLoggingOptions)));
         services.Configure<StartupWindowOptions>(context.Configuration.GetSection(nameof(StartupWindowOptions)));
 
         return services;

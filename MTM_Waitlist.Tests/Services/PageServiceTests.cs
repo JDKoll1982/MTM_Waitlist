@@ -14,7 +14,7 @@ public sealed class PageServiceTests
     {
         var service = new PageService();
 
-        Assert.AreEqual(typeof(MainShellPage), service.GetPageType(typeof(MainShellViewModel).FullName!));
+        Assert.AreEqual(typeof(LoginPage), service.GetPageType(typeof(LoginViewModel).FullName!));
         Assert.AreEqual(typeof(SettingsPage), service.GetPageType(typeof(SettingsViewModel).FullName!));
         Assert.AreEqual(typeof(DeveloperModePage), service.GetPageType(typeof(DeveloperModeViewModel).FullName!));
     }

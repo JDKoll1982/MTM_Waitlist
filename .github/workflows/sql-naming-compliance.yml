@@ -1,0 +1,21 @@
+name: SQL Naming Compliance
+
+on:
+  pull_request:
+    paths:
+      - "Database/**/*.sql"
+      - ".github/scripts/validate-sql-naming.ps1"
+      - ".github/workflows/sql-naming-compliance.yml"
+      - ".github/instructions/database-schema-rules.instructions.md"
+  workflow_dispatch:
+
+jobs:
+  validate-sql-naming:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate SQL naming conventions
+        shell: pwsh
+        run: ./.github/scripts/validate-sql-naming.ps1

@@ -13,7 +13,7 @@ public sealed class LocalSettingsServiceTests
     private const string RecoveryProbeKey = "Developer.RecoveryProbe";
 
     [TestMethod]
-    public async Task SaveSettingAsync_ThenReadSettingAsync_RoundTripsValue()
+    public async Task SaveSettingAsync_ThenReadSettingAsync_RoundTripsValueAsync()
     {
         var fileService = new InMemoryFileService();
         var service = CreateService(fileService);
@@ -27,7 +27,7 @@ public sealed class LocalSettingsServiceTests
     }
 
     [TestMethod]
-    public async Task ReadSettingAsync_ReturnsDefault_WhenSettingIsMissing()
+    public async Task ReadSettingAsync_ReturnsDefault_WhenSettingIsMissingAsync()
     {
         var service = CreateService(new InMemoryFileService());
 
@@ -37,7 +37,7 @@ public sealed class LocalSettingsServiceTests
     }
 
     [TestMethod]
-    public async Task ResetSettingAsync_RemovesOnlyRequestedSetting()
+    public async Task ResetSettingAsync_RemovesOnlyRequestedSettingAsync()
     {
         var fileService = new InMemoryFileService(new Dictionary<string, object>
         {
@@ -54,7 +54,7 @@ public sealed class LocalSettingsServiceTests
     }
 
     [TestMethod]
-    public async Task ResetAsync_ClearsAllSettings()
+    public async Task ResetAsync_ClearsAllSettingsAsync()
     {
         var fileService = new InMemoryFileService(new Dictionary<string, object>
         {
@@ -70,7 +70,7 @@ public sealed class LocalSettingsServiceTests
     }
 
     [TestMethod]
-    public async Task CorruptForTestAsync_WritesInvalidJsonPayload()
+    public async Task CorruptForTestAsync_WritesInvalidJsonPayloadAsync()
     {
         var appDataFolder = $"MTM_Waitlist/Tests/{Guid.NewGuid():N}";
         var filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appDataFolder, "LocalSettings.json");

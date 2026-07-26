@@ -1,17 +1,29 @@
 # Phase 03 - Identity and Workstation Checks
 
-## Current Implementation Status (As of 2026-07-22)
+## Current Implementation Status (As of 2026-07-26)
 
-- Status: Not Started
+- Status: In Progress
 - Implemented:
-	- Startup context has placeholders for username and role fields.
+	- Database-backed startup session repository resolves workstation registration using hostname plus MAC and user identity by normalized Windows username.
+	- Startup coordinator now consumes repository results for identity routing and role resolution.
+	- `New User` routing is now gated by authoritative workstation registration status to avoid false unregistered-workstation states when startup cannot verify DB status.
+	- Startup runtime context now persists `IsWorkstationRegistrationAuthoritative` for explicit verification-state tracing.
+	- Startup coordinator now validates malformed `StartupDatabaseOptions.ConnectionString` values at runtime and blocks with a deterministic startup-configuration message.
+	- Startup DB connection string now supports environment-variable override (`MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING`) for packaged and unpackaged rollout consistency.
+	- Baseline startup schema and seed artifacts for users/workstations/sessions exist under `Database/Migrations` and `Database/Seeds`.
 - Missing:
-	- Database-backed user lookup by Windows username.
-	- Workstation lookup by hostname plus MAC.
-	- Explicit unknown workstation branch with New User action routing.
-	- Role resolution sourced from database role values.
+	- Production environment DB connection-value rollout (actual environment provisioning) across packaged and unpackaged launch profiles.
+	- End-to-end role and workstation verification against live production-like data sets.
 - Evidence:
-	- `Services/StartupCoordinator.cs`, `Models/StartupState.cs`
+	- `Services/StartupSessionRepository.cs`, `Services/StartupCoordinator.cs`, `Models/StartupSessionSnapshot.cs`
+	- `Models/StartupState.cs`
+	- `MTM_Waitlist.Tests/Services/StartupCoordinatorTests.cs` (`RunAsync_WhenUnknownWorkstation_RoutesToLoginAndRequiresNewUserActionAsync`, `RunAsync_WhenWorkstationStatusIsNotAuthoritative_RoutesToLoginWithoutNewUserActionAsync`, `RunAsync_WhenDatabaseConnectionStringIsMalformed_ReturnsBlockedAsync`, `RunAsync_WhenConnectionStringEnvironmentOverrideIsMalformed_ReturnsBlockedAsync`, `RunAsync_WhenConnectionStringEnvironmentOverrideIsValid_IgnoresMalformedConfiguredConnectionStringAsync`)
+	- `Database/Migrations/0001__baseline_startup_schema.sql`, `Database/Seeds/seed_dev_masked_baseline.sql`
+
+## Sequencing Note (2026-07-26)
+
+- This phase is a required blocker for Supervisor Analytics implementation in `Documents/Analytics/Plan.md`.
+- Analytics implementation starts only after startup phases 01 through 09 are complete.
 
 ## Goal
 
@@ -29,7 +41,7 @@ Implement startup identity lookups and workstation registration checks.
 - Create and organize startup schema artifacts under `./Database` (users, workstations, sessions).
 - Add user lookup query using Windows username.
 - Add workstation lookup query using hostname and MAC.
-- Add explicit startup branch for unregistered workstation that routes to Login first and exposes a New User action.
+- Add explicit startup branch for unregistered workstation that routes to Login first and exposes a New User action only when registration status is authoritative.
 - Ensure no manual override path is exposed.
 
 ## Suggested NuGet Packages (If Relevant)
@@ -40,7 +52,8 @@ Implement startup identity lookups and workstation registration checks.
 ## Done When
 
 - Startup context includes `userMatched` and `workstationMatched` results.
-- Unknown workstation always follows defined route logic with no override.
+- Startup context includes authoritative verification state for workstation registration.
+- Unknown workstation routing follows authoritative-status rules with no override.
 
 ## Testable End State
 
@@ -49,3 +62,5 @@ Manual tests:
 1. Known user plus known workstation returns matched state.
 2. Unknown user plus known workstation routes to Login branch.
 3. Unknown workstation routes to Login first with a New User option and does not offer an override action.
+4. Malformed startup DB connection string blocks startup with a configuration error message.
+5. A valid `MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING` environment override takes precedence over appsettings connection string values.

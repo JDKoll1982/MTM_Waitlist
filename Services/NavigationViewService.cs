@@ -57,18 +57,26 @@ public class NavigationViewService : INavigationViewService
 
     private void OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
-        if (args.IsSettingsInvoked)
+        try
         {
-            _navigationService.NavigateTo(typeof(SettingsViewModel).FullName!);
-        }
-        else
-        {
-            var selectedItem = args.InvokedItemContainer as NavigationViewItem;
-
-            if (selectedItem?.GetValue(NavigationHelper.NavigateToProperty) is string pageKey)
+            if (args.IsSettingsInvoked)
             {
-                _navigationService.NavigateTo(pageKey);
+                _navigationService.NavigateTo(typeof(SettingsViewModel).FullName!);
+                return;
             }
+
+            var selectedItem = args.InvokedItemContainer as NavigationViewItem;
+            if (selectedItem?.GetValue(NavigationHelper.NavigateToProperty) is not string pageKey || string.IsNullOrWhiteSpace(pageKey))
+            {
+                StartupDebugLog.Info("NavigationViewService", "Item invoked without a valid navigation key.");
+                return;
+            }
+
+            _navigationService.NavigateTo(pageKey);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("NavigationViewService", ex, "NavigationView item invocation failed.");
         }
     }
 

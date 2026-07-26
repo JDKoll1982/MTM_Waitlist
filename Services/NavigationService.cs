@@ -85,9 +85,22 @@ public class NavigationService : INavigationService
 
     public bool NavigateTo(string pageKey, object? parameter = null, bool clearNavigation = false)
     {
+        if (string.IsNullOrWhiteSpace(pageKey))
+        {
+            StartupDebugLog.Error("NavigationService", new InvalidOperationException("NavigateTo called with null or empty pageKey."), "NavigateTo called with null or empty pageKey.");
+            return false;
+        }
+        
+        if (_frame == null)
+        {
+            StartupDebugLog.Error("NavigationService", new InvalidOperationException("Navigation frame is not initialized. Ensure ShellPage has set NavigationService.Frame."), "Navigation frame is not initialized. Ensure ShellPage has set NavigationService.Frame.");
+            return false;
+        }
+        
         var pageType = _pageService.GetPageType(pageKey);
 
-        if (_frame != null && (_frame.Content?.GetType() != pageType || (parameter != null && !parameter.Equals(_lastParameterUsed))))
+        // Only navigate if the page type changed or parameters changed
+        if (_frame.Content?.GetType() != pageType || (parameter != null && !parameter.Equals(_lastParameterUsed)))
         {
             _frame.Tag = clearNavigation;
             var vmBeforeNavigation = _frame.GetPageViewModel();
@@ -104,7 +117,9 @@ public class NavigationService : INavigationService
             return navigated;
         }
 
-        return false;
+        // Frame already shows the correct page - return success
+        StartupDebugLog.Info("NavigationService", $"Frame already showing {pageType?.Name}; no navigation needed.");
+        return true;
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)

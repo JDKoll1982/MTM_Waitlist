@@ -14,7 +14,7 @@ public class PageService : IPageService
 
     public PageService()
     {
-        Configure<MainShellViewModel, MainShellPage>();
+        Configure<LoginViewModel, LoginPage>();
         Configure<WaitlistViewViewModel, WaitlistViewPage>();
         Configure<WaitlistViewDetailViewModel, WaitlistViewDetailPage>();
         Configure<SettingsViewModel, SettingsPage>();

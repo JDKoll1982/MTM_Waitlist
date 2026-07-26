@@ -18,7 +18,7 @@ The following decisions are locked for implementation:
 - Database Down UX: Database failures must be shown as an error state within the Splash Screen with a `Retry` button and a `Close App` button. Automatic retrying is not allowed.
 - Workstation Override Policy: If hostname and MAC address do not match a known shared workstation record, no manual override path is allowed.
 - Saved User Record Source: Saved user records come from the database only.
-- Unknown Workstation Routing: Unknown or unregistered workstations must route to Login first with a `New User` action available from that screen.
+- Unknown Workstation Routing: Startup must route to Login first. `New User` is shown only when workstation registration status is authoritatively confirmed as unregistered.
 - Role Resolution Source: Admin/developer determination must come from role values stored in the database.
 - Developer Mode: The application must include a Developer Mode that allows logs to be read inside the app and exported into readable, printable workflow reports.
 - Developer Mode Access: Developer Mode is available only to users with Developer Access. If the current session user is not a developer, the app must prompt for developer username and password before access is granted.
@@ -26,8 +26,10 @@ The following decisions are locked for implementation:
 - Developer Mode Export Visibility: Exported Developer Mode workflow reports do not require redaction.
 - Developer Mode Release Scope: Developer Mode is included in the MVP.
 - Splash Screen Text Standard: All user-facing startup text must be written for end users, avoid code jargon, and present every startup step on the Splash Screen.
+- Splash Window Chrome Standard: The startup splash window must hide the title bar and caption buttons (close, minimize, maximize) and use a compact centered startup footprint.
 - MVP Logging Destination: Secure startup logs must be written to the hosted VM logging location and forwarded to a centralized logging database in the MVP.
 - Centralized Logging Target Selection: The centralized logging destination must be configurable by an admin or developer. If the centralized logging target is unset and the current user is not an admin or developer, the app must not allow startup to continue. If the centralized logging target is unset and the current user is an admin or developer, the app must require that user to choose or set the destination before startup can proceed.
+- Centralized Logging Prompt UX: When destination setup is required, the prompt must open automatically during startup and include direct folder selection support (including a browse action).
 - Centralized Logging Destination Baseline: No centralized destination is confirmed at this time. If any legacy destinations are discovered, they must be migrated to the new logging workflow.
 - Logging Setup Cancellation Rule: If an admin or developer cancels centralized logging destination setup, startup must stop.
 - Hosted VM Log Retention Policy: Startup logs must be stored at the configured hosted VM logging location using the daily file pattern `startup_daily_YYYY_MM_DD.log`. The log format must use plaintext JSON Lines (`.jsonl`) for MVP.
@@ -132,8 +134,9 @@ The startup orchestration module routes users according to the following evaluat
    - If a local session token exists and is valid, route directly to Main Window.
    - If no valid session token exists, route to Login Screen.
 2. If the Windows username does not match a saved user record:
-   - If the workstation hostname and MAC address are registered in MySQL as a shared workstation, route to Login Screen.
-  - If the workstation is not registered as a shared workstation, route to Login Screen and expose a `New User` action.
+  - If the workstation hostname and MAC address are registered in MySQL as a shared workstation, route to Login Screen.
+  - If workstation status is authoritatively known and the workstation is unregistered, route to Login Screen and expose a `New User` action.
+  - If workstation status is not authoritative (for example, startup could not verify workstation registration from the database), route to Login Screen without exposing a false `New User` unregistered-workstation state.
 
 No manual override path exists for unknown or unregistered workstations.
 

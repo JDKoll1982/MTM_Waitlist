@@ -11,9 +11,9 @@ public sealed partial class DeveloperModePage : Page
         get;
     }
 
-    public DeveloperModePage(DeveloperModeViewModel viewModel)
+    public DeveloperModePage()
     {
-        ViewModel = viewModel;
+        ViewModel = App.GetService<DeveloperModeViewModel>();
         InitializeComponent();
     }
 }

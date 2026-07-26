@@ -1,16 +1,23 @@
 # Phase 04 - Database Failure UX and Retry
 
-## Current Implementation Status (As of 2026-07-22)
+## Current Implementation Status (As of 2026-07-26)
 
-- Status: Not Started
+- Status: In Progress
 - Implemented:
-	- Manual retry/exit actions exist in splash UI at a general startup level.
+	- Startup DB calls now enforce a 10-second connection timeout and bounded retry policy (max 2 retries with exponential backoff base delay).
+	- Splash startup flow now identifies DB-specific startup failures and limits actions to manual retry or close-app semantics (no reset-to-defaults action for DB outages).
+	- Splash retry after DB failure now re-runs DB phase checks only (`retryDatabasePhaseOnly`) instead of re-running local-settings repair stage.
 - Missing:
-	- Database timeout and bounded retry policy for startup DB calls.
-	- Dedicated database-down splash error state.
-	- Retry behavior scoped to DB phase only.
+	- End-to-end validation against real network drop and DB-down scenarios in packaged launch profile.
 - Evidence:
-	- `ViewModels/SplashViewModel.cs`, `Views/SplashView.xaml`, `Services/StartupCoordinator.cs`
+	- `Models/StartupDatabaseOptions.cs`, `Services/StartupSessionRepository.cs`, `Services/StartupCoordinator.cs`
+	- `ViewModels/SplashViewModel.cs`, `Views/SplashView.xaml`
+	- `MTM_Waitlist.Tests/ViewModels/SplashViewModelTests.cs`, `MTM_Waitlist.Tests/Services/StartupCoordinatorTests.cs`
+
+## Sequencing Note (2026-07-26)
+
+- This phase is a required blocker for Supervisor Analytics implementation in `Documents/Analytics/Plan.md`.
+- Analytics implementation starts only after startup phases 01 through 09 are complete.
 
 ## Goal
 
@@ -39,6 +46,11 @@ Implement database failure handling exactly as defined by spec.
 
 - DB failures do not crash app.
 - User can only retry manually or close app.
+
+## Automated Coverage
+
+1. `MTM_Waitlist.Tests.ViewModels.SplashViewModelTests.StartAsync_WhenDatabaseFailureBlocked_HidesResetActionAndShowsManualActionsAsync`
+2. `MTM_Waitlist.Tests.ViewModels.SplashViewModelTests.RetryAsync_AfterDatabaseFailure_RerunsDatabasePhaseOnlyAsync`
 
 ## Testable End State
 

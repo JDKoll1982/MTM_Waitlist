@@ -1,0 +1,51 @@
+name: CSharp Xaml Naming Compliance
+
+on:
+    pull_request:
+        paths:
+            - "**/*.cs"
+            - "**/*.xaml"
+            - "**/*.resw"
+            - ".github/scripts/validate-csharp-xaml-naming.ps1"
+            - ".github/workflows/csharp-xaml-naming-compliance.yml"
+            - ".github/instructions/csharp-xaml-naming-rules.instructions.md"
+    workflow_dispatch:
+
+jobs:
+    validate-csharp-xaml-naming:
+        runs-on: windows-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v5
+
+            - name: Build changed file list
+              id: files
+              shell: pwsh
+              run: |
+                  if ("${{ github.event_name }}" -eq "pull_request") {
+                    $base = "${{ github.event.pull_request.base.sha }}"
+                    $head = "${{ github.event.pull_request.head.sha }}"
+                    $files = git diff --name-only $base $head | Where-Object { $_ -match '\.(cs|xaml|resw)$' }
+                    if (-not $files) {
+                      "files=" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+                    } else {
+                      $joined = ($files -join ';')
+                      "files=$joined" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+                    }
+                  }
+
+            - name: Validate changed C#/XAML/RESW naming
+              shell: pwsh
+              run: |
+                  $raw = "${{ steps.files.outputs.files }}"
+                  if ([string]::IsNullOrWhiteSpace($raw)) {
+                    if ("${{ github.event_name }}" -eq "pull_request") {
+                      Write-Host "No changed C#/XAML/RESW files to validate."
+                      exit 0
+                    }
+                    ./.github/scripts/validate-csharp-xaml-naming.ps1
+                    exit $LASTEXITCODE
+                  }
+
+                  $files = $raw -split ';' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+                  ./.github/scripts/validate-csharp-xaml-naming.ps1 -Files $files

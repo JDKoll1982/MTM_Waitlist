@@ -9,6 +9,11 @@
 
 This file captures implementation suggestions discovered while executing startup phases.
 
+## Sequencing Rule (2026-07-26)
+
+- Startup phases 01 through 09 remain the active delivery focus.
+- Supervisor Analytics work from `Documents/Analytics/Plan.md` is intentionally deferred until Phase 09 is complete.
+
 ## Suggestion 1
 
 - Phase observed: Phase 1 (Startup Shell and Splash)
@@ -107,3 +112,12 @@ This file captures implementation suggestions discovered while executing startup
   - `Services/LocalSettingsService.cs`
   - `Contracts/Services/ILocalSettingsService.cs`
   - `Models/StartupSessionToken.cs`
+
+## Suggestion 11
+
+- Phase observed: Post-Phase 09 handoff
+- Suggestion: Start analytics implementation only after the startup status table in `StartupPhases/README.md` shows all phases complete.
+- Why: This prevents startup hardening work from being diluted by unrelated analytics scope.
+- Where to implement:
+  - `Documents/Analytics/Plan.md`
+  - `StartupPhases/README.md` (status verification checkpoint)

@@ -30,6 +30,17 @@
                 HorizontalAlignment="Center"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" />
+            <Border
+                x:Name="DatabaseFailureBanner"
+                x:Load="{x:Bind ViewModel.IsDatabaseFailure, Mode=OneWay}"
+                Padding="12"
+                Background="{ThemeResource SystemFillColorCriticalBrush}"
+                CornerRadius="8">
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                    FontWeight="SemiBold"
+                    Text="Database is unavailable. Retry or close the app." />
+            </Border>
         </StackPanel>
 
         <StackPanel
@@ -41,8 +52,12 @@
             Orientation="Horizontal"
             Spacing="12">
             <Button Command="{x:Bind ViewModel.RetryCommand, Mode=OneWay}" Content="Try again" />
-            <Button Command="{x:Bind ViewModel.ResetToDefaultsCommand, Mode=OneWay}" Content="Reset to defaults" />
-            <Button Command="{x:Bind ViewModel.ExitCommand, Mode=OneWay}" Content="Exit" />
+            <StackPanel
+                x:Name="ResetActionArea"
+                x:Load="{x:Bind ViewModel.ShowResetToDefaultsAction, Mode=OneWay}">
+                <Button Command="{x:Bind ViewModel.ResetToDefaultsCommand, Mode=OneWay}" Content="Reset to defaults" />
+            </StackPanel>
+            <Button Command="{x:Bind ViewModel.ExitCommand, Mode=OneWay}" Content="Close app" />
         </StackPanel>
     </Grid>
 </UserControl>

@@ -12,6 +12,11 @@
 - Evidence:
 	- `Views/ShellPage.xaml.cs` (developer visibility check)
 
+## Sequencing Note (2026-07-26)
+
+- This phase is a required blocker for Supervisor Analytics implementation in `Documents/Analytics/Plan.md`.
+- Analytics implementation starts only after startup phases 01 through 09 are complete.
+
 ## Goal
 
 Deliver Developer Mode read and export workflows.

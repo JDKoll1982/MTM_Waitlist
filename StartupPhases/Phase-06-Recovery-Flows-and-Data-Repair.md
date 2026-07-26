@@ -12,6 +12,11 @@
 - Evidence:
 	- `Services/StartupRecoveryService.cs`, `Services/StartupCoordinator.cs`
 
+## Sequencing Note (2026-07-26)
+
+- This phase is a required blocker for Supervisor Analytics implementation in `Documents/Analytics/Plan.md`.
+- Analytics implementation starts only after startup phases 01 through 09 are complete.
+
 ## Goal
 
 Implement startup self-healing flows for duplicate and damaged records.

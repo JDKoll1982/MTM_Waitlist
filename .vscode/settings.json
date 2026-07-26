@@ -1,1 +1,10 @@
-{}
+{
+    "csharp.debug.justMyCode": true,
+    "csharp.debug.logging": {
+        "exceptions": false,
+        "moduleLoad": false,
+        "programOutput": false,
+        "threadExit": false,
+        "processExit": false
+    }
+}

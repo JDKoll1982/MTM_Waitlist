@@ -8,7 +8,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class SampleDataServiceTests
 {
     [TestMethod]
-    public async Task GetContentGridDataAsync_ReturnsKnownBuildingRows()
+    public async Task GetContentGridDataAsync_ReturnsKnownBuildingRowsAsync()
     {
         var service = new SampleDataService();
 
@@ -20,7 +20,7 @@ public sealed class SampleDataServiceTests
     }
 
     [TestMethod]
-    public async Task GetContentGridDataAsync_ReturnsEmptyForUnknownBuilding()
+    public async Task GetContentGridDataAsync_ReturnsEmptyForUnknownBuildingAsync()
     {
         var service = new SampleDataService();
 
@@ -30,7 +30,7 @@ public sealed class SampleDataServiceTests
     }
 
     [TestMethod]
-    public async Task GetContentGridDataAsync_ThrowsForBlankBuilding()
+    public async Task GetContentGridDataAsync_ThrowsForBlankBuildingAsync()
     {
         var service = new SampleDataService();
 

@@ -13,6 +13,8 @@ namespace MTM_Waitlist.Services;
 
 public class LocalSettingsService : ILocalSettingsService
 {
+    private const string CorruptPayload = "{ invalid-json";
+
     private const string _defaultApplicationDataFolder = "MTM_Waitlist/ApplicationData";
     private const string _defaultLocalSettingsFile = "LocalSettings.json";
 
@@ -145,11 +147,25 @@ public class LocalSettingsService : ILocalSettingsService
     {
         if (RuntimeHelper.IsMSIX)
         {
-            ApplicationData.Current.LocalSettings.Values["Developer.RecoveryProbe"] = "{ invalid-json";
+            ApplicationData.Current.LocalSettings.Values["Developer.RecoveryProbe"] = CorruptPayload;
+
+            if (ApplicationData.Current.LocalSettings.Values["Developer.RecoveryProbe"] is not string probeValue
+                || !string.Equals(probeValue, CorruptPayload, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("Failed to verify corrupted startup probe value in local settings.");
+            }
+
             return;
         }
 
         Directory.CreateDirectory(_applicationDataFolder);
-        await File.WriteAllTextAsync(Path.Combine(_applicationDataFolder, _localsettingsFile), "{ invalid-json");
+        var filePath = Path.Combine(_applicationDataFolder, _localsettingsFile);
+        await File.WriteAllTextAsync(filePath, CorruptPayload);
+
+        var fileContents = await File.ReadAllTextAsync(filePath);
+        if (!string.Equals(fileContents, CorruptPayload, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("Failed to verify corrupted startup settings file contents before restart.");
+        }
     }
 }

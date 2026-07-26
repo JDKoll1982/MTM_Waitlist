@@ -12,6 +12,11 @@
 - Evidence:
 	- `Models/StartupState.cs`
 
+## Sequencing Note (2026-07-26)
+
+- This phase is the final startup blocker before Supervisor Analytics implementation in `Documents/Analytics/Plan.md`.
+- Begin analytics implementation only after this phase is complete and the startup status table is updated.
+
 ## Goal
 
 Enforce role boundaries and complete final startup hardening checks.

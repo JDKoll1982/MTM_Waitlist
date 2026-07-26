@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using MTM_Waitlist.Contracts.Services;
 using MTM_Waitlist.Models;
@@ -28,6 +29,12 @@ public partial class ShellViewModel : ObservableRecipient
     {
         get; set;
     }
+
+    [ObservableProperty]
+    public partial string HeaderText
+    {
+        get; set;
+    } = string.Empty;
 
     public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
 
@@ -60,6 +67,7 @@ public partial class ShellViewModel : ObservableRecipient
         _buildingSelectionService = buildingSelectionService;
         _startupState = startupState;
         SelectedBuilding = _buildingSelectionService.SelectedBuilding;
+        HeaderText = "MTM Waitlist";
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)
@@ -69,6 +77,14 @@ public partial class ShellViewModel : ObservableRecipient
         if (e.SourcePageType == typeof(SettingsPage))
         {
             Selected = NavigationViewService.SettingsItem;
+            HeaderText = "Settings";
+            return;
+        }
+
+        if (e.SourcePageType == typeof(LoginPage))
+        {
+            Selected = null;
+            HeaderText = "Sign in";
             return;
         }
 
@@ -76,7 +92,18 @@ public partial class ShellViewModel : ObservableRecipient
         if (selectedItem != null)
         {
             Selected = selectedItem;
+            if (selectedItem is ContentControl contentControl)
+            {
+                HeaderText = contentControl.Content?.ToString() ?? string.Empty;
+            }
+            else
+            {
+                HeaderText = string.Empty;
+            }
+            return;
         }
+
+        HeaderText = string.Empty;
     }
 
     partial void OnSelectedBuildingChanged(string? value)

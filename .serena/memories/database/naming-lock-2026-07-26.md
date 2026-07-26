@@ -1,0 +1,11 @@
+# Naming Lock
+- Table names: plural lowercase snake_case with module pattern `{category}_{table}_{action_or_purpose}`.
+- Primary key column name: `id`.
+- FK columns: relationship descriptor + `_id` (e.g., user_id, workstation_id).
+- Constraint/index naming: fk_ / uq_ / idx_ patterns.
+- UTC datetime suffix: `_utc`.
+- Boolean prefixes: `is_` / `has_`.
+- Allowed abbreviations: id, utc, mac, ip, rbac, uuid.
+- Banned abbreviations: cfg, usr, ws, sess, rpt.
+- Banned words: class, delete, order.
+- Explicit exception allowed: `value_type`.

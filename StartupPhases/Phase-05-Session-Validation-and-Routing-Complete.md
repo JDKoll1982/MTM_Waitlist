@@ -2,17 +2,23 @@
 
 ## Current Implementation Status (As of 2026-07-22)
 
-- Status: In Progress
+- Status: Completed (Implementation Ready; integration depends on configured DB connection)
 - Implemented:
-	- Startup currently routes to main shell on startup success through coordinator result routing.
-	- Splash startup sequence reaches one final route target in current baseline.
+	- Startup now uses explicit route targets for both session-valid (`Waitlist`) and session-invalid/unknown-user (`Login`) outcomes.
+	- Session token arbitration is implemented with local-first precedence over database token source values.
+	- Session validity is checked against server time from database function `fn_server_utc_now()` through a startup session repository.
+	- Unknown workstation and unmatched user branch now sets a `New User` action requirement state used by the login route.
+	- Login `New User` action now persists a startup registration request payload for follow-up startup controls.
+	- Splash startup now receives and displays the finalized five-step approved progress strings.
 - Missing:
-	- Server-time session validation via database function.
-	- Dual-source session token arbitration (local-first vs database).
-	- Full routing matrix coverage for all session/identity combinations.
-	- Finalized five-step user-facing startup progress strings.
+	- Production connection string and database tables/functions must be configured in deployment environment (`StartupDatabaseOptions.ConnectionString`).
 - Evidence:
-	- `Services/StartupCoordinator.cs`, `ViewModels/SplashViewModel.cs`
+	- `Services/StartupCoordinator.cs`, `Services/StartupSessionRepository.cs`, `Services/StartupRegistrationService.cs`, `ViewModels/SplashViewModel.cs`, `ViewModels/LoginViewModel.cs`, `Views/LoginPage.xaml`
+
+## Sequencing Note (2026-07-26)
+
+- This phase is a required blocker for Supervisor Analytics implementation in `Documents/Analytics/Plan.md`.
+- Analytics implementation starts only after startup phases 01 through 09 are complete.
 
 ## Goal
 

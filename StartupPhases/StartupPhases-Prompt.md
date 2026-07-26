@@ -27,14 +27,18 @@ You must actively leverage these servers for validation before writing code:
 ## 📍 Current Resume Anchors
 1. **Source of Truth:** Read and trust the current status table in `StartupPhases/README.md`.
 2. **Complete:** `StartupPhases/Phase-01-Startup-Shell-and-Splash-Complete.md`
-3. **In Progress:** `Phase-02-Environment-and-Config.md`, `Phase-05-Session-Validation-and-Routing.md`, `Phase-07-Logging-Pipeline-and-Retention.md`
-4. **Not Started:** Phases `03`, `04`, `06`, `08`, and `09`.
-5. **Backlog:** Use `StartupPhases/Phase-Suggestions.md` as the active backlog only.
+3. **Complete:** `StartupPhases/Phase-07-Logging-Pipeline-and-Retention-Complete.md`
+4. **In Progress:** `StartupPhases/Phase-03-Identity-and-Workstation-Checks.md`
+5. **Not Started:** Phases `04`, `06`, `08`, and `09`.
+6. **Complete:** `Phase-05-Session-Validation-and-Routing-Complete.md`
+7. **Backlog:** Use `StartupPhases/Phase-Suggestions.md` as the active backlog only.
+8. **Execution Gate:** Complete startup phases `01` through `09` before starting any work from `Documents/Analytics/Plan.md`.
 
 ## 🚀 Execution Rules
 1. **Priority Focus:** Start directly with the highest-priority "In Progress" phase unless explicitly redirected.
 2. **Atomic Synchronization:** Keep code updates, new unit tests, and `StartupPhases` documentation synchronized within the exact same response/work session.
 3. **Phase Completion Workflow:** When a phase is finished and all covering unit tests are passing via `dotnet test`, rename the phase file to append `-Complete` and update the `StartupPhases/README.md` status table.
+4. **No Early Analytics Scope:** Do not implement analytics page UI/routing/services/settings until all startup phases are complete.
 
 ---
 
