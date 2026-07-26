@@ -22,7 +22,9 @@ jobs:
         runs-on: windows-latest
 
         env:
-            MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING: ${{ secrets.MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING }}
+            MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_HOME: ${{ secrets.MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_HOME }}
+            MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_WORK: ${{ secrets.MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_WORK }}
+            MTM_WAITLIST_DATABASE_NAME: mtm_waitlist
 
         steps:
             - name: Checkout
@@ -44,4 +46,4 @@ jobs:
 
             - name: Validate database schema
               shell: pwsh
-              run: ./.github/scripts/validate-database-schema.ps1
+              run: ./.github/scripts/validate-database-schema.ps1 -DatabaseName $env:MTM_WAITLIST_DATABASE_NAME

@@ -84,7 +84,7 @@
   </ItemGroup>
 
   <Target Name="ValidateDatabaseSchemaOnBuild" BeforeTargets="Build">
-    <Exec Command="pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\.github\scripts\validate-database-schema.ps1&quot;" />
+    <Exec Command="pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\.github\scripts\validate-database-schema.ps1&quot; -DatabaseName mtm_waitlist" />
   </Target>
 
   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
