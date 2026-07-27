@@ -52,10 +52,15 @@ This document applies your completed naming conventions and database architectur
 - Use `_history` tables for change auditability.
 - Retention windows are dynamic settings values from `config_settings_values`.
 
-## Migration and Release Governance
-- Use `0001__description.sql` naming.
-- Use `0001__description_rollback.sql` naming.
-- Migration model: Hybrid EF + DBA-reviewed SQL.
+## Artifact Layout and Release Governance
+- Use a file-per-artifact layout under `Database/`.
+- Bootstrap database creation lives in `Database/Bootstrap/create_database.sql`.
+- Table artifacts live in `Database/Tables/<table_name>/create.sql` and `rollback.sql`.
+- Stored procedure artifacts live in `Database/StoredProcedures/<procedure_name>/create.sql` and `rollback.sql`.
+- View artifacts live in `Database/Views/<view_name>/create.sql` and `rollback.sql`.
+- Seed artifacts live in `Database/Seeds/<seed_name>/create.sql` and `rollback.sql`.
+- Validation artifacts live in `Database/Validation/<validation_name>/validate.sql`.
+- FluentMigrator is the recommended runner layer for executing the reviewed SQL artifacts.
 - Production rollout: manual DBA-reviewed promotion with rollback prepared.
 - Naming drift in SQL must fail CI/PR checks.
 - Exceptions require explicit written approval in PR notes.

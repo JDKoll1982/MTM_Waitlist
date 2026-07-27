@@ -17,10 +17,10 @@ Enforce hard-fail naming and schema conventions for all SQL files under Database
 
 ## Validation Rules
 1. File naming:
-- Migration and rollback files must match:
-- 0001__description.sql
-- 0001__description_rollback.sql
-- Seed files must match seed_<description>.sql.
+- Bootstrap file must be `Database/Bootstrap/create_database.sql`.
+- Table/procedure/view files must use per-artifact folders with `create.sql` and `rollback.sql`.
+- Seed files must use per-artifact folders with `create.sql` and `rollback.sql`.
+- Validation files must use per-artifact folders with `validate.sql`.
 
 2. Identifiers:
 - Lowercase snake_case only.
@@ -52,4 +52,4 @@ Enforce hard-fail naming and schema conventions for all SQL files under Database
 - Violations are printed with file and line context.
 
 ## Exception Process
-- Naming exceptions require explicit written approval in migration PR notes.
+- Naming exceptions require explicit written approval in PR notes.

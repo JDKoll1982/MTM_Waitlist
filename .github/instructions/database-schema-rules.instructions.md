@@ -58,8 +58,15 @@ applyTo: "Database/**/*.sql"
 - Retention windows must be settings-driven from `config_settings_values`.
 
 ## Migration and Deployment
-- Migration model: Hybrid EF + DBA-reviewed SQL scripts.
-- Every schema migration requires matching rollback script.
+- Migration model: FluentMigrator runner backed by reviewed SQL artifacts.
+- Use a file-per-artifact layout under `Database/`:
+	- `Bootstrap/create_database.sql`
+	- `Tables/<table_name>/create.sql` and `rollback.sql`
+	- `StoredProcedures/<procedure_name>/create.sql` and `rollback.sql`
+	- `Views/<view_name>/create.sql` and `rollback.sql`
+	- `Seeds/<seed_name>/create.sql` and `rollback.sql`
+	- `Validation/<validation_name>/validate.sql`
+- Every schema artifact requires matching rollback or validation where appropriate.
 - Production rollout is manual DBA-reviewed promotion.
 - Do not auto-apply schema changes on app startup.
 

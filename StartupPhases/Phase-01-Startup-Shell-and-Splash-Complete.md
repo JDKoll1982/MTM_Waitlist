@@ -58,7 +58,7 @@ Manual test:
 ## Clarified Decisions (Pre-Phase 1)
 
 - Splash first screen: Use a new standalone Splash window as the first visible screen at app launch.
-- Startup database schema: No final schema exists yet. Create it and place each file type in the appropriate subfolder under `./Database`.
+- Startup database schema: Use a file-per-artifact layout under `./Database` with `Bootstrap`, `Tables`, `StoredProcedures`, `Seeds`, and `Validation` folders.
 - Server time source: Use a database function for startup server-time validation.
 - Session token storage and format: Store and validate session token data in both local storage and the database, with local data taking precedence over database data.
 - Admin/developer determination: Resolve from the user's role stored in the database.

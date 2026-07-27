@@ -71,12 +71,13 @@ Please answer each item.
 - cfg, usr, ws, sess, rpt
 3. Any banned words or terms to avoid in table/column names?
 
-## 8) Migration File Naming
-1. Confirm migration filename pattern:
-- 0001__description.sql
-- 0002__description.sql
-2. Confirm rollback filename pattern:
-- 0001__description_rollback.sql
+## 8) Database Artifact File Naming
+1. Confirm bootstrap filename:
+- `Database/Bootstrap/create_database.sql`
+2. Confirm artifact file naming:
+- `create.sql` for forward execution inside each artifact folder
+- `rollback.sql` for rollback execution inside each artifact folder
+- `validate.sql` for validation scripts inside each validation folder
 
 ## 9) Case and Cross-Platform Safety
 1. Confirm lowercase-only object names to avoid Linux/Windows case sensitivity drift.
@@ -114,8 +115,8 @@ Please answer each item.
 - 7.1: allowed abbreviations: `id`, `utc`, `mac`, `ip`, `rbac`, `uuid`
 - 7.2: banned abbreviations: `cfg`, `usr`, `ws`, `sess`, `rpt`
 - 7.3: banned words: `type`, `class`, `delete`, `order`
-- 8.1: `0001__description.sql`
-- 8.2: `0001__description_rollback.sql`
+- 8.1: `Database/Bootstrap/create_database.sql`
+- 8.2: `create.sql` / `rollback.sql` / `validate.sql` inside artifact-specific folders
 - 9.1: yes, lowercase only
 - 9.2: yes, no quoted identifiers unless unavoidable
 - 10.1: yes, hard-fail in PR validation

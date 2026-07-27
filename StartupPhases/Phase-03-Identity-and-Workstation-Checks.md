@@ -10,7 +10,7 @@
 	- Startup runtime context now persists `IsWorkstationRegistrationAuthoritative` for explicit verification-state tracing.
 	- Startup coordinator now validates malformed `StartupDatabaseOptions.ConnectionString` values at runtime and blocks with a deterministic startup-configuration message.
 	- Startup DB connection string now supports environment-variable override (`MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING`) for packaged and unpackaged rollout consistency.
-	- Baseline startup schema and seed artifacts for users/workstations/sessions exist under `Database/Migrations` and `Database/Seeds`.
+	- Baseline startup schema, seed artifacts, bootstrap script, and validation script now exist under per-artifact folders in `Database/`.
 - Missing:
 	- Production environment DB connection-value rollout (actual environment provisioning) across packaged and unpackaged launch profiles.
 	- End-to-end role and workstation verification against live production-like data sets.
@@ -18,7 +18,7 @@
 	- `Services/StartupSessionRepository.cs`, `Services/StartupCoordinator.cs`, `Models/StartupSessionSnapshot.cs`
 	- `Models/StartupState.cs`
 	- `MTM_Waitlist.Tests/Services/StartupCoordinatorTests.cs` (`RunAsync_WhenUnknownWorkstation_RoutesToLoginAndRequiresNewUserActionAsync`, `RunAsync_WhenWorkstationStatusIsNotAuthoritative_RoutesToLoginWithoutNewUserActionAsync`, `RunAsync_WhenDatabaseConnectionStringIsMalformed_ReturnsBlockedAsync`, `RunAsync_WhenConnectionStringEnvironmentOverrideIsMalformed_ReturnsBlockedAsync`, `RunAsync_WhenConnectionStringEnvironmentOverrideIsValid_IgnoresMalformedConfiguredConnectionStringAsync`)
-	- `Database/Migrations/0001__baseline_startup_schema.sql`, `Database/Seeds/seed_dev_masked_baseline.sql`
+	- `Database/Bootstrap/create_database.sql`, `Database/Tables/auth_roles_catalog/create.sql`, `Database/Tables/core_users_profiles/create.sql`, `Database/Tables/auth_roles_assignments/create.sql`, `Database/Tables/core_workstations_registry/create.sql`, `Database/Tables/auth_sessions_tokens/create.sql`, `Database/Tables/config_settings_values/create.sql`, `Database/Tables/config_settings_history/create.sql`, `Database/Tables/ops_startup_logs/create.sql`, `Database/StoredProcedures/fn_server_utc_now/create.sql`, `Database/Seeds/seed_dev_masked_baseline/create.sql`, `Database/Validation/startup_schema/validate.sql`
 
 ## Sequencing Note (2026-07-26)
 
