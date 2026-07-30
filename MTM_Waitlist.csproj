@@ -75,7 +75,10 @@
     </None>
   </ItemGroup>
 
-  <Target Name="ValidateDatabaseSchemaOnBuild" BeforeTargets="Build">
+  <!-- DB schema validation requires PowerShell 7 (pwsh) and runs only in CI or when explicitly opted in.
+       To run locally: set the environment variable CI=true, or pass /p:RunDbValidation=true to MSBuild. -->
+  <Target Name="ValidateDatabaseSchemaOnBuild" BeforeTargets="Build"
+          Condition="'$(CI)' == 'true' or '$(RunDbValidation)' == 'true'">
     <Exec Command="pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\.github\scripts\validate-database-schema.ps1&quot; -DatabaseName mtm_waitlist" />
   </Target>
 

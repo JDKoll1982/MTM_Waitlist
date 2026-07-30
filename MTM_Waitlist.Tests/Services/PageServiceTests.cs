@@ -1,5 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_DevTools.ViewModels;
+using MTM_Waitlist.Module_DevTools.Views;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Core.ViewModels;
 using MTM_Waitlist.Module_Core.Views;
@@ -23,6 +25,7 @@ public sealed class PageServiceTests
         Assert.AreEqual(typeof(LoginPage), service.GetPageType(typeof(LoginViewModel).FullName!));
         Assert.AreEqual(typeof(SettingsPage), service.GetPageType(typeof(SettingsViewModel).FullName!));
         Assert.AreEqual(typeof(DeveloperModePage), service.GetPageType(typeof(DeveloperModeViewModel).FullName!));
+        Assert.AreEqual(typeof(RequestTypeBuilderPage), service.GetPageType(typeof(RequestTypeBuilderViewModel).FullName!));
         Assert.AreEqual(typeof(WaitlistViewPage), service.GetPageType(typeof(WaitlistViewViewModel).FullName!));
         Assert.AreEqual(typeof(WaitlistViewDetailPage), service.GetPageType(typeof(WaitlistViewDetailViewModel).FullName!));
     }

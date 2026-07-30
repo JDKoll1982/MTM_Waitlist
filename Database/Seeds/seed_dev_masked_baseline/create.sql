@@ -120,6 +120,15 @@ VALUES (
         1,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'jkoll',
+        'John Koll',
+        'emp-dev-001',
+        1,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
     )
 ON DUPLICATE KEY UPDATE
     display_name = VALUES(display_name),
@@ -139,7 +148,7 @@ FROM
     core_users_profiles users
     INNER JOIN auth_roles_catalog roles ON roles.role_code = 'developer'
 WHERE
-    users.username_normalized = 'johnk'
+    users.username_normalized IN ('johnk', 'jkoll')
 ON DUPLICATE KEY UPDATE
     assigned_utc = VALUES(assigned_utc),
     assigned_by_user_id = VALUES(assigned_by_user_id);
@@ -159,6 +168,15 @@ VALUES (
         'johnspc',
         'johnspc',
         'd8-43-ae-47-d0-d6',
+        1,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'mtmfg-161',
+        'mtmfg-161',
+        'f4-f1-9e-38-64-d3',
         1,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()

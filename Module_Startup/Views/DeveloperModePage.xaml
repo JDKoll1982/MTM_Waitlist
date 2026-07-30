@@ -16,6 +16,24 @@
                 <wct:SettingsCard.Header>
                     <TextBlock
                         Style="{ThemeResource SubtitleTextBlockStyle}"
+                        Text="Developer tools" />
+                </wct:SettingsCard.Header>
+                <wct:SettingsCard.Description>
+                    <TextBlock
+                        TextWrapping="Wrap"
+                        Text="Open developer workflows that manage metadata and diagnostics." />
+                </wct:SettingsCard.Description>
+                <wct:SettingsCard.Content>
+                    <Button
+                        HorizontalAlignment="Left"
+                        Command="{x:Bind ViewModel.OpenRequestTypeBuilderCommand}"
+                        Content="Open Request Type Builder" />
+                </wct:SettingsCard.Content>
+            </wct:SettingsCard>
+            <wct:SettingsCard>
+                <wct:SettingsCard.Header>
+                    <TextBlock
+                        Style="{ThemeResource SubtitleTextBlockStyle}"
                         Text="Startup recovery test" />
                 </wct:SettingsCard.Header>
                 <wct:SettingsCard.Description>

@@ -1,18 +1,14 @@
 -- Server UTC function for startup session validation
 -- Engine: MySQL 5.7
+-- phpMyAdmin: run with default Delimiter ;
 
 USE mtm_waitlist;
 
-DROP FUNCTION IF EXISTS fn_server_utc_now;
+DROP FUNCTION IF EXISTS `fn_server_utc_now`;
 
-DELIMITER $$
-
-CREATE FUNCTION fn_server_utc_now()
+CREATE FUNCTION `fn_server_utc_now`()
 RETURNS DATETIME
 DETERMINISTIC
 NO SQL
-BEGIN
-    RETURN UTC_TIMESTAMP();
-END$$
-
-DELIMITER;
+SQL SECURITY DEFINER
+RETURN UTC_TIMESTAMP();

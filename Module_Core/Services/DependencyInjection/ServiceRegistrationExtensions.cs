@@ -6,6 +6,8 @@ using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Core.Services.DependencyInjection;
+using MTM_Waitlist.Module_DevTools.ViewModels;
+using MTM_Waitlist.Module_DevTools.Views;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Settings.Views;
@@ -66,6 +68,8 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<WaitlistViewDetailPage>();
         services.AddTransient<WaitlistViewViewModel>();
         services.AddTransient<WaitlistViewPage>();
+        services.AddTransient<RequestTypeBuilderViewModel>();
+        services.AddTransient<RequestTypeBuilderPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();
 

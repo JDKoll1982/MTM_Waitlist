@@ -32,6 +32,9 @@ public sealed partial class ShellPage : Page
         DeveloperModeItem.Visibility = ViewModel.IsDeveloperModeVisible
             ? Visibility.Visible
             : Visibility.Collapsed;
+        RequestTypeBuilderItem.Visibility = ViewModel.IsDeveloperModeVisible
+            ? Visibility.Visible
+            : Visibility.Collapsed;
         _startupShellStateService.StateChanged += OnStartupShellStateChanged;
         ApplyStartupShellState();
     }
@@ -65,6 +68,9 @@ public sealed partial class ShellPage : Page
         {
             ApplyStartupShellState();
             DeveloperModeItem.Visibility = ViewModel.IsDeveloperModeVisible
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            RequestTypeBuilderItem.Visibility = ViewModel.IsDeveloperModeVisible
                 ? Visibility.Visible
                 : Visibility.Collapsed;
         });

@@ -73,6 +73,9 @@
   <data name="Shell_DeveloperMode.Content" xml:space="preserve">
     <value>Developer Mode</value>
   </data>
+  <data name="Shell_RequestTypeBuilder.Content" xml:space="preserve">
+    <value>Request Type Builder</value>
+  </data>
   <data name="Settings_Personalization.Text" xml:space="preserve">
     <value>Personalization</value>
   </data>

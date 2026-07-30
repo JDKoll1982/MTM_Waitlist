@@ -40,11 +40,10 @@ if ([string]::IsNullOrWhiteSpace($nugetRoot)) {
 }
 
 $loggingAbstractionsAssembly = Get-ChildItem -Path (Join-Path $nugetRoot 'microsoft.extensions.logging.abstractions') -Recurse -Filter 'Microsoft.Extensions.Logging.Abstractions.dll' |
-Where-Object { $_.FullName -match '\\7\.0\.1\\' } |
 Select-Object -First 1
 
 if ($null -eq $loggingAbstractionsAssembly) {
-    throw 'Unable to locate Microsoft.Extensions.Logging.Abstractions 7.0.1 in the NuGet package cache.'
+    throw 'Unable to locate Microsoft.Extensions.Logging.Abstractions in the NuGet package cache.'
 }
 
 Write-Log "Using logging abstractions assembly: $($loggingAbstractionsAssembly.FullName)"
