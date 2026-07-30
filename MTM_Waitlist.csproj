@@ -49,10 +49,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MTM_Waitlist.Core\MTM_Waitlist.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Update="Assets\coil.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
