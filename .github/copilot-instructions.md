@@ -26,7 +26,7 @@ For this repository, prioritize MCP-backed validation for:
 # Architecture & Structural Guidelines
 
 ## Project Snapshot
-- WinUI 3 desktop app on .NET 10 (`MTM_Waitlist.csproj`) with a companion core library (`MTM_Waitlist.Core`).
+- WinUI 3 desktop app on .NET 10 (`MTM_Waitlist.csproj`) with module-owned core services under `Module_Core`.
 - The app uses a single host-managed window and a Template Studio-style shell/navigation setup.
 
 ## Architecture to Preserve (DI & Routing)

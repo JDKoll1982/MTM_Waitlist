@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Core.Contracts.Services;
-using MTM_Waitlist.Models;
-using MTM_Waitlist.Services;
+using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 
 namespace MTM_Waitlist.Tests.Services;
 
@@ -127,27 +127,40 @@ public sealed class LocalSettingsServiceTests
 
         public Dictionary<string, object> CurrentState => new(_state);
 
-        public T? Read<T>(string folderPath, string fileName)
+        public Task<T?> Read<T>(string folderPath, string fileName)
         {
             if (typeof(T) != typeof(IDictionary<string, object>))
             {
-                return default;
+                return Task.FromResult(default(T));
             }
 
-            return (T)(object)new Dictionary<string, object>(_state);
+            return Task.FromResult((T?)(object)new Dictionary<string, object>(_state));
         }
 
-        public void Save<T>(string folderPath, string fileName, T content)
+        public Task Save<T>(string folderPath, string fileName, T content)
         {
             if (content is IDictionary<string, object> dictionary)
             {
                 _state = new Dictionary<string, object>(dictionary);
             }
+
+            return Task.CompletedTask;
         }
 
-        public void Delete(string folderPath, string fileName)
+        public Task Delete(string folderPath, string fileName)
         {
             _state.Clear();
+            return Task.CompletedTask;
+        }
+
+        public Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(string.Empty);
+        }
+
+        public Task WriteAllTextAsync(string path, string contents, CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
         }
     }
 }

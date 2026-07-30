@@ -1,6 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Core.Models;
+using MTM_Waitlist.Module_Waitlist.Models;
 
 namespace MTM_Waitlist.Tests.Core.Models;
 
@@ -8,52 +8,39 @@ namespace MTM_Waitlist.Tests.Core.Models;
 public sealed class SampleModelsTests
 {
     [TestMethod]
-    public void SampleOrder_ComputedPropertiesAndDefaultsWork()
+    public void SampleOrder_DefaultsAndDetailBindingsWork()
+    {
+        var order = new SampleOrder();
+
+        Assert.AreEqual(0, order.Id);
+        Assert.AreEqual(string.Empty, order.Title);
+        Assert.AreEqual(string.Empty, order.Subtitle);
+        Assert.AreEqual(string.Empty, order.Status);
+        Assert.AreEqual(string.Empty, order.ImagePath);
+        Assert.AreEqual(0, order.Fields.Count);
+    }
+
+    [TestMethod]
+    public void SampleOrder_CanBePopulatedForDetailBinding()
     {
         var order = new SampleOrder
         {
-            OrderID = 42,
-            SymbolCode = 65,
-            Company = "Acme",
-            Status = "Waiting"
+            Id = 42,
+            Title = "Order 42",
+            Subtitle = "Acme",
+            Status = "Waiting",
+            ImagePath = "coil.png"
         };
 
-        Assert.AreEqual('A', order.Symbol);
-        Assert.AreEqual("Order ID: 42", order.ShortDescription);
-        Assert.AreEqual("Acme Waiting", order.ToString());
-        Assert.IsNotNull(order.Details);
-        Assert.AreEqual(0, order.Details.Count);
-        Assert.AreEqual(string.Empty, order.ShipperName);
-        Assert.AreEqual(string.Empty, order.ImageIconPath);
-    }
+        order.Fields.Add(new WaitlistField { Label = "Request type", Value = "Coil" });
 
-    [TestMethod]
-    public void SampleOrderDetail_ComputedDescriptionAndDefaultsWork()
-    {
-        var detail = new SampleOrderDetail
-        {
-            ProductID = 7,
-            ProductName = "Bracket"
-        };
-
-        Assert.AreEqual("Product ID: 7 - Bracket", detail.ShortDescription);
-        Assert.AreEqual(string.Empty, detail.QuantityPerUnit);
-        Assert.AreEqual(string.Empty, detail.CategoryName);
-        Assert.AreEqual(string.Empty, detail.CategoryDescription);
-    }
-
-    [TestMethod]
-    public void SampleCompany_DefaultOrdersCollectionIsInitialized()
-    {
-        var company = new SampleCompany
-        {
-            CompanyID = "C001",
-            CompanyName = "Acme"
-        };
-
-        Assert.IsNotNull(company.Orders);
-        Assert.AreEqual(0, company.Orders.Count);
-        Assert.AreEqual(string.Empty, company.ContactName);
-        Assert.AreEqual("Acme", company.CompanyName);
+        Assert.AreEqual(42, order.Id);
+        Assert.AreEqual("Order 42", order.Title);
+        Assert.AreEqual("Acme", order.Subtitle);
+        Assert.AreEqual("Waiting", order.Status);
+        Assert.AreEqual("coil.png", order.ImagePath);
+        Assert.AreEqual(1, order.Fields.Count);
+        Assert.AreEqual("Request type", order.Fields[0].Label);
+        Assert.AreEqual("Coil", order.Fields[0].Value);
     }
 }

@@ -1,7 +1,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Models;
-using MTM_Waitlist.ViewModels;
+using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Tests.Models;
 

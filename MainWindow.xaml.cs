@@ -1,4 +1,4 @@
-﻿using MTM_Waitlist.Helpers;
+﻿using MTM_Waitlist.Module_Core.Helpers;
 using Windows.UI.ViewManagement;
 
 namespace MTM_Waitlist;

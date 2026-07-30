@@ -3,15 +3,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using System.Runtime.ExceptionServices;
 using MTM_Waitlist.Activation;
-using MTM_Waitlist.Contracts.Services;
-using MTM_Waitlist.Core.Contracts.Services;
-using MTM_Waitlist.Core.Services;
-using MTM_Waitlist.Helpers;
-using MTM_Waitlist.Models;
+using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Core.Services.DependencyInjection;
+using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Notifications;
-using MTM_Waitlist.Services;
-using MTM_Waitlist.ViewModels;
-using MTM_Waitlist.Views;
 
 namespace MTM_Waitlist;
 

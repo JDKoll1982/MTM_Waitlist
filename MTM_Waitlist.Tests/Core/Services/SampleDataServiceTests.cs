@@ -1,6 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Core.Services;
+using MTM_Waitlist.Module_Core.Services;
 
 namespace MTM_Waitlist.Tests.Core.Services;
 
@@ -8,32 +8,34 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class SampleDataServiceTests
 {
     [TestMethod]
-    public async Task GetContentGridDataAsync_ReturnsKnownBuildingRowsAsync()
+    public void GetSampleOrders_ReturnsTwoOrdersWithDetailBindings()
     {
         var service = new SampleDataService();
 
-        var rows = (await service.GetContentGridDataAsync("Expo Drive")).ToList();
+        var rows = service.GetSampleOrders();
 
-        Assert.AreEqual(8, rows.Count);
-        Assert.AreEqual(10001, rows[0].OrderID);
-        Assert.AreEqual("Spot Weld", rows[0].Company);
+        Assert.AreEqual(2, rows.Count);
+        var firstOrder = rows[0] as MTM_Waitlist.Module_Waitlist.Models.SampleOrder;
+        Assert.IsNotNull(firstOrder);
+        Assert.AreEqual("Material request", firstOrder!.Title);
+        Assert.AreEqual("Expo Drive", firstOrder.Subtitle);
+        Assert.IsTrue(firstOrder.Fields.Count > 0);
     }
 
     [TestMethod]
-    public async Task GetContentGridDataAsync_ReturnsEmptyForUnknownBuildingAsync()
+    public void GetSampleOrders_UsesDifferentDataForEachBuilding()
     {
         var service = new SampleDataService();
 
-        var rows = await service.GetContentGridDataAsync("Unknown Building");
+        var expoRows = service.GetSampleOrders("Expo Drive");
+        var vitsRows = service.GetSampleOrders("Vits Drive");
 
-        Assert.AreEqual(0, rows.Count());
-    }
+        var expoOrder = expoRows[0] as MTM_Waitlist.Module_Waitlist.Models.SampleOrder;
+        var vitsOrder = vitsRows[0] as MTM_Waitlist.Module_Waitlist.Models.SampleOrder;
 
-    [TestMethod]
-    public async Task GetContentGridDataAsync_ThrowsForBlankBuildingAsync()
-    {
-        var service = new SampleDataService();
-
-        await Assert.ThrowsExceptionAsync<ArgumentException>(() => service.GetContentGridDataAsync("   "));
+        Assert.IsNotNull(expoOrder);
+        Assert.IsNotNull(vitsOrder);
+        Assert.AreNotEqual(expoOrder!.Title, vitsOrder!.Title);
+        Assert.AreNotEqual(expoOrder.Subtitle, vitsOrder.Subtitle);
     }
 }
