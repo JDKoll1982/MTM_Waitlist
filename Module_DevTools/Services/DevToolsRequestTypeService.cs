@@ -104,24 +104,24 @@ public sealed class DevToolsRequestTypeService : IDevToolsRequestTypeService
             CommandType = CommandType.StoredProcedure
         };
 
-        command.Parameters.AddWithValue("@publicId", Guid.NewGuid().ToString());
-        command.Parameters.AddWithValue("@requestTypeName", requestTypeDefinition.RequestTypeName.Trim());
-        command.Parameters.AddWithValue("@requestTypeNameNormalized", normalizedRequestTypeName);
+        command.Parameters.AddWithValue("@p_public_id", Guid.NewGuid().ToString());
+        command.Parameters.AddWithValue("@p_request_type_name", requestTypeDefinition.RequestTypeName.Trim());
+        command.Parameters.AddWithValue("@p_request_type_name_normalized", normalizedRequestTypeName);
 
         if (string.IsNullOrWhiteSpace(requestTypeDefinition.ImageFilePath))
         {
-            command.Parameters.AddWithValue("@imageFilePath", DBNull.Value);
+            command.Parameters.AddWithValue("@p_image_file_path", DBNull.Value);
         }
         else
         {
-            command.Parameters.AddWithValue("@imageFilePath", requestTypeDefinition.ImageFilePath.Trim());
+            command.Parameters.AddWithValue("@p_image_file_path", requestTypeDefinition.ImageFilePath.Trim());
         }
 
-        command.Parameters.AddWithValue("@createdByUsername", createdByUsername);
-        command.Parameters.AddWithValue("@createdUtc", DateTime.UtcNow);
-        command.Parameters.AddWithValue("@updatedUtc", DateTime.UtcNow);
+        command.Parameters.AddWithValue("@p_created_by_username", createdByUsername);
+        command.Parameters.AddWithValue("@p_created_utc", DateTime.UtcNow);
+        command.Parameters.AddWithValue("@p_updated_utc", DateTime.UtcNow);
 
-        var outputParameter = new MySqlParameter("@requestTypeId", MySqlDbType.Int64)
+        var outputParameter = new MySqlParameter("@p_request_type_id", MySqlDbType.Int64)
         {
             Direction = System.Data.ParameterDirection.Output
         };
@@ -150,14 +150,14 @@ public sealed class DevToolsRequestTypeService : IDevToolsRequestTypeService
             CommandType = CommandType.StoredProcedure
         };
 
-        command.Parameters.AddWithValue("@publicId", Guid.NewGuid().ToString());
-        command.Parameters.AddWithValue("@requestTypeId", requestTypeId);
-        command.Parameters.AddWithValue("@fieldName", field.FieldName);
-        command.Parameters.AddWithValue("@fieldNameNormalized", NormalizeText(field.FieldName));
-        command.Parameters.AddWithValue("@dataTypeName", field.DataType.ToDatabaseValue());
-        command.Parameters.AddWithValue("@displayOrder", displayOrder);
-        command.Parameters.AddWithValue("@createdUtc", DateTime.UtcNow);
-        command.Parameters.AddWithValue("@updatedUtc", DateTime.UtcNow);
+        command.Parameters.AddWithValue("@p_public_id", Guid.NewGuid().ToString());
+        command.Parameters.AddWithValue("@p_request_type_id", requestTypeId);
+        command.Parameters.AddWithValue("@p_field_name", field.FieldName);
+        command.Parameters.AddWithValue("@p_field_name_normalized", NormalizeText(field.FieldName));
+        command.Parameters.AddWithValue("@p_data_type_name", field.DataType.ToDatabaseValue());
+        command.Parameters.AddWithValue("@p_display_order", displayOrder);
+        command.Parameters.AddWithValue("@p_created_utc", DateTime.UtcNow);
+        command.Parameters.AddWithValue("@p_updated_utc", DateTime.UtcNow);
 
         await command.ExecuteNonQueryAsync(cancellationToken);
     }

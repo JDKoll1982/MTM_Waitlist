@@ -19,6 +19,9 @@ public partial class RequestTypeBuilderViewModel : ObservableRecipient
     public partial string ImageFilePath { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial Uri? PreviewImageUri { get; set; }
+
+    [ObservableProperty]
     public partial string CardFieldNameInput { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -277,6 +280,25 @@ public partial class RequestTypeBuilderViewModel : ObservableRecipient
     private static string NormalizeFieldName(string fieldName)
     {
         return fieldName.Trim();
+    }
+
+    partial void OnImageFilePathChanged(string value)
+    {
+        var trimmedPath = value?.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedPath))
+        {
+            PreviewImageUri = null;
+            return;
+        }
+
+        if (Uri.TryCreate(trimmedPath, UriKind.Absolute, out var uri)
+            && (uri.IsFile || string.Equals(uri.Scheme, "ms-appx", StringComparison.OrdinalIgnoreCase)))
+        {
+            PreviewImageUri = uri;
+            return;
+        }
+
+        PreviewImageUri = null;
     }
 
     private static string MergeNamePart(string currentName, string addition, bool prepend)

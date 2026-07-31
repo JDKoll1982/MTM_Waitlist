@@ -3,17 +3,20 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:devToolsModels="using:MTM_Waitlist.Module_DevTools.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:wct="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d">
 
-    <ScrollViewer>
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled">
         <Grid
             Margin="24"
-            HorizontalAlignment="Center"
-            MaxWidth="1240"
+            HorizontalAlignment="Stretch"
             RowSpacing="16">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -33,6 +36,7 @@
 
             <wct:SettingsExpander
                 Grid.Row="1"
+                HorizontalAlignment="Stretch"
                 IsExpanded="True"
                 Description="Define the request type, choose an image, and use presets to assemble a good name quickly."
                 Header="Request Setup &amp; Presets">
@@ -156,6 +160,7 @@
 
             <wct:SettingsExpander
                 Grid.Row="2"
+                HorizontalAlignment="Stretch"
                 IsExpanded="True"
                 Description="Add up to five fields that appear on the request card."
                 Header="Card Data (Max 5)">
@@ -219,6 +224,7 @@
 
             <wct:SettingsExpander
                 Grid.Row="3"
+                HorizontalAlignment="Stretch"
                 IsExpanded="True"
                 Description="Add the information that should appear after the card is opened."
                 Header="Clicked Card Data">
@@ -247,7 +253,6 @@
                                         Margin="0,28,0,0"
                                         Command="{x:Bind ViewModel.AddDetailFieldCommand}"
                                         Content="Add" />
-                                    HorizontalAlignment="Stretch"
                                 </Grid>
 
                                 <ListView
@@ -281,7 +286,121 @@
                 </wct:SettingsExpander.Items>
             </wct:SettingsExpander>
 
-            <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="12">
+            <wct:SettingsExpander
+                Grid.Row="4"
+                HorizontalAlignment="Stretch"
+                IsExpanded="True"
+                Description="Live mockup of the waitlist line item generated from your request setup and card fields."
+                Header="Waitlist Line Item Preview">
+                <wct:SettingsExpander.Items>
+                    <wct:SettingsCard ContentAlignment="Vertical" HorizontalContentAlignment="Stretch">
+                        <wct:SettingsCard.Content>
+                            <Border
+                                x:Name="LineItemPreviewBorder"
+                                MinHeight="150"
+                                Padding="16"
+                                HorizontalAlignment="Stretch"
+                                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <Grid VerticalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid
+                                        Grid.Column="0"
+                                        Width="120"
+                                        Height="120"
+                                        Margin="0,0,16,0"
+                                        Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                                        CornerRadius="8">
+                                        <Image
+                                            Width="120"
+                                            Height="120"
+                                            Stretch="UniformToFill"
+                                            Source="{x:Bind ToImageSource(ViewModel.PreviewImageUri), Mode=OneWay}" />
+                                    </Grid>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                        <TextBlock
+                                            FontSize="26"
+                                            Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                            Text="{x:Bind ViewModel.RequestTypeName, Mode=OneWay}" />
+                                        <TextBlock
+                                            FontSize="16"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="Generated waitlist line item preview" />
+                                        <TextBlock
+                                            FontSize="14"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="Status: Draft" />
+
+                                        <ItemsControl Margin="0,8,0,0" ItemsSource="{x:Bind ViewModel.CardFields, Mode=OneWay}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="devToolsModels:RequestTypeFieldDefinition">
+                                                    <TextBlock
+                                                        Margin="0,0,0,2"
+                                                        FontSize="14"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{x:Bind FieldName}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+
+                                    <StackPanel
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <Button
+                                            Width="48"
+                                            Height="48"
+                                            AutomationProperties.Name="Preview Edit"
+                                            Background="{ThemeResource SystemAccentColor}"
+                                            CornerRadius="10">
+                                            <FontIcon
+                                                FontSize="20"
+                                                Foreground="White"
+                                                Glyph="&#xE70F;" />
+                                        </Button>
+                                        <Button
+                                            Width="48"
+                                            Height="48"
+                                            AutomationProperties.Name="Preview Cancel"
+                                            Background="{ThemeResource SystemFillColorCriticalBrush}"
+                                            CornerRadius="10">
+                                            <FontIcon
+                                                FontSize="20"
+                                                Foreground="White"
+                                                Glyph="&#xE10A;" />
+                                        </Button>
+                                        <Button
+                                            Width="48"
+                                            Height="48"
+                                            AutomationProperties.Name="Preview Accept"
+                                            Background="{ThemeResource SystemFillColorSuccessBrush}"
+                                            CornerRadius="10">
+                                            <FontIcon
+                                                FontSize="20"
+                                                Foreground="White"
+                                                Glyph="&#xE10B;" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+                </wct:SettingsExpander.Items>
+            </wct:SettingsExpander>
+
+            <StackPanel Grid.Row="5" Orientation="Horizontal" Spacing="12">
                 <Button
                     Command="{x:Bind ViewModel.SaveRequestTypeCommand}"
                     Content="Save Request Type" />

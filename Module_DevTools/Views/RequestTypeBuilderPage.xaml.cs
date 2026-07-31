@@ -1,4 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 using MTM_Waitlist.Module_DevTools.ViewModels;
 
@@ -43,5 +45,22 @@ public sealed partial class RequestTypeBuilderPage : Page
         InitializeWithWindow.Initialize(picker, hwnd);
         var file = await picker.PickSingleFileAsync();
         return file?.Path;
+    }
+
+    private ImageSource? ToImageSource(Uri? uri)
+    {
+        if (uri is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return new BitmapImage(uri);
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
