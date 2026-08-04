@@ -18,6 +18,7 @@ The feature covers:
 - Loading and saving dunnage setup values through the same MySQL-backed pattern used by the receiving application.
 - Confirmation of preloaded values before persisting changes.
 - Finalization of the setup flow and handoff to downstream save/cleanup logic.
+- Helper-server routing for read-only and read/write interactions that short-circuits to mock data when `Feature.UseMockData` is enabled in app data.
 
 ## 3. User Journey
 
@@ -105,6 +106,7 @@ The feature covers:
 - Navigation should remain integrated with the existing shell and navigation services.
 - The feature should gracefully handle service failures and show actionable error states.
 - The feature should be privacy-first and avoid hardcoded secrets.
+- The feature should honor the app-data mock-data toggle and route through helper servers before backend execution when mock data is enabled.
 
 ## 6. Suggested Implementation Shape
 
