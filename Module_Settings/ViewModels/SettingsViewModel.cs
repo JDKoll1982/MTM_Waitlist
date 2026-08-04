@@ -11,7 +11,10 @@ namespace MTM_Waitlist.Module_Settings.ViewModels;
 
 public partial class SettingsViewModel : ObservableRecipient
 {
+    private const string MockDataSettingKey = "Feature.UseMockData";
+
     private readonly IThemeSelectorService _themeSelectorService;
+    private readonly ILocalSettingsService _localSettingsService;
 
     [ObservableProperty]
     public partial ElementTheme ElementTheme
@@ -25,6 +28,9 @@ public partial class SettingsViewModel : ObservableRecipient
         get; set;
     }
 
+    [ObservableProperty]
+    private bool _useMockData;
+
     // FIX: A clean, type-safe string representation of the Enum for the XAML engine
     public string SelectedThemeText => ElementTheme.ToString();
 
@@ -33,12 +39,14 @@ public partial class SettingsViewModel : ObservableRecipient
         get;
     }
 
-    public SettingsViewModel(IThemeSelectorService themeSelectorService)
+    public SettingsViewModel(IThemeSelectorService themeSelectorService, ILocalSettingsService localSettingsService)
     {
         _themeSelectorService = themeSelectorService;
+        _localSettingsService = localSettingsService;
 
         ElementTheme = _themeSelectorService.Theme;
         VersionDescription = GetVersionDescription();
+        UseMockData = _localSettingsService.ReadSettingAsync<bool?>(MockDataSettingKey).GetAwaiter().GetResult() ?? true;
 
         SwitchThemeCommand = new RelayCommand<ElementTheme>(
             async (param) =>
@@ -56,6 +64,11 @@ public partial class SettingsViewModel : ObservableRecipient
     partial void OnElementThemeChanged(ElementTheme value)
     {
         OnPropertyChanged(nameof(SelectedThemeText));
+    }
+
+    partial void OnUseMockDataChanged(bool value)
+    {
+        _ = _localSettingsService.SaveSettingAsync(MockDataSettingKey, value);
     }
 
     private static string GetVersionDescription()

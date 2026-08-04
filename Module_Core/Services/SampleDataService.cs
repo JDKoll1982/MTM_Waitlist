@@ -7,8 +7,26 @@ namespace MTM_Waitlist.Module_Core.Services;
 
 public sealed class SampleDataService : ISampleDataService
 {
+    private const string MockDataSettingKey = "Feature.UseMockData";
+    private readonly ILocalSettingsService? _localSettingsService;
+
+    public SampleDataService()
+        : this(null)
+    {
+    }
+
+    public SampleDataService(ILocalSettingsService? localSettingsService)
+    {
+        _localSettingsService = localSettingsService;
+    }
+
     public IReadOnlyList<object> GetSampleOrders(string? building = null)
     {
+        if (!IsMockDataEnabled())
+        {
+            return Array.Empty<object>();
+        }
+
         var normalizedBuilding = (building ?? string.Empty).Trim();
 
         if (string.Equals(normalizedBuilding, "Vits Drive", StringComparison.OrdinalIgnoreCase))
@@ -27,6 +45,17 @@ public sealed class SampleDataService : ISampleDataService
             CreateItem(2, "NCM Pickup", "pickup_ncm.png", "Riley Shaw", "Press 05", "00:33"),
             CreateItem(3, "Outside Service Pickup", "pickup_os.png", "Cameron Diaz", "Press 01", "01:05")
         };
+    }
+
+    private bool IsMockDataEnabled()
+    {
+        if (_localSettingsService is null)
+        {
+            return true;
+        }
+
+        var value = _localSettingsService.ReadSettingAsync<bool>(MockDataSettingKey).GetAwaiter().GetResult();
+        return value;
     }
 
     private static SampleOrder CreateItem(int id, string title, string imagePath, string requestedByName, string requestedPressName, string remainingTimeText)

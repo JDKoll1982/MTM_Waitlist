@@ -89,6 +89,27 @@
                     </wct:SettingsExpander.Items>
                 </wct:SettingsExpander>
 
+                <wct:SettingsCard>
+                    <wct:SettingsCard.Header>
+                        <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Mock Data" />
+                    </wct:SettingsCard.Header>
+                    <wct:SettingsCard.Description>
+                        <TextBlock
+                            Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Text="Show sample waitlist data when mock data is enabled." />
+                    </wct:SettingsCard.Description>
+                    <wct:SettingsCard.HeaderIcon>
+                        <SymbolIcon Symbol="PreviewLink" />
+                    </wct:SettingsCard.HeaderIcon>
+                    <wct:SettingsCard.Content>
+                        <ToggleSwitch
+                            OffContent="Off"
+                            OnContent="On"
+                            IsOn="{x:Bind ViewModel.UseMockData, Mode=TwoWay}" />
+                    </wct:SettingsCard.Content>
+                </wct:SettingsCard>
+
                 <!--  Explicit standalone TextBlock mapping your localized description text cleanly below the card  -->
                 <TextBlock x:Uid="Settings_Theme" Visibility="Collapsed" />
             </StackPanel>

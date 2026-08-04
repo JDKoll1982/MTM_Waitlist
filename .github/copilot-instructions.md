@@ -56,6 +56,12 @@ For this repository, prioritize MCP-backed validation for:
 - Keep AI features privacy-first: local inference by default, no external endpoint assumptions, and no hardcoded secrets.
 - Add defensive error handling and clear fallback UX when local model service is unavailable.
 
+## Mock Data & Helper Server Guidance
+- The app now supports a boolean app-data setting named `Feature.UseMockData` persisted through the existing local settings storage path rather than the database.
+- When mock data is enabled, helper services for read-only and read/write interactions should short-circuit to the mock-data path and call the sample-data service instead of continuing to backend execution.
+- The shared routing pattern is: `SearchButton -> helper server -> mock-data setting check -> sample-data service -> requested action`.
+- Implement helper-server behavior through DI-registered services that depend on `ILocalSettingsService` and `ISampleDataService`.
+
 ---
 
 # Multi-File Agentic Execution Workflow

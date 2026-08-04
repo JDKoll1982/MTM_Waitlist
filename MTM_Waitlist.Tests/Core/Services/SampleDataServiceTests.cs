@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 
 namespace MTM_Waitlist.Tests.Core.Services;
@@ -57,5 +58,60 @@ public sealed class SampleDataServiceTests
                 "scrap.png"
             },
             imagePaths);
+    }
+
+    [TestMethod]
+    public async Task GetSampleOrders_ReturnsEmptyWhenMockDataDisabledAsync()
+    {
+        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
+        {
+            ["Feature.UseMockData"] = false,
+        });
+
+        var service = new SampleDataService(settings);
+
+        var rows = await Task.FromResult(service.GetSampleOrders());
+
+        Assert.AreEqual(0, rows.Count);
+    }
+
+    private sealed class InMemoryLocalSettingsService : ILocalSettingsService
+    {
+        private readonly Dictionary<string, object> _settings;
+
+        public InMemoryLocalSettingsService(Dictionary<string, object> settings)
+        {
+            _settings = settings;
+        }
+
+        public Task<T?> ReadSettingAsync<T>(string key)
+        {
+            if (_settings.TryGetValue(key, out var value))
+            {
+                return Task.FromResult((T?)value);
+            }
+
+            return Task.FromResult(default(T));
+        }
+
+        public Task SaveSettingAsync<T>(string key, T value)
+        {
+            _settings[key] = value!;
+            return Task.CompletedTask;
+        }
+
+        public Task ResetSettingAsync(string key, CancellationToken cancellationToken = default)
+        {
+            _settings.Remove(key);
+            return Task.CompletedTask;
+        }
+
+        public Task ResetAsync()
+        {
+            _settings.Clear();
+            return Task.CompletedTask;
+        }
+
+        public Task CorruptForTestAsync() => Task.CompletedTask;
     }
 }

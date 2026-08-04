@@ -52,7 +52,10 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<INavigationService, NavigationService>();
 
         // Core services
-        services.AddSingleton<ISampleDataService, SampleDataService>();
+        services.AddSingleton<ISampleDataService>(serviceProvider =>
+            new SampleDataService(serviceProvider.GetRequiredService<ILocalSettingsService>()));
+        services.AddSingleton<SqlHelperServer>();
+        services.AddSingleton<MySqlHelperServer>();
         services.AddSingleton<IFileService, FileService>();
 
         // Views and view models
