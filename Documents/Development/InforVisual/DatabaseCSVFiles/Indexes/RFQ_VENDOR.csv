@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RFQ_VENDOR"	"PK_RFQ_VENDOR"	"CLUSTERED"	"YES"	"YES"	"RFQ_ID"	"1"	"NO"
+"RFQ_VENDOR"	"PK_RFQ_VENDOR"	"CLUSTERED"	"YES"	"YES"	"VENDOR_ID"	"2"	"NO"
+"RFQ_VENDOR"	"X_RFQ_VENDOR_1"	"NONCLUSTERED"	"NO"	"NO"	"VENDOR_ID"	"1"	"NO"

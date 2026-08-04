@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"VR_CAL_DATE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"VR_CAL_DATE"	"2"	"CAL_DAY"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"VR_CAL_DATE"	"3"	"CAL_WEEK"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"VR_CAL_DATE"	"4"	"CAL_MONTH"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"VR_CAL_DATE"	"5"	"CAL_QUARTER"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"VR_CAL_DATE"	"6"	"CAL_YEAR"	"int"	"NULL"	"10"	"0"	"YES"	"NO"	"NO"

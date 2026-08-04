@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_DIVISION"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_DIVISION"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_DIVISION"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_DIVISION"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_DIVISION"	"CREATE_DATE"	"datetime"	"YES"

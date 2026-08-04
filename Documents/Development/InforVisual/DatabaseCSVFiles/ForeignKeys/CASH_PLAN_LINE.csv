@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9550"	"CASH_PLAN_LINE"	"CASH_PLAN_ID"	"CASH_PLAN"	"ID"

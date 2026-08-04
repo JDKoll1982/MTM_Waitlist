@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SHIPPER_INVOICE"	"PK_SHIPPER_INVOICE"	"CLUSTERED"	"YES"	"YES"	"PACKLIST_ID"	"1"	"NO"
+"SHIPPER_INVOICE"	"PK_SHIPPER_INVOICE"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"2"	"NO"

@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9456"	"PURC_MATL_DETAIL"	"CURRENCY_ID"	"CURRENCY"	"ID"
+"FKEY9002"	"PURC_MATL_DETAIL"	"PURC_ORDER_ID"	"PURCHASE_ORDER"	"ID"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_TASK_REJ_CODE"	"TASK"	"REJECT_CODE"	"TASK_REJ_CODES"	"CODE"

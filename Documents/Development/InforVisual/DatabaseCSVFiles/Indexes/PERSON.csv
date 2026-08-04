@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PERSON"	"PK_PERSON"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"PERSON"	"X_PERSON_0"	"NONCLUSTERED"	"NO"	"NO"	"ID"	"1"	"NO"

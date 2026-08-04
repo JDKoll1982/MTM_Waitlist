@@ -1,0 +1,8 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"GJ_DIST"	"PK_GJ_DIST"	"CLUSTERED"	"YES"	"YES"	"GJ_ID"	"1"	"NO"
+"GJ_DIST"	"PK_GJ_DIST"	"CLUSTERED"	"YES"	"YES"	"DIST_NO"	"2"	"NO"
+"GJ_DIST"	"PK_GJ_DIST"	"CLUSTERED"	"YES"	"YES"	"ENTRY_NO"	"3"	"NO"
+"GJ_DIST"	"PK_GJ_DIST"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"4"	"NO"
+"GJ_DIST"	"X_GJ_DIST_1"	"NONCLUSTERED"	"NO"	"NO"	"BATCH_ID"	"1"	"NO"
+"GJ_DIST"	"X_GJ_DIST_2"	"NONCLUSTERED"	"NO"	"NO"	"GL_ACCOUNT_ID"	"1"	"NO"
+"GJ_DIST"	"X_GJ_DIST_3"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"

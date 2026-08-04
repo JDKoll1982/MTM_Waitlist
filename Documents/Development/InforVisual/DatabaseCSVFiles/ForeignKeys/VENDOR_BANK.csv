@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VEND_BANK_CNTRY"	"VENDOR_BANK"	"COUNTRY_ID"	"COUNTRY"	"ID"
+"FK_VEND_BANK_VEND"	"VENDOR_BANK"	"VENDOR_ID"	"VENDOR"	"ID"

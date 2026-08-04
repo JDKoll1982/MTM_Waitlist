@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"VENDOR_BUYER"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"VENDOR_BUYER"	"2"	"VENDOR_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"VENDOR_BUYER"	"3"	"BUYER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"VENDOR_BUYER"	"4"	"EFFECTIVE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

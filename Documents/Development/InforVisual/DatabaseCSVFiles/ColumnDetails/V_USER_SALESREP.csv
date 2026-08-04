@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_USER_SALESREP"	"1"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"V_USER_SALESREP"	"2"	"SALESREP_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"V_USER_SALESREP"	"3"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_USER_SALESREP"	"4"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

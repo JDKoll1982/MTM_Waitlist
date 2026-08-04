@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"COUNTRY"	"PK_COUNTRY"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"COUNTRY"	"X_COUNTRY_1"	"NONCLUSTERED"	"NO"	"NO"	"INTRA_COUNTRY_ID"	"1"	"NO"
+"COUNTRY"	"X_COUNTRY_2"	"NONCLUSTERED"	"NO"	"NO"	"ESL_COUNTRY_ID"	"1"	"NO"

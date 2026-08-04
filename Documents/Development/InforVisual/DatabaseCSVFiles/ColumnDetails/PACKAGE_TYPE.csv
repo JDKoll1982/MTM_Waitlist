@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PACKAGE_TYPE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PACKAGE_TYPE"	"2"	"CODE"	"nvarchar"	"5"	"0"	"0"	"NO"	"NO"	"NO"
+"PACKAGE_TYPE"	"3"	"LENGTH"	"decimal"	"NULL"	"14"	"4"	"YES"	"NO"	"NO"
+"PACKAGE_TYPE"	"4"	"WIDTH"	"decimal"	"NULL"	"14"	"4"	"YES"	"NO"	"NO"
+"PACKAGE_TYPE"	"5"	"HEIGHT"	"decimal"	"NULL"	"14"	"4"	"YES"	"NO"	"NO"
+"PACKAGE_TYPE"	"6"	"UNIT_OF_MEASURE"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"

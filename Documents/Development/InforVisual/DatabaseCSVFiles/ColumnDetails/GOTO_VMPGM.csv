@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"GOTO_VMPGM"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"GOTO_VMPGM"	"2"	"PROGRAM_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"GOTO_VMPGM"	"3"	"GOTO_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"GOTO_VMPGM"	"4"	"WPARAM_ARG"	"int"	"NULL"	"10"	"0"	"YES"	"NO"	"NO"

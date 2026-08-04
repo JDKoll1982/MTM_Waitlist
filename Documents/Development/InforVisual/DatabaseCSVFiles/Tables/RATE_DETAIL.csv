@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"RATE_DETAIL"	"ROWID"	"int"	"NO"
+"dbo"	"RATE_DETAIL"	"RATE_ID"	"nvarchar"	"NO"
+"dbo"	"RATE_DETAIL"	"PERIOD_ID"	"nvarchar"	"NO"
+"dbo"	"RATE_DETAIL"	"COST_CATEGORY_ID"	"nvarchar"	"NO"
+"dbo"	"RATE_DETAIL"	"RATE"	"decimal"	"NO"
+"dbo"	"RATE_DETAIL"	"SITE_ID"	"nvarchar"	"NO"

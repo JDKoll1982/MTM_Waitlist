@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_TASK_BINARY"	"BITS_LENGTH"	"DF__V_TASK_BI__BITS___37BCB71A"	"NULL"
+"V_TASK_BINARY"	"TYPE"	"DF__V_TASK_BIN__TYPE__36C892E1"	"NULL"

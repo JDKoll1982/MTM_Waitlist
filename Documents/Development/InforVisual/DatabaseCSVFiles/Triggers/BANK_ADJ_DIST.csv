@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"BANK_ADJ_DIST"	"INSERT_BANK_ADJ_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"BANK_ADJ_DIST"	"UPDATE_BANK_ADJ_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

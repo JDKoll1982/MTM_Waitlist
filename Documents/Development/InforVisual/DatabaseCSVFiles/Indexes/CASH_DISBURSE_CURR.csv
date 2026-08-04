@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CASH_DISBURSE_CURR"	"PK_CSHD_CURR"	"CLUSTERED"	"YES"	"YES"	"BANK_ACCOUNT_ID"	"1"	"NO"
+"CASH_DISBURSE_CURR"	"PK_CSHD_CURR"	"CLUSTERED"	"YES"	"YES"	"CONTROL_NO"	"2"	"NO"
+"CASH_DISBURSE_CURR"	"PK_CSHD_CURR"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"3"	"NO"

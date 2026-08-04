@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_EC_HISTORY"	"EC_HISTORY"	"EC_ID"	"EC"	"ID"

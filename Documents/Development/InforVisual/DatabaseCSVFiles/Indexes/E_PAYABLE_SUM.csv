@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_PAYABLE_SUM"	"EX_PAYABLE_SUM"	"NONCLUSTERED"	"YES"	"NO"	"eis_date"	"1"	"NO"

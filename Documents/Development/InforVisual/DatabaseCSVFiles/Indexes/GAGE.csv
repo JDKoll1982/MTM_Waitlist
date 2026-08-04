@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"GAGE"	"PK_GAGE"	"CLUSTERED"	"YES"	"YES"	"GAGE_ID"	"1"	"NO"

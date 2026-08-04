@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EQUIP_PROFILE"	"pk_equip_profile"	"CLUSTERED"	"YES"	"YES"	"profile_id"	"1"	"NO"
+"EQUIP_PROFILE"	"pk_equip_profile"	"CLUSTERED"	"YES"	"YES"	"equip_id"	"2"	"NO"

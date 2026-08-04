@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CONSIGN_RCVR_LINE"	"PK_CONSIGN_RCVR_LINE"	"CLUSTERED"	"YES"	"YES"	"RECEIVER_ID"	"1"	"NO"
+"CONSIGN_RCVR_LINE"	"PK_CONSIGN_RCVR_LINE"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"

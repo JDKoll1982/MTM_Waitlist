@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"INBOX_ERROR"	"PK_INBOX_ERROR"	"CLUSTERED"	"YES"	"YES"	"C_ID"	"1"	"NO"
+"INBOX_ERROR"	"X_INBOX_ERROR_1"	"NONCLUSTERED"	"NO"	"NO"	"C_INBOX_ID"	"1"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUSTOMER_TYPE"	"PK_CUSTOMER_TYPE"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"1"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TEST_STEP_BINARY"	"PK_TEST_STEP_BINARY"	"CLUSTERED"	"YES"	"YES"	"TEST_ID"	"1"	"NO"
+"TEST_STEP_BINARY"	"PK_TEST_STEP_BINARY"	"CLUSTERED"	"YES"	"YES"	"STEP_NO"	"2"	"NO"
+"TEST_STEP_BINARY"	"PK_TEST_STEP_BINARY"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"3"	"NO"

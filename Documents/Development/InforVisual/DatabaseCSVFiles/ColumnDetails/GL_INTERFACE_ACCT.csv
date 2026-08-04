@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"GL_INTERFACE_ACCT"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"GL_INTERFACE_ACCT"	"2"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"GL_INTERFACE_ACCT"	"3"	"INTERFACE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"GL_INTERFACE_ACCT"	"4"	"GL_GROUP_ID"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"
+"GL_INTERFACE_ACCT"	"5"	"GL_ACCOUNT_ID"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00238"	"V_OPTY_ESTIMATE"	"OPTY_ID"	"V_OPPORTUNITY"	"ID"

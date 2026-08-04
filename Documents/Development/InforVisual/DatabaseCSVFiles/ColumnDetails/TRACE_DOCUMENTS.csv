@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"TRACE_DOCUMENTS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"TRACE_DOCUMENTS"	"2"	"TRACE_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"TRACE_DOCUMENTS"	"3"	"REFERENCE"	"nvarchar"	"40"	"0"	"0"	"NO"	"NO"	"NO"
+"TRACE_DOCUMENTS"	"4"	"CERT_FILE_PATH"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"
+"TRACE_DOCUMENTS"	"5"	"CERT_DOC_ID"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"

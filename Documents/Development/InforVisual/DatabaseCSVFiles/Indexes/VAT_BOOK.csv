@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VAT_BOOK"	"PK_VAT_BOOK"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"
+"VAT_BOOK"	"PK_VAT_BOOK"	"CLUSTERED"	"YES"	"YES"	"YEAR"	"2"	"NO"
+"VAT_BOOK"	"PK_VAT_BOOK"	"CLUSTERED"	"YES"	"YES"	"ENTITY_ID"	"3"	"NO"

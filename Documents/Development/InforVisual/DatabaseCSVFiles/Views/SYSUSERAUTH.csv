@@ -1,0 +1,2 @@
+"TableSchema"	"ViewName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"
+"dbo"	"SYSUSERAUTH"	"1"	"NAME"	"sysname"	"NULL"	"0"	"0"	"NO"

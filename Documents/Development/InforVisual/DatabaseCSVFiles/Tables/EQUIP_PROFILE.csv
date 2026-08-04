@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EQUIP_PROFILE"	"ROWID"	"int"	"NO"
+"dbo"	"EQUIP_PROFILE"	"profile_id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_PROFILE"	"equip_id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_PROFILE"	"last_date"	"datetime"	"YES"
+"dbo"	"EQUIP_PROFILE"	"profile_day"	"int"	"YES"
+"dbo"	"EQUIP_PROFILE"	"date_dayno"	"int"	"YES"
+"dbo"	"EQUIP_PROFILE"	"profile_month"	"int"	"YES"

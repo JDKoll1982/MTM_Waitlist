@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"NATURE_OF_TRANS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"NATURE_OF_TRANS"	"2"	"CODE"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"NATURE_OF_TRANS"	"3"	"DESCRIPTION"	"nvarchar"	"50"	"0"	"0"	"YES"	"NO"	"NO"

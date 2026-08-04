@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"TRACE_LABOR_TRANS"	"CREATE_DATE"	"DF__TRACE_LAB__CREAT__485D3337"	"NULL"

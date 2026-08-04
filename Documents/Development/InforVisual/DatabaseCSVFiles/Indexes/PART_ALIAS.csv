@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PART_ALIAS"	"PK_PART_ALIAS"	"CLUSTERED"	"YES"	"YES"	"PART_ID"	"1"	"NO"
+"PART_ALIAS"	"PK_PART_ALIAS"	"CLUSTERED"	"YES"	"YES"	"ID"	"2"	"NO"

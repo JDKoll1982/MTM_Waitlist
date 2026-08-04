@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"TASK_BINARY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"TASK_BINARY"	"2"	"TASK_TYPE"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"TASK_BINARY"	"3"	"TASK_NO"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"TASK_BINARY"	"4"	"SEQ_NO"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"TASK_BINARY"	"5"	"TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"TASK_BINARY"	"6"	"BITS"	"image"	"NULL"	"0"	"0"	"YES"	"NO"	"NO"
+"TASK_BINARY"	"7"	"BITS_LENGTH"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

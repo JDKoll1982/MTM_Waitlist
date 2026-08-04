@@ -1,0 +1,6 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"GPSCMF"	"GPSCMF01"	"GCBOID"	"1"
+"GPSCMF"	"GPSCMF01"	"GCBOVL"	"2"
+"GPSCMF"	"GPSCMF01"	"GCLNID"	"3"
+"GPSCMF"	"GPSCMF02"	"GCBOID"	"1"
+"GPSCMF"	"GPSCMF02"	"GCBOVL"	"2"

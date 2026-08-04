@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PART_UNITS_CONV"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PART_UNITS_CONV"	"2"	"PART_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"PART_UNITS_CONV"	"3"	"FROM_UM"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"PART_UNITS_CONV"	"4"	"TO_UM"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"PART_UNITS_CONV"	"5"	"CONVERSION_FACTOR"	"decimal"	"NULL"	"15"	"8"	"NO"	"NO"	"NO"

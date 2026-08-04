@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_SYNC_USER"	"X_V_SYNC_USER_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

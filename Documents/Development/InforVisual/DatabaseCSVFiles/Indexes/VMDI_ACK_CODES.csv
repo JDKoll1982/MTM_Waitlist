@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VMDI_ACK_CODES"	"PK_VMDI_ACK_CODES"	"CLUSTERED"	"YES"	"YES"	"ACK_ID"	"1"	"NO"

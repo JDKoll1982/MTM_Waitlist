@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"APPLICATION_LINK"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"APPLICATION_LINK"	"2"	"GROUP_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"APPLICATION_LINK"	"3"	"GROUP_SEQ_NO"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"APPLICATION_LINK"	"4"	"PROGRAM_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"APPLICATION_LINK"	"5"	"LANGUAGE_ID"	"nvarchar"	"3"	"0"	"0"	"NO"	"NO"	"NO"
+"APPLICATION_LINK"	"6"	"ACCELERATOR"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

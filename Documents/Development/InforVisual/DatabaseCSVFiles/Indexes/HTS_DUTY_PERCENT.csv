@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"HTS_DUTY_PERCENT"	"PK_HTS_DUTY_PCT"	"CLUSTERED"	"YES"	"YES"	"HTS_CODE"	"1"	"NO"
+"HTS_DUTY_PERCENT"	"PK_HTS_DUTY_PCT"	"CLUSTERED"	"YES"	"YES"	"ORIG_COUNTRY_ID"	"2"	"NO"

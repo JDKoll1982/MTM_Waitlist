@@ -1,0 +1,4 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"VENDOR_WEEK"	"X_VENDWEEK_0"	"VENDOR_ID"	"1"
+"VENDOR_WEEK"	"X_VENDWEEK_0"	"SERVICE_ID"	"2"
+"VENDOR_WEEK"	"X_VENDWEEK_0"	"DAY_OF_WEEK"	"3"

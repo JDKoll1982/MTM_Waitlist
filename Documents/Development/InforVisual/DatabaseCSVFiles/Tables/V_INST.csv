@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_INST"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_INST"	"INST_TYPE"	"nvarchar"	"NO"
+"dbo"	"V_INST"	"END_OF_MONTH"	"nchar"	"YES"
+"dbo"	"V_INST"	"VAT_ON_FIRST_INST"	"nchar"	"YES"
+"dbo"	"V_INST"	"PERIOD_TYPE"	"nchar"	"NO"
+"dbo"	"V_INST"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_INST"	"LAST_MODIFIED"	"datetime"	"YES"

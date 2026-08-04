@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_SRVCORD_LBR"	"X_V_SRVCORD_LBR_0"	"CLUSTERED"	"YES"	"YES"	"SRVC_ORDER_ID"	"1"	"NO"
+"V_SRVCORD_LBR"	"X_V_SRVCORD_LBR_0"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"

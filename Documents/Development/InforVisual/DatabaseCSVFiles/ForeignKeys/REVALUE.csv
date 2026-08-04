@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9472"	"REVALUE"	"SITE_ID"	"SITE"	"ID"

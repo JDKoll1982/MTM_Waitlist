@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_SRVC_ORDER"	"EXP_MKUP_PERCENT"	"DF__V_SRVC_OR__EXP_M__0CD25915"	"NULL"
+"V_SRVC_ORDER"	"MTL_MKUP_PERCENT"	"DF__V_SRVC_OR__MTL_M__0DC67D4E"	"NULL"

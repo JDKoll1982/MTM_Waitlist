@@ -1,0 +1,3 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TMP_KREI_2219"	"tmp_part_id"	"varchar"	"YES"
+"dbo"	"TMP_KREI_2219"	"tmp_eng_id"	"varchar"	"YES"

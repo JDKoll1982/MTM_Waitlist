@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_TASK_ACTIVITY_TYPE"	"X_V_TASK_ACT_TYPE_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

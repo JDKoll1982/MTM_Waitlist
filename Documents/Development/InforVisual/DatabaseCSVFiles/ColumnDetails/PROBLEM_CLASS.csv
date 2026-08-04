@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PROBLEM_CLASS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PROBLEM_CLASS"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"PROBLEM_CLASS"	"3"	"TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"PROBLEM_CLASS"	"4"	"DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"

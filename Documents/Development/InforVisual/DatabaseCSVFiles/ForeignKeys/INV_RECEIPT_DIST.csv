@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9554"	"INV_RECEIPT_DIST"	"INV_TRANS_ID"	"INVENTORY_TRANS"	"TRANSACTION_ID"

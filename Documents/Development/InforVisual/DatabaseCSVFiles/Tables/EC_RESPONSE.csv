@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EC_RESPONSE"	"ROWID"	"int"	"NO"
+"dbo"	"EC_RESPONSE"	"EC_ID"	"nvarchar"	"NO"
+"dbo"	"EC_RESPONSE"	"TYPE"	"nchar"	"NO"
+"dbo"	"EC_RESPONSE"	"BITS"	"image"	"YES"
+"dbo"	"EC_RESPONSE"	"BITS_LENGTH"	"int"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"JOURNAL_DIM_FILTER"	"IS_DEFAULT"	"DF__JOURNAL_D__IS_DE__5C443053"	"NULL"

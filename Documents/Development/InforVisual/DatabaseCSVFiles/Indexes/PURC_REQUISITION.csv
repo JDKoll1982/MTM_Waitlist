@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PURC_REQUISITION"	"PK_PURC_REQISITION"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"PURC_REQUISITION"	"X_PURC_REQ_1"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"
+"PURC_REQUISITION"	"X_PURC_REQ_2"	"NONCLUSTERED"	"NO"	"NO"	"WAREHOUSE_ID"	"1"	"NO"

@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_RATE_DETAIL_01"	"RATE_DETAIL"	"COST_CATEGORY_ID"	"COST_CATEGORY"	"ID"
+"FK_RATE_DETAIL_00"	"RATE_DETAIL"	"RATE_ID"	"RATE"	"ID"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEYCONT_BIN_CONT"	"CONTACT_BINARY"	"CONTACT_ID"	"CONTACT"	"ID"

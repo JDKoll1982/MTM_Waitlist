@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"MACRO"	"PK_MACRO"	"CLUSTERED"	"YES"	"YES"	"USER_ID"	"1"	"NO"
+"MACRO"	"PK_MACRO"	"CLUSTERED"	"YES"	"YES"	"PROGRAM_ID"	"2"	"NO"
+"MACRO"	"PK_MACRO"	"CLUSTERED"	"YES"	"YES"	"NAME"	"3"	"NO"

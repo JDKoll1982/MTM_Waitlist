@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUST_PRIORITY"	"PK_CUST_PRIORITY"	"CLUSTERED"	"YES"	"YES"	"PRIORITY_CODE"	"1"	"NO"

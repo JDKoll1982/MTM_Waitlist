@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"STATE_PROVINCE"	"ROWID"	"int"	"NO"
+"dbo"	"STATE_PROVINCE"	"CODE"	"nvarchar"	"NO"
+"dbo"	"STATE_PROVINCE"	"NAME"	"nvarchar"	"YES"

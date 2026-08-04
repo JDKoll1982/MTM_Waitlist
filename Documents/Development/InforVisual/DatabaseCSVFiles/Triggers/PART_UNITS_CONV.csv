@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"PART_UNITS_CONV"	"INSERT_PART_UNITS_CONV"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"PART_UNITS_CONV"	"UPDATE_PART_UNITS_CONV"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

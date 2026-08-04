@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VENDOR_GROUP"	"PK_VEND_GROUP"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

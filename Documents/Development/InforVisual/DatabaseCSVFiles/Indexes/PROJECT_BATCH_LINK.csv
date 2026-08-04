@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PROJECT_BATCH_LINK"	"PK_PROJECT_BATCH_LINK"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"1"	"NO"
+"PROJECT_BATCH_LINK"	"PK_PROJECT_BATCH_LINK"	"CLUSTERED"	"YES"	"YES"	"SOURCE_BATCH_ID"	"2"	"NO"

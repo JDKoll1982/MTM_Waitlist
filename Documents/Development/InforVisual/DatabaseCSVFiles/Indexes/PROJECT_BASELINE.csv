@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PROJECT_BASELINE"	"PK_PROJECT_BASELINE"	"CLUSTERED"	"YES"	"YES"	"WORKORDER_BASE_ID"	"1"	"NO"
+"PROJECT_BASELINE"	"PK_PROJECT_BASELINE"	"CLUSTERED"	"YES"	"YES"	"WORKORDER_SPLIT_ID"	"2"	"NO"

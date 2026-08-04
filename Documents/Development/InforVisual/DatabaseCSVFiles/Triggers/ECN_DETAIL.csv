@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"ECN_DETAIL"	"DELETE_ECN_DETAIL"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"

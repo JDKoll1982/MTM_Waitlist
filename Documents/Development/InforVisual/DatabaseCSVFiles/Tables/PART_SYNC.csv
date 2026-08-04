@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PART_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"PART_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"PART_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"PART_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"PART_SYNC"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"PART_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"PART_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

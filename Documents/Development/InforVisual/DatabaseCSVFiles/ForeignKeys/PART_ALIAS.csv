@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9485"	"PART_ALIAS"	"PART_ID"	"PART"	"ID"
+"FK_PART_ALIAS_00"	"PART_ALIAS"	"TYPE"	"PART_ALIAS_TYPE"	"ID"

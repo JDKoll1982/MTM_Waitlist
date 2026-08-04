@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"ACCOUNT_PERIOD"	"STATUS_EFF_DATE"	"DF__ACCOUNT_P__STATU__2375C74B"	"NULL"

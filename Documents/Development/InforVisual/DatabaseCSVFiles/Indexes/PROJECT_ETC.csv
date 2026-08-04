@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PROJECT_ETC"	"PK_PROJECT_ETC"	"CLUSTERED"	"YES"	"YES"	"PROJECT_ID"	"1"	"NO"
+"PROJECT_ETC"	"PK_PROJECT_ETC"	"CLUSTERED"	"YES"	"YES"	"ETC_VERSION_ID"	"2"	"NO"
+"PROJECT_ETC"	"X_PRJ_ETC_0"	"NONCLUSTERED"	"YES"	"NO"	"PROJECT_ID"	"1"	"NO"
+"PROJECT_ETC"	"X_PRJ_ETC_0"	"NONCLUSTERED"	"YES"	"NO"	"ETC_VERSION_ID"	"2"	"NO"

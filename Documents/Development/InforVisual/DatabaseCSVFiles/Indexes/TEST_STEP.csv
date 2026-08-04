@@ -1,0 +1,6 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TEST_STEP"	"PK_TEST_STEP"	"CLUSTERED"	"YES"	"YES"	"TEST_ID"	"1"	"NO"
+"TEST_STEP"	"PK_TEST_STEP"	"CLUSTERED"	"YES"	"YES"	"STEP_NO"	"2"	"NO"
+"TEST_STEP"	"X_TSTEP_1"	"NONCLUSTERED"	"NO"	"NO"	"TEST_ID"	"1"	"NO"
+"TEST_STEP"	"X_TSTEP_1"	"NONCLUSTERED"	"NO"	"NO"	"SEQ_NO"	"2"	"NO"
+"TEST_STEP"	"X_TSTEP_2"	"NONCLUSTERED"	"NO"	"NO"	"GAGE_ID"	"1"	"NO"

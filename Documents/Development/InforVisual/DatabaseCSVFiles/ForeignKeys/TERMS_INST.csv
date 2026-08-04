@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_TERMS_INST_00"	"TERMS_INST"	"TERMS_ID"	"TERMS"	"ID"

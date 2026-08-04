@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VENDOR_CALENDAR"	"X_VENDCAL_0"	"NONCLUSTERED"	"YES"	"NO"	"VENDOR_ID"	"1"	"NO"
+"VENDOR_CALENDAR"	"X_VENDCAL_0"	"NONCLUSTERED"	"YES"	"NO"	"SERVICE_ID"	"2"	"NO"
+"VENDOR_CALENDAR"	"X_VENDCAL_0"	"NONCLUSTERED"	"YES"	"NO"	"START_DATE"	"3"	"NO"

@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_TASK"	"REL_NO"	"DF__V_TASK__REL_NO__35D46EA8"	"NULL"
+"V_TASK"	"USER_NOTE"	"DF__V_TASK__USER_NOT__34E04A6F"	"NULL"

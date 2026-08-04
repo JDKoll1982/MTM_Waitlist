@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"CYCLE_COUNT_PART"	"ROWID"	"int"	"NO"
+"dbo"	"CYCLE_COUNT_PART"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"CYCLE_COUNT_PART"	"WAREHOUSE_ID"	"nvarchar"	"NO"
+"dbo"	"CYCLE_COUNT_PART"	"COUNT_FREQ"	"smallint"	"YES"
+"dbo"	"CYCLE_COUNT_PART"	"LAST_COUNT_DATE"	"datetime"	"YES"

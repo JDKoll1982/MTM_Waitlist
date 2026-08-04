@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"BANK_DEPOSIT"	"AMOUNT"	"DF__BANK_DEPO__AMOUN__4F544989"	"NULL"
+"BANK_DEPOSIT"	"CLEARED"	"DF__BANK_DEPO__CLEAR__50486DC2"	"NULL"

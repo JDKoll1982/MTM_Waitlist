@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_ESTIM_DET"	"EX_ESTIM_DET"	"NONCLUSTERED"	"NO"	"NO"	"EIS_DATE"	"1"	"NO"

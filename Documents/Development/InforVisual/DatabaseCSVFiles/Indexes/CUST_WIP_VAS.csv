@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUST_WIP_VAS"	"PK_CUST_WIP_VAS"	"CLUSTERED"	"YES"	"YES"	"CUSTOMER_ID"	"1"	"NO"
+"CUST_WIP_VAS"	"PK_CUST_WIP_VAS"	"CLUSTERED"	"YES"	"YES"	"PART_ID"	"2"	"NO"
+"CUST_WIP_VAS"	"PK_CUST_WIP_VAS"	"CLUSTERED"	"YES"	"YES"	"WIP_VAS_ID"	"3"	"NO"

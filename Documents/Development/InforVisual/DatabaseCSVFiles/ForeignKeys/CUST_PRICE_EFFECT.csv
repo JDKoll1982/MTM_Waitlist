@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9600"	"CUST_PRICE_EFFECT"	"PART_ID"	"PART"	"ID"

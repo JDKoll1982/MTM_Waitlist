@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_IBT_SHP_CONT_ID"	"IBT_SHIPPER"	"CONTACT_ID"	"CONTACT"	"ID"
+"FKEY9490"	"IBT_SHIPPER"	"IBT_ID"	"IBT"	"ID"
+"FK_IBT_SHIPPER_TO_SITE"	"IBT_SHIPPER"	"SITE_ID"	"SITE"	"ID"

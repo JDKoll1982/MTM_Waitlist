@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_ACCT_BINARY"	"ACCT_ID"	"nvarchar"	"NO"
+"dbo"	"V_ACCT_BINARY"	"BITS_LENGTH"	"int"	"NO"
+"dbo"	"V_ACCT_BINARY"	"TYPE"	"nvarchar"	"NO"
+"dbo"	"V_ACCT_BINARY"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_ACCT_BINARY"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_ACCT_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"V_ACCT_BINARY"	"CREATE_DATE"	"datetime"	"YES"

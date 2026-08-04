@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"SALES_REP"	"PAY_METHOD"	"DF__SALES_REP__PAY_M__521BA79B"	"NULL"

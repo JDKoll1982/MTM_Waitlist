@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"VENDOR_BANK"	"IS_DEFAULT"	"DF__VENDOR_BA__IS_DE__48E7431C"	"NULL"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"HONORIFIC"	"PK_HONORIFIC"	"CLUSTERED"	"YES"	"YES"	"NAME"	"1"	"NO"

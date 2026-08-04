@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"MARKET"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"MARKET"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"MARKET"	"3"	"DESCRIPTION"	"nvarchar"	"45"	"0"	"0"	"YES"	"NO"	"NO"
+"MARKET"	"4"	"CURRENCY_ID"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"
+"MARKET"	"5"	"MARKET_RATE"	"decimal"	"NULL"	"22"	"8"	"YES"	"NO"	"NO"

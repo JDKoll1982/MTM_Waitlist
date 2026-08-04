@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_OPTY_CURR"	"X_V_OPTY_CURR_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_OPTY_CURR"	"X_V_OPTY_CURR_0"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"2"	"NO"

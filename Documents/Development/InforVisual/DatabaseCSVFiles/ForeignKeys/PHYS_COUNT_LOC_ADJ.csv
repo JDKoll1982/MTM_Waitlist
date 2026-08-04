@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9622"	"PHYS_COUNT_LOC_ADJ"	"PHYS_COUNT_ID"	"PHYSICAL_COUNT"	"ID"

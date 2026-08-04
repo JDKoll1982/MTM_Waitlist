@@ -1,0 +1,3 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"CUST_PRICE_GROUP"	"1"	"CODE"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"CUST_PRICE_GROUP"	"2"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"

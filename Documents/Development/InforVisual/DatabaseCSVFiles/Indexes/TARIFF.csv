@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TARIFF"	"PK_TARIFF"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"USAGE_ANALYSIS"	"X_USAGE_ANALYSIS_0"	"NONCLUSTERED"	"YES"	"NO"	"SITE_ID"	"1"	"NO"
+"USAGE_ANALYSIS"	"X_USAGE_ANALYSIS_0"	"NONCLUSTERED"	"YES"	"NO"	"PART_ID"	"2"	"NO"
+"USAGE_ANALYSIS"	"X_USAGE_ANALYSIS_1"	"NONCLUSTERED"	"NO"	"NO"	"CALC_VALUE"	"1"	"NO"

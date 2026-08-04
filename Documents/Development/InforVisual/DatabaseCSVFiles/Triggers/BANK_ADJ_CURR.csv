@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"BANK_ADJ_CURR"	"DELETE_BANK_ADJ_CURR"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"BANK_ADJ_CURR"	"INSERT_BANK_ADJ_CURR"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"BANK_ADJ_CURR"	"UPDATE_BANK_ADJ_CURR"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

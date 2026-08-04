@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"USAGE_ANALYSIS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"USAGE_ANALYSIS"	"2"	"PART_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"USAGE_ANALYSIS"	"3"	"CALC_VALUE"	"decimal"	"NULL"	"23"	"8"	"NO"	"NO"	"NO"
+"USAGE_ANALYSIS"	"4"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"

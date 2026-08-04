@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"BANK_ACCOUNT"	"CURRENCY_ID"	"DF__BANK_ACCO__CURRE__48A74BFA"	"NULL"

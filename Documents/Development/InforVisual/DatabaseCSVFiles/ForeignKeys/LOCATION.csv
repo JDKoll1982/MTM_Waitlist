@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9607"	"LOCATION"	"CUSTOMER_ID"	"CUSTOMER"	"ID"
+"FKEY9608"	"LOCATION"	"VENDOR_ID"	"VENDOR"	"ID"
+"FKEY0117"	"LOCATION"	"WAREHOUSE_ID"	"WAREHOUSE"	"ID"

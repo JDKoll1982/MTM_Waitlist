@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PACKAGE_TYPE"	"PK_PACKAGE_TYPE"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

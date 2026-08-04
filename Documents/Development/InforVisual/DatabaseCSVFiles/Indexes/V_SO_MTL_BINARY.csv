@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_SO_MTL_BINARY"	"X_V_SO_MTL_BINARY_0"	"CLUSTERED"	"YES"	"YES"	"SRVC_ORDER_ID"	"1"	"NO"
+"V_SO_MTL_BINARY"	"X_V_SO_MTL_BINARY_0"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"
+"V_SO_MTL_BINARY"	"X_V_SO_MTL_BINARY_0"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"3"	"NO"

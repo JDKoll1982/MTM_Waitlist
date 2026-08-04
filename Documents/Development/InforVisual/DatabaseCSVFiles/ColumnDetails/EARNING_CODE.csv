@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"EARNING_CODE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"EARNING_CODE"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"EARNING_CODE"	"3"	"DESCRIPTION"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"

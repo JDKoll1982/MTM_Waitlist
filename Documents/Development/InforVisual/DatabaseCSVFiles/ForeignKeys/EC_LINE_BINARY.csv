@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_EC_LINE_BINARY"	"EC_LINE_BINARY"	"EC_ID"	"EC_LINE"	"EC_ID"
+"FK_EC_LINE_BINARY"	"EC_LINE_BINARY"	"LINE_NO"	"EC_LINE"	"LINE_NO"

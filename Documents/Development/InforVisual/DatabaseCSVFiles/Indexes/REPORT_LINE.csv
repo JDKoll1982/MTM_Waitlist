@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"REPORT_LINE"	"PK_REPORT_LINE"	"CLUSTERED"	"YES"	"YES"	"REPORT_ID"	"1"	"NO"
+"REPORT_LINE"	"PK_REPORT_LINE"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"

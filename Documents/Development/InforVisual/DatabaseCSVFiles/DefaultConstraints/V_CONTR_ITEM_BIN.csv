@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_CONTR_ITEM_BIN"	"BITS_LENGTH"	"DF__V_CONTR_I__BITS___426F4FB7"	"NULL"
+"V_CONTR_ITEM_BIN"	"TYPE"	"DF__V_CONTR_IT__TYPE__417B2B7E"	"NULL"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_PURCLATE_SUM"	"EX_PURCLATE_SUM"	"NONCLUSTERED"	"YES"	"NO"	"eis_date"	"1"	"NO"

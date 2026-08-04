@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EQUIP_PM_EXCEPTION"	"ROWID"	"int"	"NO"
+"dbo"	"EQUIP_PM_EXCEPTION"	"equip_id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_PM_EXCEPTION"	"profile_id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_PM_EXCEPTION"	"exception_month"	"int"	"YES"
+"dbo"	"EQUIP_PM_EXCEPTION"	"from_date"	"datetime"	"YES"
+"dbo"	"EQUIP_PM_EXCEPTION"	"to_date"	"datetime"	"YES"

@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_SOA_DIMENSION"	"SOA_CODE_LIST"	"AGENCY_ID"	"SOA_DIMENSION"	"AGENCY_ID"
+"FK_SOA_DIMENSION"	"SOA_CODE_LIST"	"LIST_ID"	"SOA_DIMENSION"	"ID"

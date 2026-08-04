@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"E_CLASS"	"rowid"	"int"	"NO"
+"dbo"	"E_CLASS"	"name"	"nvarchar"	"YES"
+"dbo"	"E_CLASS"	"summary_purge"	"int"	"YES"
+"dbo"	"E_CLASS"	"detail_purge"	"int"	"YES"

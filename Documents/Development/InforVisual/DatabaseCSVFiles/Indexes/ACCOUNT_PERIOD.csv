@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ACCOUNT_PERIOD"	"PK_ACCOUNT_PERIOD"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"1"	"NO"
+"ACCOUNT_PERIOD"	"PK_ACCOUNT_PERIOD"	"CLUSTERED"	"YES"	"YES"	"ACCT_YEAR"	"2"	"NO"
+"ACCOUNT_PERIOD"	"PK_ACCOUNT_PERIOD"	"CLUSTERED"	"YES"	"YES"	"ACCT_PERIOD"	"3"	"NO"

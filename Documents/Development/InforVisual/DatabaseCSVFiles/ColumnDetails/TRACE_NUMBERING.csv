@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"TRACE_NUMBERING"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"TRACE_NUMBERING"	"2"	"ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"TRACE_NUMBERING"	"3"	"NEXT_NUMBER"	"decimal"	"NULL"	"15"	"0"	"YES"	"NO"	"NO"
+"TRACE_NUMBERING"	"4"	"ALPHA_PREFIX"	"nvarchar"	"4"	"0"	"0"	"YES"	"NO"	"NO"
+"TRACE_NUMBERING"	"5"	"ALPHA_SUFFIX"	"nvarchar"	"4"	"0"	"0"	"YES"	"NO"	"NO"
+"TRACE_NUMBERING"	"6"	"DECIMAL_PLACES"	"smallint"	"NULL"	"5"	"0"	"YES"	"NO"	"NO"
+"TRACE_NUMBERING"	"7"	"LEADING_ZEROS"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

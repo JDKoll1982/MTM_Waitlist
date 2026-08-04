@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9400"	"PAYABLE_CURR"	"CURRENCY_ID"	"CURRENCY"	"ID"
+"FKEY9401"	"PAYABLE_CURR"	"VOUCHER_ID"	"PAYABLE"	"VOUCHER_ID"

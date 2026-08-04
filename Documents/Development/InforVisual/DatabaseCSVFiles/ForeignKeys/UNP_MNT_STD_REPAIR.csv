@@ -1,0 +1,8 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9533"	"UNP_MNT_STD_REPAIR"	"equipment_model"	"EQUIP_MODEL"	"id"
+"FKEY9533"	"UNP_MNT_STD_REPAIR"	"equipment_type"	"EQUIP_MODEL"	"type_id"
+"FKEY9532"	"UNP_MNT_STD_REPAIR"	"equipment_type"	"EQUIP_TYPE"	"id"
+"FKEY9531"	"UNP_MNT_STD_REPAIR"	"fault_code"	"UNP_MNT_FAULT_CODE"	"id"
+"FKEY9531"	"UNP_MNT_STD_REPAIR"	"fault_type"	"UNP_MNT_FAULT_CODE"	"type_id"
+"FKEY9530"	"UNP_MNT_STD_REPAIR"	"fault_type"	"UNP_MNT_FAULT_TYPE"	"id"
+"FKEY9529"	"UNP_MNT_STD_REPAIR"	"part_id"	"PART"	"ID"

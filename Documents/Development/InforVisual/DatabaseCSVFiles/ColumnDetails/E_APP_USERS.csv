@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"E_APP_USERS"	"1"	"rowid"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"E_APP_USERS"	"2"	"name"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"
+"E_APP_USERS"	"3"	"sales"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"E_APP_USERS"	"4"	"purchases"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"E_APP_USERS"	"5"	"production"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"E_APP_USERS"	"6"	"financials"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

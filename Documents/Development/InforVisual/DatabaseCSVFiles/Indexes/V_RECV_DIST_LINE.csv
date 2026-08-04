@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_RECV_DIST_LINE"	"X_V_RECV_DIST_LINE_0"	"CLUSTERED"	"YES"	"YES"	"DIST_ID"	"1"	"NO"
+"V_RECV_DIST_LINE"	"X_V_RECV_DIST_LINE_0"	"CLUSTERED"	"YES"	"YES"	"ENTRY_NBR"	"2"	"NO"

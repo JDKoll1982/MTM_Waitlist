@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"USER_DIMENSION"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"USER_DIMENSION"	"2"	"DIMENSION"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"USER_DIMENSION"	"3"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_DIMENSION"	"4"	"DESCRIPTION"	"nvarchar"	"50"	"0"	"0"	"YES"	"NO"	"NO"
+"USER_DIMENSION"	"5"	"IS_SUMMARY"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_DIMENSION"	"6"	"IS_RESERVED"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_DIMENSION"	"7"	"PARENT_DIMENSION"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"

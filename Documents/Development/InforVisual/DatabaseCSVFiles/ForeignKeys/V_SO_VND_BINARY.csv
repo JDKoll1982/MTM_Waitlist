@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00249"	"V_SO_VND_BINARY"	"LINE_NO"	"V_SRVCORD_VNDR"	"LINE_NO"
+"FK_VFO_00249"	"V_SO_VND_BINARY"	"SRVC_ORDER_ID"	"V_SRVCORD_VNDR"	"SRVC_ORDER_ID"

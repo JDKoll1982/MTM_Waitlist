@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"INV_RECEIPT_DIST"	"PK_INV_RCPT_DIST"	"CLUSTERED"	"YES"	"YES"	"INV_TRANS_ID"	"1"	"NO"
+"INV_RECEIPT_DIST"	"PK_INV_RCPT_DIST"	"CLUSTERED"	"YES"	"YES"	"DEMAND_SUPPLY_ID"	"2"	"NO"
+"INV_RECEIPT_DIST"	"X_INV_RCPT_DIST_1"	"NONCLUSTERED"	"NO"	"NO"	"DEMAND_SUPPLY_ID"	"1"	"NO"

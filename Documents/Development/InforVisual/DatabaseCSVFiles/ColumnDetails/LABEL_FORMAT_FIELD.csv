@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"LABEL_FORMAT_FIELD"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"LABEL_FORMAT_FIELD"	"2"	"COLUMN_ID"	"nvarchar"	"70"	"0"	"0"	"NO"	"NO"	"NO"
+"LABEL_FORMAT_FIELD"	"3"	"LABEL_FIELD"	"nvarchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"LABEL_FORMAT_FIELD"	"4"	"LABEL_FORMAT_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"LABEL_FORMAT_FIELD"	"5"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"

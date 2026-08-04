@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"LABOR_TICKET_BREAK"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"LABOR_TICKET_BREAK"	"2"	"TRANSACTION_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"LABOR_TICKET_BREAK"	"3"	"CLOCK_IN"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"LABOR_TICKET_BREAK"	"4"	"CLOCK_OUT"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

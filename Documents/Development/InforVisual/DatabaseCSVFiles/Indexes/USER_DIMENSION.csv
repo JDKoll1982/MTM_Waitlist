@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"USER_DIMENSION"	"PK_USER_DIMENSION"	"CLUSTERED"	"YES"	"YES"	"DIMENSION"	"1"	"NO"
+"USER_DIMENSION"	"PK_USER_DIMENSION"	"CLUSTERED"	"YES"	"YES"	"ID"	"2"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"FIN_DIST_DETAIL"	"CURRENCY_ID"	"DF__FIN_DIST___CURRE__057B5010"	"NULL"

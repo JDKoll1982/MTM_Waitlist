@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"COST_GROUP"	"ROWID"	"int"	"NO"
+"dbo"	"COST_GROUP"	"ID"	"nvarchar"	"NO"
+"dbo"	"COST_GROUP"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"COST_GROUP"	"TYPE"	"nchar"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"ECN"	"UPDATE_ECN"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

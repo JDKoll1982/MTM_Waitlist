@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CATEGORY"	"X_V_CATEGORY_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_CATEGORY"	"X_V_CATEGORY_0"	"CLUSTERED"	"YES"	"YES"	"KEYWORD_ID"	"2"	"NO"

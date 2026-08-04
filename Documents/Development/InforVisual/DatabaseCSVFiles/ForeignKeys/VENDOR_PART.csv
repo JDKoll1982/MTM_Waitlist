@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0102"	"VENDOR_PART"	"PART_ID"	"PART"	"ID"
+"FK_VEND_PART_TO_SITE"	"VENDOR_PART"	"SITE_ID"	"SITE"	"ID"
+"FKEY0080"	"VENDOR_PART"	"VENDOR_ID"	"VENDOR"	"ID"

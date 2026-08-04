@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PURC_LINE_TRC_CTL"	"PK_PURC_LINE_TRC_CTL"	"CLUSTERED"	"YES"	"YES"	"PURC_ORDER_ID"	"1"	"NO"
+"PURC_LINE_TRC_CTL"	"PK_PURC_LINE_TRC_CTL"	"CLUSTERED"	"YES"	"YES"	"PURC_ORDER_LINE_NO"	"2"	"NO"

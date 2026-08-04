@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"SHOP_RESOURCE"	"UPDATE_SHOP_RESOURCE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

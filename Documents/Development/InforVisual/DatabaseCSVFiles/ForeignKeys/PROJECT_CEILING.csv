@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PROJECT_CEILING_00"	"PROJECT_CEILING"	"PROJECT_ID"	"PROJECT_INFO"	"ID"

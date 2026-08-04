@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"VR_MENU"	"ROWID"	"int"	"NO"
+"dbo"	"VR_MENU"	"ID"	"nvarchar"	"NO"
+"dbo"	"VR_MENU"	"LOCALE"	"nvarchar"	"NO"
+"dbo"	"VR_MENU"	"DESCRIPTION"	"nvarchar"	"YES"

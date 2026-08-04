@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"UDF_LAYOUT"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"UDF_LAYOUT"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"UDF_LAYOUT"	"3"	"UDF_LABELS"	"nvarchar"	"250"	"0"	"0"	"NO"	"NO"	"NO"

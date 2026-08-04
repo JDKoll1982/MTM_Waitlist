@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"VR_DATA_SRC_DRILLTO_PARAM"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"VR_DATA_SRC_DRILLTO_PARAM"	"2"	"DATA_SOURCE_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_DATA_SRC_DRILLTO_PARAM"	"3"	"DATA_SOURCE_COLUMN_NAME"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_DATA_SRC_DRILLTO_PARAM"	"4"	"SEQUENCE_NO"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"VR_DATA_SRC_DRILLTO_PARAM"	"5"	"PARAMETER_TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_DATA_SRC_DRILLTO_PARAM"	"6"	"PARAMETER_VALUE"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"

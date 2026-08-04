@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_ACCTBALDIM_CURR"	"ACCOUNT_BAL_DIM"	"CURRENCY_ID"	"CURRENCY"	"ID"
+"FK_ACCTBALDIM_SITE"	"ACCOUNT_BAL_DIM"	"SITE_ID"	"SITE"	"ID"

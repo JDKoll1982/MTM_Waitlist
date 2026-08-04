@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"ACCOUNT_SITE"	"ROWID"	"int"	"NO"
+"dbo"	"ACCOUNT_SITE"	"ACCOUNT_ID"	"nvarchar"	"NO"
+"dbo"	"ACCOUNT_SITE"	"SITE_ID"	"nvarchar"	"NO"
+"dbo"	"ACCOUNT_SITE"	"IS_VIEWABLE"	"nchar"	"NO"

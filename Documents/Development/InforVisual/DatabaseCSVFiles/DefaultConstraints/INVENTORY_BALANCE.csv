@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"INVENTORY_BALANCE"	"CURRENCY_ID"	"DF__INVENTORY__CURRE__4C0DC88A"	"NULL"

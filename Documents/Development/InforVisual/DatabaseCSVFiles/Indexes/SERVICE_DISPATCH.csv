@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SERVICE_DISPATCH"	"PK_SERVICE_DISPATCH"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"SERVICE_DISPATCH"	"X_SERV_DISPATCH_1"	"NONCLUSTERED"	"NO"	"NO"	"PURC_ORDER_ID"	"1"	"NO"
+"SERVICE_DISPATCH"	"X_SERV_DISPATCH_2"	"NONCLUSTERED"	"NO"	"NO"	"VENDOR_ID"	"1"	"NO"

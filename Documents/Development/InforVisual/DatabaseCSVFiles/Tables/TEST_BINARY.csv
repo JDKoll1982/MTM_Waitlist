@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TEST_BINARY"	"ROWID"	"int"	"NO"
+"dbo"	"TEST_BINARY"	"TEST_ID"	"nvarchar"	"NO"
+"dbo"	"TEST_BINARY"	"TYPE"	"nchar"	"NO"
+"dbo"	"TEST_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"TEST_BINARY"	"BITS_LENGTH"	"int"	"NO"

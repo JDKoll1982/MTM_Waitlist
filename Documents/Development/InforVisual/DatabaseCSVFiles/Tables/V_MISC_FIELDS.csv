@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_MISC_FIELDS"	"IS_DELETED"	"smallint"	"NO"
+"dbo"	"V_MISC_FIELDS"	"EDIT_FROM_DETAIL"	"smallint"	"NO"
+"dbo"	"V_MISC_FIELDS"	"BINARY_CHANGED"	"smallint"	"NO"
+"dbo"	"V_MISC_FIELDS"	"IS_DIRTY"	"smallint"	"NO"
+"dbo"	"V_MISC_FIELDS"	"CREATE_DATE"	"datetime"	"YES"

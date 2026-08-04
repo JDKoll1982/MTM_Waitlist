@@ -1,0 +1,6 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CONTACT"	"PK_CONTACT"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"CONTACT"	"X_CONTACT_1"	"NONCLUSTERED"	"NO"	"NO"	"FIRST_NAME"	"1"	"NO"
+"CONTACT"	"X_CONTACT_2"	"NONCLUSTERED"	"NO"	"NO"	"LAST_NAME"	"1"	"NO"
+"CONTACT"	"X_CONTACT_3"	"NONCLUSTERED"	"NO"	"NO"	"FIRST_NAME"	"1"	"NO"
+"CONTACT"	"X_CONTACT_3"	"NONCLUSTERED"	"NO"	"NO"	"LAST_NAME"	"2"	"NO"

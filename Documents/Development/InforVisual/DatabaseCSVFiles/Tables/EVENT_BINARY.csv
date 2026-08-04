@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EVENT_BINARY"	"ROWID"	"int"	"NO"
+"dbo"	"EVENT_BINARY"	"EVENT_ID"	"int"	"NO"
+"dbo"	"EVENT_BINARY"	"TYPE"	"nchar"	"NO"
+"dbo"	"EVENT_BINARY"	"BITS_LENGTH"	"int"	"NO"
+"dbo"	"EVENT_BINARY"	"BITS"	"image"	"YES"

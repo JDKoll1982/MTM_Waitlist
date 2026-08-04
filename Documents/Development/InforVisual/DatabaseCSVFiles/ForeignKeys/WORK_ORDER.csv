@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9468"	"WORK_ORDER"	"DEF_LBL_FORMAT_ID"	"LABEL_FORMAT"	"ID"
+"FKEY0093"	"WORK_ORDER"	"PART_ID"	"PART"	"ID"
+"FK_WO_TO_SITE"	"WORK_ORDER"	"SITE_ID"	"SITE"	"ID"

@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"RECEIVER"	"DELETE_RECEIVER"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"RECEIVER"	"INSERT_RECEIVER"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"RECEIVER"	"UPDATE_RECEIVER"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

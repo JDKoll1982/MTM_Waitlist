@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_DEFAULT_DATA_SITE"	"DEFAULT_DATA"	"SITE_ID"	"SITE"	"ID"

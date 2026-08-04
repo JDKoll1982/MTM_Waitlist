@@ -1,0 +1,75 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Waitlist.Controls.PickupWip.PickupWipWaitlistLineView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:MTM_Waitlist.Module_Waitlist.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <local:WaitlistLineCardView
+            AccentBrush="#FFE1B800"
+            AccentSurfaceBrush="#FFFFF7CC"
+            BadgeBackgroundBrush="#FFFFE986"
+            BadgeText="WIP"
+            Order="{Binding Mode=OneWay}">
+        <local:WaitlistLineCardView.DetailsContent>
+            <Grid ColumnSpacing="12" RowSpacing="2">
+                <Grid.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="11" />
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock FontWeight="SemiBold" Text="Work order" />
+                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Part and quantity" />
+                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Pickup work center" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="WIP destination" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Operation sequence" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </local:WaitlistLineCardView.DetailsContent>
+    </local:WaitlistLineCardView>
+</UserControl>
+
+<!--
+    Notes
+    Card contents:
+    Request type - Clearly identify the request as a Work In Process (WIP) pickup.
+    Work order - The work order identifier for the WIP material.
+    Part and quantity - The part number, description, and quantity to be moved.
+    Pickup work center - The work center, press, or resource where the WIP material is staged.
+    WIP destination - The assigned warehouse and location in the WIP area where the material must be inventoried.
+    Operation sequence - The operation associated with the WIP material.
+    Pickup priority - Required-by date, scheduled operation finish, urgency, and current waitlist age.
+    Handling alert - Packaging, weight, safety, equipment, or special transport instructions visible before pickup.
+
+    Detail page contents:
+    Request summary - WIP status, request date and time, priority, target completion time, and current owner.
+    Pickup instructions - Source work center, press or resource, warehouse, current location, staging point, and work-center contact.
+    WIP destination - Other locations where this material may be located, derived by querying the MTM WIP Application's inventory system.
+    Work-order details - Work order type, base, lot, split, sub-ID, status, and priority.
+    Part and quantity details - Part number, description, desired, received, allocated, fulfilled, and remaining quantities.
+    Operation details - Operation sequence, press or resource, operation status, completed quantity, and dispatched quantity.
+    Schedule details - Desired release, desired want, scheduled start, scheduled finish, and could-finish dates.
+    Material requirement - Required part, calculated quantity, issued quantity, allocated quantity, fulfilled quantity, and required date.
+    Inventory record - Quantity placed, unit of measure, container or lot identifier, inventory transaction, placement time, and material-handler confirmation.
+    Traceability - Work order, operation, part, lot, serial, heat, batch, or container identifiers needed to keep the WIP material connected to its job.
+    Handling and safety - Packaging, weight, lifting equipment, hazardous-material information, and other transport restrictions.
+    Cost context - Material, labor, burden, and service WIP amounts when authorized and relevant.
+    Request context - Requesting user, employee number, requesting work center, press, pickup acknowledgement, delivery time, and remaining waitlist time.
+-->

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SALES_TAX_GRP_PART"	"X_SALES_TAX_GRP_PART_0"	"NONCLUSTERED"	"YES"	"NO"	"PART_ID"	"1"	"NO"
+"SALES_TAX_GRP_PART"	"X_SALES_TAX_GRP_PART_0"	"NONCLUSTERED"	"YES"	"NO"	"CUSTOMER_ID"	"2"	"NO"
+"SALES_TAX_GRP_PART"	"X_SALES_TAX_GRP_PART_0"	"NONCLUSTERED"	"YES"	"NO"	"ADDR_NO"	"3"	"NO"

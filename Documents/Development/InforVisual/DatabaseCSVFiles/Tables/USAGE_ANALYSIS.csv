@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"USAGE_ANALYSIS"	"ROWID"	"int"	"NO"
+"dbo"	"USAGE_ANALYSIS"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"USAGE_ANALYSIS"	"CALC_VALUE"	"decimal"	"NO"
+"dbo"	"USAGE_ANALYSIS"	"SITE_ID"	"nvarchar"	"NO"

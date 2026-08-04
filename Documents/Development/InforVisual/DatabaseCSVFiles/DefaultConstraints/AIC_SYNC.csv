@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"AIC_SYNC"	"CREATE_DATE"	"DF__AIC_SYNC__CREATE__3A592CA3"	"NULL"
+"AIC_SYNC"	"SUBSCRIPTIONS"	"DF__AIC_SYNC__SUBSCR__3B4D50DC"	"NULL"

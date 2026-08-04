@@ -1,0 +1,2 @@
+"TableName"	"ConstraintName"	"Definition"
+"ACCOUNTING_ENTITY"	"CHK_ACCOUNTING_ENTITY"	"NULL"

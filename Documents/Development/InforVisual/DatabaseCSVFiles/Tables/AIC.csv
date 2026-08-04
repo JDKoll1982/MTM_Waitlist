@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"AIC"	"ROWID"	"int"	"NO"
+"dbo"	"AIC"	"CODE"	"nvarchar"	"NO"
+"dbo"	"AIC"	"DESCRIPTION"	"nvarchar"	"YES"

@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_SALES_PLAN"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_SALES_PLAN"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_SALES_PLAN"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_SALES_PLAN"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_SALES_PLAN"	"CREATOR"	"nvarchar"	"YES"
+"dbo"	"V_SALES_PLAN"	"CREATE_DATE"	"datetime"	"YES"

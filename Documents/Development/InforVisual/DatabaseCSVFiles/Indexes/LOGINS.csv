@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"LOGINS"	"X_LOGINS_1"	"NONCLUSTERED"	"NO"	"NO"	"MACHINE_ID"	"1"	"NO"
+"LOGINS"	"X_LOGINS_1"	"NONCLUSTERED"	"NO"	"NO"	"PROGRAM_ID"	"2"	"NO"

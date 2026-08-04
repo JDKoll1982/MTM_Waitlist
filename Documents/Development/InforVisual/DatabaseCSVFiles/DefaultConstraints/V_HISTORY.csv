@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_HISTORY"	"AUTO_NOTE"	"DF__V_HISTORY__AUTO___56764864"	"NULL"
+"V_HISTORY"	"REL_TYPE"	"DF__V_HISTORY__REL_T__5582242B"	"NULL"

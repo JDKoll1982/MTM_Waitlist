@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"DEVIATION"	"ROWID"	"int"	"NO"
+"dbo"	"DEVIATION"	"ID"	"nvarchar"	"NO"
+"dbo"	"DEVIATION"	"DESCRIPTION"	"nvarchar"	"NO"

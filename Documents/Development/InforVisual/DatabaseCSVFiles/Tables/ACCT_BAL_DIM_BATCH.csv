@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"ACCT_BAL_DIM_BATCH"	"SITE_ID"	"nvarchar"	"NO"
+"dbo"	"ACCT_BAL_DIM_BATCH"	"BATCH_ID"	"nvarchar"	"NO"
+"dbo"	"ACCT_BAL_DIM_BATCH"	"BATCH_ACTION"	"nchar"	"NO"
+"dbo"	"ACCT_BAL_DIM_BATCH"	"ACCT_YEAR"	"decimal"	"YES"
+"dbo"	"ACCT_BAL_DIM_BATCH"	"ACCT_PERIOD"	"decimal"	"YES"
+"dbo"	"ACCT_BAL_DIM_BATCH"	"FAILED_ATTEMPTS"	"smallint"	"NO"
+"dbo"	"ACCT_BAL_DIM_BATCH"	"CREATE_DATE"	"datetime"	"NO"

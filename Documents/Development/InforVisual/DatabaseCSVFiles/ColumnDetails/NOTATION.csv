@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"NOTATION"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"NOTATION"	"2"	"TYPE"	"nchar"	"2"	"0"	"0"	"NO"	"NO"	"NO"
+"NOTATION"	"3"	"OWNER_ID"	"nvarchar"	"40"	"0"	"0"	"NO"	"NO"	"NO"
+"NOTATION"	"4"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"NOTATION"	"5"	"NOTE"	"image"	"NULL"	"0"	"0"	"YES"	"NO"	"NO"

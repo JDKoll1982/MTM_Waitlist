@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"GJ_CURR"	"ROWID"	"int"	"NO"
+"dbo"	"GJ_CURR"	"GJ_ID"	"nvarchar"	"NO"
+"dbo"	"GJ_CURR"	"CURRENCY_ID"	"nvarchar"	"NO"
+"dbo"	"GJ_CURR"	"AMOUNT"	"decimal"	"NO"
+"dbo"	"GJ_CURR"	"SELL_RATE"	"decimal"	"NO"
+"dbo"	"GJ_CURR"	"BUY_RATE"	"decimal"	"NO"

@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"ENUM_CODES"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"ENUM_CODES"	"2"	"TABLE_NAME"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"ENUM_CODES"	"3"	"COLUMN_NAME"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"ENUM_CODES"	"4"	"LANGUAGE_ID"	"nvarchar"	"3"	"0"	"0"	"NO"	"NO"	"NO"
+"ENUM_CODES"	"5"	"ENUM_TEXT"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"
+"ENUM_CODES"	"6"	"ENUM_VALUE"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"

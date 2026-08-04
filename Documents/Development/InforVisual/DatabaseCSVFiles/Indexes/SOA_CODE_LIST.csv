@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SOA_CODE_LIST"	"PK_SOA_CODE_LIST"	"CLUSTERED"	"YES"	"YES"	"LIST_ID"	"1"	"NO"
+"SOA_CODE_LIST"	"PK_SOA_CODE_LIST"	"CLUSTERED"	"YES"	"YES"	"AGENCY_ID"	"2"	"NO"
+"SOA_CODE_LIST"	"PK_SOA_CODE_LIST"	"CLUSTERED"	"YES"	"YES"	"CODE"	"3"	"NO"

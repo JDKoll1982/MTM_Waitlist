@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RCR_GJ"	"PK_RCR_GJ"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

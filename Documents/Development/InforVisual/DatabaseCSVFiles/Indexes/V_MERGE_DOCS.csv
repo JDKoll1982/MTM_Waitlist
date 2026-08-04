@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_MERGE_DOCS"	"X_V_MERGE_DOCS_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

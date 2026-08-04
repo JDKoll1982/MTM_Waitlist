@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SALES_REP"	"PK_SALES_REP"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"SALES_REP"	"X_SALES_REP_1"	"NONCLUSTERED"	"NO"	"NO"	"VENDOR_ID"	"1"	"NO"
+"SALES_REP"	"X_SALES_REP_2"	"NONCLUSTERED"	"NO"	"NO"	"EMPLOYEE_ID"	"1"	"NO"
+"SALES_REP"	"X_SALES_REP_3"	"NONCLUSTERED"	"NO"	"NO"	"EARNING_CODE_ID"	"1"	"NO"

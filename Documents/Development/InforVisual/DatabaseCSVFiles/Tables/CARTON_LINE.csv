@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"CARTON_LINE"	"ROWID"	"int"	"NO"
+"dbo"	"CARTON_LINE"	"CARTON_ID"	"nvarchar"	"NO"
+"dbo"	"CARTON_LINE"	"LINE_NO"	"smallint"	"NO"
+"dbo"	"CARTON_LINE"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"CARTON_LINE"	"QTY"	"decimal"	"NO"

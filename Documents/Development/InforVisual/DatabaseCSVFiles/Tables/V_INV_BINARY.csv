@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_INV_BINARY"	"INVOICE_ID"	"nvarchar"	"NO"
+"dbo"	"V_INV_BINARY"	"TYPE"	"nvarchar"	"NO"
+"dbo"	"V_INV_BINARY"	"BITS_LENGTH"	"int"	"NO"
+"dbo"	"V_INV_BINARY"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_INV_BINARY"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_INV_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"V_INV_BINARY"	"CREATE_DATE"	"datetime"	"YES"

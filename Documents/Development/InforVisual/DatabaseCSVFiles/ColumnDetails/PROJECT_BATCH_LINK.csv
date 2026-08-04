@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PROJECT_BATCH_LINK"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PROJECT_BATCH_LINK"	"2"	"SOURCE_BATCH_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"PROJECT_BATCH_LINK"	"3"	"PROJECT_BATCH_ID"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"
+"PROJECT_BATCH_LINK"	"4"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"PROJECT_BATCH_LINK"	"5"	"PROJ_BURD_BATCH_ID"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"
+"PROJECT_BATCH_LINK"	"6"	"COMM_BURD_BATCH_ID"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"
+"PROJECT_BATCH_LINK"	"7"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"

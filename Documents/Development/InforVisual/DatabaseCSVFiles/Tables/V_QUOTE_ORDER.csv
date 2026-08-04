@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_QUOTE_ORDER"	"CUST_ORDER_ID"	"nvarchar"	"NO"
+"dbo"	"V_QUOTE_ORDER"	"QUOTE_ID"	"nvarchar"	"NO"
+"dbo"	"V_QUOTE_ORDER"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_QUOTE_ORDER"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_QUOTE_ORDER"	"ORDER_LINE_NO"	"smallint"	"NO"
+"dbo"	"V_QUOTE_ORDER"	"QUOTE_LINE_NO"	"smallint"	"NO"
+"dbo"	"V_QUOTE_ORDER"	"CREATE_DATE"	"datetime"	"YES"

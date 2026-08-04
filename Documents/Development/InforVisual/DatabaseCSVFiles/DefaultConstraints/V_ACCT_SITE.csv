@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_ACCT_SITE"	"CREATE_DATE"	"DF__V_ACCT_SI__CREAT__3382DD39"	"NULL"
+"V_ACCT_SITE"	"ORDER_FILL_RATE"	"DF__V_ACCT_SI__ORDER__328EB900"	"NULL"

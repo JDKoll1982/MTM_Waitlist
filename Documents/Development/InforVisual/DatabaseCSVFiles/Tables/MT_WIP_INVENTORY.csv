@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"MT_WIP_INVENTORY"	"PART_ID"	"varchar"	"NO"
+"dbo"	"MT_WIP_INVENTORY"	"WAREHOUSE"	"varchar"	"NO"
+"dbo"	"MT_WIP_INVENTORY"	"LOCATION"	"varchar"	"NO"
+"dbo"	"MT_WIP_INVENTORY"	"QTY"	"decimal"	"NO"

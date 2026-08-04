@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"CUSTOMER_CONTACT"	"DELETE_CUSTOMER_CONTACT"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"

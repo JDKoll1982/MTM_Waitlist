@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9592"	"CURR_PRICE_INDEX"	"FROM_CURRENCY_ID"	"CURRENCY"	"ID"
+"FKEY9593"	"CURR_PRICE_INDEX"	"TO_CURRENCY_ID"	"CURRENCY"	"ID"

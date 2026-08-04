@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"INBOX_ERROR"	"C_CREATE_DATE"	"DF__INBOX_ERR__C_CRE__2F7189DC"	"NULL"

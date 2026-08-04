@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TRACE_DATE"	"ROWID"	"int"	"NO"
+"dbo"	"TRACE_DATE"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"TRACE_DATE"	"DATE_NAME"	"nvarchar"	"NO"
+"dbo"	"TRACE_DATE"	"TRACE_DAYS"	"int"	"YES"
+"dbo"	"TRACE_DATE"	"FROM_DATE_NAME"	"nvarchar"	"YES"
+"dbo"	"TRACE_DATE"	"CLASS_ID"	"nchar"	"YES"
+"dbo"	"TRACE_DATE"	"SITE_ID"	"nvarchar"	"YES"

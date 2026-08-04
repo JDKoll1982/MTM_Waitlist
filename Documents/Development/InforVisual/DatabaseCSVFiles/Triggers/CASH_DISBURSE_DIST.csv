@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"CASH_DISBURSE_DIST"	"INSERT_CASH_DISBURSE_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"CASH_DISBURSE_DIST"	"UPDATE_CASH_DISBURSE_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

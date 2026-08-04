@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"BANK_STATEMENT"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"BANK_STATEMENT"	"2"	"BANK_ACCOUNT_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"BANK_STATEMENT"	"3"	"STATEMENT_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"BANK_STATEMENT"	"4"	"STARTING_BALANCE"	"decimal"	"NULL"	"23"	"8"	"NO"	"NO"	"NO"
+"BANK_STATEMENT"	"5"	"ENDING_BALANCE"	"decimal"	"NULL"	"23"	"8"	"NO"	"NO"	"NO"

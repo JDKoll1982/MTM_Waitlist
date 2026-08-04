@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9528"	"UNP_MNT_ENGINEER"	"resource_id"	"SHOP_RESOURCE"	"ID"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"MARKET"	"PK_MARKET"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

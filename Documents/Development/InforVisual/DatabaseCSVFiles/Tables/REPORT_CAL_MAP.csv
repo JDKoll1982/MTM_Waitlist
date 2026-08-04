@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"REPORT_CAL_MAP"	"ROWID"	"int"	"NO"
+"dbo"	"REPORT_CAL_MAP"	"RPT_CAL_ID"	"nvarchar"	"NO"
+"dbo"	"REPORT_CAL_MAP"	"FIN_CAL_ID"	"nvarchar"	"NO"
+"dbo"	"REPORT_CAL_MAP"	"BEGIN_ACCT_PERIOD"	"decimal"	"NO"
+"dbo"	"REPORT_CAL_MAP"	"END_ACCT_PERIOD"	"decimal"	"NO"
+"dbo"	"REPORT_CAL_MAP"	"BEGIN_ACCT_YEAR"	"decimal"	"YES"
+"dbo"	"REPORT_CAL_MAP"	"END_ACCT_YEAR"	"decimal"	"YES"

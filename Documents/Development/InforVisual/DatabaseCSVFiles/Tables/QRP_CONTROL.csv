@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"QRP_CONTROL"	"ROWID"	"int"	"NO"
+"dbo"	"QRP_CONTROL"	"STD_QRP_NAME"	"nvarchar"	"NO"
+"dbo"	"QRP_CONTROL"	"CONTEXT_TYPE"	"nchar"	"NO"
+"dbo"	"QRP_CONTROL"	"CONTEXT_ID"	"nvarchar"	"NO"
+"dbo"	"QRP_CONTROL"	"USER_QRP_NAME"	"nvarchar"	"NO"
+"dbo"	"QRP_CONTROL"	"DESCRIPTION"	"nvarchar"	"YES"

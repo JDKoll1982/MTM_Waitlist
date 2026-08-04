@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"SHIPMENT_DETAIL"	"CURRENCY_ID"	"DF__SHIPMENT___CURRE__7A2998F5"	"NULL"

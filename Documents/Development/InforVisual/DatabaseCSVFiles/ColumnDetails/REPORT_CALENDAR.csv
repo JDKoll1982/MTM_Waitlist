@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"REPORT_CALENDAR"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"REPORT_CALENDAR"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"REPORT_CALENDAR"	"3"	"DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"
+"REPORT_CALENDAR"	"4"	"ACTIVE_FLAG"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

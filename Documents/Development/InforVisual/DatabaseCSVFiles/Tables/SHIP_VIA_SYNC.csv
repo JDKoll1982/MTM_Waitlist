@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SHIP_VIA_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"SHIP_VIA_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"SHIP_VIA_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"SHIP_VIA_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"SHIP_VIA_SYNC"	"SHIP_VIA_CODE"	"nvarchar"	"NO"
+"dbo"	"SHIP_VIA_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"SHIP_VIA_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

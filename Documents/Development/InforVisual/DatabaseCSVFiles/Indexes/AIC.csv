@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"AIC"	"PK_AIC"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

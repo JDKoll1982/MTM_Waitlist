@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"DEVIATION_REASON"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"DEVIATION_REASON"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"DEVIATION_REASON"	"3"	"DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"
+"DEVIATION_REASON"	"4"	"PAID_FLAG"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

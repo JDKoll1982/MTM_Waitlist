@@ -7,26 +7,97 @@
     mc:Ignorable="d">
 
     <Grid Padding="32">
-        <StackPanel
-            MaxWidth="460"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Spacing="16">
-            <TextBlock
-                FontSize="28"
-                FontWeight="SemiBold"
-                Text="Sign in" />
-            <TextBlock
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Text="{x:Bind ViewModel.LoginHint, Mode=OneWay}"
-                TextWrapping="WrapWholeWords" />
-            <StackPanel
-                x:Name="NewUserActionArea"
-                Orientation="Horizontal"
-                Spacing="12"
-                x:Load="{x:Bind ViewModel.ShowNewUserAction, Mode=OneWay}">
-                <Button Content="New User" Command="{x:Bind ViewModel.NewUserCommand, Mode=OneWay}" />
-            </StackPanel>
-        </StackPanel>
+        <ScrollViewer
+            HorizontalScrollBarVisibility="Disabled"
+            HorizontalScrollMode="Disabled"
+            VerticalScrollBarVisibility="Auto"
+            VerticalScrollMode="Auto">
+            <Border
+                MaxWidth="520"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="0,24"
+                Padding="28"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="12">
+                <StackPanel Spacing="16">
+                <TextBlock
+                    FontSize="28"
+                    FontWeight="SemiBold"
+                    Text="Sign in" />
+
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="Use your assigned credentials to continue." />
+
+                <TextBox
+                    x:Name="UsernameTextBox"
+                    Header="Username"
+                    PlaceholderText="Enter your username"
+                    Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <PasswordBox
+                    x:Name="PasswordBox"
+                    Header="Password"
+                    PlaceholderText="Enter your password"
+                    PasswordChanged="PasswordBox_OnPasswordChanged" />
+
+                <CheckBox
+                    Content="Remember password on this device"
+                    IsChecked="{x:Bind ViewModel.RememberPassword, Mode=TwoWay}" />
+
+                <StackPanel
+                    x:Name="PasswordChangePanel"
+                    Spacing="12"
+                    x:Load="{x:Bind ViewModel.ShowPasswordChangePrompt, Mode=OneWay}">
+                    <TextBlock
+                        Text="Change Password"
+                        FontSize="18"
+                        FontWeight="SemiBold" />
+                    <PasswordBox
+                        x:Name="NewPasswordBox"
+                        Header="New password"
+                        PlaceholderText="Enter a new password"
+                        PasswordChanged="NewPasswordBox_OnPasswordChanged" />
+                    <PasswordBox
+                        x:Name="ConfirmPasswordBox"
+                        Header="Confirm new password"
+                        PlaceholderText="Re-enter the new password"
+                        PasswordChanged="ConfirmPasswordBox_OnPasswordChanged" />
+                    <Button
+                        Content="Update password"
+                        Command="{x:Bind ViewModel.ChangePasswordCommand, Mode=OneWay}"
+                        Style="{ThemeResource AccentButtonStyle}" />
+                </StackPanel>
+
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind ViewModel.LoginHint, Mode=OneWay}"
+                    TextWrapping="WrapWholeWords" />
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button
+                        Content="Sign in"
+                        Command="{x:Bind ViewModel.SignInCommand, Mode=OneWay}"
+                        Style="{ThemeResource AccentButtonStyle}" />
+                    <Button
+                        Content="Cancel"
+                        Command="{x:Bind ViewModel.CancelCommand, Mode=OneWay}" />
+                </StackPanel>
+
+                <StackPanel
+                    x:Name="NewUserActionArea"
+                    Orientation="Horizontal"
+                    Spacing="12"
+                    x:Load="{x:Bind ViewModel.ShowNewUserAction, Mode=OneWay}">
+                    <Button
+                        Content="New User"
+                        Command="{x:Bind ViewModel.NewUserCommand, Mode=OneWay}" />
+                </StackPanel>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
     </Grid>
 </Page>

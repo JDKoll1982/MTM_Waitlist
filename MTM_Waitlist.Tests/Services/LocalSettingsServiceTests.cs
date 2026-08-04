@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text.Json;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Settings.Models;
@@ -24,6 +25,38 @@ public sealed class LocalSettingsServiceTests
 
         Assert.AreEqual("Dark", theme);
         Assert.IsTrue(fileService.CurrentState.ContainsKey("Theme"));
+    }
+
+    [TestMethod]
+    public async Task ReadSettingAsync_WhenPersistedValueIsJsonElementString_ReturnsUnwrappedStringAsync()
+    {
+        var persistedState = JsonSerializer.Deserialize<Dictionary<string, object>>("""
+            {
+              "Theme": "\"Dark\""
+            }
+            """)!;
+
+        var service = CreateService(new InMemoryFileService(persistedState));
+
+        var theme = await service.ReadSettingAsync<string>("Theme");
+
+        Assert.AreEqual("Dark", theme);
+    }
+
+    [TestMethod]
+    public async Task ReadSettingAsync_WhenPersistedBoolPayloadIsJsonElementString_ReturnsBoolAsync()
+    {
+        var persistedState = JsonSerializer.Deserialize<Dictionary<string, object>>("""
+            {
+              "Login.RememberPassword": "true"
+            }
+            """)!;
+
+        var service = CreateService(new InMemoryFileService(persistedState));
+
+        var rememberPassword = await service.ReadSettingAsync<bool>("Login.RememberPassword");
+
+        Assert.IsTrue(rememberPassword);
     }
 
     [TestMethod]

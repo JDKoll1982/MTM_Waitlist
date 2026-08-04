@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_DATA_SRC_COL_TO_DATA_SRC"	"VR_DATA_SOURCE_COLUMN"	"DATA_SOURCE_ID"	"VR_DATA_SOURCE"	"ID"

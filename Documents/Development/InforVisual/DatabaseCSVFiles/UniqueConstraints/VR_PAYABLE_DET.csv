@@ -1,0 +1,4 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"VR_PAYABLE_DET"	"VR_PAYABLE_DET_0"	"VOUCHER_ID"	"1"
+"VR_PAYABLE_DET"	"VR_PAYABLE_DET_0"	"SITE_ID"	"2"
+"VR_PAYABLE_DET"	"VR_PAYABLE_DET_0"	"LINE_NO"	"3"

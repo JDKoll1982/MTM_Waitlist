@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CALL_RESOLUTION"	"X_V_CALL_RESOLUTION_0"	"CLUSTERED"	"YES"	"YES"	"CALL_ID"	"1"	"NO"
+"V_CALL_RESOLUTION"	"X_V_CALL_RESOLUTION_0"	"CLUSTERED"	"YES"	"YES"	"ISSUE_NO"	"2"	"NO"
+"V_CALL_RESOLUTION"	"X_V_CALL_RESOLUTION_0"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"3"	"NO"

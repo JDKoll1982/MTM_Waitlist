@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"MENU_NAME"	"PK_MENU_NAME"	"CLUSTERED"	"YES"	"YES"	"USER_ID"	"1"	"NO"
+"MENU_NAME"	"PK_MENU_NAME"	"CLUSTERED"	"YES"	"YES"	"SEQ_NO"	"2"	"NO"
+"MENU_NAME"	"PK_MENU_NAME"	"CLUSTERED"	"YES"	"YES"	"ID"	"3"	"NO"

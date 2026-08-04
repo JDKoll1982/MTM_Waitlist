@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"CUST_LINE_BILLING"	"CREATE_DATE"	"DF__CUST_LINE__CREAT__1D87E3CB"	"NULL"

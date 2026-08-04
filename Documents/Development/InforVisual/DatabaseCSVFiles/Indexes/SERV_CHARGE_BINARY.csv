@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SERV_CHARGE_BINARY"	"PK_SERV_CHARGE_BINARY"	"CLUSTERED"	"YES"	"YES"	"SERVICE_CHARGE_ID"	"1"	"NO"
+"SERV_CHARGE_BINARY"	"PK_SERV_CHARGE_BINARY"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"2"	"NO"

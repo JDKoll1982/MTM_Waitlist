@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PLANNING_PART"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PLANNING_PART"	"2"	"ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"PLANNING_PART"	"3"	"DESCRIPTION"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"
+"PLANNING_PART"	"4"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"

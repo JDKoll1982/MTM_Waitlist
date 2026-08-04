@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TRANSIT_TIME"	"PK_TRANSIT_TIME"	"CLUSTERED"	"YES"	"YES"	"FROM_WAREHOUSE_ID"	"1"	"NO"
+"TRANSIT_TIME"	"PK_TRANSIT_TIME"	"CLUSTERED"	"YES"	"YES"	"TO_WAREHOUSE_ID"	"2"	"NO"

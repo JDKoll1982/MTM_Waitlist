@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"LABEL_TYPE_VAR"	"PK_LABEL_TYPE_VAR"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"LABEL_TYPE_VAR"	"PK_LABEL_TYPE_VAR"	"CLUSTERED"	"YES"	"YES"	"LABEL_TYPE_ID"	"2"	"NO"
+"LABEL_TYPE_VAR"	"PK_LABEL_TYPE_VAR"	"CLUSTERED"	"YES"	"YES"	"ID_ALIAS"	"3"	"NO"

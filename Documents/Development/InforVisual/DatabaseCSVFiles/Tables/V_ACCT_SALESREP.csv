@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_ACCT_SALESREP"	"ACCT_ID"	"nvarchar"	"NO"
+"dbo"	"V_ACCT_SALESREP"	"COMMISSION_PCT"	"decimal"	"YES"
+"dbo"	"V_ACCT_SALESREP"	"SALESREP_ID"	"nvarchar"	"NO"
+"dbo"	"V_ACCT_SALESREP"	"SALESREP_ROLE"	"nvarchar"	"YES"
+"dbo"	"V_ACCT_SALESREP"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_ACCT_SALESREP"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_ACCT_SALESREP"	"CREATE_DATE"	"datetime"	"YES"

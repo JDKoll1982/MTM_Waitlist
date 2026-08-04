@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"CLYRPD"	"ROWID"	"int"	"NO"
+"dbo"	"CLYRPD"	"YQDATE"	"decimal"	"YES"
+"dbo"	"CLYRPD"	"YQYEAR"	"decimal"	"YES"
+"dbo"	"CLYRPD"	"YQPERD"	"decimal"	"YES"
+"dbo"	"CLYRPD"	"YQDTMT"	"decimal"	"YES"
+"dbo"	"CLYRPD"	"YQBLNK"	"nvarchar"	"YES"

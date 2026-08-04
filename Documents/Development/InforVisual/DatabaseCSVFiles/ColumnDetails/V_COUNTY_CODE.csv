@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_COUNTY_CODE"	"1"	"COUNTY_NAME"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"V_COUNTY_CODE"	"2"	"STATE"	"nvarchar"	"10"	"0"	"0"	"NO"	"NO"	"NO"
+"V_COUNTY_CODE"	"3"	"CODE"	"nvarchar"	"3"	"0"	"0"	"NO"	"NO"	"NO"
+"V_COUNTY_CODE"	"4"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"V_COUNTY_CODE"	"5"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_COUNTY_CODE"	"6"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

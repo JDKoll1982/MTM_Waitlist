@@ -1,0 +1,4 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"SERVICE_UNIT_CONV"	"X_SERV_CONV_1"	"SERVICE_ID"	"1"
+"SERVICE_UNIT_CONV"	"X_SERV_CONV_1"	"TO_UM"	"2"
+"SERVICE_UNIT_CONV"	"X_SERV_CONV_1"	"FROM_UM"	"3"

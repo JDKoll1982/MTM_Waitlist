@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EXCEPTION"	"ROWID"	"int"	"NO"
+"dbo"	"EXCEPTION"	"TYPE"	"nchar"	"NO"
+"dbo"	"EXCEPTION"	"OWNER_ID"	"nvarchar"	"NO"
+"dbo"	"EXCEPTION"	"EXCEPTION_ID"	"nvarchar"	"NO"
+"dbo"	"EXCEPTION"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"EXCEPTION"	"NOTE"	"image"	"YES"

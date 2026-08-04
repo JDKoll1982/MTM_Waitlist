@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_CATEGORY"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_CATEGORY"	"KEYWORD_ID"	"nvarchar"	"NO"
+"dbo"	"V_CATEGORY"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_CATEGORY"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_CATEGORY"	"DETAILS"	"nvarchar"	"YES"
+"dbo"	"V_CATEGORY"	"COLOR"	"int"	"YES"
+"dbo"	"V_CATEGORY"	"CREATE_DATE"	"datetime"	"YES"

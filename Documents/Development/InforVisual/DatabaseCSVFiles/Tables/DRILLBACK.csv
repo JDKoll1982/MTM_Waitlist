@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"DRILLBACK"	"ID"	"nvarchar"	"NO"
+"dbo"	"DRILLBACK"	"PROGRAM_ID"	"nvarchar"	"NO"
+"dbo"	"DRILLBACK"	"PROGRAM_NAME"	"nvarchar"	"YES"
+"dbo"	"DRILLBACK"	"ROWID"	"int"	"NO"

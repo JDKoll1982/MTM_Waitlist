@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"BURDEN_BATCH_RATES"	"PK_BURDEN_BATCH_RATES"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"1"	"NO"
+"BURDEN_BATCH_RATES"	"PK_BURDEN_BATCH_RATES"	"CLUSTERED"	"YES"	"YES"	"BATCH_ID"	"2"	"NO"

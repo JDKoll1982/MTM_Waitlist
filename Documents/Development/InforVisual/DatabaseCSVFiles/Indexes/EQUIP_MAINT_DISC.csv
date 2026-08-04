@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EQUIP_MAINT_DISC"	"pk_eq_maint_disc"	"CLUSTERED"	"YES"	"YES"	"maint_id"	"1"	"NO"
+"EQUIP_MAINT_DISC"	"pk_eq_maint_disc"	"CLUSTERED"	"YES"	"YES"	"customer_id"	"2"	"NO"

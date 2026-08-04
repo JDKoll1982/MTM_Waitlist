@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EXTRA_JOIN"	"PARENT"	"nvarchar"	"NO"
+"dbo"	"EXTRA_JOIN"	"CHILD"	"nvarchar"	"NO"
+"dbo"	"EXTRA_JOIN"	"ADDTL_WHERE"	"nvarchar"	"YES"
+"dbo"	"EXTRA_JOIN"	"NAME"	"nvarchar"	"NO"
+"dbo"	"EXTRA_JOIN"	"CHILD_COLUMNS"	"nvarchar"	"YES"
+"dbo"	"EXTRA_JOIN"	"ROWID"	"int"	"NO"

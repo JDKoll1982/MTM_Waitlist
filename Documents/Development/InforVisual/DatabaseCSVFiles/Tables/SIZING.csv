@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SIZING"	"USER_ID"	"nvarchar"	"NO"
+"dbo"	"SIZING"	"PROGRAM_ID"	"nvarchar"	"NO"
+"dbo"	"SIZING"	"SECTION"	"nvarchar"	"NO"
+"dbo"	"SIZING"	"ENTRY"	"nvarchar"	"NO"
+"dbo"	"SIZING"	"VALUE"	"nvarchar"	"NO"
+"dbo"	"SIZING"	"MODIFY_DATE"	"datetime"	"NO"
+"dbo"	"SIZING"	"ROWID"	"int"	"NO"

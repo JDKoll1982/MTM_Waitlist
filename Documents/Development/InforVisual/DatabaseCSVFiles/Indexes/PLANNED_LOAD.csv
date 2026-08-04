@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PLANNED_LOAD"	"X_PLANNEDLOAD_0"	"NONCLUSTERED"	"NO"	"NO"	"RESOURCE_ID"	"1"	"NO"
+"PLANNED_LOAD"	"X_PLANNEDLOAD_0"	"NONCLUSTERED"	"NO"	"NO"	"CALC_DATE"	"2"	"NO"
+"PLANNED_LOAD"	"X_PLANNEDLOAD_0"	"NONCLUSTERED"	"NO"	"NO"	"HORIZON"	"3"	"NO"

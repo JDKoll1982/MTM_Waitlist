@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUSTOMER_DISCOUNT"	"PK_CUSTOMER_DISCOUNT"	"CLUSTERED"	"YES"	"YES"	"DISCOUNT_CODE"	"1"	"NO"

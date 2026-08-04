@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VENDOR_REMIT_ADDR"	"PK_VENDOR_REMIT_ADDR"	"CLUSTERED"	"YES"	"YES"	"VENDOR_ID"	"1"	"NO"
+"VENDOR_REMIT_ADDR"	"PK_VENDOR_REMIT_ADDR"	"CLUSTERED"	"YES"	"YES"	"ADDR_NO"	"2"	"NO"

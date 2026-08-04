@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SETUP_TYPE_ATTRIB"	"PK_SETUP_TYPE_ATTRIB"	"CLUSTERED"	"YES"	"YES"	"SETUP_ID"	"1"	"NO"
+"SETUP_TYPE_ATTRIB"	"PK_SETUP_TYPE_ATTRIB"	"CLUSTERED"	"YES"	"YES"	"ATTRIBUTE_ID"	"2"	"NO"

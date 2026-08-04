@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"NATURE_OF_TRANS"	"PK_NATURE_OF_TRANS"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

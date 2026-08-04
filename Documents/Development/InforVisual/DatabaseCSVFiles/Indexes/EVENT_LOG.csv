@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EVENT_LOG"	"X_EVENTLOG_1"	"NONCLUSTERED"	"NO"	"NO"	"PROGRAM_ID"	"1"	"NO"
+"EVENT_LOG"	"X_EVENTLOG_1"	"NONCLUSTERED"	"NO"	"NO"	"CREATE_DATE"	"2"	"NO"
+"EVENT_LOG"	"X_EVENTLOG_2"	"NONCLUSTERED"	"NO"	"NO"	"CREATE_DATE"	"1"	"NO"

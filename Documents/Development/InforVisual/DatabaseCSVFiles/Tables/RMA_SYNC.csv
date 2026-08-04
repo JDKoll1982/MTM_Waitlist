@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"RMA_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"RMA_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"RMA_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"RMA_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"RMA_SYNC"	"RMA_ID"	"nvarchar"	"NO"
+"dbo"	"RMA_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"RMA_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

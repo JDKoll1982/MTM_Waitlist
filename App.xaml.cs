@@ -16,7 +16,9 @@ public partial class App : Application
 {
     private static WindowEx? _mainWindow;
     private static SplashWindow? _splashWindow;
+    private static LoginWindow? _loginWindow;
     private static bool _mainWindowActivated;
+    private static bool _loginWindowActivated;
 
     public IHost Host
     {
@@ -103,6 +105,56 @@ public partial class App : Application
         }
     }
 
+    public static void ShowLoginWindowAndCloseSplash()
+    {
+        StartupDebugLog.Info("LoginWindow", "Activating login window and closing splash.");
+
+        try
+        {
+            if (_loginWindow == null)
+            {
+                _loginWindow = App.GetService<LoginWindow>();
+                _loginWindow.Closed += LoginWindow_Closed;
+                StartupDebugLog.Info("LoginWindow", "Login window created.");
+            }
+
+            _loginWindowActivated = true;
+            _loginWindow.Activate();
+            CloseSplashWindow();
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("LoginWindow", ex, "Failed while activating login window or closing splash.");
+            Current.Exit();
+        }
+    }
+
+    public static void ShowMainWindowAndCloseLoginWindow()
+    {
+        StartupDebugLog.Info("MainWindow", "Activating main window and closing login window.");
+
+        try
+        {
+            MainWindow.Closed += MainWindow_Closed;
+            _mainWindowActivated = true;
+            MainWindow.Activate();
+
+            if (_loginWindow is not null)
+            {
+                var windowToClose = _loginWindow;
+                _loginWindow = null;
+                _loginWindowActivated = false;
+                windowToClose.Closed -= LoginWindow_Closed;
+                windowToClose.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("MainWindow", ex, "Failed while activating main window or closing login window.");
+            Current.Exit();
+        }
+    }
+
     private static void CloseSplashWindow()
     {
         if (_splashWindow == null)
@@ -119,7 +171,26 @@ public partial class App : Application
 
     private static void SplashWindow_Closed(object sender, WindowEventArgs args)
     {
-        StartupDebugLog.Info("Splash", $"Splash window closed event. MainWindowActivated={_mainWindowActivated}.");
+        StartupDebugLog.Info("Splash", $"Splash window closed event. MainWindowActivated={_mainWindowActivated}, LoginWindowActivated={_loginWindowActivated}.");
+        if (!_mainWindowActivated && !_loginWindowActivated)
+        {
+            Current.Exit();
+        }
+    }
+
+    private static void LoginWindow_Closed(object sender, WindowEventArgs args)
+    {
+        StartupDebugLog.Info("LoginWindow", "Login window closed event received.");
+
+        if (_loginWindow is null)
+        {
+            return;
+        }
+
+        _loginWindow.Closed -= LoginWindow_Closed;
+        _loginWindow = null;
+        _loginWindowActivated = false;
+
         if (!_mainWindowActivated)
         {
             Current.Exit();

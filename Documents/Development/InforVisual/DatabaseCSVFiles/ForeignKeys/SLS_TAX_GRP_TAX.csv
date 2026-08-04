@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0041"	"SLS_TAX_GRP_TAX"	"SALES_TAX_GROUP_ID"	"SALES_TAX_GROUP"	"ID"
+"FKEY0046"	"SLS_TAX_GRP_TAX"	"SALES_TAX_ID"	"SALES_TAX"	"ID"

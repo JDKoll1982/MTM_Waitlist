@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"INSTALLMENT"	"PERIOD_TYPE"	"DF__INSTALLME__PERIO__3EB3CD6C"	"NULL"

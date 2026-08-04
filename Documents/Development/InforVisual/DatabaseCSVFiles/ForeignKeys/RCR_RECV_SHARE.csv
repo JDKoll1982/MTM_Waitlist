@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9585"	"RCR_RECV_SHARE"	"RCR_RECV_ID"	"RCR_RECEIVABLE"	"ID"
+"FKEY9586"	"RCR_RECV_SHARE"	"SHARE_SALESREP_ID"	"SALES_REP"	"ID"

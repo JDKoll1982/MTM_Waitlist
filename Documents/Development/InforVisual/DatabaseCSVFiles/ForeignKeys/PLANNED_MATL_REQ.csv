@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PLND_REQ_TO_SITE"	"PLANNED_MATL_REQ"	"SITE_ID"	"SITE"	"ID"

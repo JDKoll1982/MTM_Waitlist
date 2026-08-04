@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ECN_DISPOSITION"	"PK_ECN_DISPOSITION"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

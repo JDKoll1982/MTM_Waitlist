@@ -1,0 +1,75 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Waitlist.Controls.PickupNcm.PickupNcmWaitlistLineView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:MTM_Waitlist.Module_Waitlist.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <local:WaitlistLineCardView
+            AccentBrush="#FFF28A25"
+            AccentSurfaceBrush="#FFFFF0DF"
+            BadgeBackgroundBrush="#FFFFE0B8"
+            BadgeText="NCM"
+            Order="{Binding Mode=OneWay}">
+        <local:WaitlistLineCardView.DetailsContent>
+            <Grid ColumnSpacing="12" RowSpacing="2">
+                <Grid.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="11" />
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock FontWeight="SemiBold" Text="Part" />
+                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Quantity to move" />
+                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Pickup location" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="Destination" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Traceability ID" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </local:WaitlistLineCardView.DetailsContent>
+    </local:WaitlistLineCardView>
+</UserControl>
+
+<!--
+    Notes
+    Card contents:
+    NCM pickup - Clearly identify the request as a pickup of nonconforming material.
+    Part - Internal part number, customer part number, and short part description.
+    Quantity to move - Quantity of nonconforming material that must be picked up.
+    Pickup location - The current work center, press, warehouse, and location where the material is staged.
+    Destination - The NCM area or receiving location where the material must be delivered.
+    Container or traceability ID - Container, lot, serial, heat, or other identifier needed to keep the material segregated and traceable.
+    Customer and order - Customer, customer order number, and work order when applicable.
+    Pickup priority - Required-by or promise date, urgency, and current waitlist age.
+    Handling alert - Safety, equipment, packaging, or special handling instructions visible before pickup.
+
+    Detail page contents:
+    Request summary - NCM status, request date and time, priority, target completion time, and current owner.
+    Material identification - Internal and customer part numbers, description, revision, unit of measure, and material type.
+    Quantity and packaging - Quantity affected, quantity to move, quantity already moved, container count, package type, and weight when relevant.
+    Traceability - Lot, serial, heat, batch, container, work order, operation, and customer order identifiers.
+    Pickup instructions - Source work center, press, warehouse, location, contact, access instructions, and any safe-handling requirements.
+    NCM destination - Assigned NCM area, destination location, segregation requirement, and confirmation that the move was completed.
+    Nonconformance description - Defect or condition, when it was found, who identified it, affected operation, and supporting notes or photos.
+    Containment - Immediate containment action, material quantity placed on hold, related material or work orders, and risk to production or shipment.
+    Quality review - Inspector or Quality owner, inspection status, inspection results, sample or test information, and date reviewed.
+    Disposition - Pending, use as-is, rework, return to vendor, scrap, or other approved disposition; include approver, date, and instructions.
+    Customer and order context - Customer, customer order number, line number, purchase-order reference, desired ship date, and promise date.
+    Audit trail - Requesting user, employee number, pickup acknowledgement, handler, pickup time, delivery time, Quality actions, and status changes.
+-->

@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"ACCOUNT_CHG_LOG"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"ACCOUNT_CHG_LOG"	"2"	"TRANSACTION_ID"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"ACCOUNT_CHG_LOG"	"3"	"ACCOUNT_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"ACCOUNT_CHG_LOG"	"4"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"ACCOUNT_CHG_LOG"	"5"	"FROM_TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"ACCOUNT_CHG_LOG"	"6"	"TO_TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"ACCOUNT_CHG_LOG"	"7"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"

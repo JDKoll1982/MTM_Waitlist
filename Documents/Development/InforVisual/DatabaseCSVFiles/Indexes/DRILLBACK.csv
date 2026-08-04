@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DRILLBACK"	"PK_DRILLBACK"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"DRILLBACK"	"PK_DRILLBACK"	"CLUSTERED"	"YES"	"YES"	"PROGRAM_ID"	"2"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SALES_TAX"	"PK_SALES_TAX"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"SALES_TAX"	"X_SALES_TAX_1"	"NONCLUSTERED"	"NO"	"NO"	"GL_ACCOUNT_ID"	"1"	"NO"
+"SALES_TAX"	"X_SALES_TAX_2"	"NONCLUSTERED"	"NO"	"NO"	"RTN_GL_ACCT_ID"	"1"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VR_RECEIVER_DET"	"VR_RECEIVER_DET_0"	"NONCLUSTERED"	"NO"	"NO"	"RECEIVER_ID"	"1"	"NO"
+"VR_RECEIVER_DET"	"VR_RECEIVER_DET_0"	"NONCLUSTERED"	"NO"	"NO"	"RECEIVER_LINE_NO"	"2"	"NO"
+"VR_RECEIVER_DET"	"VR_RECEIVER_DET_1"	"NONCLUSTERED"	"NO"	"NO"	"ORDER_DATE"	"1"	"NO"

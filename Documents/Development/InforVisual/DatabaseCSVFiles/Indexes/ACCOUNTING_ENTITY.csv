@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ACCOUNTING_ENTITY"	"PK_ACCOUNTING_ENTITY"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

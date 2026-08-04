@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_BUSINESS_UNIT"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_BUSINESS_UNIT"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_BUSINESS_UNIT"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_BUSINESS_UNIT"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_BUSINESS_UNIT"	"CREATE_DATE"	"datetime"	"YES"

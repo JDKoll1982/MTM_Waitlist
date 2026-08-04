@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"CUST_LINE_DEL"	"DELETE_CUST_LINE_DEL"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"CUST_LINE_DEL"	"INSERT_CUST_LINE_DEL"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"CUST_LINE_DEL"	"UPDATE_CUST_LINE_DEL"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

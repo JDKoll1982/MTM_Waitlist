@@ -1,0 +1,4 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"EQUIP_PM_SCHEDULE"	"X_EQ_PM_SCHEDULE_0"	"job_id"	"1"
+"EQUIP_PM_SCHEDULE"	"X_EQ_PM_SCHEDULE_0"	"profile_id"	"2"
+"EQUIP_PM_SCHEDULE"	"X_EQ_PM_SCHEDULE_0"	"equip_id"	"3"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9379"	"RMA_LINE"	"RMA_ID"	"RMA"	"ID"

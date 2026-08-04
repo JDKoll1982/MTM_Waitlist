@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"RATE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"RATE"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"RATE"	"3"	"DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"
+"RATE"	"4"	"USE_FOR_ACTUALS"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

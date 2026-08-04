@@ -7,6 +7,7 @@
     xmlns:helpers="using:MTM_Waitlist.Module_Core.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
     x:Name="RootPage"
     Loaded="OnLoaded">
 
@@ -17,17 +18,48 @@
             VerticalAlignment="Top"
             Canvas.ZIndex="1"
             IsHitTestVisible="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
             <Image
+                Grid.Column="0"
                 Width="16"
                 Height="16"
-                HorizontalAlignment="Left"
+                Margin="8,0,4,0"
                 Source="/Assets/WindowIcon.ico" />
             <TextBlock
                 x:Name="AppTitleBarText"
-                Margin="28,0,0,0"
+                Grid.Column="1"
+                Margin="4,0,0,0"
                 VerticalAlignment="Center"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 TextWrapping="NoWrap" />
+            <AutoSuggestBox
+                x:Name="TitleBarSearchBox"
+                Grid.Column="2"
+                Width="420"
+                MaxWidth="600"
+                Margin="8,0,8,0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                PlaceholderText="Search waitlist"
+                QueryIcon="Find"
+                QuerySubmitted="TitleBarSearchBox_QuerySubmitted"
+                SuggestionChosen="TitleBarSearchBox_SuggestionChosen"
+                TextChanged="TitleBarSearchBox_TextChanged">
+                <AutoSuggestBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:SampleOrder">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="{x:Bind Title}" />
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind RequestedByName}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </AutoSuggestBox.ItemTemplate>
+            </AutoSuggestBox>
         </Grid>
         <NavigationView
             x:Name="NavigationViewControl"
@@ -52,43 +84,55 @@
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xf0e2;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem
-                    x:Name="DeveloperModeItem"
-                    x:Uid="Shell_DeveloperMode"
-                    helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Startup.ViewModels.DeveloperModeViewModel">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe713;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem
-                    x:Name="RequestTypeBuilderItem"
-                    x:Uid="Shell_RequestTypeBuilder"
-                    helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_DevTools.ViewModels.RequestTypeBuilderViewModel">
-                    <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE70F;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.HeaderTemplate>
                 <DataTemplate>
-                    <Grid ColumnSpacing="16">
+                    <Grid Height="64" ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock
                             Grid.Column="0"
                             VerticalAlignment="Center"
-                            Style="{ThemeResource TitleTextBlockStyle}"
+                            Style="{ThemeResource BodyLargeStrongTextBlockStyle}"
                             Text="{Binding}" />
                         <ComboBox
                             Grid.Column="1"
                             Width="220"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
-                            Header="Building"
                             ItemsSource="{Binding ViewModel.Buildings, ElementName=RootPage}"
-                            SelectedItem="{Binding ViewModel.SelectedBuilding, ElementName=RootPage, Mode=TwoWay}" />
+                            SelectedItem="{Binding ViewModel.SelectedBuilding, ElementName=RootPage, Mode=TwoWay}"
+                            ToolTipService.ToolTip="Select waitlist" />
+                        <Button
+                            Grid.Column="2"
+                            Margin="16,0,0,0"
+                            Padding="8"
+                            HorizontalAlignment="Right"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            ToolTipService.ToolTip="Current user">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Border
+                                    Width="32"
+                                    Height="32"
+                                    Background="{Binding ViewModel.CurrentUserBadgeBrush, ElementName=RootPage}"
+                                    CornerRadius="16">
+                                    <FontIcon
+                                        FontSize="16"
+                                        Foreground="White"
+                                        Glyph="{Binding ViewModel.CurrentUserIconGlyph, ElementName=RootPage}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Style="{ThemeResource BodyTextBlockStyle}"
+                                    Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}" />
+                            </StackPanel>
+                        </Button>
                     </Grid>
                 </DataTemplate>
             </NavigationView.HeaderTemplate>
@@ -96,24 +140,52 @@
                 <behaviors:NavigationViewHeaderBehavior DefaultHeader="{x:Bind ViewModel.HeaderText, Mode=OneWay}">
                     <behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
                         <DataTemplate>
-                            <Grid Margin="0,0,60,0" ColumnSpacing="16">
+                            <Grid Height="64" Margin="0,0,60,0" ColumnSpacing="16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock
                                     Grid.Column="0"
                                     VerticalAlignment="Center"
-                                    Style="{ThemeResource TitleTextBlockStyle}"
+                                    Style="{ThemeResource BodyLargeStrongTextBlockStyle}"
                                     Text="{Binding}" />
                                 <ComboBox
                                     Grid.Column="1"
                                     Width="220"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
-                                    Header="Selected Waitlist"
                                     ItemsSource="{Binding ViewModel.Buildings, ElementName=RootPage}"
-                                    SelectedItem="{Binding ViewModel.SelectedBuilding, ElementName=RootPage, Mode=TwoWay}" />
+                                    SelectedItem="{Binding ViewModel.SelectedBuilding, ElementName=RootPage, Mode=TwoWay}"
+                                    ToolTipService.ToolTip="Select waitlist" />
+                                <Button
+                                    Grid.Column="2"
+                                    Margin="16,0,0,0"
+                                    Padding="8"
+                                    HorizontalAlignment="Right"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    ToolTipService.ToolTip="Current user">
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <Border
+                                            Width="32"
+                                            Height="32"
+                                            Background="{Binding ViewModel.CurrentUserBadgeBrush, ElementName=RootPage}"
+                                            CornerRadius="16">
+                                            <FontIcon
+                                                FontSize="16"
+                                                Foreground="White"
+                                                Glyph="{Binding ViewModel.CurrentUserIconGlyph, ElementName=RootPage}"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center" />
+                                        </Border>
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Style="{ThemeResource BodyTextBlockStyle}"
+                                            Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}" />
+                                    </StackPanel>
+                                </Button>
                             </Grid>
                         </DataTemplate>
                     </behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>

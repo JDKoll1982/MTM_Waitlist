@@ -1,0 +1,4 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"PART_UNITS_CONV"	"X_PART_CONV_1"	"PART_ID"	"1"
+"PART_UNITS_CONV"	"X_PART_CONV_1"	"TO_UM"	"2"
+"PART_UNITS_CONV"	"X_PART_CONV_1"	"FROM_UM"	"3"

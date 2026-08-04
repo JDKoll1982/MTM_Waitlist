@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PAYABLE_BINARY"	"PK_PAYABLE_BINARY"	"CLUSTERED"	"YES"	"YES"	"VOUCHER_ID"	"1"	"NO"
+"PAYABLE_BINARY"	"PK_PAYABLE_BINARY"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"2"	"NO"

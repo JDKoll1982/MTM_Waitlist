@@ -1,5 +1,21 @@
 {
     "servers": {
+        "csv-mcp-server": {
+            "type": "stdio",
+            "command": "csv",
+            "args": [
+                "--transport",
+                "stdio",
+                "--log-level",
+                "INFO"
+            ],
+            "env": {
+                "CSV_STORAGE_PATH": "c:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\Documents\\Development\\InforVisual\\DatabaseCSVFiles",
+                "CSV_MAX_FILE_SIZE": "100",
+                "CSV_BACKUP_ENABLED": "true",
+                "CSV_SUPPORT_ABSOLUTE_PATHS": "true"
+            }
+        },
         "oraios/serena": {
             "type": "stdio",
             "command": "C:\\Users\\johnk\\.local\\bin\\uvx.exe",

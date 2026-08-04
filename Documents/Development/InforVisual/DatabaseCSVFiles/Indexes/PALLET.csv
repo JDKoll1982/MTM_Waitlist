@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PALLET"	"PK_PALLET"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"PALLET"	"X_PALLET_1"	"NONCLUSTERED"	"NO"	"NO"	"BOL_ID"	"1"	"NO"
+"PALLET"	"X_PALLET_2"	"NONCLUSTERED"	"NO"	"NO"	"TARE_ID"	"1"	"NO"

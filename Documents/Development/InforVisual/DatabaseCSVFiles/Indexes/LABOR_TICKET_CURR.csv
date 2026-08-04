@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"LABOR_TICKET_CURR"	"PK_LBR_TCKT_CURR"	"CLUSTERED"	"YES"	"YES"	"TRANSACTION_ID"	"1"	"NO"
+"LABOR_TICKET_CURR"	"PK_LBR_TCKT_CURR"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"2"	"NO"

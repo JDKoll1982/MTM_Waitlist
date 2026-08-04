@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"OPER_TYPE_BINARY"	"PK_OPER_TYPE_BINARY"	"CLUSTERED"	"YES"	"YES"	"OPERATION_TYPE_ID"	"1"	"NO"
+"OPER_TYPE_BINARY"	"PK_OPER_TYPE_BINARY"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"2"	"NO"
+"OPER_TYPE_BINARY"	"PK_OPER_TYPE_BINARY"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"3"	"NO"

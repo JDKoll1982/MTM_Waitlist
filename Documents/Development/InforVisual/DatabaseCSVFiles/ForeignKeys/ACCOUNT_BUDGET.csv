@@ -1,0 +1,6 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9501"	"ACCOUNT_BUDGET"	"account_id"	"ACCOUNT"	"ID"
+"FKEY9504"	"ACCOUNT_BUDGET"	"budget_code"	"BUDGET_CODE"	"id"
+"FKEY9503"	"ACCOUNT_BUDGET"	"budget_type"	"BUDGET_TYPE"	"id"
+"FKEY9505"	"ACCOUNT_BUDGET"	"currency_id"	"CURRENCY"	"ID"
+"FKEY9502"	"ACCOUNT_BUDGET"	"SITE_ID"	"SITE"	"ID"

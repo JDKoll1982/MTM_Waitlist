@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"INV_PIECES"	"QTY"	"DF__INV_PIECES__QTY__409C15DE"	"NULL"

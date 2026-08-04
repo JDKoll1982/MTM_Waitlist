@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"VR_MENU"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"VR_MENU"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_MENU"	"3"	"LOCALE"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_MENU"	"4"	"DESCRIPTION"	"nvarchar"	"50"	"0"	"0"	"YES"	"NO"	"NO"

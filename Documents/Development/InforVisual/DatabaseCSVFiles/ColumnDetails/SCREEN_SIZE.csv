@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"SCREEN_SIZE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"SCREEN_SIZE"	"2"	"USER_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"SCREEN_SIZE"	"3"	"SECTION"	"nvarchar"	"100"	"0"	"0"	"NO"	"NO"	"NO"
+"SCREEN_SIZE"	"4"	"ENTRY"	"nvarchar"	"100"	"0"	"0"	"NO"	"NO"	"NO"
+"SCREEN_SIZE"	"5"	"VALUE"	"nvarchar"	"100"	"0"	"0"	"YES"	"NO"	"NO"
+"SCREEN_SIZE"	"6"	"MODIFY_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

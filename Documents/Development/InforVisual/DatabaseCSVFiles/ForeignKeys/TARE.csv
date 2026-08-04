@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_TARE_BOL"	"TARE"	"BOL_ID"	"BOL"	"ID"

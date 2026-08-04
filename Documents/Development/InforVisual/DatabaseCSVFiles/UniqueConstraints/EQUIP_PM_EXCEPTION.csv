@@ -1,0 +1,3 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"EQUIP_PM_EXCEPTION"	"X_EQ_PM_EXCEPT_1"	"profile_id"	"1"
+"EQUIP_PM_EXCEPTION"	"X_EQ_PM_EXCEPT_1"	"equip_id"	"2"

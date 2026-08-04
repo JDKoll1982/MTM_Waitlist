@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00236"	"V_QTE_LINE_BINARY"	"LINE_NO"	"V_QUOTE_LINE"	"LINE_NO"
+"FK_VFO_00236"	"V_QTE_LINE_BINARY"	"QUOTE_ID"	"V_QUOTE_LINE"	"QUOTE_ID"

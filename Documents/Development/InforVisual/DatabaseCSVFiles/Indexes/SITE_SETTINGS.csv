@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SITE_SETTINGS"	"PK_SITE_SETTINGS"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"1"	"NO"
+"SITE_SETTINGS"	"PK_SITE_SETTINGS"	"CLUSTERED"	"YES"	"YES"	"NAME"	"2"	"NO"

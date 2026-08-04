@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"EARNING_CODE"	"UPDATE_EARNING_CODE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

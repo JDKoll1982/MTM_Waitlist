@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"PART_SITE"	"DELETE_PART_SITE"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"PART_SITE"	"INSERT_PART_SITE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"PART_SITE"	"UPDATE_PART_SITE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

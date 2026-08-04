@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"BURDEN_RULE"	"PK_BURDEN_RULE"	"CLUSTERED"	"YES"	"YES"	"BURDEN_GROUP_ID"	"1"	"NO"
+"BURDEN_RULE"	"PK_BURDEN_RULE"	"CLUSTERED"	"YES"	"YES"	"COST_CATEGORY_ID"	"2"	"NO"

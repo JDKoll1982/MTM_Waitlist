@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CARTON_LINE"	"PK_CARTON_LINE"	"CLUSTERED"	"YES"	"YES"	"CARTON_ID"	"1"	"NO"
+"CARTON_LINE"	"PK_CARTON_LINE"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"
+"CARTON_LINE"	"X_CARTONLINE_1"	"NONCLUSTERED"	"NO"	"NO"	"PART_ID"	"1"	"NO"

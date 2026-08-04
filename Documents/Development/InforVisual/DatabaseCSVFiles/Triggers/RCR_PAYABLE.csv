@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"RCR_PAYABLE"	"UPDATE_RCR_PAYABLE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

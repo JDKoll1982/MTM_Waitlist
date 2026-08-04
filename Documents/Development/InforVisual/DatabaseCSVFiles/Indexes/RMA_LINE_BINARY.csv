@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RMA_LINE_BINARY"	"PK_RMA_LINE_BINARY"	"CLUSTERED"	"YES"	"YES"	"RMA_ID"	"1"	"NO"
+"RMA_LINE_BINARY"	"PK_RMA_LINE_BINARY"	"CLUSTERED"	"YES"	"YES"	"RMA_LINE_NO"	"2"	"NO"
+"RMA_LINE_BINARY"	"PK_RMA_LINE_BINARY"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"3"	"NO"

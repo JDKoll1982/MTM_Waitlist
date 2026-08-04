@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"WAREHOUSE"	"UPDATE_WAREHOUSE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"UNITS_CONVERSION"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"UNITS_CONVERSION"	"2"	"FROM_UM"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"UNITS_CONVERSION"	"3"	"TO_UM"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"UNITS_CONVERSION"	"4"	"CONVERSION_FACTOR"	"decimal"	"NULL"	"15"	"8"	"NO"	"NO"	"NO"

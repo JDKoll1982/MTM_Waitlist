@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_CALL_RES_BINARY"	"BITS_LENGTH"	"DF__V_CALL_RE__BITS___3144C3B5"	"NULL"
+"V_CALL_RES_BINARY"	"TYPE"	"DF__V_CALL_RES__TYPE__30509F7C"	"NULL"

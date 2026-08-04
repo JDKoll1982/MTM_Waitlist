@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"INSTALLMENT"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"INSTALLMENT"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"INSTALLMENT"	"3"	"INST_TYPE"	"nchar"	"2"	"0"	"0"	"NO"	"NO"	"NO"
+"INSTALLMENT"	"4"	"END_OF_MONTH"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"INSTALLMENT"	"5"	"VAT_ON_FIRST_INST"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"INSTALLMENT"	"6"	"PERIOD_TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

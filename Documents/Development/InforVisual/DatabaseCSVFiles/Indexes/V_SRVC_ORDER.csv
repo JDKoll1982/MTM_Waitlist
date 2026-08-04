@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_SRVC_ORDER"	"X_V_SRVC_ORDER_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_SRVC_ORDER"	"X_V_SRVC_ORDER_1"	"NONCLUSTERED"	"NO"	"NO"	"ACCT_ID"	"1"	"NO"
+"V_SRVC_ORDER"	"X_V_SRVC_ORDER_2"	"NONCLUSTERED"	"NO"	"NO"	"CONTACT_ID"	"1"	"NO"

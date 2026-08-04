@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VR_CUSTORD_DET"	"VR_CUSTORD_DET_0"	"NONCLUSTERED"	"NO"	"NO"	"CUST_ORDER_ID"	"1"	"NO"
+"VR_CUSTORD_DET"	"VR_CUSTORD_DET_0"	"NONCLUSTERED"	"NO"	"NO"	"LINE_NO"	"2"	"NO"
+"VR_CUSTORD_DET"	"VR_CUSTORD_DET_1"	"NONCLUSTERED"	"NO"	"NO"	"ORDER_DATE"	"1"	"NO"

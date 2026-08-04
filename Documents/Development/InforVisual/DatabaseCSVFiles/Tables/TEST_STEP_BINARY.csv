@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TEST_STEP_BINARY"	"ROWID"	"int"	"NO"
+"dbo"	"TEST_STEP_BINARY"	"TEST_ID"	"nvarchar"	"NO"
+"dbo"	"TEST_STEP_BINARY"	"STEP_NO"	"int"	"NO"
+"dbo"	"TEST_STEP_BINARY"	"TYPE"	"nchar"	"NO"
+"dbo"	"TEST_STEP_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"TEST_STEP_BINARY"	"BITS_LENGTH"	"int"	"NO"

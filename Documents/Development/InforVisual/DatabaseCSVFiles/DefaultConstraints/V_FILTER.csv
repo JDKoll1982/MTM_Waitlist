@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_FILTER"	"BITS_LENGTH"	"DF__V_FILTER__BITS_L__4DE10263"	"NULL"
+"V_FILTER"	"DEFAULT_FILTER"	"DF__V_FILTER__DEFAUL__4CECDE2A"	"NULL"

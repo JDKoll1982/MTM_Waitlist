@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"CARRIER_SYNC"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"CARRIER_SYNC"	"2"	"EVENT_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"CARRIER_SYNC"	"3"	"TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"CARRIER_SYNC"	"4"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"CARRIER_SYNC"	"5"	"CARRIER_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"CARRIER_SYNC"	"6"	"EXCEPTION"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"CARRIER_SYNC"	"7"	"SUBSCRIPTIONS"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

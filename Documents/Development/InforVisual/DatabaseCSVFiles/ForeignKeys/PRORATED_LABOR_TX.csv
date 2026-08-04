@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PRORATED_LABOR_00"	"PRORATED_LABOR_TX"	"TRANSACTION_ID"	"LABOR_TICKET"	"TRANSACTION_ID"

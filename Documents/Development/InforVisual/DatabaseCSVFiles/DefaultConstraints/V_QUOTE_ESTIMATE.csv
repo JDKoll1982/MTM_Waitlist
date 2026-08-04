@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_QUOTE_ESTIMATE"	"EST_LINE_NO"	"DF__V_QUOTE_E__EST_L__75EEF3BD"	"NULL"
+"V_QUOTE_ESTIMATE"	"QUOTE_LINE_NO"	"DF__V_QUOTE_E__QUOTE__76E317F6"	"NULL"

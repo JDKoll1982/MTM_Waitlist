@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TERMS_INST"	"ROWID"	"int"	"NO"
+"dbo"	"TERMS_INST"	"TERMS_ID"	"nvarchar"	"NO"
+"dbo"	"TERMS_INST"	"INST_NO"	"smallint"	"NO"
+"dbo"	"TERMS_INST"	"INST_PERCENT"	"decimal"	"NO"
+"dbo"	"TERMS_INST"	"PERIOD"	"smallint"	"NO"

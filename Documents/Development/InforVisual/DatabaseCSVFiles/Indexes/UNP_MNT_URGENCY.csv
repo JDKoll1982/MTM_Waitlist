@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"UNP_MNT_URGENCY"	"pk_unp_mnt_urge"	"CLUSTERED"	"YES"	"YES"	"id"	"1"	"NO"

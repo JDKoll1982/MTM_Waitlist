@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"APS_DATA"	"PK_APS_DATA"	"CLUSTERED"	"YES"	"YES"	"LAYOUT_KEY"	"1"	"NO"
+"APS_DATA"	"PK_APS_DATA"	"CLUSTERED"	"YES"	"YES"	"SEGMENT_TYPE"	"2"	"NO"
+"APS_DATA"	"PK_APS_DATA"	"CLUSTERED"	"YES"	"YES"	"TABLE_NAME"	"3"	"NO"
+"APS_DATA"	"PK_APS_DATA"	"CLUSTERED"	"YES"	"YES"	"COLUMN_NAME"	"4"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_QUOTE_TYPE"	"X_V_QUOTE_TYPE_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

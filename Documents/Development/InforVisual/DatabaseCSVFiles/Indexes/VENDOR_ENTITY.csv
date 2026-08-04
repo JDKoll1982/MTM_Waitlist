@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VENDOR_ENTITY"	"PK_VENDOR_ENTITY"	"CLUSTERED"	"YES"	"YES"	"ENTITY_ID"	"1"	"NO"
+"VENDOR_ENTITY"	"PK_VENDOR_ENTITY"	"CLUSTERED"	"YES"	"YES"	"VENDOR_ID"	"2"	"NO"

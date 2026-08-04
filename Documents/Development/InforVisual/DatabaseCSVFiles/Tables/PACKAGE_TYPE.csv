@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PACKAGE_TYPE"	"ROWID"	"int"	"NO"
+"dbo"	"PACKAGE_TYPE"	"CODE"	"nvarchar"	"NO"
+"dbo"	"PACKAGE_TYPE"	"LENGTH"	"decimal"	"YES"
+"dbo"	"PACKAGE_TYPE"	"WIDTH"	"decimal"	"YES"
+"dbo"	"PACKAGE_TYPE"	"HEIGHT"	"decimal"	"YES"
+"dbo"	"PACKAGE_TYPE"	"UNIT_OF_MEASURE"	"nvarchar"	"YES"

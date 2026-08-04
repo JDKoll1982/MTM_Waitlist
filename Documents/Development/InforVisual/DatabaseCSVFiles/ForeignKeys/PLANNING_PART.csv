@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PLNG_PART_TO_SITE"	"PLANNING_PART"	"SITE_ID"	"SITE"	"ID"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00163"	"V_OPTY_PLAN"	"STAGE_ID"	"V_SALES_STAGE"	"ID"

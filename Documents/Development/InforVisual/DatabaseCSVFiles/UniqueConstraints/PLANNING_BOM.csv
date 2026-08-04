@@ -1,0 +1,4 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"PLANNING_BOM"	"X_PLAN_BOM_3"	"PARENT_PLN_PART_ID"	"1"
+"PLANNING_BOM"	"X_PLAN_BOM_3"	"SUBORD_PLN_PART_ID"	"2"
+"PLANNING_BOM"	"X_PLAN_BOM_3"	"SUBORD_PART_ID"	"3"

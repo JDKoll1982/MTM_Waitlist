@@ -1,0 +1,74 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Waitlist.Controls.PickupOs.PickupOsWaitlistLineView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:MTM_Waitlist.Module_Waitlist.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <local:WaitlistLineCardView
+            AccentBrush="#FFD6B100"
+            AccentSurfaceBrush="#FFFFF8DA"
+            BadgeBackgroundBrush="#FFFFEFA4"
+            BadgeText="O/S"
+            Order="{Binding Mode=OneWay}">
+        <local:WaitlistLineCardView.DetailsContent>
+            <Grid ColumnSpacing="12" RowSpacing="2">
+                <Grid.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="11" />
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock FontWeight="SemiBold" Text="Part or work order" />
+                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Quantity to move" />
+                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Pickup work center" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="Destination" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Vendor or service" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </local:WaitlistLineCardView.DetailsContent>
+    </local:WaitlistLineCardView>
+</UserControl>
+
+<!--
+    Notes
+    Card contents:
+    Request type - Clearly identify the request as an Outside Service (O/S) pickup.
+    Part or work order - The part and work order associated with the outside-service request.
+    Quantity to move - The quantity the material handler must pick up from the work center.
+    Pickup work center - The work center where the material is staged and ready for pickup.
+    Outside-service destination - The outside-service section or assigned service destination where the material must be delivered.
+    Vendor or service - The outside vendor or service operation receiving the material.
+    Operation sequence - The operation that requires outside-service processing.
+    Pickup priority - Required-by date, scheduled service date, urgency, and current waitlist age.
+    Handling alert - Packaging, weight, safety, equipment, or special transport instructions visible before pickup.
+
+    Detail page contents:
+    Request summary - O/S status, request date and time, priority, target completion time, and current owner.
+    Pickup instructions - Source work center, press or resource, warehouse, location, staging point, and work-center contact.
+    Material identification - Part number, part description, revision, unit of measure, lot, serial, heat, batch, or container identifier.
+    Quantity and packaging - Quantity to move, quantity already dispatched, quantity received by the service section, container count, package type, and weight when relevant.
+    Delivery instructions - Outside-service section, vendor or service destination, delivery location, access instructions, and required delivery date.
+    Service details - Vendor, service identifier, operation sequence, operation status, service requirements, and notes.
+    Work-order context - Work order number, operation quantities, required quantity, completed quantity, and related customer order when applicable.
+    Dispatch and receipt history - Handler assignment, pickup acknowledgement, dispatch time, delivery time, receiver acknowledgement, and current service status.
+    Quantity and timing - Quantity still needed, scheduled service dates, expected return date, and remaining waitlist time.
+    Handling and safety - Packaging, weight, lifting equipment, hazardous-material information, and other transport restrictions.
+    Request context - Requesting user, requesting work center, employee number, press, and audit history of status changes.
+-->

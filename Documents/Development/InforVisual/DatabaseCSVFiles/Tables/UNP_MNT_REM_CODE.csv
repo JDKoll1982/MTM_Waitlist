@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"UNP_MNT_REM_CODE"	"ROWID"	"int"	"NO"
+"dbo"	"UNP_MNT_REM_CODE"	"id"	"nvarchar"	"NO"
+"dbo"	"UNP_MNT_REM_CODE"	"type_id"	"nvarchar"	"NO"
+"dbo"	"UNP_MNT_REM_CODE"	"description"	"nvarchar"	"YES"

@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"DEMSUP_SUMMARY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"DEMSUP_SUMMARY"	"2"	"SPID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"DEMSUP_SUMMARY"	"3"	"ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"DEMSUP_SUMMARY"	"4"	"RECEIVED_QTY"	"decimal"	"NULL"	"20"	"8"	"NO"	"NO"	"NO"

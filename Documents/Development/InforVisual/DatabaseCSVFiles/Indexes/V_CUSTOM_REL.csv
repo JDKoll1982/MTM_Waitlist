@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CUSTOM_REL"	"X_V_CUSTOM_REL_0"	"CLUSTERED"	"YES"	"YES"	"BUS_TYPE"	"1"	"NO"
+"V_CUSTOM_REL"	"X_V_CUSTOM_REL_0"	"CLUSTERED"	"YES"	"YES"	"REL_BUS_TYPE"	"2"	"NO"

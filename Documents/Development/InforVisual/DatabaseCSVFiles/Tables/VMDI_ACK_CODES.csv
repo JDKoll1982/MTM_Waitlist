@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"VMDI_ACK_CODES"	"ROWID"	"int"	"NO"
+"dbo"	"VMDI_ACK_CODES"	"ACK_ID"	"nvarchar"	"NO"
+"dbo"	"VMDI_ACK_CODES"	"DESCRIPTION"	"nvarchar"	"YES"

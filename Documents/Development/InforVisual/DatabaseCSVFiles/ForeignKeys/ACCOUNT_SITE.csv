@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_ACCT_SITE_ACCT"	"ACCOUNT_SITE"	"ACCOUNT_ID"	"ACCOUNT"	"ID"
+"FK_ACCT_SITE_SITE"	"ACCOUNT_SITE"	"SITE_ID"	"SITE"	"ID"

@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"VR_CAL_DATE"	"ROWID"	"int"	"NO"
+"dbo"	"VR_CAL_DATE"	"CAL_DAY"	"datetime"	"NO"
+"dbo"	"VR_CAL_DATE"	"CAL_WEEK"	"datetime"	"YES"
+"dbo"	"VR_CAL_DATE"	"CAL_MONTH"	"datetime"	"YES"
+"dbo"	"VR_CAL_DATE"	"CAL_QUARTER"	"datetime"	"YES"
+"dbo"	"VR_CAL_DATE"	"CAL_YEAR"	"int"	"YES"

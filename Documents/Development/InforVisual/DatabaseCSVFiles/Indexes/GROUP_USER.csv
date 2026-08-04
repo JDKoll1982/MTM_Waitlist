@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"GROUP_USER"	"PK_GROUP_USER"	"CLUSTERED"	"YES"	"YES"	"GROUP_ID"	"1"	"NO"
+"GROUP_USER"	"PK_GROUP_USER"	"CLUSTERED"	"YES"	"YES"	"USER_ID"	"2"	"NO"

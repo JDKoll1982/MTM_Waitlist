@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VR_DATA_SOURCE_COLUMN"	"PK_VR_DATA_SOURCE_COLUMN"	"CLUSTERED"	"YES"	"YES"	"DATA_SOURCE_ID"	"1"	"NO"
+"VR_DATA_SOURCE_COLUMN"	"PK_VR_DATA_SOURCE_COLUMN"	"CLUSTERED"	"YES"	"YES"	"NAME"	"2"	"NO"

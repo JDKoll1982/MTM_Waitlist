@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TC_MASTER"	"ROWID"	"int"	"NO"
+"dbo"	"TC_MASTER"	"ID"	"nvarchar"	"NO"
+"dbo"	"TC_MASTER"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"TC_MASTER"	"PRINT_TYPE"	"nchar"	"YES"

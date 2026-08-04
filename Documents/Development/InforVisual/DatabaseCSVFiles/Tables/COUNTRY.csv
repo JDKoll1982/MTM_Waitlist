@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"COUNTRY"	"ROWID"	"int"	"NO"
+"dbo"	"COUNTRY"	"ID"	"nvarchar"	"NO"
+"dbo"	"COUNTRY"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"COUNTRY"	"INTRASTAT_REQD"	"nchar"	"NO"
+"dbo"	"COUNTRY"	"INTRA_COUNTRY_ID"	"nvarchar"	"YES"
+"dbo"	"COUNTRY"	"ESL_COUNTRY_ID"	"nvarchar"	"YES"
+"dbo"	"COUNTRY"	"esl_country"	"nvarchar"	"NO"

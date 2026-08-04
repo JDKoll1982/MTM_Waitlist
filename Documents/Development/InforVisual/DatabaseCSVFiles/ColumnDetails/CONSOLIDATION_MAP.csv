@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"CONSOLIDATION_MAP"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"CONSOLIDATION_MAP"	"2"	"CONSOLIDATION_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"CONSOLIDATION_MAP"	"3"	"LINE_NO"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"CONSOLIDATION_MAP"	"4"	"LOCAL_ACCT_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"CONSOLIDATION_MAP"	"5"	"PARENT_ACCT_ID"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"
+"CONSOLIDATION_MAP"	"6"	"PERCENT"	"decimal"	"NULL"	"6"	"3"	"YES"	"NO"	"NO"
+"CONSOLIDATION_MAP"	"7"	"DERIVED"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

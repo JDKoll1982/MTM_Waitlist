@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DEMSUP_SUMMARY"	"PK_DEMSUP_SUM"	"CLUSTERED"	"YES"	"YES"	"SPID"	"1"	"NO"
+"DEMSUP_SUMMARY"	"PK_DEMSUP_SUM"	"CLUSTERED"	"YES"	"YES"	"ID"	"2"	"NO"

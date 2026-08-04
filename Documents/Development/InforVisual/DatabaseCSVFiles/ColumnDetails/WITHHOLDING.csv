@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"WITHHOLDING"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"WITHHOLDING"	"2"	"CODE"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"WITHHOLDING"	"3"	"DESCRIPTION"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"
+"WITHHOLDING"	"4"	"TAX_PERCENT"	"decimal"	"NULL"	"15"	"2"	"NO"	"NO"	"NO"
+"WITHHOLDING"	"5"	"TAX_ALLOWANCE_PCT"	"decimal"	"NULL"	"15"	"2"	"NO"	"NO"	"NO"
+"WITHHOLDING"	"6"	"TAX_GL_ACCT_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"

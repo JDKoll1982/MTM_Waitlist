@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"QUOTE_ORDER"	"ROWID"	"int"	"NO"
+"dbo"	"QUOTE_ORDER"	"QUOTE_ID"	"nvarchar"	"NO"
+"dbo"	"QUOTE_ORDER"	"CUST_ORDER_ID"	"nvarchar"	"NO"
+"dbo"	"QUOTE_ORDER"	"CREATE_DATE"	"datetime"	"NO"

@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"VENDOR_PART"	"ROWID"	"int"	"NO"
+"dbo"	"VENDOR_PART"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"VENDOR_PART"	"VENDOR_ID"	"nvarchar"	"NO"
+"dbo"	"VENDOR_PART"	"VENDOR_PART_ID"	"nvarchar"	"YES"
+"dbo"	"VENDOR_PART"	"LONG_DESCRIPTION"	"image"	"YES"
+"dbo"	"VENDOR_PART"	"LEADTIME_BUFFER"	"smallint"	"YES"
+"dbo"	"VENDOR_PART"	"SITE_ID"	"nvarchar"	"NO"

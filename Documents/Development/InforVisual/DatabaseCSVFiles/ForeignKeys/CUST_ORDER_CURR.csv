@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9424"	"CUST_ORDER_CURR"	"CURRENCY_ID"	"CURRENCY"	"ID"
+"FKEY9425"	"CUST_ORDER_CURR"	"CUST_ORDER_ID"	"CUSTOMER_ORDER"	"ID"

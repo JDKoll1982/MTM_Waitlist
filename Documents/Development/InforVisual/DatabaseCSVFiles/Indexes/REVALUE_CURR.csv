@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"REVALUE_CURR"	"PK_REVALUE_CURR"	"CLUSTERED"	"YES"	"YES"	"REVALUE_ID"	"1"	"NO"
+"REVALUE_CURR"	"PK_REVALUE_CURR"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"2"	"NO"

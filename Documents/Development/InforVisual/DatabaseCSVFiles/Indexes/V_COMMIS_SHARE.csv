@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_COMMIS_SHARE"	"X_V_COMMIS_SHARE_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_COMMIS_SHARE"	"X_V_COMMIS_SHARE_0"	"CLUSTERED"	"YES"	"YES"	"SALESREP_ID"	"2"	"NO"
+"V_COMMIS_SHARE"	"X_V_COMMIS_SHARE_0"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"3"	"NO"
+"V_COMMIS_SHARE"	"X_V_COMMIS_SHARE_0"	"CLUSTERED"	"YES"	"YES"	"TYPE_ID"	"4"	"NO"

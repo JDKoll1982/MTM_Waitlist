@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"IBT"	"PK_IBT"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"IBT"	"X_IBT_1"	"NONCLUSTERED"	"NO"	"NO"	"TO_WHSE_ID"	"1"	"NO"
+"IBT"	"X_IBT_2"	"NONCLUSTERED"	"NO"	"NO"	"FROM_WHSE_ID"	"1"	"NO"
+"IBT"	"X_IBT_3"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"

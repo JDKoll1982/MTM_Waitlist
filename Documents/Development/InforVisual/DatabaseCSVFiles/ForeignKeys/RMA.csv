@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9381"	"RMA"	"PACKLIST_ID"	"SHIPPER"	"PACKLIST_ID"
+"FK_RMA_TO_SITE"	"RMA"	"SITE_ID"	"SITE"	"ID"

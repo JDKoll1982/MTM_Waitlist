@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SERVICE"	"PK_SERVICE"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"SERVICE"	"X_SERVICE_1"	"NONCLUSTERED"	"NO"	"NO"	"VENDOR_ID"	"1"	"NO"
+"SERVICE"	"X_SERVICE_2"	"NONCLUSTERED"	"NO"	"NO"	"SERVICE_PART_ID"	"1"	"NO"

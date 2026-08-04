@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"RFQ_BINARY"	"ROWID"	"int"	"NO"
+"dbo"	"RFQ_BINARY"	"RFQ_ID"	"nvarchar"	"NO"
+"dbo"	"RFQ_BINARY"	"TYPE"	"nchar"	"NO"
+"dbo"	"RFQ_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"RFQ_BINARY"	"BITS_LENGTH"	"int"	"NO"

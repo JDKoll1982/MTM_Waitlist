@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"GPSCMF"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"GPSCMF"	"2"	"GCBOID"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"
+"GPSCMF"	"3"	"GCBOVL"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"
+"GPSCMF"	"4"	"GCLNID"	"nvarchar"	"2"	"0"	"0"	"YES"	"NO"	"NO"
+"GPSCMF"	"5"	"GCBODS"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"

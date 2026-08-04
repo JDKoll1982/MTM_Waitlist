@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"BANK_ACCOUNT"	"PK_BANK_ACCOUNT"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"BANK_ACCOUNT"	"X_BANK_ACCOUNT_1"	"NONCLUSTERED"	"NO"	"NO"	"GL_ACCOUNT_ID"	"1"	"NO"
+"BANK_ACCOUNT"	"X_BANK_ACCOUNT_2"	"NONCLUSTERED"	"NO"	"NO"	"CURRENCY_ID"	"1"	"NO"

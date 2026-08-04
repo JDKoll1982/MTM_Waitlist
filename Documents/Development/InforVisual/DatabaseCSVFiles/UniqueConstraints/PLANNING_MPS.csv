@@ -1,0 +1,4 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"PLANNING_MPS"	"X_PLAN_MPS_0"	"PLANNING_PART_ID"	"1"
+"PLANNING_MPS"	"X_PLAN_MPS_0"	"WANT_DATE"	"2"
+"PLANNING_MPS"	"X_PLAN_MPS_0"	"WAREHOUSE_ID"	"3"

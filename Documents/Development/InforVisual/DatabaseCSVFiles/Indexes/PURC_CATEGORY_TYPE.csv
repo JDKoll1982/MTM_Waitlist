@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PURC_CATEGORY_TYPE"	"PK_PURC_CATEGORY_TYPE"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

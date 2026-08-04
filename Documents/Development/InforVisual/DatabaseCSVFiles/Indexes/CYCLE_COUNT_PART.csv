@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CYCLE_COUNT_PART"	"PK_CYCLE_COUNT_PART"	"CLUSTERED"	"YES"	"YES"	"PART_ID"	"1"	"NO"
+"CYCLE_COUNT_PART"	"PK_CYCLE_COUNT_PART"	"CLUSTERED"	"YES"	"YES"	"WAREHOUSE_ID"	"2"	"NO"
+"CYCLE_COUNT_PART"	"X_CYC_CNT_PART_1"	"NONCLUSTERED"	"NO"	"NO"	"WAREHOUSE_ID"	"1"	"NO"

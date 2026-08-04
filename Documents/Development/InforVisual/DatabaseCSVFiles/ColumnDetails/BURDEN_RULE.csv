@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"BURDEN_RULE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"BURDEN_RULE"	"2"	"BURDEN_GROUP_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"BURDEN_RULE"	"3"	"COST_CATEGORY_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"BURDEN_RULE"	"4"	"DEBIT_GL_ACCOUNT"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"
+"BURDEN_RULE"	"5"	"CREDIT_GL_ACCOUNT"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"

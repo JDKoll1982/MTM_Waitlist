@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"APS_TABLE"	"ROWID"	"int"	"NO"
+"dbo"	"APS_TABLE"	"LAYOUT_KEY"	"nchar"	"NO"
+"dbo"	"APS_TABLE"	"SEGMENT_TYPE"	"nchar"	"NO"
+"dbo"	"APS_TABLE"	"TABLE_NAME"	"nvarchar"	"NO"
+"dbo"	"APS_TABLE"	"JOIN"	"image"	"YES"
+"dbo"	"APS_TABLE"	"PRIMARY_KEY"	"nvarchar"	"YES"

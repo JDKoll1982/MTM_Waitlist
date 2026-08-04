@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"NOTATION"	"ROWID"	"int"	"NO"
+"dbo"	"NOTATION"	"TYPE"	"nchar"	"NO"
+"dbo"	"NOTATION"	"OWNER_ID"	"nvarchar"	"NO"
+"dbo"	"NOTATION"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"NOTATION"	"NOTE"	"image"	"YES"

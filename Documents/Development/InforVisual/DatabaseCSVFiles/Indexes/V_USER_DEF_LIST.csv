@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_USER_DEF_LIST"	"X_V_USER_DEF_LIST_0"	"CLUSTERED"	"YES"	"YES"	"BUS_TYPE"	"1"	"NO"
+"V_USER_DEF_LIST"	"X_V_USER_DEF_LIST_0"	"CLUSTERED"	"YES"	"YES"	"FIELD_NAME"	"2"	"NO"
+"V_USER_DEF_LIST"	"X_V_USER_DEF_LIST_0"	"CLUSTERED"	"YES"	"YES"	"CODE"	"3"	"NO"

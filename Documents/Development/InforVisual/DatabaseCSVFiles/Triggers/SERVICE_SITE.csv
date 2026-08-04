@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"SERVICE_SITE"	"UPDATE_SERVICE_SITE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"EXTRA_JOIN"	"1"	"PARENT"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"EXTRA_JOIN"	"2"	"CHILD"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"EXTRA_JOIN"	"3"	"ADDTL_WHERE"	"nvarchar"	"2000"	"0"	"0"	"YES"	"NO"	"NO"
+"EXTRA_JOIN"	"4"	"NAME"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"EXTRA_JOIN"	"5"	"CHILD_COLUMNS"	"nvarchar"	"2000"	"0"	"0"	"YES"	"NO"	"NO"
+"EXTRA_JOIN"	"6"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"

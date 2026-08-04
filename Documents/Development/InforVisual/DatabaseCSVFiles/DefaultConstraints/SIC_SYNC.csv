@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"SIC_SYNC"	"CREATE_DATE"	"DF__SIC_SYNC__CREATE__13E96AF8"	"NULL"
+"SIC_SYNC"	"SUBSCRIPTIONS"	"DF__SIC_SYNC__SUBSCR__14DD8F31"	"NULL"

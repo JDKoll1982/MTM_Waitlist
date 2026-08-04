@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RCR_RECV_LINE"	"PK_RCR_RECV_LINE"	"CLUSTERED"	"YES"	"YES"	"RCR_RECEIVABLE_ID"	"1"	"NO"
+"RCR_RECV_LINE"	"PK_RCR_RECV_LINE"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"
+"RCR_RECV_LINE"	"X_RCR_RECV_LINE_1"	"NONCLUSTERED"	"NO"	"NO"	"GL_ACCOUNT_ID"	"1"	"NO"

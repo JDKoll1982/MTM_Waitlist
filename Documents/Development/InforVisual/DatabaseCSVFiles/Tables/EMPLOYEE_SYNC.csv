@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EMPLOYEE_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"EMPLOYEE_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"EMPLOYEE_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"EMPLOYEE_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"EMPLOYEE_SYNC"	"EMPLOYEE_ID"	"nvarchar"	"NO"
+"dbo"	"EMPLOYEE_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"EMPLOYEE_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

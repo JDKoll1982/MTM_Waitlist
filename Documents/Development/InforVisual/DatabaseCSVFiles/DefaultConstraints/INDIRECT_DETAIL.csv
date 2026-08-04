@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"INDIRECT_DETAIL"	"CURRENCY_ID"	"DF__INDIRECT___CURRE__3065AE15"	"NULL"

@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"CUST_WIP_VAS"	"ROWID"	"int"	"NO"
+"dbo"	"CUST_WIP_VAS"	"CUSTOMER_ID"	"nvarchar"	"NO"
+"dbo"	"CUST_WIP_VAS"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"CUST_WIP_VAS"	"WIP_VAS_ID"	"nvarchar"	"NO"
+"dbo"	"CUST_WIP_VAS"	"STATUS"	"nchar"	"YES"

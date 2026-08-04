@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"UNP_MNT_REM_CODE"	"pk_unp_mnt_rem_cd"	"CLUSTERED"	"YES"	"YES"	"id"	"1"	"NO"
+"UNP_MNT_REM_CODE"	"pk_unp_mnt_rem_cd"	"CLUSTERED"	"YES"	"YES"	"type_id"	"2"	"NO"

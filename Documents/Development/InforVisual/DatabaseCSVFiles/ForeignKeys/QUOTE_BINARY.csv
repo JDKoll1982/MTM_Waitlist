@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0179"	"QUOTE_BINARY"	"QUOTE_ID"	"QUOTE"	"ID"

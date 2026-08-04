@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"SEMAPHORE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"SEMAPHORE"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"SEMAPHORE"	"3"	"DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"
+"SEMAPHORE"	"4"	"EVENT_NO"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

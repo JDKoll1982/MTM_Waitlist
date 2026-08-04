@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"FOB_POINT"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"FOB_POINT"	"2"	"CODE"	"nvarchar"	"25"	"0"	"0"	"NO"	"NO"	"NO"
+"FOB_POINT"	"3"	"DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"
+"FOB_POINT"	"4"	"INTRANSIT_OWNER"	"nvarchar"	"25"	"0"	"0"	"YES"	"NO"	"NO"

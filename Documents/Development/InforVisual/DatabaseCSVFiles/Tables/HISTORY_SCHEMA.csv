@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"HISTORY_SCHEMA"	"TBL_NAME"	"nvarchar"	"NO"
+"dbo"	"HISTORY_SCHEMA"	"COL_NAME"	"nvarchar"	"NO"
+"dbo"	"HISTORY_SCHEMA"	"COL_TYPE"	"nvarchar"	"YES"
+"dbo"	"HISTORY_SCHEMA"	"IS_PRIMARY"	"nchar"	"YES"
+"dbo"	"HISTORY_SCHEMA"	"PK_ORDER"	"int"	"YES"

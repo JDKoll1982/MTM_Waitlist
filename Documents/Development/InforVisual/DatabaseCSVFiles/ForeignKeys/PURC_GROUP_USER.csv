@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PURC_GROUP_USER_00"	"PURC_GROUP_USER"	"PURC_REQ_ID"	"PURC_REQUISITION"	"ID"

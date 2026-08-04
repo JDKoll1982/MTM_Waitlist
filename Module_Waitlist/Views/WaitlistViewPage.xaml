@@ -7,14 +7,53 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
+    xmlns:selectors="using:MTM_Waitlist.Module_Waitlist.Selectors"
+    xmlns:coilControls="using:MTM_Waitlist.Module_Waitlist.Controls.Coil"
+    xmlns:pickupFgControls="using:MTM_Waitlist.Module_Waitlist.Controls.PickupFg"
+    xmlns:pickupNcmControls="using:MTM_Waitlist.Module_Waitlist.Controls.PickupNcm"
+    xmlns:pickupOsControls="using:MTM_Waitlist.Module_Waitlist.Controls.PickupOs"
+    xmlns:pickupWipControls="using:MTM_Waitlist.Module_Waitlist.Controls.PickupWip"
+    xmlns:scrapControls="using:MTM_Waitlist.Module_Waitlist.Controls.Scrap"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <DataTemplate x:Key="CoilWaitlistLineTemplate" x:DataType="models:SampleOrder">
+            <coilControls:CoilWaitlistLineView />
+        </DataTemplate>
+        <DataTemplate x:Key="PickupFgWaitlistLineTemplate" x:DataType="models:SampleOrder">
+            <pickupFgControls:PickupFgWaitlistLineView />
+        </DataTemplate>
+        <DataTemplate x:Key="PickupNcmWaitlistLineTemplate" x:DataType="models:SampleOrder">
+            <pickupNcmControls:PickupNcmWaitlistLineView />
+        </DataTemplate>
+        <DataTemplate x:Key="PickupOsWaitlistLineTemplate" x:DataType="models:SampleOrder">
+            <pickupOsControls:PickupOsWaitlistLineView />
+        </DataTemplate>
+        <DataTemplate x:Key="PickupWipWaitlistLineTemplate" x:DataType="models:SampleOrder">
+            <pickupWipControls:PickupWipWaitlistLineView />
+        </DataTemplate>
+        <DataTemplate x:Key="ScrapWaitlistLineTemplate" x:DataType="models:SampleOrder">
+            <scrapControls:ScrapWaitlistLineView />
+        </DataTemplate>
+
+        <selectors:WaitlistLineTemplateSelector
+            x:Key="WaitlistLineTemplateSelector"
+            CoilTemplate="{StaticResource CoilWaitlistLineTemplate}"
+            DefaultTemplate="{StaticResource CoilWaitlistLineTemplate}"
+            PickupFgTemplate="{StaticResource PickupFgWaitlistLineTemplate}"
+            PickupNcmTemplate="{StaticResource PickupNcmWaitlistLineTemplate}"
+            PickupOsTemplate="{StaticResource PickupOsWaitlistLineTemplate}"
+            PickupWipTemplate="{StaticResource PickupWipWaitlistLineTemplate}"
+            ScrapTemplate="{StaticResource ScrapWaitlistLineTemplate}" />
+    </Page.Resources>
 
     <Grid x:Name="ContentArea">
         <ListView
             Padding="6,12"
             IsItemClickEnabled="True"
             ItemClick="ListView_ItemClick"
+            ItemTemplateSelector="{StaticResource WaitlistLineTemplateSelector}"
             ItemsSource="{x:Bind ViewModel.Source, Mode=OneWay}"
             SelectionMode="Single">
 
@@ -41,123 +80,6 @@
                 </Style>
             </ListView.ItemContainerStyle>
 
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="models:SampleOrder">
-                    <Border
-                        x:Name="CardBorder"
-                        Height="150"
-                        Padding="16"
-                        Background="{ThemeResource LayerFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
-                        <!--  Clean, un-embedded layout implementation  -->
-                        <Grid VerticalAlignment="Stretch">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <!--  Left Column: Image -->
-                            <Image
-                                Grid.Column="0"
-                                Width="120"
-                                Height="120"
-                                Margin="0,0,16,0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Source="{x:Bind ImageUri}" />
-
-                            <!--  Middle Column: Detail Text Blocks  -->
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock
-                                    Margin="12,0,12,0"
-                                    FontSize="28"
-                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                    Text="{x:Bind Title}" />
-                                <TextBlock
-                                    Margin="12,2,12,0"
-                                    FontSize="18"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind Subtitle}" />
-                                <TextBlock
-                                    Margin="12,8,12,0"
-                                    FontSize="16"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind Status}" />
-                                <ItemsControl Margin="12,10,12,0" ItemsSource="{x:Bind Fields}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="models:WaitlistField">
-                                            <TextBlock
-                                                Margin="0,0,0,2"
-                                                FontSize="14"
-                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                Text="{x:Bind Label}" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-
-                            <!--  Right Column: Action Buttons  -->
-                            <StackPanel
-                                Grid.Column="2"
-                                VerticalAlignment="Center"
-                                Orientation="Horizontal"
-                                Spacing="8">
-                                <Button
-                                    Width="60"
-                                    Height="60"
-                                    AutomationProperties.Name="Edit"
-                                    Background="{ThemeResource SystemAccentColor}"
-                                    CornerRadius="12">
-                                    <FontIcon
-                                        FontSize="24"
-                                        Foreground="White"
-                                        Glyph="&#xE70F;" />
-                                </Button>
-                                <Button
-                                    Width="60"
-                                    Height="60"
-                                    AutomationProperties.Name="Cancel"
-                                    Background="{ThemeResource SystemFillColorCriticalBrush}"
-                                    CornerRadius="12">
-                                    <FontIcon
-                                        FontSize="24"
-                                        Foreground="White"
-                                        Glyph="&#xE10A;" />
-                                </Button>
-                                <Button
-                                    Width="60"
-                                    Height="60"
-                                    AutomationProperties.Name="Accept"
-                                    Background="{ThemeResource SystemFillColorSuccessBrush}"
-                                    CornerRadius="12">
-                                    <FontIcon
-                                        FontSize="24"
-                                        Foreground="White"
-                                        Glyph="&#xE10B;" />
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-
-                        <!--  Outer Card Selection State Changes only the border brush  -->
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroup x:Name="SelectionStates">
-                                <VisualState x:Name="Unselected" />
-                                <VisualState x:Name="Selected">
-                                    <VisualState.Setters>
-                                        <Setter Target="CardBorder.BorderBrush" Value="{ThemeResource SystemControlHighlightAccentBrush}" />
-                                        <Setter Target="CardBorder.BorderThickness" Value="2" />
-                                    </VisualState.Setters>
-                                </VisualState>
-                            </VisualStateGroup>
-                        </VisualStateManager.VisualStateGroups>
-                    </Border>
-                </DataTemplate>
-            </ListView.ItemTemplate>
         </ListView>
 
         <!--  Floating Green Circular Action Button  -->

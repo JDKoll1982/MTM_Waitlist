@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SLS_TAX_GRP_TAX"	"PK_SLS_TAX_GRP_TAX"	"CLUSTERED"	"YES"	"YES"	"SALES_TAX_GROUP_ID"	"1"	"NO"
+"SLS_TAX_GRP_TAX"	"PK_SLS_TAX_GRP_TAX"	"CLUSTERED"	"YES"	"YES"	"SALES_TAX_ID"	"2"	"NO"
+"SLS_TAX_GRP_TAX"	"SLS_TAX_GRP_TAX_1"	"NONCLUSTERED"	"NO"	"NO"	"SALES_TAX_ID"	"1"	"NO"

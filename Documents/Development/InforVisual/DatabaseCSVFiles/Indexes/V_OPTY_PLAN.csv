@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_OPTY_PLAN"	"X_V_OPTY_PLAN_0"	"CLUSTERED"	"YES"	"YES"	"OPTY_ID"	"1"	"NO"
+"V_OPTY_PLAN"	"X_V_OPTY_PLAN_0"	"CLUSTERED"	"YES"	"YES"	"STAGE_ID"	"2"	"NO"
+"V_OPTY_PLAN"	"X_V_OPTY_PLAN_0"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"3"	"NO"

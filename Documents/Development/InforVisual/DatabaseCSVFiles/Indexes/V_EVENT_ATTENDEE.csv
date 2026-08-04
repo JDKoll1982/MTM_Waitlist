@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_EVENT_ATTENDEE"	"X_V_EVENT_ATTENDEE"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_EVENT_ATTENDEE"	"X_V_EVENT_ATTENDEE"	"CLUSTERED"	"YES"	"YES"	"EVENT_ID"	"2"	"NO"
+"V_EVENT_ATTENDEE"	"X_V_EVENT_ATTENDEE"	"CLUSTERED"	"YES"	"YES"	"CONTACT_ID"	"3"	"NO"

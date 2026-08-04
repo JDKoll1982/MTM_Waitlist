@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"DOCUMENT_REF_EAC"	"PROJECT_ID"	"nvarchar"	"NO"
+"dbo"	"DOCUMENT_REF_EAC"	"EAC_VERSION"	"nvarchar"	"NO"
+"dbo"	"DOCUMENT_REF_EAC"	"DOCUMENT_ID"	"nvarchar"	"NO"
+"dbo"	"DOCUMENT_REF_EAC"	"CREATE_DATE"	"datetime"	"YES"
+"dbo"	"DOCUMENT_REF_EAC"	"ROWID"	"int"	"NO"
+"dbo"	"DOCUMENT_REF_EAC"	"SITE_ID"	"nvarchar"	"YES"

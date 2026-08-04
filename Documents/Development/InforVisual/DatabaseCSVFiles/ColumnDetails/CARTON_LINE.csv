@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"CARTON_LINE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"CARTON_LINE"	"2"	"CARTON_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"CARTON_LINE"	"3"	"LINE_NO"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"CARTON_LINE"	"4"	"PART_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"CARTON_LINE"	"5"	"QTY"	"decimal"	"NULL"	"20"	"8"	"NO"	"NO"	"NO"

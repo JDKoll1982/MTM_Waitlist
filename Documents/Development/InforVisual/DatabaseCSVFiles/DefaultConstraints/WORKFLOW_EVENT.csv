@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"WORKFLOW_EVENT"	"CREATE_DATE"	"DF__WORKFLOW___CREAT__05F0515C"	"NULL"

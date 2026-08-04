@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"GL_INTERFACE"	"UPDATE_GL_INTERFACE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

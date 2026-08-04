@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SOA_DOC_SYNC"	"PK_SOA_DOC_SYNC"	"CLUSTERED"	"YES"	"YES"	"EVENT_ID"	"1"	"NO"
+"SOA_DOC_SYNC"	"X_SOA_DOC_SYNC_1"	"NONCLUSTERED"	"NO"	"NO"	"PROC_TYPE"	"1"	"NO"
+"SOA_DOC_SYNC"	"X_SOA_DOC_SYNC_1"	"NONCLUSTERED"	"NO"	"NO"	"CREATE_DATE"	"2"	"NO"

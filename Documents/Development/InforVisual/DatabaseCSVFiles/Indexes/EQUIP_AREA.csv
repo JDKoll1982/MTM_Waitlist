@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EQUIP_AREA"	"PK_EQUIP_AREA"	"CLUSTERED"	"YES"	"YES"	"id"	"1"	"NO"

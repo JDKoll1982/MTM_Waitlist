@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_LEASE_TYPE"	"1"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"V_LEASE_TYPE"	"2"	"DESCRIPTION"	"nvarchar"	"50"	"0"	"0"	"YES"	"NO"	"NO"
+"V_LEASE_TYPE"	"3"	"LEASE_REV_ACCT"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"
+"V_LEASE_TYPE"	"4"	"LEASE_INT_ACCT"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"
+"V_LEASE_TYPE"	"5"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"V_LEASE_TYPE"	"6"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_LEASE_TYPE"	"7"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

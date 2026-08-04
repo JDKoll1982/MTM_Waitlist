@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0301"	"LABEL_GROUP_LINE"	"LABEL_FORMAT_ID"	"LABEL_FORMAT"	"ID"
+"FKEY0300"	"LABEL_GROUP_LINE"	"LABEL_GROUP_ID"	"LABEL_GROUP"	"ID"

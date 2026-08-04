@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"WITHHOLDING"	"UPDATE_WITHHOLDING"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

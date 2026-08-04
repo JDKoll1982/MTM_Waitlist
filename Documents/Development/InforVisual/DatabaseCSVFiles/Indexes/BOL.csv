@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"BOL"	"PK_BOL"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"BOL"	"X_BOL_1"	"NONCLUSTERED"	"NO"	"NO"	"ASN_ID"	"1"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"USER_DIM_PROC_PRI"	"PK_USR_DIM_PROC_PRI"	"CLUSTERED"	"YES"	"YES"	"DIMENSION"	"1"	"NO"
+"USER_DIM_PROC_PRI"	"PK_USR_DIM_PROC_PRI"	"CLUSTERED"	"YES"	"YES"	"PROCESS_TYPE"	"2"	"NO"
+"USER_DIM_PROC_PRI"	"PK_USR_DIM_PROC_PRI"	"CLUSTERED"	"YES"	"YES"	"SOURCE_TYPE"	"3"	"NO"

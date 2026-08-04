@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PROFILES"	"ROWID"	"int"	"NO"
+"dbo"	"PROFILES"	"ID"	"nvarchar"	"NO"
+"dbo"	"PROFILES"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"PROFILES"	"CREATE_DATE"	"datetime"	"NO"

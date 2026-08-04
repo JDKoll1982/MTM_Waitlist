@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SECURITY_CLASS"	"PK_SECURITY_CLASS"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

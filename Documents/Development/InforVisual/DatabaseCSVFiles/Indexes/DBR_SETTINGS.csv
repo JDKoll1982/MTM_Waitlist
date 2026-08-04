@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DBR_SETTINGS"	"PK_DBR_SETTINGS"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"1"	"NO"
+"DBR_SETTINGS"	"PK_DBR_SETTINGS"	"CLUSTERED"	"YES"	"YES"	"CCR_ID"	"2"	"NO"
+"DBR_SETTINGS"	"X_DBRSETTINGS_1"	"NONCLUSTERED"	"YES"	"NO"	"SITE_ID"	"1"	"NO"
+"DBR_SETTINGS"	"X_DBRSETTINGS_1"	"NONCLUSTERED"	"YES"	"NO"	"RANK"	"2"	"NO"

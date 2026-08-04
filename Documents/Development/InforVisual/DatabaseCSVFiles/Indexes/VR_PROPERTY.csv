@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VR_PROPERTY"	"VR_PROPERTY_0"	"NONCLUSTERED"	"NO"	"NO"	"NAME"	"1"	"NO"

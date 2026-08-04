@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"PHYS_INV_PIECES"	"STATUS"	"DF__PHYS_INV___STATU__20B95631"	"NULL"

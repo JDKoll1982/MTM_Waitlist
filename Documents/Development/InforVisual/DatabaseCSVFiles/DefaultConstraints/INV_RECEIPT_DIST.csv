@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"INV_RECEIPT_DIST"	"QTY"	"DF__INV_RECEIPT__QTY__41903A17"	"NULL"

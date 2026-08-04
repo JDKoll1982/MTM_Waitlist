@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PART_SYNC"	"PK_PART_SYNC"	"CLUSTERED"	"YES"	"YES"	"EVENT_ID"	"1"	"NO"

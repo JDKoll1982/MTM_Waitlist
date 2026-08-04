@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"CO_PRODUCT"	"DELETE_CO_PRODUCT"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"CO_PRODUCT"	"INSERT_CO_PRODUCT"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"CO_PRODUCT"	"UPDATE_CO_PRODUCT"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

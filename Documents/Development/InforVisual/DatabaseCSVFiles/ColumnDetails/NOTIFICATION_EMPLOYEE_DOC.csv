@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"NOTIFICATION_EMPLOYEE_DOC"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"NOTIFICATION_EMPLOYEE_DOC"	"2"	"PROGRAM_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"NOTIFICATION_EMPLOYEE_DOC"	"3"	"DOC_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"NOTIFICATION_EMPLOYEE_DOC"	"4"	"DOC_LINE_NO"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"NOTIFICATION_EMPLOYEE_DOC"	"5"	"EMPLOYEE_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"NOTIFICATION_EMPLOYEE_DOC"	"6"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"NOTIFICATION_EMPLOYEE_DOC"	"7"	"NOTIFY_ME_TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

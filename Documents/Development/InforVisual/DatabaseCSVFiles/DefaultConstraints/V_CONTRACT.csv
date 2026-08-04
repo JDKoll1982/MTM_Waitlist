@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_CONTRACT"	"EXP_MKUP_PERCENT"	"DF__V_CONTRAC__EXP_M__491C4D46"	"NULL"
+"V_CONTRACT"	"MTL_MKUP_PERCENT"	"DF__V_CONTRAC__MTL_M__4A10717F"	"NULL"

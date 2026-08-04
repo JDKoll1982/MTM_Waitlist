@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PROJECT_EAC_POC"	"PK_PROJECT_EAC_POC"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"PROJECT_EAC_POC"	"PK_PROJECT_EAC_POC"	"CLUSTERED"	"YES"	"YES"	"PROJECT_ID"	"2"	"NO"

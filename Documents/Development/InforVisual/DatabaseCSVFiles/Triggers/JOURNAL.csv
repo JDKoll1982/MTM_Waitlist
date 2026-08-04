@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"JOURNAL"	"DELETE_JOURNAL"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"JOURNAL"	"INSERT_JOURNAL"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"JOURNAL"	"UPDATE_JOURNAL"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

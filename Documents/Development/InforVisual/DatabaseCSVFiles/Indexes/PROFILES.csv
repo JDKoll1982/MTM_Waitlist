@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PROFILES"	"PK_PROFILES"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"GPSUMF"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"GPSUMF"	"2"	"GUBOID"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"
+"GPSUMF"	"3"	"GUBOVL"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"
+"GPSUMF"	"4"	"GUBODS"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"

@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EC_TYPES"	"ROWID"	"int"	"NO"
+"dbo"	"EC_TYPES"	"CODE"	"nvarchar"	"NO"
+"dbo"	"EC_TYPES"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"EC_TYPES"	"CREATE_DATE"	"datetime"	"NO"

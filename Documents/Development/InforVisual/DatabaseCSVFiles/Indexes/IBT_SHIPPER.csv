@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"IBT_SHIPPER"	"PK_IBT_SHIPPER"	"CLUSTERED"	"YES"	"YES"	"SHIPPER_ID"	"1"	"NO"
+"IBT_SHIPPER"	"X_IBT_SHIPPER_1"	"NONCLUSTERED"	"NO"	"NO"	"IBT_ID"	"1"	"NO"
+"IBT_SHIPPER"	"X_IBT_SHIPPER_2"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"

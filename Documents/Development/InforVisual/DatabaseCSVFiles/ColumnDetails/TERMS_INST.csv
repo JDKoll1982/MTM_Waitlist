@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"TERMS_INST"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"TERMS_INST"	"2"	"TERMS_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"TERMS_INST"	"3"	"INST_NO"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"TERMS_INST"	"4"	"INST_PERCENT"	"decimal"	"NULL"	"6"	"3"	"NO"	"NO"	"NO"
+"TERMS_INST"	"5"	"PERIOD"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"

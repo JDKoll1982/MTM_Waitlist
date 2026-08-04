@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"LOCATION"	"ROWID"	"int"	"NO"
+"dbo"	"LOCATION"	"ID"	"nvarchar"	"NO"
+"dbo"	"LOCATION"	"WAREHOUSE_ID"	"nvarchar"	"NO"
+"dbo"	"LOCATION"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"LOCATION"	"TYPE"	"nchar"	"NO"
+"dbo"	"LOCATION"	"CUSTOMER_ID"	"nvarchar"	"YES"
+"dbo"	"LOCATION"	"VENDOR_ID"	"nvarchar"	"YES"

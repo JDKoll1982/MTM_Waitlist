@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"LABEL_GROUP"	"ROWID"	"int"	"NO"
+"dbo"	"LABEL_GROUP"	"ID"	"nvarchar"	"NO"
+"dbo"	"LABEL_GROUP"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"LABEL_GROUP"	"LABEL_TYPE_ID"	"nvarchar"	"YES"
+"dbo"	"LABEL_GROUP"	"SITE_ID"	"nvarchar"	"NO"

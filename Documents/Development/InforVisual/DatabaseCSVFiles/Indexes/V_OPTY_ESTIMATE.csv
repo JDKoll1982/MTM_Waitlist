@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_OPTY_ESTIMATE"	"X_V_OPTY_ESTIMATE_0"	"CLUSTERED"	"YES"	"YES"	"EST_ID"	"1"	"NO"
+"V_OPTY_ESTIMATE"	"X_V_OPTY_ESTIMATE_0"	"CLUSTERED"	"YES"	"YES"	"OPTY_ID"	"2"	"NO"

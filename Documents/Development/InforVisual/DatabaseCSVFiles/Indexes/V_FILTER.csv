@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_FILTER"	"X_V_FILTER_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_FILTER"	"X_V_FILTER_1"	"NONCLUSTERED"	"NO"	"NO"	"BUS_OBJ_TYPE"	"1"	"NO"
+"V_FILTER"	"X_V_FILTER_1"	"NONCLUSTERED"	"NO"	"NO"	"OWNER"	"2"	"NO"

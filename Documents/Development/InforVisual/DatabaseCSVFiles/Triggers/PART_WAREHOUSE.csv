@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"PART_WAREHOUSE"	"INSERT_PART_WAREHOUSE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"

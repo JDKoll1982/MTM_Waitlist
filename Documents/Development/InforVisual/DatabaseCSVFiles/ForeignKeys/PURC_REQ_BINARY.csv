@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PURC_REQ_BINARY_00"	"PURC_REQ_BINARY"	"PURC_REQ_ID"	"PURC_REQUISITION"	"ID"

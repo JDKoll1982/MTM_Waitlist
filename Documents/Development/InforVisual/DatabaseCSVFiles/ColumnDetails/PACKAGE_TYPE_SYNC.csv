@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PACKAGE_TYPE_SYNC"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PACKAGE_TYPE_SYNC"	"2"	"EVENT_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"PACKAGE_TYPE_SYNC"	"3"	"TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"PACKAGE_TYPE_SYNC"	"4"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"PACKAGE_TYPE_SYNC"	"5"	"PACKAGE_CODE"	"nvarchar"	"5"	"0"	"0"	"NO"	"NO"	"NO"
+"PACKAGE_TYPE_SYNC"	"6"	"EXCEPTION"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"PACKAGE_TYPE_SYNC"	"7"	"SUBSCRIPTIONS"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

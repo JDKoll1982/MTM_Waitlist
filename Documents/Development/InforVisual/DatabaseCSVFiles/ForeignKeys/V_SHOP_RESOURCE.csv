@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00229"	"V_SHOP_RESOURCE"	"ID"	"SHOP_RESOURCE"	"ID"

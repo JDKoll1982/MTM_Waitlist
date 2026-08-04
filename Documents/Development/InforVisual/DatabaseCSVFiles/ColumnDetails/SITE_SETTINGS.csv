@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"SITE_SETTINGS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"SITE_SETTINGS"	"2"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"SITE_SETTINGS"	"3"	"NAME"	"nvarchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"SITE_SETTINGS"	"4"	"SETTING_VALUE"	"nvarchar"	"250"	"0"	"0"	"YES"	"NO"	"NO"

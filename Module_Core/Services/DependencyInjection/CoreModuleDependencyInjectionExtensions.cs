@@ -2,7 +2,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
-using MTM_Waitlist.Module_DevTools.Services.DependencyInjection;
 using MTM_Waitlist.Module_Settings.Services.DependencyInjection;
 using MTM_Waitlist.Module_Shared.Services.DependencyInjection;
 using MTM_Waitlist.Module_Startup.Services.DependencyInjection;
@@ -21,8 +20,6 @@ public static class CoreModuleDependencyInjectionExtensions
         services.AddSharedModuleServices(configuration);
         services.AddStartupModuleServices(configuration);
         services.AddWaitlistModuleServices(configuration);
-        services.AddDevToolsModuleServices(configuration);
-
         return services;
     }
 }

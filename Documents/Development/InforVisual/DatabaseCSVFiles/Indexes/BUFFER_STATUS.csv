@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"BUFFER_STATUS"	"PK_BUFFER_STATUS"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"BUFFER_STATUS"	"X_BUFFER_STATUS_1"	"NONCLUSTERED"	"NO"	"NO"	"BUFFER_ID"	"1"	"NO"

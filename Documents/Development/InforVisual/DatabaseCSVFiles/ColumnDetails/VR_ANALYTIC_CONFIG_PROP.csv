@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"VR_ANALYTIC_CONFIG_PROP"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"VR_ANALYTIC_CONFIG_PROP"	"2"	"ANALYTIC_CONFIG_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_ANALYTIC_CONFIG_PROP"	"3"	"PROPERTY_NAME"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_ANALYTIC_CONFIG_PROP"	"4"	"PROPERTY_VALUE"	"nvarchar"	"250"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_ANALYTIC_CONFIG_PROP"	"5"	"SEQUENCE_NO"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

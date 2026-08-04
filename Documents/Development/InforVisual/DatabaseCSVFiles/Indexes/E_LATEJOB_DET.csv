@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_LATEJOB_DET"	"EX_LATEJOB_DET"	"NONCLUSTERED"	"NO"	"NO"	"EIS_DATE"	"1"	"NO"

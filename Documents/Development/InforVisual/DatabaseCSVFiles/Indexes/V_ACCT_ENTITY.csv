@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_ACCT_ENTITY"	"X_V_ACCT_ENTITY_0"	"CLUSTERED"	"YES"	"YES"	"ENTITY_ID"	"1"	"NO"
+"V_ACCT_ENTITY"	"X_V_ACCT_ENTITY_0"	"CLUSTERED"	"YES"	"YES"	"ACCT_ID"	"2"	"NO"

@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EQUIP_LABOR_PRICE"	"pk_eq_lab_price"	"CLUSTERED"	"YES"	"YES"	"id"	"1"	"NO"
+"EQUIP_LABOR_PRICE"	"pk_eq_lab_price"	"CLUSTERED"	"YES"	"YES"	"resource_id"	"2"	"NO"

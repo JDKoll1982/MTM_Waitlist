@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00122"	"V_KEYWORD"	"PARENT_ID"	"V_KEYWORD"	"ID"

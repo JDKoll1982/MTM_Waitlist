@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUST_LINE_TRC_CTL"	"PK_CUST_LINE_TRC_CTL"	"CLUSTERED"	"YES"	"YES"	"CUST_ORDER_ID"	"1"	"NO"
+"CUST_LINE_TRC_CTL"	"PK_CUST_LINE_TRC_CTL"	"CLUSTERED"	"YES"	"YES"	"CUST_ORDER_LINE_NO"	"2"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"GJ_LINE"	"UPDATE_GJ_LINE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

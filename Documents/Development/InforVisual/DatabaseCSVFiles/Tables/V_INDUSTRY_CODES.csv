@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_INDUSTRY_CODES"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_INDUSTRY_CODES"	"TYPE"	"nvarchar"	"NO"
+"dbo"	"V_INDUSTRY_CODES"	"LONG_DESC"	"nvarchar"	"YES"
+"dbo"	"V_INDUSTRY_CODES"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_INDUSTRY_CODES"	"LAST_MODIFIED"	"datetime"	"YES"

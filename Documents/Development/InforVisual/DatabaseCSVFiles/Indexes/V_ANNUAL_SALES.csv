@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_ANNUAL_SALES"	"X_V_ANNUAL_SALES_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

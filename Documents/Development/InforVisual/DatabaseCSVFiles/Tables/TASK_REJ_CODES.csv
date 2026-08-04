@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TASK_REJ_CODES"	"ROWID"	"int"	"NO"
+"dbo"	"TASK_REJ_CODES"	"CODE"	"nvarchar"	"NO"
+"dbo"	"TASK_REJ_CODES"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"TASK_REJ_CODES"	"CREATE_DATE"	"datetime"	"NO"

@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"EXCEPTION"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"EXCEPTION"	"2"	"TYPE"	"nchar"	"2"	"0"	"0"	"NO"	"NO"	"NO"
+"EXCEPTION"	"3"	"OWNER_ID"	"nvarchar"	"40"	"0"	"0"	"NO"	"NO"	"NO"
+"EXCEPTION"	"4"	"EXCEPTION_ID"	"nvarchar"	"40"	"0"	"0"	"NO"	"NO"	"NO"
+"EXCEPTION"	"5"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"EXCEPTION"	"6"	"NOTE"	"image"	"NULL"	"0"	"0"	"YES"	"NO"	"NO"

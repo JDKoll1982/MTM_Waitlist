@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"UNP_MNT_ENGINEER"	"pk_unp_mnt_eng"	"CLUSTERED"	"YES"	"YES"	"resource_id"	"1"	"NO"
+"UNP_MNT_ENGINEER"	"pk_unp_mnt_eng"	"CLUSTERED"	"YES"	"YES"	"key1_id"	"2"	"NO"
+"UNP_MNT_ENGINEER"	"pk_unp_mnt_eng"	"CLUSTERED"	"YES"	"YES"	"key2_id"	"3"	"NO"
+"UNP_MNT_ENGINEER"	"pk_unp_mnt_eng"	"CLUSTERED"	"YES"	"YES"	"key_type"	"4"	"NO"

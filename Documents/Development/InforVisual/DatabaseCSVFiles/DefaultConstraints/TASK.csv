@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"TASK"	"CREATE_DATE"	"DF__TASK__CREATE_DAT__326DF218"	"NULL"
+"TASK"	"STATUS_EFF_DATE"	"DF__TASK__STATUS_EFF__33621651"	"NULL"

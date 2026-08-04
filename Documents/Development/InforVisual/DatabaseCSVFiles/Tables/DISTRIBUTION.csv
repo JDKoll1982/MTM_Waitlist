@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"DISTRIBUTION"	"ROWID"	"int"	"NO"
+"dbo"	"DISTRIBUTION"	"ID"	"nvarchar"	"NO"
+"dbo"	"DISTRIBUTION"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"DISTRIBUTION"	"STATUS"	"nvarchar"	"YES"

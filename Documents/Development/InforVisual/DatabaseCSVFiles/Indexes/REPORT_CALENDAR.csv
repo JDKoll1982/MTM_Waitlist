@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"REPORT_CALENDAR"	"PK_RPT_CALENDAR"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

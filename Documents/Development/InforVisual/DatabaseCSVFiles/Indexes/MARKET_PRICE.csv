@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"MARKET_PRICE"	"PK_MARKET_PRICE"	"CLUSTERED"	"YES"	"YES"	"MARKET_ID"	"1"	"NO"
+"MARKET_PRICE"	"PK_MARKET_PRICE"	"CLUSTERED"	"YES"	"YES"	"PART_ID"	"2"	"NO"
+"MARKET_PRICE"	"PK_MARKET_PRICE"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"3"	"NO"

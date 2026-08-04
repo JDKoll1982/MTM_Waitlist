@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"UNP_MNT_ENGINEER"	"ROWID"	"int"	"NO"
+"dbo"	"UNP_MNT_ENGINEER"	"resource_id"	"nvarchar"	"NO"
+"dbo"	"UNP_MNT_ENGINEER"	"all_flag"	"nvarchar"	"YES"
+"dbo"	"UNP_MNT_ENGINEER"	"key1_id"	"nvarchar"	"NO"
+"dbo"	"UNP_MNT_ENGINEER"	"key2_id"	"nvarchar"	"NO"
+"dbo"	"UNP_MNT_ENGINEER"	"key_type"	"nvarchar"	"NO"

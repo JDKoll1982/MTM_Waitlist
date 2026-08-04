@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_CONTACT_BINARY"	"BITS_LENGTH"	"DF__V_CONTACT__BITS___3ACE2DEF"	"NULL"
+"V_CONTACT_BINARY"	"TYPE"	"DF__V_CONTACT___TYPE__3BC25228"	"NULL"

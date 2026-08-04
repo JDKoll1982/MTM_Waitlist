@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"BURDEN_GROUP"	"ROWID"	"int"	"NO"
+"dbo"	"BURDEN_GROUP"	"ID"	"nvarchar"	"NO"
+"dbo"	"BURDEN_GROUP"	"DESCRIPTION"	"nvarchar"	"YES"

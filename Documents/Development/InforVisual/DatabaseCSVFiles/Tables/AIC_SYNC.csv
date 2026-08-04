@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"AIC_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"AIC_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"AIC_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"AIC_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"AIC_SYNC"	"AIC_CODE"	"nvarchar"	"NO"
+"dbo"	"AIC_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"AIC_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

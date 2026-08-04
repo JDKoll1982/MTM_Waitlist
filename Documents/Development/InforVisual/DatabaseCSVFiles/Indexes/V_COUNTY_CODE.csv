@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_COUNTY_CODE"	"X_V_COUNTY_CODE_0"	"CLUSTERED"	"YES"	"YES"	"COUNTY_NAME"	"1"	"NO"
+"V_COUNTY_CODE"	"X_V_COUNTY_CODE_0"	"CLUSTERED"	"YES"	"YES"	"STATE"	"2"	"NO"

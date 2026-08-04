@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"SHIPTO_ALT_WAREHS"	"1"	"CUSTOMER_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"SHIPTO_ALT_WAREHS"	"2"	"SHIPTO_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"SHIPTO_ALT_WAREHS"	"3"	"WAREHOUSE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"SHIPTO_ALT_WAREHS"	"4"	"RANK"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"SHIPTO_ALT_WAREHS"	"5"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"

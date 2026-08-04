@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_CUSTOM_REL"	"1"	"BUS_TYPE"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"V_CUSTOM_REL"	"2"	"REL_BUS_TYPE"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"V_CUSTOM_REL"	"3"	"REL_TYPE"	"nvarchar"	"3"	"0"	"0"	"YES"	"NO"	"NO"
+"V_CUSTOM_REL"	"4"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"V_CUSTOM_REL"	"5"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_CUSTOM_REL"	"6"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

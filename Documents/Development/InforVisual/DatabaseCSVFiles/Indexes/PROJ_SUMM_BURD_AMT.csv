@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PROJ_SUMM_BURD_AMT"	"PK_PROJ_SUMM_BURD_AMT"	"CLUSTERED"	"YES"	"YES"	"PROJECT_SUMMARY_ID"	"1"	"NO"
+"PROJ_SUMM_BURD_AMT"	"PK_PROJ_SUMM_BURD_AMT"	"CLUSTERED"	"YES"	"YES"	"COST_CATEGORY_ID"	"2"	"NO"

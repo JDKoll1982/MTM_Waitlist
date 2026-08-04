@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"JOURNAL_DIM_FILTER"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"JOURNAL_DIM_FILTER"	"2"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"JOURNAL_DIM_FILTER"	"3"	"NAME"	"nvarchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"JOURNAL_DIM_FILTER"	"4"	"CRITERIA_TYPE"	"nvarchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"JOURNAL_DIM_FILTER"	"5"	"IS_DEFAULT"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"JOURNAL_DIM_FILTER"	"6"	"CRITERIA_COMPARISN"	"nvarchar"	"10"	"0"	"0"	"YES"	"NO"	"NO"
+"JOURNAL_DIM_FILTER"	"7"	"CRITERIA_TEXT"	"varbinary"	"NULL"	"0"	"0"	"NO"	"NO"	"NO"

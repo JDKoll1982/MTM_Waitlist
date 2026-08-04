@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"SOA_DIMENSION"	"CREATE_DATE"	"DF__SOA_DIMEN__CREAT__1A966887"	"NULL"

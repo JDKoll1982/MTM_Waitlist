@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_INST"	"1"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"V_INST"	"2"	"INST_TYPE"	"nvarchar"	"2"	"0"	"0"	"NO"	"NO"	"NO"
+"V_INST"	"3"	"END_OF_MONTH"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"V_INST"	"4"	"VAT_ON_FIRST_INST"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"V_INST"	"5"	"PERIOD_TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"V_INST"	"6"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_INST"	"7"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

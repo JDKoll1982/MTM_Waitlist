@@ -1,0 +1,5 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"RECV_MEMO_APPLY"	"X_RECV_MEMO_APP_2"	"INV_INVOICE_ID"	"1"
+"RECV_MEMO_APPLY"	"X_RECV_MEMO_APP_2"	"MEMO_INVOICE_ID"	"2"
+"RECV_MEMO_APPLY"	"X_RECV_MEMO_APP_2"	"apply_date"	"3"
+"RECV_MEMO_APPLY"	"X_RECV_MEMO_APP_2"	"INST_NO"	"4"

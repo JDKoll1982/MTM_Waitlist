@@ -8,18 +8,19 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class SampleDataServiceTests
 {
     [TestMethod]
-    public void GetSampleOrders_ReturnsTwoOrdersWithDetailBindings()
+    public void GetSampleOrders_ReturnsThreeOrdersWithDetailBindings()
     {
         var service = new SampleDataService();
 
         var rows = service.GetSampleOrders();
 
-        Assert.AreEqual(2, rows.Count);
+        Assert.AreEqual(3, rows.Count);
         var firstOrder = rows[0] as MTM_Waitlist.Module_Waitlist.Models.SampleOrder;
         Assert.IsNotNull(firstOrder);
-        Assert.AreEqual("Material request", firstOrder!.Title);
-        Assert.AreEqual("Expo Drive", firstOrder.Subtitle);
-        Assert.IsTrue(firstOrder.Fields.Count > 0);
+        Assert.AreEqual("Coil Request", firstOrder!.Title);
+        Assert.AreEqual("Jordan Lee", firstOrder.RequestedByName);
+        Assert.AreEqual("Press 12", firstOrder.RequestedPressName);
+        Assert.AreEqual("00:27", firstOrder.RemainingTimeText);
     }
 
     [TestMethod]
@@ -36,6 +37,25 @@ public sealed class SampleDataServiceTests
         Assert.IsNotNull(expoOrder);
         Assert.IsNotNull(vitsOrder);
         Assert.AreNotEqual(expoOrder!.Title, vitsOrder!.Title);
-        Assert.AreNotEqual(expoOrder.Subtitle, vitsOrder.Subtitle);
+        Assert.AreNotEqual(expoOrder.RequestedByName, vitsOrder!.RequestedByName);
+        Assert.AreEqual(3, expoRows.Count);
+        Assert.AreEqual(3, vitsRows.Count);
+
+        var imagePaths = expoRows.Concat(vitsRows)
+            .OfType<MTM_Waitlist.Module_Waitlist.Models.SampleOrder>()
+            .Select(item => item.ImagePath)
+            .ToArray();
+
+        CollectionAssert.AreEquivalent(
+            new[]
+            {
+                "coil.png",
+                "pickup_fg.png",
+                "pickup_ncm.png",
+                "pickup_os.png",
+                "pickup_wip.png",
+                "scrap.png"
+            },
+            imagePaths);
     }
 }

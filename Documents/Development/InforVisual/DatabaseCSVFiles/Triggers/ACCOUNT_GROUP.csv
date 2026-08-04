@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"ACCOUNT_GROUP"	"UPDATE_ACCOUNT_GROUP"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

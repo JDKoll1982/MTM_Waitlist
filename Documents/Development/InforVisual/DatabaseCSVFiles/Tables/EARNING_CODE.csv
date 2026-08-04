@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EARNING_CODE"	"ROWID"	"int"	"NO"
+"dbo"	"EARNING_CODE"	"ID"	"nvarchar"	"NO"
+"dbo"	"EARNING_CODE"	"DESCRIPTION"	"nvarchar"	"YES"

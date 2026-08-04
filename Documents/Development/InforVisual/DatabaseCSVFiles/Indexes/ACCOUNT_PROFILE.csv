@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ACCOUNT_PROFILE"	"pk_acct_profile"	"CLUSTERED"	"YES"	"YES"	"account_type"	"1"	"NO"
+"ACCOUNT_PROFILE"	"pk_acct_profile"	"CLUSTERED"	"YES"	"YES"	"profile_id"	"2"	"NO"
+"ACCOUNT_PROFILE"	"pk_acct_profile"	"CLUSTERED"	"YES"	"YES"	"profile_type"	"3"	"NO"
+"ACCOUNT_PROFILE"	"pk_acct_profile"	"CLUSTERED"	"YES"	"YES"	"account_id"	"4"	"NO"

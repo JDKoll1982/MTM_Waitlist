@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"DBR_EVENT_DETECT"	"CREATE_DATE"	"DF__DBR_EVENT__CREAT__641A5C45"	"NULL"

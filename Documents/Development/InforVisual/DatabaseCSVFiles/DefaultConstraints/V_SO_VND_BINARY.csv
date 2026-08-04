@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_SO_VND_BINARY"	"BITS_LENGTH"	"DF__V_SO_VND___BITS___0BDE34DC"	"NULL"
+"V_SO_VND_BINARY"	"TYPE"	"DF__V_SO_VND_B__TYPE__0AEA10A3"	"NULL"

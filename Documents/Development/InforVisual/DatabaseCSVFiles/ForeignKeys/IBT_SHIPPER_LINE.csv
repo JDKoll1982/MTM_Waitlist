@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9492"	"IBT_SHIPPER_LINE"	"SHIPPER_ID"	"IBT_SHIPPER"	"SHIPPER_ID"

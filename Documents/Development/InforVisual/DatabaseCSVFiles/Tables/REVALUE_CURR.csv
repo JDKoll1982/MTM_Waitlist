@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"REVALUE_CURR"	"ROWID"	"int"	"NO"
+"dbo"	"REVALUE_CURR"	"REVALUE_ID"	"nvarchar"	"NO"
+"dbo"	"REVALUE_CURR"	"CURRENCY_ID"	"nvarchar"	"NO"
+"dbo"	"REVALUE_CURR"	"SELL_RATE"	"decimal"	"NO"
+"dbo"	"REVALUE_CURR"	"BUY_RATE"	"decimal"	"NO"
+"dbo"	"REVALUE_CURR"	"AVG_SELL_RATE"	"decimal"	"NO"
+"dbo"	"REVALUE_CURR"	"AVG_BUY_RATE"	"decimal"	"NO"

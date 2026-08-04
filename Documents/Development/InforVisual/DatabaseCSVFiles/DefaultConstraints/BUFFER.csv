@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"BUFFER"	"CREATE_DATE"	"DF__BUFFER__CREATE_D__56F56B51"	"NULL"
+"BUFFER"	"MODIFIED_DATE"	"DF__BUFFER__MODIFIED__57E98F8A"	"NULL"

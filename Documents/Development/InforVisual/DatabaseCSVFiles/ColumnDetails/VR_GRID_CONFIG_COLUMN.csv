@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"VR_GRID_CONFIG_COLUMN"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"VR_GRID_CONFIG_COLUMN"	"2"	"GRID_CONFIG_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_GRID_CONFIG_COLUMN"	"3"	"NAME"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_GRID_CONFIG_COLUMN"	"4"	"IS_VISIBLE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"VR_GRID_CONFIG_COLUMN"	"5"	"SEQ_NO"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

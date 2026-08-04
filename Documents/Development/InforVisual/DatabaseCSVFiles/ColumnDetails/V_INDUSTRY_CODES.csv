@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_INDUSTRY_CODES"	"1"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"V_INDUSTRY_CODES"	"2"	"TYPE"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"V_INDUSTRY_CODES"	"3"	"LONG_DESC"	"nvarchar"	"254"	"0"	"0"	"YES"	"NO"	"NO"
+"V_INDUSTRY_CODES"	"4"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_INDUSTRY_CODES"	"5"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

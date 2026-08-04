@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"INSPECTION_REASON"	"PK_INSP_REASON"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

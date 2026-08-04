@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"TRACE_NUMBERING"	"UPDATE_TRACE_NUMBERING"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

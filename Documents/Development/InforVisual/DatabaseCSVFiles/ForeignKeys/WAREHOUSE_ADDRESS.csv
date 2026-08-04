@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9620"	"WAREHOUSE_ADDRESS"	"WAREHOUSE_ID"	"WAREHOUSE"	"ID"

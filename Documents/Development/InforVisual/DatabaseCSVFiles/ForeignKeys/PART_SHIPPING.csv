@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9444"	"PART_SHIPPING"	"PART_ID"	"PART"	"ID"

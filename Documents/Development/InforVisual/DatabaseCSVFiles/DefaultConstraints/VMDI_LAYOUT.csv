@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"VMDI_LAYOUT"	"CREATE_DATE"	"DF__VMDI_LAYO__CREAT__5B05F357"	"NULL"
+"VMDI_LAYOUT"	"SAVE_DATA_FLOW"	"DF__VMDI_LAYO__SAVE___5BFA1790"	"NULL"

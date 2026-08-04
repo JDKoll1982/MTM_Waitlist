@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"MACRO"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"MACRO"	"2"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"MACRO"	"3"	"PROGRAM_ID"	"nvarchar"	"8"	"0"	"0"	"NO"	"NO"	"NO"
+"MACRO"	"4"	"NAME"	"nvarchar"	"100"	"0"	"0"	"NO"	"NO"	"NO"
+"MACRO"	"5"	"MACRO"	"image"	"NULL"	"0"	"0"	"YES"	"NO"	"NO"

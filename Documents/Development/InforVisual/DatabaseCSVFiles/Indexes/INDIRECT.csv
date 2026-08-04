@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"INDIRECT"	"PK_INDIRECT"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"INDIRECT"	"X_INDIRECT_1"	"NONCLUSTERED"	"NO"	"NO"	"GL_ACCOUNT_ID"	"1"	"NO"

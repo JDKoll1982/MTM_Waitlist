@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_SO_EXP_BINARY"	"BITS_LENGTH"	"DF__V_SO_EXP___BITS___043D1314"	"NULL"
+"V_SO_EXP_BINARY"	"TYPE"	"DF__V_SO_EXP_B__TYPE__0348EEDB"	"NULL"

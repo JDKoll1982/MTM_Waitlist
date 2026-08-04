@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"QUOTE"	"DELETE_QUOTE"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"QUOTE"	"INSERT_QUOTE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"QUOTE"	"UPDATE_QUOTE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

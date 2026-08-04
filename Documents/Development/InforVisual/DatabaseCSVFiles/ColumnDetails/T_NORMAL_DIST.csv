@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"T_NORMAL_DIST"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"T_NORMAL_DIST"	"2"	"T"	"decimal"	"NULL"	"3"	"1"	"NO"	"NO"	"NO"
+"T_NORMAL_DIST"	"3"	"OUTSIDE_OF_LIM"	"decimal"	"NULL"	"6"	"4"	"NO"	"NO"	"NO"

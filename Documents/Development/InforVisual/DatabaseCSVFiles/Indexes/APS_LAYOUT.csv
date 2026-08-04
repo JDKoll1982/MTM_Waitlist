@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"APS_LAYOUT"	"PK_APS_LAYOUT"	"CLUSTERED"	"YES"	"YES"	"KEY"	"1"	"NO"

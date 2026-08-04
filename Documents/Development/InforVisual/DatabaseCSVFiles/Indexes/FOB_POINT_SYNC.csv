@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"FOB_POINT_SYNC"	"PK_FOB_POINT_SYNC"	"CLUSTERED"	"YES"	"YES"	"EVENT_ID"	"1"	"NO"

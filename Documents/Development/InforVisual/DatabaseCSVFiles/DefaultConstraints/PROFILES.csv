@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"PROFILES"	"CREATE_DATE"	"DF__PROFILES__CREATE__276653C0"	"NULL"

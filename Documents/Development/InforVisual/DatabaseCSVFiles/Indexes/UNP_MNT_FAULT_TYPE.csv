@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"UNP_MNT_FAULT_TYPE"	"pk_unp_mnt_flt_tp"	"CLUSTERED"	"YES"	"YES"	"id"	"1"	"NO"

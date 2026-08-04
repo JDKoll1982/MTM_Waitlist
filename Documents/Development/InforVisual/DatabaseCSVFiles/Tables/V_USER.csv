@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_USER"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_USER"	"TYPE"	"nvarchar"	"YES"
+"dbo"	"V_USER"	"EMP_ID"	"nvarchar"	"YES"
+"dbo"	"V_USER"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_USER"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_USER"	"CREATOR"	"nvarchar"	"YES"
+"dbo"	"V_USER"	"CREATE_DATE"	"datetime"	"YES"

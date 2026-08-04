@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EARNING_CODE"	"PK_EARNING_CODE"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

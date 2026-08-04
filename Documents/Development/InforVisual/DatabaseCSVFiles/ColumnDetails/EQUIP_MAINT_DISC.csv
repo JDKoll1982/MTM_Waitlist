@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"EQUIP_MAINT_DISC"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"EQUIP_MAINT_DISC"	"2"	"maint_id"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"EQUIP_MAINT_DISC"	"3"	"customer_id"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"EQUIP_MAINT_DISC"	"4"	"DISCOUNT_PERCENT"	"decimal"	"NULL"	"6"	"3"	"YES"	"NO"	"NO"
+"EQUIP_MAINT_DISC"	"5"	"DISCOUNT_VALUE"	"decimal"	"NULL"	"23"	"8"	"YES"	"NO"	"NO"

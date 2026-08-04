@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EQUIP_RELEASE"	"ROWID"	"int"	"NO"
+"dbo"	"EQUIP_RELEASE"	"equip_id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_RELEASE"	"release_no"	"nvarchar"	"NO"
+"dbo"	"EQUIP_RELEASE"	"release_date"	"datetime"	"YES"

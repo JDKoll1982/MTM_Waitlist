@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"UNITS_CONVERSION"	"INSERT_UNITS_CONVERSION"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"UNITS_CONVERSION"	"UPDATE_UNITS_CONVERSION"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

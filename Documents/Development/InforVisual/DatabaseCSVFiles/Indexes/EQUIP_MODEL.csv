@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EQUIP_MODEL"	"PK_EQUIP_MODEL"	"CLUSTERED"	"YES"	"YES"	"type_id"	"1"	"NO"
+"EQUIP_MODEL"	"PK_EQUIP_MODEL"	"CLUSTERED"	"YES"	"YES"	"id"	"2"	"NO"

@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Options;
 
 using MySqlConnector;
+using System.Security.Cryptography;
+using System.Text;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Startup.Models;
@@ -9,6 +11,11 @@ namespace MTM_Waitlist.Module_Startup.Services;
 
 public sealed class StartupSessionRepository : IStartupSessionRepository
 {
+    private const int PasswordSaltLengthBytes = 16;
+    private const int PasswordHashLengthBytes = 32;
+    private const int PasswordIterations = 100_000;
+    private const string TemporaryDefaultPasswordHashMarker = "0000";
+
     private readonly StartupDatabaseOptions _startupDatabaseOptions;
 
     public StartupSessionRepository(IOptions<StartupDatabaseOptions> startupDatabaseOptions)
@@ -96,6 +103,125 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                 HasDatabaseSession = sessionExpiry.HasValue,
                 DatabaseSessionExpiresUtc = sessionExpiry
             };
+        }, cancellationToken);
+    }
+
+    public async Task<StartupCredentialCheckResult> CheckCredentialsAsync(
+        string username,
+        string password,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrEmpty(password))
+        {
+            return StartupCredentialCheckResult.Failed();
+        }
+
+        var connectionString = ResolveConnectionString();
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return StartupCredentialCheckResult.Failed();
+        }
+
+        var timeoutConnectionString = BuildTimeoutConnectionString(connectionString);
+        return await ExecuteWithRetryAsync(async token =>
+        {
+            await using var connection = new MySqlConnection(timeoutConnectionString);
+            await connection.OpenAsync(token);
+
+            await using var command = new MySqlCommand(
+                """
+                SELECT u.id,
+                       COALESCE(r.role_name, '') AS role_name,
+                       u.password_hash,
+                       u.password_salt,
+                       u.require_password_change
+                FROM core_users_profiles u
+                LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
+                LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
+                WHERE u.username_normalized = @username
+                  AND u.is_active = 1
+                ORDER BY ra.assigned_utc DESC
+                LIMIT 1;
+                """,
+                connection);
+
+            command.Parameters.AddWithValue("@username", username.Trim().ToLowerInvariant());
+
+            await using var reader = await command.ExecuteReaderAsync(token);
+            if (!await reader.ReadAsync(token))
+            {
+                return StartupCredentialCheckResult.Failed();
+            }
+
+            var userId = reader.GetInt64(0);
+            var currentRole = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+            var passwordHash = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+            var passwordSalt = reader.IsDBNull(3) ? null : (byte[])reader[3];
+            var requirePasswordChange = !reader.IsDBNull(4) && reader.GetBoolean(4);
+
+            if (IsTemporaryDefaultPassword(passwordHash))
+            {
+                if (!string.Equals(password, TemporaryDefaultPasswordHashMarker, StringComparison.Ordinal))
+                {
+                    return StartupCredentialCheckResult.Failed();
+                }
+
+                return StartupCredentialCheckResult.Success(userId, currentRole, true);
+            }
+
+            if (!VerifyPassword(password, passwordHash, passwordSalt))
+            {
+                return StartupCredentialCheckResult.Failed();
+            }
+
+            return StartupCredentialCheckResult.Success(userId, currentRole, requirePasswordChange);
+        }, cancellationToken);
+    }
+
+    public async Task<bool> UpdatePasswordAsync(
+        long userId,
+        string newPassword,
+        CancellationToken cancellationToken = default)
+    {
+        if (userId <= 0 || string.IsNullOrWhiteSpace(newPassword))
+        {
+            return false;
+        }
+
+        var connectionString = ResolveConnectionString();
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return false;
+        }
+
+        var timeoutConnectionString = BuildTimeoutConnectionString(connectionString);
+        return await ExecuteWithRetryAsync(async token =>
+        {
+            var salt = new byte[PasswordSaltLengthBytes];
+            RandomNumberGenerator.Fill(salt);
+            var hash = HashPassword(newPassword, salt);
+
+            await using var connection = new MySqlConnection(timeoutConnectionString);
+            await connection.OpenAsync(token);
+
+            await using var command = new MySqlCommand(
+                """
+                UPDATE core_users_profiles
+                SET password_hash = @passwordHash,
+                    password_salt = @passwordSalt,
+                    require_password_change = 0,
+                    updated_utc = UTC_TIMESTAMP()
+                WHERE id = @userId
+                  AND is_active = 1;
+                """,
+                connection);
+
+            command.Parameters.AddWithValue("@passwordHash", hash);
+            command.Parameters.AddWithValue("@passwordSalt", salt);
+            command.Parameters.AddWithValue("@userId", userId);
+
+            var rows = await command.ExecuteNonQueryAsync(token);
+            return rows > 0;
         }, cancellationToken);
     }
 
@@ -242,5 +368,50 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         };
 
         return builder.ConnectionString;
+    }
+
+    private static bool IsTemporaryDefaultPassword(string passwordHash)
+    {
+        return string.IsNullOrWhiteSpace(passwordHash)
+            || string.Equals(passwordHash, TemporaryDefaultPasswordHashMarker, StringComparison.Ordinal);
+    }
+
+    private static bool VerifyPassword(string password, string storedHash, byte[]? storedSalt)
+    {
+        if (string.IsNullOrWhiteSpace(storedHash) || storedSalt is null || storedSalt.Length == 0)
+        {
+            return false;
+        }
+
+        byte[] expectedHash;
+        try
+        {
+            expectedHash = Convert.FromBase64String(storedHash);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+
+        var computedHash = Rfc2898DeriveBytes.Pbkdf2(
+            Encoding.UTF8.GetBytes(password),
+            storedSalt,
+            PasswordIterations,
+            HashAlgorithmName.SHA256,
+            PasswordHashLengthBytes);
+
+        return CryptographicOperations.FixedTimeEquals(expectedHash, computedHash);
+    }
+
+    private static string HashPassword(string password, byte[] salt)
+    {
+        var hash = Rfc2898DeriveBytes.Pbkdf2(
+            Encoding.UTF8.GetBytes(password),
+            salt,
+            PasswordIterations,
+            HashAlgorithmName.SHA256,
+            PasswordHashLengthBytes);
+
+        return Convert.ToBase64String(hash);
     }
 }

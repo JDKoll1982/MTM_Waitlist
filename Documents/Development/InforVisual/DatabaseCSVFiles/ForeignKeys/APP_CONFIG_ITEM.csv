@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_APP_CONFIG_ITEM_TO_APP"	"APP_CONFIG_ITEM"	"APP_CONFIG_ID"	"APP_CONFIG"	"ID"

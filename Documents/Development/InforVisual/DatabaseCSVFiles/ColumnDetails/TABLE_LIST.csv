@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"TABLE_LIST"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"TABLE_LIST"	"2"	"TABLE_NAME"	"nvarchar"	"100"	"0"	"0"	"NO"	"NO"	"NO"
+"TABLE_LIST"	"3"	"LAST_MOD_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"TABLE_LIST"	"4"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"

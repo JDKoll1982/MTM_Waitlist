@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"SETTINGS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"SETTINGS"	"2"	"NAME"	"nvarchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"SETTINGS"	"3"	"SETTING_VALUE"	"nvarchar"	"250"	"0"	"0"	"YES"	"NO"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PROJECT_STATUS"	"PK_PROJECT_STATUS"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"USER_MNU_AUTHORITY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"USER_MNU_AUTHORITY"	"2"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_MNU_AUTHORITY"	"3"	"GROUP_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_MNU_AUTHORITY"	"4"	"LANGUAGE_ID"	"nvarchar"	"3"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_MNU_AUTHORITY"	"5"	"PERMISSION"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

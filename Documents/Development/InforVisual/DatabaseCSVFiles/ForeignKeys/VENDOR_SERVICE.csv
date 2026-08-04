@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VEND_SERV_TO_SITE"	"VENDOR_SERVICE"	"SITE_ID"	"SITE"	"ID"

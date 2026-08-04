@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"GAGE"	"ROWID"	"int"	"NO"
+"dbo"	"GAGE"	"GAGE_ID"	"nvarchar"	"NO"
+"dbo"	"GAGE"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"GAGE"	"TYPE"	"nvarchar"	"YES"
+"dbo"	"GAGE"	"SERIALNUM_REQD"	"nchar"	"NO"

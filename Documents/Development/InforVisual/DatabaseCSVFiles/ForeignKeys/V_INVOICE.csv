@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00240"	"V_INVOICE"	"CURRENCY_ID"	"CURRENCY"	"ID"

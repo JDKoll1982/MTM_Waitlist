@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PERIOD"	"PK_PERIOD"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"PERIOD"	"PK_PERIOD"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"2"	"NO"

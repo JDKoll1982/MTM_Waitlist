@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"VENDOR_CALENDAR"	"ROWID"	"int"	"NO"
+"dbo"	"VENDOR_CALENDAR"	"VENDOR_ID"	"nvarchar"	"NO"
+"dbo"	"VENDOR_CALENDAR"	"SERVICE_ID"	"nvarchar"	"YES"
+"dbo"	"VENDOR_CALENDAR"	"START_DATE"	"datetime"	"NO"
+"dbo"	"VENDOR_CALENDAR"	"END_DATE"	"datetime"	"NO"
+"dbo"	"VENDOR_CALENDAR"	"DAY_PERCENT"	"smallint"	"NO"

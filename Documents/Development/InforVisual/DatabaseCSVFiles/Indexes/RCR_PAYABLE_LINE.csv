@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RCR_PAYABLE_LINE"	"PK_RCR_PAYABLE_LINE"	"CLUSTERED"	"YES"	"YES"	"RCR_PAYABLE_ID"	"1"	"NO"
+"RCR_PAYABLE_LINE"	"PK_RCR_PAYABLE_LINE"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"
+"RCR_PAYABLE_LINE"	"X_RCR_PAYB_LINE_1"	"NONCLUSTERED"	"NO"	"NO"	"GL_ACCOUNT_ID"	"1"	"NO"

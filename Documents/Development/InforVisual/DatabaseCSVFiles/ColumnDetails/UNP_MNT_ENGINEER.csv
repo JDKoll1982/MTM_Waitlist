@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"UNP_MNT_ENGINEER"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"UNP_MNT_ENGINEER"	"2"	"resource_id"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"UNP_MNT_ENGINEER"	"3"	"all_flag"	"nvarchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"UNP_MNT_ENGINEER"	"4"	"key1_id"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"UNP_MNT_ENGINEER"	"5"	"key2_id"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"UNP_MNT_ENGINEER"	"6"	"key_type"	"nvarchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

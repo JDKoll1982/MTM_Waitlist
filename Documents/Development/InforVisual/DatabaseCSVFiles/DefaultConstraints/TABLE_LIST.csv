@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"TABLE_LIST"	"CREATE_DATE"	"DF__TABLE_LIS__CREAT__3179CDDF"	"NULL"
+"TABLE_LIST"	"LAST_MOD_DATE"	"DF__TABLE_LIS__LAST___3085A9A6"	"NULL"

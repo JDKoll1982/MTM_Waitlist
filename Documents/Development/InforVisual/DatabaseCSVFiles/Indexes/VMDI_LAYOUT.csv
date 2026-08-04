@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VMDI_LAYOUT"	"PK_VMDI_LAYOUT"	"CLUSTERED"	"YES"	"YES"	"KEY"	"1"	"NO"
+"VMDI_LAYOUT"	"PK_VMDI_LAYOUT"	"CLUSTERED"	"YES"	"YES"	"VERSION"	"2"	"NO"
+"VMDI_LAYOUT"	"PK_VMDI_LAYOUT"	"CLUSTERED"	"YES"	"YES"	"DIRECTION"	"3"	"NO"

@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_QUOTE_ATTRIB"	"X_V_QUOTE_ATTRIB_0"	"CLUSTERED"	"YES"	"YES"	"QUOTE_ID"	"1"	"NO"
+"V_QUOTE_ATTRIB"	"X_V_QUOTE_ATTRIB_0"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"
+"V_QUOTE_ATTRIB"	"X_V_QUOTE_ATTRIB_0"	"CLUSTERED"	"YES"	"YES"	"PART_NO"	"3"	"NO"
+"V_QUOTE_ATTRIB"	"X_V_QUOTE_ATTRIB_0"	"CLUSTERED"	"YES"	"YES"	"ATTRIB_NO"	"4"	"NO"

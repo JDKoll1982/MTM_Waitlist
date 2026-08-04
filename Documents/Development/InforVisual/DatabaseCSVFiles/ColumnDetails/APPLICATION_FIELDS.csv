@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"APPLICATION_FIELDS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"APPLICATION_FIELDS"	"2"	"PROGRAM_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"APPLICATION_FIELDS"	"3"	"FIELD_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"APPLICATION_FIELDS"	"4"	"FIELD_DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"

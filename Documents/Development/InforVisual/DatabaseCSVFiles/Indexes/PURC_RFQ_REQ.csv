@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PURC_RFQ_REQ"	"PK_PURC_RFQ_REQ"	"CLUSTERED"	"YES"	"YES"	"RFQ_ID"	"1"	"NO"
+"PURC_RFQ_REQ"	"PK_PURC_RFQ_REQ"	"CLUSTERED"	"YES"	"YES"	"RFQ_LINE_NO"	"2"	"NO"
+"PURC_RFQ_REQ"	"PK_PURC_RFQ_REQ"	"CLUSTERED"	"YES"	"YES"	"PURC_REQ_ID"	"3"	"NO"
+"PURC_RFQ_REQ"	"PK_PURC_RFQ_REQ"	"CLUSTERED"	"YES"	"YES"	"PURC_REQ_LINE_NO"	"4"	"NO"

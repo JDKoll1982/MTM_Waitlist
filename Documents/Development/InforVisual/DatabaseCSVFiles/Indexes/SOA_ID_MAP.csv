@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SOA_ID_MAP"	"PK_SOA_ID_MAP"	"CLUSTERED"	"YES"	"YES"	"NOUN_ID"	"1"	"NO"
+"SOA_ID_MAP"	"PK_SOA_ID_MAP"	"CLUSTERED"	"YES"	"YES"	"SYS_KEY_ID"	"2"	"NO"
+"SOA_ID_MAP"	"PK_SOA_ID_MAP"	"CLUSTERED"	"YES"	"YES"	"SYS_ENTITY_ID"	"3"	"NO"
+"SOA_ID_MAP"	"PK_SOA_ID_MAP"	"CLUSTERED"	"YES"	"YES"	"SYS_AGENCY_ID"	"4"	"NO"

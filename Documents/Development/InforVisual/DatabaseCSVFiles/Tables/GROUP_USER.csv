@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"GROUP_USER"	"ROWID"	"int"	"NO"
+"dbo"	"GROUP_USER"	"GROUP_ID"	"nvarchar"	"NO"
+"dbo"	"GROUP_USER"	"USER_ID"	"nvarchar"	"NO"
+"dbo"	"GROUP_USER"	"IS_LEADER"	"nchar"	"YES"
+"dbo"	"GROUP_USER"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"GROUP_USER"	"USER_SIGNOFF"	"nchar"	"YES"

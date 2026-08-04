@@ -1,0 +1,7 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"EC"	"X_EC_1"	"ORIGINATOR"	"1"
+"EC"	"X_EC_1"	"ID"	"2"
+"EC"	"X_EC_2"	"ASSIGNED_TO"	"1"
+"EC"	"X_EC_2"	"ID"	"2"
+"EC"	"X_EC_3"	"WANT_DATE"	"1"
+"EC"	"X_EC_3"	"ID"	"2"

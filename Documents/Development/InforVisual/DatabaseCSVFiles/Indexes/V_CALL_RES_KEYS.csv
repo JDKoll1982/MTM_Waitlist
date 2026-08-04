@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CALL_RES_KEYS"	"X_V_CALL_RES_KEYS_0"	"CLUSTERED"	"YES"	"YES"	"CALL_ID"	"1"	"NO"
+"V_CALL_RES_KEYS"	"X_V_CALL_RES_KEYS_0"	"CLUSTERED"	"YES"	"YES"	"ISSUE_NO"	"2"	"NO"
+"V_CALL_RES_KEYS"	"X_V_CALL_RES_KEYS_0"	"CLUSTERED"	"YES"	"YES"	"RESOLUTION_NO"	"3"	"NO"
+"V_CALL_RES_KEYS"	"X_V_CALL_RES_KEYS_0"	"CLUSTERED"	"YES"	"YES"	"KEY_NO"	"4"	"NO"

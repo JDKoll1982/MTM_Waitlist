@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PURC_GROUP_USER"	"ROWID"	"int"	"NO"
+"dbo"	"PURC_GROUP_USER"	"PURC_REQ_ID"	"nvarchar"	"NO"
+"dbo"	"PURC_GROUP_USER"	"GROUP_TYPE"	"nvarchar"	"NO"
+"dbo"	"PURC_GROUP_USER"	"USER_ID"	"nvarchar"	"NO"
+"dbo"	"PURC_GROUP_USER"	"IS_LEADER"	"nchar"	"YES"
+"dbo"	"PURC_GROUP_USER"	"USER_SIGNOFF"	"nchar"	"YES"
+"dbo"	"PURC_GROUP_USER"	"CREATE_DATE"	"datetime"	"NO"

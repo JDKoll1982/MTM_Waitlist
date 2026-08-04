@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9546"	"IBT_LINE_BINARY"	"IBT_ID"	"IBT_LINE"	"IBT_ID"
+"FKEY9546"	"IBT_LINE_BINARY"	"IBT_LINE_NO"	"IBT_LINE"	"LINE_NO"

@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"SPLIT_TRANS"	"DELETE_SPLIT_TRANS"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"SPLIT_TRANS"	"INSERT_SPLIT_TRANS"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"SPLIT_TRANS"	"UPDATE_SPLIT_TRANS"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

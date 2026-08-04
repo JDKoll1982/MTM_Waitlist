@@ -1,0 +1,6 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"QUOTE"	"PK_QUOTE"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"QUOTE"	"X_QUOTE_1"	"NONCLUSTERED"	"NO"	"NO"	"CUSTOMER_ID"	"1"	"NO"
+"QUOTE"	"X_QUOTE_2"	"NONCLUSTERED"	"NO"	"NO"	"CURRENCY_ID"	"1"	"NO"
+"QUOTE"	"X_QUOTE_3"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"
+"QUOTE"	"X_QUOTE_4"	"NONCLUSTERED"	"NO"	"NO"	"PROJECT_ID"	"1"	"NO"

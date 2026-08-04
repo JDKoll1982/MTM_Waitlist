@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"E_PURCORD_SUM"	"1"	"rowid"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"E_PURCORD_SUM"	"2"	"eis_date"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"E_PURCORD_SUM"	"3"	"doc_qty"	"decimal"	"NULL"	"15"	"2"	"YES"	"NO"	"NO"
+"E_PURCORD_SUM"	"4"	"line_qty"	"decimal"	"NULL"	"15"	"2"	"YES"	"NO"	"NO"
+"E_PURCORD_SUM"	"5"	"amount_value"	"decimal"	"NULL"	"23"	"8"	"YES"	"NO"	"NO"

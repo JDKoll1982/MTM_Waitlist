@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"CASH_RECEIPT_CURR"	"ROWID"	"int"	"NO"
+"dbo"	"CASH_RECEIPT_CURR"	"CUSTOMER_ID"	"nvarchar"	"NO"
+"dbo"	"CASH_RECEIPT_CURR"	"CHECK_ID"	"nvarchar"	"NO"
+"dbo"	"CASH_RECEIPT_CURR"	"CURRENCY_ID"	"nvarchar"	"NO"
+"dbo"	"CASH_RECEIPT_CURR"	"AMOUNT"	"decimal"	"NO"
+"dbo"	"CASH_RECEIPT_CURR"	"SELL_RATE"	"decimal"	"NO"
+"dbo"	"CASH_RECEIPT_CURR"	"BUY_RATE"	"decimal"	"NO"

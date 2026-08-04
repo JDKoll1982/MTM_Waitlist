@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_OPENOPS_DET"	"E2_OPENOPS_DET"	"NONCLUSTERED"	"NO"	"NO"	"SCHED_START_DATE"	"1"	"NO"
+"E_OPENOPS_DET"	"E3_OPENOPS_DET"	"NONCLUSTERED"	"NO"	"NO"	"SCHED_FINISH_DATE"	"1"	"NO"
+"E_OPENOPS_DET"	"EX_OPENOPS_DET"	"NONCLUSTERED"	"NO"	"NO"	"EIS_DATE"	"1"	"NO"

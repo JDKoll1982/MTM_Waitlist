@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CONTR_ADDR"	"X_V_CONTR_ADDR_0"	"CLUSTERED"	"YES"	"YES"	"ADDR_ID"	"1"	"NO"
+"V_CONTR_ADDR"	"X_V_CONTR_ADDR_0"	"CLUSTERED"	"YES"	"YES"	"CONTR_ID"	"2"	"NO"

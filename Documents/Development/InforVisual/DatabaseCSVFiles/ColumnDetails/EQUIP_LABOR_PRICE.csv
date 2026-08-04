@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"EQUIP_LABOR_PRICE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"EQUIP_LABOR_PRICE"	"2"	"id"	"nvarchar"	"10"	"0"	"0"	"NO"	"NO"	"NO"
+"EQUIP_LABOR_PRICE"	"3"	"resource_id"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"EQUIP_LABOR_PRICE"	"4"	"normal"	"decimal"	"NULL"	"22"	"8"	"YES"	"NO"	"NO"
+"EQUIP_LABOR_PRICE"	"5"	"overtime_1"	"decimal"	"NULL"	"22"	"8"	"YES"	"NO"	"NO"
+"EQUIP_LABOR_PRICE"	"6"	"overtime_2"	"decimal"	"NULL"	"22"	"8"	"YES"	"NO"	"NO"

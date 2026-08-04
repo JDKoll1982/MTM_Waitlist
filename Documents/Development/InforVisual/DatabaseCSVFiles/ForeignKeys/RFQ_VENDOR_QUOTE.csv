@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9604"	"RFQ_VENDOR_QUOTE"	"CURRENCY_ID"	"CURRENCY"	"ID"

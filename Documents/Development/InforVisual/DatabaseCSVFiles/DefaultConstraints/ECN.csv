@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"ECN"	"CREATE_DATE"	"DF__ECN__CREATE_DATE__76390C80"	"NULL"
+"ECN"	"STATUS"	"DF__ECN__STATUS__7544E847"	"NULL"

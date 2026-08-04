@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"QRP_CONTROL"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"QRP_CONTROL"	"2"	"STD_QRP_NAME"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"QRP_CONTROL"	"3"	"CONTEXT_TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"QRP_CONTROL"	"4"	"CONTEXT_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"QRP_CONTROL"	"5"	"USER_QRP_NAME"	"nvarchar"	"128"	"0"	"0"	"NO"	"NO"	"NO"
+"QRP_CONTROL"	"6"	"DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"

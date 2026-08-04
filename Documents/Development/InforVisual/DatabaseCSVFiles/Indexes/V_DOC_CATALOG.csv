@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_DOC_CATALOG"	"X_V_DOC_CATALOG_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

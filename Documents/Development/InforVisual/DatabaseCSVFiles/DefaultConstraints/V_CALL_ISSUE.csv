@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_CALL_ISSUE"	"PRIORITY_ID"	"DF__V_CALL_IS__PRIOR__2F5C7B43"	"NULL"

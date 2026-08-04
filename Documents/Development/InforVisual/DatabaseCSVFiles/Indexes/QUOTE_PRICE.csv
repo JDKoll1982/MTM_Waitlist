@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"QUOTE_PRICE"	"PK_QUOTE_PRICE"	"CLUSTERED"	"YES"	"YES"	"QUOTE_ID"	"1"	"NO"
+"QUOTE_PRICE"	"PK_QUOTE_PRICE"	"CLUSTERED"	"YES"	"YES"	"QUOTE_LINE_NO"	"2"	"NO"
+"QUOTE_PRICE"	"PK_QUOTE_PRICE"	"CLUSTERED"	"YES"	"YES"	"QTY"	"3"	"NO"

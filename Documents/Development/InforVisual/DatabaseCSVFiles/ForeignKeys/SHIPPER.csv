@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0157"	"SHIPPER"	"CUST_ORDER_ID"	"CUSTOMER_ORDER"	"ID"
+"FK_SHIPPER_TO_SITE"	"SHIPPER"	"SITE_ID"	"SITE"	"ID"

@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"SPREAD_PROFILE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"SPREAD_PROFILE"	"2"	"id"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"SPREAD_PROFILE"	"3"	"description"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"
+"SPREAD_PROFILE"	"4"	"type"	"nvarchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"SPREAD_PROFILE"	"5"	"acct_period"	"decimal"	"NULL"	"2"	"0"	"NO"	"NO"	"NO"
+"SPREAD_PROFILE"	"6"	"profile_amount"	"decimal"	"NULL"	"23"	"8"	"YES"	"NO"	"NO"

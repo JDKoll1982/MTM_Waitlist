@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VAT"	"PK_VAT"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"
+"VAT"	"PK_VAT"	"CLUSTERED"	"YES"	"YES"	"effective_date"	"2"	"NO"

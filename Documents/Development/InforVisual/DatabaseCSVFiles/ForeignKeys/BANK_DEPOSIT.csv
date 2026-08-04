@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0221"	"BANK_DEPOSIT"	"BANK_ACCOUNT_ID"	"BANK_ACCOUNT"	"ID"

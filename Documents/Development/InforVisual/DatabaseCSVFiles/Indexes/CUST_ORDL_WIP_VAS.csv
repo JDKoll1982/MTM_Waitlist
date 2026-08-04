@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUST_ORDL_WIP_VAS"	"PK_CO_LN_WIPVAS"	"CLUSTERED"	"YES"	"YES"	"CUST_ORDER_ID"	"1"	"NO"
+"CUST_ORDL_WIP_VAS"	"PK_CO_LN_WIPVAS"	"CLUSTERED"	"YES"	"YES"	"CUST_ORDER_LINE_NO"	"2"	"NO"
+"CUST_ORDL_WIP_VAS"	"PK_CO_LN_WIPVAS"	"CLUSTERED"	"YES"	"YES"	"WIP_VAS_ID"	"3"	"NO"

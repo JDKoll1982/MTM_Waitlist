@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VMDI_CSH_LINE"	"PK_VMDI_CSH_LINE"	"CLUSTERED"	"YES"	"YES"	"CUSTOMER_ID"	"1"	"NO"
+"VMDI_CSH_LINE"	"PK_VMDI_CSH_LINE"	"CLUSTERED"	"YES"	"YES"	"CHECK_ID"	"2"	"NO"
+"VMDI_CSH_LINE"	"PK_VMDI_CSH_LINE"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"3"	"NO"

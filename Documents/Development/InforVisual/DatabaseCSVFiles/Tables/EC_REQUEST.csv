@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EC_REQUEST"	"ROWID"	"int"	"NO"
+"dbo"	"EC_REQUEST"	"EC_ID"	"nvarchar"	"NO"
+"dbo"	"EC_REQUEST"	"TYPE"	"nchar"	"NO"
+"dbo"	"EC_REQUEST"	"BITS"	"image"	"YES"
+"dbo"	"EC_REQUEST"	"BITS_LENGTH"	"int"	"NO"

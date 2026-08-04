@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"WIP_VAS_SYNC"	"CREATE_DATE"	"DF__WIP_VAS_S__CREAT__6C307F59"	"NULL"
+"WIP_VAS_SYNC"	"SUBSCRIPTIONS"	"DF__WIP_VAS_S__SUBSC__6D24A392"	"NULL"

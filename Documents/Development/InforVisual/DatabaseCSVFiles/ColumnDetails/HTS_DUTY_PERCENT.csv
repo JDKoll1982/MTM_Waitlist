@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"HTS_DUTY_PERCENT"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"HTS_DUTY_PERCENT"	"2"	"HTS_CODE"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"HTS_DUTY_PERCENT"	"3"	"ORIG_COUNTRY_ID"	"nvarchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"HTS_DUTY_PERCENT"	"4"	"DUTY_PERCENT"	"decimal"	"NULL"	"6"	"3"	"NO"	"NO"	"NO"

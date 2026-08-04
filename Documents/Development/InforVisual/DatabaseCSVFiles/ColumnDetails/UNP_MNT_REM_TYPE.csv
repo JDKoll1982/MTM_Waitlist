@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"UNP_MNT_REM_TYPE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"UNP_MNT_REM_TYPE"	"2"	"id"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"UNP_MNT_REM_TYPE"	"3"	"description"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"

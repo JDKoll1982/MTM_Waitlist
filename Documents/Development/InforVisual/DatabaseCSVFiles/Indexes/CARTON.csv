@@ -1,0 +1,6 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CARTON"	"PK_CARTON"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"CARTON"	"X_CARTON_1"	"NONCLUSTERED"	"NO"	"NO"	"BOL_ID"	"1"	"NO"
+"CARTON"	"X_CARTON_2"	"NONCLUSTERED"	"NO"	"NO"	"PALLET_ID"	"1"	"NO"
+"CARTON"	"X_CARTON_3"	"NONCLUSTERED"	"NO"	"NO"	"CARRIER_ID"	"1"	"NO"
+"CARTON"	"X_CARTON_4"	"NONCLUSTERED"	"NO"	"NO"	"TRACKING_NO"	"1"	"NO"

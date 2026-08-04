@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_KEYWORD"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_KEYWORD"	"PARENT_ID"	"nvarchar"	"YES"
+"dbo"	"V_KEYWORD"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_KEYWORD"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_KEYWORD"	"DETAILS"	"nvarchar"	"YES"
+"dbo"	"V_KEYWORD"	"CREATE_DATE"	"datetime"	"YES"

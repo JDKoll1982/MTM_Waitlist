@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_PROBABILITY"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_PROBABILITY"	"PROBABILITY"	"decimal"	"YES"
+"dbo"	"V_PROBABILITY"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_PROBABILITY"	"LAST_MODIFIED"	"datetime"	"YES"

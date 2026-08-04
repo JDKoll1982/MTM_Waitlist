@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"JOURNAL"	"CREATE_DATE"	"DF__JOURNAL__CREATE___54A30E8B"	"NULL"
+"JOURNAL"	"CURRENCY_ID"	"DF__JOURNAL__CURRENC__559732C4"	"NULL"

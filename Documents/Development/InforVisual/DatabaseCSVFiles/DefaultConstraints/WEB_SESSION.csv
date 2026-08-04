@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"WEB_SESSION"	"CREATE_DATE"	"DF__WEB_SESSI__CREAT__24FFB3B8"	"NULL"
+"WEB_SESSION"	"LAST_ACTIVITY"	"DF__WEB_SESSI__LAST___240B8F7F"	"NULL"

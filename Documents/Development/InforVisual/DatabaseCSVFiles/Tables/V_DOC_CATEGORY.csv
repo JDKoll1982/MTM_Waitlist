@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_DOC_CATEGORY"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_DOC_CATEGORY"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_DOC_CATEGORY"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_DOC_CATEGORY"	"DETAILS"	"nvarchar"	"YES"
+"dbo"	"V_DOC_CATEGORY"	"CREATE_DATE"	"datetime"	"YES"

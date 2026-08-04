@@ -1,0 +1,8 @@
+"Table"	"PrimaryKeyColumn"
+"ACCOUNT_BUDGET"	"account_id"
+"ACCOUNT_BUDGET"	"SITE_ID"
+"ACCOUNT_BUDGET"	"acct_year"
+"ACCOUNT_BUDGET"	"acct_period"
+"ACCOUNT_BUDGET"	"budget_type"
+"ACCOUNT_BUDGET"	"budget_code"
+"ACCOUNT_BUDGET"	"currency_id"

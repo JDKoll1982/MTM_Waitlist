@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_OPTY_ESTIMATE"	"1"	"EST_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"V_OPTY_ESTIMATE"	"2"	"OPTY_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"V_OPTY_ESTIMATE"	"3"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_OPTY_ESTIMATE"	"4"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"V_OPTY_ESTIMATE"	"5"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

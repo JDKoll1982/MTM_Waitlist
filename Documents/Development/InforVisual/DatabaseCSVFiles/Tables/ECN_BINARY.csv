@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"ECN_BINARY"	"ROWID"	"int"	"NO"
+"dbo"	"ECN_BINARY"	"ECN_ID"	"nvarchar"	"NO"
+"dbo"	"ECN_BINARY"	"TYPE"	"nchar"	"NO"
+"dbo"	"ECN_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"ECN_BINARY"	"BITS_LENGTH"	"int"	"NO"

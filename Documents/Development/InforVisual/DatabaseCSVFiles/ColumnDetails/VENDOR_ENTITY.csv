@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"VENDOR_ENTITY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"VENDOR_ENTITY"	"2"	"ENTITY_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"VENDOR_ENTITY"	"3"	"VENDOR_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"VENDOR_ENTITY"	"4"	"TOTAL_OPEN_ORDERS"	"decimal"	"NULL"	"23"	"8"	"NO"	"NO"	"NO"
+"VENDOR_ENTITY"	"5"	"TOTAL_OPEN_PAYB"	"decimal"	"NULL"	"23"	"8"	"NO"	"NO"	"NO"
+"VENDOR_ENTITY"	"6"	"OPEN_ORDER_COUNT"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"VENDOR_ENTITY"	"7"	"OPEN_PAYB_COUNT"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

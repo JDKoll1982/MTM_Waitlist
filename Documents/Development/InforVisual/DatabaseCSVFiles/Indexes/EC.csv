@@ -1,0 +1,8 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EC"	"PK_EC"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"EC"	"X_EC_1"	"NONCLUSTERED"	"YES"	"NO"	"ORIGINATOR"	"1"	"NO"
+"EC"	"X_EC_1"	"NONCLUSTERED"	"YES"	"NO"	"ID"	"2"	"NO"
+"EC"	"X_EC_2"	"NONCLUSTERED"	"YES"	"NO"	"ASSIGNED_TO"	"1"	"NO"
+"EC"	"X_EC_2"	"NONCLUSTERED"	"YES"	"NO"	"ID"	"2"	"NO"
+"EC"	"X_EC_3"	"NONCLUSTERED"	"YES"	"NO"	"WANT_DATE"	"1"	"NO"
+"EC"	"X_EC_3"	"NONCLUSTERED"	"YES"	"NO"	"ID"	"2"	"NO"

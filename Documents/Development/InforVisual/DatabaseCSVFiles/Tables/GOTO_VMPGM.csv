@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"GOTO_VMPGM"	"ROWID"	"int"	"NO"
+"dbo"	"GOTO_VMPGM"	"PROGRAM_ID"	"nvarchar"	"NO"
+"dbo"	"GOTO_VMPGM"	"GOTO_ID"	"int"	"NO"
+"dbo"	"GOTO_VMPGM"	"WPARAM_ARG"	"int"	"YES"

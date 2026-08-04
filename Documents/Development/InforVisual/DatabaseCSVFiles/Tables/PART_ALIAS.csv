@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PART_ALIAS"	"ROWID"	"int"	"NO"
+"dbo"	"PART_ALIAS"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"PART_ALIAS"	"ID"	"nvarchar"	"NO"
+"dbo"	"PART_ALIAS"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"PART_ALIAS"	"TYPE"	"nvarchar"	"NO"

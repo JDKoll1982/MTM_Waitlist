@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"IBT_LINE"	"PK_IBT_LINE"	"CLUSTERED"	"YES"	"YES"	"IBT_ID"	"1"	"NO"
+"IBT_LINE"	"PK_IBT_LINE"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"
+"IBT_LINE"	"X_IBT_LINE_1"	"NONCLUSTERED"	"NO"	"NO"	"PART_ID"	"1"	"NO"

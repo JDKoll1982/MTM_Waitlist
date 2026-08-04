@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PRORATED_LABOR_TX"	"PK_PRORATED_LABOR"	"CLUSTERED"	"YES"	"YES"	"PRORATE_ID"	"1"	"NO"
+"PRORATED_LABOR_TX"	"PK_PRORATED_LABOR"	"CLUSTERED"	"YES"	"YES"	"TRANSACTION_ID"	"2"	"NO"

@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9580"	"PAYABLE_LINE"	"vat_category"	"VAT_CATEGORY"	"id"
+"FKEY0223"	"PAYABLE_LINE"	"VOUCHER_ID"	"PAYABLE"	"VOUCHER_ID"

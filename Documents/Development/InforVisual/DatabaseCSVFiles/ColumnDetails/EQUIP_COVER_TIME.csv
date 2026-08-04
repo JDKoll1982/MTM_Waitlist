@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"EQUIP_COVER_TIME"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"EQUIP_COVER_TIME"	"2"	"coverage_id"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"EQUIP_COVER_TIME"	"3"	"start_time"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"EQUIP_COVER_TIME"	"4"	"end_time"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"EQUIP_COVER_TIME"	"5"	"description"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"

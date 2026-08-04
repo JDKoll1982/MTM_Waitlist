@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TABLE_LIST"	"ROWID"	"int"	"NO"
+"dbo"	"TABLE_LIST"	"TABLE_NAME"	"nvarchar"	"NO"
+"dbo"	"TABLE_LIST"	"LAST_MOD_DATE"	"datetime"	"NO"
+"dbo"	"TABLE_LIST"	"CREATE_DATE"	"datetime"	"NO"

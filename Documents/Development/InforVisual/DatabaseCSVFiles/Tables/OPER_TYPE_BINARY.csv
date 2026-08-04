@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"OPER_TYPE_BINARY"	"ROWID"	"int"	"NO"
+"dbo"	"OPER_TYPE_BINARY"	"OPERATION_TYPE_ID"	"nvarchar"	"NO"
+"dbo"	"OPER_TYPE_BINARY"	"TYPE"	"nchar"	"NO"
+"dbo"	"OPER_TYPE_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"OPER_TYPE_BINARY"	"BITS_LENGTH"	"int"	"NO"
+"dbo"	"OPER_TYPE_BINARY"	"SITE_ID"	"nvarchar"	"NO"

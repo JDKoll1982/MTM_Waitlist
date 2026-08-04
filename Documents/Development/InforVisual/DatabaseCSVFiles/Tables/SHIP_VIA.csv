@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SHIP_VIA"	"ROWID"	"int"	"NO"
+"dbo"	"SHIP_VIA"	"CODE"	"nvarchar"	"NO"
+"dbo"	"SHIP_VIA"	"DESCRIPTION"	"nvarchar"	"YES"

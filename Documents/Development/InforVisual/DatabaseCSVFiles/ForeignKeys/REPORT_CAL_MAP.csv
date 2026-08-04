@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_FIN_CAL_MAP"	"REPORT_CAL_MAP"	"FIN_CAL_ID"	"FINANCIAL_CALENDAR"	"ID"
+"FK_RPT_CAL_MAP"	"REPORT_CAL_MAP"	"RPT_CAL_ID"	"REPORT_CALENDAR"	"ID"

@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EXCEPTION"	"PK_EXCEPTION"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"1"	"NO"
+"EXCEPTION"	"PK_EXCEPTION"	"CLUSTERED"	"YES"	"YES"	"OWNER_ID"	"2"	"NO"
+"EXCEPTION"	"PK_EXCEPTION"	"CLUSTERED"	"YES"	"YES"	"EXCEPTION_ID"	"3"	"NO"
+"EXCEPTION"	"PK_EXCEPTION"	"CLUSTERED"	"YES"	"YES"	"CREATE_DATE"	"4"	"NO"

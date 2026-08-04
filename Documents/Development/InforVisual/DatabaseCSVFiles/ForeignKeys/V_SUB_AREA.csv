@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00107"	"V_SUB_AREA"	"AREA_ID"	"V_AREA"	"ID"

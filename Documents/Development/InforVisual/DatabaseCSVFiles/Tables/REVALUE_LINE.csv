@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"REVALUE_LINE"	"ROWID"	"int"	"NO"
+"dbo"	"REVALUE_LINE"	"REVALUE_ID"	"nvarchar"	"NO"
+"dbo"	"REVALUE_LINE"	"LINE_NO"	"int"	"NO"
+"dbo"	"REVALUE_LINE"	"GL_ACCOUNT_ID"	"nvarchar"	"NO"
+"dbo"	"REVALUE_LINE"	"GROUP_ID"	"nvarchar"	"YES"

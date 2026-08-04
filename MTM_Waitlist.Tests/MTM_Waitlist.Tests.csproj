@@ -19,6 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MTM_Waitlist.csproj" />
+    <ProjectReference
+      Include="..\MTM_Waitlist.csproj"
+      AdditionalProperties="WindowsAppSdkBootstrapInitialize=false;WindowsAppSDKDeploymentManagerInitialize=false;WindowsAppSdkUndockedRegFreeWinRTInitialize=false"
+    />
   </ItemGroup>
 </Project>

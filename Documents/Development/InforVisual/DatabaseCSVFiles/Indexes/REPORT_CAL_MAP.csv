@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"REPORT_CAL_MAP"	"PK_RPT_CAL_MAP"	"CLUSTERED"	"YES"	"YES"	"RPT_CAL_ID"	"1"	"NO"
+"REPORT_CAL_MAP"	"PK_RPT_CAL_MAP"	"CLUSTERED"	"YES"	"YES"	"FIN_CAL_ID"	"2"	"NO"

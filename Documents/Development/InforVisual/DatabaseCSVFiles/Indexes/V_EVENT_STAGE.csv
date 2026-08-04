@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_EVENT_STAGE"	"X_V_EVENT_STAGE_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

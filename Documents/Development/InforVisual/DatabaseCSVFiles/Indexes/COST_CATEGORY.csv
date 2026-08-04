@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"COST_CATEGORY"	"PK_COST_CATEGORY"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"COST_CATEGORY"	"X_COST_CATEGORY_1"	"NONCLUSTERED"	"NO"	"NO"	"COST_GROUP_ID"	"1"	"NO"

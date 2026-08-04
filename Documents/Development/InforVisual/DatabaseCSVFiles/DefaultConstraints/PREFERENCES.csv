@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"PREFERENCES"	"IS_ACTIVE"	"DF__PREFERENC__IS_AC__2DDF127C"	"NULL"
+"PREFERENCES"	"IS_GLOBAL"	"DF__PREFERENC__IS_GL__2CEAEE43"	"NULL"

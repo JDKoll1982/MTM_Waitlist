@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PLANNING_MPS"	"X_PLAN_MPS_0"	"NONCLUSTERED"	"YES"	"NO"	"PLANNING_PART_ID"	"1"	"NO"
+"PLANNING_MPS"	"X_PLAN_MPS_0"	"NONCLUSTERED"	"YES"	"NO"	"WANT_DATE"	"2"	"NO"
+"PLANNING_MPS"	"X_PLAN_MPS_0"	"NONCLUSTERED"	"YES"	"NO"	"WAREHOUSE_ID"	"3"	"NO"

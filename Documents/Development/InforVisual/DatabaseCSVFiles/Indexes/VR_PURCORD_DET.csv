@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VR_PURCORD_DET"	"VR_PURCORD_DET_0"	"NONCLUSTERED"	"NO"	"NO"	"PURC_ORDER_ID"	"1"	"NO"
+"VR_PURCORD_DET"	"VR_PURCORD_DET_0"	"NONCLUSTERED"	"NO"	"NO"	"LINE_NO"	"2"	"NO"
+"VR_PURCORD_DET"	"VR_PURCORD_DET_1"	"NONCLUSTERED"	"NO"	"NO"	"ORDER_DATE"	"1"	"NO"

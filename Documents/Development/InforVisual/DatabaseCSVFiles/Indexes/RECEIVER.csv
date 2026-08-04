@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RECEIVER"	"PK_RECEIVER"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"RECEIVER"	"X_RECEIVER_1"	"NONCLUSTERED"	"NO"	"NO"	"PURC_ORDER_ID"	"1"	"NO"
+"RECEIVER"	"X_RECEIVER_2"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"

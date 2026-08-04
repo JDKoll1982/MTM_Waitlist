@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"GPSUMF"	"ROWID"	"int"	"NO"
+"dbo"	"GPSUMF"	"GUBOID"	"nvarchar"	"YES"
+"dbo"	"GPSUMF"	"GUBOVL"	"nvarchar"	"YES"
+"dbo"	"GPSUMF"	"GUBODS"	"nvarchar"	"YES"

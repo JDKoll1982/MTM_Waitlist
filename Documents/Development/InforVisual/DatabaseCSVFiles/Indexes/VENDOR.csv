@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VENDOR"	"PK_VENDOR"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"VENDOR"	"X_VENDOR_1"	"NONCLUSTERED"	"NO"	"NO"	"CURRENCY_ID"	"1"	"NO"
+"VENDOR"	"X_VENDOR_2"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"

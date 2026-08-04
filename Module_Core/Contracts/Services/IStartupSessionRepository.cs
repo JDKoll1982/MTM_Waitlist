@@ -11,4 +11,14 @@ public interface IStartupSessionRepository
         string hostnameNormalized,
         string macAddressNormalized,
         CancellationToken cancellationToken = default);
+
+    Task<StartupCredentialCheckResult> CheckCredentialsAsync(
+        string username,
+        string password,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> UpdatePasswordAsync(
+        long userId,
+        string newPassword,
+        CancellationToken cancellationToken = default);
 }

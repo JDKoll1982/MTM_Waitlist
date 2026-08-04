@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_CUST_CONT_CONT"	"CUST_CONTACT"	"CONTACT_ID"	"CONTACT"	"ID"
+"FK_CUST_CONT_CUST"	"CUST_CONTACT"	"CUSTOMER_ID"	"CUSTOMER"	"ID"

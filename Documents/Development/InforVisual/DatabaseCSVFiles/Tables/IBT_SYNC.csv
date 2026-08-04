@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"IBT_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"IBT_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"IBT_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"IBT_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"IBT_SYNC"	"IBT_ID"	"nvarchar"	"NO"
+"dbo"	"IBT_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"IBT_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

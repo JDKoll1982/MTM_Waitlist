@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUSTOMER_BOOKINGS"	"PK_CUSTOMER_BOOKINGS"	"CLUSTERED"	"YES"	"YES"	"CUST_ORDER_ID"	"1"	"NO"
+"CUSTOMER_BOOKINGS"	"PK_CUSTOMER_BOOKINGS"	"CLUSTERED"	"YES"	"YES"	"BOOK_DATE"	"2"	"NO"

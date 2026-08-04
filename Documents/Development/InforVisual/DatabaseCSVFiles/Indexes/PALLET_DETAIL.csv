@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PALLET_DETAIL"	"PK_PALLET_DETAIL"	"CLUSTERED"	"YES"	"YES"	"PACKLIST_ID"	"1"	"NO"
+"PALLET_DETAIL"	"PK_PALLET_DETAIL"	"CLUSTERED"	"YES"	"YES"	"PACKLIST_LINE_NO"	"2"	"NO"
+"PALLET_DETAIL"	"PK_PALLET_DETAIL"	"CLUSTERED"	"YES"	"YES"	"PALLET_ID"	"3"	"NO"

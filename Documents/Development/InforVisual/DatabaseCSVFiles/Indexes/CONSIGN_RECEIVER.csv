@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CONSIGN_RECEIVER"	"PK_CONSIGN_RCVR"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"CONSIGN_RECEIVER"	"X_CONSIGN_RCVR_1"	"NONCLUSTERED"	"NO"	"NO"	"PURC_ORDER_ID"	"1"	"NO"
+"CONSIGN_RECEIVER"	"X_CONSIGN_RCVR_2"	"NONCLUSTERED"	"NO"	"NO"	"CUSTOMER_ID"	"1"	"NO"

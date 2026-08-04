@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DISTRIBUTION_LINE"	"PK_DISTRIBUTION_LINE"	"CLUSTERED"	"YES"	"YES"	"DISTRIBUTION_ID"	"1"	"NO"
+"DISTRIBUTION_LINE"	"PK_DISTRIBUTION_LINE"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"

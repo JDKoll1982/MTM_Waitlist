@@ -1,0 +1,2 @@
+"TableName"	"ConstraintName"	"Definition"
+"RCR_PAYABLE"	"CHK_RCR_PAYABLE"	"NULL"

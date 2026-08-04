@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SCREEN_SIZE"	"ROWID"	"int"	"NO"
+"dbo"	"SCREEN_SIZE"	"USER_ID"	"nvarchar"	"NO"
+"dbo"	"SCREEN_SIZE"	"SECTION"	"nvarchar"	"NO"
+"dbo"	"SCREEN_SIZE"	"ENTRY"	"nvarchar"	"NO"
+"dbo"	"SCREEN_SIZE"	"VALUE"	"nvarchar"	"YES"
+"dbo"	"SCREEN_SIZE"	"MODIFY_DATE"	"datetime"	"YES"

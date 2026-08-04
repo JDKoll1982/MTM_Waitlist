@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_TASK_BINARY"	"TASK_BINARY"	"SEQ_NO"	"TASK"	"SEQ_NO"
+"FK_TASK_BINARY"	"TASK_BINARY"	"TASK_NO"	"TASK"	"TASK_NO"
+"FK_TASK_BINARY"	"TASK_BINARY"	"TASK_TYPE"	"TASK"	"TYPE"

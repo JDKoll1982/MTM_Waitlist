@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"MARKET"	"ROWID"	"int"	"NO"
+"dbo"	"MARKET"	"ID"	"nvarchar"	"NO"
+"dbo"	"MARKET"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"MARKET"	"CURRENCY_ID"	"nvarchar"	"YES"
+"dbo"	"MARKET"	"MARKET_RATE"	"decimal"	"YES"

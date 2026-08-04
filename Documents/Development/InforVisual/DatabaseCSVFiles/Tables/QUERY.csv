@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"QUERY"	"ROWID"	"int"	"NO"
+"dbo"	"QUERY"	"USER_ID"	"nvarchar"	"NO"
+"dbo"	"QUERY"	"NAME"	"nvarchar"	"NO"
+"dbo"	"QUERY"	"QUERY"	"image"	"YES"
+"dbo"	"QUERY"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"QUERY"	"AUTO_JOIN"	"nchar"	"NO"

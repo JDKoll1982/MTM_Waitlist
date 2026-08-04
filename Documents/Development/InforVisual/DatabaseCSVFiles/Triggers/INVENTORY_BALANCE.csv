@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"INVENTORY_BALANCE"	"INSERT_INVENTORY_BALANCE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"INVENTORY_BALANCE"	"UPDATE_INVENTORY_BALANCE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

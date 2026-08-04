@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"LANG_DESCRIPTION"	"pk_lang_desc"	"CLUSTERED"	"YES"	"YES"	"part_id"	"1"	"NO"
+"LANG_DESCRIPTION"	"pk_lang_desc"	"CLUSTERED"	"YES"	"YES"	"language_id"	"2"	"NO"

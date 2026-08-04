@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"RECV_MEMO_APPLY"	"ROWID"	"int"	"NO"
+"dbo"	"RECV_MEMO_APPLY"	"MEMO_INVOICE_ID"	"nvarchar"	"NO"
+"dbo"	"RECV_MEMO_APPLY"	"INV_INVOICE_ID"	"nvarchar"	"NO"
+"dbo"	"RECV_MEMO_APPLY"	"APPLY_AMOUNT"	"decimal"	"NO"
+"dbo"	"RECV_MEMO_APPLY"	"apply_date"	"datetime"	"YES"
+"dbo"	"RECV_MEMO_APPLY"	"INST_NO"	"smallint"	"YES"

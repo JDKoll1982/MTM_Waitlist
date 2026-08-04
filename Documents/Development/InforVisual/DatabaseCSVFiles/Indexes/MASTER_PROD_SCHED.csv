@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"MASTER_PROD_SCHED"	"PK_MSTR_PROD_SCHD"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

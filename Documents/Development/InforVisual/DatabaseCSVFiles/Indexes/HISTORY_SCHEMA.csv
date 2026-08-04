@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"HISTORY_SCHEMA"	"PK_HISTORY_SCHEMA"	"CLUSTERED"	"YES"	"YES"	"TBL_NAME"	"1"	"NO"
+"HISTORY_SCHEMA"	"PK_HISTORY_SCHEMA"	"CLUSTERED"	"YES"	"YES"	"COL_NAME"	"2"	"NO"
+"HISTORY_SCHEMA"	"X_HISTORY_SCHEMA_1"	"NONCLUSTERED"	"NO"	"NO"	"TBL_NAME"	"1"	"NO"

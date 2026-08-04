@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9614"	"CONSIGN_RECEIVER"	"CUSTOMER_ID"	"CUSTOMER"	"ID"
+"FKEY9613"	"CONSIGN_RECEIVER"	"PURC_ORDER_ID"	"PURCHASE_ORDER"	"ID"

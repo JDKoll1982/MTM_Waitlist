@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PALLET_BOL"	"PALLET"	"BOL_ID"	"BOL"	"ID"
+"FKEY9565"	"PALLET"	"TARE_ID"	"TARE"	"ID"

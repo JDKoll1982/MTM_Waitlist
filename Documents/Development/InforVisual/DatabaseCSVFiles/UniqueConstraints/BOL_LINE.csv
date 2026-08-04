@@ -1,0 +1,4 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"BOL_LINE"	"X_BOL_LINE_0"	"BOL_ID"	"1"
+"BOL_LINE"	"X_BOL_LINE_0"	"NMFC_CODE_ID"	"2"
+"BOL_LINE"	"X_BOL_LINE_0"	"PACKAGE_TYPE"	"3"

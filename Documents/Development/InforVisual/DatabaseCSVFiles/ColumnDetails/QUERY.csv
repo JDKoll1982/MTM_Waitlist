@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"QUERY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"QUERY"	"2"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"QUERY"	"3"	"NAME"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"QUERY"	"4"	"QUERY"	"image"	"NULL"	"0"	"0"	"YES"	"NO"	"NO"
+"QUERY"	"5"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"QUERY"	"6"	"AUTO_JOIN"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

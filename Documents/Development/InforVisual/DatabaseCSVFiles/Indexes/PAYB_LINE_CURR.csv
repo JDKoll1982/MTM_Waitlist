@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PAYB_LINE_CURR"	"PK_PAYB_LINE_CURR"	"CLUSTERED"	"YES"	"YES"	"VOUCHER_ID"	"1"	"NO"
+"PAYB_LINE_CURR"	"PK_PAYB_LINE_CURR"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"
+"PAYB_LINE_CURR"	"PK_PAYB_LINE_CURR"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"3"	"NO"

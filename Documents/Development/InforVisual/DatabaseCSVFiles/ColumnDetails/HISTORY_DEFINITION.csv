@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"HISTORY_DEFINITION"	"1"	"TBL_NAME"	"nvarchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"HISTORY_DEFINITION"	"2"	"COL_NAME"	"nvarchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"HISTORY_DEFINITION"	"3"	"COL_TYPE"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"
+"HISTORY_DEFINITION"	"4"	"FOR_INSERT"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"HISTORY_DEFINITION"	"5"	"FOR_UPDATE"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"HISTORY_DEFINITION"	"6"	"FOR_DELETE"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

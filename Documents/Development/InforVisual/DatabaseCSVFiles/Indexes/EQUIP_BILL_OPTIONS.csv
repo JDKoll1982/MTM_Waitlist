@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EQUIP_BILL_OPTIONS"	"X_EQB_OPTIONS_0"	"NONCLUSTERED"	"YES"	"NO"	"CUST_ORDER_ID"	"1"	"NO"
+"EQUIP_BILL_OPTIONS"	"X_EQB_OPTIONS_0"	"NONCLUSTERED"	"YES"	"NO"	"CUST_ORDER_LINE_NO"	"2"	"NO"
+"EQUIP_BILL_OPTIONS"	"X_EQB_OPTIONS_0"	"NONCLUSTERED"	"YES"	"NO"	"SEQ_NO"	"3"	"NO"

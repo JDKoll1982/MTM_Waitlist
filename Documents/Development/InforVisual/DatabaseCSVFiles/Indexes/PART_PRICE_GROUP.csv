@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PART_PRICE_GROUP"	"PK_PART_PRICE_GROUP"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"SALES_TAX_GROUP"	"UPDATE_SALES_TAX_GROUP"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

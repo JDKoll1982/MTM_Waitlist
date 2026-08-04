@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_SRVC_CODE"	"1"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"V_SRVC_CODE"	"2"	"DESCRIPTION"	"nvarchar"	"50"	"0"	"0"	"YES"	"NO"	"NO"
+"V_SRVC_CODE"	"3"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"V_SRVC_CODE"	"4"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_SRVC_CODE"	"5"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

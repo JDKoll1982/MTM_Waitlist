@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_RECV_DIST"	"X_V_RECV_DIST_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

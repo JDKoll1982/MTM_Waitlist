@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EQUIP_PM_SCHEDULE"	"pk_equip_pm_sched"	"CLUSTERED"	"YES"	"YES"	"job_id"	"1"	"NO"
+"EQUIP_PM_SCHEDULE"	"X_EQ_PM_SCHEDULE_0"	"NONCLUSTERED"	"YES"	"NO"	"job_id"	"1"	"NO"
+"EQUIP_PM_SCHEDULE"	"X_EQ_PM_SCHEDULE_0"	"NONCLUSTERED"	"YES"	"NO"	"profile_id"	"2"	"NO"
+"EQUIP_PM_SCHEDULE"	"X_EQ_PM_SCHEDULE_0"	"NONCLUSTERED"	"YES"	"NO"	"equip_id"	"3"	"NO"

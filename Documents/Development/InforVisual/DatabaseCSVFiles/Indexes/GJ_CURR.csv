@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"GJ_CURR"	"PK_GJ_CURR"	"CLUSTERED"	"YES"	"YES"	"GJ_ID"	"1"	"NO"
+"GJ_CURR"	"PK_GJ_CURR"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"2"	"NO"

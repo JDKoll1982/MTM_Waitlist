@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"NEXT_NUM_GEN_EAC"	"1"	"PROJECT_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"NEXT_NUM_GEN_EAC"	"2"	"NEXT_NUMBER"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"NEXT_NUM_GEN_EAC"	"3"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"

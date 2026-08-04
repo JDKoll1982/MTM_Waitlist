@@ -1,0 +1,3 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"VR_RECEIVABLE_HDR"	"VR_RECEIVABLE_HDR_0"	"INVOICE_ID"	"1"
+"VR_RECEIVABLE_HDR"	"VR_RECEIVABLE_HDR_0"	"SITE_ID"	"2"

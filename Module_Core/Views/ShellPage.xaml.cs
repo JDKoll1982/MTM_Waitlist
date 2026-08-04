@@ -6,6 +6,8 @@ using Microsoft.UI.Xaml.Media;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.ViewModels;
+using MTM_Waitlist.Module_Waitlist.Models;
+using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 using Windows.System;
 
@@ -29,18 +31,15 @@ public sealed partial class ShellPage : Page
 
         ViewModel.NavigationService.Frame = NavigationFrame;
         ViewModel.NavigationViewService.Initialize(NavigationViewControl);
-        DeveloperModeItem.Visibility = ViewModel.IsDeveloperModeVisible
-            ? Visibility.Visible
-            : Visibility.Collapsed;
-        RequestTypeBuilderItem.Visibility = ViewModel.IsDeveloperModeVisible
-            ? Visibility.Visible
-            : Visibility.Collapsed;
+        NavigationFrame.Navigated += NavigationFrame_Navigated;
         _startupShellStateService.StateChanged += OnStartupShellStateChanged;
         ApplyStartupShellState();
     }
 
     private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        ViewModel.RefreshUserInfo();
+
         if (AppTitleBar is null || AppTitleBarText is null)
         {
             StartupDebugLog.Info("ShellPage", "Title bar elements were unavailable on load.");
@@ -67,12 +66,6 @@ public sealed partial class ShellPage : Page
         _ = DispatcherQueue.TryEnqueue(() =>
         {
             ApplyStartupShellState();
-            DeveloperModeItem.Visibility = ViewModel.IsDeveloperModeVisible
-                ? Visibility.Visible
-                : Visibility.Collapsed;
-            RequestTypeBuilderItem.Visibility = ViewModel.IsDeveloperModeVisible
-                ? Visibility.Visible
-                : Visibility.Collapsed;
         });
     }
 
@@ -84,8 +77,57 @@ public sealed partial class ShellPage : Page
 
     private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
     {
+        NavigationFrame.Navigated -= NavigationFrame_Navigated;
         _startupShellStateService.StateChanged -= OnStartupShellStateChanged;
         Unloaded -= ShellPage_Unloaded;
+    }
+
+    private void NavigationFrame_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        if (NavigationFrame.GetPageViewModel() is not WaitlistViewViewModel)
+        {
+            TitleBarSearchBox.Text = string.Empty;
+            TitleBarSearchBox.ItemsSource = null;
+        }
+    }
+
+    private void TitleBarSearchBox_TextChanged(
+        AutoSuggestBox sender,
+        AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
+        {
+            return;
+        }
+
+        if (NavigationFrame.GetPageViewModel() is not WaitlistViewViewModel viewModel)
+        {
+            sender.ItemsSource = null;
+            return;
+        }
+
+        viewModel.UpdateSearchSuggestions(sender.Text);
+        sender.ItemsSource = viewModel.SearchSuggestions;
+    }
+
+    private void TitleBarSearchBox_SuggestionChosen(
+        AutoSuggestBox sender,
+        AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is SampleOrder order)
+        {
+            sender.Text = order.Title;
+        }
+    }
+
+    private void TitleBarSearchBox_QuerySubmitted(
+        AutoSuggestBox sender,
+        AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (NavigationFrame.GetPageViewModel() is WaitlistViewViewModel viewModel)
+        {
+            viewModel.SubmitSearch(args.QueryText, args.ChosenSuggestion as SampleOrder);
+        }
     }
 
     private void NavigationViewControl_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)

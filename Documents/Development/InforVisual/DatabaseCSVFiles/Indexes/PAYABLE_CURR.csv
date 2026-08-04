@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PAYABLE_CURR"	"PK_PAYABLE_CURR"	"CLUSTERED"	"YES"	"YES"	"VOUCHER_ID"	"1"	"NO"
+"PAYABLE_CURR"	"PK_PAYABLE_CURR"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"2"	"NO"

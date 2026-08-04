@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"MASTER_PROD_SCHED"	"ROWID"	"int"	"NO"
+"dbo"	"MASTER_PROD_SCHED"	"ID"	"nvarchar"	"NO"
+"dbo"	"MASTER_PROD_SCHED"	"DESCRIPTION"	"nvarchar"	"NO"
+"dbo"	"MASTER_PROD_SCHED"	"RANK"	"smallint"	"YES"

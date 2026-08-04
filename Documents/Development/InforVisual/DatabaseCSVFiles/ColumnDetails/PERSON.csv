@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PERSON"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PERSON"	"2"	"ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"PERSON"	"3"	"NAME"	"nvarchar"	"50"	"0"	"0"	"YES"	"NO"	"NO"
+"PERSON"	"4"	"IS_APPROVER"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"PERSON"	"5"	"IS_BUYER"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"PERSON"	"6"	"IS_PLANNER"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"PERSON"	"7"	"IS_REQUESTER"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

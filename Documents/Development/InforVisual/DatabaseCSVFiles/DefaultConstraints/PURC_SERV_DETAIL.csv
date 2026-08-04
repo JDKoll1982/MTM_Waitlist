@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"PURC_SERV_DETAIL"	"CURRENCY_ID"	"DF__PURC_SERV__CURRE__59F1D38D"	"NULL"

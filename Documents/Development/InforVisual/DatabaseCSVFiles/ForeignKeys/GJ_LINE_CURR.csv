@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9440"	"GJ_LINE_CURR"	"CURRENCY_ID"	"CURRENCY"	"ID"
+"FKEY9441"	"GJ_LINE_CURR"	"GJ_ID"	"GJ_LINE"	"GJ_ID"
+"FKEY9441"	"GJ_LINE_CURR"	"LINE_NO"	"GJ_LINE"	"LINE_NO"

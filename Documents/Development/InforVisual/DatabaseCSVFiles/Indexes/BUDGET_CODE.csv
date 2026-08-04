@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"BUDGET_CODE"	"pk_budget_code"	"CLUSTERED"	"YES"	"YES"	"id"	"1"	"NO"

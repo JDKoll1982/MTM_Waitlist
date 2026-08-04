@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_RPT_USER_OPT"	"X_V_RPT_USER_OPT_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

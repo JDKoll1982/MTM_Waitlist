@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PLANNING_PART"	"PK_PLANNING_PART"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"PLANNING_PART"	"PK_PLANNING_PART"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"2"	"NO"
+"PLANNING_PART"	"X_PLAN_PART_1"	"NONCLUSTERED"	"NO"	"NO"	"DESCRIPTION"	"1"	"NO"

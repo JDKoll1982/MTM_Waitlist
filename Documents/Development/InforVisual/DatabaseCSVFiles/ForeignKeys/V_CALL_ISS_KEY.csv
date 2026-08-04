@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00115"	"V_CALL_ISS_KEY"	"CALL_ID"	"V_CALL_ISSUE"	"CALL_ID"
+"FK_VFO_00115"	"V_CALL_ISS_KEY"	"ISSUE_NO"	"V_CALL_ISSUE"	"LINE_NO"
+"FK_VFO_00124"	"V_CALL_ISS_KEY"	"KEYWORD_ID"	"V_KEYWORD"	"ID"

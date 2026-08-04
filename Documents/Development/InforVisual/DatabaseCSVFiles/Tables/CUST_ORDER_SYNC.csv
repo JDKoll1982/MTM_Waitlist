@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"CUST_ORDER_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"CUST_ORDER_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"CUST_ORDER_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"CUST_ORDER_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"CUST_ORDER_SYNC"	"CUST_ORDER_ID"	"nvarchar"	"NO"
+"dbo"	"CUST_ORDER_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"CUST_ORDER_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

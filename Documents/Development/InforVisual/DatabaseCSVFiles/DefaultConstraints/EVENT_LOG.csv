@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"EVENT_LOG"	"CREATE_DATE"	"DF__EVENT_LOG__CREAT__0393079E"	"NULL"

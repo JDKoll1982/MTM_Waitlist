@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"REVALUE"	"ROWID"	"int"	"NO"
+"dbo"	"REVALUE"	"ID"	"nvarchar"	"NO"
+"dbo"	"REVALUE"	"SITE_ID"	"nvarchar"	"NO"
+"dbo"	"REVALUE"	"POSTING_DATE"	"datetime"	"NO"
+"dbo"	"REVALUE"	"CREATE_DATE"	"datetime"	"NO"

@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_SRVC_CODE"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_SRVC_CODE"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_SRVC_CODE"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_SRVC_CODE"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_SRVC_CODE"	"CREATE_DATE"	"datetime"	"YES"

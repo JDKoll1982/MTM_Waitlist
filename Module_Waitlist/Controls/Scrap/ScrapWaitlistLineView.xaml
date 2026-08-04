@@ -1,0 +1,72 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapWaitlistLineView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:MTM_Waitlist.Module_Waitlist.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <local:WaitlistLineCardView
+            AccentBrush="#FF4D545C"
+            AccentSurfaceBrush="#FFF0F2F4"
+            BadgeBackgroundBrush="#FFFFD1A6"
+            BadgeText="SCRAP"
+            Order="{Binding Mode=OneWay}">
+        <local:WaitlistLineCardView.DetailsContent>
+            <Grid ColumnSpacing="12" RowSpacing="2">
+                <Grid.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="11" />
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock FontWeight="SemiBold" Text="Part number" />
+                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Pickup work center" />
+                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Quantity involved" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="Scrap lugger" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Scrap reason" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </local:WaitlistLineCardView.DetailsContent>
+    </local:WaitlistLineCardView>
+</UserControl>
+
+<!--
+    Notes
+    Card contents:
+    Request type - Clearly identify the request as a Scrap pickup.
+    Part number - The part associated with the scrap request.
+    Pickup work center - The work center, press, or location where the scrap is staged.
+    Quantity involved - The quantity or number of containers the material handler must pick up. (default = 1)
+    Scrap lugger - The required destination: 3003 Aluminum, 5052 Aluminum, Galvanized Steel, Steel, Skeleton Frames, or Other.
+    Pickup priority - Required-by time, urgency, and current waitlist age.
+
+    Detail page contents:
+    Request summary - Scrap status, request date and time, priority, target completion time, and current owner.
+    Pickup instructions - Source work center, press or resource, warehouse, location, staging point, and work-center contact.
+    Material identification - Part number, part description, revision, material grade, lot, heat, batch, serial, or container identifier.
+    Scrap classification - Selected lugger category: 3003 Aluminum, 5052 Aluminum, Galvanized Steel, Steel, Skeleton Frames, or Other.
+    Classification verification - The reason or evidence supporting the selected material category, including a Quality or supervisor review when required.
+    Quantity and packaging - Quantity, unit of measure, container count, package type, estimated weight, and quantity already removed.
+    Work-order context - Work order number, operation sequence, press or resource, status, completed quantity, and related customer order when applicable.
+    Scrap reason - Defect or reason for scrap, when it was identified, affected operation, and supporting notes or photos.
+    Handler workflow - Material-handler assignment, pickup acknowledgement, pickup time, route or destination instructions, and placement confirmation.
+    Lugger placement - Selected lugger, lugger location or identifier, delivery time, and confirmation that the material was placed in the correct lugger.
+    Safety and contamination - Sharp-edge, heavy-load, hot-material, chemical, contamination, PPE, and equipment requirements.
+    Audit trail - Requesting user, employee number, approving person, handler, status changes, and any correction to the selected lugger.
+-->

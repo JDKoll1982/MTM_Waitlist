@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0294"	"RFQ_LINE"	"PART_ID"	"PART"	"ID"
+"FKEY0252"	"RFQ_LINE"	"RFQ_ID"	"REQUEST_FOR_QUOTE"	"ID"

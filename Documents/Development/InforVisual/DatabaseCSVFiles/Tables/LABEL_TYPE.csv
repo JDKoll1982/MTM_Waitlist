@@ -1,0 +1,3 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"LABEL_TYPE"	"ROWID"	"int"	"NO"
+"dbo"	"LABEL_TYPE"	"ID"	"nvarchar"	"NO"

@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SITE_SETTINGS"	"ROWID"	"int"	"NO"
+"dbo"	"SITE_SETTINGS"	"SITE_ID"	"nvarchar"	"NO"
+"dbo"	"SITE_SETTINGS"	"NAME"	"nvarchar"	"NO"
+"dbo"	"SITE_SETTINGS"	"SETTING_VALUE"	"nvarchar"	"YES"

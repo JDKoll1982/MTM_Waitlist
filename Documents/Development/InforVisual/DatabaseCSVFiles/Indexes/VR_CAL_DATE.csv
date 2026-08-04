@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VR_CAL_DATE"	"VR_CAL_DATE_0"	"NONCLUSTERED"	"YES"	"NO"	"CAL_DAY"	"1"	"NO"

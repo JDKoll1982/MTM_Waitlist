@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"COMMODITY"	"ROWID"	"int"	"NO"
+"dbo"	"COMMODITY"	"CODE"	"nvarchar"	"NO"
+"dbo"	"COMMODITY"	"UNIV_PLAN_MATERIAL"	"nvarchar"	"YES"
+"dbo"	"COMMODITY"	"DESCRIPTION"	"nvarchar"	"YES"

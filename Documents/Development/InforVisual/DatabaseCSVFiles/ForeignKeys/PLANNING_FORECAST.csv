@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PLNG_FORECAST_TO_SITE"	"PLANNING_FORECAST"	"SITE_ID"	"SITE"	"ID"

@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"REVALUE"	"CREATE_DATE"	"DF__REVALUE__CREATE___385BD598"	"NULL"

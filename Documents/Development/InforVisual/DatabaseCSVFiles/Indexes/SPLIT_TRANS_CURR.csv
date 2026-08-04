@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SPLIT_TRANS_CURR"	"PK_SPLT_TRNS_CURR"	"CLUSTERED"	"YES"	"YES"	"TRANSACTION_ID"	"1"	"NO"
+"SPLIT_TRANS_CURR"	"PK_SPLT_TRNS_CURR"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"2"	"NO"

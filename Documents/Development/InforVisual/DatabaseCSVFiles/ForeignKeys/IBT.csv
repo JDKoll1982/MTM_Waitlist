@@ -1,0 +1,5 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_IBT_CONT_ID"	"IBT"	"CONTACT_ID"	"CONTACT"	"ID"
+"FKEY9609"	"IBT"	"CUSTOMER_ID"	"CUSTOMER"	"ID"
+"FK_IBT_TO_SITE"	"IBT"	"SITE_ID"	"SITE"	"ID"
+"FKEY9610"	"IBT"	"VENDOR_ID"	"VENDOR"	"ID"

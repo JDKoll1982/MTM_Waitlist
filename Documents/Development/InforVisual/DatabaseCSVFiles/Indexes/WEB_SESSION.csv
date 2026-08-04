@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"WEB_SESSION"	"PK_WEB_SESSION"	"CLUSTERED"	"YES"	"YES"	"USER_ID"	"1"	"NO"
+"WEB_SESSION"	"PK_WEB_SESSION"	"CLUSTERED"	"YES"	"YES"	"APPLICATION_ID"	"2"	"NO"

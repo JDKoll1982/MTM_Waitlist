@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"PAYABLE_DIST"	"INSERT_PAYABLE_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"PAYABLE_DIST"	"UPDATE_PAYABLE_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"QUOTE_BINARY"	"ROWID"	"int"	"NO"
+"dbo"	"QUOTE_BINARY"	"QUOTE_ID"	"nvarchar"	"NO"
+"dbo"	"QUOTE_BINARY"	"TYPE"	"nchar"	"NO"
+"dbo"	"QUOTE_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"QUOTE_BINARY"	"BITS_LENGTH"	"int"	"NO"

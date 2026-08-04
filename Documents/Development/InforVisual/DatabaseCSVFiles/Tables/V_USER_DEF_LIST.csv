@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_USER_DEF_LIST"	"BUS_TYPE"	"smallint"	"NO"
+"dbo"	"V_USER_DEF_LIST"	"FIELD_NAME"	"nvarchar"	"NO"
+"dbo"	"V_USER_DEF_LIST"	"CODE"	"nvarchar"	"NO"
+"dbo"	"V_USER_DEF_LIST"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_USER_DEF_LIST"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_USER_DEF_LIST"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_USER_DEF_LIST"	"CREATE_DATE"	"datetime"	"YES"

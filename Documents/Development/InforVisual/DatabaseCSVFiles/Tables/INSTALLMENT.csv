@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"INSTALLMENT"	"ROWID"	"int"	"NO"
+"dbo"	"INSTALLMENT"	"ID"	"nvarchar"	"NO"
+"dbo"	"INSTALLMENT"	"INST_TYPE"	"nchar"	"NO"
+"dbo"	"INSTALLMENT"	"END_OF_MONTH"	"nchar"	"YES"
+"dbo"	"INSTALLMENT"	"VAT_ON_FIRST_INST"	"nchar"	"YES"
+"dbo"	"INSTALLMENT"	"PERIOD_TYPE"	"nchar"	"NO"

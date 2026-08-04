@@ -6,5 +6,8 @@
         "programOutput": false,
         "threadExit": false,
         "processExit": false
+    },
+    "files.associations": {
+        "*.csv": "tsv"
     }
 }

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"STAGE"	"PK_STAGE"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SEMAPHORE"	"ROWID"	"int"	"NO"
+"dbo"	"SEMAPHORE"	"ID"	"nvarchar"	"NO"
+"dbo"	"SEMAPHORE"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"SEMAPHORE"	"EVENT_NO"	"int"	"NO"

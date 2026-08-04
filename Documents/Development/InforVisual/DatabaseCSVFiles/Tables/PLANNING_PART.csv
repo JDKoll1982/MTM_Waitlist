@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PLANNING_PART"	"ROWID"	"int"	"NO"
+"dbo"	"PLANNING_PART"	"ID"	"nvarchar"	"NO"
+"dbo"	"PLANNING_PART"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"PLANNING_PART"	"SITE_ID"	"nvarchar"	"NO"

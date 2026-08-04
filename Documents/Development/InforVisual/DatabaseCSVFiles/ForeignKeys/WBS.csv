@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_WBS_DEPT_00"	"WBS"	"DEF_DEPARTMENT_ID"	"DEPARTMENT"	"ID"

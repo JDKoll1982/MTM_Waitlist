@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"WEB_SESSION"	"ROWID"	"int"	"NO"
+"dbo"	"WEB_SESSION"	"USER_ID"	"nvarchar"	"NO"
+"dbo"	"WEB_SESSION"	"APPLICATION_ID"	"nvarchar"	"NO"
+"dbo"	"WEB_SESSION"	"TOKEN"	"nvarchar"	"NO"
+"dbo"	"WEB_SESSION"	"LAST_ACTIVITY"	"datetime"	"NO"
+"dbo"	"WEB_SESSION"	"EXPIRE_DATE"	"datetime"	"NO"
+"dbo"	"WEB_SESSION"	"CREATE_DATE"	"datetime"	"NO"

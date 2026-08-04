@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RCR_PAYABLE"	"PK_RCR_PAYABLE"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"RCR_PAYABLE"	"X_RCR_PAYABLE_1"	"NONCLUSTERED"	"NO"	"NO"	"VENDOR_ID"	"1"	"NO"
+"RCR_PAYABLE"	"X_RCR_PAYABLE_2"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"
+"RCR_PAYABLE"	"X_RCR_PAYABLE_3"	"NONCLUSTERED"	"NO"	"NO"	"PAYB_GL_ACCT_ID"	"1"	"NO"

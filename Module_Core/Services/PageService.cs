@@ -3,8 +3,6 @@
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
-using MTM_Waitlist.Module_DevTools.ViewModels;
-using MTM_Waitlist.Module_DevTools.Views;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Settings.Views;
 using MTM_Waitlist.Module_Startup.ViewModels;
@@ -22,12 +20,9 @@ public class PageService : IPageService
 
     public PageService()
     {
-        Configure<LoginViewModel, LoginPage>();
         Configure<WaitlistViewViewModel, WaitlistViewPage>();
         Configure<WaitlistViewDetailViewModel, WaitlistViewDetailPage>();
         Configure<SettingsViewModel, SettingsPage>();
-        Configure<DeveloperModeViewModel, DeveloperModePage>();
-        Configure<RequestTypeBuilderViewModel, RequestTypeBuilderPage>();
     }
 
     public Type GetPageType(string key)

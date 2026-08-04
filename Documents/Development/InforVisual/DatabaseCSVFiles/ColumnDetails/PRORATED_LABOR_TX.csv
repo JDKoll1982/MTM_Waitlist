@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PRORATED_LABOR_TX"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PRORATED_LABOR_TX"	"2"	"PRORATE_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"PRORATED_LABOR_TX"	"3"	"TRANSACTION_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"PRORATED_LABOR_TX"	"4"	"PRORATE_TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

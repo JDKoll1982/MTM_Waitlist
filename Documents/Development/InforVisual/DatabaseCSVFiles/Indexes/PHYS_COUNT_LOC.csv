@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PHYS_COUNT_LOC"	"PK_PHYS_COUNT_LOC"	"CLUSTERED"	"YES"	"YES"	"PHYS_COUNT_ID"	"1"	"NO"
+"PHYS_COUNT_LOC"	"PK_PHYS_COUNT_LOC"	"CLUSTERED"	"YES"	"YES"	"WAREHOUSE_ID"	"2"	"NO"
+"PHYS_COUNT_LOC"	"PK_PHYS_COUNT_LOC"	"CLUSTERED"	"YES"	"YES"	"LOCATION_ID"	"3"	"NO"

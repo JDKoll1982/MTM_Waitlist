@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_PAYB_NEW_DET"	"E2_PAYB_NEW_DET"	"NONCLUSTERED"	"NO"	"NO"	"INVOICE_DATE"	"1"	"NO"
+"E_PAYB_NEW_DET"	"EX_PAYB_NEW_DET"	"NONCLUSTERED"	"NO"	"NO"	"EIS_DATE"	"1"	"NO"

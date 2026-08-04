@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_LBR_GROUP"	"X_V_LBR_GROUP_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

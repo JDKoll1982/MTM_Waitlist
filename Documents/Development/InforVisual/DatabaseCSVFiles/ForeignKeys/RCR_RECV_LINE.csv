@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9370"	"RCR_RECV_LINE"	"GL_ACCOUNT_ID"	"ACCOUNT"	"ID"
+"FKEY9368"	"RCR_RECV_LINE"	"RCR_RECEIVABLE_ID"	"RCR_RECEIVABLE"	"ID"
+"FKEY9581"	"RCR_RECV_LINE"	"vat_category"	"VAT_CATEGORY"	"id"

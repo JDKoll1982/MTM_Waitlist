@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PAYABLE_CURR"	"ROWID"	"int"	"NO"
+"dbo"	"PAYABLE_CURR"	"VOUCHER_ID"	"nvarchar"	"NO"
+"dbo"	"PAYABLE_CURR"	"CURRENCY_ID"	"nvarchar"	"NO"
+"dbo"	"PAYABLE_CURR"	"AMOUNT"	"decimal"	"NO"
+"dbo"	"PAYABLE_CURR"	"SELL_RATE"	"decimal"	"NO"
+"dbo"	"PAYABLE_CURR"	"BUY_RATE"	"decimal"	"NO"

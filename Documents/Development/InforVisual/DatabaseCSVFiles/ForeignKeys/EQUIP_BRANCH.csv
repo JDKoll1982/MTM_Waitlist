@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9509"	"EQUIP_BRANCH"	"area_id"	"EQUIP_AREA"	"id"

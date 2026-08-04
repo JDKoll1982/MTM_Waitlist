@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SHIFT"	"PK_SHIFT"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"SHIFT"	"X_SHIFT_1"	"NONCLUSTERED"	"NO"	"NO"	"INDIRECT_ID"	"1"	"NO"

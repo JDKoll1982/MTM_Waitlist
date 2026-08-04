@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"GOTO_VMPGM"	"PK_GOTO_VMPGM"	"CLUSTERED"	"YES"	"YES"	"PROGRAM_ID"	"1"	"NO"
+"GOTO_VMPGM"	"PK_GOTO_VMPGM"	"CLUSTERED"	"YES"	"YES"	"GOTO_ID"	"2"	"NO"

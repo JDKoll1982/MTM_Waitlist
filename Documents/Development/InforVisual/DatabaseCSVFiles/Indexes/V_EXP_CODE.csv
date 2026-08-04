@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_EXP_CODE"	"X_V_EXP_CODE_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

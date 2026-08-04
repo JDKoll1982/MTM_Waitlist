@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00085"	"V_SRVCORD_BINARY"	"SRVC_ORDER_ID"	"V_SRVC_ORDER"	"ID"

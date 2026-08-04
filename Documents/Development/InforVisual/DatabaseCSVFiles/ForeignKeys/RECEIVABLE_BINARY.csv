@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0232"	"RECEIVABLE_BINARY"	"INVOICE_ID"	"RECEIVABLE"	"INVOICE_ID"

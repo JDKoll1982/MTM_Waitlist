@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_CONTACT_PREF"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_CONTACT_PREF"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_CONTACT_PREF"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_CONTACT_PREF"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_CONTACT_PREF"	"CREATE_DATE"	"datetime"	"YES"
+"dbo"	"V_CONTACT_PREF"	"CREATOR"	"nvarchar"	"YES"

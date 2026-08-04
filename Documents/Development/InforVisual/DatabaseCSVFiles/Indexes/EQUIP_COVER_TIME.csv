@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EQUIP_COVER_TIME"	"pk_eq_cover_time"	"CLUSTERED"	"YES"	"YES"	"coverage_id"	"1"	"NO"

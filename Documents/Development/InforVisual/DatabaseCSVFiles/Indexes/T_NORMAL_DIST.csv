@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"T_NORMAL_DIST"	"PK_T_NORMAL_DIST"	"CLUSTERED"	"YES"	"YES"	"T"	"1"	"NO"

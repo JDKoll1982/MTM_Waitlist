@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TRACE_DATE"	"PK_TRACE_DATE"	"CLUSTERED"	"YES"	"YES"	"PART_ID"	"1"	"NO"
+"TRACE_DATE"	"PK_TRACE_DATE"	"CLUSTERED"	"YES"	"YES"	"DATE_NAME"	"2"	"NO"

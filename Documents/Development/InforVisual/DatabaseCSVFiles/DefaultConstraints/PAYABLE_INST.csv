@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"PAYABLE_INST"	"PAY_STATUS"	"DF__PAYABLE_I__PAY_S__117712A1"	"NULL"

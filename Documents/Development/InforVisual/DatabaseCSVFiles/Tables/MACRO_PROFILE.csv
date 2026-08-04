@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"MACRO_PROFILE"	"ROWID"	"int"	"NO"
+"dbo"	"MACRO_PROFILE"	"PROGRAM_ID"	"nvarchar"	"NO"
+"dbo"	"MACRO_PROFILE"	"MACRO_NAME"	"nvarchar"	"NO"
+"dbo"	"MACRO_PROFILE"	"PROFILE_ID"	"nvarchar"	"NO"

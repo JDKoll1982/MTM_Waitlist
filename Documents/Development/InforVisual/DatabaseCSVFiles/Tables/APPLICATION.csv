@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"APPLICATION"	"ROWID"	"int"	"NO"
+"dbo"	"APPLICATION"	"PROGRAM_ID"	"nvarchar"	"NO"
+"dbo"	"APPLICATION"	"LANGUAGE_ID"	"nvarchar"	"NO"
+"dbo"	"APPLICATION"	"MENU_STRING"	"nvarchar"	"NO"
+"dbo"	"APPLICATION"	"TYPE"	"nchar"	"NO"
+"dbo"	"APPLICATION"	"CMD_LINE_ARGS"	"nvarchar"	"YES"
+"dbo"	"APPLICATION"	"MODULE"	"nchar"	"NO"

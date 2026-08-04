@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EXTRA_JOIN"	"PK_EXTRA_JOIN"	"CLUSTERED"	"YES"	"YES"	"PARENT"	"1"	"NO"
+"EXTRA_JOIN"	"PK_EXTRA_JOIN"	"CLUSTERED"	"YES"	"YES"	"CHILD"	"2"	"NO"
+"EXTRA_JOIN"	"PK_EXTRA_JOIN"	"CLUSTERED"	"YES"	"YES"	"NAME"	"3"	"NO"

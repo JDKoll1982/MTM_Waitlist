@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"RFQ_BINARY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"RFQ_BINARY"	"2"	"RFQ_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"RFQ_BINARY"	"3"	"TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"RFQ_BINARY"	"4"	"BITS"	"image"	"NULL"	"0"	"0"	"YES"	"NO"	"NO"
+"RFQ_BINARY"	"5"	"BITS_LENGTH"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

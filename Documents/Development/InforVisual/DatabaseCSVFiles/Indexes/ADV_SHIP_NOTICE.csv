@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ADV_SHIP_NOTICE"	"PK_ADV_SHIP_NOTICE"	"CLUSTERED"	"YES"	"YES"	"id"	"1"	"NO"

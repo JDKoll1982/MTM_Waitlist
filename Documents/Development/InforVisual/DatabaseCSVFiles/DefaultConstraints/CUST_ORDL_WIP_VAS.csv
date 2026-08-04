@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"CUST_ORDL_WIP_VAS"	"WIP_VAS_UNIT_PRICE"	"DF__CUST_ORDL__WIP_V__392FFE40"	"NULL"

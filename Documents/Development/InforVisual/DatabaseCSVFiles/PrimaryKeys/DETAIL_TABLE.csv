@@ -1,0 +1,3 @@
+"Table"	"PrimaryKeyColumn"
+"DETAIL_TABLE"	"SUMMARY_TABLE_ID"
+"DETAIL_TABLE"	"LINE_NO"

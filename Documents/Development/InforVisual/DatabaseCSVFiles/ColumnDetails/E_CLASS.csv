@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"E_CLASS"	"1"	"rowid"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"E_CLASS"	"2"	"name"	"nvarchar"	"60"	"0"	"0"	"YES"	"NO"	"NO"
+"E_CLASS"	"3"	"summary_purge"	"int"	"NULL"	"10"	"0"	"YES"	"NO"	"NO"
+"E_CLASS"	"4"	"detail_purge"	"int"	"NULL"	"10"	"0"	"YES"	"NO"	"NO"

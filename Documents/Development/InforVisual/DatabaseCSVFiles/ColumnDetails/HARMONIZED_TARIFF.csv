@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"HARMONIZED_TARIFF"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"HARMONIZED_TARIFF"	"2"	"HTS_CODE"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"HARMONIZED_TARIFF"	"3"	"DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"
+"HARMONIZED_TARIFF"	"4"	"DUTY_PERCENT"	"decimal"	"NULL"	"6"	"4"	"NO"	"NO"	"NO"

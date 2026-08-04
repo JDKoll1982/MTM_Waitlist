@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_LEAD_SOURCE"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_LEAD_SOURCE"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_LEAD_SOURCE"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_LEAD_SOURCE"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_LEAD_SOURCE"	"CREATE_DATE"	"datetime"	"YES"

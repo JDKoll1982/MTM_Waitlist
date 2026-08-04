@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"MACRO"	"ROWID"	"int"	"NO"
+"dbo"	"MACRO"	"USER_ID"	"nvarchar"	"NO"
+"dbo"	"MACRO"	"PROGRAM_ID"	"nvarchar"	"NO"
+"dbo"	"MACRO"	"NAME"	"nvarchar"	"NO"
+"dbo"	"MACRO"	"MACRO"	"image"	"YES"

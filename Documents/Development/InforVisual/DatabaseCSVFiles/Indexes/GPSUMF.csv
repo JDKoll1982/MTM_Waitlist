@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"GPSUMF"	"GPSUMF01"	"NONCLUSTERED"	"YES"	"NO"	"GUBOID"	"1"	"NO"
+"GPSUMF"	"GPSUMF01"	"NONCLUSTERED"	"YES"	"NO"	"GUBOVL"	"2"	"NO"

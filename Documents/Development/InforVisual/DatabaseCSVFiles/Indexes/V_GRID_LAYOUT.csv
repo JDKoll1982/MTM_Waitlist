@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_GRID_LAYOUT"	"X_V_GRID_LAYOUT_0"	"CLUSTERED"	"YES"	"YES"	"BUS_TYPE"	"1"	"NO"
+"V_GRID_LAYOUT"	"X_V_GRID_LAYOUT_0"	"CLUSTERED"	"YES"	"YES"	"FIELD_NAME"	"2"	"NO"

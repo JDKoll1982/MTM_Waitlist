@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_SITE_TO_ACC_ENTITY"	"SITE"	"ENTITY_ID"	"ACCOUNTING_ENTITY"	"ID"

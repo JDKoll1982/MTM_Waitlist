@@ -1,0 +1,5 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00095"	"V_CALL"	"ACCT_ID"	"V_ACCOUNT"	"ID"
+"FK_VFO_00202"	"V_CALL"	"CALLER_ID"	"V_CONTACT"	"ID"
+"FK_VFO_00137"	"V_CALL"	"CONTR_ID"	"V_CONTRACT"	"ID"
+"FK_VFO_00053"	"V_CALL"	"SITE_ID"	"SITE"	"ID"

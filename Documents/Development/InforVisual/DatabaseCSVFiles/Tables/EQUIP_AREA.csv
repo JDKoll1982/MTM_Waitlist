@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EQUIP_AREA"	"ROWID"	"int"	"NO"
+"dbo"	"EQUIP_AREA"	"id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_AREA"	"description"	"nvarchar"	"YES"

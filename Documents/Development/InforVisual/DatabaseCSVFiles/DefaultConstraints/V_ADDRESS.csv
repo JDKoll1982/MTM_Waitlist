@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_ADDRESS"	"TAX_EXEMPT"	"DF__V_ADDRESS__TAX_E__2A97C626"	"NULL"

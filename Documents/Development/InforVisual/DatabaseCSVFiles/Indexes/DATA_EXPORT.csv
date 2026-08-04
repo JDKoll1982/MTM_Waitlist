@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DATA_EXPORT"	"PK_DATA_EXPORT"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"DATA_EXPORT"	"PK_DATA_EXPORT"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"2"	"NO"
+"DATA_EXPORT"	"PK_DATA_EXPORT"	"CLUSTERED"	"YES"	"YES"	"CONTEXT"	"3"	"NO"
+"DATA_EXPORT"	"PK_DATA_EXPORT"	"CLUSTERED"	"YES"	"YES"	"START_AT"	"4"	"NO"

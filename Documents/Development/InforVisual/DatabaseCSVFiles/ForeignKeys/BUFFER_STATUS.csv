@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY_BUFSTAT_BUF"	"BUFFER_STATUS"	"BUFFER_ID"	"BUFFER"	"ID"

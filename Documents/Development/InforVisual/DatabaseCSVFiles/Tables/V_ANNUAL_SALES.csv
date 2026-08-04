@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_ANNUAL_SALES"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_ANNUAL_SALES"	"ANN_SALES"	"nvarchar"	"YES"
+"dbo"	"V_ANNUAL_SALES"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_ANNUAL_SALES"	"LAST_MODIFIED"	"datetime"	"YES"

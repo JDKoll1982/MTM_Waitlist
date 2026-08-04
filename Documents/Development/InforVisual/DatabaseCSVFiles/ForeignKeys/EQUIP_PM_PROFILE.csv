@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9512"	"EQUIP_PM_PROFILE"	"eng_id"	"EQUIP_MAINT_ENG"	"id"

@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUST_ORDER_CURR"	"PK_CUST_ORD_CURR"	"CLUSTERED"	"YES"	"YES"	"CUST_ORDER_ID"	"1"	"NO"
+"CUST_ORDER_CURR"	"PK_CUST_ORD_CURR"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"2"	"NO"

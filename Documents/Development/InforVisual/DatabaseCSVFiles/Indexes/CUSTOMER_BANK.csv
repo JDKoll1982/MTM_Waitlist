@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUSTOMER_BANK"	"PK_CUST_BANK"	"CLUSTERED"	"YES"	"YES"	"CUSTOMER_ID"	"1"	"NO"
+"CUSTOMER_BANK"	"PK_CUST_BANK"	"CLUSTERED"	"YES"	"YES"	"BANK_ID"	"2"	"NO"

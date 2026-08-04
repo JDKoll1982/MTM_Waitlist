@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PURC_RFQ_REQ"	"ROWID"	"int"	"NO"
+"dbo"	"PURC_RFQ_REQ"	"RFQ_ID"	"nvarchar"	"NO"
+"dbo"	"PURC_RFQ_REQ"	"RFQ_LINE_NO"	"smallint"	"NO"
+"dbo"	"PURC_RFQ_REQ"	"PURC_REQ_ID"	"nvarchar"	"NO"
+"dbo"	"PURC_RFQ_REQ"	"PURC_REQ_LINE_NO"	"smallint"	"NO"

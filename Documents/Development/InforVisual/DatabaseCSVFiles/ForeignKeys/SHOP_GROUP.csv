@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0123"	"SHOP_GROUP"	"GROUP_RESOURCE_ID"	"SHOP_RESOURCE"	"ID"
+"FKEY0124"	"SHOP_GROUP"	"SUB_RESOURCE_ID"	"SHOP_RESOURCE"	"ID"

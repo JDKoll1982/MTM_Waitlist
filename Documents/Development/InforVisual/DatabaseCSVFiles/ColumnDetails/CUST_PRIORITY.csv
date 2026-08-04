@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"CUST_PRIORITY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"CUST_PRIORITY"	"2"	"PRIORITY_CODE"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"CUST_PRIORITY"	"3"	"DESCRIPTION"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"
+"CUST_PRIORITY"	"4"	"FILL_RATE"	"decimal"	"NULL"	"5"	"2"	"NO"	"NO"	"NO"

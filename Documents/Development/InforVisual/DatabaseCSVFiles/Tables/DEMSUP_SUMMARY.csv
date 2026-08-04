@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"DEMSUP_SUMMARY"	"ROWID"	"int"	"NO"
+"dbo"	"DEMSUP_SUMMARY"	"SPID"	"nvarchar"	"NO"
+"dbo"	"DEMSUP_SUMMARY"	"ID"	"int"	"NO"
+"dbo"	"DEMSUP_SUMMARY"	"RECEIVED_QTY"	"decimal"	"NO"

@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"VEND_CONTACT"	"VENDOR_ID"	"nvarchar"	"NO"
+"dbo"	"VEND_CONTACT"	"CONTACT_NO"	"smallint"	"YES"
+"dbo"	"VEND_CONTACT"	"CONTACT_ID"	"nvarchar"	"NO"
+"dbo"	"VEND_CONTACT"	"PRIMARY_CONTACT"	"nchar"	"NO"
+"dbo"	"VEND_CONTACT"	"ROWID"	"int"	"NO"

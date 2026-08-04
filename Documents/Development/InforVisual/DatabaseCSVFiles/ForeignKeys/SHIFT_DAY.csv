@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0257"	"SHIFT_DAY"	"SHIFT_ID"	"SHIFT"	"ID"

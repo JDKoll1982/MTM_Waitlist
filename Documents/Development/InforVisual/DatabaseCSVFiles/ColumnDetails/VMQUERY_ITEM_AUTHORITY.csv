@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"VMQUERY_ITEM_AUTHORITY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"VMQUERY_ITEM_AUTHORITY"	"2"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"VMQUERY_ITEM_AUTHORITY"	"3"	"ITEM_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"VMQUERY_ITEM_AUTHORITY"	"4"	"PERMISSION"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

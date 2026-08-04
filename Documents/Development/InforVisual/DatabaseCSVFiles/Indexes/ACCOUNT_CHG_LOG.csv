@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ACCOUNT_CHG_LOG"	"PK_ACCTCHGLOG"	"CLUSTERED"	"YES"	"YES"	"TRANSACTION_ID"	"1"	"NO"
+"ACCOUNT_CHG_LOG"	"X_ACCTCHGLOG_1"	"NONCLUSTERED"	"NO"	"NO"	"TRANSACTION_ID"	"1"	"NO"

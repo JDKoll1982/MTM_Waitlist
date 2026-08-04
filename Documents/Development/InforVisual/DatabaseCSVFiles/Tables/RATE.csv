@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"RATE"	"ROWID"	"int"	"NO"
+"dbo"	"RATE"	"ID"	"nvarchar"	"NO"
+"dbo"	"RATE"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"RATE"	"USE_FOR_ACTUALS"	"nchar"	"YES"

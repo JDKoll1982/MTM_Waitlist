@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_SALES_PLAN"	"X_V_SALES_PLAN_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

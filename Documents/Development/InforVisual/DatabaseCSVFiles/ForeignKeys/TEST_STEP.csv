@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0288"	"TEST_STEP"	"GAGE_ID"	"GAGE"	"GAGE_ID"
+"FKEY0244"	"TEST_STEP"	"TEST_ID"	"TEST"	"ID"

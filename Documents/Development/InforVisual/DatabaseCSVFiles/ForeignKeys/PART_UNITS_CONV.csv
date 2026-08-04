@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0032"	"PART_UNITS_CONV"	"FROM_UM"	"UNITS"	"UNIT_OF_MEASURE"
+"FKEY0091"	"PART_UNITS_CONV"	"PART_ID"	"PART"	"ID"

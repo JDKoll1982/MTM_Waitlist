@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PART_WHS_REPLENISH"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PART_WHS_REPLENISH"	"2"	"PART_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"PART_WHS_REPLENISH"	"3"	"WAREHOUSE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"PART_WHS_REPLENISH"	"4"	"BEGIN_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"PART_WHS_REPLENISH"	"5"	"END_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"PART_WHS_REPLENISH"	"6"	"REPLENISH_LEVEL"	"decimal"	"NULL"	"20"	"8"	"NO"	"NO"	"NO"
+"PART_WHS_REPLENISH"	"7"	"IS_RECURRING"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

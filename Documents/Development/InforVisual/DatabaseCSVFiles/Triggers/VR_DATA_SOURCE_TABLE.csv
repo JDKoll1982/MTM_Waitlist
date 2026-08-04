@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"VR_DATA_SOURCE_TABLE"	"DELETE_VR_DATA_SOURCE_TABLE"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"

@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"CASH_PLAN_AMOUNT"	"ROWID"	"int"	"NO"
+"dbo"	"CASH_PLAN_AMOUNT"	"CASH_PLAN_ID"	"nvarchar"	"NO"
+"dbo"	"CASH_PLAN_AMOUNT"	"CASH_PLAN_LINE_NO"	"smallint"	"NO"
+"dbo"	"CASH_PLAN_AMOUNT"	"YEAR"	"decimal"	"NO"
+"dbo"	"CASH_PLAN_AMOUNT"	"PERIOD"	"decimal"	"NO"
+"dbo"	"CASH_PLAN_AMOUNT"	"AMOUNT_TYPE"	"nchar"	"NO"
+"dbo"	"CASH_PLAN_AMOUNT"	"AMOUNT"	"decimal"	"YES"

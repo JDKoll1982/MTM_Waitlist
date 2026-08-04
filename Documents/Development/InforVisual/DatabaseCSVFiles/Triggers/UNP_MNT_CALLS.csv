@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"UNP_MNT_CALLS"	"DELETE_UNP_MNT_CALLS"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"UNP_MNT_CALLS"	"INSERT_UNP_MNT_CALLS"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"UNP_MNT_CALLS"	"UPDATE_UNP_MNT_CALLS"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

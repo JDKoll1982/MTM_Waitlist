@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_RFQ_VEN_CONT_ID"	"RFQ_VENDOR"	"CONTACT_ID"	"CONTACT"	"ID"
+"FKEY0251"	"RFQ_VENDOR"	"RFQ_ID"	"REQUEST_FOR_QUOTE"	"ID"
+"FKEY0293"	"RFQ_VENDOR"	"VENDOR_ID"	"VENDOR"	"ID"

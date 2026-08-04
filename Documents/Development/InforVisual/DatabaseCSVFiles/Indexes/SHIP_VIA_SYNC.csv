@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SHIP_VIA_SYNC"	"PK_SHIP_VIA_SYNC"	"CLUSTERED"	"YES"	"YES"	"EVENT_ID"	"1"	"NO"

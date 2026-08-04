@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_GRID_COL_TO_GRID_CFG"	"VR_GRID_CONFIG_COLUMN"	"GRID_CONFIG_ID"	"VR_GRID_CONFIG"	"ID"

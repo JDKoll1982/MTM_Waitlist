@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"JOURNAL_BATCH"	"INSERT_JOURNAL_BATCH"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"JOURNAL_BATCH"	"UPDATE_JOURNAL_BATCH"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

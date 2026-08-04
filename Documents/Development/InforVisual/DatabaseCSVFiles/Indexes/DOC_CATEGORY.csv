@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DOC_CATEGORY"	"PK_DOC_CATEGORY"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

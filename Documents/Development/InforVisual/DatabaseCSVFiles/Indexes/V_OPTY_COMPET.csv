@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_OPTY_COMPET"	"X_V_OPTY_COMPET_0"	"CLUSTERED"	"YES"	"YES"	"OPTY_ID"	"1"	"NO"
+"V_OPTY_COMPET"	"X_V_OPTY_COMPET_0"	"CLUSTERED"	"YES"	"YES"	"ACCT_ID"	"2"	"NO"
+"V_OPTY_COMPET"	"X_V_OPTY_COMPET_1"	"NONCLUSTERED"	"NO"	"NO"	"ACCT_ID"	"1"	"NO"
+"V_OPTY_COMPET"	"X_V_OPTY_COMPET_2"	"NONCLUSTERED"	"NO"	"NO"	"OPTY_ID"	"1"	"NO"

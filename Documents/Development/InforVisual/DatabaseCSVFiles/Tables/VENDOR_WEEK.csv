@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"VENDOR_WEEK"	"ROWID"	"int"	"NO"
+"dbo"	"VENDOR_WEEK"	"VENDOR_ID"	"nvarchar"	"NO"
+"dbo"	"VENDOR_WEEK"	"SERVICE_ID"	"nvarchar"	"YES"
+"dbo"	"VENDOR_WEEK"	"DAY_OF_WEEK"	"smallint"	"NO"
+"dbo"	"VENDOR_WEEK"	"DAY_PERCENT"	"smallint"	"NO"

@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RECEIVABLE_SCHED"	"PK_RECEIVABLE_SCHED"	"CLUSTERED"	"YES"	"YES"	"INVOICE_ID"	"1"	"NO"
+"RECEIVABLE_SCHED"	"PK_RECEIVABLE_SCHED"	"CLUSTERED"	"YES"	"YES"	"PROMISE_DATE"	"2"	"NO"

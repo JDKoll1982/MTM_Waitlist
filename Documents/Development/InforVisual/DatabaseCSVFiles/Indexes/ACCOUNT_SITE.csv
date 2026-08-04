@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ACCOUNT_SITE"	"PK_ACCOUNT_SITE"	"CLUSTERED"	"YES"	"YES"	"ACCOUNT_ID"	"1"	"NO"
+"ACCOUNT_SITE"	"PK_ACCOUNT_SITE"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"2"	"NO"

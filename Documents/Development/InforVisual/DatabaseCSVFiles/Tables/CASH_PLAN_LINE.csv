@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"CASH_PLAN_LINE"	"ROWID"	"int"	"NO"
+"dbo"	"CASH_PLAN_LINE"	"CASH_PLAN_ID"	"nvarchar"	"NO"
+"dbo"	"CASH_PLAN_LINE"	"LINE_NO"	"smallint"	"NO"
+"dbo"	"CASH_PLAN_LINE"	"CATEGORY"	"nvarchar"	"YES"
+"dbo"	"CASH_PLAN_LINE"	"TYPE"	"nchar"	"YES"
+"dbo"	"CASH_PLAN_LINE"	"CLASS"	"smallint"	"YES"

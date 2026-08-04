@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"T_SEC_APPROX_K1"	"PK_T_SEC_APPROX_K1"	"CLUSTERED"	"YES"	"YES"	"T"	"1"	"NO"

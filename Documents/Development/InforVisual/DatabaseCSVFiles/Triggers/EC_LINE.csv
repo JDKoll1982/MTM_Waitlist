@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"EC_LINE"	"DELETE_EC_LINE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"EC_LINE"	"INSERT_EC_LINE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"EC_LINE"	"UPDATE_EC_LINE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

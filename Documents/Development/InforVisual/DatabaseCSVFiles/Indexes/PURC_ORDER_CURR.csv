@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PURC_ORDER_CURR"	"PK_PURC_ORD_CURR"	"CLUSTERED"	"YES"	"YES"	"PURC_ORDER_ID"	"1"	"NO"
+"PURC_ORDER_CURR"	"PK_PURC_ORD_CURR"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"2"	"NO"

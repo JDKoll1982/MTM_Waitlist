@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PORT_OF_TRANS"	"ROWID"	"int"	"NO"
+"dbo"	"PORT_OF_TRANS"	"CODE"	"nvarchar"	"NO"
+"dbo"	"PORT_OF_TRANS"	"DESCRIPTION"	"nvarchar"	"YES"

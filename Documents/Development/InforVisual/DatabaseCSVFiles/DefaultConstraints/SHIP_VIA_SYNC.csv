@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"SHIP_VIA_SYNC"	"CREATE_DATE"	"DF__SHIP_VIA___CREAT__78415083"	"NULL"
+"SHIP_VIA_SYNC"	"SUBSCRIPTIONS"	"DF__SHIP_VIA___SUBSC__793574BC"	"NULL"

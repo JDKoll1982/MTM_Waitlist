@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PURC_REQ_CURR"	"ROWID"	"int"	"NO"
+"dbo"	"PURC_REQ_CURR"	"PURC_REQ_ID"	"nvarchar"	"NO"
+"dbo"	"PURC_REQ_CURR"	"CURRENCY_ID"	"nvarchar"	"NO"
+"dbo"	"PURC_REQ_CURR"	"AMOUNT"	"decimal"	"NO"
+"dbo"	"PURC_REQ_CURR"	"SELL_RATE"	"decimal"	"NO"
+"dbo"	"PURC_REQ_CURR"	"BUY_RATE"	"decimal"	"NO"

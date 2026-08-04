@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"IBT_RECEIVER"	"PK_IBT_RECEIVER"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"IBT_RECEIVER"	"X_IBT_RECEIVER_1"	"NONCLUSTERED"	"NO"	"NO"	"IBT_ID"	"1"	"NO"
+"IBT_RECEIVER"	"X_IBT_RECEIVER_2"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"

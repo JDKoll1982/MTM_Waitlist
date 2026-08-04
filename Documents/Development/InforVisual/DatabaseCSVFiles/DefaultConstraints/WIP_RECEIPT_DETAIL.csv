@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"WIP_RECEIPT_DETAIL"	"CURRENCY_ID"	"DF__WIP_RECEI__CURRE__6677A603"	"NULL"

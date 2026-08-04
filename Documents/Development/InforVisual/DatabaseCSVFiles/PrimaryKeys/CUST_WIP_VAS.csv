@@ -1,0 +1,4 @@
+"Table"	"PrimaryKeyColumn"
+"CUST_WIP_VAS"	"CUSTOMER_ID"
+"CUST_WIP_VAS"	"PART_ID"
+"CUST_WIP_VAS"	"WIP_VAS_ID"

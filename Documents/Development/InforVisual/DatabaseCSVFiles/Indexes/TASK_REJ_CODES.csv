@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TASK_REJ_CODES"	"PK_TASK_REJ_CODES"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

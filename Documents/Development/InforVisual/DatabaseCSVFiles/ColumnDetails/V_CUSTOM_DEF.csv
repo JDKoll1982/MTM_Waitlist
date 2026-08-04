@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_CUSTOM_DEF"	"1"	"BUS_TYPE"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"V_CUSTOM_DEF"	"2"	"NAME"	"nvarchar"	"50"	"0"	"0"	"YES"	"NO"	"NO"
+"V_CUSTOM_DEF"	"3"	"PLURAL_NAME"	"nvarchar"	"50"	"0"	"0"	"YES"	"NO"	"NO"
+"V_CUSTOM_DEF"	"4"	"SEQ_NO"	"smallint"	"NULL"	"5"	"0"	"YES"	"NO"	"NO"
+"V_CUSTOM_DEF"	"5"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"V_CUSTOM_DEF"	"6"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_CUSTOM_DEF"	"7"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

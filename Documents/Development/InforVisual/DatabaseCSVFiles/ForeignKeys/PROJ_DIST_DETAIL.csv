@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PROJ_DIST_DETAIL_01"	"PROJ_DIST_DETAIL"	"CURRENCY_ID"	"CURRENCY"	"ID"

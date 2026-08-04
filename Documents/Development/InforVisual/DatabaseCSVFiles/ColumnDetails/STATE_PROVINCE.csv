@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"STATE_PROVINCE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"STATE_PROVINCE"	"2"	"CODE"	"nvarchar"	"10"	"0"	"0"	"NO"	"NO"	"NO"
+"STATE_PROVINCE"	"3"	"NAME"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"

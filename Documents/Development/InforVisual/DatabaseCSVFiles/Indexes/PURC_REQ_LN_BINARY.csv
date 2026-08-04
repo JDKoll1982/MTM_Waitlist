@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PURC_REQ_LN_BINARY"	"PK_PURC_REQ_LN_BINARY"	"CLUSTERED"	"YES"	"YES"	"PURC_REQ_ID"	"1"	"NO"
+"PURC_REQ_LN_BINARY"	"PK_PURC_REQ_LN_BINARY"	"CLUSTERED"	"YES"	"YES"	"PURC_REQ_LINE_NO"	"2"	"NO"
+"PURC_REQ_LN_BINARY"	"PK_PURC_REQ_LN_BINARY"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"3"	"NO"

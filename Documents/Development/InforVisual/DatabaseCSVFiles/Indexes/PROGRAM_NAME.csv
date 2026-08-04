@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PROGRAM_NAME"	"PK_PROGRAM_NAME"	"CLUSTERED"	"YES"	"YES"	"USER_ID"	"1"	"NO"
+"PROGRAM_NAME"	"PK_PROGRAM_NAME"	"CLUSTERED"	"YES"	"YES"	"MENU_ID"	"2"	"NO"
+"PROGRAM_NAME"	"PK_PROGRAM_NAME"	"CLUSTERED"	"YES"	"YES"	"SEQ_NO"	"3"	"NO"
+"PROGRAM_NAME"	"PK_PROGRAM_NAME"	"CLUSTERED"	"YES"	"YES"	"PROGRAM_ID"	"4"	"NO"

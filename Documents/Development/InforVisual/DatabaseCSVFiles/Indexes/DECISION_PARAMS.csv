@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DECISION_PARAMS"	"PK_DECISION_PARAMS"	"CLUSTERED"	"YES"	"YES"	"PARAM_ID"	"1"	"NO"

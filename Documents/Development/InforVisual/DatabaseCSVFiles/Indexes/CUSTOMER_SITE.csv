@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUSTOMER_SITE"	"PK_CUSTOMER_SITE"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"1"	"NO"
+"CUSTOMER_SITE"	"PK_CUSTOMER_SITE"	"CLUSTERED"	"YES"	"YES"	"CUSTOMER_ID"	"2"	"NO"

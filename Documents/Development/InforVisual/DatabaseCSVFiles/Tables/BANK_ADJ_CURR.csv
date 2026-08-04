@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"BANK_ADJ_CURR"	"ROWID"	"int"	"NO"
+"dbo"	"BANK_ADJ_CURR"	"BANK_ACCOUNT_ID"	"nvarchar"	"NO"
+"dbo"	"BANK_ADJ_CURR"	"ADJUSTMENT_ID"	"nvarchar"	"NO"
+"dbo"	"BANK_ADJ_CURR"	"CURRENCY_ID"	"nvarchar"	"NO"
+"dbo"	"BANK_ADJ_CURR"	"AMOUNT"	"decimal"	"NO"
+"dbo"	"BANK_ADJ_CURR"	"SELL_RATE"	"decimal"	"NO"
+"dbo"	"BANK_ADJ_CURR"	"BUY_RATE"	"decimal"	"NO"

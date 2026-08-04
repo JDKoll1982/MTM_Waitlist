@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PROBLEM_CLASS"	"ROWID"	"int"	"NO"
+"dbo"	"PROBLEM_CLASS"	"ID"	"nvarchar"	"NO"
+"dbo"	"PROBLEM_CLASS"	"TYPE"	"nchar"	"NO"
+"dbo"	"PROBLEM_CLASS"	"DESCRIPTION"	"nvarchar"	"YES"

@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0246"	"TEST_STEP_BINARY"	"STEP_NO"	"TEST_STEP"	"STEP_NO"
+"FKEY0246"	"TEST_STEP_BINARY"	"TEST_ID"	"TEST_STEP"	"TEST_ID"

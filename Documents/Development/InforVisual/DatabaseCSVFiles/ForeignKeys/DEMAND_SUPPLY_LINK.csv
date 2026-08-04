@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_DSL_DEMAND_TO_SITE"	"DEMAND_SUPPLY_LINK"	"DEMAND_SITE_ID"	"SITE"	"ID"
+"FK_DSL_SUPPLY_TO_SITE"	"DEMAND_SUPPLY_LINK"	"SUPPLY_SITE_ID"	"SITE"	"ID"

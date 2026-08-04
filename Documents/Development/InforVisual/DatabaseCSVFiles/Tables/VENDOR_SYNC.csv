@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"VENDOR_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"VENDOR_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"VENDOR_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"VENDOR_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"VENDOR_SYNC"	"VENDOR_ID"	"nvarchar"	"NO"
+"dbo"	"VENDOR_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"VENDOR_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

@@ -1,0 +1,7 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ECN"	"PK_ECN"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"ECN"	"X_ECN_1"	"NONCLUSTERED"	"NO"	"NO"	"WORKORDER_TYPE"	"1"	"NO"
+"ECN"	"X_ECN_1"	"NONCLUSTERED"	"NO"	"NO"	"WORKORDER_BASE_ID"	"2"	"NO"
+"ECN"	"X_ECN_1"	"NONCLUSTERED"	"NO"	"NO"	"WORKORDER_LOT_ID"	"3"	"NO"
+"ECN"	"X_ECN_1"	"NONCLUSTERED"	"NO"	"NO"	"WORKORDER_SPLIT_ID"	"4"	"NO"
+"ECN"	"X_ECN_1"	"NONCLUSTERED"	"NO"	"NO"	"WORKORDER_SUB_ID"	"5"	"NO"

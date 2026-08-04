@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EMPLOYEE_SITE"	"ROWID"	"int"	"NO"
+"dbo"	"EMPLOYEE_SITE"	"SITE_ID"	"nvarchar"	"NO"
+"dbo"	"EMPLOYEE_SITE"	"EMPLOYEE_ID"	"nvarchar"	"NO"
+"dbo"	"EMPLOYEE_SITE"	"DEFAULT_SITE"	"nchar"	"YES"
+"dbo"	"EMPLOYEE_SITE"	"BASE_PAY_RATE"	"decimal"	"YES"

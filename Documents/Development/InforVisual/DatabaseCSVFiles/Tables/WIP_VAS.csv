@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"WIP_VAS"	"ROWID"	"int"	"NO"
+"dbo"	"WIP_VAS"	"WIP_VAS_ID"	"nvarchar"	"NO"
+"dbo"	"WIP_VAS"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"WIP_VAS"	"UNIT_PRICE"	"decimal"	"NO"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0190"	"ACCOUNT_GROUP"	"ACCOUNT_ID"	"ACCOUNT"	"ID"

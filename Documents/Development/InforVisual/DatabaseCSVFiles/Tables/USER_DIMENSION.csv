@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"USER_DIMENSION"	"ROWID"	"int"	"NO"
+"dbo"	"USER_DIMENSION"	"DIMENSION"	"smallint"	"NO"
+"dbo"	"USER_DIMENSION"	"ID"	"nvarchar"	"NO"
+"dbo"	"USER_DIMENSION"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"USER_DIMENSION"	"IS_SUMMARY"	"nchar"	"NO"
+"dbo"	"USER_DIMENSION"	"IS_RESERVED"	"nchar"	"NO"
+"dbo"	"USER_DIMENSION"	"PARENT_DIMENSION"	"nvarchar"	"YES"

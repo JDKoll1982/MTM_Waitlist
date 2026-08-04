@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SCREEN_SIZE"	"X_SCREEN_SIZE_0"	"NONCLUSTERED"	"NO"	"NO"	"USER_ID"	"1"	"NO"
+"SCREEN_SIZE"	"X_SCREEN_SIZE_0"	"NONCLUSTERED"	"NO"	"NO"	"SECTION"	"2"	"NO"
+"SCREEN_SIZE"	"X_SCREEN_SIZE_0"	"NONCLUSTERED"	"NO"	"NO"	"ENTRY"	"3"	"NO"
+"SCREEN_SIZE"	"X_SCREEN_SIZE_1"	"NONCLUSTERED"	"NO"	"NO"	"ENTRY"	"1"	"NO"

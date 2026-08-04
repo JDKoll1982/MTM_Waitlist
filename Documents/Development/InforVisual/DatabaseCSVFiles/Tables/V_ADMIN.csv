@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_ADMIN"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_ADMIN"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_ADMIN"	"SETTING"	"nvarchar"	"YES"
+"dbo"	"V_ADMIN"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_ADMIN"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_ADMIN"	"CREATE_DATE"	"datetime"	"YES"

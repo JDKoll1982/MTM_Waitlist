@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0292"	"REQUEST_FOR_QUOTE"	"SITE_ID"	"SITE"	"ID"

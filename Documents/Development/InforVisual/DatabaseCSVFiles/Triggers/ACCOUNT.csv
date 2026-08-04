@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"ACCOUNT"	"DELETE_ACCOUNT"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"ACCOUNT"	"UPDATE_ACCOUNT"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
@@ -63,10 +64,7 @@ public class LocalSettingsService : ILocalSettingsService
 
             if (_settings != null && _settings.TryGetValue(key, out var obj))
             {
-                // System.Text.Json deserializes values as JsonElement; convert to raw JSON string first
-                var json = obj is System.Text.Json.JsonElement element
-                    ? element.GetRawText()
-                    : obj?.ToString() ?? "null";
+                var json = GetStoredJson(obj);
                 return await Json.ToObjectAsync<T>(json);
             }
         }
@@ -169,5 +167,25 @@ public class LocalSettingsService : ILocalSettingsService
         {
             throw new InvalidOperationException("Failed to verify corrupted startup settings file contents before restart.");
         }
+    }
+
+    private static string GetStoredJson(object? value)
+    {
+        if (value is null)
+        {
+            return "null";
+        }
+
+        if (value is JsonElement element)
+        {
+            return element.ValueKind switch
+            {
+                JsonValueKind.String => element.GetString() ?? "null",
+                JsonValueKind.Null => "null",
+                _ => element.GetRawText()
+            };
+        }
+
+        return value.ToString() ?? "null";
     }
 }

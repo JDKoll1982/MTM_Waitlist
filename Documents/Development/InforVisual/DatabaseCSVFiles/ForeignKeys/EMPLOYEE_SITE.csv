@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_EMP_SITE_TO_SITE"	"EMPLOYEE_SITE"	"SITE_ID"	"SITE"	"ID"

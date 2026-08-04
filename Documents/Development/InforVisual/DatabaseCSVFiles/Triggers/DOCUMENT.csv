@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"DOCUMENT"	"INSERT_DOCUMENT"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"

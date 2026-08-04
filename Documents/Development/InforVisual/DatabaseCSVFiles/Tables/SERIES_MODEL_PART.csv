@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SERIES_MODEL_PART"	"ROWID"	"int"	"NO"
+"dbo"	"SERIES_MODEL_PART"	"SERIES_ID"	"nvarchar"	"NO"
+"dbo"	"SERIES_MODEL_PART"	"MODEL_ID"	"nvarchar"	"NO"
+"dbo"	"SERIES_MODEL_PART"	"PART_ID"	"nvarchar"	"YES"
+"dbo"	"SERIES_MODEL_PART"	"ENG_ID"	"nvarchar"	"YES"
+"dbo"	"SERIES_MODEL_PART"	"SITE_ID"	"nvarchar"	"NO"

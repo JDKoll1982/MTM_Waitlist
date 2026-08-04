@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PART_UNITS_CONV"	"ROWID"	"int"	"NO"
+"dbo"	"PART_UNITS_CONV"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"PART_UNITS_CONV"	"FROM_UM"	"nvarchar"	"NO"
+"dbo"	"PART_UNITS_CONV"	"TO_UM"	"nvarchar"	"NO"
+"dbo"	"PART_UNITS_CONV"	"CONVERSION_FACTOR"	"decimal"	"NO"

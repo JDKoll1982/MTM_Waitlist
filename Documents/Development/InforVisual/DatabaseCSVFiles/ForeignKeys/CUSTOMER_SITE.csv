@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_CUST_SITE_TO_CUST"	"CUSTOMER_SITE"	"CUSTOMER_ID"	"CUSTOMER"	"ID"
+"FK_CUST_SITE_TO_SITE"	"CUSTOMER_SITE"	"SITE_ID"	"SITE"	"ID"

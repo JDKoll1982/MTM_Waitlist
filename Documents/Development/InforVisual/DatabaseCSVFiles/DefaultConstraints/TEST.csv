@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"TEST"	"HOURS_REPORTED"	"DF__TEST__HOURS_REPO__3B033819"	"NULL"
+"TEST"	"QTY_REPORTED"	"DF__TEST__QTY_REPORT__3A0F13E0"	"NULL"

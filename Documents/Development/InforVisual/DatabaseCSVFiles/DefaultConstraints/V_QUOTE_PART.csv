@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_QUOTE_PART"	"HAS_SPECS"	"DF__V_QUOTE_P__HAS_S__7AB3A8DA"	"NULL"
+"V_QUOTE_PART"	"REQUIRED"	"DF__V_QUOTE_P__REQUI__79BF84A1"	"NULL"

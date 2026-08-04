@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DOCUMENT_REF_PATH"	"PK_DOCUMENT_REF_PATH"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"1"	"NO"
+"DOCUMENT_REF_PATH"	"PK_DOCUMENT_REF_PATH"	"CLUSTERED"	"YES"	"YES"	"ID"	"2"	"NO"

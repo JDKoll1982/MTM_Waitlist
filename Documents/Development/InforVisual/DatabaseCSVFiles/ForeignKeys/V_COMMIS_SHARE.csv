@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00079"	"V_COMMIS_SHARE"	"SALESREP_ID"	"SALES_REP"	"ID"

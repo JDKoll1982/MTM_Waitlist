@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"ADJUSTMENT_DIST"	"DELETE_ADJUSTMENT_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"ADJUSTMENT_DIST"	"UPDATE_ADJUSTMENT_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

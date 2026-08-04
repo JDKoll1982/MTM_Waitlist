@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PHYSICAL_COUNT"	"PK_PHYSICAL_COUNT"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"PHYSICAL_COUNT"	"X_PHYSICAL_COUNT_1"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"

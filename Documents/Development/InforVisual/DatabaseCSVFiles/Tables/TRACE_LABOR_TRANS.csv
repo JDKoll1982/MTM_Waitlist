@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TRACE_LABOR_TRANS"	"ROWID"	"int"	"NO"
+"dbo"	"TRACE_LABOR_TRANS"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"TRACE_LABOR_TRANS"	"TRACE_ID"	"nvarchar"	"NO"
+"dbo"	"TRACE_LABOR_TRANS"	"TRANSACTION_ID"	"int"	"NO"
+"dbo"	"TRACE_LABOR_TRANS"	"QTY"	"decimal"	"NO"
+"dbo"	"TRACE_LABOR_TRANS"	"CREATE_DATE"	"datetime"	"NO"

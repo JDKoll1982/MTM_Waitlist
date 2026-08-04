@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0049"	"SALES_REP"	"EARNING_CODE_ID"	"EARNING_CODE"	"ID"
+"FKEY0085"	"SALES_REP"	"EMPLOYEE_ID"	"EMPLOYEE"	"ID"
+"FKEY0072"	"SALES_REP"	"VENDOR_ID"	"VENDOR"	"ID"

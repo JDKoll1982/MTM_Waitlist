@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"JOURNAL_DIM"	"INSERT_JOURNAL_DIM"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"JOURNAL_DIM"	"UPDATE_JOURNAL_DIM"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

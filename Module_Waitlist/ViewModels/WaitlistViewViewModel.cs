@@ -17,6 +17,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private bool _isSubscribed;
 
     public ObservableCollection<SampleOrder> Source { get; } = new ObservableCollection<SampleOrder>();
+    public ObservableCollection<SampleOrder> SearchSuggestions { get; } = new();
 
     public WaitlistViewViewModel(
         INavigationService navigationService,
@@ -79,5 +80,60 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 Source.Add(sampleOrder);
             }
         }
+        UpdateSearchSuggestions(SearchQuery);
     }
+    public string SearchQuery
+    {
+        get; private set;
+    } = string.Empty;
+
+    public void UpdateSearchSuggestions(string? query)
+    {
+        SearchQuery = query?.Trim() ?? string.Empty;
+        SearchSuggestions.Clear();
+
+        if (string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            return;
+        }
+
+        foreach (var order in Source.Where(order => MatchesSearch(order, SearchQuery)).Take(8))
+        {
+            SearchSuggestions.Add(order);
+        }
+    }
+
+    public void SubmitSearch(string? query, SampleOrder? selectedSuggestion = null)
+    {
+        var order = selectedSuggestion
+            ?? Source.FirstOrDefault(candidate => string.Equals(candidate.Title, query?.Trim(), StringComparison.OrdinalIgnoreCase))
+            ?? Source.FirstOrDefault(candidate => MatchesSearch(candidate, query?.Trim() ?? string.Empty));
+
+        if (order is not null)
+        {
+            OpenOrder(order);
+        }
+    }
+    private void OpenOrder(SampleOrder order)
+    {
+        _navigationService.SetListDataItemForNextConnectedAnimation(order);
+        _navigationService.NavigateTo(typeof(WaitlistViewDetailViewModel).FullName!, order.Id);
+    }
+
+    private static bool MatchesSearch(SampleOrder order, string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return false;
+        }
+
+        return Contains(order.Title, query)
+            || Contains(order.Status, query)
+            || Contains(order.RequestedByName, query)
+            || Contains(order.RequestedPressName, query)
+            || order.Fields.Any(field => Contains(field.Label, query) || Contains(field.Value, query));
+    }
+
+    private static bool Contains(string value, string query) =>
+        value.Contains(query, StringComparison.OrdinalIgnoreCase);
 }

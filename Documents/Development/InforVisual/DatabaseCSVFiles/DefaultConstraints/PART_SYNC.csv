@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"PART_SYNC"	"CREATE_DATE"	"DF__PART_SYNC__CREAT__6874FD0E"	"NULL"
+"PART_SYNC"	"SUBSCRIPTIONS"	"DF__PART_SYNC__SUBSC__69692147"	"NULL"

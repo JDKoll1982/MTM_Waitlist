@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"CUSTOMER_BANK"	"IS_DEFAULT"	"DF__CUSTOMER___IS_DE__4595D525"	"NULL"

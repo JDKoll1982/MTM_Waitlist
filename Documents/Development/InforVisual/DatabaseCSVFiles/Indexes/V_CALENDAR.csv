@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CALENDAR"	"X_V_CALENDAR_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_CALENDAR"	"X_V_CALENDAR_1"	"NONCLUSTERED"	"NO"	"NO"	"START_DATE"	"1"	"NO"
+"V_CALENDAR"	"X_V_CALENDAR_2"	"NONCLUSTERED"	"NO"	"NO"	"ACCT_ID"	"1"	"NO"
+"V_CALENDAR"	"X_V_CALENDAR_3"	"NONCLUSTERED"	"NO"	"NO"	"CONTACT_ID"	"1"	"NO"

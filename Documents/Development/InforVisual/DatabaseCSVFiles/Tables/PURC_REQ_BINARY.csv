@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PURC_REQ_BINARY"	"ROWID"	"int"	"NO"
+"dbo"	"PURC_REQ_BINARY"	"PURC_REQ_ID"	"nvarchar"	"NO"
+"dbo"	"PURC_REQ_BINARY"	"TYPE"	"nchar"	"NO"
+"dbo"	"PURC_REQ_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"PURC_REQ_BINARY"	"BITS_LENGTH"	"int"	"NO"

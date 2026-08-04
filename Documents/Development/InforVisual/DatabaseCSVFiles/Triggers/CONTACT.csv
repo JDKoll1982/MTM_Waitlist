@@ -1,0 +1,5 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"CONTACT"	"UPDATE_CONTACT"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"
+"CONTACT"	"V_AD_CONTACT"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"CONTACT"	"V_AI_CONTACT"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"CONTACT"	"V_AU_CONTACT"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

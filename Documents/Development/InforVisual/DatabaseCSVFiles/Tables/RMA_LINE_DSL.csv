@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"RMA_LINE_DSL"	"ROWID"	"int"	"NO"
+"dbo"	"RMA_LINE_DSL"	"RMA_ID"	"nvarchar"	"NO"
+"dbo"	"RMA_LINE_DSL"	"RMA_LINE_NO"	"smallint"	"NO"
+"dbo"	"RMA_LINE_DSL"	"DSL_ID"	"int"	"NO"
+"dbo"	"RMA_LINE_DSL"	"QTY"	"decimal"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RECV_LINE_BINARY"	"PK_RECV_LINE_BINARY"	"CLUSTERED"	"YES"	"YES"	"INVOICE_ID"	"1"	"NO"
+"RECV_LINE_BINARY"	"PK_RECV_LINE_BINARY"	"CLUSTERED"	"YES"	"YES"	"RECV_LINE_NO"	"2"	"NO"
+"RECV_LINE_BINARY"	"PK_RECV_LINE_BINARY"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"3"	"NO"

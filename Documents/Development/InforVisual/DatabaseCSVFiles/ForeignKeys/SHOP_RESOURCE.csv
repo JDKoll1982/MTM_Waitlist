@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0266"	"SHOP_RESOURCE"	"AFB_GL_ACCT_ID"	"ACCOUNT"	"ID"

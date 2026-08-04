@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"INV_RECEIPT_DIST"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"INV_RECEIPT_DIST"	"2"	"INV_TRANS_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"INV_RECEIPT_DIST"	"3"	"DEMAND_SUPPLY_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"INV_RECEIPT_DIST"	"4"	"QTY"	"decimal"	"NULL"	"20"	"8"	"NO"	"NO"	"NO"

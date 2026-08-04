@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"SOA_CODE_MAP"	"1"	"LIST_ID"	"nvarchar"	"100"	"0"	"0"	"NO"	"NO"	"NO"
+"SOA_CODE_MAP"	"2"	"AGENCY_ID"	"nvarchar"	"10"	"0"	"0"	"NO"	"NO"	"NO"
+"SOA_CODE_MAP"	"3"	"SOA_CODE"	"nvarchar"	"100"	"0"	"0"	"NO"	"NO"	"NO"
+"SOA_CODE_MAP"	"4"	"VE_CODE"	"nvarchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"SOA_CODE_MAP"	"5"	"VE_CODE_DESC"	"nvarchar"	"250"	"0"	"0"	"YES"	"NO"	"NO"
+"SOA_CODE_MAP"	"6"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"

@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"SIZING"	"1"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"SIZING"	"2"	"PROGRAM_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"SIZING"	"3"	"SECTION"	"nvarchar"	"120"	"0"	"0"	"NO"	"NO"	"NO"
+"SIZING"	"4"	"ENTRY"	"nvarchar"	"100"	"0"	"0"	"NO"	"NO"	"NO"
+"SIZING"	"5"	"VALUE"	"nvarchar"	"100"	"0"	"0"	"NO"	"NO"	"NO"
+"SIZING"	"6"	"MODIFY_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"SIZING"	"7"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"

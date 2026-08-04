@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"DOCUMENT_REF_PATH"	"ROWID"	"int"	"NO"
+"dbo"	"DOCUMENT_REF_PATH"	"SITE_ID"	"nvarchar"	"NO"
+"dbo"	"DOCUMENT_REF_PATH"	"ID"	"nvarchar"	"NO"
+"dbo"	"DOCUMENT_REF_PATH"	"REFERENCE_TYPE"	"nvarchar"	"NO"
+"dbo"	"DOCUMENT_REF_PATH"	"DOC_FILE_PATH"	"nvarchar"	"YES"
+"dbo"	"DOCUMENT_REF_PATH"	"CREATE_DATE"	"datetime"	"NO"

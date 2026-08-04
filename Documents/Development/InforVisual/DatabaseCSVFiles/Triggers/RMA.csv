@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"RMA"	"UPDATE_RMA"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

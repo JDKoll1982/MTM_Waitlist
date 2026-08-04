@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"DETAIL_TABLE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"DETAIL_TABLE"	"2"	"SUMMARY_TABLE_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"DETAIL_TABLE"	"3"	"QTY"	"decimal"	"NULL"	"20"	"8"	"NO"	"NO"	"NO"
+"DETAIL_TABLE"	"4"	"AMOUNT"	"decimal"	"NULL"	"23"	"8"	"NO"	"NO"	"NO"
+"DETAIL_TABLE"	"5"	"LINE_NO"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

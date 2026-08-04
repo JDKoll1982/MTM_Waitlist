@@ -1,0 +1,6 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"GPSCMF"	"GPSCMF01"	"NONCLUSTERED"	"YES"	"NO"	"GCBOID"	"1"	"NO"
+"GPSCMF"	"GPSCMF01"	"NONCLUSTERED"	"YES"	"NO"	"GCBOVL"	"2"	"NO"
+"GPSCMF"	"GPSCMF01"	"NONCLUSTERED"	"YES"	"NO"	"GCLNID"	"3"	"NO"
+"GPSCMF"	"GPSCMF02"	"NONCLUSTERED"	"YES"	"NO"	"GCBOID"	"1"	"NO"
+"GPSCMF"	"GPSCMF02"	"NONCLUSTERED"	"YES"	"NO"	"GCBOVL"	"2"	"NO"

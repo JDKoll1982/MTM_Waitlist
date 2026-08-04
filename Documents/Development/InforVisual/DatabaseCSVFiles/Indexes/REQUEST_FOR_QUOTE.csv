@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"REQUEST_FOR_QUOTE"	"PK_REQUEST_FOR_QUOTE"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"REQUEST_FOR_QUOTE"	"X_RFQ_1"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"

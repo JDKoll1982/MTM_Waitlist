@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SHIPPER_LINE_DEL"	"PK_SHIPPER_LINE_DEL"	"CLUSTERED"	"YES"	"YES"	"PACKLIST_ID"	"1"	"NO"
+"SHIPPER_LINE_DEL"	"PK_SHIPPER_LINE_DEL"	"CLUSTERED"	"YES"	"YES"	"PACKLIST_LINE_NO"	"2"	"NO"
+"SHIPPER_LINE_DEL"	"PK_SHIPPER_LINE_DEL"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"3"	"NO"

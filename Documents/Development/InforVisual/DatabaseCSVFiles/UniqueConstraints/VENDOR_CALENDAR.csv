@@ -1,0 +1,4 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"VENDOR_CALENDAR"	"X_VENDCAL_0"	"VENDOR_ID"	"1"
+"VENDOR_CALENDAR"	"X_VENDCAL_0"	"SERVICE_ID"	"2"
+"VENDOR_CALENDAR"	"X_VENDCAL_0"	"START_DATE"	"3"

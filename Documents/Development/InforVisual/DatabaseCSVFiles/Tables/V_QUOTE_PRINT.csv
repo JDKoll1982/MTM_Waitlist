@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_QUOTE_PRINT"	"LONG_DESC"	"nvarchar"	"YES"
+"dbo"	"V_QUOTE_PRINT"	"PICTURE"	"nvarchar"	"YES"
+"dbo"	"V_QUOTE_PRINT"	"CREATE_DATE"	"datetime"	"YES"
+"dbo"	"V_QUOTE_PRINT"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_QUOTE_PRINT"	"LAST_MODIFIED"	"datetime"	"YES"

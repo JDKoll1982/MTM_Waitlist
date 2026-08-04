@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"LABOR_TICKET_BREAK"	"PK_LABOR_TICKET_BREAK"	"CLUSTERED"	"YES"	"YES"	"TRANSACTION_ID"	"1"	"NO"
+"LABOR_TICKET_BREAK"	"PK_LABOR_TICKET_BREAK"	"CLUSTERED"	"YES"	"YES"	"CLOCK_IN"	"2"	"NO"

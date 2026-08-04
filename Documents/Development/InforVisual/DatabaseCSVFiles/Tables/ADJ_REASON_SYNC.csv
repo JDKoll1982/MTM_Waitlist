@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"ADJ_REASON_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"ADJ_REASON_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"ADJ_REASON_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"ADJ_REASON_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"ADJ_REASON_SYNC"	"REASON_ID"	"nvarchar"	"NO"
+"dbo"	"ADJ_REASON_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"ADJ_REASON_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

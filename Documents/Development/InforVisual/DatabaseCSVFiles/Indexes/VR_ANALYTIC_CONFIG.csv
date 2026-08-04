@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VR_ANALYTIC_CONFIG"	"PK_VR_ANALYTIC_CONFIG"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

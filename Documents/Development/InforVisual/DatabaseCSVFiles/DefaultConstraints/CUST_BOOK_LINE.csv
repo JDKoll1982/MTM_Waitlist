@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"CUST_BOOK_LINE"	"CREATE_DATE"	"DF__CUST_BOOK__CREAT__1B9F9B59"	"NULL"

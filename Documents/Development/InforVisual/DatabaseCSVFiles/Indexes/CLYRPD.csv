@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CLYRPD"	"X_CLYRPD_1"	"NONCLUSTERED"	"YES"	"NO"	"YQDATE"	"1"	"NO"

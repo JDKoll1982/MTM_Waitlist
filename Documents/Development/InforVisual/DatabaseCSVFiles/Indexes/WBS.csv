@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"WBS"	"PK_WBS"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"
+"WBS"	"PK_WBS"	"CLUSTERED"	"YES"	"YES"	"PROJECT_ID"	"2"	"NO"

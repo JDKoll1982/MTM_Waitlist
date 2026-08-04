@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"DASHBOARD_ITEM_AUTHORITY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"DASHBOARD_ITEM_AUTHORITY"	"2"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"DASHBOARD_ITEM_AUTHORITY"	"3"	"ITEM_TYPE"	"nvarchar"	"8"	"0"	"0"	"NO"	"NO"	"NO"
+"DASHBOARD_ITEM_AUTHORITY"	"4"	"ITEM_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"DASHBOARD_ITEM_AUTHORITY"	"5"	"PERMISSION"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"CASH_DISBURSEMENT"	"UPDATE_CASH_DISBURSEMENT"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

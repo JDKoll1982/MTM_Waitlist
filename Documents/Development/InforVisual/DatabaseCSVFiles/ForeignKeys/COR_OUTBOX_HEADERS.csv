@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_COR_OUTBOX_ENTRY"	"COR_OUTBOX_HEADERS"	"C_OUTBOX_ID"	"COR_OUTBOX_ENTRY"	"C_ID"

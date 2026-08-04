@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9371"	"VENDOR_REMIT_ADDR"	"VENDOR_ID"	"VENDOR"	"ID"

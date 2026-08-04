@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"LOCATION"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"LOCATION"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"LOCATION"	"3"	"WAREHOUSE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"LOCATION"	"4"	"DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"
+"LOCATION"	"5"	"TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"LOCATION"	"6"	"CUSTOMER_ID"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"
+"LOCATION"	"7"	"VENDOR_ID"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"

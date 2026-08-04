@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"MT_WIP_LOCATIONS"	"1"	"WAREHOUSE_ID"	"varchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"MT_WIP_LOCATIONS"	"2"	"LOCATION_ID"	"varchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"MT_WIP_LOCATIONS"	"3"	"Status"	"bit"	"NULL"	"1"	"0"	"NO"	"NO"	"NO"

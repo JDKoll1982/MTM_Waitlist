@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"DOCUMENT_REF_EAC"	"1"	"PROJECT_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"DOCUMENT_REF_EAC"	"2"	"EAC_VERSION"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"DOCUMENT_REF_EAC"	"3"	"DOCUMENT_ID"	"nvarchar"	"128"	"0"	"0"	"NO"	"NO"	"NO"
+"DOCUMENT_REF_EAC"	"4"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"DOCUMENT_REF_EAC"	"5"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"DOCUMENT_REF_EAC"	"6"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"

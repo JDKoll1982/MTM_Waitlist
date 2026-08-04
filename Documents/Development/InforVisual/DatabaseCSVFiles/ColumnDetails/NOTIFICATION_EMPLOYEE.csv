@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"NOTIFICATION_EMPLOYEE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"NOTIFICATION_EMPLOYEE"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"NOTIFICATION_EMPLOYEE"	"3"	"PROGRAM_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"NOTIFICATION_EMPLOYEE"	"4"	"EMPLOYEE_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"

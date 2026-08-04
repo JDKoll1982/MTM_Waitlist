@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VR_MENU_NODE"	"PK_VR_MENU_NODE"	"CLUSTERED"	"YES"	"YES"	"MENU_ID"	"1"	"NO"
+"VR_MENU_NODE"	"PK_VR_MENU_NODE"	"CLUSTERED"	"YES"	"YES"	"NODE_ID"	"2"	"NO"
+"VR_MENU_NODE"	"PK_VR_MENU_NODE"	"CLUSTERED"	"YES"	"YES"	"LOCALE"	"3"	"NO"

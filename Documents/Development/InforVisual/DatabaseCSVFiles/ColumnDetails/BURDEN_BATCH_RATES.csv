@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"BURDEN_BATCH_RATES"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"BURDEN_BATCH_RATES"	"2"	"BATCH_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"BURDEN_BATCH_RATES"	"3"	"BURDEN_RATE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"BURDEN_BATCH_RATES"	"4"	"BURDEN_PERIOD_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"BURDEN_BATCH_RATES"	"5"	"POSTING_STATUS"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"BURDEN_BATCH_RATES"	"6"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"

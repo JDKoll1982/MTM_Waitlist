@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"BURDEN_RULE"	"ROWID"	"int"	"NO"
+"dbo"	"BURDEN_RULE"	"BURDEN_GROUP_ID"	"nvarchar"	"NO"
+"dbo"	"BURDEN_RULE"	"COST_CATEGORY_ID"	"nvarchar"	"NO"
+"dbo"	"BURDEN_RULE"	"DEBIT_GL_ACCOUNT"	"nvarchar"	"YES"
+"dbo"	"BURDEN_RULE"	"CREDIT_GL_ACCOUNT"	"nvarchar"	"YES"

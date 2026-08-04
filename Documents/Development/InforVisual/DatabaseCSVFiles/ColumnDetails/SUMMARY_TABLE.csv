@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"SUMMARY_TABLE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"SUMMARY_TABLE"	"2"	"ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"SUMMARY_TABLE"	"3"	"DESCRIPTION"	"nvarchar"	"50"	"0"	"0"	"YES"	"NO"	"NO"
+"SUMMARY_TABLE"	"4"	"TOTAL_AMOUNT"	"decimal"	"NULL"	"23"	"8"	"NO"	"NO"	"NO"

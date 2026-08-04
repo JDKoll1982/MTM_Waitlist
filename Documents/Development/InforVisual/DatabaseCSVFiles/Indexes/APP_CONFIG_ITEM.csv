@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"APP_CONFIG_ITEM"	"PK_APP_CONFIG_ITEM"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

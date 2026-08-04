@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SHIPTO_PRICE_GROUP"	"PK_SHIPTO_PRICE_GROUP"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

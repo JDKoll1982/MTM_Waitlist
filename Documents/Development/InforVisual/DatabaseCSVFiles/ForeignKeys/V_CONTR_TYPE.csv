@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00006"	"V_CONTR_TYPE"	"REV_EXP_ACCT_ID"	"ACCOUNT"	"ID"
+"FK_VFO_00054"	"V_CONTR_TYPE"	"SITE_ID"	"SITE"	"ID"
+"FK_VFO_00070"	"V_CONTR_TYPE"	"SLS_TAX_GRP_ID"	"SALES_TAX_GROUP"	"ID"

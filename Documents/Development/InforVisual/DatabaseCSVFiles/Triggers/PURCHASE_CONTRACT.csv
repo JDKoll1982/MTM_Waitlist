@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"PURCHASE_CONTRACT"	"UPDATE_PURCHASE_CONTRACT"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"

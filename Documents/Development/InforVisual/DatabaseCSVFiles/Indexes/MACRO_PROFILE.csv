@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"MACRO_PROFILE"	"PK_MACRO_PROFILE"	"CLUSTERED"	"YES"	"YES"	"PROGRAM_ID"	"1"	"NO"
+"MACRO_PROFILE"	"PK_MACRO_PROFILE"	"CLUSTERED"	"YES"	"YES"	"MACRO_NAME"	"2"	"NO"
+"MACRO_PROFILE"	"PK_MACRO_PROFILE"	"CLUSTERED"	"YES"	"YES"	"PROFILE_ID"	"3"	"NO"

@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VR_GRID_CONFIG_COLUMN"	"PK_VR_GRID_CONFIG_COLUMN"	"CLUSTERED"	"YES"	"YES"	"GRID_CONFIG_ID"	"1"	"NO"
+"VR_GRID_CONFIG_COLUMN"	"PK_VR_GRID_CONFIG_COLUMN"	"CLUSTERED"	"YES"	"YES"	"NAME"	"2"	"NO"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00169"	"V_QUOTE_ORDER"	"QUOTE_ID"	"V_QUOTE"	"ID"

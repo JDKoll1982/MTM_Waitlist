@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ENUM_CODES"	"PK_ENUM_CODES"	"CLUSTERED"	"YES"	"YES"	"TABLE_NAME"	"1"	"NO"
+"ENUM_CODES"	"PK_ENUM_CODES"	"CLUSTERED"	"YES"	"YES"	"COLUMN_NAME"	"2"	"NO"
+"ENUM_CODES"	"PK_ENUM_CODES"	"CLUSTERED"	"YES"	"YES"	"LANGUAGE_ID"	"3"	"NO"
+"ENUM_CODES"	"PK_ENUM_CODES"	"CLUSTERED"	"YES"	"YES"	"ENUM_VALUE"	"4"	"NO"

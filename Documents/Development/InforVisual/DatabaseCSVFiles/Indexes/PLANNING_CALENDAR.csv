@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PLANNING_CALENDAR"	"PK_PLANNING_CALENDAR"	"CLUSTERED"	"YES"	"YES"	"CALENDAR_NO"	"1"	"NO"

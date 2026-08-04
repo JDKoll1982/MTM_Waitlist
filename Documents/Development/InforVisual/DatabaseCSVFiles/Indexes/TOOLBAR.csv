@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TOOLBAR"	"PK_TOOLBAR"	"CLUSTERED"	"YES"	"YES"	"USER_ID"	"1"	"NO"
+"TOOLBAR"	"PK_TOOLBAR"	"CLUSTERED"	"YES"	"YES"	"PROGRAM_ID"	"2"	"NO"
+"TOOLBAR"	"PK_TOOLBAR"	"CLUSTERED"	"YES"	"YES"	"ID"	"3"	"NO"

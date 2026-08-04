@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TRANSIT_TIME"	"ROWID"	"int"	"NO"
+"dbo"	"TRANSIT_TIME"	"FROM_WAREHOUSE_ID"	"nvarchar"	"NO"
+"dbo"	"TRANSIT_TIME"	"TO_WAREHOUSE_ID"	"nvarchar"	"NO"
+"dbo"	"TRANSIT_TIME"	"DAYS"	"decimal"	"NO"

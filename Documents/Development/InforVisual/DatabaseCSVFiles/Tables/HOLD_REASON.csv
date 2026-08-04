@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"HOLD_REASON"	"ROWID"	"int"	"NO"
+"dbo"	"HOLD_REASON"	"ID"	"nvarchar"	"NO"
+"dbo"	"HOLD_REASON"	"DESCRIPTION"	"nvarchar"	"NO"

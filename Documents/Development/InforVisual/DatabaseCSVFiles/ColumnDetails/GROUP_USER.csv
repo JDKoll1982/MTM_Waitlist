@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"GROUP_USER"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"GROUP_USER"	"2"	"GROUP_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"GROUP_USER"	"3"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"GROUP_USER"	"4"	"IS_LEADER"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"GROUP_USER"	"5"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"GROUP_USER"	"6"	"USER_SIGNOFF"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

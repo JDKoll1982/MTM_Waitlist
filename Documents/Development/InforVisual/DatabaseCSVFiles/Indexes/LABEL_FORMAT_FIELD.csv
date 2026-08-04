@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"LABEL_FORMAT_FIELD"	"PK_LABEL_FMT_FLD"	"CLUSTERED"	"YES"	"YES"	"LABEL_FIELD"	"1"	"NO"
+"LABEL_FORMAT_FIELD"	"PK_LABEL_FMT_FLD"	"CLUSTERED"	"YES"	"YES"	"LABEL_FORMAT_ID"	"2"	"NO"

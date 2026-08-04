@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"WORK_ORDER"	"DELETE_WORK_ORDER"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"WORK_ORDER"	"INSERT_WORK_ORDER"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"WORK_ORDER"	"UPDATE_WORK_ORDER"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"SITE"	"INSERT_SITE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"SITE"	"UPDATE_SITE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

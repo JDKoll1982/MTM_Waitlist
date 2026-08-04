@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"LANGUAGE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"LANGUAGE"	"2"	"id"	"nvarchar"	"2"	"0"	"0"	"NO"	"NO"	"NO"
+"LANGUAGE"	"3"	"description"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"

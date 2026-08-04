@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SHIFT_DAY"	"PK_SHIFT_DAY"	"CLUSTERED"	"YES"	"YES"	"SHIFT_ID"	"1"	"NO"
+"SHIFT_DAY"	"PK_SHIFT_DAY"	"CLUSTERED"	"YES"	"YES"	"SHIFT_CODE"	"2"	"NO"

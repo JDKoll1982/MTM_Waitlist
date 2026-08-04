@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"ENUM_CODES"	"ROWID"	"int"	"NO"
+"dbo"	"ENUM_CODES"	"TABLE_NAME"	"nvarchar"	"NO"
+"dbo"	"ENUM_CODES"	"COLUMN_NAME"	"nvarchar"	"NO"
+"dbo"	"ENUM_CODES"	"LANGUAGE_ID"	"nvarchar"	"NO"
+"dbo"	"ENUM_CODES"	"ENUM_TEXT"	"nvarchar"	"YES"
+"dbo"	"ENUM_CODES"	"ENUM_VALUE"	"nvarchar"	"NO"

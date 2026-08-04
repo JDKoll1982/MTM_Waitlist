@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"PAYABLE"	"DELETE_PAYABLE"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"PAYABLE"	"INSERT_PAYABLE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"PAYABLE"	"UPDATE_PAYABLE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

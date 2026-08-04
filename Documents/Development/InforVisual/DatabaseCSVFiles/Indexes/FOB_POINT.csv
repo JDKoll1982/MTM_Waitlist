@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"FOB_POINT"	"PK_FOB_POINT"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

@@ -1,0 +1,6 @@
+"Table"	"PrimaryKeyColumn"
+"WORK_ORDER"	"TYPE"
+"WORK_ORDER"	"BASE_ID"
+"WORK_ORDER"	"LOT_ID"
+"WORK_ORDER"	"SPLIT_ID"
+"WORK_ORDER"	"SUB_ID"

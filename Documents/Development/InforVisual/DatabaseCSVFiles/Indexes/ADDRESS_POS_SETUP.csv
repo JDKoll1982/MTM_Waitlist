@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ADDRESS_POS_SETUP"	"PK_ADDRESS_POS_SETUP"	"CLUSTERED"	"YES"	"YES"	"country"	"1"	"NO"
+"ADDRESS_POS_SETUP"	"PK_ADDRESS_POS_SETUP"	"CLUSTERED"	"YES"	"YES"	"field_no"	"2"	"NO"
+"ADDRESS_POS_SETUP"	"PK_ADDRESS_POS_SETUP"	"CLUSTERED"	"YES"	"YES"	"field_type"	"3"	"NO"

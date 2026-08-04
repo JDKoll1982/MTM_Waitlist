@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EQUIP_MAINT_DISC"	"ROWID"	"int"	"NO"
+"dbo"	"EQUIP_MAINT_DISC"	"maint_id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_MAINT_DISC"	"customer_id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_MAINT_DISC"	"DISCOUNT_PERCENT"	"decimal"	"YES"
+"dbo"	"EQUIP_MAINT_DISC"	"DISCOUNT_VALUE"	"decimal"	"YES"

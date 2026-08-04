@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0064"	"CUSTOMER_CONTACT"	"CUSTOMER_ID"	"CUSTOMER"	"ID"

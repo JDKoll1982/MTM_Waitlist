@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"RCR_RECV_SHARE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"RCR_RECV_SHARE"	"2"	"RCR_RECV_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"RCR_RECV_SHARE"	"3"	"SHARE_SALESREP_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"RCR_RECV_SHARE"	"4"	"SHARE_PERCENT"	"decimal"	"NULL"	"6"	"3"	"YES"	"NO"	"NO"

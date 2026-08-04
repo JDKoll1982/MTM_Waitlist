@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DEF_SHIPPING_LBL"	"PK_DEF_SHIPPING_LBL"	"CLUSTERED"	"YES"	"YES"	"PART_ID"	"1"	"NO"
+"DEF_SHIPPING_LBL"	"PK_DEF_SHIPPING_LBL"	"CLUSTERED"	"YES"	"YES"	"CUSTOMER_ID"	"2"	"NO"
+"DEF_SHIPPING_LBL"	"PK_DEF_SHIPPING_LBL"	"CLUSTERED"	"YES"	"YES"	"SHIPTO_ADDR_NO"	"3"	"NO"

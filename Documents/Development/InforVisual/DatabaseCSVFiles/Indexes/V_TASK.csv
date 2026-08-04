@@ -1,0 +1,6 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_TASK"	"X_V_TASK_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_TASK"	"X_V_TASK_1"	"NONCLUSTERED"	"NO"	"NO"	"ACCT_ID"	"1"	"NO"
+"V_TASK"	"X_V_TASK_2"	"NONCLUSTERED"	"NO"	"NO"	"CONTACT_ID"	"1"	"NO"
+"V_TASK"	"X_V_TASK_3"	"NONCLUSTERED"	"NO"	"NO"	"REL_TYPE"	"1"	"NO"
+"V_TASK"	"X_V_TASK_4"	"NONCLUSTERED"	"NO"	"NO"	"REL_ID"	"1"	"NO"

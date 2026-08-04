@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"WAREHOUSE"	"PK_WAREHOUSE"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"WAREHOUSE"	"X_WAREHOUSE_1"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"

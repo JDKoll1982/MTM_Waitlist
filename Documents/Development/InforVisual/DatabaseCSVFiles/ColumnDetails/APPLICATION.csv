@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"APPLICATION"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"APPLICATION"	"2"	"PROGRAM_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"APPLICATION"	"3"	"LANGUAGE_ID"	"nvarchar"	"3"	"0"	"0"	"NO"	"NO"	"NO"
+"APPLICATION"	"4"	"MENU_STRING"	"nvarchar"	"40"	"0"	"0"	"NO"	"NO"	"NO"
+"APPLICATION"	"5"	"TYPE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"APPLICATION"	"6"	"CMD_LINE_ARGS"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"
+"APPLICATION"	"7"	"MODULE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

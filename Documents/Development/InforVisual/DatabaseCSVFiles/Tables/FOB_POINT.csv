@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"FOB_POINT"	"ROWID"	"int"	"NO"
+"dbo"	"FOB_POINT"	"CODE"	"nvarchar"	"NO"
+"dbo"	"FOB_POINT"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"FOB_POINT"	"INTRANSIT_OWNER"	"nvarchar"	"YES"

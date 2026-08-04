@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_AMTS_PENDING_TRANS_00"	"AMTS_PENDING_TRANS"	"DEVIATION_ID"	"DEVIATION_REASON"	"ID"

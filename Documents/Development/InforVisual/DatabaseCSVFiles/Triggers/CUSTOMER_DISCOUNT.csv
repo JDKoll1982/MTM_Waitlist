@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"CUSTOMER_DISCOUNT"	"UPDATE_CUSTOMER_DISCOUNT"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

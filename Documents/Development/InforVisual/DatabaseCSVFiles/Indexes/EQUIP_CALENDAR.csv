@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"EQUIP_CALENDAR"	"X_EQB_CALENDAR_0"	"NONCLUSTERED"	"YES"	"NO"	"SITE_ID"	"1"	"NO"
+"EQUIP_CALENDAR"	"X_EQB_CALENDAR_0"	"NONCLUSTERED"	"YES"	"NO"	"RESOURCE_ID"	"2"	"NO"
+"EQUIP_CALENDAR"	"X_EQB_CALENDAR_0"	"NONCLUSTERED"	"YES"	"NO"	"DAY_OF_WEEK"	"3"	"NO"

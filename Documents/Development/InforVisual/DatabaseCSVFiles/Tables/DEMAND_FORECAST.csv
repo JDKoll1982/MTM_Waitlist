@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"DEMAND_FORECAST"	"ROWID"	"int"	"NO"
+"dbo"	"DEMAND_FORECAST"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"DEMAND_FORECAST"	"REQUIRED_DATE"	"datetime"	"NO"
+"dbo"	"DEMAND_FORECAST"	"REQUIRED_QTY"	"decimal"	"NO"
+"dbo"	"DEMAND_FORECAST"	"WAREHOUSE_ID"	"nvarchar"	"YES"
+"dbo"	"DEMAND_FORECAST"	"SITE_ID"	"nvarchar"	"NO"

@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"RMA_SYNC"	"CREATE_DATE"	"DF__RMA_SYNC__CREATE__50335F29"	"NULL"
+"RMA_SYNC"	"SUBSCRIPTIONS"	"DF__RMA_SYNC__SUBSCR__51278362"	"NULL"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_BOOK_SUM"	"EX_BOOK_SUM"	"NONCLUSTERED"	"YES"	"NO"	"eis_date"	"1"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"USER_DIMENSION_SETUP"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"USER_DIMENSION_SETUP"	"2"	"DIMENSION"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"USER_DIMENSION_SETUP"	"3"	"DIMENSION_LABEL"	"nvarchar"	"25"	"0"	"0"	"YES"	"NO"	"NO"

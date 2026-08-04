@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TMP_KREI_3912"	"X_TMP_KREI_3912"	"NONCLUSTERED"	"NO"	"NO"	"tmp_part_id"	"1"	"NO"
+"TMP_KREI_3912"	"X_TMP_KREI_3912"	"NONCLUSTERED"	"NO"	"NO"	"tmp_eng_id"	"2"	"NO"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_GRID_CFG_TO_DATA_SRC"	"VR_GRID_CONFIG"	"DATA_SOURCE_ID"	"VR_DATA_SOURCE"	"ID"

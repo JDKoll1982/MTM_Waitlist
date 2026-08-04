@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"RECEIVABLE_SCHED"	"AMOUNT"	"DF__RECEIVABL__AMOUN__0F59C005"	"NULL"

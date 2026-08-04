@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_RPT_OPT"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_RPT_OPT"	"RPT_TYPE"	"nvarchar"	"YES"
+"dbo"	"V_RPT_OPT"	"RPT_SUB_TYPE"	"nvarchar"	"YES"
+"dbo"	"V_RPT_OPT"	"RPT_SECTION"	"nvarchar"	"YES"
+"dbo"	"V_RPT_OPT"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_RPT_OPT"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_RPT_OPT"	"CREATE_DATE"	"datetime"	"YES"

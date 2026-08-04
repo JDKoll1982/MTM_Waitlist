@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CASH_PLAN_LINE"	"PK_CASH_PLAN_LINE"	"CLUSTERED"	"YES"	"YES"	"CASH_PLAN_ID"	"1"	"NO"
+"CASH_PLAN_LINE"	"PK_CASH_PLAN_LINE"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"

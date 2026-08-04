@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"EQUIP_PART_PRICE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"EQUIP_PART_PRICE"	"2"	"id"	"nvarchar"	"10"	"0"	"0"	"NO"	"NO"	"NO"
+"EQUIP_PART_PRICE"	"3"	"part_id"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"EQUIP_PART_PRICE"	"4"	"price"	"decimal"	"NULL"	"22"	"8"	"YES"	"NO"	"NO"
+"EQUIP_PART_PRICE"	"5"	"discount"	"decimal"	"NULL"	"14"	"4"	"YES"	"NO"	"NO"

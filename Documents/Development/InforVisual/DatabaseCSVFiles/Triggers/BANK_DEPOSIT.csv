@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"BANK_DEPOSIT"	"INSERT_BANK_DEPOSIT"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"BANK_DEPOSIT"	"UPDATE_BANK_DEPOSIT"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

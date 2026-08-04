@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"USER_DIM_PROC_PRI"	"ROWID"	"int"	"NO"
+"dbo"	"USER_DIM_PROC_PRI"	"DIMENSION"	"smallint"	"NO"
+"dbo"	"USER_DIM_PROC_PRI"	"PROCESS_TYPE"	"nvarchar"	"NO"
+"dbo"	"USER_DIM_PROC_PRI"	"SOURCE_TYPE"	"nvarchar"	"NO"
+"dbo"	"USER_DIM_PROC_PRI"	"DR_PROCESS_ORDER"	"smallint"	"YES"
+"dbo"	"USER_DIM_PROC_PRI"	"CR_PROCESS_ORDER"	"smallint"	"YES"

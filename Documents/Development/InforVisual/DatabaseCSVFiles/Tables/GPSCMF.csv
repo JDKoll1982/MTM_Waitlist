@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"GPSCMF"	"ROWID"	"int"	"NO"
+"dbo"	"GPSCMF"	"GCBOID"	"nvarchar"	"YES"
+"dbo"	"GPSCMF"	"GCBOVL"	"nvarchar"	"YES"
+"dbo"	"GPSCMF"	"GCLNID"	"nvarchar"	"YES"
+"dbo"	"GPSCMF"	"GCBODS"	"nvarchar"	"YES"

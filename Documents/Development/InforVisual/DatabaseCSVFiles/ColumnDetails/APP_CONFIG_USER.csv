@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"APP_CONFIG_USER"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"APP_CONFIG_USER"	"2"	"ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"APP_CONFIG_USER"	"3"	"PROGRAM_ID"	"nvarchar"	"80"	"0"	"0"	"NO"	"NO"	"NO"
+"APP_CONFIG_USER"	"4"	"USER_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"APP_CONFIG_USER"	"5"	"DEFAULT_APP_CONFIG_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"RECV_LINE_BINARY"	"ROWID"	"int"	"NO"
+"dbo"	"RECV_LINE_BINARY"	"INVOICE_ID"	"nvarchar"	"NO"
+"dbo"	"RECV_LINE_BINARY"	"RECV_LINE_NO"	"smallint"	"NO"
+"dbo"	"RECV_LINE_BINARY"	"TYPE"	"nchar"	"NO"
+"dbo"	"RECV_LINE_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"RECV_LINE_BINARY"	"BITS_LENGTH"	"int"	"NO"

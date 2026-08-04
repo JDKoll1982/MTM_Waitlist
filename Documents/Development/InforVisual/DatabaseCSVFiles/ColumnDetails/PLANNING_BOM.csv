@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PLANNING_BOM"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PLANNING_BOM"	"2"	"PARENT_PLN_PART_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"PLANNING_BOM"	"3"	"SUBORD_PLN_PART_ID"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"
+"PLANNING_BOM"	"4"	"SUBORD_PART_ID"	"nvarchar"	"30"	"0"	"0"	"YES"	"NO"	"NO"
+"PLANNING_BOM"	"5"	"PERCENT_PER"	"decimal"	"NULL"	"12"	"6"	"YES"	"NO"	"NO"
+"PLANNING_BOM"	"6"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"

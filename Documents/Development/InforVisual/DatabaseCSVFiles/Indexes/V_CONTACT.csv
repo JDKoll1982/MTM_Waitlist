@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CONTACT"	"X_V_CONTACT_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_CONTACT"	"X_V_CONTACT_1"	"NONCLUSTERED"	"NO"	"NO"	"ACCT_ID"	"1"	"NO"
+"V_CONTACT"	"X_V_CONTACT_2"	"NONCLUSTERED"	"NO"	"NO"	"BUS_PHONE"	"1"	"NO"

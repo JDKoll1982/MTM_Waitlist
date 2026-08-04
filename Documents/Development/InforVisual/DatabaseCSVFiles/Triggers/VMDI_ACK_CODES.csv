@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"VMDI_ACK_CODES"	"UPDATE_VMDI_ACK_CODES"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

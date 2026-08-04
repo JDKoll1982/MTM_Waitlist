@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00235"	"V_CAL_BINARY"	"CAL_ID"	"V_CALENDAR"	"ID"

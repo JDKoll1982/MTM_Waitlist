@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"E_APP_USERS"	"rowid"	"int"	"NO"
+"dbo"	"E_APP_USERS"	"name"	"nvarchar"	"YES"
+"dbo"	"E_APP_USERS"	"sales"	"nchar"	"YES"
+"dbo"	"E_APP_USERS"	"purchases"	"nchar"	"YES"
+"dbo"	"E_APP_USERS"	"production"	"nchar"	"YES"
+"dbo"	"E_APP_USERS"	"financials"	"nchar"	"YES"

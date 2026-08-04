@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_USAGE_ANAL_TO_SITE"	"USAGE_ANALYSIS"	"SITE_ID"	"SITE"	"ID"

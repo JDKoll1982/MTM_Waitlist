@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_RIGHTS"	"X_V_RIGHTS_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_RIGHTS"	"X_V_RIGHTS_0"	"CLUSTERED"	"YES"	"YES"	"VFO_USER_ID"	"2"	"NO"

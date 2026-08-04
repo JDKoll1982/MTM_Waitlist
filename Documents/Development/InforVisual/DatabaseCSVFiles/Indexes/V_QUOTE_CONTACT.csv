@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_QUOTE_CONTACT"	"X_V_QUOTE_CONTACT_0"	"CLUSTERED"	"YES"	"YES"	"QUOTE_ID"	"1"	"NO"
+"V_QUOTE_CONTACT"	"X_V_QUOTE_CONTACT_0"	"CLUSTERED"	"YES"	"YES"	"CONTACT_ID"	"2"	"NO"

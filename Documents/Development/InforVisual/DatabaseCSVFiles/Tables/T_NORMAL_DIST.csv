@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"T_NORMAL_DIST"	"ROWID"	"int"	"NO"
+"dbo"	"T_NORMAL_DIST"	"T"	"decimal"	"NO"
+"dbo"	"T_NORMAL_DIST"	"OUTSIDE_OF_LIM"	"decimal"	"NO"

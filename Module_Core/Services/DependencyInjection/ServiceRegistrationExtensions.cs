@@ -6,8 +6,6 @@ using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Core.Services.DependencyInjection;
-using MTM_Waitlist.Module_DevTools.ViewModels;
-using MTM_Waitlist.Module_DevTools.Views;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Settings.Views;
@@ -50,6 +48,7 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<INavigationViewService, NavigationViewService>();
         services.AddSingleton<IActivationService, ActivationService>();
         services.AddSingleton<IPageService, PageService>();
+        services.AddSingleton<IPageTransitionService, PageTransitionService>();
         services.AddSingleton<INavigationService, NavigationService>();
 
         // Core services
@@ -60,16 +59,13 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<SplashViewModel>();
         services.AddTransient<LoginViewModel>();
         services.AddTransient<SettingsViewModel>();
+        services.AddTransient<LoginWindow>();
         services.AddTransient<LoginPage>();
         services.AddTransient<SettingsPage>();
-        services.AddTransient<DeveloperModeViewModel>();
-        services.AddTransient<DeveloperModePage>();
         services.AddTransient<WaitlistViewDetailViewModel>();
         services.AddTransient<WaitlistViewDetailPage>();
         services.AddTransient<WaitlistViewViewModel>();
         services.AddTransient<WaitlistViewPage>();
-        services.AddTransient<RequestTypeBuilderViewModel>();
-        services.AddTransient<RequestTypeBuilderPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();
 

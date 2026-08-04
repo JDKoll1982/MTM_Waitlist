@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"RATE_DETAIL"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"RATE_DETAIL"	"2"	"RATE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"RATE_DETAIL"	"3"	"PERIOD_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"RATE_DETAIL"	"4"	"COST_CATEGORY_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"RATE_DETAIL"	"5"	"RATE"	"decimal"	"NULL"	"15"	"8"	"NO"	"NO"	"NO"
+"RATE_DETAIL"	"6"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"

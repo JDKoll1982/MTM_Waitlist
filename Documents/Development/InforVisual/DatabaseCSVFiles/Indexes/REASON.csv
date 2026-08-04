@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"REASON"	"PK_REASON"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"1"	"NO"
+"REASON"	"PK_REASON"	"CLUSTERED"	"YES"	"YES"	"CODE"	"2"	"NO"

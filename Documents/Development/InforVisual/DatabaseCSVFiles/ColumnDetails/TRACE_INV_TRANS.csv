@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"TRACE_INV_TRANS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"TRACE_INV_TRANS"	"2"	"PART_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"TRACE_INV_TRANS"	"3"	"TRACE_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"TRACE_INV_TRANS"	"4"	"TRANSACTION_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"TRACE_INV_TRANS"	"5"	"QTY"	"decimal"	"NULL"	"20"	"8"	"NO"	"NO"	"NO"
+"TRACE_INV_TRANS"	"6"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"TRACE_INV_TRANS"	"7"	"COSTED_QTY"	"decimal"	"NULL"	"20"	"8"	"NO"	"NO"	"NO"

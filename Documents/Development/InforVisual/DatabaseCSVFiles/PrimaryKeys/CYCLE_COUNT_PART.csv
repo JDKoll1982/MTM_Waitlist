@@ -1,0 +1,3 @@
+"Table"	"PrimaryKeyColumn"
+"CYCLE_COUNT_PART"	"PART_ID"
+"CYCLE_COUNT_PART"	"WAREHOUSE_ID"

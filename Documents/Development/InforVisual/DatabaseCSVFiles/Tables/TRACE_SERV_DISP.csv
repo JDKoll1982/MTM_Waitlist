@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TRACE_SERV_DISP"	"ROWID"	"int"	"NO"
+"dbo"	"TRACE_SERV_DISP"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"TRACE_SERV_DISP"	"TRACE_ID"	"nvarchar"	"NO"
+"dbo"	"TRACE_SERV_DISP"	"DISPATCH_ID"	"nvarchar"	"NO"
+"dbo"	"TRACE_SERV_DISP"	"DISP_LINE_NO"	"smallint"	"NO"
+"dbo"	"TRACE_SERV_DISP"	"DISPATCH_QTY"	"decimal"	"NO"
+"dbo"	"TRACE_SERV_DISP"	"CREATE_DATE"	"datetime"	"NO"

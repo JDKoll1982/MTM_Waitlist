@@ -204,6 +204,12 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
             StartupDebugLog.Info("SplashViewModel", "Startup succeeded; transitioning to main mode.");
             try
             {
+                if (string.Equals(result.RouteTarget, typeof(LoginViewModel).FullName, StringComparison.Ordinal))
+                {
+                    App.ShowLoginWindowAndCloseSplash();
+                    return;
+                }
+
                 await _startupShellStateService.EnterMainModeAsync();
                 _navigationService.NavigateTo(result.RouteTarget, null, true);
                 App.ShowMainWindowAndCloseSplash();

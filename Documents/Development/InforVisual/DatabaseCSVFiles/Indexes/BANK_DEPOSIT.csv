@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"BANK_DEPOSIT"	"PK_BANK_DEPOSIT"	"CLUSTERED"	"YES"	"YES"	"BANK_ACCOUNT_ID"	"1"	"NO"
+"BANK_DEPOSIT"	"PK_BANK_DEPOSIT"	"CLUSTERED"	"YES"	"YES"	"DEPOSIT_ID"	"2"	"NO"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0030"	"UNITS_CONVERSION"	"FROM_UM"	"UNITS"	"UNIT_OF_MEASURE"

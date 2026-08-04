@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_USER_SALESREP"	"X_V_USER_SR_0"	"CLUSTERED"	"YES"	"YES"	"USER_ID"	"1"	"NO"
+"V_USER_SALESREP"	"X_V_USER_SR_0"	"CLUSTERED"	"YES"	"YES"	"SALESREP_ID"	"2"	"NO"

@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EQUIP_PART_PRICE"	"ROWID"	"int"	"NO"
+"dbo"	"EQUIP_PART_PRICE"	"id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_PART_PRICE"	"part_id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_PART_PRICE"	"price"	"decimal"	"YES"
+"dbo"	"EQUIP_PART_PRICE"	"discount"	"decimal"	"YES"

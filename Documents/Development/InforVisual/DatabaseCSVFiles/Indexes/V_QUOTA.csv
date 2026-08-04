@@ -1,0 +1,6 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_QUOTA"	"X_V_QUOTA_0"	"CLUSTERED"	"YES"	"YES"	"REPORTING_TYPE"	"1"	"NO"
+"V_QUOTA"	"X_V_QUOTA_0"	"CLUSTERED"	"YES"	"YES"	"REPORTING_ID"	"2"	"NO"
+"V_QUOTA"	"X_V_QUOTA_0"	"CLUSTERED"	"YES"	"YES"	"STAGE_ID"	"3"	"NO"
+"V_QUOTA"	"X_V_QUOTA_0"	"CLUSTERED"	"YES"	"YES"	"YEAR"	"4"	"NO"
+"V_QUOTA"	"X_V_QUOTA_0"	"CLUSTERED"	"YES"	"YES"	"MONTH"	"5"	"NO"

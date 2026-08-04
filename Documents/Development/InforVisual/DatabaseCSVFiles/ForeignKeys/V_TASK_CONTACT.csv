@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00128"	"V_TASK_CONTACT"	"CONTACT_ID"	"V_CONTACT"	"ID"
+"FK_VFO_00047"	"V_TASK_CONTACT"	"TASK_ID"	"V_TASK"	"ID"

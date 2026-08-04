@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"REVENUE_DETAIL"	"PK_REVENUE_DETAIL"	"CLUSTERED"	"YES"	"YES"	"REV_DIST_ID"	"1"	"NO"
+"REVENUE_DETAIL"	"PK_REVENUE_DETAIL"	"CLUSTERED"	"YES"	"YES"	"PROJECT_ID"	"2"	"NO"
+"REVENUE_DETAIL"	"PK_REVENUE_DETAIL"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"3"	"NO"

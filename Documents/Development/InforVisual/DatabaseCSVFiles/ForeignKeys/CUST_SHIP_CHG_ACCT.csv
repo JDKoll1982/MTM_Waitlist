@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_CUST_SHIP_CHG_ACCT_CUST"	"CUST_SHIP_CHG_ACCT"	"CUSTOMER_ID"	"CUSTOMER"	"ID"

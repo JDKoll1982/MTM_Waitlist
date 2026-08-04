@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PART_WHS_BUF_PROFILE"	"PART_WAREHOUSE"	"BUFFER_PROFILE_ID"	"BUFFER_PROFILE"	"ID"

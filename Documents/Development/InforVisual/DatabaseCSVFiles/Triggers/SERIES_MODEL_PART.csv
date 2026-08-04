@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"SERIES_MODEL_PART"	"UPDATE_SERIES_MODEL_PART"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

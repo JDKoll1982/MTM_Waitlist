@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DEVIATION_REASON"	"PK_DEVIATION_REASON"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

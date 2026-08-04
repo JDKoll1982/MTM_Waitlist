@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"MASTER_PROD_SCHED"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"MASTER_PROD_SCHED"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"MASTER_PROD_SCHED"	"3"	"DESCRIPTION"	"nvarchar"	"40"	"0"	"0"	"NO"	"NO"	"NO"
+"MASTER_PROD_SCHED"	"4"	"RANK"	"smallint"	"NULL"	"5"	"0"	"YES"	"NO"	"NO"

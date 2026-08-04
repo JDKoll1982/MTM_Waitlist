@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"DOCUMENT_EML_AUDIT"	"EMAIL_DATE"	"DF__DOCUMENT___EMAIL__02F4B477"	"NULL"

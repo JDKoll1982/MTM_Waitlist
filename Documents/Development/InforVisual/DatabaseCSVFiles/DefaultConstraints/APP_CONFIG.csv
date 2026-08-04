@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"APP_CONFIG"	"LOCKED"	"DF__APP_CONFI__LOCKE__09D6BC30"	"NULL"
+"APP_CONFIG"	"SHARED"	"DF__APP_CONFI__SHARE__0ACAE069"	"NULL"

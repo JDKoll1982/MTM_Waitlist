@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"CUST_ORDL_WIP_VAS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"CUST_ORDL_WIP_VAS"	"2"	"CUST_ORDER_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"CUST_ORDL_WIP_VAS"	"3"	"CUST_ORDER_LINE_NO"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"CUST_ORDL_WIP_VAS"	"4"	"WIP_VAS_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"CUST_ORDL_WIP_VAS"	"5"	"WIP_VAS_UNIT_PRICE"	"decimal"	"NULL"	"22"	"8"	"NO"	"NO"	"NO"
+"CUST_ORDL_WIP_VAS"	"6"	"LONG_DESCRIPTION"	"image"	"NULL"	"0"	"0"	"YES"	"NO"	"NO"

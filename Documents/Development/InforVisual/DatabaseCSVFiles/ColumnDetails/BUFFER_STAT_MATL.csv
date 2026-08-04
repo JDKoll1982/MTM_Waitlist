@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"BUFFER_STAT_MATL"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"BUFFER_STAT_MATL"	"2"	"BUFFER_STATUS_ID"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"BUFFER_STAT_MATL"	"3"	"SUPPLY_TYPE"	"nvarchar"	"2"	"0"	"0"	"NO"	"NO"	"NO"
+"BUFFER_STAT_MATL"	"4"	"SUPPLY_BASE_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"BUFFER_STAT_MATL"	"5"	"SUPPLY_SEQ_NO"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"BUFFER_STAT_MATL"	"6"	"SUPPLY_NO"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"

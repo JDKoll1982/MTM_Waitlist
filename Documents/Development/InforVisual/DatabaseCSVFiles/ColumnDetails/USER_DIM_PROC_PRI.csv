@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"USER_DIM_PROC_PRI"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"USER_DIM_PROC_PRI"	"2"	"DIMENSION"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"USER_DIM_PROC_PRI"	"3"	"PROCESS_TYPE"	"nvarchar"	"5"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_DIM_PROC_PRI"	"4"	"SOURCE_TYPE"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_DIM_PROC_PRI"	"5"	"DR_PROCESS_ORDER"	"smallint"	"NULL"	"5"	"0"	"YES"	"NO"	"NO"
+"USER_DIM_PROC_PRI"	"6"	"CR_PROCESS_ORDER"	"smallint"	"NULL"	"5"	"0"	"YES"	"NO"	"NO"

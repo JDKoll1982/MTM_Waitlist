@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"CASH_DISBURSE_CURR"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"CASH_DISBURSE_CURR"	"2"	"BANK_ACCOUNT_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"CASH_DISBURSE_CURR"	"3"	"CONTROL_NO"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"CASH_DISBURSE_CURR"	"4"	"CURRENCY_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"CASH_DISBURSE_CURR"	"5"	"AMOUNT"	"decimal"	"NULL"	"23"	"8"	"NO"	"NO"	"NO"
+"CASH_DISBURSE_CURR"	"6"	"SELL_RATE"	"decimal"	"NULL"	"15"	"8"	"NO"	"NO"	"NO"
+"CASH_DISBURSE_CURR"	"7"	"BUY_RATE"	"decimal"	"NULL"	"15"	"8"	"NO"	"NO"	"NO"

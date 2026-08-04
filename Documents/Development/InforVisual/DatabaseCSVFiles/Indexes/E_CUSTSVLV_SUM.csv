@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_CUSTSVLV_SUM"	"EX_CUSTSVLV_SUM"	"NONCLUSTERED"	"NO"	"NO"	"eis_date"	"1"	"NO"

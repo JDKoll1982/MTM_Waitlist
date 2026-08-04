@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"APP_CONFIG_USER"	"ROWID"	"int"	"NO"
+"dbo"	"APP_CONFIG_USER"	"ID"	"int"	"NO"
+"dbo"	"APP_CONFIG_USER"	"PROGRAM_ID"	"nvarchar"	"NO"
+"dbo"	"APP_CONFIG_USER"	"USER_ID"	"nvarchar"	"NO"
+"dbo"	"APP_CONFIG_USER"	"DEFAULT_APP_CONFIG_ID"	"int"	"NO"

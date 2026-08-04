@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"VAT_CATEGORY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"VAT_CATEGORY"	"2"	"id"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"VAT_CATEGORY"	"3"	"category_type"	"nvarchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"VAT_CATEGORY"	"4"	"description"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"

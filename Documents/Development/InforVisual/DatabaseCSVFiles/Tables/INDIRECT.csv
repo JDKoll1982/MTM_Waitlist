@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"INDIRECT"	"ROWID"	"int"	"NO"
+"dbo"	"INDIRECT"	"ID"	"nvarchar"	"NO"
+"dbo"	"INDIRECT"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"INDIRECT"	"GL_ACCOUNT_ID"	"nvarchar"	"NO"
+"dbo"	"INDIRECT"	"INDIRECT_CODE"	"nchar"	"NO"

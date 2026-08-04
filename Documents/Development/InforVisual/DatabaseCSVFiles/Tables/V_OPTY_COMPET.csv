@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_OPTY_COMPET"	"OPTY_ID"	"nvarchar"	"NO"
+"dbo"	"V_OPTY_COMPET"	"ACCT_ID"	"nvarchar"	"NO"
+"dbo"	"V_OPTY_COMPET"	"COMMENTS"	"nvarchar"	"YES"
+"dbo"	"V_OPTY_COMPET"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_OPTY_COMPET"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_OPTY_COMPET"	"CREATE_DATE"	"datetime"	"YES"

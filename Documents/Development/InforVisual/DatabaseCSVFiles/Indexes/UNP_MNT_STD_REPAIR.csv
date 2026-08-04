@@ -1,0 +1,7 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"UNP_MNT_STD_REPAIR"	"pk_mnt_std_repair"	"CLUSTERED"	"YES"	"YES"	"equipment_type"	"1"	"NO"
+"UNP_MNT_STD_REPAIR"	"pk_mnt_std_repair"	"CLUSTERED"	"YES"	"YES"	"equipment_model"	"2"	"NO"
+"UNP_MNT_STD_REPAIR"	"pk_mnt_std_repair"	"CLUSTERED"	"YES"	"YES"	"fault_type"	"3"	"NO"
+"UNP_MNT_STD_REPAIR"	"pk_mnt_std_repair"	"CLUSTERED"	"YES"	"YES"	"fault_code"	"4"	"NO"
+"UNP_MNT_STD_REPAIR"	"pk_mnt_std_repair"	"CLUSTERED"	"YES"	"YES"	"part_id"	"5"	"NO"
+"UNP_MNT_STD_REPAIR"	"pk_mnt_std_repair"	"CLUSTERED"	"YES"	"YES"	"engineer_master"	"6"	"NO"

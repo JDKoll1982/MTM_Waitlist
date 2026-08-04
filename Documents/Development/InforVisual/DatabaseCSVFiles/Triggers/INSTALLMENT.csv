@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"INSTALLMENT"	"V_AI_INSTALLMENT"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"INSTALLMENT"	"V_AU_INSTALLMENT"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"
+"INSTALLMENT"	"V_DE_INSTALLMENT"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"

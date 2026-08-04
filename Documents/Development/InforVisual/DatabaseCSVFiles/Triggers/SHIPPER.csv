@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"SHIPPER"	"DELETE_SHIPPER"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"SHIPPER"	"INSERT_SHIPPER"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"SHIPPER"	"UPDATE_SHIPPER"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

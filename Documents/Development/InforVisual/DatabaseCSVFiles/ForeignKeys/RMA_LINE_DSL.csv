@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_RMA_LINE_DSL_RMA_LINE"	"RMA_LINE_DSL"	"RMA_ID"	"RMA_LINE"	"RMA_ID"
+"FK_RMA_LINE_DSL_RMA_LINE"	"RMA_LINE_DSL"	"RMA_LINE_NO"	"RMA_LINE"	"LINE_NO"

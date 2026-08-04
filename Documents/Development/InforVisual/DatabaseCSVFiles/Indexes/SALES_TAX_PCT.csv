@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SALES_TAX_PCT"	"PK_SALES_TAX_PCT"	"CLUSTERED"	"YES"	"YES"	"SALES_TAX_ID"	"1"	"NO"
+"SALES_TAX_PCT"	"PK_SALES_TAX_PCT"	"CLUSTERED"	"YES"	"YES"	"EFFECTIVE_DATE"	"2"	"NO"

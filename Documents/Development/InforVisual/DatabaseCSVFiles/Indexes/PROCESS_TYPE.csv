@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"PROCESS_TYPE"	"PK_PROCESS_TYPE"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"1"	"NO"
+"PROCESS_TYPE"	"PK_PROCESS_TYPE"	"CLUSTERED"	"YES"	"YES"	"ID"	"2"	"NO"

@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"ACCOUNT_GROUP"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"ACCOUNT_GROUP"	"2"	"GROUP_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"ACCOUNT_GROUP"	"3"	"ACCOUNT_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"ACCOUNT_GROUP"	"4"	"ADD_ASSET_EXPENSE"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

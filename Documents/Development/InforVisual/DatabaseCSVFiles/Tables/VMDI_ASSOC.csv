@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"VMDI_ASSOC"	"ROWID"	"int"	"NO"
+"dbo"	"VMDI_ASSOC"	"LAYOUT_KEY"	"nchar"	"NO"
+"dbo"	"VMDI_ASSOC"	"LAYOUT_VERSION"	"nchar"	"NO"
+"dbo"	"VMDI_ASSOC"	"LAYOUT_DIRECTION"	"nchar"	"NO"
+"dbo"	"VMDI_ASSOC"	"TABLE_NAME"	"nvarchar"	"NO"
+"dbo"	"VMDI_ASSOC"	"TABLE_KEY"	"nvarchar"	"NO"

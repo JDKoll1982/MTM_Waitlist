@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"BANK_ADJUSTMENT"	"CREATE_DATE"	"DF__BANK_ADJU__CREAT__4E602550"	"NULL"

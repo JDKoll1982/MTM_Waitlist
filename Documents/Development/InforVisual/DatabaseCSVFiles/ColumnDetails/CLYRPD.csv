@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"CLYRPD"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"CLYRPD"	"2"	"YQDATE"	"decimal"	"NULL"	"7"	"0"	"YES"	"NO"	"NO"
+"CLYRPD"	"3"	"YQYEAR"	"decimal"	"NULL"	"3"	"0"	"YES"	"NO"	"NO"
+"CLYRPD"	"4"	"YQPERD"	"decimal"	"NULL"	"2"	"0"	"YES"	"NO"	"NO"
+"CLYRPD"	"5"	"YQDTMT"	"decimal"	"NULL"	"7"	"0"	"YES"	"NO"	"NO"
+"CLYRPD"	"6"	"YQBLNK"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"

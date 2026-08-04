@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"NMFC_CODE_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"NMFC_CODE_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"NMFC_CODE_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"NMFC_CODE_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"NMFC_CODE_SYNC"	"NMFC_CODE_ID"	"nvarchar"	"NO"
+"dbo"	"NMFC_CODE_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"NMFC_CODE_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

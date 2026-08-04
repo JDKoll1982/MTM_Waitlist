@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RECEIVABLE_CURR"	"PK_RECEIVABLE_CURR"	"CLUSTERED"	"YES"	"YES"	"INVOICE_ID"	"1"	"NO"
+"RECEIVABLE_CURR"	"PK_RECEIVABLE_CURR"	"CLUSTERED"	"YES"	"YES"	"CURRENCY_ID"	"2"	"NO"

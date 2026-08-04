@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_PURC_REQ_CURR_00"	"PURC_REQ_CURR"	"CURRENCY_ID"	"CURRENCY"	"ID"
+"FK_PURC_REQ_CURR_01"	"PURC_REQ_CURR"	"PURC_REQ_ID"	"PURC_REQUISITION"	"ID"

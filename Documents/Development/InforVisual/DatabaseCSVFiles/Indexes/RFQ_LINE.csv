@@ -1,0 +1,6 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RFQ_LINE"	"PK_RFQ_LINE"	"CLUSTERED"	"YES"	"YES"	"RFQ_ID"	"1"	"NO"
+"RFQ_LINE"	"PK_RFQ_LINE"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"
+"RFQ_LINE"	"X_RFQ_LINE_1"	"NONCLUSTERED"	"NO"	"NO"	"PART_ID"	"1"	"NO"
+"RFQ_LINE"	"X_RFQ_LINE_2"	"NONCLUSTERED"	"NO"	"NO"	"VENDOR_PART_ID"	"1"	"NO"
+"RFQ_LINE"	"X_RFQ_LINE_3"	"NONCLUSTERED"	"NO"	"NO"	"SERVICE_ID"	"1"	"NO"

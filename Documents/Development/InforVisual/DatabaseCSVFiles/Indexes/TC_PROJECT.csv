@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TC_PROJECT"	"PK_TC_PROJECT"	"CLUSTERED"	"YES"	"YES"	"TC_ID"	"1"	"NO"
+"TC_PROJECT"	"PK_TC_PROJECT"	"CLUSTERED"	"YES"	"YES"	"PROJECT_ID"	"2"	"NO"

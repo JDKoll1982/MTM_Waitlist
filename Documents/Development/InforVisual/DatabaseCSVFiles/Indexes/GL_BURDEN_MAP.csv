@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"GL_BURDEN_MAP"	"PK_GL_BURDEN_MAP"	"CLUSTERED"	"YES"	"YES"	"DEPARTMENT_ID"	"1"	"NO"
+"GL_BURDEN_MAP"	"PK_GL_BURDEN_MAP"	"CLUSTERED"	"YES"	"YES"	"PROJECT_TYPE"	"2"	"NO"
+"GL_BURDEN_MAP"	"PK_GL_BURDEN_MAP"	"CLUSTERED"	"YES"	"YES"	"COST_GROUP_ID"	"3"	"NO"

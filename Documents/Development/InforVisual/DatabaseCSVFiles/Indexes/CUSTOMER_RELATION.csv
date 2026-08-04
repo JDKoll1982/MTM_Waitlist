@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUSTOMER_RELATION"	"PK_CUSTOMER_RELATION"	"CLUSTERED"	"YES"	"YES"	"OWNER_CUST_ID"	"1"	"NO"
+"CUSTOMER_RELATION"	"PK_CUSTOMER_RELATION"	"CLUSTERED"	"YES"	"YES"	"SELL_TO_CUST_ID"	"2"	"NO"

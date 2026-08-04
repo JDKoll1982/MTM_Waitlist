@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0050"	"EMPLOYEE"	"EARNING_CODE_ID"	"EARNING_CODE"	"ID"
+"FKEY0263"	"EMPLOYEE"	"SHIFT_ID"	"SHIFT"	"ID"

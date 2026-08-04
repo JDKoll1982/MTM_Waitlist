@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SOA_CODE_MAP"	"LIST_ID"	"nvarchar"	"NO"
+"dbo"	"SOA_CODE_MAP"	"AGENCY_ID"	"nvarchar"	"NO"
+"dbo"	"SOA_CODE_MAP"	"SOA_CODE"	"nvarchar"	"NO"
+"dbo"	"SOA_CODE_MAP"	"VE_CODE"	"nvarchar"	"NO"
+"dbo"	"SOA_CODE_MAP"	"VE_CODE_DESC"	"nvarchar"	"YES"
+"dbo"	"SOA_CODE_MAP"	"ROWID"	"int"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SCHEDULE_GROUP"	"PK_SCHEDULE_GROUP"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"

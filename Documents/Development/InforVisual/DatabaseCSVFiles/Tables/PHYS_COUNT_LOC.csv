@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PHYS_COUNT_LOC"	"ROWID"	"int"	"NO"
+"dbo"	"PHYS_COUNT_LOC"	"PHYS_COUNT_ID"	"nvarchar"	"NO"
+"dbo"	"PHYS_COUNT_LOC"	"WAREHOUSE_ID"	"nvarchar"	"NO"
+"dbo"	"PHYS_COUNT_LOC"	"LOCATION_ID"	"nvarchar"	"NO"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"WIP_VAS"	"PK_WIP_VAS"	"CLUSTERED"	"YES"	"YES"	"WIP_VAS_ID"	"1"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CUSTOM_BINARY"	"X_V_CUSTOM_BIN_0"	"CLUSTERED"	"YES"	"YES"	"BUS_TYPE"	"1"	"NO"
+"V_CUSTOM_BINARY"	"X_V_CUSTOM_BIN_0"	"CLUSTERED"	"YES"	"YES"	"CUSTOM_ID"	"2"	"NO"
+"V_CUSTOM_BINARY"	"X_V_CUSTOM_BIN_0"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"3"	"NO"

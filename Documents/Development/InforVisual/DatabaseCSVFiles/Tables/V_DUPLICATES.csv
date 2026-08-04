@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_DUPLICATES"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_DUPLICATES"	"TYPE"	"nvarchar"	"NO"
+"dbo"	"V_DUPLICATES"	"TYPE_ID"	"nvarchar"	"NO"
+"dbo"	"V_DUPLICATES"	"LONG_DESC"	"nvarchar"	"YES"
+"dbo"	"V_DUPLICATES"	"REVIEWED"	"smallint"	"YES"
+"dbo"	"V_DUPLICATES"	"STATUS"	"nvarchar"	"YES"

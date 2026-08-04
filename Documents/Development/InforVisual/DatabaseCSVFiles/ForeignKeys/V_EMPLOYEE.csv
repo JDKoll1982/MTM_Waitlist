@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00108"	"V_EMPLOYEE"	"SRVC_AREA_ID"	"V_AREA"	"ID"
+"FK_VFO_00110"	"V_EMPLOYEE"	"SRVC_AREA_ID"	"V_SUB_AREA"	"AREA_ID"
+"FK_VFO_00110"	"V_EMPLOYEE"	"SRVC_SUB_AREA_ID"	"V_SUB_AREA"	"ID"

@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"T_SEC_APPROX_K1"	"ROWID"	"int"	"NO"
+"dbo"	"T_SEC_APPROX_K1"	"T"	"decimal"	"NO"
+"dbo"	"T_SEC_APPROX_K1"	"OUTSIDE_LIM1"	"decimal"	"NO"
+"dbo"	"T_SEC_APPROX_K1"	"OUTSIDE_LIM2"	"decimal"	"NO"

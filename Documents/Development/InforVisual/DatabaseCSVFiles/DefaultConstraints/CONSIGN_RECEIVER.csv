@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"CONSIGN_RECEIVER"	"CREATE_DATE"	"DF__CONSIGN_R__CREAT__0980EB1E"	"NULL"

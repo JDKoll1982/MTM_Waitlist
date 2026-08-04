@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"COR_OUTBOX_ENTRY"	"1"	"C_ID"	"bigint"	"NULL"	"19"	"0"	"NO"	"YES"	"NO"
+"COR_OUTBOX_ENTRY"	"2"	"C_XML"	"varbinary"	"NULL"	"0"	"0"	"YES"	"NO"	"NO"
+"COR_OUTBOX_ENTRY"	"3"	"C_TENANT_ID"	"nvarchar"	"250"	"0"	"0"	"NO"	"NO"	"NO"
+"COR_OUTBOX_ENTRY"	"4"	"C_MESSAGE_PRIORITY"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"
+"COR_OUTBOX_ENTRY"	"5"	"C_CREATED_DATE_TIME"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"
+"COR_OUTBOX_ENTRY"	"6"	"C_WAS_PROCESSED"	"int"	"NULL"	"10"	"0"	"NO"	"NO"	"NO"

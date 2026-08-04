@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PRODUCT_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"PRODUCT_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"PRODUCT_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"PRODUCT_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"PRODUCT_SYNC"	"PRODUCT_CODE"	"nvarchar"	"NO"
+"dbo"	"PRODUCT_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"PRODUCT_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PROJECT_TYPE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PROJECT_TYPE"	"2"	"CODE"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"PROJECT_TYPE"	"3"	"DESCRIPTION"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"
+"PROJECT_TYPE"	"4"	"USE_FOR_COMMERCIAL"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

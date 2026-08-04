@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"CUSTOMER_BOOKINGS"	"CREATE_DATE"	"DF__CUSTOMER___CREAT__4689F95E"	"NULL"

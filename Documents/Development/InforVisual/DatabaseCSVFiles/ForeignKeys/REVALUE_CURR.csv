@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9481"	"REVALUE_CURR"	"CURRENCY_ID"	"CURRENCY"	"ID"
+"FKEY9480"	"REVALUE_CURR"	"REVALUE_ID"	"REVALUE"	"ID"

@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"VMDI_SPECIAL_COLS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"VMDI_SPECIAL_COLS"	"2"	"LAYOUT_KEY"	"nchar"	"3"	"0"	"0"	"NO"	"NO"	"NO"
+"VMDI_SPECIAL_COLS"	"3"	"TABLE_NAME"	"nvarchar"	"18"	"0"	"0"	"NO"	"NO"	"NO"
+"VMDI_SPECIAL_COLS"	"4"	"COLUMN_NAME"	"nvarchar"	"18"	"0"	"0"	"NO"	"NO"	"NO"
+"VMDI_SPECIAL_COLS"	"5"	"SPECIAL_INST"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"
+"VMDI_SPECIAL_COLS"	"6"	"SEGMENT_TYPE"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

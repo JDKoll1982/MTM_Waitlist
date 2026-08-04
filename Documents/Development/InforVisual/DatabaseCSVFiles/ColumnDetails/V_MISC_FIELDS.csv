@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_MISC_FIELDS"	"1"	"IS_DELETED"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"V_MISC_FIELDS"	"2"	"EDIT_FROM_DETAIL"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"V_MISC_FIELDS"	"3"	"BINARY_CHANGED"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"V_MISC_FIELDS"	"4"	"IS_DIRTY"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"V_MISC_FIELDS"	"5"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

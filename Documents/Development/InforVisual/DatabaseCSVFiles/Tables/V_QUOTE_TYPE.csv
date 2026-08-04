@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_QUOTE_TYPE"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_QUOTE_TYPE"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_QUOTE_TYPE"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_QUOTE_TYPE"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_QUOTE_TYPE"	"CREATE_DATE"	"datetime"	"YES"

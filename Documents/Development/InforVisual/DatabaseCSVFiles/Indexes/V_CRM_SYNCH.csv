@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CRM_SYNCH"	"X_V_CRM_SYNCH0"	"CLUSTERED"	"YES"	"YES"	"CUSTOMER_ID"	"1"	"NO"
+"V_CRM_SYNCH"	"X_V_CRM_SYNCH0"	"CLUSTERED"	"YES"	"YES"	"TRX_TYPE"	"2"	"NO"
+"V_CRM_SYNCH"	"X_V_CRM_SYNCH0"	"CLUSTERED"	"YES"	"YES"	"TABLE_NAME"	"3"	"NO"

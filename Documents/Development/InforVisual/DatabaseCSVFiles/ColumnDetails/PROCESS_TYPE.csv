@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PROCESS_TYPE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PROCESS_TYPE"	"2"	"SITE_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"PROCESS_TYPE"	"3"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"PROCESS_TYPE"	"4"	"DESCRIPTION"	"nvarchar"	"120"	"0"	"0"	"YES"	"NO"	"NO"
+"PROCESS_TYPE"	"5"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"PROCESS_TYPE"	"6"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"NO"	"NO"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUST_BOOK_LINE"	"PK_CUST_BOOK_LINE"	"CLUSTERED"	"YES"	"YES"	"CUST_ORDER_ID"	"1"	"NO"
+"CUST_BOOK_LINE"	"PK_CUST_BOOK_LINE"	"CLUSTERED"	"YES"	"YES"	"CUST_ORDER_LINE_NO"	"2"	"NO"
+"CUST_BOOK_LINE"	"PK_CUST_BOOK_LINE"	"CLUSTERED"	"YES"	"YES"	"BOOK_DATE"	"3"	"NO"

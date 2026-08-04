@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"NOTATION"	"PK_NOTATION"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"1"	"NO"
+"NOTATION"	"PK_NOTATION"	"CLUSTERED"	"YES"	"YES"	"OWNER_ID"	"2"	"NO"
+"NOTATION"	"PK_NOTATION"	"CLUSTERED"	"YES"	"YES"	"CREATE_DATE"	"3"	"NO"

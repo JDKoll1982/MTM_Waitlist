@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VMQUERY_ITEM_AUTHORITY"	"PK_VMQUERY_ITEM_AUTHORITY"	"CLUSTERED"	"YES"	"YES"	"USER_ID"	"1"	"NO"
+"VMQUERY_ITEM_AUTHORITY"	"PK_VMQUERY_ITEM_AUTHORITY"	"CLUSTERED"	"YES"	"YES"	"ITEM_ID"	"2"	"NO"

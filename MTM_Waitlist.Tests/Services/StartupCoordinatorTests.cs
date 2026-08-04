@@ -631,6 +631,10 @@ public sealed class StartupCoordinatorTests
 
         public StartupSessionSnapshot Snapshot { get; init; } = new();
 
+        public StartupCredentialCheckResult CredentialCheckResult { get; init; } = StartupCredentialCheckResult.Failed();
+
+        public bool UpdatePasswordResult { get; init; } = true;
+
         public Task<DateTimeOffset?> ReadServerTimeUtcAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult(ServerTimeUtc);
@@ -643,6 +647,16 @@ public sealed class StartupCoordinatorTests
             CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Snapshot);
+        }
+
+        public Task<StartupCredentialCheckResult> CheckCredentialsAsync(string username, string password, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(CredentialCheckResult);
+        }
+
+        public Task<bool> UpdatePasswordAsync(long userId, string newPassword, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(UpdatePasswordResult);
         }
     }
 

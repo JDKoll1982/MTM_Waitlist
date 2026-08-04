@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_BOL_TO_SITE"	"BOL"	"SITE_ID"	"SITE"	"ID"

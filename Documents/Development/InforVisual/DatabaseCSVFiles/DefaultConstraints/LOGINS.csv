@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"LOGINS"	"LAST_ACTIVITY"	"DF__LOGINS__LAST_ACT__6F5704C7"	"NULL"
+"LOGINS"	"LOGIN_TIME"	"DF__LOGINS__LOGIN_TI__6E62E08E"	"NULL"

@@ -1,0 +1,2 @@
+"TableName"	"ConstraintName"	"Definition"
+"RECEIVABLE"	"CHK_RECEIVABLE"	"NULL"

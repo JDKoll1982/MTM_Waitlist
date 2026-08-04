@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0164"	"PURC_ORDER_BINARY"	"PURC_ORDER_ID"	"PURCHASE_ORDER"	"ID"

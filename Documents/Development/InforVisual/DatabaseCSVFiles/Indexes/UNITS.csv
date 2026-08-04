@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"UNITS"	"PK_UNITS"	"CLUSTERED"	"YES"	"YES"	"UNIT_OF_MEASURE"	"1"	"NO"

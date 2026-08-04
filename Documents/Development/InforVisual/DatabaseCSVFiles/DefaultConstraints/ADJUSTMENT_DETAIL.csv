@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"ADJUSTMENT_DETAIL"	"CURRENCY_ID"	"DF__ADJUSTMEN__CURRE__377CBFF8"	"NULL"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_BACKLOG_SUM"	"EX_BACKLOG_SUM"	"NONCLUSTERED"	"YES"	"NO"	"eis_date"	"1"	"NO"

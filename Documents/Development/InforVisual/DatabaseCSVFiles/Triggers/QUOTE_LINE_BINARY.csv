@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"QUOTE_LINE_BINARY"	"INSUPD_QUOTE_LINE_BINARY"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT, UPDATE"

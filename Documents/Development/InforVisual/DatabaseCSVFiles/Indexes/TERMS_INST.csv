@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TERMS_INST"	"PK_TERMS_INST"	"CLUSTERED"	"YES"	"YES"	"TERMS_ID"	"1"	"NO"
+"TERMS_INST"	"PK_TERMS_INST"	"CLUSTERED"	"YES"	"YES"	"INST_NO"	"2"	"NO"

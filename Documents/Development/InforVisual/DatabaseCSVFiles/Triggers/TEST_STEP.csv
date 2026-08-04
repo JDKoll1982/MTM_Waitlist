@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"TEST_STEP"	"INSERT_TEST_STEP"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"TEST_STEP"	"UPDATE_TEST_STEP"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

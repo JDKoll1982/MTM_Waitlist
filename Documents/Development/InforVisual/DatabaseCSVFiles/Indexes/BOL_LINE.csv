@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"BOL_LINE"	"X_BOL_LINE_0"	"NONCLUSTERED"	"YES"	"NO"	"BOL_ID"	"1"	"NO"
+"BOL_LINE"	"X_BOL_LINE_0"	"NONCLUSTERED"	"YES"	"NO"	"NMFC_CODE_ID"	"2"	"NO"
+"BOL_LINE"	"X_BOL_LINE_0"	"NONCLUSTERED"	"YES"	"NO"	"PACKAGE_TYPE"	"3"	"NO"

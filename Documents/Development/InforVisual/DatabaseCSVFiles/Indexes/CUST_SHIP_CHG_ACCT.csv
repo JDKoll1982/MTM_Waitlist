@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUST_SHIP_CHG_ACCT"	"PK_CUST_SHIP_CHG_ACCT"	"CLUSTERED"	"YES"	"YES"	"CUSTOMER_ID"	"1"	"NO"
+"CUST_SHIP_CHG_ACCT"	"PK_CUST_SHIP_CHG_ACCT"	"CLUSTERED"	"YES"	"YES"	"SHIP_VIA"	"2"	"NO"

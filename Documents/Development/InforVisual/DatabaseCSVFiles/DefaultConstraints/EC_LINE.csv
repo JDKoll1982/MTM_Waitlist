@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"EC_LINE"	"CREATE_DATE"	"DF__EC_LINE__CREATE___71745763"	"NULL"
+"EC_LINE"	"STATUS_EFF_DATE"	"DF__EC_LINE__STATUS___72687B9C"	"NULL"

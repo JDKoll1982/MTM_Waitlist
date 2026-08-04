@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EQUIP_LABOR_PRICE"	"ROWID"	"int"	"NO"
+"dbo"	"EQUIP_LABOR_PRICE"	"id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_LABOR_PRICE"	"resource_id"	"nvarchar"	"NO"
+"dbo"	"EQUIP_LABOR_PRICE"	"normal"	"decimal"	"YES"
+"dbo"	"EQUIP_LABOR_PRICE"	"overtime_1"	"decimal"	"YES"
+"dbo"	"EQUIP_LABOR_PRICE"	"overtime_2"	"decimal"	"YES"

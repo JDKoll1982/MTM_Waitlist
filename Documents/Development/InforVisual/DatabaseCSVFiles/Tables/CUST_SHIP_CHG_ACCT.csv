@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"CUST_SHIP_CHG_ACCT"	"ROWID"	"int"	"NO"
+"dbo"	"CUST_SHIP_CHG_ACCT"	"CUSTOMER_ID"	"nvarchar"	"NO"
+"dbo"	"CUST_SHIP_CHG_ACCT"	"SHIP_VIA"	"nvarchar"	"NO"
+"dbo"	"CUST_SHIP_CHG_ACCT"	"ACCOUNT_NO"	"nvarchar"	"NO"

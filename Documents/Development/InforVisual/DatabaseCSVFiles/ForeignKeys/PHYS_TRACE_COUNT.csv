@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0177"	"PHYS_TRACE_COUNT"	"PHYS_COUNT_ID"	"PHYS_COUNT_TAG"	"PHYS_COUNT_ID"
+"FKEY0177"	"PHYS_TRACE_COUNT"	"TAG_NO"	"PHYS_COUNT_TAG"	"TAG_NO"

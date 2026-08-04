@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"APPLICATION_GROUP"	"PK_APPLICATION_GROUP"	"CLUSTERED"	"YES"	"YES"	"GROUP_ID"	"1"	"NO"
+"APPLICATION_GROUP"	"PK_APPLICATION_GROUP"	"CLUSTERED"	"YES"	"YES"	"LANGUAGE_ID"	"2"	"NO"

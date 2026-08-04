@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DBR_EVENT_DETECT"	"X_DBR_EV_DETECT_0"	"NONCLUSTERED"	"NO"	"NO"	"SITE_ID"	"1"	"NO"
+"DBR_EVENT_DETECT"	"X_DBR_EV_DETECT_0"	"NONCLUSTERED"	"NO"	"NO"	"EVENT_ACTION"	"2"	"NO"
+"DBR_EVENT_DETECT"	"X_DBR_EV_DETECT_0"	"NONCLUSTERED"	"NO"	"NO"	"EVENT_CLASS"	"3"	"NO"

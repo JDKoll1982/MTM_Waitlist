@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SUMMARY_CODE"	"PK_SUMMARY_CODE"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

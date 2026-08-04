@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"RFQ_LINE"	"CREATE_DATE"	"DF__RFQ_LINE__CREATE__45B5D0B6"	"NULL"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0047"	"SALES_TAX_PCT"	"SALES_TAX_ID"	"SALES_TAX"	"ID"

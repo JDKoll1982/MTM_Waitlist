@@ -1,0 +1,4 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"COR_PROPERTY"	"1"	"C_ID"	"bigint"	"NULL"	"19"	"0"	"NO"	"YES"	"NO"
+"COR_PROPERTY"	"2"	"C_PROPERTY_NAME"	"nvarchar"	"250"	"0"	"0"	"NO"	"NO"	"NO"
+"COR_PROPERTY"	"3"	"C_PROPERTY_VALUE"	"nvarchar"	"250"	"0"	"0"	"NO"	"NO"	"NO"

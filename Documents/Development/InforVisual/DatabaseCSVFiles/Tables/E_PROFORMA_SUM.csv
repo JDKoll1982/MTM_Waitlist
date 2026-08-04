@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"E_PROFORMA_SUM"	"rowid"	"int"	"NO"
+"dbo"	"E_PROFORMA_SUM"	"eis_date"	"datetime"	"YES"
+"dbo"	"E_PROFORMA_SUM"	"doc_qty"	"decimal"	"YES"
+"dbo"	"E_PROFORMA_SUM"	"line_qty"	"decimal"	"YES"
+"dbo"	"E_PROFORMA_SUM"	"amount_value"	"decimal"	"YES"

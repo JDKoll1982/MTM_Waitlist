@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PERSON"	"ROWID"	"int"	"NO"
+"dbo"	"PERSON"	"ID"	"nvarchar"	"NO"
+"dbo"	"PERSON"	"NAME"	"nvarchar"	"YES"
+"dbo"	"PERSON"	"IS_APPROVER"	"nchar"	"NO"
+"dbo"	"PERSON"	"IS_BUYER"	"nchar"	"NO"
+"dbo"	"PERSON"	"IS_PLANNER"	"nchar"	"NO"
+"dbo"	"PERSON"	"IS_REQUESTER"	"nchar"	"NO"

@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"USER_PGM_AUTHORITY"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"USER_PGM_AUTHORITY"	"2"	"USER_ID"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_PGM_AUTHORITY"	"3"	"PROGRAM_ID"	"nvarchar"	"8"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_PGM_AUTHORITY"	"4"	"PROGRAM_COMPONENT"	"nvarchar"	"8"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_PGM_AUTHORITY"	"5"	"PERMISSION"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"
+"USER_PGM_AUTHORITY"	"6"	"PROFILE_STRING"	"nvarchar"	"80"	"0"	"0"	"YES"	"NO"	"NO"

@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_AREA"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_AREA"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_AREA"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_AREA"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_AREA"	"CREATE_DATE"	"datetime"	"YES"

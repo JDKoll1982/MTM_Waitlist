@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_COUNTY_CODE"	"COUNTY_NAME"	"nvarchar"	"NO"
+"dbo"	"V_COUNTY_CODE"	"STATE"	"nvarchar"	"NO"
+"dbo"	"V_COUNTY_CODE"	"CODE"	"nvarchar"	"NO"
+"dbo"	"V_COUNTY_CODE"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_COUNTY_CODE"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_COUNTY_CODE"	"CREATE_DATE"	"datetime"	"YES"

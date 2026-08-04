@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"COR_INBOX_HEADERS"	"1"	"C_ID"	"bigint"	"NULL"	"19"	"0"	"NO"	"YES"	"NO"
+"COR_INBOX_HEADERS"	"2"	"C_INBOX_ID"	"bigint"	"NULL"	"19"	"0"	"NO"	"NO"	"NO"
+"COR_INBOX_HEADERS"	"3"	"C_HEADER_KEY"	"nvarchar"	"250"	"0"	"0"	"NO"	"NO"	"NO"
+"COR_INBOX_HEADERS"	"4"	"C_HEADER_VALUE"	"nvarchar"	"250"	"0"	"0"	"NO"	"NO"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SOA_NOUN"	"PK_SOA_NOUN"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"SOA_NOUN"	"PK_SOA_NOUN"	"CLUSTERED"	"YES"	"YES"	"NAME"	"2"	"NO"
+"SOA_NOUN"	"X_SOA_NOUN_1"	"NONCLUSTERED"	"YES"	"NO"	"ID"	"1"	"NO"

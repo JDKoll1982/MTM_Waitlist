@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_ESTIM_SUM"	"EX_ESTIM_SUM"	"NONCLUSTERED"	"YES"	"NO"	"eis_date"	"1"	"NO"

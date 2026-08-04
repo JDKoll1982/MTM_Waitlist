@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"PHYSICAL_COUNT"	"UPDATE_PHYSICAL_COUNT"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

@@ -1,0 +1,5 @@
+"Table"	"PrimaryKeyColumn"
+"ACCOUNT_PROFILE"	"account_type"
+"ACCOUNT_PROFILE"	"profile_id"
+"ACCOUNT_PROFILE"	"profile_type"
+"ACCOUNT_PROFILE"	"account_id"

@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"RECEIVABLE_CURR"	"ROWID"	"int"	"NO"
+"dbo"	"RECEIVABLE_CURR"	"INVOICE_ID"	"nvarchar"	"NO"
+"dbo"	"RECEIVABLE_CURR"	"CURRENCY_ID"	"nvarchar"	"NO"
+"dbo"	"RECEIVABLE_CURR"	"AMOUNT"	"decimal"	"NO"
+"dbo"	"RECEIVABLE_CURR"	"SELL_RATE"	"decimal"	"NO"
+"dbo"	"RECEIVABLE_CURR"	"BUY_RATE"	"decimal"	"NO"

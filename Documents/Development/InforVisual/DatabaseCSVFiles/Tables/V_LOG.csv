@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_LOG"	"TBNAME"	"nvarchar"	"YES"
+"dbo"	"V_LOG"	"COLNAME"	"nvarchar"	"YES"
+"dbo"	"V_LOG"	"SPNAME"	"nvarchar"	"YES"
+"dbo"	"V_LOG"	"TIME"	"datetime"	"YES"
+"dbo"	"V_LOG"	"VALUE_PREV"	"nvarchar"	"YES"
+"dbo"	"V_LOG"	"VALUE_CURR"	"nvarchar"	"YES"
+"dbo"	"V_LOG"	"COMMENTS"	"nvarchar"	"YES"

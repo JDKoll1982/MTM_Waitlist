@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_DUPLICATES"	"X_V_DUPLICATES_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_DUPLICATES"	"X_V_DUPLICATES_0"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"2"	"NO"
+"V_DUPLICATES"	"X_V_DUPLICATES_0"	"CLUSTERED"	"YES"	"YES"	"TYPE_ID"	"3"	"NO"

@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_COMMENTS_BACKUP"	"1"	"TYPE"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_COMMENTS_BACKUP"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"YES"	"NO"	"NO"
+"V_COMMENTS_BACKUP"	"3"	"ID2_N"	"smallint"	"NULL"	"5"	"0"	"YES"	"NO"	"NO"
+"V_COMMENTS_BACKUP"	"4"	"ID3_N"	"smallint"	"NULL"	"5"	"0"	"YES"	"NO"	"NO"
+"V_COMMENTS_BACKUP"	"5"	"DATA1"	"image"	"NULL"	"0"	"0"	"YES"	"NO"	"NO"

@@ -106,6 +106,9 @@ INSERT INTO
     core_users_profiles (
         public_id,
         username_normalized,
+        password_hash,
+        password_salt,
+        require_password_change,
         display_name,
         employee_identifier,
         is_active,
@@ -115,6 +118,9 @@ INSERT INTO
 VALUES (
         UUID(),
         'johnk',
+        '0000',
+        NULL,
+        1,
         'John Koll',
         'emp-dev-001',
         1,
@@ -124,6 +130,9 @@ VALUES (
     (
         UUID(),
         'jkoll',
+        '0000',
+        NULL,
+        1,
         'John Koll',
         'emp-dev-001',
         1,
@@ -131,6 +140,9 @@ VALUES (
         UTC_TIMESTAMP()
     )
 ON DUPLICATE KEY UPDATE
+    password_hash = VALUES(password_hash),
+    password_salt = VALUES(password_salt),
+    require_password_change = VALUES(require_password_change),
     display_name = VALUES(display_name),
     employee_identifier = VALUES(employee_identifier),
     updated_utc = VALUES(updated_utc);

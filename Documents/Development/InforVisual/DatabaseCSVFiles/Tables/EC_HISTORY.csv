@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"EC_HISTORY"	"ROWID"	"int"	"NO"
+"dbo"	"EC_HISTORY"	"EC_ID"	"nvarchar"	"NO"
+"dbo"	"EC_HISTORY"	"TYPE"	"nchar"	"NO"
+"dbo"	"EC_HISTORY"	"BITS"	"image"	"YES"
+"dbo"	"EC_HISTORY"	"BITS_LENGTH"	"int"	"NO"

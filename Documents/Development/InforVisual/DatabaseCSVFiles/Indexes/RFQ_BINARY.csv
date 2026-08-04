@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RFQ_BINARY"	"PK_RFQ_BINARY"	"CLUSTERED"	"YES"	"YES"	"RFQ_ID"	"1"	"NO"
+"RFQ_BINARY"	"PK_RFQ_BINARY"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"2"	"NO"

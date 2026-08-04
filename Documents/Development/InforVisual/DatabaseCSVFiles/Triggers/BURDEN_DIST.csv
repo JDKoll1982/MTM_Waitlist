@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"BURDEN_DIST"	"DELETE_BURDEN_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"BURDEN_DIST"	"INSERT_BURDEN_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"BURDEN_DIST"	"UPDATE_BURDEN_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"BANK_ADJ_DIST"	"CREATE_DATE"	"DF__BANK_ADJ___CREAT__4C77DCDE"	"NULL"
+"BANK_ADJ_DIST"	"CURRENCY_ID"	"DF__BANK_ADJ___CURRE__4D6C0117"	"NULL"

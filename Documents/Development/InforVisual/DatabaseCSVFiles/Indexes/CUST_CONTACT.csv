@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUST_CONTACT"	"PK_CUST_CONTACT"	"CLUSTERED"	"YES"	"YES"	"CUSTOMER_ID"	"1"	"NO"
+"CUST_CONTACT"	"PK_CUST_CONTACT"	"CLUSTERED"	"YES"	"YES"	"CONTACT_ID"	"2"	"NO"

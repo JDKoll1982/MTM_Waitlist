@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SHOP_VIEW"	"PK_SHOP_VIEW"	"CLUSTERED"	"YES"	"YES"	"VIEW_ID"	"1"	"NO"
+"SHOP_VIEW"	"PK_SHOP_VIEW"	"CLUSTERED"	"YES"	"YES"	"SEQ_NO"	"2"	"NO"
+"SHOP_VIEW"	"PK_SHOP_VIEW"	"CLUSTERED"	"YES"	"YES"	"RESOURCE_ID"	"3"	"NO"
+"SHOP_VIEW"	"X_SHOP_VIEW_1"	"NONCLUSTERED"	"NO"	"NO"	"RESOURCE_ID"	"1"	"NO"

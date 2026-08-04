@@ -1,0 +1,5 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"MT_WIP_INVENTORY"	"1"	"PART_ID"	"varchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"MT_WIP_INVENTORY"	"2"	"WAREHOUSE"	"varchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"MT_WIP_INVENTORY"	"3"	"LOCATION"	"varchar"	"50"	"0"	"0"	"NO"	"NO"	"NO"
+"MT_WIP_INVENTORY"	"4"	"QTY"	"decimal"	"NULL"	"15"	"6"	"NO"	"NO"	"NO"

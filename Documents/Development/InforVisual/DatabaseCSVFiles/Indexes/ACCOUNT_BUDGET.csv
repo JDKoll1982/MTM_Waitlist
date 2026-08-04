@@ -1,0 +1,8 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ACCOUNT_BUDGET"	"PK_ACCOUNT_BUDGET"	"CLUSTERED"	"YES"	"YES"	"account_id"	"1"	"NO"
+"ACCOUNT_BUDGET"	"PK_ACCOUNT_BUDGET"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"2"	"NO"
+"ACCOUNT_BUDGET"	"PK_ACCOUNT_BUDGET"	"CLUSTERED"	"YES"	"YES"	"acct_year"	"3"	"NO"
+"ACCOUNT_BUDGET"	"PK_ACCOUNT_BUDGET"	"CLUSTERED"	"YES"	"YES"	"acct_period"	"4"	"NO"
+"ACCOUNT_BUDGET"	"PK_ACCOUNT_BUDGET"	"CLUSTERED"	"YES"	"YES"	"budget_type"	"5"	"NO"
+"ACCOUNT_BUDGET"	"PK_ACCOUNT_BUDGET"	"CLUSTERED"	"YES"	"YES"	"budget_code"	"6"	"NO"
+"ACCOUNT_BUDGET"	"PK_ACCOUNT_BUDGET"	"CLUSTERED"	"YES"	"YES"	"currency_id"	"7"	"NO"

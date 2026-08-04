@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SPREAD_PROFILE"	"pk_spread_profile"	"CLUSTERED"	"YES"	"YES"	"id"	"1"	"NO"
+"SPREAD_PROFILE"	"pk_spread_profile"	"CLUSTERED"	"YES"	"YES"	"acct_period"	"2"	"NO"

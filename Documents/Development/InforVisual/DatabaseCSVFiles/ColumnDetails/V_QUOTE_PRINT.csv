@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_QUOTE_PRINT"	"1"	"LONG_DESC"	"nvarchar"	"254"	"0"	"0"	"YES"	"NO"	"NO"
+"V_QUOTE_PRINT"	"2"	"PICTURE"	"nvarchar"	"254"	"0"	"0"	"YES"	"NO"	"NO"
+"V_QUOTE_PRINT"	"3"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"V_QUOTE_PRINT"	"4"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_QUOTE_PRINT"	"5"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CONTR_ITEM_BIN"	"X_V_CONTR_ITEM_BIN_0"	"CLUSTERED"	"YES"	"YES"	"CONTR_ID"	"1"	"NO"
+"V_CONTR_ITEM_BIN"	"X_V_CONTR_ITEM_BIN_0"	"CLUSTERED"	"YES"	"YES"	"ITEM_TYPE"	"2"	"NO"
+"V_CONTR_ITEM_BIN"	"X_V_CONTR_ITEM_BIN_0"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"3"	"NO"
+"V_CONTR_ITEM_BIN"	"X_V_CONTR_ITEM_BIN_0"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"4"	"NO"

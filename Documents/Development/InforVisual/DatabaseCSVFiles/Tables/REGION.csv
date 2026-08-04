@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"REGION"	"ROWID"	"int"	"NO"
+"dbo"	"REGION"	"ID"	"nvarchar"	"NO"
+"dbo"	"REGION"	"DESCRIPTION"	"nvarchar"	"YES"

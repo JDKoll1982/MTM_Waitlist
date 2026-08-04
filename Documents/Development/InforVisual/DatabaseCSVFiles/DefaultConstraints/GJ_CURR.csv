@@ -1,0 +1,4 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"GJ_CURR"	"AMOUNT"	"DF__GJ_CURR__AMOUNT__11E126F5"	"NULL"
+"GJ_CURR"	"BUY_RATE"	"DF__GJ_CURR__BUY_RAT__13C96F67"	"NULL"
+"GJ_CURR"	"SELL_RATE"	"DF__GJ_CURR__SELL_RA__12D54B2E"	"NULL"

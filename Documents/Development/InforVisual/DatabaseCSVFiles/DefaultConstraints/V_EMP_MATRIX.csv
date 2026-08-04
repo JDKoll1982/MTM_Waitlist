@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_EMP_MATRIX"	"BILLING_RATE"	"DF__V_EMP_MAT__BILLI__4BF8B9F1"	"NULL"
+"V_EMP_MATRIX"	"RATING"	"DF__V_EMP_MAT__RATIN__4B0495B8"	"NULL"

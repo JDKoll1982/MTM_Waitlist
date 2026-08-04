@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"CASH_PLAN_LINE"	"DELETE_CASH_PLAN_LINE"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"CASH_PLAN_LINE"	"UPDATE_CASH_PLAN_LINE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

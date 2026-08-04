@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_EVENT_STAGE"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_EVENT_STAGE"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_EVENT_STAGE"	"CREATE_DATE"	"datetime"	"YES"
+"dbo"	"V_EVENT_STAGE"	"CREATOR"	"nvarchar"	"YES"
+"dbo"	"V_EVENT_STAGE"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_EVENT_STAGE"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_EVENT_STAGE"	"RECORDHISTORY"	"smallint"	"YES"

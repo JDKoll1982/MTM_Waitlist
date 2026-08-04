@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"FOB_POINT_SYNC"	"ROWID"	"int"	"NO"
+"dbo"	"FOB_POINT_SYNC"	"EVENT_ID"	"int"	"NO"
+"dbo"	"FOB_POINT_SYNC"	"TYPE"	"nchar"	"NO"
+"dbo"	"FOB_POINT_SYNC"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"FOB_POINT_SYNC"	"FOB_POINT_CODE"	"nvarchar"	"NO"
+"dbo"	"FOB_POINT_SYNC"	"EXCEPTION"	"nchar"	"NO"
+"dbo"	"FOB_POINT_SYNC"	"SUBSCRIPTIONS"	"int"	"NO"

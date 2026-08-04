@@ -1,0 +1,159 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Waitlist.Controls.WaitlistLineCardView"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Border
+        MinHeight="120"
+        Padding="10"
+        Background="{ThemeResource LayerFillColorDefaultBrush}"
+        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+        BorderThickness="1"
+        CornerRadius="10">
+        <Grid RowSpacing="6" ColumnSpacing="10">
+            <Grid.RowDefinitions>
+                    <RowDefinition MinHeight="96" />
+                    <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="6" />
+                <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="190" />
+                    <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Grid.Row="0"
+                Grid.Column="0"
+                Background="{Binding AccentBrush, ElementName=Root}"
+                CornerRadius="6" />
+
+            <Border
+                Grid.Row="0"
+                Grid.Column="1"
+                Width="96"
+                Height="96"
+                Padding="7"
+                Background="{Binding AccentSurfaceBrush, ElementName=Root}"
+                CornerRadius="10">
+                <Grid>
+                    <Image
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Source="{Binding Order.ImageUri, ElementName=Root}"
+                        Stretch="Uniform" />
+
+                    <Border
+                        Padding="6,3"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Background="{Binding BadgeBackgroundBrush, ElementName=Root}"
+                        CornerRadius="999">
+                        <TextBlock
+                            FontSize="10"
+                            FontWeight="Bold"
+                            Text="{Binding BadgeText, ElementName=Root}" />
+                    </Border>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Spacing="3">
+                <TextBlock
+                    FontSize="20"
+                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                    Text="{Binding Order.Title, ElementName=Root}"
+                    TextWrapping="WrapWholeWords" />
+                <TextBlock
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                    <Run FontWeight="SemiBold" Text="Requested by: " />
+                    <Run Text="{Binding Order.RequestedByName, ElementName=Root}" />
+                </TextBlock>
+                <TextBlock
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                    <Run FontWeight="SemiBold" Text="Press: " />
+                    <Run Text="{Binding Order.RequestedPressName, ElementName=Root}" />
+                </TextBlock>
+                <TextBlock
+                    FontSize="12"
+                    Foreground="{Binding AccentBrush, ElementName=Root}">
+                    <Run FontWeight="SemiBold" Text="Remaining time: " />
+                    <Run Text="{Binding Order.RemainingTimeText, ElementName=Root}" />
+                </TextBlock>
+            </StackPanel>
+
+            <StackPanel
+                Grid.Row="0"
+                    Grid.Column="4"
+                Orientation="Horizontal"
+                Spacing="5"
+                VerticalAlignment="Center">
+                <Button
+                    Width="44"
+                    Height="44"
+                    AutomationProperties.Name="Edit"
+                    Background="{ThemeResource SystemAccentColor}"
+                    CornerRadius="9">
+                    <FontIcon
+                        FontSize="18"
+                        Foreground="White"
+                        Glyph="&#xE70F;" />
+                </Button>
+                <Button
+                    Width="44"
+                    Height="44"
+                    AutomationProperties.Name="Cancel"
+                    Background="{ThemeResource SystemFillColorCriticalBrush}"
+                    CornerRadius="9">
+                    <FontIcon
+                        FontSize="18"
+                        Foreground="White"
+                        Glyph="&#xE10A;" />
+                </Button>
+                <Button
+                    Width="44"
+                    Height="44"
+                    AutomationProperties.Name="Accept"
+                    Background="{ThemeResource SystemFillColorSuccessBrush}"
+                    CornerRadius="9">
+                    <FontIcon
+                        FontSize="18"
+                        Foreground="White"
+                        Glyph="&#xE10B;" />
+                </Button>
+            </StackPanel>
+
+            <ContentPresenter
+                 Grid.Column="3"
+                 Margin="0,0,4,0"
+                Content="{Binding DetailsContent, ElementName=Root}"
+                HorizontalContentAlignment="Stretch" />
+        </Grid>
+    </Border>
+</UserControl>
+
+<!--
+    Notes
+    Card contents:
+    Request image - The request-type image selected by the order's image path.
+    Request badge - The request type label, such as COIL, FG, NCM, O/S, WIP, or SCRAP.
+    Request title - The primary short description of the waitlist request.
+    Requesting user - The name of the user who created the request.
+    Press - The press or resource associated with the request when available.
+    Remaining time - The calculated time remaining before the request's target or promise time.
+    Actions - Edit, cancel, and accept controls. Each action must be wired to the appropriate command before being enabled.
+
+    Detail page contents:
+    Shared summary - Reuse the request image, badge, title, requester, press or resource, and remaining time from the card.
+    Type-specific sections - Render the fields listed in the corresponding request-type control's notes.
+    Scheduling section - Show queued time, target or promise date, current status, and assignment when available.
+    Material section - Show part, description, quantity, location, and inventory or WIP information when applicable.
+    Workflow section - Show approval, dispatch, acceptance, cancellation, and audit information when available.
+    Navigation - Provide a clear way to return to the waitlist and preserve the selected request context.
+-->

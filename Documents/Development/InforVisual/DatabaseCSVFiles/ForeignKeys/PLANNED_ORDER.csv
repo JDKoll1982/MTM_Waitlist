@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0098"	"PLANNED_ORDER"	"PART_ID"	"PART"	"ID"
+"FK_PLND_ORD_TO_SITE"	"PLANNED_ORDER"	"SITE_ID"	"SITE"	"ID"

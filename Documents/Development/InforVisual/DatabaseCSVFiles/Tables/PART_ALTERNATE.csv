@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"PART_ALTERNATE"	"ROWID"	"int"	"NO"
+"dbo"	"PART_ALTERNATE"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"PART_ALTERNATE"	"ALTERNATE_PART_ID"	"nvarchar"	"NO"
+"dbo"	"PART_ALTERNATE"	"RANK"	"smallint"	"YES"

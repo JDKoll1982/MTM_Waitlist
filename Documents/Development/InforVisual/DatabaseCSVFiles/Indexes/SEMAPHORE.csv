@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SEMAPHORE"	"X_SEMAPHORE_0"	"NONCLUSTERED"	"YES"	"NO"	"ID"	"1"	"NO"

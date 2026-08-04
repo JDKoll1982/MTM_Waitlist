@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_CSH_BKSUM_2SITE"	"CASH_BOOK_SUMMARY"	"SITE_ID"	"SITE"	"ID"

@@ -1,0 +1,7 @@
+"Table"	"PrimaryKeyColumn"
+"UNP_MNT_STD_REPAIR"	"equipment_type"
+"UNP_MNT_STD_REPAIR"	"equipment_model"
+"UNP_MNT_STD_REPAIR"	"fault_type"
+"UNP_MNT_STD_REPAIR"	"fault_code"
+"UNP_MNT_STD_REPAIR"	"part_id"
+"UNP_MNT_STD_REPAIR"	"engineer_master"

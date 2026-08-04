@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_SERV_SITE_TO_SERVICE"	"SERVICE_SITE"	"SERVICE_ID"	"SERVICE"	"ID"
+"FK_SERV_SITE_TO_SITE"	"SERVICE_SITE"	"SITE_ID"	"SITE"	"ID"

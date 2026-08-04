@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0296"	"WORKORDER_AUDIT"	"SCHEDULE_ID"	"SCHEDULE"	"ID"

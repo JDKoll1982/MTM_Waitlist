@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"INSTALLMENT_LINE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"INSTALLMENT_LINE"	"2"	"INSTALLMENT_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"INSTALLMENT_LINE"	"3"	"INST_TYPE"	"nchar"	"2"	"0"	"0"	"NO"	"NO"	"NO"
+"INSTALLMENT_LINE"	"4"	"INST_NO"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"INSTALLMENT_LINE"	"5"	"INST_PERCENT"	"decimal"	"NULL"	"6"	"3"	"NO"	"NO"	"NO"
+"INSTALLMENT_LINE"	"6"	"PERIOD"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"

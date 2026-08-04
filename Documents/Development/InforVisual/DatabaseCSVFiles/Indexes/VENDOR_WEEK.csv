@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VENDOR_WEEK"	"X_VENDWEEK_0"	"NONCLUSTERED"	"YES"	"NO"	"VENDOR_ID"	"1"	"NO"
+"VENDOR_WEEK"	"X_VENDWEEK_0"	"NONCLUSTERED"	"YES"	"NO"	"SERVICE_ID"	"2"	"NO"
+"VENDOR_WEEK"	"X_VENDWEEK_0"	"NONCLUSTERED"	"YES"	"NO"	"DAY_OF_WEEK"	"3"	"NO"

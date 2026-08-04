@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"E_PURCBACK_DET"	"E2_PBK_DET"	"NONCLUSTERED"	"NO"	"NO"	"DESIRED_RECV_DATE"	"1"	"NO"
+"E_PURCBACK_DET"	"EX_PURCBACK_DET"	"NONCLUSTERED"	"NO"	"NO"	"EIS_DATE"	"1"	"NO"

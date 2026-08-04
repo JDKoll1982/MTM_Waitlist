@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"CUST_ADDRESS"	"V_AD_CUST_ADDRESS"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"CUST_ADDRESS"	"V_AI_CUST_ADDR"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"CUST_ADDRESS"	"V_AU_CUST_ADDRESS"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

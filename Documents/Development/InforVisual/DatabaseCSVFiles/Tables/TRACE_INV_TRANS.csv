@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TRACE_INV_TRANS"	"ROWID"	"int"	"NO"
+"dbo"	"TRACE_INV_TRANS"	"PART_ID"	"nvarchar"	"NO"
+"dbo"	"TRACE_INV_TRANS"	"TRACE_ID"	"nvarchar"	"NO"
+"dbo"	"TRACE_INV_TRANS"	"TRANSACTION_ID"	"int"	"NO"
+"dbo"	"TRACE_INV_TRANS"	"QTY"	"decimal"	"NO"
+"dbo"	"TRACE_INV_TRANS"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"TRACE_INV_TRANS"	"COSTED_QTY"	"decimal"	"NO"

@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_CONTR_ADDR"	"ADDR_ID"	"nvarchar"	"NO"
+"dbo"	"V_CONTR_ADDR"	"CONTR_ID"	"nvarchar"	"NO"
+"dbo"	"V_CONTR_ADDR"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_CONTR_ADDR"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_CONTR_ADDR"	"CREATE_DATE"	"datetime"	"YES"

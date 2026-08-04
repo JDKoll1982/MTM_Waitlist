@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0158"	"QUOTE_ORDER"	"CUST_ORDER_ID"	"CUSTOMER_ORDER"	"ID"
+"FKEY0178"	"QUOTE_ORDER"	"QUOTE_ID"	"QUOTE"	"ID"

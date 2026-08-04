@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"NOTIFICATION_TOKEN"	"PK_NOTIF_TOKEN"	"CLUSTERED"	"YES"	"YES"	"PROGRAM_ID"	"1"	"NO"
+"NOTIFICATION_TOKEN"	"PK_NOTIF_TOKEN"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"2"	"NO"
+"NOTIFICATION_TOKEN"	"PK_NOTIF_TOKEN"	"CLUSTERED"	"YES"	"YES"	"TOKEN"	"3"	"NO"

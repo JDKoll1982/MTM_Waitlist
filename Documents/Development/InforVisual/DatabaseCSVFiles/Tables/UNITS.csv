@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"UNITS"	"ROWID"	"int"	"NO"
+"dbo"	"UNITS"	"UNIT_OF_MEASURE"	"nvarchar"	"NO"
+"dbo"	"UNITS"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"UNITS"	"SCALE"	"smallint"	"NO"
+"dbo"	"UNITS"	"CATEGORY"	"nvarchar"	"YES"
+"dbo"	"UNITS"	"USER_DEFINED_UOM"	"nchar"	"YES"

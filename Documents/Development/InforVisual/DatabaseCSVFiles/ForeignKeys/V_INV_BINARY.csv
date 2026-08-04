@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00242"	"V_INV_BINARY"	"INVOICE_ID"	"V_INVOICE"	"ID"

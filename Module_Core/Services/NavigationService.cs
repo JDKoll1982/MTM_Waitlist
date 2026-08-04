@@ -3,6 +3,7 @@
 using CommunityToolkit.WinUI.UI.Animations;
 
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -16,6 +17,7 @@ namespace MTM_Waitlist.Module_Core.Services;
 public class NavigationService : INavigationService
 {
     private readonly IPageService _pageService;
+    private readonly IPageTransitionService _pageTransitionService;
     private object? _lastParameterUsed;
     private Frame? _frame;
 
@@ -45,9 +47,10 @@ public class NavigationService : INavigationService
     [MemberNotNullWhen(true, nameof(Frame), nameof(_frame))]
     public bool CanGoBack => Frame != null && Frame.CanGoBack;
 
-    public NavigationService(IPageService pageService)
+    public NavigationService(IPageService pageService, IPageTransitionService pageTransitionService)
     {
         _pageService = pageService;
+        _pageTransitionService = pageTransitionService;
     }
 
     private void RegisterFrameEvents()
@@ -71,7 +74,7 @@ public class NavigationService : INavigationService
         if (CanGoBack)
         {
             var vmBeforeNavigation = _frame.GetPageViewModel();
-            _frame.GoBack();
+            _frame.GoBack(_pageTransitionService.GetForBackNavigation());
             if (vmBeforeNavigation is INavigationAware navigationAware)
             {
                 navigationAware.OnNavigatedFrom();
@@ -104,7 +107,10 @@ public class NavigationService : INavigationService
         {
             _frame.Tag = clearNavigation;
             var vmBeforeNavigation = _frame.GetPageViewModel();
-            var navigated = _frame.Navigate(pageType, parameter);
+            var navigated = _frame.Navigate(
+                pageType,
+                parameter,
+                _pageTransitionService.GetForNavigation(parameter, clearNavigation));
             if (navigated)
             {
                 _lastParameterUsed = parameter;

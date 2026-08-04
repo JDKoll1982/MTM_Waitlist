@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_CUSTOM_DEF"	"BUS_TYPE"	"smallint"	"NO"
+"dbo"	"V_CUSTOM_DEF"	"NAME"	"nvarchar"	"YES"
+"dbo"	"V_CUSTOM_DEF"	"PLURAL_NAME"	"nvarchar"	"YES"
+"dbo"	"V_CUSTOM_DEF"	"SEQ_NO"	"smallint"	"YES"
+"dbo"	"V_CUSTOM_DEF"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_CUSTOM_DEF"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_CUSTOM_DEF"	"CREATE_DATE"	"datetime"	"YES"

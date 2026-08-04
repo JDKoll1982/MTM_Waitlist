@@ -1,0 +1,2 @@
+"TableName"	"ConstraintName"	"Definition"
+"CUSTOMER_ORDER"	"CHK_CUSTOMER_ORDER"	"NULL"

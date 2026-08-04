@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9407"	"ACCOUNT"	"CURRENCY_ID"	"CURRENCY"	"ID"

@@ -1,0 +1,5 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"LANG_DESCRIPTION"	"ROWID"	"int"	"NO"
+"dbo"	"LANG_DESCRIPTION"	"part_id"	"nvarchar"	"NO"
+"dbo"	"LANG_DESCRIPTION"	"language_id"	"nvarchar"	"NO"
+"dbo"	"LANG_DESCRIPTION"	"part_description"	"nvarchar"	"YES"

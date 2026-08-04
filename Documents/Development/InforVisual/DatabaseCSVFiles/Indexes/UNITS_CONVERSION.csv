@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"UNITS_CONVERSION"	"PK_UNITS_CONVERSION"	"CLUSTERED"	"YES"	"YES"	"FROM_UM"	"1"	"NO"
+"UNITS_CONVERSION"	"PK_UNITS_CONVERSION"	"CLUSTERED"	"YES"	"YES"	"TO_UM"	"2"	"NO"
+"UNITS_CONVERSION"	"X_UNITS_CONV_1"	"NONCLUSTERED"	"NO"	"NO"	"TO_UM"	"1"	"NO"

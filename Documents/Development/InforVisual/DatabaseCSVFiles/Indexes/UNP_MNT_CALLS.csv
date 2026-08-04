@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"UNP_MNT_CALLS"	"PK_UNP_MNT_CALLS"	"CLUSTERED"	"YES"	"YES"	"call_id"	"1"	"NO"

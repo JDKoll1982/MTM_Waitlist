@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"GL_INTERFACE"	"ROWID"	"int"	"NO"
+"dbo"	"GL_INTERFACE"	"ID"	"nvarchar"	"NO"
+"dbo"	"GL_INTERFACE"	"DESCRIPTION"	"nvarchar"	"YES"

@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"VEND_CONTACT"	"PRIMARY_CONTACT"	"DF__VEND_CONT__PRIMA__3E69B4A9"	"NULL"

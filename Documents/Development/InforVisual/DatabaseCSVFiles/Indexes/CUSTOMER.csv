@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CUSTOMER"	"PK_CUSTOMER"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"CUSTOMER"	"X_CUSTOMER_1"	"NONCLUSTERED"	"NO"	"NO"	"DISCOUNT_CODE"	"1"	"NO"
+"CUSTOMER"	"X_CUSTOMER_2"	"NONCLUSTERED"	"NO"	"NO"	"CURRENCY_ID"	"1"	"NO"
+"CUSTOMER"	"X_CUSTOMER_4"	"NONCLUSTERED"	"NO"	"NO"	"DEF_SLS_TAX_GRP_ID"	"1"	"NO"

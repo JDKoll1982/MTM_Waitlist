@@ -1,0 +1,4 @@
+"Table"	"PrimaryKeyColumn"
+"EXTRA_JOIN"	"PARENT"
+"EXTRA_JOIN"	"CHILD"
+"EXTRA_JOIN"	"NAME"

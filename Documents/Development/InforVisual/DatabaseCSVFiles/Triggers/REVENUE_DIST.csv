@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"REVENUE_DIST"	"INSERT_REVENUE_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"REVENUE_DIST"	"UPDATE_REVENUE_DIST"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

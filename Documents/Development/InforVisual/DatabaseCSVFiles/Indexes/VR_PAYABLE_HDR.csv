@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"VR_PAYABLE_HDR"	"VR_PAYABLE_HDR_0"	"NONCLUSTERED"	"NO"	"NO"	"VOUCHER_ID"	"1"	"NO"
+"VR_PAYABLE_HDR"	"VR_PAYABLE_HDR_1"	"NONCLUSTERED"	"NO"	"NO"	"INVOICE_DATE"	"1"	"NO"

@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_USER_SITE_TO_SITE"	"USER_SITE"	"SITE_ID"	"SITE"	"ID"

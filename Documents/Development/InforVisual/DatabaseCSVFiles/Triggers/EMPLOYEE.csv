@@ -1,0 +1,2 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"EMPLOYEE"	"V_AI_EMPLOYEE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_LBR_GRP_RATE"	"X_V_LBR_GRP_RATE_0"	"CLUSTERED"	"YES"	"YES"	"GROUP_ID"	"1"	"NO"
+"V_LBR_GRP_RATE"	"X_V_LBR_GRP_RATE_0"	"CLUSTERED"	"YES"	"YES"	"RESOURCE_ID"	"2"	"NO"
+"V_LBR_GRP_RATE"	"X_V_LBR_GRP_RATE_0"	"CLUSTERED"	"YES"	"YES"	"EFF_DATE"	"3"	"NO"

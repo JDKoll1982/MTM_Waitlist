@@ -1,0 +1,2 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"PRODUCT"	"ACTIVE_FLAG"	"DF__PRODUCT__ACTIVE___1879E142"	"NULL"

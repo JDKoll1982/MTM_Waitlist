@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_SUB_AREA"	"X_V_SUB_AREA_0"	"CLUSTERED"	"YES"	"YES"	"ID"	"1"	"NO"
+"V_SUB_AREA"	"X_V_SUB_AREA_0"	"CLUSTERED"	"YES"	"YES"	"AREA_ID"	"2"	"NO"

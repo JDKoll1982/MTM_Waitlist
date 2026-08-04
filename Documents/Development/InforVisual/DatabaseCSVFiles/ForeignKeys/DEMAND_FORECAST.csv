@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0097"	"DEMAND_FORECAST"	"PART_ID"	"PART"	"ID"
+"FK_DEMAND_FORECAST_TO_SITE"	"DEMAND_FORECAST"	"SITE_ID"	"SITE"	"ID"

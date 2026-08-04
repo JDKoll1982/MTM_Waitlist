@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TRACE_PROFILE"	"PK_TRACE_PROFILE"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"1"	"NO"
+"TRACE_PROFILE"	"PK_TRACE_PROFILE"	"CLUSTERED"	"YES"	"YES"	"PART_ID"	"2"	"NO"
+"TRACE_PROFILE"	"X_TRACE_PROF_1"	"NONCLUSTERED"	"NO"	"NO"	"NUMBERING_ID"	"1"	"NO"

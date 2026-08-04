@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"ECN_DETAIL"	"PK_ECN_DETAIL"	"CLUSTERED"	"YES"	"YES"	"ECN_ID"	"1"	"NO"
+"ECN_DETAIL"	"PK_ECN_DETAIL"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"
+"ECN_DETAIL"	"PK_ECN_DETAIL"	"CLUSTERED"	"YES"	"YES"	"ENTRY_NO"	"3"	"NO"

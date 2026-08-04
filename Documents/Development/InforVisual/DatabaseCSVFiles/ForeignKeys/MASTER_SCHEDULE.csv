@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY0096"	"MASTER_SCHEDULE"	"PART_ID"	"PART"	"ID"
+"FK_MSTRSCHD_TO_SITE"	"MASTER_SCHEDULE"	"SITE_ID"	"SITE"	"ID"

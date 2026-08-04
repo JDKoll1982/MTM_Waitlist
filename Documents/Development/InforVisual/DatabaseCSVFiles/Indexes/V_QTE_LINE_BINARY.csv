@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_QTE_LINE_BINARY"	"X_V_QTE_LINE_BINARY_0"	"CLUSTERED"	"YES"	"YES"	"QUOTE_ID"	"1"	"NO"
+"V_QTE_LINE_BINARY"	"X_V_QTE_LINE_BINARY_0"	"CLUSTERED"	"YES"	"YES"	"LINE_NO"	"2"	"NO"
+"V_QTE_LINE_BINARY"	"X_V_QTE_LINE_BINARY_0"	"CLUSTERED"	"YES"	"YES"	"TYPE"	"3"	"NO"

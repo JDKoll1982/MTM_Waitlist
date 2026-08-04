@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CONSOLIDATION_LOG"	"X_CONSOLID_LOG_0"	"NONCLUSTERED"	"NO"	"NO"	"CONSOLIDATION_ID"	"1"	"NO"

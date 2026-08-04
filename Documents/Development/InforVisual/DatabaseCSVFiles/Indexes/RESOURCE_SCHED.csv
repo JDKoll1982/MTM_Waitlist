@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RESOURCE_SCHED"	"PK_RESOURCE_SCHED"	"CLUSTERED"	"YES"	"YES"	"SCHEDULE_ID"	"1"	"NO"
+"RESOURCE_SCHED"	"PK_RESOURCE_SCHED"	"CLUSTERED"	"YES"	"YES"	"RESOURCE_ID"	"2"	"NO"
+"RESOURCE_SCHED"	"X_RES_SCHD_1"	"NONCLUSTERED"	"NO"	"NO"	"RESOURCE_ID"	"1"	"NO"

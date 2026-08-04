@@ -1,0 +1,4 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"ACCOUNT_BUDGET"	"budget_cr_amount"	"DF__ACCOUNT_B__budge__1AE0814A"	"NULL"
+"ACCOUNT_BUDGET"	"budget_dr_amount"	"DF__ACCOUNT_B__budge__19EC5D11"	"NULL"
+"ACCOUNT_BUDGET"	"FLAG"	"DF__ACCOUNT_BU__FLAG__1BD4A583"	"NULL"

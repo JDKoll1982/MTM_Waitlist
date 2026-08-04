@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"PLANNED_ORDER"	"DELETE_PLANNED_ORDER"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"PLANNED_ORDER"	"UPDATE_PLANNED_ORDER"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

@@ -1,0 +1,8 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"V_ACCT_SALESREP"	"1"	"ACCT_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"V_ACCT_SALESREP"	"2"	"COMMISSION_PCT"	"decimal"	"NULL"	"6"	"3"	"YES"	"NO"	"NO"
+"V_ACCT_SALESREP"	"3"	"SALESREP_ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"V_ACCT_SALESREP"	"4"	"SALESREP_ROLE"	"nvarchar"	"50"	"0"	"0"	"YES"	"NO"	"NO"
+"V_ACCT_SALESREP"	"5"	"LAST_MODIFIED"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"
+"V_ACCT_SALESREP"	"6"	"LAST_USER"	"nvarchar"	"20"	"0"	"0"	"YES"	"NO"	"NO"
+"V_ACCT_SALESREP"	"7"	"CREATE_DATE"	"datetime"	"NULL"	"23"	"3"	"YES"	"NO"	"NO"

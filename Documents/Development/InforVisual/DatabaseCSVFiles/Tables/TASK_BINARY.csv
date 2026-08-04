@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"TASK_BINARY"	"ROWID"	"int"	"NO"
+"dbo"	"TASK_BINARY"	"TASK_TYPE"	"nvarchar"	"NO"
+"dbo"	"TASK_BINARY"	"TASK_NO"	"int"	"NO"
+"dbo"	"TASK_BINARY"	"SEQ_NO"	"int"	"NO"
+"dbo"	"TASK_BINARY"	"TYPE"	"nchar"	"NO"
+"dbo"	"TASK_BINARY"	"BITS"	"image"	"YES"
+"dbo"	"TASK_BINARY"	"BITS_LENGTH"	"int"	"NO"

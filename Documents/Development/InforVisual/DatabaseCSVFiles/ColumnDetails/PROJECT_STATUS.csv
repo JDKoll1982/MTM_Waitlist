@@ -1,0 +1,3 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"PROJECT_STATUS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"PROJECT_STATUS"	"2"	"CODE"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"

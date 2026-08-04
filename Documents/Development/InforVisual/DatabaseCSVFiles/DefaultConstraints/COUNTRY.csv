@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"COUNTRY"	"esl_country"	"DF__COUNTRY__esl_cou__15E6C203"	"NULL"
+"COUNTRY"	"INTRASTAT_REQD"	"DF__COUNTRY__INTRAST__14F29DCA"	"NULL"

@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"COR_INBOX_HEADERS"	"PK_COR_INBOX_HEADERS"	"CLUSTERED"	"YES"	"YES"	"C_ID"	"1"	"NO"

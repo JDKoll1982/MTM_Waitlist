@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"PURC_LINE_DEL"	"DELETE_PURC_LINE_DEL"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"PURC_LINE_DEL"	"INSERT_PURC_LINE_DEL"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"PURC_LINE_DEL"	"UPDATE_PURC_LINE_DEL"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

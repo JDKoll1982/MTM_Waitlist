@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_OPTY_ORDER"	"OPTY_ID"	"nvarchar"	"NO"
+"dbo"	"V_OPTY_ORDER"	"CUST_ORDER_ID"	"nvarchar"	"NO"
+"dbo"	"V_OPTY_ORDER"	"CREATE_DATE"	"datetime"	"YES"
+"dbo"	"V_OPTY_ORDER"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_OPTY_ORDER"	"LAST_MODIFIED"	"datetime"	"YES"

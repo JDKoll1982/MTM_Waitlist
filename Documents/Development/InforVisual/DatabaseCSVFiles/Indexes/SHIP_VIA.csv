@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SHIP_VIA"	"PK_SHIP_VIA"	"CLUSTERED"	"YES"	"YES"	"CODE"	"1"	"NO"

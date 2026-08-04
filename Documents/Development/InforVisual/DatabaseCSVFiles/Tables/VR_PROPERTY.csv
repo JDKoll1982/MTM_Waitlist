@@ -1,0 +1,4 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"VR_PROPERTY"	"ROWID"	"int"	"NO"
+"dbo"	"VR_PROPERTY"	"NAME"	"nvarchar"	"YES"
+"dbo"	"VR_PROPERTY"	"VALUE"	"nvarchar"	"YES"

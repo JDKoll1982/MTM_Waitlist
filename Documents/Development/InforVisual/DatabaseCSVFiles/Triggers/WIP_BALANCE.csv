@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"WIP_BALANCE"	"INSERT_WIP_BALANCE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"WIP_BALANCE"	"UPDATE_WIP_BALANCE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

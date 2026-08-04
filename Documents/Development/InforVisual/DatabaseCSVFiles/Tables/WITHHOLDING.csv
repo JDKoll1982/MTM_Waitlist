@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"WITHHOLDING"	"ROWID"	"int"	"NO"
+"dbo"	"WITHHOLDING"	"CODE"	"nvarchar"	"NO"
+"dbo"	"WITHHOLDING"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"WITHHOLDING"	"TAX_PERCENT"	"decimal"	"NO"
+"dbo"	"WITHHOLDING"	"TAX_ALLOWANCE_PCT"	"decimal"	"NO"
+"dbo"	"WITHHOLDING"	"TAX_GL_ACCT_ID"	"nvarchar"	"NO"

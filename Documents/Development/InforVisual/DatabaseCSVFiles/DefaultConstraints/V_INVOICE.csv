@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"V_INVOICE"	"TERMS_DISC_TYPE"	"DF__V_INVOICE__TERMS__5E176A2C"	"NULL"
+"V_INVOICE"	"TERMS_NET_TYPE"	"DF__V_INVOICE__TERMS__5D2345F3"	"NULL"

@@ -1,0 +1,4 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_VFO_00098"	"V_HISTORY"	"ACCT_ID"	"V_ACCOUNT"	"ID"
+"FK_VFO_00245"	"V_HISTORY"	"CATEGORY_ID"	"V_HISTORY_CATEGORY"	"ID"
+"FK_VFO_00254"	"V_HISTORY"	"EVENT_ID"	"V_EVENT"	"ID"

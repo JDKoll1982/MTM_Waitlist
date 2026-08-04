@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"RMA"	"CREATE_DATE"	"DF__RMA__CREATE_DATE__4A7A85D3"	"NULL"
+"RMA"	"STATUS_EFF_DATE"	"DF__RMA__STATUS_EFF___4B6EAA0C"	"NULL"

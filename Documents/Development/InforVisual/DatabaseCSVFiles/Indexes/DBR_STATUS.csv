@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"DBR_STATUS"	"X_DBRSTATUS_0"	"NONCLUSTERED"	"NO"	"NO"	"CCR_ID"	"1"	"NO"
+"DBR_STATUS"	"X_DBRSTATUS_0"	"NONCLUSTERED"	"NO"	"NO"	"STATUS_TYPE"	"2"	"NO"
+"DBR_STATUS"	"X_DBRSTATUS_0"	"NONCLUSTERED"	"NO"	"NO"	"STATUS_DATE"	"3"	"NO"

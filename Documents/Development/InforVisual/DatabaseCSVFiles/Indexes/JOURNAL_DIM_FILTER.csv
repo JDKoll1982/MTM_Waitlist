@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"JOURNAL_DIM_FILTER"	"PK_JOURN_DIM_FLTR"	"CLUSTERED"	"YES"	"YES"	"USER_ID"	"1"	"NO"
+"JOURNAL_DIM_FILTER"	"PK_JOURN_DIM_FLTR"	"CLUSTERED"	"YES"	"YES"	"NAME"	"2"	"NO"
+"JOURNAL_DIM_FILTER"	"PK_JOURN_DIM_FLTR"	"CLUSTERED"	"YES"	"YES"	"CRITERIA_TYPE"	"3"	"NO"

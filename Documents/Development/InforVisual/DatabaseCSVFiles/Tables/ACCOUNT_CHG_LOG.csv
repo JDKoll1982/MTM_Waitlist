@@ -1,0 +1,8 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"ACCOUNT_CHG_LOG"	"ROWID"	"int"	"NO"
+"dbo"	"ACCOUNT_CHG_LOG"	"TRANSACTION_ID"	"smallint"	"NO"
+"dbo"	"ACCOUNT_CHG_LOG"	"ACCOUNT_ID"	"nvarchar"	"NO"
+"dbo"	"ACCOUNT_CHG_LOG"	"CREATE_DATE"	"datetime"	"NO"
+"dbo"	"ACCOUNT_CHG_LOG"	"FROM_TYPE"	"nchar"	"NO"
+"dbo"	"ACCOUNT_CHG_LOG"	"TO_TYPE"	"nchar"	"NO"
+"dbo"	"ACCOUNT_CHG_LOG"	"USER_ID"	"nvarchar"	"NO"

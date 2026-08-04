@@ -1,0 +1,6 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"INDIRECT"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"INDIRECT"	"2"	"ID"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"INDIRECT"	"3"	"DESCRIPTION"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"
+"INDIRECT"	"4"	"GL_ACCOUNT_ID"	"nvarchar"	"30"	"0"	"0"	"NO"	"NO"	"NO"
+"INDIRECT"	"5"	"INDIRECT_CODE"	"nchar"	"1"	"0"	"0"	"NO"	"NO"	"NO"

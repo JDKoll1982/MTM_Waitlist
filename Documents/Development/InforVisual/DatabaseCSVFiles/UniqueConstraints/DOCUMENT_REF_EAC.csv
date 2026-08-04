@@ -1,0 +1,4 @@
+"TableName"	"ConstraintName"	"ColumnName"	"KeyOrdinal"
+"DOCUMENT_REF_EAC"	"X_DOC_REF_EAC_0"	"PROJECT_ID"	"1"
+"DOCUMENT_REF_EAC"	"X_DOC_REF_EAC_0"	"EAC_VERSION"	"2"
+"DOCUMENT_REF_EAC"	"X_DOC_REF_EAC_0"	"DOCUMENT_ID"	"3"

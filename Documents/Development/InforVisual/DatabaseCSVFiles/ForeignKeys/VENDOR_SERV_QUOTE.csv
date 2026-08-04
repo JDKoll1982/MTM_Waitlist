@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9603"	"VENDOR_SERV_QUOTE"	"CURRENCY_ID"	"CURRENCY"	"ID"
+"FK_VENDSERV_QUOTE_TO_SITE"	"VENDOR_SERV_QUOTE"	"SITE_ID"	"SITE"	"ID"

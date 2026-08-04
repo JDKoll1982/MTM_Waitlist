@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"BANK_ADJUSTMENT"	"DELETE_BANK_ADJUSTMENT"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"BANK_ADJUSTMENT"	"UPDATE_BANK_ADJUSTMENT"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

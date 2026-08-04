@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"QRP_CONTROL"	"PK_QRP_CONTROL"	"CLUSTERED"	"YES"	"YES"	"STD_QRP_NAME"	"1"	"NO"
+"QRP_CONTROL"	"PK_QRP_CONTROL"	"CLUSTERED"	"YES"	"YES"	"CONTEXT_TYPE"	"2"	"NO"
+"QRP_CONTROL"	"PK_QRP_CONTROL"	"CLUSTERED"	"YES"	"YES"	"CONTEXT_ID"	"3"	"NO"

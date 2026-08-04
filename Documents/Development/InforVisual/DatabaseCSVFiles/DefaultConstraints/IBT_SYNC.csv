@@ -1,0 +1,3 @@
+"TableName"	"ColumnName"	"ConstraintName"	"Definition"
+"IBT_SYNC"	"CREATE_DATE"	"DF__IBT_SYNC__CREATE__2D89416A"	"NULL"
+"IBT_SYNC"	"SUBSCRIPTIONS"	"DF__IBT_SYNC__SUBSCR__2E7D65A3"	"NULL"

@@ -1,0 +1,3 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"TEST"	"DELETE_TEST"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"TEST"	"UPDATE_TEST"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

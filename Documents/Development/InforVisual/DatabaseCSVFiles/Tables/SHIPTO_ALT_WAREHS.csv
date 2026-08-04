@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SHIPTO_ALT_WAREHS"	"CUSTOMER_ID"	"nvarchar"	"NO"
+"dbo"	"SHIPTO_ALT_WAREHS"	"SHIPTO_ID"	"nvarchar"	"NO"
+"dbo"	"SHIPTO_ALT_WAREHS"	"WAREHOUSE_ID"	"nvarchar"	"NO"
+"dbo"	"SHIPTO_ALT_WAREHS"	"RANK"	"smallint"	"NO"
+"dbo"	"SHIPTO_ALT_WAREHS"	"ROWID"	"int"	"NO"

@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"INV_TRANS_DIST_TRC"	"PK_INV_TRANS_DIST_TRC"	"CLUSTERED"	"YES"	"YES"	"IN_TRANS_ID"	"1"	"NO"
+"INV_TRANS_DIST_TRC"	"PK_INV_TRANS_DIST_TRC"	"CLUSTERED"	"YES"	"YES"	"OUT_TRANS_ID"	"2"	"NO"
+"INV_TRANS_DIST_TRC"	"PK_INV_TRANS_DIST_TRC"	"CLUSTERED"	"YES"	"YES"	"TRACE_ID"	"3"	"NO"

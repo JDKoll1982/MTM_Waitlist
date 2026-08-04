@@ -1,0 +1,3 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FKEY9508"	"EQUIP_MAINT_DISC"	"customer_id"	"CUSTOMER"	"ID"
+"FKEY9507"	"EQUIP_MAINT_DISC"	"maint_id"	"EQUIP_MAINT_TYPE"	"id"

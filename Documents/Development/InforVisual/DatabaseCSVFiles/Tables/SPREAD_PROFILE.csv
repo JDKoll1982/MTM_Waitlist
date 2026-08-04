@@ -1,0 +1,7 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SPREAD_PROFILE"	"ROWID"	"int"	"NO"
+"dbo"	"SPREAD_PROFILE"	"id"	"nvarchar"	"NO"
+"dbo"	"SPREAD_PROFILE"	"description"	"nvarchar"	"YES"
+"dbo"	"SPREAD_PROFILE"	"type"	"nvarchar"	"NO"
+"dbo"	"SPREAD_PROFILE"	"acct_period"	"decimal"	"NO"
+"dbo"	"SPREAD_PROFILE"	"profile_amount"	"decimal"	"YES"

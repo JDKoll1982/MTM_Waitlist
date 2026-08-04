@@ -1,0 +1,3 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"DIMENSION_DESC"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"DIMENSION_DESC"	"2"	"DIMENSION_DESC"	"nvarchar"	"20"	"0"	"0"	"NO"	"NO"	"NO"

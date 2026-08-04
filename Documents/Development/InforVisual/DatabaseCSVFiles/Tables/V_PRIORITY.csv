@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"V_PRIORITY"	"ID"	"nvarchar"	"NO"
+"dbo"	"V_PRIORITY"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"V_PRIORITY"	"LAST_MODIFIED"	"datetime"	"YES"
+"dbo"	"V_PRIORITY"	"LAST_USER"	"nvarchar"	"YES"
+"dbo"	"V_PRIORITY"	"CREATE_DATE"	"datetime"	"YES"

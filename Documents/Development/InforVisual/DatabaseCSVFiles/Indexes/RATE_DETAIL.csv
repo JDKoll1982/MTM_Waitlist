@@ -1,0 +1,5 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"RATE_DETAIL"	"PK_RATE_DETAIL"	"CLUSTERED"	"YES"	"YES"	"RATE_ID"	"1"	"NO"
+"RATE_DETAIL"	"PK_RATE_DETAIL"	"CLUSTERED"	"YES"	"YES"	"SITE_ID"	"2"	"NO"
+"RATE_DETAIL"	"PK_RATE_DETAIL"	"CLUSTERED"	"YES"	"YES"	"PERIOD_ID"	"3"	"NO"
+"RATE_DETAIL"	"PK_RATE_DETAIL"	"CLUSTERED"	"YES"	"YES"	"COST_CATEGORY_ID"	"4"	"NO"

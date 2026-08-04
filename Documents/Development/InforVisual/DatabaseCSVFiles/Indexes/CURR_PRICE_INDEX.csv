@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"CURR_PRICE_INDEX"	"PK_CURR_PRICE_INDEX"	"CLUSTERED"	"YES"	"YES"	"FROM_CURRENCY_ID"	"1"	"NO"
+"CURR_PRICE_INDEX"	"PK_CURR_PRICE_INDEX"	"CLUSTERED"	"YES"	"YES"	"TO_CURRENCY_ID"	"2"	"NO"

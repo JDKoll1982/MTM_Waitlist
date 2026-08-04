@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_EMP_MATRIX"	"X_V_EMP_MATRIX_0"	"CLUSTERED"	"YES"	"YES"	"EMP_ID"	"1"	"NO"
+"V_EMP_MATRIX"	"X_V_EMP_MATRIX_0"	"CLUSTERED"	"YES"	"YES"	"RESOURCE_ID"	"2"	"NO"

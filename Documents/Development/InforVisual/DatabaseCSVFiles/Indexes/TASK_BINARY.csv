@@ -1,0 +1,4 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"TASK_BINARY"	"PK_TASK_BINARY"	"CLUSTERED"	"YES"	"YES"	"TASK_TYPE"	"1"	"NO"
+"TASK_BINARY"	"PK_TASK_BINARY"	"CLUSTERED"	"YES"	"YES"	"TASK_NO"	"2"	"NO"
+"TASK_BINARY"	"PK_TASK_BINARY"	"CLUSTERED"	"YES"	"YES"	"SEQ_NO"	"3"	"NO"

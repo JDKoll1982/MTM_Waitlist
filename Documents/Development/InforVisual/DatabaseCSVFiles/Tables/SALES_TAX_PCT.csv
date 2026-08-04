@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"SALES_TAX_PCT"	"ROWID"	"int"	"NO"
+"dbo"	"SALES_TAX_PCT"	"SALES_TAX_ID"	"nvarchar"	"NO"
+"dbo"	"SALES_TAX_PCT"	"EFFECTIVE_DATE"	"datetime"	"NO"
+"dbo"	"SALES_TAX_PCT"	"TAX_PERCENT"	"decimal"	"YES"
+"dbo"	"SALES_TAX_PCT"	"TAX_CEILING_AMOUNT"	"decimal"	"YES"

@@ -1,0 +1,3 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"SCHEDULER_RUN_LOG"	"PK_SCHEDULER_RUN_LOG"	"CLUSTERED"	"YES"	"YES"	"SCHEDULE_ID"	"1"	"NO"
+"SCHEDULER_RUN_LOG"	"PK_SCHEDULER_RUN_LOG"	"CLUSTERED"	"YES"	"YES"	"COUNT"	"2"	"NO"

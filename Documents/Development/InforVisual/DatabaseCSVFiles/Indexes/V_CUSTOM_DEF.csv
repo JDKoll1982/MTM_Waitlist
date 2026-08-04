@@ -1,0 +1,2 @@
+"TableName"	"IndexName"	"IndexType"	"IsUnique"	"IsPrimaryKey"	"ColumnName"	"KeyOrdinal"	"IsIncludedColumn"
+"V_CUSTOM_DEF"	"X_V_CUSTOM_DEF_0"	"CLUSTERED"	"YES"	"YES"	"BUS_TYPE"	"1"	"NO"

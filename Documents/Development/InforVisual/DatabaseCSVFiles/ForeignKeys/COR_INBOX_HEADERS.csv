@@ -1,0 +1,2 @@
+"FK_Name"	"Table"	"Column"	"Referenced_Table"	"Referenced_Column"
+"FK_COR_INBOX_ENTRY"	"COR_INBOX_HEADERS"	"C_INBOX_ID"	"COR_INBOX_ENTRY"	"C_ID"

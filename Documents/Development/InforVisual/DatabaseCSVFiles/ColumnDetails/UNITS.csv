@@ -1,0 +1,7 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"UNITS"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"UNITS"	"2"	"UNIT_OF_MEASURE"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
+"UNITS"	"3"	"DESCRIPTION"	"nvarchar"	"40"	"0"	"0"	"YES"	"NO"	"NO"
+"UNITS"	"4"	"SCALE"	"smallint"	"NULL"	"5"	"0"	"NO"	"NO"	"NO"
+"UNITS"	"5"	"CATEGORY"	"nvarchar"	"64"	"0"	"0"	"YES"	"NO"	"NO"
+"UNITS"	"6"	"USER_DEFINED_UOM"	"nchar"	"1"	"0"	"0"	"YES"	"NO"	"NO"

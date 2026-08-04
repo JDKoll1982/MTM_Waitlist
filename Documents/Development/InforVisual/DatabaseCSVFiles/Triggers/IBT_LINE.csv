@@ -1,0 +1,4 @@
+"TableName"	"TriggerName"	"TriggerType"	"IsInsteadOfTrigger"	"IsDisabled"	"TriggerEvent"
+"IBT_LINE"	"DELETE_IBT_LINE"	"SQL_TRIGGER"	"NO"	"NO"	"DELETE"
+"IBT_LINE"	"INSERT_IBT_LINE"	"SQL_TRIGGER"	"NO"	"NO"	"INSERT"
+"IBT_LINE"	"UPDATE_IBT_LINE"	"SQL_TRIGGER"	"NO"	"NO"	"UPDATE"

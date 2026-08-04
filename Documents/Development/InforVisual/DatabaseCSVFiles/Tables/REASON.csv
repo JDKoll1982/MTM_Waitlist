@@ -1,0 +1,6 @@
+"TABLE_SCHEMA"	"TABLE_NAME"	"COLUMN_NAME"	"DATA_TYPE"	"IS_NULLABLE"
+"dbo"	"REASON"	"ROWID"	"int"	"NO"
+"dbo"	"REASON"	"TYPE"	"nchar"	"NO"
+"dbo"	"REASON"	"CODE"	"nvarchar"	"NO"
+"dbo"	"REASON"	"DESCRIPTION"	"nvarchar"	"YES"
+"dbo"	"REASON"	"GL_ACCOUNT_ID"	"nvarchar"	"YES"

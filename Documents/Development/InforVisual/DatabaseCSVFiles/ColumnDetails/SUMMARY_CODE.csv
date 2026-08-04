@@ -1,0 +1,3 @@
+"TableName"	"ColumnOrdinal"	"ColumnName"	"DataType"	"MaxLength"	"Precision"	"Scale"	"IsNullable"	"IsIdentity"	"IsComputed"
+"SUMMARY_CODE"	"1"	"ROWID"	"int"	"NULL"	"10"	"0"	"NO"	"YES"	"NO"
+"SUMMARY_CODE"	"2"	"CODE"	"nvarchar"	"15"	"0"	"0"	"NO"	"NO"	"NO"
