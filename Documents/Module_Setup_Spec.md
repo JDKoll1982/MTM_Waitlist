@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-Module_Setup will provide the workstation setup experience for entering a work order, resolving part and sequence information, and preparing the setup data required for downstream workstation operations. The flow is derived from the current workflow diagram in [SavedDiagram.drawio](SavedDiagram.drawio).
+Module_Setup will provide the workstation setup experience for entering a work order, resolving part and sequence information, and preparing the setup data required for downstream workstation operations. The flow is derived from the current workflow diagram in [SavedDiagram.drawio](SavedDiagram.drawio). Module_Setup will be implemented as a workflow embedded inside the shell navigation rather than as a separate standalone window.
 
 ## 2. Feature Scope
 
@@ -19,6 +19,7 @@ The feature covers:
 - Confirmation of preloaded values before persisting changes.
 - Finalization of the setup flow and handoff to downstream save/cleanup logic.
 - Helper-server routing for read-only and read/write interactions that short-circuits to mock data when `Feature.UseMockData` is enabled in app data.
+- Persistence of all Infor Visual lookup requests and responses to SQL queue files in the Database/InforVisual/Queues/Module folder so lookups can be replayed, audited, and re-read from disk.
 
 ## 3. User Journey
 
@@ -74,6 +75,7 @@ The feature covers:
 - Zero-result handling must show a non-blocking inline error.
 - Single-result handling must proceed without prompting the user.
 - Multi-result handling must require the user to choose exactly one part.
+- All Infor Visual lookup requests and responses must be written to SQL queue files under Database/InforVisual/Queues/Module and read back from those queue files whenever the workflow needs to replay or rehydrate lookup context.
 
 ### 4.3 Sequence Selection
 - The system must return connected sequences for the chosen WO and part.
@@ -82,7 +84,8 @@ The feature covers:
 ### 4.4 Subordinate Parts and Categorization
 - The system must categorize subordinate parts into logical groups such as dies, coils, flatstock, or components.
 - Categorized values must be persisted for operator requests and services.
-- The review screen must display the selected subordinate part context clearly, including the primary coil and die selections and the list of component parts that were resolved for the current work order and sequence.
+- The review screen must display the selected subordinate part context clearly, including the primary coil and the relevant die selection(s) and the list of component parts that were resolved for the current work order and sequence.
+- The review screen must support zero, one, or many dies for a given part/sequence context. When no die exists for the selected work order/part/sequence combination, the UI must show a neutral state such as “No die assigned for this job.”
 - The review screen must surface on-hand quantities and any out-of-stock or low-stock state that should be visible to the operator before confirmation.
 
 ### 4.5 Dunnage Setup
@@ -260,7 +263,9 @@ Elements:
 | Sequence: 20                                                 |
 |                                                              |
 | Coil: MMC0001000   On Hand: 12,568                           |
-| Die: FGT-0653      Die Location: V-A1-01                     |
+| Dies:                                                        |
+| - FGT-0653   Location: V-A1-01                                |
+| - FGT-001    No die assigned for this job                    |
 |                                                              |
 | Component Parts:                                             |
 | 23-23451-006       On Hand: 125,000                          |
@@ -276,7 +281,7 @@ Elements:
 
 Elements:
 - Final review screen that summarizes the work order, part, sequence, subordinate part context, and the selected dunnage choice.
-- A compact summary layout for the coil, die, and component part context, including on-hand quantities and clear out-of-stock messaging where applicable.
+- A compact summary layout for the coil, one-or-many die entries, and component part context, including on-hand quantities and clear out-of-stock messaging where applicable.
 - A clear selected dunnage summary section that shows the chosen dunnage selections in a compact list.
 - Clear action buttons for Edit and Confirm.
 - Confirmation state for saving the setup data and moving to cleanup.

@@ -19,8 +19,7 @@ Use available MCP servers to ground implementation decisions before writing or c
 For this repository, prioritize MCP-backed validation for:
 - WinUI 3 and Windows App SDK APIs
 - App notifications and packaging flows
-- Local AI and Foundry-related guidance
-
+- Local AI and Foundry-related guidance- Module_Setup shell-workflow implementation and the SQL queue persistence path for Infor Visual lookups under Database/InforVisual/Queues/Module
 ## CSV Schema Exploration
 - The workspace CSV MCP server is configured in `.vscode/mcp.json` as `csv-mcp-server`.
 - Its storage root is `Documents/Development/InforVisual/DatabaseCSVFiles`, which contains the schema exports split into folders by type.
