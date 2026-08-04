@@ -68,6 +68,8 @@ INSERT INTO
     config_settings_values (
         public_id,
         setting_key,
+        scope_type,
+        scope_key,
         setting_value_int,
         value_type,
         updated_by_user_id,
@@ -76,6 +78,8 @@ INSERT INTO
 VALUES (
         UUID(),
         'sessions.retention_inactive_days',
+        'all_users',
+        'all_users',
         30,
         'int',
         NULL,
@@ -84,6 +88,8 @@ VALUES (
     (
         UUID(),
         'waitlist.resolved_retention_days',
+        'all_users',
+        'all_users',
         90,
         'int',
         NULL,
@@ -92,12 +98,16 @@ VALUES (
     (
         UUID(),
         'settings.history_retention_days',
+        'all_users',
+        'all_users',
         30,
         'int',
         NULL,
         UTC_TIMESTAMP()
     )
 ON DUPLICATE KEY UPDATE
+    scope_type = VALUES(scope_type),
+    scope_key = VALUES(scope_key),
     setting_value_int = VALUES(setting_value_int),
     value_type = VALUES(value_type),
     updated_utc = VALUES(updated_utc);
@@ -164,6 +174,39 @@ WHERE
 ON DUPLICATE KEY UPDATE
     assigned_utc = VALUES(assigned_utc),
     assigned_by_user_id = VALUES(assigned_by_user_id);
+
+INSERT INTO
+    core_buildings_catalog (
+        public_id,
+        building_code,
+        building_name,
+        is_active,
+        created_utc,
+        updated_utc,
+        updated_by_user_id
+    )
+VALUES (
+        UUID(),
+        'expo_drive',
+        'Expo Drive',
+        1,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP(),
+        NULL
+    ),
+    (
+        UUID(),
+        'vits_drive',
+        'Vits Drive',
+        1,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP(),
+        NULL
+    )
+ON DUPLICATE KEY UPDATE
+    building_name = VALUES(building_name),
+    is_active = VALUES(is_active),
+    updated_utc = VALUES(updated_utc);
 
 INSERT INTO
     core_workstations_registry (

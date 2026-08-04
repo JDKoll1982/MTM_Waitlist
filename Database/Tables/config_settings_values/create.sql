@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS config_settings_values (
     id BIGINT NOT NULL AUTO_INCREMENT,
     public_id CHAR(36) NOT NULL,
     setting_key VARCHAR(190) NOT NULL,
+    scope_type VARCHAR(16) NOT NULL DEFAULT 'all_users',
+    scope_key VARCHAR(255) NOT NULL DEFAULT 'all_users',
+    workstation_id BIGINT NULL,
+    user_id BIGINT NULL,
     setting_value TEXT NULL,
     setting_value_int BIGINT NULL,
     setting_value_bool TINYINT(1) NULL,
@@ -21,9 +25,13 @@ CREATE TABLE IF NOT EXISTS config_settings_values (
     updated_utc DATETIME NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uq_config_settings_values_public_id (public_id),
-    UNIQUE KEY uq_config_settings_values_setting_key (setting_key),
+    UNIQUE KEY uq_config_settings_values_setting_scope (setting_key, scope_key),
     KEY idx_config_settings_values_updated_by_user_id (updated_by_user_id),
-    CONSTRAINT fk_config_settings_values_core_users_profiles_updated_by_user_id FOREIGN KEY (updated_by_user_id) REFERENCES core_users_profiles (id)
+    KEY idx_config_settings_values_workstation_id (workstation_id),
+    KEY idx_config_settings_values_user_id (user_id),
+    CONSTRAINT fk_config_settings_values_core_users_profiles_updated_by_user_id FOREIGN KEY (updated_by_user_id) REFERENCES core_users_profiles (id),
+    CONSTRAINT fk_config_settings_values_core_workstations_registry_workstation_id FOREIGN KEY (workstation_id) REFERENCES core_workstations_registry (id),
+    CONSTRAINT fk_config_settings_values_core_users_profiles_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

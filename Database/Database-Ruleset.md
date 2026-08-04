@@ -52,6 +52,15 @@ This document applies your completed naming conventions and database architectur
 - Use `_history` tables for change auditability.
 - Retention windows are dynamic settings values from `config_settings_values`.
 
+## Settings Scope and Resolution
+- Settings are persisted in `config_settings_values`; changes are recorded in `config_settings_history`.
+- Supported scope types are `workstation`, `all_users`, `user`, `admin`, and `developer`.
+- Scope resolution is ordered from fallback to override: workstation -> all_users -> user -> admin -> developer.
+- `scope_key` is required and is `workstation:<id>`, `all_users`, `user:<id>`, `admin`, or `developer`.
+- Workstation and user scopes use `workstation_id` and `user_id` foreign keys respectively.
+- Admin and developer scope writes require role authorization; raw secrets must remain outside the settings table.
+- Effective reads must use `sp_config_settings_get_effective`; writes must use `sp_config_settings_upsert`.
+
 ## Artifact Layout and Release Governance
 - Use a file-per-artifact layout under `Database/`.
 - Bootstrap database creation lives in `Database/Bootstrap/create_database.sql`.
