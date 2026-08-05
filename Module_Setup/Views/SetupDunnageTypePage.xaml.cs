@@ -11,8 +11,18 @@ public sealed partial class SetupDunnageTypePage : Page
 
     public SetupDunnageTypePage()
     {
-        ViewModel = App.GetService<SetupDunnageTypeViewModel>();
-        InitializeComponent();
+        try
+        {
+            StartupDebugLog.Info("SetupDunnageTypePage", "Page constructor started.");
+            ViewModel = App.GetService<SetupDunnageTypeViewModel>();
+            InitializeComponent();
+            StartupDebugLog.Info("SetupDunnageTypePage", "Page constructor completed.");
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("SetupDunnageTypePage", ex, "Page constructor failed.");
+            throw;
+        }
     }
 
     private async void OnQuickAddTypeClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

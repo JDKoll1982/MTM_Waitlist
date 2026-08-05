@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS config_settings_history (
     ),
     CONSTRAINT fk_settings_history_settings_values_config_setting_id FOREIGN KEY (config_setting_id) REFERENCES config_settings_values (id),
     CONSTRAINT fk_settings_history_users_changed_by_user_id FOREIGN KEY (changed_by_user_id) REFERENCES core_users_profiles (id),
-    CONSTRAINT fk_config_settings_history_core_workstations_registry_workstation_id FOREIGN KEY (workstation_id) REFERENCES core_workstations_registry (id),
-    CONSTRAINT fk_config_settings_history_core_users_profiles_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id)
+    CONSTRAINT fk_history_ws_registry_workstation_id FOREIGN KEY (workstation_id) REFERENCES core_workstations_registry (id),
+    CONSTRAINT fk_history_users_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

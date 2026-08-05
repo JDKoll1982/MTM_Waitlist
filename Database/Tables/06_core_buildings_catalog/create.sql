@@ -19,5 +19,5 @@ CREATE TABLE IF NOT EXISTS core_buildings_catalog (
     UNIQUE KEY uq_core_buildings_catalog_building_code (building_code),
     UNIQUE KEY uq_core_buildings_catalog_building_name (building_name),
     KEY idx_core_buildings_catalog_is_active_building_name (is_active, building_name),
-    CONSTRAINT fk_core_buildings_catalog_core_users_profiles_updated_by_user_id FOREIGN KEY (updated_by_user_id) REFERENCES core_users_profiles (id)
+    CONSTRAINT fk_buildings_users_updated_by_user_id FOREIGN KEY (updated_by_user_id) REFERENCES core_users_profiles (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

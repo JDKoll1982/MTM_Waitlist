@@ -3,7 +3,7 @@
     "csharp.debug.logging": {
         "exceptions": false,
         "moduleLoad": false,
-        "programOutput": false,
+        "programOutput": true,
         "threadExit": false,
         "processExit": false
     },

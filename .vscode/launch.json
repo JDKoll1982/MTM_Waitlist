@@ -13,6 +13,9 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "justMyCode": true,
+            "logging": {
+                "programOutput": true
+            },
             "env": {
                 "Logging__LogLevel__Default": "None",
                 "Logging__LogLevel__Microsoft": "None",
@@ -28,6 +31,9 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "justMyCode": true,
+            "logging": {
+                "programOutput": true
+            },
             "env": {
                 "Logging__LogLevel__Default": "None",
                 "Logging__LogLevel__Microsoft": "None",

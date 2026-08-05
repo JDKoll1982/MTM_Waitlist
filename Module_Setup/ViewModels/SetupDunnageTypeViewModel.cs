@@ -69,30 +69,38 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
 
     public void OnNavigatedTo(object parameter)
     {
-        StartupDebugLog.Info("SetupDunnageTypeVm", "OnNavigatedTo started.");
-        StatusMessage = State.StatusMessage;
-
-        _dunnageTypes.Clear();
-        foreach (var dunnageType in State.DunnageTypes)
+        try
         {
-            _dunnageTypes.Add(dunnageType);
+            StartupDebugLog.Info("SetupDunnageTypeVm", "OnNavigatedTo started.");
+            StatusMessage = State.StatusMessage;
+
+            _dunnageTypes.Clear();
+            foreach (var dunnageType in State.DunnageTypes)
+            {
+                _dunnageTypes.Add(dunnageType);
+            }
+
+            SelectedDunnageType = _dunnageTypes.FirstOrDefault(type => string.Equals(type.Id, State.SelectedDunnageTypeId, StringComparison.OrdinalIgnoreCase));
+
+            if (_dunnageTypes.Count == 0)
+            {
+                StatusMessage = string.IsNullOrWhiteSpace(StatusMessage)
+                    ? "No receiving dunnage types are available for this part and sequence."
+                    : StatusMessage;
+                StartupDebugLog.Info("SetupDunnageTypeVm", "No dunnage types available for current context.");
+            }
+
+            OnPropertyChanged(nameof(PageTitle));
+            OnPropertyChanged(nameof(ProgressText));
+            OnPropertyChanged(nameof(CurrentSelectionSummary));
+            OnPropertyChanged(nameof(CanManageDefinitions));
+            StartupDebugLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo completed. LocalDunnageTypeCount={_dunnageTypes.Count}.");
         }
-
-        SelectedDunnageType = _dunnageTypes.FirstOrDefault(type => string.Equals(type.Id, State.SelectedDunnageTypeId, StringComparison.OrdinalIgnoreCase));
-
-        if (_dunnageTypes.Count == 0)
+        catch (Exception ex)
         {
-            StatusMessage = string.IsNullOrWhiteSpace(StatusMessage)
-                ? "No receiving dunnage types are available for this part and sequence."
-                : StatusMessage;
-            StartupDebugLog.Info("SetupDunnageTypeVm", "No dunnage types available for current context.");
+            StartupDebugLog.Error("SetupDunnageTypeVm", ex, "OnNavigatedTo failed.");
+            throw;
         }
-
-        OnPropertyChanged(nameof(PageTitle));
-        OnPropertyChanged(nameof(ProgressText));
-        OnPropertyChanged(nameof(CurrentSelectionSummary));
-        OnPropertyChanged(nameof(CanManageDefinitions));
-        StartupDebugLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo completed. LocalDunnageTypeCount={_dunnageTypes.Count}.");
     }
 
     public void OnNavigatedFrom()

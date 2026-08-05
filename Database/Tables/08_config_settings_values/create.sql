@@ -29,9 +29,9 @@ CREATE TABLE IF NOT EXISTS config_settings_values (
     KEY idx_config_settings_values_updated_by_user_id (updated_by_user_id),
     KEY idx_config_settings_values_workstation_id (workstation_id),
     KEY idx_config_settings_values_user_id (user_id),
-    CONSTRAINT fk_config_settings_values_core_users_profiles_updated_by_user_id FOREIGN KEY (updated_by_user_id) REFERENCES core_users_profiles (id),
-    CONSTRAINT fk_config_settings_values_core_workstations_registry_workstation_id FOREIGN KEY (workstation_id) REFERENCES core_workstations_registry (id),
-    CONSTRAINT fk_config_settings_values_core_users_profiles_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id)
+    CONSTRAINT fk_values_users_updated_by_user_id FOREIGN KEY (updated_by_user_id) REFERENCES core_users_profiles (id),
+    CONSTRAINT fk_values_ws_registry_workstation_id FOREIGN KEY (workstation_id) REFERENCES core_workstations_registry (id),
+    CONSTRAINT fk_values_users_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

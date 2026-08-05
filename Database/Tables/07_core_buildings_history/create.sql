@@ -19,6 +19,6 @@ CREATE TABLE IF NOT EXISTS core_buildings_history (
     UNIQUE KEY uq_core_buildings_history_public_id (public_id),
     KEY idx_core_buildings_history_building_id_changed_utc (building_id, changed_utc),
     KEY idx_core_buildings_history_changed_by_user_id (changed_by_user_id),
-    CONSTRAINT fk_core_buildings_history_core_buildings_catalog_building_id FOREIGN KEY (building_id) REFERENCES core_buildings_catalog (id),
-    CONSTRAINT fk_core_buildings_history_core_users_profiles_changed_by_user_id FOREIGN KEY (changed_by_user_id) REFERENCES core_users_profiles (id)
+    CONSTRAINT fk_buildings_history_building_id FOREIGN KEY (building_id) REFERENCES core_buildings_catalog (id),
+    CONSTRAINT fk_buildings_history_changed_by_user_id FOREIGN KEY (changed_by_user_id) REFERENCES core_users_profiles (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
