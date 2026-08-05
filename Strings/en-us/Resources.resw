@@ -65,10 +65,184 @@
 		<value>MTM_Waitlist</value>
   	</data>
   <data name="Shell_MainShell.Content" xml:space="preserve">
-    <value>MainShell</value>
+    <value>Home</value>
   </data>
   <data name="Shell_WaitlistView.Content" xml:space="preserve">
-    <value>WaitlistView</value>
+    <value>Waitlist</value>
+  </data>
+  <data name="Shell_ModuleSetup.Content" xml:space="preserve">
+    <value>Module Setup</value>
+  </data>
+  <data name="Setup_Progress.Step1" xml:space="preserve">
+    <value>Step 1/5 · 20% complete</value>
+  </data>
+  <data name="Setup_Progress.Step2" xml:space="preserve">
+    <value>Step 2/5 · 40% complete</value>
+  </data>
+  <data name="Setup_Progress.Step3" xml:space="preserve">
+    <value>Step 3/5 · 60% complete</value>
+  </data>
+  <data name="Setup_Progress.Step4" xml:space="preserve">
+    <value>Step 4/5 · 80% complete</value>
+  </data>
+  <data name="Setup_Progress.Step5" xml:space="preserve">
+    <value>Step 5/5 · 100% complete</value>
+  </data>
+  <data name="Setup_WorkOrder.EnterTitle.Text" xml:space="preserve">
+    <value>Start Setup</value>
+  </data>
+  <data name="Setup_WorkOrder.Input.Header" xml:space="preserve">
+    <value>Work Order</value>
+  </data>
+  <data name="Setup_WorkOrder.Input.PlaceholderText" xml:space="preserve">
+    <value>Enter work order (for example 76951, 076951, or WO-076951)</value>
+  </data>
+  <data name="Setup_WorkOrder.Validation.InvalidFormat" xml:space="preserve">
+    <value>Enter a valid work order in one of these formats: 76951, 076951, or WO-076951.</value>
+  </data>
+  <data name="Setup_WorkOrder.Validation.NoMatchingParts" xml:space="preserve">
+    <value>No parts were found for this work order.</value>
+  </data>
+  <data name="Setup_Part.Title" xml:space="preserve">
+    <value>Choose Part</value>
+  </data>
+  <data name="Setup_Part.FoundPartsLabel.Text" xml:space="preserve">
+    <value>Matching parts</value>
+  </data>
+  <data name="Setup_Part.Validation.SelectPart" xml:space="preserve">
+    <value>Choose a part to continue.</value>
+  </data>
+  <data name="Setup_Sequence.Title" xml:space="preserve">
+    <value>Choose Operation</value>
+  </data>
+  <data name="Setup_Sequence.AvailableLabel.Text" xml:space="preserve">
+    <value>Available operations</value>
+  </data>
+  <data name="Setup_Sequence.Validation.SelectSequence" xml:space="preserve">
+    <value>Choose an operation to continue.</value>
+  </data>
+  <data name="Setup_Sequence.Validation.NoMatchingSequences" xml:space="preserve">
+    <value>No operations were found for the selected part.</value>
+  </data>
+  <data name="Setup_DunnageType.Title" xml:space="preserve">
+    <value>Choose Dunnage Type</value>
+  </data>
+  <data name="Setup_DunnageType.PageLabel.Text" xml:space="preserve">
+    <value>Choose a dunnage type</value>
+  </data>
+  <data name="Setup_DunnageType.Validation.SelectType" xml:space="preserve">
+    <value>Choose a dunnage type to continue.</value>
+  </data>
+  <data name="Setup_DunnagePart.Title" xml:space="preserve">
+    <value>Choose Dunnage Option</value>
+  </data>
+  <data name="Setup_DunnagePart.PageLabel.Text" xml:space="preserve">
+    <value>Choose a dunnage option</value>
+  </data>
+  <data name="Setup_DunnagePart.Validation.SelectPart" xml:space="preserve">
+    <value>Choose a dunnage option to continue.</value>
+  </data>
+  <data name="Setup_DunnagePart.NoImageFallback.Text" xml:space="preserve">
+    <value>Image preview unavailable</value>
+  </data>
+  <data name="Setup_DunnagePart.Filter.PlaceholderText" xml:space="preserve">
+    <value>Search by part number, name, or details</value>
+  </data>
+  <data name="Setup_Dunnage.Selection.None" xml:space="preserve">
+    <value>No dunnage selected</value>
+  </data>
+  <data name="Setup_Dunnage.SelectionSummaryLabel.Text" xml:space="preserve">
+    <value>Selected dunnage</value>
+  </data>
+  <data name="Setup_Review.Title" xml:space="preserve">
+    <value>Review Setup</value>
+  </data>
+  <data name="Setup_Review.PageLabel.Text" xml:space="preserve">
+    <value>Review Setup</value>
+  </data>
+  <data name="Setup_Review.Header.WorkOrder.Text" xml:space="preserve">
+    <value>Work Order</value>
+  </data>
+  <data name="Setup_Review.Header.Part.Text" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="Setup_Review.Header.Sequence.Text" xml:space="preserve">
+    <value>Sequence</value>
+  </data>
+  <data name="Setup_Review.Header.Dunnage.Text" xml:space="preserve">
+    <value>Dunnage</value>
+  </data>
+  <data name="Setup_Review.SubordinatePartsTitle.Text" xml:space="preserve">
+    <value>Subordinate Parts</value>
+  </data>
+  <data name="Setup_Review.Group.CategoryLabel.Text" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Setup_Review.Group.CountLabel.Text" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="Setup_Review.Part.PartNumberLabel.Text" xml:space="preserve">
+    <value>Part Number</value>
+  </data>
+  <data name="Setup_Review.Part.DescriptionLabel.Text" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Setup_Review.Part.LocationLabel.Text" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Setup_Review.Part.TypeLabel.Text" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Setup_Review.Part.OnHandLabel.Text" xml:space="preserve">
+    <value>On Hand</value>
+  </data>
+  <data name="Setup_Review.SelectedDunnageTitle.Text" xml:space="preserve">
+    <value>Dunnage Selection</value>
+  </data>
+  <data name="Setup_Review.ReplacePromptTitle.Text" xml:space="preserve">
+    <value>Replace Active Job?</value>
+  </data>
+  <data name="Setup_Review.Confirmation.ReplacePrompt" xml:space="preserve">
+    <value>{0} already has an active job. Replace it with this setup?</value>
+  </data>
+  <data name="Setup_Review.Status.Saved" xml:space="preserve">
+    <value>Setup saved successfully.</value>
+  </data>
+  <data name="Setup_Review.Status.MockSaved" xml:space="preserve">
+    <value>Setup saved using sample data.</value>
+  </data>
+  <data name="Setup_Error.LookupUnavailable" xml:space="preserve">
+    <value>The lookup service is currently unavailable. Please try again.</value>
+  </data>
+  <data name="Setup_Action.Cancel.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Setup_Action.Search.Content" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Setup_Action.Next.Content" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Setup_Action.Back.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Setup_Action.Continue.Content" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="Setup_Action.Review.Content" xml:space="preserve">
+    <value>Continue to Review</value>
+  </data>
+  <data name="Setup_Action.BackToTypes.Content" xml:space="preserve">
+    <value>Back to Dunnage Types</value>
+  </data>
+  <data name="Setup_Action.Edit.Content" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Setup_Action.Confirm.Content" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Setup_Action.Replace.Content" xml:space="preserve">
+    <value>Replace</value>
   </data>
   <data name="Settings_Personalization.Text" xml:space="preserve">
     <value>Personalization</value>
@@ -89,7 +263,7 @@
     <value>About this application</value>
   </data>
   <data name="Settings_AboutDescription.Text" xml:space="preserve">
-    <value>TODO: Replace with your app description.</value>
+    <value>MTM Waitlist helps teams track, prioritize, and complete material requests in real time.</value>
   </data>
   <data name="SettingsPage_PrivacyTermsLink.Content" xml:space="preserve">
     <value>Privacy Statement</value>

@@ -5,6 +5,9 @@ using Microsoft.UI.Xaml.Controls;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Settings.Views;
+using MTM_Waitlist.Module_Setup.Models;
+using MTM_Waitlist.Module_Setup.ViewModels;
+using MTM_Waitlist.Module_Setup.Views;
 using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -23,6 +26,12 @@ public class PageService : IPageService
         Configure<WaitlistViewViewModel, WaitlistViewPage>();
         Configure<WaitlistViewDetailViewModel, WaitlistViewDetailPage>();
         Configure<SettingsViewModel, SettingsPage>();
+        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupWorkOrderViewModel, SetupWorkOrderPage>();
+        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupPartSelectionViewModel, SetupPartSelectionPage>();
+        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupSequenceSelectionViewModel, SetupSequenceSelectionPage>();
+        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupDunnageTypeViewModel, SetupDunnageTypePage>();
+        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupDunnagePartViewModel, SetupDunnagePartPage>();
+        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupReviewViewModel, SetupReviewPage>();
     }
 
     public Type GetPageType(string key)

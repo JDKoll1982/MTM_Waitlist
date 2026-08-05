@@ -11,7 +11,8 @@ namespace MTM_Waitlist.Module_Settings.ViewModels;
 
 public partial class SettingsViewModel : ObservableRecipient
 {
-    private const string MockDataSettingKey = "Feature.UseMockData";
+    private const string RecvMockDataSettingKey = "Feature.RecvMockData";
+    private const string InforVisualMockDataSettingKey = "Feature.InforVisualMockData";
 
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly ILocalSettingsService _localSettingsService;
@@ -29,7 +30,10 @@ public partial class SettingsViewModel : ObservableRecipient
     }
 
     [ObservableProperty]
-    private bool _useMockData;
+    private bool _useRecvMockData;
+
+    [ObservableProperty]
+    private bool _useInforVisualMockData;
 
     // FIX: A clean, type-safe string representation of the Enum for the XAML engine
     public string SelectedThemeText => ElementTheme.ToString();
@@ -46,7 +50,8 @@ public partial class SettingsViewModel : ObservableRecipient
 
         ElementTheme = _themeSelectorService.Theme;
         VersionDescription = GetVersionDescription();
-        UseMockData = _localSettingsService.ReadSettingAsync<bool?>(MockDataSettingKey).GetAwaiter().GetResult() ?? true;
+        UseRecvMockData = _localSettingsService.ReadSettingAsync<bool?>(RecvMockDataSettingKey).GetAwaiter().GetResult() ?? false;
+        UseInforVisualMockData = _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey).GetAwaiter().GetResult() ?? true;
 
         SwitchThemeCommand = new RelayCommand<ElementTheme>(
             async (param) =>
@@ -66,9 +71,14 @@ public partial class SettingsViewModel : ObservableRecipient
         OnPropertyChanged(nameof(SelectedThemeText));
     }
 
-    partial void OnUseMockDataChanged(bool value)
+    partial void OnUseRecvMockDataChanged(bool value)
     {
-        _ = _localSettingsService.SaveSettingAsync(MockDataSettingKey, value);
+        _ = _localSettingsService.SaveSettingAsync(RecvMockDataSettingKey, value);
+    }
+
+    partial void OnUseInforVisualMockDataChanged(bool value)
+    {
+        _ = _localSettingsService.SaveSettingAsync(InforVisualMockDataSettingKey, value);
     }
 
     private static string GetVersionDescription()

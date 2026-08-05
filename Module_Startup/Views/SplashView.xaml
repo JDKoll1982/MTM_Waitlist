@@ -25,7 +25,7 @@
                 HorizontalAlignment="Center"
                 FontSize="26"
                 FontWeight="SemiBold"
-                Text="Starting MTM Waitlist" />
+                Text="Launching MTM Waitlist" />
             <TextBlock
                 HorizontalAlignment="Center"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -39,7 +39,7 @@
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                     FontWeight="SemiBold"
-                    Text="Database is unavailable. Retry or close the app." />
+                    Text="We could not connect to the database. Retry or close the application." />
             </Border>
         </StackPanel>
 
@@ -51,13 +51,13 @@
             HorizontalAlignment="Center"
             Orientation="Horizontal"
             Spacing="12">
-            <Button Command="{x:Bind ViewModel.RetryCommand, Mode=OneWay}" Content="Try again" />
+            <Button Command="{x:Bind ViewModel.RetryCommand, Mode=OneWay}" Content="Retry" />
             <StackPanel
                 x:Name="ResetActionArea"
                 x:Load="{x:Bind ViewModel.ShowResetToDefaultsAction, Mode=OneWay}">
-                <Button Command="{x:Bind ViewModel.ResetToDefaultsCommand, Mode=OneWay}" Content="Reset to defaults" />
+                <Button Command="{x:Bind ViewModel.ResetToDefaultsCommand, Mode=OneWay}" Content="Restore Defaults" />
             </StackPanel>
-            <Button Command="{x:Bind ViewModel.ExitCommand, Mode=OneWay}" Content="Close app" />
+            <Button Command="{x:Bind ViewModel.ExitCommand, Mode=OneWay}" Content="Close" />
         </StackPanel>
     </Grid>
 </UserControl>

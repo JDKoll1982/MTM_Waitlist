@@ -25,7 +25,7 @@
                 HorizontalAlignment="Center"
                 FontSize="26"
                 FontWeight="SemiBold"
-                Text="Starting MTM Waitlist" />
+                Text="Launching MTM Waitlist" />
             <TextBlock
                 HorizontalAlignment="Center"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -40,9 +40,9 @@
             HorizontalAlignment="Center"
             Orientation="Horizontal"
             Spacing="12">
-            <Button Command="{x:Bind ViewModel.RetryCommand, Mode=OneWay}" Content="Try again" />
-            <Button Command="{x:Bind ViewModel.ResetToDefaultsCommand, Mode=OneWay}" Content="Reset to defaults" />
-            <Button Command="{x:Bind ViewModel.ExitCommand, Mode=OneWay}" Content="Exit" />
+            <Button Command="{x:Bind ViewModel.RetryCommand, Mode=OneWay}" Content="Retry" />
+            <Button Command="{x:Bind ViewModel.ResetToDefaultsCommand, Mode=OneWay}" Content="Restore Defaults" />
+            <Button Command="{x:Bind ViewModel.ExitCommand, Mode=OneWay}" Content="Close" />
         </StackPanel>
     </Grid>
 </Page>

@@ -26,7 +26,7 @@
                     Style="{ThemeResource SubtitleTextBlockStyle}" />
 
                 <!--  FIX 1: Explicitly redirect the localization engine from .Text to .Header and .Description properties  -->
-                <wct:SettingsExpander Description="Choose which theme color your waitlist application should display" Header="App Theme">
+                <wct:SettingsExpander Description="Choose the appearance used throughout MTM Waitlist." Header="App Theme">
                     <wct:SettingsExpander.HeaderIcon>
                         <SymbolIcon Symbol="Setting" />
                     </wct:SettingsExpander.HeaderIcon>
@@ -91,13 +91,13 @@
 
                 <wct:SettingsCard>
                     <wct:SettingsCard.Header>
-                        <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Mock Data" />
+                        <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Infor Visual Mock Data" />
                     </wct:SettingsCard.Header>
                     <wct:SettingsCard.Description>
                         <TextBlock
                             Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
                             Style="{ThemeResource CaptionTextBlockStyle}"
-                            Text="Show sample waitlist data when mock data is enabled." />
+                            Text="Use sample data for Infor Visual lookup flows. Default: On." />
                     </wct:SettingsCard.Description>
                     <wct:SettingsCard.HeaderIcon>
                         <SymbolIcon Symbol="PreviewLink" />
@@ -106,7 +106,28 @@
                         <ToggleSwitch
                             OffContent="Off"
                             OnContent="On"
-                            IsOn="{x:Bind ViewModel.UseMockData, Mode=TwoWay}" />
+                            IsOn="{x:Bind ViewModel.UseInforVisualMockData, Mode=TwoWay}" />
+                    </wct:SettingsCard.Content>
+                </wct:SettingsCard>
+
+                <wct:SettingsCard>
+                    <wct:SettingsCard.Header>
+                        <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Receiving Mock Data" />
+                    </wct:SettingsCard.Header>
+                    <wct:SettingsCard.Description>
+                        <TextBlock
+                            Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Text="Use sample data for receiving and MySQL-backed flows. Default: Off." />
+                    </wct:SettingsCard.Description>
+                    <wct:SettingsCard.HeaderIcon>
+                        <SymbolIcon Symbol="PreviewLink" />
+                    </wct:SettingsCard.HeaderIcon>
+                    <wct:SettingsCard.Content>
+                        <ToggleSwitch
+                            OffContent="Off"
+                            OnContent="On"
+                            IsOn="{x:Bind ViewModel.UseRecvMockData, Mode=TwoWay}" />
                     </wct:SettingsCard.Content>
                 </wct:SettingsCard>
 
@@ -128,7 +149,7 @@
                         <TextBlock
                             x:Uid="Settings_About"
                             Style="{ThemeResource BodyTextBlockStyle}"
-                            Text="Application Version" />
+                            Text="App Version" />
                     </wct:SettingsCard.Header>
                     <wct:SettingsCard.HeaderIcon>
                         <SymbolIcon Symbol="Important" />
@@ -167,7 +188,7 @@
                         <HyperlinkButton
                             x:Uid="SettingsPage_PrivacyTermsLink"
                             VerticalAlignment="Center"
-                            Content="Privacy Terms &amp; Policy" />
+                            Content="Privacy Policy" />
                     </wct:SettingsCard.Content>
                 </wct:SettingsCard>
             </StackPanel>

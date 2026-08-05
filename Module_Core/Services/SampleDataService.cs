@@ -7,7 +7,8 @@ namespace MTM_Waitlist.Module_Core.Services;
 
 public sealed class SampleDataService : ISampleDataService
 {
-    private const string MockDataSettingKey = "Feature.UseMockData";
+    private const string RecvMockDataSettingKey = "Feature.RecvMockData";
+    private const string InforVisualMockDataSettingKey = "Feature.InforVisualMockData";
     private readonly ILocalSettingsService? _localSettingsService;
 
     public SampleDataService()
@@ -54,8 +55,9 @@ public sealed class SampleDataService : ISampleDataService
             return true;
         }
 
-        var value = _localSettingsService.ReadSettingAsync<bool>(MockDataSettingKey).GetAwaiter().GetResult();
-        return value;
+        var recvValue = _localSettingsService.ReadSettingAsync<bool?>(RecvMockDataSettingKey).GetAwaiter().GetResult() ?? false;
+        var inforVisualValue = _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey).GetAwaiter().GetResult() ?? true;
+        return recvValue || inforVisualValue;
     }
 
     private static SampleOrder CreateItem(int id, string title, string imagePath, string requestedByName, string requestedPressName, string remainingTimeText)

@@ -1,0 +1,3 @@
+- 2026-08-04: Added the first Module_Setup scaffold: workflow state, work-order validation, lookup/subordinate/dunnage/persistence services, shell nav entry, page-service mappings, and step pages/view-models.
+- WinUI XAML pages under Module_Setup/Views are already included by the SDK default items; adding explicit <Page> entries caused NETSDK1022 duplicate Page items.
+- Targeted setup tests passed (5/5) after the initial implementation slice.

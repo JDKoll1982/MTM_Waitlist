@@ -140,7 +140,16 @@ public class NavigationService : INavigationService
 
             if (frame.GetPageViewModel() is INavigationAware navigationAware)
             {
-                navigationAware.OnNavigatedTo(e.Parameter);
+                try
+                {
+                    navigationAware.OnNavigatedTo(e.Parameter);
+                }
+                catch (Exception ex)
+                {
+                    var targetPage = frame.Content?.GetType().FullName ?? "<unknown-page>";
+                    StartupDebugLog.Error("NavigationService", ex, $"OnNavigatedTo failed for page '{targetPage}'.");
+                    throw;
+                }
             }
 
             Navigated?.Invoke(sender, e);

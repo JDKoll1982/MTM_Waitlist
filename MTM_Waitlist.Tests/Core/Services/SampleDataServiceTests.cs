@@ -65,7 +65,8 @@ public sealed class SampleDataServiceTests
     {
         var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
         {
-            ["Feature.UseMockData"] = false,
+            ["Feature.InforVisualMockData"] = false,
+            ["Feature.RecvMockData"] = false,
         });
 
         var service = new SampleDataService(settings);

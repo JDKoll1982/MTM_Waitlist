@@ -34,6 +34,21 @@
     <Content Include="Assets\pickup_wip.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Database\InforVisual\Queues\Module_Setup\**\*.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Database\MTMReceivingApp\Queues\Module_Setup\**\*.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Database\MTMReceivingApp\StoredProcedures\**\*.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Database\StoredProcedures\sp_setup_save_setup\*.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Database\InforVisual\Queues\Module_Setup\README.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
@@ -77,8 +92,11 @@
 
   <!-- DB schema validation requires PowerShell 7 (pwsh) and runs only in CI or when explicitly opted in.
        To run locally: set the environment variable CI=true, or pass /p:RunDbValidation=true to MSBuild. -->
-  <Target Name="ValidateDatabaseSchemaOnBuild" BeforeTargets="Build"
-          Condition="'$(CI)' == 'true' or '$(RunDbValidation)' == 'true'">
+  <Target
+    Name="ValidateDatabaseSchemaOnBuild"
+    BeforeTargets="Build"
+    Condition="'$(CI)' == 'true' or '$(RunDbValidation)' == 'true'"
+  >
     <Exec Command="pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\.github\scripts\validate-database-schema.ps1&quot; -DatabaseName mtm_waitlist" />
   </Target>
 

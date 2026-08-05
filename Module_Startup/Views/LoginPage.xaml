@@ -26,7 +26,7 @@
                 <TextBlock
                     FontSize="28"
                     FontWeight="SemiBold"
-                    Text="Sign in" />
+                    Text="Sign In" />
 
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -35,17 +35,17 @@
                 <TextBox
                     x:Name="UsernameTextBox"
                     Header="Username"
-                    PlaceholderText="Enter your username"
+                    PlaceholderText="Username"
                     Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                 <PasswordBox
                     x:Name="PasswordBox"
                     Header="Password"
-                    PlaceholderText="Enter your password"
+                    PlaceholderText="Password"
                     PasswordChanged="PasswordBox_OnPasswordChanged" />
 
                 <CheckBox
-                    Content="Remember password on this device"
+                    Content="Remember me on this device"
                     IsChecked="{x:Bind ViewModel.RememberPassword, Mode=TwoWay}" />
 
                 <StackPanel
@@ -53,21 +53,21 @@
                     Spacing="12"
                     x:Load="{x:Bind ViewModel.ShowPasswordChangePrompt, Mode=OneWay}">
                     <TextBlock
-                        Text="Change Password"
+                        Text="Update Password"
                         FontSize="18"
                         FontWeight="SemiBold" />
                     <PasswordBox
                         x:Name="NewPasswordBox"
                         Header="New password"
-                        PlaceholderText="Enter a new password"
+                        PlaceholderText="New password"
                         PasswordChanged="NewPasswordBox_OnPasswordChanged" />
                     <PasswordBox
                         x:Name="ConfirmPasswordBox"
                         Header="Confirm new password"
-                        PlaceholderText="Re-enter the new password"
+                        PlaceholderText="Confirm new password"
                         PasswordChanged="ConfirmPasswordBox_OnPasswordChanged" />
                     <Button
-                        Content="Update password"
+                        Content="Update Password"
                         Command="{x:Bind ViewModel.ChangePasswordCommand, Mode=OneWay}"
                         Style="{ThemeResource AccentButtonStyle}" />
                 </StackPanel>
@@ -79,11 +79,11 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <Button
-                        Content="Sign in"
+                        Content="Sign In"
                         Command="{x:Bind ViewModel.SignInCommand, Mode=OneWay}"
                         Style="{ThemeResource AccentButtonStyle}" />
                     <Button
-                        Content="Cancel"
+                        Content="Back"
                         Command="{x:Bind ViewModel.CancelCommand, Mode=OneWay}" />
                 </StackPanel>
 
@@ -93,7 +93,7 @@
                     Spacing="12"
                     x:Load="{x:Bind ViewModel.ShowNewUserAction, Mode=OneWay}">
                     <Button
-                        Content="New User"
+                        Content="Create Account"
                         Command="{x:Bind ViewModel.NewUserCommand, Mode=OneWay}" />
                 </StackPanel>
                 </StackPanel>

@@ -65,7 +65,7 @@
                             Grid.Row="1"
                             Grid.Column="1"
                             FontWeight="SemiBold"
-                            Text="Requested by" />
+                            Text="Requested By" />
                         <TextBlock
                             Grid.Row="1"
                             Grid.Column="2"
@@ -75,7 +75,7 @@
                             Grid.Row="2"
                             Grid.Column="1"
                             FontWeight="SemiBold"
-                            Text="Press" />
+                            Text="Work Center" />
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="2"
@@ -85,7 +85,7 @@
                             Grid.Row="3"
                             Grid.Column="1"
                             FontWeight="SemiBold"
-                            Text="Remaining time" />
+                            Text="Remaining Time" />
                         <TextBlock
                             Grid.Row="3"
                             Grid.Column="2"
@@ -99,7 +99,7 @@
                             Grid.ColumnSpan="2"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Style="{ThemeResource CaptionTextBlockStyle}"
-                            Text="Request-specific material, workflow, and handoff details are shown below." 
+                            Text="Material, workflow, and handoff details are shown below." 
                             TextWrapping="WrapWholeWords" />
                     </Grid>
                 </Border>
@@ -107,7 +107,7 @@
                 <TextBlock
                     Grid.Row="1"
                     Style="{ThemeResource SubtitleTextBlockStyle}"
-                    Text="Request details" />
+                    Text="Request Details" />
 
                 <ItemsControl
                     Grid.Row="2"

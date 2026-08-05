@@ -30,4 +30,4 @@ For this repository, prioritize MCP-backed validation for:
 - WinUI 3 and Windows App SDK APIs
 - App notifications and packaging flows
 - Local AI and Foundry-related guidance
-- Helper-server and mock-data routing patterns that short-circuit to app-data-backed sample data when `Feature.UseMockData` is enabled
+- Helper-server and mock-data routing patterns that short-circuit to app-data-backed sample data when module-specific toggles are enabled (`Feature.InforVisualMockData` for Infor Visual flows, `Feature.RecvMockData` for receiving/MySQL flows)

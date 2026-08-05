@@ -14,7 +14,7 @@ public sealed class HelperServersTests
     {
         var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
         {
-            ["Feature.UseMockData"] = true,
+            ["Feature.InforVisualMockData"] = true,
         });
         var sampleDataService = new SampleDataService(settings);
         var server = new SqlHelperServer(settings, sampleDataService);
@@ -30,7 +30,7 @@ public sealed class HelperServersTests
     {
         var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
         {
-            ["Feature.UseMockData"] = true,
+            ["Feature.RecvMockData"] = true,
         });
         var sampleDataService = new SampleDataService(settings);
         var server = new MySqlHelperServer(settings, sampleDataService);

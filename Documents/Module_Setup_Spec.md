@@ -18,8 +18,15 @@ The feature covers:
 - Loading and saving dunnage setup values through the same MySQL-backed pattern used by the receiving application.
 - Confirmation of preloaded values before persisting changes.
 - Finalization of the setup flow and handoff to downstream save/cleanup logic.
-- Helper-server routing for read-only and read/write interactions that short-circuits to mock data when `Feature.UseMockData` is enabled in app data.
-- Persistence of all Infor Visual lookup requests and responses to SQL queue files in the Database/InforVisual/Queues/Module folder so lookups can be replayed, audited, and re-read from disk.
+- Helper-server routing for read-only and read/write interactions that short-circuits to mock data when module-specific toggles are enabled in app data:
+  - `Feature.InforVisualMockData` (default On)
+  - `Feature.RecvMockData` (default Off)
+- Persistence of all Infor Visual lookup request/response definitions as checked-in SQL scripts in the Infor Visual queue-script folder so the workflow can be replayed without runtime JSON artifacts.
+- Explicit separation of storage responsibilities:
+  - Infor Visual SQL Server: work-order lookup, parts, sequences, and subordinate-part retrieval.
+  - MySQL mtm_receiving_application: dunnage types and dunnage parts queue scripts under Database/MTMReceivingApp/Queues/Module_Setup/Queues.
+  - MySQL mtm_waitlist: setup-state persistence, active-job coordination, and local history/audit data.
+  - Stored procedure `sp_setup_save_setup` under Database/StoredProcedures/sp_setup_save_setup/create.sql for setup save persistence, with rollback script at Database/StoredProcedures/sp_setup_save_setup/rollback.sql.
 
 ## 3. User Journey
 
@@ -45,8 +52,8 @@ The feature covers:
 ### Phase 3: MySQL Database Phase
 1. The system pulls subordinate parts for the selected part and sequence from Infor Visual.
 2. The system categorizes subordinate parts using the defined rules (for example, FGT, MMC, MMF, or Other).
-3. The system saves the categorized subordinate parts to MySQL for operator requests/services.
-4. The system queries MySQL for dunnage definitions by part-and-sequence context and loads the available dunnage types.
+3. The system saves the categorized subordinate parts to the MySQL mtm_waitlist database for operator requests/services.
+4. The system queries the MySQL mtm_receiving_application database for dunnage definitions by part-and-sequence context and loads the available dunnage types from the receiving-app queue script folder.
 5. The user first selects the dunnage type from a guided type-selection screen.
 6. The system then loads the matching dunnage parts for that selected type from MySQL.
 7. The user selects the specific dunnage part to use and can either return to the type-selection screen or continue to review.
@@ -54,7 +61,7 @@ The feature covers:
 9. The system determines whether the current selection originated from existing MySQL-backed preloaded values.
 10. If preloaded values are present, the user is prompted to confirm changes.
 11. If no preloaded values exist, the selection is saved directly.
-12. The setup flow finalizes and the data is handed off to the active queue/history persistence path.
+12. The setup flow finalizes and the data is handed off to the active queue/history persistence path in mtm_waitlist, with setup save persisted through `Database/StoredProcedures/sp_setup_save_setup/create.sql`.
 
 ### Phase 4: Saving and Cleanup
 1. The system checks whether an active job already exists.
@@ -94,7 +101,7 @@ The feature covers:
 - The user must be able to return to the dunnage type-selection screen before advancing to review.
 - The system must resolve part numbers, image paths, and supporting metadata for each selected dunnage part.
 - If no image exists, the app must fall back to a default “No Image” state.
-- The system must save and retrieve dunnage data through MySQL-backed entities and procedures that mirror the receiving application model: dunnage types, dunnage parts, active label data, and history records.
+- The system must save and retrieve dunnage data through MySQL-backed entities and queue-script files in `Database/MTMReceivingApp/Queues/Module_Setup/Queues` that mirror the receiving application model: dunnage types, dunnage parts, active label data, and history records.
 - The review/confirm screen must include a selected dunnage summary section that lists the chosen dunnage entries in a compact format.
 - Preloaded values must require explicit confirmation before overwrite.
 
@@ -109,7 +116,9 @@ The feature covers:
 - Navigation should remain integrated with the existing shell and navigation services.
 - The feature should gracefully handle service failures and show actionable error states.
 - The feature should be privacy-first and avoid hardcoded secrets.
-- The feature should honor the app-data mock-data toggle and route through helper servers before backend execution when mock data is enabled.
+- The feature should honor app-data mock-data toggles and route through helper servers before backend execution when mock data is enabled:
+  - Infor Visual flows use `Feature.InforVisualMockData` (default On).
+  - Receiving/MySQL flows use `Feature.RecvMockData` (default Off).
 
 ## 6. Suggested Implementation Shape
 
@@ -125,7 +134,7 @@ The feature should be implemented as a dedicated module-aligned workflow with th
 - Models for WO input, part selection, sequence selection, dunnage types, dunnage parts, and setup state.
 - Workflow state objects similar to the receiving application’s workflow-service pattern so the user can navigate between type selection, part selection, and review without losing context.
 
-This spec should follow the receiving application’s concrete workflow conventions rather than a generic one-page dunnage form. In practice, that means a workflow-oriented UI around dunnage type selection, dunnage part selection, and review/save, backed by MySQL entities such as dunnage types, dunnage parts, the active label-data queue, and history records.
+This spec should follow the receiving application’s concrete workflow conventions rather than a generic one-page dunnage form. In practice, that means a workflow-oriented UI around dunnage type selection, dunnage part selection, and review/save, backed by MySQL entities in mtm_receiving_application such as dunnage types, dunnage parts, the active label-data queue, and history records.
 
 ## 7. Guided Workflow UI Mockups
 

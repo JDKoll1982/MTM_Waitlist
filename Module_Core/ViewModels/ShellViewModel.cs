@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Navigation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Views;
 using MTM_Waitlist.Module_Settings.Views;
+using MTM_Waitlist.Module_Setup.Views;
 using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Views;
@@ -159,6 +160,13 @@ public partial class ShellViewModel : ObservableRecipient
         {
             Selected = NavigationViewService.SettingsItem;
             HeaderText = "Settings";
+            return;
+        }
+
+        if (e.SourcePageType.Namespace?.StartsWith("MTM_Waitlist.Module_Setup.Views", StringComparison.Ordinal) == true)
+        {
+            Selected = NavigationViewService.GetSelectedItem(typeof(SetupWorkOrderPage));
+            HeaderText = "Module Setup";
             return;
         }
 
