@@ -38,4 +38,9 @@ public sealed partial class SetupWorkOrderPage : Page
             _ = WorkOrderTextBox.Focus(Microsoft.UI.Xaml.FocusState.Programmatic);
         }
     }
+
+    private async void OnWorkOrderTextBoxLostFocus(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        await ViewModel.AutoSearchOnWorkOrderBlurAsync();
+    }
 }

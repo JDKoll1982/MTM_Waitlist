@@ -9,6 +9,12 @@ public sealed partial class SetupDunnageTypePage : Page
 {
     public SetupDunnageTypeViewModel ViewModel { get; }
 
+    private static string LocalizeOrDefault(string key, string fallback)
+    {
+        var localized = key.GetLocalized();
+        return string.Equals(localized, key, StringComparison.Ordinal) ? fallback : localized;
+    }
+
     public SetupDunnageTypePage()
     {
         try
@@ -25,31 +31,23 @@ public sealed partial class SetupDunnageTypePage : Page
         }
     }
 
-    private async void OnQuickAddTypeClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private async void OnClearAllForPairClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        var inputTextBox = new TextBox
-        {
-            PlaceholderText = "Enter dunnage type name",
-            MaxLength = 100,
-        };
-
         var dialog = new ContentDialog
         {
-            Title = "Add New Dunnage Type",
-            PrimaryButtonText = "Add",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary,
-            Content = inputTextBox,
+            Title = LocalizeOrDefault("Setup_DunnagePair.ClearAll.DialogTitle", "Clear all dunnage assignments?"),
+            Content = LocalizeOrDefault("Setup_DunnagePair.ClearAll.DialogMessage", "This will remove all dunnage assignments for the current part/sequence pair."),
+            PrimaryButtonText = LocalizeOrDefault("Setup_DunnagePair.ClearAll.Confirm", "Clear All"),
+            CloseButtonText = LocalizeOrDefault("Setup_DunnagePair.ClearAll.Cancel", "Cancel"),
+            DefaultButton = ContentDialogButton.Close,
             XamlRoot = XamlRoot,
         };
 
         var result = await dialog.ShowAsync();
-        if (result != ContentDialogResult.Primary)
+        if (result == ContentDialogResult.Primary && ViewModel.ClearAllForPairCommand.CanExecute(null))
         {
-            return;
+            ViewModel.ClearAllForPairCommand.Execute(null);
         }
-
-        var addResult = await ViewModel.QuickAddTypeAsync(inputTextBox.Text);
-        StartupDebugLog.Info("SetupDunnageTypePage", $"Quick add type dialog completed. Success={addResult.Success}. Message='{addResult.Message}'.");
     }
+
 }

@@ -31,9 +31,25 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
 
     public Visibility ReplacementConfirmationVisibility => State.RequiresReplacementConfirmation ? Visibility.Visible : Visibility.Collapsed;
 
+    public Visibility ConfirmButtonVisibility => State.RequiresReplacementConfirmation ? Visibility.Collapsed : Visibility.Visible;
+
     public SetupWorkflowState State => _workflowService.State;
 
     public ObservableCollection<SetupSubordinatePart> SubordinateParts => State.SubordinateParts;
+
+    public ObservableCollection<SetupDunnagePart> DunnagePairAssignments => State.SelectedDunnageParts;
+
+    public IReadOnlyList<SetupDunnageAssignmentDisplay> DunnageAssignmentDisplays => State.SelectedDunnageParts
+        .GroupBy(part => string.IsNullOrWhiteSpace(part.PartNumber) ? part.DisplayName : part.PartNumber, StringComparer.OrdinalIgnoreCase)
+        .Select(group => group.First())
+        .Select(part => new SetupDunnageAssignmentDisplay
+        {
+            PartNumber = part.PartNumber,
+            DisplayName = string.IsNullOrWhiteSpace(part.DisplayName) ? part.PartNumber : part.DisplayName,
+            IconGlyph = ResolveTypeIconGlyph(part.TypeId)
+        })
+        .OrderBy(item => item.DisplayName, StringComparer.OrdinalIgnoreCase)
+        .ToArray();
 
     public IReadOnlyList<SetupSubordinatePartGroup> SubordinatePartGroups => State.SubordinateParts
         .GroupBy(part => string.IsNullOrWhiteSpace(part.Category) ? "Other" : part.Category)
@@ -64,7 +80,9 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
         OnPropertyChanged(nameof(ProgressText));
         OnPropertyChanged(nameof(SubordinatePartGroups));
         OnPropertyChanged(nameof(ReplacementConfirmationVisibility));
+        OnPropertyChanged(nameof(ConfirmButtonVisibility));
         OnPropertyChanged(nameof(SelectedDunnageSummary));
+        OnPropertyChanged(nameof(DunnageAssignmentDisplays));
     }
 
     public void OnNavigatedFrom()
@@ -87,6 +105,7 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
             StatusMessage = result.Message;
             State.RequiresReplacementConfirmation = result.RequiresReplacementConfirmation;
             OnPropertyChanged(nameof(ReplacementConfirmationVisibility));
+            OnPropertyChanged(nameof(ConfirmButtonVisibility));
 
             if (result.RequiresReplacementConfirmation)
             {
@@ -94,6 +113,13 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
             }
 
             State.StatusMessage = result.Message;
+            _navigationService.NavigateTo(
+                typeof(SetupCompletionViewModel).FullName!,
+                new SetupCompletionNavigationData
+                {
+                    Success = result.Success,
+                    Message = result.Message,
+                });
         }
         finally
         {
@@ -111,7 +137,15 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
             StatusMessage = result.Message;
             State.RequiresReplacementConfirmation = false;
             OnPropertyChanged(nameof(ReplacementConfirmationVisibility));
+            OnPropertyChanged(nameof(ConfirmButtonVisibility));
             State.StatusMessage = result.Message;
+            _navigationService.NavigateTo(
+                typeof(SetupCompletionViewModel).FullName!,
+                new SetupCompletionNavigationData
+                {
+                    Success = result.Success,
+                    Message = result.Message,
+                });
         }
         finally
         {
@@ -124,5 +158,21 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
     {
         State.RequiresReplacementConfirmation = false;
         OnPropertyChanged(nameof(ReplacementConfirmationVisibility));
+        OnPropertyChanged(nameof(ConfirmButtonVisibility));
     }
+
+    private string ResolveTypeIconGlyph(string typeId)
+    {
+        var type = State.DunnageTypes.FirstOrDefault(candidate => string.Equals(candidate.Id, typeId, StringComparison.OrdinalIgnoreCase));
+        return string.IsNullOrWhiteSpace(type?.IconGlyph) ? "\uE8B7" : type.IconGlyph;
+    }
+}
+
+public sealed class SetupDunnageAssignmentDisplay
+{
+    public string DisplayName { get; set; } = string.Empty;
+
+    public string PartNumber { get; set; } = string.Empty;
+
+    public string IconGlyph { get; set; } = "\uE8B7";
 }

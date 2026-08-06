@@ -26,12 +26,15 @@ public class PageService : IPageService
         Configure<WaitlistViewViewModel, WaitlistViewPage>();
         Configure<WaitlistViewDetailViewModel, WaitlistViewDetailPage>();
         Configure<SettingsViewModel, SettingsPage>();
+        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupWorkstationViewModel, SetupWorkstationPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupWorkOrderViewModel, SetupWorkOrderPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupPartSelectionViewModel, SetupPartSelectionPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupSequenceSelectionViewModel, SetupSequenceSelectionPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupDunnageTypeViewModel, SetupDunnageTypePage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupDunnagePartViewModel, SetupDunnagePartPage>();
+        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupDunnageAddPartSelectionViewModel, SetupDunnageAddPartSelectionPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupReviewViewModel, SetupReviewPage>();
+        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupCompletionViewModel, SetupCompletionPage>();
     }
 
     public Type GetPageType(string key)

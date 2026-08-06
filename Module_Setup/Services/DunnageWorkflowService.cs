@@ -178,6 +178,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
                 Id = GetValueAsString(row, "id"),
                 Name = GetValueAsString(row, "type_name"),
                 IconGlyph = ResolveGlyph(GetValueAsString(row, "icon")),
+                ImagePath = GetValueAsString(row, "image_path"),
             })
             .Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.Name))
             .ToArray();

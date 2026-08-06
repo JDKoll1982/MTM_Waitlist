@@ -14,6 +14,8 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
 
     public SetupWorkflowState State { get; }
 
+    public bool HasUnsavedChanges => State.HasUnsavedChanges;
+
     public SetupWorkflowService(
         IWorkOrderValidationService workOrderValidationService,
         IInforVisualLookupService lookupService,
@@ -81,7 +83,10 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         if (State.PartResults.Count == 0)
         {
             StartupDebugLog.Info("SetupWorkflow", "No matching parts found.");
-            State.ValidationMessage = "Setup_WorkOrder.Validation.NoMatchingParts".GetLocalized();
+            var noMatchingPartsMessage = "Setup_WorkOrder.Validation.NoMatchingParts".GetLocalized();
+            State.ValidationMessage = string.Equals(noMatchingPartsMessage, "Setup_WorkOrder.Validation.NoMatchingParts", StringComparison.Ordinal)
+                ? "No parts were found for this work order."
+                : noMatchingPartsMessage;
             State.CurrentStep = SetupWorkflowStep.WorkOrderEntry;
             return new SetupLookupResult
             {
@@ -101,6 +106,8 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
             State.CurrentStep = SetupWorkflowStep.PartSelection;
         }
 
+        State.HasUnsavedChanges = true;
+
         return lookupResult;
     }
 
@@ -108,7 +115,10 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
     {
         StartupDebugLog.Info("SetupWorkflow", $"SelectPartAsync started. Part='{partNumber}'.");
         State.SelectedPartNumber = partNumber;
-        State.SelectedWorkCenter = State.PartResults.FirstOrDefault(part => string.Equals(part.PartNumber, partNumber, StringComparison.OrdinalIgnoreCase))?.WorkCenter ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(State.SelectedWorkCenter))
+        {
+            State.SelectedWorkCenter = State.PartResults.FirstOrDefault(part => string.Equals(part.PartNumber, partNumber, StringComparison.OrdinalIgnoreCase))?.WorkCenter ?? string.Empty;
+        }
         State.SequenceResults.Clear();
         State.SelectedSequence = string.Empty;
         State.DunnageTypes.Clear();
@@ -128,7 +138,10 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         if (State.SequenceResults.Count == 0)
         {
             StartupDebugLog.Info("SetupWorkflow", "No sequences found; staying on part selection.");
-            State.StatusMessage = "Setup_Sequence.Validation.NoMatchingSequences".GetLocalized();
+            var noMatchingSequencesMessage = "Setup_Sequence.Validation.NoMatchingSequences".GetLocalized();
+            State.StatusMessage = string.Equals(noMatchingSequencesMessage, "Setup_Sequence.Validation.NoMatchingSequences", StringComparison.Ordinal)
+                ? "No operations were found for the selected part."
+                : noMatchingSequencesMessage;
             State.CurrentStep = SetupWorkflowStep.PartSelection;
             return new SetupSelectionResult { Success = false, Message = State.StatusMessage };
         }
@@ -136,6 +149,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         State.CurrentStep = SetupWorkflowStep.SequenceSelection;
         StartupDebugLog.Info("SetupWorkflow", "Part selection completed; moving to sequence selection.");
         State.StatusMessage = string.Empty;
+        State.HasUnsavedChanges = true;
         return new SetupSelectionResult { Success = true };
     }
 
@@ -174,8 +188,21 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
 
         StartupDebugLog.Info("SetupWorkflow", $"Dunnage types loaded. Count={State.DunnageTypes.Count}.");
 
+        var savedAssignments = await _persistenceService
+            .LoadSavedDunnageAssignmentsAsync(State.NormalizedWorkOrder, State.SelectedPartNumber, sequenceNumber, cancellationToken)
+            .ConfigureAwait(true);
+
+        State.SelectedDunnageParts.Clear();
+        foreach (var assignment in savedAssignments)
+        {
+            State.SelectedDunnageParts.Add(assignment);
+        }
+        State.UpdateSelectedDunnageSummary();
+        StartupDebugLog.Info("SetupWorkflow", $"Saved dunnage assignments rehydrated. Count={State.SelectedDunnageParts.Count}.");
+
         State.CurrentStep = SetupWorkflowStep.DunnageTypeSelection;
         StartupDebugLog.Info("SetupWorkflow", "Sequence selection completed; moving to dunnage type selection.");
+        State.HasUnsavedChanges = true;
         return new SetupSelectionResult { Success = true };
     }
 
@@ -200,6 +227,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
 
         State.CurrentStep = SetupWorkflowStep.DunnagePartSelection;
         StartupDebugLog.Info("SetupWorkflow", "Dunnage type selection completed; moving to dunnage part selection.");
+        State.HasUnsavedChanges = true;
         return new SetupSelectionResult { Success = true };
     }
 
@@ -218,8 +246,9 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         }
 
         State.UpdateSelectedDunnageSummary();
-        State.CurrentStep = SetupWorkflowStep.Review;
-        StartupDebugLog.Info("SetupWorkflow", $"Dunnage part selection completed; moving to review. Summary='{State.SelectedDunnageSummary}'.");
+        State.CurrentStep = SetupWorkflowStep.DunnageTypeSelection;
+        StartupDebugLog.Info("SetupWorkflow", $"Dunnage part selection completed; returning to dunnage pair screen. Summary='{State.SelectedDunnageSummary}'.");
+        State.HasUnsavedChanges = true;
 
         return Task.FromResult(new SetupSelectionResult { Success = true });
     }
@@ -245,6 +274,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         }
 
         State.UpdateSelectedDunnageSummary();
+        State.HasUnsavedChanges = true;
         return Task.FromResult(new SetupSelectionResult { Success = true });
     }
 
@@ -268,6 +298,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         }
 
         State.UpdateSelectedDunnageSummary();
+        State.HasUnsavedChanges = true;
         return Task.FromResult(new SetupSelectionResult
         {
             Success = true,
@@ -284,6 +315,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         State.SelectedDunnageParts.Clear();
         State.SelectedDunnagePartId = string.Empty;
         State.UpdateSelectedDunnageSummary();
+        State.HasUnsavedChanges = true;
 
         return Task.FromResult(new SetupSelectionResult
         {
@@ -292,7 +324,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         });
     }
 
-    public Task<SetupSaveResult> SaveAsync(bool forceReplace = false, CancellationToken cancellationToken = default)
+    public async Task<SetupSaveResult> SaveAsync(bool forceReplace = false, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupWorkflow", $"SaveAsync started. ForceReplace={forceReplace}. WO='{State.NormalizedWorkOrder}', Part='{State.SelectedPartNumber}', Sequence='{State.SelectedSequence}', WorkCenter='{State.SelectedWorkCenter}'.");
         var selectedPart = State.PartResults.FirstOrDefault(part => string.Equals(part.PartNumber, State.SelectedPartNumber, StringComparison.OrdinalIgnoreCase));
@@ -301,7 +333,9 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
             WorkOrder = State.NormalizedWorkOrder,
             PartNumber = State.SelectedPartNumber,
             SequenceNumber = State.SelectedSequence,
-            WorkCenter = selectedPart?.WorkCenter ?? State.SelectedWorkCenter,
+            WorkCenter = string.IsNullOrWhiteSpace(State.SelectedWorkCenter)
+                ? (selectedPart?.WorkCenter ?? string.Empty)
+                : State.SelectedWorkCenter,
             SelectedDunnageTypeId = State.SelectedDunnageTypeId,
             SelectedDunnagePartId = State.SelectedDunnagePartId,
             SubordinateParts = State.SubordinateParts.ToArray(),
@@ -310,6 +344,8 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
 
         State.SelectedWorkCenter = request.WorkCenter;
         StartupDebugLog.Info("SetupWorkflow", "Save request assembled and dispatched to persistence service.");
-        return _persistenceService.SaveAsync(request, forceReplace, cancellationToken);
+        var result = await _persistenceService.SaveAsync(request, forceReplace, cancellationToken).ConfigureAwait(true);
+        State.HasUnsavedChanges = !(result.Success && !result.RequiresReplacementConfirmation);
+        return result;
     }
 }

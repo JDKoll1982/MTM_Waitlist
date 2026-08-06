@@ -2,6 +2,7 @@
     x:Class="MTM_Waitlist.Module_Setup.Views.SetupReviewPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:converters="using:MTM_Waitlist.Module_Setup.Converters"
+    xmlns:viewmodels="using:MTM_Waitlist.Module_Setup.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,179 +15,108 @@
     </Page.Resources>
 
     <Grid Padding="24" RowSpacing="16">
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroup>
-                <VisualState x:Name="WideSummaryCardsState">
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="900" />
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                        <Setter Target="SummaryCardsGridColumn1.Width" Value="*" />
-                        <Setter Target="SummaryPartCard.(Grid.Row)" Value="0" />
-                        <Setter Target="SummaryPartCard.(Grid.Column)" Value="1" />
-                        <Setter Target="SummarySequenceCard.(Grid.Row)" Value="1" />
-                        <Setter Target="SummarySequenceCard.(Grid.Column)" Value="0" />
-                        <Setter Target="SummaryDunnageCard.(Grid.Row)" Value="1" />
-                        <Setter Target="SummaryDunnageCard.(Grid.Column)" Value="1" />
-                    </VisualState.Setters>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>
-
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Spacing="8">
-            <TextBlock x:Uid="Setup_Review.PageLabel" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Review and Confirm" />
-            <Grid x:Name="SummaryCardsGrid" ColumnSpacing="12" RowSpacing="12">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition x:Name="SummaryCardsGridColumn1" Width="0" />
-                </Grid.ColumnDefinitions>
-
-                <Border x:Name="SummaryWorkOrderCard" Padding="14" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
-                    <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_Review.Header.WorkOrder" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="WORK ORDER" CharacterSpacing="120" />
-                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" />
-                    </StackPanel>
+        <TabView Grid.Row="0" IsAddTabButtonVisible="False">
+            <TabViewItem x:Uid="Setup_Review.Tab.JobContext" Header="Job Context">
+                <Border Padding="16" Margin="0,8,0,0" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
+                    <Grid ColumnSpacing="16" RowSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" x:Uid="Setup_Review.Header.WorkOrder" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Work Order" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" x:Uid="Setup_Review.Header.Part" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Part" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedPartNumber, Mode=OneWay}" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" x:Uid="Setup_Review.Header.Sequence" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Sequence" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedSequence, Mode=OneWay}" />
+                    </Grid>
                 </Border>
+            </TabViewItem>
 
-                <Border x:Name="SummaryPartCard" Grid.Row="1" Padding="14" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
-                    <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_Review.Header.Part" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="PART" CharacterSpacing="120" />
-                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedPartNumber, Mode=OneWay}" />
-                    </StackPanel>
-                </Border>
+            <TabViewItem x:Uid="Setup_Review.Tab.SubordinateParts" Header="Subordinate Parts">
+                <ScrollViewer Margin="0,8,0,0">
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.SubordinatePartGroups, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:SetupSubordinatePartGroup">
+                                <Border Margin="0,0,0,12" Padding="12" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
+                                    <StackPanel Spacing="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind CategoryDisplayName}" />
+                                            <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind PartCountLabel}" />
+                                        </Grid>
+                                        <ItemsControl ItemsSource="{x:Bind Parts}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="models:SetupSubordinatePart">
+                                                    <Grid Margin="0,0,0,8" ColumnSpacing="12">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="2*" />
+                                                            <ColumnDefinition Width="2*" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel>
+                                                            <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind PartNumber}" />
+                                                            <TextBlock Text="{x:Bind Description}" TextWrapping="WrapWholeWords" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="1">
+                                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Location" />
+                                                            <TextBlock Text="{x:Bind LocationDisplay}" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="On Hand" />
+                                                            <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind OnHandDisplay}" HorizontalAlignment="Right" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </TabViewItem>
 
-                <Border x:Name="SummarySequenceCard" Grid.Row="2" Padding="14" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
-                    <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_Review.Header.Sequence" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="SEQUENCE" CharacterSpacing="120" />
-                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedSequence, Mode=OneWay}" />
-                    </StackPanel>
-                </Border>
-
-                <Border x:Name="SummaryDunnageCard" Grid.Row="3" Padding="14" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
-                    <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_Review.Header.Dunnage" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="DUNNAGE" CharacterSpacing="120" />
-                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.SelectedDunnageSummary, Mode=OneWay}" TextWrapping="WrapWholeWords" MaxLines="2" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-            <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="Wrap" />
-        </StackPanel>
-
-        <ScrollViewer Grid.Row="1">
-            <StackPanel Spacing="16">
-                <Border Padding="16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
+            <TabViewItem x:Uid="Setup_Review.Tab.DunnageAssignments" Header="Dunnage Pair Assignments">
+                <Border Margin="0,8,0,0" Padding="16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
                     <StackPanel Spacing="8">
-                        <TextBlock x:Uid="Setup_Review.SubordinatePartsTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Subordinate Parts" />
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.SubordinatePartGroups, Mode=OneWay}">
+                        <TextBlock x:Uid="Setup_Review.SelectedDunnageTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Selected Dunnage Summary" />
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.DunnageAssignmentDisplays, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="models:SetupSubordinatePartGroup">
-                                    <Border Margin="0,0,0,12" Padding="0" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="14">
-                                        <StackPanel Spacing="12">
-                                            <Border Padding="14,12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{x:Bind CategoryAccentKey, Converter={StaticResource CategoryAccentBrushConverter}}" BorderThickness="0,0,0,1" CornerRadius="14,14,0,0">
-                                                <Grid ColumnSpacing="12">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <Border Width="36" Height="36" Background="{x:Bind CategoryAccentKey, Converter={StaticResource CategoryAccentBrushConverter}}" CornerRadius="18" VerticalAlignment="Center">
-                                                        <FontIcon FontSize="18" Glyph="{x:Bind CategoryGlyph}" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                    </Border>
-
-                                                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                                        <TextBlock x:Uid="Setup_Review.Group.CategoryLabel" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="CATEGORY" CharacterSpacing="120" />
-                                                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind CategoryDisplayName}" />
-                                                    </StackPanel>
-
-                                                    <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
-                                                        <TextBlock x:Uid="Setup_Review.Group.CountLabel" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="COUNT" CharacterSpacing="120" HorizontalAlignment="Right" />
-                                                        <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind PartCountLabel}" HorizontalAlignment="Right" />
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-
-                                            <ItemsControl Padding="14,0,14,14" ItemsSource="{x:Bind Parts}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate x:DataType="models:SetupSubordinatePart">
-                                                        <Border Margin="0,0,0,10" Padding="14" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
-                                                            <Grid ColumnSpacing="16">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="Auto" />
-                                                                    <ColumnDefinition Width="2*" />
-                                                                    <ColumnDefinition Width="*" />
-                                                                    <ColumnDefinition Width="Auto" />
-                                                                </Grid.ColumnDefinitions>
-
-                                                                <Border Width="40" Height="40" Background="{x:Bind CategoryAccentKey, Converter={StaticResource CategoryAccentBrushConverter}}" CornerRadius="20" VerticalAlignment="Center">
-                                                                    <FontIcon FontSize="18" Glyph="{x:Bind CategoryGlyph}" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                                </Border>
-
-                                                                <StackPanel Grid.Column="1" Spacing="4">
-                                                                    <TextBlock x:Uid="Setup_Review.Part.PartNumberLabel" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="PART NUMBER" CharacterSpacing="120" />
-                                                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind PartNumber}" />
-                                                                    <TextBlock x:Uid="Setup_Review.Part.DescriptionLabel" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="DESCRIPTION" CharacterSpacing="120" />
-                                                                    <TextBlock Text="{x:Bind Description}" TextWrapping="WrapWholeWords" MaxWidth="320" />
-                                                                </StackPanel>
-
-                                                                <StackPanel Grid.Column="2" Spacing="4">
-                                                                    <TextBlock x:Uid="Setup_Review.Part.LocationLabel" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="LOCATION" CharacterSpacing="120" />
-                                                                    <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind LocationDisplay}" TextWrapping="WrapWholeWords" />
-                                                                    <TextBlock x:Uid="Setup_Review.Part.TypeLabel" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="TYPE" CharacterSpacing="120" />
-                                                                    <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind CategoryDisplayName}" />
-                                                                </StackPanel>
-
-                                                                <StackPanel Grid.Column="3" Spacing="6" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                                    <TextBlock x:Uid="Setup_Review.Part.OnHandLabel" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="ON HAND" CharacterSpacing="120" HorizontalAlignment="Right" />
-                                                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind OnHandDisplay}" HorizontalAlignment="Right" />
-                                                                    <Border Background="{x:Bind StockStateKey, Converter={StaticResource StockStateBrushConverter}, ConverterParameter=Background}" CornerRadius="999" Padding="10,4" HorizontalAlignment="Right">
-                                                                        <TextBlock Foreground="{x:Bind StockStateKey, Converter={StaticResource StockStateBrushConverter}, ConverterParameter=Foreground}" Text="{x:Bind StockMessage}" HorizontalAlignment="Right" TextWrapping="WrapWholeWords" />
-                                                                    </Border>
-                                                                </StackPanel>
-                                                            </Grid>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </StackPanel>
-                                    </Border>
+                                <DataTemplate x:DataType="viewmodels:SetupDunnageAssignmentDisplay">
+                                    <Grid Margin="0,0,0,10" ColumnSpacing="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <FontIcon Grid.Column="0" Glyph="{x:Bind IconGlyph}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" TextWrapping="WrapWholeWords" />
+                                    </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
                 </Border>
+            </TabViewItem>
+        </TabView>
 
-                <Border Padding="16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
-                    <StackPanel Spacing="8">
-                        <TextBlock x:Uid="Setup_Review.SelectedDunnageTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Selected Dunnage Summary" />
-                        <TextBlock Text="{x:Bind ViewModel.SelectedDunnageSummary, Mode=OneWay}" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-
-                <Border Padding="16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}">
-                    <StackPanel Spacing="8">
-                        <TextBlock x:Uid="Setup_Review.ReplacePromptTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Replace Existing Active Job?" />
-                        <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </ScrollViewer>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
             <Button x:Uid="Setup_Action.Edit" Content="Edit" Command="{x:Bind ViewModel.EditCommand}" />
-            <Button x:Uid="Setup_Action.Confirm" Content="Confirm" Command="{x:Bind ViewModel.ConfirmCommand}" />
+            <Button x:Uid="Setup_Action.Confirm" Content="Confirm" Command="{x:Bind ViewModel.ConfirmCommand}" Visibility="{x:Bind ViewModel.ConfirmButtonVisibility, Mode=OneWay}" />
             <Button x:Uid="Setup_Action.Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelReplacementCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
             <Button x:Uid="Setup_Action.Replace" Content="Replace" Command="{x:Bind ViewModel.ReplaceCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
         </StackPanel>

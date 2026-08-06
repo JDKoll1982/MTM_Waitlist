@@ -115,6 +115,23 @@ This checklist translates the Module_Setup specification into an implementation 
   - [x] Review
 - [x] If no image exists, show the neutral placeholder state.
 - [x] Ensure the selected dunnage summary is carried into the review page.
+- [x] Mirror receiving dunnage UI (near pixel parity) for:
+  - [x] type selection view
+  - [x] part selection view
+  - [x] review view
+  - [x] quick-add type/part dialogs (adapted fields)
+- [x] Implement pair assignment controls in setup flow:
+  - [x] add selected dunnage part to pair
+  - [x] remove assigned dunnage part
+  - [x] remove all assigned for selected type
+  - [x] clear all assigned for pair
+- [x] Allow workflow to continue and save with zero assigned dunnage.
+- [x] Role-gate quick add operations by `StartupState.CurrentRole`:
+  - [x] Admin
+  - [x] Developer
+  - [x] Plant Manager
+  - [x] Setup Lead
+  - [x] Production Lead
 
 ## 8. Implement Review and Confirm Step
 - [x] Create the Step 5 review page and view model.
@@ -170,6 +187,9 @@ This checklist translates the Module_Setup specification into an implementation 
 - [ ] Ensure explicit confirmation is required before overwriting preloaded values.
 - [ ] Add error handling for database connectivity, missing rows, and save conflicts.
 - [ ] Add logging around persistence operations.
+- [x] Add receiving-db quick-add operations for dunnage definitions:
+  - [x] quick add type -> `sp_Dunnage_Types_Insert`
+  - [x] quick add part -> `sp_Dunnage_Parts_Insert`
 
 ## 12. Integrate Navigation, Shell, and DI
 - [x] Create the view models and pages for the workflow steps.

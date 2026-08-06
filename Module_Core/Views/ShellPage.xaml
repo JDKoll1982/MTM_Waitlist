@@ -84,7 +84,7 @@
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xf0e2;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Uid="Shell_ModuleSetup" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Setup.ViewModels.SetupWorkOrderViewModel">
+                <NavigationViewItem x:Uid="Shell_ModuleSetup" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Setup.ViewModels.SetupWorkstationViewModel">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7be;" />
                     </NavigationViewItem.Icon>

@@ -1,0 +1,86 @@
+<Page
+    x:Class="MTM_Waitlist.Module_Setup.Views.SetupWorkstationPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
+    mc:Ignorable="d">
+
+    <Grid Padding="24" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="8">
+            <TextBlock x:Uid="Setup_Workstation.Title" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Select Workstation" />
+            <TextBlock x:Uid="Setup_Workstation.Subtitle" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Choose where this setup is being performed." />
+            <TextBox x:Uid="Setup_Workstation.SearchInput" Header="Search" PlaceholderText="Search by workstation, work order, sequence, or part number" Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <GridView
+                Grid.Column="0"
+                ItemsSource="{x:Bind ViewModel.DisplayedWorkstations, Mode=OneWay}"
+                SelectionMode="Single"
+                SelectedItem="{x:Bind ViewModel.SelectedWorkstation, Mode=TwoWay}">
+                <GridView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ItemsWrapGrid MaximumRowsOrColumns="3" Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </GridView.ItemsPanel>
+                <GridView.ItemTemplate>
+                    <DataTemplate x:DataType="models:SetupWorkstation">
+                        <Border
+                            MinWidth="220"
+                            Margin="8"
+                            Padding="12"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                            <StackPanel Spacing="8">
+                                <FontIcon Glyph="&#xE7F8;" FontSize="24" />
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Name}" TextWrapping="WrapWholeWords" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentJobDisplay}" TextWrapping="WrapWholeWords" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentPartDisplay}" TextWrapping="WrapWholeWords" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
+
+            <Border Grid.Column="1" Padding="12" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <StackPanel Spacing="8">
+                    <TextBlock x:Uid="Setup_Workstation.ManageTitle" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Manage Workstations" />
+                    <TextBox x:Uid="Setup_Workstation.NameInput" Header="Workstation" Text="{x:Bind ViewModel.WorkstationNameInput, Mode=TwoWay}" PlaceholderText="Enter workstation name" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button x:Uid="Setup_Workstation.Add" Content="Add" Command="{x:Bind ViewModel.AddWorkstationCommand}" IsEnabled="{x:Bind ViewModel.CanManageWorkstations, Mode=OneWay}" />
+                        <Button x:Uid="Setup_Workstation.Update" Content="Edit" Command="{x:Bind ViewModel.UpdateWorkstationCommand}" IsEnabled="{x:Bind ViewModel.CanManageWorkstations, Mode=OneWay}" />
+                        <Button x:Uid="Setup_Workstation.Remove" Content="Remove" Command="{x:Bind ViewModel.RemoveWorkstationCommand}" IsEnabled="{x:Bind ViewModel.CanManageWorkstations, Mode=OneWay}" />
+                    </StackPanel>
+                    <TextBlock x:Uid="Setup_Workstation.ManageHint" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Setup Tech, Admin, and above can manage workstations." TextWrapping="WrapWholeWords" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1" x:Uid="Setup_Action.Refresh" Content="Refresh" Command="{x:Bind ViewModel.RefreshCommand}" />
+            <Button Grid.Column="2" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
+        </Grid>
+    </Grid>
+</Page>

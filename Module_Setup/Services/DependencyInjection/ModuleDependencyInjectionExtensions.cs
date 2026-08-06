@@ -12,6 +12,7 @@ public static class ModuleDependencyInjectionExtensions
     {
         services.AddSingleton<SetupWorkflowState>();
         services.AddSingleton<IWorkOrderValidationService, WorkOrderValidationService>();
+        services.AddSingleton<ISetupWorkstationService, SetupWorkstationService>();
         services.AddSingleton<IInforVisualLookupService, SetupLookupService>();
         services.AddSingleton<ISubordinatePartService, SetupLookupService>();
         services.AddSingleton<IDunnageWorkflowService, DunnageWorkflowService>();

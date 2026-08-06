@@ -19,6 +19,17 @@ public interface ISubordinatePartService
     Task<IReadOnlyList<SetupSubordinatePart>> GetSubordinatePartsAsync(string normalizedWorkOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default);
 }
 
+public interface ISetupWorkstationService
+{
+    Task<IReadOnlyList<SetupWorkstation>> GetWorkstationsAsync(CancellationToken cancellationToken = default);
+
+    Task<SetupSelectionResult> AddWorkstationAsync(string workstationName, CancellationToken cancellationToken = default);
+
+    Task<SetupSelectionResult> UpdateWorkstationAsync(string workstationId, string workstationName, CancellationToken cancellationToken = default);
+
+    Task<SetupSelectionResult> RemoveWorkstationAsync(string workstationId, CancellationToken cancellationToken = default);
+}
+
 public interface IDunnageWorkflowService
 {
     Task<IReadOnlyList<SetupDunnageType>> GetDunnageTypesAsync(string partNumber, string sequenceNumber, CancellationToken cancellationToken = default);
@@ -40,11 +51,15 @@ public interface IActiveJobCoordinatorService
 public interface ISetupPersistenceService
 {
     Task<SetupSaveResult> SaveAsync(SetupSaveRequest request, bool forceReplace = false, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<SetupDunnagePart>> LoadSavedDunnageAssignmentsAsync(string workOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default);
 }
 
 public interface ISetupWorkflowService
 {
     SetupWorkflowState State { get; }
+
+    bool HasUnsavedChanges { get; }
 
     Task ResetAsync(CancellationToken cancellationToken = default);
 

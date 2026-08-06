@@ -4,6 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
+    x:Name="RootPage"
     mc:Ignorable="d">
 
     <Grid Padding="24" RowSpacing="16">
@@ -19,15 +21,77 @@
                 x:Name="WorkOrderTextBox"
                 x:Uid="Setup_WorkOrder.Input"
                 Header="Work Order"
-                Text="{x:Bind ViewModel.WorkOrderInput, Mode=TwoWay}"
+                Text="{x:Bind ViewModel.WorkOrderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                LostFocus="OnWorkOrderTextBoxLostFocus"
                 PlaceholderText="Enter work order (for example 76951, 076951, or WO-076951)" />
+
+            <Border Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock x:Uid="Setup_Combined.Header.WorkOrder" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="WORK ORDER" CharacterSpacing="120" />
+                        <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock x:Uid="Setup_Combined.Header.SelectedPart" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="SELECTED PART" CharacterSpacing="120" />
+                        <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.SelectedPartDisplay, Mode=OneWay}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <StackPanel Visibility="{x:Bind ViewModel.PartSectionVisibility, Mode=OneWay}">
+                <TextBlock x:Uid="Setup_Part.FoundPartsLabel" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Matching parts" Margin="0,4,0,8" />
+                <ItemsControl ItemsSource="{x:Bind ViewModel.State.PartResults, Mode=OneWay}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:SetupPartResult">
+                            <Button Command="{Binding ElementName=RootPage, Path=ViewModel.SelectPartCommand}" CommandParameter="{x:Bind}" Margin="0,0,12,12">
+                                <StackPanel Padding="10" Width="220" Spacing="4">
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind PartNumber}" />
+                                    <TextBlock Text="{x:Bind Description}" TextWrapping="WrapWholeWords" />
+                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind WorkCenter}" />
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <StackPanel Visibility="{x:Bind ViewModel.SequenceSectionVisibility, Mode=OneWay}">
+                <TextBlock x:Uid="Setup_Sequence.AvailableLabel" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Available operations" Margin="0,4,0,8" />
+                <ItemsControl ItemsSource="{x:Bind ViewModel.State.SequenceResults, Mode=OneWay}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="4" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:SetupSequenceResult">
+                            <Button Command="{Binding ElementName=RootPage, Path=ViewModel.SelectSequenceCommand}" CommandParameter="{x:Bind}" Margin="0,0,12,12">
+                                <StackPanel Padding="10" Width="180" Spacing="4">
+                                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind SequenceNumber}" />
+                                    <TextBlock Text="{x:Bind Description}" TextWrapping="WrapWholeWords" />
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="Wrap" />
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+            <Button x:Uid="Setup_Action.BackToWorkstations" Content="Back" Command="{x:Bind ViewModel.BackToWorkstationsCommand}" />
             <Button x:Uid="Setup_Action.Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelCommand}" />
             <Button x:Uid="Setup_Action.Search" Content="Search" Command="{x:Bind ViewModel.SearchCommand}" />
-            <Button x:Uid="Setup_Action.Next" Content="Next" Command="{x:Bind ViewModel.NextCommand}" />
         </StackPanel>
     </Grid>
 </Page>

@@ -6,6 +6,7 @@ namespace MTM_Waitlist.Module_Setup.Models;
 
 public enum SetupWorkflowStep
 {
+    WorkstationSelection,
     WorkOrderEntry,
     PartSelection,
     SequenceSelection,
@@ -26,9 +27,12 @@ public sealed class SetupWorkflowState : ObservableObject
     private string _selectedDunnagePartId = string.Empty;
     private string _selectedWorkCenter = string.Empty;
     private bool _requiresReplacementConfirmation;
-    private SetupWorkflowStep _currentStep = SetupWorkflowStep.WorkOrderEntry;
+    private bool _hasUnsavedChanges;
+    private SetupWorkflowStep _currentStep = SetupWorkflowStep.WorkstationSelection;
 
     public ObservableCollection<SetupPartResult> PartResults { get; } = new();
+
+    public ObservableCollection<SetupWorkstation> Workstations { get; } = new();
 
     public ObservableCollection<SetupSequenceResult> SequenceResults { get; } = new();
 
@@ -100,6 +104,12 @@ public sealed class SetupWorkflowState : ObservableObject
         set => SetProperty(ref _requiresReplacementConfirmation, value);
     }
 
+    public bool HasUnsavedChanges
+    {
+        get => _hasUnsavedChanges;
+        set => SetProperty(ref _hasUnsavedChanges, value);
+    }
+
     public SetupWorkflowStep CurrentStep
     {
         get => _currentStep;
@@ -127,8 +137,10 @@ public sealed class SetupWorkflowState : ObservableObject
         SelectedDunnagePartId = string.Empty;
         SelectedWorkCenter = string.Empty;
         RequiresReplacementConfirmation = false;
-        CurrentStep = SetupWorkflowStep.WorkOrderEntry;
+        HasUnsavedChanges = false;
+        CurrentStep = SetupWorkflowStep.WorkstationSelection;
 
+        Workstations.Clear();
         PartResults.Clear();
         SequenceResults.Clear();
         SubordinateParts.Clear();
@@ -137,6 +149,29 @@ public sealed class SetupWorkflowState : ObservableObject
         SelectedDunnageParts.Clear();
         OnPropertyChanged(nameof(SelectedDunnageSummary));
     }
+}
+
+public sealed class SetupWorkstation
+{
+    public string Id { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
+
+    public bool IsActive { get; set; } = true;
+
+    public string CurrentWorkOrder { get; set; } = string.Empty;
+
+    public string CurrentPartNumber { get; set; } = string.Empty;
+
+    public string CurrentSequenceNumber { get; set; } = string.Empty;
+
+    public string CurrentJobDisplay => string.IsNullOrWhiteSpace(CurrentWorkOrder)
+        ? "Current Job: None"
+        : $"Current Job: {CurrentWorkOrder}/{CurrentSequenceNumber}";
+
+    public string CurrentPartDisplay => string.IsNullOrWhiteSpace(CurrentPartNumber)
+        ? "Part Number: None"
+        : $"Part Number: {CurrentPartNumber}";
 }
 
 public sealed class SetupPartResult
@@ -246,6 +281,10 @@ public sealed class SetupDunnageType
     public string Name { get; set; } = string.Empty;
 
     public string IconGlyph { get; set; } = string.Empty;
+
+    public string ImagePath { get; set; } = string.Empty;
+
+    public bool HasImage => !string.IsNullOrWhiteSpace(ImagePath);
 }
 
 public sealed class SetupDunnagePart
@@ -263,6 +302,8 @@ public sealed class SetupDunnagePart
     public string ImagePath { get; set; } = string.Empty;
 
     public string Metadata { get; set; } = string.Empty;
+
+    public bool IsSelectedForPair { get; set; }
 
     public bool HasImage => !string.IsNullOrWhiteSpace(ImagePath);
 

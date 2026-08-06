@@ -49,7 +49,7 @@ For this repository, prioritize MCP-backed validation for:
 - Custom title-bar behavior is centralized in `Helpers/TitleBarHelper.cs` and uses `App.AppTitlebar`.
 
 ## AI Feature Guidance (Repo Standard)
-- Default local AI integration target is Foundry Local OpenAI-compatible endpoint: `http://172.16.1.104:5272/openai/v1`.
+- Default local AI integration target is Foundry Local OpenAI-compatible endpoint: `http://localhost:5272/openai/v1`.
 - Default local model name: `phi-4-mini` unless requirements specify otherwise.
 - Use `Azure.AI.OpenAI` for chat-completion style calls.
 - Keep AI features privacy-first: local inference by default, no external endpoint assumptions, and no hardcoded secrets.
@@ -62,6 +62,8 @@ For this repository, prioritize MCP-backed validation for:
 - When the relevant mock toggle is enabled, helper services for read-only and read/write interactions should short-circuit to the mock-data path and call the sample-data service instead of continuing to backend execution.
 - The shared routing pattern is: `SearchButton -> helper server -> mock-data setting check -> sample-data service -> requested action`.
 - Implement helper-server behavior through DI-registered services that depend on `ILocalSettingsService` and `ISampleDataService`.
+- Module_Setup dunnage workflow now mirrors receiving-app UI patterns (type selection, part selection, tabbed review) but saves setup pair assignments instead of label-data rows.
+- Quick Add in Module_Setup writes dunnage type/part definitions to `mtm_receiving_application` and is restricted to roles: Admin, Developer, Plant Manager, Setup Lead, Production Lead.
 
 ---
 

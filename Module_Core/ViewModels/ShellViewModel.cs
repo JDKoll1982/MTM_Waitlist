@@ -165,7 +165,7 @@ public partial class ShellViewModel : ObservableRecipient
 
         if (e.SourcePageType.Namespace?.StartsWith("MTM_Waitlist.Module_Setup.Views", StringComparison.Ordinal) == true)
         {
-            Selected = NavigationViewService.GetSelectedItem(typeof(SetupWorkOrderPage));
+            Selected = NavigationViewService.GetSelectedItem(typeof(SetupWorkstationPage));
             HeaderText = "Module Setup";
             return;
         }

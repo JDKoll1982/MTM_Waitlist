@@ -244,6 +244,222 @@
   <data name="Setup_Action.Replace.Content" xml:space="preserve">
     <value>Replace</value>
   </data>
+  <data name="Setup_DunnagePart.EmptyAvailable" xml:space="preserve">
+    <value>No receiving dunnage parts are currently available for this type. Use Add New Part if you have the required role.</value>
+  </data>
+  <data name="Setup_DunnagePart.Validation.SelectTypeFirst" xml:space="preserve">
+    <value>Select a dunnage type first.</value>
+  </data>
+  <data name="Setup_DunnageType.Header.PairContext.Text" xml:space="preserve">
+    <value>Part/Sequence Context</value>
+  </data>
+  <data name="Setup_DunnagePart.Header.SelectedType.Text" xml:space="preserve">
+    <value>Selected Type</value>
+  </data>
+  <data name="Setup_DunnagePart.AssignedTitle.Text" xml:space="preserve">
+    <value>Assigned to This Part/Sequence</value>
+  </data>
+  <data name="Setup_Action.QuickAddType.Label.Text" xml:space="preserve">
+    <value>Add New Type</value>
+  </data>
+  <data name="Setup_Action.QuickAddPart.Label.Text" xml:space="preserve">
+    <value>Add New Part</value>
+  </data>
+  <data name="Setup_Action.RemoveAllForType.Label.Text" xml:space="preserve">
+    <value>Remove All for Type</value>
+  </data>
+  <data name="Setup_Action.ClearAllForPair.Label.Text" xml:space="preserve">
+    <value>Clear All for Pair</value>
+  </data>
+  <data name="Setup_Action.AddSelectedToPair.Label.Text" xml:space="preserve">
+    <value>Add Selected to Pair</value>
+  </data>
+  <data name="Setup_Action.RemoveAssigned.Content" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Setup_Action.QuickAddType.Content" xml:space="preserve">
+    <value>Add New Type</value>
+  </data>
+  <data name="Setup_Action.QuickAddPart.Content" xml:space="preserve">
+    <value>Add New Part</value>
+  </data>
+  <data name="Setup_Action.RemoveAllForType.Content" xml:space="preserve">
+    <value>Remove All for Type</value>
+  </data>
+  <data name="Setup_Action.ClearAllForPair.Content" xml:space="preserve">
+    <value>Clear All for Pair</value>
+  </data>
+  <data name="Setup_Action.AddSelectedToPair.Content" xml:space="preserve">
+    <value>Add Selected to Pair</value>
+  </data>
+  <data name="Setup_Review.Tab.JobContext.Header" xml:space="preserve">
+    <value>Job Context</value>
+  </data>
+  <data name="Setup_Review.Tab.SubordinateParts.Header" xml:space="preserve">
+    <value>Subordinate Parts</value>
+  </data>
+  <data name="Setup_Review.Tab.DunnageAssignments.Header" xml:space="preserve">
+    <value>Dunnage Pair Assignments</value>
+  </data>
+  <data name="Setup_DunnagePair.PageLabel.Text" xml:space="preserve">
+    <value>Dunnage Pair</value>
+  </data>
+  <data name="Setup_DunnagePair.CurrentAssignments.Text" xml:space="preserve">
+    <value>Current Pair Assignments</value>
+  </data>
+  <data name="Setup_DunnagePair.AvailableTypes.Text" xml:space="preserve">
+    <value>Available Dunnage Types</value>
+  </data>
+  <data name="Setup_AddDunnage.TypeSelection.Title" xml:space="preserve">
+    <value>Select Dunnage Type</value>
+  </data>
+  <data name="Setup_AddDunnage.TypeSelection.PageLabel.Text" xml:space="preserve">
+    <value>Select Dunnage Type</value>
+  </data>
+  <data name="Setup_AddDunnage.PartSelection.Title" xml:space="preserve">
+    <value>Select Dunnage Part</value>
+  </data>
+  <data name="Setup_AddDunnage.PartSelection.PageLabel.Text" xml:space="preserve">
+    <value>Select Dunnage Part</value>
+  </data>
+  <data name="Setup_Common.None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Setup_DunnagePair.Header.WorkStation.Text" xml:space="preserve">
+    <value>WORK STATION</value>
+  </data>
+  <data name="Setup_DunnagePair.Header.WorkOrder.Text" xml:space="preserve">
+    <value>WORK ORDER</value>
+  </data>
+  <data name="Setup_DunnagePair.Header.PartNumber.Text" xml:space="preserve">
+    <value>PART NUMBER</value>
+  </data>
+  <data name="Setup_DunnagePair.Header.Sequence.Text" xml:space="preserve">
+    <value>SEQUENCE</value>
+  </data>
+  <data name="Setup_Combined.Header.WorkOrder.Text" xml:space="preserve">
+    <value>WORK ORDER</value>
+  </data>
+  <data name="Setup_Combined.Header.SelectedPart.Text" xml:space="preserve">
+    <value>SELECTED PART</value>
+  </data>
+  <data name="Setup_Completion.Title" xml:space="preserve">
+    <value>Setup Result</value>
+  </data>
+  <data name="Setup_Completion.SuccessHeading" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Setup_Completion.FailureHeading" xml:space="preserve">
+    <value>Failure</value>
+  </data>
+  <data name="Setup_Completion.SuccessMessage" xml:space="preserve">
+    <value>Setup was saved successfully.</value>
+  </data>
+  <data name="Setup_Completion.UnknownFailure" xml:space="preserve">
+    <value>Setup save failed. Please review the reason and try again.</value>
+  </data>
+  <data name="Setup_Completion.ResultMessageLabel.Text" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="Setup_Completion.FailureReasonLabel.Text" xml:space="preserve">
+    <value>Failure reason</value>
+  </data>
+  <data name="Setup_Completion.Action.StartOver.Content" xml:space="preserve">
+    <value>Start Over</value>
+  </data>
+  <data name="Setup_Completion.Action.ReturnToWaitlist.Content" xml:space="preserve">
+    <value>Return to Waitlist</value>
+  </data>
+  <data name="Setup_Workstation.Title.Text" xml:space="preserve">
+    <value>Select Workstation</value>
+  </data>
+  <data name="Setup_Workstation.Subtitle.Text" xml:space="preserve">
+    <value>Choose where this setup is being performed.</value>
+  </data>
+  <data name="Setup_Workstation.SearchInput.Header" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Setup_Workstation.SearchInput.PlaceholderText" xml:space="preserve">
+    <value>Search by workstation, work order, sequence, or part number</value>
+  </data>
+  <data name="Setup_Workstation.ManageTitle.Text" xml:space="preserve">
+    <value>Manage Workstations</value>
+  </data>
+  <data name="Setup_Workstation.NameInput.Header" xml:space="preserve">
+    <value>Workstation</value>
+  </data>
+  <data name="Setup_Workstation.NameInput.PlaceholderText" xml:space="preserve">
+    <value>Enter workstation name</value>
+  </data>
+  <data name="Setup_Workstation.Add.Content" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Setup_Workstation.Update.Content" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Setup_Workstation.Remove.Content" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Setup_Workstation.ManageHint.Text" xml:space="preserve">
+    <value>Setup Tech, Admin, and above can manage workstations.</value>
+  </data>
+  <data name="Setup_Action.BackToWorkstations.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Setup_DunnagePair.ClearAll.DialogTitle" xml:space="preserve">
+    <value>Clear all dunnage assignments?</value>
+  </data>
+  <data name="Setup_DunnagePair.ClearAll.DialogMessage" xml:space="preserve">
+    <value>This will remove all dunnage assignments for the current part/sequence pair.</value>
+  </data>
+  <data name="Setup_DunnagePair.ClearAll.Confirm" xml:space="preserve">
+    <value>Clear All</value>
+  </data>
+  <data name="Setup_DunnagePair.ClearAll.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Setup_Navigation.LeaveSetup.Title" xml:space="preserve">
+    <value>Leave Module Setup?</value>
+  </data>
+  <data name="Setup_Navigation.LeaveSetup.Message" xml:space="preserve">
+    <value>All unsaved setup data will be lost. Continue?</value>
+  </data>
+  <data name="Setup_Navigation.LeaveSetup.Confirm" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Setup_Navigation.LeaveSetup.Cancel" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Setup_Action.AddDunnage.Content" xml:space="preserve">
+    <value>Add Dunnage</value>
+  </data>
+  <data name="Setup_Action.Refresh.Content" xml:space="preserve">
+    <value>Refresh Types</value>
+  </data>
+  <data name="Setup_QuickAddType.DialogTitle" xml:space="preserve">
+    <value>Add New Dunnage Type</value>
+  </data>
+  <data name="Setup_QuickAddType.PrimaryButton" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Setup_QuickAddType.CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Setup_QuickAddType.Placeholder" xml:space="preserve">
+    <value>Enter dunnage type name</value>
+  </data>
+  <data name="Setup_QuickAddPart.DialogTitle" xml:space="preserve">
+    <value>Add New Dunnage Part</value>
+  </data>
+  <data name="Setup_QuickAddPart.PrimaryButton" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Setup_QuickAddPart.CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Setup_QuickAddPart.Placeholder" xml:space="preserve">
+    <value>Enter dunnage part name</value>
+  </data>
   <data name="Settings_Personalization.Text" xml:space="preserve">
     <value>Personalization</value>
   </data>

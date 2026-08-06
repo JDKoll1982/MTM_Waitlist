@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.ViewModels;
+using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Core.ViewModels;
 
@@ -15,17 +16,25 @@ public class NavigationViewService : INavigationViewService
     private readonly INavigationService _navigationService;
 
     private readonly IPageService _pageService;
+    private readonly ISetupWorkflowService _setupWorkflowService;
 
     private NavigationView? _navigationView;
+
+    private static string LocalizeOrDefault(string key, string fallback)
+    {
+        var localized = key.GetLocalized();
+        return string.Equals(localized, key, StringComparison.Ordinal) ? fallback : localized;
+    }
 
     public IList<object>? MenuItems => _navigationView?.MenuItems;
 
     public object? SettingsItem => _navigationView?.SettingsItem;
 
-    public NavigationViewService(INavigationService navigationService, IPageService pageService)
+    public NavigationViewService(INavigationService navigationService, IPageService pageService, ISetupWorkflowService setupWorkflowService)
     {
         _navigationService = navigationService;
         _pageService = pageService;
+        _setupWorkflowService = setupWorkflowService;
     }
 
     [MemberNotNull(nameof(_navigationView))]
@@ -57,20 +66,31 @@ public class NavigationViewService : INavigationViewService
 
     private void OnBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args) => _navigationService.GoBack();
 
-    private void OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+    private async void OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         try
         {
+            var pageKey = string.Empty;
+
             if (args.IsSettingsInvoked)
             {
-                _navigationService.NavigateTo(typeof(SettingsViewModel).FullName!);
-                return;
+                pageKey = typeof(SettingsViewModel).FullName!;
+            }
+            else
+            {
+                var selectedItem = args.InvokedItemContainer as NavigationViewItem;
+                if (selectedItem?.GetValue(NavigationHelper.NavigateToProperty) is not string resolvedPageKey || string.IsNullOrWhiteSpace(resolvedPageKey))
+                {
+                    StartupDebugLog.Info("NavigationViewService", "Item invoked without a valid navigation key.");
+                    return;
+                }
+
+                pageKey = resolvedPageKey;
             }
 
-            var selectedItem = args.InvokedItemContainer as NavigationViewItem;
-            if (selectedItem?.GetValue(NavigationHelper.NavigateToProperty) is not string pageKey || string.IsNullOrWhiteSpace(pageKey))
+            if (!await CanLeaveSetupAsync(sender, pageKey).ConfigureAwait(true))
             {
-                StartupDebugLog.Info("NavigationViewService", "Item invoked without a valid navigation key.");
+                ReselectCurrentNavigationItem(sender);
                 return;
             }
 
@@ -79,6 +99,62 @@ public class NavigationViewService : INavigationViewService
         catch (Exception ex)
         {
             StartupDebugLog.Error("NavigationViewService", ex, "NavigationView item invocation failed.");
+        }
+    }
+
+    private async Task<bool> CanLeaveSetupAsync(NavigationView sender, string destinationPageKey)
+    {
+        var currentPageType = _navigationService.Frame?.Content?.GetType();
+        var currentPageNamespace = currentPageType?.Namespace ?? string.Empty;
+        if (!currentPageNamespace.StartsWith("MTM_Waitlist.Module_Setup.Views", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        var destinationPageType = _pageService.GetPageType(destinationPageKey);
+        var destinationPageNamespace = destinationPageType.Namespace ?? string.Empty;
+        if (destinationPageNamespace.StartsWith("MTM_Waitlist.Module_Setup.Views", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        if (!_setupWorkflowService.HasUnsavedChanges)
+        {
+            return true;
+        }
+
+        var dialog = new ContentDialog
+        {
+            Title = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Title", "Leave Module Setup?"),
+            Content = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Message", "All unsaved setup data will be lost. Continue?"),
+            PrimaryButtonText = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Confirm", "Yes"),
+            CloseButtonText = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Cancel", "No"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = sender.XamlRoot,
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result != ContentDialogResult.Primary)
+        {
+            return false;
+        }
+
+        await _setupWorkflowService.ResetAsync().ConfigureAwait(true);
+        return true;
+    }
+
+    private void ReselectCurrentNavigationItem(NavigationView sender)
+    {
+        var currentPageType = _navigationService.Frame?.Content?.GetType();
+        if (currentPageType is null)
+        {
+            return;
+        }
+
+        var selectedItem = GetSelectedItem(currentPageType);
+        if (selectedItem is not null)
+        {
+            sender.SelectedItem = selectedItem;
         }
     }
 

@@ -2,9 +2,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.Services;
+using MTM_Waitlist.Module_Setup.ViewModels;
+using MTM_Waitlist.Module_Startup.Models;
 
 namespace MTM_Waitlist.Tests.Module_Setup.Services;
 
@@ -70,7 +73,7 @@ public sealed class SetupWorkflowServiceTests
 
         var partResult = await service.SelectDunnagePartAsync("coil-a");
         Assert.IsTrue(partResult.Success);
-        Assert.AreEqual(SetupWorkflowStep.Review, service.State.CurrentStep);
+        Assert.AreEqual(SetupWorkflowStep.DunnageTypeSelection, service.State.CurrentStep);
         Assert.AreEqual("coil-a", service.State.SelectedDunnagePartId);
         Assert.IsTrue(service.State.SelectedDunnageSummary.Contains("Dunnage Coil A", StringComparison.OrdinalIgnoreCase));
     }
@@ -105,6 +108,120 @@ public sealed class SetupWorkflowServiceTests
         Assert.IsTrue(sequenceResult.Success);
         Assert.AreEqual(SetupWorkflowStep.DunnageTypeSelection, service.State.CurrentStep);
         Assert.AreEqual(0, service.State.DunnageTypes.Count);
+    }
+
+    [TestMethod]
+    public async Task SelectDunnagePartAsync_AllowsMultipleAssignmentsForPair()
+    {
+        var service = CreateService();
+
+        await service.SearchWorkOrderAsync("76951");
+        await service.SelectPartAsync("12345679");
+        await service.SelectSequenceAsync("20");
+        await service.SelectDunnageTypeAsync("Coils");
+
+        var addFirst = await service.SelectDunnagePartAsync("coil-a");
+        var addSecond = await service.SelectDunnagePartAsync("coil-b");
+
+        Assert.IsTrue(addFirst.Success);
+        Assert.IsTrue(addSecond.Success);
+        Assert.AreEqual(2, service.State.SelectedDunnageParts.Count);
+        Assert.IsTrue(service.State.SelectedDunnageParts.Any(part => part.Id == "coil-a"));
+        Assert.IsTrue(service.State.SelectedDunnageParts.Any(part => part.Id == "coil-b"));
+    }
+
+    [TestMethod]
+    public async Task RemoveDunnagePartAsync_RemovesSingleAssignedItem()
+    {
+        var service = CreateService();
+
+        await service.SearchWorkOrderAsync("76951");
+        await service.SelectPartAsync("12345679");
+        await service.SelectSequenceAsync("20");
+        await service.SelectDunnageTypeAsync("Coils");
+        await service.SelectDunnagePartAsync("coil-a");
+        await service.SelectDunnagePartAsync("coil-b");
+
+        var removeResult = await service.RemoveDunnagePartAsync("coil-a");
+
+        Assert.IsTrue(removeResult.Success);
+        Assert.AreEqual(1, service.State.SelectedDunnageParts.Count);
+        Assert.IsFalse(service.State.SelectedDunnageParts.Any(part => part.Id == "coil-a"));
+        Assert.IsTrue(service.State.SelectedDunnageParts.Any(part => part.Id == "coil-b"));
+    }
+
+    [TestMethod]
+    public async Task ClearAllDunnageForPairAsync_RemovesAllAssignedItems()
+    {
+        var service = CreateService();
+
+        await service.SearchWorkOrderAsync("76951");
+        await service.SelectPartAsync("12345679");
+        await service.SelectSequenceAsync("20");
+        await service.SelectDunnageTypeAsync("Coils");
+        await service.SelectDunnagePartAsync("coil-a");
+        await service.SelectDunnagePartAsync("coil-b");
+
+        var clearResult = await service.ClearAllDunnageForPairAsync();
+
+        Assert.IsTrue(clearResult.Success);
+        Assert.AreEqual(0, service.State.SelectedDunnageParts.Count);
+    }
+
+    [TestMethod]
+    public async Task QuickAddTypeAsync_WhenBackendReturnsEmpty_InjectsLocalType()
+    {
+        var workflowService = CreateService(recvMockData: false);
+        await workflowService.SearchWorkOrderAsync("76951");
+        await workflowService.SelectPartAsync("12345679");
+        await workflowService.SelectSequenceAsync("20");
+
+        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
+        {
+            ["Feature.InforVisualMockData"] = true,
+            ["Feature.RecvMockData"] = false,
+        });
+
+        var sampleDataService = new SampleDataService(settings);
+        var dunnageWorkflowService = new DunnageWorkflowService(new MySqlHelperServer(settings, sampleDataService));
+        var viewModel = new SetupDunnageTypeViewModel(
+            new NoOpNavigationService(),
+            workflowService,
+            dunnageWorkflowService,
+            new StartupState { CurrentRole = "Developer" });
+
+        var result = await viewModel.QuickAddTypeAsync("Local Type A");
+
+        Assert.IsTrue(result.Success);
+        Assert.IsTrue(workflowService.State.DunnageTypes.Any(type => string.Equals(type.Name, "Local Type A", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [TestMethod]
+    public async Task QuickAddPartAsync_WhenBackendReturnsEmpty_InjectsLocalPart()
+    {
+        var workflowService = CreateService(recvMockData: false);
+        await workflowService.SearchWorkOrderAsync("76951");
+        await workflowService.SelectPartAsync("12345679");
+        workflowService.State.SelectedDunnageTypeId = "-1";
+
+        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
+        {
+            ["Feature.InforVisualMockData"] = true,
+            ["Feature.RecvMockData"] = false,
+        });
+
+        var sampleDataService = new SampleDataService(settings);
+        var dunnageWorkflowService = new DunnageWorkflowService(new MySqlHelperServer(settings, sampleDataService));
+        var viewModel = new SetupDunnagePartViewModel(
+            new NoOpNavigationService(),
+            workflowService,
+            dunnageWorkflowService,
+            new StartupState { CurrentRole = "Developer" });
+
+        var result = await viewModel.QuickAddPartAsync("Local Part A");
+
+        Assert.IsTrue(result.Success);
+        Assert.IsTrue(workflowService.State.DunnageParts.Any(part => string.Equals(part.PartNumber, "Local Part A", StringComparison.OrdinalIgnoreCase)));
     }
 
     private static SetupWorkflowService CreateService(bool recvMockData = true)
@@ -171,5 +288,26 @@ public sealed class SetupWorkflowServiceTests
         }
 
         public Task CorruptForTestAsync() => Task.CompletedTask;
+    }
+
+    private sealed class NoOpNavigationService : INavigationService
+    {
+        public event Microsoft.UI.Xaml.Navigation.NavigatedEventHandler? Navigated;
+
+        public Microsoft.UI.Xaml.Controls.Frame? Frame
+        {
+            get => null;
+            set { }
+        }
+
+        public bool CanGoBack => false;
+
+        public bool GoBack() => false;
+
+        public bool NavigateTo(string pageKey, object? parameter = null, bool clearNavigation = false) => true;
+
+        public void SetListDataItemForNextConnectedAnimation(object item)
+        {
+        }
     }
 }

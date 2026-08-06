@@ -8,29 +8,25 @@ using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
-using MTM_Waitlist.Module_Startup.Models;
 
 namespace MTM_Waitlist.Module_Setup.ViewModels;
 
 public partial class SetupDunnagePartViewModel : ObservableRecipient, INavigationAware
 {
-    private static readonly string[] AllowedQuickAddRoles =
-    {
-        "Admin",
-        "Developer",
-        "Plant Manager",
-        "Setup Lead",
-        "Production Lead",
-    };
-
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
     private readonly IDunnageWorkflowService _dunnageWorkflowService;
-    private readonly StartupState _startupState;
-    private readonly ObservableCollection<SetupDunnagePart> _filteredDunnageParts = new();
+    private readonly ObservableCollection<SetupDunnageType> _displayedTypes = new();
+    private bool _isNavigating;
+
+    private static string LocalizeOrDefault(string key, string fallback)
+    {
+        var localized = key.GetLocalized();
+        return string.Equals(localized, key, StringComparison.Ordinal) ? fallback : localized;
+    }
 
     [ObservableProperty]
-    public partial SetupDunnagePart? SelectedDunnagePart
+    public partial SetupDunnageType? SelectedDunnageType
     {
         get; set;
     }
@@ -41,59 +37,45 @@ public partial class SetupDunnagePartViewModel : ObservableRecipient, INavigatio
         get; set;
     } = string.Empty;
 
-    [ObservableProperty]
-    public partial string FilterText
-    {
-        get; set;
-    } = string.Empty;
-
     public SetupWorkflowState State => _workflowService.State;
 
-    public ObservableCollection<SetupDunnagePart> FilteredDunnageParts => _filteredDunnageParts;
+    public ObservableCollection<SetupDunnageType> DisplayedTypes => _displayedTypes;
 
-    public ObservableCollection<SetupDunnagePart> SelectedDunnageParts => State.SelectedDunnageParts;
+    public IReadOnlyList<string> SortOptions { get; } = new[] { "Name A-Z", "Name Z-A" };
 
-    public bool CanManageDefinitions => AllowedQuickAddRoles.Any(role => string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+    [ObservableProperty]
+    public partial string SelectedSortOption
+    {
+        get; set;
+    } = "Name A-Z";
 
-    public string PageTitle => "Setup_DunnagePart.Title".GetLocalized();
+    public string PageTitle => LocalizeOrDefault("Setup_AddDunnage.TypeSelection.Title", "Select Dunnage Type");
 
-    public string ProgressText => "Setup_Progress.Step4".GetLocalized();
+    public string ProgressText => LocalizeOrDefault("Setup_Progress.Step4", "Step 4/5 · 80% complete");
 
-    public string CurrentSelectionSummary => SelectedDunnagePart is null
-        ? (State.SelectedDunnageParts.Count == 0
-            ? "Setup_Dunnage.Selection.None".GetLocalized()
-            : State.SelectedDunnageSummary)
-        : $"{SelectedDunnagePart.DisplayName} ({SelectedDunnagePart.PartNumber})";
+    public string CurrentSelectionSummary => State.SelectedDunnageParts.Count == 0
+        ? LocalizeOrDefault("Setup_Dunnage.Selection.None", "No dunnage selected")
+        : State.SelectedDunnageSummary;
 
     public SetupDunnagePartViewModel(
         INavigationService navigationService,
         ISetupWorkflowService workflowService,
-        IDunnageWorkflowService dunnageWorkflowService,
-        StartupState startupState)
+        IDunnageWorkflowService dunnageWorkflowService)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
         _dunnageWorkflowService = dunnageWorkflowService;
-        _startupState = startupState;
     }
 
     public void OnNavigatedTo(object parameter)
     {
         StatusMessage = State.StatusMessage;
-        FilterText = string.Empty;
-        ApplyFilter();
-        SelectedDunnagePart = State.DunnageParts.FirstOrDefault(part => string.Equals(part.Id, State.SelectedDunnagePartId, StringComparison.OrdinalIgnoreCase));
-        if (_filteredDunnageParts.Count == 0)
-        {
-            StatusMessage = string.IsNullOrWhiteSpace(StatusMessage)
-                ? "Setup_DunnagePart.EmptyAvailable".GetLocalized()
-                : StatusMessage;
-        }
+        RefreshDisplayedTypes();
+        SelectedDunnageType = null;
 
         OnPropertyChanged(nameof(PageTitle));
         OnPropertyChanged(nameof(ProgressText));
         OnPropertyChanged(nameof(CurrentSelectionSummary));
-        OnPropertyChanged(nameof(CanManageDefinitions));
     }
 
     public void OnNavigatedFrom()
@@ -101,130 +83,77 @@ public partial class SetupDunnagePartViewModel : ObservableRecipient, INavigatio
     }
 
     [RelayCommand]
-    private void BackToTypes()
+    private void BackToPair()
     {
         _navigationService.GoBack();
     }
 
-    partial void OnFilterTextChanged(string value)
-    {
-        ApplyFilter();
-    }
-
-    partial void OnSelectedDunnagePartChanged(SetupDunnagePart? value)
-    {
-        OnPropertyChanged(nameof(CurrentSelectionSummary));
-    }
-
     [RelayCommand]
-    private async Task AddSelectedToPairAsync()
+    private async Task RefreshTypesAsync()
     {
-        if (SelectedDunnagePart is null)
+        var types = await _dunnageWorkflowService.GetDunnageTypesAsync(State.SelectedPartNumber, State.SelectedSequence).ConfigureAwait(true);
+        State.DunnageTypes.Clear();
+        foreach (var type in types)
         {
-            StatusMessage = "Setup_DunnagePart.Validation.SelectPart".GetLocalized();
-            return;
+            State.DunnageTypes.Add(type);
         }
 
-        var result = await _workflowService.SelectDunnagePartAsync(SelectedDunnagePart.Id).ConfigureAwait(true);
-        StatusMessage = result.Message;
-        OnPropertyChanged(nameof(CurrentSelectionSummary));
+        RefreshDisplayedTypes();
     }
 
     [RelayCommand]
-    private async Task RemoveAssignedPartAsync(SetupDunnagePart? assignedPart)
+    private async Task SelectTypeAndNavigateAsync(SetupDunnageType selectedType)
     {
-        if (assignedPart is null)
+        if (_isNavigating)
         {
             return;
         }
 
-        var result = await _workflowService.RemoveDunnagePartAsync(assignedPart.Id).ConfigureAwait(true);
-        StatusMessage = result.Message;
-        OnPropertyChanged(nameof(CurrentSelectionSummary));
-    }
-
-    [RelayCommand]
-    private async Task RemoveAllForTypeAsync()
-    {
-        var typeId = State.SelectedDunnageTypeId;
-        if (string.IsNullOrWhiteSpace(typeId))
+        _isNavigating = true;
+        try
         {
-            StatusMessage = "Setup_DunnagePart.Validation.SelectTypeFirst".GetLocalized();
-            return;
-        }
-
-        var result = await _workflowService.RemoveAllDunnageForTypeAsync(typeId).ConfigureAwait(true);
-        StatusMessage = result.Message;
-        OnPropertyChanged(nameof(CurrentSelectionSummary));
-    }
-
-    [RelayCommand]
-    private async Task ClearAllForPairAsync()
-    {
-        var result = await _workflowService.ClearAllDunnageForPairAsync().ConfigureAwait(true);
-        StatusMessage = result.Message;
-        OnPropertyChanged(nameof(CurrentSelectionSummary));
-    }
-
-    [RelayCommand]
-    private async Task ReviewAsync()
-    {
-        if (SelectedDunnagePart is not null)
-        {
-            var addResult = await _workflowService.SelectDunnagePartAsync(SelectedDunnagePart.Id).ConfigureAwait(true);
-            if (!addResult.Success)
+            var result = await _workflowService.SelectDunnageTypeAsync(selectedType.Id).ConfigureAwait(true);
+            if (!result.Success)
             {
-                StatusMessage = addResult.Message;
+                StatusMessage = result.Message;
                 return;
             }
-        }
 
-        _navigationService.NavigateTo(typeof(SetupReviewViewModel).FullName!, null);
-    }
-
-    public async Task<SetupSelectionResult> QuickAddPartAsync(string partName)
-    {
-        var result = await _dunnageWorkflowService
-            .AddDunnagePartAsync(State.SelectedDunnageTypeId, partName, _startupState.CurrentRole)
-            .ConfigureAwait(true);
-
-        if (!result.Success)
-        {
             StatusMessage = result.Message;
-            return result;
+            _navigationService.NavigateTo(typeof(SetupDunnageAddPartSelectionViewModel).FullName!, null);
         }
-
-        var refreshedParts = await _dunnageWorkflowService
-            .GetDunnagePartsAsync(State.SelectedDunnageTypeId, State.SelectedPartNumber, State.SelectedSequence)
-            .ConfigureAwait(true);
-
-        State.DunnageParts.Clear();
-        foreach (var dunnagePart in refreshedParts)
+        finally
         {
-            State.DunnageParts.Add(dunnagePart);
+            _isNavigating = false;
         }
-
-        ApplyFilter();
-        SelectedDunnagePart = State.DunnageParts.FirstOrDefault(part => string.Equals(part.PartNumber, partName.Trim(), StringComparison.OrdinalIgnoreCase));
-        StatusMessage = result.Message;
-        return result;
     }
 
-    private void ApplyFilter()
+    partial void OnSelectedDunnageTypeChanged(SetupDunnageType? value)
     {
-        _filteredDunnageParts.Clear();
-
-        var normalizedFilter = FilterText.Trim();
-        var filteredItems = string.IsNullOrWhiteSpace(normalizedFilter)
-            ? State.DunnageParts
-            : new ObservableCollection<SetupDunnagePart>(State.DunnageParts.Where(part =>
-                part.DisplayName.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
-                || part.PartNumber.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
-                || part.Metadata.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)));
-
-        foreach (var part in filteredItems)
+        if (value is null)
         {
-            _filteredDunnageParts.Add(part);
+            return;
+        }
+
+        _ = SelectTypeAndNavigateAsync(value);
+    }
+
+    partial void OnSelectedSortOptionChanged(string value)
+    {
+        RefreshDisplayedTypes();
+    }
+
+    private void RefreshDisplayedTypes()
+    {
+        _displayedTypes.Clear();
+
+        var ordered = string.Equals(SelectedSortOption, "Name Z-A", StringComparison.OrdinalIgnoreCase)
+            ? State.DunnageTypes.OrderByDescending(type => type.Name, StringComparer.OrdinalIgnoreCase)
+            : State.DunnageTypes.OrderBy(type => type.Name, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var dunnageType in ordered)
+        {
+            _displayedTypes.Add(dunnageType);
         }
     }
 }

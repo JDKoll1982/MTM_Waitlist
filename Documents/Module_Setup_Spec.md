@@ -15,7 +15,13 @@ The feature covers:
 - Review of a summary for WO, part, and sequence.
 - Retrieval and presentation of subordinate part categorizations.
 - Guided dunnage selection using a MySQL-backed workflow of dunnage type -> dunnage part -> review/confirm.
+- Near pixel-parity UX with MTM_Receiving_Application dunnage screens for type selection, part selection, review, and quick-add dialogs, adapted for setup pair assignment (not label-data save).
 - Loading and saving dunnage setup values through the same MySQL-backed pattern used by the receiving application.
+- Pair assignment behavior for selected part/sequence:
+  - Add one or many dunnage parts.
+  - Remove one assigned dunnage part.
+  - Remove all assigned parts for the selected type.
+  - Clear all assigned parts for the pair.
 - Confirmation of preloaded values before persisting changes.
 - Finalization of the setup flow and handoff to downstream save/cleanup logic.
 - Helper-server routing for read-only and read/write interactions that short-circuits to mock data when module-specific toggles are enabled in app data:
@@ -103,7 +109,15 @@ The feature covers:
 - If no image exists, the app must fall back to a default “No Image” state.
 - The system must save and retrieve dunnage data through MySQL-backed entities and queue-script files in `Database/MTMReceivingApp/Queues/Module_Setup/Queues` that mirror the receiving application model: dunnage types, dunnage parts, active label data, and history records.
 - The review/confirm screen must include a selected dunnage summary section that lists the chosen dunnage entries in a compact format.
+- The review/confirm screen must be tabbed and include:
+  - Job Context
+  - Subordinate Parts
+  - Dunnage Pair Assignments
 - Preloaded values must require explicit confirmation before overwrite.
+- Quick Add operations are role-gated and can write new dunnage definitions directly to mtm_receiving_application:
+  - Add New Type
+  - Add New Part
+  - Allowed roles: Admin, Developer, Plant Manager, Setup Lead, Production Lead.
 
 ### 4.6 Save/Cleanup
 - The system must guard replacement of an existing active job with a confirmation step.
