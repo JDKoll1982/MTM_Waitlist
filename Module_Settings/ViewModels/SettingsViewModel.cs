@@ -51,7 +51,7 @@ public partial class SettingsViewModel : ObservableRecipient
         ElementTheme = _themeSelectorService.Theme;
         VersionDescription = GetVersionDescription();
         UseRecvMockData = _localSettingsService.ReadSettingAsync<bool?>(RecvMockDataSettingKey).GetAwaiter().GetResult() ?? false;
-        UseInforVisualMockData = _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey).GetAwaiter().GetResult() ?? true;
+        UseInforVisualMockData = _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey).GetAwaiter().GetResult() ?? false;
 
         SwitchThemeCommand = new RelayCommand<ElementTheme>(
             async (param) =>

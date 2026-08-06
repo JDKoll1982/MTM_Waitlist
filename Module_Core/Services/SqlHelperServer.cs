@@ -16,7 +16,7 @@ public sealed class SqlHelperServer
 
     public async Task<IReadOnlyList<object>> ExecuteReadOnlyQueueAsync(string queueName, string? parameter = null)
     {
-        var useMockData = await _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey) ?? true;
+        var useMockData = await _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey) ?? false;
         if (useMockData)
         {
             return _sampleDataService.GetSampleOrders(parameter);
@@ -31,7 +31,7 @@ public sealed class SqlHelperServer
         Func<Task<T>> mockAction,
         Func<Task<T>> backendAction)
     {
-        var useMockData = await _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey) ?? true;
+        var useMockData = await _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey) ?? false;
         if (useMockData)
         {
             _ = _sampleDataService.GetSampleOrders(parameter);

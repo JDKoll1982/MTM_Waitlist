@@ -11,6 +11,7 @@ public static class ModuleDependencyInjectionExtensions
     public static IServiceCollection AddSetupModuleServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<SetupWorkflowState>();
+        services.AddSingleton<InforVisualSqlQueryService>();
         services.AddSingleton<IWorkOrderValidationService, WorkOrderValidationService>();
         services.AddSingleton<ISetupWorkstationService, SetupWorkstationService>();
         services.AddSingleton<IInforVisualLookupService, SetupLookupService>();

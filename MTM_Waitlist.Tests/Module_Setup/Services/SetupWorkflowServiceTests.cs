@@ -236,7 +236,7 @@ public sealed class SetupWorkflowServiceTests
         var sqlHelperServer = new SqlHelperServer(settings, sampleDataService);
         var mySqlHelperServer = new MySqlHelperServer(settings, sampleDataService);
         var workOrderValidationService = new WorkOrderValidationService();
-        var lookupService = new SetupLookupService(sqlHelperServer);
+        var lookupService = new SetupLookupService(sqlHelperServer, new InforVisualSqlQueryService());
         var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer);
         var activeJobCoordinatorService = new SetupActiveJobCoordinatorService();
         var persistenceService = new SetupPersistenceService(activeJobCoordinatorService, mySqlHelperServer);

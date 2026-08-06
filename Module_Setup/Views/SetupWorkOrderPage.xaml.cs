@@ -25,6 +25,7 @@ public sealed partial class SetupWorkOrderPage : Page
 
     private void OnUnloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        ViewModel.NotifyViewClosing();
         ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
         Loaded -= OnLoaded;
         Unloaded -= OnUnloaded;
@@ -41,6 +42,11 @@ public sealed partial class SetupWorkOrderPage : Page
 
     private async void OnWorkOrderTextBoxLostFocus(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        if (ViewModel.IsClosing)
+        {
+            return;
+        }
+
         await ViewModel.AutoSearchOnWorkOrderBlurAsync();
     }
 }

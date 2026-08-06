@@ -71,10 +71,13 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
             return lookupResult;
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         State.PartResults.Clear();
 
         foreach (var part in lookupResult.Parts)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             State.PartResults.Add(part);
         }
 
@@ -114,6 +117,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
     public async Task<SetupSelectionResult> SelectPartAsync(string partNumber, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupWorkflow", $"SelectPartAsync started. Part='{partNumber}'.");
+        cancellationToken.ThrowIfCancellationRequested();
         State.SelectedPartNumber = partNumber;
         if (string.IsNullOrWhiteSpace(State.SelectedWorkCenter))
         {
@@ -128,8 +132,10 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         State.SelectedDunnageTypeId = string.Empty;
 
         var sequences = await _lookupService.GetSequencesAsync(State.NormalizedWorkOrder, partNumber, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
         foreach (var sequence in sequences)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             State.SequenceResults.Add(sequence);
         }
 
@@ -156,6 +162,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
     public async Task<SetupSelectionResult> SelectSequenceAsync(string sequenceNumber, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupWorkflow", $"SelectSequenceAsync started. Sequence='{sequenceNumber}'.");
+        cancellationToken.ThrowIfCancellationRequested();
         State.SelectedSequence = sequenceNumber;
         State.SubordinateParts.Clear();
         State.DunnageTypes.Clear();
@@ -169,8 +176,10 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
             sequenceNumber,
             cancellationToken);
 
+        cancellationToken.ThrowIfCancellationRequested();
         foreach (var subordinatePart in subordinateParts)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             State.SubordinateParts.Add(subordinatePart);
         }
 
@@ -181,8 +190,10 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
             sequenceNumber,
             cancellationToken);
 
+        cancellationToken.ThrowIfCancellationRequested();
         foreach (var dunnageType in dunnageTypes)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             State.DunnageTypes.Add(dunnageType);
         }
 
@@ -192,9 +203,11 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
             .LoadSavedDunnageAssignmentsAsync(State.NormalizedWorkOrder, State.SelectedPartNumber, sequenceNumber, cancellationToken)
             .ConfigureAwait(true);
 
+        cancellationToken.ThrowIfCancellationRequested();
         State.SelectedDunnageParts.Clear();
         foreach (var assignment in savedAssignments)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             State.SelectedDunnageParts.Add(assignment);
         }
         State.UpdateSelectedDunnageSummary();

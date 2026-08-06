@@ -15,6 +15,8 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
     private readonly SemaphoreSlim _searchGate = new(1, 1);
+    private CancellationTokenSource _lifecycleCts = new();
+    private bool _isClosing;
 
     private static string LocalizeOrDefault(string key, string fallback)
     {
@@ -54,6 +56,8 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
 
     public SetupWorkflowState State => _workflowService.State;
 
+    public bool IsClosing => _isClosing;
+
     public string PageTitle => LocalizeOrDefault("Shell_ModuleSetup.Content", "Module Setup");
 
     public string ProgressText => LocalizeOrDefault("Setup_Progress.Step1", "Step 1/5 · 20% complete");
@@ -80,6 +84,13 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
 
     public void OnNavigatedTo(object parameter)
     {
+        _isClosing = false;
+        if (_lifecycleCts.IsCancellationRequested)
+        {
+            _lifecycleCts.Dispose();
+            _lifecycleCts = new CancellationTokenSource();
+        }
+
         WorkOrderInput = State.WorkOrderInput;
         StatusMessage = State.ValidationMessage;
         SelectedPart = State.PartResults.FirstOrDefault(part => string.Equals(part.PartNumber, State.SelectedPartNumber, StringComparison.OrdinalIgnoreCase));
@@ -93,6 +104,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
 
     public void OnNavigatedFrom()
     {
+        NotifyViewClosing();
     }
 
     [RelayCommand]
@@ -103,7 +115,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
 
     public async Task AutoSearchOnWorkOrderBlurAsync()
     {
-        if (string.IsNullOrWhiteSpace(WorkOrderInput))
+        if (_isClosing || _lifecycleCts.IsCancellationRequested || string.IsNullOrWhiteSpace(WorkOrderInput))
         {
             return;
         }
@@ -113,7 +125,12 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
 
     private async Task ExecuteSearchAsync()
     {
-        if (!await _searchGate.WaitAsync(0).ConfigureAwait(true))
+        if (_isClosing || _lifecycleCts.IsCancellationRequested)
+        {
+            return;
+        }
+
+        if (!await _searchGate.WaitAsync(0, _lifecycleCts.Token).ConfigureAwait(true))
         {
             return;
         }
@@ -121,7 +138,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
         IsBusy = true;
         try
         {
-            var result = await _workflowService.SearchWorkOrderAsync(WorkOrderInput).ConfigureAwait(true);
+            var result = await _workflowService.SearchWorkOrderAsync(WorkOrderInput, _lifecycleCts.Token).ConfigureAwait(true);
             StatusMessage = result.Message;
 
             if (!string.IsNullOrWhiteSpace(State.NormalizedWorkOrder))
@@ -141,6 +158,10 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
                 OnPropertyChanged(nameof(SequenceSectionVisibility));
                 OnPropertyChanged(nameof(SelectedPartDisplay));
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // Ignore cancellations caused by page unload or app shutdown.
         }
         finally
         {
@@ -171,7 +192,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
     [RelayCommand]
     private async Task SelectPartAsync(SetupPartResult? part)
     {
-        if (part is null)
+        if (part is null || _isClosing || _lifecycleCts.IsCancellationRequested)
         {
             return;
         }
@@ -180,10 +201,14 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
         try
         {
             SelectedPart = part;
-            var result = await _workflowService.SelectPartAsync(part.PartNumber).ConfigureAwait(true);
+            var result = await _workflowService.SelectPartAsync(part.PartNumber, _lifecycleCts.Token).ConfigureAwait(true);
             StatusMessage = result.Message;
             OnPropertyChanged(nameof(SelectedPartDisplay));
             OnPropertyChanged(nameof(SequenceSectionVisibility));
+        }
+        catch (OperationCanceledException)
+        {
+            // Ignore cancellations caused by page unload or app shutdown.
         }
         finally
         {
@@ -194,7 +219,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
     [RelayCommand]
     private async Task SelectSequenceAsync(SetupSequenceResult? sequence)
     {
-        if (sequence is null)
+        if (sequence is null || _isClosing || _lifecycleCts.IsCancellationRequested)
         {
             return;
         }
@@ -203,7 +228,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
         try
         {
             SelectedSequence = sequence;
-            var result = await _workflowService.SelectSequenceAsync(sequence.SequenceNumber).ConfigureAwait(true);
+            var result = await _workflowService.SelectSequenceAsync(sequence.SequenceNumber, _lifecycleCts.Token).ConfigureAwait(true);
             StatusMessage = result.Message;
 
             if (result.Success)
@@ -211,9 +236,28 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
                 _navigationService.NavigateTo(typeof(SetupDunnageTypeViewModel).FullName!, null);
             }
         }
+        catch (OperationCanceledException)
+        {
+            // Ignore cancellations caused by page unload or app shutdown.
+        }
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    public void NotifyViewClosing()
+    {
+        if (_isClosing)
+        {
+            return;
+        }
+
+        _isClosing = true;
+
+        if (!_lifecycleCts.IsCancellationRequested)
+        {
+            _lifecycleCts.Cancel();
         }
     }
 }

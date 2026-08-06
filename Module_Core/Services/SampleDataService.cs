@@ -52,11 +52,11 @@ public sealed class SampleDataService : ISampleDataService
     {
         if (_localSettingsService is null)
         {
-            return true;
+            return false;
         }
 
         var recvValue = _localSettingsService.ReadSettingAsync<bool?>(RecvMockDataSettingKey).GetAwaiter().GetResult() ?? false;
-        var inforVisualValue = _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey).GetAwaiter().GetResult() ?? true;
+        var inforVisualValue = _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey).GetAwaiter().GetResult() ?? false;
         return recvValue || inforVisualValue;
     }
 

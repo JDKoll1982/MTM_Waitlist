@@ -7,7 +7,7 @@ internal static class SetupSqlScriptStore
     private const string ScriptFolderName = "Database";
     private const string QueryFolderName = "InforVisual";
     private const string ModuleFolderName = "Queues";
-    private const string ScriptModuleFolderName = "Module";
+    private const string ScriptModuleFolderName = "Module_Setup";
     private const string ScriptQueryFolderName = "Queries";
 
     public static async Task<string> LoadAsync(string scriptName, CancellationToken cancellationToken = default)
