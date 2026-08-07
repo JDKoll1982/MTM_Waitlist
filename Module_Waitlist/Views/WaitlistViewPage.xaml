@@ -84,6 +84,7 @@
 
         <!--  Floating Green Circular Action Button  -->
         <Button
+            Click="OnAddRequestClick"
             Width="100"
             Height="100"
             Margin="0,0,24,24"

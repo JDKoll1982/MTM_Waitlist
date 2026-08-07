@@ -30,6 +30,8 @@ applyTo: "Database/**/*.sql"
 - Unique constraints: `uq_<table>_<column_or_purpose>`.
 - Non-unique indexes: `idx_<table>_<column_or_purpose>`.
 - Composite index order: left-to-right by filter/selectivity.
+- MySQL identifier max length is 64 characters; all key/constraint/index names must stay at or below this limit.
+- When names would exceed 64 characters, shorten descriptive middle segments while preserving required prefixes and uniqueness.
 
 ## Reserved/Banned Terms and Abbreviations
 - Allowed abbreviations: `id`, `utc`, `mac`, `ip`, `rbac`, `uuid`.
@@ -61,12 +63,14 @@ applyTo: "Database/**/*.sql"
 - Migration model: FluentMigrator runner backed by reviewed SQL artifacts.
 - Use a file-per-artifact layout under `Database/`:
 	- `Bootstrap/create_database.sql`
+	- `Bootstrap/update_table_descriptions.sql` (mandatory maintenance file)
 	- `Tables/<table_name>/create.sql` and `rollback.sql`
 	- `StoredProcedures/<procedure_name>/create.sql` and `rollback.sql`
 	- `Views/<view_name>/create.sql` and `rollback.sql`
 	- `Seeds/<seed_name>/create.sql` and `rollback.sql`
 	- `Validation/<validation_name>/validate.sql`
 - Every schema artifact requires matching rollback or validation where appropriate.
+- Any SQL add/edit/remove under `Database/` must include corresponding updates to `Database/Bootstrap/update_table_descriptions.sql` in the same change.
 - Production rollout is manual DBA-reviewed promotion.
 - Do not auto-apply schema changes on app startup.
 

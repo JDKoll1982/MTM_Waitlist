@@ -32,6 +32,24 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
 
     public IReadOnlyList<SetupDunnagePart> PairAssignments => State.SelectedDunnageParts;
 
+    public IReadOnlyList<string> ScrapTypes => State.ScrapTypes;
+
+    public string SelectedScrapType
+    {
+        get => State.SelectedScrapType;
+        set
+        {
+            if (State.SelectedScrapType == value)
+            {
+                return;
+            }
+
+            State.SelectedScrapType = value;
+            State.HasUnsavedChanges = true;
+            OnPropertyChanged(nameof(SelectedScrapType));
+        }
+    }
+
     public string PageTitle => "Setup_DunnageType.Title".GetLocalized();
 
     public string ProgressText => "Setup_Progress.Step4".GetLocalized();
@@ -68,6 +86,8 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
             OnPropertyChanged(nameof(CurrentSelectionSummary));
             OnPropertyChanged(nameof(DunnageTypes));
             OnPropertyChanged(nameof(PairAssignments));
+            OnPropertyChanged(nameof(ScrapTypes));
+            OnPropertyChanged(nameof(SelectedScrapType));
             StartupDebugLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo completed. AvailableTypeCount={State.DunnageTypes.Count}, PairAssignments={State.SelectedDunnageParts.Count}.");
         }
         catch (Exception ex)
@@ -120,5 +140,23 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
     private void ContinueToReview()
     {
         _navigationService.NavigateTo(typeof(SetupReviewViewModel).FullName!, null);
+    }
+
+    public void AddScrapType(string? scrapType)
+    {
+        var normalized = scrapType?.Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return;
+        }
+
+        if (!State.ScrapTypes.Any(existing => string.Equals(existing, normalized, StringComparison.OrdinalIgnoreCase)))
+        {
+            State.ScrapTypes.Add(normalized);
+        }
+
+        SelectedScrapType = State.ScrapTypes.FirstOrDefault() ?? string.Empty;
+        State.HasUnsavedChanges = true;
+        OnPropertyChanged(nameof(ScrapTypes));
     }
 }

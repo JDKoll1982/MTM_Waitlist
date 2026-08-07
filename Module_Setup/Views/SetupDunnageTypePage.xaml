@@ -11,6 +11,7 @@
     <Grid Padding="24" RowSpacing="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -58,7 +59,33 @@
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
 
-        <Grid Grid.Row="1">
+        <Border Grid.Row="1" Padding="12" MaxWidth="560" HorizontalAlignment="Left" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+            <StackPanel Spacing="8">
+                <TextBlock Text="SCRAP TYPE" Foreground="{ThemeResource TextFillColorSecondaryBrush}" CharacterSpacing="120" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ComboBox
+                        Grid.Column="0"
+                        PlaceholderText="Select scrap type"
+                        ItemsSource="{x:Bind ViewModel.ScrapTypes, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.SelectedScrapType, Mode=TwoWay}" />
+
+                    <Button
+                        Grid.Column="1"
+                        Width="40"
+                        Height="40"
+                        FontSize="18"
+                        Content="+"
+                        Click="OnAddScrapTypeClick" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
             <Border Padding="16" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
                 <StackPanel Spacing="8">
                     <TextBlock x:Uid="Setup_DunnagePair.CurrentAssignments" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Current Pair Assignments" />
@@ -83,7 +110,7 @@
             </Border>
         </Grid>
 
-        <Grid Grid.Row="2" ColumnSpacing="12">
+        <Grid Grid.Row="3" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />

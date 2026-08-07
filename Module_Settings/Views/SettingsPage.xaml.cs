@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.ViewModels;
 
 namespace MTM_Waitlist.Module_Settings.Views;
@@ -14,7 +15,9 @@ public sealed partial class SettingsPage : Page
 
     public SettingsPage()
     {
+        StartupDebugLog.Info("SettingsPage", "Constructor started.");
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
+        StartupDebugLog.Info("SettingsPage", "Constructor completed.");
     }
 }

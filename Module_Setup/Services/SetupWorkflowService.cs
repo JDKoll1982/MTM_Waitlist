@@ -6,6 +6,17 @@ namespace MTM_Waitlist.Module_Setup.Services;
 
 public sealed class SetupWorkflowService : ISetupWorkflowService
 {
+    private static readonly string[] s_defaultScrapTypes =
+    [
+        "Scrap Type Required",
+        "3003 Aluminum",
+        "5052 aluminum",
+        "Galvanized Steel",
+        "Steel",
+        "Skeleton",
+        "Gaylord"
+    ];
+
     private readonly IWorkOrderValidationService _workOrderValidationService;
     private readonly IInforVisualLookupService _lookupService;
     private readonly ISubordinatePartService _subordinatePartService;
@@ -129,6 +140,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         State.DunnageParts.Clear();
         State.SelectedDunnageParts.Clear();
         State.SelectedDunnagePartId = string.Empty;
+        State.SelectedScrapType = string.Empty;
         State.SelectedDunnageTypeId = string.Empty;
 
         var sequences = await _lookupService.GetSequencesAsync(State.NormalizedWorkOrder, partNumber, cancellationToken);
@@ -184,6 +196,9 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         }
 
         StartupDebugLog.Info("SetupWorkflow", $"Subordinate parts loaded. Count={State.SubordinateParts.Count}.");
+
+        EnsureDefaultScrapTypes();
+        await RehydrateOrSuggestScrapTypeAsync(sequenceNumber, cancellationToken).ConfigureAwait(true);
 
         var dunnageTypes = await _dunnageWorkflowService.GetDunnageTypesAsync(
             State.SelectedPartNumber,
@@ -351,7 +366,20 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
                 : State.SelectedWorkCenter,
             SelectedDunnageTypeId = State.SelectedDunnageTypeId,
             SelectedDunnagePartId = State.SelectedDunnagePartId,
-            SubordinateParts = State.SubordinateParts.ToArray(),
+            SelectedScrapType = State.SelectedScrapType,
+            SubordinateParts = State.SubordinateParts
+                .Select(part => new SetupSubordinatePart
+                {
+                    Category = part.Category,
+                    PartNumber = part.PartNumber,
+                    Description = part.Description,
+                    Location = part.Location,
+                    OnHandQuantity = part.OnHandQuantity,
+                    IsLowStock = part.IsLowStock,
+                    User8 = part.User8,
+                    SelectedScrapType = State.SelectedScrapType,
+                })
+                .ToArray(),
             SelectedDunnageParts = State.SelectedDunnageParts.ToArray()
         };
 
@@ -360,5 +388,170 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         var result = await _persistenceService.SaveAsync(request, forceReplace, cancellationToken).ConfigureAwait(true);
         State.HasUnsavedChanges = !(result.Success && !result.RequiresReplacementConfirmation);
         return result;
+    }
+
+    private void EnsureDefaultScrapTypes()
+    {
+        var defaults = s_defaultScrapTypes;
+        if (State.ScrapTypes.Count == 0)
+        {
+            foreach (var value in defaults)
+            {
+                State.ScrapTypes.Add(value);
+            }
+
+            return;
+        }
+
+        foreach (var value in defaults)
+        {
+            if (!State.ScrapTypes.Any(existing => string.Equals(existing, value, StringComparison.OrdinalIgnoreCase)))
+            {
+                State.ScrapTypes.Add(value);
+            }
+        }
+    }
+
+    private void SetSuggestedScrapTypeFromUser8()
+    {
+        var candidates = State.ScrapTypes
+            .Where(value => !string.Equals(value, s_defaultScrapTypes[0], StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        var user8Sources = State.SubordinateParts
+            .Where(part => string.Equals(part.Category, "Coil", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(part.Category, "Flatstock", StringComparison.OrdinalIgnoreCase))
+            .Select(part => part.User8)
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .ToArray();
+
+        string? bestMatch = null;
+        var bestDistance = int.MaxValue;
+
+        foreach (var source in user8Sources)
+        {
+            var match = FindBestScrapTypeMatch(source, candidates);
+            if (match.Match is null)
+            {
+                continue;
+            }
+
+            if (match.Distance < bestDistance)
+            {
+                bestDistance = match.Distance;
+                bestMatch = match.Match;
+            }
+        }
+
+        State.SelectedScrapType = bestMatch ?? s_defaultScrapTypes[0];
+    }
+
+    private async Task RehydrateOrSuggestScrapTypeAsync(string sequenceNumber, CancellationToken cancellationToken)
+    {
+        var savedScrapType = await _persistenceService
+            .LoadSavedScrapTypeAsync(State.NormalizedWorkOrder, State.SelectedPartNumber, sequenceNumber, cancellationToken)
+            .ConfigureAwait(true);
+
+        if (!string.IsNullOrWhiteSpace(savedScrapType))
+        {
+            var existing = State.ScrapTypes.FirstOrDefault(value => string.Equals(value, savedScrapType, StringComparison.OrdinalIgnoreCase));
+            if (existing is null)
+            {
+                State.ScrapTypes.Add(savedScrapType);
+                State.SelectedScrapType = savedScrapType;
+            }
+            else
+            {
+                State.SelectedScrapType = existing;
+            }
+
+            return;
+        }
+
+        SetSuggestedScrapTypeFromUser8();
+    }
+
+    private static (string? Match, int Distance) FindBestScrapTypeMatch(string source, IReadOnlyList<string> candidates)
+    {
+        var normalizedSource = NormalizeForFuzzy(source);
+        if (string.IsNullOrWhiteSpace(normalizedSource))
+        {
+            return (null, int.MaxValue);
+        }
+
+        string? bestMatch = null;
+        var bestDistance = int.MaxValue;
+
+        foreach (var candidate in candidates)
+        {
+            var normalizedCandidate = NormalizeForFuzzy(candidate);
+            if (string.IsNullOrWhiteSpace(normalizedCandidate))
+            {
+                continue;
+            }
+
+            if (string.Equals(normalizedSource, normalizedCandidate, StringComparison.OrdinalIgnoreCase)
+                || normalizedSource.Contains(normalizedCandidate, StringComparison.OrdinalIgnoreCase)
+                || normalizedCandidate.Contains(normalizedSource, StringComparison.OrdinalIgnoreCase))
+            {
+                return (candidate, 0);
+            }
+
+            var distance = ComputeLevenshteinDistance(normalizedSource, normalizedCandidate);
+            var threshold = Math.Max(2, (int)Math.Ceiling(Math.Max(normalizedSource.Length, normalizedCandidate.Length) * 0.35));
+            if (distance <= threshold && distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestMatch = candidate;
+            }
+        }
+
+        return (bestMatch, bestDistance);
+    }
+
+    private static string NormalizeForFuzzy(string value)
+    {
+        var chars = value
+            .Where(char.IsLetterOrDigit)
+            .Select(char.ToLowerInvariant)
+            .ToArray();
+        return new string(chars);
+    }
+
+    private static int ComputeLevenshteinDistance(string left, string right)
+    {
+        if (left.Length == 0)
+        {
+            return right.Length;
+        }
+
+        if (right.Length == 0)
+        {
+            return left.Length;
+        }
+
+        var costs = new int[right.Length + 1];
+        for (var j = 0; j <= right.Length; j++)
+        {
+            costs[j] = j;
+        }
+
+        for (var i = 1; i <= left.Length; i++)
+        {
+            var previousDiagonal = costs[0];
+            costs[0] = i;
+
+            for (var j = 1; j <= right.Length; j++)
+            {
+                var previousCost = costs[j];
+                var substitutionCost = left[i - 1] == right[j - 1] ? 0 : 1;
+                costs[j] = Math.Min(
+                    Math.Min(costs[j] + 1, costs[j - 1] + 1),
+                    previousDiagonal + substitutionCost);
+                previousDiagonal = previousCost;
+            }
+        }
+
+        return costs[right.Length];
     }
 }

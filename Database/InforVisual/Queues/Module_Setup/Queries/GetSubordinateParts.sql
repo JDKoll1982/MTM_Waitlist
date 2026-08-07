@@ -49,6 +49,7 @@ SELECT DISTINCT
         WHEN req.PART_ID LIKE 'MMF%' THEN COALESCE(NULLIF(req.LOCATION_ID, ''), NULLIF(pl.LOCATION_ID, ''), NULLIF(wh.DESCRIPTION, ''), '')
         ELSE ''
     END AS Location,
+    COALESCE(NULLIF(part.USER_8, ''), '') AS User8,
     CAST(COALESCE(pl.QTY, part.QTY_ON_HAND, 0) AS decimal(20, 8)) AS OnHandQuantity
 FROM WORK_ORDER AS wo
 INNER JOIN REQUIREMENT AS req

@@ -1,4 +1,5 @@
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
 using Microsoft.Extensions.Options;
 using MTM_Waitlist.Module_Startup.Models;
 using MySqlConnector;
@@ -89,6 +90,7 @@ public sealed class MySqlHelperServer
 
         try
         {
+            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteStoredProcedureQueryAsync started. Procedure='{storedProcedureName}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
             await using var connection = new MySqlConnection(connectionString);
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -120,8 +122,9 @@ public sealed class MySqlHelperServer
 
             return rows;
         }
-        catch
+        catch (Exception ex)
         {
+            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteStoredProcedureQueryAsync failed. Procedure='{storedProcedureName}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
             return Array.Empty<Dictionary<string, object?>>();
         }
     }
@@ -140,6 +143,7 @@ public sealed class MySqlHelperServer
 
         try
         {
+            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteStoredProcedureNonQueryAsync started. Procedure='{storedProcedureName}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
             await using var connection = new MySqlConnection(connectionString);
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -157,8 +161,9 @@ public sealed class MySqlHelperServer
 
             return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch
+        catch (Exception ex)
         {
+            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteStoredProcedureNonQueryAsync failed. Procedure='{storedProcedureName}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
             return 0;
         }
     }
@@ -177,6 +182,7 @@ public sealed class MySqlHelperServer
 
         try
         {
+            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteSqlQueryAsync started. Sql='{DescribeSql(sql)}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
             await using var connection = new MySqlConnection(connectionString);
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -208,8 +214,9 @@ public sealed class MySqlHelperServer
 
             return rows;
         }
-        catch
+        catch (Exception ex)
         {
+            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteSqlQueryAsync failed. Sql='{DescribeSql(sql)}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
             return Array.Empty<Dictionary<string, object?>>();
         }
     }
@@ -228,6 +235,7 @@ public sealed class MySqlHelperServer
 
         try
         {
+            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteSqlNonQueryAsync started. Sql='{DescribeSql(sql)}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
             await using var connection = new MySqlConnection(connectionString);
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -245,8 +253,9 @@ public sealed class MySqlHelperServer
 
             return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch
+        catch (Exception ex)
         {
+            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteSqlNonQueryAsync failed. Sql='{DescribeSql(sql)}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
             return 0;
         }
     }
@@ -289,6 +298,27 @@ public sealed class MySqlHelperServer
         return databaseTarget == MySqlDatabaseTarget.MtmReceivingApplication
             ? "mtm_receiving_application"
             : "mtm_waitlist";
+    }
+
+    private static string DescribeParameters(IReadOnlyDictionary<string, object?> parameters)
+    {
+        if (parameters.Count == 0)
+        {
+            return "<none>";
+        }
+
+        return string.Join(", ", parameters.Select(entry => $"{entry.Key}={(entry.Value is null ? "<null>" : entry.Value)}"));
+    }
+
+    private static string DescribeSql(string sql)
+    {
+        if (string.IsNullOrWhiteSpace(sql))
+        {
+            return "<empty>";
+        }
+
+        var trimmed = sql.Trim().ReplaceLineEndings(" ");
+        return trimmed.Length <= 140 ? trimmed : trimmed[..140] + "...";
     }
 
     private async Task<bool> IsMockDataEnabledAsync(MySqlDatabaseTarget databaseTarget)

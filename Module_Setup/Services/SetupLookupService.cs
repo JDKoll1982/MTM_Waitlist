@@ -171,6 +171,7 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
                     PartNumber = GetString(row, "PartNumber"),
                     Description = GetString(row, "Description"),
                     Location = GetString(row, "Location"),
+                    User8 = GetString(row, "User8"),
                     OnHandQuantity = onHandQuantity,
                     IsLowStock = onHandQuantity > 0 && onHandQuantity < 10,
                 };

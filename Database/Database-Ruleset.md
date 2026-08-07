@@ -25,6 +25,8 @@ This document applies your completed naming conventions and database architectur
 - Unique naming: `uq_<table>_<column_or_purpose>`.
 - Index naming: `idx_<table>_<column_or_purpose>`.
 - Composite index ordering: left-to-right by filter/selectivity.
+- MySQL identifier max length: 64 characters (hard limit for key/constraint/index names).
+- If a generated constraint/index name exceeds 64 characters, shorten descriptive middle segments while preserving required prefixes and meaning.
 
 ## Allowed and Banned Terms
 - Allowed abbreviations: `id`, `utc`, `mac`, `ip`, `rbac`, `uuid`.
@@ -64,6 +66,8 @@ This document applies your completed naming conventions and database architectur
 ## Artifact Layout and Release Governance
 - Use a file-per-artifact layout under `Database/`.
 - Bootstrap database creation lives in `Database/Bootstrap/create_database.sql`.
+- Table and column description updates live in `Database/Bootstrap/update_table_descriptions.sql`.
+- Updating `Database/Bootstrap/update_table_descriptions.sql` is mandatory whenever any SQL artifact is added, modified, or removed under `Database/`.
 - Table artifacts live in `Database/Tables/<table_name>/create.sql` and `rollback.sql`.
 - Stored procedure artifacts live in `Database/StoredProcedures/<procedure_name>/create.sql` and `rollback.sql`.
 - View artifacts live in `Database/Views/<view_name>/create.sql` and `rollback.sql`.

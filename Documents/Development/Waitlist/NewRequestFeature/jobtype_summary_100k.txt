@@ -1,0 +1,19 @@
+﻿ROWS_ANALYZED=100000
+ROWS_WITH_VALID_DURATION=96556
+
+JOB_TYPES (count and avg minutes)
+  Unknown: count=45275, served_for_avg=43189, avg_minutes=16.55
+  Pickup: count=39559, served_for_avg=38626, avg_minutes=13.87
+  Scrap: count=8224, served_for_avg=8016, avg_minutes=15.43
+  Coil: count=3899, served_for_avg=3788, avg_minutes=20.15
+  Bring: count=2758, served_for_avg=2659, avg_minutes=22.56
+  Flatstock: count=285, served_for_avg=278, avg_minutes=26.06
+
+SUB_JOB_TYPES (count and avg minutes)
+  General [type=Unknown]: count=56257, served_for_avg=53864, avg_minutes=16.68
+  Pickup Other [type=Pickup]: count=37980, served_for_avg=37098, avg_minutes=13.5
+  MMC/Coil [type=Coil]: count=3899, served_for_avg=3788, avg_minutes=20.15
+  Pickup NCM [type=Pickup]: count=1153, served_for_avg=1114, avg_minutes=19.6
+  Pickup WIP [type=Pickup]: count=356, served_for_avg=345, avg_minutes=32.29
+  MMF/Flatstock [type=Flatstock]: count=285, served_for_avg=278, avg_minutes=26.06
+  Pickup FG [type=Pickup]: count=70, served_for_avg=69, avg_minutes=26.23

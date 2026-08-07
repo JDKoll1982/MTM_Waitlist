@@ -1,0 +1,35 @@
+﻿ROWS_ANALYZED=100000
+ROWS_WITH_VALID_DURATION=96556
+
+JOB_TYPES (count and avg minutes)
+  Pickup: count=40683, served_for_avg=39741, avg_minutes=13.69
+  Unknown: count=17266, served_for_avg=16121, avg_minutes=17.02
+  Container Handling: count=11556, served_for_avg=11146, avg_minutes=13.75
+  Coil: count=9210, served_for_avg=8950, avg_minutes=22.63
+  Scrap: count=8351, served_for_avg=8139, avg_minutes=15.51
+  Flatstock: count=4666, served_for_avg=4502, avg_minutes=18.45
+  Bring: count=2839, served_for_avg=2750, avg_minutes=21.62
+  Table Handling: count=2494, served_for_avg=2408, avg_minutes=8.71
+  Die Handling: count=2454, served_for_avg=2349, avg_minutes=20.18
+  Assist: count=481, served_for_avg=450, avg_minutes=14.82
+
+SUB_JOB_TYPES (count and avg minutes)
+  Pickup Other [type=Pickup]: count=39104, served_for_avg=38213, avg_minutes=13.32
+  General [type=Unknown]: count=17266, served_for_avg=16121, avg_minutes=17.02
+  MMC/Coil [type=Coil]: count=9210, served_for_avg=8950, avg_minutes=22.63
+  General [type=Scrap]: count=8351, served_for_avg=8139, avg_minutes=15.51
+  MMF/Flatstock [type=Flatstock]: count=4666, served_for_avg=4502, avg_minutes=18.45
+  Skid/Pallet [type=Container Handling]: count=4638, served_for_avg=4466, avg_minutes=13.18
+  Gaylord [type=Container Handling]: count=3852, served_for_avg=3683, avg_minutes=14.32
+  Crate [type=Container Handling]: count=2944, served_for_avg=2878, avg_minutes=13.77
+  General [type=Bring]: count=2839, served_for_avg=2750, avg_minutes=21.62
+  Table Place Parts [type=Table Handling]: count=2492, served_for_avg=2406, avg_minutes=8.72
+  Die Pull [type=Die Handling]: count=1207, served_for_avg=1162, avg_minutes=17.89
+  Pickup NCM [type=Pickup]: count=1153, served_for_avg=1114, avg_minutes=19.6
+  Die Move [type=Die Handling]: count=1053, served_for_avg=1009, avg_minutes=23.08
+  Forklift Assist [type=Assist]: count=481, served_for_avg=450, avg_minutes=14.82
+  Pickup WIP [type=Pickup]: count=356, served_for_avg=345, avg_minutes=32.29
+  Die Putaway [type=Die Handling]: count=194, served_for_avg=178, avg_minutes=18.64
+  Skid/Pallet Empty [type=Container Handling]: count=122, served_for_avg=119, avg_minutes=16.89
+  Pickup FG [type=Pickup]: count=70, served_for_avg=69, avg_minutes=26.23
+  Table Remove Parts [type=Table Handling]: count=2, served_for_avg=2, avg_minutes=3.48

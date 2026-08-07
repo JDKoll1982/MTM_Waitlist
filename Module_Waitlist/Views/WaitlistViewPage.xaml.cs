@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 
+using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Module_Waitlist.Views;
@@ -23,5 +24,16 @@ public sealed partial class WaitlistViewPage : Page
         {
             ViewModel.ItemClickCommand.Execute(e.ClickedItem);
         }
+    }
+
+    private async void OnAddRequestClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        var dialogService = App.GetService<IWorkCenterSelectionDialogService>();
+        if (XamlRoot is null)
+        {
+            return;
+        }
+
+        _ = await dialogService.ShowForCurrentWorkstationAsync(XamlRoot).ConfigureAwait(true);
     }
 }

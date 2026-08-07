@@ -39,6 +39,10 @@ function Validate-IdentifierBase {
         Add-Error -File $File -Line $Line -Message "$Kind '$Name' must be lowercase snake_case"
     }
 
+    if ($Name.Length -gt 64) {
+        Add-Error -File $File -Line $Line -Message "$Kind '$Name' exceeds MySQL 64-character identifier limit"
+    }
+
     $segments = $Name.Split('_', [System.StringSplitOptions]::RemoveEmptyEntries)
     $bannedAbbrev = @('cfg', 'usr', 'ws', 'sess', 'rpt')
     foreach ($segment in $segments) {

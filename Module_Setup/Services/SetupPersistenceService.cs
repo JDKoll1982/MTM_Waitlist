@@ -2,6 +2,7 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
+using Microsoft.UI.Dispatching;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -14,6 +15,13 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
 
     private static string LocalizeOrDefault(string key, string fallback)
     {
+        var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        if (dispatcherQueue is null || !dispatcherQueue.HasThreadAccess)
+        {
+            // Setup persistence frequently runs off the UI thread; avoid WinRT resource-loader COM calls there.
+            return fallback;
+        }
+
         var localized = key.GetLocalized();
         return string.Equals(localized, key, StringComparison.Ordinal) ? fallback : localized;
     }
@@ -113,6 +121,65 @@ LIMIT 1;";
         catch
         {
             return Array.Empty<SetupDunnagePart>();
+        }
+    }
+
+    public async Task<string?> LoadSavedScrapTypeAsync(string workOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(workOrder)
+            || string.IsNullOrWhiteSpace(partNumber)
+            || string.IsNullOrWhiteSpace(sequenceNumber))
+        {
+            return null;
+        }
+
+        const string sql = @"
+SELECT subordinate_parts_json
+FROM setup_active_jobs
+WHERE work_order = @p_work_order
+  AND part_number = @p_part_number
+  AND sequence_number = @p_sequence_number
+  AND is_active = 1
+ORDER BY updated_utc DESC
+LIMIT 1;";
+
+        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
+            sql,
+            new Dictionary<string, object?>
+            {
+                ["p_work_order"] = workOrder.Trim(),
+                ["p_part_number"] = partNumber.Trim(),
+                ["p_sequence_number"] = sequenceNumber.Trim(),
+            },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        if (rows.Count == 0)
+        {
+            return null;
+        }
+
+        if (!rows[0].TryGetValue("subordinate_parts_json", out var jsonValue) || jsonValue is null)
+        {
+            return null;
+        }
+
+        var json = Convert.ToString(jsonValue);
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return null;
+        }
+
+        try
+        {
+            var payload = JsonSerializer.Deserialize<List<PersistedSubordinatePart>>(json) ?? new List<PersistedSubordinatePart>();
+            return payload
+                .Select(item => item.SelectedScrapType?.Trim())
+                .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+        }
+        catch
+        {
+            return null;
         }
     }
 
@@ -261,5 +328,11 @@ LIMIT 1;";
 
         [JsonPropertyName("Metadata")]
         public string? Metadata { get; set; }
+    }
+
+    private sealed class PersistedSubordinatePart
+    {
+        [JsonPropertyName("SelectedScrapType")]
+        public string? SelectedScrapType { get; set; }
     }
 }

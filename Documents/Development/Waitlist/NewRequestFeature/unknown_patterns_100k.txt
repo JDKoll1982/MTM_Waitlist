@@ -1,0 +1,248 @@
+﻿ROWS_ANALYZED=100000
+UNKNOWN_ROWS=44200
+
+TOP_UNKNOWN_SERVICES
+
+TOP_UNKNOWN_TOKENS
+  parts => 4517
+  skids => 3993
+  table => 2808
+  die => 2616
+  half => 2553
+  crates => 2496
+  op => 2298
+  gaylords => 2112
+  gaylord => 1697
+  kohler => 1508
+  short => 1447
+  skid => 1419
+  next => 1350
+  pull => 1345
+  blanks => 1291
+  away => 1135
+  take => 1062
+  more => 1021
+  part => 901
+  empty => 831
+  cardboard => 736
+  40x48 => 586
+  totes => 582
+  lennox => 569
+  tall => 555
+  crate => 548
+  location => 529
+  hopper => 468
+  boxes => 436
+  blue => 408
+  roof => 399
+  generac => 397
+  wire => 388
+  inventory => 366
+  back => 356
+  baskets => 352
+  structure => 349
+  down => 347
+  forklift => 343
+  return => 340
+  yellow => 309
+  green => 309
+  up => 300
+  lift => 279
+  remove => 277
+  pallet => 276
+  label => 267
+  blank => 265
+  pallets => 261
+  mmc1000 => 257
+  a22-76574-001 => 256
+  a22-76574-000 => 254
+  dies => 248
+  small => 243
+  21-28841-007 => 232
+  shop => 231
+  can => 228
+  fork => 228
+  assist => 220
+  you => 210
+  0l5741 => 206
+  out => 204
+  box => 202
+  help => 198
+  move => 195
+  21-28841-006 => 192
+  metal => 185
+  1/2 => 182
+  a01-35446-000 => 178
+  racks => 175
+  banding => 166
+  have => 162
+  fixture => 162
+  mmc364 => 156
+  opt => 156
+  rack => 156
+  unstack => 155
+  front => 154
+  a20664601 => 153
+  kawasaki => 151
+  we => 150
+  stack => 150
+  a0003448372 => 148
+  floor => 148
+  lifted => 146
+  op20 => 144
+  tote => 143
+  nuts => 143
+  40x74 => 141
+  just => 141
+  029-22042-000 => 140
+  0j8304 => 139
+  flip => 137
+  assistance => 134
+  15-27547-000 => 133
+  will => 132
+  step => 132
+  if => 127
+  off => 124
+  x2 => 122
+  a0003883721 => 119
+  a110146 => 117
+  kholer => 117
+  op19 => 116
+  mmc783 => 116
+  0l4445in-al-blank => 115
+  0l4449ex-al-blank => 115
+  pick => 115
+  big => 114
+  steel => 113
+  lids => 111
+  p/u => 110
+  22-73639-100 => 110
+  mmc681 => 107
+  any => 106
+  electrolux => 106
+  needed => 106
+  42x54 => 106
+  nut => 104
+  386-11022-021 => 103
+
+SAMPLE_UNKNOWN_NOTES
+  - dig out a die prestage by 23
+  - Gaylords : Short / Half
+  - half gaylord
+  - Skids : 40 x 48
+  - 1/2 gaylord on skid
+  - A22-76574-003   opt 20
+  - (2) kohler crates
+  - remove front turn table
+  - 11057-7392
+  - mmc0001000
+  - mcm crate
+  - Take away skeletons
+  - parts on table
+  - pull die 14600 LBS
+  - mmc427
+  - need 3 more MTM crates please
+  - 12x12x6 single wall boxes
+  - MMC384
+  - remove empty wood crate
+  - need 4 reg skids
+  - 0L4445IN-AL-Blank
+  - 24733474-Blank
+  - blue crates
+  - 1/2 gaylord
+  - pull die
+  - mmc854
+  - A22-76574-002  opt  20
+  - parts on table please
+  - pull die
+  - mmc089
+  - 20x20 KI skids
+  - take small tabel
+  - 6" HMA-2 BAFFLE BLANKS OP 0/99
+  - half kohler crates
+  - MMC367
+  - KK87344; R-A1-11; 18 parts
+  - mmc56
+  - MMC758
+  - Skids : 48 x 52 (Roof Structure Skid)
+  - put parts on table
+  - forklift assist
+  - MMF6614
+  - Skids : 40 x 48
+  - (2)  mtm crates please
+  - mmc746
+  - Skids : 40 x 48
+  - 1/2 gaylord
+  - A0006873403-Blank
+  - A0003701903; need more parts plz
+  - need parts 386-11022-021  op# 0/100
+  - Gaylords : Short / Half
+  - need liners
+  - 24 090 03; U-Z0-04; set die on floor
+  - forklift assist
+  - mmc1000
+  - half gaylords
+  - put parts on table
+  - 0659
+  - MMC0000005
+  - return unused coils
+  - need half gaylord on pallet
+  - GM93206   FORMED
+  - return stack of coils to inventory
+  - return dies
+  - 104910-05
+  - Need Parts on Table
+  - 1/2 gaylord
+  - W-C0-29 part A66-20730-000
+  - 30104902-Blank Green tag
+  - A0006873401
+  - 7491242; 7491243; 7491244
+  - die pull
+  - forklift assist
+  - parts on top of other bins please
+  - please take away broken mtm crate. most of the bottom is missing
+  - mmc154
+  - parts put on tilt talbe
+  - 24733514-pkg op10
+  - pull die to die shop
+  - take die to die shop, need goliath
+  - mmc0565
+  - Skids : 40 x 48
+  - MMC384
+  - MMF0005531
+  - A0006876773-Blank
+  - pull die and put away
+  - s-e2-11
+  - A22-75452-000
+  - take away skeleton
+  - 1/2 gaylord
+  - mmf0000315
+  - put die away
+  - half gaylords
+  - empty osco box
+  - mmc56
+  - A18-54118-000 DIE S-G2-01
+  - remove parts from tilt table and put the other box on.
+  - 900073 008100
+  - 49 x 54 KI Skids
+  - Need Parts on Table; WASHER
+  - pull die
+  - pull die
+  - Skids : 48 x 52 (Roof Structure Skid)
+  - mmc125
+  - empty half gaylord
+  - MMC658
+  - U-C0-05. 029-26981-001
+  - GM107144-08
+  - Skids : 40 x 48
+  - Gaylords : Short / Half
+  - 15x12x7 kawasaki totes
+  - Gaylords : Short / Half
+  - A0006873401-BLANKS
+  - A0006876776-blank
+  - need 18-72142-101 placed on empty wooden crate and removal of other wooden crate
+  - 139524 green
+  - genfoam  1
+  - part:0J8304
+  - 15-30092-002
+  - 0L4445IN-AL-BLANK

@@ -259,5 +259,83 @@ ON DUPLICATE KEY UPDATE
     workstation_name = VALUES(workstation_name),
     updated_by_user_id = VALUES(updated_by_user_id),
     updated_utc = UTC_TIMESTAMP();
+
+-- Stored Procedure: sp_config_hot_workcenters_get_for_workstation
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_hot_workcenters_get_for_workstation;
+
+CREATE PROCEDURE sp_config_hot_workcenters_get_for_workstation(
+    IN p_workstation_name VARCHAR(128)
+)
+SELECT
+    swc.workstation_name AS work_center_name,
+    cwhc.sort_rank
+FROM config_workstation_hot_workcenters cwhc
+INNER JOIN core_workstations_registry cwr ON cwr.id = cwhc.core_workstation_id
+INNER JOIN setup_workstations_catalog swc ON swc.id = cwhc.setup_workstation_id
+WHERE cwhc.is_active = 1
+  AND swc.is_active = 1
+  AND (
+        cwr.workstation_name = TRIM(p_workstation_name)
+        OR cwr.hostname_normalized = TRIM(p_workstation_name)
+      )
+ORDER BY cwhc.sort_rank ASC, swc.workstation_name ASC;
+
+-- Stored Procedure: sp_config_hot_workcenters_delete_for_workstation
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_hot_workcenters_delete_for_workstation;
+
+CREATE PROCEDURE sp_config_hot_workcenters_delete_for_workstation(
+    IN p_core_workstation_id BIGINT
+)
+DELETE FROM config_workstation_hot_workcenters
+WHERE core_workstation_id = p_core_workstation_id;
+
+-- Stored Procedure: sp_config_hot_workcenters_upsert
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_hot_workcenters_upsert;
+
+CREATE PROCEDURE sp_config_hot_workcenters_upsert(
+    IN p_core_workstation_id BIGINT,
+    IN p_setup_workstation_id BIGINT,
+    IN p_sort_rank INT,
+    IN p_modified_by_user_id BIGINT
+)
+INSERT INTO config_workstation_hot_workcenters (
+    core_workstation_id,
+    setup_workstation_id,
+    public_id,
+    sort_rank,
+    is_active,
+    created_by_user_id,
+    updated_by_user_id,
+    created_utc,
+    updated_utc
+)
+VALUES (
+    p_core_workstation_id,
+    p_setup_workstation_id,
+    UUID(),
+    p_sort_rank,
+    1,
+    p_modified_by_user_id,
+    p_modified_by_user_id,
+    UTC_TIMESTAMP(),
+    UTC_TIMESTAMP()
+)
+ON DUPLICATE KEY UPDATE
+    sort_rank = VALUES(sort_rank),
+    is_active = 1,
+    updated_by_user_id = VALUES(updated_by_user_id),
+    updated_utc = UTC_TIMESTAMP();
     
     
