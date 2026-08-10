@@ -81,6 +81,15 @@
     <Content Update="Assets\scrap.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="Assets\Config\waitlist-request-types.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\RequestTypeImages\*.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\Images\waitlist-empty-state.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="Assets\SplashScreen.scale-200.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>

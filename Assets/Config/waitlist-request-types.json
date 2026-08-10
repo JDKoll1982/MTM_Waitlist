@@ -1,0 +1,145 @@
+[
+  {
+    "requestType": "Pickup",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.Pickup.PickupRequestTypeImageView",
+    "subtypes": [
+      {
+        "name": "Pickup Other",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Pickup.PickupRequestTypeImageView"
+      },
+      {
+        "name": "Pickup NCM",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.PickupNcm.PickupNcmWaitlistLineView"
+      },
+      {
+        "name": "Pickup WIP",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.PickupWip.PickupWipWaitlistLineView"
+      },
+      {
+        "name": "Pickup FG",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.PickupFg.PickupFgWaitlistLineView"
+      },
+      {
+        "name": "Pickup Coil",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView"
+      },
+      {
+        "name": "Pickup Flatstock",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView"
+      }
+    ]
+  },
+  {
+    "requestType": "Other",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.Other.OtherRequestTypeImageView",
+    "subtypes": [
+      {
+        "name": "General Text Entry",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Other.OtherRequestTypeImageView"
+      }
+    ]
+  },
+  {
+    "requestType": "Coil",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilRequestTypeImageView",
+    "subtypes": [
+      {
+        "name": "Bring",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView"
+      },
+      {
+        "name": "Pickup",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView"
+      },
+      {
+        "name": "Wrong Coil @ press",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView"
+      },
+      {
+        "name": "Need Riser Table",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView"
+      },
+      {
+        "name": "Need Coil Turned around",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView"
+      }
+    ]
+  },
+  {
+    "requestType": "Scrap",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapRequestTypeImageView",
+    "subtypes": [
+      {
+        "name": "Empty",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapWaitlistLineView"
+      },
+      {
+        "name": "Pickup Hopper, do not return",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapWaitlistLineView"
+      },
+      {
+        "name": "Bring Hopper",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapWaitlistLineView"
+      }
+    ]
+  },
+  {
+    "requestType": "Flatstock",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
+    "subtypes": [
+      {
+        "name": "Bring",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView"
+      },
+      {
+        "name": "Pickup",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView"
+      },
+      {
+        "name": "Wrong Flatstock @ Workcenter",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView"
+      }
+    ]
+  },
+  {
+    "requestType": "Table Handling",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.TableHandling.TableHandlingRequestTypeImageView",
+    "subtypes": [
+      {
+        "name": "Table Place Parts",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.TableHandling.TableHandlingRequestTypeImageView"
+      },
+      {
+        "name": "Table Remove Parts",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.TableHandling.TableHandlingRequestTypeImageView"
+      }
+    ]
+  },
+  {
+    "requestType": "Die Handling",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
+    "subtypes": [
+      {
+        "name": "Bring Die",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView"
+      },
+      {
+        "name": "Pull Die and Put Away",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView"
+      },
+      {
+        "name": "Pull Die and Take to Die Shop",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView"
+      },
+      {
+        "name": "Pull Die and Leave @ press",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView"
+      }
+    ]
+  },
+  {
+    "requestType": "Forklift Assist",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.ForkliftAssist.ForkliftAssistRequestTypeImageView",
+    "subtypes": []
+  }
+]

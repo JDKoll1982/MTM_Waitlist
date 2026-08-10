@@ -1,11 +1,12 @@
-﻿using System.Reflection;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Reflection;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Startup.Models;
 using Windows.ApplicationModel;
@@ -28,6 +29,7 @@ public partial class SettingsViewModel : ObservableRecipient
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly ILocalSettingsService _localSettingsService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
+    private readonly IDunnageTypeVisibilityCatalogService _dunnageTypeVisibilityCatalogService;
     private readonly StartupState _startupState;
 
     [ObservableProperty]
@@ -49,6 +51,9 @@ public partial class SettingsViewModel : ObservableRecipient
     private bool _useInforVisualMockData;
 
     [ObservableProperty]
+    private string _searchQuery = string.Empty;
+
+    [ObservableProperty]
     public partial string SelectedWorkstation
     {
         get; set;
@@ -66,14 +71,60 @@ public partial class SettingsViewModel : ObservableRecipient
         get; set;
     } = string.Empty;
 
+    [ObservableProperty]
+    public partial bool IsDunnageTypeVisibilityBusy
+    {
+        get; set;
+    }
+
+    [ObservableProperty]
+    public partial string DunnageTypeVisibilityStatusMessage
+    {
+        get; set;
+    } = string.Empty;
+
     public ObservableCollection<string> AvailableWorkstations { get; } = new();
 
     public ObservableCollection<string> HotWorkCenters { get; } = new();
 
     public ObservableCollection<string> OtherWorkCenters { get; } = new();
 
+    public ObservableCollection<DunnageTypeVisibilityOption> VisibleDunnageTypes { get; } = new();
+
+    public ObservableCollection<DunnageTypeVisibilityOption> HiddenDunnageTypes { get; } = new();
+
     public bool CanManageHotWorkCenters => AllowedHotWorkCenterManageRoles.Any(role =>
         string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+
+    public bool CanManageDunnageTypeVisibility => CanManageHotWorkCenters;
+
+    public bool IsAppearancePanelVisible => MatchesSearch("appearance", "app theme", "light", "dark", "default", SelectedThemeText);
+
+    public bool IsMockDataPanelVisible => MatchesSearch("mock data", "infor visual", "receiving", "mysql", "sample data");
+
+    public bool IsHotWorkCentersPanelVisible => MatchesSearch(
+        "hot workcenters",
+        "workstation",
+        "computer",
+        string.Join(" ", HotWorkCenters),
+        string.Join(" ", OtherWorkCenters),
+        string.Join(" ", AvailableWorkstations));
+
+    public bool IsDunnageTypeVisibilityPanelVisible => MatchesSearch(
+        "dunnage",
+        "visibility",
+        "shown",
+        "hidden",
+        string.Join(" ", VisibleDunnageTypes.Select(item => item.Name)),
+        string.Join(" ", HiddenDunnageTypes.Select(item => item.Name)));
+
+    public bool IsAboutPanelVisible => MatchesSearch("about", "version", "privacy", VersionDescription, "mtm waitlist");
+
+    public bool IsAppearanceCategoryVisible => IsAppearancePanelVisible;
+
+    public bool IsOperationsCategoryVisible => IsMockDataPanelVisible || IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible;
+
+    public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
     // FIX: A clean, type-safe string representation of the Enum for the XAML engine
     public string SelectedThemeText => ElementTheme.ToString();
@@ -87,12 +138,14 @@ public partial class SettingsViewModel : ObservableRecipient
         IThemeSelectorService themeSelectorService,
         ILocalSettingsService localSettingsService,
         IWorkCenterCatalogService workCenterCatalogService,
+        IDunnageTypeVisibilityCatalogService dunnageTypeVisibilityCatalogService,
         StartupState startupState)
     {
         StartupDebugLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
         _localSettingsService = localSettingsService;
         _workCenterCatalogService = workCenterCatalogService;
+        _dunnageTypeVisibilityCatalogService = dunnageTypeVisibilityCatalogService;
         _startupState = startupState;
 
         ElementTheme = _themeSelectorService.Theme;
@@ -111,6 +164,8 @@ public partial class SettingsViewModel : ObservableRecipient
             });
 
         _ = InitializeHotWorkCentersAsync();
+        _ = InitializeDunnageTypeVisibilityAsync();
+        RefreshSearchVisibility();
         StartupDebugLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}', RecvMockData={UseRecvMockData}, InforVisualMockData={UseInforVisualMockData}.");
     }
 
@@ -120,18 +175,27 @@ public partial class SettingsViewModel : ObservableRecipient
     {
         StartupDebugLog.Info("SettingsViewModel", $"Theme changed to '{value}'.");
         OnPropertyChanged(nameof(SelectedThemeText));
+        RefreshSearchVisibility();
     }
 
     partial void OnUseRecvMockDataChanged(bool value)
     {
         StartupDebugLog.Info("SettingsViewModel", $"UseRecvMockData changed to {value}.");
         _ = _localSettingsService.SaveSettingAsync(RecvMockDataSettingKey, value);
+        RefreshSearchVisibility();
     }
 
     partial void OnUseInforVisualMockDataChanged(bool value)
     {
         StartupDebugLog.Info("SettingsViewModel", $"UseInforVisualMockData changed to {value}.");
         _ = _localSettingsService.SaveSettingAsync(InforVisualMockDataSettingKey, value);
+        RefreshSearchVisibility();
+    }
+
+    partial void OnSearchQueryChanged(string value)
+    {
+        StartupDebugLog.Info("SettingsViewModel", $"SearchQuery changed to '{value}'.");
+        RefreshSearchVisibility();
     }
 
     partial void OnSelectedWorkstationChanged(string value)
@@ -173,6 +237,7 @@ public partial class SettingsViewModel : ObservableRecipient
         HotWorkCenters.Add(normalizedWorkCenter);
         SortCollection(HotWorkCenters);
         ReplaceCollectionValues(OtherWorkCenters, existingOthers);
+        RefreshSearchVisibility();
 
         await SaveCurrentHotWorkCentersAsync().ConfigureAwait(true);
     }
@@ -204,7 +269,73 @@ public partial class SettingsViewModel : ObservableRecipient
             SortCollection(OtherWorkCenters);
         }
 
+        RefreshSearchVisibility();
+
         await SaveCurrentHotWorkCentersAsync().ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private async Task ShowDunnageTypeAsync(string? dunnageTypeId)
+    {
+        if (!CanManageDunnageTypeVisibility)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(dunnageTypeId))
+        {
+            return;
+        }
+
+        var normalizedId = dunnageTypeId.Trim();
+        var selectedOption = HiddenDunnageTypes.FirstOrDefault(item => string.Equals(item.Id, normalizedId, StringComparison.OrdinalIgnoreCase));
+        if (selectedOption is null)
+        {
+            return;
+        }
+
+        StartupDebugLog.Info("SettingsDunnageVisibility", $"ShowDunnageTypeAsync started. DunnageTypeId='{normalizedId}'.");
+
+        var nextHidden = HiddenDunnageTypes.Where(item => !string.Equals(item.Id, normalizedId, StringComparison.OrdinalIgnoreCase)).ToArray();
+        var nextVisible = VisibleDunnageTypes.Concat(new[] { selectedOption }).ToArray();
+
+        ReplaceDunnageTypeValues(HiddenDunnageTypes, nextHidden);
+        ReplaceDunnageTypeValues(VisibleDunnageTypes, nextVisible);
+        RefreshSearchVisibility();
+
+        await SaveCurrentDunnageTypeVisibilityAsync().ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private async Task HideDunnageTypeAsync(string? dunnageTypeId)
+    {
+        if (!CanManageDunnageTypeVisibility)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(dunnageTypeId))
+        {
+            return;
+        }
+
+        var normalizedId = dunnageTypeId.Trim();
+        var selectedOption = VisibleDunnageTypes.FirstOrDefault(item => string.Equals(item.Id, normalizedId, StringComparison.OrdinalIgnoreCase));
+        if (selectedOption is null)
+        {
+            return;
+        }
+
+        StartupDebugLog.Info("SettingsDunnageVisibility", $"HideDunnageTypeAsync started. DunnageTypeId='{normalizedId}'.");
+
+        var nextVisible = VisibleDunnageTypes.Where(item => !string.Equals(item.Id, normalizedId, StringComparison.OrdinalIgnoreCase)).ToArray();
+        var nextHidden = HiddenDunnageTypes.Concat(new[] { selectedOption }).ToArray();
+
+        ReplaceDunnageTypeValues(VisibleDunnageTypes, nextVisible);
+        ReplaceDunnageTypeValues(HiddenDunnageTypes, nextHidden);
+        RefreshSearchVisibility();
+
+        await SaveCurrentDunnageTypeVisibilityAsync().ConfigureAwait(true);
     }
 
     private async Task InitializeHotWorkCentersAsync()
@@ -236,6 +367,8 @@ public partial class SettingsViewModel : ObservableRecipient
                 await LoadCatalogForWorkstationAsync(SelectedWorkstation).ConfigureAwait(true);
             }
 
+            RefreshSearchVisibility();
+
             StartupDebugLog.Info("SettingsViewModel", $"InitializeHotWorkCentersAsync completed. Workstation='{SelectedWorkstation}', AvailableCount={AvailableWorkstations.Count}.");
         }
         finally
@@ -254,6 +387,7 @@ public partial class SettingsViewModel : ObservableRecipient
             ReplaceCollectionValues(HotWorkCenters, catalog.HotWorkCenters);
             ReplaceCollectionValues(OtherWorkCenters, catalog.OtherWorkCenters);
             HotWorkCentersStatusMessage = string.Empty;
+            RefreshSearchVisibility();
             StartupDebugLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync completed. Workstation='{workstationName}', HotCount={HotWorkCenters.Count}, OtherCount={OtherWorkCenters.Count}.");
         }
         catch (Exception ex)
@@ -289,6 +423,56 @@ public partial class SettingsViewModel : ObservableRecipient
         }
     }
 
+    private async Task InitializeDunnageTypeVisibilityAsync()
+    {
+        StartupDebugLog.Info("SettingsDunnageVisibility", "InitializeDunnageTypeVisibilityAsync started.");
+        IsDunnageTypeVisibilityBusy = true;
+        try
+        {
+            var catalog = await _dunnageTypeVisibilityCatalogService.GetCatalogAsync().ConfigureAwait(true);
+            ReplaceDunnageTypeValues(VisibleDunnageTypes, catalog.VisibleDunnageTypes);
+            ReplaceDunnageTypeValues(HiddenDunnageTypes, catalog.HiddenDunnageTypes);
+            DunnageTypeVisibilityStatusMessage = string.Empty;
+            RefreshSearchVisibility();
+            StartupDebugLog.Info("SettingsDunnageVisibility", $"InitializeDunnageTypeVisibilityAsync completed. VisibleCount={VisibleDunnageTypes.Count}, HiddenCount={HiddenDunnageTypes.Count}.");
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("SettingsDunnageVisibility", ex, "InitializeDunnageTypeVisibilityAsync failed.");
+            DunnageTypeVisibilityStatusMessage = $"Unable to load dunnage visibility: {ex.Message}";
+        }
+        finally
+        {
+            IsDunnageTypeVisibilityBusy = false;
+        }
+    }
+
+    private async Task SaveCurrentDunnageTypeVisibilityAsync()
+    {
+        try
+        {
+            IsDunnageTypeVisibilityBusy = true;
+            var saveMessage = await _dunnageTypeVisibilityCatalogService
+                .SaveVisibleDunnageTypesAsync(VisibleDunnageTypes.Select(item => item.Id).ToArray())
+                .ConfigureAwait(true);
+
+            DunnageTypeVisibilityStatusMessage = string.IsNullOrWhiteSpace(saveMessage)
+                ? "Dunnage visibility saved."
+                : saveMessage;
+
+            StartupDebugLog.Info("SettingsDunnageVisibility", $"SaveCurrentDunnageTypeVisibilityAsync completed. VisibleCount={VisibleDunnageTypes.Count}, HiddenCount={HiddenDunnageTypes.Count}, Message='{DunnageTypeVisibilityStatusMessage}'.");
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("SettingsDunnageVisibility", ex, "SaveCurrentDunnageTypeVisibilityAsync failed.");
+            DunnageTypeVisibilityStatusMessage = $"Unable to save dunnage visibility: {ex.Message}";
+        }
+        finally
+        {
+            IsDunnageTypeVisibilityBusy = false;
+        }
+    }
+
     private static void ReplaceCollectionValues(ObservableCollection<string> targetCollection, IEnumerable<string> values)
     {
         targetCollection.Clear();
@@ -314,6 +498,43 @@ public partial class SettingsViewModel : ObservableRecipient
         {
             values.Add(value);
         }
+    }
+
+    private static void ReplaceDunnageTypeValues(ObservableCollection<DunnageTypeVisibilityOption> targetCollection, IEnumerable<DunnageTypeVisibilityOption> values)
+    {
+        targetCollection.Clear();
+        foreach (var value in values
+                     .Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.Name))
+                     .GroupBy(item => item.Id, StringComparer.OrdinalIgnoreCase)
+                     .Select(group => group.First())
+                     .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            targetCollection.Add(value);
+        }
+    }
+
+    private bool MatchesSearch(params string[] values)
+    {
+        var query = SearchQuery?.Trim();
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return true;
+        }
+
+        return values.Any(value =>
+            !string.IsNullOrWhiteSpace(value) && value.Contains(query, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void RefreshSearchVisibility()
+    {
+        OnPropertyChanged(nameof(IsAppearancePanelVisible));
+        OnPropertyChanged(nameof(IsMockDataPanelVisible));
+        OnPropertyChanged(nameof(IsHotWorkCentersPanelVisible));
+        OnPropertyChanged(nameof(IsDunnageTypeVisibilityPanelVisible));
+        OnPropertyChanged(nameof(IsAboutPanelVisible));
+        OnPropertyChanged(nameof(IsAppearanceCategoryVisible));
+        OnPropertyChanged(nameof(IsOperationsCategoryVisible));
+        OnPropertyChanged(nameof(IsAboutCategoryVisible));
     }
 
     private static string GetVersionDescription()

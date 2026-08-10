@@ -20,7 +20,7 @@ public sealed partial class WorkCenterSelectionDialog : ContentDialog
         IReadOnlyList<string> otherWorkCenters,
         IReadOnlyList<string> activeJobWorkCenters)
     {
-        WorkstationTextBlock.Text = $"Workstation: {workstationName}";
+        WorkstationTextBlock.Text = $"Current Work Center Station: {workstationName}";
         HotWorkCentersGridView.ItemsSource = hotWorkCenters;
         OtherWorkCentersGridView.ItemsSource = otherWorkCenters;
         _activeJobWorkCenters = new HashSet<string>(

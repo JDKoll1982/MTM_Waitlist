@@ -443,3 +443,62 @@ CREATE TABLE IF NOT EXISTS config_workstation_hot_workcenters (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- Create table: setup_part_sequence_custom_data
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS setup_part_sequence_custom_data (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    public_id CHAR(36) NOT NULL,
+    part_number VARCHAR(64) NOT NULL,
+    sequence_number VARCHAR(32) NOT NULL,
+    selected_scrap_type VARCHAR(128) NULL,
+    selected_dunnage_type_id VARCHAR(64) NULL,
+    selected_dunnage_part_id VARCHAR(64) NULL,
+    subordinate_parts_json JSON NULL,
+    selected_dunnage_parts_json JSON NULL,
+    created_by_user_id BIGINT NULL,
+    updated_by_user_id BIGINT NULL,
+    created_utc DATETIME NOT NULL,
+    updated_utc DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_setup_part_sequence_custom_data_public_id (public_id),
+    UNIQUE KEY uq_setup_part_sequence_custom_data_part_sequence (part_number, sequence_number),
+    KEY idx_setup_part_sequence_custom_data_updated_utc (updated_utc)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Create table: config_dunnage_types_visibility
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS config_dunnage_types_visibility (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    public_id CHAR(36) NOT NULL,
+    dunnage_type_id BIGINT NOT NULL,
+    dunnage_type_name VARCHAR(128) NOT NULL,
+    is_visible TINYINT(1) NOT NULL DEFAULT 1,
+    created_by_user_id BIGINT NULL,
+    updated_by_user_id BIGINT NULL,
+    created_utc DATETIME NOT NULL,
+    updated_utc DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_config_dunnage_types_visibility_public_id (public_id),
+    UNIQUE KEY uq_config_dunnage_types_visibility_dunnage_type_id (dunnage_type_id),
+    KEY idx_config_dunnage_types_visibility_is_visible (is_visible),
+    KEY idx_config_dunnage_types_visibility_updated_utc (updated_utc)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;
+

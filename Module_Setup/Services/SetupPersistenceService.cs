@@ -65,18 +65,8 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             return Array.Empty<SetupDunnagePart>();
         }
 
-        const string sql = @"
-SELECT selected_dunnage_parts_json
-FROM setup_active_jobs
-WHERE work_order = @p_work_order
-  AND part_number = @p_part_number
-  AND sequence_number = @p_sequence_number
-  AND is_active = 1
-ORDER BY updated_utc DESC
-LIMIT 1;";
-
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            sql,
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            "sp_setup_active_job_dunnage_assignments_get",
             new Dictionary<string, object?>
             {
                 ["p_work_order"] = workOrder.Trim(),
@@ -126,25 +116,40 @@ LIMIT 1;";
 
     public async Task<string?> LoadSavedScrapTypeAsync(string workOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
     {
+        StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeAsync started. WO='{workOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
         if (string.IsNullOrWhiteSpace(workOrder)
             || string.IsNullOrWhiteSpace(partNumber)
             || string.IsNullOrWhiteSpace(sequenceNumber))
         {
+            StartupDebugLog.Info("SetupPersistence", "LoadSavedScrapTypeAsync skipped due to missing required key(s).");
             return null;
         }
 
-        const string sql = @"
-SELECT subordinate_parts_json
-FROM setup_active_jobs
-WHERE work_order = @p_work_order
-  AND part_number = @p_part_number
-  AND sequence_number = @p_sequence_number
-  AND is_active = 1
-ORDER BY updated_utc DESC
-LIMIT 1;";
+        var exactPairScrapType = await LoadSavedScrapTypeInternalAsync(
+            workOrder,
+            partNumber,
+            sequenceNumber,
+            cancellationToken).ConfigureAwait(false);
 
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            sql,
+        if (!string.IsNullOrWhiteSpace(exactPairScrapType))
+        {
+            StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeAsync matched exact WO+Part+Sequence history entry. ScrapType='{exactPairScrapType}'.");
+            return exactPairScrapType;
+        }
+
+        StartupDebugLog.Info("SetupPersistence", "LoadSavedScrapTypeAsync found no exact WO+Part+Sequence history scrap type.");
+        return null;
+    }
+
+    private async Task<string?> LoadSavedScrapTypeInternalAsync(
+        string workOrder,
+        string partNumber,
+        string sequenceNumber,
+        CancellationToken cancellationToken)
+    {
+        StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeInternalAsync started. Source=setup_part_sequence_custom_data, Scope=Part+Sequence, Part='{partNumber}', Sequence='{sequenceNumber}'.");
+                var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                        "sp_setup_job_history_scrap_type_get",
             new Dictionary<string, object?>
             {
                 ["p_work_order"] = workOrder.Trim(),
@@ -154,33 +159,28 @@ LIMIT 1;";
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
+        StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeInternalAsync query completed. Source=setup_part_sequence_custom_data, RowCount={rows.Count}.");
+
         if (rows.Count == 0)
         {
             return null;
         }
 
-        if (!rows[0].TryGetValue("subordinate_parts_json", out var jsonValue) || jsonValue is null)
+        if (!rows[0].TryGetValue("selected_scrap_type", out var scrapValue) || scrapValue is null)
         {
+            StartupDebugLog.Info("SetupPersistence", "LoadSavedScrapTypeInternalAsync found row but selected_scrap_type was null/missing.");
             return null;
         }
 
-        var json = Convert.ToString(jsonValue);
-        if (string.IsNullOrWhiteSpace(json))
+        var selectedScrapType = Convert.ToString(scrapValue)?.Trim();
+        if (string.IsNullOrWhiteSpace(selectedScrapType))
         {
+            StartupDebugLog.Info("SetupPersistence", "LoadSavedScrapTypeInternalAsync found row but selected_scrap_type was empty.");
             return null;
         }
 
-        try
-        {
-            var payload = JsonSerializer.Deserialize<List<PersistedSubordinatePart>>(json) ?? new List<PersistedSubordinatePart>();
-            return payload
-                .Select(item => item.SelectedScrapType?.Trim())
-                .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
-        }
-        catch
-        {
-            return null;
-        }
+        StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeInternalAsync resolved selected_scrap_type='{selectedScrapType}'.");
+        return selectedScrapType;
     }
 
     private static Task<SetupSaveResult> SaveMockAsync()
@@ -196,20 +196,13 @@ LIMIT 1;";
     private async Task<SetupSaveResult> SaveBackendAsync(SetupSaveRequest request, CancellationToken cancellationToken)
     {
         StartupDebugLog.Info("SetupPersistence", "SaveBackendAsync started. Loading waitlist SQL script and executing stored procedure.");
+        var distinctRequestScrapValues = request.SubordinateParts
+            .Select(part => part.SelectedScrapType?.Trim())
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        StartupDebugLog.Info("SetupPersistence", $"SaveBackendAsync scrap payload snapshot. RequestSelectedScrapType='{request.SelectedScrapType}', SubordinatePartCount={request.SubordinateParts.Count}, DistinctSubordinateScrapCount={distinctRequestScrapValues.Length}, DistinctSubordinateScrapValues='{string.Join(" | ", distinctRequestScrapValues)}'.");
         _ = await SetupWaitlistMySqlScriptStore.LoadAsync("create.sql", cancellationToken).ConfigureAwait(false);
-
-        var replaceSql = @"
-DELETE FROM setup_active_jobs
-WHERE work_center = @p_work_center;";
-
-        _ = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-            replaceSql,
-            new Dictionary<string, object?>
-            {
-                ["p_work_center"] = request.WorkCenter,
-            },
-            MySqlDatabaseTarget.MtmWaitlist,
-            cancellationToken).ConfigureAwait(false);
 
         var parameters = new Dictionary<string, object?>
         {
@@ -223,6 +216,7 @@ WHERE work_center = @p_work_center;";
             ["p_selected_dunnage_parts_json"] = JsonSerializer.Serialize(request.SelectedDunnageParts),
             ["p_saved_by_user_id"] = null,
         };
+        StartupDebugLog.Info("SetupPersistence", $"SaveBackendAsync procedure parameters assembled. SubordinateJsonLength={Convert.ToString(parameters["p_subordinate_parts_json"])?.Length ?? 0}, SelectedDunnageJsonLength={Convert.ToString(parameters["p_selected_dunnage_parts_json"])?.Length ?? 0}." );
 
         var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
             "sp_setup_save_setup",
@@ -242,48 +236,33 @@ WHERE work_center = @p_work_center;";
             };
         }
 
-        const string historyInsertSql = @"
-INSERT INTO setup_job_history (
-    public_id,
-    active_job_id,
-    event_action,
-    work_order,
-    part_number,
-    sequence_number,
-    work_center,
-    selected_dunnage_type_id,
-    selected_dunnage_part_id,
-    subordinate_parts_json,
-    selected_dunnage_parts_json,
-    changed_by_user_id,
-    changed_utc
-)
-SELECT
-    UUID(),
-    aj.id,
-    @p_event_action,
-    aj.work_order,
-    aj.part_number,
-    aj.sequence_number,
-    aj.work_center,
-    aj.selected_dunnage_type_id,
-    aj.selected_dunnage_part_id,
-    aj.subordinate_parts_json,
-    aj.selected_dunnage_parts_json,
-    @p_changed_by_user_id,
-    UTC_TIMESTAMP()
-FROM setup_active_jobs aj
-WHERE aj.work_center = @p_work_center
-ORDER BY aj.updated_utc DESC
-LIMIT 1;";
+        var customDataRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+            "sp_setup_part_sequence_custom_data_upsert",
+            new Dictionary<string, object?>
+            {
+                ["p_part_number"] = request.PartNumber,
+                ["p_sequence_number"] = request.SequenceNumber,
+                ["p_selected_scrap_type"] = request.SelectedScrapType,
+                ["p_selected_dunnage_type_id"] = request.SelectedDunnageTypeId,
+                ["p_selected_dunnage_part_id"] = request.SelectedDunnagePartId,
+                ["p_subordinate_parts_json"] = JsonSerializer.Serialize(request.SubordinateParts),
+                ["p_selected_dunnage_parts_json"] = JsonSerializer.Serialize(request.SelectedDunnageParts),
+                ["p_updated_by_user_id"] = null,
+            },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
 
-        var historyRows = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-            historyInsertSql,
+        StartupDebugLog.Info("SetupPersistence", $"sp_setup_part_sequence_custom_data_upsert completed. AffectedRows={customDataRows}.");
+
+        var historyRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+            "sp_setup_job_history_insert_for_pair",
             new Dictionary<string, object?>
             {
                 ["p_event_action"] = "save",
                 ["p_changed_by_user_id"] = null,
-                ["p_work_center"] = request.WorkCenter,
+                ["p_work_order"] = request.WorkOrder,
+                ["p_part_number"] = request.PartNumber,
+                ["p_sequence_number"] = request.SequenceNumber,
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);

@@ -177,7 +177,7 @@ ALTER TABLE setup_active_jobs
     MODIFY COLUMN work_center VARCHAR(64) NOT NULL COMMENT 'Work center or press identifier.',
     MODIFY COLUMN selected_dunnage_type_id VARCHAR(64) NULL COMMENT 'Selected dunnage type identifier.',
     MODIFY COLUMN selected_dunnage_part_id VARCHAR(64) NULL COMMENT 'Selected dunnage part identifier.',
-    MODIFY COLUMN subordinate_parts_json JSON NULL COMMENT 'Serialized subordinate parts payload.',
+    MODIFY COLUMN subordinate_parts_json JSON NULL COMMENT 'Serialized subordinate parts payload for the active work-center setup row.',
     MODIFY COLUMN selected_dunnage_parts_json JSON NULL COMMENT 'Serialized selected dunnage parts payload.',
     MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the active job row is active.',
     MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the active job row.',
@@ -199,7 +199,7 @@ ALTER TABLE setup_job_history
     MODIFY COLUMN work_center VARCHAR(64) NOT NULL COMMENT 'Work center at time of event.',
     MODIFY COLUMN selected_dunnage_type_id VARCHAR(64) NULL COMMENT 'Selected dunnage type identifier snapshot.',
     MODIFY COLUMN selected_dunnage_part_id VARCHAR(64) NULL COMMENT 'Selected dunnage part identifier snapshot.',
-    MODIFY COLUMN subordinate_parts_json JSON NULL COMMENT 'Serialized subordinate parts snapshot.',
+    MODIFY COLUMN subordinate_parts_json JSON NULL COMMENT 'Serialized subordinate parts snapshot, including saved scrap selection for the exact work order/part/sequence event.',
     MODIFY COLUMN selected_dunnage_parts_json JSON NULL COMMENT 'Serialized selected dunnage parts snapshot.',
     MODIFY COLUMN changed_by_user_id BIGINT NULL COMMENT 'User who caused the history event.',
     MODIFY COLUMN changed_utc DATETIME NOT NULL COMMENT 'UTC timestamp when history row was recorded.';
@@ -230,5 +230,37 @@ ALTER TABLE config_workstation_hot_workcenters
     MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether this hot mapping is active.',
     MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the mapping row.',
     MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the mapping row.',
+    MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',
+    MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was last updated.';
+
+ALTER TABLE setup_part_sequence_custom_data
+    COMMENT = 'Custom setup data keyed by part and sequence for values not sourced from Infor Visual.';
+
+ALTER TABLE setup_part_sequence_custom_data
+    MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+    MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for custom pair row.',
+    MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'Part number key for custom setup data.',
+    MODIFY COLUMN sequence_number VARCHAR(32) NOT NULL COMMENT 'Sequence number key for custom setup data.',
+    MODIFY COLUMN selected_scrap_type VARCHAR(128) NULL COMMENT 'Saved scrap selection for the part/sequence pair.',
+    MODIFY COLUMN selected_dunnage_type_id VARCHAR(64) NULL COMMENT 'Saved dunnage type identifier for the part/sequence pair.',
+    MODIFY COLUMN selected_dunnage_part_id VARCHAR(64) NULL COMMENT 'Saved dunnage part identifier for the part/sequence pair.',
+    MODIFY COLUMN subordinate_parts_json JSON NULL COMMENT 'Serialized subordinate parts payload for the part/sequence pair.',
+    MODIFY COLUMN selected_dunnage_parts_json JSON NULL COMMENT 'Serialized selected dunnage parts payload for the part/sequence pair.',
+    MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the custom pair row.',
+    MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the custom pair row.',
+    MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',
+    MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was last updated.';
+
+ALTER TABLE config_dunnage_types_visibility
+    COMMENT = 'Global dunnage type visibility preferences for MTM Waitlist.';
+
+ALTER TABLE config_dunnage_types_visibility
+    MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+    MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for visibility row.',
+    MODIFY COLUMN dunnage_type_id BIGINT NOT NULL COMMENT 'Source dunnage type identifier from mtm_receiving_application.dunnage_types.id.',
+    MODIFY COLUMN dunnage_type_name VARCHAR(128) NOT NULL COMMENT 'Dunnage type display name snapshot.',
+    MODIFY COLUMN is_visible TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the dunnage type is visible in MTM Waitlist.',
+    MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the visibility row.',
+    MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the visibility row.',
     MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',
     MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was last updated.';

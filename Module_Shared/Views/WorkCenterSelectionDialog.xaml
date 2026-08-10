@@ -22,7 +22,7 @@
                 <TextBlock
                     FontSize="16"
                     FontWeight="SemiBold"
-                    Text="Hot Workcenters" />
+                    Text="Hot Work Centers" />
                 <GridView
                     x:Name="HotWorkCentersGridView"
                     IsItemClickEnabled="True"
@@ -62,7 +62,7 @@
                 <TextBlock
                     FontSize="16"
                     FontWeight="SemiBold"
-                    Text="Other Workcenters" />
+                    Text="Other Work Centers" />
                 <GridView
                     x:Name="OtherWorkCentersGridView"
                     MaxHeight="320"

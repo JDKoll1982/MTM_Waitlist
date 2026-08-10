@@ -2,6 +2,8 @@ using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Shared.Services;
+using System.Text.Json;
 
 namespace MTM_Waitlist.Module_Setup.Services;
 
@@ -17,10 +19,14 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
     };
 
     private readonly MySqlHelperServer _mySqlHelperServer;
+    private readonly IDunnageTypeVisibilityCatalogService? _dunnageTypeVisibilityCatalogService;
 
-    public DunnageWorkflowService(MySqlHelperServer mySqlHelperServer)
+    public DunnageWorkflowService(
+        MySqlHelperServer mySqlHelperServer,
+        IDunnageTypeVisibilityCatalogService? dunnageTypeVisibilityCatalogService = null)
     {
         _mySqlHelperServer = mySqlHelperServer;
+        _dunnageTypeVisibilityCatalogService = dunnageTypeVisibilityCatalogService;
     }
 
     public async Task<IReadOnlyList<SetupDunnageType>> GetDunnageTypesAsync(string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
@@ -158,6 +164,8 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
         StartupDebugLog.Info("SetupDunnage", "Loading receiving SQL script GetDunnageTypes.");
         _ = await SetupReceivingMySqlScriptStore.LoadAsync("GetDunnageTypes", cancellationToken).ConfigureAwait(false);
 
+        var typeImageOverrides = await GetDunnageTypeImageOverridesAsync(cancellationToken).ConfigureAwait(false);
+
         var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
             "sp_Dunnage_Types_GetAll",
             new Dictionary<string, object?>(),
@@ -178,14 +186,31 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
                 Id = GetValueAsString(row, "id"),
                 Name = GetValueAsString(row, "type_name"),
                 IconGlyph = ResolveGlyph(GetValueAsString(row, "icon")),
-                ImagePath = GetValueAsString(row, "image_path"),
+                ImagePath = ResolveTypeImagePath(row, typeImageOverrides),
             })
             .Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.Name))
             .ToArray();
 
-        StartupDebugLog.Info("SetupDunnage", $"Dunnage type projection completed. Result count={results.Length}.");
+        if (_dunnageTypeVisibilityCatalogService is null)
+        {
+            StartupDebugLog.Info("SetupDunnage", $"Dunnage type projection completed. Result count={results.Length}. Visibility filter not configured.");
+            return results;
+        }
 
-        return results;
+        var visibilityMap = await _dunnageTypeVisibilityCatalogService.GetVisibilityMapAsync(cancellationToken).ConfigureAwait(false);
+        if (visibilityMap.Count == 0)
+        {
+            StartupDebugLog.Info("SetupDunnage", $"Dunnage type projection completed. Result count={results.Length}. No visibility overrides found.");
+            return results;
+        }
+
+        var filteredResults = results
+            .Where(item => !visibilityMap.TryGetValue(item.Id, out var isVisible) || isVisible)
+            .ToArray();
+
+        StartupDebugLog.Info("SetupDunnage", $"Dunnage type projection completed. Result count={results.Length}, FilteredCount={filteredResults.Length}.");
+
+        return filteredResults;
     }
 
     private async Task<IReadOnlyList<SetupDunnagePart>> GetDunnagePartsFromBackendAsync(string dunnageTypeId, string partNumber, string sequenceNumber, CancellationToken cancellationToken)
@@ -228,7 +253,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
                     TypeId = GetValueAsString(row, "type_id"),
                     PartNumber = GetValueAsString(row, "part_id"),
                     DisplayName = GetValueAsString(row, "part_id"),
-                    ImagePath = GetValueAsString(row, "image_path"),
+                    ImagePath = ResolvePartImagePath(row),
                     Metadata = BuildMetadata(quantityType, homeLocation),
                 };
             })
@@ -238,6 +263,96 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             StartupDebugLog.Info("SetupDunnage", $"Dunnage part projection completed. Result count={results.Length}.");
 
             return results;
+    }
+
+    private async Task<IReadOnlyDictionary<string, string>> GetDunnageTypeImageOverridesAsync(CancellationToken cancellationToken)
+    {
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            "sp_Dunnage_Parts_GetAll",
+            new Dictionary<string, object?>(),
+            MySqlDatabaseTarget.MtmReceivingApplication,
+            cancellationToken).ConfigureAwait(false);
+
+        var overrides = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var row in rows)
+        {
+            var typeId = GetValueAsString(row, "type_id");
+            if (string.IsNullOrWhiteSpace(typeId) || overrides.ContainsKey(typeId))
+            {
+                continue;
+            }
+
+            var imagePath = ResolvePartImagePath(row);
+            if (!string.IsNullOrWhiteSpace(imagePath))
+            {
+                overrides[typeId] = imagePath;
+            }
+        }
+
+        StartupDebugLog.Info("SetupDunnage", $"Built dunnage type image overrides from part spec JSON. Count={overrides.Count}.");
+        return overrides;
+    }
+
+    private static string ResolveTypeImagePath(IReadOnlyDictionary<string, object?> row, IReadOnlyDictionary<string, string> typeImageOverrides)
+    {
+        var typeId = GetValueAsString(row, "id");
+        if (!string.IsNullOrWhiteSpace(typeId) && typeImageOverrides.TryGetValue(typeId, out var overridePath) && !string.IsNullOrWhiteSpace(overridePath))
+        {
+            return overridePath;
+        }
+
+        return GetValueAsString(row, "image_path");
+    }
+
+    private static string ResolvePartImagePath(IReadOnlyDictionary<string, object?> row)
+    {
+        var fromSpecJson = TryGetImagePathFromJson(GetValueAsString(row, "spec_values"));
+        if (!string.IsNullOrWhiteSpace(fromSpecJson))
+        {
+            return fromSpecJson;
+        }
+
+        var direct = GetValueAsString(row, "image_path");
+        if (!string.IsNullOrWhiteSpace(direct))
+        {
+            return direct;
+        }
+
+        return GetValueAsString(row, "type_image_path");
+    }
+
+    private static string TryGetImagePathFromJson(string rawJson)
+    {
+        if (string.IsNullOrWhiteSpace(rawJson))
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(rawJson);
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                return string.Empty;
+            }
+
+            foreach (var property in document.RootElement.EnumerateObject())
+            {
+                if (!string.Equals(property.Name, "image_path", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var value = property.Value.GetString();
+                return value?.Trim() ?? string.Empty;
+            }
+        }
+        catch
+        {
+            return string.Empty;
+        }
+
+        return string.Empty;
     }
 
     private static string GetValueAsString(IReadOnlyDictionary<string, object?> row, string key)

@@ -21,15 +21,8 @@ public sealed class SetupWorkstationService : ISetupWorkstationService
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        var activeJobs = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT aj.work_center, aj.work_order, aj.part_number, aj.sequence_number
-FROM setup_active_jobs aj
-INNER JOIN (
-    SELECT work_center, MAX(id) AS max_id
-    FROM setup_active_jobs
-    WHERE is_active = 1
-    GROUP BY work_center
-) latest ON latest.max_id = aj.id;",
+        var activeJobs = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            "sp_setup_active_jobs_latest_by_work_center_get",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);

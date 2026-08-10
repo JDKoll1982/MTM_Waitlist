@@ -142,6 +142,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         State.SelectedDunnagePartId = string.Empty;
         State.SelectedScrapType = string.Empty;
         State.SelectedDunnageTypeId = string.Empty;
+        StartupDebugLog.Info("SetupWorkflow", "Part selection reset scrap state. SelectedScrapType cleared and dunnage selections reset.");
 
         var sequences = await _lookupService.GetSequencesAsync(State.NormalizedWorkOrder, partNumber, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
@@ -196,9 +197,18 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         }
 
         StartupDebugLog.Info("SetupWorkflow", $"Subordinate parts loaded. Count={State.SubordinateParts.Count}.");
+        var user8Samples = State.SubordinateParts
+            .Select(part => part.User8?.Trim())
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(5)
+            .ToArray();
+        StartupDebugLog.Info("SetupWorkflow", $"Subordinate USER_8 snapshot. NonEmptyCount={user8Samples.Length}, Samples='{string.Join(" | ", user8Samples)}'.");
 
         EnsureDefaultScrapTypes();
+        StartupDebugLog.Info("SetupWorkflow", $"Preparing scrap rehydrate. WO='{State.NormalizedWorkOrder}', Part='{State.SelectedPartNumber}', Sequence='{sequenceNumber}', CurrentSelectedScrap='{State.SelectedScrapType}', ScrapTypeCount={State.ScrapTypes.Count}.");
         await RehydrateOrSuggestScrapTypeAsync(sequenceNumber, cancellationToken).ConfigureAwait(true);
+        StartupDebugLog.Info("SetupWorkflow", $"Scrap selection after rehydrate. SelectedScrapType='{State.SelectedScrapType}', ScrapTypeCount={State.ScrapTypes.Count}, ScrapTypes='{string.Join(" | ", State.ScrapTypes)}'.");
 
         var dunnageTypes = await _dunnageWorkflowService.GetDunnageTypesAsync(
             State.SelectedPartNumber,
@@ -355,6 +365,7 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
     public async Task<SetupSaveResult> SaveAsync(bool forceReplace = false, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupWorkflow", $"SaveAsync started. ForceReplace={forceReplace}. WO='{State.NormalizedWorkOrder}', Part='{State.SelectedPartNumber}', Sequence='{State.SelectedSequence}', WorkCenter='{State.SelectedWorkCenter}'.");
+        StartupDebugLog.Info("SetupWorkflow", $"Scrap state before save. SelectedScrapType='{State.SelectedScrapType}', ScrapTypeCount={State.ScrapTypes.Count}, SubordinatePartCount={State.SubordinateParts.Count}.");
         var selectedPart = State.PartResults.FirstOrDefault(part => string.Equals(part.PartNumber, State.SelectedPartNumber, StringComparison.OrdinalIgnoreCase));
         var request = new SetupSaveRequest
         {
@@ -384,14 +395,22 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         };
 
         State.SelectedWorkCenter = request.WorkCenter;
+        var requestScrapValues = request.SubordinateParts
+            .Select(part => part.SelectedScrapType?.Trim())
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        StartupDebugLog.Info("SetupWorkflow", $"Save request scrap payload. RequestSelectedScrapType='{request.SelectedScrapType}', DistinctSubordinateScrapCount={requestScrapValues.Length}, DistinctSubordinateScrapValues='{string.Join(" | ", requestScrapValues)}'.");
         StartupDebugLog.Info("SetupWorkflow", "Save request assembled and dispatched to persistence service.");
         var result = await _persistenceService.SaveAsync(request, forceReplace, cancellationToken).ConfigureAwait(true);
+        StartupDebugLog.Info("SetupWorkflow", $"SaveAsync result received. Success={result.Success}, RequiresReplacementConfirmation={result.RequiresReplacementConfirmation}, Message='{result.Message}'.");
         State.HasUnsavedChanges = !(result.Success && !result.RequiresReplacementConfirmation);
         return result;
     }
 
     private void EnsureDefaultScrapTypes()
     {
+        var initialCount = State.ScrapTypes.Count;
         var defaults = s_defaultScrapTypes;
         if (State.ScrapTypes.Count == 0)
         {
@@ -399,6 +418,8 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
             {
                 State.ScrapTypes.Add(value);
             }
+
+            StartupDebugLog.Info("SetupWorkflow", $"Default scrap types initialized. Added={defaults.Length}, FinalCount={State.ScrapTypes.Count}, Values='{string.Join(" | ", State.ScrapTypes)}'.");
 
             return;
         }
@@ -410,6 +431,9 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
                 State.ScrapTypes.Add(value);
             }
         }
+
+        var addedCount = State.ScrapTypes.Count - initialCount;
+        StartupDebugLog.Info("SetupWorkflow", $"Default scrap type merge completed. Added={addedCount}, FinalCount={State.ScrapTypes.Count}, Values='{string.Join(" | ", State.ScrapTypes)}'.");
     }
 
     private void SetSuggestedScrapTypeFromUser8()
@@ -424,6 +448,8 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
             .Select(part => part.User8)
             .Where(value => !string.IsNullOrWhiteSpace(value))
             .ToArray();
+
+        StartupDebugLog.Info("SetupWorkflow", $"USER_8 scrap suggestion started. CandidateCount={candidates.Length}, User8SourceCount={user8Sources.Length}. Candidates='{string.Join(" | ", candidates)}'.");
 
         string? bestMatch = null;
         var bestDistance = int.MaxValue;
@@ -444,10 +470,12 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         }
 
         State.SelectedScrapType = bestMatch ?? s_defaultScrapTypes[0];
+        StartupDebugLog.Info("SetupWorkflow", $"USER_8 scrap suggestion completed. BestMatch='{bestMatch}', SelectedScrapType='{State.SelectedScrapType}', Distance={bestDistance}. Sources='{string.Join(" | ", user8Sources)}'.");
     }
 
     private async Task RehydrateOrSuggestScrapTypeAsync(string sequenceNumber, CancellationToken cancellationToken)
     {
+        StartupDebugLog.Info("SetupWorkflow", $"Scrap rehydrate started. WO='{State.NormalizedWorkOrder}', Part='{State.SelectedPartNumber}', Sequence='{sequenceNumber}'.");
         var savedScrapType = await _persistenceService
             .LoadSavedScrapTypeAsync(State.NormalizedWorkOrder, State.SelectedPartNumber, sequenceNumber, cancellationToken)
             .ConfigureAwait(true);
@@ -459,16 +487,20 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
             {
                 State.ScrapTypes.Add(savedScrapType);
                 State.SelectedScrapType = savedScrapType;
+                StartupDebugLog.Info("SetupWorkflow", $"Saved scrap type not found in list; appended new value. SavedValue='{savedScrapType}'.");
             }
             else
             {
                 State.SelectedScrapType = existing;
             }
 
+            StartupDebugLog.Info("SetupWorkflow", $"Scrap type rehydrated from saved metadata. Sequence='{sequenceNumber}', Value='{State.SelectedScrapType}'.");
+
             return;
         }
 
-        SetSuggestedScrapTypeFromUser8();
+        State.SelectedScrapType = s_defaultScrapTypes[0];
+        StartupDebugLog.Info("SetupWorkflow", $"No saved scrap type found. Defaulting to required placeholder. Sequence='{sequenceNumber}', Value='{State.SelectedScrapType}'.");
     }
 
     private static (string? Match, int Distance) FindBestScrapTypeMatch(string source, IReadOnlyList<string> candidates)

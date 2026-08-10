@@ -4,8 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:MTM_Waitlist.Module_Setup.Converters"
     xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <converters:SetupImagePathToImageSourceConverter x:Key="SetupImagePathToImageSourceConverter" />
+    </Page.Resources>
 
     <Grid Padding="24" RowSpacing="16">
         <Grid.RowDefinitions>
@@ -55,7 +60,19 @@
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1"
                                     CornerRadius="8">
-                                    <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30" Glyph="{x:Bind IconGlyph}" />
+                                    <Rectangle
+                                        Width="64"
+                                        Height="64"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        RadiusX="8"
+                                        RadiusY="8">
+                                        <Rectangle.Fill>
+                                            <ImageBrush
+                                                Stretch="UniformToFill"
+                                                ImageSource="{x:Bind ImagePath, Converter={StaticResource SetupImagePathToImageSourceConverter}}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
                                 </Border>
                                 <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Name}" TextWrapping="WrapWholeWords" TextAlignment="Center" />
                             </StackPanel>

@@ -10,6 +10,7 @@ public static class ModuleDependencyInjectionExtensions
     {
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IAppModuleClock, MTM_Waitlist.Module_Core.Services.AppModuleClock>();
         services.AddSingleton<WaitlistModuleService>();
+        services.AddSingleton<IWaitlistNewRequestDialogService, WaitlistNewRequestDialogService>();
         return services;
     }
 }

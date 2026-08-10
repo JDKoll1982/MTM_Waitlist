@@ -158,7 +158,7 @@ CREATE PROCEDURE sp_setup_save_setup(
 	IN p_selected_dunnage_part_id VARCHAR(64),
 	IN p_subordinate_parts_json JSON,
 	IN p_selected_dunnage_parts_json JSON,
-	IN p_saved_by_user_id BIGINT
+    IN p_saved_by_user_id BIGINT
 )
 INSERT INTO setup_active_jobs (
 	public_id,
@@ -191,7 +191,182 @@ SELECT
 	p_saved_by_user_id,
 	UTC_TIMESTAMP(),
 	UTC_TIMESTAMP()
-FROM dual;
+FROM dual
+ON DUPLICATE KEY UPDATE
+	work_order = VALUES(work_order),
+	part_number = VALUES(part_number),
+	sequence_number = VALUES(sequence_number),
+	selected_dunnage_type_id = VALUES(selected_dunnage_type_id),
+	selected_dunnage_part_id = VALUES(selected_dunnage_part_id),
+	subordinate_parts_json = VALUES(subordinate_parts_json),
+	selected_dunnage_parts_json = VALUES(selected_dunnage_parts_json),
+	is_active = 1,
+	updated_by_user_id = VALUES(updated_by_user_id),
+	updated_utc = UTC_TIMESTAMP();
+
+-- Stored Procedure: sp_setup_active_job_dunnage_assignments_get
+-- Engine: MySQL 5.7
+-- Purpose: Get saved dunnage assignments JSON for an exact part/sequence pair from custom setup data.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_setup_active_job_dunnage_assignments_get;
+
+CREATE PROCEDURE sp_setup_active_job_dunnage_assignments_get(
+        IN p_work_order VARCHAR(32),
+        IN p_part_number VARCHAR(64),
+        IN p_sequence_number VARCHAR(32)
+)
+SELECT selected_dunnage_parts_json
+FROM setup_part_sequence_custom_data
+WHERE part_number = TRIM(p_part_number)
+    AND sequence_number = TRIM(p_sequence_number)
+ORDER BY updated_utc DESC
+LIMIT 1;
+
+-- Stored Procedure: sp_setup_job_history_scrap_type_get
+-- Engine: MySQL 5.7
+-- Purpose: Get saved scrap type for an exact part/sequence pair from custom setup data.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_setup_job_history_scrap_type_get;
+
+CREATE PROCEDURE sp_setup_job_history_scrap_type_get(
+        IN p_work_order VARCHAR(32),
+        IN p_part_number VARCHAR(64),
+        IN p_sequence_number VARCHAR(32)
+)
+SELECT selected_scrap_type
+FROM setup_part_sequence_custom_data
+WHERE part_number = TRIM(p_part_number)
+    AND sequence_number = TRIM(p_sequence_number)
+ORDER BY updated_utc DESC
+LIMIT 1;
+
+-- Stored Procedure: sp_setup_part_sequence_custom_data_upsert
+-- Engine: MySQL 5.7
+-- Purpose: Upsert custom setup data for an exact part/sequence pair.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_setup_part_sequence_custom_data_upsert;
+
+CREATE PROCEDURE sp_setup_part_sequence_custom_data_upsert(
+    IN p_part_number VARCHAR(64),
+    IN p_sequence_number VARCHAR(32),
+    IN p_selected_scrap_type VARCHAR(128),
+    IN p_selected_dunnage_type_id VARCHAR(64),
+    IN p_selected_dunnage_part_id VARCHAR(64),
+    IN p_subordinate_parts_json JSON,
+    IN p_selected_dunnage_parts_json JSON,
+    IN p_updated_by_user_id BIGINT
+)
+INSERT INTO setup_part_sequence_custom_data (
+    public_id,
+    part_number,
+    sequence_number,
+    selected_scrap_type,
+    selected_dunnage_type_id,
+    selected_dunnage_part_id,
+    subordinate_parts_json,
+    selected_dunnage_parts_json,
+    created_by_user_id,
+    updated_by_user_id,
+    created_utc,
+    updated_utc
+)
+SELECT
+    UUID(),
+    TRIM(p_part_number),
+    TRIM(p_sequence_number),
+    NULLIF(TRIM(p_selected_scrap_type), ''),
+    NULLIF(TRIM(p_selected_dunnage_type_id), ''),
+    NULLIF(TRIM(p_selected_dunnage_part_id), ''),
+    p_subordinate_parts_json,
+    p_selected_dunnage_parts_json,
+    p_updated_by_user_id,
+    p_updated_by_user_id,
+    UTC_TIMESTAMP(),
+    UTC_TIMESTAMP()
+FROM dual
+ON DUPLICATE KEY UPDATE
+    selected_scrap_type = VALUES(selected_scrap_type),
+    selected_dunnage_type_id = VALUES(selected_dunnage_type_id),
+    selected_dunnage_part_id = VALUES(selected_dunnage_part_id),
+    subordinate_parts_json = VALUES(subordinate_parts_json),
+    selected_dunnage_parts_json = VALUES(selected_dunnage_parts_json),
+    updated_by_user_id = VALUES(updated_by_user_id),
+    updated_utc = UTC_TIMESTAMP();
+
+-- Stored Procedure: sp_setup_job_history_insert_for_pair
+-- Engine: MySQL 5.7
+-- Purpose: Insert a history snapshot for an exact work order/part/sequence pair from setup_active_jobs.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_setup_job_history_insert_for_pair;
+
+CREATE PROCEDURE sp_setup_job_history_insert_for_pair(
+        IN p_event_action VARCHAR(32),
+        IN p_changed_by_user_id BIGINT,
+        IN p_work_order VARCHAR(32),
+        IN p_part_number VARCHAR(64),
+        IN p_sequence_number VARCHAR(32)
+)
+INSERT INTO setup_job_history (
+        public_id,
+        active_job_id,
+        event_action,
+        work_order,
+        part_number,
+        sequence_number,
+        work_center,
+        selected_dunnage_type_id,
+        selected_dunnage_part_id,
+        subordinate_parts_json,
+        selected_dunnage_parts_json,
+        changed_by_user_id,
+        changed_utc
+)
+SELECT
+        UUID(),
+        aj.id,
+        TRIM(p_event_action),
+        aj.work_order,
+        aj.part_number,
+        aj.sequence_number,
+        aj.work_center,
+        aj.selected_dunnage_type_id,
+        aj.selected_dunnage_part_id,
+        aj.subordinate_parts_json,
+        aj.selected_dunnage_parts_json,
+        p_changed_by_user_id,
+        UTC_TIMESTAMP()
+FROM setup_active_jobs aj
+WHERE aj.work_order = TRIM(p_work_order)
+    AND aj.part_number = TRIM(p_part_number)
+    AND aj.sequence_number = TRIM(p_sequence_number)
+ORDER BY aj.updated_utc DESC
+LIMIT 1;
+
+-- Stored Procedure: sp_setup_active_jobs_latest_by_work_center_get
+-- Engine: MySQL 5.7
+-- Purpose: Retrieve latest active setup row per work center.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_setup_active_jobs_latest_by_work_center_get;
+
+CREATE PROCEDURE sp_setup_active_jobs_latest_by_work_center_get()
+SELECT aj.work_center, aj.work_order, aj.part_number, aj.sequence_number
+FROM setup_active_jobs aj
+INNER JOIN (
+        SELECT work_center, MAX(id) AS max_id
+        FROM setup_active_jobs
+        WHERE is_active = 1
+        GROUP BY work_center
+) latest ON latest.max_id = aj.id;
 
 -- Stored Procedure: sp_setup_workstations_delete
 -- Engine: MySQL 5.7

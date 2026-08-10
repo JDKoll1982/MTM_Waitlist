@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,6 +19,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     public ObservableCollection<SampleOrder> Source { get; } = new ObservableCollection<SampleOrder>();
     public ObservableCollection<SampleOrder> SearchSuggestions { get; } = new();
+    public bool IsWaitlistEmpty => Source.Count == 0;
 
     public WaitlistViewViewModel(
         INavigationService navigationService,
@@ -31,6 +33,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _navigationService = navigationService;
         _sampleDataService = sampleDataService;
         _buildingSelectionService = buildingSelectionService;
+
+        Source.CollectionChanged += OnSourceCollectionChanged;
     }
 
     public async void OnNavigatedTo(object parameter)
@@ -136,4 +140,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     private static bool Contains(string value, string query) =>
         value.Contains(query, StringComparison.OrdinalIgnoreCase);
+
+    private void OnSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(IsWaitlistEmpty));
+    }
 }

@@ -82,6 +82,62 @@
 
         </ListView>
 
+        <Grid
+            x:Name="EmptyWaitlistState"
+            x:Load="{x:Bind ViewModel.IsWaitlistEmpty, Mode=OneWay}"
+            IsHitTestVisible="False"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Margin="24">
+            <Border
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Padding="24"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="16">
+                <Grid>
+                    <Grid
+                        MaxWidth="520"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Image
+                            x:Name="EmptyStateImage"
+                            Grid.Row="0"
+                            Width="240"
+                            Height="240"
+                            HorizontalAlignment="Center"
+                            Stretch="Uniform"
+                            Source="ms-appx:///Assets/Images/waitlist-empty-state.png"
+                            AutomationProperties.Name="No requests available illustration" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            HorizontalAlignment="Center"
+                            Style="{ThemeResource TitleTextBlockStyle}"
+                            Text="No Requests Right Now"
+                            TextAlignment="Center" />
+
+                        <TextBlock
+                            Grid.Row="2"
+                            HorizontalAlignment="Center"
+                            Style="{ThemeResource BodyTextBlockStyle}"
+                            Text="Tap the + button to add the first request for this Work Center."
+                            TextAlignment="Center"
+                            TextWrapping="WrapWholeWords" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
         <!--  Floating Green Circular Action Button  -->
         <Button
             Click="OnAddRequestClick"

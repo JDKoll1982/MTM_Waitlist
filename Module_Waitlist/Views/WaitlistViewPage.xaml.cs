@@ -1,6 +1,10 @@
 ﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
+
+using System.IO;
 
 using MTM_Waitlist.Module_Shared.Services;
+using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Module_Waitlist.Views;
@@ -16,6 +20,30 @@ public sealed partial class WaitlistViewPage : Page
     {
         ViewModel = App.GetService<WaitlistViewViewModel>();
         InitializeComponent();
+        Loaded += WaitlistViewPage_Loaded;
+    }
+
+    private void WaitlistViewPage_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        SetEmptyStateImageSource();
+    }
+
+    private void SetEmptyStateImageSource()
+    {
+        if (EmptyStateImage is null)
+        {
+            return;
+        }
+
+        var localPath = Path.Combine(AppContext.BaseDirectory, "Assets", "Images", "waitlist-empty-state.png");
+
+        if (File.Exists(localPath))
+        {
+            EmptyStateImage.Source = new BitmapImage(new Uri(localPath, UriKind.Absolute));
+            return;
+        }
+
+        EmptyStateImage.Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/waitlist-empty-state.png"));
     }
 
     private void ListView_ItemClick(object sender, ItemClickEventArgs e)
@@ -28,12 +56,19 @@ public sealed partial class WaitlistViewPage : Page
 
     private async void OnAddRequestClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        var dialogService = App.GetService<IWorkCenterSelectionDialogService>();
+        var workCenterDialogService = App.GetService<IWorkCenterSelectionDialogService>();
+        var newRequestDialogService = App.GetService<IWaitlistNewRequestDialogService>();
         if (XamlRoot is null)
         {
             return;
         }
 
-        _ = await dialogService.ShowForCurrentWorkstationAsync(XamlRoot).ConfigureAwait(true);
+        var selectedWorkCenter = await workCenterDialogService.ShowForCurrentWorkstationAsync(XamlRoot).ConfigureAwait(true);
+        if (string.IsNullOrWhiteSpace(selectedWorkCenter))
+        {
+            return;
+        }
+
+        _ = await newRequestDialogService.ShowJobTypeSelectionAsync(XamlRoot, selectedWorkCenter).ConfigureAwait(true);
     }
 }

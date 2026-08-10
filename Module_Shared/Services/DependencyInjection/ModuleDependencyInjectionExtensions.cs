@@ -14,6 +14,7 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<SharedModuleService>();
         services.AddSingleton<ISharedConfigurationService, SharedConfigurationService>();
         services.AddSingleton<IWorkCenterCatalogService, WorkCenterCatalogService>();
+        services.AddSingleton<IDunnageTypeVisibilityCatalogService, DunnageTypeVisibilityCatalogService>();
         services.AddSingleton<IWorkCenterSelectionDialogService, WorkCenterSelectionDialogService>();
         return services;
     }
