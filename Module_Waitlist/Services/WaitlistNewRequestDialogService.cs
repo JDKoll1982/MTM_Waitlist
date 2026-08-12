@@ -1,5 +1,6 @@
 using System.Text.Json;
 
+using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -45,23 +46,212 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         dialog.SetContent(selectedWorkCenter.Trim(), dialogItems);
         _ = await dialog.ShowAsync();
 
-        if (!string.IsNullOrWhiteSpace(dialog.SelectedRequestType))
+        if (string.IsNullOrWhiteSpace(dialog.SelectedRequestType))
         {
-            StartupDebugLog.Info("WaitlistNewRequest", $"Selected Work Center '{selectedWorkCenter}', selected Job Type '{dialog.SelectedRequestType}'.");
-
-            var progressDialog = new ContentDialog
-            {
-                XamlRoot = xamlRoot,
-                Title = "New Request",
-                Content = "Job Type selection is now connected. Subtype, input, confirmation, and submit steps are the next increment.",
-                CloseButtonText = "OK",
-                DefaultButton = ContentDialogButton.Close,
-            };
-
-            _ = await progressDialog.ShowAsync();
+            return null;
         }
 
-        return dialog.SelectedRequestType;
+        var selectedRequestType = requestTypes.FirstOrDefault(item => string.Equals(item.RequestType.Trim(), dialog.SelectedRequestType.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (selectedRequestType is null)
+        {
+            await ShowMessageAsync(xamlRoot, "Unable to continue", "The selected request type could not be resolved. Please try again.").ConfigureAwait(true);
+            return null;
+        }
+
+        StartupDebugLog.Info("WaitlistNewRequest", $"Selected Work Center '{selectedWorkCenter}', selected Job Type '{dialog.SelectedRequestType}'.");
+
+        var selectedSubtype = await SelectSubtypeAsync(xamlRoot, selectedRequestType).ConfigureAwait(true);
+        if (selectedSubtype is null && selectedRequestType.Subtypes.Count > 0)
+        {
+            return null;
+        }
+
+        string? inputValue = null;
+        if (selectedSubtype?.RequiresTextInput == true)
+        {
+            inputValue = await PromptForTextInputAsync(xamlRoot, selectedRequestType, selectedSubtype).ConfigureAwait(true);
+            if (inputValue is null)
+            {
+                return null;
+            }
+        }
+
+        var confirmed = await ShowConfirmationAsync(xamlRoot, selectedWorkCenter, selectedRequestType, selectedSubtype, inputValue).ConfigureAwait(true);
+        if (!confirmed)
+        {
+            return null;
+        }
+
+        return selectedRequestType.RequestType.Trim();
+    }
+
+    private static async Task<NewRequestSubtypeDefinition?> SelectSubtypeAsync(XamlRoot xamlRoot, NewRequestTypeDefinition requestType)
+    {
+        if (requestType.Subtypes.Count == 0)
+        {
+            return null;
+        }
+
+        var subtypeNames = requestType.Subtypes
+            .Select(item => item.Name)
+            .ToList();
+
+        var comboBox = new ComboBox
+        {
+            Header = "Select a subtype",
+            Width = 360,
+            Margin = new Thickness(0, 0, 0, 8),
+            ItemsSource = subtypeNames,
+            SelectedIndex = 0,
+        };
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = xamlRoot,
+            Title = $"{requestType.RequestType} - Choose subtype",
+            PrimaryButtonText = "Continue",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            Content = comboBox,
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result != ContentDialogResult.Primary || comboBox.SelectedIndex < 0)
+        {
+            return null;
+        }
+
+        return requestType.Subtypes[comboBox.SelectedIndex];
+    }
+
+    private static async Task<string?> PromptForTextInputAsync(XamlRoot xamlRoot, NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition subtype)
+    {
+        var textBox = new TextBox
+        {
+            Header = string.IsNullOrWhiteSpace(subtype.PromptText)
+                ? $"Enter details for {subtype.Name}"
+                : subtype.PromptText,
+            MinWidth = 360,
+            MaxWidth = 420,
+            AcceptsReturn = false,
+            TextWrapping = TextWrapping.Wrap,
+            PlaceholderText = "Enter a short description",
+        };
+
+        var validationText = new TextBlock
+        {
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 6, 0, 0),
+        };
+
+        var panel = new StackPanel
+        {
+            Spacing = 8,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = $"{requestType.RequestType} / {subtype.Name}",
+                    FontWeight = FontWeights.SemiBold,
+                    TextWrapping = TextWrapping.Wrap,
+                },
+                textBox,
+                validationText,
+            },
+        };
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = xamlRoot,
+            Title = "Additional details",
+            PrimaryButtonText = "Continue",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            Content = panel,
+        };
+
+        dialog.PrimaryButtonClick += (sender, args) =>
+        {
+            var value = textBox.Text?.Trim() ?? string.Empty;
+            if (value.Length < subtype.MinLength || value.Length > subtype.MaxLength)
+            {
+                validationText.Text = $"Please enter between {subtype.MinLength} and {subtype.MaxLength} characters.";
+                args.Cancel = true;
+            }
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result != ContentDialogResult.Primary)
+        {
+            return null;
+        }
+
+        return textBox.Text?.Trim();
+    }
+
+    private static async Task<bool> ShowConfirmationAsync(XamlRoot xamlRoot, string selectedWorkCenter, NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition? subtype, string? inputValue)
+    {
+        var details = new StackPanel
+        {
+            Spacing = 8,
+        };
+
+        details.Children.Add(new TextBlock
+        {
+            Text = "Request summary",
+            FontWeight = FontWeights.SemiBold,
+            TextWrapping = TextWrapping.Wrap,
+        });
+        details.Children.Add(new TextBlock { Text = $"Work Center: {selectedWorkCenter}", TextWrapping = TextWrapping.Wrap });
+        details.Children.Add(new TextBlock { Text = $"Request Type: {requestType.RequestType}", TextWrapping = TextWrapping.Wrap });
+        if (subtype is not null)
+        {
+            details.Children.Add(new TextBlock { Text = $"Subtype: {subtype.Name}", TextWrapping = TextWrapping.Wrap });
+        }
+
+        if (!string.IsNullOrWhiteSpace(inputValue))
+        {
+            details.Children.Add(new TextBlock { Text = $"Details: {inputValue}", TextWrapping = TextWrapping.Wrap });
+        }
+
+        details.Children.Add(new TextBlock
+        {
+            Text = "Duplicate requests are allowed with a warning. Continue if this request is intentional.",
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Orange),
+            TextWrapping = TextWrapping.Wrap,
+        });
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = xamlRoot,
+            Title = "Confirm request",
+            PrimaryButtonText = "Submit",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            Content = details,
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
+    }
+
+    private static async Task ShowMessageAsync(XamlRoot xamlRoot, string title, string message)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = xamlRoot,
+            Title = title,
+            Content = new TextBlock
+            {
+                Text = message,
+                TextWrapping = TextWrapping.Wrap,
+            },
+            CloseButtonText = "OK",
+            DefaultButton = ContentDialogButton.Close,
+        };
+
+        _ = await dialog.ShowAsync();
     }
 
     private static async Task<IReadOnlyList<NewRequestTypeDefinition>> LoadRequestTypesAsync(CancellationToken cancellationToken)

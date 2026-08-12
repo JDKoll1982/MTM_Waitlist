@@ -19,7 +19,7 @@ public sealed class SampleDataServiceTests
     }
 
     [TestMethod]
-    public void GetSampleOrders_ReturnsThreeOrdersWhenVisualMockDataIsEnabled()
+    public void GetSampleOrders_ReturnsSixOrdersWhenVisualMockDataIsEnabled()
     {
         var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
         {
@@ -30,7 +30,7 @@ public sealed class SampleDataServiceTests
 
         var rows = service.GetSampleOrders();
 
-        Assert.AreEqual(3, rows.Count);
+        Assert.AreEqual(6, rows.Count);
         var firstOrder = rows[0] as MTM_Waitlist.Module_Waitlist.Models.SampleOrder;
         Assert.IsNotNull(firstOrder);
         Assert.AreEqual("Coil Request", firstOrder!.Title);
@@ -59,8 +59,8 @@ public sealed class SampleDataServiceTests
         Assert.IsNotNull(vitsOrder);
         Assert.AreNotEqual(expoOrder!.Title, vitsOrder!.Title);
         Assert.AreNotEqual(expoOrder.RequestedByName, vitsOrder!.RequestedByName);
-        Assert.AreEqual(3, expoRows.Count);
-        Assert.AreEqual(3, vitsRows.Count);
+        Assert.AreEqual(6, expoRows.Count);
+        Assert.AreEqual(6, vitsRows.Count);
 
         var imagePaths = expoRows.Concat(vitsRows)
             .OfType<MTM_Waitlist.Module_Waitlist.Models.SampleOrder>()

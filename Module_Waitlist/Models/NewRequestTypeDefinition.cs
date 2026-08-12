@@ -6,5 +6,9 @@ public sealed class NewRequestTypeDefinition
 
     public string Control { get; set; } = string.Empty;
 
+    public string Flow { get; set; } = "direct-to-confirmation";
+
+    public List<string> CenterDataGridFields { get; set; } = new();
+
     public List<NewRequestSubtypeDefinition> Subtypes { get; set; } = new();
 }

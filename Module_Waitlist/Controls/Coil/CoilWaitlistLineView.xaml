@@ -30,6 +30,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <TextBlock FontWeight="SemiBold" Text="Requested coil" />
                 <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" />
@@ -41,6 +42,11 @@
                 <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" />
                 <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Requesting work center" />
                 <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{Binding Title}" TextWrapping="WrapWholeWords" />
+                <TextBlock Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Style="{ThemeResource BodyStrongTextBlockStyle}" TextWrapping="WrapWholeWords">
+                    <Run Text="Work Center: " />
+                    <Run Text="{Binding RequestedPressName}" />
+                </TextBlock>
             </Grid>
         </local:WaitlistLineCardView.DetailsContent>
     </local:WaitlistLineCardView>

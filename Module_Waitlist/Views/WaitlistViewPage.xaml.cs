@@ -63,12 +63,39 @@ public sealed partial class WaitlistViewPage : Page
             return;
         }
 
-        var selectedWorkCenter = await workCenterDialogService.ShowForCurrentWorkstationAsync(XamlRoot).ConfigureAwait(true);
-        if (string.IsNullOrWhiteSpace(selectedWorkCenter))
+        while (true)
         {
-            return;
-        }
+            var selectedWorkCenter = await workCenterDialogService.ShowForCurrentWorkstationAsync(XamlRoot).ConfigureAwait(true);
+            if (string.IsNullOrWhiteSpace(selectedWorkCenter))
+            {
+                return;
+            }
 
-        _ = await newRequestDialogService.ShowJobTypeSelectionAsync(XamlRoot, selectedWorkCenter).ConfigureAwait(true);
+            var requestType = await newRequestDialogService.ShowJobTypeSelectionAsync(XamlRoot, selectedWorkCenter).ConfigureAwait(true);
+            if (!string.IsNullOrWhiteSpace(requestType))
+            {
+                return;
+            }
+
+            var retryDialog = new ContentDialog
+            {
+                XamlRoot = XamlRoot,
+                Title = "Restart workflow",
+                Content = new TextBlock
+                {
+                    Text = "Choose a different work center or cancel to return to the waitlist.",
+                    TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap,
+                },
+                PrimaryButtonText = "Try again",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+            };
+
+            var result = await retryDialog.ShowAsync();
+            if (result != ContentDialogResult.Primary)
+            {
+                return;
+            }
+        }
     }
 }

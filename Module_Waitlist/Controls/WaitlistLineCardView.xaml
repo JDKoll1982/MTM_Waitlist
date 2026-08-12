@@ -8,7 +8,7 @@
     mc:Ignorable="d">
 
     <Border
-        MinHeight="120"
+        MinHeight="136"
         Padding="10"
         Background="{ThemeResource LayerFillColorDefaultBrush}"
         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -16,8 +16,7 @@
         CornerRadius="10">
         <Grid RowSpacing="6" ColumnSpacing="10">
             <Grid.RowDefinitions>
-                    <RowDefinition MinHeight="96" />
-                    <RowDefinition Height="Auto" />
+                <RowDefinition MinHeight="96" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="6" />
@@ -62,29 +61,18 @@
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Spacing="3">
+            <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Top" Spacing="4">
                 <TextBlock
-                    FontSize="20"
-                    Style="{ThemeResource BodyStrongTextBlockStyle}"
-                    Text="{Binding Order.Title, ElementName=Root}"
-                    TextWrapping="WrapWholeWords" />
+                    FontSize="12"
+                    Foreground="{Binding RemainingTimeBrush, ElementName=Root}">
+                    <Run FontWeight="SemiBold" Text="Remaining time: " />
+                    <Run Text="{Binding Order.RemainingTimeText, ElementName=Root}" />
+                </TextBlock>
                 <TextBlock
                     FontSize="12"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}">
                     <Run FontWeight="SemiBold" Text="Requested by: " />
                     <Run Text="{Binding Order.RequestedByName, ElementName=Root}" />
-                </TextBlock>
-                <TextBlock
-                    FontSize="12"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                    <Run FontWeight="SemiBold" Text="Press: " />
-                    <Run Text="{Binding Order.RequestedPressName, ElementName=Root}" />
-                </TextBlock>
-                <TextBlock
-                    FontSize="12"
-                    Foreground="{Binding AccentBrush, ElementName=Root}">
-                    <Run FontWeight="SemiBold" Text="Remaining time: " />
-                    <Run Text="{Binding Order.RemainingTimeText, ElementName=Root}" />
                 </TextBlock>
             </StackPanel>
 
