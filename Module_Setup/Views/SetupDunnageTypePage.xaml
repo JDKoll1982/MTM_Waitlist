@@ -8,7 +8,7 @@
     x:Name="RootPage"
     mc:Ignorable="d">
 
-    <Grid Padding="24" RowSpacing="16">
+    <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -16,8 +16,8 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Spacing="8">
-            <TextBlock x:Uid="Setup_DunnagePair.PageLabel" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Dunnage Pair" />
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}" Spacing="8">
+            <TextBlock x:Uid="Setup_DunnagePair.PageLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Dunnage Pair" />
             <Grid ColumnSpacing="12" RowSpacing="12">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -28,30 +28,30 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <Border Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_DunnagePair.Header.WorkStation" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="WORK STATION" CharacterSpacing="120" />
+                        <TextBlock x:Uid="Setup_DunnagePair.Header.WorkStation" Style="{StaticResource SetupFieldLabelStyle}" Text="WORK STATION" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedWorkCenter, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="1" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <Border Grid.Column="1" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_DunnagePair.Header.WorkOrder" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="WORK ORDER" CharacterSpacing="120" />
+                        <TextBlock x:Uid="Setup_DunnagePair.Header.WorkOrder" Style="{StaticResource SetupFieldLabelStyle}" Text="WORK ORDER" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Row="1" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <Border Grid.Row="1" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_DunnagePair.Header.PartNumber" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="PART NUMBER" CharacterSpacing="120" />
+                        <TextBlock x:Uid="Setup_DunnagePair.Header.PartNumber" Style="{StaticResource SetupFieldLabelStyle}" Text="PART NUMBER" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedPartNumber, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Row="1" Grid.Column="1" Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_DunnagePair.Header.Sequence" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="SEQUENCE" CharacterSpacing="120" />
+                        <TextBlock x:Uid="Setup_DunnagePair.Header.Sequence" Style="{StaticResource SetupFieldLabelStyle}" Text="SEQUENCE" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedSequence, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
@@ -59,7 +59,7 @@
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
 
-        <Border Grid.Row="1" Padding="12" MaxWidth="560" HorizontalAlignment="Left" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+        <Border Grid.Row="1" MaxWidth="560" HorizontalAlignment="Left" Style="{StaticResource SetupSectionCardStyle}">
             <StackPanel Spacing="8">
                 <TextBlock Text="SCRAP TYPE" Foreground="{ThemeResource TextFillColorSecondaryBrush}" CharacterSpacing="120" />
                 <Grid ColumnSpacing="8">
@@ -76,17 +76,21 @@
 
                     <Button
                         Grid.Column="1"
-                        Width="40"
-                        Height="40"
-                        FontSize="18"
-                        Content="+"
-                        Click="OnAddScrapTypeClick" />
+                        Width="32"
+                        Height="32"
+                        FontSize="16"
+                        Padding="0"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Click="OnAddScrapTypeClick">
+                        <FontIcon Glyph="&#xE710;" FontSize="16" />
+                    </Button>
                 </Grid>
             </StackPanel>
         </Border>
 
         <Grid Grid.Row="2">
-            <Border Padding="16" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+            <Border Style="{StaticResource SetupItemCardStyle}">
                 <StackPanel Spacing="8">
                     <TextBlock x:Uid="Setup_DunnagePair.CurrentAssignments" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Current Pair Assignments" />
                     <ItemsControl ItemsSource="{x:Bind ViewModel.PairAssignments, Mode=OneWay}">

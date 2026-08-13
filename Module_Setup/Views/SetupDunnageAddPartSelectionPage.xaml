@@ -13,15 +13,15 @@
         <converters:SetupImagePathToImageSourceConverter x:Key="SetupImagePathToImageSourceConverter" />
     </Page.Resources>
 
-    <Grid Padding="24" RowSpacing="16">
+    <Grid Style="{StaticResource SetupPageGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Spacing="8">
-            <TextBlock x:Uid="Setup_AddDunnage.PartSelection.PageLabel" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Select Dunnage Part" />
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
+            <TextBlock x:Uid="Setup_AddDunnage.PartSelection.PageLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Select Dunnage Part" />
             <TextBox x:Uid="Setup_DunnagePart.Filter" PlaceholderText="Search by part number, name, or details" Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
@@ -37,11 +37,7 @@
                     <Button Command="{Binding ElementName=RootPage, Path=ViewModel.SelectPartCommand}" CommandParameter="{x:Bind}" Margin="8">
                         <Border
                             MinWidth="220"
-                            Padding="12"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
-                            CornerRadius="10">
+                            Style="{StaticResource SetupItemCardStyle}">
                             <Grid RowSpacing="8">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />

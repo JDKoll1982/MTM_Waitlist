@@ -9,6 +9,7 @@
                 <ResourceDictionary Source="/Styles/FontSizes.xaml" />
                 <ResourceDictionary Source="/Styles/Thickness.xaml" />
                 <ResourceDictionary Source="/Styles/TextBlock.xaml" />
+                <ResourceDictionary Source="/Styles/ModuleSetup.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:StringToImageSourceConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="StringToImageSourceConverter" />
         </ResourceDictionary>
