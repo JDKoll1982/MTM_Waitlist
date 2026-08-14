@@ -45,13 +45,22 @@ public partial class SettingsViewModel : ObservableRecipient
     }
 
     [ObservableProperty]
-    private bool _useRecvMockData;
+    public partial bool UseRecvMockData
+    {
+        get; set;
+    }
 
     [ObservableProperty]
-    private bool _useInforVisualMockData;
+    public partial bool UseInforVisualMockData
+    {
+        get; set;
+    }
 
     [ObservableProperty]
-    private string _searchQuery = string.Empty;
+    public partial string SearchQuery
+    {
+        get; set;
+    } = string.Empty;
 
     [ObservableProperty]
     public partial string SelectedWorkstation

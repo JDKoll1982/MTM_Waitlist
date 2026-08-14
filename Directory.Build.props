@@ -2,4 +2,9 @@
   <PropertyGroup Condition="'$(AppxPackage)'=='false'">
     <WindowsAppSDKDeploymentManagerInitialize>false</WindowsAppSDKDeploymentManagerInitialize>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- WinUIEx exposes its obsolete Icon converter through generated XAML metadata. -->
+    <NoWarn>$(NoWarn);CS0618</NoWarn>
+  </PropertyGroup>
 </Project>

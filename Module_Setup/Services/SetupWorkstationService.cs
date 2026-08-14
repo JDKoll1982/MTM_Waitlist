@@ -44,6 +44,7 @@ public sealed class SetupWorkstationService : ISetupWorkstationService
                 {
                     Id = GetValue(row, "id"),
                     Name = workstationName,
+                    Building = GetValue(row, "building"),
                     IsActive = string.Equals(GetValue(row, "is_active"), "1", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(GetValue(row, "is_active"), "true", StringComparison.OrdinalIgnoreCase),
                     CurrentWorkOrder = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "work_order"),
@@ -55,11 +56,16 @@ public sealed class SetupWorkstationService : ISetupWorkstationService
             .ToArray();
     }
 
-    public async Task<SetupSelectionResult> AddWorkstationAsync(string workstationName, CancellationToken cancellationToken = default)
+    public async Task<SetupSelectionResult> AddWorkstationAsync(string workstationName, string building, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(workstationName))
         {
             return new SetupSelectionResult { Success = false, Message = "Workstation name is required." };
+        }
+
+        if (string.IsNullOrWhiteSpace(building))
+        {
+            return new SetupSelectionResult { Success = false, Message = "Building is required." };
         }
 
         var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
@@ -68,6 +74,7 @@ public sealed class SetupWorkstationService : ISetupWorkstationService
             {
                 ["p_workstation_id"] = null,
                 ["p_workstation_name"] = workstationName.Trim(),
+                ["p_building"] = building.Trim(),
                 ["p_modified_by_user_id"] = null,
             },
             MySqlDatabaseTarget.MtmWaitlist,
@@ -80,11 +87,11 @@ public sealed class SetupWorkstationService : ISetupWorkstationService
         };
     }
 
-    public async Task<SetupSelectionResult> UpdateWorkstationAsync(string workstationId, string workstationName, CancellationToken cancellationToken = default)
+    public async Task<SetupSelectionResult> UpdateWorkstationAsync(string workstationId, string workstationName, string building, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(workstationId) || string.IsNullOrWhiteSpace(workstationName))
+        if (string.IsNullOrWhiteSpace(workstationId) || string.IsNullOrWhiteSpace(workstationName) || string.IsNullOrWhiteSpace(building))
         {
-            return new SetupSelectionResult { Success = false, Message = "Workstation ID and name are required." };
+            return new SetupSelectionResult { Success = false, Message = "Workstation ID, name, and building are required." };
         }
 
         var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
@@ -93,6 +100,7 @@ public sealed class SetupWorkstationService : ISetupWorkstationService
             {
                 ["p_workstation_id"] = workstationId.Trim(),
                 ["p_workstation_name"] = workstationName.Trim(),
+                ["p_building"] = building.Trim(),
                 ["p_modified_by_user_id"] = null,
             },
             MySqlDatabaseTarget.MtmWaitlist,

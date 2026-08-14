@@ -21,94 +21,53 @@
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
 
-        <SplitView
-            x:Name="WorkstationSplitView"
+        <GridView
             Grid.Row="1"
-            CompactPaneLength="56"
-            DisplayMode="Inline"
-            IsPaneOpen="False"
-            OpenPaneLength="320"
-            PanePlacement="Right">
-            <SplitView.Content>
-                <GridView
+                HorizontalContentAlignment="Stretch"
                 ItemsSource="{x:Bind ViewModel.DisplayedWorkstations, Mode=OneWay}"
                 SelectionMode="Single"
                 SelectedItem="{x:Bind ViewModel.SelectedWorkstation, Mode=TwoWay}">
                 <GridView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <ItemsWrapGrid MaximumRowsOrColumns="3" Orientation="Horizontal" />
+                        <ItemsWrapGrid MaximumRowsOrColumns="4" Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </GridView.ItemsPanel>
                 <GridView.ItemTemplate>
                     <DataTemplate x:DataType="models:SetupWorkstation">
                         <Border
                             MinWidth="220"
+                            Width="260"
                             Margin="8"
                             Style="{StaticResource SetupItemCardStyle}">
+                            <Border.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Text="Edit" Tag="{x:Bind}" Click="OnEditWorkstationClick" />
+                                    <MenuFlyoutItem Text="Remove" Tag="{x:Bind}" Click="OnRemoveWorkstationClick" />
+                                </MenuFlyout>
+                            </Border.ContextFlyout>
                             <StackPanel Spacing="8">
                                 <FontIcon Glyph="&#xE7F8;" FontSize="24" />
                                 <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Name}" TextWrapping="WrapWholeWords" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Building}" TextWrapping="WrapWholeWords" />
                                 <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentJobDisplay}" TextWrapping="WrapWholeWords" />
                                 <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentPartDisplay}" TextWrapping="WrapWholeWords" />
                             </StackPanel>
                         </Border>
                     </DataTemplate>
                 </GridView.ItemTemplate>
-                </GridView>
-            </SplitView.Content>
-            <SplitView.Pane>
-                <Border Style="{StaticResource SetupSectionCardStyle}">
-                    <Grid Width="288" ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="44" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <ToggleButton
-                            Grid.Column="0"
-                            Width="44"
-                            Height="180"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            IsChecked="{Binding IsPaneOpen, ElementName=WorkstationSplitView, Mode=TwoWay}">
-                            <Grid>
-                                <TextBlock
-                                    x:Uid="Setup_Workstation.ManageTitle"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                    Text="Manage Workstations"
-                                    TextWrapping="WrapWholeWords">
-                                    <TextBlock.RenderTransform>
-                                        <RotateTransform Angle="-90" />
-                                    </TextBlock.RenderTransform>
-                                </TextBlock>
-                            </Grid>
-                        </ToggleButton>
-
-                        <StackPanel Grid.Column="1" Spacing="8">
-                            <TextBox x:Uid="Setup_Workstation.NameInput" Header="Workstation" Text="{x:Bind ViewModel.WorkstationNameInput, Mode=TwoWay}" PlaceholderText="Enter workstation name" />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Button x:Uid="Setup_Workstation.Add" Content="Add" Command="{x:Bind ViewModel.AddWorkstationCommand}" IsEnabled="{x:Bind ViewModel.CanManageWorkstations, Mode=OneWay}" />
-                                <Button x:Uid="Setup_Workstation.Update" Content="Edit" Command="{x:Bind ViewModel.UpdateWorkstationCommand}" IsEnabled="{x:Bind ViewModel.CanManageWorkstations, Mode=OneWay}" />
-                                <Button x:Uid="Setup_Workstation.Remove" Content="Remove" Command="{x:Bind ViewModel.RemoveWorkstationCommand}" IsEnabled="{x:Bind ViewModel.CanManageWorkstations, Mode=OneWay}" />
-                            </StackPanel>
-                            <TextBlock x:Uid="Setup_Workstation.ManageHint" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Setup Tech, Admin, and above can manage workstations." TextWrapping="WrapWholeWords" />
-                        </StackPanel>
-                    </Grid>
-                </Border>
-            </SplitView.Pane>
-        </SplitView>
+        </GridView>
 
         <Grid Grid.Row="2" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="1" x:Uid="Setup_Action.Refresh" Content="Refresh" Command="{x:Bind ViewModel.RefreshCommand}" />
-            <Button Grid.Column="2" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
+            <Button Grid.Column="0" Content="New Workstation" MinWidth="150" Click="OnNewWorkstationClick" IsEnabled="{x:Bind ViewModel.CanManageWorkstations, Mode=OneWay}" />
+            <Button Grid.Column="2" x:Uid="Setup_Action.Refresh" Content="Refresh" Command="{x:Bind ViewModel.RefreshCommand}" />
+            <Button Grid.Column="3" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
         </Grid>
     </Grid>
 </Page>

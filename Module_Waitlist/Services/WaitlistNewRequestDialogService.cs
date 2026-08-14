@@ -17,7 +17,7 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         PropertyNameCaseInsensitive = true,
     };
 
-    public async Task<string?> ShowJobTypeSelectionAsync(XamlRoot xamlRoot, string selectedWorkCenter, CancellationToken cancellationToken = default)
+    public async Task<WaitlistRequestDraft?> ShowJobTypeSelectionAsync(XamlRoot xamlRoot, string building, string selectedWorkCenter, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(xamlRoot);
 
@@ -63,6 +63,7 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         var selectedSubtype = await SelectSubtypeAsync(xamlRoot, selectedRequestType).ConfigureAwait(true);
         if (selectedSubtype is null && selectedRequestType.Subtypes.Count > 0)
         {
+            StartupDebugLog.Info("WaitlistNewRequest", $"Request type '{selectedRequestType.RequestType}' was canceled during subtype selection.");
             return null;
         }
 
@@ -72,6 +73,7 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
             inputValue = await PromptForTextInputAsync(xamlRoot, selectedRequestType, selectedSubtype).ConfigureAwait(true);
             if (inputValue is null)
             {
+                StartupDebugLog.Info("WaitlistNewRequest", $"Request type '{selectedRequestType.RequestType}' was canceled during text input.");
                 return null;
             }
         }
@@ -79,10 +81,20 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         var confirmed = await ShowConfirmationAsync(xamlRoot, selectedWorkCenter, selectedRequestType, selectedSubtype, inputValue).ConfigureAwait(true);
         if (!confirmed)
         {
+            StartupDebugLog.Info("WaitlistNewRequest", $"Request type '{selectedRequestType.RequestType}' was canceled at confirmation.");
             return null;
         }
 
-        return selectedRequestType.RequestType.Trim();
+        StartupDebugLog.Info("WaitlistNewRequest", $"Request confirmed. WorkCenter='{selectedWorkCenter}', RequestType='{selectedRequestType.RequestType}', Subtype='{selectedSubtype?.Name ?? string.Empty}'.");
+
+        return new WaitlistRequestDraft
+        {
+            Building = building.Trim(),
+            WorkCenter = selectedWorkCenter.Trim(),
+            RequestType = selectedRequestType.RequestType.Trim(),
+            Subtype = selectedSubtype?.Name,
+            InputValue = inputValue,
+        };
     }
 
     private static async Task<NewRequestSubtypeDefinition?> SelectSubtypeAsync(XamlRoot xamlRoot, NewRequestTypeDefinition requestType)

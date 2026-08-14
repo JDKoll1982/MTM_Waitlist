@@ -3,6 +3,7 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
 using Microsoft.UI.Dispatching;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -15,7 +16,20 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
 
     private static string LocalizeOrDefault(string key, string fallback)
     {
-        var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        DispatcherQueue? dispatcherQueue;
+        try
+        {
+            dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        }
+        catch (COMException)
+        {
+            return fallback;
+        }
+        catch (FileNotFoundException)
+        {
+            return fallback;
+        }
+
         if (dispatcherQueue is null || !dispatcherQueue.HasThreadAccess)
         {
             // Setup persistence frequently runs off the UI thread; avoid WinRT resource-loader COM calls there.

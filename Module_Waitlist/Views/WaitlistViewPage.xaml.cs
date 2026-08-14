@@ -3,9 +3,11 @@ using Microsoft.UI.Xaml.Media.Imaging;
 
 using System.IO;
 
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
+using MTM_Waitlist.Module_Waitlist.Models;
 
 namespace MTM_Waitlist.Module_Waitlist.Views;
 
@@ -71,31 +73,48 @@ public sealed partial class WaitlistViewPage : Page
                 return;
             }
 
-            var requestType = await newRequestDialogService.ShowJobTypeSelectionAsync(XamlRoot, selectedWorkCenter).ConfigureAwait(true);
-            if (!string.IsNullOrWhiteSpace(requestType))
+            var draft = await newRequestDialogService.ShowJobTypeSelectionAsync(XamlRoot, ViewModel.SelectedBuilding, selectedWorkCenter).ConfigureAwait(true);
+            if (draft is null)
             {
                 return;
             }
 
-            var retryDialog = new ContentDialog
+            var requestService = App.GetService<IWaitlistRequestService>();
+            var submitResult = await requestService.SubmitAsync(draft, allowDuplicate: false).ConfigureAwait(true);
+            if (submitResult.Status == WaitlistRequestSubmitStatus.DuplicateWarningRequired)
+            {
+                var duplicateDialog = new ContentDialog
+                {
+                    XamlRoot = XamlRoot,
+                    Title = "Matching request already active",
+                    Content = new TextBlock { Text = submitResult.Message, TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap },
+                    PrimaryButtonText = "Continue",
+                    CloseButtonText = "Cancel",
+                    DefaultButton = ContentDialogButton.Close,
+                };
+                if (await duplicateDialog.ShowAsync() != ContentDialogResult.Primary)
+                {
+                    return;
+                }
+
+                submitResult = await requestService.SubmitAsync(draft, allowDuplicate: true).ConfigureAwait(true);
+            }
+
+            if (submitResult.Status == WaitlistRequestSubmitStatus.Success)
+            {
+                StartupDebugLog.Info("WaitlistRequest", $"Submission succeeded. Refreshing building '{ViewModel.SelectedBuilding}'.");
+                await ViewModel.RefreshAsync();
+                return;
+            }
+
+            await new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = "Restart workflow",
-                Content = new TextBlock
-                {
-                    Text = "Choose a different work center or cancel to return to the waitlist.",
-                    TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap,
-                },
-                PrimaryButtonText = "Try again",
-                CloseButtonText = "Cancel",
-                DefaultButton = ContentDialogButton.Primary,
-            };
-
-            var result = await retryDialog.ShowAsync();
-            if (result != ContentDialogResult.Primary)
-            {
-                return;
-            }
+                Title = "Request not submitted",
+                Content = new TextBlock { Text = submitResult.Message, TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap },
+                CloseButtonText = "Close",
+            }.ShowAsync();
+            return;
         }
     }
 }

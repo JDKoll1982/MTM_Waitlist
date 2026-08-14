@@ -208,8 +208,14 @@ ALTER TABLE setup_workstations_catalog
     COMMENT = 'Setup work center catalog used by setup and waitlist flows.';
 
 ALTER TABLE setup_workstations_catalog
+    ADD COLUMN building VARCHAR(64) NOT NULL DEFAULT 'Expo Drive' AFTER public_id,
+    DROP INDEX uq_setup_workstations_catalog_workstation_name,
+    ADD UNIQUE KEY uq_setup_workstations_catalog_building_workstation_name (building, workstation_name);
+
+ALTER TABLE setup_workstations_catalog
     MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
     MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for work center catalog row.',
+    MODIFY COLUMN building VARCHAR(64) NOT NULL DEFAULT 'Expo Drive' COMMENT 'Facility building where the work center is located.',
     MODIFY COLUMN workstation_name VARCHAR(64) NOT NULL COMMENT 'Work center or press display name.',
     MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether this work center is active.',
     MODIFY COLUMN sort_rank INT NOT NULL DEFAULT 100 COMMENT 'Sort order rank for UI lists.',

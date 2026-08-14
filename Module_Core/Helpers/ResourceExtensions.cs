@@ -57,6 +57,11 @@ public static class ResourceExtensions
                 // Loader can fail very early in app startup; retry on the next call.
                 return null;
             }
+            catch (FileNotFoundException)
+            {
+                // Headless test hosts and unpackaged startup can lack WinRT resource files.
+                return null;
+            }
         }
     }
 

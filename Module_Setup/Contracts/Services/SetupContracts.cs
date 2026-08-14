@@ -23,9 +23,9 @@ public interface ISetupWorkstationService
 {
     Task<IReadOnlyList<SetupWorkstation>> GetWorkstationsAsync(CancellationToken cancellationToken = default);
 
-    Task<SetupSelectionResult> AddWorkstationAsync(string workstationName, CancellationToken cancellationToken = default);
+    Task<SetupSelectionResult> AddWorkstationAsync(string workstationName, string building, CancellationToken cancellationToken = default);
 
-    Task<SetupSelectionResult> UpdateWorkstationAsync(string workstationId, string workstationName, CancellationToken cancellationToken = default);
+    Task<SetupSelectionResult> UpdateWorkstationAsync(string workstationId, string workstationName, string building, CancellationToken cancellationToken = default);
 
     Task<SetupSelectionResult> RemoveWorkstationAsync(string workstationId, CancellationToken cancellationToken = default);
 }

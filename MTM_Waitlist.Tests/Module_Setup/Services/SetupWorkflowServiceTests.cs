@@ -169,59 +169,32 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task QuickAddTypeAsync_WhenBackendReturnsEmpty_InjectsLocalType()
+    public async Task AddDunnageTypeAsync_WhenNameIsMissing_ReturnsValidationFailure()
     {
-        var workflowService = CreateService(recvMockData: false);
-        await workflowService.SearchWorkOrderAsync("76951");
-        await workflowService.SelectPartAsync("12345679");
-        await workflowService.SelectSequenceAsync("20");
+        var result = await CreateDunnageWorkflowService().AddDunnageTypeAsync(string.Empty, "Developer");
 
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = false,
-        });
-
-        var sampleDataService = new SampleDataService(settings);
-        var dunnageWorkflowService = new DunnageWorkflowService(new MySqlHelperServer(settings, sampleDataService));
-        var viewModel = new SetupDunnageTypeViewModel(
-            new NoOpNavigationService(),
-            workflowService,
-            dunnageWorkflowService,
-            new StartupState { CurrentRole = "Developer" });
-
-        var result = await viewModel.QuickAddTypeAsync("Local Type A");
-
-        Assert.IsTrue(result.Success);
-        Assert.IsTrue(workflowService.State.DunnageTypes.Any(type => string.Equals(type.Name, "Local Type A", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsFalse(result.Success);
+        Assert.IsTrue(result.Message.Contains("required", StringComparison.OrdinalIgnoreCase));
     }
 
     [TestMethod]
-    public async Task QuickAddPartAsync_WhenBackendReturnsEmpty_InjectsLocalPart()
+    public async Task AddDunnagePartAsync_WhenTypeIdIsInvalid_ReturnsValidationFailure()
     {
-        var workflowService = CreateService(recvMockData: false);
-        await workflowService.SearchWorkOrderAsync("76951");
-        await workflowService.SelectPartAsync("12345679");
-        workflowService.State.SelectedDunnageTypeId = "-1";
+        var result = await CreateDunnageWorkflowService().AddDunnagePartAsync("not-an-id", "Test Part", "Developer");
 
+        Assert.IsFalse(result.Success);
+        Assert.IsTrue(result.Message.Contains("valid dunnage type", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static DunnageWorkflowService CreateDunnageWorkflowService()
+    {
         var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
         {
             ["Feature.InforVisualMockData"] = true,
             ["Feature.RecvMockData"] = false,
         });
-
         var sampleDataService = new SampleDataService(settings);
-        var dunnageWorkflowService = new DunnageWorkflowService(new MySqlHelperServer(settings, sampleDataService));
-        var viewModel = new SetupDunnagePartViewModel(
-            new NoOpNavigationService(),
-            workflowService,
-            dunnageWorkflowService,
-            new StartupState { CurrentRole = "Developer" });
-
-        var result = await viewModel.QuickAddPartAsync("Local Part A");
-
-        Assert.IsTrue(result.Success);
-        Assert.IsTrue(workflowService.State.DunnageParts.Any(part => string.Equals(part.PartNumber, "Local Part A", StringComparison.OrdinalIgnoreCase)));
+        return new DunnageWorkflowService(new MySqlHelperServer(settings, sampleDataService));
     }
 
     private static SetupWorkflowService CreateService(bool recvMockData = true)
@@ -236,7 +209,7 @@ public sealed class SetupWorkflowServiceTests
         var sqlHelperServer = new SqlHelperServer(settings, sampleDataService);
         var mySqlHelperServer = new MySqlHelperServer(settings, sampleDataService);
         var workOrderValidationService = new WorkOrderValidationService();
-        var lookupService = new SetupLookupService(sqlHelperServer, new InforVisualSqlQueryService());
+        var lookupService = new SetupLookupService(sqlHelperServer, new InforVisualSqlQueryService(new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build()));
         var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer);
         var activeJobCoordinatorService = new SetupActiveJobCoordinatorService();
         var persistenceService = new SetupPersistenceService(activeJobCoordinatorService, mySqlHelperServer);
@@ -292,7 +265,11 @@ public sealed class SetupWorkflowServiceTests
 
     private sealed class NoOpNavigationService : INavigationService
     {
-        public event Microsoft.UI.Xaml.Navigation.NavigatedEventHandler? Navigated;
+        public event Microsoft.UI.Xaml.Navigation.NavigatedEventHandler? Navigated
+        {
+            add { }
+            remove { }
+        }
 
         public Microsoft.UI.Xaml.Controls.Frame? Frame
         {
