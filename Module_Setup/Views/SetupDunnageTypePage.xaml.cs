@@ -50,4 +50,36 @@ public sealed partial class SetupDunnageTypePage : Page
         }
     }
 
+    private async void OnAddScrapTypeClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        StartupDebugLog.Info("SetupDunnageTypePage", "OnAddScrapTypeClick started. Opening add-scrap dialog.");
+        var scrapTypeInput = new TextBox
+        {
+            PlaceholderText = LocalizeOrDefault("Setup_DunnagePair.ScrapType.DialogPlaceholder", "Enter scrap type"),
+            MinWidth = 320
+        };
+
+        var dialog = new ContentDialog
+        {
+            Title = LocalizeOrDefault("Setup_DunnagePair.ScrapType.DialogTitle", "Add Scrap Type"),
+            Content = scrapTypeInput,
+            PrimaryButtonText = LocalizeOrDefault("Setup_DunnagePair.ScrapType.Add", "Add"),
+            CloseButtonText = LocalizeOrDefault("Setup_DunnagePair.ScrapType.Cancel", "Cancel"),
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = XamlRoot,
+        };
+
+        var result = await dialog.ShowAsync();
+        StartupDebugLog.Info("SetupDunnageTypePage", $"Add-scrap dialog completed. Result='{result}', Input='{scrapTypeInput.Text}'.");
+        if (result == ContentDialogResult.Primary)
+        {
+            ViewModel.AddScrapType(scrapTypeInput.Text);
+            StartupDebugLog.Info("SetupDunnageTypePage", "Primary action selected. ViewModel.AddScrapType invoked.");
+        }
+        else
+        {
+            StartupDebugLog.Info("SetupDunnageTypePage", "Add-scrap dialog canceled/closed without adding a value.");
+        }
+    }
+
 }

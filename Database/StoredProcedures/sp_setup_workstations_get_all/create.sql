@@ -8,6 +8,7 @@ DROP PROCEDURE IF EXISTS sp_setup_workstations_get_all;
 CREATE PROCEDURE sp_setup_workstations_get_all()
 SELECT
     id,
+    building,
     workstation_name,
     is_active
 FROM vw_setup_workstations_active

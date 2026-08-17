@@ -23,9 +23,9 @@ public interface ISetupWorkstationService
 {
     Task<IReadOnlyList<SetupWorkstation>> GetWorkstationsAsync(CancellationToken cancellationToken = default);
 
-    Task<SetupSelectionResult> AddWorkstationAsync(string workstationName, CancellationToken cancellationToken = default);
+    Task<SetupSelectionResult> AddWorkstationAsync(string workstationName, string building, CancellationToken cancellationToken = default);
 
-    Task<SetupSelectionResult> UpdateWorkstationAsync(string workstationId, string workstationName, CancellationToken cancellationToken = default);
+    Task<SetupSelectionResult> UpdateWorkstationAsync(string workstationId, string workstationName, string building, CancellationToken cancellationToken = default);
 
     Task<SetupSelectionResult> RemoveWorkstationAsync(string workstationId, CancellationToken cancellationToken = default);
 }
@@ -53,6 +53,8 @@ public interface ISetupPersistenceService
     Task<SetupSaveResult> SaveAsync(SetupSaveRequest request, bool forceReplace = false, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<SetupDunnagePart>> LoadSavedDunnageAssignmentsAsync(string workOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default);
+
+    Task<string?> LoadSavedScrapTypeAsync(string workOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default);
 }
 
 public interface ISetupWorkflowService

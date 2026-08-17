@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
@@ -251,6 +252,15 @@ public partial class App : Application
     private static void CurrentDomain_FirstChanceException(object? sender, FirstChanceExceptionEventArgs e)
     {
 #if DEBUG
+        if (e.Exception is COMException comException)
+        {
+            var stack = comException.StackTrace ?? string.Empty;
+            if (stack.Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase))
+            {
+                StartupDebugLog.Error("FirstChance", comException, $"First-chance COMException in MTM_Waitlist stack. HResult=0x{comException.HResult:X8}.");
+            }
+        }
+
         if (e.Exception is NullReferenceException nullReferenceException)
         {
             var stack = nullReferenceException.StackTrace ?? string.Empty;

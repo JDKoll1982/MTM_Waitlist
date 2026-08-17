@@ -33,7 +33,7 @@ public sealed class SetupPersistenceServiceTests
     }
 
     [TestMethod]
-    public async Task SaveAsync_WhenMockDisabled_RegistersActiveJobAndReturnsSavedAsync()
+    public async Task SaveAsync_WhenMockDisabled_AndBackendWritesNoRows_ReturnsFailureAsync()
     {
         var activeJobCoordinator = new FakeActiveJobCoordinatorService(hasActiveJob: false);
         var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
@@ -47,9 +47,10 @@ public sealed class SetupPersistenceServiceTests
         var request = CreateRequest();
         var result = await service.SaveAsync(request, false);
 
-        Assert.IsTrue(result.Success);
+        Assert.IsFalse(result.Success);
         Assert.IsFalse(result.RequiresReplacementConfirmation);
-        Assert.AreEqual(1, activeJobCoordinator.RegisterCalls);
+        Assert.IsTrue(result.Message.Contains("no rows", StringComparison.OrdinalIgnoreCase));
+        Assert.AreEqual(0, activeJobCoordinator.RegisterCalls);
     }
 
     [TestMethod]

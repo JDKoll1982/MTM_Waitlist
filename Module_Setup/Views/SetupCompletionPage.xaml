@@ -6,14 +6,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Padding="24" RowSpacing="16">
+    <Grid Style="{StaticResource SetupPageGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Border
-            Padding="24"
+            Padding="28"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             MinWidth="520"
@@ -21,7 +21,7 @@
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
-            CornerRadius="12">
+            CornerRadius="14">
             <StackPanel Spacing="14">
                 <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                     <FontIcon Glyph="{x:Bind ViewModel.ResultIconGlyph, Mode=OneWay}" FontSize="24" />
@@ -48,7 +48,7 @@
             </StackPanel>
         </Border>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+        <StackPanel Grid.Row="1" Style="{StaticResource SetupActionBarStyle}">
             <Button x:Uid="Setup_Completion.Action.StartOver" Content="Start Over" Command="{x:Bind ViewModel.StartOverCommand}" />
             <Button x:Uid="Setup_Completion.Action.ReturnToWaitlist" Content="Return to Waitlist" Command="{x:Bind ViewModel.ReturnToWaitlistCommand}" />
         </StackPanel>

@@ -26,6 +26,7 @@ public sealed class SetupWorkflowState : ObservableObject
     private string _selectedDunnageTypeId = string.Empty;
     private string _selectedDunnagePartId = string.Empty;
     private string _selectedWorkCenter = string.Empty;
+    private string _selectedScrapType = string.Empty;
     private bool _requiresReplacementConfirmation;
     private bool _hasUnsavedChanges;
     private SetupWorkflowStep _currentStep = SetupWorkflowStep.WorkstationSelection;
@@ -43,6 +44,8 @@ public sealed class SetupWorkflowState : ObservableObject
     public ObservableCollection<SetupDunnagePart> DunnageParts { get; } = new();
 
     public ObservableCollection<SetupDunnagePart> SelectedDunnageParts { get; } = new();
+
+    public ObservableCollection<string> ScrapTypes { get; } = new();
 
     public string WorkOrderInput
     {
@@ -98,6 +101,12 @@ public sealed class SetupWorkflowState : ObservableObject
         set => SetProperty(ref _selectedWorkCenter, value);
     }
 
+    public string SelectedScrapType
+    {
+        get => _selectedScrapType;
+        set => SetProperty(ref _selectedScrapType, value);
+    }
+
     public bool RequiresReplacementConfirmation
     {
         get => _requiresReplacementConfirmation;
@@ -136,6 +145,7 @@ public sealed class SetupWorkflowState : ObservableObject
         SelectedDunnageTypeId = string.Empty;
         SelectedDunnagePartId = string.Empty;
         SelectedWorkCenter = string.Empty;
+        SelectedScrapType = string.Empty;
         RequiresReplacementConfirmation = false;
         HasUnsavedChanges = false;
         CurrentStep = SetupWorkflowStep.WorkstationSelection;
@@ -147,6 +157,7 @@ public sealed class SetupWorkflowState : ObservableObject
         DunnageTypes.Clear();
         DunnageParts.Clear();
         SelectedDunnageParts.Clear();
+        ScrapTypes.Clear();
         OnPropertyChanged(nameof(SelectedDunnageSummary));
     }
 }
@@ -156,6 +167,8 @@ public sealed class SetupWorkstation
     public string Id { get; set; } = string.Empty;
 
     public string Name { get; set; } = string.Empty;
+
+    public string Building { get; set; } = string.Empty;
 
     public bool IsActive { get; set; } = true;
 
@@ -207,6 +220,10 @@ public sealed class SetupSubordinatePart
     public string Location { get; set; } = string.Empty;
 
     public decimal OnHandQuantity { get; set; }
+
+    public string User8 { get; set; } = string.Empty;
+
+    public string SelectedScrapType { get; set; } = string.Empty;
 
     public bool IsLowStock { get; set; }
 
@@ -325,6 +342,8 @@ public sealed class SetupSaveRequest
     public string SelectedDunnageTypeId { get; set; } = string.Empty;
 
     public string SelectedDunnagePartId { get; set; } = string.Empty;
+
+    public string SelectedScrapType { get; set; } = string.Empty;
 
     public IReadOnlyList<SetupSubordinatePart> SubordinateParts { get; set; } = Array.Empty<SetupSubordinatePart>();
 

@@ -65,6 +65,8 @@
             Canvas.ZIndex="0"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
             ExpandedModeThresholdWidth="1280"
+            OpenPaneLength="260"
+            CompactPaneLength="48"
             Header="{x:Bind ViewModel.HeaderText, Mode=OneWay}"
             IsBackButtonVisible="Visible"
             IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"

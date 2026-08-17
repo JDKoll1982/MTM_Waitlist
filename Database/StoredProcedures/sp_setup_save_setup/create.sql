@@ -48,4 +48,15 @@ SELECT
 	p_saved_by_user_id,
 	UTC_TIMESTAMP(),
 	UTC_TIMESTAMP()
-FROM dual;
+FROM dual
+ON DUPLICATE KEY UPDATE
+	work_order = VALUES(work_order),
+	part_number = VALUES(part_number),
+	sequence_number = VALUES(sequence_number),
+	selected_dunnage_type_id = VALUES(selected_dunnage_type_id),
+	selected_dunnage_part_id = VALUES(selected_dunnage_part_id),
+	subordinate_parts_json = VALUES(subordinate_parts_json),
+	selected_dunnage_parts_json = VALUES(selected_dunnage_parts_json),
+	is_active = 1,
+	updated_by_user_id = VALUES(updated_by_user_id),
+	updated_utc = UTC_TIMESTAMP();

@@ -21,15 +21,8 @@ public sealed class SetupWorkstationService : ISetupWorkstationService
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        var activeJobs = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT aj.work_center, aj.work_order, aj.part_number, aj.sequence_number
-FROM setup_active_jobs aj
-INNER JOIN (
-    SELECT work_center, MAX(id) AS max_id
-    FROM setup_active_jobs
-    WHERE is_active = 1
-    GROUP BY work_center
-) latest ON latest.max_id = aj.id;",
+        var activeJobs = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            "sp_setup_active_jobs_latest_by_work_center_get",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -51,6 +44,7 @@ INNER JOIN (
                 {
                     Id = GetValue(row, "id"),
                     Name = workstationName,
+                    Building = GetValue(row, "building"),
                     IsActive = string.Equals(GetValue(row, "is_active"), "1", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(GetValue(row, "is_active"), "true", StringComparison.OrdinalIgnoreCase),
                     CurrentWorkOrder = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "work_order"),
@@ -62,11 +56,16 @@ INNER JOIN (
             .ToArray();
     }
 
-    public async Task<SetupSelectionResult> AddWorkstationAsync(string workstationName, CancellationToken cancellationToken = default)
+    public async Task<SetupSelectionResult> AddWorkstationAsync(string workstationName, string building, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(workstationName))
         {
             return new SetupSelectionResult { Success = false, Message = "Workstation name is required." };
+        }
+
+        if (string.IsNullOrWhiteSpace(building))
+        {
+            return new SetupSelectionResult { Success = false, Message = "Building is required." };
         }
 
         var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
@@ -75,6 +74,7 @@ INNER JOIN (
             {
                 ["p_workstation_id"] = null,
                 ["p_workstation_name"] = workstationName.Trim(),
+                ["p_building"] = building.Trim(),
                 ["p_modified_by_user_id"] = null,
             },
             MySqlDatabaseTarget.MtmWaitlist,
@@ -87,11 +87,11 @@ INNER JOIN (
         };
     }
 
-    public async Task<SetupSelectionResult> UpdateWorkstationAsync(string workstationId, string workstationName, CancellationToken cancellationToken = default)
+    public async Task<SetupSelectionResult> UpdateWorkstationAsync(string workstationId, string workstationName, string building, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(workstationId) || string.IsNullOrWhiteSpace(workstationName))
+        if (string.IsNullOrWhiteSpace(workstationId) || string.IsNullOrWhiteSpace(workstationName) || string.IsNullOrWhiteSpace(building))
         {
-            return new SetupSelectionResult { Success = false, Message = "Workstation ID and name are required." };
+            return new SetupSelectionResult { Success = false, Message = "Workstation ID, name, and building are required." };
         }
 
         var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
@@ -100,6 +100,7 @@ INNER JOIN (
             {
                 ["p_workstation_id"] = workstationId.Trim(),
                 ["p_workstation_name"] = workstationName.Trim(),
+                ["p_building"] = building.Trim(),
                 ["p_modified_by_user_id"] = null,
             },
             MySqlDatabaseTarget.MtmWaitlist,

@@ -8,6 +8,12 @@ Explore the [WinUI Gallery](https://www.microsoft.com/store/productId/9P3JFPWWDZ
 
 Relaunch Template Studio to modify the project by right-clicking on the project in `View -> Solution Explorer` then selecting `Add -> New Item (Template Studio)`.
 
+## External Integrations
+
+### Tables Ready
+
+- API key: `5a657e2e-c68e-484c-9249-9db7049a5ada`
+
 ## Publishing
 
 For projects with MSIX packaging, right-click on the application project and select `Package and Publish -> Create App Packages...` to create an MSIX package.

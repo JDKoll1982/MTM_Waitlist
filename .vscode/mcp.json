@@ -1,33 +1,40 @@
 {
-    "servers": {
-        "csv-mcp-server": {
-            "type": "stdio",
-            "command": "csv",
-            "args": [
-                "--transport",
-                "stdio",
-                "--log-level",
-                "INFO"
-            ],
-            "env": {
-                "CSV_STORAGE_PATH": "c:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\Documents\\Development\\InforVisual\\DatabaseCSVFiles",
-                "CSV_MAX_FILE_SIZE": "100",
-                "CSV_BACKUP_ENABLED": "true",
-                "CSV_SUPPORT_ABSOLUTE_PATHS": "true"
-            }
-        },
-        "oraios/serena": {
-            "type": "stdio",
-            "command": "C:\\Users\\johnk\\.local\\bin\\uvx.exe",
-            "args": [
-                "--from",
-                "git+https://github.com/oraios/serena",
-                "serena",
-                "start-mcp-server",
-                "serena@latest",
-                "--context",
-                "ide-assistant"
-            ]
-        }
+  "servers": {
+    "csv-mcp-server": {
+      "type": "stdio",
+      "command": "C:\\ProgramData\\uv\\uv.exe",
+      "args": [
+        "tool",
+        "run",
+        "--from",
+        "csv-mcp-server",
+        "csv",
+        "--transport",
+        "stdio",
+        "--log-level",
+        "INFO"
+      ],
+      "env": {
+        "CSV_STORAGE_PATH": "c:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\Documents\\Development\\InforVisual\\DatabaseCSVFiles",
+        "CSV_MAX_FILE_SIZE": "100",
+        "CSV_BACKUP_ENABLED": "true",
+        "CSV_SUPPORT_ABSOLUTE_PATHS": "true"
+      }
+    },
+    "oraios/serena": {
+      "type": "stdio",
+      "command": "C:\\ProgramData\\uv\\uv.exe",
+      "args": [
+        "tool",
+        "run",
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "serena@latest",
+        "--context",
+        "ide-assistant"
+      ]
     }
+  }
 }

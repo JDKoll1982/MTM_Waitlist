@@ -14,7 +14,7 @@
         <converters:StockStateBrushConverter x:Key="StockStateBrushConverter" />
     </Page.Resources>
 
-    <Grid Padding="24" RowSpacing="16">
+    <Grid Style="{StaticResource SetupPageGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
@@ -22,7 +22,7 @@
 
         <TabView Grid.Row="0" IsAddTabButtonVisible="False">
             <TabViewItem x:Uid="Setup_Review.Tab.JobContext" Header="Job Context">
-                <Border Padding="16" Margin="0,8,0,0" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
+                <Border Margin="0,8,0,0" Style="{StaticResource SetupSectionCardStyle}">
                     <Grid ColumnSpacing="16" RowSpacing="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -48,7 +48,7 @@
                     <ItemsControl ItemsSource="{x:Bind ViewModel.SubordinatePartGroups, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="models:SetupSubordinatePartGroup">
-                                <Border Margin="0,0,0,12" Padding="12" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
+                                <Border Margin="0,0,0,12" Style="{StaticResource SetupSectionCardStyle}">
                                     <StackPanel Spacing="10">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -92,7 +92,7 @@
             </TabViewItem>
 
             <TabViewItem x:Uid="Setup_Review.Tab.DunnageAssignments" Header="Dunnage Pair Assignments">
-                <Border Margin="0,8,0,0" Padding="16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
+                <Border Margin="0,8,0,0" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock x:Uid="Setup_Review.SelectedDunnageTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Selected Dunnage Summary" />
                         <ItemsControl ItemsSource="{x:Bind ViewModel.DunnageAssignmentDisplays, Mode=OneWay}">
@@ -114,7 +114,7 @@
             </TabViewItem>
         </TabView>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+        <StackPanel Grid.Row="1" Style="{StaticResource SetupActionBarStyle}">
             <Button x:Uid="Setup_Action.Edit" Content="Edit" Command="{x:Bind ViewModel.EditCommand}" />
             <Button x:Uid="Setup_Action.Confirm" Content="Confirm" Command="{x:Bind ViewModel.ConfirmCommand}" Visibility="{x:Bind ViewModel.ConfirmButtonVisibility, Mode=OneWay}" />
             <Button x:Uid="Setup_Action.Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelReplacementCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />

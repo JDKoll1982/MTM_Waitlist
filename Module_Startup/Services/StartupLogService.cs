@@ -60,13 +60,14 @@ public sealed class StartupLogService : BackgroundService, IStartupLogService
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _ = RunRetentionCleanupSafeAsync(stoppingToken);
+        _ = RunRetentionCleanupSafeAsync(CancellationToken.None);
 
         try
         {
-            await foreach (var entry in _channel.Reader.ReadAllAsync(stoppingToken))
+            // Drain until writer completion to avoid cancellation exceptions during normal shutdown.
+            await foreach (var entry in _channel.Reader.ReadAllAsync(CancellationToken.None))
             {
-                await ProcessEntrySafeAsync(entry, stoppingToken);
+                await ProcessEntrySafeAsync(entry, CancellationToken.None);
             }
         }
         catch (OperationCanceledException)
@@ -89,7 +90,7 @@ public sealed class StartupLogService : BackgroundService, IStartupLogService
 
         if (!_channel.Writer.TryWrite(entry))
         {
-            Debug.WriteLine($"[STARTUP][{entry.TimestampUtc:O}][Logging] Dropped log event because channel is full.");
+            Debug.WriteLine($"[STARTUP][{entry.TimestampUtc:O}][Logging] Dropped log event because logging channel is unavailable.");
         }
     }
 
@@ -102,6 +103,10 @@ public sealed class StartupLogService : BackgroundService, IStartupLogService
 
             await WriteToHostedVmLogAsync(entry.TimestampUtc, line, cancellationToken);
             await ForwardWithRetryAsync(line, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Expected during host shutdown when background work is canceled.
         }
         catch (Exception ex)
         {
@@ -159,6 +164,11 @@ public sealed class StartupLogService : BackgroundService, IStartupLogService
             try
             {
                 await _forwarder.ForwardAsync(line, cancellationToken);
+                return;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // Expected during shutdown.
                 return;
             }
             catch when (attempt < maxAttempts)

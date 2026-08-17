@@ -74,6 +74,7 @@ public class NavigationViewService : INavigationViewService
 
             if (args.IsSettingsInvoked)
             {
+                StartupDebugLog.Info("NavigationViewService", "Settings item invoked.");
                 pageKey = typeof(SettingsViewModel).FullName!;
             }
             else
@@ -87,6 +88,8 @@ public class NavigationViewService : INavigationViewService
 
                 pageKey = resolvedPageKey;
             }
+
+            StartupDebugLog.Info("NavigationViewService", $"Navigation requested. PageKey='{pageKey}'.");
 
             if (!await CanLeaveSetupAsync(sender, pageKey).ConfigureAwait(true))
             {

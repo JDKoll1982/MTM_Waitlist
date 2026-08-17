@@ -400,6 +400,9 @@
   <data name="Setup_Workstation.Remove.Content" xml:space="preserve">
     <value>Remove</value>
   </data>
+  <data name="Setup_Workstation.New.Content" xml:space="preserve">
+    <value>New Workstation</value>
+  </data>
   <data name="Setup_Workstation.ManageHint.Text" xml:space="preserve">
     <value>Setup Tech, Admin, and above can manage workstations.</value>
   </data>

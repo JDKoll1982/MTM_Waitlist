@@ -10,6 +10,7 @@ Enforce hard-fail naming and schema conventions for all SQL files under Database
 ## Trigger Conditions
 - Pull requests that change:
 - Database/**/*.sql
+- Database/Bootstrap/update_table_descriptions.sql
 - .github/scripts/validate-sql-naming.ps1
 - .github/workflows/sql-naming-compliance.yml
 - .github/instructions/database-schema-rules.instructions.md
@@ -18,9 +19,15 @@ Enforce hard-fail naming and schema conventions for all SQL files under Database
 ## Validation Rules
 1. File naming:
 - Bootstrap file must be `Database/Bootstrap/create_database.sql`.
+- Table/column description update file must be `Database/Bootstrap/update_table_descriptions.sql`.
 - Table/procedure/view files must use per-artifact folders with `create.sql` and `rollback.sql`.
 - Seed files must use per-artifact folders with `create.sql` and `rollback.sql`.
 - Validation files must use per-artifact folders with `validate.sql`.
+
+8. Description update policy:
+- Any SQL add/edit/remove under `Database/` must include a synchronized update to `Database/Bootstrap/update_table_descriptions.sql`.
+- New tables must include a table comment update and per-column comment updates in that script.
+- Removed tables/columns must be removed from that script in the same change.
 
 2. Identifiers:
 - Lowercase snake_case only.
@@ -46,6 +53,11 @@ Enforce hard-fail naming and schema conventions for all SQL files under Database
 - Foreign key constraints must match fk_<from_table>_<to_table>_<column>.
 - Unique keys must start with uq_.
 - Non-unique indexes must start with idx_.
+
+7. Identifier length guardrail (MySQL 5.7):
+- All identifiers (table, column, constraint, key, index) must be 64 characters or fewer.
+- Prefer concise middle segments for composite keys and constraints to keep names deterministic and under the limit.
+- Keep required prefixes (`fk_`, `uq_`, `idx_`) while shortening descriptive suffixes when needed.
 
 ## Failure Behavior
 - Any violation exits with status code 1 and fails the CI job.

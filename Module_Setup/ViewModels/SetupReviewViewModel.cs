@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -113,13 +115,7 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
             }
 
             State.StatusMessage = result.Message;
-            _navigationService.NavigateTo(
-                typeof(SetupCompletionViewModel).FullName!,
-                new SetupCompletionNavigationData
-                {
-                    Success = result.Success,
-                    Message = result.Message,
-                });
+            NavigateToCompletion(result.Success, result.Message);
         }
         finally
         {
@@ -139,13 +135,7 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
             OnPropertyChanged(nameof(ReplacementConfirmationVisibility));
             OnPropertyChanged(nameof(ConfirmButtonVisibility));
             State.StatusMessage = result.Message;
-            _navigationService.NavigateTo(
-                typeof(SetupCompletionViewModel).FullName!,
-                new SetupCompletionNavigationData
-                {
-                    Success = result.Success,
-                    Message = result.Message,
-                });
+            NavigateToCompletion(result.Success, result.Message);
         }
         finally
         {
@@ -165,6 +155,33 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
     {
         var type = State.DunnageTypes.FirstOrDefault(candidate => string.Equals(candidate.Id, typeId, StringComparison.OrdinalIgnoreCase));
         return string.IsNullOrWhiteSpace(type?.IconGlyph) ? "\uE8B7" : type.IconGlyph;
+    }
+
+    private void NavigateToCompletion(bool success, string message)
+    {
+        var navigationData = new SetupCompletionNavigationData
+        {
+            Success = success,
+            Message = message,
+        };
+
+        try
+        {
+            _ = _navigationService.NavigateTo(typeof(SetupCompletionViewModel).FullName!, navigationData);
+        }
+        catch (COMException ex)
+        {
+            StartupDebugLog.Error("SetupReviewVm", ex, "NavigateTo completion threw COMException. Retrying on dispatcher queue.");
+
+            var dispatcherQueue = App.MainWindow.DispatcherQueue;
+            if (dispatcherQueue is not null)
+            {
+                _ = dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                {
+                    _ = _navigationService.NavigateTo(typeof(SetupCompletionViewModel).FullName!, navigationData);
+                });
+            }
+        }
     }
 }
 

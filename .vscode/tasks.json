@@ -1,42 +1,66 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Clean MTM_Waitlist",
-            "type": "shell",
-            "command": "dotnet",
-            "args": [
-                "clean",
-                "${workspaceFolder}/MTM_Waitlist.csproj",
-                "-p:Configuration=Debug",
-                "-p:TargetFramework=net10.0-windows10.0.19041.0",
-                "-p:WindowsPackageType=None",
-                "-p:WinUISDKReferences=false"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "Build MTM_Waitlist",
-            "type": "shell",
-            "command": "dotnet",
-            "args": [
-                "build",
-                "${workspaceFolder}/MTM_Waitlist.csproj",
-                "-p:Configuration=Debug",
-                "-p:TargetFramework=net10.0-windows10.0.19041.0",
-                "-p:WindowsPackageType=None",
-                "-p:WinUISDKReferences=false"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "Clean + Build MTM_Waitlist",
-            "dependsOn": [
-                "Clean MTM_Waitlist",
-                "Build MTM_Waitlist"
-            ],
-            "dependsOrder": "sequence",
-            "problemMatcher": []
-        }
-    ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Clean MTM_Waitlist",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"clean",
+				"${workspaceFolder}/MTM_Waitlist.csproj",
+				"-p:Configuration=Debug",
+				"-p:TargetFramework=net10.0-windows10.0.19041.0",
+				"-p:WindowsPackageType=None",
+				"-p:WinUISDKReferences=false"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Build MTM_Waitlist",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"${workspaceFolder}/MTM_Waitlist.csproj",
+				"-p:Configuration=Debug",
+				"-p:TargetFramework=net10.0-windows10.0.19041.0",
+				"-p:WindowsPackageType=None",
+				"-p:WinUISDKReferences=false"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Clean + Build MTM_Waitlist",
+			"dependsOn": [
+				"Clean MTM_Waitlist",
+				"Build MTM_Waitlist"
+			],
+			"dependsOrder": "sequence",
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Module_Setup tests",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"${workspaceFolder}/MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj",
+				"--filter",
+				"FullyQualifiedName~Module_Setup"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Run Module_Setup tests",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"${workspaceFolder}/MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj",
+				"--filter",
+				"FullyQualifiedName~Module_Setup"
+			],
+			"isBackground": false
+		}
+	]
 }

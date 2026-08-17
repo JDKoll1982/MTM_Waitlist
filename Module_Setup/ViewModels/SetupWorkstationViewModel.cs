@@ -27,6 +27,7 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
     private readonly ISetupWorkstationService _workstationService;
+    private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly StartupState _startupState;
     private readonly ObservableCollection<SetupWorkstation> _displayedWorkstations = new();
 
@@ -38,6 +39,12 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
 
     [ObservableProperty]
     public partial string WorkstationNameInput
+    {
+        get; set;
+    } = string.Empty;
+
+    [ObservableProperty]
+    public partial string BuildingInput
     {
         get; set;
     } = string.Empty;
@@ -66,30 +73,39 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
 
     public ObservableCollection<SetupWorkstation> DisplayedWorkstations => _displayedWorkstations;
 
+    public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
+
     public bool CanManageWorkstations => AllowedManageRoles.Any(role => string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
 
     public SetupWorkstationViewModel(
         INavigationService navigationService,
         ISetupWorkflowService workflowService,
         ISetupWorkstationService workstationService,
-        StartupState startupState)
+        StartupState startupState,
+        IBuildingSelectionService buildingSelectionService)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
         _workstationService = workstationService;
         _startupState = startupState;
+        _buildingSelectionService = buildingSelectionService;
     }
 
     public void OnNavigatedTo(object parameter)
     {
+        _buildingSelectionService.BuildingChanged += OnBuildingChanged;
         StatusMessage = State.StatusMessage;
         FilterText = string.Empty;
-        SelectedWorkstation = State.Workstations.FirstOrDefault(item => string.Equals(item.Name, State.SelectedWorkCenter, StringComparison.OrdinalIgnoreCase));
+        BuildingInput = _buildingSelectionService.SelectedBuilding;
+        SelectedWorkstation = State.Workstations.FirstOrDefault(item =>
+            string.Equals(item.Building, _buildingSelectionService.SelectedBuilding, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(item.Name, State.SelectedWorkCenter, StringComparison.OrdinalIgnoreCase));
         _ = LoadWorkstationsAsync();
     }
 
     public void OnNavigatedFrom()
     {
+        _buildingSelectionService.BuildingChanged -= OnBuildingChanged;
     }
 
     [RelayCommand]
@@ -123,11 +139,12 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
             return;
         }
 
-        var result = await _workstationService.AddWorkstationAsync(WorkstationNameInput).ConfigureAwait(true);
+        var result = await _workstationService.AddWorkstationAsync(WorkstationNameInput, BuildingInput).ConfigureAwait(true);
         StatusMessage = result.Message;
         if (result.Success)
         {
             WorkstationNameInput = string.Empty;
+            BuildingInput = _buildingSelectionService.SelectedBuilding;
             await LoadWorkstationsAsync().ConfigureAwait(true);
         }
     }
@@ -147,11 +164,12 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
             return;
         }
 
-        var result = await _workstationService.UpdateWorkstationAsync(SelectedWorkstation.Id, WorkstationNameInput).ConfigureAwait(true);
+        var result = await _workstationService.UpdateWorkstationAsync(SelectedWorkstation.Id, WorkstationNameInput, BuildingInput).ConfigureAwait(true);
         StatusMessage = result.Message;
         if (result.Success)
         {
             WorkstationNameInput = string.Empty;
+            BuildingInput = _buildingSelectionService.SelectedBuilding;
             await LoadWorkstationsAsync().ConfigureAwait(true);
         }
     }
@@ -188,10 +206,19 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
         }
 
         WorkstationNameInput = value.Name;
+        BuildingInput = string.IsNullOrWhiteSpace(value.Building)
+            ? _buildingSelectionService.SelectedBuilding
+            : value.Building;
     }
 
     partial void OnFilterTextChanged(string value)
     {
+        ApplyFilter();
+    }
+
+    private void OnBuildingChanged(object? sender, EventArgs e)
+    {
+        BuildingInput = _buildingSelectionService.SelectedBuilding;
         ApplyFilter();
     }
 
@@ -226,10 +253,11 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
         _displayedWorkstations.Clear();
 
         var normalizedFilter = FilterText.Trim();
-        var filteredItems = string.IsNullOrWhiteSpace(normalizedFilter)
-            ? State.Workstations
-            : new ObservableCollection<SetupWorkstation>(State.Workstations.Where(item =>
-                item.Name.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
+        var selectedBuilding = _buildingSelectionService.SelectedBuilding;
+        var filteredItems = State.Workstations.Where(item =>
+            string.Equals(item.Building, selectedBuilding, StringComparison.OrdinalIgnoreCase)
+            && (string.IsNullOrWhiteSpace(normalizedFilter)
+                || item.Name.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
                 || item.CurrentWorkOrder.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
                 || item.CurrentSequenceNumber.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
                 || item.CurrentPartNumber.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)));

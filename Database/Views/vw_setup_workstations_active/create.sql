@@ -9,6 +9,7 @@ CREATE VIEW vw_setup_workstations_active AS
 SELECT
     id,
     public_id,
+    building,
     workstation_name,
     is_active,
     sort_rank,

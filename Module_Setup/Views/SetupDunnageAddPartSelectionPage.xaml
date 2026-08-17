@@ -4,19 +4,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:MTM_Waitlist.Module_Setup.Converters"
     xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
     x:Name="RootPage"
     mc:Ignorable="d">
 
-    <Grid Padding="24" RowSpacing="16">
+    <Page.Resources>
+        <converters:SetupImagePathToImageSourceConverter x:Key="SetupImagePathToImageSourceConverter" />
+    </Page.Resources>
+
+    <Grid Style="{StaticResource SetupPageGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Spacing="8">
-            <TextBlock x:Uid="Setup_AddDunnage.PartSelection.PageLabel" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Select Dunnage Part" />
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
+            <TextBlock x:Uid="Setup_AddDunnage.PartSelection.PageLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Select Dunnage Part" />
             <TextBox x:Uid="Setup_DunnagePart.Filter" PlaceholderText="Search by part number, name, or details" Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
@@ -30,11 +35,47 @@
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="models:SetupDunnagePart">
                     <Button Command="{Binding ElementName=RootPage, Path=ViewModel.SelectPartCommand}" CommandParameter="{x:Bind}" Margin="8">
-                        <StackPanel MinWidth="220" Padding="12" Spacing="8">
-                            <Image MinHeight="72" MaxHeight="96" Source="{x:Bind DisplayImagePath}" Stretch="Uniform" />
-                            <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" TextWrapping="WrapWholeWords" />
-                            <TextBlock Text="{x:Bind PartNumber}" />
-                        </StackPanel>
+                        <Border
+                            MinWidth="220"
+                            Style="{StaticResource SetupItemCardStyle}">
+                            <Grid RowSpacing="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Rectangle
+                                    Grid.Row="0"
+                                    MinHeight="72"
+                                    MaxHeight="96"
+                                    RadiusX="10"
+                                    RadiusY="10">
+                                    <Rectangle.Fill>
+                                        <ImageBrush
+                                            Stretch="UniformToFill"
+                                            ImageSource="{x:Bind DisplayImagePath, Converter={StaticResource SetupImagePathToImageSourceConverter}}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    HorizontalAlignment="Center"
+                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                    Text="{x:Bind DisplayName}"
+                                    TextAlignment="Center"
+                                    TextWrapping="WrapWholeWords" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    HorizontalAlignment="Center"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind PartNumber}"
+                                    TextAlignment="Center"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="NoWrap" />
+                            </Grid>
+                        </Border>
                     </Button>
                 </DataTemplate>
             </GridView.ItemTemplate>

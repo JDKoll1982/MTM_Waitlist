@@ -9,13 +9,28 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class SampleDataServiceTests
 {
     [TestMethod]
-    public void GetSampleOrders_ReturnsThreeOrdersWithDetailBindings()
+    public void GetSampleOrders_ReturnsEmptyByDefaultWhenVisualMockDataIsUnset()
     {
         var service = new SampleDataService();
 
         var rows = service.GetSampleOrders();
 
-        Assert.AreEqual(3, rows.Count);
+        Assert.AreEqual(0, rows.Count);
+    }
+
+    [TestMethod]
+    public void GetSampleOrders_ReturnsSixOrdersWhenVisualMockDataIsEnabled()
+    {
+        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
+        {
+            ["Feature.InforVisualMockData"] = true,
+        });
+
+        var service = new SampleDataService(settings);
+
+        var rows = service.GetSampleOrders();
+
+        Assert.AreEqual(6, rows.Count);
         var firstOrder = rows[0] as MTM_Waitlist.Module_Waitlist.Models.SampleOrder;
         Assert.IsNotNull(firstOrder);
         Assert.AreEqual("Coil Request", firstOrder!.Title);
@@ -27,7 +42,12 @@ public sealed class SampleDataServiceTests
     [TestMethod]
     public void GetSampleOrders_UsesDifferentDataForEachBuilding()
     {
-        var service = new SampleDataService();
+        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
+        {
+            ["Feature.InforVisualMockData"] = true,
+        });
+
+        var service = new SampleDataService(settings);
 
         var expoRows = service.GetSampleOrders("Expo Drive");
         var vitsRows = service.GetSampleOrders("Vits Drive");
@@ -39,8 +59,8 @@ public sealed class SampleDataServiceTests
         Assert.IsNotNull(vitsOrder);
         Assert.AreNotEqual(expoOrder!.Title, vitsOrder!.Title);
         Assert.AreNotEqual(expoOrder.RequestedByName, vitsOrder!.RequestedByName);
-        Assert.AreEqual(3, expoRows.Count);
-        Assert.AreEqual(3, vitsRows.Count);
+        Assert.AreEqual(6, expoRows.Count);
+        Assert.AreEqual(6, vitsRows.Count);
 
         var imagePaths = expoRows.Concat(vitsRows)
             .OfType<MTM_Waitlist.Module_Waitlist.Models.SampleOrder>()

@@ -8,15 +8,15 @@
     x:Name="RootPage"
     mc:Ignorable="d">
 
-    <Grid Padding="24" RowSpacing="16">
+    <Grid Style="{StaticResource SetupPageGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Spacing="12">
-            <TextBlock x:Uid="Setup_WorkOrder.EnterTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Start Setup" />
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
+            <TextBlock x:Uid="Setup_WorkOrder.EnterTitle" Style="{StaticResource SetupPageTitleStyle}" Text="Start Setup" />
             <TextBox
                 x:Name="WorkOrderTextBox"
                 x:Uid="Setup_WorkOrder.Input"
@@ -25,7 +25,7 @@
                 LostFocus="OnWorkOrderTextBoxLostFocus"
                 PlaceholderText="Enter work order (for example 76951, 076951, or WO-076951)" />
 
-            <Border Padding="12" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="10">
+            <Border Style="{StaticResource SetupSectionCardStyle}">
                 <Grid ColumnSpacing="14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -43,7 +43,7 @@
             </Border>
 
             <StackPanel Visibility="{x:Bind ViewModel.PartSectionVisibility, Mode=OneWay}">
-                <TextBlock x:Uid="Setup_Part.FoundPartsLabel" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Matching parts" Margin="0,4,0,8" />
+                <TextBlock x:Uid="Setup_Part.FoundPartsLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Matching parts" Margin="0,8,0,4" />
                 <ItemsControl ItemsSource="{x:Bind ViewModel.State.PartResults, Mode=OneWay}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -53,7 +53,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:SetupPartResult">
                             <Button Command="{Binding ElementName=RootPage, Path=ViewModel.SelectPartCommand}" CommandParameter="{x:Bind}" Margin="0,0,12,12">
-                                <StackPanel Padding="10" MinWidth="180" MaxWidth="260" Spacing="4">
+                                <StackPanel Padding="14" MinWidth="180" MaxWidth="260" Spacing="6">
                                     <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind PartNumber}" />
                                     <TextBlock Text="{x:Bind Description}" TextWrapping="WrapWholeWords" />
                                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind WorkCenter}" />
@@ -65,7 +65,7 @@
             </StackPanel>
 
             <StackPanel Visibility="{x:Bind ViewModel.SequenceSectionVisibility, Mode=OneWay}">
-                <TextBlock x:Uid="Setup_Sequence.AvailableLabel" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Available operations" Margin="0,4,0,8" />
+                <TextBlock x:Uid="Setup_Sequence.AvailableLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Available operations" Margin="0,8,0,4" />
                 <ItemsControl ItemsSource="{x:Bind ViewModel.State.SequenceResults, Mode=OneWay}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -75,7 +75,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:SetupSequenceResult">
                             <Button Command="{Binding ElementName=RootPage, Path=ViewModel.SelectSequenceCommand}" CommandParameter="{x:Bind}" Margin="0,0,12,12">
-                                <StackPanel Padding="10" MinWidth="150" MaxWidth="220" Spacing="4">
+                                <StackPanel Padding="14" MinWidth="150" MaxWidth="220" Spacing="6">
                                     <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind SequenceNumber}" />
                                     <TextBlock Text="{x:Bind Description}" TextWrapping="WrapWholeWords" />
                                 </StackPanel>
@@ -88,7 +88,7 @@
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="Wrap" />
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+        <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
             <Button x:Uid="Setup_Action.BackToWorkstations" Content="Back" Command="{x:Bind ViewModel.BackToWorkstationsCommand}" />
             <Button x:Uid="Setup_Action.Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelCommand}" />
             <Button x:Uid="Setup_Action.Search" Content="Search" Command="{x:Bind ViewModel.SearchCommand}" />

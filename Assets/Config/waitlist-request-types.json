@@ -1,0 +1,340 @@
+[
+  {
+    "requestType": "Pickup",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.Pickup.PickupRequestTypeImageView",
+    "centerDataGridFields": [
+      "Part",
+      "Quantity to move",
+      "Pickup location",
+      "Destination",
+      "Traceability ID"
+    ],
+    "subtypes": [
+      {
+        "name": "Pickup Other",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Pickup.PickupRequestTypeImageView",
+        "centerDataGridFields": [
+          "Request description",
+          "Requested work center"
+        ]
+      },
+      {
+        "name": "Pickup NCM",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.PickupNcm.PickupNcmWaitlistLineView",
+        "centerDataGridFields": [
+          "Part",
+          "Quantity to move",
+          "Pickup location",
+          "Destination",
+          "Traceability ID"
+        ]
+      },
+      {
+        "name": "Pickup WIP",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.PickupWip.PickupWipWaitlistLineView",
+        "centerDataGridFields": [
+          "Part and quantity",
+          "Pickup work center",
+          "WIP destination",
+          "Operation sequence"
+        ]
+      },
+      {
+        "name": "Pickup FG",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.PickupFg.PickupFgWaitlistLineView",
+        "centerDataGridFields": [
+          "Part number",
+          "Quantity remaining",
+          "Part description",
+          "Customer",
+          "Packlist"
+        ]
+      },
+      {
+        "name": "Pickup Coil",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
+        "centerDataGridFields": [
+          "Coil number",
+          "Quantity in house",
+          "Coil description",
+          "Average coil weight",
+          "Requesting work center"
+        ]
+      },
+      {
+        "name": "Pickup Flatstock",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
+        "centerDataGridFields": [
+          "Part",
+          "Quantity",
+          "Work center",
+          "Destination"
+        ]
+      }
+    ]
+  },
+  {
+    "requestType": "Other",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.Other.OtherRequestTypeImageView",
+    "centerDataGridFields": [
+      "Request description",
+      "Requested work center"
+    ],
+    "subtypes": [
+      {
+        "name": "General Text Entry",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Other.OtherRequestTypeImageView",
+        "centerDataGridFields": [
+          "Request description",
+          "Requested work center"
+        ]
+      }
+    ]
+  },
+  {
+    "requestType": "Coil",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilRequestTypeImageView",
+    "centerDataGridFields": [
+      "Coil number",
+      "Quantity in house",
+      "Coil description",
+      "Average coil weight",
+      "Requesting work center"
+    ],
+    "subtypes": [
+      {
+        "name": "Bring",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
+        "centerDataGridFields": [
+          "Coil number",
+          "Quantity in house",
+          "Coil description",
+          "Average coil weight",
+          "Requesting work center"
+        ]
+      },
+      {
+        "name": "Pickup",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
+        "centerDataGridFields": [
+          "Coil number",
+          "Quantity in house",
+          "Coil description",
+          "Average coil weight",
+          "Requesting work center"
+        ]
+      },
+      {
+        "name": "Wrong Coil @ press",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
+        "centerDataGridFields": [
+          "Coil number",
+          "Quantity in house",
+          "Coil description",
+          "Average coil weight",
+          "Requesting work center"
+        ]
+      },
+      {
+        "name": "Need Riser Table",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
+        "centerDataGridFields": [
+          "Coil number",
+          "Quantity in house",
+          "Coil description",
+          "Average coil weight",
+          "Requesting work center"
+        ]
+      },
+      {
+        "name": "Need Coil Turned around",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
+        "centerDataGridFields": [
+          "Coil number",
+          "Quantity in house",
+          "Coil description",
+          "Average coil weight",
+          "Requesting work center"
+        ]
+      }
+    ]
+  },
+  {
+    "requestType": "Scrap",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapRequestTypeImageView",
+    "centerDataGridFields": [
+      "Pickup work center",
+      "Quantity involved",
+      "Scrap lugger",
+      "Scrap reason"
+    ],
+    "subtypes": [
+      {
+        "name": "Empty",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapWaitlistLineView",
+        "centerDataGridFields": [
+          "Pickup work center",
+          "Quantity involved",
+          "Scrap lugger",
+          "Scrap reason"
+        ]
+      },
+      {
+        "name": "Pickup Hopper, do not return",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapWaitlistLineView",
+        "centerDataGridFields": [
+          "Pickup work center",
+          "Quantity involved",
+          "Scrap lugger",
+          "Scrap reason"
+        ]
+      },
+      {
+        "name": "Bring Hopper",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapWaitlistLineView",
+        "centerDataGridFields": [
+          "Pickup work center",
+          "Quantity involved",
+          "Scrap lugger",
+          "Scrap reason"
+        ]
+      }
+    ]
+  },
+  {
+    "requestType": "Flatstock",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
+    "centerDataGridFields": [
+      "Part",
+      "Quantity",
+      "Work center",
+      "Destination"
+    ],
+    "subtypes": [
+      {
+        "name": "Bring",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
+        "centerDataGridFields": [
+          "Part",
+          "Quantity",
+          "Work center",
+          "Destination"
+        ]
+      },
+      {
+        "name": "Pickup",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
+        "centerDataGridFields": [
+          "Part",
+          "Quantity",
+          "Work center",
+          "Destination"
+        ]
+      },
+      {
+        "name": "Wrong Flatstock @ Workcenter",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
+        "centerDataGridFields": [
+          "Part",
+          "Quantity",
+          "Work center",
+          "Destination"
+        ]
+      }
+    ]
+  },
+  {
+    "requestType": "Table Handling",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.TableHandling.TableHandlingRequestTypeImageView",
+    "centerDataGridFields": [
+      "Part",
+      "Quantity",
+      "Work center",
+      "Destination"
+    ],
+    "subtypes": [
+      {
+        "name": "Table Place Parts",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.TableHandling.TableHandlingRequestTypeImageView",
+        "centerDataGridFields": [
+          "Part",
+          "Quantity",
+          "Work center",
+          "Destination"
+        ]
+      },
+      {
+        "name": "Table Remove Parts",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.TableHandling.TableHandlingRequestTypeImageView",
+        "centerDataGridFields": [
+          "Part",
+          "Quantity",
+          "Work center",
+          "Destination"
+        ]
+      }
+    ]
+  },
+  {
+    "requestType": "Die Handling",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
+    "centerDataGridFields": [
+      "Die",
+      "Quantity",
+      "Pickup location",
+      "Destination"
+    ],
+    "subtypes": [
+      {
+        "name": "Bring Die",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
+        "centerDataGridFields": [
+          "Die",
+          "Quantity",
+          "Pickup location",
+          "Destination"
+        ]
+      },
+      {
+        "name": "Pull Die and Put Away",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
+        "centerDataGridFields": [
+          "Die",
+          "Quantity",
+          "Pickup location",
+          "Destination"
+        ]
+      },
+      {
+        "name": "Pull Die and Take to Die Shop",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
+        "centerDataGridFields": [
+          "Die",
+          "Quantity",
+          "Pickup location",
+          "Destination"
+        ]
+      },
+      {
+        "name": "Pull Die and Leave @ press",
+        "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
+        "centerDataGridFields": [
+          "Die",
+          "Quantity",
+          "Pickup location",
+          "Destination"
+        ]
+      }
+    ]
+  },
+  {
+    "requestType": "Forklift Assist",
+    "control": "MTM_Waitlist.Module_Waitlist.Controls.ForkliftAssist.ForkliftAssistRequestTypeImageView",
+    "centerDataGridFields": [
+      "Description",
+      "Work center",
+      "Requested by"
+    ],
+    "subtypes": []
+  }
+]

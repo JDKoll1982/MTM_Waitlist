@@ -1,5 +1,6 @@
 -- Seed: seed_setup_workstations_default
 -- Engine: MySQL 5.7
+-- Source: live Visual SHOP_RESOURCE workstation list
 
 USE mtm_waitlist;
 
@@ -16,47 +17,7 @@ INSERT IGNORE INTO
     )
 VALUES (
         UUID(),
-        'Press 01A',
-        1,
-        10,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'Press 02B',
-        1,
-        20,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'Press 03C',
-        1,
-        30,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'Press 04D',
-        1,
-        40,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'Laser Cell 01',
+        '100-03',
         1,
         50,
         NULL,
@@ -66,17 +27,7 @@ VALUES (
     ),
     (
         UUID(),
-        'Laser Cell 02',
-        1,
-        60,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'Brake Press A',
+        '100-06',
         1,
         70,
         NULL,
@@ -86,7 +37,7 @@ VALUES (
     ),
     (
         UUID(),
-        'Brake Press B',
+        '100-07',
         1,
         80,
         NULL,
@@ -96,7 +47,7 @@ VALUES (
     ),
     (
         UUID(),
-        'Weld Bay 01',
+        '100-08',
         1,
         90,
         NULL,
@@ -106,7 +57,7 @@ VALUES (
     ),
     (
         UUID(),
-        'Weld Bay 02',
+        '100-09',
         1,
         100,
         NULL,
@@ -116,17 +67,7 @@ VALUES (
     ),
     (
         UUID(),
-        'Assembly Line North',
-        1,
-        110,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'Assembly Line South',
+        '100-12',
         1,
         120,
         NULL,
@@ -136,7 +77,7 @@ VALUES (
     ),
     (
         UUID(),
-        'Packing Station Alpha',
+        '100-13',
         1,
         130,
         NULL,
@@ -146,7 +87,7 @@ VALUES (
     ),
     (
         UUID(),
-        'Packing Station Bravo',
+        '100-14',
         1,
         140,
         NULL,
@@ -156,9 +97,29 @@ VALUES (
     ),
     (
         UUID(),
-        'Inspection Cell Delta',
+        '100-15',
         1,
         150,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-16',
+        1,
+        160,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-17',
+        1,
+        180,
         NULL,
         NULL,
         UTC_TIMESTAMP(),

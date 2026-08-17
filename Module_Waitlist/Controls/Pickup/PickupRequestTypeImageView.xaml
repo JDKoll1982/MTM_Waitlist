@@ -1,0 +1,14 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Waitlist.Controls.Pickup.PickupRequestTypeImageView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <Image
+            Width="160"
+            Height="160"
+            Stretch="Uniform"
+            Source="ms-appx:///Assets/RequestTypeImages/pickup.png"
+            AutomationProperties.Name="Pickup request type image" />
+    </Grid>
+</UserControl>

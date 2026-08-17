@@ -4,18 +4,23 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:MTM_Waitlist.Module_Setup.Converters"
     xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
     mc:Ignorable="d">
 
-    <Grid Padding="24" RowSpacing="16">
+    <Page.Resources>
+        <converters:SetupImagePathToImageSourceConverter x:Key="SetupImagePathToImageSourceConverter" />
+    </Page.Resources>
+
+    <Grid Style="{StaticResource SetupPageGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Spacing="8">
-            <TextBlock x:Uid="Setup_AddDunnage.TypeSelection.PageLabel" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Select Dunnage Type" />
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
+            <TextBlock x:Uid="Setup_AddDunnage.TypeSelection.PageLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Select Dunnage Type" />
             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.CurrentSelectionSummary, Mode=OneWay}" />
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
@@ -42,11 +47,7 @@
                         <Border
                             MinWidth="190"
                             Margin="8"
-                            Padding="12"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
-                            CornerRadius="10">
+                            Style="{StaticResource SetupItemCardStyle}">
                             <StackPanel Spacing="8" HorizontalAlignment="Center">
                                 <Border
                                     MinWidth="64"
@@ -57,7 +58,19 @@
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1"
                                     CornerRadius="8">
-                                    <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30" Glyph="{x:Bind IconGlyph}" />
+                                    <Rectangle
+                                        Width="64"
+                                        Height="64"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        RadiusX="8"
+                                        RadiusY="8">
+                                        <Rectangle.Fill>
+                                            <ImageBrush
+                                                Stretch="UniformToFill"
+                                                ImageSource="{x:Bind ImagePath, Converter={StaticResource SetupImagePathToImageSourceConverter}}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
                                 </Border>
                                 <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Name}" TextWrapping="WrapWholeWords" TextAlignment="Center" />
                             </StackPanel>
@@ -66,7 +79,7 @@
                 </GridView.ItemTemplate>
             </GridView>
 
-            <Grid Grid.Row="1" ColumnSpacing="8">
+            <Grid Grid.Row="1" ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />

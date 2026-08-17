@@ -34,9 +34,12 @@ public sealed class SampleDataService : ISampleDataService
         {
             return new object[]
             {
-                CreateItem(101, "Finished Goods Pickup", "pickup_fg.png", "Maria Torres", "Press 07", "00:18"),
-                CreateItem(102, "WIP Pickup", "pickup_wip.png", "Devon Price", "Press 09", "00:42"),
-                CreateItem(103, "Scrap Return", "scrap.png", "Alicia Kent", "Press 03", "00:11")
+                CreateItem(101, "Coil Request", "coil.png", "Maria Torres", "Press 07", "00:18"),
+                CreateItem(102, "NCM Pickup", "pickup_ncm.png", "Devon Price", "Press 09", "00:42"),
+                CreateItem(103, "Outside Service Pickup", "pickup_os.png", "Alicia Kent", "Press 03", "00:11"),
+                CreateItem(104, "WIP Pickup", "pickup_wip.png", "Noah Rivera", "Press 11", "00:22"),
+                CreateItem(105, "Finished Goods Pickup", "pickup_fg.png", "Elena Brooks", "Press 04", "00:35"),
+                CreateItem(106, "Scrap Return", "scrap.png", "Harper Wells", "Press 08", "00:09")
             };
         }
 
@@ -44,7 +47,10 @@ public sealed class SampleDataService : ISampleDataService
         {
             CreateItem(1, "Coil Request", "coil.png", "Jordan Lee", "Press 12", "00:27"),
             CreateItem(2, "NCM Pickup", "pickup_ncm.png", "Riley Shaw", "Press 05", "00:33"),
-            CreateItem(3, "Outside Service Pickup", "pickup_os.png", "Cameron Diaz", "Press 01", "01:05")
+            CreateItem(3, "Outside Service Pickup", "pickup_os.png", "Cameron Diaz", "Press 01", "01:05"),
+            CreateItem(4, "WIP Pickup", "pickup_wip.png", "Sage Chen", "Press 06", "00:41"),
+            CreateItem(5, "Finished Goods Pickup", "pickup_fg.png", "Mason Patel", "Press 10", "00:28"),
+            CreateItem(6, "Scrap Return", "scrap.png", "Liam Ortiz", "Press 02", "00:16")
         };
     }
 
@@ -52,11 +58,11 @@ public sealed class SampleDataService : ISampleDataService
     {
         if (_localSettingsService is null)
         {
-            return true;
+            return false;
         }
 
         var recvValue = _localSettingsService.ReadSettingAsync<bool?>(RecvMockDataSettingKey).GetAwaiter().GetResult() ?? false;
-        var inforVisualValue = _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey).GetAwaiter().GetResult() ?? true;
+        var inforVisualValue = _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey).GetAwaiter().GetResult() ?? false;
         return recvValue || inforVisualValue;
     }
 
