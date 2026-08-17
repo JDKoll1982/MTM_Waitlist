@@ -43,8 +43,10 @@
                         <Border
                             x:Name="ItemHero"
                             Grid.RowSpan="5"
-                            Width="110"
-                            Height="110"
+                            MinWidth="88"
+                            MinHeight="88"
+                            MaxWidth="110"
+                            MaxHeight="110"
                             Padding="12"
                             Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
                             CornerRadius="12">
@@ -59,7 +61,9 @@
                             Grid.Column="1"
                             Grid.ColumnSpan="2"
                             Style="{ThemeResource TitleTextBlockStyle}"
-                            Text="{x:Bind ViewModel.Item.Title, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.Item.Title, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="WrapWholeWords" />
 
                         <TextBlock
                             Grid.Row="1"
@@ -70,7 +74,9 @@
                             Grid.Row="1"
                             Grid.Column="2"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.Item.RequestedByName, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.Item.RequestedByName, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="NoWrap" />
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="1"
@@ -80,7 +86,9 @@
                             Grid.Row="2"
                             Grid.Column="2"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.Item.RequestedPressName, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.Item.RequestedPressName, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="NoWrap" />
                         <TextBlock
                             Grid.Row="3"
                             Grid.Column="1"
@@ -151,11 +159,12 @@
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="models:WaitlistDetailTemplateField">
                                                 <Grid
-                                                    Width="360"
+                                                    MinWidth="260"
+                                                    MaxWidth="420"
                                                     Margin="0,0,16,6"
                                                     ColumnSpacing="12">
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="150" />
+                                                        <ColumnDefinition Width="Auto" MinWidth="120" MaxWidth="180" />
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock

@@ -22,8 +22,8 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="6" />
                 <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="190" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" MinWidth="140" MaxWidth="260" />
+                    <ColumnDefinition Width="2*" MinWidth="180" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
@@ -36,8 +36,10 @@
             <Border
                 Grid.Row="0"
                 Grid.Column="1"
-                Width="96"
-                Height="96"
+                MinWidth="72"
+                MinHeight="72"
+                MaxWidth="96"
+                MaxHeight="96"
                 Padding="7"
                 Background="{Binding AccentSurfaceBrush, ElementName=Root}"
                 CornerRadius="10">
@@ -65,24 +67,32 @@
             <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Spacing="3">
                 <TextBlock
                     FontSize="20"
+                    MaxLines="2"
                     Style="{ThemeResource BodyStrongTextBlockStyle}"
                     Text="{Binding Order.Title, ElementName=Root}"
+                    TextTrimming="CharacterEllipsis"
                     TextWrapping="WrapWholeWords" />
                 <TextBlock
                     FontSize="12"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    TextTrimming="CharacterEllipsis"
+                    TextWrapping="NoWrap">
                     <Run FontWeight="SemiBold" Text="Requested by: " />
                     <Run Text="{Binding Order.RequestedByName, ElementName=Root}" />
                 </TextBlock>
                 <TextBlock
                     FontSize="12"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    TextTrimming="CharacterEllipsis"
+                    TextWrapping="NoWrap">
                     <Run FontWeight="SemiBold" Text="Press: " />
                     <Run Text="{Binding Order.RequestedPressName, ElementName=Root}" />
                 </TextBlock>
                 <TextBlock
                     FontSize="12"
-                    Foreground="{Binding AccentBrush, ElementName=Root}">
+                    Foreground="{Binding AccentBrush, ElementName=Root}"
+                    TextTrimming="CharacterEllipsis"
+                    TextWrapping="NoWrap">
                     <Run FontWeight="SemiBold" Text="Remaining time: " />
                     <Run Text="{Binding Order.RemainingTimeText, ElementName=Root}" />
                 </TextBlock>
@@ -95,8 +105,10 @@
                 Spacing="5"
                 VerticalAlignment="Center">
                 <Button
-                    Width="44"
-                    Height="44"
+                    MinWidth="40"
+                    MinHeight="40"
+                    MaxWidth="48"
+                    MaxHeight="48"
                     AutomationProperties.Name="Edit"
                     Background="{ThemeResource SystemAccentColor}"
                     CornerRadius="9">
@@ -106,8 +118,10 @@
                         Glyph="&#xE70F;" />
                 </Button>
                 <Button
-                    Width="44"
-                    Height="44"
+                    MinWidth="40"
+                    MinHeight="40"
+                    MaxWidth="48"
+                    MaxHeight="48"
                     AutomationProperties.Name="Cancel"
                     Background="{ThemeResource SystemFillColorCriticalBrush}"
                     CornerRadius="9">
@@ -117,8 +131,10 @@
                         Glyph="&#xE10A;" />
                 </Button>
                 <Button
-                    Width="44"
-                    Height="44"
+                    MinWidth="40"
+                    MinHeight="40"
+                    MaxWidth="48"
+                    MaxHeight="48"
                     AutomationProperties.Name="Accept"
                     Background="{ThemeResource SystemFillColorSuccessBrush}"
                     CornerRadius="9">
@@ -129,11 +145,17 @@
                 </Button>
             </StackPanel>
 
-            <ContentPresenter
-                 Grid.Column="3"
-                 Margin="0,0,4,0"
-                Content="{Binding DetailsContent, ElementName=Root}"
-                HorizontalContentAlignment="Stretch" />
+            <ScrollViewer
+                Grid.Column="3"
+                Margin="0,0,4,0"
+                HorizontalScrollBarVisibility="Disabled"
+                HorizontalScrollMode="Disabled"
+                VerticalScrollBarVisibility="Auto"
+                VerticalScrollMode="Auto">
+                <ContentPresenter
+                    Content="{Binding DetailsContent, ElementName=Root}"
+                    HorizontalContentAlignment="Stretch" />
+            </ScrollViewer>
         </Grid>
     </Border>
 </UserControl>

@@ -53,7 +53,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:SetupPartResult">
                             <Button Command="{Binding ElementName=RootPage, Path=ViewModel.SelectPartCommand}" CommandParameter="{x:Bind}" Margin="0,0,12,12">
-                                <StackPanel Padding="10" Width="220" Spacing="4">
+                                <StackPanel Padding="10" MinWidth="180" MaxWidth="260" Spacing="4">
                                     <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind PartNumber}" />
                                     <TextBlock Text="{x:Bind Description}" TextWrapping="WrapWholeWords" />
                                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind WorkCenter}" />
@@ -75,7 +75,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:SetupSequenceResult">
                             <Button Command="{Binding ElementName=RootPage, Path=ViewModel.SelectSequenceCommand}" CommandParameter="{x:Bind}" Margin="0,0,12,12">
-                                <StackPanel Padding="10" Width="180" Spacing="4">
+                                <StackPanel Padding="10" MinWidth="150" MaxWidth="220" Spacing="4">
                                     <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind SequenceNumber}" />
                                     <TextBlock Text="{x:Bind Description}" TextWrapping="WrapWholeWords" />
                                 </StackPanel>
