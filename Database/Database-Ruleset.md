@@ -77,3 +77,10 @@ This document applies your completed naming conventions and database architectur
 - Production rollout: manual DBA-reviewed promotion with rollback prepared.
 - Naming drift in SQL must fail CI/PR checks.
 - Exceptions require explicit written approval in PR notes.
+
+## Waitlist Request Persistence Guidance
+- For waitlist request persistence work, prefer the existing MySQL stored-procedure pattern and current operational tables before introducing new schema objects.
+- Reuse the established helper-server execution style (`MySqlHelperServer` + parameterized stored procedures / SQL) instead of creating ad hoc direct SQL wiring in each feature service.
+- A new table is allowed only when the workflow clearly requires a distinct domain model that cannot be represented by the current operational data model without breaking invariants.
+- All new or modified SQL artifacts must still follow the file-per-artifact convention and must update `Database/Bootstrap/update_table_descriptions.sql` when applicable.
+- Blockpoint: do not duplicate persistence logic across feature services; centralize the request creation contract through the helper-server pattern and make any new stored procedure contract explicit in the repo documentation before implementation.

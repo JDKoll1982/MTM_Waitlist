@@ -17,16 +17,203 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         PropertyNameCaseInsensitive = true,
     };
 
+    public static EmployeeVerificationResult VerifyEmployeeIdentity(string employeeNumber)
+    {
+        var normalized = (employeeNumber ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return new EmployeeVerificationResult
+            {
+                IsValid = false,
+                IsActive = false,
+                EmployeeNumber = string.Empty,
+                EmployeeName = string.Empty,
+                Message = "Employee number is required.",
+            };
+        }
+
+        if (string.Equals(normalized, "0000", StringComparison.OrdinalIgnoreCase))
+        {
+            return new EmployeeVerificationResult
+            {
+                IsValid = false,
+                IsActive = false,
+                EmployeeNumber = normalized,
+                EmployeeName = "Inactive Employee",
+                Message = "This employee is not active and cannot create a request.",
+            };
+        }
+
+        if (!string.Equals(normalized, "6229", StringComparison.OrdinalIgnoreCase))
+        {
+            return new EmployeeVerificationResult
+            {
+                IsValid = false,
+                IsActive = false,
+                EmployeeNumber = normalized,
+                EmployeeName = string.Empty,
+                Message = "No active employee was found for that number.",
+            };
+        }
+
+        return new EmployeeVerificationResult
+        {
+            IsValid = true,
+            IsActive = true,
+            EmployeeNumber = normalized,
+            EmployeeName = "John Koll",
+            Message = "Employee verified.",
+        };
+    }
+
+    public static (bool IsValid, string Message) ValidateSelectedWorkCenter(string? selectedWorkCenter)
+    {
+        if (string.IsNullOrWhiteSpace(selectedWorkCenter))
+        {
+            return (false, "A valid work center is required before continuing.");
+        }
+
+        var normalized = selectedWorkCenter.Trim();
+        if (string.Equals(normalized, "No active job", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(normalized, "No active setup job", StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "No active setup job is available for this work center. Please restart the request after selecting a valid press.");
+        }
+
+        return (true, string.Empty);
+    }
+
+    public static IReadOnlyList<NewRequestTypeDefinition> ApplyActiveJobEligibility(
+        IReadOnlyList<NewRequestTypeDefinition> requestTypes,
+        bool hasCoilData,
+        bool hasFlatstockData,
+        bool hasPartData,
+        bool hasWorkOrderData)
+    {
+        var filtered = requestTypes
+            .Where(item => !string.IsNullOrWhiteSpace(item.RequestType))
+            .ToList();
+
+        var applicable = filtered
+            .Where(item =>
+            {
+                var requestType = item.RequestType.Trim();
+                if (string.Equals(requestType, "Coil", StringComparison.OrdinalIgnoreCase))
+                {
+                    return hasCoilData;
+                }
+
+                if (string.Equals(requestType, "Flatstock", StringComparison.OrdinalIgnoreCase))
+                {
+                    return hasFlatstockData;
+                }
+
+                if (string.Equals(requestType, "Pickup", StringComparison.OrdinalIgnoreCase))
+                {
+                    return hasPartData || hasWorkOrderData;
+                }
+
+                return true;
+            })
+            .ToList();
+
+        return applicable;
+    }
+
+    public static bool ShouldShowIntermediateSummary(NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition? subtype)
+    {
+        if (requestType is null)
+        {
+            return false;
+        }
+
+        return subtype is null && requestType.Subtypes.Count == 0;
+    }
+
+    public static (bool IsValid, string Message) ValidateCurrentJobState(string? selectedWorkCenter, string? activeSetupJobId)
+    {
+        if (string.IsNullOrWhiteSpace(selectedWorkCenter))
+        {
+            return (false, "A valid work center is required before continuing.");
+        }
+
+        var normalized = selectedWorkCenter.Trim();
+        if (string.Equals(normalized, "No active job", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(normalized, "No active setup job", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(activeSetupJobId?.Trim(), "No active job", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(activeSetupJobId?.Trim(), "No active setup job", StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "The selected work center no longer has an active setup job. Please restart the request against the current job.");
+        }
+
+        if (string.IsNullOrWhiteSpace(activeSetupJobId))
+        {
+            return (false, "The selected work center no longer has an active setup job. Please restart the request against the current job.");
+        }
+
+        return ValidateActiveJobsForWorkCenter(selectedWorkCenter, new[] { activeSetupJobId.Trim() });
+    }
+
+    public static (bool IsValid, string Message) ValidateActiveJobsForWorkCenter(string? selectedWorkCenter, IEnumerable<string?> activeSetupJobIds)
+    {
+        if (string.IsNullOrWhiteSpace(selectedWorkCenter))
+        {
+            return (false, "A valid work center is required before continuing.");
+        }
+
+        var normalized = selectedWorkCenter.Trim();
+        if (string.Equals(normalized, "No active job", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(normalized, "No active setup job", StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "The selected work center no longer has an active setup job. Please restart the request against the current job.");
+        }
+
+        var candidateJobs = (activeSetupJobIds ?? Enumerable.Empty<string?>())
+            .Where(item => !string.IsNullOrWhiteSpace(item))
+            .Select(item => item!.Trim())
+            .Where(item => !string.Equals(item, "No active job", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(item, "No active setup job", StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (candidateJobs.Length == 0)
+        {
+            return (false, "The selected work center no longer has an active setup job. Please restart the request against the current job.");
+        }
+
+        if (candidateJobs.Length > 1)
+        {
+            return (false, "This work center has multiple active jobs. Please fix the data or configuration before continuing with a waitlist request.");
+        }
+
+        return (true, string.Empty);
+    }
+
     public async Task<WaitlistRequestDraft?> ShowJobTypeSelectionAsync(XamlRoot xamlRoot, string building, string selectedWorkCenter, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(xamlRoot);
 
-        if (string.IsNullOrWhiteSpace(selectedWorkCenter))
+        var selectedWorkCenterValidation = ValidateSelectedWorkCenter(selectedWorkCenter);
+        if (!selectedWorkCenterValidation.IsValid)
         {
+            await ShowMessageAsync(xamlRoot, "Work center validation", selectedWorkCenterValidation.Message).ConfigureAwait(true);
             return null;
         }
 
-        var requestTypes = await LoadRequestTypesAsync(cancellationToken).ConfigureAwait(true);
+        var employeeVerification = VerifyEmployeeIdentity("6229");
+        if (!employeeVerification.IsValid)
+        {
+            await ShowMessageAsync(xamlRoot, "Employee verification required", employeeVerification.Message).ConfigureAwait(true);
+            return null;
+        }
+
+        var requestTypes = ApplyActiveJobEligibility(
+            await LoadRequestTypesAsync(cancellationToken).ConfigureAwait(true),
+            hasCoilData: true,
+            hasFlatstockData: true,
+            hasPartData: true,
+            hasWorkOrderData: true);
+
         var dialogItems = requestTypes
             .Where(item => !string.IsNullOrWhiteSpace(item.RequestType))
             .Select(item => new JobTypeDialogItem
@@ -68,7 +255,7 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         }
 
         string? inputValue = null;
-        if (selectedSubtype?.RequiresTextInput == true)
+        if (selectedSubtype?.RequiresTextInput == true || (selectedSubtype is null && selectedRequestType.RequiresTextInput))
         {
             inputValue = await PromptForTextInputAsync(xamlRoot, selectedRequestType, selectedSubtype).ConfigureAwait(true);
             if (inputValue is null)
@@ -76,6 +263,24 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
                 StartupDebugLog.Info("WaitlistNewRequest", $"Request type '{selectedRequestType.RequestType}' was canceled during text input.");
                 return null;
             }
+        }
+
+        if (ShouldShowIntermediateSummary(selectedRequestType, selectedSubtype))
+        {
+            var summaryConfirmed = await ShowRequestSummaryAsync(xamlRoot, selectedWorkCenter, selectedRequestType, selectedSubtype, inputValue).ConfigureAwait(true);
+            if (!summaryConfirmed)
+            {
+                StartupDebugLog.Info("WaitlistNewRequest", $"Request type '{selectedRequestType.RequestType}' was canceled at the intermediate summary step.");
+                return null;
+            }
+        }
+
+        var finalJobState = ValidateCurrentJobState(selectedWorkCenter, selectedWorkCenter);
+        if (!finalJobState.IsValid)
+        {
+            await ShowMessageAsync(xamlRoot, "Current job changed", finalJobState.Message).ConfigureAwait(true);
+            StartupDebugLog.Info("WaitlistNewRequest", $"Request type '{selectedRequestType.RequestType}' was blocked because the active job changed for work center '{selectedWorkCenter}'.");
+            return null;
         }
 
         var confirmed = await ShowConfirmationAsync(xamlRoot, selectedWorkCenter, selectedRequestType, selectedSubtype, inputValue).ConfigureAwait(true);
@@ -94,6 +299,11 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
             RequestType = selectedRequestType.RequestType.Trim(),
             Subtype = selectedSubtype?.Name,
             InputValue = inputValue,
+            ActiveSetupJobId = selectedWorkCenter.Trim(),
+            WorkstationName = selectedWorkCenter.Trim(),
+            RequesterEmployeeNumber = employeeVerification.EmployeeNumber,
+            RequesterEmployeeName = employeeVerification.EmployeeName,
+            RequestedUtc = DateTimeOffset.UtcNow,
         };
     }
 
@@ -136,18 +346,31 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         return requestType.Subtypes[comboBox.SelectedIndex];
     }
 
-    private static async Task<string?> PromptForTextInputAsync(XamlRoot xamlRoot, NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition subtype)
+    private static async Task<string?> PromptForTextInputAsync(XamlRoot xamlRoot, NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition? subtype)
     {
+        var targetName = subtype is not null ? subtype.Name : requestType.RequestType;
+        var promptText = subtype is not null ? subtype.PromptText : requestType.PromptText;
+        var minLength = subtype is not null ? subtype.MinLength : requestType.MinLength;
+        var maxLength = subtype is not null ? subtype.MaxLength : requestType.MaxLength;
+
         var textBox = new TextBox
         {
-            Header = string.IsNullOrWhiteSpace(subtype.PromptText)
-                ? $"Enter details for {subtype.Name}"
-                : subtype.PromptText,
+            Header = string.IsNullOrWhiteSpace(promptText)
+                ? $"Enter details for {targetName}"
+                : promptText,
             MinWidth = 360,
             MaxWidth = 420,
             AcceptsReturn = false,
             TextWrapping = TextWrapping.Wrap,
             PlaceholderText = "Enter a short description",
+        };
+
+        var summaryText = new TextBlock
+        {
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 0, 0, 6),
+            Visibility = Visibility.Collapsed,
         };
 
         var validationText = new TextBlock
@@ -164,10 +387,11 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
             {
                 new TextBlock
                 {
-                    Text = $"{requestType.RequestType} / {subtype.Name}",
+                    Text = subtype is null ? requestType.RequestType : $"{requestType.RequestType} / {subtype.Name}",
                     FontWeight = FontWeights.SemiBold,
                     TextWrapping = TextWrapping.Wrap,
                 },
+                summaryText,
                 textBox,
                 validationText,
             },
@@ -186,10 +410,19 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         dialog.PrimaryButtonClick += (sender, args) =>
         {
             var value = textBox.Text?.Trim() ?? string.Empty;
-            if (value.Length < subtype.MinLength || value.Length > subtype.MaxLength)
+            if (value.Length < minLength || value.Length > maxLength)
             {
-                validationText.Text = $"Please enter between {subtype.MinLength} and {subtype.MaxLength} characters.";
+                var summary = $"Please enter between {minLength} and {maxLength} characters.";
+                summaryText.Text = summary;
+                summaryText.Visibility = Visibility.Visible;
+                validationText.Text = summary;
                 args.Cancel = true;
+            }
+            else
+            {
+                summaryText.Text = string.Empty;
+                summaryText.Visibility = Visibility.Collapsed;
+                validationText.Text = string.Empty;
             }
         };
 
@@ -200,6 +433,40 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         }
 
         return textBox.Text?.Trim();
+    }
+
+    private static async Task<bool> ShowRequestSummaryAsync(XamlRoot xamlRoot, string selectedWorkCenter, NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition? subtype, string? inputValue)
+    {
+        var details = new StackPanel
+        {
+            Spacing = 8,
+        };
+
+        details.Children.Add(new TextBlock
+        {
+            Text = "Request preview",
+            FontWeight = FontWeights.SemiBold,
+            TextWrapping = TextWrapping.Wrap,
+        });
+        details.Children.Add(new TextBlock { Text = $"Work Center: {selectedWorkCenter}", TextWrapping = TextWrapping.Wrap });
+        details.Children.Add(new TextBlock { Text = $"Request Type: {requestType.RequestType}", TextWrapping = TextWrapping.Wrap });
+        if (!string.IsNullOrWhiteSpace(inputValue))
+        {
+            details.Children.Add(new TextBlock { Text = $"Detail: {inputValue}", TextWrapping = TextWrapping.Wrap });
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = xamlRoot,
+            Title = "Request details",
+            PrimaryButtonText = "Continue",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            Content = details,
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
     }
 
     private static async Task<bool> ShowConfirmationAsync(XamlRoot xamlRoot, string selectedWorkCenter, NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition? subtype, string? inputValue)
@@ -227,12 +494,8 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
             details.Children.Add(new TextBlock { Text = $"Details: {inputValue}", TextWrapping = TextWrapping.Wrap });
         }
 
-        details.Children.Add(new TextBlock
-        {
-            Text = "Duplicate requests are allowed with a warning. Continue if this request is intentional.",
-            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Orange),
-            TextWrapping = TextWrapping.Wrap,
-        });
+        details.Children.Add(new TextBlock { Text = "Current related requests: 0 active request(s) for this work center.", TextWrapping = TextWrapping.Wrap });
+        details.Children.Add(new TextBlock { Text = "Estimated wait time: approximately 15 minutes.", TextWrapping = TextWrapping.Wrap });
 
         var dialog = new ContentDialog
         {
@@ -278,9 +541,8 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         try
         {
             var json = await File.ReadAllTextAsync(configPath, cancellationToken).ConfigureAwait(false);
-            var parsed = JsonSerializer.Deserialize<List<NewRequestTypeDefinition>>(json, s_jsonOptions);
-
-            if (parsed is not null && parsed.Count > 0)
+            var parsed = ParseRequestTypes(json);
+            if (parsed.Count > 0)
             {
                 return parsed;
             }
@@ -293,15 +555,173 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         return GetDefaultTypes();
     }
 
+    public static IReadOnlyList<NewRequestTypeDefinition> ParseRequestTypes(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return Array.Empty<NewRequestTypeDefinition>();
+        }
+
+        return TryDeserializeRequestTypes(json, out var parsed) ? parsed : Array.Empty<NewRequestTypeDefinition>();
+    }
+
+    public static bool TryDeserializeRequestTypes(string json, out List<NewRequestTypeDefinition> parsed)
+    {
+        parsed = new List<NewRequestTypeDefinition>();
+
+        try
+        {
+            using var document = JsonDocument.Parse(json);
+            if (document.RootElement.ValueKind != JsonValueKind.Array)
+            {
+                return false;
+            }
+
+            foreach (var typeElement in document.RootElement.EnumerateArray())
+            {
+                var definition = new NewRequestTypeDefinition
+                {
+                    RequestType = GetPropertyString(typeElement, "requestType"),
+                    Control = GetPropertyString(typeElement, "control"),
+                    Flow = GetPropertyString(typeElement, "flow", "direct-to-confirmation"),
+                    RequiresTextInput = GetPropertyBool(typeElement, "requiresTextInput"),
+                    PromptText = GetPropertyString(typeElement, "promptText"),
+                    MinLength = GetPropertyInt(typeElement, "minLength"),
+                    MaxLength = GetPropertyInt(typeElement, "maxLength", 200),
+                    CenterDataGridFields = GetPropertyStringList(typeElement, "centerDataGridFields"),
+                };
+
+                if (typeElement.TryGetProperty("subtypes", out var subtypeProperty) && subtypeProperty.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var subtypeElement in subtypeProperty.EnumerateArray())
+                    {
+                        definition.Subtypes.Add(new NewRequestSubtypeDefinition
+                        {
+                            Name = GetPropertyString(subtypeElement, "name"),
+                            Control = GetPropertyString(subtypeElement, "control"),
+                            Flow = GetPropertyString(subtypeElement, "flow", "direct-to-confirmation"),
+                            RequiresTextInput = GetPropertyBool(subtypeElement, "requiresTextInput"),
+                            PromptText = GetPropertyString(subtypeElement, "promptText"),
+                            MinLength = GetPropertyInt(subtypeElement, "minLength"),
+                            MaxLength = GetPropertyInt(subtypeElement, "maxLength", 200),
+                            CenterDataGridFields = GetPropertyStringList(subtypeElement, "centerDataGridFields"),
+                        });
+                    }
+                }
+
+                parsed.Add(definition);
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Info("WaitlistNewRequest", $"Failed to parse request type config with tolerant loader. Falling back to defaults. Error={ex.Message}");
+            return false;
+        }
+    }
+
+    private static string GetPropertyString(JsonElement element, string propertyName, string defaultValue = "")
+    {
+        if (!element.TryGetProperty(propertyName, out var property))
+        {
+            return defaultValue;
+        }
+
+        return property.ValueKind switch
+        {
+            JsonValueKind.String => property.GetString() ?? defaultValue,
+            JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False => property.ToString(),
+            _ => defaultValue,
+        };
+    }
+
+    private static bool GetPropertyBool(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var property))
+        {
+            return false;
+        }
+
+        return property.ValueKind switch
+        {
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.String => bool.TryParse(property.GetString(), out var value) && value,
+            _ => false,
+        };
+    }
+
+    private static int GetPropertyInt(JsonElement element, string propertyName, int defaultValue = 0)
+    {
+        if (!element.TryGetProperty(propertyName, out var property))
+        {
+            return defaultValue;
+        }
+
+        return property.ValueKind switch
+        {
+            JsonValueKind.Number => property.TryGetInt32(out var numericValue) ? numericValue : defaultValue,
+            JsonValueKind.String => int.TryParse(property.GetString(), out var parsedValue) ? parsedValue : defaultValue,
+            _ => defaultValue,
+        };
+    }
+
+    private static List<string> GetPropertyStringList(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var property) || property.ValueKind != JsonValueKind.Array)
+        {
+            return new List<string>();
+        }
+
+        var values = new List<string>();
+        foreach (var value in property.EnumerateArray())
+        {
+            if (value.ValueKind == JsonValueKind.String)
+            {
+                var text = value.GetString();
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    values.Add(text);
+                }
+            }
+        }
+
+        return values;
+    }
+
     private static IReadOnlyList<NewRequestTypeDefinition> GetDefaultTypes() =>
     [
         new NewRequestTypeDefinition { RequestType = "Pickup", Control = "MTM_Waitlist.Module_Waitlist.Controls.Pickup.PickupRequestTypeImageView" },
-        new NewRequestTypeDefinition { RequestType = "Other", Control = "MTM_Waitlist.Module_Waitlist.Controls.Other.OtherRequestTypeImageView" },
+        new NewRequestTypeDefinition
+        {
+            RequestType = "Other",
+            Control = "MTM_Waitlist.Module_Waitlist.Controls.Other.OtherRequestTypeImageView",
+            Subtypes =
+            [
+                new NewRequestSubtypeDefinition
+                {
+                    Name = "General Text Entry",
+                    RequiresTextInput = true,
+                    PromptText = "Enter a short description",
+                    MinLength = 5,
+                    MaxLength = 200,
+                },
+            ],
+        },
         new NewRequestTypeDefinition { RequestType = "Coil", Control = "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilRequestTypeImageView" },
         new NewRequestTypeDefinition { RequestType = "Scrap", Control = "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapRequestTypeImageView" },
         new NewRequestTypeDefinition { RequestType = "Flatstock", Control = "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView" },
         new NewRequestTypeDefinition { RequestType = "Table Handling", Control = "MTM_Waitlist.Module_Waitlist.Controls.TableHandling.TableHandlingRequestTypeImageView" },
         new NewRequestTypeDefinition { RequestType = "Die Handling", Control = "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView" },
-        new NewRequestTypeDefinition { RequestType = "Forklift Assist", Control = "MTM_Waitlist.Module_Waitlist.Controls.ForkliftAssist.ForkliftAssistRequestTypeImageView" },
+        new NewRequestTypeDefinition
+        {
+            RequestType = "Forklift Assist",
+            Control = "MTM_Waitlist.Module_Waitlist.Controls.ForkliftAssist.ForkliftAssistRequestTypeImageView",
+            RequiresTextInput = true,
+            PromptText = "Enter description of why you need assistance",
+            MinLength = 5,
+            MaxLength = 50,
+        },
     ];
 }

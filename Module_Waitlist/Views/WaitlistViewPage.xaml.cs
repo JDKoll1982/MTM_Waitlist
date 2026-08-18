@@ -104,17 +104,63 @@ public sealed partial class WaitlistViewPage : Page
             {
                 StartupDebugLog.Info("WaitlistRequest", $"Submission succeeded. Refreshing building '{ViewModel.SelectedBuilding}'.");
                 await ViewModel.RefreshAsync();
-                return;
+
+                var completedResult = await ShowSubmissionCompleteDialogAsync().ConfigureAwait(true);
+                if (completedResult)
+                {
+                    return;
+                }
+
+                continue;
             }
 
-            await new ContentDialog
+            var retryResult = await ShowSubmissionFailureDialogAsync(submitResult.Message).ConfigureAwait(true);
+            if (retryResult)
             {
-                XamlRoot = XamlRoot,
-                Title = "Request not submitted",
-                Content = new TextBlock { Text = submitResult.Message, TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap },
-                CloseButtonText = "Close",
-            }.ShowAsync();
+                continue;
+            }
+
             return;
         }
+    }
+
+    private static async Task<bool> ShowSubmissionCompleteDialogAsync()
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = App.MainWindow?.Content?.XamlRoot,
+            Title = "Request completed",
+            Content = new TextBlock
+            {
+                Text = "Your request has been created. Choose whether to return to the waitlist or start another request.",
+                TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap,
+            },
+            PrimaryButtonText = "Return to Waitlist",
+            SecondaryButtonText = "Add Another Request",
+            DefaultButton = ContentDialogButton.Primary,
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
+    }
+
+    private static async Task<bool> ShowSubmissionFailureDialogAsync(string message)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = App.MainWindow?.Content?.XamlRoot,
+            Title = "Request not submitted",
+            Content = new TextBlock
+            {
+                Text = message,
+                TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap,
+            },
+            PrimaryButtonText = "Retry",
+            CloseButtonText = "Close",
+            DefaultButton = ContentDialogButton.Primary,
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
     }
 }

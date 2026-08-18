@@ -13,6 +13,11 @@
       {
         "name": "Pickup Other",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Pickup.PickupRequestTypeImageView",
+        "flow": "collect-input-then-confirm",
+        "requiresTextInput": true,
+        "promptText": "Enter what is needed",
+        "minLength": 5,
+        "maxLength": 200,
         "centerDataGridFields": [
           "Request description",
           "Requested work center"
@@ -84,6 +89,11 @@
       {
         "name": "General Text Entry",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Other.OtherRequestTypeImageView",
+        "flow": "collect-input-then-confirm",
+        "requiresTextInput": true,
+        "promptText": "Enter a short description",
+        "minLength": 5,
+        "maxLength": 200,
         "centerDataGridFields": [
           "Request description",
           "Requested work center"
@@ -127,6 +137,11 @@
       {
         "name": "Wrong Coil @ press",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
+        "flow": "collect-input-then-confirm",
+        "requiresTextInput": true,
+        "promptText": "Explain how or why the coil is wrong",
+        "minLength": 5,
+        "maxLength": 200,
         "centerDataGridFields": [
           "Coil number",
           "Quantity in house",
@@ -330,6 +345,11 @@
   {
     "requestType": "Forklift Assist",
     "control": "MTM_Waitlist.Module_Waitlist.Controls.ForkliftAssist.ForkliftAssistRequestTypeImageView",
+    "flow": "collect-input-then-confirm",
+    "requiresTextInput": true,
+    "promptText": "Enter description of why you need assistance",
+    "minLength": 5,
+    "maxLength": 50,
     "centerDataGridFields": [
       "Description",
       "Work center",

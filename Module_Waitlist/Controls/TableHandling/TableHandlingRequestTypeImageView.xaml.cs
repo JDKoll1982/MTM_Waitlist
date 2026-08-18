@@ -7,5 +7,6 @@ public sealed partial class TableHandlingRequestTypeImageView : UserControl
     public TableHandlingRequestTypeImageView()
     {
         InitializeComponent();
+        DataContext = new TableHandlingRequestTypeViewModel();
     }
 }

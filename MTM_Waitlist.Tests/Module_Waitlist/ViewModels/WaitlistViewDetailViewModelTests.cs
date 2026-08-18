@@ -35,6 +35,36 @@ public sealed class WaitlistViewDetailViewModelTests
     }
 
     [TestMethod]
+    public void OnNavigatedTo_WhenPassedSessionRequestId_UsesTheCorrectRequestDetailTemplate()
+    {
+        var request = new WaitlistRequest
+        {
+            Id = Guid.NewGuid(),
+            Building = "Expo Drive",
+            WorkCenter = "Press 12",
+            RequestType = "Coil",
+            Subtype = "Wrong Coil",
+            InputValue = "Wrong material at press",
+            Status = "Pending",
+            RequestedUtc = DateTimeOffset.UtcNow,
+            TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(12),
+            IsOverdue = false,
+        };
+
+        var item = WaitlistViewViewModel.CreateSessionOrder(request);
+        var viewModel = new WaitlistViewDetailViewModel(
+            new RecordingNavigationService(),
+            new StubSampleDataService(item),
+            new StubBuildingSelectionService());
+
+        viewModel.OnNavigatedTo(item.Id);
+
+        Assert.AreEqual(3, viewModel.TemplateSections.Count);
+        Assert.AreEqual("Coil material", viewModel.TemplateSections[0].Title);
+        Assert.AreEqual("Wrong coil", viewModel.TemplateSections[0].Fields[0].Value);
+    }
+
+    [TestMethod]
     public void BackCommand_CallsNavigationGoBack()
     {
         var navigationService = new RecordingNavigationService();

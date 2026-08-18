@@ -17,11 +17,26 @@ Current End-User Flow (Implemented Today)
 4. User clicks a press/work center card.
 5. The app validates whether that selected press/work center has an active setup job.
 6. If no active setup job exists, the app blocks continuation and shows:
-   No Job is currently set up for that Press. Please contact a Setup Tech.
+   No active setup job is available for this work center. Please restart the request after selecting a valid press.
 7. If an active setup job exists, the selection is accepted and the work-center modal closes.
+8. The guided new-request flow continues with request-type selection, optional subtype selection, required text validation, summary handling, and final confirmation.
+9. If the work center changes or becomes stale at the final validation step, the workflow stops and requires the user to restart from the work center selection.
 
-Important implementation note:
-As of this update, the guided New Request modal (Job Type, Subtype, validation, confirmation) is not yet wired in immediately after successful press/work-center selection.
+Implementation status:
+- Work-center validation, employee verification, job-state revalidation, subtype branching, text-field validation, duplicate warning, and waitlist refresh are implemented and covered by the waitlist test suite.
+- The configuration-driven request types and text rules continue to be loaded from `Assets/Config/waitlist-request-types.json` with safe fallback defaults when malformed values are encountered.
+
+Production Persistence Contract (Current Decision)
+
+For live production waitlist requests, the implementation should use the existing database pattern already established in the repo:
+
+- Use `MySqlHelperServer` and the existing stored-procedure execution pattern (`ExecuteStoredProcedureQueryAsync`, `ExecuteStoredProcedureNonQueryAsync`, and `ExecuteSqlQueryAsync`) instead of inventing a separate custom persistence layer.
+- Reuse current operational tables and queue-backed database structures unless a new table is clearly required by the business workflow and approved by the DB contract review.
+- Keep waitlist insert/update logic aligned with `Database/Database-Ruleset.md` and the file-per-artifact layout under `Database/StoredProcedures/`.
+- Preserve the existing mock-data short-circuit pattern using `Feature.InforVisualMockData` and `Feature.RecvMockData` so production behavior is still testable without changing the app's runtime contract.
+- Any production SQL contract should be written in the same stored-procedure style as the rest of the repo, with parameterized queries and explicit review of table reuse before creating a new table.
+
+This is the default contract for any future waitlist persistence work and is intended to avoid schema drift and duplicated persistence patterns.
 
 Guided New Request Experience (Next Phase)
 

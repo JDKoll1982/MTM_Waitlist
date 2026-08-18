@@ -7,5 +7,6 @@ public sealed partial class FlatstockRequestTypeImageView : UserControl
     public FlatstockRequestTypeImageView()
     {
         InitializeComponent();
+        DataContext = new FlatstockRequestTypeViewModel();
     }
 }

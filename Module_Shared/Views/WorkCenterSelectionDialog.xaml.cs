@@ -30,7 +30,7 @@ public sealed partial class WorkCenterSelectionDialog : ContentDialog
         StartupDebugLog.Info("WorkCenterSelectionDialog", $"SetContent completed. Workstation='{workstationName}', HotCount={hotWorkCenters.Count}, OtherCount={otherWorkCenters.Count}, ActiveJobCount={_activeJobWorkCenters.Count}.");
     }
 
-    private async void WorkCenter_ItemClick(object sender, ItemClickEventArgs e)
+    private void WorkCenter_ItemClick(object sender, ItemClickEventArgs e)
     {
         if (e.ClickedItem is string workCenter && !string.IsNullOrWhiteSpace(workCenter))
         {
@@ -44,16 +44,7 @@ public sealed partial class WorkCenterSelectionDialog : ContentDialog
 
                 StartupDebugLog.Info("WorkCenterSelectionDialog", $"Blocked workstation selection for '{normalizedWorkCenter}' because no active setup job exists.");
 
-                var infoDialog = new ContentDialog
-                {
-                    XamlRoot = XamlRoot,
-                    Title = "No Active Setup Job",
-                    Content = "No Job is currently set up for that Press. Please contact a Setup Tech.",
-                    CloseButtonText = "OK",
-                    DefaultButton = ContentDialogButton.Close,
-                };
-
-                _ = await infoDialog.ShowAsync();
+                NoActiveJobInfoBar.IsOpen = true;
                 return;
             }
 

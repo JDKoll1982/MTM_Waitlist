@@ -12,6 +12,14 @@
             FontSize="14"
             Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
+        <InfoBar
+            x:Name="NoActiveJobInfoBar"
+            IsOpen="False"
+            IsClosable="True"
+            Severity="Warning"
+            Title="No active setup job"
+            Message="No Job is currently set up for that Press. Please contact a Setup Tech." />
+
         <Border
             Padding="12"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

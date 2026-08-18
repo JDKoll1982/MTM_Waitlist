@@ -44,7 +44,7 @@ public sealed class MySqlHelperServer
         var useMockData = await IsMockDataEnabledAsync(MySqlDatabaseTarget.MtmWaitlist).ConfigureAwait(false);
         if (useMockData)
         {
-            return _sampleDataService.GetSampleOrders(parameter);
+            return _sampleDataService.GetSampleOrders(parameter).Take(3).ToArray();
         }
 
         return Array.Empty<object>();

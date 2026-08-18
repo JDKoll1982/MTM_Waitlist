@@ -7,5 +7,6 @@ public sealed partial class DieHandlingRequestTypeImageView : UserControl
     public DieHandlingRequestTypeImageView()
     {
         InitializeComponent();
+        DataContext = new DieHandlingRequestTypeViewModel();
     }
 }

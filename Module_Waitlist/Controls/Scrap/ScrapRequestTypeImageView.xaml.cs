@@ -7,5 +7,6 @@ public sealed partial class ScrapRequestTypeImageView : UserControl
     public ScrapRequestTypeImageView()
     {
         InitializeComponent();
+        DataContext = new ScrapRequestTypeViewModel();
     }
 }
