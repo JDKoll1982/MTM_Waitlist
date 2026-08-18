@@ -100,7 +100,7 @@ public sealed class RequestSubtypeDisplayLabelRecord
     /// This is what users see in the UI.
     /// Note: NOT globally unique; multiple subtypes may share the same name under different parents.
     /// </summary>
-    public string CurrentDisplayName { get; init; } = string.Empty;
+    public string CurrentDisplayName { get; set; } = string.Empty;
 
     /// <summary>
     /// Previous display name, if the name has changed since application startup.

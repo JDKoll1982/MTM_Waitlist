@@ -555,9 +555,8 @@ public sealed class ImageLocationService : IImageLocationService
         {
             _logger.LogInformation("Loading active work centers from catalog...");
 
-            // Get the work center catalog result for the current workstation
-            // We use GetCatalogAsync with null workstationName to get the current workstation
-            var catalogResult = await _workCenterCatalogService.GetCatalogAsync(null, cancellationToken);
+            // An empty workstation name makes the catalog service resolve the current workstation.
+            var catalogResult = await _workCenterCatalogService.GetCatalogAsync(string.Empty, cancellationToken);
 
             if (catalogResult == null)
             {
@@ -566,7 +565,10 @@ public sealed class ImageLocationService : IImageLocationService
             }
 
             // Get all work centers (hot + other) from the catalog
-            var allWorkCenterNames = catalogResult.GetAllWorkCenters();
+            var allWorkCenterNames = catalogResult.HotWorkCenters
+                .Concat(catalogResult.OtherWorkCenters)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             _logger.LogDebug("Retrieved {Count} work centers from catalog: {Hot} hot, {Other} other",
                            allWorkCenterNames.Count, catalogResult.HotWorkCenters.Count, catalogResult.OtherWorkCenters.Count);

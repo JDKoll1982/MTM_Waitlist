@@ -79,7 +79,7 @@ public sealed class RequestTypeDisplayLabelRecord
     /// Current display name from the JSON configuration.
     /// This is what users see in the UI.
     /// </summary>
-    public string CurrentDisplayName { get; init; } = string.Empty;
+    public string CurrentDisplayName { get; set; } = string.Empty;
 
     /// <summary>
     /// Previous display name, if the name has changed since application startup.

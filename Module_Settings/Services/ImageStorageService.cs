@@ -1,7 +1,6 @@
-using System.Drawing;
-using System.Drawing.Imaging;
 using Microsoft.Extensions.Logging;
 using MTM_Waitlist.Module_Settings.Models;
+using Windows.Graphics.Imaging;
 
 namespace MTM_Waitlist.Module_Settings.Services;
 
@@ -71,9 +70,7 @@ public sealed class ImageStorageService : IImageStorageService
                     $"The selected image exceeds the max allowed size of {maxSize} bytes.");
             }
 
-            using var bitmap = Image.FromFile(sourceFilePath);
-            var width = bitmap.Width;
-            var height = bitmap.Height;
+            var (width, height) = await ReadImageDimensionsAsync(sourceFilePath).ConfigureAwait(false);
             var dimensions = $"{width}x{height}";
 
             if (width < _validationRules.MinDimensionPixels || height < _validationRules.MinDimensionPixels)
@@ -112,7 +109,7 @@ public sealed class ImageStorageService : IImageStorageService
         {
             throw;
         }
-        catch (OutOfMemoryException ex)
+        catch (InvalidDataException ex)
         {
             _logger.LogWarning(ex, "The selected file could not be decoded as an image: {FilePath}", sourceFilePath);
             return CreateValidationFailure(sourceFilePath, "UNREADABLE_IMAGE", "The selected file could not be read as an image.");
@@ -121,6 +118,20 @@ public sealed class ImageStorageService : IImageStorageService
         {
             _logger.LogError(ex, "Image validation failed for {FilePath}", sourceFilePath);
             return CreateValidationFailure(sourceFilePath, "VALIDATION_FAILED", ex.Message);
+        }
+    }
+
+    private static async Task<(int Width, int Height)> ReadImageDimensionsAsync(string filePath)
+    {
+        try
+        {
+            using var stream = File.OpenRead(filePath);
+            var decoder = await BitmapDecoder.CreateAsync(stream.AsRandomAccessStream());
+            return ((int)decoder.PixelWidth, (int)decoder.PixelHeight);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidDataException($"Unable to decode image '{filePath}'.", ex);
         }
     }
 
