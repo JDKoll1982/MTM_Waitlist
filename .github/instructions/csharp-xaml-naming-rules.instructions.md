@@ -54,6 +54,12 @@ applyTo: "**/*.{cs,xaml,resw}"
 - Disallowed abbreviations: cfg, usr, msg, auth.
 - Banned generic terms in symbol names: Manager, Data, Helper unless the symbol has a distinct architectural descriptor.
 
+## WinUI Compile Guardrails
+- `ContentDialog.ShowAsync()` returns `IAsyncOperation<ContentDialogResult>`; do not call `.ConfigureAwait()` on it.
+- Nullable tuples from helper methods must be guarded or destructured before `.Item1`/`.Item2` access.
+- If a new converter or XAML resource is introduced, add the matching `xmlns` and `x:Key` registration in `App.xaml` during the same change; missing registration causes XAML compile failures.
+- Treat XAML compile errors as build-blocking; verify with `dotnet build` or the relevant test target before considering the patch complete.
+
 ## Enforcement
 - Naming violations must hard-fail PR checks.
 - Exceptions require explicit written PR approval.
