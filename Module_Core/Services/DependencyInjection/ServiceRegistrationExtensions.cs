@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 
 using MTM_Waitlist.Activation;
@@ -58,6 +59,8 @@ public static class ServiceRegistrationExtensions
             new SampleDataService(serviceProvider.GetRequiredService<ILocalSettingsService>()));
         services.AddSingleton<SqlHelperServer>();
         services.AddSingleton<MySqlHelperServer>();
+        services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMySqlHelperServer>(
+            sp => sp.GetRequiredService<MySqlHelperServer>());
         services.AddSingleton<IFileService, FileService>();
 
         // Views and view models
@@ -87,7 +90,12 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<SetupCompletionPage>();
         services.AddTransient<WaitlistViewDetailViewModel>();
         services.AddTransient<WaitlistViewDetailPage>();
-        services.AddTransient<WaitlistViewViewModel>();
+        services.AddTransient<WaitlistViewViewModel>(provider => new WaitlistViewViewModel(
+            provider.GetRequiredService<INavigationService>(),
+            provider.GetRequiredService<ISampleDataService>(),
+            provider.GetRequiredService<IBuildingSelectionService>(),
+            provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
+            DispatcherQueue.GetForCurrentThread()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();

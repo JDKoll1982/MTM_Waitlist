@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.ViewModels;
@@ -19,5 +20,35 @@ public sealed partial class SettingsPage : Page
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
         StartupDebugLog.Info("SettingsPage", "Constructor completed.");
+    }
+
+    private async void RequestTypeImages_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new RequestTypeImagesDialog(App.GetService<RequestTypeImagesDialogViewModel>())
+        {
+            XamlRoot = XamlRoot
+        };
+
+        await dialog.ShowAsync();
+    }
+
+    private async void WorkCenterImages_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new WorkCenterImagesDialog(App.GetService<WorkCenterImagesDialogViewModel>())
+        {
+            XamlRoot = XamlRoot
+        };
+
+        await dialog.ShowAsync();
+    }
+
+    private async void RequestSubtypeImages_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new RequestSubtypeImagesDialog(App.GetService<RequestSubtypeImagesDialogViewModel>())
+        {
+            XamlRoot = XamlRoot
+        };
+
+        await dialog.ShowAsync();
     }
 }

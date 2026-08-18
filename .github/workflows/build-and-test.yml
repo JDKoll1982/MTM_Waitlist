@@ -1,0 +1,53 @@
+name: Build and Test
+
+on:
+    push:
+        branches:
+            - master
+    pull_request:
+    workflow_dispatch:
+
+jobs:
+    build-and-test:
+        runs-on: windows-latest
+
+        env:
+            # Integration tests report inconclusive when this is absent, so forks and
+            # offline runs stay green. Set the secret to exercise them for real.
+            # Deliberately not MTM_WAITLIST_DB_CONNECTION_STRING: that variable changes
+            # connection resolution process-wide and breaks the Module_Setup tests.
+            MTM_WAITLIST_TEST_DB_CONNECTION_STRING: ${{ secrets.MTM_WAITLIST_TEST_DB_CONNECTION_STRING }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v5
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: 10.0.x
+
+            - name: Restore
+              run: dotnet restore MTM_Waitlist.slnx
+
+            # Compiles XAML, so a broken binding or an unregistered converter fails here.
+            - name: Build
+              run: dotnet build MTM_Waitlist.slnx -c Debug -p:Platform=x64 --no-restore
+
+            # InforVisual tests require the on-premises SQL Server and cannot run on a hosted runner.
+            - name: Test
+              run: >
+                  dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj
+                  -c Debug -p:Platform=x64 -p:RuntimeIdentifier=win-x64
+                  --framework net10.0-windows10.0.19041.0
+                  --no-build
+                  --filter "FullyQualifiedName!~InforVisualSqlQueryServiceTests"
+                  --logger "trx;LogFileName=test-results.trx"
+
+            - name: Upload test results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: test-results
+                  path: "**/TestResults/*.trx"
+                  if-no-files-found: ignore

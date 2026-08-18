@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
@@ -13,9 +14,8 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// </summary>
 public sealed class ImageOverrideReadService : IImageOverrideReadService
 {
-    private readonly MySqlHelperServer _mySqlHelperServer;
+    private readonly IMySqlHelperServer _mySqlHelperServer;
     private readonly ILogger<ImageOverrideReadService> _logger;
-
     // Valid scope values
     private static readonly HashSet<string> ValidScopes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -32,7 +32,7 @@ public sealed class ImageOverrideReadService : IImageOverrideReadService
     /// <param name="logger">Logger for diagnostics and error logging</param>
     /// <exception cref="ArgumentNullException">If any dependency is null</exception>
     public ImageOverrideReadService(
-        MySqlHelperServer mySqlHelperServer,
+        IMySqlHelperServer mySqlHelperServer,
         ILogger<ImageOverrideReadService> logger)
     {
         _mySqlHelperServer = mySqlHelperServer ?? throw new ArgumentNullException(nameof(mySqlHelperServer));

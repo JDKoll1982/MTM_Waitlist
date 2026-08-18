@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MySqlConnector;
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
@@ -16,7 +17,7 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// </summary>
 public sealed class ImageOverrideWriteService : IImageOverrideWriteService
 {
-    private readonly MySqlHelperServer _mySqlHelperServer;
+    private readonly IMySqlHelperServer _mySqlHelperServer;
     private readonly ILogger<ImageOverrideWriteService> _logger;
     private readonly IImageOverrideReadService _readService;
     private readonly IImageLocationService _imageLocationService;
@@ -40,7 +41,7 @@ public sealed class ImageOverrideWriteService : IImageOverrideWriteService
     /// <param name="logger">Logger for diagnostics and error logging</param>
     /// <exception cref="ArgumentNullException">If any dependency is null</exception>
     public ImageOverrideWriteService(
-        MySqlHelperServer mySqlHelperServer,
+        IMySqlHelperServer mySqlHelperServer,
         IImageOverrideReadService readService,
         IImageLocationService imageLocationService,
         ILogger<ImageOverrideWriteService> logger)
@@ -95,7 +96,50 @@ public sealed class ImageOverrideWriteService : IImageOverrideWriteService
 
             var publicId = Guid.NewGuid().ToString("D");
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
+            // The helper swallows MySqlException, so the unique key is checked up front
+            // and the affected-row count is used as the failure signal.
+            var existingRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
+                @"SELECT is_active
+FROM config_images_locations
+WHERE scope = @p_scope
+  AND scope_item_id = @p_scope_item_id
+LIMIT 1;",
+                new Dictionary<string, object?>
+                {
+                    ["p_scope"] = scope,
+                    ["p_scope_item_id"] = scopeItemId
+                },
+                MySqlDatabaseTarget.MtmWaitlist,
+                cancellationToken).ConfigureAwait(false);
+
+            if (existingRows.Count > 0)
+            {
+                var isActive = existingRows[0].TryGetValue("is_active", out var activeValue)
+                    && activeValue is not null
+                    && Convert.ToInt32(activeValue) != 0;
+
+                if (isActive)
+                {
+                    var duplicateMessage = $"An override already exists for scope '{scope}' and item '{scopeItemId}'";
+                    _logger.LogWarning(duplicateMessage);
+                    return new ImageOverrideWriteResult
+                    {
+                        Success = false,
+                        ErrorMessage = duplicateMessage,
+                        ErrorCode = "DUPLICATE_KEY",
+                        OperationType = "CREATE",
+                        AffectedScope = scope,
+                        AffectedScopeItemId = scopeItemId
+                    };
+                }
+
+                // The unique key spans (scope, scope_item_id) regardless of is_active,
+                // so a soft-deleted row must be reactivated rather than re-inserted.
+                return await ReactivateOverrideAsync(scope, scopeItemId, imagePath, userId, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            var affectedRows = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
                 @"INSERT INTO config_images_locations (
     public_id,
     scope,
@@ -127,6 +171,21 @@ public sealed class ImageOverrideWriteService : IImageOverrideWriteService
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
+
+            if (affectedRows != 1)
+            {
+                var failureMessage = $"Failed to create override for scope '{scope}' and item '{scopeItemId}'";
+                _logger.LogError(failureMessage);
+                return new ImageOverrideWriteResult
+                {
+                    Success = false,
+                    ErrorMessage = failureMessage,
+                    ErrorCode = "DATABASE_ERROR",
+                    OperationType = "CREATE",
+                    AffectedScope = scope,
+                    AffectedScopeItemId = scopeItemId
+                };
+            }
 
             _logger.LogInformation("Override created successfully: publicId={PublicId}, scope={Scope}, scopeItemId={ScopeItemId}", 
                                  publicId, scope, scopeItemId);
@@ -181,6 +240,59 @@ public sealed class ImageOverrideWriteService : IImageOverrideWriteService
                 AffectedScopeItemId = scopeItemId
             };
         }
+    }
+
+    private async Task<ImageOverrideWriteResult> ReactivateOverrideAsync(
+        string scope,
+        string scopeItemId,
+        string imagePath,
+        long? userId,
+        CancellationToken cancellationToken)
+    {
+        var affectedRows = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
+            @"UPDATE config_images_locations
+SET image_path = @p_image_path,
+    is_active = 1,
+    updated_by_user_id = @p_user_id,
+    updated_utc = UTC_TIMESTAMP()
+WHERE scope = @p_scope
+  AND scope_item_id = @p_scope_item_id;",
+            new Dictionary<string, object?>
+            {
+                ["p_scope"] = scope,
+                ["p_scope_item_id"] = scopeItemId,
+                ["p_image_path"] = imagePath,
+                ["p_user_id"] = userId.HasValue ? (object)userId.Value : DBNull.Value
+            },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        if (affectedRows < 1)
+        {
+            var message = $"Failed to reactivate override for scope '{scope}' and item '{scopeItemId}'";
+            _logger.LogError(message);
+            return new ImageOverrideWriteResult
+            {
+                Success = false,
+                ErrorMessage = message,
+                ErrorCode = "DATABASE_ERROR",
+                OperationType = "CREATE",
+                AffectedScope = scope,
+                AffectedScopeItemId = scopeItemId
+            };
+        }
+
+        _logger.LogInformation("Reactivated soft-deleted override: scope={Scope}, scopeItemId={ScopeItemId}", scope, scopeItemId);
+        _imageLocationService.RaiseImageLocationUpdated(scope, scopeItemId);
+
+        return new ImageOverrideWriteResult
+        {
+            Success = true,
+            Override = await _readService.GetOverrideAsync(scope, scopeItemId, cancellationToken).ConfigureAwait(false),
+            OperationType = "CREATE",
+            AffectedScope = scope,
+            AffectedScopeItemId = scopeItemId
+        };
     }
 
     /// <inheritdoc />
@@ -244,7 +356,7 @@ public sealed class ImageOverrideWriteService : IImageOverrideWriteService
                 };
             }
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
+            var rows = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
                 @"UPDATE config_images_locations
 SET image_path = @p_image_path,
     updated_by_user_id = @p_user_id,
@@ -330,7 +442,7 @@ WHERE scope = @p_scope
         {
             _logger.LogDebug("Deleting override: scope={Scope}, scopeItemId={ScopeItemId}", scope, scopeItemId);
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
+            var rows = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
                 @"UPDATE config_images_locations
 SET is_active = 0,
     updated_by_user_id = @p_user_id,
@@ -347,7 +459,7 @@ WHERE scope = @p_scope
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
 
-            var affected = rows.Count > 0;
+            var affected = rows > 0;
 
             if (!affected)
             {

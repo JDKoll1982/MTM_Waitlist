@@ -12,6 +12,8 @@
                 <ResourceDictionary Source="/Styles/ModuleSetup.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:StringToImageSourceConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="StringToImageSourceConverter" />
+            <settingsConverters:ResolvedImagePathToSourceConverter xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters" x:Key="ResolvedImagePathToSourceConverter" />
+            <settingsConverters:BoolToVisibilityConverter xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters" x:Key="BoolToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

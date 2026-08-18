@@ -332,3 +332,28 @@ MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the image
 MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the image override.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when override was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when override was last updated.';
+
+ALTER TABLE waitlist_requests_queue COMMENT = 'Submitted material-handling requests awaiting pickup, in progress, or resolved.';
+
+ALTER TABLE waitlist_requests_queue
+MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the waitlist request.',
+MODIFY COLUMN building VARCHAR(64) NOT NULL COMMENT 'Building the request belongs to.',
+MODIFY COLUMN work_center VARCHAR(64) NOT NULL COMMENT 'Work center that raised the request.',
+MODIFY COLUMN request_type VARCHAR(64) NOT NULL COMMENT 'Top-level request type display label.',
+MODIFY COLUMN subtype VARCHAR(64) NULL COMMENT 'Request subtype display label; null when the type has no subtypes.',
+MODIFY COLUMN input_value VARCHAR(255) NULL COMMENT 'Free-text value captured for request types that require input.',
+MODIFY COLUMN active_setup_job_id VARCHAR(64) NOT NULL COMMENT 'Active setup job associated with the request at submission time.',
+MODIFY COLUMN workstation_name VARCHAR(64) NOT NULL COMMENT 'Workstation that submitted the request.',
+MODIFY COLUMN requester_employee_number VARCHAR(32) NOT NULL COMMENT 'Employee number of the requester.',
+MODIFY COLUMN requester_employee_name VARCHAR(128) NOT NULL COMMENT 'Display name of the requester.',
+MODIFY COLUMN status VARCHAR(32) NOT NULL DEFAULT 'Pending' COMMENT 'Lifecycle status, for example Pending, InProgress, Resolved, or Canceled.',
+MODIFY COLUMN requested_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the request was submitted.',
+MODIFY COLUMN target_time_utc DATETIME NULL COMMENT 'UTC target completion time when one is supplied.',
+MODIFY COLUMN is_overdue TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'True when the request passed its target time without resolution.',
+MODIFY COLUMN assigned_material_handler VARCHAR(128) NULL COMMENT 'Material handler assigned to fulfil the request.',
+MODIFY COLUMN cancellation_reason VARCHAR(255) NULL COMMENT 'Reason captured when the request is canceled.',
+MODIFY COLUMN canceled_utc DATETIME NULL COMMENT 'UTC timestamp when the request was canceled.',
+MODIFY COLUMN canceled_by_employee_number VARCHAR(32) NULL COMMENT 'Employee number of the person who canceled the request.',
+MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
+MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';

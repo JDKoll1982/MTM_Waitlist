@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Linq;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
@@ -17,19 +19,24 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly ISampleDataService _sampleDataService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService _waitlistRequestService;
     private readonly IBuildingSelectionService _buildingSelectionService;
+    private readonly DispatcherQueue? _dispatcherQueue;
     private long _refreshVersion;
     private bool _isSubscribed;
 
     public ObservableCollection<SampleOrder> Source { get; } = new ObservableCollection<SampleOrder>();
     public ObservableCollection<SampleOrder> SearchSuggestions { get; } = new();
-    public bool IsWaitlistEmpty => Source.Count == 0;
+
+    [ObservableProperty]
+    public partial bool IsWaitlistEmpty { get; private set; } = true;
+
     public string SelectedBuilding => _buildingSelectionService.SelectedBuilding;
 
     public WaitlistViewViewModel(
         INavigationService navigationService,
         ISampleDataService sampleDataService,
         IBuildingSelectionService buildingSelectionService,
-        MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService waitlistRequestService)
+        MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService waitlistRequestService,
+        DispatcherQueue? dispatcherQueue = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(sampleDataService);
@@ -40,9 +47,11 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _sampleDataService = sampleDataService;
         _buildingSelectionService = buildingSelectionService;
         _waitlistRequestService = waitlistRequestService;
+        _dispatcherQueue = dispatcherQueue;
         _waitlistRequestService.RequestsChanged += OnRequestsChanged;
 
         Source.CollectionChanged += OnSourceCollectionChanged;
+        IsWaitlistEmpty = Source.Count == 0;
     }
 
     public async void OnNavigatedTo(object parameter)
@@ -97,15 +106,15 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             return;
         }
 
-        Source.Clear();
-
+        // Fetch data on the current context (background thread when called via async void).
         var data = _sampleDataService.GetSampleOrders(building);
         var sampleCount = 0;
+        var newItems = new List<SampleOrder>(data.Count());
         foreach (var item in data)
         {
             if (item is SampleOrder sampleOrder)
             {
-                Source.Add(sampleOrder);
+                newItems.Add(sampleOrder);
                 sampleCount++;
             }
         }
@@ -116,10 +125,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
 
         var activeRequests = _waitlistRequestService.GetActiveRequests(building);
+        var activeRequestCount = activeRequests.Count;
         foreach (var request in activeRequests)
         {
-            var item = CreateSessionOrder(request);
-            Source.Add(item);
+            newItems.Add(CreateSessionOrder(request));
         }
 
         if (refreshVersion != Volatile.Read(ref _refreshVersion))
@@ -127,8 +136,57 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             return;
         }
 
-        StartupDebugLog.Info("Waitlist", $"Loaded building '{building}'. SampleRows={sampleCount}, SessionRequests={activeRequests.Count}, TotalRows={Source.Count}, SearchQuery='{SearchQuery}'.");
+        await ApplySourceUpdateAsync(newItems, refreshVersion);
+        StartupDebugLog.Info("Waitlist", $"Loaded building '{building}'. SampleRows={sampleCount}, SessionRequests={activeRequestCount}, TotalRows={Source.Count}, SearchQuery='{SearchQuery}'.");
         UpdateSearchSuggestions(SearchQuery);
+    }
+
+    private async Task ApplySourceUpdateAsync(List<SampleOrder> newItems, long refreshVersion)
+    {
+        void Apply()
+        {
+            if (refreshVersion != Volatile.Read(ref _refreshVersion))
+            {
+                return;
+            }
+
+            Source.CollectionChanged -= OnSourceCollectionChanged;
+            try
+            {
+                Source.Clear();
+                foreach (var item in newItems)
+                {
+                    Source.Add(item);
+                }
+            }
+            finally
+            {
+                Source.CollectionChanged += OnSourceCollectionChanged;
+            }
+
+            IsWaitlistEmpty = Source.Count == 0;
+        }
+
+        if (_dispatcherQueue is DispatcherQueue dispatcher)
+        {
+            var tcs = new TaskCompletionSource();
+            dispatcher.TryEnqueue(() =>
+            {
+                try
+                {
+                    Apply();
+                }
+                finally
+                {
+                    tcs.SetResult();
+                }
+            });
+            await tcs.Task;
+        }
+        else
+        {
+            Apply();
+        }
     }
 
     public static SampleOrder CreateSessionOrder(WaitlistRequest request)
@@ -397,6 +455,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     private void OnSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        OnPropertyChanged(nameof(IsWaitlistEmpty));
+        var value = Source.Count == 0;
+        if (value != IsWaitlistEmpty)
+        {
+            IsWaitlistEmpty = value;
+        }
     }
 }

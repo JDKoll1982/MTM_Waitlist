@@ -1,0 +1,16 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  MTM_Waitlist -> C:\Users\jkoll\source\repos\MTM_Waitlist\bin\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.dll
+  MTM_Waitlist.Tests -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\bin\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Tests.dll
+Test run for C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\bin\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+  Skipped CreateThenRead_RoundTripsTheOverride [11 ms]
+  Skipped CreateTwice_IsRejectedByTheUniqueScopeItemKey [< 1 ms]
+  Skipped TheSameScopeItemIdIsAllowedUnderADifferentScope [< 1 ms]
+  Skipped UpdateOverride_PersistsTheNewPath [< 1 ms]
+  Skipped DeleteOverride_SoftDeletesSoTheReadPathStopsReturningIt [< 1 ms]
+  Skipped CreateAfterDelete_ReactivatesTheExistingRow [< 1 ms]
+  Skipped DeleteOverride_WhenNothingExists_ReturnsNotFound [< 1 ms]
+  Skipped GetOverridesByScopeAsync_IncludesTheCreatedRow [< 1 ms]
+
+Passed!  - Failed:     0, Passed:    65, Skipped:     8, Total:    73, Duration: 343 ms - MTM_Waitlist.Tests.dll (net10.0)

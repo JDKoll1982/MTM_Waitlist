@@ -12,7 +12,7 @@ public enum MySqlDatabaseTarget
     MtmReceivingApplication,
 }
 
-public sealed class MySqlHelperServer
+public sealed class MySqlHelperServer : IMySqlHelperServer
 {
     private const string RecvMockDataSettingKey = "Feature.RecvMockData";
     private const string WaitlistConnectionStringEnvironmentVariable = "MTM_WAITLIST_DB_CONNECTION_STRING";

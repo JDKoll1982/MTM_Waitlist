@@ -1,6 +1,9 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Threading;
+using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Shared.Services;
 
@@ -11,7 +14,7 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// Orchestrates all image location management including inventories, display labels, configuration, and notifications.
 /// Thread-safe for concurrent access; maintains initialization state.
 /// </summary>
-public sealed class ImageLocationService : IImageLocationService
+public sealed class ImageLocationService : IImageLocationService, IDisposable
 {
     private readonly ILogger<ImageLocationService> _logger;
     private readonly IRequestTypeDisplayLabelService _requestTypeDisplayLabelService;
@@ -19,9 +22,11 @@ public sealed class ImageLocationService : IImageLocationService
     private readonly IImageOverrideReadService _imageOverrideReadService;
     private readonly IImageStorageConfigurationResolver _configurationResolver;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
+    private readonly IMySqlHelperServer _mySqlHelperServer;
 
-    private bool _isInitialized;
-    private readonly object _initializationLock = new();
+    private volatile bool _isInitialized;
+    private readonly SemaphoreSlim _initializationLock = new(1, 1);
+    private bool _disposed;
 
     // Change notification event
     private event EventHandler<ImageLocationChangedEventArgs>? ImageLocationChanged;
@@ -42,7 +47,8 @@ public sealed class ImageLocationService : IImageLocationService
         IRequestSubtypeDisplayLabelService requestSubtypeDisplayLabelService,
         IImageOverrideReadService imageOverrideReadService,
         IImageStorageConfigurationResolver configurationResolver,
-        IWorkCenterCatalogService workCenterCatalogService)
+        IWorkCenterCatalogService workCenterCatalogService,
+        IMySqlHelperServer mySqlHelperServer)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _requestTypeDisplayLabelService = requestTypeDisplayLabelService ?? 
@@ -55,6 +61,8 @@ public sealed class ImageLocationService : IImageLocationService
             throw new ArgumentNullException(nameof(configurationResolver));
         _workCenterCatalogService = workCenterCatalogService ?? 
             throw new ArgumentNullException(nameof(workCenterCatalogService));
+        _mySqlHelperServer = mySqlHelperServer ??
+            throw new ArgumentNullException(nameof(mySqlHelperServer));
 
         _isInitialized = false;
     }
@@ -71,7 +79,8 @@ public sealed class ImageLocationService : IImageLocationService
             return;
         }
 
-        lock (_initializationLock)
+        await _initializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
         {
             if (_isInitialized)
             {
@@ -85,10 +94,10 @@ public sealed class ImageLocationService : IImageLocationService
             {
                 // Initialize all sub-services
                 _logger.LogDebug("Loading request type display labels...");
-                _requestTypeDisplayLabelService.InitializeFromJsonAsync().GetAwaiter().GetResult();
+                await _requestTypeDisplayLabelService.InitializeFromJsonAsync().ConfigureAwait(false);
 
                 _logger.LogDebug("Loading subtype display labels...");
-                _requestSubtypeDisplayLabelService.InitializeFromJsonAsync().GetAwaiter().GetResult();
+                await _requestSubtypeDisplayLabelService.InitializeFromJsonAsync().ConfigureAwait(false);
 
                 // Validate that inventories are loaded
                 if (!RequestTypeInventory.Items.Any())
@@ -105,7 +114,7 @@ public sealed class ImageLocationService : IImageLocationService
 
                 // Validate configuration
                 _logger.LogDebug("Validating image storage configuration...");
-                var config = _configurationResolver.GetEffectiveConfigurationAsync().GetAwaiter().GetResult();
+                var config = await _configurationResolver.GetEffectiveConfigurationAsync().ConfigureAwait(false);
                 config.Validate();
 
                 _isInitialized = true;
@@ -119,6 +128,22 @@ public sealed class ImageLocationService : IImageLocationService
                     "Image location service initialization failed. Application cannot proceed.", ex);
             }
         }
+        finally
+        {
+            _initializationLock.Release();
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _initializationLock.Dispose();
+        _disposed = true;
     }
 
     /// <inheritdoc />
@@ -294,14 +319,12 @@ public sealed class ImageLocationService : IImageLocationService
         try
         {
             var defaultPath = ImageLocationDefaults.RequestTypeDefaultPath;
-            var overridePath = await _imageOverrideReadService.GetOverrideAsync("request_type", typeId.ToString(), cancellationToken).ConfigureAwait(false);
-            var resolvedPath = overridePath is not null && !string.IsNullOrWhiteSpace(overridePath.ImagePath)
-                ? await ResolveExistingPathAsync(overridePath.ImagePath, defaultPath, "request_type", requestTypeId).ConfigureAwait(false)
-                : defaultPath;
 
-            if (overridePath is not null && string.IsNullOrWhiteSpace(overridePath.ImagePath))
+            // Cascade order: database override -> JSON imagePath -> default asset.
+            var overridePath = await _imageOverrideReadService.GetOverrideAsync("request_type", typeId.ToString(), cancellationToken).ConfigureAwait(false);
+            if (overridePath is not null && !string.IsNullOrWhiteSpace(overridePath.ImagePath))
             {
-                _logger.LogDebug("Request type override exists but path is empty: {RequestTypeId}", requestTypeId);
+                return await ResolveExistingPathAsync(overridePath.ImagePath, defaultPath, "request_type", requestTypeId).ConfigureAwait(false);
             }
 
             var jsonPath = await TryResolveJsonRequestTypeImagePathAsync(typeId).ConfigureAwait(false);
@@ -310,7 +333,7 @@ public sealed class ImageLocationService : IImageLocationService
                 return await ResolveExistingPathAsync(jsonPath, defaultPath, "request_type", requestTypeId).ConfigureAwait(false);
             }
 
-            return resolvedPath;
+            return defaultPath;
         }
         catch (OperationCanceledException)
         {
@@ -605,24 +628,78 @@ public sealed class ImageLocationService : IImageLocationService
     private async Task<IReadOnlyList<WorkCenterItem>?> LoadWorkCenterDetailsAsync(
         IReadOnlyList<string> workCenterNames, CancellationToken cancellationToken)
     {
-        // For now, return a placeholder implementation
-        // In production, this would query setup_workstations_catalog for each work center name
-        // and return the full WorkCenterItem objects with ID, building, sort_rank, etc.
-        
         _logger.LogDebug("Loading work center details for {Count} work centers", workCenterNames.Count);
-
-        // TODO: Implement database query to fetch WorkCenterItem details
-        // This should query setup_workstations_catalog WHERE workstation_name IN (...)
-        // and return results grouped by building, sorted by sort_rank
 
         if (workCenterNames.Count == 0)
         {
             return new List<WorkCenterItem>();
         }
 
-        // Placeholder: return empty list
-        // This will be implemented in Phase 2 when database access service is available
-        return new List<WorkCenterItem>();
+        // Parameter names are generated, never interpolated from the caller's values.
+        var parameters = new Dictionary<string, object?>();
+        var placeholders = new List<string>(workCenterNames.Count);
+        for (var i = 0; i < workCenterNames.Count; i++)
+        {
+            var parameterName = $"@p_name_{i}";
+            placeholders.Add(parameterName);
+            parameters[parameterName] = workCenterNames[i];
+        }
+
+        var sql = $@"SELECT
+    id,
+    workstation_name,
+    building,
+    sort_rank,
+    is_active
+FROM setup_workstations_catalog
+WHERE is_active = 1
+  AND workstation_name IN ({string.Join(", ", placeholders)})
+ORDER BY building ASC, sort_rank ASC, workstation_name ASC;";
+
+        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
+            sql,
+            parameters,
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        var items = new List<WorkCenterItem>(rows.Count);
+        foreach (var row in rows)
+        {
+            items.Add(new WorkCenterItem
+            {
+                WorkCenterId = ReadInt64(row, "id"),
+                DisplayName = ReadString(row, "workstation_name"),
+                Building = ReadString(row, "building"),
+                SortRank = (int)ReadInt64(row, "sort_rank"),
+                IsActive = ReadBoolean(row, "is_active")
+            });
+        }
+
+        _logger.LogDebug("Loaded {Count} work center detail rows", items.Count);
+        return items;
+    }
+
+    private static string ReadString(IReadOnlyDictionary<string, object?> row, string key) =>
+        row.TryGetValue(key, out var value) && value is not null ? value.ToString() ?? string.Empty : string.Empty;
+
+    private static long ReadInt64(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        if (!row.TryGetValue(key, out var value) || value is null)
+        {
+            return 0;
+        }
+
+        return value is long longValue ? longValue : Convert.ToInt64(value);
+    }
+
+    private static bool ReadBoolean(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        if (!row.TryGetValue(key, out var value) || value is null)
+        {
+            return false;
+        }
+
+        return value is bool boolValue ? boolValue : Convert.ToInt32(value) != 0;
     }
 
     private async Task<string> ResolveExistingPathAsync(string candidatePath, string fallbackPath, string scope, string scopeItemId)

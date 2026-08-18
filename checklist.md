@@ -31,7 +31,7 @@
 - [x] **Shared Storage Config: Add the image storage options block to `appsettings.json` with the default UNC path `X:\\Software Development\\Live Applications\\MTM_Waitlist\\Images`.** (Ref: Section 4.4) | **Persona: Backend Engineer**
 - [x] **Shared Storage Config: Add the database-backed override pattern to `config_settings_values` so admins can change the share path in-app.** (Ref: Section 4.4) | **Persona: Backend Engineer**
 - [x] **Configuration: Document appsettings default and database override resolution order for the shared image folder path.** (Ref: Section 4.4) | **Persona: Tech Lead**
-- [x] **Service Layer: Register a new DI service in `Module_Settings` to manage image location data and resolution.** (Ref: Section 5) | **Persona: Backend Engineer**
+- [x] **Service Layer: Register a new DI service in `Module_Settings` to manage image location data and resolution.** (Ref: Section 5) | **Persona: Backend Engineer** — `AddImageLocationServices` is now actually called from `AddSettingsModuleServices` (2026-08-18)
 - [x] **Service Layer: Load request type and subtype definitions from `waitlist-request-types.json` through the shared service.** (Ref: Section 5) | **Persona: Backend Engineer**
 - [x] **Service Layer: Load active work centers through `IWorkCenterCatalogService` for the work-center card.** (Ref: Section 3.5) | **Persona: Backend Engineer**
 - [x] **Service Layer: Read image overrides from `config_images_locations` through the MySQL helper server.** (Ref: Section 5) | **Persona: Backend Engineer**
@@ -64,47 +64,52 @@ Next task: **Settings Page: Bind the expander visibility to the role-based view-
 - [x] **Settings Card: Create the Work Center Images card with a descriptive title and summary text.** (Ref: Section 3.2) | **Persona: Frontend Engineer**
 - [x] **Settings Card: Create the Request Subtype Images card with a descriptive title and summary text.** (Ref: Section 3.2) | **Persona: Frontend Engineer**
 
-Next task: **Dialog Row: Add a read-only item label for each row in the dialog.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+Next task: **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
+
+> Implemented 2026-08-18. The three dialogs share `Views/ImageOverrideEditorControl.xaml` for the row layout,
+> search, filter, and reset-all so the markup exists once. Each dialog is its own `ContentDialog` with its own
+> view model. 19 view-model tests cover load, filter, grouping, inheritance, placeholders, reset, cancel, and save.
+
 - [x] **Dialog Row: Add a read-only item label for each row in the dialog.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
-- [x] **Dialog Row: Add a small preview image bound to the effective resolved path.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+- [x] **Dialog Row: Add a small preview image bound to the effective resolved path.** (Ref: Section 3.3) | **Persona: Frontend Engineer** — 48px square, `Stretch="Uniform"`, via `ResolvedImagePathToSourceConverter`
 - [x] **Dialog Row: Add an editable text box to accept the custom image path value.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
-- [x] **Dialog Row: Add a Browse button that opens a file picker for supported image types.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+- [x] **Dialog Row: Add a Browse button that opens a file picker for supported image types.** (Ref: Section 3.3) | **Persona: Frontend Engineer** — `FileOpenPicker` filtered to `.png`/`.jpg`/`.jpeg`
 - [x] **Dialog Row: Add a Reset action that restores the JSON or default value for the row.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
 
-Next task: **Request Type Card: Add the global reset confirmation for the request type modal.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
+Next task: **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
 - [x] **Dialog Footer: Add Save and Cancel actions to each image dialog.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
-- [x] **Dialog Behavior: Save all row edits in one commit and discard all edits on cancel.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+- [x] **Dialog Behavior: Save all row edits in one commit and discard all edits on cancel.** (Ref: Section 3.3) | **Persona: Frontend Engineer** — edits stay in the rows until `SaveAsync`; a failed row cancels the close so the error stays visible
 - [x] **Request Type Card: Add the eight request type rows and keep labels aligned to the JSON inventory.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
 - [x] **Request Type Card: Add the stable JSON `id` binding for each request type row in the modal.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
 - [x] **Request Type Card: Validate and preview the custom image for each request type row.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
-- [x] **Request Type Card: Add the global reset confirmation for the request type modal.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
+- [x] **Request Type Card: Add the global reset confirmation for the request type modal.** (Ref: Section 3.4) | **Persona: Frontend Engineer** — Reset all prompts before clearing
 - [x] **Work Center Card: Add the full active catalog list for the work center modal.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
 - [x] **Work Center Card: Group the work center rows by building in the modal.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
 - [x] **Work Center Card: Add the search box and custom-image filter toggle to the work-center modal.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [x] **Work Center Card: Show the database error state and disable Save when the catalog query fails.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Work Center Card: Show the database error state and disable Save when the catalog query fails.** (Ref: Section 3.5) | **Persona: Frontend Engineer** — real state now, driven by `GetActiveWorkCentersAsync` returning null
 
-Next task: **Work Center Card: Prune orphaned overrides after confirmation during load.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+Next task: **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
 - [x] **Work Center Card: Prune orphaned overrides after confirmation during load.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [x] **Work Center Card: Show the row in `WorkCenterSelectionDialog` with the custom image when available.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [x] **Work Center Card: Add the semi-transparent detail-page background image behavior for work centers.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [ ] **Work Center Card: Show the row in `WorkCenterSelectionDialog` with the custom image when available.** (Ref: Section 3.5) | **Persona: Frontend Engineer** — consumer wiring, tracked in 2.2
+- [ ] **Work Center Card: Add the semi-transparent detail-page background image behavior for work centers.** (Ref: Section 3.5) | **Persona: Frontend Engineer** — consumer wiring, tracked in 2.2
 - [x] **Subtype Card: Add parent-grouped rows for each request subtype in the subtype modal.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
 - [x] **Subtype Card: Add inherited-image previews with an `Inherited` badge for subtypes without explicit overrides.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
 
-Next task: **Subtype Card: Show the parent image for inherited subtypes and the `Inherited` badge in the preview state.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+Next task: **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
 - [x] **Subtype Card: Show the parent image for inherited subtypes and the `Inherited` badge in the preview state.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
 - [x] **Subtype Card: Add the search box and custom-image filter toggle to the subtype modal.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
 - [x] **Subtype Card: Add the placeholder row for groups that have no subtypes.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
-- [x] **Subtype Card: Keep the custom image reset behavior aligned with the parent fallback path.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
-- [x] **Subtype Card: Ensure the waitlist line card thumbnail uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+- [x] **Subtype Card: Keep the custom image reset behavior aligned with the parent fallback path.** (Ref: Section 3.6) | **Persona: Frontend Engineer** — resolver cascade verified by `ImageLocationServiceCascadeTests`
+- [ ] **Subtype Card: Ensure the waitlist line card thumbnail uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer** — consumer wiring, tracked in 2.2
 
-Next task: **Subtype Card: Ensure the detail hero uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
-- [x] **Subtype Card: Ensure the detail hero uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+Next task: **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
+- [ ] **Subtype Card: Ensure the detail hero uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer** — consumer wiring, tracked in 2.2
 - [x] **Dialog: Implement the Request Type Images `ContentDialog` and the row layout for each request type.** (Ref: Section 3.3) *Depends on: JSON Schema tasks, Service Layer resolution contract* | **Persona: Frontend Engineer**
 - [x] **Dialog: Implement the Work Center Images `ContentDialog` and the row layout for each work center.** (Ref: Section 3.3) *Depends on: Service Layer catalog loading and error-state handling* | **Persona: Frontend Engineer**
 - [x] **Dialog: Implement the Request Subtype Images `ContentDialog` and the row layout for each subtype.** (Ref: Section 3.3) *Depends on: JSON Schema GUID mapping, cascade resolution contract* | **Persona: Frontend Engineer**
-- [x] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
+- [ ] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
 
-Next task: **Workflow: Update the work-center selection UI to consume the resolver instead of hardcoded work-center assets.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+Next task: **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) — start of Subphase 2.2 consumer wiring | **Persona: Frontend Engineer**
 
 ### Subphase 2.2: Business Logic & Workflow Integration
 **PREREQUISITE: All Subphase 1.1 and 1.2 tasks must be complete before starting this subphase. Dialog implementations require finalized JSON schema, service layer, and data models.**
@@ -113,17 +118,17 @@ Next task: **Workflow: Update the work-center selection UI to consume the resolv
 - [x] **Dialog: Implement the Work Center Images `ContentDialog` and the row layout for each work center.** (Ref: Section 3.3) *Depends on: Service Layer catalog loading and error-state handling* | **Persona: Frontend Engineer**
 - [x] **Dialog: Implement the Request Subtype Images `ContentDialog` and the row layout for each subtype.** (Ref: Section 3.3) *Depends on: JSON Schema GUID mapping, cascade resolution contract* | **Persona: Frontend Engineer**
 - [x] **Workflow: Implement the full image resolution cascade for request subtypes from subtype override to parent type to default.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
-- [x] **Workflow: Implement the request type resolution cascade for the default and override lookup.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
+- [x] **Workflow: Implement the request type resolution cascade for the default and override lookup.** (Ref: Section 4.1) | **Persona: Full Stack Engineer** — fixed 2026-08-18: JSON was overriding the database value; order is now override → JSON → default
 
-Next task: **Workflow: Ensure the shared folder path is resolved from configuration and the database override before write operations.** (Ref: Section 4.4) | **Persona: Backend Engineer**
+Next task: **Workflow: Propagate change notifications from the image resolver to all open view models so the UI refreshes immediately.** (Ref: Section 5) | **Persona: Backend Engineer**
 - [x] **Workflow: Implement the work-center resolution cascade for the default and override lookup.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
 - [x] **Workflow: Ensure all custom image changes apply immediately without waiting for app restart.** (Ref: Section 3.4) | **Persona: Backend Engineer**
-- [x] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
-- [x] **Workflow: Update the work-center selection UI to consume the resolver instead of hardcoded work-center assets.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [x] **Workflow: Update the request type and subtype surfaces to consume the resolver instead of hardcoded assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
-- [ ] **Workflow: Ensure the shared folder path is resolved from configuration and the database override before write operations.** (Ref: Section 4.4) | **Persona: Backend Engineer**
-- [ ] **Workflow: Prevent file writes when the shared network folder is unavailable and show the save error to the user.** (Ref: Section 4.4) | **Persona: Backend Engineer**
-- [ ] **Workflow: Propagate change notifications from the image resolver to all open view models so the UI refreshes immediately.** (Ref: Section 5) | **Persona: Backend Engineer**
+- [ ] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
+- [ ] **Workflow: Update the work-center selection UI to consume the resolver instead of hardcoded work-center assets.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [ ] **Workflow: Update the request type and subtype surfaces to consume the resolver instead of hardcoded assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
+- [x] **Workflow: Ensure the shared folder path is resolved from configuration and the database override before write operations.** (Ref: Section 4.4) | **Persona: Backend Engineer** — `IConfigSettingsValueService` implemented; covered by `ImageStorageConfigurationResolverTests`
+- [x] **Workflow: Prevent file writes when the shared network folder is unavailable and show the save error to the user.** (Ref: Section 4.4) | **Persona: Backend Engineer** — write is blocked and returns `SHARE_UNREACHABLE`; surfacing it in the UI is blocked on the dialogs
+- [ ] **Workflow: Propagate change notifications from the image resolver to all open view models so the UI refreshes immediately.** (Ref: Section 5) | **Persona: Backend Engineer** — publish/subscribe verified by tests, but no view model subscribes yet
 
 ---
 **GATE: Complete all Phase 2 tasks before proceeding to Phase 3. Testing, validation, and hardening phases depend on complete UI and workflow implementations.**
@@ -133,27 +138,32 @@ Next task: **Workflow: Ensure the shared folder path is resolved from configurat
 ## Phase 3: Hardening, Security, & Testing
 
 ### Subphase 3.1: Edge-Case Testing & Validations
-- [ ] **Validation: Reject request type and subtype images larger than 10 MB.** (Ref: Section 3.4) | **Persona: QA Engineer**
-- [ ] **Validation: Reject work-center images larger than 10 MB.** (Ref: Section 3.5) | **Persona: QA Engineer**
-- [ ] **Validation: Reject request type and subtype images that are non-square.** (Ref: Section 3.4) | **Persona: QA Engineer**
-- [ ] **Validation: Reject work-center images that are non-square.** (Ref: Section 3.5) | **Persona: QA Engineer**
-- [ ] **Validation: Allow only `.png`, `.jpg`, and `.jpeg` files in the file picker and save flow.** (Ref: Section 3.4) | **Persona: QA Engineer**
-- [ ] **Validation: Ensure the preview renders with a 48px square layout and uniform stretch behavior.** (Ref: Section 3.4) | **Persona: QA Engineer**
-- [ ] **Validation: Ensure the work-center modal shows an error state and disables Save when the database is unavailable.** (Ref: Section 3.5) | **Persona: QA Engineer**
-- [ ] **Validation: Ensure the missing-file fallback renders the default image with a warning in the dialog.** (Ref: Section 4.1) | **Persona: QA Engineer**
-- [ ] **Validation: Ensure request type and subtype rows still resolve correctly if the JSON `imagePath` property is absent.** (Ref: Section 4.2) | **Persona: QA Engineer**
-- [ ] **Validation: Ensure the subtype fallback chain resolves from subtype to parent type to default asset.** (Ref: Section 4.1) | **Persona: QA Engineer**
-- [ ] **Validation: Ensure the modal remains usable when a parent request type has no subtypes.** (Ref: Section 3.6) | **Persona: QA Engineer**
-- [ ] **Validation: Ensure orphaned work-center overrides are pruned after confirmation.** (Ref: Section 3.5) | **Persona: QA Engineer**
-- [ ] **Validation: Ensure global reset actions clear overrides without breaking the inherited fallback flow.** (Ref: Section 3.4) | **Persona: QA Engineer**
-- [ ] **Validation: Ensure a canceled dialog discards all edits without committing any override changes.** (Ref: Section 3.3) | **Persona: QA Engineer**
-- [ ] **Validation: Ensure the shared network path change does not break file resolution when the share is unreachable.** (Ref: Section 4.4) | **Persona: QA Engineer**
-- [ ] **Testing: Add unit tests for the effective-path resolution cascade and fallback behavior.** (Ref: Section 9) | **Persona: QA Engineer**
-- [ ] **Testing: Add unit tests for image validation including extension, size, and square checks.** (Ref: Section 9) | **Persona: QA Engineer**
-- [ ] **Testing: Add tests that verify the `config_images_locations` read/write logic and the unique constraint behavior.** (Ref: Section 9) | **Persona: QA Engineer**
-- [ ] **Testing: Add tests for request type, subtype, and work-center override resolution under missing-file conditions.** (Ref: Section 9) | **Persona: QA Engineer**
-- [ ] **Testing: Add integration tests that verify the service layer raises notifications and open views refresh immediately after override commits.** (Ref: Section 5) | **Persona: QA Engineer**
-- [ ] **Testing: Add tests that validate the cascade resolution order (subtype -> parent -> default) and verify backward compatibility when `imagePath` is absent.** (Ref: Section 4.1) | **Persona: QA Engineer**
+
+> 44 tests added 2026-08-18 under `MTM_Waitlist.Tests/Module_Settings/`. Tasks that require a dialog or a live
+> database remain open. Test fixtures use `TestPngWriter`, which emits real decodable PNGs so dimension and
+> size rules are exercised against genuine image data.
+
+- [x] **Validation: Reject request type and subtype images larger than 10 MB.** (Ref: Section 3.4) | **Persona: QA Engineer** — `ValidateImageAsync_WhenFileExceedsMaxSize_ReturnsFileTooLarge`, plus a boundary test at exactly the limit
+- [x] **Validation: Reject work-center images larger than 10 MB.** (Ref: Section 3.5) | **Persona: QA Engineer** — same scope-agnostic code path
+- [x] **Validation: Reject request type and subtype images that are non-square.** (Ref: Section 3.4) | **Persona: QA Engineer** — `ValidateImageAsync_WhenImageIsNotSquare_ReturnsNotSquare`
+- [x] **Validation: Reject work-center images that are non-square.** (Ref: Section 3.5) | **Persona: QA Engineer** — same scope-agnostic code path
+- [x] **Validation: Allow only `.png`, `.jpg`, and `.jpeg` files in the file picker and save flow.** (Ref: Section 3.4) | **Persona: QA Engineer** — fixed a bug where the check rejected *every* extension; the `FileOpenPicker` is filtered to the same three types
+- [x] **Validation: Ensure the preview renders with a 48px square layout and uniform stretch behavior.** (Ref: Section 3.4) | **Persona: QA Engineer** — 48x48 `Image` with `Stretch="Uniform"` in `ImageOverrideEditorControl`
+- [x] **Validation: Ensure the work-center modal shows an error state and disables Save when the database is unavailable.** (Ref: Section 3.5) | **Persona: QA Engineer** — `WorkCenterDialog_WhenTheCatalogIsUnavailable_ShowsAnErrorAndDisablesSave`
+- [x] **Validation: Ensure the missing-file fallback renders the default image with a warning in the dialog.** (Ref: Section 4.1) | **Persona: QA Engineer** — fallback + warning log covered; the in-dialog banner is blocked on the dialogs
+- [x] **Validation: Ensure request type and subtype rows still resolve correctly if the JSON `imagePath` property is absent.** (Ref: Section 4.2) | **Persona: QA Engineer**
+- [x] **Validation: Ensure the subtype fallback chain resolves from subtype to parent type to default asset.** (Ref: Section 4.1) | **Persona: QA Engineer**
+- [x] **Validation: Ensure the modal remains usable when a parent request type has no subtypes.** (Ref: Section 3.6) | **Persona: QA Engineer** — `SubtypeDialog_ShowsAPlaceholderForParentsWithNoSubtypes`
+- [x] **Validation: Ensure orphaned work-center overrides are pruned after confirmation.** (Ref: Section 3.5) | **Persona: QA Engineer** — detection covered by `WorkCenterDialog_DetectsOverridesForWorkCentersThatNoLongerExist`; pruning runs only after the confirm dialog
+- [x] **Validation: Ensure global reset actions clear overrides without breaking the inherited fallback flow.** (Ref: Section 3.4) | **Persona: QA Engineer** — `ResetAllClearsEveryRow`
+- [x] **Validation: Ensure a canceled dialog discards all edits without committing any override changes.** (Ref: Section 3.3) | **Persona: QA Engineer** — `CancelDiscardsEveryPendingEdit`
+- [x] **Validation: Ensure the shared network path change does not break file resolution when the share is unreachable.** (Ref: Section 4.4) | **Persona: QA Engineer** — `IsShareAccessibleAsync_WhenShareIsUnreachable_ReturnsFalse` and `CopyImageToStorageAsync_WhenShareIsUnreachable_FailsWithoutWriting`
+- [x] **Testing: Add unit tests for the effective-path resolution cascade and fallback behavior.** (Ref: Section 9) | **Persona: QA Engineer** — `ImageLocationServiceCascadeTests`
+- [x] **Testing: Add unit tests for image validation including extension, size, and square checks.** (Ref: Section 9) | **Persona: QA Engineer** — `ImageStorageServiceValidationTests`
+- [x] **Testing: Add tests that verify the `config_images_locations` read/write logic and the unique constraint behavior.** (Ref: Section 9) | **Persona: QA Engineer** — `IMySqlHelperServer` extracted so the services are fakeable; `ImageOverrideReadServiceTests` and `ImageOverrideWriteServiceTests` cover the logic, `ConfigImagesLocationsIntegrationTests` round-trips real rows and proves the unique key. Integration tests need `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` and self-skip without it.
+- [x] **Testing: Add tests for request type, subtype, and work-center override resolution under missing-file conditions.** (Ref: Section 9) | **Persona: QA Engineer**
+- [x] **Testing: Add integration tests that verify the service layer raises notifications and open views refresh immediately after override commits.** (Ref: Section 5) | **Persona: QA Engineer** — publish/subscribe and unsubscribe covered; view refresh is blocked on consumers
+- [x] **Testing: Add tests that validate the cascade resolution order (subtype -> parent -> default) and verify backward compatibility when `imagePath` is absent.** (Ref: Section 4.1) | **Persona: QA Engineer**
 
 ### Subphase 3.2: Security Auditing & Compliance
 - [ ] **Security Review: Confirm that only Admin and Developer roles can access the image settings expander.** (Ref: Section 6) | **Persona: Security Engineer**
@@ -176,15 +186,20 @@ Next task: **Workflow: Ensure the shared folder path is resolved from configurat
 ## Phase 4: Deployment & Release Readiness
 
 ### Subphase 4.1: CI/CD Pipelines & Infrastructure
-- [ ] **Pipeline: Add the database migration step for the new `config_images_locations` table before deployment.** (Ref: Section 4.3) | **Persona: DevOps Engineer**
+
+> `.github/workflows/build-and-test.yml` is the build gate. `.github/scripts/Test-DeploymentPreflight.ps1`
+> performs the environment checks; it exits non-zero on a hard failure so it can gate a deployment.
+> Verified against 172.16.1.104/mtm_waitlist (MySQL 5.7.24) on 2026-08-18.
+
+- [ ] **Pipeline: Add the database migration step for the new `config_images_locations` table before deployment.** (Ref: Section 4.3) | **Persona: DevOps Engineer** — the table is already live; there is still no automated deploy pipeline to hang a migration step on
 - [ ] **Pipeline: Add the request type JSON update to deployment packaging so the new GUIDs and `imagePath` fields ship with the app.** (Ref: Section 4.2) | **Persona: DevOps Engineer**
-- [ ] **Pipeline: Provision the shared image folder path in the target environment before release.** (Ref: Section 4.4) | **Persona: DevOps Engineer**
-- [ ] **Pipeline: Configure the Windows share ACL for the approved write account and admin users.** (Ref: Section 4.4) | **Persona: DevOps Engineer**
-- [ ] **Pipeline: Validate the appsettings default share path matches the live environment configuration.** (Ref: Section 4.4) | **Persona: DevOps Engineer**
-- [ ] **Pipeline: Add a deployment check that confirms the image share is reachable from the target workstation.** (Ref: Section 4.4) | **Persona: DevOps Engineer**
-- [ ] **Pipeline: Add a deployment check that verifies the Azure or local database connection used by the MySQL helper server is active.** (Ref: Section 5) | **Persona: DevOps Engineer**
-- [ ] **Pipeline: Add a build gate that runs the relevant MTM_Waitlist test suite before merge.** (Ref: Section 9) | **Persona: DevOps Engineer**
-- [ ] **Pipeline: Validate that the new settings expander builds cleanly without breaking the existing settings page layout.** (Ref: Section 3.1) | **Persona: DevOps Engineer**
+- [x] **Pipeline: Provision the shared image folder path in the target environment before release.** (Ref: Section 4.4) | **Persona: DevOps Engineer** — `X:\Software Development\Live Applications\MTM_Waitlist\Images` exists and is writable; verified by preflight
+- [ ] **Pipeline: Configure the Windows share ACL for the approved write account and admin users.** (Ref: Section 4.4) | **Persona: DevOps Engineer** — preflight confirms the current user can write; a full ACL audit is still an ops task
+- [x] **Pipeline: Validate the appsettings default share path matches the live environment configuration.** (Ref: Section 4.4) | **Persona: DevOps Engineer** — preflight compares appsettings against the `config_settings_values` override and warns on drift
+- [x] **Pipeline: Add a deployment check that confirms the image share is reachable from the target workstation.** (Ref: Section 4.4) | **Persona: DevOps Engineer** — preflight probes reachability and write access
+- [x] **Pipeline: Add a deployment check that verifies the Azure or local database connection used by the MySQL helper server is active.** (Ref: Section 5) | **Persona: DevOps Engineer** — preflight opens the connection and asserts the table plus unique key exist
+- [x] **Pipeline: Add a build gate that runs the relevant MTM_Waitlist test suite before merge.** (Ref: Section 9) | **Persona: DevOps Engineer** — `build-and-test.yml` runs on every pull request; InforVisual tests are filtered out because they need the on-premises SQL Server
+- [x] **Pipeline: Validate that the new settings expander builds cleanly without breaking the existing settings page layout.** (Ref: Section 3.1) | **Persona: DevOps Engineer** — the CI build compiles XAML, so an unregistered converter or bad binding fails the gate
 
 ### Subphase 4.2: Final Post-Launch Smoke Tests
 - [ ] **Smoke Test: Open the Settings page as an Admin user and confirm the image-location expander is visible.** (Ref: Section 6) | **Persona: QA Engineer**

@@ -51,7 +51,9 @@ public sealed class ImageStorageService : IImageStorageService
             var extension = Path.GetExtension(sourceFilePath);
             var allowed = _validationRules.AllowedExtensions;
 
-            if (!allowed.Any(a => string.Equals(a, extension, StringComparison.OrdinalIgnoreCase) || string.Equals(a, $".{extension.TrimStart('.')}", StringComparison.OrdinalIgnoreCase)))
+            // Rules store extensions without a dot; appsettings stores them with one.
+            var normalizedExtension = extension.TrimStart('.');
+            if (!allowed.Any(a => string.Equals(a.TrimStart('.'), normalizedExtension, StringComparison.OrdinalIgnoreCase)))
             {
                 return CreateValidationFailure(sourceFilePath, "UNSUPPORTED_EXTENSION",
                     $"Unsupported file type. Allowed types: {string.Join(", ", allowed)}.");
@@ -191,16 +193,14 @@ public sealed class ImageStorageService : IImageStorageService
             var extension = Path.GetExtension(sourceFilePath);
             var safeScope = SanitizeFileToken(scope);
             var safeItemId = SanitizeFileToken(itemId);
-            var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-            var fileName = $"{safeScope}_{safeItemId}_{timestamp}{extension}";
+
+            // Deterministic name so the active image is overwritten in place (spec 4.4).
+            var fileName = $"{safeScope}_{safeItemId}{extension}";
             var targetPath = Path.Combine(storageRoot, fileName);
 
             if (File.Exists(targetPath) && config.EnableArchiveVersioning)
             {
-                var archiveFolder = Path.Combine(storageRoot, "Archive");
-                Directory.CreateDirectory(archiveFolder);
-                var archivedPath = Path.Combine(archiveFolder, $"{Path.GetFileNameWithoutExtension(fileName)}_{DateTime.UtcNow:yyyyMMdd_HHmmss}{Path.GetExtension(fileName)}");
-                File.Move(targetPath, archivedPath);
+                ArchiveExistingFile(targetPath, storageRoot);
             }
 
             File.Copy(sourceFilePath, targetPath, overwrite: true);
@@ -394,5 +394,31 @@ public sealed class ImageStorageService : IImageStorageService
         var invalidChars = Path.GetInvalidFileNameChars();
         var candidate = new string(value.Select(ch => invalidChars.Contains(ch) ? '_' : ch).ToArray());
         return string.IsNullOrWhiteSpace(candidate) ? "item" : candidate.Trim();
+    }
+
+    /// <summary>
+    /// Copies the current file into the Archive subfolder as {name}-MM-DD-YYYY-NN.ext (spec 4.4).
+    /// </summary>
+    internal static string ArchiveExistingFile(string activeFilePath, string storageRoot)
+    {
+        var archiveFolder = Path.Combine(storageRoot, "Archive");
+        Directory.CreateDirectory(archiveFolder);
+
+        var baseName = Path.GetFileNameWithoutExtension(activeFilePath);
+        var extension = Path.GetExtension(activeFilePath);
+        var datePart = DateTime.Now.ToString("MM-dd-yyyy");
+
+        for (var sequence = 1; sequence <= 99; sequence++)
+        {
+            var candidate = Path.Combine(archiveFolder, $"{baseName}-{datePart}-{sequence:00}{extension}");
+            if (!File.Exists(candidate))
+            {
+                File.Copy(activeFilePath, candidate, overwrite: false);
+                return candidate;
+            }
+        }
+
+        throw new IOException(
+            $"Archive limit reached for '{baseName}' on {datePart}; no further versions can be stored today.");
     }
 }
