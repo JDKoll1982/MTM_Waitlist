@@ -7,5 +7,6 @@ public sealed partial class PickupRequestTypeImageView : UserControl
     public PickupRequestTypeImageView()
     {
         InitializeComponent();
+        DataContext = new PickupRequestTypeViewModel();
     }
 }

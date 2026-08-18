@@ -7,5 +7,6 @@ public sealed partial class OtherRequestTypeImageView : UserControl
     public OtherRequestTypeImageView()
     {
         InitializeComponent();
+        DataContext = new OtherRequestTypeViewModel();
     }
 }

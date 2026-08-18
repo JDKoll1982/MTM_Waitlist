@@ -7,5 +7,6 @@ public sealed partial class CoilRequestTypeImageView : UserControl
     public CoilRequestTypeImageView()
     {
         InitializeComponent();
+        DataContext = new CoilRequestTypeViewModel();
     }
 }

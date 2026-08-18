@@ -49,8 +49,39 @@
     </Page.Resources>
 
     <Grid x:Name="ContentArea">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="FabLayoutStates">
+                <VisualState x:Name="CompactFabState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="WaitlistListView.Padding" Value="6,12,6,80" />
+                        <Setter Target="WaitlistFab.Width" Value="56" />
+                        <Setter Target="WaitlistFab.Height" Value="56" />
+                        <Setter Target="WaitlistFab.CornerRadius" Value="28" />
+                        <Setter Target="WaitlistFabIcon.FontSize" Value="24" />
+                    </VisualState.Setters>
+                </VisualState>
+
+                <VisualState x:Name="WideFabState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="900" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="WaitlistListView.Padding" Value="6,12,6,100" />
+                        <Setter Target="WaitlistFab.Width" Value="72" />
+                        <Setter Target="WaitlistFab.Height" Value="72" />
+                        <Setter Target="WaitlistFab.CornerRadius" Value="36" />
+                        <Setter Target="WaitlistFabIcon.FontSize" Value="30" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
         <ListView
-            Padding="6,12"
+            x:Name="WaitlistListView"
+            Padding="6,12,6,80"
             IsItemClickEnabled="True"
             ItemClick="ListView_ItemClick"
             ItemTemplateSelector="{StaticResource WaitlistLineTemplateSelector}"
@@ -140,9 +171,10 @@
 
         <!--  Floating Green Circular Action Button  -->
         <Button
+            x:Name="WaitlistFab"
+            Width="56"
+            Height="56"
             Click="OnAddRequestClick"
-            Width="100"
-            Height="100"
             Margin="0,0,24,24"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
@@ -150,10 +182,11 @@
             Background="{ThemeResource SystemFillColorSuccessBrush}"
             BorderBrush="Black"
             BorderThickness="4"
-            CornerRadius="50"
+            CornerRadius="28"
             Style="{ThemeResource DefaultButtonStyle}">
             <FontIcon
-                FontSize="40"
+                x:Name="WaitlistFabIcon"
+                FontSize="24"
                 Foreground="White"
                 Glyph="&#xE710;" />
         </Button>

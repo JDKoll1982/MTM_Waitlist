@@ -34,12 +34,12 @@ public sealed class SampleDataService : ISampleDataService
         {
             return new object[]
             {
-                CreateItem(101, "Coil Request", "coil.png", "Maria Torres", "Press 07", "00:18"),
-                CreateItem(102, "NCM Pickup", "pickup_ncm.png", "Devon Price", "Press 09", "00:42"),
-                CreateItem(103, "Outside Service Pickup", "pickup_os.png", "Alicia Kent", "Press 03", "00:11"),
-                CreateItem(104, "WIP Pickup", "pickup_wip.png", "Noah Rivera", "Press 11", "00:22"),
-                CreateItem(105, "Finished Goods Pickup", "pickup_fg.png", "Elena Brooks", "Press 04", "00:35"),
-                CreateItem(106, "Scrap Return", "scrap.png", "Harper Wells", "Press 08", "00:09")
+                CreateItem(101, "Finished Goods Pickup", "pickup_fg.png", "Maria Torres", "Press 07", "00:18"),
+                CreateItem(102, "VITS Coil Request", "coil.png", "Devon Price", "Press 09", "00:42"),
+                CreateItem(103, "VITS Scrap Return", "scrap.png", "Alicia Kent", "Press 03", "00:11"),
+                CreateItem(104, "VITS WIP Pickup", "pickup_wip.png", "Noah Rivera", "Press 11", "00:22"),
+                CreateItem(105, "VITS NCM Pickup", "pickup_ncm.png", "Elena Brooks", "Press 04", "00:35"),
+                CreateItem(106, "VITS Outside Service Pickup", "pickup_os.png", "Harper Wells", "Press 08", "00:09")
             };
         }
 
@@ -75,13 +75,19 @@ public sealed class SampleDataService : ISampleDataService
             Subtitle = string.Empty,
             Status = string.Empty,
             RequestedByName = requestedByName,
-            RequestedPressName = requestedPressName,
+            RequestedPressName = BuildMockPressName(title, id),
             RemainingTimeText = remainingTimeText,
             ImagePath = imagePath,
         };
 
         AddCardFields(item, imagePath);
         return item;
+    }
+
+    private static string BuildMockPressName(string title, int id)
+    {
+        var suffixNumber = Math.Abs(id % 100);
+        return $"{title} 100-{suffixNumber:D2}";
     }
 
     private static void AddCardFields(SampleOrder item, string imagePath)

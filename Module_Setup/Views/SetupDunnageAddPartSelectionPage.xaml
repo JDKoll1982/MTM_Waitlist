@@ -42,11 +42,13 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
                                 <Rectangle
                                     Grid.Row="0"
-                                    Height="96"
+                                    MinHeight="72"
+                                    MaxHeight="96"
                                     RadiusX="10"
                                     RadiusY="10">
                                     <Rectangle.Fill>
@@ -63,6 +65,15 @@
                                     Text="{x:Bind DisplayName}"
                                     TextAlignment="Center"
                                     TextWrapping="WrapWholeWords" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    HorizontalAlignment="Center"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind PartNumber}"
+                                    TextAlignment="Center"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="NoWrap" />
                             </Grid>
                         </Border>
                     </Button>

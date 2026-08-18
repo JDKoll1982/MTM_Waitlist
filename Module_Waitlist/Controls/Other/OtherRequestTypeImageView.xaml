@@ -3,12 +3,16 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Grid>
+    <StackPanel Spacing="8">
         <Image
             Width="160"
             Height="160"
             Stretch="Uniform"
-            Source="ms-appx:///Assets/RequestTypeImages/other.png"
+            Source="{Binding ImagePath}"
             AutomationProperties.Name="Other request type image" />
-    </Grid>
+        <TextBlock
+            HorizontalAlignment="Center"
+            Style="{ThemeResource BodyStrongTextBlockStyle}"
+            Text="{Binding RequestTypeName}" />
+    </StackPanel>
 </UserControl>

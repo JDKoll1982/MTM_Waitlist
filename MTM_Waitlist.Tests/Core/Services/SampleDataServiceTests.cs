@@ -35,7 +35,7 @@ public sealed class SampleDataServiceTests
         Assert.IsNotNull(firstOrder);
         Assert.AreEqual("Coil Request", firstOrder!.Title);
         Assert.AreEqual("Jordan Lee", firstOrder.RequestedByName);
-        Assert.AreEqual("Press 12", firstOrder.RequestedPressName);
+        Assert.AreEqual("Coil Request 100-01", firstOrder.RequestedPressName);
         Assert.AreEqual("00:27", firstOrder.RemainingTimeText);
     }
 
@@ -62,9 +62,10 @@ public sealed class SampleDataServiceTests
         Assert.AreEqual(6, expoRows.Count);
         Assert.AreEqual(6, vitsRows.Count);
 
-        var imagePaths = expoRows.Concat(vitsRows)
+        var uniqueImagePaths = expoRows.Concat(vitsRows)
             .OfType<MTM_Waitlist.Module_Waitlist.Models.SampleOrder>()
             .Select(item => item.ImagePath)
+            .Distinct()
             .ToArray();
 
         CollectionAssert.AreEquivalent(
@@ -77,7 +78,7 @@ public sealed class SampleDataServiceTests
                 "pickup_wip.png",
                 "scrap.png"
             },
-            imagePaths);
+            uniqueImagePaths);
     }
 
     [TestMethod]

@@ -26,6 +26,12 @@ public partial class SettingsViewModel : ObservableRecipient
         "Production Lead",
     };
 
+    private static readonly string[] AllowedImageLocationManageRoles =
+    {
+        "Admin",
+        "Developer",
+    };
+
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly ILocalSettingsService _localSettingsService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
@@ -105,6 +111,9 @@ public partial class SettingsViewModel : ObservableRecipient
     public bool CanManageHotWorkCenters => AllowedHotWorkCenterManageRoles.Any(role =>
         string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
 
+    public bool CanManageImageLocationSettings => AllowedImageLocationManageRoles.Any(role =>
+        string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+
     public bool CanManageDunnageTypeVisibility => CanManageHotWorkCenters;
 
     public bool IsAppearancePanelVisible => MatchesSearch("appearance", "app theme", "light", "dark", "default", SelectedThemeText);
@@ -131,7 +140,18 @@ public partial class SettingsViewModel : ObservableRecipient
 
     public bool IsAppearanceCategoryVisible => IsAppearancePanelVisible;
 
-    public bool IsOperationsCategoryVisible => IsMockDataPanelVisible || IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible;
+    public bool IsImageLocationSettingsPanelVisible => CanManageImageLocationSettings && MatchesSearch(
+        "image location",
+        "image settings",
+        "request type images",
+        "work center images",
+        "subtype images",
+        "image path",
+        "request type",
+        "subtype",
+        "work center");
+
+    public bool IsOperationsCategoryVisible => IsMockDataPanelVisible || IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 

@@ -7,5 +7,6 @@ public sealed partial class ForkliftAssistRequestTypeImageView : UserControl
     public ForkliftAssistRequestTypeImageView()
     {
         InitializeComponent();
+        DataContext = new ForkliftAssistRequestTypeViewModel();
     }
 }

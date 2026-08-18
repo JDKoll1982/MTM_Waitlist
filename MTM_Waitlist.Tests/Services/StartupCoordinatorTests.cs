@@ -461,7 +461,7 @@ public sealed class StartupCoordinatorTests
 
         try
         {
-            Environment.SetEnvironmentVariable(environmentVariableName, "Server=localhost;User ID=test;Password=test;Database=test;");
+            Environment.SetEnvironmentVariable(environmentVariableName, "Server=172.16.1.104;User ID=test;Password=test;Database=test;");
 
             var fileService = new InMemoryFileService(new Dictionary<string, object>
             {

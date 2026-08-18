@@ -18,8 +18,10 @@
             VerticalAlignment="Center"
             Spacing="16">
             <ProgressRing
-                Width="64"
-                Height="64"
+                MinWidth="56"
+                MinHeight="56"
+                MaxWidth="72"
+                MaxHeight="72"
                 IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
             <TextBlock
                 HorizontalAlignment="Center"

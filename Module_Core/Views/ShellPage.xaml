@@ -39,10 +39,9 @@
             <AutoSuggestBox
                 x:Name="TitleBarSearchBox"
                 Grid.Column="2"
-                Width="420"
-                MaxWidth="600"
+                MaxWidth="400"
                 Margin="8,0,8,0"
-                HorizontalAlignment="Center"
+                HorizontalAlignment="Stretch"
                 VerticalAlignment="Center"
                 PlaceholderText="Search requests"
                 QueryIcon="Find"
@@ -94,7 +93,7 @@
             </NavigationView.MenuItems>
             <NavigationView.HeaderTemplate>
                 <DataTemplate>
-                    <Grid Height="64" ColumnSpacing="16">
+                    <Grid MinHeight="64" ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -107,7 +106,8 @@
                             Text="{Binding}" />
                         <ComboBox
                             Grid.Column="1"
-                            Width="220"
+                            MinWidth="160"
+                            MaxWidth="220"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
                             ItemsSource="{Binding ViewModel.Buildings, ElementName=RootPage}"
@@ -136,8 +136,11 @@
                                 </Border>
                                 <TextBlock
                                     VerticalAlignment="Center"
+                                    MaxWidth="220"
                                     Style="{ThemeResource BodyTextBlockStyle}"
-                                    Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}" />
+                                    Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="NoWrap" />
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -147,7 +150,7 @@
                 <behaviors:NavigationViewHeaderBehavior DefaultHeader="{x:Bind ViewModel.HeaderText, Mode=OneWay}">
                     <behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
                         <DataTemplate>
-                            <Grid Height="64" Margin="0,0,60,0" ColumnSpacing="16">
+                            <Grid MinHeight="64" Margin="0,0,60,0" ColumnSpacing="16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
@@ -160,7 +163,8 @@
                                     Text="{Binding}" />
                                 <ComboBox
                                     Grid.Column="1"
-                                    Width="220"
+                                    MinWidth="160"
+                                    MaxWidth="220"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
                                     ItemsSource="{Binding ViewModel.Buildings, ElementName=RootPage}"
@@ -189,8 +193,11 @@
                                         </Border>
                                         <TextBlock
                                             VerticalAlignment="Center"
+                                            MaxWidth="220"
                                             Style="{ThemeResource BodyTextBlockStyle}"
-                                            Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}" />
+                                            Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextWrapping="NoWrap" />
                                     </StackPanel>
                                 </Button>
                             </Grid>
