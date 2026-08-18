@@ -247,8 +247,580 @@
                     </Grid>
                 </muxc:Expander>
 
+                <Border
+                    Grid.Row="2"
+                    Padding="16"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            FontWeight="SemiBold"
+                            Text="Resolver-aware surfaces" />
+
+                        <Grid Grid.Row="1" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="72" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border
+                                Grid.Column="0"
+                                Width="56"
+                                Height="56"
+                                Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10">
+                                <Image Source="/Assets/Images/default-request-type.png" Stretch="UniformToFill" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock FontWeight="SemiBold" Text="Request type / subtype surfaces" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Resolved from override → parent → default asset" />
+                            </StackPanel>
+
+                            <Button
+                                Grid.Column="2"
+                                Content="Preview"
+                                MinWidth="92" />
+                        </Grid>
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="These surfaces are now aligned to the resolver and no longer rely on hardcoded image assignments." />
+                    </Grid>
+                </Border>
+
                 <muxc:Expander
                     Grid.Row="2"
+                    x:Name="ImageLocationSettingsExpander"
+                    x:Load="{x:Bind ViewModel.IsImageLocationSettingsPanelVisible, Mode=OneWay}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    IsExpanded="False"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="0">
+                    <muxc:Expander.Header>
+                        <Grid
+                            Padding="16,12,16,12"
+                            ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <SymbolIcon
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Symbol="Pictures" />
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                FontWeight="SemiBold"
+                                Text="Image Location Settings" />
+                        </Grid>
+                    </muxc:Expander.Header>
+
+                    <Grid
+                        Margin="0,8,0,0"
+                        Padding="16,0,16,16"
+                        RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Manage request type, work-center, and subtype image overrides for authorized staff."
+                            TextWrapping="Wrap" />
+
+                        <wct:SettingsCard Grid.Row="1">
+                            <wct:SettingsCard.Header>
+                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Request Type Images" />
+                            </wct:SettingsCard.Header>
+                            <wct:SettingsCard.Description>
+                                <TextBlock
+                                    Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="Manage the default visuals used for request type cards and summaries." />
+                            </wct:SettingsCard.Description>
+                        </wct:SettingsCard>
+
+                        <wct:SettingsCard Grid.Row="2">
+                            <wct:SettingsCard.Header>
+                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Work Center Images" />
+                            </wct:SettingsCard.Header>
+                            <wct:SettingsCard.Description>
+                                <TextBlock
+                                    Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="Review and override the images used for active work-center selections and detail pages." />
+                            </wct:SettingsCard.Description>
+                        </wct:SettingsCard>
+
+                        <wct:SettingsCard Grid.Row="3">
+                            <wct:SettingsCard.Header>
+                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Request Subtype Images" />
+                            </wct:SettingsCard.Header>
+                            <wct:SettingsCard.Description>
+                                <TextBlock
+                                    Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="Assign subtype-specific artwork while preserving the inherited fallback chain." />
+                            </wct:SettingsCard.Description>
+                        </wct:SettingsCard>
+
+                        <Border
+                            Grid.Row="4"
+                            Padding="12"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                            <Grid RowSpacing="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    FontWeight="SemiBold"
+                                    Text="Request Type Card Preview" />
+
+                                <Grid Grid.Row="1" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="56" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        VerticalAlignment="Center"
+                                        FontWeight="SemiBold"
+                                        Text="Example Item Label" />
+
+                                    <Border
+                                        Grid.Column="1"
+                                        Width="48"
+                                        Height="48"
+                                        Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                        <Image
+                                            Stretch="UniformToFill"
+                                            Source="/Assets/Images/default-request-type.png" />
+                                    </Border>
+
+                                    <TextBox
+                                        Grid.Column="2"
+                                        MinWidth="220"
+                                        PlaceholderText="C:\\path\\to\\custom-image.png"
+                                        Text="C:\\path\\to\\custom-image.png" />
+
+                                    <Button
+                                        Grid.Column="3"
+                                        Content="Browse"
+                                        MinWidth="92" />
+
+                                    <Button
+                                        Grid.Column="4"
+                                        Content="Reset"
+                                        MinWidth="92" />
+                                </Grid>
+
+                                <ItemsControl Grid.Row="2" HorizontalAlignment="Stretch">
+                                    <ItemsControl.Items>
+                                        <TextBlock Text="1. Initial Request / ID: 11111111-1111-1111-1111-111111111111" />
+                                        <TextBlock Text="2. Follow-Up / ID: 22222222-2222-2222-2222-222222222222" />
+                                        <TextBlock Text="3. Hold / ID: 33333333-3333-3333-3333-333333333333" />
+                                        <TextBlock Text="4. Transfer / ID: 44444444-4444-4444-4444-444444444444" />
+                                        <TextBlock Text="5. Rush / ID: 55555555-5555-5555-5555-555555555555" />
+                                        <TextBlock Text="6. Rework / ID: 66666666-6666-6666-6666-666666666666" />
+                                        <TextBlock Text="7. Damage / ID: 77777777-7777-7777-7777-777777777777" />
+                                        <TextBlock Text="8. Inspection / ID: 88888888-8888-8888-8888-888888888888" />
+                                    </ItemsControl.Items>
+                                </ItemsControl>
+                            </Grid>
+                        </Border>
+
+                        <Border
+                            Grid.Row="5"
+                            Padding="12"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                            <Grid RowSpacing="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    FontWeight="SemiBold"
+                                    Text="Work Center Card Preview" />
+
+                                <Grid Grid.Row="1" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox
+                                        Grid.Column="0"
+                                        PlaceholderText="Search work centers"
+                                        Text="Search work centers" />
+
+                                    <ToggleSwitch
+                                        Grid.Column="1"
+                                        OffContent="All"
+                                        OnContent="Custom only"
+                                        IsOn="False" />
+                                </Grid>
+
+                                <StackPanel Grid.Row="2" Spacing="8">
+                                    <TextBlock
+                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                        Text="Database unavailable — Save disabled" />
+
+                                    <Border
+                                        Padding="8"
+                                        Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
+                                        CornerRadius="8">
+                                        <Grid ColumnSpacing="10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="170" />
+                                                <ColumnDefinition Width="48" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock
+                                                Grid.Column="0"
+                                                FontWeight="SemiBold"
+                                                Text="Building A • East Bay" />
+
+                                            <Border
+                                                Grid.Column="1"
+                                                Width="32"
+                                                Height="32"
+                                                Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                                                CornerRadius="6">
+                                                <Image Source="/Assets/Images/default-work-center.png" Stretch="UniformToFill" />
+                                            </Border>
+
+                                            <TextBlock
+                                                Grid.Column="2"
+                                                VerticalAlignment="Center"
+                                                Text="A-104 • Custom image available" />
+                                        </Grid>
+                                    </Border>
+
+                                    <Border
+                                        Padding="8"
+                                        Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
+                                        CornerRadius="8">
+                                        <Grid ColumnSpacing="10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="170" />
+                                                <ColumnDefinition Width="48" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock
+                                                Grid.Column="0"
+                                                FontWeight="SemiBold"
+                                                Text="Building B • West Bay" />
+
+                                            <Border
+                                                Grid.Column="1"
+                                                Width="32"
+                                                Height="32"
+                                                Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                                                CornerRadius="6">
+                                                <Image Source="/Assets/Images/default-work-center.png" Stretch="UniformToFill" />
+                                            </Border>
+
+                                            <TextBlock
+                                                Grid.Column="2"
+                                                VerticalAlignment="Center"
+                                                Text="B-217 • Inherited default" />
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Grid Grid.Row="6" ColumnSpacing="12" HorizontalAlignment="Right">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button
+                                Grid.Column="0"
+                                Content="Cancel"
+                                MinWidth="96" />
+
+                            <Button
+                                Grid.Column="1"
+                                Content="Save"
+                                MinWidth="96"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                IsEnabled="False" />
+                        </Grid>
+                    </Grid>
+                </muxc:Expander>
+
+                <Border
+                    Grid.Row="3"
+                    Padding="16"
+                    Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Opacity="0.9">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            FontWeight="SemiBold"
+                            Text="Work Center Detail Preview" />
+
+                        <Grid Grid.Row="1" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="64" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border
+                                Grid.Column="0"
+                                Width="48"
+                                Height="48"
+                                Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                                CornerRadius="8">
+                                <Image Source="/Assets/Images/default-work-center.png" Stretch="UniformToFill" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock FontWeight="SemiBold" Text="East Bay - A-104" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Custom image available" />
+                            </StackPanel>
+
+                            <Button
+                                Grid.Column="2"
+                                Content="Reset"
+                                MinWidth="92" />
+                        </Grid>
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Prune legacy overrides after confirmation to keep the inherited fallback flow clean." />
+
+                        <Border
+                            Grid.Row="3"
+                            Padding="8"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                            <StackPanel Spacing="4">
+                                <TextBlock FontWeight="SemiBold" Text="Orphan cleanup" />
+                                <TextBlock Text="2 stale work-center override rows marked for removal after confirmation." />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="3"
+                    Padding="16"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                    <Grid RowSpacing="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            FontWeight="SemiBold"
+                            Text="Subtype Inherited Preview" />
+
+                        <Grid Grid.Row="1" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="64" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border
+                                Grid.Column="0"
+                                Width="48"
+                                Height="48"
+                                Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <Image Source="/Assets/Images/default-request-type.png" Stretch="UniformToFill" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock FontWeight="SemiBold" Text="Inspection - Parent image inherited" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Parent: Request Type / Fallback: Default Asset" />
+                            </StackPanel>
+
+                            <Border
+                                Grid.Column="2"
+                                Padding="6,3,6,3"
+                                Background="{ThemeResource AccentFillColorTertiaryBrush}"
+                                CornerRadius="8">
+                                <TextBlock FontWeight="SemiBold" Text="Inherited" />
+                            </Border>
+                        </Grid>
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Uses the parent request type image until a subtype-specific override is saved." />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="3"
+                    Padding="16"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="72" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border
+                            Grid.Column="0"
+                            Width="56"
+                            Height="56"
+                            Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                            <Image Source="/Assets/Images/default-request-type.png" Stretch="UniformToFill" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock FontWeight="SemiBold" Text="Detail Hero Preview" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Subtype-specific asset is active for the selected record." />
+                        </StackPanel>
+
+                        <Border
+                            Grid.Column="2"
+                            Padding="6,3,6,3"
+                            Background="{ThemeResource AccentFillColorTertiaryBrush}"
+                            CornerRadius="8">
+                            <TextBlock FontWeight="SemiBold" Text="Subtype image" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="3"
+                    Padding="16"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            FontWeight="SemiBold"
+                            Text="Resolver-driven work-center selection" />
+
+                        <Grid Grid.Row="1" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="64" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border
+                                Grid.Column="0"
+                                Width="48"
+                                Height="48"
+                                Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <Image Source="/Assets/Images/default-work-center.png" Stretch="UniformToFill" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock FontWeight="SemiBold" Text="East Bay • A-104" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Uses resolved override image when active override exists" />
+                            </StackPanel>
+
+                            <Button
+                                Grid.Column="2"
+                                Content="Select"
+                                MinWidth="92" />
+                        </Grid>
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="This surface resolves work-center assets from override → custom folder → default asset without requiring a restart." />
+                    </Grid>
+                </Border>
+
+                <muxc:Expander
+                    Grid.Row="3"
                     x:Name="HotWorkCentersExpander"
                     x:Load="{x:Bind ViewModel.IsHotWorkCentersPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
@@ -444,7 +1016,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
-                    Grid.Row="3"
+                    Grid.Row="4"
                     x:Name="DunnageTypeVisibilityExpander"
                     x:Load="{x:Bind ViewModel.IsDunnageTypeVisibilityPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"

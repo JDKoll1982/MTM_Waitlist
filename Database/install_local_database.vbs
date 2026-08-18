@@ -190,14 +190,14 @@ Function RunSql(shellObj, mysqlExe, clientConfig, scriptPath, logFile)
 
     cmd = "cmd /c type " & quotedSql & " | " & quotedMysql & _
         " --defaults-extra-file=" & quotedConfig & _
-        " --default-character-set=utf8mb4 -h localhost -P 3306 2>&1"
+        " --default-character-set=utf8mb4 -h 172.16.1.104 -P 3306 2>&1"
 
     RunSql = RunCommandCapture(shellObj, cmd, logFile, "mysql output")
 End Function
 
 Function BuildPingCommand(mysqlExe, clientConfig)
     BuildPingCommand = QuoteArg(mysqlExe) & " --defaults-extra-file=" & QuoteArg(clientConfig) & _
-        " --default-character-set=utf8mb4 -h localhost -P 3306 --execute=""SELECT 1;"""
+        " --default-character-set=utf8mb4 -h 172.16.1.104 -P 3306 --execute=""SELECT 1;"""
 End Function
 
 Function QuoteArg(value)

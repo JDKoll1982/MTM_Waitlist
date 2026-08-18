@@ -1,5 +1,7 @@
 [
   {
+    "id": "7bb056da-2dfd-4da5-824c-cff0973544fb",
+    "imagePath": null,
     "requestType": "Pickup",
     "control": "MTM_Waitlist.Module_Waitlist.Controls.Pickup.PickupRequestTypeImageView",
     "centerDataGridFields": [
@@ -11,6 +13,7 @@
     ],
     "subtypes": [
       {
+        "id": "feaa6b5e-13db-4ad8-9c17-188f40ca41ed",
         "name": "Pickup Other",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Pickup.PickupRequestTypeImageView",
         "flow": "collect-input-then-confirm",
@@ -21,9 +24,11 @@
         "centerDataGridFields": [
           "Request description",
           "Requested work center"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "1a50ee24-6959-4242-9853-9b0e7ab19074",
         "name": "Pickup NCM",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.PickupNcm.PickupNcmWaitlistLineView",
         "centerDataGridFields": [
@@ -32,9 +37,11 @@
           "Pickup location",
           "Destination",
           "Traceability ID"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "7bc50583-6bc1-4ffc-94e3-40f2a21ae6d7",
         "name": "Pickup WIP",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.PickupWip.PickupWipWaitlistLineView",
         "centerDataGridFields": [
@@ -42,9 +49,11 @@
           "Pickup work center",
           "WIP destination",
           "Operation sequence"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "efb993e9-be75-4059-a619-be67519c9bc5",
         "name": "Pickup FG",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.PickupFg.PickupFgWaitlistLineView",
         "centerDataGridFields": [
@@ -53,9 +62,11 @@
           "Part description",
           "Customer",
           "Packlist"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "b46bab54-8067-436f-ac8b-d0531538422e",
         "name": "Pickup Coil",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
         "centerDataGridFields": [
@@ -64,9 +75,11 @@
           "Coil description",
           "Average coil weight",
           "Requesting work center"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "f6113875-95ba-4469-959f-c91979266596",
         "name": "Pickup Flatstock",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
         "centerDataGridFields": [
@@ -74,11 +87,14 @@
           "Quantity",
           "Work center",
           "Destination"
-        ]
+        ],
+        "imagePath": null
       }
     ]
   },
   {
+    "id": "8ee9f259-e404-4d4f-8f20-b5dd7c1c220f",
+    "imagePath": null,
     "requestType": "Other",
     "control": "MTM_Waitlist.Module_Waitlist.Controls.Other.OtherRequestTypeImageView",
     "centerDataGridFields": [
@@ -87,6 +103,7 @@
     ],
     "subtypes": [
       {
+        "id": "3be33961-67ad-4fb8-9da1-937996d8bccb",
         "name": "General Text Entry",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Other.OtherRequestTypeImageView",
         "flow": "collect-input-then-confirm",
@@ -97,11 +114,14 @@
         "centerDataGridFields": [
           "Request description",
           "Requested work center"
-        ]
+        ],
+        "imagePath": null
       }
     ]
   },
   {
+    "id": "20f434cb-59f2-4ecb-a623-84ff5fa3bed1",
+    "imagePath": null,
     "requestType": "Coil",
     "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilRequestTypeImageView",
     "centerDataGridFields": [
@@ -113,6 +133,7 @@
     ],
     "subtypes": [
       {
+        "id": "8c5dce16-b806-4165-b314-2368bb97f6d7",
         "name": "Bring",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
         "centerDataGridFields": [
@@ -121,9 +142,11 @@
           "Coil description",
           "Average coil weight",
           "Requesting work center"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "340966b0-d6a3-45d9-890e-21a01a3ad95d",
         "name": "Pickup",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
         "centerDataGridFields": [
@@ -132,9 +155,11 @@
           "Coil description",
           "Average coil weight",
           "Requesting work center"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "9499cd7c-a8d0-4f5f-b1b7-8f5c2b03c258",
         "name": "Wrong Coil @ press",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
         "flow": "collect-input-then-confirm",
@@ -148,9 +173,11 @@
           "Coil description",
           "Average coil weight",
           "Requesting work center"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "8048b55c-02e8-4797-8c9e-a35fda586650",
         "name": "Need Riser Table",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
         "centerDataGridFields": [
@@ -159,9 +186,11 @@
           "Coil description",
           "Average coil weight",
           "Requesting work center"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "4ad1825a-4fa5-4f9f-8ed3-0cc13f4de1bd",
         "name": "Need Coil Turned around",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Coil.CoilWaitlistLineView",
         "centerDataGridFields": [
@@ -170,11 +199,14 @@
           "Coil description",
           "Average coil weight",
           "Requesting work center"
-        ]
+        ],
+        "imagePath": null
       }
     ]
   },
   {
+    "id": "90dc8c5b-6a66-4cd4-94c1-5fc634363f5d",
+    "imagePath": null,
     "requestType": "Scrap",
     "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapRequestTypeImageView",
     "centerDataGridFields": [
@@ -185,6 +217,7 @@
     ],
     "subtypes": [
       {
+        "id": "73371828-06ce-49f1-9480-541e2498dc5d",
         "name": "Empty",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapWaitlistLineView",
         "centerDataGridFields": [
@@ -192,9 +225,11 @@
           "Quantity involved",
           "Scrap lugger",
           "Scrap reason"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "185903aa-6f85-4c90-a31e-30e1fa855d0e",
         "name": "Pickup Hopper, do not return",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapWaitlistLineView",
         "centerDataGridFields": [
@@ -202,9 +237,11 @@
           "Quantity involved",
           "Scrap lugger",
           "Scrap reason"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "bab039e8-ea41-47af-a332-a2853f2148e0",
         "name": "Bring Hopper",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Scrap.ScrapWaitlistLineView",
         "centerDataGridFields": [
@@ -212,11 +249,14 @@
           "Quantity involved",
           "Scrap lugger",
           "Scrap reason"
-        ]
+        ],
+        "imagePath": null
       }
     ]
   },
   {
+    "id": "805c5b0f-815f-46bf-b5a7-73de5d74fa1f",
+    "imagePath": null,
     "requestType": "Flatstock",
     "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
     "centerDataGridFields": [
@@ -227,6 +267,7 @@
     ],
     "subtypes": [
       {
+        "id": "bb93c8a1-3921-4e8b-8874-10b9e5215bb3",
         "name": "Bring",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
         "centerDataGridFields": [
@@ -234,9 +275,11 @@
           "Quantity",
           "Work center",
           "Destination"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "ccb5ebd3-df70-4405-992f-4632377059a5",
         "name": "Pickup",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
         "centerDataGridFields": [
@@ -244,9 +287,11 @@
           "Quantity",
           "Work center",
           "Destination"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "4d8f6d3b-6116-4d07-bd4a-3cc420b8001f",
         "name": "Wrong Flatstock @ Workcenter",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.Flatstock.FlatstockRequestTypeImageView",
         "centerDataGridFields": [
@@ -254,11 +299,14 @@
           "Quantity",
           "Work center",
           "Destination"
-        ]
+        ],
+        "imagePath": null
       }
     ]
   },
   {
+    "id": "b0fc9058-6c74-4171-9f46-11d9b4332b51",
+    "imagePath": null,
     "requestType": "Table Handling",
     "control": "MTM_Waitlist.Module_Waitlist.Controls.TableHandling.TableHandlingRequestTypeImageView",
     "centerDataGridFields": [
@@ -269,6 +317,7 @@
     ],
     "subtypes": [
       {
+        "id": "dcbcc811-b52d-4b2f-810d-cc34200e2825",
         "name": "Table Place Parts",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.TableHandling.TableHandlingRequestTypeImageView",
         "centerDataGridFields": [
@@ -276,9 +325,11 @@
           "Quantity",
           "Work center",
           "Destination"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "358870f2-e866-4e12-bd8a-e42f74b784f4",
         "name": "Table Remove Parts",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.TableHandling.TableHandlingRequestTypeImageView",
         "centerDataGridFields": [
@@ -286,11 +337,14 @@
           "Quantity",
           "Work center",
           "Destination"
-        ]
+        ],
+        "imagePath": null
       }
     ]
   },
   {
+    "id": "be310bec-a74d-4242-a1a8-6220557d8700",
+    "imagePath": null,
     "requestType": "Die Handling",
     "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
     "centerDataGridFields": [
@@ -301,6 +355,7 @@
     ],
     "subtypes": [
       {
+        "id": "20108458-386b-4337-a3c8-ba2e0481d930",
         "name": "Bring Die",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
         "centerDataGridFields": [
@@ -308,9 +363,11 @@
           "Quantity",
           "Pickup location",
           "Destination"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "20bc250d-4c54-4afb-a678-7190b919ada3",
         "name": "Pull Die and Put Away",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
         "centerDataGridFields": [
@@ -318,9 +375,11 @@
           "Quantity",
           "Pickup location",
           "Destination"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "36652f24-b2da-47d2-84ca-caaff1a608c4",
         "name": "Pull Die and Take to Die Shop",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
         "centerDataGridFields": [
@@ -328,9 +387,11 @@
           "Quantity",
           "Pickup location",
           "Destination"
-        ]
+        ],
+        "imagePath": null
       },
       {
+        "id": "53ec191c-f74c-4aba-9f15-55ef3c9f5cc5",
         "name": "Pull Die and Leave @ press",
         "control": "MTM_Waitlist.Module_Waitlist.Controls.DieHandling.DieHandlingRequestTypeImageView",
         "centerDataGridFields": [
@@ -338,11 +399,14 @@
           "Quantity",
           "Pickup location",
           "Destination"
-        ]
+        ],
+        "imagePath": null
       }
     ]
   },
   {
+    "id": "11a182a7-507c-4069-9763-b902bc7fe8a0",
+    "imagePath": null,
     "requestType": "Forklift Assist",
     "control": "MTM_Waitlist.Module_Waitlist.Controls.ForkliftAssist.ForkliftAssistRequestTypeImageView",
     "flow": "collect-input-then-confirm",

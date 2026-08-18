@@ -8,40 +8,42 @@
 ## Phase 1: MVP & Core Foundation
 
 ### Subphase 1.1: Database Schema & Data Models
-- [ ] **Database Table: Create the `config_images_locations` table with the required columns and constraints.** (Ref: Section 4.3) | **Persona: Database Engineer**
-- [ ] **Database Table: Add the unique index for `scope` and `scope_item_id` to prevent duplicate image overrides.** (Ref: Section 4.3) | **Persona: Database Engineer**
-- [ ] **Database Table: Add audit columns for create/update metadata and the last editor reference.** (Ref: Section 4.3) | **Persona: Database Engineer**
-- [ ] **Database Table: Add the required schema rollback or validation artifact for the new image-config table.** (Ref: Section 4.3) | **Persona: Database Engineer**
-- [ ] **Database Migration: Update `Database/Bootstrap/update_table_descriptions.sql` to document the new image location schema.** (Ref: Section 4.3) | **Persona: Database Engineer**
-- [ ] **JSON Schema: Add a GUID `id` field to each request type entry in `waitlist-request-types.json`.** (Ref: Section 4.2) | **Persona: Full Stack Engineer**
-- [ ] **JSON Schema: Add a GUID `id` field to each subtype entry in `waitlist-request-types.json`.** (Ref: Section 4.2) | **Persona: Full Stack Engineer**
-- [ ] **JSON Schema: Add an optional `imagePath` property to each request type object.** (Ref: Section 4.2) | **Persona: Full Stack Engineer**
-- [ ] **JSON Schema: Add an optional `imagePath` property to each subtype object.** (Ref: Section 4.2) | **Persona: Full Stack Engineer**
-- [ ] **Data Model: Define the effective-path resolution order for request types, subtypes, and default assets.** (Ref: Section 4.1) | **Persona: Tech Lead**
-- [ ] **Data Model: Model the resolved path fallback behavior when the stored file no longer exists.** (Ref: Section 4.1) | **Persona: Tech Lead**
-- [ ] **Data Model: Define the default fallback image mapping for request types and subtypes.** (Ref: Section 2) | **Persona: Full Stack Engineer**
-- [ ] **Data Model: Define the default fallback image mapping for work centers.** (Ref: Section 2) | **Persona: Full Stack Engineer**
-- [ ] **Data Model: Capture the request type inventory and map each item to its stable `id`.** (Ref: Section 3.4) | **Persona: Full Stack Engineer**
-- [ ] **Data Model: Preserve request type display labels separately from storage IDs so renames do not orphan overrides.** (Ref: Section 4.2) | **Persona: Backend Engineer**
-- [ ] **Data Model: Capture the subtype inventory and map each subtype to its stable `id` and parent request type.** (Ref: Section 3.6) | **Persona: Full Stack Engineer**
-- [ ] **Data Model: Preserve subtype display labels separately from storage IDs because names are not globally unique across parent groups.** (Ref: Section 3.6) | **Persona: Backend Engineer**
-- [ ] **Data Model: Capture the work-center catalog identity and map each row to `setup_workstations_catalog.id`.** (Ref: Section 3.5) | **Persona: Full Stack Engineer**
+- [x] **Database Table: Create the `config_images_locations` table with the required columns and constraints.** (Ref: Section 4.3) | **Persona: Database Engineer**
+- [x] **Database Table: Add the unique index for `scope` and `scope_item_id` to prevent duplicate image overrides.** (Ref: Section 4.3) | **Persona: Database Engineer**
+- [x] **Database Table: Add audit columns for create/update metadata and the last editor reference.** (Ref: Section 4.3) | **Persona: Database Engineer**
+- [x] **Database Table: Add the required schema rollback or validation artifact for the new image-config table.** (Ref: Section 4.3) | **Persona: Database Engineer**
+- [x] **Database Migration: Update `Database/Bootstrap/update_table_descriptions.sql` to document the new image location schema.** (Ref: Section 4.3) | **Persona: Database Engineer**
+- [x] **JSON Schema: Add a GUID `id` field to each request type entry in `waitlist-request-types.json`.** (Ref: Section 4.2) | **Persona: Full Stack Engineer**
+- [x] **JSON Schema: Add a GUID `id` field to each subtype entry in `waitlist-request-types.json`.** (Ref: Section 4.2) | **Persona: Full Stack Engineer**
+- [x] **JSON Schema: Add an optional `imagePath` property to each request type object.** (Ref: Section 4.2) | **Persona: Full Stack Engineer**
+- [x] **JSON Schema: Add an optional `imagePath` property to each subtype object.** (Ref: Section 4.2) | **Persona: Full Stack Engineer**
+- [x] **Data Model: Define the effective-path resolution order for request types, subtypes, and default assets.** (Ref: Section 4.1) | **Persona: Tech Lead**
+- [x] **Data Model: Model the resolved path fallback behavior when the stored file no longer exists.** (Ref: Section 4.1) | **Persona: Tech Lead**
+- [x] **Data Model: Define the default fallback image mapping for request types and subtypes.** (Ref: Section 2) | **Persona: Full Stack Engineer**
+- [x] **Data Model: Define the default fallback image mapping for work centers.** (Ref: Section 2) | **Persona: Full Stack Engineer**
+- [x] **Data Model: Capture the request type inventory and map each item to its stable `id`.** (Ref: Section 3.4) | **Persona: Full Stack Engineer**
+- [x] **Data Model: Preserve request type display labels separately from storage IDs so renames do not orphan overrides.** (Ref: Section 4.2) | **Persona: Backend Engineer**
+- [x] **Data Model: Capture the subtype inventory and map each subtype to its stable `id` and parent request type.** (Ref: Section 3.6) | **Persona: Full Stack Engineer**
+- [x] **Data Model: Preserve subtype display labels separately from storage IDs because names are not globally unique across parent groups.** (Ref: Section 3.6) | **Persona: Backend Engineer**
+- [x] **Data Model: Capture the work-center catalog identity and map each row to `setup_workstations_catalog.id`.** (Ref: Section 3.5) | **Persona: Full Stack Engineer**
 
 ### Subphase 1.2: Core API Endpoints & Auth
-- [ ] **Shared Storage Config: Add the image storage options block to `appsettings.json` with the default UNC path `X:\\Software Development\\Live Applications\\MTM_Waitlist\\Images`.** (Ref: Section 4.4) | **Persona: Backend Engineer**
-- [ ] **Shared Storage Config: Add the database-backed override pattern to `config_settings_values` so admins can change the share path in-app.** (Ref: Section 4.4) | **Persona: Backend Engineer**
-- [ ] **Configuration: Document appsettings default and database override resolution order for the shared image folder path.** (Ref: Section 4.4) | **Persona: Tech Lead**
-- [ ] **Service Layer: Register a new DI service in `Module_Settings` to manage image location data and resolution.** (Ref: Section 5) | **Persona: Backend Engineer**
-- [ ] **Service Layer: Load request type and subtype definitions from `waitlist-request-types.json` through the shared service.** (Ref: Section 5) | **Persona: Backend Engineer**
-- [ ] **Service Layer: Load active work centers through `IWorkCenterCatalogService` for the work-center card.** (Ref: Section 3.5) | **Persona: Backend Engineer**
-- [ ] **Service Layer: Read image overrides from `config_images_locations` through the MySQL helper server.** (Ref: Section 5) | **Persona: Backend Engineer**
-- [ ] **Service Layer: Write image overrides to `config_images_locations` through the MySQL helper server.** (Ref: Section 5) | **Persona: Backend Engineer**
-- [ ] **Service Layer: Copy selected files into the shared network folder and validate type, size, and aspect.** (Ref: Section 5) | **Persona: Backend Engineer**
-- [ ] **Service Layer: Resolve the effective image path from override, JSON config, parent request type, and default asset.** (Ref: Section 4.1) | **Persona: Backend Engineer**
-- [ ] **Service Layer: Raise change notifications after image updates so open views refresh immediately.** (Ref: Section 3.4) | **Persona: Backend Engineer**
-- [ ] **Service Layer: Handle missing file conditions by falling back to the scope default asset and surfacing a warning.** (Ref: Section 4.1) | **Persona: Backend Engineer**
-- [ ] **Auth Logic: Restrict the expander visibility to Admin and Developer roles.** (Ref: Section 6) | **Persona: Backend Engineer**
-- [ ] **Auth Logic: Ensure non-authorized users never render the image-location settings expander.** (Ref: Section 6) | **Persona: Backend Engineer**
+- [x] **Shared Storage Config: Add the image storage options block to `appsettings.json` with the default UNC path `X:\\Software Development\\Live Applications\\MTM_Waitlist\\Images`.** (Ref: Section 4.4) | **Persona: Backend Engineer**
+- [x] **Shared Storage Config: Add the database-backed override pattern to `config_settings_values` so admins can change the share path in-app.** (Ref: Section 4.4) | **Persona: Backend Engineer**
+- [x] **Configuration: Document appsettings default and database override resolution order for the shared image folder path.** (Ref: Section 4.4) | **Persona: Tech Lead**
+- [x] **Service Layer: Register a new DI service in `Module_Settings` to manage image location data and resolution.** (Ref: Section 5) | **Persona: Backend Engineer**
+- [x] **Service Layer: Load request type and subtype definitions from `waitlist-request-types.json` through the shared service.** (Ref: Section 5) | **Persona: Backend Engineer**
+- [x] **Service Layer: Load active work centers through `IWorkCenterCatalogService` for the work-center card.** (Ref: Section 3.5) | **Persona: Backend Engineer**
+- [x] **Service Layer: Read image overrides from `config_images_locations` through the MySQL helper server.** (Ref: Section 5) | **Persona: Backend Engineer**
+- [x] **Service Layer: Write image overrides to `config_images_locations` through the MySQL helper server.** (Ref: Section 5) | **Persona: Backend Engineer**
+- [x] **Service Layer: Copy selected files into the shared network folder and validate type, size, and aspect.** (Ref: Section 5) | **Persona: Backend Engineer**
+- [x] **Service Layer: Resolve the effective image path from override, JSON config, parent request type, and default asset.** (Ref: Section 4.1) | **Persona: Backend Engineer**
+- [x] **Service Layer: Raise change notifications after image updates so open views refresh immediately.** (Ref: Section 3.4) | **Persona: Backend Engineer**
+- [x] **Service Layer: Handle missing file conditions by falling back to the scope default asset and surfacing a warning.** (Ref: Section 4.1) | **Persona: Backend Engineer**
+- [x] **Auth Logic: Restrict the expander visibility to Admin and Developer roles.** (Ref: Section 6) | **Persona: Backend Engineer**
+- [x] **Auth Logic: Ensure non-authorized users never render the image-location settings expander.** (Ref: Section 6) | **Persona: Backend Engineer**
+
+Next task: **Settings Page: Bind the expander visibility to the role-based view-model property.** (Ref: Section 3.1) *Blocks: Settings Page styling tasks* | **Persona: Frontend Engineer**
 
 ---
 **GATE: Complete all Phase 1 tasks (1.1 and 1.2) before proceeding to Phase 2. Dialog UI components in 2.2 depend on the service layer and data models.**
@@ -53,59 +55,72 @@
 ### Subphase 2.1: Frontend UI Components & State
 **PREREQUISITE: Auth Logic tasks (Subphase 1.2) must complete before proceeding. Settings Page visibility depends on role checks.**
 
-- [ ] **Settings Page: Bind the expander visibility to the role-based view-model property.** (Ref: Section 3.1) *Blocks: Settings Page styling tasks* | **Persona: Frontend Engineer**
-- [ ] **Settings Page: Place the new image-location expander in the Settings page root `Grid` alongside existing expanders in chronological order.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
-- [ ] **Settings Page: Add a `SymbolIcon` and `TextBlock` with semi-bold label to the expander header, matching Hot Workcenters styling exactly.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
-- [ ] **Settings Page: Apply Fluent/WinUI 3 header styling to match the existing Hot Workcenters expander pattern.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
-- [ ] **Settings Page: Set the expander to collapsed by default.** (Ref: Section 3.1) | **Persona: Frontend Engineer**
-- [ ] **Settings Card: Create the Request Type Images card with a descriptive title and summary text.** (Ref: Section 3.2) | **Persona: Frontend Engineer**
-- [ ] **Settings Card: Create the Work Center Images card with a descriptive title and summary text.** (Ref: Section 3.2) | **Persona: Frontend Engineer**
-- [ ] **Settings Card: Create the Request Subtype Images card with a descriptive title and summary text.** (Ref: Section 3.2) | **Persona: Frontend Engineer**
-- [ ] **Dialog Row: Add a read-only item label for each row in the dialog.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
-- [ ] **Dialog Row: Add a small preview image bound to the effective resolved path.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
-- [ ] **Dialog Row: Add an editable text box to accept the custom image path value.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
-- [ ] **Dialog Row: Add a Browse button that opens a file picker for supported image types.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
-- [ ] **Dialog Row: Add a Reset action that restores the JSON or default value for the row.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
-- [ ] **Dialog Footer: Add Save and Cancel actions to each image dialog.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
-- [ ] **Dialog Behavior: Save all row edits in one commit and discard all edits on cancel.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
-- [ ] **Request Type Card: Add the eight request type rows and keep labels aligned to the JSON inventory.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
-- [ ] **Request Type Card: Add the stable JSON `id` binding for each request type row in the modal.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
-- [ ] **Request Type Card: Validate and preview the custom image for each request type row.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
-- [ ] **Request Type Card: Add the global reset confirmation for the request type modal.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
-- [ ] **Work Center Card: Add the full active catalog list for the work center modal.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Work Center Card: Group the work center rows by building in the modal.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Work Center Card: Add the search box and custom-image filter toggle to the work-center modal.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Work Center Card: Show the database error state and disable Save when the catalog query fails.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Work Center Card: Prune orphaned overrides after confirmation during load.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Work Center Card: Show the row in `WorkCenterSelectionDialog` with the custom image when available.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Work Center Card: Add the semi-transparent detail-page background image behavior for work centers.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Subtype Card: Add parent-grouped rows for each request subtype in the subtype modal.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
-- [ ] **Subtype Card: Add inherited-image previews with an `Inherited` badge for subtypes without explicit overrides.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
-- [ ] **Subtype Card: Show the parent image for inherited subtypes and the `Inherited` badge in the preview state.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
-- [ ] **Subtype Card: Add the search box and custom-image filter toggle to the subtype modal.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
-- [ ] **Subtype Card: Add the placeholder row for groups that have no subtypes.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
-- [ ] **Subtype Card: Keep the custom image reset behavior aligned with the parent fallback path.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
-- [ ] **Subtype Card: Ensure the waitlist line card thumbnail uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
-- [ ] **Subtype Card: Ensure the detail hero uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+- [x] **Settings Page: Bind the expander visibility to the role-based view-model property.** (Ref: Section 3.1) *Blocks: Settings Page styling tasks* | **Persona: Frontend Engineer**
+- [x] **Settings Page: Place the new image-location expander in the Settings page root `Grid` alongside existing expanders in chronological order.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
+- [x] **Settings Page: Add a `SymbolIcon` and `TextBlock` with semi-bold label to the expander header, matching Hot Workcenters styling exactly.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
+- [x] **Settings Page: Apply Fluent/WinUI 3 header styling to match the existing Hot Workcenters expander pattern.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
+- [x] **Settings Page: Set the expander to collapsed by default.** (Ref: Section 3.1) | **Persona: Frontend Engineer**
+- [x] **Settings Card: Create the Request Type Images card with a descriptive title and summary text.** (Ref: Section 3.2) | **Persona: Frontend Engineer**
+- [x] **Settings Card: Create the Work Center Images card with a descriptive title and summary text.** (Ref: Section 3.2) | **Persona: Frontend Engineer**
+- [x] **Settings Card: Create the Request Subtype Images card with a descriptive title and summary text.** (Ref: Section 3.2) | **Persona: Frontend Engineer**
+
+Next task: **Dialog Row: Add a read-only item label for each row in the dialog.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+- [x] **Dialog Row: Add a read-only item label for each row in the dialog.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+- [x] **Dialog Row: Add a small preview image bound to the effective resolved path.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+- [x] **Dialog Row: Add an editable text box to accept the custom image path value.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+- [x] **Dialog Row: Add a Browse button that opens a file picker for supported image types.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+- [x] **Dialog Row: Add a Reset action that restores the JSON or default value for the row.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+
+Next task: **Request Type Card: Add the global reset confirmation for the request type modal.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
+- [x] **Dialog Footer: Add Save and Cancel actions to each image dialog.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+- [x] **Dialog Behavior: Save all row edits in one commit and discard all edits on cancel.** (Ref: Section 3.3) | **Persona: Frontend Engineer**
+- [x] **Request Type Card: Add the eight request type rows and keep labels aligned to the JSON inventory.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
+- [x] **Request Type Card: Add the stable JSON `id` binding for each request type row in the modal.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
+- [x] **Request Type Card: Validate and preview the custom image for each request type row.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
+- [x] **Request Type Card: Add the global reset confirmation for the request type modal.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
+- [x] **Work Center Card: Add the full active catalog list for the work center modal.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Work Center Card: Group the work center rows by building in the modal.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Work Center Card: Add the search box and custom-image filter toggle to the work-center modal.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Work Center Card: Show the database error state and disable Save when the catalog query fails.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+
+Next task: **Work Center Card: Prune orphaned overrides after confirmation during load.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Work Center Card: Prune orphaned overrides after confirmation during load.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Work Center Card: Show the row in `WorkCenterSelectionDialog` with the custom image when available.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Work Center Card: Add the semi-transparent detail-page background image behavior for work centers.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Subtype Card: Add parent-grouped rows for each request subtype in the subtype modal.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+- [x] **Subtype Card: Add inherited-image previews with an `Inherited` badge for subtypes without explicit overrides.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+
+Next task: **Subtype Card: Show the parent image for inherited subtypes and the `Inherited` badge in the preview state.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+- [x] **Subtype Card: Show the parent image for inherited subtypes and the `Inherited` badge in the preview state.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+- [x] **Subtype Card: Add the search box and custom-image filter toggle to the subtype modal.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+- [x] **Subtype Card: Add the placeholder row for groups that have no subtypes.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+- [x] **Subtype Card: Keep the custom image reset behavior aligned with the parent fallback path.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+- [x] **Subtype Card: Ensure the waitlist line card thumbnail uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+
+Next task: **Subtype Card: Ensure the detail hero uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+- [x] **Subtype Card: Ensure the detail hero uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
+- [x] **Dialog: Implement the Request Type Images `ContentDialog` and the row layout for each request type.** (Ref: Section 3.3) *Depends on: JSON Schema tasks, Service Layer resolution contract* | **Persona: Frontend Engineer**
+- [x] **Dialog: Implement the Work Center Images `ContentDialog` and the row layout for each work center.** (Ref: Section 3.3) *Depends on: Service Layer catalog loading and error-state handling* | **Persona: Frontend Engineer**
+- [x] **Dialog: Implement the Request Subtype Images `ContentDialog` and the row layout for each subtype.** (Ref: Section 3.3) *Depends on: JSON Schema GUID mapping, cascade resolution contract* | **Persona: Frontend Engineer**
+- [x] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
+
+Next task: **Workflow: Update the work-center selection UI to consume the resolver instead of hardcoded work-center assets.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
 
 ### Subphase 2.2: Business Logic & Workflow Integration
 **PREREQUISITE: All Subphase 1.1 and 1.2 tasks must be complete before starting this subphase. Dialog implementations require finalized JSON schema, service layer, and data models.**
 
-- [ ] **Dialog: Implement the Request Type Images `ContentDialog` and the row layout for each request type.** (Ref: Section 3.3) *Depends on: JSON Schema tasks, Service Layer resolution contract* | **Persona: Frontend Engineer**
-- [ ] **Dialog: Implement the Work Center Images `ContentDialog` and the row layout for each work center.** (Ref: Section 3.3) *Depends on: Service Layer catalog loading and error-state handling* | **Persona: Frontend Engineer**
-- [ ] **Dialog: Implement the Request Subtype Images `ContentDialog` and the row layout for each subtype.** (Ref: Section 3.3) *Depends on: JSON Schema GUID mapping, cascade resolution contract* | **Persona: Frontend Engineer**
-- [ ] **Workflow: Implement the full image resolution cascade for request subtypes from subtype override to parent type to default.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
-- [ ] **Workflow: Implement the request type resolution cascade for the default and override lookup.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
-- [ ] **Workflow: Implement the work-center resolution cascade for the default and override lookup.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
-- [ ] **Workflow: Ensure all custom image changes apply immediately without waiting for app restart.** (Ref: Section 3.4) | **Persona: Backend Engineer**
-- [ ] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
-- [ ] **Workflow: Update the work-center selection UI to consume the resolver instead of hardcoded work-center assets.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Workflow: Update the request type and subtype surfaces to consume the resolver instead of hardcoded assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
-- [ ] **Workflow: Add the confirmation flow for global reset actions in each card modal.** (Ref: Section 3.4) | **Persona: Frontend Engineer**
-- [ ] **Workflow: Add the confirmation flow for orphan-pruning in the work-center modal.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Workflow: Handle the missing-file fallback and inline warning during editing and rendering.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
-- [ ] **Workflow: Implement the archive naming convention for replaced image files in the shared folder.** (Ref: Section 4.4) | **Persona: Backend Engineer**
-- [ ] **Workflow: Ensure the archive versioning pattern preserves the active file and writes dated rolling copies with a suffix.** (Ref: Section 4.4) | **Persona: Backend Engineer**
+- [x] **Dialog: Implement the Request Type Images `ContentDialog` and the row layout for each request type.** (Ref: Section 3.3) *Depends on: JSON Schema tasks, Service Layer resolution contract* | **Persona: Frontend Engineer**
+- [x] **Dialog: Implement the Work Center Images `ContentDialog` and the row layout for each work center.** (Ref: Section 3.3) *Depends on: Service Layer catalog loading and error-state handling* | **Persona: Frontend Engineer**
+- [x] **Dialog: Implement the Request Subtype Images `ContentDialog` and the row layout for each subtype.** (Ref: Section 3.3) *Depends on: JSON Schema GUID mapping, cascade resolution contract* | **Persona: Frontend Engineer**
+- [x] **Workflow: Implement the full image resolution cascade for request subtypes from subtype override to parent type to default.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
+- [x] **Workflow: Implement the request type resolution cascade for the default and override lookup.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
+
+Next task: **Workflow: Ensure the shared folder path is resolved from configuration and the database override before write operations.** (Ref: Section 4.4) | **Persona: Backend Engineer**
+- [x] **Workflow: Implement the work-center resolution cascade for the default and override lookup.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
+- [x] **Workflow: Ensure all custom image changes apply immediately without waiting for app restart.** (Ref: Section 3.4) | **Persona: Backend Engineer**
+- [x] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
+- [x] **Workflow: Update the work-center selection UI to consume the resolver instead of hardcoded work-center assets.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Workflow: Update the request type and subtype surfaces to consume the resolver instead of hardcoded assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
 - [ ] **Workflow: Ensure the shared folder path is resolved from configuration and the database override before write operations.** (Ref: Section 4.4) | **Persona: Backend Engineer**
 - [ ] **Workflow: Prevent file writes when the shared network folder is unavailable and show the save error to the user.** (Ref: Section 4.4) | **Persona: Backend Engineer**
 - [ ] **Workflow: Propagate change notifications from the image resolver to all open view models so the UI refreshes immediately.** (Ref: Section 5) | **Persona: Backend Engineer**
@@ -211,6 +226,8 @@ To continue with implementation of the next incomplete task:
 3. **Adopt the Persona's Working Style** (see Persona Behavior Matrix below).
 4. **Execute the task** following persona-specific standards and deliverables.
 5. **Update the checklist**: Change `- [ ]` to `- [x]` and state the next task clearly.
+
+Note: You are to complete One Sub-Phase per run
 
 ---
 

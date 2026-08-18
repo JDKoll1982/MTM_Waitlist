@@ -318,3 +318,17 @@ MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the visib
 MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the visibility row.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was last updated.';
+
+ALTER TABLE config_images_locations COMMENT = 'Image path overrides for request types, work centers, and request subtypes. Enables role-based customization of visual assets via cascade resolution pattern.';
+
+ALTER TABLE config_images_locations
+MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for image location override row.',
+MODIFY COLUMN scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_type, work_center, or request_subtype.',
+MODIFY COLUMN scope_item_id VARCHAR(190) NOT NULL COMMENT 'Stable identifier within scope. GUID for request types and subtypes, BIGINT for work centers.',
+MODIFY COLUMN image_path VARCHAR(500) NOT NULL COMMENT 'File system path to the image file copied to the shared network folder.',
+MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Soft-delete flag; inactive rows are ignored during path resolution cascades.',
+MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the image override.',
+MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the image override.',
+MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when override was created.',
+MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when override was last updated.';
