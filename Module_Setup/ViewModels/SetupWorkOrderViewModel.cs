@@ -58,7 +58,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
 
     public bool IsClosing => _isClosing;
 
-    public string PageTitle => LocalizeOrDefault("Shell_ModuleSetup.Content", "Module Setup");
+    public string PageTitle => LocalizeOrDefault("Shell_ModuleSetup.Content", "Work Center Setup");
 
     public string ProgressText => LocalizeOrDefault("Setup_Progress.Step1", "Step 1/5 · 20% complete");
 

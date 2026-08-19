@@ -23,7 +23,9 @@ public sealed partial class ShellPage : Page
         get;
     }
 
-    public ShellPage(ShellViewModel viewModel, IStartupShellStateService startupShellStateService)
+    public ShellPage(
+        ShellViewModel viewModel,
+        IStartupShellStateService startupShellStateService)
     {
         ViewModel = viewModel;
         _startupShellStateService = startupShellStateService;

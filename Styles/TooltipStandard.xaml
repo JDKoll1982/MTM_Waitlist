@@ -1,0 +1,35 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <SolidColorBrush x:Key="TooltipStandardBackgroundBrush" Color="#FF202020" />
+    <SolidColorBrush x:Key="TooltipStandardBorderBrush" Color="#FF0078D4" />
+    <SolidColorBrush x:Key="TooltipStandardTextBrush" Color="#FFFAFAFA" />
+
+    <Style x:Key="TooltipStandardChromeStyle" TargetType="ToolTip">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <!-- let content define size -->
+        <Setter Property="MaxWidth" Value="1200" />
+        <Setter Property="MaxHeight" Value="800" />
+    </Style>
+
+    <Style x:Key="TooltipStandardContainerStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource TooltipStandardBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource TooltipStandardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="12,10,12,10" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <Style x:Key="TooltipStandardTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TooltipStandardTextBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="None" />
+    </Style>
+</ResourceDictionary>

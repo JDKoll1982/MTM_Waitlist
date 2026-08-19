@@ -128,7 +128,7 @@ public class NavigationViewService : INavigationViewService
 
         var dialog = new ContentDialog
         {
-            Title = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Title", "Leave Module Setup?"),
+            Title = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Title", "Leave Work Center Setup?"),
             Content = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Message", "All unsaved setup data will be lost. Continue?"),
             PrimaryButtonText = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Confirm", "Yes"),
             CloseButtonText = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Cancel", "No"),

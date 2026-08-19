@@ -1,7 +1,8 @@
-<Page
+﻿<Page
     x:Class="MTM_Waitlist.Module_Setup.Views.SetupWorkOrderPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
@@ -23,7 +24,7 @@
                 Header="Work Order"
                 Text="{x:Bind ViewModel.WorkOrderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 LostFocus="OnWorkOrderTextBoxLostFocus"
-                PlaceholderText="Enter work order (for example 76951, 076951, or WO-076951)" />
+                PlaceholderText="Enter work order (for example 76951, 076951, or WO-076951)" shared:TooltipBehavior.ResourceKey="Setup_WorkOrderTextBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Setup/Views/SetupWorkOrderPage.xaml|Module_Setup/Views/SetupWorkOrderPage.xaml.cs|Module_Setup/ViewModels/SetupWorkOrderViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Enter work order (for example 76951, 076951, or WO-076951)."/>
 
             <Border Style="{StaticResource SetupSectionCardStyle}">
                 <Grid ColumnSpacing="14">

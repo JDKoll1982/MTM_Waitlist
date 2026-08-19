@@ -14,6 +14,8 @@ using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Views;
 using MTM_Waitlist.Module_Core.ViewModels;
 using MTM_Waitlist.Module_Core.Views;
+using MTM_Waitlist.Module_Shared.ViewModels;
+using MTM_Waitlist.Module_Shared.Views;
 
 namespace MTM_Waitlist.Module_Core.Services;
 
@@ -25,6 +27,7 @@ public class PageService : IPageService
     {
         Configure<WaitlistViewViewModel, WaitlistViewPage>();
         Configure<WaitlistViewDetailViewModel, WaitlistViewDetailPage>();
+        Configure<ControlInspectorDetailViewModel, ControlInspectorDetailPage>();
         Configure<SettingsViewModel, SettingsPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupWorkstationViewModel, SetupWorkstationPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupWorkOrderViewModel, SetupWorkOrderPage>();

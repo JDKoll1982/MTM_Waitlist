@@ -5,6 +5,9 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Shared.Services;
+using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Views;
 
@@ -16,6 +19,13 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
     {
         PropertyNameCaseInsensitive = true,
     };
+
+    private readonly IImageLocationService _imageLocationService;
+
+    public WaitlistNewRequestDialogService(IImageLocationService imageLocationService)
+    {
+        _imageLocationService = imageLocationService;
+    }
 
     public static EmployeeVerificationResult VerifyEmployeeIdentity(string employeeNumber)
     {
@@ -120,6 +130,59 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         return applicable;
     }
 
+    private async Task<string> ResolveRequestTypeImagePathAsync(string requestTypeName, CancellationToken cancellationToken)
+    {
+        if (_imageLocationService is null || !_imageLocationService.IsInitialized)
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            var requestType = RequestTypeInventory.GetByDisplayName(requestTypeName);
+            if (requestType is null)
+            {
+                return string.Empty;
+            }
+
+            return await _imageLocationService
+                .ResolveRequestTypeImagePathAsync(requestType.StableId.ToString(), cancellationToken)
+                .ConfigureAwait(true);
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+    }
+
+    private async Task<string> ResolveRequestSubtypeImagePathAsync(
+        string requestTypeName,
+        string subtypeName,
+        CancellationToken cancellationToken)
+    {
+        if (_imageLocationService is null || !_imageLocationService.IsInitialized)
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            var (_, subtype) = RequestSubtypeInventory.GetByDisplayNames(requestTypeName, subtypeName);
+            if (subtype is null)
+            {
+                return string.Empty;
+            }
+
+            return await _imageLocationService
+                .ResolveRequestSubtypeImagePathAsync(subtype.StableId.ToString(), cancellationToken)
+                .ConfigureAwait(true);
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+    }
+
     public static bool ShouldShowIntermediateSummary(NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition? subtype)
     {
         if (requestType is null)
@@ -214,16 +277,19 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
             hasPartData: true,
             hasWorkOrderData: true);
 
-        var dialogItems = requestTypes
-            .Where(item => !string.IsNullOrWhiteSpace(item.RequestType))
-            .Select(item => new JobTypeDialogItem
+        var dialogItems = new List<JobTypeDialogItem>();
+        foreach (var requestType in requestTypes.Where(item => !string.IsNullOrWhiteSpace(item.RequestType)))
+        {
+            var requestTypeName = requestType.RequestType.Trim();
+            dialogItems.Add(new JobTypeDialogItem
             {
-                RequestType = item.RequestType.Trim(),
-                SubtypeSummary = item.Subtypes.Count == 0
+                RequestType = requestTypeName,
+                SubtypeSummary = requestType.Subtypes.Count == 0
                     ? "No subtype required"
-                    : $"{item.Subtypes.Count} subtype option(s)",
-            })
-            .ToList();
+                    : $"{requestType.Subtypes.Count} subtype option(s)",
+                ImagePath = await ResolveRequestTypeImagePathAsync(requestTypeName, cancellationToken).ConfigureAwait(true),
+            });
+        }
 
         var dialog = new NewRequestJobTypeDialog
         {
@@ -247,7 +313,7 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
 
         StartupDebugLog.Info("WaitlistNewRequest", $"Selected Work Center '{selectedWorkCenter}', selected Job Type '{dialog.SelectedRequestType}'.");
 
-        var selectedSubtype = await SelectSubtypeAsync(xamlRoot, selectedRequestType).ConfigureAwait(true);
+        var selectedSubtype = await SelectSubtypeAsync(xamlRoot, selectedRequestType, cancellationToken).ConfigureAwait(true);
         if (selectedSubtype is null && selectedRequestType.Subtypes.Count > 0)
         {
             StartupDebugLog.Info("WaitlistNewRequest", $"Request type '{selectedRequestType.RequestType}' was canceled during subtype selection.");
@@ -307,43 +373,46 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
         };
     }
 
-    private static async Task<NewRequestSubtypeDefinition?> SelectSubtypeAsync(XamlRoot xamlRoot, NewRequestTypeDefinition requestType)
+    private async Task<NewRequestSubtypeDefinition?> SelectSubtypeAsync(
+        XamlRoot xamlRoot,
+        NewRequestTypeDefinition requestType,
+        CancellationToken cancellationToken)
     {
         if (requestType.Subtypes.Count == 0)
         {
             return null;
         }
 
-        var subtypeNames = requestType.Subtypes
-            .Select(item => item.Name)
-            .ToList();
-
-        var comboBox = new ComboBox
+        var dialogItems = new List<JobTypeDialogItem>();
+        foreach (var subtype in requestType.Subtypes)
         {
-            Header = "Select a subtype",
-            Width = 360,
-            Margin = new Thickness(0, 0, 0, 8),
-            ItemsSource = subtypeNames,
-            SelectedIndex = 0,
-        };
+            var subtypeName = subtype.Name.Trim();
+            dialogItems.Add(new JobTypeDialogItem
+            {
+                RequestType = subtypeName,
+                SubtypeSummary = subtypeName,
+                ImagePath = await ResolveRequestSubtypeImagePathAsync(
+                    requestType.RequestType,
+                    subtypeName,
+                    cancellationToken).ConfigureAwait(true),
+            });
+        }
 
-        var dialog = new ContentDialog
+        var dialog = new NewRequestSubtypeDialog
         {
             XamlRoot = xamlRoot,
-            Title = $"{requestType.RequestType} - Choose subtype",
-            PrimaryButtonText = "Continue",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary,
-            Content = comboBox,
         };
 
-        var result = await dialog.ShowAsync();
-        if (result != ContentDialogResult.Primary || comboBox.SelectedIndex < 0)
+        dialog.SetContent(requestType.RequestType.Trim(), dialogItems);
+        _ = await dialog.ShowAsync();
+
+        if (string.IsNullOrWhiteSpace(dialog.SelectedSubtypeName))
         {
             return null;
         }
 
-        return requestType.Subtypes[comboBox.SelectedIndex];
+        return requestType.Subtypes.FirstOrDefault(subtype =>
+            string.Equals(subtype.Name.Trim(), dialog.SelectedSubtypeName, StringComparison.OrdinalIgnoreCase));
     }
 
     private static async Task<string?> PromptForTextInputAsync(XamlRoot xamlRoot, NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition? subtype)
@@ -407,6 +476,8 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
             Content = panel,
         };
 
+        RequestDialogStyling.Apply(dialog);
+
         dialog.PrimaryButtonClick += (sender, args) =>
         {
             var value = textBox.Text?.Trim() ?? string.Empty;
@@ -437,22 +508,13 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
 
     private static async Task<bool> ShowRequestSummaryAsync(XamlRoot xamlRoot, string selectedWorkCenter, NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition? subtype, string? inputValue)
     {
-        var details = new StackPanel
-        {
-            Spacing = 8,
-        };
-
-        details.Children.Add(new TextBlock
-        {
-            Text = "Request preview",
-            FontWeight = FontWeights.SemiBold,
-            TextWrapping = TextWrapping.Wrap,
-        });
-        details.Children.Add(new TextBlock { Text = $"Work Center: {selectedWorkCenter}", TextWrapping = TextWrapping.Wrap });
-        details.Children.Add(new TextBlock { Text = $"Request Type: {requestType.RequestType}", TextWrapping = TextWrapping.Wrap });
+        var summaryRows = new StackPanel { Spacing = 8 };
+        summaryRows.Children.Add(CreateDialogHeading("Request preview"));
+        summaryRows.Children.Add(CreateDialogFieldRow("Work Center", selectedWorkCenter));
+        summaryRows.Children.Add(CreateDialogFieldRow("Request Type", requestType.RequestType));
         if (!string.IsNullOrWhiteSpace(inputValue))
         {
-            details.Children.Add(new TextBlock { Text = $"Detail: {inputValue}", TextWrapping = TextWrapping.Wrap });
+            summaryRows.Children.Add(CreateDialogFieldRow("Detail", inputValue));
         }
 
         var dialog = new ContentDialog
@@ -462,8 +524,10 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
             PrimaryButtonText = "Continue",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
-            Content = details,
+            Content = CreateDialogCard(summaryRows),
         };
+
+        RequestDialogStyling.Apply(dialog);
 
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary;
@@ -471,31 +535,35 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
 
     private static async Task<bool> ShowConfirmationAsync(XamlRoot xamlRoot, string selectedWorkCenter, NewRequestTypeDefinition requestType, NewRequestSubtypeDefinition? subtype, string? inputValue)
     {
-        var details = new StackPanel
+        var content = new StackPanel
         {
-            Spacing = 8,
+            Spacing = 12,
         };
 
-        details.Children.Add(new TextBlock
-        {
-            Text = "Request summary",
-            FontWeight = FontWeights.SemiBold,
-            TextWrapping = TextWrapping.Wrap,
-        });
-        details.Children.Add(new TextBlock { Text = $"Work Center: {selectedWorkCenter}", TextWrapping = TextWrapping.Wrap });
-        details.Children.Add(new TextBlock { Text = $"Request Type: {requestType.RequestType}", TextWrapping = TextWrapping.Wrap });
+        // Request summary card
+        var summaryRows = new StackPanel { Spacing = 8 };
+        summaryRows.Children.Add(CreateDialogHeading("Request summary"));
+        summaryRows.Children.Add(CreateDialogFieldRow("Work Center", selectedWorkCenter));
+        summaryRows.Children.Add(CreateDialogFieldRow("Request Type", requestType.RequestType));
         if (subtype is not null)
         {
-            details.Children.Add(new TextBlock { Text = $"Subtype: {subtype.Name}", TextWrapping = TextWrapping.Wrap });
+            summaryRows.Children.Add(CreateDialogFieldRow("Subtype", subtype.Name));
         }
 
         if (!string.IsNullOrWhiteSpace(inputValue))
         {
-            details.Children.Add(new TextBlock { Text = $"Details: {inputValue}", TextWrapping = TextWrapping.Wrap });
+            summaryRows.Children.Add(CreateDialogFieldRow("Details", inputValue));
         }
 
-        details.Children.Add(new TextBlock { Text = "Current related requests: 0 active request(s) for this work center.", TextWrapping = TextWrapping.Wrap });
-        details.Children.Add(new TextBlock { Text = "Estimated wait time: approximately 15 minutes.", TextWrapping = TextWrapping.Wrap });
+        content.Children.Add(CreateDialogCard(summaryRows));
+
+        // Queue and wait-time card
+        var infoRows = new StackPanel { Spacing = 6 };
+        infoRows.Children.Add(CreateDialogHeading("Queue & wait time"));
+        infoRows.Children.Add(CreateDialogLine("0 active request(s) for this work center."));
+        infoRows.Children.Add(CreateDialogLine("Estimated wait time: approximately 15 minutes."));
+
+        content.Children.Add(CreateDialogCard(infoRows));
 
         var dialog = new ContentDialog
         {
@@ -504,11 +572,74 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
             PrimaryButtonText = "Submit",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
-            Content = details,
+            Content = content,
         };
+
+        RequestDialogStyling.Apply(dialog);
 
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary;
+    }
+
+    private static Border CreateDialogCard(UIElement child)
+    {
+        return new Border
+        {
+            Background = RequestDialogStyling.GetBrush("CardBackgroundFillColorDefaultBrush"),
+            BorderBrush = RequestDialogStyling.GetBrush("CardStrokeColorDefaultBrush"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(10),
+            Padding = new Thickness(14),
+            Child = child,
+        };
+    }
+
+    private static TextBlock CreateDialogHeading(string text)
+    {
+        return new TextBlock
+        {
+            Text = text,
+            Style = RequestDialogStyling.GetStyle("RequestDialogTitleStyle"),
+            TextWrapping = TextWrapping.Wrap,
+        };
+    }
+
+    private static Grid CreateDialogFieldRow(string label, string value)
+    {
+        var grid = new Grid { ColumnSpacing = 12 };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(140) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        var labelBlock = new TextBlock
+        {
+            Text = label,
+            Style = RequestDialogStyling.GetStyle("RequestDialogFieldLabelStyle"),
+            TextWrapping = TextWrapping.Wrap,
+        };
+        grid.Children.Add(labelBlock);
+        Grid.SetColumn(labelBlock, 0);
+
+        var valueBlock = new TextBlock
+        {
+            Text = value,
+            Style = RequestDialogStyling.GetStyle("RequestDialogFieldValueStyle"),
+            TextWrapping = TextWrapping.Wrap,
+            IsTextSelectionEnabled = true,
+        };
+        grid.Children.Add(valueBlock);
+        Grid.SetColumn(valueBlock, 1);
+
+        return grid;
+    }
+
+    private static TextBlock CreateDialogLine(string text)
+    {
+        return new TextBlock
+        {
+            Text = text,
+            Style = RequestDialogStyling.GetStyle("RequestDialogFieldValueStyle"),
+            TextWrapping = TextWrapping.Wrap,
+        };
     }
 
     private static async Task ShowMessageAsync(XamlRoot xamlRoot, string title, string message)
@@ -525,6 +656,8 @@ public sealed class WaitlistNewRequestDialogService : IWaitlistNewRequestDialogS
             CloseButtonText = "OK",
             DefaultButton = ContentDialogButton.Close,
         };
+
+        RequestDialogStyling.Apply(dialog);
 
         _ = await dialog.ShowAsync();
     }

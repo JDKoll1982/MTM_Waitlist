@@ -1,5 +1,5 @@
 ---
-name: Module Setup Change Agent
+name: Work Center Setup Change Agent
 description: "Use when making changes to Module_Setup, setup workflow, dunnage flows, Infor Visual queue SQL, or related registration/navigation/tests. Mandatory MCP-first process: use Serena MCP + Context7 MCP + Microsoft Learn MCP before editing."
 user-invocable: true
 model: GPT-5.3-Codex

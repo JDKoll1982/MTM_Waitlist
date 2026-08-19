@@ -1,0 +1,58 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Shared styling for the Request workflow dialogs
+        (Work Center -> Request Type -> Request Subtype -> validation/confirmation).
+
+        Follows WinUI guidance:
+        - Style dialogs by basing on the default ContentDialog style instead of re-templating.
+        - Use theme resources so dialogs stay theme-aware (dark/light/high-contrast).
+    -->
+
+    <!-- Consistent ContentDialog chrome (opaque so content doesn't show through) -->
+    <Style
+        x:Key="RequestContentDialogStyle"
+        TargetType="ContentDialog"
+        BasedOn="{StaticResource DefaultContentDialogStyle}">
+        <Setter Property="Background" Value="{ThemeResource SolidBackgroundFillColorBaseBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <!-- Consistent section card used inside dialogs -->
+    <Style x:Key="RequestDialogSectionCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="12" />
+    </Style>
+
+    <Style x:Key="RequestDialogTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="WrapWholeWords" />
+    </Style>
+
+    <Style x:Key="RequestDialogCaptionStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        <Setter Property="TextWrapping" Value="WrapWholeWords" />
+    </Style>
+
+    <Style x:Key="RequestDialogFieldLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        <Setter Property="TextWrapping" Value="WrapWholeWords" />
+    </Style>
+
+    <Style x:Key="RequestDialogFieldValueStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="WrapWholeWords" />
+    </Style>
+</ResourceDictionary>

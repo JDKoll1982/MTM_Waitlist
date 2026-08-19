@@ -1,7 +1,8 @@
-<Page
+﻿<Page
     x:Class="MTM_Waitlist.Module_Startup.Views.LoginPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -36,13 +37,13 @@
                     x:Name="UsernameTextBox"
                     Header="Username"
                     PlaceholderText="Username"
-                    Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" shared:TooltipBehavior.ResourceKey="Startup_UsernameTextBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Username."/>
 
                 <PasswordBox
                     x:Name="PasswordBox"
                     Header="Password"
                     PlaceholderText="Password"
-                    PasswordChanged="PasswordBox_OnPasswordChanged" />
+                    PasswordChanged="PasswordBox_OnPasswordChanged" shared:TooltipBehavior.ResourceKey="Startup_PasswordBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Password."/>
 
                 <CheckBox
                     Content="Remember me on this device"
@@ -60,12 +61,12 @@
                         x:Name="NewPasswordBox"
                         Header="New password"
                         PlaceholderText="New password"
-                        PasswordChanged="NewPasswordBox_OnPasswordChanged" />
+                        PasswordChanged="NewPasswordBox_OnPasswordChanged" shared:TooltipBehavior.ResourceKey="Startup_NewPasswordBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="New password."/>
                     <PasswordBox
                         x:Name="ConfirmPasswordBox"
                         Header="Confirm new password"
                         PlaceholderText="Confirm new password"
-                        PasswordChanged="ConfirmPasswordBox_OnPasswordChanged" />
+                        PasswordChanged="ConfirmPasswordBox_OnPasswordChanged" shared:TooltipBehavior.ResourceKey="Startup_ConfirmPasswordBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Confirm new password."/>
                     <Button
                         Content="Update Password"
                         Command="{x:Bind ViewModel.ChangePasswordCommand, Mode=OneWay}"
@@ -101,3 +102,7 @@
         </ScrollViewer>
     </Grid>
 </Page>
+
+
+
+

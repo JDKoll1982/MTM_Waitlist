@@ -92,6 +92,7 @@ public sealed partial class WaitlistViewPage : Page
                     CloseButtonText = "Cancel",
                     DefaultButton = ContentDialogButton.Close,
                 };
+                RequestDialogStyling.Apply(duplicateDialog);
                 if (await duplicateDialog.ShowAsync() != ContentDialogResult.Primary)
                 {
                     return;
@@ -140,6 +141,8 @@ public sealed partial class WaitlistViewPage : Page
             DefaultButton = ContentDialogButton.Primary,
         };
 
+        RequestDialogStyling.Apply(dialog);
+
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary;
     }
@@ -159,6 +162,8 @@ public sealed partial class WaitlistViewPage : Page
             CloseButtonText = "Close",
             DefaultButton = ContentDialogButton.Primary,
         };
+
+        RequestDialogStyling.Apply(dialog);
 
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary;

@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Tooltip inventory generated artifacts
+tools/tooltip-inventory/
+

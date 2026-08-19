@@ -163,7 +163,7 @@ The feature should be presented as a step-based guided workflow with a persisten
 
 ```text
 +--------------------------------------------------------------+
-| Module Setup                    [Step 1/5]  20% complete     |
+| Work Center Setup                    [Step 1/5]  20% complete     |
 |--------------------------------------------------------------|
 | Enter Work Order                                             |
 |                                                              |
@@ -187,7 +187,7 @@ Elements:
 
 ```text
 +--------------------------------------------------------------+
-| Module Setup                    [Step 2/5]  40% complete     |
+| Work Center Setup                    [Step 2/5]  40% complete     |
 |--------------------------------------------------------------|
 | Select Part Number                                           |
 |                                                              |
@@ -212,7 +212,7 @@ Elements:
 
 ```text
 +--------------------------------------------------------------+
-| Module Setup                    [Step 3/5]  60% complete     |
+| Work Center Setup                    [Step 3/5]  60% complete     |
 |--------------------------------------------------------------|
 | Select Sequence                                              |
 |                                                              |
@@ -237,7 +237,7 @@ Elements:
 
 ```text
 +----------------------------------------------------------------------------------+
-| Module Setup                                        [Step 4/5]  80% complete     |
+| Work Center Setup                                        [Step 4/5]  80% complete     |
 |----------------------------------------------------------------------------------|
 | Configure Dunnage                                                                |
 |                                                                                  |
@@ -277,7 +277,7 @@ Elements:
 
 ```text
 +--------------------------------------------------------------+
-| Module Setup                    [Step 5/5] 100% complete     |
+| Work Center Setup                    [Step 5/5] 100% complete     |
 |--------------------------------------------------------------|
 | Review and Confirm                                           |
 |                                                              |
@@ -313,7 +313,7 @@ Elements:
 
 ```text
 +--------------------------------------------------------------+
-| Module Setup                                                 |
+| Work Center Setup                                                 |
 |--------------------------------------------------------------|
 | Validation Error                                             |
 |                                                              |

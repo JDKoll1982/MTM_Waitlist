@@ -13,6 +13,8 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<ISharedModuleService, SharedModuleServiceImplementation>();
         services.AddSingleton<SharedModuleService>();
         services.AddSingleton<ISharedConfigurationService, SharedConfigurationService>();
+        services.AddSingleton<ITooltipService, TooltipService>();
+        services.AddSingleton<IControlInspectorService, ControlInspectorService>();
         services.AddSingleton<IWorkCenterCatalogService, WorkCenterCatalogService>();
         services.AddSingleton<IDunnageTypeVisibilityCatalogService, DunnageTypeVisibilityCatalogService>();
         services.AddSingleton<IWorkCenterSelectionDialogService, WorkCenterSelectionDialogService>();

@@ -1,0 +1,103 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <SolidColorBrush x:Key="TooltipDeveloperBackgroundBrush" Color="#FF141821" />
+    <SolidColorBrush x:Key="TooltipDeveloperBorderBrush" Color="#FF60A5FA" />
+    <SolidColorBrush x:Key="TooltipDeveloperTextBrush" Color="#FFFAFAFA" />
+    <SolidColorBrush x:Key="TooltipDeveloperMutedTextBrush" Color="#FFBAC8DE" />
+    <SolidColorBrush x:Key="TooltipDeveloperHeaderBackgroundBrush" Color="#FF242C3D" />
+    <SolidColorBrush x:Key="TooltipDeveloperRowEvenBackgroundBrush" Color="#FF1C2230" />
+    <SolidColorBrush x:Key="TooltipDeveloperRowOddBackgroundBrush" Color="#FF181D29" />
+    <SolidColorBrush x:Key="TooltipDeveloperGridLineBrush" Color="#FF46546E" />
+
+    <Style x:Key="TooltipDeveloperChromeStyle" TargetType="ToolTip">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="MaxWidth" Value="1400" />
+        <Setter Property="MaxHeight" Value="900" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperContainerStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource TooltipDeveloperBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource TooltipDeveloperBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="14,12,14,12" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperRootPanelStyle" TargetType="StackPanel">
+        <Setter Property="Spacing" Value="6" />
+        <Setter Property="MinWidth" Value="220" />
+        <Setter Property="MaxWidth" Value="420" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperTitleStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TooltipDeveloperTextBrush}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="WrapWholeWords" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperShortcutStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TooltipDeveloperMutedTextBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperEmptyStateStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TooltipDeveloperMutedTextBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontStyle" Value="Italic" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperTableBorderStyle" TargetType="Border">
+        <Setter Property="BorderBrush" Value="{StaticResource TooltipDeveloperGridLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperHeaderCellStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource TooltipDeveloperHeaderBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource TooltipDeveloperGridLineBrush}" />
+        <Setter Property="Padding" Value="10,8,10,8" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperBodyCellStyle" TargetType="Border">
+        <Setter Property="BorderBrush" Value="{StaticResource TooltipDeveloperGridLineBrush}" />
+        <Setter Property="Padding" Value="10,8,10,8" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperHeaderTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TooltipDeveloperTextBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextTrimming" Value="None" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperFileNameTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TooltipDeveloperTextBrush}" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="None" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="TooltipDeveloperLocationTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TooltipDeveloperMutedTextBrush}" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Courier New" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="None" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+</ResourceDictionary>

@@ -22,6 +22,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="MTM_Waitlist.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Assets\pickup_fg.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

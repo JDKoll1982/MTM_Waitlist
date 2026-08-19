@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a7c34c29f</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a7c34c29f</value>
+  </resheader>
+  <data name="Shell_SelectFacility_Tooltip" xml:space="preserve">
+    <value>Facility selection control</value>
+  </data>
+  <data name="Shell_CurrentUser_Tooltip" xml:space="preserve">
+    <value>Signed-in user summary</value>
+  </data>
+  <data name="Shell_SearchBox_Tooltip" xml:space="preserve">
+    <value>Search input</value>
+  </data>
+  <data name="Core_ShellPage_NavigationViewItem1_Tooltip" xml:space="preserve">
+    <value>Navigation View Item</value>
+  </data>
+  <data name="Core_ShellPage_NavigationViewItem2_Tooltip" xml:space="preserve">
+    <value>Navigation View Item</value>
+  </data>
+  <data name="Settings_SearchTextBox_Tooltip" xml:space="preserve">
+    <value>Search Text Box</value>
+  </data>
+  <data name="Settings_CustomOnlyToggle_Tooltip" xml:space="preserve">
+    <value>Custom Only Toggle</value>
+  </data>
+  <data name="Settings_ResetAllButton_Tooltip" xml:space="preserve">
+    <value>Reset All Button</value>
+  </data>
+  <data name="Settings_Custom_image_path_Tooltip" xml:space="preserve">
+    <value>Custom Image Path</value>
+  </data>
+  <data name="Settings_ImageOverrideEditorControl_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Settings_ImageOverrideEditorControl_Button3_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Settings_SettingsPage_TextBox1_Tooltip" xml:space="preserve">
+    <value>Text Box</value>
+  </data>
+  <data name="Settings_AppTheme_Tooltip" xml:space="preserve">
+    <value>App Theme</value>
+  </data>
+  <data name="Settings_AppTheme_Tooltip_2" xml:space="preserve">
+    <value>App Theme</value>
+  </data>
+  <data name="Settings_AppTheme_Tooltip_3" xml:space="preserve">
+    <value>App Theme</value>
+  </data>
+  <data name="Settings_SettingsPage_ToggleSwitch1_Tooltip" xml:space="preserve">
+    <value>Toggle Switch</value>
+  </data>
+  <data name="Settings_SettingsPage_ToggleSwitch2_Tooltip" xml:space="preserve">
+    <value>Toggle Switch</value>
+  </data>
+  <data name="Settings_Manage_request_type_images_Tooltip" xml:space="preserve">
+    <value>Manage Request Type Images</value>
+  </data>
+  <data name="Settings_Manage_work_center_images_Tooltip" xml:space="preserve">
+    <value>Manage Work Center Images</value>
+  </data>
+  <data name="Settings_Manage_request_subtype_images_Tooltip" xml:space="preserve">
+    <value>Manage Request Subtype Images</value>
+  </data>
+  <data name="Settings_SettingsPage_ComboBox1_Tooltip" xml:space="preserve">
+    <value>Combo Box</value>
+  </data>
+  <data name="Settings_SettingsPage_Button4_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Settings_SettingsPage_Button5_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Settings_SettingsPage_Button6_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Settings_SettingsPage_Button7_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Settings_SettingsPage_HyperlinkButton1_Tooltip" xml:space="preserve">
+    <value>Hyperlink Button</value>
+  </data>
+  <data name="Setup_SetupCompletionPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupCompletionPage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupDunnageAddPartSelectionPage_TextBox1_Tooltip" xml:space="preserve">
+    <value>Text Box</value>
+  </data>
+  <data name="Setup_SetupDunnageAddPartSelectionPage_GridView1_Tooltip" xml:space="preserve">
+    <value>Grid View</value>
+  </data>
+  <data name="Setup_SetupDunnageAddPartSelectionPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupDunnageAddPartSelectionPage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupDunnagePartPage_GridView1_Tooltip" xml:space="preserve">
+    <value>Grid View</value>
+  </data>
+  <data name="Setup_SetupDunnagePartPage_ComboBox1_Tooltip" xml:space="preserve">
+    <value>Combo Box</value>
+  </data>
+  <data name="Setup_SetupDunnagePartPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupDunnagePartPage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupDunnageTypePage_ComboBox1_Tooltip" xml:space="preserve">
+    <value>Combo Box</value>
+  </data>
+  <data name="Setup_SetupDunnageTypePage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupDunnageTypePage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupDunnageTypePage_Button3_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupDunnageTypePage_Button4_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupDunnageTypePage_Button5_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupDunnageTypePage_Button6_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupPartSelectionPage_ListView1_Tooltip" xml:space="preserve">
+    <value>List View</value>
+  </data>
+  <data name="Setup_SetupPartSelectionPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupPartSelectionPage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupReviewPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupReviewPage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupReviewPage_Button3_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupReviewPage_Button4_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupSequenceSelectionPage_ListView1_Tooltip" xml:space="preserve">
+    <value>List View</value>
+  </data>
+  <data name="Setup_SetupSequenceSelectionPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupSequenceSelectionPage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_WorkOrderTextBox_Tooltip" xml:space="preserve">
+    <value>Work Order Text Box</value>
+  </data>
+  <data name="Setup_SetupWorkOrderPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupWorkOrderPage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupWorkOrderPage_Button3_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupWorkOrderPage_Button4_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupWorkOrderPage_Button5_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupWorkstationPage_TextBox1_Tooltip" xml:space="preserve">
+    <value>Text Box</value>
+  </data>
+  <data name="Setup_SetupWorkstationPage_GridView1_Tooltip" xml:space="preserve">
+    <value>Grid View</value>
+  </data>
+  <data name="Setup_SetupWorkstationPage_MenuFlyoutItem1_Tooltip" xml:space="preserve">
+    <value>Menu Flyout Item</value>
+  </data>
+  <data name="Setup_SetupWorkstationPage_MenuFlyoutItem2_Tooltip" xml:space="preserve">
+    <value>Menu Flyout Item</value>
+  </data>
+  <data name="Setup_SetupWorkstationPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupWorkstationPage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Setup_SetupWorkstationPage_Button3_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Shared_ControlInspectorDetailPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Shared_ControlInspectorDetailPage_ToggleSwitch1_Tooltip" xml:space="preserve">
+    <value>Toggle Switch</value>
+  </data>
+  <data name="Shared_HotWorkCentersGridView_Tooltip" xml:space="preserve">
+    <value>Hot Work Centers Grid View</value>
+  </data>
+  <data name="Shared_OtherWorkCentersGridView_Tooltip" xml:space="preserve">
+    <value>Other Work Centers Grid View</value>
+  </data>
+  <data name="Startup_UsernameTextBox_Tooltip" xml:space="preserve">
+    <value>Username Text Box</value>
+  </data>
+  <data name="Startup_PasswordBox_Tooltip" xml:space="preserve">
+    <value>Password Box</value>
+  </data>
+  <data name="Startup_LoginPage_CheckBox1_Tooltip" xml:space="preserve">
+    <value>Check Box</value>
+  </data>
+  <data name="Startup_NewPasswordBox_Tooltip" xml:space="preserve">
+    <value>New Password Box</value>
+  </data>
+  <data name="Startup_ConfirmPasswordBox_Tooltip" xml:space="preserve">
+    <value>Confirm Password Box</value>
+  </data>
+  <data name="Startup_LoginPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Startup_LoginPage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Startup_LoginPage_Button3_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Startup_LoginPage_Button4_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Startup_SplashPage_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Startup_SplashPage_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Startup_SplashPage_Button3_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Startup_SplashView_Button1_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Startup_SplashView_Button2_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Startup_SplashView_Button3_Tooltip" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Waitlist_Edit_Tooltip" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Waitlist_Cancel_Tooltip" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Waitlist_Accept_Tooltip" xml:space="preserve">
+    <value>Accept</value>
+  </data>
+  <data name="Waitlist_JobTypeGridView_Tooltip" xml:space="preserve">
+    <value>Job Type Grid View</value>
+  </data>
+  <data name="Waitlist_WaitlistListView_Tooltip" xml:space="preserve">
+    <value>Waitlist List View</value>
+  </data>
+  <data name="Waitlist_WaitlistFab_Tooltip" xml:space="preserve">
+    <value>Waitlist Fab</value>
+  </data>
+  <data name="Shared_PrintButton_Tooltip" xml:space="preserve">
+    <value>Print Button</value>
+  </data>
+</root>

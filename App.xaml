@@ -10,6 +10,10 @@
                 <ResourceDictionary Source="/Styles/Thickness.xaml" />
                 <ResourceDictionary Source="/Styles/TextBlock.xaml" />
                 <ResourceDictionary Source="/Styles/ModuleSetup.xaml" />
+                <ResourceDictionary Source="/Styles/TooltipStandard.xaml" />
+                <ResourceDictionary Source="/Styles/TooltipDeveloper.xaml" />
+                <ResourceDictionary Source="/Styles/ControlInspector.xaml" />
+                <ResourceDictionary Source="/Styles/RequestDialogs.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:StringToImageSourceConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="StringToImageSourceConverter" />
             <settingsConverters:ResolvedImagePathToSourceConverter xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters" x:Key="ResolvedImagePathToSourceConverter" />

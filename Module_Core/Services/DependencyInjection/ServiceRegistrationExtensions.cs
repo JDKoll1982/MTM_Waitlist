@@ -19,6 +19,8 @@ using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Views;
 using MTM_Waitlist.Module_Core.ViewModels;
 using MTM_Waitlist.Module_Core.Views;
+using MTM_Waitlist.Module_Shared.ViewModels;
+using MTM_Waitlist.Module_Shared.Views;
 using MTM_Waitlist.Notifications;
 
 namespace MTM_Waitlist.Module_Core.Services.DependencyInjection;
@@ -62,6 +64,7 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMySqlHelperServer>(
             sp => sp.GetRequiredService<MySqlHelperServer>());
         services.AddSingleton<IFileService, FileService>();
+        services.AddSingleton<IReportPrintService, ReportPrintService>();
 
         // Views and view models
         services.AddTransient<SplashViewModel>();
@@ -90,6 +93,8 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<SetupCompletionPage>();
         services.AddTransient<WaitlistViewDetailViewModel>();
         services.AddTransient<WaitlistViewDetailPage>();
+        services.AddTransient<ControlInspectorDetailViewModel>();
+        services.AddTransient<ControlInspectorDetailPage>();
         services.AddTransient<WaitlistViewViewModel>(provider => new WaitlistViewViewModel(
             provider.GetRequiredService<INavigationService>(),
             provider.GetRequiredService<ISampleDataService>(),

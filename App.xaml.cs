@@ -269,6 +269,24 @@ public partial class App : Application
                 StartupDebugLog.Error("FirstChance", nullReferenceException, "First-chance NullReferenceException in MTM_Waitlist stack.");
             }
         }
+
+        if (e.Exception is FileNotFoundException fileNotFoundException)
+        {
+            var stack = fileNotFoundException.StackTrace ?? string.Empty;
+            if (stack.Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase)
+                || stack.Contains("Tooltip", StringComparison.OrdinalIgnoreCase)
+                || stack.Contains("ResourceLoader", StringComparison.OrdinalIgnoreCase)
+                || stack.Contains("ResourceManager", StringComparison.OrdinalIgnoreCase))
+            {
+                var fileName = string.IsNullOrWhiteSpace(fileNotFoundException.FileName)
+                    ? "<unknown>"
+                    : fileNotFoundException.FileName;
+                StartupDebugLog.Error(
+                    "FirstChance",
+                    fileNotFoundException,
+                    $"First-chance FileNotFoundException. FileName='{fileName}'.");
+            }
+        }
 #endif
     }
 
