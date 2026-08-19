@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Shared.Models;
 
 namespace MTM_Waitlist.Module_Shared.Views;
 
@@ -16,8 +17,8 @@ public sealed partial class WorkCenterSelectionDialog : ContentDialog
 
     public void SetContent(
         string workstationName,
-        IReadOnlyList<string> hotWorkCenters,
-        IReadOnlyList<string> otherWorkCenters,
+        IReadOnlyList<WorkCenterSelectionItem> hotWorkCenters,
+        IReadOnlyList<WorkCenterSelectionItem> otherWorkCenters,
         IReadOnlyList<string> activeJobWorkCenters)
     {
         WorkstationTextBlock.Text = $"Current Work Center Station: {workstationName}";
@@ -32,9 +33,10 @@ public sealed partial class WorkCenterSelectionDialog : ContentDialog
 
     private void WorkCenter_ItemClick(object sender, ItemClickEventArgs e)
     {
-        if (e.ClickedItem is string workCenter && !string.IsNullOrWhiteSpace(workCenter))
+        if (e.ClickedItem is WorkCenterSelectionItem workCenterItem
+            && !string.IsNullOrWhiteSpace(workCenterItem.WorkCenterName))
         {
-            var normalizedWorkCenter = workCenter.Trim();
+            var normalizedWorkCenter = workCenterItem.WorkCenterName.Trim();
             if (!_activeJobWorkCenters.Contains(normalizedWorkCenter))
             {
                 if (sender is GridView gridView)
@@ -48,7 +50,7 @@ public sealed partial class WorkCenterSelectionDialog : ContentDialog
                 return;
             }
 
-            SelectedWorkCenter = workCenter;
+            SelectedWorkCenter = workCenterItem.WorkCenterName;
             StartupDebugLog.Info("WorkCenterSelectionDialog", $"Selected workstation '{normalizedWorkCenter}'.");
             Hide();
         }

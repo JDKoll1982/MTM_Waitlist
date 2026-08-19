@@ -46,7 +46,7 @@
                     <Image
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Source="{Binding Order.ImageUri, ElementName=Root}"
+                        Source="{Binding Order.EffectiveImagePath, ElementName=Root, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                         Stretch="Uniform" />
 
                     <Border

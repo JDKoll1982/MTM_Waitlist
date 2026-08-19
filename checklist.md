@@ -90,8 +90,8 @@ Next task: **Workflow: Update the waitlist detail surface to consume the resolve
 
 Next task: **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
 - [x] **Work Center Card: Prune orphaned overrides after confirmation during load.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Work Center Card: Show the row in `WorkCenterSelectionDialog` with the custom image when available.** (Ref: Section 3.5) | **Persona: Frontend Engineer** — consumer wiring, tracked in 2.2
-- [ ] **Work Center Card: Add the semi-transparent detail-page background image behavior for work centers.** (Ref: Section 3.5) | **Persona: Frontend Engineer** — consumer wiring, tracked in 2.2
+- [x] **Work Center Card: Show the row in `WorkCenterSelectionDialog` with the custom image when available.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Work Center Card: Add the semi-transparent detail-page background image behavior for work centers.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
 - [x] **Subtype Card: Add parent-grouped rows for each request subtype in the subtype modal.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
 - [x] **Subtype Card: Add inherited-image previews with an `Inherited` badge for subtypes without explicit overrides.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
 
@@ -100,16 +100,16 @@ Next task: **Workflow: Update the waitlist detail surface to consume the resolve
 - [x] **Subtype Card: Add the search box and custom-image filter toggle to the subtype modal.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
 - [x] **Subtype Card: Add the placeholder row for groups that have no subtypes.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
 - [x] **Subtype Card: Keep the custom image reset behavior aligned with the parent fallback path.** (Ref: Section 3.6) | **Persona: Frontend Engineer** — resolver cascade verified by `ImageLocationServiceCascadeTests`
-- [ ] **Subtype Card: Ensure the waitlist line card thumbnail uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer** — consumer wiring, tracked in 2.2
+- [x] **Subtype Card: Ensure the waitlist line card thumbnail uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
 
 Next task: **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
-- [ ] **Subtype Card: Ensure the detail hero uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer** — consumer wiring, tracked in 2.2
+- [x] **Subtype Card: Ensure the detail hero uses the subtype image when present.** (Ref: Section 3.6) | **Persona: Frontend Engineer**
 - [x] **Dialog: Implement the Request Type Images `ContentDialog` and the row layout for each request type.** (Ref: Section 3.3) *Depends on: JSON Schema tasks, Service Layer resolution contract* | **Persona: Frontend Engineer**
 - [x] **Dialog: Implement the Work Center Images `ContentDialog` and the row layout for each work center.** (Ref: Section 3.3) *Depends on: Service Layer catalog loading and error-state handling* | **Persona: Frontend Engineer**
 - [x] **Dialog: Implement the Request Subtype Images `ContentDialog` and the row layout for each subtype.** (Ref: Section 3.3) *Depends on: JSON Schema GUID mapping, cascade resolution contract* | **Persona: Frontend Engineer**
-- [ ] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
+- [x] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
 
-Next task: **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) — start of Subphase 2.2 consumer wiring | **Persona: Frontend Engineer**
+Next task: **Security Review: Confirm that only Admin and Developer roles can access the image settings expander.** (Ref: Section 6) | **Persona: Security Engineer**
 
 ### Subphase 2.2: Business Logic & Workflow Integration
 **PREREQUISITE: All Subphase 1.1 and 1.2 tasks must be complete before starting this subphase. Dialog implementations require finalized JSON schema, service layer, and data models.**
@@ -120,15 +120,15 @@ Next task: **Workflow: Update the waitlist detail surface to consume the resolve
 - [x] **Workflow: Implement the full image resolution cascade for request subtypes from subtype override to parent type to default.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
 - [x] **Workflow: Implement the request type resolution cascade for the default and override lookup.** (Ref: Section 4.1) | **Persona: Full Stack Engineer** — fixed 2026-08-18: JSON was overriding the database value; order is now override → JSON → default
 
-Next task: **Workflow: Propagate change notifications from the image resolver to all open view models so the UI refreshes immediately.** (Ref: Section 5) | **Persona: Backend Engineer**
+Next task: **Security Review: Confirm that only Admin and Developer roles can access the image settings expander.** (Ref: Section 6) | **Persona: Security Engineer**
 - [x] **Workflow: Implement the work-center resolution cascade for the default and override lookup.** (Ref: Section 4.1) | **Persona: Full Stack Engineer**
 - [x] **Workflow: Ensure all custom image changes apply immediately without waiting for app restart.** (Ref: Section 3.4) | **Persona: Backend Engineer**
-- [ ] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
-- [ ] **Workflow: Update the work-center selection UI to consume the resolver instead of hardcoded work-center assets.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
-- [ ] **Workflow: Update the request type and subtype surfaces to consume the resolver instead of hardcoded assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
+- [x] **Workflow: Update the waitlist detail surface to consume the resolver instead of hardcoded image assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
+- [x] **Workflow: Update the work-center selection UI to consume the resolver instead of hardcoded work-center assets.** (Ref: Section 3.5) | **Persona: Frontend Engineer**
+- [x] **Workflow: Update the request type and subtype surfaces to consume the resolver instead of hardcoded assets.** (Ref: Section 5) | **Persona: Frontend Engineer**
 - [x] **Workflow: Ensure the shared folder path is resolved from configuration and the database override before write operations.** (Ref: Section 4.4) | **Persona: Backend Engineer** — `IConfigSettingsValueService` implemented; covered by `ImageStorageConfigurationResolverTests`
 - [x] **Workflow: Prevent file writes when the shared network folder is unavailable and show the save error to the user.** (Ref: Section 4.4) | **Persona: Backend Engineer** — write is blocked and returns `SHARE_UNREACHABLE`; surfacing it in the UI is blocked on the dialogs
-- [ ] **Workflow: Propagate change notifications from the image resolver to all open view models so the UI refreshes immediately.** (Ref: Section 5) | **Persona: Backend Engineer** — publish/subscribe verified by tests, but no view model subscribes yet
+- [x] **Workflow: Propagate change notifications from the image resolver to all open view models so the UI refreshes immediately.** (Ref: Section 5) | **Persona: Backend Engineer**
 
 ---
 **GATE: Complete all Phase 2 tasks before proceeding to Phase 3. Testing, validation, and hardening phases depend on complete UI and workflow implementations.**

@@ -9,6 +9,8 @@ using Microsoft.UI.Dispatching;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 
 namespace MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -18,8 +20,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly INavigationService _navigationService;
     private readonly ISampleDataService _sampleDataService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService _waitlistRequestService;
+    private readonly IImageLocationService? _imageLocationService;
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly DispatcherQueue? _dispatcherQueue;
+    private IDisposable? _imageLocationSubscription;
     private long _refreshVersion;
     private bool _isSubscribed;
 
@@ -36,6 +40,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         ISampleDataService sampleDataService,
         IBuildingSelectionService buildingSelectionService,
         MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService waitlistRequestService,
+        IImageLocationService? imageLocationService = null,
         DispatcherQueue? dispatcherQueue = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
@@ -47,8 +52,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _sampleDataService = sampleDataService;
         _buildingSelectionService = buildingSelectionService;
         _waitlistRequestService = waitlistRequestService;
+        _imageLocationService = imageLocationService;
         _dispatcherQueue = dispatcherQueue;
-        _waitlistRequestService.RequestsChanged += OnRequestsChanged;
 
         Source.CollectionChanged += OnSourceCollectionChanged;
         IsWaitlistEmpty = Source.Count == 0;
@@ -59,6 +64,12 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         if (!_isSubscribed)
         {
             _buildingSelectionService.BuildingChanged += OnBuildingChanged;
+            _waitlistRequestService.RequestsChanged += OnRequestsChanged;
+            if (_imageLocationService is not null && _imageLocationService.IsInitialized)
+            {
+                _imageLocationSubscription = _imageLocationService.SubscribeToImageLocationChanges(OnImageLocationChanged);
+            }
+
             _isSubscribed = true;
         }
 
@@ -70,10 +81,11 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         if (_isSubscribed)
         {
             _buildingSelectionService.BuildingChanged -= OnBuildingChanged;
+            _waitlistRequestService.RequestsChanged -= OnRequestsChanged;
+            _imageLocationSubscription?.Dispose();
+            _imageLocationSubscription = null;
             _isSubscribed = false;
         }
-
-        _waitlistRequestService.RequestsChanged -= OnRequestsChanged;
     }
 
     [RelayCommand]
@@ -94,6 +106,11 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private async void OnRequestsChanged(object? sender, EventArgs e)
     {
         await LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+    }
+
+    private void OnImageLocationChanged(ImageLocationChangedEventArgs args)
+    {
+        _ = RefreshAsync();
     }
 
     private async Task LoadOrdersAsync(string building)
@@ -126,9 +143,12 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
         var activeRequests = _waitlistRequestService.GetActiveRequests(building);
         var activeRequestCount = activeRequests.Count;
+        var workCenterImageLookup = await BuildWorkCenterImageLookupAsync(cancellationToken: default).ConfigureAwait(false);
         foreach (var request in activeRequests)
         {
-            newItems.Add(CreateSessionOrder(request));
+            var sessionOrder = CreateSessionOrder(request);
+            await ApplyResolvedImagesAsync(sessionOrder, request, workCenterImageLookup).ConfigureAwait(false);
+            newItems.Add(sessionOrder);
         }
 
         if (refreshVersion != Volatile.Read(ref _refreshVersion))
@@ -191,6 +211,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     public static SampleOrder CreateSessionOrder(WaitlistRequest request)
     {
+        var subtypeId = ResolveSubtypeStableId(request);
+        var requestTypeId = ResolveRequestTypeStableId(request.RequestType);
+
         var item = new SampleOrder
         {
             Id = request.Id.GetHashCode(),
@@ -201,6 +224,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             RemainingTimeText = GetRemainingTimeText(request.TargetTimeUtc, request.IsOverdue),
             ImagePath = ResolveImagePath(request.RequestType, request.Subtype),
             IsOverdue = request.IsOverdue,
+            RequestTypeStableId = requestTypeId,
+            SubtypeStableId = subtypeId,
         };
 
         AddRequestFields(item, request);
@@ -259,6 +284,115 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             "pickup" => "pickup_wip.png",
             _ => "pickup_wip.png",
         };
+    }
+
+    private async Task<Dictionary<string, (long WorkCenterId, string ResolvedPath)>> BuildWorkCenterImageLookupAsync(CancellationToken cancellationToken)
+    {
+        var lookup = new Dictionary<string, (long WorkCenterId, string ResolvedPath)>(StringComparer.OrdinalIgnoreCase);
+        if (_imageLocationService is null || !_imageLocationService.IsInitialized)
+        {
+            return lookup;
+        }
+
+        try
+        {
+            var workCenters = await _imageLocationService.GetActiveWorkCentersAsync(cancellationToken).ConfigureAwait(false);
+            if (workCenters is null)
+            {
+                return lookup;
+            }
+
+            foreach (var workCenter in workCenters)
+            {
+                var resolvedPath = await _imageLocationService.ResolveWorkCenterImagePathAsync(
+                    workCenter.WorkCenterId.ToString(),
+                    cancellationToken).ConfigureAwait(false);
+                lookup[workCenter.DisplayName] = (workCenter.WorkCenterId, resolvedPath);
+            }
+        }
+        catch
+        {
+            // Keep fallback images when resolver metadata is temporarily unavailable.
+        }
+
+        return lookup;
+    }
+
+    private async Task ApplyResolvedImagesAsync(
+        SampleOrder order,
+        WaitlistRequest request,
+        IReadOnlyDictionary<string, (long WorkCenterId, string ResolvedPath)> workCenterImageLookup,
+        CancellationToken cancellationToken = default)
+    {
+        if (_imageLocationService is not null && _imageLocationService.IsInitialized)
+        {
+            try
+            {
+                var resolvedImagePath = await ResolveRequestImagePathAsync(request, cancellationToken).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(resolvedImagePath))
+                {
+                    order.ResolvedImagePath = resolvedImagePath;
+                }
+            }
+            catch
+            {
+                // Keep legacy fallback image when resolver path cannot be resolved.
+            }
+        }
+
+        if (workCenterImageLookup.TryGetValue(request.WorkCenter, out var workCenterImage))
+        {
+            order.WorkCenterCatalogId = workCenterImage.WorkCenterId;
+            order.WorkCenterImagePath = workCenterImage.ResolvedPath;
+        }
+    }
+
+    private async Task<string?> ResolveRequestImagePathAsync(WaitlistRequest request, CancellationToken cancellationToken)
+    {
+        if (_imageLocationService is null || !_imageLocationService.IsInitialized)
+        {
+            return null;
+        }
+
+        var subtypeName = request.Subtype?.Trim();
+        if (!string.IsNullOrWhiteSpace(subtypeName))
+        {
+            var subtypeMatch = RequestSubtypeInventory.GetByDisplayNames(request.RequestType, subtypeName);
+            if (subtypeMatch.item is not null)
+            {
+                return await _imageLocationService.ResolveRequestSubtypeImagePathAsync(
+                    subtypeMatch.item.StableId.ToString(),
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        var requestTypeMatch = RequestTypeInventory.GetByDisplayName(request.RequestType);
+        if (requestTypeMatch is null)
+        {
+            return null;
+        }
+
+        return await _imageLocationService.ResolveRequestTypeImagePathAsync(
+            requestTypeMatch.StableId.ToString(),
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    private static Guid? ResolveRequestTypeStableId(string requestTypeName)
+    {
+        var requestType = RequestTypeInventory.GetByDisplayName(requestTypeName);
+        return requestType?.StableId;
+    }
+
+    private static Guid? ResolveSubtypeStableId(WaitlistRequest request)
+    {
+        var subtypeName = request.Subtype?.Trim();
+        if (string.IsNullOrWhiteSpace(subtypeName))
+        {
+            return null;
+        }
+
+        var subtype = RequestSubtypeInventory.GetByDisplayNames(request.RequestType, subtypeName);
+        return subtype.item?.StableId;
     }
 
     private static void AddRequestFields(SampleOrder item, WaitlistRequest request)

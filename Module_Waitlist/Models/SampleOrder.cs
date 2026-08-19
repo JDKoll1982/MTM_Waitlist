@@ -13,7 +13,22 @@ public sealed class SampleOrder
     public string RemainingTimeText { get; set; } = string.Empty;
     public bool IsOverdue { get; set; }
     public string ImagePath { get; set; } = string.Empty;
-    public string ImageUri => string.IsNullOrWhiteSpace(ImagePath) ? "ms-appx:///Assets/coil.png" : $"ms-appx:///Assets/{ImagePath}";
+    public Guid? RequestTypeStableId { get; set; }
+    public Guid? SubtypeStableId { get; set; }
+    public long? WorkCenterCatalogId { get; set; }
+    public string ResolvedImagePath { get; set; } = string.Empty;
+    public string WorkCenterImagePath { get; set; } = string.Empty;
+    public string EffectiveImagePath =>
+        !string.IsNullOrWhiteSpace(ResolvedImagePath)
+            ? ResolvedImagePath
+            : string.IsNullOrWhiteSpace(ImagePath)
+                ? "Assets/Images/default-request-type.png"
+                : $"Assets/{ImagePath}";
+
+    public string EffectiveWorkCenterImagePath =>
+        string.IsNullOrWhiteSpace(WorkCenterImagePath)
+            ? "Assets/Images/default-workstation-image.png"
+            : WorkCenterImagePath;
     public ObservableCollection<WaitlistField> Fields { get; } = new();
 }
 

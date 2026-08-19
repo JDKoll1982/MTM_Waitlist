@@ -9,6 +9,15 @@
     mc:Ignorable="d">
 
     <Grid x:Name="ContentArea">
+        <Image
+            Margin="0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            IsHitTestVisible="False"
+            Opacity="0.14"
+            Source="{x:Bind ViewModel.Item.EffectiveWorkCenterImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+            Stretch="UniformToFill" />
+
         <ScrollViewer IsTabStop="True">
             <Grid
                 x:Name="ContentPanel"
@@ -53,7 +62,7 @@
                             <Image
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                Source="{x:Bind ViewModel.Item.ImageUri, Mode=OneWay}"
+                                Source="{x:Bind ViewModel.Item.EffectiveImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                                 Stretch="Uniform" />
                         </Border>
 

@@ -47,10 +47,19 @@
                                 BorderThickness="1"
                                 CornerRadius="10">
                                 <StackPanel Spacing="8">
-                                    <FontIcon Glyph="&#xE7F8;" FontSize="24" />
+                                    <Border
+                                        Width="44"
+                                        Height="44"
+                                        Padding="4"
+                                        Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                                        CornerRadius="8">
+                                        <Image
+                                            Source="{Binding ResolvedImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                            Stretch="Uniform" />
+                                    </Border>
                                     <TextBlock
                                         Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                        Text="{Binding}"
+                                        Text="{Binding WorkCenterName}"
                                         TextWrapping="WrapWholeWords" />
                                 </StackPanel>
                             </Border>
@@ -88,10 +97,19 @@
                                 BorderThickness="1"
                                 CornerRadius="10">
                                 <StackPanel Spacing="8">
-                                    <FontIcon Glyph="&#xE7F8;" FontSize="24" />
+                                    <Border
+                                        Width="44"
+                                        Height="44"
+                                        Padding="4"
+                                        Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                                        CornerRadius="8">
+                                        <Image
+                                            Source="{Binding ResolvedImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                            Stretch="Uniform" />
+                                    </Border>
                                     <TextBlock
                                         Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                        Text="{Binding}"
+                                        Text="{Binding WorkCenterName}"
                                         TextWrapping="WrapWholeWords" />
                                 </StackPanel>
                             </Border>

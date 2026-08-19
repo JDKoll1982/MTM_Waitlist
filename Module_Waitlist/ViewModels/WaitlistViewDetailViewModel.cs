@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 
 namespace MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -13,6 +14,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     private readonly INavigationService _navigationService;
     private readonly ISampleDataService _sampleDataService;
     private readonly IBuildingSelectionService _buildingSelectionService;
+    private readonly IImageLocationService? _imageLocationService;
+    private IDisposable? _imageLocationSubscription;
 
     [ObservableProperty]
     public partial SampleOrder? Item
@@ -25,7 +28,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     public WaitlistViewDetailViewModel(
         INavigationService navigationService,
         ISampleDataService sampleDataService,
-        IBuildingSelectionService buildingSelectionService)
+        IBuildingSelectionService buildingSelectionService,
+        IImageLocationService? imageLocationService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(sampleDataService);
@@ -34,6 +38,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _navigationService = navigationService;
         _sampleDataService = sampleDataService;
         _buildingSelectionService = buildingSelectionService;
+        _imageLocationService = imageLocationService;
     }
 
     public void OnNavigatedTo(object parameter)
@@ -51,11 +56,20 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             Item = data.OfType<SampleOrder>().FirstOrDefault(i => i.Id == orderId.Value);
         }
 
+        if (_imageLocationSubscription is null
+            && _imageLocationService is not null
+            && _imageLocationService.IsInitialized)
+        {
+            _imageLocationSubscription = _imageLocationService.SubscribeToImageLocationChanges(OnImageLocationChanged);
+        }
+
         LoadTemplateSections();
     }
 
     public void OnNavigatedFrom()
     {
+        _imageLocationSubscription?.Dispose();
+        _imageLocationSubscription = null;
     }
 
     [RelayCommand]
@@ -265,5 +279,45 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
 
         return section;
+    }
+
+    private void OnImageLocationChanged(ImageLocationChangedEventArgs args)
+    {
+        if (Item is null || _imageLocationService is null || !_imageLocationService.IsInitialized)
+        {
+            return;
+        }
+
+        _ = RefreshResolvedPathsAsync(Item);
+    }
+
+    private async Task RefreshResolvedPathsAsync(SampleOrder item)
+    {
+        if (_imageLocationService is null || !_imageLocationService.IsInitialized)
+        {
+            return;
+        }
+
+        if (item.SubtypeStableId.HasValue)
+        {
+            item.ResolvedImagePath = await _imageLocationService
+                .ResolveRequestSubtypeImagePathAsync(item.SubtypeStableId.Value.ToString())
+                .ConfigureAwait(false);
+        }
+        else if (item.RequestTypeStableId.HasValue)
+        {
+            item.ResolvedImagePath = await _imageLocationService
+                .ResolveRequestTypeImagePathAsync(item.RequestTypeStableId.Value.ToString())
+                .ConfigureAwait(false);
+        }
+
+        if (item.WorkCenterCatalogId.HasValue)
+        {
+            item.WorkCenterImagePath = await _imageLocationService
+                .ResolveWorkCenterImagePathAsync(item.WorkCenterCatalogId.Value.ToString())
+                .ConfigureAwait(false);
+        }
+
+        OnPropertyChanged(nameof(Item));
     }
 }

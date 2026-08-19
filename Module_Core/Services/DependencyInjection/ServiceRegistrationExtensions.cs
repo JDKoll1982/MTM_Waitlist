@@ -95,6 +95,7 @@ public static class ServiceRegistrationExtensions
             provider.GetRequiredService<ISampleDataService>(),
             provider.GetRequiredService<IBuildingSelectionService>(),
             provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
+            provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>(),
             DispatcherQueue.GetForCurrentThread()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
