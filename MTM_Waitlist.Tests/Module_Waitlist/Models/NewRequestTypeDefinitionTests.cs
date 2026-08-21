@@ -97,7 +97,7 @@ public sealed class NewRequestTypeDefinitionTests
         ]
         """;
 
-        var definitions = WaitlistNewRequestDialogService.ParseRequestTypes(json);
+        var definitions = NewRequestFlowRules.ParseRequestTypes(json);
 
         Assert.AreEqual(1, definitions.Count);
         Assert.AreEqual("Broken", definitions[0].RequestType);

@@ -27,6 +27,13 @@ public class PageService : IPageService
     {
         Configure<WaitlistViewViewModel, WaitlistViewPage>();
         Configure<WaitlistViewDetailViewModel, WaitlistViewDetailPage>();
+        Configure<NewRequestWorkCenterViewModel, NewRequestWorkCenterPage>();
+        Configure<NewRequestJobTypeViewModel, NewRequestJobTypePage>();
+        Configure<NewRequestSubtypeViewModel, NewRequestSubtypePage>();
+        Configure<NewRequestDetailsViewModel, NewRequestDetailsPage>();
+        Configure<NewRequestPreviewViewModel, NewRequestPreviewPage>();
+        Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
+        Configure<NewRequestResultViewModel, NewRequestResultPage>();
         Configure<ControlInspectorDetailViewModel, ControlInspectorDetailPage>();
         Configure<SettingsViewModel, SettingsPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupWorkstationViewModel, SetupWorkstationPage>();

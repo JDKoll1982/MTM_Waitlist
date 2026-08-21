@@ -1,0 +1,92 @@
+<Page
+    x:Class="MTM_Waitlist.Module_Waitlist.Views.NewRequestPreviewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:MTM_Waitlist.Module_Settings.Converters"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </Page.Resources>
+
+    <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
+            <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="Request preview" />
+            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="Review your request before continuing." />
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource SetupSectionCardStyle}">
+            <StackPanel Spacing="10">
+                <TextBlock Style="{StaticResource RequestDialogTitleStyle}" Text="Request preview" />
+                <Grid ColumnSpacing="16" RowSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Style="{StaticResource RequestDialogFieldLabelStyle}"
+                        Text="Work Center" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Style="{StaticResource RequestDialogFieldValueStyle}"
+                        Text="{x:Bind ViewModel.WorkCenter, Mode=OneWay}" />
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Style="{StaticResource RequestDialogFieldLabelStyle}"
+                        Text="Request Type" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Style="{StaticResource RequestDialogFieldValueStyle}"
+                        Text="{x:Bind ViewModel.RequestType, Mode=OneWay}" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Style="{StaticResource RequestDialogFieldLabelStyle}"
+                        Text="Detail"
+                        Visibility="{x:Bind ViewModel.HasDetail, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Style="{StaticResource RequestDialogFieldValueStyle}"
+                        Text="{x:Bind ViewModel.Detail, Mode=OneWay}"
+                        TextWrapping="WrapWholeWords"
+                        Visibility="{x:Bind ViewModel.HasDetail, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2" />
+
+        <StackPanel Grid.Row="3" Style="{StaticResource SetupActionBarStyle}">
+            <Button
+                Content="Back"
+                Command="{x:Bind ViewModel.BackCommand}" />
+            <Button
+                Content="Continue"
+                Command="{x:Bind ViewModel.ContinueCommand}"
+                Style="{StaticResource AccentButtonStyle}" />
+        </StackPanel>
+    </Grid>
+</Page>

@@ -90,7 +90,7 @@
             ItemClick="ListView_ItemClick"
             ItemTemplateSelector="{StaticResource WaitlistLineTemplateSelector}"
             ItemsSource="{x:Bind ViewModel.Source, Mode=OneWay}"
-            SelectionMode="Single" shared:TooltipBehavior.ResourceKey="Waitlist_WaitlistListView_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Waitlist/Views/WaitlistViewPage.xaml|Module_Waitlist/Views/WaitlistViewPage.xaml.cs|Module_Waitlist/ViewModels/WaitlistViewViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Select an option in Waitlist List View.">
+            SelectionMode="Single">
 
             <!--  Adjust container item style to stretch row content full width  -->
             <ListView.ItemContainerStyle>

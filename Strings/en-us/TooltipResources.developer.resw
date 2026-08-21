@@ -279,9 +279,6 @@
   <data name="Waitlist_JobTypeGridView_Tooltip" xml:space="preserve">
     <value>Job Type Grid View</value>
   </data>
-  <data name="Waitlist_WaitlistListView_Tooltip" xml:space="preserve">
-    <value>Waitlist List View</value>
-  </data>
   <data name="Waitlist_WaitlistFab_Tooltip" xml:space="preserve">
     <value>Waitlist Fab</value>
   </data>

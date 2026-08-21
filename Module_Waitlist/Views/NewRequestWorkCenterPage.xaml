@@ -1,0 +1,149 @@
+<Page
+    x:Class="MTM_Waitlist.Module_Waitlist.Views.NewRequestWorkCenterPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
+            <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="Select Work Center" />
+            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkstationName, Mode=OneWay}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Spacing="8">
+            <InfoBar
+                x:Name="NoActiveJobInfoBar"
+                IsOpen="{x:Bind ViewModel.IsNoActiveJobWarningVisible, Mode=OneWay}"
+                IsClosable="True"
+                Severity="Warning"
+                Title="No active setup job"
+                Message="No Job is currently set up for that Press. Please contact a Setup Tech." />
+
+            <InfoBar
+                IsOpen="{x:Bind ViewModel.IsVerificationWarningVisible, Mode=OneWay}"
+                IsClosable="True"
+                Severity="Error"
+                Title="Employee verification required"
+                Message="{x:Bind ViewModel.VerificationMessage, Mode=OneWay}" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16">
+                <Border Style="{StaticResource SetupSectionCardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Style="{StaticResource RequestDialogTitleStyle}" Text="Hot Work Centers" />
+                        <GridView
+                            x:Name="HotWorkCentersGridView"
+                            ItemsSource="{x:Bind ViewModel.HotWorkCenters, Mode=OneWay}"
+                            IsItemClickEnabled="True"
+                            ItemClick="HotWorkCentersGridView_ItemClick"
+                            SelectionMode="Single">
+                            <GridView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ItemsWrapGrid
+                                        Orientation="Horizontal"
+                                        MaximumRowsOrColumns="3" />
+                                </ItemsPanelTemplate>
+                            </GridView.ItemsPanel>
+                            <GridView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        MinWidth="220"
+                                        Margin="8"
+                                        Padding="12"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="10">
+                                        <StackPanel Spacing="8">
+                                            <Border
+                                                Width="44"
+                                                Height="44"
+                                                Padding="4"
+                                                Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                                                CornerRadius="8">
+                                                <Image
+                                                    Source="{Binding ResolvedImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                                    Stretch="Uniform" />
+                                            </Border>
+                                            <TextBlock
+                                                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                                Text="{Binding WorkCenterName}"
+                                                TextWrapping="WrapWholeWords" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </GridView.ItemTemplate>
+                        </GridView>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SetupSectionCardStyle}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Style="{StaticResource RequestDialogTitleStyle}" Text="Other Work Centers" />
+                        <GridView
+                            x:Name="OtherWorkCentersGridView"
+                            MaxHeight="320"
+                            ItemsSource="{x:Bind ViewModel.OtherWorkCenters, Mode=OneWay}"
+                            IsItemClickEnabled="True"
+                            ItemClick="OtherWorkCentersGridView_ItemClick"
+                            SelectionMode="Single">
+                            <GridView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ItemsWrapGrid
+                                        Orientation="Horizontal"
+                                        MaximumRowsOrColumns="3" />
+                                </ItemsPanelTemplate>
+                            </GridView.ItemsPanel>
+                            <GridView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        MinWidth="220"
+                                        Margin="8"
+                                        Padding="12"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="10">
+                                        <StackPanel Spacing="8">
+                                            <Border
+                                                Width="44"
+                                                Height="44"
+                                                Padding="4"
+                                                Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                                                CornerRadius="8">
+                                                <Image
+                                                    Source="{Binding ResolvedImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                                    Stretch="Uniform" />
+                                            </Border>
+                                            <TextBlock
+                                                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                                Text="{Binding WorkCenterName}"
+                                                TextWrapping="WrapWholeWords" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </GridView.ItemTemplate>
+                        </GridView>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="3" Style="{StaticResource SetupActionBarStyle}">
+            <Button
+                Content="Cancel"
+                Command="{x:Bind ViewModel.CancelCommand}"
+                Style="{StaticResource AccentButtonStyle}" />
+        </StackPanel>
+    </Grid>
+</Page>

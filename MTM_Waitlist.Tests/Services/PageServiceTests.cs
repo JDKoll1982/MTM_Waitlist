@@ -23,6 +23,13 @@ public sealed class PageServiceTests
         Assert.AreEqual(typeof(SettingsPage), service.GetPageType(typeof(SettingsViewModel).FullName!));
         Assert.AreEqual(typeof(WaitlistViewPage), service.GetPageType(typeof(WaitlistViewViewModel).FullName!));
         Assert.AreEqual(typeof(WaitlistViewDetailPage), service.GetPageType(typeof(WaitlistViewDetailViewModel).FullName!));
+        Assert.AreEqual(typeof(NewRequestWorkCenterPage), service.GetPageType(typeof(NewRequestWorkCenterViewModel).FullName!));
+        Assert.AreEqual(typeof(NewRequestJobTypePage), service.GetPageType(typeof(NewRequestJobTypeViewModel).FullName!));
+        Assert.AreEqual(typeof(NewRequestSubtypePage), service.GetPageType(typeof(NewRequestSubtypeViewModel).FullName!));
+        Assert.AreEqual(typeof(NewRequestDetailsPage), service.GetPageType(typeof(NewRequestDetailsViewModel).FullName!));
+        Assert.AreEqual(typeof(NewRequestPreviewPage), service.GetPageType(typeof(NewRequestPreviewViewModel).FullName!));
+        Assert.AreEqual(typeof(NewRequestSummaryPage), service.GetPageType(typeof(NewRequestSummaryViewModel).FullName!));
+        Assert.AreEqual(typeof(NewRequestResultPage), service.GetPageType(typeof(NewRequestResultViewModel).FullName!));
     }
 
     [TestMethod]

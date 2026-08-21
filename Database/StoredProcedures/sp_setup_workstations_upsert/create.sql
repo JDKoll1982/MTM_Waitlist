@@ -24,10 +24,10 @@ INSERT INTO setup_workstations_catalog (
     updated_utc
 )
 VALUES (
-    CAST(NULLIF(TRIM(p_workstation_id), '') AS UNSIGNED),
+    CAST(NULLIF(TRIM(p_workstation_id) COLLATE utf8mb4_unicode_ci, '') AS UNSIGNED),
     UUID(),
-    NULLIF(TRIM(p_building), ''),
-    NULLIF(fn_setup_workstation_name_normalized(p_workstation_name), ''),
+    NULLIF(TRIM(p_building) COLLATE utf8mb4_unicode_ci, ''),
+    NULLIF(fn_setup_workstation_name_normalized(p_workstation_name) COLLATE utf8mb4_unicode_ci, ''),
     1,
     100,
     p_modified_by_user_id,

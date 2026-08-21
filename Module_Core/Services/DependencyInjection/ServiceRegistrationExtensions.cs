@@ -93,6 +93,20 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<SetupCompletionPage>();
         services.AddTransient<WaitlistViewDetailViewModel>();
         services.AddTransient<WaitlistViewDetailPage>();
+        services.AddTransient<NewRequestWorkCenterViewModel>();
+        services.AddTransient<NewRequestWorkCenterPage>();
+        services.AddTransient<NewRequestJobTypeViewModel>();
+        services.AddTransient<NewRequestJobTypePage>();
+        services.AddTransient<NewRequestSubtypeViewModel>();
+        services.AddTransient<NewRequestSubtypePage>();
+        services.AddTransient<NewRequestDetailsViewModel>();
+        services.AddTransient<NewRequestDetailsPage>();
+        services.AddTransient<NewRequestPreviewViewModel>();
+        services.AddTransient<NewRequestPreviewPage>();
+        services.AddTransient<NewRequestSummaryViewModel>();
+        services.AddTransient<NewRequestSummaryPage>();
+        services.AddTransient<NewRequestResultViewModel>();
+        services.AddTransient<NewRequestResultPage>();
         services.AddTransient<ControlInspectorDetailViewModel>();
         services.AddTransient<ControlInspectorDetailPage>();
         services.AddTransient<WaitlistViewViewModel>(provider => new WaitlistViewViewModel(

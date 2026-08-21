@@ -17,7 +17,6 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<IControlInspectorService, ControlInspectorService>();
         services.AddSingleton<IWorkCenterCatalogService, WorkCenterCatalogService>();
         services.AddSingleton<IDunnageTypeVisibilityCatalogService, DunnageTypeVisibilityCatalogService>();
-        services.AddSingleton<IWorkCenterSelectionDialogService, WorkCenterSelectionDialogService>();
         return services;
     }
 }

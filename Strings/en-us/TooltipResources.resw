@@ -279,9 +279,6 @@
   <data name="Waitlist_JobTypeGridView_Tooltip" xml:space="preserve">
     <value>Select an option in Job Type Grid View.</value>
   </data>
-  <data name="Waitlist_WaitlistListView_Tooltip" xml:space="preserve">
-    <value>Select an option in Waitlist List View.</value>
-  </data>
   <data name="Waitlist_WaitlistFab_Tooltip" xml:space="preserve">
     <value>Add Waitlist Item.</value>
   </data>

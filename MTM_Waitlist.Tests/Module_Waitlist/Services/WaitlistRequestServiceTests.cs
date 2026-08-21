@@ -162,9 +162,9 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void WaitlistNewRequestDialogService_VerifyEmployeeIdentity_ReturnsActiveEmployeeResult()
+    public void NewRequestFlowRules_VerifyEmployeeIdentity_ReturnsActiveEmployeeResult()
     {
-        var result = WaitlistNewRequestDialogService.VerifyEmployeeIdentity("6229");
+        var result = NewRequestFlowRules.VerifyEmployeeIdentity("6229");
 
         Assert.IsTrue(result.IsValid);
         Assert.IsTrue(result.IsActive);
@@ -173,10 +173,10 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void WaitlistNewRequestDialogService_VerifyEmployeeIdentity_RejectsInactiveOrUnknownEmployee()
+    public void NewRequestFlowRules_VerifyEmployeeIdentity_RejectsInactiveOrUnknownEmployee()
     {
-        var unknownResult = WaitlistNewRequestDialogService.VerifyEmployeeIdentity("999999");
-        var inactiveResult = WaitlistNewRequestDialogService.VerifyEmployeeIdentity("0000");
+        var unknownResult = NewRequestFlowRules.VerifyEmployeeIdentity("999999");
+        var inactiveResult = NewRequestFlowRules.VerifyEmployeeIdentity("0000");
 
         Assert.IsFalse(unknownResult.IsValid);
         Assert.IsFalse(inactiveResult.IsValid);
@@ -184,11 +184,11 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void WaitlistNewRequestDialogService_ValidateSelectedWorkCenter_RequiresActiveSelection()
+    public void NewRequestFlowRules_ValidateSelectedWorkCenter_RequiresActiveSelection()
     {
-        var validResult = WaitlistNewRequestDialogService.ValidateSelectedWorkCenter("Press 12");
-        var invalidResult = WaitlistNewRequestDialogService.ValidateSelectedWorkCenter(string.Empty);
-        var blockedResult = WaitlistNewRequestDialogService.ValidateSelectedWorkCenter("No active job");
+        var validResult = NewRequestFlowRules.ValidateSelectedWorkCenter("Press 12");
+        var invalidResult = NewRequestFlowRules.ValidateSelectedWorkCenter(string.Empty);
+        var blockedResult = NewRequestFlowRules.ValidateSelectedWorkCenter("No active job");
 
         Assert.IsTrue(validResult.IsValid);
         Assert.IsFalse(invalidResult.IsValid);
@@ -196,7 +196,7 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void WaitlistNewRequestDialogService_FilterRequestTypesForActiveJob_HidesUnavailableMaterialTypes()
+    public void NewRequestFlowRules_FilterRequestTypesForActiveJob_HidesUnavailableMaterialTypes()
     {
         var requestTypes = new List<NewRequestTypeDefinition>
         {
@@ -206,7 +206,7 @@ public sealed class WaitlistRequestServiceTests
             new() { RequestType = "Other" },
         };
 
-        var filtered = WaitlistNewRequestDialogService.ApplyActiveJobEligibility(requestTypes, hasCoilData: false, hasFlatstockData: true, hasPartData: true, hasWorkOrderData: true);
+        var filtered = NewRequestFlowRules.ApplyActiveJobEligibility(requestTypes, hasCoilData: false, hasFlatstockData: true, hasPartData: true, hasWorkOrderData: true);
 
         Assert.AreEqual(3, filtered.Count);
         Assert.IsFalse(filtered.Any(item => string.Equals(item.RequestType, "Coil", StringComparison.OrdinalIgnoreCase)));
@@ -215,11 +215,11 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void WaitlistNewRequestDialogService_ValidateCurrentJobState_RequiresRestart_WhenWorkCenterIsNoLongerActive()
+    public void NewRequestFlowRules_ValidateCurrentJobState_RequiresRestart_WhenWorkCenterIsNoLongerActive()
     {
-        var valid = WaitlistNewRequestDialogService.ValidateCurrentJobState("Press 12", "JOB-1001");
-        var stale = WaitlistNewRequestDialogService.ValidateCurrentJobState("No active job", "JOB-1001");
-        var missingJob = WaitlistNewRequestDialogService.ValidateCurrentJobState("Press 12", string.Empty);
+        var valid = NewRequestFlowRules.ValidateCurrentJobState("Press 12", "JOB-1001");
+        var stale = NewRequestFlowRules.ValidateCurrentJobState("No active job", "JOB-1001");
+        var missingJob = NewRequestFlowRules.ValidateCurrentJobState("Press 12", string.Empty);
 
         Assert.IsTrue(valid.IsValid);
         Assert.IsFalse(stale.IsValid);
@@ -227,11 +227,11 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void WaitlistNewRequestDialogService_ValidateActiveJobsForWorkCenter_RejectsMultipleActiveJobs()
+    public void NewRequestFlowRules_ValidateActiveJobsForWorkCenter_RejectsMultipleActiveJobs()
     {
-        var valid = WaitlistNewRequestDialogService.ValidateActiveJobsForWorkCenter("Press 12", new[] { "JOB-1001" });
-        var multiple = WaitlistNewRequestDialogService.ValidateActiveJobsForWorkCenter("Press 12", new[] { "JOB-1001", "JOB-1002" });
-        var missing = WaitlistNewRequestDialogService.ValidateActiveJobsForWorkCenter("Press 12", Array.Empty<string>());
+        var valid = NewRequestFlowRules.ValidateActiveJobsForWorkCenter("Press 12", new[] { "JOB-1001" });
+        var multiple = NewRequestFlowRules.ValidateActiveJobsForWorkCenter("Press 12", new[] { "JOB-1001", "JOB-1002" });
+        var missing = NewRequestFlowRules.ValidateActiveJobsForWorkCenter("Press 12", Array.Empty<string>());
 
         Assert.IsTrue(valid.IsValid);
         Assert.IsFalse(multiple.IsValid);
@@ -239,7 +239,7 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void WaitlistNewRequestDialogService_ShouldShowIntermediateSummary_ForNoSubtypeFlowsOnly()
+    public void NewRequestFlowRules_ShouldShowIntermediateSummary_ForNoSubtypeFlowsOnly()
     {
         var noSubtype = new NewRequestTypeDefinition { RequestType = "Pickup" };
         var withSubtype = new NewRequestTypeDefinition
@@ -251,15 +251,15 @@ public sealed class WaitlistRequestServiceTests
             ],
         };
 
-        Assert.IsTrue(WaitlistNewRequestDialogService.ShouldShowIntermediateSummary(noSubtype, null));
-        Assert.IsFalse(WaitlistNewRequestDialogService.ShouldShowIntermediateSummary(withSubtype, withSubtype.Subtypes[0]));
+        Assert.IsTrue(NewRequestFlowRules.ShouldShowIntermediateSummary(noSubtype, null));
+        Assert.IsFalse(NewRequestFlowRules.ShouldShowIntermediateSummary(withSubtype, withSubtype.Subtypes[0]));
     }
 
     [TestMethod]
-    public void WaitlistNewRequestDialogService_ValidatesWorkCenterSelectionAndSubtypeTextWorkflowSteps()
+    public void NewRequestFlowRules_ValidatesWorkCenterSelectionAndSubtypeTextWorkflowSteps()
     {
-        var validSelection = WaitlistNewRequestDialogService.ValidateSelectedWorkCenter("Press 12");
-        var blockedSelection = WaitlistNewRequestDialogService.ValidateSelectedWorkCenter("No active job");
+        var validSelection = NewRequestFlowRules.ValidateSelectedWorkCenter("Press 12");
+        var blockedSelection = NewRequestFlowRules.ValidateSelectedWorkCenter("No active job");
 
         var types = new List<NewRequestTypeDefinition>
         {
@@ -274,20 +274,20 @@ public sealed class WaitlistRequestServiceTests
             },
         };
 
-        var filtered = WaitlistNewRequestDialogService.ApplyActiveJobEligibility(types, hasCoilData: true, hasFlatstockData: true, hasPartData: true, hasWorkOrderData: true);
+        var filtered = NewRequestFlowRules.ApplyActiveJobEligibility(types, hasCoilData: true, hasFlatstockData: true, hasPartData: true, hasWorkOrderData: true);
         Assert.IsTrue(validSelection.IsValid);
         Assert.IsFalse(blockedSelection.IsValid);
         Assert.IsTrue(filtered.Any(item => item.RequestType.Equals("Pickup", StringComparison.OrdinalIgnoreCase)));
         Assert.IsTrue(filtered.Any(item => item.RequestType.Equals("Other", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(WaitlistNewRequestDialogService.ShouldShowIntermediateSummary(types[0], null));
-        Assert.IsFalse(WaitlistNewRequestDialogService.ShouldShowIntermediateSummary(types[1], types[1].Subtypes[0]));
+        Assert.IsTrue(NewRequestFlowRules.ShouldShowIntermediateSummary(types[0], null));
+        Assert.IsFalse(NewRequestFlowRules.ShouldShowIntermediateSummary(types[1], types[1].Subtypes[0]));
     }
 
     [TestMethod]
-    public void WaitlistNewRequestDialogService_UsesTextInputRules_ForForkliftAndGeneralTextCases()
+    public void NewRequestFlowRules_UsesTextInputRules_ForForkliftAndGeneralTextCases()
     {
         var json = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Assets", "Config", "waitlist-request-types.json"));
-        var definitions = WaitlistNewRequestDialogService.ParseRequestTypes(json);
+        var definitions = NewRequestFlowRules.ParseRequestTypes(json);
 
         var otherType = definitions.Single(item => string.Equals(item.RequestType, "Other", StringComparison.OrdinalIgnoreCase));
         var generalTextSubtype = otherType.Subtypes.Single(item => string.Equals(item.Name, "General Text Entry", StringComparison.OrdinalIgnoreCase));
@@ -353,6 +353,52 @@ public sealed class WaitlistRequestServiceTests
 
         var scrapOrder = WaitlistViewViewModel.CreateSessionOrder(scrapEmpty);
         Assert.AreEqual("Not selected", scrapOrder.Fields.First(item => item.Label == "Scrap lugger").Value);
+    }
+
+    [TestMethod]
+    public void WaitlistViewViewModel_PadsSessionOrderFields_ToFiveCardSlots()
+    {
+        var forklift = new WaitlistRequest
+        {
+            Id = Guid.NewGuid(),
+            Building = "Expo Drive",
+            WorkCenter = "Press 12",
+            RequestType = "Forklift Assist",
+            InputValue = "HELP ME!!!",
+            Status = "Pending",
+        };
+        var flatstock = new WaitlistRequest
+        {
+            Id = Guid.NewGuid(),
+            Building = "Expo Drive",
+            WorkCenter = "Press 12",
+            RequestType = "Flatstock",
+            Status = "Pending",
+        };
+        var other = new WaitlistRequest
+        {
+            Id = Guid.NewGuid(),
+            Building = "Expo Drive",
+            WorkCenter = "Press 12",
+            RequestType = "Other",
+            Subtype = "General Text Entry",
+            InputValue = "Please assist",
+            Status = "Pending",
+        };
+        var pickupOther = new WaitlistRequest
+        {
+            Id = Guid.NewGuid(),
+            Building = "Expo Drive",
+            WorkCenter = "Press 12",
+            RequestType = "Pickup",
+            Subtype = "Pickup Other",
+            Status = "Pending",
+        };
+
+        Assert.IsTrue(WaitlistViewViewModel.CreateSessionOrder(forklift).Fields.Count >= 5);
+        Assert.IsTrue(WaitlistViewViewModel.CreateSessionOrder(flatstock).Fields.Count >= 5);
+        Assert.IsTrue(WaitlistViewViewModel.CreateSessionOrder(other).Fields.Count >= 5);
+        Assert.IsTrue(WaitlistViewViewModel.CreateSessionOrder(pickupOther).Fields.Count >= 5);
     }
 
     [TestMethod]

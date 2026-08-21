@@ -1,0 +1,134 @@
+<Page
+    x:Class="MTM_Waitlist.Module_Waitlist.Views.NewRequestSummaryPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:MTM_Waitlist.Module_Settings.Converters"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </Page.Resources>
+
+    <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
+            <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="Confirm request" />
+            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="Review the details and submit your request." />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Spacing="16">
+            <Border Style="{StaticResource SetupSectionCardStyle}">
+                <StackPanel Spacing="10">
+                    <TextBlock Style="{StaticResource RequestDialogTitleStyle}" Text="Request summary" />
+                    <Grid ColumnSpacing="16" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Style="{StaticResource RequestDialogFieldLabelStyle}"
+                            Text="Work Center" />
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Style="{StaticResource RequestDialogFieldValueStyle}"
+                            Text="{x:Bind ViewModel.WorkCenter, Mode=OneWay}" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Style="{StaticResource RequestDialogFieldLabelStyle}"
+                            Text="Request Type" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Style="{StaticResource RequestDialogFieldValueStyle}"
+                            Text="{x:Bind ViewModel.RequestType, Mode=OneWay}" />
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Style="{StaticResource RequestDialogFieldLabelStyle}"
+                            Text="Subtype"
+                            Visibility="{x:Bind ViewModel.HasSubtype, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Style="{StaticResource RequestDialogFieldValueStyle}"
+                            Text="{x:Bind ViewModel.SubtypeName, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords"
+                            Visibility="{x:Bind ViewModel.HasSubtype, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Style="{StaticResource RequestDialogFieldLabelStyle}"
+                            Text="Details"
+                            Visibility="{x:Bind ViewModel.HasDetail, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Style="{StaticResource RequestDialogFieldValueStyle}"
+                            Text="{x:Bind ViewModel.Detail, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords"
+                            Visibility="{x:Bind ViewModel.HasDetail, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SetupSectionCardStyle}">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource RequestDialogTitleStyle}" Text="Queue &amp; wait time" />
+                    <TextBlock Style="{StaticResource RequestDialogFieldValueStyle}" Text="0 active request(s) for this work center." />
+                    <TextBlock Style="{StaticResource RequestDialogFieldValueStyle}" Text="Estimated wait time: approximately 15 minutes." />
+                </StackPanel>
+            </Border>
+
+            <InfoBar
+                IsOpen="{x:Bind ViewModel.IsStatusVisible, Mode=OneWay}"
+                Severity="Error"
+                Title="Current job changed"
+                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
+        </StackPanel>
+
+        <Grid Grid.Row="2" />
+
+        <StackPanel Grid.Row="3" Style="{StaticResource SetupActionBarStyle}">
+            <Button
+                Content="Back"
+                Command="{x:Bind ViewModel.BackCommand}"
+                IsEnabled="{x:Bind ViewModel.CanSubmit, Mode=OneWay}" />
+            <Button
+                Command="{x:Bind ViewModel.SubmitCommand}"
+                Style="{StaticResource AccentButtonStyle}"
+                IsEnabled="{x:Bind ViewModel.CanSubmit, Mode=OneWay}">
+                <Button.Content>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <ProgressRing
+                            Width="16"
+                            Height="16"
+                            IsActive="{x:Bind ViewModel.IsSubmitting, Mode=OneWay}" />
+                        <TextBlock Text="Submit" />
+                    </StackPanel>
+                </Button.Content>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Page>

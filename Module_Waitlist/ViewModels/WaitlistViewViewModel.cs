@@ -229,7 +229,24 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         };
 
         AddRequestFields(item, request);
+        PadFieldsToCardSlots(item);
         return item;
+    }
+
+    /// <summary>
+    /// The type-specific waitlist line-card templates bind exactly five slots
+    /// (<c>Fields[0]</c> through <c>Fields[4]</c>). Requests that map fewer fields
+    /// (e.g. Forklift Assist, Flatstock, Other, Pickup/Other) must be padded to five
+    /// slots or the indexed bindings raise "Failed to connect to index" errors in the
+    /// debug console. The empty-label pad fields never match detail-page label lookups.
+    /// </summary>
+    private static void PadFieldsToCardSlots(SampleOrder item)
+    {
+        const int cardSlotCount = 5;
+        while (item.Fields.Count < cardSlotCount)
+        {
+            item.Fields.Add(new WaitlistField { Label = string.Empty, Value = string.Empty });
+        }
     }
 
     private static string GetRemainingTimeText(DateTimeOffset? targetTimeUtc, bool isOverdue)
