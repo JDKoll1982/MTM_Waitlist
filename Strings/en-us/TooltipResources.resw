@@ -217,7 +217,7 @@
     <value>Hide tooltip files.</value>
   </data>
   <data name="Shared_HotWorkCentersGridView_Tooltip" xml:space="preserve">
-    <value>Select an option in Hot Work Centers Grid View.</value>
+    <value>Select an option in Local Work Centers Grid View.</value>
   </data>
   <data name="Shared_OtherWorkCentersGridView_Tooltip" xml:space="preserve">
     <value>Select an option in Other Work Centers Grid View.</value>

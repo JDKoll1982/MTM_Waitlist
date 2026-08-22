@@ -3,6 +3,10 @@
 
 USE mtm_waitlist;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE auth_roles_catalog;
+
 INSERT INTO
     auth_roles_catalog (
         public_id,
@@ -64,6 +68,8 @@ ON DUPLICATE KEY UPDATE
     role_name = VALUES(role_name),
     updated_utc = VALUES(updated_utc);
 
+TRUNCATE TABLE config_settings_values;
+
 INSERT INTO
     config_settings_values (
         public_id,
@@ -112,6 +118,8 @@ ON DUPLICATE KEY UPDATE
     value_type = VALUES(value_type),
     updated_utc = VALUES(updated_utc);
 
+TRUNCATE TABLE core_users_profiles;
+
 INSERT INTO
     core_users_profiles (
         public_id,
@@ -157,6 +165,8 @@ ON DUPLICATE KEY UPDATE
     employee_identifier = VALUES(employee_identifier),
     updated_utc = VALUES(updated_utc);
 
+TRUNCATE TABLE auth_roles_assignments;
+
 INSERT INTO
     auth_roles_assignments (
         public_id,
@@ -174,6 +184,8 @@ WHERE
 ON DUPLICATE KEY UPDATE
     assigned_utc = VALUES(assigned_utc),
     assigned_by_user_id = VALUES(assigned_by_user_id);
+
+TRUNCATE TABLE core_buildings_catalog;
 
 INSERT INTO
     core_buildings_catalog (
@@ -207,6 +219,8 @@ ON DUPLICATE KEY UPDATE
     building_name = VALUES(building_name),
     is_active = VALUES(is_active),
     updated_utc = VALUES(updated_utc);
+
+TRUNCATE TABLE core_workstations_registry;
 
 INSERT INTO
     core_workstations_registry (
@@ -245,10 +259,13 @@ ON DUPLICATE KEY UPDATE
 
 USE mtm_waitlist;
 
+TRUNCATE TABLE setup_workstations_catalog;
+
 INSERT IGNORE INTO
     setup_workstations_catalog (
         public_id,
         workstation_name,
+        building,
         is_active,
         sort_rank,
         created_by_user_id,
@@ -258,7 +275,8 @@ INSERT IGNORE INTO
     )
 VALUES (
         UUID(),
-        'Press 01A',
+        '100-3',
+        'Expo Drive',
         1,
         10,
         NULL,
@@ -268,7 +286,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Press 02B',
+        '100-6',
+        'Expo Drive',
         1,
         20,
         NULL,
@@ -278,7 +297,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Press 03C',
+        '100-7',
+        'Expo Drive',
         1,
         30,
         NULL,
@@ -288,7 +308,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Press 04D',
+        '100-8',
+        'Expo Drive',
         1,
         40,
         NULL,
@@ -298,7 +319,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Laser Cell 01',
+        '100-9',
+        'Expo Drive',
         1,
         50,
         NULL,
@@ -308,7 +330,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Laser Cell 02',
+        '100-12',
+        'Expo Drive',
         1,
         60,
         NULL,
@@ -318,7 +341,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Brake Press A',
+        '100-13',
+        'Expo Drive',
         1,
         70,
         NULL,
@@ -328,7 +352,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Brake Press B',
+        '100-14',
+        'Expo Drive',
         1,
         80,
         NULL,
@@ -338,7 +363,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Weld Bay 01',
+        '100-15',
+        'Expo Drive',
         1,
         90,
         NULL,
@@ -348,7 +374,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Weld Bay 02',
+        '100-16',
+        'Expo Drive',
         1,
         100,
         NULL,
@@ -358,7 +385,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Assembly Line North',
+        '100-17',
+        'Expo Drive',
         1,
         110,
         NULL,
@@ -368,7 +396,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Assembly Line South',
+        '100-18',
+        'Expo Drive',
         1,
         120,
         NULL,
@@ -378,7 +407,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Packing Station Alpha',
+        '100-19',
+        'Expo Drive',
         1,
         130,
         NULL,
@@ -388,7 +418,8 @@ VALUES (
     ),
     (
         UUID(),
-        'Packing Station Bravo',
+        '100-20',
+        'Expo Drive',
         1,
         140,
         NULL,
@@ -398,11 +429,124 @@ VALUES (
     ),
     (
         UUID(),
-        'Inspection Cell Delta',
+        '100-21',
+        'Expo Drive',
         1,
         150,
         NULL,
         NULL,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-22',
+        'Expo Drive',
+        1,
+        160,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-23',
+        'Expo Drive',
+        1,
+        170,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-24',
+        'Expo Drive',
+        1,
+        180,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-25',
+        'Expo Drive',
+        1,
+        190,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-28',
+        'Expo Drive',
+        1,
+        200,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-1807',
+        'Expo Drive',
+        1,
+        210,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-1806',
+        'Expo Drive',
+        1,
+        220,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'V100-33',
+        'Vits Drive',
+        1,
+        230,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'V100-34',
+        'Vits Drive',
+        1,
+        240,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'V100-35',
+        'Vits Drive',
+        1,
+        250,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
     );
+
+SET FOREIGN_KEY_CHECKS = 1;

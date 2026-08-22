@@ -6,6 +6,8 @@
 
 USE mtm_waitlist;
 
+TRUNCATE TABLE config_settings_values;
+
 INSERT INTO
     config_settings_values (
         public_id,

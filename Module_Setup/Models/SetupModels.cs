@@ -162,8 +162,22 @@ public sealed class SetupWorkflowState : ObservableObject
     }
 }
 
-public sealed class SetupWorkstation
+public sealed class SetupWorkstation : ObservableObject
 {
+    private const string DefaultWorkstationImagePath = "Assets/Images/default-workstation-image.png";
+
+    private bool _isSelected;
+
+    /// <summary>
+    /// Whether this workstation is the currently selected card in the selection grid.
+    /// Drives the card's selection outline and blue photo frame.
+    /// </summary>
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
+
     public string Id { get; set; } = string.Empty;
 
     public string Name { get; set; } = string.Empty;
@@ -172,11 +186,25 @@ public sealed class SetupWorkstation
 
     public bool IsActive { get; set; } = true;
 
+    /// <summary>
+    /// Resolved image path for the workstation's work center. Populated by the
+    /// view model via <c>IImageLocationService.ResolveWorkCenterImagePathAsync</c>.
+    /// Falls back to the packaged default workstation image when unresolved.
+    /// </summary>
+    public string ImagePath { get; set; } = DefaultWorkstationImagePath;
+
     public string CurrentWorkOrder { get; set; } = string.Empty;
 
     public string CurrentPartNumber { get; set; } = string.Empty;
 
     public string CurrentSequenceNumber { get; set; } = string.Empty;
+
+    /// <summary>
+    /// UTC timestamp of the last setup activity or catalog update for this work center.
+    /// Read from <c>setup_workstations_catalog.updated_utc</c> and refreshed whenever a
+    /// setup is saved for the work center.
+    /// </summary>
+    public DateTime? LastUpdatedUtc { get; set; }
 
     public string CurrentJobDisplay => string.IsNullOrWhiteSpace(CurrentWorkOrder)
         ? "Current Job: None"
@@ -185,6 +213,23 @@ public sealed class SetupWorkstation
     public string CurrentPartDisplay => string.IsNullOrWhiteSpace(CurrentPartNumber)
         ? "Part Number: None"
         : $"Part Number: {CurrentPartNumber}";
+
+    /// <summary>Value-only work order/sequence summary for the grouped card layout.</summary>
+    public string CurrentJobSummary => string.IsNullOrWhiteSpace(CurrentWorkOrder)
+        ? "None"
+        : string.IsNullOrWhiteSpace(CurrentSequenceNumber)
+            ? CurrentWorkOrder
+            : $"{CurrentWorkOrder}/{CurrentSequenceNumber}";
+
+    /// <summary>Value-only part number summary for the grouped card layout.</summary>
+    public string CurrentPartSummary => string.IsNullOrWhiteSpace(CurrentPartNumber)
+        ? "None"
+        : CurrentPartNumber;
+
+    /// <summary>Local date-and-time label for the "Last Updated" row.</summary>
+    public string LastUpdatedDisplay => LastUpdatedUtc is null
+        ? "Never"
+        : LastUpdatedUtc.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
 }
 
 public sealed class SetupPartResult

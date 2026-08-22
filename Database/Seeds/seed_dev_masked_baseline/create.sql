@@ -3,6 +3,10 @@
 
 USE mtm_waitlist;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE auth_roles_catalog;
+
 INSERT INTO
     auth_roles_catalog (
         public_id,
@@ -64,6 +68,8 @@ ON DUPLICATE KEY UPDATE
     role_name = VALUES(role_name),
     updated_utc = VALUES(updated_utc);
 
+TRUNCATE TABLE config_settings_values;
+
 INSERT INTO
     config_settings_values (
         public_id,
@@ -112,6 +118,8 @@ ON DUPLICATE KEY UPDATE
     value_type = VALUES(value_type),
     updated_utc = VALUES(updated_utc);
 
+TRUNCATE TABLE core_users_profiles;
+
 INSERT INTO
     core_users_profiles (
         public_id,
@@ -157,6 +165,8 @@ ON DUPLICATE KEY UPDATE
     employee_identifier = VALUES(employee_identifier),
     updated_utc = VALUES(updated_utc);
 
+TRUNCATE TABLE auth_roles_assignments;
+
 INSERT INTO
     auth_roles_assignments (
         public_id,
@@ -174,6 +184,8 @@ WHERE
 ON DUPLICATE KEY UPDATE
     assigned_utc = VALUES(assigned_utc),
     assigned_by_user_id = VALUES(assigned_by_user_id);
+
+TRUNCATE TABLE core_buildings_catalog;
 
 INSERT INTO
     core_buildings_catalog (
@@ -208,6 +220,8 @@ ON DUPLICATE KEY UPDATE
     is_active = VALUES(is_active),
     updated_utc = VALUES(updated_utc);
 
+TRUNCATE TABLE core_workstations_registry;
+
 INSERT INTO
     core_workstations_registry (
         public_id,
@@ -239,3 +253,5 @@ VALUES (
 ON DUPLICATE KEY UPDATE
     workstation_name = VALUES(workstation_name),
     updated_utc = VALUES(updated_utc);
+
+SET FOREIGN_KEY_CHECKS = 1;

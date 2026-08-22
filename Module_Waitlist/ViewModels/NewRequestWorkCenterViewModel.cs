@@ -25,9 +25,12 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
     private readonly INavigationService _navigationService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly INewRequestFlowService _flowService;
+    private readonly IBuildingSelectionService _buildingSelectionService;
 
     private NewRequestFlowState? _state;
     private HashSet<string> _activeJobWorkCenters = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _hotWorkCenterNames = new(StringComparer.OrdinalIgnoreCase);
+    private IReadOnlyList<WorkCenterSelectionItem> _allWorkCenters = Array.Empty<WorkCenterSelectionItem>();
 
     [ObservableProperty]
     public partial string WorkstationName
@@ -59,18 +62,55 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         get; set;
     } = string.Empty;
 
+    [ObservableProperty]
+    public partial string FilterText
+    {
+        get; set;
+    } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedBuilding
+    {
+        get; set;
+    } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsOtherWorkCentersExpanded
+    {
+        get; set;
+    }
+
+    [ObservableProperty]
+    public partial bool IsLocalWorkCentersVisible
+    {
+        get; set;
+    } = true;
+
     public ObservableCollection<WorkCenterSelectionItem> HotWorkCenters { get; } = new();
 
     public ObservableCollection<WorkCenterSelectionItem> OtherWorkCenters { get; } = new();
 
+    public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
+
+    public string OtherWorkCentersHeader => IsOtherWorkCentersExpanded
+        ? "Hide Other Work Centers"
+        : "Show Other Work Centers";
+
+    partial void OnIsOtherWorkCentersExpandedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(OtherWorkCentersHeader));
+    }
+
     public NewRequestWorkCenterViewModel(
         INavigationService navigationService,
         IWorkCenterCatalogService workCenterCatalogService,
-        INewRequestFlowService flowService)
+        INewRequestFlowService flowService,
+        IBuildingSelectionService buildingSelectionService)
     {
         _navigationService = navigationService;
         _workCenterCatalogService = workCenterCatalogService;
         _flowService = flowService;
+        _buildingSelectionService = buildingSelectionService;
     }
 
     public async void OnNavigatedTo(object parameter)
@@ -85,11 +125,17 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         IsVerificationWarningVisible = false;
         VerificationMessage = string.Empty;
         IsNoActiveJobWarningVisible = false;
+
+        _buildingSelectionService.BuildingChanged += OnBuildingChanged;
+        SelectedBuilding = _buildingSelectionService.SelectedBuilding;
+        FilterText = string.Empty;
+
         await LoadWorkCentersAsync().ConfigureAwait(true);
     }
 
     public void OnNavigatedFrom()
     {
+        _buildingSelectionService.BuildingChanged -= OnBuildingChanged;
     }
 
     private async Task LoadWorkCentersAsync()
@@ -108,8 +154,19 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
                     .Select(value => value.Trim()),
                 StringComparer.OrdinalIgnoreCase);
 
-            Populate(HotWorkCenters, catalog.HotWorkCenters, imageLookup);
-            Populate(OtherWorkCenters, catalog.OtherWorkCenters, imageLookup);
+            _hotWorkCenterNames.Clear();
+            foreach (var name in catalog.HotWorkCenters)
+            {
+                _hotWorkCenterNames.Add(name.Trim());
+            }
+
+            _allWorkCenters = CreateSelectionItems(
+                catalog.HotWorkCenters.Concat(catalog.OtherWorkCenters).ToList(),
+                imageLookup,
+                catalog.WorkCenterDetails);
+
+            ApplyFilter();
+            UpdateWorkCenterSectionsVisibility();
 
             StartupDebugLog.Info("NewRequestWorkCenter", $"Catalog loaded. Workstation='{catalog.WorkstationName}', HotCount={catalog.HotWorkCenters.Count}, OtherCount={catalog.OtherWorkCenters.Count}, ActiveJobCount={_activeJobWorkCenters.Count}.");
         }
@@ -126,28 +183,78 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         }
     }
 
-    private static void Populate(ObservableCollection<WorkCenterSelectionItem> target, IReadOnlyList<string> names, IReadOnlyDictionary<string, string> imageLookup)
+    private static IReadOnlyList<WorkCenterSelectionItem> CreateSelectionItems(
+        IReadOnlyList<string> workCenterNames,
+        IReadOnlyDictionary<string, string> imageLookup,
+        IReadOnlyDictionary<string, WorkCenterDetail> workCenterDetails)
     {
-        target.Clear();
-        foreach (var item in CreateSelectionItems(names, imageLookup))
+        return workCenterNames
+            .Select(workCenterName =>
+            {
+                workCenterDetails.TryGetValue(workCenterName, out var detail);
+                return new WorkCenterSelectionItem
+                {
+                    WorkCenterName = workCenterName,
+                    ResolvedImagePath = imageLookup.TryGetValue(workCenterName, out var resolvedImagePath)
+                        ? resolvedImagePath
+                        : DefaultWorkCenterImagePath,
+                    Building = detail?.Building ?? string.Empty,
+                    LastUpdatedUtc = detail?.LastUpdatedUtc,
+                    HasActiveJob = detail?.HasActiveJob ?? false,
+                    CurrentWorkOrder = detail?.CurrentWorkOrder ?? string.Empty,
+                    CurrentPartNumber = detail?.CurrentPartNumber ?? string.Empty,
+                    CurrentSequenceNumber = detail?.CurrentSequenceNumber ?? string.Empty,
+                    IsSelected = false,
+                };
+            })
+            .ToList();
+    }
+
+    private void ApplyFilter()
+    {
+        HotWorkCenters.Clear();
+        OtherWorkCenters.Clear();
+
+        var normalizedFilter = FilterText.Trim();
+        var selectedBuilding = _buildingSelectionService.SelectedBuilding;
+        var filteredItems = _allWorkCenters.Where(item =>
+            string.Equals(item.Building, selectedBuilding, StringComparison.OrdinalIgnoreCase)
+            && (string.IsNullOrWhiteSpace(normalizedFilter)
+                || item.WorkCenterName.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
+                || item.CurrentWorkOrder.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
+                || item.CurrentSequenceNumber.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
+                || item.CurrentPartNumber.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)));
+
+        foreach (var workCenter in filteredItems)
         {
-            target.Add(item);
+            if (_hotWorkCenterNames.Contains(workCenter.WorkCenterName))
+            {
+                HotWorkCenters.Add(workCenter);
+            }
+            else
+            {
+                OtherWorkCenters.Add(workCenter);
+            }
         }
     }
 
-    private static IReadOnlyList<WorkCenterSelectionItem> CreateSelectionItems(
-        IReadOnlyList<string> workCenterNames,
-        IReadOnlyDictionary<string, string> imageLookup)
+    private void UpdateWorkCenterSectionsVisibility()
     {
-        return workCenterNames
-            .Select(workCenterName => new WorkCenterSelectionItem
-            {
-                WorkCenterName = workCenterName,
-                ResolvedImagePath = imageLookup.TryGetValue(workCenterName, out var resolvedImagePath)
-                    ? resolvedImagePath
-                    : DefaultWorkCenterImagePath,
-            })
-            .ToList();
+        var hasLocalWorkCenters = _hotWorkCenterNames.Count > 0;
+        IsLocalWorkCentersVisible = hasLocalWorkCenters;
+        // When this computer has no configured local work centers, show the others by default.
+        IsOtherWorkCentersExpanded = !hasLocalWorkCenters;
+    }
+
+    partial void OnFilterTextChanged(string value)
+    {
+        ApplyFilter();
+    }
+
+    private void OnBuildingChanged(object? sender, EventArgs e)
+    {
+        SelectedBuilding = _buildingSelectionService.SelectedBuilding;
+        ApplyFilter();
     }
 
     [RelayCommand]
@@ -156,6 +263,18 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         if (_state is null || workCenterItem is null || string.IsNullOrWhiteSpace(workCenterItem.WorkCenterName))
         {
             return;
+        }
+
+        // The highlight is transient because the page navigates on click, but the
+        // selected card is still marked so the blue outline renders before navigation.
+        foreach (var item in HotWorkCenters)
+        {
+            item.IsSelected = ReferenceEquals(item, workCenterItem);
+        }
+
+        foreach (var item in OtherWorkCenters)
+        {
+            item.IsSelected = ReferenceEquals(item, workCenterItem);
         }
 
         var normalizedWorkCenter = workCenterItem.WorkCenterName.Trim();

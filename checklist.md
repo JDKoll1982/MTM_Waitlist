@@ -57,8 +57,8 @@ Next task: **Settings Page: Bind the expander visibility to the role-based view-
 
 - [x] **Settings Page: Bind the expander visibility to the role-based view-model property.** (Ref: Section 3.1) *Blocks: Settings Page styling tasks* | **Persona: Frontend Engineer**
 - [x] **Settings Page: Place the new image-location expander in the Settings page root `Grid` alongside existing expanders in chronological order.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
-- [x] **Settings Page: Add a `SymbolIcon` and `TextBlock` with semi-bold label to the expander header, matching Hot Workcenters styling exactly.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
-- [x] **Settings Page: Apply Fluent/WinUI 3 header styling to match the existing Hot Workcenters expander pattern.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
+- [x] **Settings Page: Add a `SymbolIcon` and `TextBlock` with semi-bold label to the expander header, matching Local Workcenters styling exactly.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
+- [x] **Settings Page: Apply Fluent/WinUI 3 header styling to match the existing Local Workcenters expander pattern.** (Ref: Section 3.1) *Depends on: Role visibility contract* | **Persona: Frontend Engineer**
 - [x] **Settings Page: Set the expander to collapsed by default.** (Ref: Section 3.1) | **Persona: Frontend Engineer**
 - [x] **Settings Card: Create the Request Type Images card with a descriptive title and summary text.** (Ref: Section 3.2) | **Persona: Frontend Engineer**
 - [x] **Settings Card: Create the Work Center Images card with a descriptive title and summary text.** (Ref: Section 3.2) | **Persona: Frontend Engineer**
@@ -189,7 +189,7 @@ Next task: **Security Review: Confirm that only Admin and Developer roles can ac
 
 > `.github/workflows/build-and-test.yml` is the build gate. `.github/scripts/Test-DeploymentPreflight.ps1`
 > performs the environment checks; it exits non-zero on a hard failure so it can gate a deployment.
-> Verified against 172.16.1.104/mtm_waitlist (MySQL 5.7.24) on 2026-08-18.
+> Verified against localhost/mtm_waitlist (MySQL 5.7.24) on 2026-08-18.
 
 - [ ] **Pipeline: Add the database migration step for the new `config_images_locations` table before deployment.** (Ref: Section 4.3) | **Persona: DevOps Engineer** — the table is already live; there is still no automated deploy pipeline to hang a migration step on
 - [ ] **Pipeline: Add the request type JSON update to deployment packaging so the new GUIDs and `imagePath` fields ship with the app.** (Ref: Section 4.2) | **Persona: DevOps Engineer**
@@ -297,9 +297,9 @@ Note: You are to complete One Sub-Phase per run
 - ViewModel properties and RelayCommand implementations
 - Styling alignment notes (colors, spacing, fonts matching existing panels)
 - Accessibility markup (`AutomationProperties`)
-- Output format: Complete .xaml and .xaml.cs code, then before/after layout screenshot descriptions
+- Output format: Complete .xaml and .xaml.cs code, then before/after layout screensLocal descriptions
 
-**Tone Example:** *"I've created the expander header with a `SymbolIcon` bound to a view-model property, styled to match Hot Workcenters with semi-bold text and 12px spacing. The row layout uses a `UniformGrid` for alignment and 48px square preview images with `Stretch='Uniform'`..."*
+**Tone Example:** *"I've created the expander header with a `SymbolIcon` bound to a view-model property, styled to match Local Workcenters with semi-bold text and 12px spacing. The row layout uses a `UniformGrid` for alignment and 48px square preview images with `Stretch='Uniform'`..."*
 
 ---
 

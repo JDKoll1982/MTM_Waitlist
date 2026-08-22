@@ -29,6 +29,18 @@ For this repository, prioritize MCP-backed validation for:
 - Current limitation observed on 2026-08-03: `load_csv` fails before creating a session because the server emits a progress notification with text (`"Validating file..."`) where the MCP progress schema expects a numeric value. If this persists, use PowerShell/structured file reads for CSV inspection and record the failure rather than repeatedly retrying the same load operation.
 - Do not use CSV mutation tools (`update`, `add`, `remove`, `delete`, or export over source files) against the Infor schema exports unless the user explicitly requests a data change. Prefer read-only analysis and export to a separate temporary/output path.
 
+## XamlMcp UI Inspection (Debug Diagnostics)
+- The workspace MCP server `xamlmcp` is registered in `.vscode/mcp.json` (command `xamlmcp`, args `--enable-driver` for native dialogs/windows). It is the global dotnet tool `XamlMcp.Server` (`xamlmcp check --json` validates the install and reports live instrumented apps).
+- The WinUI in-process agent (`XamlMcp.WinUI` 1.0.0-preview.3, already referenced in `MTM_Waitlist.csproj`) is attached in `App.xaml.cs` under `#if DEBUG` (`WinUiXamlMcp.Attach()` + `RegisterWindow` for the splash, login, and main windows). Nothing listens in Release builds.
+- Workflow to inspect the running app:
+  1. Run the app in Debug (F5 or the built exe). The agent writes a discovery file under `%LOCALAPPDATA%\XamlMcp\instances\`.
+  2. Call `list-apps` → `attach(instanceId)` → `tree` / `search` / `props` / `set-prop` / `screenshot` / `input` / `action` / `wait-for` / `hit-test` / `styles` / `resources` / `assets` / `open-asset`.
+  3. `detach` when done; the app prunes its discovery file on graceful shutdown (the server prunes stale records on the next `check`).
+- WinUI capability notes: `bindings` and `failures` return `unsupported-capability`; `input` is enabled only for `mechanism: "raw"`; screenshots use `RenderTargetBitmap` (native HWND/airspace/GPU content is not captured); pseudo-class and style-class search are disabled.
+- Targets accept an exact `{snapshotId, nodeId}` or a locator (`automationId`, `name`, `type`, `text`, `styleClass`) optionally scoped by `within`; ambiguous locators return typed candidates instead of silently selecting a node.
+- Troubleshooting (2026-08-22): if `mcp_xamlmcp_*` tools report "currently disabled by the user" even though they are all checked/enabled in the global Configure Tools dialog, the **running Copilot session has a stale tool snapshot** — it started before the XamlMcp tools were registered/enabled. There is no settings-file gate (no `chat.tools`/MCP allowlist/blacklist). Fix: start a **new chat session** so the tool list refreshes; verify the `xamlmcp` server shows as connected in the MCP panel. First-chance `InspectorRpcException`s appearing in the app debug output are expected: they are the agent's normal JSON-RPC error path for invalid/ambiguous tool requests (e.g., a locator that matches many nodes) and are caught internally — not crashes.
+- Interaction notes (2026-08-22): Setup/New Request work center card selection is **model-driven** — the blue outline + blue photo frame bind to the item model's `IsSelected` (`WorkCenterSelectionItem`/`SetupWorkstation`), and the grids use `SelectionMode="None"` + `IsItemClickEnabled="True"` + `ItemClick` handlers. `action` select / `set-prop IsSelected` on a `GridViewItem` does **not** show the highlight; use a real click (`input` kind click) to trigger `ItemClick`. In New Request, clicking a card also advances to the next step — click then use **Back** to capture the selected card. Card templates now set `AutomationProperties.Name` (bound to the work center name); note `props` does not enumerate `AutomationProperties.*`, and `search` `name` matches `x:Name` only (`automationId` matches `AutomationProperties.AutomationId`) — use `search` `text` or `hit-test` to locate cards. For cropped on-disk screenshots, XamlMcp's `screenshot` returns a resource URI that can't be saved; use `tools/capture_app_region.ps1` + `tools/ocr_png.ps1` (see `/memories/repo/mcp-tooling.md`).
+
 ---
 
 # Architecture & Structural Guidelines
@@ -49,7 +61,7 @@ For this repository, prioritize MCP-backed validation for:
 - Custom title-bar behavior is centralized in `Helpers/TitleBarHelper.cs` and uses `App.AppTitlebar`.
 
 ## AI Feature Guidance (Repo Standard)
-- Default local AI integration target is Foundry Local OpenAI-compatible endpoint: `http://172.16.1.104:5272/openai/v1`.
+- Default local AI integration target is Foundry Local OpenAI-compatible endpoint: `http://localhost:5272/openai/v1`.
 - Default local model name: `phi-4-mini` unless requirements specify otherwise.
 - Use `Azure.AI.OpenAI` for chat-completion style calls.
 - Keep AI features privacy-first: local inference by default, no external endpoint assumptions, and no hardcoded secrets.
@@ -114,3 +126,21 @@ applyTo: "**/*.{xaml,cs}"
 - If a new converter or XAML resource is introduced, register the matching `xmlns` and `x:Key` in `App.xaml` in the same change; missing registration causes XAML compile failures such as `WMC0001`.
 - Validate WinUI patches with a compile/test pass before closing the task.
 - **NEVER TOUCH GENERATED ARTIFACTS**: Avoid touching files under `obj/` or generated `*.g.cs` / `*.g.i.cs` build artifacts.
+
+---
+
+# Interaction & Execution Guidance
+
+## Ask Clarifying Questions
+- When a requirement is ambiguous or has multiple reasonable interpretations, ask a small number of clarifying questions before implementing (use the questions tool when available). Do not guess on ambiguous scope, naming, behavior, or layout.
+- Respect terse feedback loops: keep questions focused and minimal.
+
+## Persona Adherence
+- When a task names a persona (Database Engineer, Backend Engineer, Frontend Engineer, Tech Lead, Full Stack Engineer), adopt that persona's working style and output format. See `.github/skills/checklist-execution/SKILL.md` for the persona styles.
+
+## Large-Task Resilience
+- For whole-repo exploration or validation (e.g., "validate all tasks in `<checklist>`", "summarize all docs"), delegate read-only research to the `Explore` subagent instead of reading many files into the main context.
+- Work in small, verifiable steps and state progress as you go. If a long operation fails or is interrupted, explicitly say what completed and resume from that point rather than restarting from scratch.
+
+## Known Build Quirks
+- `PRI175` / `PRI224 root node not found` during `dotnet build` is usually stale PRI artifacts or a running `MTM_Waitlist.exe` locking the output — not a code error. Stop the running app, delete stale `*.pri` under `obj/`/`bin/`, and rebuild before debugging the code.

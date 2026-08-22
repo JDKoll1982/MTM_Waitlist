@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
@@ -50,6 +52,7 @@ public sealed class SetupWorkstationService : ISetupWorkstationService
                     CurrentWorkOrder = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "work_order"),
                     CurrentPartNumber = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "part_number"),
                     CurrentSequenceNumber = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "sequence_number"),
+                    LastUpdatedUtc = ParseUtcDateTime(GetValue(row, "updated_utc")),
                 };
             })
             .Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.Name))
@@ -144,5 +147,21 @@ public sealed class SetupWorkstationService : ISetupWorkstationService
         }
 
         return Convert.ToString(value)?.Trim() ?? string.Empty;
+    }
+
+    private static DateTime? ParseUtcDateTime(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
+        return DateTime.TryParse(
+            raw,
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+            out var parsed)
+                ? parsed
+                : null;
     }
 }

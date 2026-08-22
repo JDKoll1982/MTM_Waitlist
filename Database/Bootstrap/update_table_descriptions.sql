@@ -275,15 +275,15 @@ MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the 
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was last updated.';
 
-ALTER TABLE config_workstation_hot_workcenters COMMENT = 'Per-computer hot work center preferences and ordering.';
+ALTER TABLE config_workstation_hot_workcenters COMMENT = 'Per-computer Local work center preferences and ordering.';
 
 ALTER TABLE config_workstation_hot_workcenters
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for hot mapping row.',
+MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for Local mapping row.',
 MODIFY COLUMN core_workstation_id BIGINT NOT NULL COMMENT 'Foreign key to core_workstations_registry.id.',
 MODIFY COLUMN setup_workstation_id BIGINT NOT NULL COMMENT 'Foreign key to setup_workstations_catalog.id.',
-MODIFY COLUMN sort_rank INT NOT NULL DEFAULT 100 COMMENT 'Display order for hot work centers per workstation.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether this hot mapping is active.',
+MODIFY COLUMN sort_rank INT NOT NULL DEFAULT 100 COMMENT 'Display order for Local work centers per workstation.',
+MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether this Local mapping is active.',
 MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the mapping row.',
 MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the mapping row.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',

@@ -393,7 +393,8 @@ SELECT
     id,
     building,
     workstation_name,
-    is_active
+    is_active,
+    updated_utc
 FROM vw_setup_workstations_active
 ORDER BY sort_rank ASC, workstation_name ASC;
 
@@ -439,6 +440,24 @@ ON DUPLICATE KEY UPDATE
     workstation_name = VALUES(workstation_name),
     updated_by_user_id = VALUES(updated_by_user_id),
     updated_utc = UTC_TIMESTAMP();
+
+-- Stored Procedure: sp_setup_workstations_touch
+-- Engine: MySQL 5.7
+-- Purpose: Refresh the work center catalog "Last Updated" timestamp after setup activity.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_setup_workstations_touch;
+
+CREATE PROCEDURE sp_setup_workstations_touch(
+    IN p_work_center VARCHAR(64),
+    IN p_updated_by_user_id BIGINT
+)
+UPDATE setup_workstations_catalog
+SET
+    updated_utc = UTC_TIMESTAMP(),
+    updated_by_user_id = COALESCE(p_updated_by_user_id, updated_by_user_id)
+WHERE workstation_name = TRIM(p_work_center);
 
 -- Stored Procedure: sp_config_hot_workcenters_get_for_workstation
 -- Engine: MySQL 5.7

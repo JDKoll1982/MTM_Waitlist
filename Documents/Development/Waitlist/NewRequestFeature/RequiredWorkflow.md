@@ -12,7 +12,7 @@ Current End-User Flow (Implemented Today)
 2. A Select Work Center modal opens.
 3. The modal shows:
    - Workstation identity at the top (current workstation name).
-   - Hot Workcenters section (quick access list).
+   - Local Workcenters section (quick access list).
    - Other Workcenters section (all other available work centers).
 4. User clicks a press/work center card.
 5. The app validates whether that selected press/work center has an active setup job.

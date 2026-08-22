@@ -10,6 +10,7 @@ SELECT
     id,
     building,
     workstation_name,
-    is_active
+    is_active,
+    updated_utc
 FROM vw_setup_workstations_active
 ORDER BY sort_rank ASC, workstation_name ASC;

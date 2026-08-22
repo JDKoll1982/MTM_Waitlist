@@ -14,7 +14,7 @@ locations used for:
 3. Request subtypes
 
 The panel follows the existing `muxc:Expander` pattern already used by the Appearance,
-Mock Data, Hot Workcenters, Dunnage Type Visibility, and About panels in
+Mock Data, Local Workcenters, Dunnage Type Visibility, and About panels in
 [Module_Settings/Views/SettingsPage.xaml](Module_Settings/Views/SettingsPage.xaml).
 
 ## 2. Confirmed Decisions
@@ -41,7 +41,7 @@ Mock Data, Hot Workcenters, Dunnage Type Visibility, and About panels in
 ### 3.1 Expander
 
 - Placed in the Settings page root `Grid` alongside existing expanders.
-- Header: `SymbolIcon` + `TextBlock` with bold semi-bold label, matching Hot Workcenters.
+- Header: `SymbolIcon` + `TextBlock` with bold semi-bold label, matching Local Workcenters.
 - `x:Load` bound to a view-model visibility property driven by the role check.
 - `IsExpanded="False"` by default.
 
@@ -121,7 +121,7 @@ Default when unresolved: `Assets\Images\default-workstation-image.png`.
 
 | Topic | Decision |
 |-------|----------|
-| Source list | All active catalog rows, not limited to hot work centers |
+| Source list | All active catalog rows, not limited to Local work centers |
 | Row key | `setup_workstations_catalog.id` |
 | Grouping | Grouped by building |
 | Finding rows | Search box plus a "has custom image" filter toggle |

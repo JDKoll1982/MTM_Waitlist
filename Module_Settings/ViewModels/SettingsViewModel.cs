@@ -121,7 +121,7 @@ public partial class SettingsViewModel : ObservableRecipient
     public bool IsMockDataPanelVisible => MatchesSearch("mock data", "infor visual", "receiving", "mysql", "sample data");
 
     public bool IsHotWorkCentersPanelVisible => MatchesSearch(
-        "hot workcenters",
+        "Local Work Centers",
         "workstation",
         "computer",
         string.Join(" ", HotWorkCenters),
@@ -440,7 +440,7 @@ public partial class SettingsViewModel : ObservableRecipient
                 .ConfigureAwait(true);
 
             HotWorkCentersStatusMessage = string.IsNullOrWhiteSpace(saveMessage)
-                ? "Hot workcenters saved."
+                ? "Local workcenters saved."
                 : saveMessage;
 
             StartupDebugLog.Info("SettingsHotWorkCenters", $"SaveCurrentHotWorkCentersAsync completed. Workstation='{SelectedWorkstation}', Message='{HotWorkCentersStatusMessage}'.");
@@ -448,7 +448,7 @@ public partial class SettingsViewModel : ObservableRecipient
         catch (Exception ex)
         {
             StartupDebugLog.Error("SettingsHotWorkCenters", ex, $"SaveCurrentHotWorkCentersAsync failed. Workstation='{SelectedWorkstation}', Count={HotWorkCenters.Count}.");
-            HotWorkCentersStatusMessage = $"Unable to save hot workcenters: {ex.Message}";
+            HotWorkCentersStatusMessage = $"Unable to save Local workcenters: {ex.Message}";
         }
     }
 

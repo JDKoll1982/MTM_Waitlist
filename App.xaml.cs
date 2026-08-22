@@ -10,6 +10,9 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Core.Services.DependencyInjection;
 using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Notifications;
+#if DEBUG
+using XamlMcp.WinUI;
+#endif
 
 namespace MTM_Waitlist;
 
@@ -20,6 +23,9 @@ public partial class App : Application
     private static LoginWindow? _loginWindow;
     private static bool _mainWindowActivated;
     private static bool _loginWindowActivated;
+#if DEBUG
+    private static WinUiXamlMcpSession? _xamlMcpSession;
+#endif
 
     public IHost Host
     {
@@ -86,6 +92,9 @@ public partial class App : Application
         }
 
         _splashWindow.Activate();
+#if DEBUG
+        RegisterXamlMcpWindow(_splashWindow);
+#endif
         StartupDebugLog.Info("Splash", "Splash window activated.");
     }
 
@@ -97,6 +106,9 @@ public partial class App : Application
             MainWindow.Closed += MainWindow_Closed;
             _mainWindowActivated = true;
             MainWindow.Activate();
+#if DEBUG
+            RegisterXamlMcpWindow(MainWindow);
+#endif
             CloseSplashWindow();
         }
         catch (Exception ex)
@@ -121,6 +133,9 @@ public partial class App : Application
 
             _loginWindowActivated = true;
             _loginWindow.Activate();
+#if DEBUG
+            RegisterXamlMcpWindow(_loginWindow);
+#endif
             CloseSplashWindow();
         }
         catch (Exception ex)
@@ -139,6 +154,9 @@ public partial class App : Application
             MainWindow.Closed += MainWindow_Closed;
             _mainWindowActivated = true;
             MainWindow.Activate();
+#if DEBUG
+            RegisterXamlMcpWindow(MainWindow);
+#endif
 
             if (_loginWindow is not null)
             {
@@ -155,6 +173,44 @@ public partial class App : Application
             Current.Exit();
         }
     }
+
+#if DEBUG
+    private static void AttachXamlMcpAgent()
+    {
+        if (_xamlMcpSession is not null)
+        {
+            return;
+        }
+
+        try
+        {
+            _xamlMcpSession = WinUiXamlMcp.Attach();
+            StartupDebugLog.Info("XamlMcp", "WinUI inspector agent attached (debug diagnostics).");
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("XamlMcp", ex, "Failed to attach the WinUI inspector agent.");
+        }
+    }
+
+    private static void RegisterXamlMcpWindow(Window window)
+    {
+        if (_xamlMcpSession is null || window is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _ = _xamlMcpSession.RegisterWindow(window);
+            StartupDebugLog.Info("XamlMcp", $"Registered '{window.GetType().Name}' for WinUI inspection.");
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("XamlMcp", ex, $"Failed to register '{window.GetType().Name}' for WinUI inspection.");
+        }
+    }
+#endif
 
     private static void CloseSplashWindow()
     {
@@ -236,6 +292,22 @@ public partial class App : Application
         {
             StartupDebugLog.Error("Shutdown", ex, "Failed to stop host.");
         }
+
+#if DEBUG
+        if (_xamlMcpSession is { } xamlMcpSession)
+        {
+            _xamlMcpSession = null;
+            try
+            {
+                await xamlMcpSession.DisposeAsync().ConfigureAwait(false);
+                StartupDebugLog.Info("XamlMcp", "WinUI inspector session disposed.");
+            }
+            catch (Exception ex)
+            {
+                StartupDebugLog.Error("XamlMcp", ex, "Failed to dispose the WinUI inspector session during shutdown.");
+            }
+        }
+#endif
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
@@ -294,6 +366,10 @@ public partial class App : Application
     {
         StartupDebugLog.Info("Launch", "OnLaunched started.");
         base.OnLaunched(args);
+
+#if DEBUG
+        AttachXamlMcpAgent();
+#endif
 
         try
         {

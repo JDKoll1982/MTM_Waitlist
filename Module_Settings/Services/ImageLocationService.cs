@@ -587,7 +587,7 @@ public sealed class ImageLocationService : IImageLocationService, IDisposable
                 return null;
             }
 
-            // Get all work centers (hot + other) from the catalog
+            // Get all work centers (Local + other) from the catalog
             var allWorkCenterNames = catalogResult.HotWorkCenters
                 .Concat(catalogResult.OtherWorkCenters)
                 .Distinct(StringComparer.OrdinalIgnoreCase)

@@ -172,6 +172,15 @@ public partial class ShellViewModel : ObservableRecipient
             return;
         }
 
+        // New Request wizard pages keep the shell header visible and step through a
+        // changing title so the user always knows where they are in the flow.
+        if (e.SourcePageType.Namespace?.StartsWith("MTM_Waitlist.Module_Waitlist.Views", StringComparison.Ordinal) == true
+            && e.SourcePageType.Name.StartsWith("NewRequest", StringComparison.Ordinal))
+        {
+            UpdateNewRequestHeader(e.SourcePageType);
+            return;
+        }
+
         var selectedItem = NavigationViewService.GetSelectedItem(e.SourcePageType);
         if (selectedItem != null)
         {
@@ -188,6 +197,53 @@ public partial class ShellViewModel : ObservableRecipient
         }
 
         HeaderText = string.Empty;
+    }
+
+    private void UpdateNewRequestHeader(Type pageType)
+    {
+        _isWaitlistPageActive = false;
+        Selected = null;
+        HeaderText = GetNewRequestStepTitle(pageType);
+    }
+
+    private static string GetNewRequestStepTitle(Type pageType)
+    {
+        if (pageType == typeof(NewRequestWorkCenterPage))
+        {
+            return "New Request — Select Work Center";
+        }
+
+        if (pageType == typeof(NewRequestJobTypePage))
+        {
+            return "New Request — Job Type";
+        }
+
+        if (pageType == typeof(NewRequestSubtypePage))
+        {
+            return "New Request — Subtype";
+        }
+
+        if (pageType == typeof(NewRequestDetailsPage))
+        {
+            return "New Request — Details";
+        }
+
+        if (pageType == typeof(NewRequestPreviewPage))
+        {
+            return "New Request — Preview";
+        }
+
+        if (pageType == typeof(NewRequestSummaryPage))
+        {
+            return "New Request — Confirm";
+        }
+
+        if (pageType == typeof(NewRequestResultPage))
+        {
+            return "New Request — Complete";
+        }
+
+        return "New Request";
     }
 
     private void UpdateWaitlistHeader()

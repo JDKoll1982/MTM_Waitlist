@@ -35,6 +35,13 @@
         "--context",
         "ide-assistant"
       ]
+    },
+    "xamlmcp": {
+      "type": "stdio",
+      "command": "xamlmcp",
+      "args": [
+        "--enable-driver"
+      ]
     }
   }
 }

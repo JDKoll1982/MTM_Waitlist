@@ -1,5 +1,29 @@
 # Tools
 
+## read_wakatime.py / wakatime_api.py
+
+Read coding-activity data from the local WakaTime extension install and the WakaTime API.
+
+### What they do
+
+- `read_wakatime.py` inspects the local WakaTime folder (`%USERPROFILE%\.wakatime`) — the
+  heartbeat store format/header, available Python BDB modules, extension storage, and the
+  `wakatime.log` format. Useful to verify what local data is actually parseable.
+- `wakatime_api.py` reads the API key from `%USERPROFILE%\.wakatime.cfg` (never printed) and
+  pulls the WakaTime dashboard summaries for `last_7_days` and `last_30_days` (daily totals,
+  top projects, top languages). Requires network access to `wakatime.com`.
+
+### Usage
+
+```powershell
+python tools/read_wakatime.py
+python tools/wakatime_api.py
+```
+
+Note: the local heartbeat store is not plain SQLite/Berkeley DB, so the API is the reliable
+source for aggregated stats. Keep any stats you cite rounded (the dashboard reports decimal
+hours and rounded per-language minutes).
+
 ## Generate-TooltipInventory.ps1
 
 Rerunnable, low-token tooltip inventory for actionable WinUI controls.

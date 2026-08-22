@@ -610,6 +610,9 @@ public sealed class WaitlistRequestServiceTests
         var sampleDataService = new DelayedSampleDataService();
         var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), sampleDataService, buildingSelectionService, requestService);
 
+        // The view model only refreshes on RequestsChanged once it subscribes in
+        // OnNavigatedTo; without this it never picks up the submitted request.
+        viewModel.OnNavigatedTo(null!);
         await viewModel.RefreshAsync();
         var submitResult = await requestService.SubmitAsync(CreateDraft(), allowDuplicate: false);
         await Task.Delay(50);

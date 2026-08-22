@@ -4,10 +4,15 @@
 
 USE mtm_waitlist;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE setup_workstations_catalog;
+
 INSERT IGNORE INTO
     setup_workstations_catalog (
         public_id,
         workstation_name,
+        building,
         is_active,
         sort_rank,
         created_by_user_id,
@@ -17,7 +22,52 @@ INSERT IGNORE INTO
     )
 VALUES (
         UUID(),
-        '100-03',
+        '100-3',
+        'Expo Drive',
+        1,
+        10,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-6',
+        'Expo Drive',
+        1,
+        20,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-7',
+        'Expo Drive',
+        1,
+        30,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-8',
+        'Expo Drive',
+        1,
+        40,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-9',
+        'Expo Drive',
         1,
         50,
         NULL,
@@ -27,7 +77,19 @@ VALUES (
     ),
     (
         UUID(),
-        '100-06',
+        '100-12',
+        'Expo Drive',
+        1,
+        60,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-13',
+        'Expo Drive',
         1,
         70,
         NULL,
@@ -37,7 +99,8 @@ VALUES (
     ),
     (
         UUID(),
-        '100-07',
+        '100-14',
+        'Expo Drive',
         1,
         80,
         NULL,
@@ -47,7 +110,8 @@ VALUES (
     ),
     (
         UUID(),
-        '100-08',
+        '100-15',
+        'Expo Drive',
         1,
         90,
         NULL,
@@ -57,7 +121,8 @@ VALUES (
     ),
     (
         UUID(),
-        '100-09',
+        '100-16',
+        'Expo Drive',
         1,
         100,
         NULL,
@@ -67,7 +132,19 @@ VALUES (
     ),
     (
         UUID(),
-        '100-12',
+        '100-17',
+        'Expo Drive',
+        1,
+        110,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-18',
+        'Expo Drive',
         1,
         120,
         NULL,
@@ -77,7 +154,8 @@ VALUES (
     ),
     (
         UUID(),
-        '100-13',
+        '100-19',
+        'Expo Drive',
         1,
         130,
         NULL,
@@ -87,7 +165,8 @@ VALUES (
     ),
     (
         UUID(),
-        '100-14',
+        '100-20',
+        'Expo Drive',
         1,
         140,
         NULL,
@@ -97,7 +176,8 @@ VALUES (
     ),
     (
         UUID(),
-        '100-15',
+        '100-21',
+        'Expo Drive',
         1,
         150,
         NULL,
@@ -107,7 +187,8 @@ VALUES (
     ),
     (
         UUID(),
-        '100-16',
+        '100-22',
+        'Expo Drive',
         1,
         160,
         NULL,
@@ -117,11 +198,102 @@ VALUES (
     ),
     (
         UUID(),
-        '100-17',
+        '100-23',
+        'Expo Drive',
+        1,
+        170,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-24',
+        'Expo Drive',
         1,
         180,
         NULL,
         NULL,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-25',
+        'Expo Drive',
+        1,
+        190,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-28',
+        'Expo Drive',
+        1,
+        200,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-1807',
+        'Expo Drive',
+        1,
+        210,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        '100-1806',
+        'Expo Drive',
+        1,
+        220,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'V100-33',
+        'Vits Drive',
+        1,
+        230,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'V100-34',
+        'Vits Drive',
+        1,
+        240,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'V100-35',
+        'Vits Drive',
+        1,
+        250,
+        NULL,
+        NULL,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
     );
+
+SET FOREIGN_KEY_CHECKS = 1;

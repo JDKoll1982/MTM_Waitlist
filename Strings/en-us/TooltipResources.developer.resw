@@ -217,7 +217,7 @@
     <value>Toggle Switch</value>
   </data>
   <data name="Shared_HotWorkCentersGridView_Tooltip" xml:space="preserve">
-    <value>Hot Work Centers Grid View</value>
+    <value>Local Work Centers Grid View</value>
   </data>
   <data name="Shared_OtherWorkCentersGridView_Tooltip" xml:space="preserve">
     <value>Other Work Centers Grid View</value>

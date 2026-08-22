@@ -71,7 +71,14 @@ ORDER BY workstation_name ASC;",
 
         StartupDebugLog.Info("WorkCenterCatalog", $"GetCatalogAsync started. Workstation='{normalizedWorkstationName}'.");
 
-        var allWorkCenters = await GetAvailableWorkCentersAsync(cancellationToken).ConfigureAwait(false);
+        var availableRows = await GetAvailableWorkCenterRowsAsync(cancellationToken).ConfigureAwait(false);
+        var allWorkCenters = availableRows
+            .Select(row => GetValue(row, "workstation_name"))
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
         var hotRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
             @"SELECT
     swc.workstation_name AS work_center_name,
@@ -107,17 +114,16 @@ ORDER BY cwhc.sort_rank ASC, swc.workstation_name ASC;",
             .Where(workCenter => !hotWorkCenters.Any(hot => string.Equals(hot, workCenter, StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
-        var activeJobRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT DISTINCT work_center
-FROM setup_active_jobs
-WHERE is_active = 1
-  AND work_center IS NOT NULL
-  AND TRIM(work_center) <> '';",
+        // Latest active setup job (work order / part / sequence) per work center.
+        // The stored procedure returns exactly the work centers that have an active
+        // job, so it also drives the ActiveJobWorkCenters membership.
+        var latestJobRows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            "sp_setup_active_jobs_latest_by_work_center_get",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        var activeJobLookup = activeJobRows
+        var activeJobLookup = latestJobRows
             .Select(row => GetValue(row, "work_center"))
             .Where(value => !string.IsNullOrWhiteSpace(value))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -127,12 +133,41 @@ WHERE is_active = 1
             .Where(workCenter => activeJobLookup.Any(active => string.Equals(active, workCenter, StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
+        var jobsByWorkCenter = latestJobRows
+            .Where(row => !string.IsNullOrWhiteSpace(GetValue(row, "work_center")))
+            .ToDictionary(
+                row => GetValue(row, "work_center"),
+                row => row,
+                StringComparer.OrdinalIgnoreCase);
+
+        var workCenterDetails = new Dictionary<string, WorkCenterDetail>(StringComparer.OrdinalIgnoreCase);
+        foreach (var row in availableRows)
+        {
+            var workCenterName = GetValue(row, "workstation_name");
+            if (string.IsNullOrWhiteSpace(workCenterName) || workCenterDetails.ContainsKey(workCenterName))
+            {
+                continue;
+            }
+
+            jobsByWorkCenter.TryGetValue(workCenterName, out var activeJobRow);
+            workCenterDetails[workCenterName] = new WorkCenterDetail
+            {
+                Building = GetValue(row, "building"),
+                LastUpdatedUtc = ParseUtcDateTime(GetValue(row, "updated_utc")),
+                HasActiveJob = activeJobRow is not null,
+                CurrentWorkOrder = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "work_order"),
+                CurrentPartNumber = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "part_number"),
+                CurrentSequenceNumber = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "sequence_number"),
+            };
+        }
+
         var result = new WorkCenterCatalogResult
         {
             WorkstationName = normalizedWorkstationName,
             HotWorkCenters = hotWorkCenters,
             OtherWorkCenters = otherWorkCenters,
             ActiveJobWorkCenters = activeJobWorkCenters,
+            WorkCenterDetails = workCenterDetails,
         };
 
         StartupDebugLog.Info("WorkCenterCatalog", $"GetCatalogAsync completed. Workstation='{normalizedWorkstationName}', HotCount={hotWorkCenters.Count}, OtherCount={otherWorkCenters.Count}, ActiveJobCount={activeJobWorkCenters.Count}.");
@@ -167,7 +202,7 @@ LIMIT 1;",
         if (workstationId <= 0)
         {
             StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. Workstation '{normalizedWorkstationName}' was not found.");
-            return "Unable to save hot workcenters: workstation not found.";
+            return "Unable to save Local workcenters: workstation not found.";
         }
 
         var availableRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
@@ -210,7 +245,7 @@ WHERE is_active = 1;",
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. No database connection was available for workstation '{normalizedWorkstationName}'.");
-            return "Unable to save hot workcenters: database connection is not configured.";
+            return "Unable to save Local workcenters: database connection is not configured.";
         }
 
         try
@@ -289,14 +324,14 @@ WHERE core_workstation_id = @p_core_workstation_id;", connection, transaction))
         catch (Exception ex)
         {
             StartupDebugLog.Error("WorkCenterCatalog", ex, $"SaveHotWorkCentersAsync failed. Workstation='{normalizedWorkstationName}', RequestedCount={orderedHotWorkCenters.Length}.");
-            return $"Unable to save hot workcenters: {ex.Message}";
+            return $"Unable to save Local workcenters: {ex.Message}";
         }
     }
 
-    private async Task<IReadOnlyList<string>> GetAvailableWorkCentersAsync(CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<IReadOnlyDictionary<string, object?>>> GetAvailableWorkCenterRowsAsync(CancellationToken cancellationToken)
     {
         var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT workstation_name
+            @"SELECT workstation_name, building, updated_utc
 FROM setup_workstations_catalog
 WHERE is_active = 1
 ORDER BY sort_rank ASC, workstation_name ASC;",
@@ -304,14 +339,7 @@ ORDER BY sort_rank ASC, workstation_name ASC;",
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        var workCenters = rows
-            .Select(row => GetValue(row, "workstation_name"))
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        return workCenters;
+        return rows;
     }
 
     private async Task<string> ResolveCurrentWorkstationNameAsync(CancellationToken cancellationToken)
@@ -368,6 +396,22 @@ LIMIT 1;",
         }
 
         return Convert.ToString(value)?.Trim() ?? string.Empty;
+    }
+
+    private static DateTime? ParseUtcDateTime(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
+        return DateTime.TryParse(
+            raw,
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+            out var parsed)
+                ? parsed
+                : null;
     }
 
     private string? ResolveConnectionString()

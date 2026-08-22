@@ -292,6 +292,18 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             };
         }
 
+        var touchRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+            "sp_setup_workstations_touch",
+            new Dictionary<string, object?>
+            {
+                ["p_work_center"] = request.WorkCenter,
+                ["p_updated_by_user_id"] = null,
+            },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        StartupDebugLog.Info("SetupPersistence", $"sp_setup_workstations_touch completed. WorkCenter='{request.WorkCenter}', AffectedRows={touchRows}.");
+
         await _activeJobCoordinatorService.RegisterActiveJobAsync(request, cancellationToken).ConfigureAwait(false);
         StartupDebugLog.Info("SetupPersistence", "Active job coordinator registration completed.");
 

@@ -8,12 +8,17 @@ using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
+using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Shared.Models;
+using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Startup.Models;
 
 namespace MTM_Waitlist.Module_Setup.ViewModels;
 
 public partial class SetupWorkstationViewModel : ObservableRecipient, INavigationAware
 {
+    private const string DefaultWorkstationImagePath = "Assets/Images/default-workstation-image.png";
+
     private static readonly string[] AllowedManageRoles =
     {
         "Setup Tech",
@@ -27,9 +32,13 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
     private readonly ISetupWorkstationService _workstationService;
+    private readonly IImageLocationService _imageLocationService;
+    private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly StartupState _startupState;
-    private readonly ObservableCollection<SetupWorkstation> _displayedWorkstations = new();
+    private readonly HashSet<string> _hotWorkCenterNames = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ObservableCollection<SetupWorkstation> _displayedHotWorkstations = new();
+    private readonly ObservableCollection<SetupWorkstation> _displayedOtherWorkstations = new();
 
     [ObservableProperty]
     public partial SetupWorkstation? SelectedWorkstation
@@ -67,11 +76,34 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
         get; set;
     } = string.Empty;
 
+    [ObservableProperty]
+    public partial bool IsOtherWorkCentersExpanded
+    {
+        get; set;
+    }
+
+    [ObservableProperty]
+    public partial bool IsLocalWorkCentersVisible
+    {
+        get; set;
+    } = true;
+
     public SetupWorkflowState State => _workflowService.State;
 
     public ObservableCollection<SetupWorkstation> Workstations => State.Workstations;
 
-    public ObservableCollection<SetupWorkstation> DisplayedWorkstations => _displayedWorkstations;
+    public ObservableCollection<SetupWorkstation> DisplayedHotWorkstations => _displayedHotWorkstations;
+
+    public ObservableCollection<SetupWorkstation> DisplayedOtherWorkstations => _displayedOtherWorkstations;
+
+    public string OtherWorkCentersHeader => IsOtherWorkCentersExpanded
+        ? "Hide Other Work Centers"
+        : "Show Other Work Centers";
+
+    partial void OnIsOtherWorkCentersExpandedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(OtherWorkCentersHeader));
+    }
 
     public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
 
@@ -81,12 +113,16 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
         INavigationService navigationService,
         ISetupWorkflowService workflowService,
         ISetupWorkstationService workstationService,
+        IImageLocationService imageLocationService,
+        IWorkCenterCatalogService workCenterCatalogService,
         StartupState startupState,
         IBuildingSelectionService buildingSelectionService)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
         _workstationService = workstationService;
+        _imageLocationService = imageLocationService;
+        _workCenterCatalogService = workCenterCatalogService;
         _startupState = startupState;
         _buildingSelectionService = buildingSelectionService;
     }
@@ -200,6 +236,11 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
 
     partial void OnSelectedWorkstationChanged(SetupWorkstation? value)
     {
+        foreach (var item in State.Workstations)
+        {
+            item.IsSelected = ReferenceEquals(item, value);
+        }
+
         if (value is null)
         {
             return;
@@ -231,15 +272,18 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
             State.Workstations.Clear();
             foreach (var item in items)
             {
+                item.ImagePath = await ResolveWorkstationImagePathAsync(item).ConfigureAwait(true);
                 State.Workstations.Add(item);
             }
 
+            await LoadHotWorkCenterNamesAsync().ConfigureAwait(true);
             ApplyFilter();
 
-            if (SelectedWorkstation is null && _displayedWorkstations.Count > 0)
+            var allVisible = _displayedHotWorkstations.Concat(_displayedOtherWorkstations).ToArray();
+            if (SelectedWorkstation is null && allVisible.Length > 0)
             {
-                SelectedWorkstation = _displayedWorkstations.FirstOrDefault(item => string.Equals(item.Name, State.SelectedWorkCenter, StringComparison.OrdinalIgnoreCase))
-                    ?? _displayedWorkstations[0];
+                SelectedWorkstation = allVisible.FirstOrDefault(item => string.Equals(item.Name, State.SelectedWorkCenter, StringComparison.OrdinalIgnoreCase))
+                    ?? allVisible[0];
             }
         }
         finally
@@ -248,9 +292,66 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
         }
     }
 
+    private async Task LoadHotWorkCenterNamesAsync(CancellationToken cancellationToken = default)
+    {
+        _hotWorkCenterNames.Clear();
+        try
+        {
+            var catalog = await _workCenterCatalogService
+                .GetCatalogAsync(_workCenterCatalogService.GetCurrentWorkstationName(), cancellationToken)
+                .ConfigureAwait(true);
+            foreach (var name in catalog.HotWorkCenters)
+            {
+                _hotWorkCenterNames.Add(name.Trim());
+            }
+
+            StartupDebugLog.Info("SetupWorkstation", $"Local work centers loaded for the setup selection screen. Count={_hotWorkCenterNames.Count}.");
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("SetupWorkstation", ex, "Failed to load Local work centers for the setup selection screen.");
+        }
+
+        UpdateWorkCenterSectionsVisibility();
+    }
+
+    private void UpdateWorkCenterSectionsVisibility()
+    {
+        var hasLocalWorkCenters = _hotWorkCenterNames.Count > 0;
+        IsLocalWorkCentersVisible = hasLocalWorkCenters;
+        // When this computer has no configured local work centers, show the others by default.
+        IsOtherWorkCentersExpanded = !hasLocalWorkCenters;
+    }
+
+    private async Task<string> ResolveWorkstationImagePathAsync(SetupWorkstation workstation, CancellationToken cancellationToken = default)
+    {
+        if (_imageLocationService is null
+            || !_imageLocationService.IsInitialized
+            || string.IsNullOrWhiteSpace(workstation.Id))
+        {
+            return DefaultWorkstationImagePath;
+        }
+
+        try
+        {
+            var resolvedPath = await _imageLocationService
+                .ResolveWorkCenterImagePathAsync(workstation.Id, cancellationToken)
+                .ConfigureAwait(true);
+            return string.IsNullOrWhiteSpace(resolvedPath)
+                ? DefaultWorkstationImagePath
+                : resolvedPath;
+        }
+        catch (Exception)
+        {
+            // A broken image override or catalog query should never blank the card.
+            return DefaultWorkstationImagePath;
+        }
+    }
+
     private void ApplyFilter()
     {
-        _displayedWorkstations.Clear();
+        _displayedHotWorkstations.Clear();
+        _displayedOtherWorkstations.Clear();
 
         var normalizedFilter = FilterText.Trim();
         var selectedBuilding = _buildingSelectionService.SelectedBuilding;
@@ -264,13 +365,22 @@ public partial class SetupWorkstationViewModel : ObservableRecipient, INavigatio
 
         foreach (var workstation in filteredItems)
         {
-            _displayedWorkstations.Add(workstation);
+            if (_hotWorkCenterNames.Contains(workstation.Name))
+            {
+                _displayedHotWorkstations.Add(workstation);
+            }
+            else
+            {
+                _displayedOtherWorkstations.Add(workstation);
+            }
         }
 
         if (SelectedWorkstation is not null
-            && !_displayedWorkstations.Any(item => string.Equals(item.Id, SelectedWorkstation.Id, StringComparison.OrdinalIgnoreCase)))
+            && !_displayedHotWorkstations.Contains(SelectedWorkstation)
+            && !_displayedOtherWorkstations.Contains(SelectedWorkstation))
         {
-            SelectedWorkstation = _displayedWorkstations.FirstOrDefault();
+            SelectedWorkstation = _displayedHotWorkstations.FirstOrDefault()
+                ?? _displayedOtherWorkstations.FirstOrDefault();
         }
     }
 }

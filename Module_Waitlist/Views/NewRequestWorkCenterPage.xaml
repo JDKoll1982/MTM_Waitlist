@@ -4,7 +4,123 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Shared.Models"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <Style x:Key="WorkCenterCardItemContainerStyle" TargetType="GridViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewItem">
+                        <ListViewItemPresenter
+                            ContentMargin="0"
+                            ContentTransitions="{TemplateBinding ContentTransitions}"
+                            PointerOverBackground="Transparent"
+                            PressedBackground="Transparent"
+                            SelectedBackground="Transparent"
+                            SelectedPointerOverBackground="Transparent"
+                            SelectedPressedBackground="Transparent"
+                            SelectedBorderThickness="0"
+                            RevealBorderThickness="0"
+                            SelectionCheckMarkVisualEnabled="False" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="WorkCenterCardTemplate" x:DataType="models:WorkCenterSelectionItem">
+            <Grid
+                Margin="8"
+                AutomationProperties.Name="{x:Bind WorkCenterName}">
+                <!-- Card body: image + details with a neutral border. -->
+                <Border
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="1" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left pane: square work center photo with a neutral frame. -->
+                        <Border
+                            Grid.Column="0"
+                            Padding="8"
+                            CornerRadius="12,0,0,12"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                            <Grid>
+                                <Border
+                                    CornerRadius="10"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="2">
+                                    <Border.Background>
+                                        <ImageBrush
+                                            ImageSource="{x:Bind ResolvedImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                            Stretch="UniformToFill" />
+                                    </Border.Background>
+                                </Border>
+                                <!-- Blue photo frame, only on the selected card. -->
+                                <Border
+                                    CornerRadius="10"
+                                    BorderBrush="{ThemeResource SystemControlHighlightAccentBrush}"
+                                    BorderThickness="2"
+                                    IsHitTestVisible="False"
+                                    Visibility="{x:Bind IsSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Divider between the image and the text panel. -->
+                        <Border Grid.Column="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+
+                        <!-- Right pane: stacked work center details with section dividers. -->
+                        <Border
+                            Grid.Column="2"
+                            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                            CornerRadius="0,12,12,0">
+                            <StackPanel Padding="12" VerticalAlignment="Center">
+                                <TextBlock
+                                    FontSize="20"
+                                    FontWeight="SemiBold"
+                                    Text="{x:Bind WorkCenterName}"
+                                    TextWrapping="WrapWholeWords" />
+                                <TextBlock
+                                    Margin="0,2,0,8"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind Building}"
+                                    TextWrapping="WrapWholeWords" />
+                                <Border Height="1" Margin="0,0,0,8" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+
+                                <TextBlock Text="Current Job" Style="{StaticResource SetupFieldLabelStyle}" />
+                                <TextBlock Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind CurrentJobSummary}" TextWrapping="WrapWholeWords" />
+                                <Border Height="1" Margin="0,0,0,6" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+
+                                <TextBlock Text="Part Number" Style="{StaticResource SetupFieldLabelStyle}" />
+                                <TextBlock Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind CurrentPartSummary}" TextWrapping="WrapWholeWords" />
+                                <Border Height="1" Margin="0,0,0,6" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+
+                                <TextBlock Text="Last Updated" Style="{StaticResource SetupFieldLabelStyle}" />
+                                <TextBlock Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind LastUpdatedDisplay}" TextWrapping="WrapWholeWords" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Selection outline drawn on the card border (only when selected). -->
+                <Border
+                    BorderBrush="{ThemeResource SystemControlHighlightAccentBrush}"
+                    BorderThickness="2"
+                    CornerRadius="12"
+                    IsHitTestVisible="False"
+                    Visibility="{x:Bind IsSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
 
     <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
         <Grid.RowDefinitions>
@@ -17,6 +133,14 @@
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
             <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="Select Work Center" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkstationName, Mode=OneWay}" />
+            <TextBox
+                Header="Search"
+                PlaceholderText="Search by work center, work order, sequence, or part number"
+                Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <ComboBox
+                Header="Building"
+                ItemsSource="{x:Bind ViewModel.Buildings, Mode=OneWay}"
+                SelectedItem="{x:Bind ViewModel.SelectedBuilding, Mode=TwoWay}" />
         </StackPanel>
 
         <StackPanel Grid.Row="1" Spacing="8">
@@ -38,104 +162,62 @@
 
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="16">
-                <Border Style="{StaticResource SetupSectionCardStyle}">
+                <Border
+                    Style="{StaticResource SetupSectionCardStyle}"
+                    Visibility="{x:Bind ViewModel.IsLocalWorkCentersVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Spacing="12">
-                        <TextBlock Style="{StaticResource RequestDialogTitleStyle}" Text="Hot Work Centers" />
+                        <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Local Work Centers" />
                         <GridView
                             x:Name="HotWorkCentersGridView"
+                            HorizontalContentAlignment="Stretch"
                             ItemsSource="{x:Bind ViewModel.HotWorkCenters, Mode=OneWay}"
                             IsItemClickEnabled="True"
                             ItemClick="HotWorkCentersGridView_ItemClick"
-                            SelectionMode="Single">
+                            ItemContainerStyle="{StaticResource WorkCenterCardItemContainerStyle}"
+                            ItemTemplate="{StaticResource WorkCenterCardTemplate}"
+                            SelectionMode="None"
+                            ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                            ScrollViewer.VerticalScrollMode="Disabled"
+                            SizeChanged="WorkCenterGridView_SizeChanged">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid
-                                        Orientation="Horizontal"
-                                        MaximumRowsOrColumns="3" />
+                                    <ItemsWrapGrid Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
-                            <GridView.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
-                                        MinWidth="220"
-                                        Margin="8"
-                                        Padding="12"
-                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="10">
-                                        <StackPanel Spacing="8">
-                                            <Border
-                                                Width="44"
-                                                Height="44"
-                                                Padding="4"
-                                                Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
-                                                CornerRadius="8">
-                                                <Image
-                                                    Source="{Binding ResolvedImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-                                                    Stretch="Uniform" />
-                                            </Border>
-                                            <TextBlock
-                                                Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                                Text="{Binding WorkCenterName}"
-                                                TextWrapping="WrapWholeWords" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </GridView.ItemTemplate>
                         </GridView>
                     </StackPanel>
                 </Border>
 
-                <Border Style="{StaticResource SetupSectionCardStyle}">
-                    <StackPanel Spacing="12">
-                        <TextBlock Style="{StaticResource RequestDialogTitleStyle}" Text="Other Work Centers" />
+                <Expander
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    IsExpanded="{x:Bind ViewModel.IsOtherWorkCentersExpanded, Mode=TwoWay}">
+                    <Expander.Header>
+                        <TextBlock
+                            Style="{ThemeResource BodyStrongTextBlockStyle}"
+                            Text="{x:Bind ViewModel.OtherWorkCentersHeader, Mode=OneWay}" />
+                    </Expander.Header>
+                    <StackPanel Spacing="12" Margin="0,12,0,0">
                         <GridView
                             x:Name="OtherWorkCentersGridView"
-                            MaxHeight="320"
+                            HorizontalContentAlignment="Stretch"
                             ItemsSource="{x:Bind ViewModel.OtherWorkCenters, Mode=OneWay}"
                             IsItemClickEnabled="True"
                             ItemClick="OtherWorkCentersGridView_ItemClick"
-                            SelectionMode="Single">
+                            ItemContainerStyle="{StaticResource WorkCenterCardItemContainerStyle}"
+                            ItemTemplate="{StaticResource WorkCenterCardTemplate}"
+                            SelectionMode="None"
+                            ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                            ScrollViewer.VerticalScrollMode="Disabled"
+                            SizeChanged="WorkCenterGridView_SizeChanged">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid
-                                        Orientation="Horizontal"
-                                        MaximumRowsOrColumns="3" />
+                                    <ItemsWrapGrid Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
-                            <GridView.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
-                                        MinWidth="220"
-                                        Margin="8"
-                                        Padding="12"
-                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="10">
-                                        <StackPanel Spacing="8">
-                                            <Border
-                                                Width="44"
-                                                Height="44"
-                                                Padding="4"
-                                                Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
-                                                CornerRadius="8">
-                                                <Image
-                                                    Source="{Binding ResolvedImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-                                                    Stretch="Uniform" />
-                                            </Border>
-                                            <TextBlock
-                                                Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                                Text="{Binding WorkCenterName}"
-                                                TextWrapping="WrapWholeWords" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </GridView.ItemTemplate>
                         </GridView>
                     </StackPanel>
-                </Border>
+                </Expander>
             </StackPanel>
         </ScrollViewer>
 
