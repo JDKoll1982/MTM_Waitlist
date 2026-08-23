@@ -68,10 +68,10 @@ Verification:
 Coding activity today (from WakaTime):
 
 ```
-MTM_Waitlist  3 Hours 8 Minutes
+MTM_Waitlist  5 Hours 35 Minutes
 ```
 
-_Data snapshot: 2026-08-22 13:00 → 16:08 (America/Chicago). Later edits should ignore this window._
+_Data snapshot: 2026-08-22 13:00 → 16:10 and 2026-08-23 10:02 → 13:19 (America/Chicago). Later edits should ignore these windows._
 
 Next steps:
 

@@ -8,6 +8,9 @@ stress-tested against the existing MTM_Waitlist WinUI 3 / Modular / MySQL archit
 
 ## Phase 0 — Workflow Route & Decomposition
 
+> **In plain English:** This section traces the full path a user takes through the new feature, and lists every part of the app it touches.
+> **Real-world example:** Think of it like mapping out a customer's trip through a store — walking in (Settings), finding the aisle (Administration), choosing items (New User / Edit), and checking out (saving to the database with a receipt/audit log).
+
 **Route:** User (rank ≥ Production Lead) opens **Settings → Administration → User Management**
 → list loads (async SP) → search/filter/sort → **New User** / **Edit** (navigated pages) →
 save (role-rank + validation) → MySQL `mtm_waitlist` SP transaction → audit insert → UI refresh.
@@ -34,6 +37,9 @@ save (role-rank + validation) → MySQL `mtm_waitlist` SP transaction → audit 
 
 ## 1. Executive Summary
 
+> **In plain English:** A quick health check on how risky the new feature is and the top problems that need attention.
+> **Real-world example:** Like a pre-purchase inspection on a car that flags the few things most likely to break before you commit.
+
 - **App Stability & Sizing Rating:** **Medium** — several async/threading and transactional
   write patterns in the current repo (sync-over-async in the Settings VM constructor, fire-and-forget
   init, retry-around-transaction) are **high-risk to copy** into the new User Management flow.
@@ -49,6 +55,9 @@ save (role-rank + validation) → MySQL `mtm_waitlist` SP transaction → audit 
 ---
 
 ## 2. Critical App-Crashing Vulnerabilities (Must Fix)
+
+> **In plain English:** These are bugs that could freeze or crash the app, or lose/duplicate data. They must be fixed before the feature ships.
+> **Real-world example:** Like clicking "Save" twice and getting two records, or the app freezing when the database is slow — the kind of thing that frustrates users and destroys trust in the data.
 
 ### 2.1 Fire-and-forget init copied from `SettingsViewModel` constructor
 
@@ -117,6 +126,9 @@ save (role-rank + validation) → MySQL `mtm_waitlist` SP transaction → audit 
 
 ## 3. Scaling & Layout Anomalies (Degraded UX / Broken Accessibility)
 
+> **In plain English:** These are screen-layout and accessibility problems that make the feature hard to use at certain display sizes or with larger text.
+> **Real-world example:** Like a form where the text gets cut off, or buttons you can't reach, when someone uses a large monitor, a low resolution, or high zoom.
+
 ### 3.1 Hardcoded widths in the new create/edit forms
 
 `[Severity: High]`
@@ -164,6 +176,9 @@ save (role-rank + validation) → MySQL `mtm_waitlist` SP transaction → audit 
 
 ## 4. Desktop Input & Data Validation Boundaries
 
+> **In plain English:** Every field a person can type into, plus the rules that keep bad or incomplete data out.
+> **Real-world example:** Like a form that refuses letters in a phone-number box, or insists on exactly 4 digits for an employee ID, so only clean data gets saved.
+
 | XAML Control / Bound Property | C# Type | Required | Min/Max / Format | UI Feedback Pattern | Filtering |
 | --- | --- | --- | --- | --- | --- |
 | `Username` (`TextBox`) | `string` | Yes | 1–128; normalized to **UPPERCASE** (F1) | `INotifyDataErrorInfo` + hint | Trim; reject whitespace-only; disallow control chars |
@@ -178,6 +193,9 @@ save (role-rank + validation) → MySQL `mtm_waitlist` SP transaction → audit 
 ---
 
 ## 5. Recommended WinUI Automation & Unit Test Cases
+
+> **In plain English:** A list of automated checks that make sure the feature works correctly and keeps working as it grows.
+> **Real-world example:** Like quality checks on a production line — each test catches a specific kind of mistake before it ever reaches users.
 
 1. **Rank-guard (unit):** `RoleAuthorization` — a `Production Lead` actor cannot create/assign a
    `Developer` or `IT Department` user; can assign up to their **own** rank (F2).
@@ -202,6 +220,9 @@ save (role-rank + validation) → MySQL `mtm_waitlist` SP transaction → audit 
 ---
 
 ## Phase 3 — Self-Check
+
+> **In plain English:** A final review confirming the planned fixes follow the project's modern coding standards.
+> **Real-world example:** Like a mechanic double-checking they used the right tools and parts before handing the car back.
 
 - (a) Mitigations use modern WinUI 3 structures: `DispatcherQueue.TryEnqueue`, `ObservableRecipient` +
   MVVM Toolkit `[RelayCommand]`/`CanExecute`, `INotifyDataErrorInfo`, `{x:Bind}` — **yes**.

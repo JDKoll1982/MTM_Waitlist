@@ -9,5 +9,6 @@
     },
     "files.associations": {
         "*.csv": "tsv"
-    }
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:system"
 }

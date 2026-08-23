@@ -9,6 +9,9 @@
 
 ## 1. Confirmed Decisions
 
+> **In plain English:** The locked-in answers for how the feature will work — who can use it, what they can do, and how it's built.
+> **Real-world example:** Like a signed agreement before starting work, so everyone is clear on the rules and there are no surprises later.
+
 ### A. Scope & Access Control
 
 - **A1 — Role hierarchy (rank order, low → high):**
@@ -71,6 +74,9 @@
 
 ## 2. Proposed UI (to confirm)
 
+> **In plain English:** A first sketch of what the new screen will look like and what it's called, for approval before building.
+> **Real-world example:** Like showing a mock-up of a new menu to staff before it's built, so everyone agrees on what it looks like.
+
 - **Category header:** "Administration"
 - **Expander header text:** "User Management"
 - **Expander icon:** `People` (or `Contact`) — `Symbol="People"`
@@ -81,6 +87,9 @@
 ---
 
 ## 3. Implementation Plan
+
+> **In plain English:** The ordered to-do list for building the feature, split into database, code, and testing steps.
+> **Real-world example:** Like a construction schedule — foundation first, then walls, then finishing and inspections.
 
 ### Phase 1 — Database (Database Engineer)
 
@@ -126,6 +135,9 @@
 
 ## 4. Resolved Follow-ups (Final Answers)
 
+> **In plain English:** Extra decisions that came up while planning, now answered and locked in.
+> **Real-world example:** Like clarifying the fine print on a contract before signing, so nothing is left vague.
+
 - **F1 — Username case change:** do it **now** as part of this feature. Changes `CheckCredentialsAsync`,
   `ReadSessionSnapshotAsync`, the `username_normalized` unique key, and the login/registration code
   from **lowercase → uppercase**; includes a data migration of existing lowercase rows.
@@ -143,6 +155,9 @@
 ---
 
 ## 5. Fully Locked Requirements (summary)
+
+> **In plain English:** The complete, final list of what the feature must do — the single source of truth for everyone.
+> **Real-world example:** Like the final spec handed to a contractor: if it's not on the list, it's not part of the job.
 
 - Panel **Administration → User Management** in Settings, visible to **rank ≥ Production Lead**
   (Production Lead, Setup Lead, Plant Manager, IT Department, Developer).
