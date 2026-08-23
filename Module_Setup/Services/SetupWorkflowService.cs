@@ -6,9 +6,16 @@ namespace MTM_Waitlist.Module_Setup.Services;
 
 public sealed class SetupWorkflowService : ISetupWorkflowService
 {
+    /// <summary>
+    /// Canonical "No Scrap" value — a selectable option in the scrap picker that
+    /// indicates the job has no scrap. It is a real entry in s_defaultScrapTypes.
+    /// </summary>
+    private const string NoScrapValue = "No Scrap";
+
     private static readonly string[] s_defaultScrapTypes =
     [
         "Scrap Type Required",
+        NoScrapValue,
         "3003 Aluminum",
         "5052 aluminum",
         "Galvanized Steel",
@@ -485,6 +492,9 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
             var existing = State.ScrapTypes.FirstOrDefault(value => string.Equals(value, savedScrapType, StringComparison.OrdinalIgnoreCase));
             if (existing is null)
             {
+                // A saved scrap type not already in the list (e.g. a custom value) is
+                // added so it remains selectable. "No Scrap" is a default entry, so it
+                // is found by the existing lookup above and never re-added.
                 State.ScrapTypes.Add(savedScrapType);
                 State.SelectedScrapType = savedScrapType;
                 StartupDebugLog.Info("SetupWorkflow", $"Saved scrap type not found in list; appended new value. SavedValue='{savedScrapType}'.");

@@ -91,7 +91,7 @@
                 </ScrollViewer>
             </TabViewItem>
 
-            <TabViewItem x:Uid="Setup_Review.Tab.DunnageAssignments" Header="Dunnage Pair Assignments">
+            <TabViewItem x:Uid="Setup_Review.Tab.DunnageAssignments" Header="Dunnage &amp; Scrap Assignments">
                 <Border Margin="0,8,0,0" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock x:Uid="Setup_Review.SelectedDunnageTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Selected Dunnage Summary" />

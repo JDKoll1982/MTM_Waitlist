@@ -18,7 +18,7 @@ applyTo: "**/*.{cs,xaml,resw}"
 ## Async and Commands
 - Async methods with awaited async flow must end with Async.
 - Task-returning wrappers without asynchronous flow may omit Async suffix.
-- CommunityToolkit RelayCommand naming keeps method name as command prefix (SaveAsync -> SaveAsyncCommand).
+- CommunityToolkit RelayCommand naming STRIPS a trailing `Async` from the method name: `SaveAsync` -> generated command `SaveCommand` (NOT `SaveAsyncCommand`). Bind the generated command in XAML accordingly (e.g. `Command="{x:Bind ViewModel.SaveCommand}"`).
 - Event handler naming pattern: OnXxx.
 
 ## MVVM and Type Suffixes

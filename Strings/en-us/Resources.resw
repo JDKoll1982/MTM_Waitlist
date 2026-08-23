@@ -170,7 +170,7 @@
     <value>Sequence</value>
   </data>
   <data name="Setup_Review.Header.Dunnage.Text" xml:space="preserve">
-    <value>Dunnage</value>
+    <value>Dunnage &amp; Scrap</value>
   </data>
   <data name="Setup_Review.SubordinatePartsTitle.Text" xml:space="preserve">
     <value>Subordinate Parts</value>
@@ -299,13 +299,13 @@
     <value>Subordinate Parts</value>
   </data>
   <data name="Setup_Review.Tab.DunnageAssignments.Header" xml:space="preserve">
-    <value>Dunnage Pair Assignments</value>
+    <value>Dunnage &amp; Scrap Assignments</value>
   </data>
   <data name="Setup_DunnagePair.PageLabel.Text" xml:space="preserve">
-    <value>Dunnage Pair</value>
+    <value>Dunnage &amp; Scrap</value>
   </data>
   <data name="Setup_DunnagePair.CurrentAssignments.Text" xml:space="preserve">
-    <value>Current Pair Assignments</value>
+    <value>Current Dunnage</value>
   </data>
   <data name="Setup_DunnagePair.AvailableTypes.Text" xml:space="preserve">
     <value>Available Dunnage Types</value>
@@ -503,5 +503,71 @@
     &lt;action content="Settings" arguments="action=Settings"/&gt;
   &lt;/actions&gt;
 &lt;/toast&gt;</value>
+  </data>
+  <data name="Setup_Header.Step1" xml:space="preserve">
+    <value>Work Station</value>
+  </data>
+  <data name="Setup_Header.Step2" xml:space="preserve">
+    <value>Work Order</value>
+  </data>
+  <data name="Setup_Header.Step3" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="Setup_Header.Step4" xml:space="preserve">
+    <value>Operation</value>
+  </data>
+  <data name="Setup_Header.Step5" xml:space="preserve">
+    <value>Dunnage &amp; Scrap</value>
+  </data>
+  <data name="Setup_Header.Step6" xml:space="preserve">
+    <value>Review</value>
+  </data>
+  <data name="Setup_Header.Step7" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="NewRequest_Header.Step1" xml:space="preserve">
+    <value>Work Center</value>
+  </data>
+  <data name="NewRequest_Header.Step2" xml:space="preserve">
+    <value>Job Type</value>
+  </data>
+  <data name="NewRequest_Header.Step3" xml:space="preserve">
+    <value>Subtype</value>
+  </data>
+  <data name="NewRequest_Header.Step4" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="NewRequest_Header.Step5" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="NewRequest_Header.Step6" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="NewRequest_Header.Step7" xml:space="preserve">
+    <value>Complete</value>
+  </data>
+  <data name="Setup_DunnagePair.NoScrap" xml:space="preserve">
+    <value>No Scrap</value>
+  </data>
+  <data name="Setup_DunnagePair.ScrapType.Header.Text" xml:space="preserve">
+    <value>SCRAP TYPE</value>
+  </data>
+  <data name="Setup_DunnagePair.ScrapType.ComboBox.PlaceholderText" xml:space="preserve">
+    <value>Select scrap type</value>
+  </data>
+  <data name="Setup_DunnagePair.ScrapSelection.Message" xml:space="preserve">
+    <value>Choose a scrap type or select "No Scrap" to continue.</value>
+  </data>
+  <data name="Setup_NoDunnage.DialogTitle" xml:space="preserve">
+    <value>Continue without dunnage?</value>
+  </data>
+  <data name="Setup_NoDunnage.DialogMessage" xml:space="preserve">
+    <value>No dunnage was selected for this job. Do you want to continue without dunnage?</value>
+  </data>
+  <data name="Setup_NoDunnage.Confirm" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Setup_NoDunnage.Cancel" xml:space="preserve">
+    <value>No</value>
   </data>
 </root>

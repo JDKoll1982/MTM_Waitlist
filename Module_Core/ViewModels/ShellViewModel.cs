@@ -1,11 +1,16 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Views;
 using MTM_Waitlist.Module_Settings.Views;
+using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.Views;
 using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
@@ -18,8 +23,54 @@ namespace MTM_Waitlist.Module_Core.ViewModels;
 public partial class ShellViewModel : ObservableRecipient
 {
     private readonly IBuildingSelectionService _buildingSelectionService;
+    private readonly SetupWorkflowState _setupWorkflowState;
     private readonly StartupState _startupState;
+    private Type? _currentPageType;
     private bool _isWaitlistPageActive;
+
+    private static readonly string[] s_setupStepLabelKeys =
+    {
+        "Setup_Header.Step1",
+        "Setup_Header.Step2",
+        "Setup_Header.Step3",
+        "Setup_Header.Step4",
+        "Setup_Header.Step5",
+        "Setup_Header.Step6",
+        "Setup_Header.Step7",
+    };
+
+    private static readonly string[] s_setupStepLabelFallbacks =
+    {
+        "Work Station",
+        "Work Order",
+        "Part",
+        "Operation",
+        "Dunnage & Scrap",
+        "Review",
+        "Result",
+    };
+
+    private static readonly string[] s_newRequestStepLabelKeys =
+    {
+        "NewRequest_Header.Step1",
+        "NewRequest_Header.Step2",
+        "NewRequest_Header.Step3",
+        "NewRequest_Header.Step4",
+        "NewRequest_Header.Step5",
+        "NewRequest_Header.Step6",
+        "NewRequest_Header.Step7",
+    };
+
+    private static readonly string[] s_newRequestStepLabelFallbacks =
+    {
+        "Work Center",
+        "Job Type",
+        "Subtype",
+        "Details",
+        "Preview",
+        "Confirm",
+        "Complete",
+    };
 
     [ObservableProperty]
     public partial bool IsBackEnabled
@@ -44,6 +95,18 @@ public partial class ShellViewModel : ObservableRecipient
     {
         get; set;
     } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsHeaderProgressVisible
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// Ordered steps shown in the shell header stepper while a multi-step
+    /// workflow (Work Center Setup or New Request) is active.
+    /// </summary>
+    public ObservableCollection<HeaderStep> HeaderSteps { get; } = new();
 
     [ObservableProperty]
     public partial string CurrentUserDisplayName
@@ -85,17 +148,21 @@ public partial class ShellViewModel : ObservableRecipient
         INavigationService navigationService,
         INavigationViewService navigationViewService,
         IBuildingSelectionService buildingSelectionService,
+        SetupWorkflowState setupWorkflowState,
         StartupState startupState)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(navigationViewService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
+        ArgumentNullException.ThrowIfNull(setupWorkflowState);
         ArgumentNullException.ThrowIfNull(startupState);
 
         NavigationService = navigationService;
         NavigationService.Navigated += OnNavigated;
         NavigationViewService = navigationViewService;
         _buildingSelectionService = buildingSelectionService;
+        _setupWorkflowState = setupWorkflowState;
+        _setupWorkflowState.PropertyChanged += OnSetupWorkflowStateChanged;
         _startupState = startupState;
         SelectedBuilding = _buildingSelectionService.SelectedBuilding;
         HeaderText = "MTM Waitlist";
@@ -138,6 +205,7 @@ public partial class ShellViewModel : ObservableRecipient
 
     private void OnNavigated(object sender, NavigationEventArgs e)
     {
+        _currentPageType = e.SourcePageType;
         IsBackEnabled = NavigationService.CanGoBack;
 
         if (e.SourcePageType == typeof(WaitlistViewDetailPage))
@@ -145,6 +213,7 @@ public partial class ShellViewModel : ObservableRecipient
             _isWaitlistPageActive = false;
             Selected = null;
             UpdateWaitlistDetailHeader();
+            HideHeaderProgress();
             return;
         }
 
@@ -154,6 +223,7 @@ public partial class ShellViewModel : ObservableRecipient
         {
             Selected = NavigationViewService.GetSelectedItem(e.SourcePageType);
             UpdateWaitlistHeader();
+            HideHeaderProgress();
             return;
         }
 
@@ -162,18 +232,20 @@ public partial class ShellViewModel : ObservableRecipient
             StartupDebugLog.Info("ShellViewModel", "Settings page navigated to.");
             Selected = NavigationViewService.SettingsItem;
             HeaderText = "Settings";
+            HideHeaderProgress();
             return;
         }
 
         if (e.SourcePageType.Namespace?.StartsWith("MTM_Waitlist.Module_Setup.Views", StringComparison.Ordinal) == true)
         {
             Selected = NavigationViewService.GetSelectedItem(typeof(SetupWorkstationPage));
-            HeaderText = "Work Center Setup";
+            UpdateSetupHeader(e.SourcePageType);
             return;
         }
 
         // New Request wizard pages keep the shell header visible and step through a
-        // changing title so the user always knows where they are in the flow.
+        // changing title and progress stepper so the user always knows where they
+        // are in the flow.
         if (e.SourcePageType.Namespace?.StartsWith("MTM_Waitlist.Module_Waitlist.Views", StringComparison.Ordinal) == true
             && e.SourcePageType.Name.StartsWith("NewRequest", StringComparison.Ordinal))
         {
@@ -193,57 +265,171 @@ public partial class ShellViewModel : ObservableRecipient
             {
                 HeaderText = string.Empty;
             }
+
+            HideHeaderProgress();
             return;
         }
 
         HeaderText = string.Empty;
+        HideHeaderProgress();
+    }
+
+    private void UpdateSetupHeader(Type pageType)
+    {
+        var (title, stepIndex) = GetSetupStep(pageType, _setupWorkflowState);
+        HeaderText = title;
+        UpdateHeaderProgress(s_setupStepLabelKeys, s_setupStepLabelFallbacks, stepIndex);
+    }
+
+    private void OnSetupWorkflowStateChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(SetupWorkflowState.CurrentStep))
+        {
+            return;
+        }
+
+        if (_currentPageType?.Namespace?.StartsWith("MTM_Waitlist.Module_Setup.Views", StringComparison.Ordinal) != true)
+        {
+            return;
+        }
+
+        // The Work Order page hosts inline part/operation selection, so advancing
+        // the workflow step (e.g. after a part is selected) must re-evaluate the
+        // header's active step even though the page itself did not change.
+        var dispatcherQueue = App.MainWindow?.DispatcherQueue;
+        if (dispatcherQueue is not null)
+        {
+            _ = dispatcherQueue.TryEnqueue(() => UpdateSetupHeader(_currentPageType!));
+        }
     }
 
     private void UpdateNewRequestHeader(Type pageType)
     {
         _isWaitlistPageActive = false;
         Selected = null;
-        HeaderText = GetNewRequestStepTitle(pageType);
+        var (title, stepIndex) = GetNewRequestStep(pageType);
+        HeaderText = title;
+        UpdateHeaderProgress(s_newRequestStepLabelKeys, s_newRequestStepLabelFallbacks, stepIndex);
     }
 
-    private static string GetNewRequestStepTitle(Type pageType)
+    private static (string Title, int Step) GetSetupStep(Type pageType, SetupWorkflowState setupWorkflowState)
+    {
+        if (pageType == typeof(SetupWorkstationPage))
+        {
+            return ("Work Center Setup — Select Work Station", 1);
+        }
+
+        if (pageType == typeof(SetupWorkOrderPage))
+        {
+            // The Work Order page hosts inline part/operation selection, so the
+            // active step also depends on how far the workflow has progressed.
+            return setupWorkflowState.CurrentStep >= SetupWorkflowStep.PartSelection
+                ? ("Work Center Setup — Part", 3)
+                : ("Work Center Setup — Work Order", 2);
+        }
+
+        if (pageType == typeof(SetupPartSelectionPage))
+        {
+            return ("Work Center Setup — Part", 3);
+        }
+
+        if (pageType == typeof(SetupSequenceSelectionPage))
+        {
+            return ("Work Center Setup — Operation", 4);
+        }
+
+        if (pageType == typeof(SetupDunnageTypePage)
+            || pageType == typeof(SetupDunnagePartPage)
+            || pageType == typeof(SetupDunnageAddPartSelectionPage))
+        {
+            return ("Work Center Setup — Dunnage & Scrap", 5);
+        }
+
+        if (pageType == typeof(SetupReviewPage))
+        {
+            return ("Work Center Setup — Review", 6);
+        }
+
+        if (pageType == typeof(SetupCompletionPage))
+        {
+            return ("Work Center Setup — Result", 7);
+        }
+
+        return ("Work Center Setup", 0);
+    }
+
+    private static (string Title, int Step) GetNewRequestStep(Type pageType)
     {
         if (pageType == typeof(NewRequestWorkCenterPage))
         {
-            return "New Request — Select Work Center";
+            return ("New Request — Select Work Center", 1);
         }
 
         if (pageType == typeof(NewRequestJobTypePage))
         {
-            return "New Request — Job Type";
+            return ("New Request — Job Type", 2);
         }
 
         if (pageType == typeof(NewRequestSubtypePage))
         {
-            return "New Request — Subtype";
+            return ("New Request — Subtype", 3);
         }
 
         if (pageType == typeof(NewRequestDetailsPage))
         {
-            return "New Request — Details";
+            return ("New Request — Details", 4);
         }
 
         if (pageType == typeof(NewRequestPreviewPage))
         {
-            return "New Request — Preview";
+            return ("New Request — Preview", 5);
         }
 
         if (pageType == typeof(NewRequestSummaryPage))
         {
-            return "New Request — Confirm";
+            return ("New Request — Confirm", 6);
         }
 
         if (pageType == typeof(NewRequestResultPage))
         {
-            return "New Request — Complete";
+            return ("New Request — Complete", 7);
         }
 
-        return "New Request";
+        return ("New Request", 0);
+    }
+
+    private void UpdateHeaderProgress(string[] labelKeys, string[] fallbacks, int stepIndex)
+    {
+        HeaderSteps.Clear();
+        for (var index = 0; index < labelKeys.Length; index++)
+        {
+            var localized = labelKeys[index].GetLocalized();
+            var label = string.Equals(localized, labelKeys[index], StringComparison.Ordinal)
+                ? fallbacks[index]
+                : localized;
+            var state = index + 1 < stepIndex
+                ? HeaderStepState.Complete
+                : index + 1 == stepIndex
+                    ? HeaderStepState.Current
+                    : HeaderStepState.Pending;
+            HeaderSteps.Add(new HeaderStep
+            {
+                Label = label,
+                State = state,
+                StepNumber = index + 1,
+                IsFirst = index == 0,
+                IsLast = index == labelKeys.Length - 1,
+                PreviousComplete = index > 0 && HeaderSteps[^1].State == HeaderStepState.Complete,
+            });
+        }
+
+        IsHeaderProgressVisible = stepIndex >= 1 && stepIndex <= labelKeys.Length;
+    }
+
+    private void HideHeaderProgress()
+    {
+        HeaderSteps.Clear();
+        IsHeaderProgressVisible = false;
     }
 
     private void UpdateWaitlistHeader()

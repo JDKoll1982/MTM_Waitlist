@@ -11,15 +11,15 @@
     <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}" Spacing="8">
-            <TextBlock x:Uid="Setup_DunnagePair.PageLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Dunnage Pair" />
+            <TextBlock x:Uid="Setup_DunnagePair.PageLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Dunnage &amp; Scrap" />
             <Grid ColumnSpacing="12" RowSpacing="12">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -55,44 +55,73 @@
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedSequence, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
+
+                <Border Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource SetupSectionCardStyle}">
+                    <StackPanel Spacing="8">
+                        <TextBlock x:Uid="Setup_DunnagePair.ScrapType.Header" Style="{StaticResource SetupFieldLabelStyle}" Text="SCRAP TYPE" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <ComboBox
+                                Grid.Column="0"
+                                x:Uid="Setup_DunnagePair.ScrapType.ComboBox"
+                                PlaceholderText="Select scrap type"
+                                ItemsSource="{x:Bind ViewModel.DisplayScrapTypes, Mode=OneWay}"
+                                SelectedItem="{x:Bind ViewModel.SelectedScrapType, Mode=TwoWay}" />
+
+                            <TextBlock
+                                Grid.Column="2"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                Text="{x:Bind ViewModel.ScrapSelectionMessage, Mode=OneWay}"
+                                TextWrapping="NoWrap"
+                                Visibility="{x:Bind ViewModel.ScrapSelectionNotificationVisibility, Mode=OneWay}" />
+
+                            <Button
+                                Grid.Column="1"
+                                Width="32"
+                                Height="32"
+                                FontSize="16"
+                                Padding="0"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Click="OnAddScrapTypeClick">
+                                <FontIcon Glyph="&#xE710;" FontSize="16" />
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </Grid>
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
 
-        <Border Grid.Row="1" MaxWidth="560" HorizontalAlignment="Left" Style="{StaticResource SetupSectionCardStyle}">
-            <StackPanel Spacing="8">
-                <TextBlock Text="SCRAP TYPE" Foreground="{ThemeResource TextFillColorSecondaryBrush}" CharacterSpacing="120" />
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <ComboBox
-                        Grid.Column="0"
-                        PlaceholderText="Select scrap type"
-                        ItemsSource="{x:Bind ViewModel.ScrapTypes, Mode=OneWay}"
-                        SelectedItem="{x:Bind ViewModel.SelectedScrapType, Mode=TwoWay}" />
-
-                    <Button
-                        Grid.Column="1"
-                        Width="32"
-                        Height="32"
-                        FontSize="16"
-                        Padding="0"
-                        HorizontalContentAlignment="Center"
-                        VerticalContentAlignment="Center"
-                        Click="OnAddScrapTypeClick">
-                        <FontIcon Glyph="&#xE710;" FontSize="16" />
-                    </Button>
-                </Grid>
-            </StackPanel>
-        </Border>
-
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="1">
             <Border Style="{StaticResource SetupItemCardStyle}">
                 <StackPanel Spacing="8">
-                    <TextBlock x:Uid="Setup_DunnagePair.CurrentAssignments" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Current Pair Assignments" />
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            x:Uid="Setup_DunnagePair.CurrentAssignments"
+                            Style="{ThemeResource BodyStrongTextBlockStyle}"
+                            Text="Current Dunnage" />
+                        <Button
+                            Grid.Column="1"
+                            x:Uid="Setup_Action.AddDunnage"
+                            Content="Add Dunnage"
+                            Command="{x:Bind ViewModel.AddDunnageCommand}" />
+                    </Grid>
                     <ItemsControl ItemsSource="{x:Bind ViewModel.PairAssignments, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="models:SetupDunnagePart">
@@ -114,19 +143,17 @@
             </Border>
         </Grid>
 
-        <Grid Grid.Row="3" ColumnSpacing="12">
+        <Grid Grid.Row="2" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="1" x:Uid="Setup_Action.AddDunnage" Content="Add Dunnage" Command="{x:Bind ViewModel.AddDunnageCommand}" />
-            <Button Grid.Column="2" x:Uid="Setup_Action.ClearAllForPair" Content="Clear All" Click="OnClearAllForPairClick" />
-            <Button Grid.Column="3" x:Uid="Setup_Action.Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
-            <Button Grid.Column="4" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueToReviewCommand}" />
+            <Button Grid.Column="1" x:Uid="Setup_Action.ClearAllForPair" Content="Clear All" Click="OnClearAllForPairClick" />
+            <Button Grid.Column="2" x:Uid="Setup_Action.Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
+            <Button Grid.Column="3" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueToReviewCommand}" IsEnabled="{x:Bind ViewModel.CanContinue, Mode=OneWay}" />
         </Grid>
     </Grid>
 </Page>

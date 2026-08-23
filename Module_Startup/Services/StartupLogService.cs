@@ -90,7 +90,7 @@ public sealed class StartupLogService : BackgroundService, IStartupLogService
 
         if (!_channel.Writer.TryWrite(entry))
         {
-            Debug.WriteLine($"[STARTUP][{entry.TimestampUtc:O}][Logging] Dropped log event because logging channel is unavailable.");
+            Debug.WriteLine($"[Logging][{entry.TimestampUtc:O}] Dropped log event because logging channel is unavailable.");
         }
     }
 
@@ -110,7 +110,7 @@ public sealed class StartupLogService : BackgroundService, IStartupLogService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[STARTUP][{DateTimeOffset.UtcNow:O}][Logging] Failed to persist startup log event: {ex}");
+            Debug.WriteLine($"[Logging][{DateTimeOffset.UtcNow:O}] Failed to persist startup log event: {ex}");
         }
     }
 
@@ -230,7 +230,7 @@ public sealed class StartupLogService : BackgroundService, IStartupLogService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[STARTUP][{DateTimeOffset.UtcNow:O}][Logging] Retention cleanup failed: {ex}");
+            Debug.WriteLine($"[Logging][{DateTimeOffset.UtcNow:O}] Retention cleanup failed: {ex}");
         }
     }
 
@@ -246,7 +246,7 @@ public sealed class StartupLogService : BackgroundService, IStartupLogService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[STARTUP][{DateTimeOffset.UtcNow:O}][Logging] Failed to read hosted log directory override: {ex}");
+            Debug.WriteLine($"[Logging][{DateTimeOffset.UtcNow:O}] Failed to read hosted log directory override: {ex}");
         }
 
         return _options.HostedVmLogDirectory;

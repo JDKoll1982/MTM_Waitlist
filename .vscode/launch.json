@@ -5,41 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "MTM_Waitlist - App Logs Only",
+            // Standard coreclr launch for an UNPACKAGED, self-contained WinUI 3 app
+            // (WindowsPackageType=None + WindowsAppSDKSelfContained=true).
+            // The app runs standalone, so no winapp/package-identity is needed.
+            "name": "Launch MTM_Waitlist (unpackaged)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "Clean + Build MTM_Waitlist",
+            "preLaunchTask": "Build MTM_Waitlist",
             "program": "${workspaceFolder}/bin/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe",
+            "args": [],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "justMyCode": false,
             "suppressJITOptimizations": true,
             "logging": {
+                "moduleLoad": false,
                 "programOutput": true
-            },
-            "env": {
-                "Logging__LogLevel__Default": "None",
-                "Logging__LogLevel__Microsoft": "None",
-                "Logging__LogLevel__Microsoft.Hosting.Lifetime": "None"
-            }
-        },
-        {
-            "name": "MTM_Waitlist - App Logs + Exceptions",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "Clean + Build MTM_Waitlist",
-            "program": "${workspaceFolder}/bin/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe",
-            "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
-            "justMyCode": false,
-            "suppressJITOptimizations": true,
-            "logging": {
-                "programOutput": true
-            },
-            "env": {
-                "Logging__LogLevel__Default": "None",
-                "Logging__LogLevel__Microsoft": "None",
-                "Logging__LogLevel__Microsoft.Hosting.Lifetime": "None"
             }
         }
     ]

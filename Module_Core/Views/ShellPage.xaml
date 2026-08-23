@@ -4,14 +4,187 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="using:MTM_Waitlist.Module_Core.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:headerModels="using:MTM_Waitlist.Module_Core.Models"
     xmlns:helpers="using:MTM_Waitlist.Module_Core.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
+    xmlns:selectors="using:MTM_Waitlist.Module_Core.Selectors"
     xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     x:Name="RootPage"
     KeyboardAcceleratorPlacementMode="Hidden"
     Loaded="OnLoaded">
+
+    <Page.Resources>
+        <SolidColorBrush x:Key="HeaderStepCurrentBrush" Color="#FFF7630C" />
+        <DataTemplate x:Key="HeaderStepPendingTemplate" x:DataType="headerModels:HeaderStep">
+            <Grid Width="120">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="28" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="60" />
+                    </Grid.ColumnDefinitions>
+                    <Rectangle
+                        Grid.Column="0"
+                        Width="60"
+                        Height="2"
+                        Margin="0,13,0,0"
+                        VerticalAlignment="Top"
+                        Fill="{x:Bind LeftConnectorBrush, Mode=OneWay}"
+                        Visibility="{x:Bind LeftConnectorVisibility, Mode=OneWay}" />
+                    <Rectangle
+                        Grid.Column="1"
+                        Width="60"
+                        Height="2"
+                        Margin="0,13,0,0"
+                        VerticalAlignment="Top"
+                        Fill="{x:Bind RightConnectorBrush, Mode=OneWay}"
+                        Visibility="{x:Bind RightConnectorVisibility, Mode=OneWay}" />
+                    <Border
+                        Grid.ColumnSpan="2"
+                        Width="28"
+                        Height="28"
+                        HorizontalAlignment="Center"
+                        Background="{ThemeResource AccentFillColorDefaultBrush}"
+                        CornerRadius="14">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            Foreground="White"
+                            Text="{x:Bind StepNumber}" />
+                    </Border>
+                </Grid>
+                <TextBlock
+                    Grid.Row="1"
+                    Margin="0,4,0,0"
+                    HorizontalAlignment="Center"
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind Label}"
+                    TextAlignment="Center"
+                    TextWrapping="NoWrap" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="HeaderStepCurrentTemplate" x:DataType="headerModels:HeaderStep">
+            <Grid Width="120">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="28" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="60" />
+                    </Grid.ColumnDefinitions>
+                    <Rectangle
+                        Grid.Column="0"
+                        Width="60"
+                        Height="2"
+                        Margin="0,13,0,0"
+                        VerticalAlignment="Top"
+                        Fill="{x:Bind LeftConnectorBrush, Mode=OneWay}"
+                        Visibility="{x:Bind LeftConnectorVisibility, Mode=OneWay}" />
+                    <Rectangle
+                        Grid.Column="1"
+                        Width="60"
+                        Height="2"
+                        Margin="0,13,0,0"
+                        VerticalAlignment="Top"
+                        Fill="{x:Bind RightConnectorBrush, Mode=OneWay}"
+                        Visibility="{x:Bind RightConnectorVisibility, Mode=OneWay}" />
+                    <Border
+                        Grid.ColumnSpan="2"
+                        Width="28"
+                        Height="28"
+                        HorizontalAlignment="Center"
+                        Background="{StaticResource HeaderStepCurrentBrush}"
+                        CornerRadius="14">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            Foreground="White"
+                            Text="{x:Bind StepNumber}" />
+                    </Border>
+                </Grid>
+                <TextBlock
+                    Grid.Row="1"
+                    Margin="0,4,0,0"
+                    HorizontalAlignment="Center"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                    Text="{x:Bind Label}"
+                    TextAlignment="Center"
+                    TextWrapping="NoWrap" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="HeaderStepCompleteTemplate" x:DataType="headerModels:HeaderStep">
+            <Grid Width="120">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="28" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="60" />
+                    </Grid.ColumnDefinitions>
+                    <Rectangle
+                        Grid.Column="0"
+                        Width="60"
+                        Height="2"
+                        Margin="0,13,0,0"
+                        VerticalAlignment="Top"
+                        Fill="{x:Bind LeftConnectorBrush, Mode=OneWay}"
+                        Visibility="{x:Bind LeftConnectorVisibility, Mode=OneWay}" />
+                    <Rectangle
+                        Grid.Column="1"
+                        Width="60"
+                        Height="2"
+                        Margin="0,13,0,0"
+                        VerticalAlignment="Top"
+                        Fill="{x:Bind RightConnectorBrush, Mode=OneWay}"
+                        Visibility="{x:Bind RightConnectorVisibility, Mode=OneWay}" />
+                    <Border
+                        Grid.ColumnSpan="2"
+                        Width="28"
+                        Height="28"
+                        HorizontalAlignment="Center"
+                        Background="{ThemeResource AccentFillColorDefaultBrush}"
+                        CornerRadius="14">
+                        <FontIcon
+                            FontSize="14"
+                            Foreground="White"
+                            Glyph="&#xE73E;"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+                    </Border>
+                </Grid>
+                <TextBlock
+                    Grid.Row="1"
+                    Margin="0,4,0,0"
+                    HorizontalAlignment="Center"
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                    Text="{x:Bind Label}"
+                    TextAlignment="Center"
+                    TextWrapping="NoWrap" />
+            </Grid>
+        </DataTemplate>
+        <selectors:HeaderStepTemplateSelector
+            x:Key="HeaderStepTemplateSelector"
+            CompleteTemplate="{StaticResource HeaderStepCompleteTemplate}"
+            CurrentTemplate="{StaticResource HeaderStepCurrentTemplate}"
+            PendingTemplate="{StaticResource HeaderStepPendingTemplate}" />
+    </Page.Resources>
 
     <Grid>
         <Grid
@@ -98,62 +271,85 @@
             </NavigationView.MenuItems>
             <NavigationView.HeaderTemplate>
                 <DataTemplate>
-                    <Grid MinHeight="64" ColumnSpacing="16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Style="{ThemeResource BodyLargeStrongTextBlockStyle}"
-                            Text="{Binding}" />
-                        <ComboBox
-                            x:Name="FacilitySelectorComboBox"
-                            Grid.Column="1"
-                            MinWidth="160"
-                            MaxWidth="220"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            ItemsSource="{Binding ViewModel.Buildings, ElementName=RootPage}"
-                            SelectedItem="{Binding ViewModel.SelectedBuilding, ElementName=RootPage, Mode=TwoWay}"
-                            shared:TooltipBehavior.ResourceKey="Shell_SelectFacility_Tooltip"
-                            shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Core/Contracts/Services/IBuildingSelectionService.cs|Module_Core/Services/BuildingSelectionService.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
-                            shared:TooltipBehavior.FallbackText="Select the active facility." />
-                        <Button
-                            x:Name="CurrentUserButton"
-                            Grid.Column="2"
-                            Margin="16,0,0,0"
-                            Padding="8"
-                            HorizontalAlignment="Right"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            shared:TooltipBehavior.ResourceKey="Shell_CurrentUser_Tooltip"
-                            shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
-                            shared:TooltipBehavior.FallbackText="View the current signed-in user.">
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <Border
-                                    Width="32"
-                                    Height="32"
-                                    Background="{Binding ViewModel.CurrentUserBadgeBrush, ElementName=RootPage}"
-                                    CornerRadius="16">
-                                    <FontIcon
-                                        FontSize="16"
-                                        Foreground="White"
-                                        Glyph="{Binding ViewModel.CurrentUserIconGlyph, ElementName=RootPage}"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center" />
-                                </Border>
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    MaxWidth="220"
-                                    Style="{ThemeResource BodyTextBlockStyle}"
-                                    Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}"
-                                    TextTrimming="CharacterEllipsis"
-                                    TextWrapping="NoWrap" />
-                            </StackPanel>
-                        </Button>
+                    <Grid MinHeight="64" RowSpacing="6">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Style="{ThemeResource BodyLargeStrongTextBlockStyle}"
+                                Text="{Binding}" />
+                            <ComboBox
+                                x:Name="FacilitySelectorComboBox"
+                                Grid.Column="1"
+                                MinWidth="160"
+                                MaxWidth="220"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                ItemsSource="{Binding ViewModel.Buildings, ElementName=RootPage}"
+                                SelectedItem="{Binding ViewModel.SelectedBuilding, ElementName=RootPage, Mode=TwoWay}"
+                                shared:TooltipBehavior.ResourceKey="Shell_SelectFacility_Tooltip"
+                                shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Core/Contracts/Services/IBuildingSelectionService.cs|Module_Core/Services/BuildingSelectionService.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
+                                shared:TooltipBehavior.FallbackText="Select the active facility." />
+                            <Button
+                                x:Name="CurrentUserButton"
+                                Grid.Column="2"
+                                Margin="16,0,0,0"
+                                Padding="8"
+                                HorizontalAlignment="Right"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                shared:TooltipBehavior.ResourceKey="Shell_CurrentUser_Tooltip"
+                                shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
+                                shared:TooltipBehavior.FallbackText="View the current signed-in user.">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Border
+                                        Width="32"
+                                        Height="32"
+                                        Background="{Binding ViewModel.CurrentUserBadgeBrush, ElementName=RootPage}"
+                                        CornerRadius="16">
+                                        <FontIcon
+                                            FontSize="16"
+                                            Foreground="White"
+                                            Glyph="{Binding ViewModel.CurrentUserIconGlyph, ElementName=RootPage}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        MaxWidth="220"
+                                        Style="{ThemeResource BodyTextBlockStyle}"
+                                        Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}"
+                                        TextTrimming="CharacterEllipsis"
+                                        TextWrapping="NoWrap" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                        <ScrollViewer
+                            Grid.Row="1"
+                            HorizontalScrollBarVisibility="Auto"
+                            HorizontalScrollMode="Auto"
+                            VerticalScrollBarVisibility="Disabled"
+                            VerticalScrollMode="Disabled"
+                            Visibility="{Binding ViewModel.IsHeaderProgressVisible, ElementName=RootPage, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <ItemsControl
+                                ItemTemplateSelector="{StaticResource HeaderStepTemplateSelector}"
+                                ItemsSource="{Binding ViewModel.HeaderSteps, ElementName=RootPage}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="0" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </ScrollViewer>
                     </Grid>
                 </DataTemplate>
             </NavigationView.HeaderTemplate>
@@ -161,62 +357,85 @@
                 <behaviors:NavigationViewHeaderBehavior DefaultHeader="{x:Bind ViewModel.HeaderText, Mode=OneWay}">
                     <behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
                         <DataTemplate>
-                            <Grid MinHeight="64" Margin="0,0,60,0" ColumnSpacing="16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                                    Grid.Column="0"
-                                    VerticalAlignment="Center"
-                                    Style="{ThemeResource BodyLargeStrongTextBlockStyle}"
-                                    Text="{Binding}" />
-                                <ComboBox
-                                    x:Name="FacilitySelectorComboBoxDefault"
-                                    Grid.Column="1"
-                                    MinWidth="160"
-                                    MaxWidth="220"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    ItemsSource="{Binding ViewModel.Buildings, ElementName=RootPage}"
-                                    SelectedItem="{Binding ViewModel.SelectedBuilding, ElementName=RootPage, Mode=TwoWay}"
-                                    shared:TooltipBehavior.ResourceKey="Shell_SelectFacility_Tooltip"
-                                    shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Core/Contracts/Services/IBuildingSelectionService.cs|Module_Core/Services/BuildingSelectionService.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
-                                    shared:TooltipBehavior.FallbackText="Select the active facility." />
-                                <Button
-                                    x:Name="CurrentUserButtonDefault"
-                                    Grid.Column="2"
-                                    Margin="16,0,0,0"
-                                    Padding="8"
-                                    HorizontalAlignment="Right"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    shared:TooltipBehavior.ResourceKey="Shell_CurrentUser_Tooltip"
-                                    shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
-                                    shared:TooltipBehavior.FallbackText="View the current signed-in user.">
-                                    <StackPanel Orientation="Horizontal" Spacing="12">
-                                        <Border
-                                            Width="32"
-                                            Height="32"
-                                            Background="{Binding ViewModel.CurrentUserBadgeBrush, ElementName=RootPage}"
-                                            CornerRadius="16">
-                                            <FontIcon
-                                                FontSize="16"
-                                                Foreground="White"
-                                                Glyph="{Binding ViewModel.CurrentUserIconGlyph, ElementName=RootPage}"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center" />
-                                        </Border>
-                                        <TextBlock
-                                            VerticalAlignment="Center"
-                                            MaxWidth="220"
-                                            Style="{ThemeResource BodyTextBlockStyle}"
-                                            Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}"
-                                            TextTrimming="CharacterEllipsis"
-                                            TextWrapping="NoWrap" />
-                                    </StackPanel>
-                                </Button>
+                            <Grid MinHeight="64" Margin="0,0,60,0" RowSpacing="6">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0" ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        VerticalAlignment="Center"
+                                        Style="{ThemeResource BodyLargeStrongTextBlockStyle}"
+                                        Text="{Binding}" />
+                                    <ComboBox
+                                        x:Name="FacilitySelectorComboBoxDefault"
+                                        Grid.Column="1"
+                                        MinWidth="160"
+                                        MaxWidth="220"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        ItemsSource="{Binding ViewModel.Buildings, ElementName=RootPage}"
+                                        SelectedItem="{Binding ViewModel.SelectedBuilding, ElementName=RootPage, Mode=TwoWay}"
+                                        shared:TooltipBehavior.ResourceKey="Shell_SelectFacility_Tooltip"
+                                        shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Core/Contracts/Services/IBuildingSelectionService.cs|Module_Core/Services/BuildingSelectionService.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
+                                        shared:TooltipBehavior.FallbackText="Select the active facility." />
+                                    <Button
+                                        x:Name="CurrentUserButtonDefault"
+                                        Grid.Column="2"
+                                        Margin="16,0,0,0"
+                                        Padding="8"
+                                        HorizontalAlignment="Right"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        shared:TooltipBehavior.ResourceKey="Shell_CurrentUser_Tooltip"
+                                        shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
+                                        shared:TooltipBehavior.FallbackText="View the current signed-in user.">
+                                        <StackPanel Orientation="Horizontal" Spacing="12">
+                                            <Border
+                                                Width="32"
+                                                Height="32"
+                                                Background="{Binding ViewModel.CurrentUserBadgeBrush, ElementName=RootPage}"
+                                                CornerRadius="16">
+                                                <FontIcon
+                                                    FontSize="16"
+                                                    Foreground="White"
+                                                    Glyph="{Binding ViewModel.CurrentUserIconGlyph, ElementName=RootPage}"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center" />
+                                            </Border>
+                                            <TextBlock
+                                                VerticalAlignment="Center"
+                                                MaxWidth="220"
+                                                Style="{ThemeResource BodyTextBlockStyle}"
+                                                Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}"
+                                                TextTrimming="CharacterEllipsis"
+                                                TextWrapping="NoWrap" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                                <ScrollViewer
+                                    Grid.Row="1"
+                                    HorizontalScrollBarVisibility="Auto"
+                                    HorizontalScrollMode="Auto"
+                                    VerticalScrollBarVisibility="Disabled"
+                                    VerticalScrollMode="Disabled"
+                                    Visibility="{Binding ViewModel.IsHeaderProgressVisible, ElementName=RootPage, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <ItemsControl
+                                        ItemTemplateSelector="{StaticResource HeaderStepTemplateSelector}"
+                                        ItemsSource="{Binding ViewModel.HeaderSteps, ElementName=RootPage}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="0" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </ScrollViewer>
                             </Grid>
                         </DataTemplate>
                     </behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>

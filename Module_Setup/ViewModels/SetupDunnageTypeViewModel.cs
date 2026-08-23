@@ -1,6 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
@@ -11,6 +14,13 @@ namespace MTM_Waitlist.Module_Setup.ViewModels;
 
 public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigationAware
 {
+    /// <summary>
+    /// Placeholder scrap value used by the workflow to indicate "no scrap choice has
+    /// been made yet". It is excluded from the picker so the Continue gate can
+    /// require an explicit decision.
+    /// </summary>
+    private const string RequiredScrapPlaceholder = "Scrap Type Required";
+
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
 
@@ -34,6 +44,50 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
 
     public IReadOnlyList<string> ScrapTypes => State.ScrapTypes;
 
+    /// <summary>
+    /// Scrap options shown in the picker: the workflow's scrap types (which include
+    /// the "No Scrap" option), excluding the "Scrap Type Required" placeholder so the
+    /// Continue gate still requires an explicit scrap decision.
+    /// </summary>
+    public IEnumerable<string> DisplayScrapTypes
+    {
+        get
+        {
+            var displayed = new List<string>();
+            foreach (var scrapType in State.ScrapTypes)
+            {
+                if (!string.Equals(scrapType, RequiredScrapPlaceholder, StringComparison.OrdinalIgnoreCase))
+                {
+                    displayed.Add(scrapType);
+                }
+            }
+
+            return displayed;
+        }
+    }
+
+    /// <summary>
+    /// Whether the user has made an explicit scrap decision (picked a real scrap
+    /// type or explicitly chose "No Scrap").
+    /// </summary>
+    public bool HasScrapDecision =>
+        !string.IsNullOrWhiteSpace(SelectedScrapType)
+        && !string.Equals(SelectedScrapType, RequiredScrapPlaceholder, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Whether the user still needs to make a scrap decision.</summary>
+    public bool IsScrapSelectionMissing => !HasScrapDecision;
+
+    /// <summary>Visibility of the inline scrap notification next to the picker.</summary>
+    public Visibility ScrapSelectionNotificationVisibility => IsScrapSelectionMissing ? Visibility.Visible : Visibility.Collapsed;
+
+    /// <summary>Whether Continue can be used (a scrap decision has been made).</summary>
+    public bool CanContinue => HasScrapDecision;
+
+    /// <summary>Inline notification shown next to the scrap picker when no decision has been made.</summary>
+    public string ScrapSelectionMessage => LocalizeOrDefault(
+        "Setup_DunnagePair.ScrapSelection.Message",
+        "Choose a scrap type or select \"No Scrap\" to continue.");
+
     public string SelectedScrapType
     {
         get => State.SelectedScrapType;
@@ -50,6 +104,10 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
             State.HasUnsavedChanges = true;
             StartupDebugLog.Info("SetupDunnageTypeVm", $"SelectedScrapType changed. Previous='{previous}', New='{State.SelectedScrapType}', HasUnsavedChanges={State.HasUnsavedChanges}.");
             OnPropertyChanged(nameof(SelectedScrapType));
+            OnPropertyChanged(nameof(HasScrapDecision));
+            OnPropertyChanged(nameof(IsScrapSelectionMissing));
+            OnPropertyChanged(nameof(ScrapSelectionNotificationVisibility));
+            OnPropertyChanged(nameof(CanContinue));
         }
     }
 
@@ -81,13 +139,13 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
                 : State.SelectedScrapType;
             StartupDebugLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo scrap bootstrap. Placeholder='{requiredPlaceholder}', CurrentSetting='{currentSetting}', ScrapTypeCount={State.ScrapTypes.Count}, ScrapTypes='{string.Join(" | ", State.ScrapTypes)}'.");
 
-            // Force initial load state to placeholder first, then apply current/saved value.
-            State.SelectedScrapType = requiredPlaceholder;
-            StartupDebugLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo applied placeholder first. SelectedScrapType='{State.SelectedScrapType}'.");
-            if (!string.IsNullOrWhiteSpace(currentSetting))
-            {
-                State.SelectedScrapType = currentSetting;
-            }
+            // Preserve whatever the workflow already selected (a saved value or an
+            // explicit choice). The "Scrap Type Required" placeholder is excluded
+            // from the picker and is represented as an empty selection so the
+            // Continue gate requires an explicit scrap decision.
+            State.SelectedScrapType = string.Equals(currentSetting, RequiredScrapPlaceholder, StringComparison.OrdinalIgnoreCase)
+                ? string.Empty
+                : currentSetting;
             StartupDebugLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo final scrap selection applied. SelectedScrapType='{State.SelectedScrapType}'.");
 
             StatusMessage = State.StatusMessage;
@@ -105,6 +163,11 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
             OnPropertyChanged(nameof(DunnageTypes));
             OnPropertyChanged(nameof(PairAssignments));
             OnPropertyChanged(nameof(ScrapTypes));
+            OnPropertyChanged(nameof(DisplayScrapTypes));
+            OnPropertyChanged(nameof(HasScrapDecision));
+            OnPropertyChanged(nameof(IsScrapSelectionMissing));
+            OnPropertyChanged(nameof(ScrapSelectionNotificationVisibility));
+            OnPropertyChanged(nameof(CanContinue));
             OnPropertyChanged(nameof(SelectedScrapType));
             StartupDebugLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo completed. AvailableTypeCount={State.DunnageTypes.Count}, PairAssignments={State.SelectedDunnageParts.Count}.");
         }
@@ -155,9 +218,40 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
     }
 
     [RelayCommand]
-    private void ContinueToReview()
+    private async Task ContinueToReviewAsync()
     {
-        _navigationService.NavigateTo(typeof(SetupReviewViewModel).FullName!, null);
+        if (State.SelectedDunnageParts.Count > 0 || await ConfirmNoDunnageAsync().ConfigureAwait(true))
+        {
+            _navigationService.NavigateTo(typeof(SetupReviewViewModel).FullName!, null);
+        }
+    }
+
+    protected virtual Task<bool> ConfirmNoDunnageAsync()
+    {
+        return ConfirmNoDunnageCoreAsync();
+    }
+
+    private async Task<bool> ConfirmNoDunnageCoreAsync()
+    {
+        var xamlRoot = (App.MainWindow?.Content as FrameworkElement)?.XamlRoot;
+        if (xamlRoot is null)
+        {
+            // No active XAML root (for example a headless test host); proceed.
+            return true;
+        }
+
+        var dialog = new ContentDialog
+        {
+            Title = LocalizeOrDefault("Setup_NoDunnage.DialogTitle", "Continue without dunnage?"),
+            Content = LocalizeOrDefault("Setup_NoDunnage.DialogMessage", "No dunnage was selected for this job. Do you want to continue without dunnage?"),
+            PrimaryButtonText = LocalizeOrDefault("Setup_NoDunnage.Confirm", "Yes"),
+            CloseButtonText = LocalizeOrDefault("Setup_NoDunnage.Cancel", "No"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = xamlRoot,
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
     }
 
     public void AddScrapType(string? scrapType)
@@ -181,9 +275,10 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
             StartupDebugLog.Info("SetupDunnageTypeVm", $"AddScrapType found existing value and did not append. Value='{normalized}'.");
         }
 
-        SelectedScrapType = State.ScrapTypes.FirstOrDefault() ?? string.Empty;
+        SelectedScrapType = normalized;
         State.HasUnsavedChanges = true;
         StartupDebugLog.Info("SetupDunnageTypeVm", $"AddScrapType completed. AddedNewValue={!existed}, FinalSelectedScrapType='{SelectedScrapType}', ScrapTypeCount={State.ScrapTypes.Count}, ScrapTypes='{string.Join(" | ", State.ScrapTypes)}'.");
         OnPropertyChanged(nameof(ScrapTypes));
+        OnPropertyChanged(nameof(DisplayScrapTypes));
     }
 }
