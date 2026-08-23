@@ -271,11 +271,12 @@
             </NavigationView.MenuItems>
             <NavigationView.HeaderTemplate>
                 <DataTemplate>
-                    <Grid MinHeight="64" RowSpacing="6">
+                    <Grid HorizontalAlignment="Stretch" MinHeight="64" RowSpacing="6">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
+
                         <Grid Grid.Row="0" ColumnSpacing="16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -333,8 +334,9 @@
                                 </StackPanel>
                             </Button>
                         </Grid>
-                        <ScrollViewer
-                            Grid.Row="1"
+
+                        <ScrollViewer Grid.Row="1"
+                            HorizontalAlignment="Center"                            
                             HorizontalScrollBarVisibility="Auto"
                             HorizontalScrollMode="Auto"
                             VerticalScrollBarVisibility="Disabled"
@@ -350,6 +352,7 @@
                                 </ItemsControl.ItemsPanel>
                             </ItemsControl>
                         </ScrollViewer>
+
                     </Grid>
                 </DataTemplate>
             </NavigationView.HeaderTemplate>
@@ -421,6 +424,7 @@
                                 </Grid>
                                 <ScrollViewer
                                     Grid.Row="1"
+                                    HorizontalAlignment="Center"
                                     HorizontalScrollBarVisibility="Auto"
                                     HorizontalScrollMode="Auto"
                                     VerticalScrollBarVisibility="Disabled"
