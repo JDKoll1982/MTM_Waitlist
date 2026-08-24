@@ -62,7 +62,7 @@ For this repository, prioritize MCP-backed validation for:
 - Custom title-bar behavior is centralized in `Helpers/TitleBarHelper.cs` and uses `App.AppTitlebar`.
 
 ## AI Feature Guidance (Repo Standard)
-- Default local AI integration target is Foundry Local OpenAI-compatible endpoint: `http://localhost:5272/openai/v1`.
+- Default local AI integration target is Foundry Local OpenAI-compatible endpoint: `http://172.16.1.104:5272/openai/v1`.
 - Default local model name: `phi-4-mini` unless requirements specify otherwise.
 - Use `Azure.AI.OpenAI` for chat-completion style calls.
 - Keep AI features privacy-first: local inference by default, no external endpoint assumptions, and no hardcoded secrets.

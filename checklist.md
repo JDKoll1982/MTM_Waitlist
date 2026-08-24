@@ -189,7 +189,7 @@ Next task: **Security Review: Confirm that only Admin and Developer roles can ac
 
 > `.github/workflows/build-and-test.yml` is the build gate. `.github/scripts/Test-DeploymentPreflight.ps1`
 > performs the environment checks; it exits non-zero on a hard failure so it can gate a deployment.
-> Verified against localhost/mtm_waitlist (MySQL 5.7.24) on 2026-08-18.
+> Verified against 172.16.1.104/mtm_waitlist (MySQL 5.7.24) on 2026-08-18.
 
 - [ ] **Pipeline: Add the database migration step for the new `config_images_locations` table before deployment.** (Ref: Section 4.3) | **Persona: DevOps Engineer** — the table is already live; there is still no automated deploy pipeline to hang a migration step on
 - [ ] **Pipeline: Add the request type JSON update to deployment packaging so the new GUIDs and `imagePath` fields ship with the app.** (Ref: Section 4.2) | **Persona: DevOps Engineer**
