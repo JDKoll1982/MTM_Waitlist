@@ -298,6 +298,38 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         return Task.FromResult(new SetupSelectionResult { Success = true });
     }
 
+    public Task<SetupSelectionResult> AddDunnagePartToPairAsync(SetupDunnagePart part, CancellationToken cancellationToken = default)
+    {
+        if (part is null || string.IsNullOrWhiteSpace(part.Id))
+        {
+            StartupDebugLog.Info("SetupWorkflow", "AddDunnagePartToPairAsync rejected a null/empty part.");
+            return Task.FromResult(new SetupSelectionResult
+            {
+                Success = false,
+                Message = "A dunnage part must be selected before adding it to the job."
+            });
+        }
+
+        StartupDebugLog.Info("SetupWorkflow", $"AddDunnagePartToPairAsync started. DunnagePartId='{part.Id}'.");
+
+        if (!State.SelectedDunnageParts.Any(existing => string.Equals(existing.Id, part.Id, StringComparison.OrdinalIgnoreCase)))
+        {
+            State.SelectedDunnageParts.Add(part);
+        }
+
+        State.SelectedDunnagePartId = part.Id;
+        State.UpdateSelectedDunnageSummary();
+        State.CurrentStep = SetupWorkflowStep.DunnageTypeSelection;
+        State.HasUnsavedChanges = true;
+        StartupDebugLog.Info("SetupWorkflow", $"AddDunnagePartToPairAsync completed. Part='{part.Id}', PairCount={State.SelectedDunnageParts.Count}, Summary='{State.SelectedDunnageSummary}'.");
+
+        return Task.FromResult(new SetupSelectionResult
+        {
+            Success = true,
+            Message = $"Dunnage part '{part.DisplayName}' added to the job."
+        });
+    }
+
     public Task<SetupSelectionResult> RemoveDunnagePartAsync(string dunnagePartId, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupWorkflow", $"RemoveDunnagePartAsync started. DunnagePartId='{dunnagePartId}'.");

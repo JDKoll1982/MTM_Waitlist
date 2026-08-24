@@ -4,6 +4,11 @@ namespace MTM_Waitlist.Module_Setup.Services;
 
 internal static class SetupDataCatalog
 {
+    private const string CoilsTypeImage = "Assets/coil.png";
+    private const string FlatstockTypeImage = "Assets/pickup_fg.png";
+    private const string ComponentsTypeImage = "Assets/pickup_ncm.png";
+    private const string OtherTypeImage = "Assets/pickup_os.png";
+
     public static IReadOnlyList<SetupPartResult> GetParts(string normalizedWorkOrder)
     {
         return normalizedWorkOrder switch
@@ -74,10 +79,10 @@ internal static class SetupDataCatalog
     {
         return new[]
         {
-            new SetupDunnageType { Id = "Coils", Name = "Coils", IconGlyph = "\uE7C1" },
-            new SetupDunnageType { Id = "Flatstock", Name = "Flatstock", IconGlyph = "\uE8A5" },
-            new SetupDunnageType { Id = "Components", Name = "Components", IconGlyph = "\uE8D4" },
-            new SetupDunnageType { Id = "Other", Name = "Other", IconGlyph = "\uE8B7" }
+            new SetupDunnageType { Id = "Coils", Name = "Coils", IconGlyph = "\uE7C1", ImagePath = CoilsTypeImage },
+            new SetupDunnageType { Id = "Flatstock", Name = "Flatstock", IconGlyph = "\uE8A5", ImagePath = FlatstockTypeImage },
+            new SetupDunnageType { Id = "Components", Name = "Components", IconGlyph = "\uE8D4", ImagePath = ComponentsTypeImage },
+            new SetupDunnageType { Id = "Other", Name = "Other", IconGlyph = "\uE8B7", ImagePath = OtherTypeImage }
         };
     }
 
@@ -104,6 +109,28 @@ internal static class SetupDataCatalog
             {
                 new SetupDunnagePart { Id = "other-a", TypeId = dunnageTypeId, PartNumber = "DUN-OTH-A", DisplayName = "Other A", ImagePath = "Assets/pickup_os.png", Metadata = "General purpose" }
             }
+        };
+    }
+
+    /// <summary>
+    /// App-wide dunnage part catalog for the image-search dialog. Includes both
+    /// image-backed parts and parts without an image so the "Show all / Images only"
+    /// toggle has meaningful data to filter.
+    /// </summary>
+    public static IReadOnlyList<SetupDunnagePart> GetAllDunnageParts()
+    {
+        // Parts with no image show the no-image placeholder in the dialog; they do
+        // NOT inherit the parent type's image.
+        return new[]
+        {
+            new SetupDunnagePart { Id = "coil-a", TypeId = "Coils", PartNumber = "DUN-COIL-A", DisplayName = "Dunnage Coil A", DunnageTypeName = "Coils", ImagePath = CoilsTypeImage, HomeLocation = "Rack A1", Metadata = "Primary coil pallet" },
+            new SetupDunnagePart { Id = "coil-b", TypeId = "Coils", PartNumber = "DUN-COIL-B", DisplayName = "Dunnage Coil B", DunnageTypeName = "Coils", ImagePath = string.Empty, HomeLocation = "Rack A2", Metadata = "Fallback no-image state" },
+            new SetupDunnagePart { Id = "flat-a", TypeId = "Flatstock", PartNumber = "DUN-FLAT-A", DisplayName = "Flatstock A", DunnageTypeName = "Flatstock", ImagePath = FlatstockTypeImage, HomeLocation = "Flatstock Bay", Metadata = "Sheet separator" },
+            new SetupDunnagePart { Id = "flat-b", TypeId = "Flatstock", PartNumber = "DUN-FLAT-B", DisplayName = "Flatstock B", DunnageTypeName = "Flatstock", ImagePath = "Assets/pickup_wip.png", HomeLocation = "Flatstock Bay", Metadata = "Rack divider" },
+            new SetupDunnagePart { Id = "component-a", TypeId = "Components", PartNumber = "DUN-COMP-A", DisplayName = "Component A", DunnageTypeName = "Components", ImagePath = ComponentsTypeImage, HomeLocation = "Kit Shelf 2", Metadata = "Small bin" },
+            new SetupDunnagePart { Id = "component-b", TypeId = "Components", PartNumber = "DUN-COMP-B", DisplayName = "Component B", DunnageTypeName = "Components", ImagePath = string.Empty, HomeLocation = "Kit Shelf 3", Metadata = "No image available" },
+            new SetupDunnagePart { Id = "other-a", TypeId = "Other", PartNumber = "DUN-OTH-A", DisplayName = "Other A", DunnageTypeName = "Other", ImagePath = OtherTypeImage, HomeLocation = "General", Metadata = "General purpose" },
+            new SetupDunnagePart { Id = "other-b", TypeId = "Other", PartNumber = "DUN-OTH-B", DisplayName = "Other B", DunnageTypeName = "Other", ImagePath = string.Empty, HomeLocation = "General", Metadata = "General purpose (no image)" }
         };
     }
 }

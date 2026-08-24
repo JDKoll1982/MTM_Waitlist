@@ -1,3 +1,5 @@
+using System.Linq;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -80,6 +82,7 @@ public sealed class SetupDunnageTypeViewModelTests
         var navigation = new RecordingNavigationService();
         var viewModel = new TestableSetupDunnageTypeViewModel(
             confirmNoDunnageResult: true,
+            imageSearchPart: null,
             navigation,
             new StubSetupWorkflowService(state),
             dunnageWorkflowService: null!);
@@ -97,6 +100,7 @@ public sealed class SetupDunnageTypeViewModelTests
         var navigation = new RecordingNavigationService();
         var viewModel = new TestableSetupDunnageTypeViewModel(
             confirmNoDunnageResult: false,
+            imageSearchPart: null,
             navigation,
             new StubSetupWorkflowService(state),
             dunnageWorkflowService: null!);
@@ -120,6 +124,7 @@ public sealed class SetupDunnageTypeViewModelTests
         var navigation = new RecordingNavigationService();
         var viewModel = new TestableSetupDunnageTypeViewModel(
             confirmNoDunnageResult: false,
+            imageSearchPart: null,
             navigation,
             new StubSetupWorkflowService(state),
             dunnageWorkflowService: null!);
@@ -130,12 +135,56 @@ public sealed class SetupDunnageTypeViewModelTests
         Assert.AreEqual(typeof(SetupReviewViewModel).FullName, navigation.LastPageKey);
     }
 
+    [TestMethod]
+    public async Task AddDunnageAsync_WhenPartSelected_AddsToPairAndShowsMessage()
+    {
+        var state = new SetupWorkflowState();
+        var navigation = new RecordingNavigationService();
+        var part = new SetupDunnagePart
+        {
+            Id = "coil-a",
+            TypeId = "Coils",
+            PartNumber = "DUN-COIL-A",
+            DisplayName = "Dunnage Coil A",
+        };
+        var viewModel = new TestableSetupDunnageTypeViewModel(
+            confirmNoDunnageResult: false,
+            imageSearchPart: part,
+            navigation,
+            new StubSetupWorkflowService(state),
+            dunnageWorkflowService: null!);
+
+        await viewModel.AddDunnageCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(1, state.SelectedDunnageParts.Count);
+        Assert.AreEqual("coil-a", state.SelectedDunnageParts[0].Id);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(viewModel.StatusMessage));
+    }
+
+    [TestMethod]
+    public async Task AddDunnageAsync_WhenDialogDismissed_DoesNotAdd()
+    {
+        var state = new SetupWorkflowState();
+        var navigation = new RecordingNavigationService();
+        var viewModel = new TestableSetupDunnageTypeViewModel(
+            confirmNoDunnageResult: false,
+            imageSearchPart: null,
+            navigation,
+            new StubSetupWorkflowService(state),
+            dunnageWorkflowService: null!);
+
+        await viewModel.AddDunnageCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(0, state.SelectedDunnageParts.Count);
+    }
+
     private static (TestableSetupDunnageTypeViewModel ViewModel, RecordingNavigationService Navigation) CreateViewModel(SetupWorkflowState? state = null)
     {
         var setupState = state ?? new SetupWorkflowState();
         var navigation = new RecordingNavigationService();
         var viewModel = new TestableSetupDunnageTypeViewModel(
             confirmNoDunnageResult: false,
+            imageSearchPart: null,
             navigation,
             new StubSetupWorkflowService(setupState),
             dunnageWorkflowService: null!);
@@ -145,18 +194,23 @@ public sealed class SetupDunnageTypeViewModelTests
     private sealed class TestableSetupDunnageTypeViewModel : SetupDunnageTypeViewModel
     {
         private readonly bool _confirmNoDunnageResult;
+        private readonly SetupDunnagePart? _imageSearchPart;
 
         public TestableSetupDunnageTypeViewModel(
             bool confirmNoDunnageResult,
+            SetupDunnagePart? imageSearchPart,
             INavigationService navigationService,
             ISetupWorkflowService workflowService,
             IDunnageWorkflowService dunnageWorkflowService)
             : base(navigationService, workflowService, dunnageWorkflowService)
         {
             _confirmNoDunnageResult = confirmNoDunnageResult;
+            _imageSearchPart = imageSearchPart;
         }
 
         protected override Task<bool> ConfirmNoDunnageAsync() => Task.FromResult(_confirmNoDunnageResult);
+
+        protected override Task<SetupDunnagePart?> ShowImageSearchDialogAsync() => Task.FromResult(_imageSearchPart);
     }
 
     private sealed class StubSetupWorkflowService : ISetupWorkflowService
@@ -186,6 +240,16 @@ public sealed class SetupDunnageTypeViewModelTests
 
         public Task<SetupSelectionResult> SelectDunnagePartAsync(string dunnagePartId, CancellationToken cancellationToken = default) =>
             Task.FromResult(new SetupSelectionResult { Success = true });
+
+        public Task<SetupSelectionResult> AddDunnagePartToPairAsync(SetupDunnagePart part, CancellationToken cancellationToken = default)
+        {
+            if (part is not null && !State.SelectedDunnageParts.Any(existing => existing.Id == part.Id))
+            {
+                State.SelectedDunnageParts.Add(part);
+            }
+
+            return Task.FromResult(new SetupSelectionResult { Success = true, Message = $"Dunnage part '{part?.DisplayName}' added to the job." });
+        }
 
         public Task<SetupSelectionResult> RemoveDunnagePartAsync(string dunnagePartId, CancellationToken cancellationToken = default) =>
             Task.FromResult(new SetupSelectionResult { Success = true });

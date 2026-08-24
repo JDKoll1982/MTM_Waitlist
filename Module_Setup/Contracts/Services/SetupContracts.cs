@@ -36,6 +36,13 @@ public interface IDunnageWorkflowService
 
     Task<IReadOnlyList<SetupDunnagePart>> GetDunnagePartsAsync(string dunnageTypeId, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Loads the app-wide dunnage part catalog (across all types) for the
+    /// image-search entry point. Parts are returned whether or not they have an
+    /// image path so the dialog's "Show all / Images only" toggle can filter them.
+    /// </summary>
+    Task<IReadOnlyList<SetupDunnagePart>> GetAllDunnagePartsAsync(CancellationToken cancellationToken = default);
+
     Task<SetupSelectionResult> AddDunnageTypeAsync(string typeName, string currentUserRole, CancellationToken cancellationToken = default);
 
     Task<SetupSelectionResult> AddDunnagePartAsync(string dunnageTypeId, string partName, string currentUserRole, CancellationToken cancellationToken = default);
@@ -74,6 +81,12 @@ public interface ISetupWorkflowService
     Task<SetupSelectionResult> SelectDunnageTypeAsync(string dunnageTypeId, CancellationToken cancellationToken = default);
 
     Task<SetupSelectionResult> SelectDunnagePartAsync(string dunnagePartId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds a dunnage part (from the image-search catalog) directly to the current
+    /// pair's assignments without requiring the type-selection step.
+    /// </summary>
+    Task<SetupSelectionResult> AddDunnagePartToPairAsync(SetupDunnagePart part, CancellationToken cancellationToken = default);
 
     Task<SetupSelectionResult> RemoveDunnagePartAsync(string dunnagePartId, CancellationToken cancellationToken = default);
 

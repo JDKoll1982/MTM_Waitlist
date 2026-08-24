@@ -338,9 +338,7 @@ public partial class ShellViewModel : ObservableRecipient
             return ("Work Center Setup — Operation", 4);
         }
 
-        if (pageType == typeof(SetupDunnageTypePage)
-            || pageType == typeof(SetupDunnagePartPage)
-            || pageType == typeof(SetupDunnageAddPartSelectionPage))
+        if (pageType == typeof(SetupDunnageTypePage))
         {
             return ("Work Center Setup — Dunnage & Scrap", 5);
         }

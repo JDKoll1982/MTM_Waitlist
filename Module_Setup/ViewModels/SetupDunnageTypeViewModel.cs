@@ -9,6 +9,7 @@ using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
+using MTM_Waitlist.Module_Setup.Views;
 
 namespace MTM_Waitlist.Module_Setup.ViewModels;
 
@@ -189,9 +190,45 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
     }
 
     [RelayCommand]
-    private void AddDunnage()
+    private async Task AddDunnageAsync()
     {
-        _navigationService.NavigateTo(typeof(SetupDunnagePartViewModel).FullName!, null);
+        var selectedPart = await ShowImageSearchDialogAsync().ConfigureAwait(true);
+        if (selectedPart is null)
+        {
+            return;
+        }
+
+        var result = await _workflowService.AddDunnagePartToPairAsync(selectedPart).ConfigureAwait(true);
+        StatusMessage = result.Message;
+        OnPropertyChanged(nameof(CurrentSelectionSummary));
+        OnPropertyChanged(nameof(PairAssignments));
+        OnPropertyChanged(nameof(State));
+    }
+
+    /// <summary>
+    /// Shows the image-backed Dunnage part search dialog and returns the part the
+    /// user picked (or <c>null</c> when dismissed). Overridable in tests.
+    /// </summary>
+    protected virtual Task<SetupDunnagePart?> ShowImageSearchDialogAsync()
+    {
+        return ShowImageSearchDialogCoreAsync();
+    }
+
+    private async Task<SetupDunnagePart?> ShowImageSearchDialogCoreAsync()
+    {
+        var xamlRoot = (App.MainWindow?.Content as FrameworkElement)?.XamlRoot;
+        if (xamlRoot is null)
+        {
+            // No active XAML root (for example a headless test host); no dialog can be shown.
+            return null;
+        }
+
+        var dialog = App.GetService<SetupDunnageImageSearchDialog>();
+        dialog.XamlRoot = xamlRoot;
+
+        await dialog.ShowAsync();
+
+        return dialog.SelectedPart;
     }
 
     [RelayCommand]
