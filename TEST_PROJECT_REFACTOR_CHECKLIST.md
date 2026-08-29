@@ -75,7 +75,7 @@ The current code puts `Module_Core`/`Module_Shared` *above* feature modules in p
 - `Module_Core/Services/PageService.cs` → references `Module_Settings`, `Module_Setup`, `Module_Waitlist` Views/ViewModels (page-type registration)
 - `Module_Shared/Services/TooltipService.cs` → `using MTM_Waitlist.Module_Startup.Models`
 
-All of these must be resolved in **Phase 2** so that `Core` and `Shared` have zero references to feature modules.
+All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_Shared` non-view code now has zero references to feature modules (only `Module_Core/Views/ShellPage.xaml.cs` — a View that stays in the app — still references `Module_Waitlist`).
 
 ---
 
@@ -95,10 +95,10 @@ All of these must be resolved in **Phase 2** so that `Core` and `Shared` have ze
 
 ### Subphase 1.1: Create and wire the library projects
 
-- [ ] **Configuration: Create one WinUI class library per module — `MTM_Waitlist.Core`, `MTM_Waitlist.Shared`, `MTM_Waitlist.Setup`, `MTM_Waitlist.Settings`, `MTM_Waitlist.Waitlist`, `MTM_Waitlist.Startup`, `MTM_Waitlist.Reporting` — each `TargetFramework=net10.0-windows10.0.19041.0`, `TargetPlatformMinVersion=10.0.17763.0`, `UseWinUI=true`, `Nullable=enable`, `ImplicitUsings=enable`, with package versions matching the app (CommunityToolkit.Mvvm, Microsoft.WindowsAppSDK, etc. only as each module needs).** (Ref: Add a Class Library project for testing) | **Persona: Tech Lead**
-- [ ] **Configuration: Add all seven library projects to `MTM_Waitlist.sln` with `x64` platform mappings mirroring the app.** (Ref: Add a Class Library project for testing) *Depends on: Create one WinUI class library per module* | **Persona: DevOps Engineer**
-- [ ] **Service Layer: Add the project-reference dependency graph: `Shared → Core`; each feature module → `Core` + `Shared`. Add NO feature→feature and NO `Core`/`Shared`→feature references.** (Ref: Target Architecture) *Depends on: Add all seven library projects to the solution* | **Persona: Backend Engineer**
-- [ ] **Service Layer: Add `InternalsVisibleTo("MTM_Waitlist")` and `InternalsVisibleTo("MTM_Waitlist.Tests")` to every library project** (the app currently exposes internals to the test assembly). (Ref: Testing non-WinUI functionality) *Depends on: Add the project-reference dependency graph* | **Persona: Backend Engineer**
+- [x] **Configuration: Create one WinUI class library per module — `MTM_Waitlist.Core`, `MTM_Waitlist.Shared`, `MTM_Waitlist.Setup`, `MTM_Waitlist.Settings`, `MTM_Waitlist.Waitlist`, `MTM_Waitlist.Startup`, `MTM_Waitlist.Reporting` — each `TargetFramework=net10.0-windows10.0.19041.0`, `TargetPlatformMinVersion=10.0.17763.0`, `UseWinUI=true`, `Nullable=enable`, `ImplicitUsings=enable`, with package versions matching the app (CommunityToolkit.Mvvm, Microsoft.WindowsAppSDK, etc. only as each module needs).** (Ref: Add a Class Library project for testing) | **Persona: Tech Lead** — verified 2026-08-29: seven `MTM_Waitlist.*/*.csproj` created
+- [x] **Configuration: Add all seven library projects to `MTM_Waitlist.sln` with `x64` platform mappings mirroring the app.** (Ref: Add a Class Library project for testing) *Depends on: Create one WinUI class library per module* | **Persona: DevOps Engineer** — verified 2026-08-29: `MTM_Waitlist.sln` lists all 7 with x64 mappings
+- [x] **Service Layer: Add the project-reference dependency graph: `Shared → Core`; each feature module → `Core` + `Shared`. Add NO feature→feature and NO `Core`/`Shared`→feature references.** (Ref: Target Architecture) *Depends on: Add all seven library projects to the solution* | **Persona: Backend Engineer** — verified 2026-08-29: csproj `ProjectReference`s
+- [x] **Service Layer: Add `InternalsVisibleTo("MTM_Waitlist")` and `InternalsVisibleTo("MTM_Waitlist.Tests")` to every library project** (the app currently exposes internals to the test assembly). (Ref: Testing non-WinUI functionality) *Depends on: Add the project-reference dependency graph* | **Persona: Backend Engineer** — verified 2026-08-29: in each csproj
 
 **GATE: `dotnet build` of the solution succeeds with all seven empty projects and the correct reference graph (no circular references).**
 
@@ -108,13 +108,13 @@ All of these must be resolved in **Phase 2** so that `Core` and `Shared` have ze
 
 ### Subphase 2.1: Move shared model contracts out of feature modules
 
-- [ ] **Data Model: Relocate the `Module_Startup.Models` types referenced by Core contracts and Shared `TooltipService` (`ComputerRecord`, `StartupState`, `StartupSessionSnapshot`, etc.) into `MTM_Waitlist.Core` (or a neutral shared location) and update the `using` statements in `IComputerGateService`, `IComputerRegistryService`, `IStartupCoordinator`, `IStartupRegistrationService`, `IStartupSessionRepository`, and `TooltipService`.** (Ref: Verified reverse dependencies) | **Persona: Backend Engineer**
-- [ ] **Service Layer: Remove the `Module_Core/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs` reference to `MTM_Waitlist.Module_Reporting.Services.DependencyInjection` (reporting registration moves to the app composition root).** (Ref: Verified reverse dependencies) | **Persona: Backend Engineer**
+- [x] **Data Model: Relocate the `Module_Startup.Models` types referenced by Core contracts and Shared `TooltipService` (`ComputerRecord`, `StartupState`, `StartupSessionSnapshot`, etc.) into `MTM_Waitlist.Core` (or a neutral shared location) and update the `using` statements in `IComputerGateService`, `IComputerRegistryService`, `IStartupCoordinator`, `IStartupRegistrationService`, `IStartupSessionRepository`, and `TooltipService`.** (Ref: Verified reverse dependencies) | **Persona: Backend Engineer** — verified 2026-08-29: all 11 Startup models → `Module_Core/Models` (`MTM_Waitlist.Module_Core.Models`); consumers updated
+- [x] **Service Layer: Remove the `Module_Core/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs` reference to `MTM_Waitlist.Module_Reporting.Services.DependencyInjection` (reporting registration moves to the app composition root).** (Ref: Verified reverse dependencies) | **Persona: Backend Engineer** — verified 2026-08-29: aggregator moved to `Services/DependencyInjection/`
 
 ### Subphase 2.2: Relocate the composition root out of Core
 
-- [ ] **Service Layer: Move `Module_Core/Services/DependencyInjection/ServiceRegistrationExtensions.cs` (the DI composition root that registers Settings/Setup/Waitlist/etc.) into the app project so `Core` no longer references feature modules.** (Ref: Verified reverse dependencies) | **Persona: Backend Engineer**
-- [ ] **Service Layer: Move the page/ViewModel type registration out of `Module_Core/Services/PageService.cs` (which references Settings/Setup/Waitlist Views+ViewModels) into the app's navigation registration; keep `Core`'s `PageService` generic/contract-only.** (Ref: Verified reverse dependencies) | **Persona: Backend Engineer**
+- [x] **Service Layer: Move `Module_Core/Services/DependencyInjection/ServiceRegistrationExtensions.cs` (the DI composition root that registers Settings/Setup/Waitlist/etc.) into the app project so `Core` no longer references feature modules.** (Ref: Verified reverse dependencies) | **Persona: Backend Engineer** — verified 2026-08-29: `Services/DependencyInjection/ServiceRegistrationExtensions.cs` (`MTM_Waitlist.Services.DependencyInjection`)
+- [x] **Service Layer: Move the page/ViewModel type registration out of `Module_Core/Services/PageService.cs` (which references Settings/Setup/Waitlist Views+ViewModels) into the app's navigation registration; keep `Core`'s `PageService` generic/contract-only.** (Ref: Verified reverse dependencies) | **Persona: Backend Engineer** — verified 2026-08-29: `Services/PageService.cs` (also moved `SampleDataService`, `NavigationViewService`, `ShellViewModel` to app)
 
 **GATE: solution builds and `Core` + `Shared` have zero references to any feature module (verified with a project-reference audit).** *Depends on: Phase 1 GATE*
 
@@ -228,4 +228,4 @@ All of these must be resolved in **Phase 2** so that `Core` and `Shared` have ze
 
 ---
 
-Next task: **Add a "kill stale build processes" pre-test step so `MTM_Waitlist.exe`, `Microsoft.UI.Xaml.Markup.Compiler`, `VBCSCompiler`, and `MSBuild` are stopped before `dotnet test` runs.** | **Persona: DevOps Engineer**
+Next task: **Move `Module_Core` non-view code — `Contracts`, `Models`, `Services` (non-composition-root), `Helpers`, `Behaviors`, `Selectors`, `Activation`, `Contracts/ViewModels/INavigationAware.cs` — into `MTM_Waitlist.Core` preserving `MTM_Waitlist.Module_Core.*` namespaces.** | **Persona: Backend Engineer**
