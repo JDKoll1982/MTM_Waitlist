@@ -1,6 +1,6 @@
 -- Stored Procedure: sp_setup_save_setup
 -- Engine: MySQL 5.7
--- Purpose: Persist workstation setup state.
+-- Purpose: Persist work center setup state.
 
 USE mtm_waitlist;
 

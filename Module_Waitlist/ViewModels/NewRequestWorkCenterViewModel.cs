@@ -143,11 +143,11 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         IsLoading = true;
         try
         {
-            var workstationName = _workCenterCatalogService.GetCurrentWorkstationName();
+            var workstationName = _workCenterCatalogService.GetCurrentComputerName();
             var catalog = await _workCenterCatalogService.GetCatalogAsync(workstationName).ConfigureAwait(true);
             var imageLookup = await _flowService.BuildWorkCenterImageLookupAsync().ConfigureAwait(true);
 
-            WorkstationName = catalog.WorkstationName;
+            WorkstationName = catalog.ComputerName;
             _activeJobWorkCenters = new HashSet<string>(
                 catalog.ActiveJobWorkCenters
                     .Where(value => !string.IsNullOrWhiteSpace(value))
@@ -168,7 +168,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
             ApplyFilter();
             UpdateWorkCenterSectionsVisibility();
 
-            StartupDebugLog.Info("NewRequestWorkCenter", $"Catalog loaded. Workstation='{catalog.WorkstationName}', HotCount={catalog.HotWorkCenters.Count}, OtherCount={catalog.OtherWorkCenters.Count}, ActiveJobCount={_activeJobWorkCenters.Count}.");
+            StartupDebugLog.Info("NewRequestWorkCenter", $"Catalog loaded. Workstation='{catalog.ComputerName}', HotCount={catalog.HotWorkCenters.Count}, OtherCount={catalog.OtherWorkCenters.Count}, ActiveJobCount={_activeJobWorkCenters.Count}.");
         }
         catch (Exception ex)
         {

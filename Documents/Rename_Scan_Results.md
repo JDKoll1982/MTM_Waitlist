@@ -1,9 +1,9 @@
 # Rename Scan Results - workstation -> Computer / Work Center
 
-Generated: 2026-08-24 06:27:36 -05:00
+Generated: 2026-08-29 13:10:23 -05:00
 Repo: C:\Users\johnk\source\repos\MTM_Waitlist
 Pattern: `workstation` / `Work Station` (case-insensitive)
-Total matches: 952 in 126 files
+Total matches: 910 in 120 files
 Files/folders to rename: 17
 
 Excluded (generated/binary/SCM): bin, obj, .git, .vs, node_modules, TestResults, packages, .serena, pri_dump; binary exts: .png, .jpg, .jpeg, .gif, .webp, .ico, .dll, .exe, .pdb, .pri, .dgspec, .snupkg, .nupkg, .db, .bdb, .dat, .ttf, .otf; log/PRI/tool files: .log + Log.md, testout.txt, testerr.txt, pri_dump.xml, scan_workstation_rename.ps1, Rename_Scan_Results.md
@@ -65,14 +65,8 @@ Excluded (generated/binary/SCM): bin, obj, .git, .vs, node_modules, TestResults,
 | `Database\Views\vw_config_settings_scope_catalog\create.sql` | 1 | Review |
 | `Database\Views\vw_setup_workstations_active\create.sql` | 5 | Work Center |
 | `Database\Views\vw_setup_workstations_active\rollback.sql` | 2 | Work Center |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 27 | Review, Work Center |
-| `Documents\Computer_FirstLoad_Gate_Design.md` | 26 | Computer, Review, Work Center |
+| `Documents\Computer_FirstLoad_Gate_Design.md` | 27 | Computer, Review, Work Center |
 | `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 27 | Computer, Review, Work Center |
-| `Documents\Development\InforVisual\InforVisualGuide.md` | 6 | Review |
-| `Documents\Development\InforVisual\Interaction_Guides\UI_Interaction_Guide.md` | 5 | Review |
-| `Documents\Development\InforVisual\Interaction_Guides\VBScript_Guide.md` | 2 | Review |
-| `Documents\Development\Waitlist\NewRequestFeature\RequiredWorkflow.md` | 2 | Review |
-| `Documents\Weekend-User-Update-Email.md` | 1 | Review |
 | `Image-Location-Settings-Spec.md` | 7 | Review, Work Center |
 | `Module_Core\Services\DependencyInjection\ServiceRegistrationExtensions.cs` | 2 | Work Center |
 | `Module_Core\Services\PageService.cs` | 1 | Work Center |
@@ -508,33 +502,6 @@ Excluded (generated/binary/SCM): bin, obj, .git, .vs, node_modules, TestResults,
 | `Database\Views\vw_setup_workstations_active\create.sql` | 18 | Work Center | FROM setup_workstations_catalog |
 | `Database\Views\vw_setup_workstations_active\rollback.sql` | 1 | Work Center | -- Rollback view: vw_setup_workstations_active |
 | `Database\Views\vw_setup_workstations_active\rollback.sql` | 5 | Work Center | DROP VIEW IF EXISTS vw_setup_workstations_active; |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 3 | Review | This checklist applies the workstation-selection card workflow already implemented on |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 4 | Work Center | `Module_Setup/Views/SetupWorkstationPage.xaml` (and `SetupWorkstationViewModel`) to |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 18 | Work Center | - `Module_Setup/Views/SetupWorkstationPage.xaml` — `WorkstationCardItemContainerStyle`, `W |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 19 | Work Center | - `Module_Setup/Views/SetupWorkstationPage.xaml.cs` — responsive sizing. |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 20 | Work Center | - `Module_Setup/ViewModels/SetupWorkstationViewModel.cs` — filter/section logic. |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 21 | Work Center | - `Module_Setup/Models/SetupModels.cs` — `SetupWorkstation` observable model pattern. |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 35 | Work Center | - [x] **Model: Add computed display props `CurrentJobSummary`, `CurrentPartSummary`, and ` |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 40 | Work Center | Next task: **SQL: Extend the `WorkCenterCatalogService` catalog queries to also select `bu |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 44 | Work Center | - [x] **SQL: Extend the `WorkCenterCatalogService` catalog queries to also select `buildin |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 45 | Work Center | - [x] **SQL: Load the latest active job (work order / part / sequence) per work center by  |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 49 | Review | Next task: **XAML: Copy `WorkstationCardItemContainerStyle` (strips GridView selection vis |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 61 | Work Center | - [x] **XAML: Copy `WorkstationCardItemContainerStyle` (strips GridView selection visuals  |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 62 | Work Center | - [x] **XAML: Add a `WorkstationCardTemplate` DataTemplate (`x:DataType="WorkCenterSelecti |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 63 | Work Center | - [x] **XAML: Bind card rows to `WorkCenterName`, `Building`, `CurrentJobSummary`, `Curren |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 64 | Work Center | - [x] **XAML: Include a blue selection-outline `Border` overlay (2px, CornerRadius 12, `Is |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 70 | Work Center | - [x] **XAML: Wrap the "Local Work Centers" section `Border` with `Visibility` bound to `I |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 71 | Work Center | - [x] **XAML: Replace the "Other Work Centers" `Border` with an `Expander`** (`IsExpanded` |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 72 | Work Center | - [x] **XAML: Add a search `TextBox` (TwoWay to `FilterText`, `UpdateSourceTrigger=Propert |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 73 | Work Center | - [x] **XAML: Set both GridViews to `SelectionMode="None"`, `IsItemClickEnabled="True"`, a |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 88 | Work Center | - [x] **VM: Inject `IBuildingSelectionService` into `NewRequestWorkCenterViewModel`** and  |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 89 | Work Center | - [x] **VM: Add `ApplyFilter()` that filters by selected building + filter text (name / wo |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 90 | Work Center | - [x] **VM: Add `UpdateWorkCenterSectionsVisibility()`** — `IsLocalWorkCentersVisible = ha |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 91 | Work Center | - [x] **VM: In `OnNavigatedTo`, set `SelectedBuilding` from the building service and subsc |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 111 | Work Center | - [x] **Code-behind: Add responsive constants (`MinItemWidth = 520`, `MaxItemWidth = 580`, |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 112 | Work Center | - [x] **Code-behind: Add `SizeChanged` handlers on both GridViews calling `UpdateItemSize( |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 113 | Work Center | - [x] **Code-behind: Retry via `DispatcherQueue.TryEnqueue(UpdateItemSize)` only when a gr |
-| `Documents\Complete-NewRequest_WorkCenter_Redesign_Checklist.md` | 138 | Review | - [x] **Verification: Manually confirm on the New Request wizard** — Local section shows f |
 | `Documents\Computer_FirstLoad_Gate_Design.md` | 8 | Review | This design separates two concepts that both currently use the word "workstation", and **e |
 | `Documents\Computer_FirstLoad_Gate_Design.md` | 12 | Computer | \| **Computer** \| A physical machine (hostname e.g. `johnspc`, display name e.g. "John's Co |
 | `Documents\Computer_FirstLoad_Gate_Design.md` | 13 | Work Center | \| **Work Center** \| A press/work station (e.g. `100-3`, `100-6`). Selected in Module_Setup |
@@ -560,50 +527,35 @@ Excluded (generated/binary/SCM): bin, obj, .git, .vs, node_modules, TestResults,
 | `Documents\Computer_FirstLoad_Gate_Design.md` | 94 | Computer | Rename **every "workstation" occurrence** into either "Computer" or "Work Center": |
 | `Documents\Computer_FirstLoad_Gate_Design.md` | 98 | Review | - **Final sweep:** VS Code search for `Workstation`, `workstation`, and `Work Station` ret |
 | `Documents\Computer_FirstLoad_Gate_Design.md` | 112 | Computer | - `tools/scan_workstation_rename.ps1` scans every text file in the repo (excluding generat |
-| `Documents\Computer_FirstLoad_Gate_Design.md` | 114 | Review | `pwsh -NoProfile -File tools/scan_workstation_rename.ps1` |
+| `Documents\Computer_FirstLoad_Gate_Design.md` | 115 | Review | `pwsh -NoProfile -File tools/scan_workstation_rename.ps1` |
+| `Documents\Computer_FirstLoad_Gate_Design.md` | 117 | Work Center | - Items marked **Review** are ambiguous (computer vs work center) and need a human decisio |
 | `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 9 | Review | - [ ] **Tech Lead: Run baseline rename scan** via `tools/scan_workstation_rename.ps1` and  |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 12 | Computer | - [ ] **Database Migration: Rename table `core_workstations_registry` → `core_computers_re |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 13 | Computer | - [ ] **Database Migration: Rename column `workstation_name` → `computer_name`** in `core_ |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 21 | Computer | - [ ] **Database Migration: Rename `auth_sessions_tokens.workstation_id` → `computer_id`** |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 22 | Computer | - [ ] **Database Migration: Rename `config_settings_values.workstation_id` → `computer_id` |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 23 | Computer | - [ ] **Database Migration: Rename `config_settings_history.workstation_id` → `computer_id |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 24 | Work Center | - [ ] **Database Migration: Rename `config_workstation_hot_workcenters.core_workstation_id |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 25 | Work Center | - [ ] **Database Migration: Rename table `config_workstation_hot_workcenters` → `config_co |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 34 | Review | ### Subphase 1.4: Rename work-center catalog (Work Station → Work Center) (Ref: 1, 4) |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 35 | Work Center | - [ ] **Database Migration: Rename table `setup_workstations_catalog` → `setup_work_center |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 36 | Work Center | - [ ] **Database Migration: Rename `waitlist_requests_queue.workstation_name` → `work_cent |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 37 | Work Center | - [ ] **Database Migration: Rename `sp_setup_workstations_*` → `sp_setup_work_centers_*`** |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 38 | Work Center | - [ ] **Database Migration: Rename `fn_setup_workstation_name_normalized` → `fn_setup_work |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 41 | Work Center | **GATE: Dev DB recreates cleanly with `core_computers_registry`, `setup_work_centers_catal |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 47 | Computer | - [ ] **Service Layer: Update `sp_config_settings_get_effective`** param `p_workstation_id |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 48 | Computer | - [ ] **Service Layer: Update `sp_config_settings_upsert`** param `p_workstation_id` → `p_ |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 49 | Work Center | - [ ] **Service Layer: Update `sp_config_hot_workcenters_*`** joins/params from `core_work |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 50 | Computer | - [ ] **Service Layer: Audit all SPs in `Database/StoredProcedures/AllSPs.sql`** for remai |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 51 | Work Center | - [ ] **Service Layer: Rename work-center SPs** (`sp_setup_work_centers_*`) and update `Al |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 53 | Work Center | **GATE: All stored procedures compile; `core_computers_registry`/`computer_id` for compute |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 60 | Computer | - [ ] **Service Layer: Rename computer-related fields in `StartupState` / `StartupSessionS |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 64 | Work Center | - [ ] **Full Stack Engineer: Rename Module_Setup work-center code** `SetupWorkstation*` →  |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 77 | Review | - [ ] **Dialog Behavior: No-MAC skip** — reuse `IsWorkstationRegistrationAuthoritative`; s |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 88 | Review | - [ ] **Full Stack Engineer: Keep stored data raw** — display format is presentation-only; |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 110 | Review | - [ ] **Tech Lead: Final sweep — run `tools/scan_workstation_rename.ps1` and VS Code searc |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 112 | Computer | **GATE: No user-facing or code "workstation" text remains anywhere; computer = "Computer", |
-| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 140 | Computer | Next task: **Rename table `core_workstations_registry` → `core_computers_registry` in `Dat |
-| `Documents\Weekend-User-Update-Email.md` | 45 | Review | - Responsive cards keep the screen usable on any workstation or screen size. |
-| `Documents\Development\InforVisual\InforVisualGuide.md` | 1166 | Review | - In the Macros section, specify how to store macros and where to read macros. Macros can  |
-| `Documents\Development\InforVisual\InforVisualGuide.md` | 1173 | Review | To store macros on and read them from the workstation, clear the check box. After you clea |
-| `Documents\Development\InforVisual\InforVisualGuide.md` | 1175 | Review | - - When a user runs a macro, the macro is read from the workstation. |
-| `Documents\Development\InforVisual\InforVisualGuide.md` | 1176 | Review | - Any macros created after the check box is selected are stored on the workstation. |
-| `Documents\Development\InforVisual\InforVisualGuide.md` | 1178 | Review | You cannot read certain macros from the database and other macros from the workstation. If |
-| `Documents\Development\InforVisual\InforVisualGuide.md` | 1765 | Review | Use the Default Sign In Profile function to set default sign in information for the work s |
-| `Documents\Development\InforVisual\Interaction_Guides\UI_Interaction_Guide.md` | 57 | Review | No local Infor/MAPICS registry keys found on this workstation. Visual is a network-hosted |
-| `Documents\Development\InforVisual\Interaction_Guides\UI_Interaction_Guide.md` | 176 | Review | **Both are present and functional.** VBScript can be invoked on this workstation. |
-| `Documents\Development\InforVisual\Interaction_Guides\UI_Interaction_Guide.md` | 213 | Review | **Conclusion:** `wscript.exe` can run unsigned `.vbs` files on this workstation without re |
-| `Documents\Development\InforVisual\Interaction_Guides\UI_Interaction_Guide.md` | 253 | Review | Windows services (e.g., `LanmanWorkstation`, `SessionEnv`, Chrome/Edge elevation services) |
-| `Documents\Development\InforVisual\Interaction_Guides\UI_Interaction_Guide.md` | 269 | Review | **ION is not installed, licensed, or reachable from this workstation.** |
-| `Documents\Development\InforVisual\Interaction_Guides\VBScript_Guide.md` | 23 | Review | The infrastructure — VBScript runtime, `ADODB`, user credentials, network access to Visual |
-| `Documents\Development\InforVisual\Interaction_Guides\VBScript_Guide.md` | 277 | Review | \| 4 \| Does Visual's macro security policy on production workstations allow `wscript.exe` t |
-| `Documents\Development\Waitlist\NewRequestFeature\RequiredWorkflow.md` | 14 | Review | - Workstation identity at the top (current workstation name). |
-| `Documents\Development\Waitlist\NewRequestFeature\RequiredWorkflow.md` | 128 | Review | - workstationName |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 13 | Computer | - [ ] **Database Migration: Rename table `core_workstations_registry` → `core_computers_re |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 14 | Computer | - [ ] **Database Migration: Rename column `workstation_name` → `computer_name`** in `core_ |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 23 | Computer | - [ ] **Database Migration: Rename `auth_sessions_tokens.workstation_id` → `computer_id`** |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 24 | Computer | - [ ] **Database Migration: Rename `config_settings_values.workstation_id` → `computer_id` |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 25 | Computer | - [ ] **Database Migration: Rename `config_settings_history.workstation_id` → `computer_id |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 26 | Work Center | - [ ] **Database Migration: Rename `config_workstation_hot_workcenters.core_workstation_id |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 27 | Work Center | - [ ] **Database Migration: Rename table `config_workstation_hot_workcenters` → `config_co |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 37 | Review | ### Subphase 1.4: Rename work-center catalog (Work Station → Work Center) (Ref: 1, 4) |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 39 | Work Center | - [ ] **Database Migration: Rename table `setup_workstations_catalog` → `setup_work_center |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 40 | Work Center | - [ ] **Database Migration: Rename `waitlist_requests_queue.workstation_name` → `work_cent |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 41 | Work Center | - [ ] **Database Migration: Rename `sp_setup_workstations_*` → `sp_setup_work_centers_*`** |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 42 | Work Center | - [ ] **Database Migration: Rename `fn_setup_workstation_name_normalized` → `fn_setup_work |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 45 | Work Center | **GATE: Dev DB recreates cleanly with `core_computers_registry`, `setup_work_centers_catal |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 51 | Computer | - [ ] **Service Layer: Update `sp_config_settings_get_effective`** param `p_workstation_id |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 52 | Computer | - [ ] **Service Layer: Update `sp_config_settings_upsert`** param `p_workstation_id` → `p_ |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 53 | Work Center | - [ ] **Service Layer: Update `sp_config_hot_workcenters_*`** joins/params from `core_work |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 54 | Computer | - [ ] **Service Layer: Audit all SPs in `Database/StoredProcedures/AllSPs.sql`** for remai |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 55 | Work Center | - [ ] **Service Layer: Rename work-center SPs** (`sp_setup_work_centers_*`) and update `Al |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 57 | Work Center | **GATE: All stored procedures compile; `core_computers_registry`/`computer_id` for compute |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 64 | Computer | - [ ] **Service Layer: Rename computer-related fields in `StartupState` / `StartupSessionS |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 68 | Work Center | - [ ] **Full Stack Engineer: Rename Module_Setup work-center code** `SetupWorkstation*` →  |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 81 | Review | - [ ] **Dialog Behavior: No-MAC skip** — reuse `IsWorkstationRegistrationAuthoritative`; s |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 92 | Review | - [ ] **Full Stack Engineer: Keep stored data raw** — display format is presentation-only; |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 114 | Review | - [ ] **Tech Lead: Final sweep — run `tools/scan_workstation_rename.ps1` and VS Code searc |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 116 | Computer | **GATE: No user-facing or code "workstation" text remains anywhere; computer = "Computer", |
+| `Documents\Computer_FirstLoad_Gate_Implementation_Checklist.md` | 144 | Computer | Next task: **Rename table `core_workstations_registry` → `core_computers_registry` in `Dat |
 | `Module_Core\Services\PageService.cs` | 39 | Work Center | Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupWorkstationViewModel, SetupWorkstation |
 | `Module_Core\Services\DependencyInjection\ServiceRegistrationExtensions.cs` | 77 | Work Center | services.AddTransient<SetupWorkstationViewModel>(); |
 | `Module_Core\Services\DependencyInjection\ServiceRegistrationExtensions.cs` | 86 | Work Center | services.AddTransient<SetupWorkstationPage>(); |

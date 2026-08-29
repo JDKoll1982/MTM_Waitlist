@@ -647,14 +647,14 @@ public sealed class ImageLocationService : IImageLocationService, IDisposable
 
         var sql = $@"SELECT
     id,
-    workstation_name,
+    work_center_name,
     building,
     sort_rank,
     is_active
-FROM setup_workstations_catalog
+FROM setup_work_centers_catalog
 WHERE is_active = 1
-  AND workstation_name IN ({string.Join(", ", placeholders)})
-ORDER BY building ASC, sort_rank ASC, workstation_name ASC;";
+  AND work_center_name IN ({string.Join(", ", placeholders)})
+ORDER BY building ASC, sort_rank ASC, work_center_name ASC;";
 
         var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
             sql,
@@ -668,7 +668,7 @@ ORDER BY building ASC, sort_rank ASC, workstation_name ASC;";
             items.Add(new WorkCenterItem
             {
                 WorkCenterId = ReadInt64(row, "id"),
-                DisplayName = ReadString(row, "workstation_name"),
+                DisplayName = ReadString(row, "work_center_name"),
                 Building = ReadString(row, "building"),
                 SortRank = (int)ReadInt64(row, "sort_rank"),
                 IsActive = ReadBoolean(row, "is_active")

@@ -90,7 +90,7 @@
         </StackPanel>
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
-            <Button x:Uid="Setup_Action.BackToWorkstations" Content="Back" Command="{x:Bind ViewModel.BackToWorkstationsCommand}" />
+            <Button x:Uid="Setup_Action.BackToWorkstations" Content="Back" Command="{x:Bind ViewModel.BackToWorkCentersCommand}" />
             <Button x:Uid="Setup_Action.Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelCommand}" />
             <Button x:Uid="Setup_Action.Search" Content="Search" Command="{x:Bind ViewModel.SearchCommand}" />
         </StackPanel>

@@ -36,7 +36,7 @@ public class PageService : IPageService
         Configure<NewRequestResultViewModel, NewRequestResultPage>();
         Configure<ControlInspectorDetailViewModel, ControlInspectorDetailPage>();
         Configure<SettingsViewModel, SettingsPage>();
-        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupWorkstationViewModel, SetupWorkstationPage>();
+        Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupWorkCenterViewModel, SetupWorkCenterPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupWorkOrderViewModel, SetupWorkOrderPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupPartSelectionViewModel, SetupPartSelectionPage>();
         Configure<MTM_Waitlist.Module_Setup.ViewModels.SetupSequenceSelectionViewModel, SetupSequenceSelectionPage>();

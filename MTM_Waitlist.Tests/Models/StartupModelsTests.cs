@@ -41,7 +41,7 @@ public sealed class StartupModelsTests
         Assert.AreEqual(string.Empty, state.MacAddressNormalized);
         Assert.AreEqual(string.Empty, state.CurrentRole);
         Assert.IsFalse(state.IsUserMatched);
-        Assert.IsFalse(state.IsWorkstationRegistered);
+        Assert.IsFalse(state.IsComputerRegistered);
         Assert.IsFalse(state.IsSessionValid);
         Assert.AreEqual(StartupState.SessionTokenSourceNone, state.SessionTokenSource);
         Assert.IsFalse(state.RequireNewUserAction);

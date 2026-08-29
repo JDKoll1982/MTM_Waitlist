@@ -6,7 +6,7 @@ namespace MTM_Waitlist.Module_Setup.Models;
 
 public enum SetupWorkflowStep
 {
-    WorkstationSelection,
+    WorkCenterSelection,
     WorkOrderEntry,
     PartSelection,
     SequenceSelection,
@@ -29,11 +29,11 @@ public sealed class SetupWorkflowState : ObservableObject
     private string _selectedScrapType = string.Empty;
     private bool _requiresReplacementConfirmation;
     private bool _hasUnsavedChanges;
-    private SetupWorkflowStep _currentStep = SetupWorkflowStep.WorkstationSelection;
+    private SetupWorkflowStep _currentStep = SetupWorkflowStep.WorkCenterSelection;
 
     public ObservableCollection<SetupPartResult> PartResults { get; } = new();
 
-    public ObservableCollection<SetupWorkstation> Workstations { get; } = new();
+    public ObservableCollection<SetupWorkCenter> WorkCenters { get; } = new();
 
     public ObservableCollection<SetupSequenceResult> SequenceResults { get; } = new();
 
@@ -148,9 +148,9 @@ public sealed class SetupWorkflowState : ObservableObject
         SelectedScrapType = string.Empty;
         RequiresReplacementConfirmation = false;
         HasUnsavedChanges = false;
-        CurrentStep = SetupWorkflowStep.WorkstationSelection;
+        CurrentStep = SetupWorkflowStep.WorkCenterSelection;
 
-        Workstations.Clear();
+        WorkCenters.Clear();
         PartResults.Clear();
         SequenceResults.Clear();
         SubordinateParts.Clear();
@@ -162,7 +162,7 @@ public sealed class SetupWorkflowState : ObservableObject
     }
 }
 
-public sealed class SetupWorkstation : ObservableObject
+public sealed class SetupWorkCenter : ObservableObject
 {
     private const string DefaultWorkstationImagePath = "Assets/Images/default-workstation-image.png";
 

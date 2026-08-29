@@ -55,7 +55,7 @@ public sealed class WaitlistRequestServiceTests
             Subtype = draft.Subtype,
             InputValue = "Different reason for the same request",
             ActiveSetupJobId = draft.ActiveSetupJobId,
-            WorkstationName = draft.WorkstationName,
+            WorkCenterName = draft.WorkCenterName,
             RequesterEmployeeNumber = draft.RequesterEmployeeNumber,
             RequesterEmployeeName = draft.RequesterEmployeeName,
             RequestedUtc = DateTimeOffset.UtcNow,
@@ -115,7 +115,7 @@ public sealed class WaitlistRequestServiceTests
             Subtype = "Wrong Coil",
             InputValue = "Wrong material at press",
             ActiveSetupJobId = "JOB-1001",
-            WorkstationName = "Press 12",
+            WorkCenterName = "Press 12",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
             TargetTimeUtc = targetTime,
@@ -129,7 +129,7 @@ public sealed class WaitlistRequestServiceTests
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status);
         Assert.IsNotNull(result.Request);
         Assert.AreEqual("JOB-1001", result.Request.ActiveSetupJobId);
-        Assert.AreEqual("Press 12", result.Request.WorkstationName);
+        Assert.AreEqual("Press 12", result.Request.WorkCenterName);
         Assert.AreEqual("6229", result.Request.RequesterEmployeeNumber);
         Assert.AreEqual("John Koll", result.Request.RequesterEmployeeName);
         Assert.AreEqual(targetTime, result.Request.TargetTimeUtc);
@@ -150,7 +150,7 @@ public sealed class WaitlistRequestServiceTests
             Subtype = "Wrong Coil",
             InputValue = "Wrong material at press",
             ActiveSetupJobId = string.Empty,
-            WorkstationName = "Press 12",
+            WorkCenterName = "Press 12",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
         };
@@ -646,7 +646,7 @@ public sealed class WaitlistRequestServiceTests
         Subtype = "Wrong Coil",
         InputValue = "Wrong material at press",
         ActiveSetupJobId = "JOB-1001",
-        WorkstationName = "Press 12",
+        WorkCenterName = "Press 12",
         RequesterEmployeeNumber = "6229",
         RequesterEmployeeName = "John Koll",
         TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(15),

@@ -80,3 +80,30 @@ Unnamed controls are auto-skipped (too ambiguous for safe regex edits).
 - After adding/changing UI pages or controls
 - Before PR review for tooltip coverage
 - Anytime; the scan is idempotent for existing keys
+
+## Split-InforVisualGuide.ps1
+
+Splits the single ~10,000-line `Documents/Development/InforVisual/InforVisualGuide.md`
+export into per-chapter Markdown files.
+
+### What it does
+
+1. Reads the guide (UTF-8) and locates every `# Chapter N: Title` heading
+2. Writes one file per chapter into `Documents/Development/InforVisual/Infor Visual Guide/`
+3. Splits the trailing `# Index` section into `Index.md`
+4. Optionally keeps the front matter (cover image, copyright, Contents TOC) as
+   `00-Front-Matter.md` when `-IncludeFrontMatter` is passed
+
+The split is line-based and lossless: chapter bodies are copied verbatim and
+headings are not renumbered. Filenames use a zero-padded chapter number and a
+hyphenated title (e.g. `02-Application-Global-Maintenance.md`).
+
+### Usage
+
+```powershell
+# Chapters + Index only (front matter skipped)
+pwsh -File tools/Split-InforVisualGuide.ps1
+
+# Also keep the cover/copyright/Contents TOC as 00-Front-Matter.md
+pwsh -File tools/Split-InforVisualGuide.ps1 -IncludeFrontMatter
+```

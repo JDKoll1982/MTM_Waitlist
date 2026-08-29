@@ -88,7 +88,7 @@ public partial class SetupCompletionViewModel : ObservableRecipient, INavigation
     private async Task StartOverAsync()
     {
         await _workflowService.ResetAsync().ConfigureAwait(true);
-        _navigationService.NavigateTo(typeof(SetupWorkstationViewModel).FullName!, null, true);
+        _navigationService.NavigateTo(typeof(SetupWorkCenterViewModel).FullName!, null, true);
     }
 
     [RelayCommand]

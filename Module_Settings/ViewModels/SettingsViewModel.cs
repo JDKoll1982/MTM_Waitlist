@@ -373,10 +373,10 @@ public partial class SettingsViewModel : ObservableRecipient
         IsHotWorkCentersBusy = true;
         try
         {
-            var workstations = await _workCenterCatalogService.GetAvailableWorkstationsAsync().ConfigureAwait(true);
+            var workstations = await _workCenterCatalogService.GetAvailableComputersAsync().ConfigureAwait(true);
             ReplaceCollectionValues(AvailableWorkstations, workstations);
 
-            var currentWorkstation = _workCenterCatalogService.GetCurrentWorkstationName();
+            var currentWorkstation = _workCenterCatalogService.GetCurrentComputerName();
             var resolvedWorkstation = AvailableWorkstations.FirstOrDefault(item =>
                                           string.Equals(item, currentWorkstation, StringComparison.OrdinalIgnoreCase))
                 ?? AvailableWorkstations.FirstOrDefault()

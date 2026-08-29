@@ -41,6 +41,9 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<IStartupRecoveryService, MTM_Waitlist.Module_Startup.Services.StartupRecoveryService>();
         services.AddSingleton<IStartupRegistrationService, MTM_Waitlist.Module_Startup.Services.StartupRegistrationService>();
         services.AddSingleton<IStartupSessionRepository, MTM_Waitlist.Module_Startup.Services.StartupSessionRepository>();
+        services.AddSingleton<IComputerRegistryService, MTM_Waitlist.Module_Startup.Services.ComputerRegistryService>();
+        services.AddSingleton<IComputerGateService, MTM_Waitlist.Module_Startup.Services.ComputerGateService>();
+        services.AddSingleton<IStartupWindowService, MTM_Waitlist.Module_Startup.Services.StartupWindowService>();
         services.AddSingleton<IStartupLogForwarder, MTM_Waitlist.Module_Startup.Services.StartupLogForwarder>();
         services.AddSingleton<MTM_Waitlist.Module_Startup.Services.StartupLogService>();
         services.AddSingleton<IStartupLogService>(provider => provider.GetRequiredService<MTM_Waitlist.Module_Startup.Services.StartupLogService>());
@@ -74,7 +77,7 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<LoginPage>();
         services.AddTransient<SettingsPage>();
         services.AddTransient<SetupWorkOrderViewModel>();
-        services.AddTransient<SetupWorkstationViewModel>();
+        services.AddTransient<SetupWorkCenterViewModel>();
         services.AddTransient<SetupPartSelectionViewModel>();
         services.AddTransient<SetupSequenceSelectionViewModel>();
         services.AddTransient<SetupDunnageTypeViewModel>();
@@ -83,7 +86,7 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<SetupReviewViewModel>();
         services.AddTransient<SetupCompletionViewModel>();
         services.AddTransient<SetupWorkOrderPage>();
-        services.AddTransient<SetupWorkstationPage>();
+        services.AddTransient<SetupWorkCenterPage>();
         services.AddTransient<SetupPartSelectionPage>();
         services.AddTransient<SetupSequenceSelectionPage>();
         services.AddTransient<SetupDunnageTypePage>();

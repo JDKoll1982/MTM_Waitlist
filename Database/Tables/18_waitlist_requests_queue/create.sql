@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS waitlist_requests_queue (
     subtype VARCHAR(64) NULL,
     input_value VARCHAR(255) NULL,
     active_setup_job_id VARCHAR(64) NOT NULL,
-    workstation_name VARCHAR(64) NOT NULL,
+    work_center_name VARCHAR(64) NOT NULL,
     requester_employee_number VARCHAR(32) NOT NULL,
     requester_employee_name VARCHAR(128) NOT NULL,
     status VARCHAR(32) NOT NULL DEFAULT 'Pending',

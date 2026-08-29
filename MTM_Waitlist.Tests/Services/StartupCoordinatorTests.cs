@@ -56,7 +56,7 @@ public sealed class StartupCoordinatorTests
             Snapshot = new StartupSessionSnapshot
             {
                 IsUserMatched = true,
-                IsWorkstationRegistered = true,
+                IsComputerRegistered = true,
                 CurrentRole = "Developer",
                 HasDatabaseSession = false,
                 DatabaseSessionExpiresUtc = null
@@ -95,7 +95,7 @@ public sealed class StartupCoordinatorTests
             Snapshot = new StartupSessionSnapshot
             {
                 IsUserMatched = false,
-                IsWorkstationRegistered = true,
+                IsComputerRegistered = true,
                 CurrentRole = string.Empty,
                 HasDatabaseSession = false,
                 DatabaseSessionExpiresUtc = null
@@ -141,7 +141,7 @@ public sealed class StartupCoordinatorTests
             Snapshot = new StartupSessionSnapshot
             {
                 IsUserMatched = true,
-                IsWorkstationRegistered = true,
+                IsComputerRegistered = true,
                 CurrentRole = string.Empty,
                 HasDatabaseSession = true,
                 DatabaseSessionExpiresUtc = new DateTimeOffset(2026, 7, 26, 9, 0, 0, TimeSpan.Zero)
@@ -194,7 +194,7 @@ public sealed class StartupCoordinatorTests
             Snapshot = new StartupSessionSnapshot
             {
                 IsUserMatched = true,
-                IsWorkstationRegistered = true,
+                IsComputerRegistered = true,
                 CurrentRole = string.Empty,
                 HasDatabaseSession = true,
                 DatabaseSessionExpiresUtc = new DateTimeOffset(2026, 7, 26, 9, 0, 0, TimeSpan.Zero)
@@ -235,7 +235,7 @@ public sealed class StartupCoordinatorTests
             Snapshot = new StartupSessionSnapshot
             {
                 IsUserMatched = false,
-                IsWorkstationRegistered = false,
+                IsComputerRegistered = false,
                 CurrentRole = string.Empty,
                 HasDatabaseSession = false,
                 DatabaseSessionExpiresUtc = null
@@ -256,9 +256,9 @@ public sealed class StartupCoordinatorTests
         var result = await coordinator.RunAsync();
 
         Assert.AreEqual(typeof(LoginViewModel).FullName, result.RouteTarget);
-        Assert.IsTrue(startupState.IsWorkstationRegistrationAuthoritative);
+        Assert.IsTrue(startupState.IsComputerRegistrationAuthoritative);
         Assert.IsTrue(startupState.RequireNewUserAction);
-        Assert.AreEqual("This workstation is not registered. Choose New User to request access.", startupState.LoginHint);
+        Assert.AreEqual("This computer is not registered. Choose New User to request access.", startupState.LoginHint);
     }
 
     [TestMethod]
@@ -277,8 +277,8 @@ public sealed class StartupCoordinatorTests
             Snapshot = new StartupSessionSnapshot
             {
                 IsUserMatched = false,
-                IsWorkstationRegistered = false,
-                IsWorkstationRegistrationAuthoritative = false,
+                IsComputerRegistered = false,
+                IsComputerRegistrationAuthoritative = false,
                 CurrentRole = string.Empty,
                 HasDatabaseSession = false,
                 DatabaseSessionExpiresUtc = null
@@ -299,7 +299,7 @@ public sealed class StartupCoordinatorTests
         var result = await coordinator.RunAsync();
 
         Assert.AreEqual(typeof(LoginViewModel).FullName, result.RouteTarget);
-        Assert.IsFalse(startupState.IsWorkstationRegistrationAuthoritative);
+        Assert.IsFalse(startupState.IsComputerRegistrationAuthoritative);
         Assert.IsFalse(startupState.RequireNewUserAction);
         Assert.AreEqual("Sign in to continue.", startupState.LoginHint);
     }
@@ -320,7 +320,7 @@ public sealed class StartupCoordinatorTests
             Snapshot = new StartupSessionSnapshot
             {
                 IsUserMatched = false,
-                IsWorkstationRegistered = true,
+                IsComputerRegistered = true,
                 CurrentRole = string.Empty,
                 HasDatabaseSession = false,
                 DatabaseSessionExpiresUtc = null
@@ -461,7 +461,7 @@ public sealed class StartupCoordinatorTests
 
         try
         {
-            Environment.SetEnvironmentVariable(environmentVariableName, "Server=172.16.1.104;User ID=test;Password=test;Database=test;");
+            Environment.SetEnvironmentVariable(environmentVariableName, "Server=localhost;User ID=test;Password=test;Database=test;");
 
             var fileService = new InMemoryFileService(new Dictionary<string, object>
             {
@@ -592,7 +592,7 @@ public sealed class StartupCoordinatorTests
             Snapshot = new StartupSessionSnapshot
             {
                 IsUserMatched = false,
-                IsWorkstationRegistered = true,
+                IsComputerRegistered = true,
                 CurrentRole = "Developer",
                 HasDatabaseSession = false,
                 DatabaseSessionExpiresUtc = null

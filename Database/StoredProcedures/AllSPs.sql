@@ -7,14 +7,14 @@ DROP PROCEDURE IF EXISTS sp_config_settings_get_effective;
 
 CREATE PROCEDURE sp_config_settings_get_effective(
     IN p_setting_key VARCHAR(190),
-    IN p_workstation_id BIGINT,
+    IN p_computer_id BIGINT,
     IN p_user_id BIGINT
 )
 SELECT
     setting_key,
     scope_type,
     scope_key,
-    workstation_id,
+    computer_id,
     user_id,
     setting_value,
     setting_value_int,
@@ -28,7 +28,7 @@ SELECT
 FROM config_settings_values
 WHERE setting_key = p_setting_key
   AND (
-        (scope_type = 'workstation' AND workstation_id = p_workstation_id)
+        (scope_type = 'computer' AND computer_id = p_computer_id)
         OR scope_type = 'all_users'
         OR (scope_type = 'user' AND user_id = p_user_id)
         OR scope_type IN ('admin', 'developer')
@@ -46,7 +46,7 @@ DROP PROCEDURE IF EXISTS sp_config_settings_upsert;
 CREATE PROCEDURE sp_config_settings_upsert(
     IN p_setting_key VARCHAR(190),
     IN p_scope_type VARCHAR(16),
-    IN p_workstation_id BIGINT,
+    IN p_computer_id BIGINT,
     IN p_user_id BIGINT,
     IN p_setting_value TEXT,
     IN p_setting_value_int BIGINT,
@@ -61,7 +61,7 @@ INSERT INTO config_settings_values (
     setting_key,
     scope_type,
     scope_key,
-    workstation_id,
+    computer_id,
     user_id,
     setting_value,
     setting_value_int,
@@ -77,13 +77,13 @@ SELECT
     TRIM(p_setting_key),
     LOWER(TRIM(p_scope_type)),
     CASE LOWER(TRIM(p_scope_type))
-        WHEN 'workstation' THEN CONCAT('workstation:', p_workstation_id)
+        WHEN 'computer' THEN CONCAT('computer:', p_computer_id)
         WHEN 'user' THEN CONCAT('user:', p_user_id)
         WHEN 'all_users' THEN 'all_users'
         WHEN 'admin' THEN 'admin'
         ELSE 'developer'
     END,
-    p_workstation_id,
+    p_computer_id,
     p_user_id,
     p_setting_value,
     p_setting_value_int,
@@ -143,7 +143,7 @@ ON DUPLICATE KEY UPDATE
     
     -- Stored Procedure: sp_setup_save_setup
 -- Engine: MySQL 5.7
--- Purpose: Persist workstation setup state.
+-- Purpose: Persist work center setup state.
 
 USE mtm_waitlist;
 
@@ -368,54 +368,54 @@ INNER JOIN (
         GROUP BY work_center
 ) latest ON latest.max_id = aj.id;
 
--- Stored Procedure: sp_setup_workstations_delete
+-- Stored Procedure: sp_setup_work_centers_delete
 -- Engine: MySQL 5.7
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_setup_workstations_delete;
+DROP PROCEDURE IF EXISTS sp_setup_work_centers_delete;
 
-CREATE PROCEDURE sp_setup_workstations_delete(
-    IN p_workstation_id VARCHAR(32)
+CREATE PROCEDURE sp_setup_work_centers_delete(
+    IN p_work_center_id VARCHAR(32)
 )
-DELETE FROM setup_workstations_catalog
-WHERE id = CAST(TRIM(p_workstation_id) AS UNSIGNED);
+DELETE FROM setup_work_centers_catalog
+WHERE id = CAST(TRIM(p_work_center_id) AS UNSIGNED);
 
--- Stored Procedure: sp_setup_workstations_get_all
+-- Stored Procedure: sp_setup_work_centers_get_all
 -- Engine: MySQL 5.7
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_setup_workstations_get_all;
+DROP PROCEDURE IF EXISTS sp_setup_work_centers_get_all;
 
-CREATE PROCEDURE sp_setup_workstations_get_all()
+CREATE PROCEDURE sp_setup_work_centers_get_all()
 SELECT
     id,
     building,
-    workstation_name,
+    work_center_name,
     is_active,
     updated_utc
-FROM vw_setup_workstations_active
-ORDER BY sort_rank ASC, workstation_name ASC;
+FROM vw_setup_work_centers_active
+ORDER BY sort_rank ASC, work_center_name ASC;
 
--- Stored Procedure: sp_setup_workstations_upsert
+-- Stored Procedure: sp_setup_work_centers_upsert
 -- Engine: MySQL 5.7
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_setup_workstations_upsert;
+DROP PROCEDURE IF EXISTS sp_setup_work_centers_upsert;
 
-CREATE PROCEDURE sp_setup_workstations_upsert(
-    IN p_workstation_id VARCHAR(32),
+CREATE PROCEDURE sp_setup_work_centers_upsert(
+    IN p_work_center_id VARCHAR(32),
     IN p_building VARCHAR(64),
-    IN p_workstation_name VARCHAR(64),
+    IN p_work_center_name VARCHAR(64),
     IN p_modified_by_user_id BIGINT
 )
-INSERT INTO setup_workstations_catalog (
+INSERT INTO setup_work_centers_catalog (
     id,
     public_id,
     building,
-    workstation_name,
+    work_center_name,
     is_active,
     sort_rank,
     created_by_user_id,
@@ -424,10 +424,10 @@ INSERT INTO setup_workstations_catalog (
     updated_utc
 )
 VALUES (
-    CAST(NULLIF(TRIM(p_workstation_id) COLLATE utf8mb4_unicode_ci, '') AS UNSIGNED),
+    CAST(NULLIF(TRIM(p_work_center_id) COLLATE utf8mb4_unicode_ci, '') AS UNSIGNED),
     UUID(),
     NULLIF(TRIM(p_building) COLLATE utf8mb4_unicode_ci, ''),
-    NULLIF(fn_setup_workstation_name_normalized(p_workstation_name) COLLATE utf8mb4_unicode_ci, ''),
+    NULLIF(fn_setup_work_center_name_normalized(p_work_center_name) COLLATE utf8mb4_unicode_ci, ''),
     1,
     100,
     p_modified_by_user_id,
@@ -437,64 +437,64 @@ VALUES (
 )
 ON DUPLICATE KEY UPDATE
     building = VALUES(building),
-    workstation_name = VALUES(workstation_name),
+    work_center_name = VALUES(work_center_name),
     updated_by_user_id = VALUES(updated_by_user_id),
     updated_utc = UTC_TIMESTAMP();
 
--- Stored Procedure: sp_setup_workstations_touch
+-- Stored Procedure: sp_setup_work_centers_touch
 -- Engine: MySQL 5.7
 -- Purpose: Refresh the work center catalog "Last Updated" timestamp after setup activity.
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_setup_workstations_touch;
+DROP PROCEDURE IF EXISTS sp_setup_work_centers_touch;
 
-CREATE PROCEDURE sp_setup_workstations_touch(
+CREATE PROCEDURE sp_setup_work_centers_touch(
     IN p_work_center VARCHAR(64),
     IN p_updated_by_user_id BIGINT
 )
-UPDATE setup_workstations_catalog
+UPDATE setup_work_centers_catalog
 SET
     updated_utc = UTC_TIMESTAMP(),
     updated_by_user_id = COALESCE(p_updated_by_user_id, updated_by_user_id)
-WHERE workstation_name = TRIM(p_work_center);
+WHERE work_center_name = TRIM(p_work_center);
 
--- Stored Procedure: sp_config_hot_workcenters_get_for_workstation
+-- Stored Procedure: sp_config_hot_workcenters_get_for_computer
 -- Engine: MySQL 5.7
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_config_hot_workcenters_get_for_workstation;
+DROP PROCEDURE IF EXISTS sp_config_hot_workcenters_get_for_computer;
 
-CREATE PROCEDURE sp_config_hot_workcenters_get_for_workstation(
-    IN p_workstation_name VARCHAR(128)
+CREATE PROCEDURE sp_config_hot_workcenters_get_for_computer(
+    IN p_computer_name VARCHAR(128)
 )
 SELECT
-    swc.workstation_name AS work_center_name,
+    swc.work_center_name AS work_center_name,
     cwhc.sort_rank
-FROM config_workstation_hot_workcenters cwhc
-INNER JOIN core_workstations_registry cwr ON cwr.id = cwhc.core_workstation_id
-INNER JOIN setup_workstations_catalog swc ON swc.id = cwhc.setup_workstation_id
+FROM config_computer_hot_work_centers cwhc
+INNER JOIN core_computers_registry cwr ON cwr.id = cwhc.computer_id
+INNER JOIN setup_work_centers_catalog swc ON swc.id = cwhc.work_center_id
 WHERE cwhc.is_active = 1
   AND swc.is_active = 1
   AND (
-        cwr.workstation_name = TRIM(p_workstation_name)
-        OR cwr.hostname_normalized = TRIM(p_workstation_name)
+        cwr.computer_name = TRIM(p_computer_name)
+        OR cwr.hostname_normalized = TRIM(p_computer_name)
       )
-ORDER BY cwhc.sort_rank ASC, swc.workstation_name ASC;
+ORDER BY cwhc.sort_rank ASC, swc.work_center_name ASC;
 
--- Stored Procedure: sp_config_hot_workcenters_delete_for_workstation
+-- Stored Procedure: sp_config_hot_workcenters_delete_for_computer
 -- Engine: MySQL 5.7
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_config_hot_workcenters_delete_for_workstation;
+DROP PROCEDURE IF EXISTS sp_config_hot_workcenters_delete_for_computer;
 
-CREATE PROCEDURE sp_config_hot_workcenters_delete_for_workstation(
-    IN p_core_workstation_id BIGINT
+CREATE PROCEDURE sp_config_hot_workcenters_delete_for_computer(
+    IN p_computer_id BIGINT
 )
-DELETE FROM config_workstation_hot_workcenters
-WHERE core_workstation_id = p_core_workstation_id;
+DELETE FROM config_computer_hot_work_centers
+WHERE computer_id = p_computer_id;
 
 -- Stored Procedure: sp_config_hot_workcenters_upsert
 -- Engine: MySQL 5.7
@@ -504,14 +504,14 @@ USE mtm_waitlist;
 DROP PROCEDURE IF EXISTS sp_config_hot_workcenters_upsert;
 
 CREATE PROCEDURE sp_config_hot_workcenters_upsert(
-    IN p_core_workstation_id BIGINT,
-    IN p_setup_workstation_id BIGINT,
+    IN p_computer_id BIGINT,
+    IN p_work_center_id BIGINT,
     IN p_sort_rank INT,
     IN p_modified_by_user_id BIGINT
 )
-INSERT INTO config_workstation_hot_workcenters (
-    core_workstation_id,
-    setup_workstation_id,
+INSERT INTO config_computer_hot_work_centers (
+    computer_id,
+    work_center_id,
     public_id,
     sort_rank,
     is_active,
@@ -521,8 +521,8 @@ INSERT INTO config_workstation_hot_workcenters (
     updated_utc
 )
 VALUES (
-    p_core_workstation_id,
-    p_setup_workstation_id,
+    p_computer_id,
+    p_work_center_id,
     UUID(),
     p_sort_rank,
     1,
@@ -549,7 +549,7 @@ CREATE PROCEDURE sp_waitlist_request_insert(
     IN p_subtype VARCHAR(64),
     IN p_input_value VARCHAR(255),
     IN p_active_setup_job_id VARCHAR(64),
-    IN p_workstation_name VARCHAR(64),
+    IN p_work_center_name VARCHAR(64),
     IN p_requester_employee_number VARCHAR(32),
     IN p_requester_employee_name VARCHAR(128),
     IN p_status VARCHAR(32),
@@ -567,7 +567,7 @@ INSERT INTO waitlist_requests_queue (
     subtype,
     input_value,
     active_setup_job_id,
-    workstation_name,
+    work_center_name,
     requester_employee_number,
     requester_employee_name,
     status,
@@ -587,7 +587,7 @@ VALUES (
     NULLIF(TRIM(COALESCE(p_subtype, '')) COLLATE utf8mb4_unicode_ci, ''),
     NULLIF(TRIM(COALESCE(p_input_value, '')) COLLATE utf8mb4_unicode_ci, ''),
     TRIM(p_active_setup_job_id),
-    TRIM(p_workstation_name),
+    TRIM(p_work_center_name),
     TRIM(p_requester_employee_number),
     TRIM(p_requester_employee_name),
     COALESCE(NULLIF(TRIM(COALESCE(p_status, '')) COLLATE utf8mb4_unicode_ci, ''), 'Pending'),

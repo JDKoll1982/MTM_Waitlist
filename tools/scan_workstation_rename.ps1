@@ -34,6 +34,7 @@ if (-not (Test-Path $repoRoot)) { throw "Repo root not found: $repoRoot" }
 if (-not $OutFile) { $OutFile = Join-Path $repoRoot 'Documents\Rename_Scan_Results.md' }
 
 $excludeDirs   = @('bin', 'obj', '.git', '.vs', 'node_modules', 'TestResults', 'packages', '.serena', 'pri_dump')
+$excludePaths  = @('Documents\Development\InforVisual')
 $binaryExts    = @('.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.dll', '.exe', '.pdb', '.pri', '.dgspec', '.snupkg', '.nupkg', '.db', '.bdb', '.dat', '.ttf', '.otf')
 $logExts       = @('.log')
 $excludeFileNames = @('Log.md', 'testout.txt', 'testerr.txt', 'pri_dump.xml', 'scan_workstation_rename.ps1', 'Rename_Scan_Results.md')
@@ -43,6 +44,10 @@ $lineTruncate  = 90
 function Test-Excluded([string]$fullPath) {
     $parts = $fullPath.Split([IO.Path]::DirectorySeparatorChar)
     foreach ($p in $parts) { if ($excludeDirs -contains $p) { return $true } }
+    $rel = $fullPath.Substring($repoRoot.Length).TrimStart('\', '/')
+    foreach ($xp in $excludePaths) {
+        if ($rel -eq $xp -or $rel.StartsWith($xp + '\') -or $rel.StartsWith($xp + '/')) { return $true }
+    }
     return $false
 }
 

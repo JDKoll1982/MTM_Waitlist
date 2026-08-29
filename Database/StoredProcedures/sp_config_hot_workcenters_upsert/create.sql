@@ -6,14 +6,14 @@ USE mtm_waitlist;
 DROP PROCEDURE IF EXISTS sp_config_hot_workcenters_upsert;
 
 CREATE PROCEDURE sp_config_hot_workcenters_upsert(
-    IN p_core_workstation_id BIGINT,
-    IN p_setup_workstation_id BIGINT,
+    IN p_computer_id BIGINT,
+    IN p_work_center_id BIGINT,
     IN p_sort_rank INT,
     IN p_modified_by_user_id BIGINT
 )
-INSERT INTO config_workstation_hot_workcenters (
-    core_workstation_id,
-    setup_workstation_id,
+INSERT INTO config_computer_hot_work_centers (
+    computer_id,
+    work_center_id,
     public_id,
     sort_rank,
     is_active,
@@ -23,8 +23,8 @@ INSERT INTO config_workstation_hot_workcenters (
     updated_utc
 )
 VALUES (
-    p_core_workstation_id,
-    p_setup_workstation_id,
+    p_computer_id,
+    p_work_center_id,
     UUID(),
     p_sort_rank,
     1,

@@ -2,13 +2,15 @@
 
 > Source of truth for the `Computer_FirstLoad_Gate_Implementation_Checklist.md`.
 > Decisions locked via Q&A on 2026-08-24. Dev-only database (recreate freely; no production migration).
+>
+> **Project structure (post-refactor):** The remaining implementation phases run after the per-module project split. Each module now builds as its own WinUI class library — `MTM_Waitlist.Core` (← `Module_Core`), `MTM_Waitlist.Shared` (← `Module_Shared`), `MTM_Waitlist.Startup` (← `Module_Startup`), `MTM_Waitlist.Setup` (← `Module_Setup`), `MTM_Waitlist.Settings` (← `Module_Settings`), `MTM_Waitlist.Waitlist` (← `Module_Waitlist`), `MTM_Waitlist.Reporting` (← `Module_Reporting`). The `MTM_Waitlist` app project is the **composition root** and owns all `Views`, `Controls`, XAML, resources (`.resw`), and DI wiring. Namespaces (`MTM_Waitlist.Module_*`) are **unchanged**, so every code identifier referenced in this design resolves within its owning project; any `Module_*` path below resolves under that module's project root.
 
 ## 1. Terminology (critical distinction)
 
 This design separates two concepts that both currently use the word "workstation", and **eliminates "Workstation" entirely**:
 
 | Concept | Meaning | DB home | Final naming |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Computer** | A physical machine (hostname e.g. `johnspc`, display name e.g. "John's Computer"). Has nothing to do with presses/work centers. | `core_workstations_registry` → `core_computers_registry` | **"Computer"** |
 | **Work Center** | A press/work station (e.g. `100-3`, `100-6`). Selected in Module_Setup. | `setup_workstations_catalog` → `setup_work_centers_catalog` | **"Work Center"** |
 
@@ -64,7 +66,7 @@ Work-center naming uses "work_center" / "Work Center" — never "workstation" an
 
 - **Renamed machine** (same MAC, new hostname): update the existing row (UPSERT), do not insert. Show the modal on startup to confirm.
 - **Reimaged/replaced machine** (same hostname, new MAC): strict composite → insert a **second** registry row (accept duplicate hostnames; only the latest is linked). *Decision: accept duplicate hostname rows.*
-- **No stable MAC** (VM / no NIC): fall back to hostname-only; if still not authoritative, **skip the dialog** (reuse `IsWorkstationRegistrationAuthoritative`). Never infinite-loop.
+- **No stable MAC** (VM / no NIC): fall back to hostname-only; if still not authoritative, **skip the dialog** (reuse `IsComputerRegistrationAuthoritative`). Never infinite-loop.
 
 ## 6. DB unavailable handling
 
@@ -81,7 +83,7 @@ Work-center naming uses "work_center" / "Work Center" — never "workstation" an
 ## 8. Display format across UI
 
 - Everywhere a computer name is shown to users across **all modules** (Setup, Waitlist, Reporting, Settings, history/logs) use `{DisplayName} - {ComputerName}`.
-- Does NOT change stored data (e.g. `waitlist_requests_queue.workstation_name` remains raw); the format is display-only.
+- Does NOT change stored data (e.g. `waitlist_requests_queue.work_center_name` remains raw); the format is display-only.
 
 ## 9. Settings panel (Module_Settings)
 
@@ -109,7 +111,7 @@ Rename **every "workstation" occurrence** into either "Computer" or "Work Center
 
 ## 13. Rename scan tool
 
-- `tools/scan_workstation_rename.ps1` scans every text file in the repo (excluding generated/binary/SCM dirs: `bin`, `obj`, `.git`, `.vs`, `node_modules`, `TestResults`, `packages`, `.serena`, `pri_dump`; log files `*.log`, `Log.md`, `testout.txt`, `testerr.txt`; PRI dump `pri_dump.xml`; and the tool's own files `scan_workstation_rename.ps1` / `Rename_Scan_Results.md`) for `workstation` / `Work Station` and emits a per-file, per-line edit map with a **Computer / Work Center / Review** heuristic.
+- `tools/scan_workstation_rename.ps1` scans every text file in the repo (excluding generated/binary/SCM dirs: `bin`, `obj`, `.git`, `.vs`, `node_modules`, `TestResults`, `packages`, `.serena`, `pri_dump`; log files `*.log`, `Log.md`, `testout.txt`, `testerr.txt`; PRI dump `pri_dump.xml`; and the tool's own files `scan_workstation_rename.ps1` / `Rename_Scan_Results.md`) for `workstation` / `Work Station` and emits a per-file, per-line edit map with a **Computer / Work Center / Review** heuristic. Post-refactor, the scan covers every per-module project root plus the app and test projects.
 - Also reports **files and folders whose names contain the pattern** (a `Files / folders to rename` table) with a suggested new name (PascalCase → `WorkCenter`/`Computer`, snake_case → `work_center`/`computer`).
 - Output: console table + `Documents/Rename_Scan_Results.md`. Regenerate with:
   `pwsh -NoProfile -File tools/scan_workstation_rename.ps1`

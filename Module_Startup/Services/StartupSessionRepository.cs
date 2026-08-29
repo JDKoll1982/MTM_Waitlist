@@ -62,8 +62,8 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
             return new StartupSessionSnapshot
             {
                 IsUserMatched = false,
-                IsWorkstationRegistered = false,
-                IsWorkstationRegistrationAuthoritative = false,
+                IsComputerRegistered = false,
+                IsComputerRegistrationAuthoritative = false,
                 CurrentRole = string.Empty,
                 HasDatabaseSession = false,
                 DatabaseSessionExpiresUtc = null
@@ -76,7 +76,7 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
             await using var connection = new MySqlConnection(timeoutConnectionString);
             await connection.OpenAsync(token);
 
-            var workstationRegistered = await ReadWorkstationRegisteredAsync(connection, hostnameNormalized, macAddressNormalized, token);
+            var computerRegistered = await ReadComputerRegisteredAsync(connection, hostnameNormalized, macAddressNormalized, token);
             var userRow = await ReadUserRowAsync(connection, username, token);
 
             if (!userRow.IsUserMatched)
@@ -84,8 +84,8 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                 return new StartupSessionSnapshot
                 {
                     IsUserMatched = false,
-                    IsWorkstationRegistered = workstationRegistered,
-                    IsWorkstationRegistrationAuthoritative = true,
+                    IsComputerRegistered = computerRegistered,
+                    IsComputerRegistrationAuthoritative = true,
                     CurrentRole = string.Empty,
                     HasDatabaseSession = false,
                     DatabaseSessionExpiresUtc = null
@@ -97,8 +97,8 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
             return new StartupSessionSnapshot
             {
                 IsUserMatched = true,
-                IsWorkstationRegistered = workstationRegistered,
-                IsWorkstationRegistrationAuthoritative = true,
+                IsComputerRegistered = computerRegistered,
+                IsComputerRegistrationAuthoritative = true,
                 CurrentRole = userRow.CurrentRole,
                 HasDatabaseSession = sessionExpiry.HasValue,
                 DatabaseSessionExpiresUtc = sessionExpiry
@@ -225,7 +225,7 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         }, cancellationToken);
     }
 
-    private static async Task<bool> ReadWorkstationRegisteredAsync(
+    private static async Task<bool> ReadComputerRegisteredAsync(
         MySqlConnection connection,
         string hostnameNormalized,
         string macAddressNormalized,
@@ -234,7 +234,7 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         await using var command = new MySqlCommand(
             """
             SELECT COUNT(1)
-            FROM core_workstations_registry
+            FROM core_computers_registry
             WHERE hostname_normalized = @hostname
               AND mac_address_normalized = @macAddress
               AND is_registered = 1;

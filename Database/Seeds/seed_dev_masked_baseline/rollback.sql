@@ -11,9 +11,9 @@ DELETE FROM core_buildings_catalog
 WHERE
     building_code IN ('expo_drive', 'vits_drive');
 
-DELETE FROM core_workstations_registry
+DELETE FROM core_computers_registry
 WHERE
-    workstation_name = 'johnspc';
+    computer_name = 'johnspc';
 
 DELETE FROM core_users_profiles WHERE username_normalized = 'johnk';
 

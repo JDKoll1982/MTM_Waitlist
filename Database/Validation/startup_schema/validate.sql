@@ -40,14 +40,14 @@ FROM (
                     AND table_name = 'auth_roles_assignments'
             )
         UNION ALL
-        SELECT 'missing_table', 'core_workstations_registry', 'table exists', 'missing'
+        SELECT 'missing_table', 'core_computers_registry', 'table exists', 'missing'
         WHERE
             NOT EXISTS (
                 SELECT 1
                 FROM information_schema.tables
                 WHERE
                     table_schema = DATABASE()
-                    AND table_name = 'core_workstations_registry'
+                    AND table_name = 'core_computers_registry'
             )
         UNION ALL
         SELECT 'missing_table', 'auth_sessions_tokens', 'table exists', 'missing'
@@ -327,82 +327,109 @@ FROM (
                     AND data_type = 'bigint'
             )
         UNION ALL
-        SELECT 'missing_column', 'core_workstations_registry.workstation_name', 'VARCHAR(128) NOT NULL', 'missing'
+        SELECT 'missing_column', 'core_computers_registry.computer_name', 'VARCHAR(128) NOT NULL', 'missing'
         WHERE
             NOT EXISTS (
                 SELECT 1
                 FROM information_schema.columns
                 WHERE
                     table_schema = DATABASE()
-                    AND table_name = 'core_workstations_registry'
-                    AND column_name = 'workstation_name'
+                    AND table_name = 'core_computers_registry'
+                    AND column_name = 'computer_name'
                     AND data_type = 'varchar'
                     AND character_maximum_length = 128
                     AND is_nullable = 'NO'
             )
         UNION ALL
-        SELECT 'missing_column', 'core_workstations_registry.hostname_normalized', 'VARCHAR(255) NOT NULL', 'missing'
+        SELECT 'missing_column', 'core_computers_registry.hostname_normalized', 'VARCHAR(255) NOT NULL', 'missing'
         WHERE
             NOT EXISTS (
                 SELECT 1
                 FROM information_schema.columns
                 WHERE
                     table_schema = DATABASE()
-                    AND table_name = 'core_workstations_registry'
+                    AND table_name = 'core_computers_registry'
                     AND column_name = 'hostname_normalized'
                     AND data_type = 'varchar'
                     AND character_maximum_length = 255
                     AND is_nullable = 'NO'
             )
         UNION ALL
-        SELECT 'missing_column', 'core_workstations_registry.mac_address_normalized', 'VARCHAR(64) NOT NULL', 'missing'
+        SELECT 'missing_column', 'core_computers_registry.mac_address_normalized', 'VARCHAR(64) NOT NULL', 'missing'
         WHERE
             NOT EXISTS (
                 SELECT 1
                 FROM information_schema.columns
                 WHERE
                     table_schema = DATABASE()
-                    AND table_name = 'core_workstations_registry'
+                    AND table_name = 'core_computers_registry'
                     AND column_name = 'mac_address_normalized'
                     AND data_type = 'varchar'
                     AND character_maximum_length = 64
                     AND is_nullable = 'NO'
             )
         UNION ALL
-        SELECT 'missing_column', 'core_workstations_registry.is_registered', 'TINYINT(1) NOT NULL', 'missing'
+        SELECT 'missing_column', 'core_computers_registry.display_name', 'VARCHAR(128) NOT NULL', 'missing'
         WHERE
             NOT EXISTS (
                 SELECT 1
                 FROM information_schema.columns
                 WHERE
                     table_schema = DATABASE()
-                    AND table_name = 'core_workstations_registry'
+                    AND table_name = 'core_computers_registry'
+                    AND column_name = 'display_name'
+                    AND data_type = 'varchar'
+                    AND character_maximum_length = 128
+                    AND is_nullable = 'NO'
+            )
+        UNION ALL
+        SELECT 'missing_column', 'core_computers_registry.description', 'VARCHAR(255) NULL', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'core_computers_registry'
+                    AND column_name = 'description'
+                    AND data_type = 'varchar'
+                    AND character_maximum_length = 255
+            )
+        UNION ALL
+        SELECT 'missing_column', 'core_computers_registry.is_registered', 'TINYINT(1) NOT NULL', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'core_computers_registry'
                     AND column_name = 'is_registered'
                     AND data_type = 'tinyint'
                     AND is_nullable = 'NO'
             )
         UNION ALL
-        SELECT 'missing_column', 'core_workstations_registry.created_utc', 'DATETIME NOT NULL', 'missing'
+        SELECT 'missing_column', 'core_computers_registry.created_utc', 'DATETIME NOT NULL', 'missing'
         WHERE
             NOT EXISTS (
                 SELECT 1
                 FROM information_schema.columns
                 WHERE
                     table_schema = DATABASE()
-                    AND table_name = 'core_workstations_registry'
+                    AND table_name = 'core_computers_registry'
                     AND column_name = 'created_utc'
                     AND data_type = 'datetime'
                     AND is_nullable = 'NO'
             )
         UNION ALL
-        SELECT 'missing_column', 'core_workstations_registry.updated_utc', 'DATETIME NOT NULL', 'missing'
+        SELECT 'missing_column', 'core_computers_registry.updated_utc', 'DATETIME NOT NULL', 'missing'
         WHERE
             NOT EXISTS (
                 SELECT 1
                 FROM information_schema.columns
                 WHERE
                     table_schema = DATABASE()
-                    AND table_name = 'core_workstations_registry'
+                    AND table_name = 'core_computers_registry'
                     AND column_name = 'updated_utc'
                     AND data_type = 'datetime'
                     AND is_nullable = 'NO'
@@ -421,7 +448,7 @@ FROM (
                     AND is_nullable = 'NO'
             )
         UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.workstation_id', 'BIGINT NULL', 'missing'
+        SELECT 'missing_column', 'auth_sessions_tokens.computer_id', 'BIGINT NULL', 'missing'
         WHERE
             NOT EXISTS (
                 SELECT 1
@@ -429,7 +456,7 @@ FROM (
                 WHERE
                     table_schema = DATABASE()
                     AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'workstation_id'
+                    AND column_name = 'computer_id'
                     AND data_type = 'bigint'
             )
         UNION ALL

@@ -9,7 +9,7 @@ CREATE FUNCTION fn_config_settings_scope_rank(p_scope_type VARCHAR(16))
 RETURNS TINYINT
 DETERMINISTIC
 RETURN CASE LOWER(TRIM(p_scope_type))
-    WHEN 'workstation' THEN 1
+    WHEN 'computer' THEN 1
     WHEN 'all_users' THEN 2
     WHEN 'user' THEN 3
     WHEN 'admin' THEN 4

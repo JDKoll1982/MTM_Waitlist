@@ -220,14 +220,16 @@ ON DUPLICATE KEY UPDATE
     is_active = VALUES(is_active),
     updated_utc = VALUES(updated_utc);
 
-TRUNCATE TABLE core_workstations_registry;
+TRUNCATE TABLE core_computers_registry;
 
 INSERT INTO
-    core_workstations_registry (
+    core_computers_registry (
         public_id,
-        workstation_name,
+        computer_name,
         hostname_normalized,
         mac_address_normalized,
+        display_name,
+        description,
         is_registered,
         created_utc,
         updated_utc
@@ -237,6 +239,8 @@ VALUES (
         'johnspc',
         'johnspc',
         'd8-43-ae-47-d0-d6',
+        'John''s Computer',
+        NULL,
         1,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
@@ -246,25 +250,27 @@ VALUES (
         'mtmfg-161',
         'mtmfg-161',
         'f4-f1-9e-38-64-d3',
+        'MTMFG 161',
+        NULL,
         1,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
     )
 ON DUPLICATE KEY UPDATE
-    workstation_name = VALUES(workstation_name),
+    computer_name = VALUES(computer_name),
     updated_utc = VALUES(updated_utc);
     
--- Seed: seed_setup_workstations_default
+-- Seed: seed_setup_work_centers_default
 -- Engine: MySQL 5.7
 
 USE mtm_waitlist;
 
-TRUNCATE TABLE setup_workstations_catalog;
+TRUNCATE TABLE setup_work_centers_catalog;
 
 INSERT IGNORE INTO
-    setup_workstations_catalog (
+    setup_work_centers_catalog (
         public_id,
-        workstation_name,
+        work_center_name,
         building,
         is_active,
         sort_rank,

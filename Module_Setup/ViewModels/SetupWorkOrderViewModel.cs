@@ -184,9 +184,9 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
     }
 
     [RelayCommand]
-    private void BackToWorkstations()
+    private void BackToWorkCenters()
     {
-        _navigationService.NavigateTo(typeof(SetupWorkstationViewModel).FullName!, null);
+        _navigationService.NavigateTo(typeof(SetupWorkCenterViewModel).FullName!, null);
     }
 
     [RelayCommand]

@@ -8,7 +8,7 @@ DROP PROCEDURE IF EXISTS sp_config_settings_upsert;
 CREATE PROCEDURE sp_config_settings_upsert(
     IN p_setting_key VARCHAR(190),
     IN p_scope_type VARCHAR(16),
-    IN p_workstation_id BIGINT,
+    IN p_computer_id BIGINT,
     IN p_user_id BIGINT,
     IN p_setting_value TEXT,
     IN p_setting_value_int BIGINT,
@@ -23,7 +23,7 @@ INSERT INTO config_settings_values (
     setting_key,
     scope_type,
     scope_key,
-    workstation_id,
+    computer_id,
     user_id,
     setting_value,
     setting_value_int,
@@ -39,13 +39,13 @@ SELECT
     TRIM(p_setting_key),
     LOWER(TRIM(p_scope_type)),
     CASE LOWER(TRIM(p_scope_type))
-        WHEN 'workstation' THEN CONCAT('workstation:', p_workstation_id)
+        WHEN 'computer' THEN CONCAT('computer:', p_computer_id)
         WHEN 'user' THEN CONCAT('user:', p_user_id)
         WHEN 'all_users' THEN 'all_users'
         WHEN 'admin' THEN 'admin'
         ELSE 'developer'
     END,
-    p_workstation_id,
+    p_computer_id,
     p_user_id,
     p_setting_value,
     p_setting_value_int,

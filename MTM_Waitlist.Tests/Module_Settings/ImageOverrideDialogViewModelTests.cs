@@ -321,7 +321,7 @@ public sealed class ImageOverrideDialogViewModelTests
     {
         _catalog.Catalog = new WorkCenterCatalogResult
         {
-            WorkstationName = "test",
+            ComputerName = "test",
             HotWorkCenters = new[] { "Press 12" },
             OtherWorkCenters = new[] { "Press 14" }
         };
@@ -342,7 +342,7 @@ public sealed class ImageOverrideDialogViewModelTests
     public async Task WorkCenterDialog_WhenTheCatalogIsUnavailable_ShowsAnErrorAndDisablesSave()
     {
         // No rows queued, so the catalog lookup yields nothing and the loader reports failure.
-        _catalog.Catalog = new WorkCenterCatalogResult { WorkstationName = "test" };
+        _catalog.Catalog = new WorkCenterCatalogResult { ComputerName = "test" };
 
         var viewModel = CreateWorkCenterViewModel();
         await viewModel.LoadAsync();
@@ -357,7 +357,7 @@ public sealed class ImageOverrideDialogViewModelTests
     {
         _catalog.Catalog = new WorkCenterCatalogResult
         {
-            WorkstationName = "test",
+            ComputerName = "test",
             OtherWorkCenters = new[] { "Press 12" }
         };
 

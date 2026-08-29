@@ -7,12 +7,17 @@
 			"command": "dotnet",
 			"args": [
 				"build",
-				"${workspaceFolder}/MTM_Waitlist.csproj",
+				"${workspaceFolder}/MTM_Waitlist.sln",
 				"-p:Configuration=Debug",
-				"-p:TargetFramework=net10.0-windows10.0.19041.0",
-				"-p:WindowsPackageType=None",
-				"-p:WinUISDKReferences=false"
+				"-p:Platform=x64",
+				"/m:1",
+				"/nodeReuse:false"
 			],
+			"options": {
+				"env": {
+					"MSBUILDDISABLENODEREUSE": "1"
+				}
+			},
 			"problemMatcher": "$msCompile",
 			"group": {
 				"kind": "build",
@@ -25,12 +30,42 @@
 			"command": "dotnet",
 			"args": [
 				"clean",
-				"${workspaceFolder}/MTM_Waitlist.csproj",
+				"${workspaceFolder}/MTM_Waitlist.sln",
 				"-p:Configuration=Debug",
-				"-p:TargetFramework=net10.0-windows10.0.19041.0",
-				"-p:WindowsPackageType=None",
-				"-p:WinUISDKReferences=false"
+				"-p:Platform=x64",
+				"/m:1",
+				"/nodeReuse:false"
 			],
+			"options": {
+				"env": {
+					"MSBUILDDISABLENODEREUSE": "1"
+				}
+			},
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Kill stale build processes",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Process -Name MTM_Waitlist,Microsoft.UI.Xaml.Markup.Compiler,VBCSCompiler,MSBuild -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Write-Output 'Cleared stale XAML compiler / build node processes.'"
+			]
+		},
+		{
+			"label": "Test: All (clean)",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Process -Name MTM_Waitlist,Microsoft.UI.Xaml.Markup.Compiler,VBCSCompiler,MSBuild -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; $env:MSBUILDDISABLENODEREUSE='1'; dotnet test \"${workspaceFolder}/MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj\" -c Debug -p:Platform=x64"
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
 			"problemMatcher": "$msCompile"
 		},
 		{
@@ -40,9 +75,16 @@
 			"args": [
 				"test",
 				"${workspaceFolder}/MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj",
+				"-p:Platform=x64",
+				"/m:1",
 				"--filter",
 				"FullyQualifiedName~Module_Setup"
-			]
+			],
+			"options": {
+				"env": {
+					"MSBUILDDISABLENODEREUSE": "1"
+				}
+			}
 		}
 	]
 }

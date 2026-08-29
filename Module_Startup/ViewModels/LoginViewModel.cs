@@ -1,7 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using MySqlConnector;
+
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
@@ -20,9 +23,13 @@ public partial class LoginViewModel : ObservableRecipient
     private readonly ILocalSettingsService _localSettingsService;
     private readonly IStartupShellStateService _startupShellStateService;
     private readonly INavigationService _navigationService;
+    private readonly IComputerGateService _computerGateService;
+    private readonly IComputerRegistryService _computerRegistryService;
+    private readonly IStartupWindowService _startupWindowService;
     private readonly StartupState _startupState;
     private long _pendingUserIdForPasswordChange;
     private string _pendingRole = string.Empty;
+    private ComputerGateCheck? _pendingGateCheck;
 
     [ObservableProperty]
     public partial string Username
@@ -80,12 +87,71 @@ public partial class LoginViewModel : ObservableRecipient
         set;
     }
 
+    [ObservableProperty]
+    public partial ComputerGateStatus ComputerGateState
+    {
+        get;
+        set;
+    }
+
+    [ObservableProperty]
+    public partial string ComputerGateHint
+    {
+        get;
+        set;
+    }
+
+    [ObservableProperty]
+    public partial string DetectedComputerName
+    {
+        get;
+        set;
+    }
+
+    [ObservableProperty]
+    public partial string DetectedMacAddress
+    {
+        get;
+        set;
+    }
+
+    [ObservableProperty]
+    public partial string ExistingDisplayName
+    {
+        get;
+        set;
+    }
+
+    [ObservableProperty]
+    public partial string ComputerDisplayName
+    {
+        get;
+        set;
+    }
+
+    [ObservableProperty]
+    public partial string ComputerDescription
+    {
+        get;
+        set;
+    }
+
+    [ObservableProperty]
+    public partial string ComputerGateError
+    {
+        get;
+        set;
+    }
+
     public LoginViewModel(
         IStartupSessionRepository startupSessionRepository,
         IStartupRegistrationService startupRegistrationService,
         ILocalSettingsService localSettingsService,
         IStartupShellStateService startupShellStateService,
         INavigationService navigationService,
+        IComputerGateService computerGateService,
+        IComputerRegistryService computerRegistryService,
+        IStartupWindowService startupWindowService,
         StartupState startupState)
     {
         ArgumentNullException.ThrowIfNull(startupSessionRepository);
@@ -93,6 +159,9 @@ public partial class LoginViewModel : ObservableRecipient
         ArgumentNullException.ThrowIfNull(localSettingsService);
         ArgumentNullException.ThrowIfNull(startupShellStateService);
         ArgumentNullException.ThrowIfNull(navigationService);
+        ArgumentNullException.ThrowIfNull(computerGateService);
+        ArgumentNullException.ThrowIfNull(computerRegistryService);
+        ArgumentNullException.ThrowIfNull(startupWindowService);
         ArgumentNullException.ThrowIfNull(startupState);
 
         _startupSessionRepository = startupSessionRepository;
@@ -100,6 +169,9 @@ public partial class LoginViewModel : ObservableRecipient
         _localSettingsService = localSettingsService;
         _startupShellStateService = startupShellStateService;
         _navigationService = navigationService;
+        _computerGateService = computerGateService;
+        _computerRegistryService = computerRegistryService;
+        _startupWindowService = startupWindowService;
         _startupState = startupState;
         Username = _startupState.Username;
         Password = string.Empty;
@@ -111,6 +183,14 @@ public partial class LoginViewModel : ObservableRecipient
             : _startupState.LoginHint;
         ShowNewUserAction = _startupState.RequireNewUserAction;
         ShowPasswordChangePrompt = false;
+        ComputerGateState = ComputerGateStatus.Registered;
+        ComputerGateHint = string.Empty;
+        DetectedComputerName = string.Empty;
+        DetectedMacAddress = string.Empty;
+        ExistingDisplayName = string.Empty;
+        ComputerDisplayName = string.Empty;
+        ComputerDescription = string.Empty;
+        ComputerGateError = string.Empty;
     }
 
     public async Task InitializeAsync()
@@ -217,7 +297,7 @@ public partial class LoginViewModel : ObservableRecipient
     [RelayCommand]
     private Task CancelAsync()
     {
-        App.Current.Exit();
+        _startupWindowService.Exit();
         return Task.CompletedTask;
     }
 
@@ -259,8 +339,135 @@ public partial class LoginViewModel : ObservableRecipient
             await _localSettingsService.SaveSettingAsync<string?>(RememberedPasswordKey, null);
         }
 
+        await EvaluateComputerGateAsync();
+    }
+
+    public async Task<bool> CompleteComputerGateAsync()
+    {
+        var displayName = ComputerDisplayName?.Trim();
+        if (string.IsNullOrWhiteSpace(displayName))
+        {
+            ComputerGateError = "Display name is required.";
+            return false;
+        }
+
+        var computerName = ResolveComputerName();
+        var macAddress = _startupState.MacAddressNormalized?.Trim() ?? string.Empty;
+
+        try
+        {
+            if (_pendingGateCheck?.Status == ComputerGateStatus.RenamedMachine)
+            {
+                await _computerRegistryService.UpdateComputerByMacAsync(
+                    macAddress,
+                    computerName,
+                    computerName,
+                    displayName,
+                    ComputerDescription);
+            }
+            else
+            {
+                await _computerRegistryService.UpsertComputerAsync(
+                    computerName,
+                    computerName,
+                    macAddress,
+                    displayName,
+                    ComputerDescription);
+            }
+        }
+        catch (Exception ex)
+        {
+            if (IsDuplicateDisplayName(ex))
+            {
+                ComputerGateError = "That display name is already in use. Choose a different one.";
+                return false;
+            }
+
+            StartupDebugLog.Error("LoginViewModel", ex, "Computer gate save failed.");
+            ComputerGateError = "Could not save this computer. Try again.";
+            return false;
+        }
+
+        await FinishLoginNavigationAsync();
+        return true;
+    }
+
+    public async Task<ComputerGateStatus> RetryComputerGateAsync()
+    {
+        var gate = await _computerGateService.CheckAsync();
+        return await ApplyGateCheckAsync(gate);
+    }
+
+    private async Task<ComputerGateStatus> EvaluateComputerGateAsync()
+    {
+        var gate = await _computerGateService.CheckAsync();
+        return await ApplyGateCheckAsync(gate);
+    }
+
+    private async Task<ComputerGateStatus> ApplyGateCheckAsync(ComputerGateCheck gate)
+    {
+        switch (gate.Status)
+        {
+            case ComputerGateStatus.Registered:
+            case ComputerGateStatus.SkippedNoMac:
+                await FinishLoginNavigationAsync();
+                return gate.Status;
+
+            case ComputerGateStatus.DatabaseUnavailable:
+                _pendingGateCheck = gate;
+                ComputerGateState = ComputerGateStatus.DatabaseUnavailable;
+                ComputerGateHint = "The database could not be reached. Check the connection and try again.";
+                return gate.Status;
+
+            case ComputerGateStatus.Missing:
+                _pendingGateCheck = gate;
+                ComputerGateState = ComputerGateStatus.Missing;
+                ComputerGateHint = "Register this computer to continue.";
+                PrepareComputerFields();
+                return gate.Status;
+
+            case ComputerGateStatus.RenamedMachine:
+                _pendingGateCheck = gate;
+                ComputerGateState = ComputerGateStatus.RenamedMachine;
+                ComputerGateHint = "This computer's name changed. Confirm its display name to continue.";
+                PrepareComputerFields();
+                return gate.Status;
+
+            default:
+                return gate.Status;
+        }
+    }
+
+    private void PrepareComputerFields()
+    {
+        DetectedComputerName = ResolveComputerName();
+        DetectedMacAddress = _startupState.MacAddressNormalized?.Trim() ?? string.Empty;
+        ExistingDisplayName = _pendingGateCheck?.ExistingComputer?.DisplayName ?? string.Empty;
+        ComputerDisplayName = ExistingDisplayName;
+        ComputerDescription = _pendingGateCheck?.ExistingComputer?.Description ?? string.Empty;
+        ComputerGateError = string.Empty;
+    }
+
+    private string ResolveComputerName()
+    {
+        if (!string.IsNullOrWhiteSpace(_startupState.HostnameNormalized))
+        {
+            return _startupState.HostnameNormalized.Trim();
+        }
+
+        return Environment.MachineName;
+    }
+
+    private async Task FinishLoginNavigationAsync()
+    {
         await _startupShellStateService.EnterMainModeAsync();
         _navigationService.NavigateTo(typeof(WaitlistViewViewModel).FullName!, null, true);
-        App.ShowMainWindowAndCloseLoginWindow();
+        _startupWindowService.ShowMainWindowAndCloseLoginWindow();
+    }
+
+    private static bool IsDuplicateDisplayName(Exception ex)
+    {
+        return ex.Message.Contains("uq_core_computers_registry_display_name", StringComparison.OrdinalIgnoreCase)
+            || ex.Message.Contains("Duplicate entry", StringComparison.OrdinalIgnoreCase);
     }
 }

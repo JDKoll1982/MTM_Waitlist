@@ -38,7 +38,7 @@ public sealed class ConfigSettingValue
     /// Workstation ID (optional, for workstation-scoped settings)
     /// Nullable; used when scope_type is "workstation".
     /// </summary>
-    public long? WorkstationId { get; init; }
+    public long? ComputerId { get; init; }
 
     /// <summary>
     /// User ID (optional, for user-scoped settings)

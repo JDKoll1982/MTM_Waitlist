@@ -18,15 +18,17 @@ MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the user 
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
 
-ALTER TABLE core_workstations_registry COMMENT = 'Registered workstation and host identity catalog.';
+ALTER TABLE core_computers_registry COMMENT = 'Registered computer and host identity catalog.';
 
-ALTER TABLE core_workstations_registry
+ALTER TABLE core_computers_registry
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for workstation record.',
-MODIFY COLUMN workstation_name VARCHAR(128) NOT NULL COMMENT 'Friendly workstation/computer name.',
+MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for computer record.',
+MODIFY COLUMN computer_name VARCHAR(128) NOT NULL COMMENT 'Friendly computer name.',
 MODIFY COLUMN hostname_normalized VARCHAR(255) NOT NULL COMMENT 'Normalized host name used for identity matching.',
-MODIFY COLUMN mac_address_normalized VARCHAR(64) NOT NULL COMMENT 'Normalized MAC address for workstation identity.',
-MODIFY COLUMN is_registered TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the workstation is currently registered.',
+MODIFY COLUMN mac_address_normalized VARCHAR(64) NOT NULL COMMENT 'Normalized MAC address for computer identity.',
+MODIFY COLUMN display_name VARCHAR(128) NOT NULL COMMENT 'User-facing display name for the computer.',
+MODIFY COLUMN description VARCHAR(255) NULL COMMENT 'Optional free-text description for the computer.',
+MODIFY COLUMN is_registered TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the computer is currently registered.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
 
@@ -56,7 +58,7 @@ ALTER TABLE auth_sessions_tokens
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for session record.',
 MODIFY COLUMN user_id BIGINT NOT NULL COMMENT 'Foreign key to core_users_profiles.id.',
-MODIFY COLUMN workstation_id BIGINT NULL COMMENT 'Optional foreign key to core_workstations_registry.id.',
+MODIFY COLUMN computer_id BIGINT NULL COMMENT 'Optional foreign key to core_computers_registry.id.',
 MODIFY COLUMN token_hash CHAR(64) NOT NULL COMMENT 'Hashed session token value.',
 MODIFY COLUMN token_salt VARBINARY(32) NOT NULL COMMENT 'Salt used for token hashing.',
 MODIFY COLUMN token_version SMALLINT NOT NULL DEFAULT 1 COMMENT 'Token schema/hash version.',
@@ -98,9 +100,9 @@ ALTER TABLE config_settings_values
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for setting row.',
 MODIFY COLUMN setting_key VARCHAR(190) NOT NULL COMMENT 'Unique setting identifier key.',
-MODIFY COLUMN scope_type VARCHAR(16) NOT NULL DEFAULT 'all_users' COMMENT 'Scope kind such as workstation, user, or all_users.',
+MODIFY COLUMN scope_type VARCHAR(16) NOT NULL DEFAULT 'all_users' COMMENT 'Scope kind such as computer, user, or all_users.',
 MODIFY COLUMN scope_key VARCHAR(255) NOT NULL DEFAULT 'all_users' COMMENT 'Scope discriminator key value.',
-MODIFY COLUMN workstation_id BIGINT NULL COMMENT 'Optional workstation scope foreign key.',
+MODIFY COLUMN computer_id BIGINT NULL COMMENT 'Optional computer scope foreign key.',
 MODIFY COLUMN user_id BIGINT NULL COMMENT 'Optional user scope foreign key.',
 MODIFY COLUMN setting_value TEXT NULL COMMENT 'Text setting value payload.',
 MODIFY COLUMN setting_value_int BIGINT NULL COMMENT 'Integer setting value payload.',
@@ -120,7 +122,7 @@ MODIFY COLUMN config_setting_id BIGINT NOT NULL COMMENT 'Foreign key to config_s
 MODIFY COLUMN setting_key VARCHAR(190) NOT NULL COMMENT 'Setting key snapshot at time of change.',
 MODIFY COLUMN scope_type VARCHAR(16) NOT NULL COMMENT 'Scope type snapshot at time of change.',
 MODIFY COLUMN scope_key VARCHAR(255) NOT NULL COMMENT 'Scope key snapshot at time of change.',
-MODIFY COLUMN workstation_id BIGINT NULL COMMENT 'Optional workstation scope foreign key snapshot.',
+MODIFY COLUMN computer_id BIGINT NULL COMMENT 'Optional computer scope foreign key snapshot.',
 MODIFY COLUMN user_id BIGINT NULL COMMENT 'Optional user scope foreign key snapshot.',
 MODIFY COLUMN previous_setting_value TEXT NULL COMMENT 'Previous text setting value.',
 MODIFY COLUMN previous_setting_value_int BIGINT NULL COMMENT 'Previous integer setting value.',
@@ -148,7 +150,7 @@ MODIFY COLUMN event_action VARCHAR(128) NOT NULL COMMENT 'Event action or operat
 MODIFY COLUMN outcome VARCHAR(32) NOT NULL COMMENT 'Outcome status for event.',
 MODIFY COLUMN actor_kind VARCHAR(32) NULL COMMENT 'Actor type for event source.',
 MODIFY COLUMN actor_id VARCHAR(128) NULL COMMENT 'Actor identifier value.',
-MODIFY COLUMN host_id VARCHAR(128) NULL COMMENT 'Host/workstation identifier captured for event.',
+MODIFY COLUMN host_id VARCHAR(128) NULL COMMENT 'Host/computer identifier captured for event.',
 MODIFY COLUMN mac_address VARCHAR(64) NULL COMMENT 'MAC address captured for event.',
 MODIFY COLUMN message TEXT NOT NULL COMMENT 'Primary log message text.',
 MODIFY COLUMN payload_json MEDIUMTEXT NULL COMMENT 'Optional structured payload as JSON text.',
@@ -192,7 +194,7 @@ MODIFY COLUMN selected_dunnage_parts_json JSON NULL COMMENT 'Serialized selected
 MODIFY COLUMN changed_by_user_id BIGINT NULL COMMENT 'User who caused the history event.',
 MODIFY COLUMN changed_utc DATETIME NOT NULL COMMENT 'UTC timestamp when history row was recorded.';
 
-ALTER TABLE setup_workstations_catalog COMMENT = 'Setup work center catalog used by setup and waitlist flows.';
+ALTER TABLE setup_work_centers_catalog COMMENT = 'Setup work center catalog used by setup and waitlist flows.';
 
 SET
     @has_building_column := (
@@ -200,15 +202,15 @@ SET
         FROM information_schema.columns
         WHERE
             table_schema = DATABASE()
-            AND table_name = 'setup_workstations_catalog'
+            AND table_name = 'setup_work_centers_catalog'
             AND column_name = 'building'
     );
 
 SET
     @sql_stmt := IF(
         @has_building_column = 0,
-        'ALTER TABLE setup_workstations_catalog ADD COLUMN building VARCHAR(64) NOT NULL DEFAULT ''Expo Drive'' AFTER public_id',
-        'SELECT ''setup_workstations_catalog.building already exists'''
+        'ALTER TABLE setup_work_centers_catalog ADD COLUMN building VARCHAR(64) NOT NULL DEFAULT ''Expo Drive'' AFTER public_id',
+        'SELECT ''setup_work_centers_catalog.building already exists'''
     );
 
 PREPARE stmt FROM @sql_stmt;
@@ -223,15 +225,15 @@ SET
         FROM information_schema.statistics
         WHERE
             table_schema = DATABASE()
-            AND table_name = 'setup_workstations_catalog'
-            AND index_name = 'uq_setup_workstations_catalog_workstation_name'
+            AND table_name = 'setup_work_centers_catalog'
+            AND index_name = 'uq_setup_work_centers_catalog_work_center_name'
     );
 
 SET
     @sql_stmt := IF(
         @has_legacy_index > 0,
-        'ALTER TABLE setup_workstations_catalog DROP INDEX uq_setup_workstations_catalog_workstation_name',
-        'SELECT ''uq_setup_workstations_catalog_workstation_name not present'''
+        'ALTER TABLE setup_work_centers_catalog DROP INDEX uq_setup_work_centers_catalog_work_center_name',
+        'SELECT ''uq_setup_work_centers_catalog_work_center_name not present'''
     );
 
 PREPARE stmt FROM @sql_stmt;
@@ -246,15 +248,15 @@ SET
         FROM information_schema.statistics
         WHERE
             table_schema = DATABASE()
-            AND table_name = 'setup_workstations_catalog'
-            AND index_name = 'uq_setup_workstations_catalog_building_workstation_name'
+            AND table_name = 'setup_work_centers_catalog'
+            AND index_name = 'uq_setup_work_centers_catalog_building_work_center_name'
     );
 
 SET
     @sql_stmt := IF(
         @has_building_index = 0,
-        'ALTER TABLE setup_workstations_catalog ADD UNIQUE KEY uq_setup_workstations_catalog_building_workstation_name (building, workstation_name)',
-        'SELECT ''uq_setup_workstations_catalog_building_workstation_name already exists'''
+        'ALTER TABLE setup_work_centers_catalog ADD UNIQUE KEY uq_setup_work_centers_catalog_building_work_center_name (building, work_center_name)',
+        'SELECT ''uq_setup_work_centers_catalog_building_work_center_name already exists'''
     );
 
 PREPARE stmt FROM @sql_stmt;
@@ -263,11 +265,11 @@ EXECUTE stmt;
 
 DEALLOCATE PREPARE stmt;
 
-ALTER TABLE setup_workstations_catalog
+ALTER TABLE setup_work_centers_catalog
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for work center catalog row.',
 MODIFY COLUMN building VARCHAR(64) NOT NULL DEFAULT 'Expo Drive' COMMENT 'Facility building where the work center is located.',
-MODIFY COLUMN workstation_name VARCHAR(64) NOT NULL COMMENT 'Work center or press display name.',
+MODIFY COLUMN work_center_name VARCHAR(64) NOT NULL COMMENT 'Work center or press display name.',
 MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether this work center is active.',
 MODIFY COLUMN sort_rank INT NOT NULL DEFAULT 100 COMMENT 'Sort order rank for UI lists.',
 MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the work center row.',
@@ -275,14 +277,14 @@ MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the 
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was last updated.';
 
-ALTER TABLE config_workstation_hot_workcenters COMMENT = 'Per-computer Local work center preferences and ordering.';
+ALTER TABLE config_computer_hot_work_centers COMMENT = 'Per-computer Local work center preferences and ordering.';
 
-ALTER TABLE config_workstation_hot_workcenters
+ALTER TABLE config_computer_hot_work_centers
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for Local mapping row.',
-MODIFY COLUMN core_workstation_id BIGINT NOT NULL COMMENT 'Foreign key to core_workstations_registry.id.',
-MODIFY COLUMN setup_workstation_id BIGINT NOT NULL COMMENT 'Foreign key to setup_workstations_catalog.id.',
-MODIFY COLUMN sort_rank INT NOT NULL DEFAULT 100 COMMENT 'Display order for Local work centers per workstation.',
+MODIFY COLUMN computer_id BIGINT NOT NULL COMMENT 'Foreign key to core_computers_registry.id.',
+MODIFY COLUMN work_center_id BIGINT NOT NULL COMMENT 'Foreign key to setup_work_centers_catalog.id.',
+MODIFY COLUMN sort_rank INT NOT NULL DEFAULT 100 COMMENT 'Display order for Local work centers per computer.',
 MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether this Local mapping is active.',
 MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the mapping row.',
 MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the mapping row.',
@@ -344,7 +346,7 @@ MODIFY COLUMN request_type VARCHAR(64) NOT NULL COMMENT 'Top-level request type 
 MODIFY COLUMN subtype VARCHAR(64) NULL COMMENT 'Request subtype display label; null when the type has no subtypes.',
 MODIFY COLUMN input_value VARCHAR(255) NULL COMMENT 'Free-text value captured for request types that require input.',
 MODIFY COLUMN active_setup_job_id VARCHAR(64) NOT NULL COMMENT 'Active setup job associated with the request at submission time.',
-MODIFY COLUMN workstation_name VARCHAR(64) NOT NULL COMMENT 'Workstation that submitted the request.',
+MODIFY COLUMN work_center_name VARCHAR(64) NOT NULL COMMENT 'Work center that submitted the request.',
 MODIFY COLUMN requester_employee_number VARCHAR(32) NOT NULL COMMENT 'Employee number of the requester.',
 MODIFY COLUMN requester_employee_name VARCHAR(128) NOT NULL COMMENT 'Display name of the requester.',
 MODIFY COLUMN status VARCHAR(32) NOT NULL DEFAULT 'Pending' COMMENT 'Lifecycle status, for example Pending, InProgress, Resolved, or Canceled.',

@@ -64,14 +64,14 @@ FROM (
                 ), 'present', 'missing'
             )
         UNION ALL
-        SELECT 'missing_column', 'config_settings_values.workstation_id', 'BIGINT NULL', IF(
+        SELECT 'missing_column', 'config_settings_values.computer_id', 'BIGINT NULL', IF(
                 EXISTS (
                     SELECT 1
                     FROM information_schema.columns
                     WHERE
                         table_schema = DATABASE()
                         AND table_name = 'config_settings_values'
-                        AND column_name = 'workstation_id'
+                        AND column_name = 'computer_id'
                 ), 'present', 'missing'
             )
         UNION ALL

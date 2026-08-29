@@ -1,0 +1,20 @@
+{
+  "provider": "openai-compatible",
+  "model": "deepseek-v4-flash",
+  "sourceDir": "src",
+  "threshold": 80,
+  "mocksFile": "src/test/mocks.ts",
+  "coverageFormat": "lcov",
+  "coverageDir": "coverage",
+  "maxIterations": 3,
+  "coverageTimeout": 300,
+  "ignore": [],
+  "baseURL": "https://api.deepseek.com/v1",
+  "apiKeyEnv": "DEEPSEEK_API_KEY",
+  "maxTokens": 16000,
+  "testEnv": {},
+  "debug": false,
+  "format": true,
+  "nodeEnvRouting": true,
+  "memory": {}
+}

@@ -4,9 +4,9 @@ public sealed class StartupSessionSnapshot
 {
     public bool IsUserMatched { get; init; }
 
-    public bool IsWorkstationRegistered { get; init; }
+    public bool IsComputerRegistered { get; init; }
 
-    public bool IsWorkstationRegistrationAuthoritative { get; init; } = true;
+    public bool IsComputerRegistrationAuthoritative { get; init; } = true;
 
     public string CurrentRole { get; init; } = string.Empty;
 

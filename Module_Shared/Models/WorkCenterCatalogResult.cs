@@ -2,7 +2,7 @@ namespace MTM_Waitlist.Module_Shared.Models;
 
 public sealed class WorkCenterCatalogResult
 {
-    public string WorkstationName { get; init; } = string.Empty;
+    public string ComputerName { get; init; } = string.Empty;
 
     public IReadOnlyList<string> HotWorkCenters { get; init; } = Array.Empty<string>();
 

@@ -97,7 +97,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Subtype = existing.Subtype,
             InputValue = existing.InputValue,
             ActiveSetupJobId = existing.ActiveSetupJobId,
-            WorkstationName = existing.WorkstationName,
+            WorkCenterName = existing.WorkCenterName,
             RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
             RequesterEmployeeName = existing.RequesterEmployeeName,
             Status = nextStatus,
@@ -161,7 +161,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             return WaitlistRequestSubmitResult.ValidationFailure("A valid active setup job is required before submitting a waitlist request.");
         }
 
-        if (string.IsNullOrWhiteSpace(draft.WorkstationName))
+        if (string.IsNullOrWhiteSpace(draft.WorkCenterName))
         {
             return WaitlistRequestSubmitResult.ValidationFailure("The current workstation name is required before submitting a waitlist request.");
         }
@@ -193,7 +193,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Subtype = string.IsNullOrWhiteSpace(draft.Subtype) ? null : draft.Subtype.Trim(),
             InputValue = string.IsNullOrWhiteSpace(draft.InputValue) ? null : draft.InputValue.Trim(),
             ActiveSetupJobId = draft.ActiveSetupJobId.Trim(),
-            WorkstationName = draft.WorkstationName.Trim(),
+            WorkCenterName = draft.WorkCenterName.Trim(),
             RequesterEmployeeNumber = draft.RequesterEmployeeNumber.Trim(),
             RequesterEmployeeName = draft.RequesterEmployeeName.Trim(),
             RequestedUtc = draft.RequestedUtc,
@@ -224,7 +224,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                     ["p_subtype"] = request.Subtype,
                     ["p_input_value"] = request.InputValue,
                     ["p_active_setup_job_id"] = request.ActiveSetupJobId,
-                    ["p_workstation_name"] = request.WorkstationName,
+                    ["p_work_center_name"] = request.WorkCenterName,
                     ["p_requester_employee_number"] = request.RequesterEmployeeNumber,
                     ["p_requester_employee_name"] = request.RequesterEmployeeName,
                     ["p_status"] = request.Status,

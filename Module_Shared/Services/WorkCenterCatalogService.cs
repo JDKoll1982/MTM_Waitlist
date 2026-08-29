@@ -26,7 +26,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         _startupDatabaseOptions = startupDatabaseOptions?.Value ?? new StartupDatabaseOptions();
     }
 
-    public string GetCurrentWorkstationName()
+    public string GetCurrentComputerName()
     {
         if (!string.IsNullOrWhiteSpace(_startupState.HostnameNormalized))
         {
@@ -36,25 +36,25 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         return Environment.MachineName;
     }
 
-    public async Task<IReadOnlyList<string>> GetAvailableWorkstationsAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<string>> GetAvailableComputersAsync(CancellationToken cancellationToken = default)
     {
         var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT workstation_name
-FROM core_workstations_registry
+            @"SELECT computer_name
+FROM core_computers_registry
 WHERE is_registered = 1
-ORDER BY workstation_name ASC;",
+ORDER BY computer_name ASC;",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
         var workstations = rows
-            .Select(row => GetValue(row, "workstation_name"))
+            .Select(row => GetValue(row, "computer_name"))
             .Where(value => !string.IsNullOrWhiteSpace(value))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var currentWorkstation = await ResolveCurrentWorkstationNameAsync(cancellationToken).ConfigureAwait(false);
+        var currentWorkstation = await ResolveCurrentComputerNameAsync(cancellationToken).ConfigureAwait(false);
         if (!workstations.Any(value => string.Equals(value, currentWorkstation, StringComparison.OrdinalIgnoreCase)))
         {
             workstations.Insert(0, currentWorkstation);
@@ -66,14 +66,14 @@ ORDER BY workstation_name ASC;",
     public async Task<WorkCenterCatalogResult> GetCatalogAsync(string workstationName, CancellationToken cancellationToken = default)
     {
         var normalizedWorkstationName = string.IsNullOrWhiteSpace(workstationName)
-            ? await ResolveCurrentWorkstationNameAsync(cancellationToken).ConfigureAwait(false)
+            ? await ResolveCurrentComputerNameAsync(cancellationToken).ConfigureAwait(false)
             : workstationName.Trim();
 
         StartupDebugLog.Info("WorkCenterCatalog", $"GetCatalogAsync started. Workstation='{normalizedWorkstationName}'.");
 
         var availableRows = await GetAvailableWorkCenterRowsAsync(cancellationToken).ConfigureAwait(false);
         var allWorkCenters = availableRows
-            .Select(row => GetValue(row, "workstation_name"))
+            .Select(row => GetValue(row, "work_center_name"))
             .Where(value => !string.IsNullOrWhiteSpace(value))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
@@ -81,18 +81,18 @@ ORDER BY workstation_name ASC;",
 
         var hotRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
             @"SELECT
-    swc.workstation_name AS work_center_name,
+    swc.work_center_name AS work_center_name,
     cwhc.sort_rank
-FROM config_workstation_hot_workcenters cwhc
-INNER JOIN core_workstations_registry cwr ON cwr.id = cwhc.core_workstation_id
-INNER JOIN setup_workstations_catalog swc ON swc.id = cwhc.setup_workstation_id
+FROM config_computer_hot_work_centers cwhc
+INNER JOIN core_computers_registry cwr ON cwr.id = cwhc.computer_id
+INNER JOIN setup_work_centers_catalog swc ON swc.id = cwhc.work_center_id
 WHERE cwhc.is_active = 1
   AND swc.is_active = 1
   AND (
-        cwr.workstation_name = @p_workstation_name
+        cwr.computer_name = @p_workstation_name
         OR cwr.hostname_normalized = @p_workstation_name
       )
-ORDER BY cwhc.sort_rank ASC, swc.workstation_name ASC;",
+ORDER BY cwhc.sort_rank ASC, swc.work_center_name ASC;",
             new Dictionary<string, object?>
             {
                 ["p_workstation_name"] = normalizedWorkstationName,
@@ -143,7 +143,7 @@ ORDER BY cwhc.sort_rank ASC, swc.workstation_name ASC;",
         var workCenterDetails = new Dictionary<string, WorkCenterDetail>(StringComparer.OrdinalIgnoreCase);
         foreach (var row in availableRows)
         {
-            var workCenterName = GetValue(row, "workstation_name");
+            var workCenterName = GetValue(row, "work_center_name");
             if (string.IsNullOrWhiteSpace(workCenterName) || workCenterDetails.ContainsKey(workCenterName))
             {
                 continue;
@@ -163,7 +163,7 @@ ORDER BY cwhc.sort_rank ASC, swc.workstation_name ASC;",
 
         var result = new WorkCenterCatalogResult
         {
-            WorkstationName = normalizedWorkstationName,
+            ComputerName = normalizedWorkstationName,
             HotWorkCenters = hotWorkCenters,
             OtherWorkCenters = otherWorkCenters,
             ActiveJobWorkCenters = activeJobWorkCenters,
@@ -179,17 +179,17 @@ ORDER BY cwhc.sort_rank ASC, swc.workstation_name ASC;",
         cancellationToken.ThrowIfCancellationRequested();
 
         var normalizedWorkstationName = string.IsNullOrWhiteSpace(workstationName)
-            ? await ResolveCurrentWorkstationNameAsync(cancellationToken).ConfigureAwait(false)
+            ? await ResolveCurrentComputerNameAsync(cancellationToken).ConfigureAwait(false)
             : workstationName.Trim();
 
         StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync started. Workstation='{normalizedWorkstationName}', RequestedCount={hotWorkCenters.Count}.");
 
         var workstationRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
             @"SELECT id
-FROM core_workstations_registry
-WHERE workstation_name = @p_workstation_name
+FROM core_computers_registry
+WHERE computer_name = @p_workstation_name
    OR hostname_normalized = @p_workstation_name
-ORDER BY CASE WHEN workstation_name = @p_workstation_name THEN 0 ELSE 1 END
+ORDER BY CASE WHEN computer_name = @p_workstation_name THEN 0 ELSE 1 END
 LIMIT 1;",
             new Dictionary<string, object?>
             {
@@ -206,8 +206,8 @@ LIMIT 1;",
         }
 
         var availableRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT id, workstation_name
-FROM setup_workstations_catalog
+            @"SELECT id, work_center_name
+FROM setup_work_centers_catalog
 WHERE is_active = 1;",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
@@ -217,7 +217,7 @@ WHERE is_active = 1;",
             .Select(row => new
             {
                 Id = GetInt64(row, "id"),
-                Name = GetValue(row, "workstation_name"),
+                Name = GetValue(row, "work_center_name"),
             })
             .Where(item => item.Id > 0 && !string.IsNullOrWhiteSpace(item.Name))
             .GroupBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
@@ -234,11 +234,11 @@ WHERE is_active = 1;",
             {
                 WorkCenterName = workCenterName,
                 SortRank = index + 1,
-                SetupWorkstationId = workCenterIdByName.TryGetValue(workCenterName, out var setupWorkstationId)
+                WorkCenterId = workCenterIdByName.TryGetValue(workCenterName, out var setupWorkstationId)
                     ? setupWorkstationId
                     : 0L,
             })
-            .Where(item => item.SetupWorkstationId > 0)
+            .Where(item => item.WorkCenterId > 0)
             .ToArray();
 
         var connectionString = ResolveConnectionString();
@@ -261,8 +261,8 @@ WHERE is_active = 1;",
             await using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
             await using (var deleteCommand = new MySqlCommand(@"
-DELETE FROM config_workstation_hot_workcenters
-WHERE core_workstation_id = @p_core_workstation_id;", connection, transaction))
+DELETE FROM config_computer_hot_work_centers
+WHERE computer_id = @p_core_workstation_id;", connection, transaction))
             {
                 deleteCommand.CommandTimeout = Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds);
                 deleteCommand.Parameters.AddWithValue("@p_core_workstation_id", workstationId);
@@ -272,9 +272,9 @@ WHERE core_workstation_id = @p_core_workstation_id;", connection, transaction))
             if (resolvedHotWorkCenters.Length > 0)
             {
                 var insertSql = new StringBuilder();
-                insertSql.AppendLine("INSERT INTO config_workstation_hot_workcenters (");
-                insertSql.AppendLine("    core_workstation_id,");
-                insertSql.AppendLine("    setup_workstation_id,");
+                insertSql.AppendLine("INSERT INTO config_computer_hot_work_centers (");
+                insertSql.AppendLine("    computer_id,");
+                insertSql.AppendLine("    work_center_id,");
                 insertSql.AppendLine("    public_id,");
                 insertSql.AppendLine("    sort_rank,");
                 insertSql.AppendLine("    is_active,");
@@ -310,7 +310,7 @@ WHERE core_workstation_id = @p_core_workstation_id;", connection, transaction))
                 for (var index = 0; index < resolvedHotWorkCenters.Length; index++)
                 {
                     var item = resolvedHotWorkCenters[index];
-                    insertCommand.Parameters.AddWithValue($"@p_setup_workstation_id_{index}", item.SetupWorkstationId);
+                    insertCommand.Parameters.AddWithValue($"@p_setup_workstation_id_{index}", item.WorkCenterId);
                     insertCommand.Parameters.AddWithValue($"@p_sort_rank_{index}", item.SortRank);
                 }
 
@@ -331,10 +331,10 @@ WHERE core_workstation_id = @p_core_workstation_id;", connection, transaction))
     private async Task<IReadOnlyList<IReadOnlyDictionary<string, object?>>> GetAvailableWorkCenterRowsAsync(CancellationToken cancellationToken)
     {
         var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT workstation_name, building, updated_utc
-FROM setup_workstations_catalog
+            @"SELECT work_center_name, building, updated_utc
+FROM setup_work_centers_catalog
 WHERE is_active = 1
-ORDER BY sort_rank ASC, workstation_name ASC;",
+ORDER BY sort_rank ASC, work_center_name ASC;",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -342,20 +342,20 @@ ORDER BY sort_rank ASC, workstation_name ASC;",
         return rows;
     }
 
-    private async Task<string> ResolveCurrentWorkstationNameAsync(CancellationToken cancellationToken)
+    private async Task<string> ResolveCurrentComputerNameAsync(CancellationToken cancellationToken)
     {
-        var key = GetCurrentWorkstationName();
+        var key = GetCurrentComputerName();
         if (string.IsNullOrWhiteSpace(key))
         {
             return Environment.MachineName;
         }
 
         var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT workstation_name
-FROM core_workstations_registry
-WHERE workstation_name = @p_workstation_name
+            @"SELECT computer_name
+FROM core_computers_registry
+WHERE computer_name = @p_workstation_name
    OR hostname_normalized = @p_workstation_name
-ORDER BY CASE WHEN workstation_name = @p_workstation_name THEN 0 ELSE 1 END
+ORDER BY CASE WHEN computer_name = @p_workstation_name THEN 0 ELSE 1 END
 LIMIT 1;",
             new Dictionary<string, object?>
             {
@@ -364,7 +364,7 @@ LIMIT 1;",
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        var workstationName = GetValue(rows.FirstOrDefault(), "workstation_name");
+        var workstationName = GetValue(rows.FirstOrDefault(), "computer_name");
         return string.IsNullOrWhiteSpace(workstationName) ? key : workstationName;
     }
 

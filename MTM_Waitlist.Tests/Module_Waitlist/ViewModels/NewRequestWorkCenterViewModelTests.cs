@@ -296,7 +296,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     {
         return new WorkCenterCatalogResult
         {
-            WorkstationName = "test-workstation",
+            ComputerName = "test-workstation",
             HotWorkCenters = hot,
             OtherWorkCenters = other,
             ActiveJobWorkCenters = active,
@@ -308,9 +308,9 @@ public sealed class NewRequestWorkCenterViewModelTests
     {
         public WorkCenterCatalogResult Catalog { get; set; } = new();
 
-        public string GetCurrentWorkstationName() => "test-workstation";
+        public string GetCurrentComputerName() => "test-workstation";
 
-        public Task<IReadOnlyList<string>> GetAvailableWorkstationsAsync(CancellationToken cancellationToken = default) =>
+        public Task<IReadOnlyList<string>> GetAvailableComputersAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<string>>(new[] { "test-workstation" });
 
         public Task<WorkCenterCatalogResult> GetCatalogAsync(string workstationName, CancellationToken cancellationToken = default) =>

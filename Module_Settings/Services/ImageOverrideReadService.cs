@@ -474,7 +474,7 @@ LIMIT {maxRecordCount};",
         try
         {
             var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"SELECT id FROM setup_workstations_catalog WHERE id = @p_id LIMIT 1;",
+                @"SELECT id FROM setup_work_centers_catalog WHERE id = @p_id LIMIT 1;",
                 new Dictionary<string, object?> { ["p_id"] = id },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);

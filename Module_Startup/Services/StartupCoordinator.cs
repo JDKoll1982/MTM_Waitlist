@@ -165,9 +165,9 @@ public sealed class StartupCoordinator : IStartupCoordinator
             return StartupResult.Blocked("Could not validate startup session from the database. Try again.");
         }
 
-        var isWorkstationRegistered = sessionSnapshot.IsWorkstationRegistered;
-        _startupState.IsWorkstationRegistered = isWorkstationRegistered;
-        _startupState.IsWorkstationRegistrationAuthoritative = sessionSnapshot.IsWorkstationRegistrationAuthoritative;
+        var isComputerRegistered = sessionSnapshot.IsComputerRegistered;
+        _startupState.IsComputerRegistered = isComputerRegistered;
+        _startupState.IsComputerRegistrationAuthoritative = sessionSnapshot.IsComputerRegistrationAuthoritative;
 
         progress?.Report(StartupProgress.Step3);
         var isUserMatched = sessionSnapshot.IsUserMatched;
@@ -222,9 +222,9 @@ public sealed class StartupCoordinator : IStartupCoordinator
         _startupState.ServerTimeUtc = serverTimeUtc;
         _startupState.IsSessionValid = sessionIsValid;
         _startupState.RequireNewUserAction =
-            _startupState.IsWorkstationRegistrationAuthoritative
+            _startupState.IsComputerRegistrationAuthoritative
             && !isUserMatched
-            && !isWorkstationRegistered;
+            && !isComputerRegistered;
 
         progress?.Report(StartupProgress.Step5);
 
@@ -237,13 +237,13 @@ public sealed class StartupCoordinator : IStartupCoordinator
         }
 
         _startupState.LoginHint = _startupState.RequireNewUserAction
-            ? "This workstation is not registered. Choose New User to request access."
+            ? "This computer is not registered. Choose New User to request access."
             : "Sign in to continue.";
 
         var loginResult = StartupResult.Success(typeof(LoginViewModel).FullName!, _startupState.LoginHint);
         StartupDebugLog.Info(
             "StartupCoordinator",
-            $"Startup routed to login. UserMatched={isUserMatched}, WorkstationRegistered={isWorkstationRegistered}, SessionValid={sessionIsValid}, TokenSource={tokenSource}");
+            $"Startup routed to login. UserMatched={isUserMatched}, ComputerRegistered={isComputerRegistered}, SessionValid={sessionIsValid}, TokenSource={tokenSource}");
         return loginResult;
     }
 

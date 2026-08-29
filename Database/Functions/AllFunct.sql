@@ -9,7 +9,7 @@ CREATE FUNCTION fn_config_settings_scope_rank(p_scope_type VARCHAR(16))
 RETURNS TINYINT
 DETERMINISTIC
 RETURN CASE LOWER(TRIM(p_scope_type))
-    WHEN 'workstation' THEN 1
+    WHEN 'computer' THEN 1
     WHEN 'all_users' THEN 2
     WHEN 'user' THEN 3
     WHEN 'admin' THEN 4
@@ -32,17 +32,17 @@ NO SQL
 SQL SECURITY DEFINER
 RETURN UTC_TIMESTAMP();
 
--- Function: fn_setup_workstation_name_normalized
+-- Function: fn_setup_work_center_name_normalized
 -- Engine: MySQL 5.7
 
 USE mtm_waitlist;
 
-DROP FUNCTION IF EXISTS fn_setup_workstation_name_normalized;
+DROP FUNCTION IF EXISTS fn_setup_work_center_name_normalized;
 
-CREATE FUNCTION fn_setup_workstation_name_normalized(
-    p_workstation_name VARCHAR(64)
+CREATE FUNCTION fn_setup_work_center_name_normalized(
+    p_work_center_name VARCHAR(64)
 )
 RETURNS VARCHAR(64)
 DETERMINISTIC
-RETURN TRIM(REPLACE(REPLACE(REPLACE(IFNULL(p_workstation_name, ''), '\r', ' '), '\n', ' '), '\t', ' '));
+RETURN TRIM(REPLACE(REPLACE(REPLACE(IFNULL(p_work_center_name, ''), '\r', ' '), '\n', ' '), '\t', ' '));
 

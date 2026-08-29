@@ -4,9 +4,9 @@ namespace MTM_Waitlist.Module_Shared.Services;
 
 public interface IWorkCenterCatalogService
 {
-    string GetCurrentWorkstationName();
+    string GetCurrentComputerName();
 
-    Task<IReadOnlyList<string>> GetAvailableWorkstationsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<string>> GetAvailableComputersAsync(CancellationToken cancellationToken = default);
 
     Task<WorkCenterCatalogResult> GetCatalogAsync(string workstationName, CancellationToken cancellationToken = default);
 

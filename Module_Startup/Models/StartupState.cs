@@ -30,9 +30,9 @@ public sealed class StartupState
 
     public bool IsUserMatched { get; set; }
 
-    public bool IsWorkstationRegistered { get; set; }
+    public bool IsComputerRegistered { get; set; }
 
-    public bool IsWorkstationRegistrationAuthoritative { get; set; }
+    public bool IsComputerRegistrationAuthoritative { get; set; }
 
     public bool IsSessionValid { get; set; }
 

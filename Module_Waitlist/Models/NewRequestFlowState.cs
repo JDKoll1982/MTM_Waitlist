@@ -33,7 +33,7 @@ public sealed class NewRequestFlowState
         Subtype = Subtype?.Name,
         InputValue = InputValue,
         ActiveSetupJobId = WorkCenter.Trim(),
-        WorkstationName = WorkCenter.Trim(),
+        WorkCenterName = WorkCenter.Trim(),
         RequesterEmployeeNumber = RequesterEmployeeNumber.Trim(),
         RequesterEmployeeName = RequesterEmployeeName.Trim(),
         RequestedUtc = DateTimeOffset.UtcNow,

@@ -31,7 +31,7 @@ public sealed class NewRequestFlowStateTests
         Assert.AreEqual("Wrong Coil", draft.Subtype);
         Assert.AreEqual("Wrong material at press", draft.InputValue);
         Assert.AreEqual("Press 12", draft.ActiveSetupJobId);
-        Assert.AreEqual("Press 12", draft.WorkstationName);
+        Assert.AreEqual("Press 12", draft.WorkCenterName);
         Assert.AreEqual("6229", draft.RequesterEmployeeNumber);
         Assert.AreEqual("John Koll", draft.RequesterEmployeeName);
     }

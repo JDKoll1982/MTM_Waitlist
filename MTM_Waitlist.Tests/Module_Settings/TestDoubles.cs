@@ -164,9 +164,9 @@ internal sealed class FakeWorkCenterCatalogService : IWorkCenterCatalogService
 {
     public WorkCenterCatalogResult Catalog { get; set; } = new();
 
-    public string GetCurrentWorkstationName() => "test-workstation";
+    public string GetCurrentComputerName() => "test-workstation";
 
-    public Task<IReadOnlyList<string>> GetAvailableWorkstationsAsync(CancellationToken cancellationToken = default) =>
+    public Task<IReadOnlyList<string>> GetAvailableComputersAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<string>>(new[] { "test-workstation" });
 
     public Task<WorkCenterCatalogResult> GetCatalogAsync(string workstationName, CancellationToken cancellationToken = default) =>

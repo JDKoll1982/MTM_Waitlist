@@ -238,7 +238,7 @@ public partial class ShellViewModel : ObservableRecipient
 
         if (e.SourcePageType.Namespace?.StartsWith("MTM_Waitlist.Module_Setup.Views", StringComparison.Ordinal) == true)
         {
-            Selected = NavigationViewService.GetSelectedItem(typeof(SetupWorkstationPage));
+            Selected = NavigationViewService.GetSelectedItem(typeof(SetupWorkCenterPage));
             UpdateSetupHeader(e.SourcePageType);
             return;
         }
@@ -314,7 +314,7 @@ public partial class ShellViewModel : ObservableRecipient
 
     private static (string Title, int Step) GetSetupStep(Type pageType, SetupWorkflowState setupWorkflowState)
     {
-        if (pageType == typeof(SetupWorkstationPage))
+        if (pageType == typeof(SetupWorkCenterPage))
         {
             return ("Work Center Setup — Select Work Station", 1);
         }

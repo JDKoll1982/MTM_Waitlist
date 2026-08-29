@@ -9,7 +9,7 @@ public sealed class WaitlistRequest
     public string? Subtype { get; init; }
     public string? InputValue { get; init; }
     public string ActiveSetupJobId { get; init; } = string.Empty;
-    public string WorkstationName { get; init; } = string.Empty;
+    public string WorkCenterName { get; init; } = string.Empty;
     public string RequesterEmployeeNumber { get; init; } = string.Empty;
     public string RequesterEmployeeName { get; init; } = string.Empty;
     public string Status { get; init; } = "Pending";

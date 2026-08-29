@@ -19,15 +19,15 @@ public interface ISubordinatePartService
     Task<IReadOnlyList<SetupSubordinatePart>> GetSubordinatePartsAsync(string normalizedWorkOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default);
 }
 
-public interface ISetupWorkstationService
+public interface ISetupWorkCenterService
 {
-    Task<IReadOnlyList<SetupWorkstation>> GetWorkstationsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<SetupWorkCenter>> GetWorkCentersAsync(CancellationToken cancellationToken = default);
 
-    Task<SetupSelectionResult> AddWorkstationAsync(string workstationName, string building, CancellationToken cancellationToken = default);
+    Task<SetupSelectionResult> AddWorkCenterAsync(string workstationName, string building, CancellationToken cancellationToken = default);
 
-    Task<SetupSelectionResult> UpdateWorkstationAsync(string workstationId, string workstationName, string building, CancellationToken cancellationToken = default);
+    Task<SetupSelectionResult> UpdateWorkCenterAsync(string workstationId, string workstationName, string building, CancellationToken cancellationToken = default);
 
-    Task<SetupSelectionResult> RemoveWorkstationAsync(string workstationId, CancellationToken cancellationToken = default);
+    Task<SetupSelectionResult> RemoveWorkCenterAsync(string workstationId, CancellationToken cancellationToken = default);
 }
 
 public interface IDunnageWorkflowService

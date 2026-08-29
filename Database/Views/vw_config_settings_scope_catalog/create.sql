@@ -8,7 +8,7 @@ SELECT
     setting_key,
     scope_type,
     scope_key,
-    workstation_id,
+    computer_id,
     user_id,
     fn_config_settings_scope_rank (scope_type) AS scope_rank,
     setting_value,

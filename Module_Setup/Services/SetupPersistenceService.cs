@@ -293,7 +293,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
         }
 
         var touchRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
-            "sp_setup_workstations_touch",
+            "sp_setup_work_centers_touch",
             new Dictionary<string, object?>
             {
                 ["p_work_center"] = request.WorkCenter,
