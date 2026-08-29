@@ -1,4 +1,4 @@
-namespace MTM_Waitlist.Module_Startup.Models;
+namespace MTM_Waitlist.Module_Core.Models;
 
 public sealed class StartupDevelopmentOptions
 {

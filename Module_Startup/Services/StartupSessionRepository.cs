@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 
 namespace MTM_Waitlist.Module_Startup.Services;
 

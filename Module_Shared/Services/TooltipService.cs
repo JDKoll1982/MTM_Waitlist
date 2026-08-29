@@ -2,7 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.ApplicationModel.Resources;
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 
 namespace MTM_Waitlist.Module_Shared.Services;
 

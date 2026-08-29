@@ -3,7 +3,7 @@ using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Startup.ViewModels;
 
 namespace MTM_Waitlist.Module_Startup.Views;

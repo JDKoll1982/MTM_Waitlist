@@ -12,7 +12,6 @@ using MTM_Waitlist.Module_Core.Views;
 using MTM_Waitlist.Module_Settings.Views;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.Views;
-using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Views;
 

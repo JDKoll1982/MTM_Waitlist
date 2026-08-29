@@ -4,7 +4,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Shared.ViewModels;
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 
 namespace MTM_Waitlist.Tests.Module_Shared.Services;
 

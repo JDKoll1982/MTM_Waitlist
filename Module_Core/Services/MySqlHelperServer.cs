@@ -1,7 +1,7 @@
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using Microsoft.Extensions.Options;
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 using MySqlConnector;
 
 namespace MTM_Waitlist.Module_Core.Services;

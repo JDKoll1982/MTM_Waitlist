@@ -6,13 +6,12 @@ using Microsoft.UI.Xaml;
 using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
-using MTM_Waitlist.Module_Core.Services.DependencyInjection;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Settings.Views;
 using MTM_Waitlist.Module_Setup.ViewModels;
 using MTM_Waitlist.Module_Setup.Views;
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -23,7 +22,7 @@ using MTM_Waitlist.Module_Shared.ViewModels;
 using MTM_Waitlist.Module_Shared.Views;
 using MTM_Waitlist.Notifications;
 
-namespace MTM_Waitlist.Module_Core.Services.DependencyInjection;
+namespace MTM_Waitlist.Services.DependencyInjection;
 
 public static class ServiceRegistrationExtensions
 {
@@ -52,7 +51,7 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<IBuildingSelectionService, BuildingSelectionService>();
         services.AddSingleton<IStartupShellStateService, MTM_Waitlist.Module_Startup.Services.StartupShellStateService>();
         services.AddSingleton<IStartupCoordinator, MTM_Waitlist.Module_Startup.Services.StartupCoordinator>();
-        services.AddSingleton<MTM_Waitlist.Module_Startup.Models.StartupState>();
+        services.AddSingleton<MTM_Waitlist.Module_Core.Models.StartupState>();
         services.AddTransient<INavigationViewService, NavigationViewService>();
         services.AddSingleton<IActivationService, ActivationService>();
         services.AddSingleton<IPageService, PageService>();

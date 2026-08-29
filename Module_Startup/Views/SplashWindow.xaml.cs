@@ -1,6 +1,6 @@
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Startup.ViewModels;
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;

@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 

@@ -7,9 +7,9 @@ using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
-using MTM_Waitlist.Module_Core.Services.DependencyInjection;
 using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Notifications;
+using MTM_Waitlist.Services.DependencyInjection;
 #if DEBUG
 using XamlMcp.WinUI;
 #endif

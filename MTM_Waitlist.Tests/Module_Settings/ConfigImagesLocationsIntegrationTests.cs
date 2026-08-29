@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Services;
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 
 namespace MTM_Waitlist.Tests.Module_Settings;
 

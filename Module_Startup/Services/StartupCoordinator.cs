@@ -4,7 +4,7 @@ using System.Net.NetworkInformation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.Models;
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MySqlConnector;

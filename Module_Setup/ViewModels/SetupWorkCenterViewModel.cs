@@ -11,7 +11,7 @@ using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
-using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Core.Models;
 
 namespace MTM_Waitlist.Module_Setup.ViewModels;
 
