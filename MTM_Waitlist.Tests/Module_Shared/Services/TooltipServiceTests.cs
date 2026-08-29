@@ -17,7 +17,7 @@ public sealed class TooltipServiceTests
             new[]
             {
                 "Module_Core/Views/ShellPage.xaml",
-                " Module_Core/ViewModels/ShellViewModel.cs ",
+                " ViewModels/ShellViewModel.cs ",
                 "Module_Core/Views/ShellPage.xaml",
             },
             "Select the active facility.");
@@ -25,7 +25,7 @@ public sealed class TooltipServiceTests
         Assert.IsTrue(presentation.IsDeveloperMode);
         Assert.AreEqual(2, presentation.AssociatedFiles.Count);
         Assert.AreEqual("Module_Core/Views/ShellPage.xaml", presentation.AssociatedFiles[0]);
-        Assert.AreEqual("Module_Core/ViewModels/ShellViewModel.cs", presentation.AssociatedFiles[1]);
+        Assert.AreEqual("ViewModels/ShellViewModel.cs", presentation.AssociatedFiles[1]);
         Assert.IsFalse(string.IsNullOrWhiteSpace(presentation.Text));
     }
 

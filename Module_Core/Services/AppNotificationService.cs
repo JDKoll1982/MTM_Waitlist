@@ -3,7 +3,6 @@ using System.Web;
 using Microsoft.Windows.AppNotifications;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
-using MTM_Waitlist.Module_Core.ViewModels;
 
 namespace MTM_Waitlist.Notifications;
 

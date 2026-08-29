@@ -12,12 +12,11 @@ using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Views;
-using MTM_Waitlist.Module_Core.ViewModels;
 using MTM_Waitlist.Module_Core.Views;
 using MTM_Waitlist.Module_Shared.ViewModels;
 using MTM_Waitlist.Module_Shared.Views;
 
-namespace MTM_Waitlist.Module_Core.Services;
+namespace MTM_Waitlist.Services;
 
 public class PageService : IPageService
 {

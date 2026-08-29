@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Services;
-using MTM_Waitlist.Module_Core.ViewModels;
+using MTM_Waitlist.Services;
 using MTM_Waitlist.Module_Core.Views;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Settings.Views;

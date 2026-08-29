@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml.Media;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
-using MTM_Waitlist.Module_Core.ViewModels;
+using MTM_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 

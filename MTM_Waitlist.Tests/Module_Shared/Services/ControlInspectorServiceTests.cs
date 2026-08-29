@@ -78,7 +78,7 @@ public sealed class ControlInspectorServiceTests
         var tooltipService = new TooltipService(new StartupState { CurrentRole = "Developer" });
         var presentation = tooltipService.ResolvePresentation(
             "Shell_SelectFacility_Tooltip",
-            new[] { "Module_Core/Views/ShellPage.xaml", "Module_Core/ViewModels/ShellViewModel.cs" },
+            new[] { "Module_Core/Views/ShellPage.xaml", "ViewModels/ShellViewModel.cs" },
             "Select facility");
 
         var detail = new ControlInspectorDetail
@@ -102,12 +102,12 @@ public sealed class ControlInspectorServiceTests
             seedFiles: new[]
             {
                 "Module_Core/Views/ShellPage.xaml",
-                "Module_Core/ViewModels/ShellViewModel.cs",
+                "ViewModels/ShellViewModel.cs",
             },
             resourceKey: "Shell_SelectFacility_Tooltip");
 
         Assert.IsTrue(expanded.Any(static path => path.Equals("Module_Core/Views/ShellPage.xaml", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(expanded.Any(static path => path.Equals("Module_Core/ViewModels/ShellViewModel.cs", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(expanded.Any(static path => path.Equals("ViewModels/ShellViewModel.cs", StringComparison.OrdinalIgnoreCase)));
         Assert.IsTrue(expanded.Any(static path => path.Equals("Module_Core/Views/ShellPage.xaml.cs", StringComparison.OrdinalIgnoreCase)));
         Assert.IsTrue(expanded.Any(static path => path.Contains("/Models/", StringComparison.OrdinalIgnoreCase)));
         Assert.IsTrue(expanded.Any(static path => path.StartsWith("Module_Shared/", StringComparison.OrdinalIgnoreCase)));
@@ -124,7 +124,7 @@ public sealed class ControlInspectorServiceTests
         var files = new[]
         {
             "Module_Core/Views/ShellPage.xaml",
-            "Module_Core/ViewModels/ShellViewModel.cs",
+            "ViewModels/ShellViewModel.cs",
             "Module_Shared/Services/TooltipService.cs",
             "Module_Shared/Services/TooltipBehavior.cs",
             "Styles/TooltipDeveloper.xaml",

@@ -17,7 +17,7 @@ using MTM_Waitlist.Module_Waitlist.Views;
 
 using Windows.UI;
 
-namespace MTM_Waitlist.Module_Core.ViewModels;
+namespace MTM_Waitlist.ViewModels;
 
 public partial class ShellViewModel : ObservableRecipient
 {

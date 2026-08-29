@@ -413,14 +413,14 @@ public sealed class ControlInspectorService : IControlInspectorService
         yield return "Styles/TooltipDeveloper.xaml";
         yield return "Module_Core/Views/ShellPage.xaml";
         yield return "Module_Core/Views/ShellPage.xaml.cs";
-        yield return "Module_Core/ViewModels/ShellViewModel.cs";
+        yield return "ViewModels/ShellViewModel.cs";
         yield return "Module_Core/Helpers/ResourceExtensions.cs";
         yield return "Module_Core/Contracts/Services/INavigationService.cs";
         yield return "Module_Core/Contracts/Services/IBuildingSelectionService.cs";
         yield return "Module_Core/Services/BuildingSelectionService.cs";
         yield return "Module_Core/Services/NavigationService.cs";
-        yield return "Module_Core/Services/PageService.cs";
-        yield return "Module_Startup/Models/StartupState.cs";
+        yield return "Services/PageService.cs";
+        yield return "Module_Core/Models/StartupState.cs";
         yield return "Module_Waitlist/Models/SampleOrder.cs";
     }
 

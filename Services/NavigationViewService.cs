@@ -7,9 +7,8 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
-using MTM_Waitlist.Module_Core.ViewModels;
 
-namespace MTM_Waitlist.Module_Core.Services;
+namespace MTM_Waitlist.Services;
 
 public class NavigationViewService : INavigationViewService
 {

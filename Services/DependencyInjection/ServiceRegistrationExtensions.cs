@@ -4,6 +4,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 
 using MTM_Waitlist.Activation;
+using MTM_Waitlist.Services;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
@@ -16,8 +17,8 @@ using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Views;
-using MTM_Waitlist.Module_Core.ViewModels;
 using MTM_Waitlist.Module_Core.Views;
+using MTM_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Shared.ViewModels;
 using MTM_Waitlist.Module_Shared.Views;
 using MTM_Waitlist.Notifications;
