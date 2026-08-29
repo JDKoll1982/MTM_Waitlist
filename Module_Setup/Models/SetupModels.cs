@@ -361,13 +361,23 @@ public sealed class SetupDunnagePart
 
     public string DisplayName { get; set; } = string.Empty;
 
+    /// <summary>Dunnage type display name, populated by the image-search load.</summary>
+    public string DunnageTypeName { get; set; } = string.Empty;
+
+    /// <summary>Home location used by the image-search filter (part, type, or location).</summary>
+    public string HomeLocation { get; set; } = string.Empty;
+
     public string ImagePath { get; set; } = string.Empty;
 
     public string Metadata { get; set; } = string.Empty;
 
     public bool IsSelectedForPair { get; set; }
 
+    /// <summary>Whether the part has its own image (drives the "Images only" filter and the card image).</summary>
     public bool HasImage => !string.IsNullOrWhiteSpace(ImagePath);
+
+    /// <summary>Whether to show the no-image placeholder glyph in the image-search card.</summary>
+    public bool ShowNoImagePlaceholder => !HasImage;
 
     public string DisplayImagePath => HasImage ? ImagePath : NoImagePath;
 

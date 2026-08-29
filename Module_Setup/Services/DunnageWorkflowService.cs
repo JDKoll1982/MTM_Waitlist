@@ -51,6 +51,17 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             () => GetDunnagePartsFromBackendAsync(dunnageTypeId, partNumber, sequenceNumber, cancellationToken)).ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<SetupDunnagePart>> GetAllDunnagePartsAsync(CancellationToken cancellationToken = default)
+    {
+        StartupDebugLog.Info("SetupDunnage", "GetAllDunnagePartsAsync started.");
+        return await _mySqlHelperServer.ExecuteReadWriteAsync(
+            "Setup.DunnageParts.LoadAll",
+            null,
+            MySqlDatabaseTarget.MtmReceivingApplication,
+            () => Task.FromResult(SetupDataCatalog.GetAllDunnageParts()),
+            () => GetAllDunnagePartsFromBackendAsync(cancellationToken)).ConfigureAwait(false);
+    }
+
     public async Task<SetupSelectionResult> AddDunnageTypeAsync(string typeName, string currentUserRole, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupDunnage", $"AddDunnageTypeAsync started. TypeName='{typeName}', Role='{currentUserRole}'.");
@@ -253,7 +264,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
                     TypeId = GetValueAsString(row, "type_id"),
                     PartNumber = GetValueAsString(row, "part_id"),
                     DisplayName = GetValueAsString(row, "part_id"),
-                    ImagePath = ResolvePartImagePath(row),
+                    ImagePath = ResolvePartOwnImagePath(row),
                     Metadata = BuildMetadata(quantityType, homeLocation),
                 };
             })
@@ -263,6 +274,54 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             StartupDebugLog.Info("SetupDunnage", $"Dunnage part projection completed. Result count={results.Length}.");
 
             return results;
+    }
+
+    private async Task<IReadOnlyList<SetupDunnagePart>> GetAllDunnagePartsFromBackendAsync(CancellationToken cancellationToken)
+    {
+        StartupDebugLog.Info("SetupDunnage", "Loading receiving SQL script GetDunnageParts.");
+        _ = await SetupReceivingMySqlScriptStore.LoadAsync("GetDunnageParts", cancellationToken).ConfigureAwait(false);
+
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            "sp_Dunnage_Parts_GetAll",
+            new Dictionary<string, object?>(),
+            MySqlDatabaseTarget.MtmReceivingApplication,
+            cancellationToken).ConfigureAwait(false);
+
+        StartupDebugLog.Info("SetupDunnage", $"sp_Dunnage_Parts_GetAll returned {rows.Count} row(s).");
+
+        if (rows.Count == 0)
+        {
+            StartupDebugLog.Info("SetupDunnage", "No dunnage parts returned from receiving database.");
+            return Array.Empty<SetupDunnagePart>();
+        }
+
+        // Each part uses its own image (spec_values JSON "image_path" or
+        // dunnage_parts.image_path). Parts without an image show a no-image
+        // placeholder in the dialog rather than inheriting the parent type's image.
+        var results = rows
+            .Select(row =>
+            {
+                var quantityType = GetValueAsString(row, "quantity_type");
+                var homeLocation = GetValueAsString(row, "home_location");
+
+                return new SetupDunnagePart
+                {
+                    Id = GetValueAsString(row, "id"),
+                    TypeId = GetValueAsString(row, "type_id"),
+                    PartNumber = GetValueAsString(row, "part_id"),
+                    DisplayName = GetValueAsString(row, "part_id"),
+                    DunnageTypeName = GetValueAsString(row, "type_name"),
+                    HomeLocation = homeLocation,
+                    ImagePath = ResolvePartOwnImagePath(row),
+                    Metadata = BuildMetadata(quantityType, homeLocation),
+                };
+            })
+            .Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.PartNumber))
+            .ToArray();
+
+        StartupDebugLog.Info("SetupDunnage", $"Dunnage all-parts projection completed. Result count={results.Length}.");
+
+        return results;
     }
 
     private async Task<IReadOnlyDictionary<string, string>> GetDunnageTypeImageOverridesAsync(CancellationToken cancellationToken)
@@ -282,7 +341,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
                 continue;
             }
 
-            var imagePath = ResolvePartImagePath(row);
+            var imagePath = ResolvePartOwnImagePath(row);
             if (!string.IsNullOrWhiteSpace(imagePath))
             {
                 overrides[typeId] = imagePath;
@@ -304,7 +363,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
         return GetValueAsString(row, "image_path");
     }
 
-    private static string ResolvePartImagePath(IReadOnlyDictionary<string, object?> row)
+    private static string ResolvePartOwnImagePath(IReadOnlyDictionary<string, object?> row)
     {
         var fromSpecJson = TryGetImagePathFromJson(GetValueAsString(row, "spec_values"));
         if (!string.IsNullOrWhiteSpace(fromSpecJson))
@@ -312,13 +371,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             return fromSpecJson;
         }
 
-        var direct = GetValueAsString(row, "image_path");
-        if (!string.IsNullOrWhiteSpace(direct))
-        {
-            return direct;
-        }
-
-        return GetValueAsString(row, "type_image_path");
+        return GetValueAsString(row, "image_path");
     }
 
     private static string TryGetImagePathFromJson(string rawJson)
