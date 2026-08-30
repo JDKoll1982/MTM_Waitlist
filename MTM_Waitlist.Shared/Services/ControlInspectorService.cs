@@ -421,7 +421,7 @@ public sealed class ControlInspectorService : IControlInspectorService
         yield return "MTM_Waitlist.Core/Services/NavigationService.cs";
         yield return "Services/PageService.cs";
         yield return "MTM_Waitlist.Core/Models/StartupState.cs";
-        yield return "Module_Waitlist/Models/SampleOrder.cs";
+        yield return "MTM_Waitlist.Waitlist/Models/SampleOrder.cs";
     }
 
     private static void AddPairedSourceFiles(string relativePath, Action<string?> addCandidate)

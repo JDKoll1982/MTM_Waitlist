@@ -163,10 +163,10 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ### Subphase 4.4: MTM_Waitlist.Waitlist ← Module_Waitlist
 
-- [ ] **Service Layer: Move `Module_Waitlist` non-view code (Services, Models, ViewModels, Selectors, Converters, Controls/*RequestTypeViewModel/Model) into `MTM_Waitlist.Waitlist` preserving namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 3 GATE* | **Persona: Backend Engineer**
-- [ ] **Configuration: Remove moved `Module_Waitlist` files from the app; keep `Module_Waitlist/Views/*` and `Controls/*View.xaml*` in the app; add `ProjectReference` app → Waitlist.** *Depends on: Move Module_Waitlist non-view code* | **Persona: Frontend Engineer**
+- [x] **Service Layer: Move `Module_Waitlist` non-view code (Services, Models, ViewModels, Selectors, Converters, Controls/*RequestTypeViewModel/Model) into `MTM_Waitlist.Waitlist` preserving namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 3 GATE* | **Persona: Backend Engineer**
+- [x] **Configuration: Remove moved `Module_Waitlist` files from the app; keep `Module_Waitlist/Views/*` and `Controls/*View.xaml*` in the app; add `ProjectReference` app → Waitlist.** *Depends on: Move Module_Waitlist non-view code* | **Persona: Frontend Engineer**
 
-**GATE: solution builds and `Module_Waitlist` test suite passes.**
+**GATE: solution builds and `Module_Waitlist` test suite passes.** (✓ Verified: 52 Waitlist tests green; full suite 246 green, 2026-08-29)
 
 ### Subphase 4.5: MTM_Waitlist.Reporting ← Module_Reporting
 
@@ -228,4 +228,4 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ---
 
-Next task: **Move `Module_Waitlist` non-view code (Services, Models, Controls, ViewModels, DI) into `MTM_Waitlist.Waitlist` preserving namespaces, then update the Waitlist test fakes.** | **Persona: Backend Engineer**
+Next task: **Move `Module_Reporting` non-view code (Services, DI) into `MTM_Waitlist.Reporting` preserving namespaces, then update the Reporting test fakes.** | **Persona: Backend Engineer**
