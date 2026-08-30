@@ -93,12 +93,16 @@ public static class TooltipBehavior
             var resourceKey = GetResourceKey(element);
             var associatedFiles = ParseFiles(GetAssociatedFiles(element));
             var fallbackText = GetFallbackText(element);
-            var tooltipService = App.GetService<ITooltipService>();
+            var tooltipService = SharedServiceLocator.TooltipService;
+            if (tooltipService is null)
+            {
+                return;
+            }
+
             tooltipService.ApplyToElement(element, resourceKey, associatedFiles, fallbackText);
 
             // Track for developer inspector (Ctrl+Alt+Right-Click) without creating DI cycles.
-            var inspectorService = App.GetService<IControlInspectorService>();
-            inspectorService.TrackElement(element, resourceKey, associatedFiles, fallbackText);
+            SharedServiceLocator.ControlInspectorService?.TrackElement(element, resourceKey, associatedFiles, fallbackText);
         }
         catch (Exception)
         {

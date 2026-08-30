@@ -7,6 +7,7 @@ using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Notifications;
 using MTM_Waitlist.Services.DependencyInjection;
@@ -59,6 +60,8 @@ public partial class App : Application
         Build();
 
         AppServiceLocator.NavigationService = Host.Services.GetService<INavigationService>();
+        SharedServiceLocator.TooltipService = Host.Services.GetService<ITooltipService>();
+        SharedServiceLocator.ControlInspectorService = Host.Services.GetService<IControlInspectorService>();
 
         StartupDebugLog.Configure(Host.Services.GetService<IStartupLogService>());
         StartupDebugLog.Info("App", "Host built.");
