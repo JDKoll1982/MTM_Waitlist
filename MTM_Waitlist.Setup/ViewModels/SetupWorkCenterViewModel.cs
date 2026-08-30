@@ -8,7 +8,6 @@ using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
-using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -32,7 +31,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
     private readonly ISetupWorkCenterService _workCenterService;
-    private readonly IImageLocationService _imageLocationService;
+    private readonly IWorkCenterImageService _imageLocationService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly StartupState _startupState;
@@ -113,7 +112,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         INavigationService navigationService,
         ISetupWorkflowService workflowService,
         ISetupWorkCenterService workCenterService,
-        IImageLocationService imageLocationService,
+        IWorkCenterImageService imageLocationService,
         IWorkCenterCatalogService workCenterCatalogService,
         StartupState startupState,
         IBuildingSelectionService buildingSelectionService)

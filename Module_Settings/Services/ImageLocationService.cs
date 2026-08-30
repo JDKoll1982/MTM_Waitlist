@@ -14,7 +14,7 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// Orchestrates all image location management including inventories, display labels, configuration, and notifications.
 /// Thread-safe for concurrent access; maintains initialization state.
 /// </summary>
-public sealed class ImageLocationService : IImageLocationService, IDisposable
+public sealed class ImageLocationService : IImageLocationService, IWorkCenterImageService, IDisposable
 {
     private readonly ILogger<ImageLocationService> _logger;
     private readonly IRequestTypeDisplayLabelService _requestTypeDisplayLabelService;

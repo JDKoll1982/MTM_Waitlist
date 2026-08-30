@@ -149,10 +149,10 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ### Subphase 4.2: MTM_Waitlist.Setup ← Module_Setup (highest test coverage)
 
-- [ ] **Service Layer: Move `Module_Setup` non-view code (Contracts, Models, Services, ViewModels, Converters, DI) into `MTM_Waitlist.Setup` preserving namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 3 GATE* | **Persona: Backend Engineer**
-- [ ] **Configuration: Remove moved `Module_Setup` files from the app; keep `Module_Setup/Views/*` in the app; add `ProjectReference` app → Setup.** *Depends on: Move Module_Setup non-view code* | **Persona: Frontend Engineer**
+- [x] **Service Layer: Move `Module_Setup` non-view code (Contracts, Models, Services, ViewModels, Converters, DI) into `MTM_Waitlist.Setup` preserving namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 3 GATE* | **Persona: Backend Engineer**
+- [x] **Configuration: Remove moved `Module_Setup` files from the app; keep `Module_Setup/Views/*` in the app; add `ProjectReference` app → Setup.** *Depends on: Move Module_Setup non-view code* | **Persona: Frontend Engineer**
 
-**GATE: solution builds AND `dotnet test --filter FullyQualifiedName~Module_Setup` passes (32+ tests green).**
+**GATE: solution builds AND `dotnet test --filter FullyQualifiedName~Module_Setup` passes (32+ tests green).** (✓ Verified: 30 Setup tests green + 4 DB-integration skipped; full suite 246 green, 2026-08-29)
 
 ### Subphase 4.3: MTM_Waitlist.Settings ← Module_Settings
 
@@ -228,4 +228,4 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ---
 
-Next task: **Move `Module_Setup` non-view code (Services, Models, ViewModels, DI) into `MTM_Waitlist.Setup` preserving namespaces, then update the Setup test fakes.** | **Persona: Backend Engineer**
+Next task: **Move `Module_Settings` non-view code (Services, Models, Converters, ViewModels, DI) into `MTM_Waitlist.Settings` preserving namespaces, then update the Settings test fakes.** | **Persona: Backend Engineer**

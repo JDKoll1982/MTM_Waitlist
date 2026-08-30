@@ -10,6 +10,7 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Settings.Views;
+using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.ViewModels;
 using MTM_Waitlist.Module_Setup.Views;
 using MTM_Waitlist.Module_Core.Models;
@@ -40,6 +41,8 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<IAppWindowProvider, AppWindowProvider>();
         services.AddSingleton<IShellContentProvider, ShellContentProvider>();
         services.AddSingleton<IAppLifecycleService, AppLifecycleService>();
+        services.AddSingleton<ISetupDialogService, SetupDialogService>();
+        services.AddSingleton<IWorkCenterImageService, MTM_Waitlist.Module_Settings.Services.ImageLocationService>();
         services.AddSingleton<ILocalSettingsService, MTM_Waitlist.Module_Settings.Services.LocalSettingsService>();
         services.AddSingleton<IStartupRecoveryService, MTM_Waitlist.Module_Startup.Services.StartupRecoveryService>();
         services.AddSingleton<IStartupRegistrationService, MTM_Waitlist.Module_Startup.Services.StartupRegistrationService>();

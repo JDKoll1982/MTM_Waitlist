@@ -85,7 +85,8 @@ public sealed class SetupDunnageTypeViewModelTests
             imageSearchPart: null,
             navigation,
             new StubSetupWorkflowService(state),
-            dunnageWorkflowService: null!);
+            dunnageWorkflowService: null!,
+            dialogService: new NoOpSetupDialogService());
 
         await viewModel.ContinueToReviewCommand.ExecuteAsync(null);
 
@@ -103,7 +104,8 @@ public sealed class SetupDunnageTypeViewModelTests
             imageSearchPart: null,
             navigation,
             new StubSetupWorkflowService(state),
-            dunnageWorkflowService: null!);
+            dunnageWorkflowService: null!,
+            dialogService: new NoOpSetupDialogService());
 
         await viewModel.ContinueToReviewCommand.ExecuteAsync(null);
 
@@ -127,7 +129,8 @@ public sealed class SetupDunnageTypeViewModelTests
             imageSearchPart: null,
             navigation,
             new StubSetupWorkflowService(state),
-            dunnageWorkflowService: null!);
+            dunnageWorkflowService: null!,
+            dialogService: new NoOpSetupDialogService());
 
         await viewModel.ContinueToReviewCommand.ExecuteAsync(null);
 
@@ -152,7 +155,8 @@ public sealed class SetupDunnageTypeViewModelTests
             imageSearchPart: part,
             navigation,
             new StubSetupWorkflowService(state),
-            dunnageWorkflowService: null!);
+            dunnageWorkflowService: null!,
+            dialogService: new NoOpSetupDialogService());
 
         await viewModel.AddDunnageCommand.ExecuteAsync(null);
 
@@ -171,7 +175,8 @@ public sealed class SetupDunnageTypeViewModelTests
             imageSearchPart: null,
             navigation,
             new StubSetupWorkflowService(state),
-            dunnageWorkflowService: null!);
+            dunnageWorkflowService: null!,
+            dialogService: new NoOpSetupDialogService());
 
         await viewModel.AddDunnageCommand.ExecuteAsync(null);
 
@@ -187,7 +192,8 @@ public sealed class SetupDunnageTypeViewModelTests
             imageSearchPart: null,
             navigation,
             new StubSetupWorkflowService(setupState),
-            dunnageWorkflowService: null!);
+            dunnageWorkflowService: null!,
+            dialogService: new NoOpSetupDialogService());
         return (viewModel, navigation);
     }
 
@@ -201,8 +207,9 @@ public sealed class SetupDunnageTypeViewModelTests
             SetupDunnagePart? imageSearchPart,
             INavigationService navigationService,
             ISetupWorkflowService workflowService,
-            IDunnageWorkflowService dunnageWorkflowService)
-            : base(navigationService, workflowService, dunnageWorkflowService)
+            IDunnageWorkflowService dunnageWorkflowService,
+            ISetupDialogService dialogService)
+            : base(navigationService, workflowService, dunnageWorkflowService, dialogService)
         {
             _confirmNoDunnageResult = confirmNoDunnageResult;
             _imageSearchPart = imageSearchPart;

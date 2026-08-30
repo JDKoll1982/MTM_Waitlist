@@ -6,7 +6,6 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
-using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Module_Setup.ViewModels;
 
@@ -21,6 +20,8 @@ public partial class SetupCompletionViewModel : ObservableRecipient, INavigation
 {
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
+
+    private const string WaitlistRoute = "MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewViewModel";
 
     [ObservableProperty]
     public partial bool IsSuccess
@@ -94,6 +95,6 @@ public partial class SetupCompletionViewModel : ObservableRecipient, INavigation
     [RelayCommand]
     private void ReturnToWaitlist()
     {
-        _navigationService.NavigateTo(typeof(WaitlistViewViewModel).FullName!, null, true);
+        _navigationService.NavigateTo(WaitlistRoute, null, true);
     }
 }

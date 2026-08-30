@@ -2,14 +2,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
-using MTM_Waitlist.Module_Setup.Views;
 
 namespace MTM_Waitlist.Module_Setup.ViewModels;
 
@@ -24,6 +22,7 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
 
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
+    private readonly ISetupDialogService _dialogService;
 
     private static string LocalizeOrDefault(string key, string fallback)
     {
@@ -123,10 +122,12 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
     public SetupDunnageTypeViewModel(
         INavigationService navigationService,
         ISetupWorkflowService workflowService,
-        IDunnageWorkflowService dunnageWorkflowService)
+        IDunnageWorkflowService dunnageWorkflowService,
+        ISetupDialogService dialogService)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
+        _dialogService = dialogService;
     }
 
     public void OnNavigatedTo(object parameter)
@@ -211,24 +212,7 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
     /// </summary>
     protected virtual Task<SetupDunnagePart?> ShowImageSearchDialogAsync()
     {
-        return ShowImageSearchDialogCoreAsync();
-    }
-
-    private async Task<SetupDunnagePart?> ShowImageSearchDialogCoreAsync()
-    {
-        var xamlRoot = (App.MainWindow?.Content as FrameworkElement)?.XamlRoot;
-        if (xamlRoot is null)
-        {
-            // No active XAML root (for example a headless test host); no dialog can be shown.
-            return null;
-        }
-
-        var dialog = App.GetService<SetupDunnageImageSearchDialog>();
-        dialog.XamlRoot = xamlRoot;
-
-        await dialog.ShowAsync();
-
-        return dialog.SelectedPart;
+        return _dialogService.ShowDunnageImageSearchDialogAsync();
     }
 
     [RelayCommand]
@@ -265,30 +249,7 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
 
     protected virtual Task<bool> ConfirmNoDunnageAsync()
     {
-        return ConfirmNoDunnageCoreAsync();
-    }
-
-    private async Task<bool> ConfirmNoDunnageCoreAsync()
-    {
-        var xamlRoot = (App.MainWindow?.Content as FrameworkElement)?.XamlRoot;
-        if (xamlRoot is null)
-        {
-            // No active XAML root (for example a headless test host); proceed.
-            return true;
-        }
-
-        var dialog = new ContentDialog
-        {
-            Title = LocalizeOrDefault("Setup_NoDunnage.DialogTitle", "Continue without dunnage?"),
-            Content = LocalizeOrDefault("Setup_NoDunnage.DialogMessage", "No dunnage was selected for this job. Do you want to continue without dunnage?"),
-            PrimaryButtonText = LocalizeOrDefault("Setup_NoDunnage.Confirm", "Yes"),
-            CloseButtonText = LocalizeOrDefault("Setup_NoDunnage.Cancel", "No"),
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = xamlRoot,
-        };
-
-        var result = await dialog.ShowAsync();
-        return result == ContentDialogResult.Primary;
+        return _dialogService.ConfirmNoDunnageAsync();
     }
 
     public void AddScrapType(string? scrapType)

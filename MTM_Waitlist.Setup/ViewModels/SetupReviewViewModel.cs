@@ -18,6 +18,7 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
 {
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
+    private readonly IAppWindowProvider _appWindowProvider;
 
     [ObservableProperty]
     public partial string StatusMessage
@@ -69,10 +70,11 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
 
     public string SelectedDunnageSummary => State.SelectedDunnageSummary;
 
-    public SetupReviewViewModel(INavigationService navigationService, ISetupWorkflowService workflowService)
+    public SetupReviewViewModel(INavigationService navigationService, ISetupWorkflowService workflowService, IAppWindowProvider appWindowProvider)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
+        _appWindowProvider = appWindowProvider;
     }
 
     public void OnNavigatedTo(object parameter)
@@ -173,7 +175,7 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
         {
             StartupDebugLog.Error("SetupReviewVm", ex, "NavigateTo completion threw COMException. Retrying on dispatcher queue.");
 
-            var dispatcherQueue = App.MainWindow.DispatcherQueue;
+            var dispatcherQueue = _appWindowProvider.MainWindow.DispatcherQueue;
             if (dispatcherQueue is not null)
             {
                 _ = dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
