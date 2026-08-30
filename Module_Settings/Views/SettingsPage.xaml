@@ -162,6 +162,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock
@@ -412,7 +413,9 @@
                             HorizontalAlignment="Stretch"
                             IsEnabled="{x:Bind ViewModel.CanManageHotWorkCenters, Mode=OneWay}"
                             ItemsSource="{x:Bind ViewModel.AvailableWorkstations, Mode=OneWay}"
-                            SelectedItem="{x:Bind ViewModel.SelectedWorkstation, Mode=TwoWay}" />
+                            DisplayMemberPath="Label"
+                            SelectedValuePath="Key"
+                            SelectedValue="{x:Bind ViewModel.SelectedWorkstation, Mode=TwoWay}" />
                         <ProgressRing
                             Grid.Row="0"
                             Grid.Column="2"
@@ -723,6 +726,155 @@
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 Text="{x:Bind ViewModel.DunnageTypeVisibilityStatusMessage, Mode=OneWay}"
                                 TextWrapping="Wrap" />
+                        </Border>
+                    </Grid>
+                </muxc:Expander>
+
+                <muxc:Expander
+                    Grid.Row="5"
+                    x:Name="ComputersExpander"
+                    x:Load="{x:Bind ViewModel.IsComputersPanelVisible, Mode=OneWay}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    IsExpanded="False">
+                    <muxc:Expander.Header>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <SymbolIcon
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Symbol="Setting" />
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                FontWeight="SemiBold"
+                                Text="Computers" />
+                        </Grid>
+                    </muxc:Expander.Header>
+
+                    <Grid
+                        Margin="0,8,0,0"
+                        Padding="20"
+                        HorizontalAlignment="Stretch"
+                        ColumnSpacing="12"
+                        RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Manage the computers registered on the shop floor. Restricted to Admin and Developer roles."
+                            TextWrapping="Wrap" />
+
+                        <Grid
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            HorizontalAlignment="Stretch"
+                            ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button
+                                Grid.Column="1"
+                                Content="Add"
+                                Click="AddComputer_Click"
+                                IsEnabled="{x:Bind ViewModel.ComputerManagement.CanManageComputers, Mode=OneWay}" />
+                            <Button
+                                Grid.Column="2"
+                                Content="Edit"
+                                Click="EditComputer_Click"
+                                IsEnabled="{x:Bind ViewModel.ComputerManagement.CanEditSelected, Mode=OneWay}" />
+                        </Grid>
+
+                        <Border
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            Padding="10"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                            <Grid RowSpacing="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0" ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        FontWeight="SemiBold"
+                                        Text="Registered Computers" />
+                                    <ProgressRing
+                                        Grid.Column="1"
+                                        Width="20"
+                                        Height="20"
+                                        VerticalAlignment="Center"
+                                        IsActive="{x:Bind ViewModel.ComputerManagement.IsBusy, Mode=OneWay}" />
+                                </Grid>
+
+                                <ListView
+                                    Grid.Row="1"
+                                    MaxHeight="320"
+                                    ItemsSource="{x:Bind ViewModel.ComputerManagement.Computers, Mode=OneWay}"
+                                    SelectedItem="{x:Bind ViewModel.ComputerManagement.SelectedComputer, Mode=TwoWay}">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="4" ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock FontWeight="SemiBold" Text="{Binding DisplayName}" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{Binding ComputerName}" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{Binding MacAddressNormalized}" />
+                                                </StackPanel>
+                                                <Button
+                                                    Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding ViewModel.ComputerManagement.DeleteCommand, ElementName=RootPage}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="Delete"
+                                                    Visibility="{Binding IsCurrentComputer, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind ViewModel.ComputerManagement.StatusMessage, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                            </Grid>
                         </Border>
                     </Grid>
                 </muxc:Expander>

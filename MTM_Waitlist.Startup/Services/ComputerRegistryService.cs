@@ -148,6 +148,81 @@ public sealed class ComputerRegistryService : IComputerRegistryService
         return record ?? throw new InvalidOperationException("Computer update failed: no registry row returned.");
     }
 
+    public async Task<IReadOnlyList<ComputerRecord>> GetAllComputersAsync(CancellationToken cancellationToken = default)
+    {
+        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
+            """
+            SELECT id, computer_name, display_name, description, mac_address_normalized, is_registered
+            FROM core_computers_registry
+            ORDER BY display_name ASC, computer_name ASC;
+            """,
+            new Dictionary<string, object?>(),
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        return rows
+            .Select(Map)
+            .Where(record => record is not null)
+            .Select(record => record!)
+            .ToList();
+    }
+
+    public async Task<ComputerRecord> UpdateComputerAsync(
+        long id,
+        string computerName,
+        string hostnameNormalized,
+        string macAddressNormalized,
+        string displayName,
+        string? description,
+        bool isRegistered,
+        CancellationToken cancellationToken = default)
+    {
+        _ = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
+            """
+            UPDATE core_computers_registry
+            SET computer_name = @computer_name,
+                hostname_normalized = @hostname,
+                mac_address_normalized = @mac_address,
+                display_name = @display_name,
+                description = @description,
+                is_registered = @is_registered,
+                updated_utc = UTC_TIMESTAMP()
+            WHERE id = @id;
+            """,
+            new Dictionary<string, object?>
+            {
+                ["id"] = id,
+                ["computer_name"] = computerName.Trim(),
+                ["hostname"] = hostnameNormalized.Trim(),
+                ["mac_address"] = macAddressNormalized.Trim(),
+                ["display_name"] = displayName.Trim(),
+                ["description"] = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+                ["is_registered"] = isRegistered ? 1 : 0,
+            },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        var record = await LookupComputerAsync(computerName, macAddressNormalized, cancellationToken).ConfigureAwait(false);
+        return record ?? throw new InvalidOperationException("Computer update failed: no registry row returned.");
+    }
+
+    public async Task<bool> DeleteComputerAsync(long id, CancellationToken cancellationToken = default)
+    {
+        var affected = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
+            """
+            DELETE FROM core_computers_registry
+            WHERE id = @id;
+            """,
+            new Dictionary<string, object?>
+            {
+                ["id"] = id,
+            },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        return affected > 0;
+    }
+
     private static ComputerRecord? Map(IReadOnlyDictionary<string, object?>? row)
     {
         if (row is null)

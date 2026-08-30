@@ -220,6 +220,55 @@ public sealed class StartupCoordinatorTests
     }
 
     [TestMethod]
+    public async Task RunAsync_WhenComputerNotRegisteredButSessionValid_RoutesToLoginNotShellAsync()
+    {
+        // Regression guard: the first-load gate must NOT be bypassed by a valid local
+        // session when the computer is not registered. A user who previously left a
+        // session token (e.g. closing the app on the Register Computer screen with an
+        // older build) must still be routed to the Login page so the gate fires again.
+        // The shell route is only allowed when isComputerRegistered is true.
+        var fileService = new InMemoryFileService(new Dictionary<string, object>
+        {
+            [RecoveryProbeKey] = "\"ok\"",
+            ["Startup.Session.Token"] = "\"valid-local-token\"",
+            ["Startup.Session.ExpiresUtc"] = "\"2026-07-26T11:00:00Z\""
+        });
+
+        var localSettingsService = CreateLocalSettingsService(fileService);
+        var startupState = new StartupState();
+        var repository = new FakeStartupSessionRepository
+        {
+            ServerTimeUtc = new DateTimeOffset(2026, 7, 26, 10, 0, 0, TimeSpan.Zero),
+            Snapshot = new StartupSessionSnapshot
+            {
+                IsUserMatched = true,
+                IsComputerRegistered = false,
+                CurrentRole = "Developer",
+                HasDatabaseSession = false,
+                DatabaseSessionExpiresUtc = null
+            }
+        };
+
+        var coordinator = CreateCoordinator(
+            new LocalSettingsOptions
+            {
+                ApplicationDataFolder = "MTM_Waitlist/ApplicationData",
+                LocalSettingsFile = "LocalSettings.json"
+            },
+            localSettingsService,
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
+            repository,
+            startupState);
+
+        var result = await coordinator.RunAsync();
+
+        // Even though a valid session token exists, an unregistered computer must be
+        // routed to Login so the gate runs, NOT straight to the shell.
+        Assert.AreEqual(typeof(LoginViewModel).FullName, result.RouteTarget);
+        Assert.IsFalse(startupState.IsComputerRegistered);
+    }
+
+    [TestMethod]
     public async Task RunAsync_WhenUnknownWorkstation_RoutesToLoginAndRequiresNewUserActionAsync()
     {
         var fileService = new InMemoryFileService(new Dictionary<string, object>

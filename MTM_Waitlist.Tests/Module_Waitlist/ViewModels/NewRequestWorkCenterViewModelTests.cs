@@ -310,8 +310,8 @@ public sealed class NewRequestWorkCenterViewModelTests
 
         public string GetCurrentComputerName() => "test-workstation";
 
-        public Task<IReadOnlyList<string>> GetAvailableComputersAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult<IReadOnlyList<string>>(new[] { "test-workstation" });
+        public Task<IReadOnlyList<ComputerOption>> GetAvailableComputersAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<ComputerOption>>(new[] { new ComputerOption { Key = "test-workstation", Label = "Test Workstation - test-workstation" } });
 
         public Task<WorkCenterCatalogResult> GetCatalogAsync(string workstationName, CancellationToken cancellationToken = default) =>
             Task.FromResult(Catalog);

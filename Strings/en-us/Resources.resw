@@ -326,7 +326,7 @@
     <value>None</value>
   </data>
   <data name="Setup_DunnagePair.Header.WorkStation.Text" xml:space="preserve">
-    <value>WORK STATION</value>
+    <value>WORK CENTER</value>
   </data>
   <data name="Setup_DunnagePair.Header.WorkOrder.Text" xml:space="preserve">
     <value>WORK ORDER</value>
@@ -371,7 +371,7 @@
     <value>Return to Waitlist</value>
   </data>
   <data name="Setup_Workstation.Title.Text" xml:space="preserve">
-    <value>Select Workstation</value>
+    <value>Select Work Center</value>
   </data>
   <data name="Setup_Workstation.Subtitle.Text" xml:space="preserve">
     <value>Choose where this setup is being performed.</value>
@@ -380,16 +380,16 @@
     <value>Search</value>
   </data>
   <data name="Setup_Workstation.SearchInput.PlaceholderText" xml:space="preserve">
-    <value>Search by workstation, work order, sequence, or part number</value>
+    <value>Search by work center, work order, sequence, or part number</value>
   </data>
   <data name="Setup_Workstation.ManageTitle.Text" xml:space="preserve">
-    <value>Manage Workstations</value>
+    <value>Manage Work Centers</value>
   </data>
   <data name="Setup_Workstation.NameInput.Header" xml:space="preserve">
-    <value>Workstation</value>
+    <value>Work Center</value>
   </data>
   <data name="Setup_Workstation.NameInput.PlaceholderText" xml:space="preserve">
-    <value>Enter workstation name</value>
+    <value>Enter work center name</value>
   </data>
   <data name="Setup_Workstation.Add.Content" xml:space="preserve">
     <value>Add</value>
@@ -401,10 +401,10 @@
     <value>Remove</value>
   </data>
   <data name="Setup_Workstation.New.Content" xml:space="preserve">
-    <value>New Workstation</value>
+    <value>New Work Center</value>
   </data>
   <data name="Setup_Workstation.ManageHint.Text" xml:space="preserve">
-    <value>Setup Tech, Admin, and above can manage workstations.</value>
+    <value>Setup Tech, Admin, and above can manage work centers.</value>
   </data>
   <data name="Setup_Action.BackToWorkstations.Content" xml:space="preserve">
     <value>Back</value>
@@ -505,7 +505,7 @@
 &lt;/toast&gt;</value>
   </data>
   <data name="Setup_Header.Step1" xml:space="preserve">
-    <value>Work Station</value>
+    <value>Work Center</value>
   </data>
   <data name="Setup_Header.Step2" xml:space="preserve">
     <value>Work Order</value>

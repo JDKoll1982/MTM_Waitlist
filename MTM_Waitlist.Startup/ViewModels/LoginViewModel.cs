@@ -321,11 +321,12 @@ public partial class LoginViewModel : ObservableRecipient
         _startupState.IsSessionValid = true;
         _startupState.SessionTokenSource = StartupState.SessionTokenSourceLocal;
 
-        var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-        var expiryUtc = DateTimeOffset.UtcNow.AddHours(8);
-
-        await _localSettingsService.SaveSettingAsync(LocalSessionTokenKey, token);
-        await _localSettingsService.SaveSettingAsync(LocalSessionExpiryKey, expiryUtc.ToString("O"));
+        // NOTE: The local session token/expiry are deliberately NOT persisted here.
+        // They are written in FinishLoginNavigationAsync (only reached after the
+        // computer gate passes). Persisting them before the gate would let a user who
+        // closes the app on the Register Computer screen keep a valid session and
+        // bypass the gate on the next launch.
+        
         await _localSettingsService.SaveSettingAsync(RememberPasswordKey, RememberPassword);
 
         if (RememberPassword)
@@ -421,16 +422,16 @@ public partial class LoginViewModel : ObservableRecipient
 
             case ComputerGateStatus.Missing:
                 _pendingGateCheck = gate;
-                ComputerGateState = ComputerGateStatus.Missing;
                 ComputerGateHint = "Register this computer to continue.";
                 PrepareComputerFields();
+                ComputerGateState = ComputerGateStatus.Missing;
                 return gate.Status;
 
             case ComputerGateStatus.RenamedMachine:
                 _pendingGateCheck = gate;
-                ComputerGateState = ComputerGateStatus.RenamedMachine;
                 ComputerGateHint = "This computer's name changed. Confirm its display name to continue.";
                 PrepareComputerFields();
+                ComputerGateState = ComputerGateStatus.RenamedMachine;
                 return gate.Status;
 
             default:
@@ -460,6 +461,17 @@ public partial class LoginViewModel : ObservableRecipient
 
     private async Task FinishLoginNavigationAsync()
     {
+        // Persist the local session token only now that the computer gate has
+        // passed (this method is reached from Registered / SkippedNoMac, and from
+        // CompleteComputerGateAsync after a successful save). This prevents a user
+        // who closes the app on the Register Computer screen from keeping a valid
+        // session that would bypass the gate on the next launch.
+        var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+        var expiryUtc = DateTimeOffset.UtcNow.AddHours(8);
+
+        await _localSettingsService.SaveSettingAsync(LocalSessionTokenKey, token);
+        await _localSettingsService.SaveSettingAsync(LocalSessionExpiryKey, expiryUtc.ToString("O"));
+
         await _startupShellStateService.EnterMainModeAsync();
         _navigationService.NavigateTo(WaitlistRoute, null, true);
         _startupWindowService.ShowMainWindowAndCloseLoginWindow();

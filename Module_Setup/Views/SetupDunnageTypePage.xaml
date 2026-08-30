@@ -30,7 +30,7 @@
 
                 <Border Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_DunnagePair.Header.WorkStation" Style="{StaticResource SetupFieldLabelStyle}" Text="WORK STATION" />
+                        <TextBlock x:Uid="Setup_DunnagePair.Header.WorkStation" Style="{StaticResource SetupFieldLabelStyle}" Text="WORK CENTER" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedWorkCenter, Mode=OneWay}" />
                     </StackPanel>
                 </Border>

@@ -36,31 +36,40 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         return Environment.MachineName;
     }
 
-    public async Task<IReadOnlyList<string>> GetAvailableComputersAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<ComputerOption>> GetAvailableComputersAsync(CancellationToken cancellationToken = default)
     {
         var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT computer_name
+            @"SELECT computer_name, display_name
 FROM core_computers_registry
 WHERE is_registered = 1
-ORDER BY computer_name ASC;",
+ORDER BY display_name ASC, computer_name ASC;",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        var workstations = rows
-            .Select(row => GetValue(row, "computer_name"))
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
+        var computers = rows
+            .Select(row => new ComputerOption
+            {
+                Key = GetValue(row, "computer_name"),
+                Label = new ComputerRecord
+                {
+                    ComputerName = GetValue(row, "computer_name"),
+                    DisplayName = GetValue(row, "display_name"),
+                }.GetDisplayLabel(),
+            })
+            .Where(option => !string.IsNullOrWhiteSpace(option.Key))
+            .GroupBy(option => option.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .OrderBy(option => option.Label, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         var currentWorkstation = await ResolveCurrentComputerNameAsync(cancellationToken).ConfigureAwait(false);
-        if (!workstations.Any(value => string.Equals(value, currentWorkstation, StringComparison.OrdinalIgnoreCase)))
+        if (!computers.Any(option => string.Equals(option.Key, currentWorkstation, StringComparison.OrdinalIgnoreCase)))
         {
-            workstations.Insert(0, currentWorkstation);
+            computers.Insert(0, new ComputerOption { Key = currentWorkstation, Label = currentWorkstation });
         }
 
-        return workstations;
+        return computers;
     }
 
     public async Task<WorkCenterCatalogResult> GetCatalogAsync(string workstationName, CancellationToken cancellationToken = default)

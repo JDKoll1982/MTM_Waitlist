@@ -139,9 +139,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
-            <TextBlock x:Uid="Setup_Workstation.Title" Style="{StaticResource SetupPageTitleStyle}" Text="Select Workstation" />
+            <TextBlock x:Uid="Setup_Workstation.Title" Style="{StaticResource SetupPageTitleStyle}" Text="Select Work Center" />
             <TextBlock x:Uid="Setup_Workstation.Subtitle" Style="{StaticResource SetupPageSubtitleStyle}" Text="Choose where this setup is being performed." />
-            <TextBox x:Uid="Setup_Workstation.SearchInput" Header="Search" PlaceholderText="Search by workstation, work order, sequence, or part number" Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox x:Uid="Setup_Workstation.SearchInput" Header="Search" PlaceholderText="Search by work center, work order, sequence, or part number" Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
 
@@ -214,7 +214,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Content="New Workstation" MinWidth="150" Click="OnNewWorkCenterClick" IsEnabled="{x:Bind ViewModel.CanManageWorkCenters, Mode=OneWay}" />
+            <Button Grid.Column="0" Content="New Work Center" MinWidth="150" Click="OnNewWorkCenterClick" IsEnabled="{x:Bind ViewModel.CanManageWorkCenters, Mode=OneWay}" />
             <Button Grid.Column="2" x:Uid="Setup_Action.Refresh" Content="Refresh" Command="{x:Bind ViewModel.RefreshCommand}" />
             <Button Grid.Column="3" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
         </Grid>

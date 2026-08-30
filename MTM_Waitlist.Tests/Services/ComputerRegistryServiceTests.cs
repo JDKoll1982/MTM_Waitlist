@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Startup.Services;
 
@@ -104,6 +105,113 @@ public sealed class ComputerRegistryServiceTests
         Assert.AreEqual("new-host", record.ComputerName);
         Assert.AreEqual("New Name", record.DisplayName);
         Assert.AreEqual(1, helper.NonQueryCallCount);
+    }
+
+    [TestMethod]
+    public async Task GetAllComputersAsync_ReturnsAllMappedRecordsAsync()
+    {
+        var helper = new FakeMySqlHelperServer
+        {
+            QueryResult = new List<Dictionary<string, object?>>
+            {
+                ComputerRow(id: 1, computerName: "johnspc", displayName: "John's Computer"),
+                ComputerRow(id: 2, computerName: "mtmfg-161", displayName: "MTMFG 161")
+            }
+        };
+        var service = new ComputerRegistryService(helper);
+
+        var records = await service.GetAllComputersAsync();
+
+        Assert.AreEqual(2, records.Count);
+        Assert.AreEqual(1, records[0].Id);
+        Assert.AreEqual(2, records[1].Id);
+        Assert.AreEqual(1, helper.QueryCallCount);
+    }
+
+    [TestMethod]
+    public async Task UpdateComputerAsync_UpdatesThenLooksUpAsync()
+    {
+        var helper = new FakeMySqlHelperServer
+        {
+            NonQueryResult = 1,
+            QueryResult = new List<Dictionary<string, object?>> { ComputerRow(displayName: "Updated Name") }
+        };
+        var service = new ComputerRegistryService(helper);
+
+        var record = await service.UpdateComputerAsync(1, "johnspc", "johnspc", "d8-43-ae-47-d0-d6", "Updated Name", null, isRegistered: false);
+
+        Assert.IsNotNull(record);
+        Assert.AreEqual("Updated Name", record.DisplayName);
+        Assert.AreEqual(1, helper.NonQueryCallCount);
+        Assert.AreEqual(1, helper.QueryCallCount);
+    }
+
+    [TestMethod]
+    public async Task DeleteComputerAsync_ReturnsTrueWhenAffectedAsync()
+    {
+        var helper = new FakeMySqlHelperServer { NonQueryResult = 1 };
+        var service = new ComputerRegistryService(helper);
+
+        var deleted = await service.DeleteComputerAsync(1);
+
+        Assert.IsTrue(deleted);
+        Assert.AreEqual(1, helper.NonQueryCallCount);
+    }
+
+    [TestMethod]
+    public async Task DeleteComputerAsync_ReturnsFalseWhenNothingDeletedAsync()
+    {
+        var helper = new FakeMySqlHelperServer { NonQueryResult = 0 };
+        var service = new ComputerRegistryService(helper);
+
+        var deleted = await service.DeleteComputerAsync(999);
+
+        Assert.IsFalse(deleted);
+    }
+
+    [TestMethod]
+    public void ComputerRecord_GetDisplayLabel_FormatsDisplayNameAndComputerName()
+    {
+        var record = new ComputerRecord
+        {
+            Id = 1,
+            ComputerName = "johnspc",
+            DisplayName = "John's Computer",
+            MacAddressNormalized = "d8-43-ae-47-d0-d6",
+            IsRegistered = true
+        };
+
+        Assert.AreEqual("John's Computer - johnspc", record.GetDisplayLabel());
+    }
+
+    [TestMethod]
+    public void ComputerRecord_GetDisplayLabel_FallsBackToComputerNameWhenNoDisplayName()
+    {
+        var record = new ComputerRecord
+        {
+            Id = 1,
+            ComputerName = "johnspc",
+            DisplayName = string.Empty,
+            MacAddressNormalized = "d8-43-ae-47-d0-d6",
+            IsRegistered = true
+        };
+
+        Assert.AreEqual("johnspc", record.GetDisplayLabel());
+    }
+
+    [TestMethod]
+    public void ComputerRecord_IsCurrentComputer_DefaultsToFalse()
+    {
+        var record = new ComputerRecord
+        {
+            Id = 1,
+            ComputerName = "johnspc",
+            DisplayName = "John's Computer",
+            MacAddressNormalized = "d8-43-ae-47-d0-d6",
+            IsRegistered = true
+        };
+
+        Assert.IsFalse(record.IsCurrentComputer);
     }
 
     private static Dictionary<string, object?> ComputerRow(

@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.ViewModels;
@@ -20,6 +21,12 @@ public sealed partial class SettingsPage : Page
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
         StartupDebugLog.Info("SettingsPage", "Constructor completed.");
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        _ = ViewModel.ComputerManagement.LoadAsync();
     }
 
     private async void RequestTypeImages_Click(object sender, RoutedEventArgs e)
@@ -50,5 +57,48 @@ public sealed partial class SettingsPage : Page
         };
 
         await dialog.ShowAsync();
+    }
+
+    private async void AddComputer_Click(object sender, RoutedEventArgs e)
+    {
+        if (!ViewModel.ComputerManagement.CanManageComputers)
+        {
+            return;
+        }
+
+        var editViewModel = App.GetService<ComputerEditDialogViewModel>();
+        editViewModel.ConfigureForAdd();
+
+        var dialog = new ComputerEditDialog(editViewModel)
+        {
+            XamlRoot = XamlRoot
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await ViewModel.ComputerManagement.LoadAsync();
+        }
+    }
+
+    private async void EditComputer_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = ViewModel.ComputerManagement.SelectedComputer;
+        if (!ViewModel.ComputerManagement.CanManageComputers || selected is null)
+        {
+            return;
+        }
+
+        var editViewModel = App.GetService<ComputerEditDialogViewModel>();
+        editViewModel.ConfigureForEdit(selected);
+
+        var dialog = new ComputerEditDialog(editViewModel)
+        {
+            XamlRoot = XamlRoot
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await ViewModel.ComputerManagement.LoadAsync();
+        }
     }
 }

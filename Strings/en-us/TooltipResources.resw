@@ -190,7 +190,7 @@
     <value>Search.</value>
   </data>
   <data name="Setup_SetupWorkstationPage_TextBox1_Tooltip" xml:space="preserve">
-    <value>Search by workstation, work order, sequence, or part number.</value>
+    <value>Search by work center, work order, sequence, or part number.</value>
   </data>
   <data name="Setup_SetupWorkstationPage_GridView1_Tooltip" xml:space="preserve">
     <value>Select an option in Grid View.</value>
@@ -202,7 +202,7 @@
     <value>Activate Menu Flyout Item.</value>
   </data>
   <data name="Setup_SetupWorkstationPage_Button1_Tooltip" xml:space="preserve">
-    <value>New Workstation.</value>
+    <value>New Work Center.</value>
   </data>
   <data name="Setup_SetupWorkstationPage_Button2_Tooltip" xml:space="preserve">
     <value>Refresh.</value>

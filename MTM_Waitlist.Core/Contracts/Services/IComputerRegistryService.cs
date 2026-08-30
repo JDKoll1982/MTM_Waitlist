@@ -13,6 +13,8 @@ public interface IComputerRegistryService
         string macAddressNormalized,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<ComputerRecord>> GetAllComputersAsync(CancellationToken cancellationToken = default);
+
     Task<ComputerRecord> UpsertComputerAsync(
         string computerName,
         string hostnameNormalized,
@@ -28,4 +30,16 @@ public interface IComputerRegistryService
         string displayName,
         string? description,
         CancellationToken cancellationToken = default);
+
+    Task<ComputerRecord> UpdateComputerAsync(
+        long id,
+        string computerName,
+        string hostnameNormalized,
+        string macAddressNormalized,
+        string displayName,
+        string? description,
+        bool isRegistered,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteComputerAsync(long id, CancellationToken cancellationToken = default);
 }

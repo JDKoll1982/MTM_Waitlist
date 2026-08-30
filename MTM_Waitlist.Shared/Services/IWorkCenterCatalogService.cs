@@ -6,7 +6,7 @@ public interface IWorkCenterCatalogService
 {
     string GetCurrentComputerName();
 
-    Task<IReadOnlyList<string>> GetAvailableComputersAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ComputerOption>> GetAvailableComputersAsync(CancellationToken cancellationToken = default);
 
     Task<WorkCenterCatalogResult> GetCatalogAsync(string workstationName, CancellationToken cancellationToken = default);
 

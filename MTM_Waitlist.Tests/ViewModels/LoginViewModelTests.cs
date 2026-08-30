@@ -138,6 +138,54 @@ public sealed class LoginViewModelTests
     }
 
     [TestMethod]
+    public async Task SignInAsync_WhenComputerMissing_DoesNotPersistSessionTokenAsync()
+    {
+        // Regression guard: the local session token must NOT be persisted when the
+        // computer gate blocks on the Register Computer screen. Otherwise a user who
+        // closes the app during the gate would keep a valid session and bypass the
+        // gate on the next launch. The token may only be written in
+        // FinishLoginNavigationAsync, which is reached after the gate passes.
+        var startupState = SignedInState();
+        var gateService = new FakeComputerGateService { CheckResult = new ComputerGateCheck(ComputerGateStatus.Missing) };
+        var localSettingsService = new NoOpLocalSettingsService();
+        var navigation = new RecordingNavigationService();
+        var viewModel = CreateViewModel(startupState, gateService: gateService, localSettingsService: localSettingsService, navigationService: navigation);
+        viewModel.Username = "johnk";
+        viewModel.Password = "pw-1234";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(ComputerGateStatus.Missing, viewModel.ComputerGateState);
+        Assert.AreEqual(0, navigation.NavigateToCalls.Count);
+
+        var token = await localSettingsService.ReadSettingAsync<string>("Startup.Session.Token");
+        var expiry = await localSettingsService.ReadSettingAsync<string>("Startup.Session.ExpiresUtc");
+        Assert.IsTrue(string.IsNullOrEmpty(token), "Session token must not be persisted while the computer gate is pending.");
+        Assert.IsTrue(string.IsNullOrEmpty(expiry), "Session expiry must not be persisted while the computer gate is pending.");
+    }
+
+    [TestMethod]
+    public async Task SignInAsync_WhenComputerRegistered_PersistsSessionTokenAsync()
+    {
+        // Confirms the session token IS persisted once the gate passes (Registered
+        // routes through FinishLoginNavigationAsync). Guards against over-correction
+        // that would break remembered sessions.
+        var startupState = SignedInState();
+        var gateService = new FakeComputerGateService { CheckResult = new ComputerGateCheck(ComputerGateStatus.Registered) };
+        var localSettingsService = new NoOpLocalSettingsService();
+        var viewModel = CreateViewModel(startupState, gateService: gateService, localSettingsService: localSettingsService);
+        viewModel.Username = "johnk";
+        viewModel.Password = "pw-1234";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        var token = await localSettingsService.ReadSettingAsync<string>("Startup.Session.Token");
+        var expiry = await localSettingsService.ReadSettingAsync<string>("Startup.Session.ExpiresUtc");
+        Assert.IsFalse(string.IsNullOrEmpty(token), "Session token should be persisted after the gate passes.");
+        Assert.IsFalse(string.IsNullOrEmpty(expiry), "Session expiry should be persisted after the gate passes.");
+    }
+
+    [TestMethod]
     public async Task CompleteComputerGateAsync_WithEmptyDisplayName_ReturnsFalseWithoutUpsertAsync()
     {
         var startupState = SignedInState();
@@ -374,6 +422,21 @@ public sealed class LoginViewModelTests
                 MacAddressNormalized = macAddressNormalized,
                 IsRegistered = true
             });
+        }
+
+        public Task<IReadOnlyList<ComputerRecord>> GetAllComputersAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<ComputerRecord>>(Array.Empty<ComputerRecord>());
+        }
+
+        public Task<ComputerRecord> UpdateComputerAsync(long id, string computerName, string hostnameNormalized, string macAddressNormalized, string displayName, string? description, bool isRegistered, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> DeleteComputerAsync(long id, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 

@@ -17,6 +17,8 @@ public static class ModuleDependencyInjectionExtensions
         services.AddTransient<MTM_Waitlist.Module_Settings.ViewModels.RequestTypeImagesDialogViewModel>();
         services.AddTransient<MTM_Waitlist.Module_Settings.ViewModels.WorkCenterImagesDialogViewModel>();
         services.AddTransient<MTM_Waitlist.Module_Settings.ViewModels.RequestSubtypeImagesDialogViewModel>();
+        services.AddTransient<MTM_Waitlist.Module_Settings.ViewModels.ComputerEditDialogViewModel>();
+        services.AddTransient<MTM_Waitlist.Module_Settings.ViewModels.ComputerManagementViewModel>();
 
         return services;
     }

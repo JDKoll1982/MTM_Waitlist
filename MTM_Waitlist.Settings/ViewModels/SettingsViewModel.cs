@@ -38,6 +38,8 @@ public partial class SettingsViewModel : ObservableRecipient
     private readonly IDunnageTypeVisibilityCatalogService _dunnageTypeVisibilityCatalogService;
     private readonly StartupState _startupState;
 
+    public ComputerManagementViewModel ComputerManagement { get; }
+
     [ObservableProperty]
     public partial ElementTheme ElementTheme
     {
@@ -98,7 +100,7 @@ public partial class SettingsViewModel : ObservableRecipient
         get; set;
     } = string.Empty;
 
-    public ObservableCollection<string> AvailableWorkstations { get; } = new();
+    public ObservableCollection<ComputerOption> AvailableWorkstations { get; } = new();
 
     public ObservableCollection<string> HotWorkCenters { get; } = new();
 
@@ -126,7 +128,7 @@ public partial class SettingsViewModel : ObservableRecipient
         "computer",
         string.Join(" ", HotWorkCenters),
         string.Join(" ", OtherWorkCenters),
-        string.Join(" ", AvailableWorkstations));
+        string.Join(" ", AvailableWorkstations.Select(option => option.Label)));
 
     public bool IsDunnageTypeVisibilityPanelVisible => MatchesSearch(
         "dunnage",
@@ -151,7 +153,15 @@ public partial class SettingsViewModel : ObservableRecipient
         "subtype",
         "work center");
 
-    public bool IsOperationsCategoryVisible => IsMockDataPanelVisible || IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible;
+    public bool IsComputersPanelVisible => ComputerManagement.CanManageComputers && MatchesSearch(
+        "computer",
+        "computers",
+        "registry",
+        "mac",
+        "display name",
+        string.Join(" ", ComputerManagement.Computers.Select(record => record.GetDisplayLabel())));
+
+    public bool IsOperationsCategoryVisible => IsMockDataPanelVisible || IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsComputersPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
@@ -168,7 +178,8 @@ public partial class SettingsViewModel : ObservableRecipient
         ILocalSettingsService localSettingsService,
         IWorkCenterCatalogService workCenterCatalogService,
         IDunnageTypeVisibilityCatalogService dunnageTypeVisibilityCatalogService,
-        StartupState startupState)
+        StartupState startupState,
+        ComputerManagementViewModel computerManagement)
     {
         StartupDebugLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
@@ -176,6 +187,7 @@ public partial class SettingsViewModel : ObservableRecipient
         _workCenterCatalogService = workCenterCatalogService;
         _dunnageTypeVisibilityCatalogService = dunnageTypeVisibilityCatalogService;
         _startupState = startupState;
+        ComputerManagement = computerManagement;
 
         ElementTheme = _themeSelectorService.Theme;
         VersionDescription = GetVersionDescription();
@@ -377,9 +389,9 @@ public partial class SettingsViewModel : ObservableRecipient
             ReplaceCollectionValues(AvailableWorkstations, workstations);
 
             var currentWorkstation = _workCenterCatalogService.GetCurrentComputerName();
-            var resolvedWorkstation = AvailableWorkstations.FirstOrDefault(item =>
-                                          string.Equals(item, currentWorkstation, StringComparison.OrdinalIgnoreCase))
-                ?? AvailableWorkstations.FirstOrDefault()
+            var resolvedWorkstation = (AvailableWorkstations.FirstOrDefault(item =>
+                                           string.Equals(item.Key, currentWorkstation, StringComparison.OrdinalIgnoreCase))
+                                       ?? AvailableWorkstations.FirstOrDefault())?.Key
                 ?? currentWorkstation;
 
             var workstationChanged = !string.Equals(SelectedWorkstation, resolvedWorkstation, StringComparison.OrdinalIgnoreCase);
@@ -515,6 +527,19 @@ public partial class SettingsViewModel : ObservableRecipient
         }
     }
 
+    private static void ReplaceCollectionValues(ObservableCollection<ComputerOption> targetCollection, IEnumerable<ComputerOption> values)
+    {
+        targetCollection.Clear();
+        foreach (var value in values
+                     .Where(item => !string.IsNullOrWhiteSpace(item.Key))
+                     .GroupBy(item => item.Key, StringComparer.OrdinalIgnoreCase)
+                     .Select(group => group.First())
+                     .OrderBy(item => item.Label, StringComparer.OrdinalIgnoreCase))
+        {
+            targetCollection.Add(value);
+        }
+    }
+
     private static void SortCollection(ObservableCollection<string> values)
     {
         var sorted = values
@@ -561,6 +586,7 @@ public partial class SettingsViewModel : ObservableRecipient
         OnPropertyChanged(nameof(IsHotWorkCentersPanelVisible));
         OnPropertyChanged(nameof(IsDunnageTypeVisibilityPanelVisible));
         OnPropertyChanged(nameof(IsAboutPanelVisible));
+        OnPropertyChanged(nameof(IsComputersPanelVisible));
         OnPropertyChanged(nameof(IsAppearanceCategoryVisible));
         OnPropertyChanged(nameof(IsOperationsCategoryVisible));
         OnPropertyChanged(nameof(IsAboutCategoryVisible));

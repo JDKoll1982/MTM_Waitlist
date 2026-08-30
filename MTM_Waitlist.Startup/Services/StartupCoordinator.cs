@@ -227,7 +227,7 @@ public sealed class StartupCoordinator : IStartupCoordinator
 
         progress?.Report(StartupProgress.Step5);
 
-        if (isUserMatched && sessionIsValid)
+        if (isUserMatched && sessionIsValid && isComputerRegistered)
         {
             _startupState.LoginHint = string.Empty;
             var result = StartupResult.Success(WaitlistRoute, StartupProgress.Step5);
