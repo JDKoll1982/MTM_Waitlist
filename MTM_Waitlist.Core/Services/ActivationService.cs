@@ -4,7 +4,6 @@ using Microsoft.UI.Xaml.Controls;
 using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
-using MTM_Waitlist.Module_Core.Views;
 
 namespace MTM_Waitlist.Module_Core.Services;
 
@@ -14,18 +13,24 @@ public class ActivationService : IActivationService
     private readonly IEnumerable<IActivationHandler> _activationHandlers;
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly IStartupShellStateService _startupShellStateService;
+    private readonly IAppWindowProvider _appWindowProvider;
+    private readonly IShellContentProvider _shellContentProvider;
     private UIElement? _shell = null;
 
     public ActivationService(
         ActivationHandler<LaunchActivatedEventArgs> defaultHandler,
         IEnumerable<IActivationHandler> activationHandlers,
         IThemeSelectorService themeSelectorService,
-        IStartupShellStateService startupShellStateService)
+        IStartupShellStateService startupShellStateService,
+        IAppWindowProvider appWindowProvider,
+        IShellContentProvider shellContentProvider)
     {
         _defaultHandler = defaultHandler;
         _activationHandlers = activationHandlers;
         _themeSelectorService = themeSelectorService;
         _startupShellStateService = startupShellStateService;
+        _appWindowProvider = appWindowProvider;
+        _shellContentProvider = shellContentProvider;
     }
 
     public async Task ActivateAsync(object activationArgs, bool activateMainWindow = true)
@@ -39,10 +44,10 @@ public class ActivationService : IActivationService
         StartupDebugLog.Info("ActivationService", "Splash mode entered.");
 
         // Set the MainWindow Content.
-        if (App.MainWindow.Content == null)
+        if (_appWindowProvider.MainWindow.Content == null)
         {
-            _shell = App.GetService<ShellPage>();
-            App.MainWindow.Content = _shell ?? new Frame();
+            _shell = _shellContentProvider.CreateShellContent();
+            _appWindowProvider.MainWindow.Content = _shell ?? new Frame();
             StartupDebugLog.Info("ActivationService", "Shell content assigned to MainWindow.");
         }
 
@@ -53,7 +58,7 @@ public class ActivationService : IActivationService
         // Activate the MainWindow when requested by the startup flow.
         if (activateMainWindow)
         {
-            App.MainWindow.Activate();
+            _appWindowProvider.MainWindow.Activate();
             StartupDebugLog.Info("ActivationService", "MainWindow activated.");
         }
 

@@ -37,6 +37,8 @@ public static class ServiceRegistrationExtensions
 
         // Services
         services.AddSingleton<IAppNotificationService, AppNotificationService>();
+        services.AddSingleton<IAppWindowProvider, AppWindowProvider>();
+        services.AddSingleton<IShellContentProvider, ShellContentProvider>();
         services.AddSingleton<ILocalSettingsService, MTM_Waitlist.Module_Settings.Services.LocalSettingsService>();
         services.AddSingleton<IStartupRecoveryService, MTM_Waitlist.Module_Startup.Services.StartupRecoveryService>();
         services.AddSingleton<IStartupRegistrationService, MTM_Waitlist.Module_Startup.Services.StartupRegistrationService>();

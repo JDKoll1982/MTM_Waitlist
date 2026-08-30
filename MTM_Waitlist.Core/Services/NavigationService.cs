@@ -18,6 +18,7 @@ public class NavigationService : INavigationService
 {
     private readonly IPageService _pageService;
     private readonly IPageTransitionService _pageTransitionService;
+    private readonly IAppWindowProvider _appWindowProvider;
     private object? _lastParameterUsed;
     private Frame? _frame;
 
@@ -29,7 +30,7 @@ public class NavigationService : INavigationService
         {
             if (_frame == null)
             {
-                _frame = App.MainWindow.Content as Frame;
+                _frame = _appWindowProvider.MainWindow.Content as Frame;
                 RegisterFrameEvents();
             }
 
@@ -47,10 +48,11 @@ public class NavigationService : INavigationService
     [MemberNotNullWhen(true, nameof(Frame), nameof(_frame))]
     public bool CanGoBack => Frame != null && Frame.CanGoBack;
 
-    public NavigationService(IPageService pageService, IPageTransitionService pageTransitionService)
+    public NavigationService(IPageService pageService, IPageTransitionService pageTransitionService, IAppWindowProvider appWindowProvider)
     {
         _pageService = pageService;
         _pageTransitionService = pageTransitionService;
+        _appWindowProvider = appWindowProvider;
     }
 
     private void RegisterFrameEvents()

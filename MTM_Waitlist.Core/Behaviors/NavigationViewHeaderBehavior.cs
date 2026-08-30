@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Xaml.Interactivity;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Services;
 
 namespace MTM_Waitlist.Module_Core.Behaviors;
 
@@ -56,7 +57,8 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     {
         base.OnAttached();
 
-        var navigationService = App.GetService<INavigationService>();
+        var navigationService = AppServiceLocator.NavigationService
+            ?? throw new InvalidOperationException("NavigationService is not initialized.");
         navigationService.Navigated += OnNavigated;
 
     }
@@ -65,7 +67,8 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     {
         base.OnDetaching();
 
-        var navigationService = App.GetService<INavigationService>();
+        var navigationService = AppServiceLocator.NavigationService
+            ?? throw new InvalidOperationException("NavigationService is not initialized.");
         navigationService.Navigated -= OnNavigated;
     }
 

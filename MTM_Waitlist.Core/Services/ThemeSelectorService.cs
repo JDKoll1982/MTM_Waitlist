@@ -12,10 +12,12 @@ public class ThemeSelectorService : IThemeSelectorService
     public ElementTheme Theme { get; set; } = ElementTheme.Default;
 
     private readonly ILocalSettingsService _localSettingsService;
+    private readonly IAppWindowProvider _appWindowProvider;
 
-    public ThemeSelectorService(ILocalSettingsService localSettingsService)
+    public ThemeSelectorService(ILocalSettingsService localSettingsService, IAppWindowProvider appWindowProvider)
     {
         _localSettingsService = localSettingsService;
+        _appWindowProvider = appWindowProvider;
     }
 
     public async Task InitializeAsync()
@@ -34,11 +36,11 @@ public class ThemeSelectorService : IThemeSelectorService
 
     public async Task SetRequestedThemeAsync()
     {
-        if (App.MainWindow.Content is FrameworkElement rootElement)
+        if (_appWindowProvider.MainWindow.Content is FrameworkElement rootElement)
         {
             rootElement.RequestedTheme = Theme;
 
-            TitleBarHelper.UpdateTitleBar(Theme);
+            TitleBarHelper.UpdateTitleBar(_appWindowProvider.MainWindow, Theme);
         }
 
         await Task.CompletedTask;

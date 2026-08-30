@@ -115,6 +115,12 @@
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
+
+  <!-- Project references to the per-module class libraries (code was migrated out of this project). -->
+  <ItemGroup>
+    <ProjectReference Include="MTM_Waitlist.Core\MTM_Waitlist.Core.csproj" />
+  </ItemGroup>
+
   <!-- Add this near the bottom of MTM_Waitlist.csproj to block recursive compiling of sibling projects -->
   <ItemGroup>
     <Compile Remove="MTM_Waitlist.Tests\**\*.cs" />

@@ -50,7 +50,7 @@ public sealed partial class MainWindow : WindowEx
             {
                 return;
             }
-            TitleBarHelper.ApplySystemThemeToCaptionButtons();
+            TitleBarHelper.ApplySystemThemeToCaptionButtons(App.MainWindow, App.AppTitlebar);
         });
     }
 

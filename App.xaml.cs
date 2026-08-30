@@ -58,6 +58,8 @@ public partial class App : Application
         ConfigureServices((context, services) => services.AddAppServices(context)).
         Build();
 
+        AppServiceLocator.NavigationService = Host.Services.GetService<INavigationService>();
+
         StartupDebugLog.Configure(Host.Services.GetService<IStartupLogService>());
         StartupDebugLog.Info("App", "Host built.");
 

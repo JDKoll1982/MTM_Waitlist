@@ -11,11 +11,13 @@ public class AppNotificationActivationHandler : ActivationHandler<LaunchActivate
 {
     private readonly INavigationService _navigationService;
     private readonly IAppNotificationService _notificationService;
+    private readonly IAppWindowProvider _appWindowProvider;
 
-    public AppNotificationActivationHandler(INavigationService navigationService, IAppNotificationService notificationService)
+    public AppNotificationActivationHandler(INavigationService navigationService, IAppNotificationService notificationService, IAppWindowProvider appWindowProvider)
     {
         _navigationService = navigationService;
         _notificationService = notificationService;
+        _appWindowProvider = appWindowProvider;
     }
 
     protected override bool CanHandleInternal(LaunchActivatedEventArgs args)
@@ -40,9 +42,9 @@ public class AppNotificationActivationHandler : ActivationHandler<LaunchActivate
         ////     });
         //// }
 
-        App.MainWindow.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        _appWindowProvider.MainWindow.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
         {
-            App.MainWindow.ShowMessageDialogAsync("TODO: Handle notification activations.", "Notification Activation");
+            _appWindowProvider.MainWindow.ShowMessageDialogAsync("TODO: Handle notification activations.", "Notification Activation");
         });
 
         await Task.CompletedTask;

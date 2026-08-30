@@ -9,10 +9,12 @@ namespace MTM_Waitlist.Notifications;
 public class AppNotificationService : IAppNotificationService
 {
     private readonly INavigationService _navigationService;
+    private readonly IAppWindowProvider _appWindowProvider;
 
-    public AppNotificationService(INavigationService navigationService)
+    public AppNotificationService(INavigationService navigationService, IAppWindowProvider appWindowProvider)
     {
         _navigationService = navigationService;
+        _appWindowProvider = appWindowProvider;
     }
 
     ~AppNotificationService()
@@ -32,10 +34,10 @@ public class AppNotificationService : IAppNotificationService
 
     public void OnNotificationInvoked(AppNotificationManager sender, AppNotificationActivatedEventArgs args)
     {
-        App.MainWindow.DispatcherQueue.TryEnqueue(() =>
+        _appWindowProvider.MainWindow.DispatcherQueue.TryEnqueue(() =>
         {
-            App.MainWindow.ShowMessageDialogAsync("TODO: Handle notification invocations when your app is already running.", "Notification Invoked");
-            App.MainWindow.BringToFront();
+            _appWindowProvider.MainWindow.ShowMessageDialogAsync("TODO: Handle notification invocations when your app is already running.", "Notification Invoked");
+            _appWindowProvider.MainWindow.BringToFront();
         });
     }
 

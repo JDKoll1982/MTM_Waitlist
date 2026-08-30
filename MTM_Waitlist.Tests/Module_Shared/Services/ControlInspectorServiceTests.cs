@@ -115,7 +115,7 @@ public sealed class ControlInspectorServiceTests
         Assert.IsTrue(expanded.Any(static path => path.Equals("Styles/TooltipDeveloper.xaml", StringComparison.OrdinalIgnoreCase)));
         Assert.IsTrue(expanded.Any(static path => path.Equals("Strings/en-us/TooltipResources.resw", StringComparison.OrdinalIgnoreCase)));
         Assert.IsTrue(expanded.Any(static path => path.Equals("Module_Waitlist/Models/SampleOrder.cs", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(expanded.Any(static path => path.Equals("Module_Core/Services/BuildingSelectionService.cs", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(expanded.Any(static path => path.Equals("MTM_Waitlist.Core/Services/BuildingSelectionService.cs", StringComparison.OrdinalIgnoreCase)));
     }
 
     [TestMethod]
@@ -129,7 +129,7 @@ public sealed class ControlInspectorServiceTests
             "Module_Shared/Services/TooltipBehavior.cs",
             "Styles/TooltipDeveloper.xaml",
             "Strings/en-us/TooltipResources.resw",
-            "Module_Core/Services/BuildingSelectionService.cs",
+            "MTM_Waitlist.Core/Services/BuildingSelectionService.cs",
             "Module_Waitlist/Models/SampleOrder.cs",
         };
 
@@ -138,7 +138,7 @@ public sealed class ControlInspectorServiceTests
             .ToArray();
 
         Assert.IsTrue(filtered.Contains("Module_Core/Views/ShellPage.xaml"));
-        Assert.IsTrue(filtered.Contains("Module_Core/Services/BuildingSelectionService.cs"));
+        Assert.IsTrue(filtered.Contains("MTM_Waitlist.Core/Services/BuildingSelectionService.cs"));
         Assert.IsTrue(filtered.Contains("Module_Waitlist/Models/SampleOrder.cs"));
         Assert.IsFalse(filtered.Any(static path => path.Contains("Tooltip", StringComparison.OrdinalIgnoreCase)));
     }

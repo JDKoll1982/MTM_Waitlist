@@ -55,7 +55,7 @@ public sealed partial class ShellPage : Page
         App.MainWindow.SetTitleBar(AppTitleBar);
         App.AppTitlebar = AppTitleBarText as UIElement;
         AppTitleBarText.Text = "AppDisplayName".GetLocalized();
-        TitleBarHelper.UpdateTitleBar(RequestedTheme);
+        TitleBarHelper.UpdateTitleBar(App.MainWindow, RequestedTheme);
 
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu));
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));

@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Media;
 
 using Windows.UI;
 using Windows.UI.ViewManagement;
+using WinUIEx;
 
 namespace MTM_Waitlist.Module_Core.Helpers;
 
@@ -24,9 +25,9 @@ internal class TitleBarHelper
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     private static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, IntPtr lParam);
 
-    public static void UpdateTitleBar(ElementTheme theme)
+    public static void UpdateTitleBar(WindowEx window, ElementTheme theme)
     {
-        if (App.MainWindow.ExtendsContentIntoTitleBar)
+        if (window.ExtendsContentIntoTitleBar)
         {
             if (theme == ElementTheme.Default)
             {
@@ -41,37 +42,37 @@ internal class TitleBarHelper
                 theme = Application.Current.RequestedTheme == ApplicationTheme.Light ? ElementTheme.Light : ElementTheme.Dark;
             }
 
-            App.MainWindow.AppWindow.TitleBar.ButtonForegroundColor = theme switch
+            window.AppWindow.TitleBar.ButtonForegroundColor = theme switch
             {
                 ElementTheme.Dark => Colors.White,
                 ElementTheme.Light => Colors.Black,
                 _ => Colors.Transparent
             };
 
-            App.MainWindow.AppWindow.TitleBar.ButtonHoverForegroundColor = theme switch
+            window.AppWindow.TitleBar.ButtonHoverForegroundColor = theme switch
             {
                 ElementTheme.Dark => Colors.White,
                 ElementTheme.Light => Colors.Black,
                 _ => Colors.Transparent
             };
 
-            App.MainWindow.AppWindow.TitleBar.ButtonHoverBackgroundColor = theme switch
+            window.AppWindow.TitleBar.ButtonHoverBackgroundColor = theme switch
             {
                 ElementTheme.Dark => Color.FromArgb(0x33, 0xFF, 0xFF, 0xFF),
                 ElementTheme.Light => Color.FromArgb(0x33, 0x00, 0x00, 0x00),
                 _ => Colors.Transparent
             };
 
-            App.MainWindow.AppWindow.TitleBar.ButtonPressedBackgroundColor = theme switch
+            window.AppWindow.TitleBar.ButtonPressedBackgroundColor = theme switch
             {
                 ElementTheme.Dark => Color.FromArgb(0x66, 0xFF, 0xFF, 0xFF),
                 ElementTheme.Light => Color.FromArgb(0x66, 0x00, 0x00, 0x00),
                 _ => Colors.Transparent
             };
 
-            App.MainWindow.AppWindow.TitleBar.BackgroundColor = Colors.Transparent;
+            window.AppWindow.TitleBar.BackgroundColor = Colors.Transparent;
 
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
             if (hwnd == GetActiveWindow())
             {
                 SendMessage(hwnd, WMACTIVATE, WAINACTIVE, IntPtr.Zero);
@@ -85,12 +86,12 @@ internal class TitleBarHelper
         }
     }
 
-    public static void ApplySystemThemeToCaptionButtons()
+    public static void ApplySystemThemeToCaptionButtons(WindowEx window, UIElement? appTitleBar)
     {
-        var frame = App.AppTitlebar as FrameworkElement;
+        var frame = appTitleBar as FrameworkElement;
         if (frame != null)
         {
-            UpdateTitleBar(frame.ActualTheme);
+            UpdateTitleBar(window, frame.ActualTheme);
         }
     }
 }
