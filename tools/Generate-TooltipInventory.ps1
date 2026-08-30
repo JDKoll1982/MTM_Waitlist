@@ -268,10 +268,10 @@ function Get-AssociatedFiles([string]$RelativeXamlPath) {
 
     # Shared/core tooltip infrastructure commonly needed for developer inspector.
     foreach ($infra in @(
-            "Module_Shared/Services/TooltipBehavior.cs",
-            "Module_Shared/Services/TooltipService.cs",
-            "Module_Shared/Services/ControlInspectorService.cs",
-            "Module_Core/Helpers/ResourceExtensions.cs"
+            "MTM_Waitlist.Shared/Services/TooltipBehavior.cs",
+            "MTM_Waitlist.Shared/Services/TooltipService.cs",
+            "MTM_Waitlist.Shared/Services/ControlInspectorService.cs",
+            "MTM_Waitlist.Core/Helpers/ResourceExtensions.cs"
         )) {
         $fs = Join-Path $RepoRoot ($infra -replace '/', [IO.Path]::DirectorySeparatorChar)
         if (Test-Path $fs) {

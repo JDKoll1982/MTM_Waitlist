@@ -28,11 +28,11 @@ jobs:
                   dotnet-version: 10.0.x
 
             - name: Restore
-              run: dotnet restore MTM_Waitlist.slnx
+              run: dotnet restore MTM_Waitlist.sln
 
             # Compiles XAML, so a broken binding or an unregistered converter fails here.
             - name: Build
-              run: dotnet build MTM_Waitlist.slnx -c Debug -p:Platform=x64 --no-restore
+              run: dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 --no-restore
 
             # InforVisual tests require the on-premises SQL Server and cannot run on a hosted runner.
             - name: Test

@@ -7,14 +7,14 @@ on:
             - ".github/scripts/validate-database-schema.ps1"
             - ".github/workflows/database-schema-validation.yml"
             - "MTM_Waitlist.csproj"
-            - "MTM_Waitlist.slnx"
+            - "MTM_Waitlist.sln"
     pull_request:
         paths:
             - "Database/**/*.sql"
             - ".github/scripts/validate-database-schema.ps1"
             - ".github/workflows/database-schema-validation.yml"
             - "MTM_Waitlist.csproj"
-            - "MTM_Waitlist.slnx"
+            - "MTM_Waitlist.sln"
     workflow_dispatch:
 
 jobs:
@@ -36,10 +36,10 @@ jobs:
                   dotnet-version: 10.0.x
 
             - name: Restore
-              run: dotnet restore MTM_Waitlist.slnx
+              run: dotnet restore MTM_Waitlist.sln
 
             - name: Build
-              run: dotnet build MTM_Waitlist.slnx -c Debug -p:Platform=x64
+              run: dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64
 
             - name: Test
               run: dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 -p:RuntimeIdentifier=win-x64 --framework net10.0-windows10.0.19041.0

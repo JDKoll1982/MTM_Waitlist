@@ -27,18 +27,18 @@ Run all discovery tasks first.
 
 1. Serena MCP exploration (required):
 - Map symbols in Module_Setup:
-  - Module_Setup/Contracts/Services/SetupContracts.cs
-  - Module_Setup/Models/SetupModels.cs
-  - Module_Setup/Services/**/*.cs
-  - Module_Setup/ViewModels/**/*.cs
-  - Module_Setup/Views/**/*.xaml and *.xaml.cs
+  - MTM_Waitlist.Setup/Contracts/Services/SetupContracts.cs
+  - MTM_Waitlist.Setup/Models/SetupModels.cs
+  - MTM_Waitlist.Setup/Services/**/*.cs
+  - MTM_Waitlist.Setup/ViewModels/**/*.cs
+  - Module_Setup/Views/**/*.xaml and *.xaml.cs (app project, unchanged)
 - Map cross-module dependencies:
   - App.xaml.cs
-  - Module_Core/Services/DependencyInjection/ServiceRegistrationExtensions.cs
-  - Module_Core/Services/DependencyInjection/CoreModuleDependencyInjectionExtensions.cs
-  - Module_Core/Services/PageService.cs
-  - Module_Core/Services/NavigationViewService.cs
-  - Module_Core/Views/ShellPage.xaml
+  - Services/DependencyInjection/ServiceRegistrationExtensions.cs (app composition root)
+  - Services/DependencyInjection/CoreModuleDependencyInjectionExtensions.cs (app composition root)
+  - MTM_Waitlist.Core/Services/PageService.cs
+  - Services/NavigationViewService.cs (app composition root)
+  - Module_Core/Views/ShellPage.xaml (app project, unchanged)
 - Map persistence and SQL dependencies:
   - Database/InforVisual/Queues/Module_Setup/**/*.sql
   - Database/MTMReceivingApp/StoredProcedures/sp_setup_dunnage_type_insert.sql

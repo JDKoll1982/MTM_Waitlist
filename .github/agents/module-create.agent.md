@@ -89,17 +89,17 @@ Map and verify these files before edits:
 
 - App host/DI entry:
   - App.xaml.cs
-  - Module_Core/Services/DependencyInjection/ServiceRegistrationExtensions.cs
+  - Services/DependencyInjection/ServiceRegistrationExtensions.cs (app composition root)
 
 - Module DI chain:
-  - Module_Core/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs
-  - Module_Core/Services/DependencyInjection/CoreModuleDependencyInjectionExtensions.cs
-  - Existing module DI extension files under Module_*/Services/DependencyInjection/
+  - Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs (app composition root)
+  - Services/DependencyInjection/CoreModuleDependencyInjectionExtensions.cs (app composition root)
+  - Existing module DI extension files under MTM_Waitlist.*/Services/DependencyInjection/
 
 - Navigation mapping:
-  - Module_Core/Services/PageService.cs
-  - Module_Core/Views/ShellPage.xaml
-  - Module_Core/ViewModels/ShellViewModel.cs
+  - MTM_Waitlist.Core/Services/PageService.cs
+  - Module_Core/Views/ShellPage.xaml (app project, unchanged)
+  - ViewModels/ShellViewModel.cs (app composition root)
 
 - Localization and strings:
   - Strings/en-us/Resources.resw
@@ -127,20 +127,20 @@ Execute in this sequence:
 - Register module services with appropriate lifetimes.
 
 3. Register module in global DI chain
-- Update Module_Core/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs
+- Update Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs (app composition root)
 - Add using + services.Add<Feature>ModuleServices(configuration).
 
 4. Register views and viewmodels in app registrations
-- Update Module_Core/Services/DependencyInjection/ServiceRegistrationExtensions.cs
+- Update Services/DependencyInjection/ServiceRegistrationExtensions.cs (app composition root)
 - Add transient registrations for new pages/viewmodels.
 
 5. Add page mappings
-- Update Module_Core/Services/PageService.cs
+- Update MTM_Waitlist.Core/Services/PageService.cs
 - Add Configure<ViewModel, Page>() mappings.
 
 6. Optional shell navigation wiring (only if user approved)
 - Update Module_Core/Views/ShellPage.xaml with NavigationViewItem and NavigateTo key.
-- Update Module_Core/ViewModels/ShellViewModel.cs with module header/selection behavior.
+- Update ViewModels/ShellViewModel.cs with module header/selection behavior.
 - Update Strings/en-us/Resources.resw with Shell_<Module>.Content text.
 
 7. Add mock data toggle integration (if approved)

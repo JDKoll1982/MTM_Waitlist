@@ -19,7 +19,8 @@ Use available MCP servers to ground implementation decisions before writing or c
 For this repository, prioritize MCP-backed validation for:
 - WinUI 3 and Windows App SDK APIs
 - App notifications and packaging flows
-- Local AI and Foundry-related guidance- Module_Setup shell-workflow implementation and the SQL queue persistence path for Infor Visual lookups under Database/InforVisual/Queues/Module
+- Local AI and Foundry-related guidance
+- Module_Setup shell-workflow implementation (now `MTM_Waitlist.Setup` + app Views) and the SQL queue persistence path for Infor Visual lookups under Database/InforVisual/Queues/Module
 ## CSV Schema Exploration
 - The workspace CSV MCP server is configured in `.vscode/mcp.json` as `csv-mcp-server`.
 - Its storage root is `Documents/Development/InforVisual/DatabaseCSVFiles`, which contains the schema exports split into folders by type.
@@ -54,7 +55,7 @@ For this repository, prioritize MCP-backed validation for:
 # Architecture & Structural Guidelines
 
 ## Project Snapshot
-- WinUI 3 desktop app on .NET 10 (`MTM_Waitlist.csproj`) with module-owned core services under `Module_Core`.
+- WinUI 3 desktop app on .NET 10 (`MTM_Waitlist.csproj`) with per-module class libraries. Non-view code lives in `MTM_Waitlist.*` libraries (e.g. `MTM_Waitlist.Core` holds `PageService`, `NavigationService`); XAML Views stay in the app under `Module_*/Views` (composition root).
 - The app uses a single host-managed window and a Template Studio-style shell/navigation setup.
 
 ## Architecture to Preserve (DI & Routing)

@@ -38,7 +38,7 @@ ${input:workflow:Paste the WinUI 3 / XAML view code, C# ViewModel/Code-behind, M
 
 ### Phase 0 — Decompose
 1. **State the Workflow Route:** Map out the exact flow: User UI Action (XAML/Command) → Cross-Module or Core Service Dependency → ViewModel State Update → Background Thread / Async Tasks / Database Queries → UI Thread Marshalling → Screen Update.
-2. **Enumerate Windows & Modular Ecosystem Dependencies:** List everything touched (DispatcherQueue, Module_Shared dependencies, Local/Roaming AppData, Windows Registry, MSIX packaging constraints, Tables Ready API, SQLite/Local Database).
+2. **Enumerate Windows & Modular Ecosystem Dependencies:** List everything touched (DispatcherQueue, MTM_Waitlist.Shared dependencies, Local/Roaming AppData, Windows Registry, MSIX packaging constraints, Tables Ready API, SQLite/Local Database).
 3. **Identify Silent Assumptions:** Document unspoken assumptions (e.g., "Main window is always focused", "Tables Ready API key is valid", "DispatcherQueue is not dead", "Cross-module event aggregator alive").
 
 ### Phase 1 — Four Review Passes
@@ -50,7 +50,7 @@ Simulate 4 distinct adversarial review passes in your hidden thinking before wri
   * Deadlocks induced by `.Result` or `.Wait()` on asynchronous tasks.
   * Race conditions when rapid double-clicking fires multiple instances of a `RelayCommand` or event handler simultaneously.
 * **Pass B — Memory, Lifecycle & Modular Interop (The Win32 & Architecture Lens):**
-  * Memory leaks caused by unhooked C# Event Handlers or circular references across separate Feature Modules (e.g., Module_Waitlist to Module_Core).
+  * Memory leaks caused by unhooked C# Event Handlers or circular references across separate Feature Modules (e.g., MTM_Waitlist.Waitlist.View to MTM_Waitlist.Core).
   * App suspension/termination states (Failure to save state or restore state cleanly during lifecycle transitions).
   * Native Win32 pointer/COM handle mismanagement (Window close exceptions, HWND misplacement, unmanaged memory leaks).
   * MSIX sandbox limitations or file permission errors when accessing external system directories or reading `appsettings.json`.

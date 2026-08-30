@@ -85,7 +85,7 @@ Work-center naming uses "work_center" / "Work Center" — never "workstation" an
 - Everywhere a computer name is shown to users across **all modules** (Setup, Waitlist, Reporting, Settings, history/logs) use `{DisplayName} - {ComputerName}`.
 - Does NOT change stored data (e.g. `waitlist_requests_queue.work_center_name` remains raw); the format is display-only.
 
-## 9. Settings panel (Module_Settings)
+## 9. Settings panel (MTM_Waitlist.Settings, formerly Module_Settings)
 
 - New **collapsible panel to manage computers**: full CRUD (list, add, edit, deactivate/delete).
 - Fields: computer name, display name, description, MAC, active.

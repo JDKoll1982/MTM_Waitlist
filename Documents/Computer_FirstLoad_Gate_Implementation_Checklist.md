@@ -63,12 +63,12 @@ Source of truth: `Documents/Computer_FirstLoad_Gate_Design.md` (refs below map t
 
 ## Phase 3: Backend Services / Startup — Computer Rename (Ref: 5, 10)
 
-- [x] **Service Layer: Rename computer-related identifiers in `Module_Startup/Services/StartupSessionRepository.cs`** (registry lookup by hostname+MAC; fields → computer). (Ref: 5, 10) | **Persona: Backend Engineer**
+- [x] **Service Layer: Rename computer-related identifiers in `MTM_Waitlist.Startup/Services/StartupSessionRepository.cs`** (registry lookup by hostname+MAC; fields → computer). (Ref: 5, 10) | **Persona: Backend Engineer**
 - [x] **Service Layer: Rename computer-related fields in `StartupState` / `StartupSessionSnapshot`** models (e.g. workstation → computer). (Ref: 5, 10) | **Persona: Backend Engineer**
 - [x] **Service Layer: Update `StartupCoordinator`** references and DI registrations for the renamed computer services. (Ref: 5, 10) *Depends on: repository + model renames* | **Persona: Backend Engineer**
 - [x] **Service Layer: Add computer lookup service** returning `computer_name`, `display_name`, `description`, MAC, authoritative status. (Ref: 5, 7) | **Persona: Backend Engineer**
 - [x] **Service Layer: Add upsert service** for a computer row (hostname, MAC, display name, description). (Ref: 7) *Depends on: computer lookup service* | **Persona: Backend Engineer**
-- [x] **Full Stack Engineer: Rename Module_Setup work-center code** `SetupWorkstation*` → `SetupWorkCenter*` (model, service, interface, view model, page, DI registrations, XAML). (Ref: 4, 10) | **Persona: Full Stack Engineer**
+- [x] **Full Stack Engineer: Rename Module_Setup work-center code** `SetupWorkstation*` → `SetupWorkCenter*` (model, service, interface, view model, DI registrations in `MTM_Waitlist.Setup`; page/XAML in `Module_Setup/Views`). (Ref: 4, 10) | **Persona: Full Stack Engineer**
 
 **GATE: Backend compiles; computer services named "Computer", Module_Setup work-center code named "WorkCenter"; before Phase 4.**
 
