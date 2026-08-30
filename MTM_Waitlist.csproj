@@ -73,7 +73,6 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
     <PackageReference Include="WinUIEx" Version="2.9.2" />
-    <PackageReference Include="XamlMcp.WinUI" Version="1.0.0-preview.3" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,8 +5,8 @@ namespace MTM_Waitlist.Module_Core.Helpers;
 
 public static class ResourceExtensions
 {
-    private static readonly object s_loaderSync = new();
-    private static ResourceLoader? s_resourceLoader;
+    private static readonly object s_managerSync = new();
+    private static ResourceManager? s_resourceManager;
 
     public static string GetLocalized(this string resourceKey)
     {
@@ -17,52 +17,64 @@ public static class ResourceExtensions
 
         try
         {
-            var loader = GetOrCreateLoader();
-            if (loader is null)
+            // Use the resource map's TryGetValue, which returns null for a missing key instead of
+            // throwing the "NamedResource Not Found" COMException (HRESULT 0x80073B17) that
+            // ResourceLoader.GetString raises. This avoids first-chance COM exception noise in the
+            // debugger while preserving the same fallback-to-key behavior for untranslated keys.
+            var resourceManager = GetOrCreateManager();
+            var resourceMap = resourceManager?.MainResourceMap;
+            if (resourceMap is null)
             {
                 return resourceKey;
             }
 
-            var localized = loader.GetString(resourceKey);
-            return string.IsNullOrWhiteSpace(localized) ? resourceKey : localized;
+            var candidate = resourceMap.TryGetValue(resourceKey);
+            if (candidate is null)
+            {
+                return resourceKey;
+            }
+
+            var value = candidate.ValueAsString;
+            return string.IsNullOrWhiteSpace(value) ? resourceKey : value;
         }
         catch (COMException)
         {
-            // Some WinUI resource lookups throw instead of returning empty when the key is missing.
+            return resourceKey;
+        }
+        catch (FileNotFoundException)
+        {
             return resourceKey;
         }
     }
 
-    private static ResourceLoader? GetOrCreateLoader()
+    private static ResourceManager? GetOrCreateManager()
     {
-        if (s_resourceLoader is not null)
+        if (s_resourceManager is not null)
         {
-            return s_resourceLoader;
+            return s_resourceManager;
         }
 
-        lock (s_loaderSync)
+        lock (s_managerSync)
         {
-            if (s_resourceLoader is not null)
+            if (s_resourceManager is not null)
             {
-                return s_resourceLoader;
+                return s_resourceManager;
             }
 
             try
             {
-                s_resourceLoader = new ResourceLoader();
-                return s_resourceLoader;
+                s_resourceManager = new ResourceManager();
             }
             catch (COMException)
             {
-                // Loader can fail very early in app startup; retry on the next call.
                 return null;
             }
             catch (FileNotFoundException)
             {
-                // Headless test hosts and unpackaged startup can lack WinRT resource files.
                 return null;
             }
         }
-    }
 
+        return s_resourceManager;
+    }
 }

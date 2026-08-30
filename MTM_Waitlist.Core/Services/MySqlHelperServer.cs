@@ -90,7 +90,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
 
         try
         {
-            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteStoredProcedureQueryAsync started. Procedure='{storedProcedureName}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
+            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteStoredProcedureQueryAsync started. Procedure='{storedProcedureName}', Target='{GetDatabaseName(databaseTarget)}', Parameters={DescribeParameters(parameters)}.");
             await using var connection = new MySqlConnection(connectionString);
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -124,7 +124,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteStoredProcedureQueryAsync failed. Procedure='{storedProcedureName}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
+            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteStoredProcedureQueryAsync failed. Procedure='{storedProcedureName}', Target='{GetDatabaseName(databaseTarget)}', Parameters={DescribeParameters(parameters)}.");
             return Array.Empty<Dictionary<string, object?>>();
         }
     }
@@ -143,7 +143,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
 
         try
         {
-            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteStoredProcedureNonQueryAsync started. Procedure='{storedProcedureName}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
+            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteStoredProcedureNonQueryAsync started. Procedure='{storedProcedureName}', Target='{GetDatabaseName(databaseTarget)}', Parameters={DescribeParameters(parameters)}.");
             await using var connection = new MySqlConnection(connectionString);
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -163,7 +163,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteStoredProcedureNonQueryAsync failed. Procedure='{storedProcedureName}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
+            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteStoredProcedureNonQueryAsync failed. Procedure='{storedProcedureName}', Target='{GetDatabaseName(databaseTarget)}', Parameters={DescribeParameters(parameters)}.");
             return 0;
         }
     }
@@ -182,7 +182,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
 
         try
         {
-            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteSqlQueryAsync started. Sql='{DescribeSql(sql)}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
+            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteSqlQueryAsync started. Sql='{DescribeSql(sql)}', Target='{GetDatabaseName(databaseTarget)}', Parameters={DescribeParameters(parameters)}.");
             await using var connection = new MySqlConnection(connectionString);
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -216,7 +216,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteSqlQueryAsync failed. Sql='{DescribeSql(sql)}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
+            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteSqlQueryAsync failed. Sql='{DescribeSql(sql)}', Target='{GetDatabaseName(databaseTarget)}', Parameters={DescribeParameters(parameters)}.");
             return Array.Empty<Dictionary<string, object?>>();
         }
     }
@@ -235,7 +235,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
 
         try
         {
-            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteSqlNonQueryAsync started. Sql='{DescribeSql(sql)}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
+            StartupDebugLog.Info("MySqlHelperServer", $"ExecuteSqlNonQueryAsync started. Sql='{DescribeSql(sql)}', Target='{GetDatabaseName(databaseTarget)}', Parameters={DescribeParameters(parameters)}.");
             await using var connection = new MySqlConnection(connectionString);
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -255,7 +255,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteSqlNonQueryAsync failed. Sql='{DescribeSql(sql)}', Target='{databaseTarget}', Parameters={DescribeParameters(parameters)}.");
+            StartupDebugLog.Error("MySqlHelperServer", ex, $"ExecuteSqlNonQueryAsync failed. Sql='{DescribeSql(sql)}', Target='{GetDatabaseName(databaseTarget)}', Parameters={DescribeParameters(parameters)}.");
             return 0;
         }
     }
