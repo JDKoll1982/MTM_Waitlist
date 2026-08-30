@@ -55,6 +55,7 @@ public sealed class SplashViewModelTests
             new NoOpLocalSettingsService(),
             new NoOpNavigationService(),
             new NoOpStartupShellStateService(),
+            new NoOpAppLifecycleService(),
             new StartupState());
     }
 

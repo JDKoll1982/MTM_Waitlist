@@ -12,7 +12,7 @@ public sealed class StartupRecoveryServiceTests
     public async Task ResetSettingAsync_ForwardsToLocalSettingsServiceAsync()
     {
         var localSettingsService = new RecordingLocalSettingsService();
-        var service = new StartupRecoveryService(localSettingsService);
+        var service = new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService());
 
         await service.ResetSettingAsync("Developer.RecoveryProbe");
 
@@ -24,7 +24,7 @@ public sealed class StartupRecoveryServiceTests
     public async Task ResetToDefaultsAsync_ForwardsToLocalSettingsServiceAsync()
     {
         var localSettingsService = new RecordingLocalSettingsService();
-        var service = new StartupRecoveryService(localSettingsService);
+        var service = new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService());
 
         await service.ResetToDefaultsAsync();
 

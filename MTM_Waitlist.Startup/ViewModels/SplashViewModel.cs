@@ -19,6 +19,7 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
     private readonly ILocalSettingsService _localSettingsService;
     private readonly INavigationService _navigationService;
     private readonly IStartupShellStateService _startupShellStateService;
+    private readonly IAppLifecycleService _lifecycle;
     private readonly StartupState _startupState;
     private bool _startupStarted;
     private string _statusText = "Starting application...";
@@ -66,6 +67,7 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
         ILocalSettingsService localSettingsService,
         INavigationService navigationService,
         IStartupShellStateService startupShellStateService,
+        IAppLifecycleService lifecycle,
         StartupState startupState)
     {
         ArgumentNullException.ThrowIfNull(startupCoordinator);
@@ -80,6 +82,7 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
         _localSettingsService = localSettingsService;
         _navigationService = navigationService;
         _startupShellStateService = startupShellStateService;
+        _lifecycle = lifecycle;
         _startupState = startupState;
 
         StatusText = _startupState.StatusText;
@@ -151,7 +154,7 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     private void Exit()
     {
-        App.Current.Exit();
+        _lifecycle.Exit();
     }
 
     private async Task RunStartupAsync(bool retryDatabasePhaseOnly = false)
@@ -206,13 +209,13 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
             {
                 if (string.Equals(result.RouteTarget, typeof(LoginViewModel).FullName, StringComparison.Ordinal))
                 {
-                    App.ShowLoginWindowAndCloseSplash();
+                    _lifecycle.ShowLoginWindowAndCloseSplash();
                     return;
                 }
 
                 await _startupShellStateService.EnterMainModeAsync();
                 _navigationService.NavigateTo(result.RouteTarget, null, true);
-                App.ShowMainWindowAndCloseSplash();
+                _lifecycle.ShowMainWindowAndCloseSplash();
                 return;
             }
             catch (Exception ex)

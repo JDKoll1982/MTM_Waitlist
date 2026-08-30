@@ -3,10 +3,8 @@ using System.Net.NetworkInformation;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
-using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Startup.ViewModels;
-using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MySqlConnector;
 
 namespace MTM_Waitlist.Module_Startup.Services;
@@ -16,6 +14,7 @@ public sealed class StartupCoordinator : IStartupCoordinator
     private const string RecoveryProbeSettingKey = "Developer.RecoveryProbe";
     private const string LocalSessionTokenKey = "Startup.Session.Token";
     private const string LocalSessionExpiryKey = "Startup.Session.ExpiresUtc";
+    private const string WaitlistRoute = "MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewViewModel";
 
     private static class StartupProgress
     {
@@ -231,7 +230,7 @@ public sealed class StartupCoordinator : IStartupCoordinator
         if (isUserMatched && sessionIsValid)
         {
             _startupState.LoginHint = string.Empty;
-            var result = StartupResult.Success(typeof(WaitlistViewViewModel).FullName!, StartupProgress.Step5);
+            var result = StartupResult.Success(WaitlistRoute, StartupProgress.Step5);
             StartupDebugLog.Info("StartupCoordinator", $"Startup succeeded. Route target={result.RouteTarget}. TokenSource={tokenSource}");
             return result;
         }

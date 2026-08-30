@@ -11,10 +11,12 @@ namespace MTM_Waitlist.Module_Startup.Services;
 public sealed class StartupShellStateService : IStartupShellStateService
 {
     private readonly StartupWindowOptions _windowOptions;
+    private readonly IAppWindowProvider _appWindowProvider;
 
-    public StartupShellStateService(IOptions<StartupWindowOptions> windowOptions)
+    public StartupShellStateService(IOptions<StartupWindowOptions> windowOptions, IAppWindowProvider appWindowProvider)
     {
         _windowOptions = windowOptions?.Value ?? new StartupWindowOptions();
+        _appWindowProvider = appWindowProvider;
     }
 
     public event EventHandler? StateChanged;
@@ -41,11 +43,11 @@ public sealed class StartupShellStateService : IStartupShellStateService
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private static void TryResizeWindow(int width, int height, bool centerWindow)
+    private void TryResizeWindow(int width, int height, bool centerWindow)
     {
         try
         {
-            var appWindow = App.MainWindow.AppWindow;
+            var appWindow = _appWindowProvider.MainWindow.AppWindow;
             var clampedWidth = Math.Max(400, width);
             var clampedHeight = Math.Max(300, height);
 

@@ -6,13 +6,13 @@ using MySqlConnector;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
-using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Module_Startup.ViewModels;
 
 public partial class LoginViewModel : ObservableRecipient
 {
     private const string LocalSessionTokenKey = "Startup.Session.Token";
+    private const string WaitlistRoute = "MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewViewModel";
     private const string LocalSessionExpiryKey = "Startup.Session.ExpiresUtc";
     private const string RememberPasswordKey = "Login.RememberPassword";
     private const string RememberedUsernameKey = "Login.RememberedUsername";
@@ -461,7 +461,7 @@ public partial class LoginViewModel : ObservableRecipient
     private async Task FinishLoginNavigationAsync()
     {
         await _startupShellStateService.EnterMainModeAsync();
-        _navigationService.NavigateTo(typeof(WaitlistViewViewModel).FullName!, null, true);
+        _navigationService.NavigateTo(WaitlistRoute, null, true);
         _startupWindowService.ShowMainWindowAndCloseLoginWindow();
     }
 

@@ -142,10 +142,10 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ### Subphase 4.1: MTM_Waitlist.Startup ← Module_Startup
 
-- [ ] **Service Layer: Move `Module_Startup` non-view code (Services, Models, ViewModels, DI) into `MTM_Waitlist.Startup` preserving namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 3 GATE* | **Persona: Backend Engineer**
-- [ ] **Configuration: Remove moved `Module_Startup` files from the app; keep `Module_Startup/Views/*` in the app; add `ProjectReference` app → Startup.** *Depends on: Move Module_Startup non-view code* | **Persona: Frontend Engineer**
+- [x] **Service Layer: Move `Module_Startup` non-view code (Services, Models, ViewModels, DI) into `MTM_Waitlist.Startup` preserving namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 3 GATE* | **Persona: Backend Engineer**
+- [x] **Configuration: Remove moved `Module_Startup` files from the app; keep `Module_Startup/Views/*` in the app; add `ProjectReference` app → Startup.** *Depends on: Move Module_Startup non-view code* | **Persona: Frontend Engineer**
 
-**GATE: solution builds and `Module_Startup` test suite passes.**
+**GATE: solution builds and `Module_Startup` test suite passes.** (✓ Verified: 54 Startup-related tests green, 2026-08-28)
 
 ### Subphase 4.2: MTM_Waitlist.Setup ← Module_Setup (highest test coverage)
 
@@ -228,4 +228,4 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ---
 
-Next task: **Move `Module_Startup` non-view code (Services, Models, ViewModels, DI) into `MTM_Waitlist.Startup` preserving namespaces.** | **Persona: Backend Engineer**
+Next task: **Move `Module_Setup` non-view code (Services, Models, ViewModels, DI) into `MTM_Waitlist.Setup` preserving namespaces, then update the Setup test fakes.** | **Persona: Backend Engineer**

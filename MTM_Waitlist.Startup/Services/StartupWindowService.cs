@@ -4,13 +4,20 @@ namespace MTM_Waitlist.Module_Startup.Services;
 
 public sealed class StartupWindowService : IStartupWindowService
 {
+    private readonly IAppLifecycleService _lifecycle;
+
+    public StartupWindowService(IAppLifecycleService lifecycle)
+    {
+        _lifecycle = lifecycle;
+    }
+
     public void ShowMainWindowAndCloseLoginWindow()
     {
-        App.ShowMainWindowAndCloseLoginWindow();
+        _lifecycle.ShowMainWindowAndCloseLoginWindow();
     }
 
     public void Exit()
     {
-        App.Current.Exit();
+        _lifecycle.Exit();
     }
 }

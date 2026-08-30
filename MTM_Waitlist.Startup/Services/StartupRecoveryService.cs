@@ -9,11 +9,14 @@ namespace MTM_Waitlist.Module_Startup.Services;
 public sealed class StartupRecoveryService : IStartupRecoveryService
 {
     private readonly ILocalSettingsService _localSettingsService;
+    private readonly IAppLifecycleService _lifecycle;
 
-    public StartupRecoveryService(ILocalSettingsService localSettingsService)
+    public StartupRecoveryService(ILocalSettingsService localSettingsService, IAppLifecycleService lifecycle)
     {
         ArgumentNullException.ThrowIfNull(localSettingsService);
+        ArgumentNullException.ThrowIfNull(lifecycle);
         _localSettingsService = localSettingsService;
+        _lifecycle = lifecycle;
     }
 
     public Task ResetSettingAsync(string key, CancellationToken cancellationToken = default)
@@ -61,6 +64,6 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
 
         Process.Start(processStartInfo);
 
-        App.Current.Exit();
+        _lifecycle.Exit();
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace MTM_Waitlist.Module_Settings.Models;
+﻿namespace MTM_Waitlist.Module_Core.Models;
 
 public class LocalSettingsOptions
 {

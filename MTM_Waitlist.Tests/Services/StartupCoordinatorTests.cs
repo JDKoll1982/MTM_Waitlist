@@ -20,7 +20,7 @@ public sealed class StartupCoordinatorTests
     public async Task RunAsync_ReturnsBlocked_WhenConfigurationPathsAreMissingAsync()
     {
         var localSettingsService = new RecordingLocalSettingsService();
-        var recoveryService = new StartupRecoveryService(localSettingsService);
+        var recoveryService = new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService());
         var repository = new FakeStartupSessionRepository();
 
         var coordinator = CreateCoordinator(
@@ -70,7 +70,7 @@ public sealed class StartupCoordinatorTests
                 LocalSettingsFile = "LocalSettings.json"
             },
             localSettingsService,
-            new StartupRecoveryService(localSettingsService),
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
             repository,
             startupState);
 
@@ -88,7 +88,7 @@ public sealed class StartupCoordinatorTests
     public async Task RunAsync_WhenRetryDatabasePhaseOnly_SkipsLocalProbeStageAsync()
     {
         var localSettingsService = new RecordingLocalSettingsService();
-        var recoveryService = new StartupRecoveryService(localSettingsService);
+        var recoveryService = new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService());
         var repository = new FakeStartupSessionRepository
         {
             ServerTimeUtc = new DateTimeOffset(2026, 7, 26, 10, 0, 0, TimeSpan.Zero),
@@ -165,7 +165,7 @@ public sealed class StartupCoordinatorTests
             }),
             localSettingsService,
             repository,
-            new StartupRecoveryService(localSettingsService),
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
             new StartupState());
 
         var result = await coordinator.RunAsync();
@@ -208,7 +208,7 @@ public sealed class StartupCoordinatorTests
                 LocalSettingsFile = "LocalSettings.json"
             },
             localSettingsService,
-            new StartupRecoveryService(localSettingsService),
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
             repository,
             startupState);
 
@@ -249,7 +249,7 @@ public sealed class StartupCoordinatorTests
                 LocalSettingsFile = "LocalSettings.json"
             },
             localSettingsService,
-            new StartupRecoveryService(localSettingsService),
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
             repository,
             startupState);
 
@@ -292,7 +292,7 @@ public sealed class StartupCoordinatorTests
                 LocalSettingsFile = "LocalSettings.json"
             },
             localSettingsService,
-            new StartupRecoveryService(localSettingsService),
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
             repository,
             startupState);
 
@@ -334,7 +334,7 @@ public sealed class StartupCoordinatorTests
                 LocalSettingsFile = "LocalSettings.json"
             },
             localSettingsService,
-            new StartupRecoveryService(localSettingsService),
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
             repository,
             startupState,
             new StartupDevelopmentOptions
@@ -393,7 +393,7 @@ public sealed class StartupCoordinatorTests
                 LocalSettingsFile = "LocalSettings.json"
             },
             localSettingsService,
-            new StartupRecoveryService(localSettingsService),
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
             repository,
             startupState,
             startupDatabaseOptions: new StartupDatabaseOptions
@@ -433,7 +433,7 @@ public sealed class StartupCoordinatorTests
                     LocalSettingsFile = "LocalSettings.json"
                 },
                 localSettingsService,
-                new StartupRecoveryService(localSettingsService),
+                new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
                 repository,
                 startupState,
                 startupDatabaseOptions: new StartupDatabaseOptions
@@ -479,7 +479,7 @@ public sealed class StartupCoordinatorTests
                     LocalSettingsFile = "LocalSettings.json"
                 },
                 localSettingsService,
-                new StartupRecoveryService(localSettingsService),
+                new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
                 repository,
                 startupState,
                 startupDatabaseOptions: new StartupDatabaseOptions
@@ -518,7 +518,7 @@ public sealed class StartupCoordinatorTests
                 LocalSettingsFile = "LocalSettings.json"
             },
             localSettingsService,
-            new StartupRecoveryService(localSettingsService),
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
             repository,
             startupState,
             new StartupDevelopmentOptions
@@ -555,7 +555,7 @@ public sealed class StartupCoordinatorTests
                 LocalSettingsFile = "LocalSettings.json"
             },
             localSettingsService,
-            new StartupRecoveryService(localSettingsService),
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
             repository,
             startupState,
             new StartupDevelopmentOptions
@@ -606,7 +606,7 @@ public sealed class StartupCoordinatorTests
                 LocalSettingsFile = "LocalSettings.json"
             },
             localSettingsService,
-            new StartupRecoveryService(localSettingsService),
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
             repository,
             startupState,
             new StartupDevelopmentOptions
