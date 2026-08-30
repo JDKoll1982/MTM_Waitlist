@@ -560,8 +560,20 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
 
         ImageLocationChanged += wrappedHandler;
 
-        // Return a disposable that unsubscribes
-        return new SubscriptionDisposer(this, wrappedHandler);
+        // Return a disposable that unsubscribes. Uses a closure-based token so no nested type
+        // holds a back-reference to this service; keeps the dependency graph acyclic.
+        bool disposed = false;
+        return new SubscriptionToken(() =>
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            _logger.LogDebug("Unsubscribing from image location change notifications");
+            ImageLocationChanged -= wrappedHandler;
+            disposed = true;
+        });
     }
 
     /// <inheritdoc />
@@ -804,20 +816,18 @@ ORDER BY building ASC, sort_rank ASC, work_center_name ASC;";
     }
 
     /// <summary>
-    /// Internal helper for unsubscribing from change notifications.
+    /// Lightweight closure-based disposable token for unsubscribing from change notifications.
+    /// Depends only on a dispose delegate (not the owning service), keeping the dependency
+    /// graph free of the previous nested-type back-reference cycle.
     /// </summary>
-    private sealed class SubscriptionDisposer : IDisposable
+    private sealed class SubscriptionToken : IDisposable
     {
-        private readonly ImageLocationService _service;
-        private readonly EventHandler<ImageLocationChangedEventArgs> _handler;
+        private readonly Action _dispose;
         private bool _disposed;
 
-        public SubscriptionDisposer(
-            ImageLocationService service,
-            EventHandler<ImageLocationChangedEventArgs> handler)
+        public SubscriptionToken(Action dispose)
         {
-            _service = service ?? throw new ArgumentNullException(nameof(service));
-            _handler = handler ?? throw new ArgumentNullException(nameof(handler));
+            _dispose = dispose ?? throw new ArgumentNullException(nameof(dispose));
         }
 
         public void Dispose()
@@ -827,8 +837,7 @@ ORDER BY building ASC, sort_rank ASC, work_center_name ASC;";
                 return;
             }
 
-            _service._logger.LogDebug("Unsubscribing from image location change notifications");
-            _service.ImageLocationChanged -= _handler;
+            _dispose();
             _disposed = true;
         }
     }

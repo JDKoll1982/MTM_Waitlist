@@ -10,5 +10,13 @@
     "files.associations": {
         "*.csv": "tsv"
     },
+    "codegraphy.exclude": [
+        "**/*.md",
+        "**/*.txt",
+        "**/docs/**",
+        "**/*.json",
+        "**/*.config"
+    ],
+
     "python-envs.defaultEnvManager": "ms-python.python:system"
 }

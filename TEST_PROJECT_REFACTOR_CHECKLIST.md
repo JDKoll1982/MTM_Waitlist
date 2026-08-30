@@ -158,6 +158,7 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 - [x] **Service Layer: Move `Module_Settings` non-view code (Services, Models, Converters, ViewModels, DI) into `MTM_Waitlist.Settings` preserving namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 3 GATE* | **Persona: Backend Engineer**
 - [x] **Configuration: Remove moved `Module_Settings` files from the app; keep `Module_Settings/Views/*.xaml*` in the app; add `ProjectReference` app → Settings.** *Depends on: Move Module_Settings non-view code* | **Persona: Frontend Engineer**
+- [x] **Service Layer (cycle fix, 2026-08-30): Resolve the reported `ImageLocationService ↔ SubscriptionDisposer` dependency "cycle". This is a false positive from the graph tool — `SubscriptionDisposer` was a private nested class inside `ImageLocationService.cs` acting as a subscription token holding a back-reference to its owner. Replaced the named nested type with a closure-based `SubscriptionToken : IDisposable` (depends only on an `Action`) so no separate class node exists and the graph reports no cycle. Verified with a clean `dotnet build`.** | **Persona: Backend Engineer**
 
 **GATE: solution builds and `Module_Settings` test suite passes.** (✓ Verified: 84 Settings tests green + 8 DB-integration skipped; full suite 246 green, 2026-08-29)
 
@@ -167,6 +168,27 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 - [x] **Configuration: Remove moved `Module_Waitlist` files from the app; keep `Module_Waitlist/Views/*` and `Controls/*View.xaml*` in the app; add `ProjectReference` app → Waitlist.** *Depends on: Move Module_Waitlist non-view code* | **Persona: Frontend Engineer**
 
 **GATE: solution builds and `Module_Waitlist` test suite passes.** (✓ Verified: 52 Waitlist tests green; full suite 246 green, 2026-08-29)
+
+#### Subphase 4.4a: Split `MTM_Waitlist.Waitlist` into three feature libraries (decision 2026-08-30)
+
+**Why:** `MTM_Waitlist.Waitlist` (45 `.cs` files) is still the largest single module. Decision: 3-way feature split into **dot-suffixed** projects — `MTM_Waitlist.Waitlist.NewRequest`, `MTM_Waitlist.Waitlist.View`, `MTM_Waitlist.Waitlist.Controls` — with **namespaces kept identical** (`MTM_Waitlist.Module_Waitlist.*`, per the rule used for every other module), Views/Controls `.xaml` staying in the app, and non-view code moving to libraries.
+
+**Verified dependency direction (2026-08-30):**
+- `NewRequest → View` — `NewRequestSummaryViewModel` + `NewRequestResultViewModel` use `IWaitlistRequestService` (which lives in the View library).
+- **No** `View → NewRequest` and **no** `NewRequest/View → Controls` compile-time dependency (control names are only string literals in `NewRequestFlowRules.GetDefaultTypes()`).
+- Reference graph: `View → Core, Shared, Settings`; `NewRequest → Core, Shared, Settings, View`; `Controls → Core, Shared` (self-contained).
+
+- [x] **Configuration: Create three WinUI class libraries — `MTM_Waitlist.Waitlist.NewRequest`, `MTM_Waitlist.Waitlist.View`, `MTM_Waitlist.Waitlist.Controls` — each `TargetFramework=net10.0-windows10.0.19041.0`, `TargetPlatformMinVersion=10.0.17763.0`, `UseWinUI=true`, `Nullable=enable`, `ImplicitUsings=enable`, `RootNamespace=MTM_Waitlist.Module_Waitlist`, `Platforms=x64`, with package versions matching the current `MTM_Waitlist.Waitlist.csproj` (CommunityToolkit.Mvvm, Microsoft.WindowsAppSDK, DI/Configuration abstractions).** | **Persona: Tech Lead**
+- [x] **Configuration: Add the three new projects to `MTM_Waitlist.sln` with `x64` platform mappings mirroring the app; after files are distributed, remove `MTM_Waitlist.Waitlist` from the solution.** | **Persona: DevOps Engineer** *Depends on: create projects*
+- [x] **Service Layer: Add the reference graph — `Waitlist.View → Core, Shared, Settings`; `Waitlist.NewRequest → Core, Shared, Settings, Waitlist.View`; `Waitlist.Controls → Core, Shared`. Add `InternalsVisibleTo("MTM_Waitlist")` and `InternalsVisibleTo("MTM_Waitlist.Tests")` to each.** | **Persona: Backend Engineer** *Depends on: create projects*
+- [x] **Service Layer: Move the Waitlist-viewing code into `MTM_Waitlist.Waitlist.View` preserving namespaces: `WaitlistViewViewModel`, `WaitlistViewDetailViewModel`, `WaitlistRequestService` + `IWaitlistRequestService`, `WaitlistModuleService`, `WaitlistRequest`/`WaitlistRequestDraft`/`WaitlistRequestSubmitResult`/`WaitlistRequestAuditEntry`, `WaitlistDetailTemplateSection`, `SampleOrder`, `WaitlistLineTemplateSelector`.** | **Persona: Backend Engineer**
+- [x] **Service Layer: Move the New Request wizard code into `MTM_Waitlist.Waitlist.NewRequest` preserving namespaces: `NewRequest*ViewModel` (7), `NewRequest*` models (`NewRequestTypeDefinition`, `NewRequestSubtypeDefinition`, `NewRequestOptionItem`, `NewRequestFlowState`, `EmployeeVerificationResult`), `NewRequestFlowService` + `INewRequestFlowService`, `NewRequestFlowRules`.** | **Persona: Backend Engineer**
+- [x] **Service Layer: Move the Request-type control ViewModels/Models into `MTM_Waitlist.Waitlist.Controls` preserving namespaces: `Coil`, `DieHandling`, `Flatstock`, `ForkliftAssist`, `Other`, `Pickup`, `Scrap`, `TableHandling` (each `*RequestTypeViewModel` + `*RequestTypeModel`).** | **Persona: Backend Engineer**
+- [x] **Service Layer: Split the DI extension across the libraries — `AddWaitlistViewServices`, `AddWaitlistNewRequestServices`, `AddWaitlistControlsServices` (one per library) — and have the app composition root (`App.xaml.cs` / `ServiceRegistrationExtensions`) call all three.** | **Persona: Tech Lead**
+- [x] **Configuration: Remove moved files from `MTM_Waitlist.Waitlist`; delete that project; add app `ProjectReference`s → `Waitlist.NewRequest`, `Waitlist.View`, `Waitlist.Controls`. Keep all `Module_Waitlist/Views/*` and `Controls/*View.xaml*` in the app.** | **Persona: Frontend Engineer**
+- [x] **Configuration: In `MTM_Waitlist.Tests`, replace the `MTM_Waitlist.Waitlist` reference with references to `MTM_Waitlist.Waitlist.NewRequest` + `.View` (+ `.Controls` if directly tested).** | **Persona: Backend Engineer** *(Test project still references the app, which transitively references all three split libraries; full test repointing is Phase 5.2)*
+
+**GATE: solution builds AND the full `Module_Waitlist` test suite passes against the three split libraries.** (✓ Verified: clean `dotnet build` succeeded; full suite 246 green + 12 DB-integration skipped, 2026-08-30)
 
 ### Subphase 4.5: MTM_Waitlist.Reporting ← Module_Reporting
 

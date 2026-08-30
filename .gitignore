@@ -364,3 +364,4 @@ FodyWeavers.xsd
 # Tooltip inventory generated artifacts
 tools/tooltip-inventory/
 
+.codegraphy/*

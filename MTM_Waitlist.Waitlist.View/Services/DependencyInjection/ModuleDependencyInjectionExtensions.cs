@@ -6,12 +6,11 @@ namespace MTM_Waitlist.Module_Waitlist.Services.DependencyInjection;
 
 public static class ModuleDependencyInjectionExtensions
 {
-    public static IServiceCollection AddWaitlistModuleServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddWaitlistViewServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IAppModuleClock, MTM_Waitlist.Module_Core.Services.AppModuleClock>();
         services.AddSingleton<WaitlistModuleService>();
         services.AddSingleton<IWaitlistRequestService, WaitlistRequestService>();
-        services.AddSingleton<INewRequestFlowService, NewRequestFlowService>();
         return services;
     }
 }

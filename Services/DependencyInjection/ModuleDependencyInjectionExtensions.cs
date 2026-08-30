@@ -19,7 +19,9 @@ public static class ModuleDependencyInjectionExtensions
         services.AddCoreModuleServices(configuration);
         services.AddSharedModuleServices(configuration);
         services.AddSetupModuleServices(configuration);
-        services.AddWaitlistModuleServices(configuration);
+        services.AddWaitlistViewServices(configuration);
+        services.AddWaitlistNewRequestServices(configuration);
+        services.AddWaitlistControlsServices(configuration);
         services.AddSettingsModuleServices(configuration);
         services.AddStartupModuleServices(configuration);
         services.AddReportingModuleServices(configuration);
