@@ -18,6 +18,7 @@ using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Views;
+using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Core.Views;
 using MTM_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Shared.ViewModels;
@@ -61,7 +62,30 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<MTM_Waitlist.Module_Core.Models.StartupState>();
         services.AddTransient<INavigationViewService, NavigationViewService>();
         services.AddSingleton<IActivationService, ActivationService>();
-        services.AddSingleton<IPageService, PageService>();
+        services.AddSingleton<PageService>();
+        services.AddSingleton<IPageService>(sp =>
+        {
+            var pageService = sp.GetRequiredService<PageService>();
+            pageService.Configure<WaitlistViewViewModel, WaitlistViewPage>();
+            pageService.Configure<WaitlistViewDetailViewModel, WaitlistViewDetailPage>();
+            pageService.Configure<NewRequestWorkCenterViewModel, NewRequestWorkCenterPage>();
+            pageService.Configure<NewRequestJobTypeViewModel, NewRequestJobTypePage>();
+            pageService.Configure<NewRequestSubtypeViewModel, NewRequestSubtypePage>();
+            pageService.Configure<NewRequestDetailsViewModel, NewRequestDetailsPage>();
+            pageService.Configure<NewRequestPreviewViewModel, NewRequestPreviewPage>();
+            pageService.Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
+            pageService.Configure<NewRequestResultViewModel, NewRequestResultPage>();
+            pageService.Configure<ControlInspectorDetailViewModel, ControlInspectorDetailPage>();
+            pageService.Configure<SettingsViewModel, SettingsPage>();
+            pageService.Configure<SetupWorkCenterViewModel, SetupWorkCenterPage>();
+            pageService.Configure<SetupWorkOrderViewModel, SetupWorkOrderPage>();
+            pageService.Configure<SetupPartSelectionViewModel, SetupPartSelectionPage>();
+            pageService.Configure<SetupSequenceSelectionViewModel, SetupSequenceSelectionPage>();
+            pageService.Configure<SetupDunnageTypeViewModel, SetupDunnageTypePage>();
+            pageService.Configure<SetupReviewViewModel, SetupReviewPage>();
+            pageService.Configure<SetupCompletionViewModel, SetupCompletionPage>();
+            return pageService;
+        });
         services.AddSingleton<IPageTransitionService, PageTransitionService>();
         services.AddSingleton<INavigationService, NavigationService>();
 

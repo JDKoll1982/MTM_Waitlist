@@ -8,6 +8,17 @@ Explore the [WinUI Gallery](https://www.microsoft.com/store/productId/9P3JFPWWDZ
 
 Relaunch Template Studio to modify the project by right-clicking on the project in `View -> Solution Explorer` then selecting `Add -> New Item (Template Studio)`.
 
+## Project Structure (per-module class libraries)
+
+This repo uses a modular, per-module class-library layout. The WinExe **app** (`MTM_Waitlist.csproj`) is the **composition root** — it owns all `Views`, `Controls`, XAML, `App.xaml`, DI wiring, page/navigation registration, and resources — and references every module library. Testable non-view code lives in class libraries that both the app and the test project reference:
+
+- **`MTM_Waitlist.Core`** — core infrastructure, shared contracts/interfaces, and app-agnostic services (e.g. `NavigationService`, `PageService`, `AppServiceLocator`, `ISampleDataService`). Referenced by all modules; references no feature module.
+- **`MTM_Waitlist.Shared`** — shared services/models used across modules (e.g. `TooltipService`, `ControlInspectorService`). Depends on `Core`.
+- **Feature modules** (self-contained; reference only `Core` + `Shared`): `MTM_Waitlist.Startup`, `MTM_Waitlist.Setup`, `MTM_Waitlist.Settings`, `MTM_Waitlist.Reporting`, and the split `MTM_Waitlist.Waitlist.*` (`View`, `NewRequest`, `Controls`).
+- **`MTM_Waitlist.Tests`** references the module libraries directly — **not** the WinExe app — so `dotnet test` does not recompile the app's XAML (this avoids the locked `input.json` / dual-build race that occurs when tests pull the app project into their build graph).
+
+Namespaces remain `MTM_Waitlist.Module_*.*` across the split, so XAML `{x:Bind}` bindings and test `using` lines are unchanged. The app (`ServiceRegistrationExtensions`) wires all module DI (`Add*ModuleServices`) and configures `PageService` page mappings.
+
 ## External Integrations
 
 ### Tables Ready

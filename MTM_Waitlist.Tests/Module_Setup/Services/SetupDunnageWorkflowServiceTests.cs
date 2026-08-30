@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
-using MTM_Waitlist.Services;
+using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Setup.Services;
 
 namespace MTM_Waitlist.Tests.Module_Setup.Services;

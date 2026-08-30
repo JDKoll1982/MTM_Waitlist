@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 
-namespace MTM_Waitlist.Services;
+namespace MTM_Waitlist.Module_Waitlist.Services;
 
 public sealed class SampleDataService : ISampleDataService
 {

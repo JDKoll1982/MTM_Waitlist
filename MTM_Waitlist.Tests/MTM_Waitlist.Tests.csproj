@@ -19,9 +19,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference
-      Include="..\MTM_Waitlist.csproj"
-      AdditionalProperties="WindowsAppSdkBootstrapInitialize=false;WindowsAppSDKDeploymentManagerInitialize=false;WindowsAppSdkUndockedRegFreeWinRTInitialize=false"
-    />
+    <None Include="..\Assets\Config\waitlist-request-types.json" Link="Assets\Config\waitlist-request-types.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MTM_Waitlist.Core\MTM_Waitlist.Core.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Shared\MTM_Waitlist.Shared.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Settings\MTM_Waitlist.Settings.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Setup\MTM_Waitlist.Setup.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Startup\MTM_Waitlist.Startup.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Waitlist.View\MTM_Waitlist.Waitlist.View.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Waitlist.NewRequest\MTM_Waitlist.Waitlist.NewRequest.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Waitlist.Controls\MTM_Waitlist.Waitlist.Controls.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Reporting\MTM_Waitlist.Reporting.csproj" />
   </ItemGroup>
 </Project>

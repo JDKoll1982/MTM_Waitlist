@@ -205,14 +205,14 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ### Subphase 5.1: Complete the app composition root
 
-- [ ] **Configuration: Ensure all module DI extensions (`Add*ModuleServices`) are called from `App.xaml.cs`; confirm `PageService`/navigation registers every page against the now-separate module assemblies.** (Ref: Target Architecture) *Depends on: Phase 4 GATE* | **Persona: Tech Lead**
+- [x] **Configuration: Ensure all module DI extensions (`Add*ModuleServices`) are called from `App.xaml.cs`; confirm `PageService`/navigation registers every page against the now-separate module assemblies.** (Ref: Target Architecture) *Depends on: Phase 4 GATE* | **Persona: Tech Lead** — verified 2026-08-30: `App.xaml.cs` → `AddAppServices` → `AddModuleServices` calls every `Add*ModuleServices` (Core/Shared/Setup/Waitlist/Settings/Startup/Reporting, incl. `AddWaitlistView/NewRequest/ControlsServices`).
 
 ### Subphase 5.2: Repoint the test project
 
-- [ ] **Configuration: In `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`, remove the `ProjectReference` to `..\MTM_Waitlist.csproj`; add `ProjectReference`s to `MTM_Waitlist.Core`, `MTM_Waitlist.Shared`, and the feature module(s) under test.** (Ref: Testing non-WinUI functionality) *Depends on: Phase 4 GATE* | **Persona: Backend Engineer**
-- [ ] **Configuration: Remove the obsolete `AdditionalProperties="WindowsAppSdkBootstrapInitialize=false;..."` from the retargeted references; add `Microsoft.WindowsAppSDK` PackageReference if tests need WinUI types not provided transitively.** (Ref: Testing non-WinUI functionality) *Depends on: Remove the ProjectReference to the app* | **Persona: Backend Engineer**
+- [x] **Configuration: In `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`, remove the `ProjectReference` to `..\MTM_Waitlist.csproj`; add `ProjectReference`s to `MTM_Waitlist.Core`, `MTM_Waitlist.Shared`, and the feature module(s) under test.** (Ref: Testing non-WinUI functionality) *Depends on: Phase 4 GATE* | **Persona: Backend Engineer** — 2026-08-30: test project now references Core/Shared/Settings/Setup/Startup/Waitlist.View/NewRequest/Controls/Reporting; the app reference was removed.
+- [x] **Configuration: Remove the obsolete `AdditionalProperties="WindowsAppSdkBootstrapInitialize=false;..."` from the retargeted references; add `Microsoft.WindowsAppSDK` PackageReference if tests need WinUI types not provided transitively.** (Ref: Testing non-WinUI functionality) *Depends on: Remove the ProjectReference to the app* | **Persona: Backend Engineer** — `AdditionalProperties` removed; no `Microsoft.WindowsAppSDK` PackageReference needed (WinUI types flow transitively from the `UseWinUI=true` libraries). Relocated the app-only types the tests needed: `SampleDataService` → `MTM_Waitlist.Waitlist.View` (`MTM_Waitlist.Module_Waitlist.Services`), `PageService` → `MTM_Waitlist.Core` (`MTM_Waitlist.Module_Core.Services`, app now configures page mappings in the composition root); rewrote `PageServiceTests` with fake types; copied `Assets/Config/waitlist-request-types.json` into the test output.
 
-**GATE: `dotnet build` of the solution succeeds AND the test project no longer pulls the app project into its build graph (verify with `dotnet build -v:diag` or project.assets.json).**
+**GATE: `dotnet build` of the solution succeeds AND the test project no longer pulls the app project into its build graph (verify with `dotnet build -v:diag` or project.assets.json).** (✓ Verified 2026-08-30: test-project build output contains only the module libraries + tests — the WinExe app is NOT in the build graph.)
 
 ---
 
@@ -220,18 +220,18 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ### Subphase 6.1: Full build + test validation
 
-- [ ] **CI/CD: Run the full solution build cleanly (`dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false`).** (Ref: Diagnosis) *Depends on: Phase 5 GATE* | **Persona: DevOps Engineer**
-- [ ] **Testing: Run the full test suite (`dotnet test`) and confirm all tests pass.** (Ref: Diagnosis) *Depends on: Full solution build* | **Persona: QA Engineer**
-- [ ] **Testing: Launch the app in Debug and confirm navigation, DI, and XAML `{x:Bind}` bindings still resolve against the separated module assemblies (spot-check Setup + Waitlist + Settings pages).** (Ref: Add a Class Library project for testing) *Depends on: Full solution build* | **Persona: Frontend Engineer**
-- [ ] **Testing: Run tests from the VS Code test UI and confirm no locked `input.json` / dual-build error occurs.** *Depends on: Full test suite* | **Persona: QA Engineer**
+- [x] **CI/CD: Run the full solution build cleanly (`dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false`).** (Ref: Diagnosis) *Depends on: Phase 5 GATE* | **Persona: DevOps Engineer** — ✓ verified 2026-08-30: 0 warnings / 0 errors.
+- [x] **Testing: Run the full test suite (`dotnet test`) and confirm all tests pass.** (Ref: Diagnosis) *Depends on: Full solution build* | **Persona: QA Engineer** — ✓ verified 2026-08-30: 246 passed / 0 failed / 12 DB-integration skipped.
+- [ ] **Testing: Launch the app in Debug and confirm navigation, DI, and XAML `{x:Bind}` bindings still resolve against the separated module assemblies (spot-check Setup + Waitlist + Settings pages).** (Ref: Add a Class Library project for testing) *Depends on: Full solution build* | **Persona: Frontend Engineer** — *pending manual launch; build + tests green and DI/page wiring verified in the composition root.*
+- [ ] **Testing: Run tests from the VS Code test UI and confirm no locked `input.json` / dual-build error occurs.** *Depends on: Full test suite* | **Persona: QA Engineer** — *structurally resolved (the test project no longer references the app, so no second XAML compile races the solution build); confirm once from the VS Code test UI.*
 
 ### Subphase 6.2: Cleanup and docs
 
-- [ ] **CI/CD: Remove the Phase 0 pre-test kill step if no longer needed, or keep it as defense-in-depth.** (Ref: Diagnosis) | **Persona: DevOps Engineer**
-- [ ] **Configuration: Remove any now-unused `Compile Remove`/`None Include` workarounds in `MTM_Waitlist.csproj` that excluded the test folder.** (Ref: Diagnosis) | **Persona: Tech Lead**
-- [ ] **Configuration: Update `README.md` / architecture notes to document the per-module project layout (`MTM_Waitlist.Core` + `MTM_Waitlist.Shared` shared foundation, feature modules self-contained, app as composition root) and that tests reference the module libraries, not the app.** (Ref: Add a Class Library project for testing) | **Persona: Tech Lead**
+- [x] **CI/CD: Remove the Phase 0 pre-test kill step if no longer needed, or keep it as defense-in-depth.** (Ref: Diagnosis) | **Persona: DevOps Engineer** — keep as defense-in-depth (still useful to clear stale build processes).
+- [x] **Configuration: Remove any now-unused `Compile Remove`/`None Include` workarounds in `MTM_Waitlist.csproj` that excluded the test folder.** (Ref: Diagnosis) | **Persona: Tech Lead** — still REQUIRED: the app project lives at the repo root, so it must keep the `<Compile Remove>` entries (incl. `MTM_Waitlist.Tests\**\*.cs`) to avoid compiling sibling project sources. No removal needed.
+- [x] **Configuration: Update `README.md` / architecture notes to document the per-module project layout (`MTM_Waitlist.Core` + `MTM_Waitlist.Shared` shared foundation, feature modules self-contained, app as composition root) and that tests reference the module libraries, not the app.** (Ref: Add a Class Library project for testing) | **Persona: Tech Lead** — README "Project Structure (per-module class libraries)" section added.
 
-**FINAL GATE: clean `dotnet build` + full `dotnet test` + VS Code test UI with no lock.**
+**FINAL GATE: clean `dotnet build` + full `dotnet test` + VS Code test UI with no lock.** (✓ build + test verified 2026-08-30; VS Code test UI check pending manual confirmation)
 
 ---
 
