@@ -170,8 +170,10 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ### Subphase 4.5: MTM_Waitlist.Reporting ← Module_Reporting
 
-- [ ] **Service Layer: Move `Module_Reporting/Services` (incl. DI) into `MTM_Waitlist.Reporting` preserving namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 3 GATE* | **Persona: Backend Engineer**
-- [ ] **Configuration: Remove moved `Module_Reporting` files from the app; add `ProjectReference` app → Reporting.** *Depends on: Move Module_Reporting/Services* | **Persona: Frontend Engineer**
+- [x] **Service Layer: Move `Module_Reporting/Services` (incl. DI) into `MTM_Waitlist.Reporting` preserving namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 3 GATE* | **Persona: Backend Engineer**
+- [x] **Configuration: Remove moved `Module_Reporting` files from the app; add `ProjectReference` app → Reporting.** *Depends on: Move Module_Reporting/Services* | **Persona: Frontend Engineer**
+
+**GATE: solution builds and full test suite passes.** (✓ Verified: full suite 246 green, 2026-08-29)
 
 **GATE: solution builds.**
 
@@ -228,4 +230,4 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ---
 
-Next task: **Move `Module_Reporting` non-view code (Services, DI) into `MTM_Waitlist.Reporting` preserving namespaces, then update the Reporting test fakes.** | **Persona: Backend Engineer**
+Next task: **Phase 5 — Complete the app composition root (ensure all module DI is wired) and repoint the test project to reference the module libraries (Core/Shared/Settings/Setup/Startup/Waitlist/Reporting) instead of the WinExe app, dropping the app reference and the `AdditionalProperties` bootstrap workaround.** | **Persona: Tech Lead**

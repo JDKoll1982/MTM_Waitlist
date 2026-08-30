@@ -67,8 +67,7 @@ digraph CSharpDependencies {
 
     "MTM_Waitlist.App" [label="App", fillcolor=white, tooltip="MTM_Waitlist.App"];
     "MTM_Waitlist.MainWindow" [label="MainWindow", fillcolor=white, tooltip="MTM_Waitlist.MainWindow"];
-    "MTM_Waitlist.ModuleDependencyInjectionExtensions" [label="ModuleDependencyInjectionExtensions", fillcolor=white, tooltip="MTM_Waitlist.Module_Reporting.Services.DependencyInjection.ModuleDependencyInjectionExtensions"];
-    "MTM_Waitlist.ReportingModuleService" [label="ReportingModuleService", fillcolor=white, tooltip="MTM_Waitlist.Module_Reporting.Services.ReportingModuleService"];
+    "MTM_Waitlist.ShellPage" [label="ShellPage", fillcolor=white, tooltip="MTM_Waitlist.Module_Core.Views.ShellPage"];
     "MTM_Waitlist.ImageOverrideEditorControl" [label="ImageOverrideEditorControl", fillcolor=white, tooltip="MTM_Waitlist.Module_Settings.Views.ImageOverrideEditorControl"];
     "MTM_Waitlist.RequestSubtypeImagesDialog" [label="RequestSubtypeImagesDialog", fillcolor=white, tooltip="MTM_Waitlist.Module_Settings.Views.RequestSubtypeImagesDialog"];
     "MTM_Waitlist.RequestTypeImagesDialog" [label="RequestTypeImagesDialog", fillcolor=white, tooltip="MTM_Waitlist.Module_Settings.Views.RequestTypeImagesDialog"];
@@ -82,6 +81,7 @@ digraph CSharpDependencies {
     "MTM_Waitlist.SetupSequenceSelectionPage" [label="SetupSequenceSelectionPage", fillcolor=white, tooltip="MTM_Waitlist.Module_Setup.Views.SetupSequenceSelectionPage"];
     "MTM_Waitlist.SetupWorkCenterPage" [label="SetupWorkCenterPage", fillcolor=white, tooltip="MTM_Waitlist.Module_Setup.Views.SetupWorkCenterPage"];
     "MTM_Waitlist.SetupWorkOrderPage" [label="SetupWorkOrderPage", fillcolor=white, tooltip="MTM_Waitlist.Module_Setup.Views.SetupWorkOrderPage"];
+    "MTM_Waitlist.ControlInspectorDetailPage" [label="ControlInspectorDetailPage", fillcolor=white, tooltip="MTM_Waitlist.Module_Shared.Views.ControlInspectorDetailPage"];
     "MTM_Waitlist.LoginPage" [label="LoginPage", fillcolor=white, tooltip="MTM_Waitlist.Module_Startup.Views.LoginPage"];
     "MTM_Waitlist.LoginWindow" [label="LoginWindow", fillcolor=white, tooltip="MTM_Waitlist.Module_Startup.Views.LoginWindow"];
     "MTM_Waitlist.SplashPage" [label="SplashPage", fillcolor=white, tooltip="MTM_Waitlist.Module_Startup.Views.SplashPage"];
@@ -159,6 +159,8 @@ digraph CSharpDependencies {
     "MTM_Waitlist.ReportPrintService" [label="ReportPrintService", fillcolor=white, tooltip="MTM_Waitlist.Module_Core.Services.ReportPrintService"];
     "MTM_Waitlist.SqlHelperServer" [label="SqlHelperServer", fillcolor=white, tooltip="MTM_Waitlist.Module_Core.Services.SqlHelperServer"];
     "MTM_Waitlist.ThemeSelectorService" [label="ThemeSelectorService", fillcolor=white, tooltip="MTM_Waitlist.Module_Core.Services.ThemeSelectorService"];
+    "MTM_Waitlist.ModuleDependencyInjectionExtensions" [label="ModuleDependencyInjectionExtensions", fillcolor=white, tooltip="MTM_Waitlist.Module_Reporting.Services.DependencyInjection.ModuleDependencyInjectionExtensions"];
+    "MTM_Waitlist.ReportingModuleService" [label="ReportingModuleService", fillcolor=white, tooltip="MTM_Waitlist.Module_Reporting.Services.ReportingModuleService"];
     "MTM_Waitlist.ResolvedImagePathToSourceConverter" [label="ResolvedImagePathToSourceConverter", fillcolor=white, tooltip="MTM_Waitlist.Module_Settings.Converters.ResolvedImagePathToSourceConverter"];
     "MTM_Waitlist.BoolToVisibilityConverter" [label="BoolToVisibilityConverter", fillcolor=white, tooltip="MTM_Waitlist.Module_Settings.Converters.BoolToVisibilityConverter"];
     "MTM_Waitlist.ConfigSettingValue" [label="ConfigSettingValue", fillcolor=white, tooltip="MTM_Waitlist.Module_Settings.Models.ConfigSettingValue"];
@@ -451,6 +453,8 @@ digraph CSharpDependencies {
     style="filled";
     color="lightgray";
 
+    "MTM_Waitlist.Reporting.ModuleDependencyInjectionExtensions" [label="ModuleDependencyInjectionExtensions", fillcolor=white, tooltip="MTM_Waitlist.Module_Reporting.Services.DependencyInjection.ModuleDependencyInjectionExtensions"];
+    "MTM_Waitlist.Reporting.ReportingModuleService" [label="ReportingModuleService", fillcolor=white, tooltip="MTM_Waitlist.Module_Reporting.Services.ReportingModuleService"];
   }
 
   subgraph "cluster_MTM_Waitlist.Settings" {
@@ -682,6 +686,8 @@ digraph CSharpDependencies {
   "MTM_Waitlist.App" -> "MTM_Waitlist.SplashWindow" [penwidth=1.5];
   "MTM_Waitlist.App" -> "MTM_Waitlist.StartupDebugLog" [penwidth=1.5];
   "MTM_Waitlist.MainWindow" -> "MTM_Waitlist.TitleBarHelper" [penwidth=1.5];
+  "MTM_Waitlist.ShellPage" -> "MTM_Waitlist.StartupDebugLog" [penwidth=1.5];
+  "MTM_Waitlist.ShellPage" -> "MTM_Waitlist.TitleBarHelper" [penwidth=1.5];
   "MTM_Waitlist.ImageOverrideEditorControl" -> "MTM_Waitlist.ImageOverrideDialogViewModel" [penwidth=1.5];
   "MTM_Waitlist.RequestSubtypeImagesDialog" -> "MTM_Waitlist.RequestSubtypeImagesDialogViewModel" [penwidth=1.5];
   "MTM_Waitlist.RequestTypeImagesDialog" -> "MTM_Waitlist.RequestTypeImagesDialogViewModel" [penwidth=1.5];
@@ -699,6 +705,10 @@ digraph CSharpDependencies {
   "MTM_Waitlist.SetupSequenceSelectionPage" -> "MTM_Waitlist.SetupSequenceSelectionViewModel" [penwidth=1.5];
   "MTM_Waitlist.SetupWorkCenterPage" -> "MTM_Waitlist.SetupWorkCenterViewModel" [penwidth=1.5];
   "MTM_Waitlist.SetupWorkOrderPage" -> "MTM_Waitlist.SetupWorkOrderViewModel" [penwidth=1.5];
+  "MTM_Waitlist.ControlInspectorDetailPage" -> "MTM_Waitlist.PrintableReportSection" [penwidth=1.5];
+  "MTM_Waitlist.ControlInspectorDetailPage" -> "MTM_Waitlist.PrintableReportField" [penwidth=1.5];
+  "MTM_Waitlist.ControlInspectorDetailPage" -> "MTM_Waitlist.PrintableReport" [penwidth=1.5];
+  "MTM_Waitlist.ControlInspectorDetailPage" -> "MTM_Waitlist.ControlInspectorDetailViewModel" [penwidth=1.5];
   "MTM_Waitlist.LoginWindow" -> "MTM_Waitlist.LoginPage" [penwidth=1.5];
   "MTM_Waitlist.SplashPage" -> "MTM_Waitlist.SplashViewModel" [penwidth=1.5];
   "MTM_Waitlist.SplashView" -> "MTM_Waitlist.NativeMethods" [penwidth=1.5];
