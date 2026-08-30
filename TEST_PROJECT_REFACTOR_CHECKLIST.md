@@ -124,15 +124,15 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ### Subphase 3.1: MTM_Waitlist.Core ← Module_Core
 
-- [ ] **Service Layer: Move `Module_Core` non-view code — `Contracts`, `Models`, `Services` (non-composition-root), `Helpers`, `Behaviors`, `Selectors`, `Activation`, `Contracts/ViewModels/INavigationAware.cs` — into `MTM_Waitlist.Core` preserving `MTM_Waitlist.Module_Core.*` namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 2 GATE* | **Persona: Backend Engineer**
-- [ ] **Configuration: Remove moved `Module_Core` files from the app; keep `Module_Core/Views/ShellPage.*` in the app; add `ProjectReference` app → Core; confirm `App.xaml.cs` DI calls resolve against the library.** *Depends on: Move Module_Core non-view code* | **Persona: Frontend Engineer**
+- [x] **Service Layer: Move `Module_Core` non-view code — `Contracts`, `Models`, `Services` (non-composition-root), `Helpers`, `Behaviors`, `Selectors`, `Activation`, `Contracts/ViewModels/INavigationAware.cs` — into `MTM_Waitlist.Core` preserving `MTM_Waitlist.Module_Core.*` namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Phase 2 GATE* | **Persona: Backend Engineer** — verified 2026-08-29: moved to `MTM_Waitlist.Core/`; app-coupled services refactored to injected `IAppWindowProvider`/`IShellContentProvider`/`AppServiceLocator`
+- [x] **Configuration: Remove moved `Module_Core` files from the app; keep `Module_Core/Views/ShellPage.*` in the app; add `ProjectReference` app → Core; confirm `App.xaml.cs` DI calls resolve against the library.** *Depends on: Move Module_Core non-view code* | **Persona: Frontend Engineer** — verified 2026-08-29: `Module_Core` left with only `Views/`; app→Core reference added
 
 **GATE: solution builds and `MTM_Waitlist.Tests/Module_Core/ModuleCoreServiceTests.cs` passes.**
 
 ### Subphase 3.2: MTM_Waitlist.Shared ← Module_Shared
 
-- [ ] **Service Layer: Move `Module_Shared` non-view code (Services, Models, ViewModels, DI) into `MTM_Waitlist.Shared` preserving `MTM_Waitlist.Module_Shared.*` namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Module_Core GATE* | **Persona: Backend Engineer**
-- [ ] **Configuration: Remove moved `Module_Shared` files from the app; keep `Module_Shared/Views/ControlInspectorDetailPage.*` in the app; add `ProjectReference` app → Shared.** *Depends on: Move Module_Shared non-view code* | **Persona: Frontend Engineer**
+- [x] **Service Layer: Move `Module_Shared` non-view code (Services, Models, ViewModels, DI) into `MTM_Waitlist.Shared` preserving `MTM_Waitlist.Module_Shared.*` namespaces.** (Ref: Add a Class Library project for testing) *Depends on: Module_Core GATE* | **Persona: Backend Engineer** — verified 2026-08-29: moved to `MTM_Waitlist.Shared/`; `TooltipBehavior` uses new `SharedServiceLocator`
+- [x] **Configuration: Remove moved `Module_Shared` files from the app; keep `Module_Shared/Views/ControlInspectorDetailPage.*` in the app; add `ProjectReference` app → Shared.** *Depends on: Move Module_Shared non-view code* | **Persona: Frontend Engineer** — verified 2026-08-29: `Module_Shared` left with only `Views/`; app→Shared reference added
 
 **GATE: solution builds and `TooltipServiceTests` + `ControlInspectorServiceTests` pass.**
 
@@ -228,4 +228,4 @@ All of these were resolved in **Phase 2** (2026-08-29). `Module_Core` + `Module_
 
 ---
 
-Next task: **Move `Module_Core` non-view code — `Contracts`, `Models`, `Services` (non-composition-root), `Helpers`, `Behaviors`, `Selectors`, `Activation`, `Contracts/ViewModels/INavigationAware.cs` — into `MTM_Waitlist.Core` preserving `MTM_Waitlist.Module_Core.*` namespaces.** | **Persona: Backend Engineer**
+Next task: **Move `Module_Startup` non-view code (Services, Models, ViewModels, DI) into `MTM_Waitlist.Startup` preserving namespaces.** | **Persona: Backend Engineer**
