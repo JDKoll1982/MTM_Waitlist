@@ -85,6 +85,53 @@ public sealed class StartupCoordinatorTests
     }
 
     [TestMethod]
+    public async Task RunAsync_PopulatesSignedInIdentityFromSessionSnapshotAsync()
+    {
+        var fileService = new InMemoryFileService(new Dictionary<string, object>
+        {
+            [RecoveryProbeKey] = "\"ok\"",
+            ["Startup.Session.Token"] = "\"local-token\"",
+            ["Startup.Session.ExpiresUtc"] = "\"2026-07-26T11:00:00Z\""
+        });
+
+        var localSettingsService = CreateLocalSettingsService(fileService);
+        var startupState = new StartupState();
+        var repository = new FakeStartupSessionRepository
+        {
+            ServerTimeUtc = new DateTimeOffset(2026, 7, 26, 10, 0, 0, TimeSpan.Zero),
+            Snapshot = new StartupSessionSnapshot
+            {
+                IsUserMatched = true,
+                IsComputerRegistered = true,
+                CurrentRole = "Developer",
+                DisplayName = "John Koll",
+                EmployeeIdentifier = "6229",
+                HasDatabaseSession = false,
+                DatabaseSessionExpiresUtc = null
+            }
+        };
+
+        var coordinator = CreateCoordinator(
+            new LocalSettingsOptions
+            {
+                ApplicationDataFolder = "MTM_Waitlist/ApplicationData",
+                LocalSettingsFile = "LocalSettings.json"
+            },
+            localSettingsService,
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
+            repository,
+            startupState);
+
+        var result = await coordinator.RunAsync();
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.IsTrue(startupState.IsUserMatched);
+        Assert.AreEqual("John Koll", startupState.EmployeeName);
+        Assert.AreEqual("6229", startupState.EmployeeNumber);
+        Assert.IsTrue(startupState.IsEmployeeIdentified);
+    }
+
+    [TestMethod]
     public async Task RunAsync_WhenRetryDatabasePhaseOnly_SkipsLocalProbeStageAsync()
     {
         var localSettingsService = new RecordingLocalSettingsService();

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 820" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>New Request — Job Type (Request Selection) tiles</title>
+  <rect width="1080" height="820" fill="#F3F3F3"/>
+  <!-- label strip -->
+  <rect width="1080" height="40" fill="#FFFFFF"/><text x="20" y="26" font-size="13" font-weight="600" fill="#1B1B1B">Mockup</text>
+  <text x="1040" y="26" font-size="11" fill="#8A8A8A" text-anchor="end">Mockups / newrequest-selection-requesttypes</text>
+  <line x1="0" y1="40" x2="1080" y2="40" stroke="#E2E2E2"/>
+
+  <!-- page header (SetupPageHeaderStyle) -->
+  <text x="120" y="104" font-size="24" font-weight="600" fill="#1B1B1B">New Request - Choose Job Type</text>
+  <text x="120" y="132" font-size="14" fill="#5E5E5E">Press P-12 · Work Center 12</text>
+  <text x="120" y="156" font-size="14" fill="#5E5E5E">Choose a Job Type to continue.</text>
+
+  <!-- GridView wrap (max 4) of 150x150 tiles -->
+  <g font-family="Segoe UI Variable, Segoe UI">
+    <!-- Coil -->
+    <g>
+      <rect x="120" y="184" width="150" height="150" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+      <rect x="158" y="200" width="74" height="74" rx="8" fill="#EAF0F7"/>
+      <rect x="158" y="200" width="74" height="74" rx="8" fill="none" stroke="#C7D8E6"/>
+      <rect x="180" y="222" width="30" height="30" rx="15" fill="#6E839C"/>
+      <text x="195" y="242" font-size="20" font-weight="700" fill="#FFFFFF" text-anchor="middle">C</text>
+      <text x="195" y="300" font-size="15" font-weight="600" fill="#1B1B1B" text-anchor="middle">Coil</text>
+      <text x="195" y="320" font-size="11" fill="#5E5E5E" text-anchor="middle">Bring / pickup</text>
+    </g>
+    <!-- Pickup -->
+    <g>
+      <rect x="286" y="184" width="150" height="150" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+      <rect x="324" y="200" width="74" height="74" rx="8" fill="#EDF1F5"/>
+      <rect x="346" y="222" width="30" height="30" rx="15" fill="#5B7C99"/>
+      <text x="361" y="242" font-size="20" font-weight="700" fill="#FFF" text-anchor="middle">P</text>
+      <text x="361" y="300" font-size="15" font-weight="600" fill="#1B1B1B" text-anchor="middle">Pickup</text>
+      <text x="361" y="320" font-size="11" fill="#5E5E5E" text-anchor="middle">FG / NCM / WIP</text>
+    </g>
+    <!-- Scrap -->
+    <g>
+      <rect x="452" y="184" width="150" height="150" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+      <rect x="490" y="200" width="74" height="74" rx="8" fill="#F6EFE7"/>
+      <rect x="512" y="222" width="30" height="30" rx="15" fill="#B5823E"/>
+      <text x="527" y="242" font-size="20" font-weight="700" fill="#FFF" text-anchor="middle">S</text>
+      <text x="527" y="300" font-size="15" font-weight="600" fill="#1B1B1B" text-anchor="middle">Scrap</text>
+      <text x="527" y="320" font-size="11" fill="#5E5E5E" text-anchor="middle">Remove scrap</text>
+    </g>
+    <!-- Flatstock -->
+    <g>
+      <rect x="618" y="184" width="150" height="150" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+      <rect x="656" y="200" width="74" height="74" rx="8" fill="#ECF3EC"/>
+      <rect x="678" y="222" width="30" height="30" rx="15" fill="#5E8C5E"/>
+      <text x="693" y="242" font-size="20" font-weight="700" fill="#FFF" text-anchor="middle">F</text>
+      <text x="693" y="300" font-size="15" font-weight="600" fill="#1B1B1B" text-anchor="middle">Flatstock</text>
+      <text x="693" y="320" font-size="11" fill="#5E5E5E" text-anchor="middle">Sheet / flat</text>
+    </g>
+  </g>
+
+  <!-- action bar: Back only -->
+  <line x1="0" y1="744" x2="1080" y2="744" stroke="#E2E2E2"/>
+  <rect x="120" y="760" width="120" height="36" rx="8" fill="#FFFFFF" stroke="#8A8A8A"/>
+  <text x="180" y="784" font-size="14" fill="#1B1B1B" text-anchor="middle">Back</text>
+</svg>

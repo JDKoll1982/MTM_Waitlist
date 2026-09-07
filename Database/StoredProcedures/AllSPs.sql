@@ -543,6 +543,7 @@ ON DUPLICATE KEY UPDATE
 DROP PROCEDURE IF EXISTS sp_waitlist_request_insert;
 
 CREATE PROCEDURE sp_waitlist_request_insert(
+    IN p_public_id CHAR(36),
     IN p_building VARCHAR(64),
     IN p_work_center VARCHAR(64),
     IN p_request_type VARCHAR(64),
@@ -557,7 +558,8 @@ CREATE PROCEDURE sp_waitlist_request_insert(
     IN p_target_time_utc DATETIME,
     IN p_is_overdue TINYINT,
     IN p_assigned_material_handler VARCHAR(128),
-    IN p_cancellation_reason VARCHAR(255)
+    IN p_cancellation_reason VARCHAR(255),
+    IN p_note VARCHAR(500)
 )
 INSERT INTO waitlist_requests_queue (
     public_id,
@@ -576,11 +578,12 @@ INSERT INTO waitlist_requests_queue (
     is_overdue,
     assigned_material_handler,
     cancellation_reason,
+    note,
     created_utc,
     updated_utc
 )
 VALUES (
-    UUID(),
+    TRIM(p_public_id),
     TRIM(p_building),
     TRIM(p_work_center),
     TRIM(p_request_type),
@@ -596,7 +599,1035 @@ VALUES (
     COALESCE(p_is_overdue, 0),
     NULLIF(TRIM(COALESCE(p_assigned_material_handler, '')) COLLATE utf8mb4_unicode_ci, ''),
     NULLIF(TRIM(COALESCE(p_cancellation_reason, '')) COLLATE utf8mb4_unicode_ci, ''),
+    NULLIF(TRIM(COALESCE(p_note, '')) COLLATE utf8mb4_unicode_ci, ''),
     UTC_TIMESTAMP(),
     UTC_TIMESTAMP()
 );
 
+-- Create procedure: sp_waitlist_request_list
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_list;
+
+CREATE PROCEDURE sp_waitlist_request_list(
+    IN p_building VARCHAR(64),
+    IN p_include_resolved TINYINT
+)
+SELECT
+    id,
+    public_id,
+    building,
+    work_center,
+    request_type,
+    subtype,
+    input_value,
+    active_setup_job_id,
+    work_center_name,
+    requester_employee_number,
+    requester_employee_name,
+    status,
+    requested_utc,
+    target_time_utc,
+    is_overdue,
+    assigned_material_handler,
+    cancellation_reason,
+    canceled_utc,
+    canceled_by_employee_number,
+    note,
+    accepted_utc,
+    completed_utc,
+    released_utc,
+    created_utc,
+    updated_utc
+FROM waitlist_requests_queue
+WHERE (p_building IS NULL OR TRIM(p_building) = '' OR building = TRIM(p_building))
+  AND (p_include_resolved = 1 OR status IN ('Pending', 'Accepted'))
+ORDER BY requested_utc ASC;
+
+-- Create procedure: sp_waitlist_request_get
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_get;
+
+CREATE PROCEDURE sp_waitlist_request_get(
+    IN p_public_id CHAR(36)
+)
+SELECT
+    id,
+    public_id,
+    building,
+    work_center,
+    request_type,
+    subtype,
+    input_value,
+    active_setup_job_id,
+    work_center_name,
+    requester_employee_number,
+    requester_employee_name,
+    status,
+    requested_utc,
+    target_time_utc,
+    is_overdue,
+    assigned_material_handler,
+    cancellation_reason,
+    canceled_utc,
+    canceled_by_employee_number,
+    note,
+    accepted_utc,
+    completed_utc,
+    released_utc,
+    created_utc,
+    updated_utc
+FROM waitlist_requests_queue
+WHERE public_id = p_public_id
+LIMIT 1;
+
+-- Create procedure: sp_waitlist_request_status_update
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_status_update;
+
+CREATE PROCEDURE sp_waitlist_request_status_update(
+    IN p_public_id CHAR(36),
+    IN p_status VARCHAR(32),
+    IN p_assigned_material_handler VARCHAR(128),
+    IN p_cancellation_reason VARCHAR(255),
+    IN p_canceled_by_employee_number VARCHAR(32),
+    IN p_note VARCHAR(500)
+)
+UPDATE waitlist_requests_queue
+SET status = TRIM(p_status),
+    assigned_material_handler = NULLIF(TRIM(COALESCE(p_assigned_material_handler, '')) COLLATE utf8mb4_unicode_ci, ''),
+    note = COALESCE(NULLIF(TRIM(COALESCE(p_note, '')) COLLATE utf8mb4_unicode_ci, ''), note),
+    accepted_utc = CASE
+        WHEN UPPER(TRIM(p_status)) = 'ACCEPTED'
+            THEN COALESCE(accepted_utc, UTC_TIMESTAMP())
+        ELSE accepted_utc
+    END,
+    completed_utc = CASE
+        WHEN UPPER(TRIM(p_status)) = 'COMPLETED'
+            THEN COALESCE(completed_utc, UTC_TIMESTAMP())
+        ELSE completed_utc
+    END,
+    released_utc = CASE
+        WHEN UPPER(TRIM(p_status)) = 'PENDING'
+            THEN COALESCE(released_utc, UTC_TIMESTAMP())
+        ELSE released_utc
+    END,
+    cancellation_reason = CASE
+        WHEN UPPER(TRIM(p_status)) = 'CANCELED'
+            THEN NULLIF(TRIM(COALESCE(p_cancellation_reason, '')) COLLATE utf8mb4_unicode_ci, '')
+        ELSE NULL
+    END,
+    canceled_utc = CASE
+        WHEN UPPER(TRIM(p_status)) = 'CANCELED'
+            THEN COALESCE(canceled_utc, UTC_TIMESTAMP())
+        ELSE NULL
+    END,
+    canceled_by_employee_number = CASE
+        WHEN UPPER(TRIM(p_status)) = 'CANCELED'
+            THEN NULLIF(TRIM(COALESCE(p_canceled_by_employee_number, '')) COLLATE utf8mb4_unicode_ci, '')
+        ELSE NULL
+    END,
+    updated_utc = UTC_TIMESTAMP()
+WHERE public_id = p_public_id;
+
+-- Create procedure: sp_waitlist_request_audit_insert
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_audit_insert;
+
+CREATE PROCEDURE sp_waitlist_request_audit_insert(
+    IN p_request_public_id CHAR(36),
+    IN p_from_status VARCHAR(32),
+    IN p_to_status VARCHAR(32),
+    IN p_event_type VARCHAR(32),
+    IN p_actor_employee_number VARCHAR(32),
+    IN p_actor_employee_name VARCHAR(128),
+    IN p_details VARCHAR(255)
+)
+INSERT INTO waitlist_requests_audit (
+    public_id,
+    request_public_id,
+    from_status,
+    to_status,
+    event_type,
+    actor_employee_number,
+    actor_employee_name,
+    details,
+    occurred_utc
+)
+VALUES (
+    UUID(),
+    TRIM(p_request_public_id),
+    NULLIF(TRIM(COALESCE(p_from_status, '')) COLLATE utf8mb4_unicode_ci, ''),
+    NULLIF(TRIM(COALESCE(p_to_status, '')) COLLATE utf8mb4_unicode_ci, ''),
+    TRIM(p_event_type),
+    NULLIF(TRIM(COALESCE(p_actor_employee_number, '')) COLLATE utf8mb4_unicode_ci, ''),
+    NULLIF(TRIM(COALESCE(p_actor_employee_name, '')) COLLATE utf8mb4_unicode_ci, ''),
+    NULLIF(TRIM(COALESCE(p_details, '')) COLLATE utf8mb4_unicode_ci, ''),
+    UTC_TIMESTAMP()
+);
+
+
+
+
+-- Create procedure: sp_waitlist_request_types_get
+-- Engine: MySQL 5.7
+-- Purpose: Return the active real (non-mock) request-type catalog rows for the New-Request wizard.
+--          Source of truth for request types (was Assets/Config/waitlist-request-types.json).
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_types_get;
+
+CREATE PROCEDURE sp_waitlist_request_types_get()
+SELECT
+    id,
+    public_id,
+    request_type,
+    control,
+    flow,
+    requires_text_input,
+    prompt_text,
+    min_length,
+    max_length,
+    default_image_path,
+    center_data_grid_fields_json,
+    is_active
+FROM waitlist_request_types
+WHERE is_active = 1
+ORDER BY id ASC;
+
+
+-- Create procedure: sp_waitlist_request_subtypes_get
+-- Engine: MySQL 5.7
+-- Purpose: Return the active real (non-mock) request-subtype catalog rows for the New-Request wizard.
+--          Source of truth for request subtypes (was Assets/Config/waitlist-request-types.json).
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_subtypes_get;
+
+CREATE PROCEDURE sp_waitlist_request_subtypes_get()
+SELECT
+    id,
+    public_id,
+    request_type_id,
+    subtype_name,
+    control,
+    flow,
+    requires_text_input,
+    prompt_text,
+    min_length,
+    max_length,
+    default_image_path,
+    center_data_grid_fields_json,
+    is_active
+FROM waitlist_request_subtypes
+WHERE is_active = 1
+ORDER BY request_type_id ASC, id ASC;
+
+
+-- Create procedure: sp_mock_inventory_locations_delete
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_inventory_locations_delete;
+
+CREATE PROCEDURE sp_mock_inventory_locations_delete(IN p_id BIGINT)
+DELETE FROM mock_inventory_locations WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_inventory_locations_get
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_inventory_locations_get;
+
+CREATE PROCEDURE sp_mock_inventory_locations_get()
+SELECT id, public_id, part_number, location_code, on_hand_quantity, created_utc, updated_utc
+FROM mock_inventory_locations
+ORDER BY id ASC;
+
+
+-- Create procedure: sp_mock_inventory_locations_insert
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_inventory_locations_insert;
+
+CREATE PROCEDURE sp_mock_inventory_locations_insert(
+    IN p_part_number VARCHAR(50),
+    IN p_location_code VARCHAR(50),
+    IN p_on_hand_quantity DECIMAL(18,2)
+)
+INSERT INTO mock_inventory_locations (part_number, location_code, on_hand_quantity, public_id, created_utc, updated_utc)
+VALUES (NULLIF(TRIM(p_part_number), ''), NULLIF(TRIM(p_location_code), ''), p_on_hand_quantity, UUID(), UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+
+-- Create procedure: sp_mock_inventory_locations_update
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_inventory_locations_update;
+
+CREATE PROCEDURE sp_mock_inventory_locations_update(
+    IN p_id BIGINT,
+    IN p_part_number VARCHAR(50),
+    IN p_location_code VARCHAR(50),
+    IN p_on_hand_quantity DECIMAL(18,2)
+)
+UPDATE mock_inventory_locations
+SET part_number = NULLIF(TRIM(p_part_number), ''), location_code = NULLIF(TRIM(p_location_code), ''), on_hand_quantity = p_on_hand_quantity, updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_locations_delete
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_locations_delete;
+
+CREATE PROCEDURE sp_mock_locations_delete(IN p_id BIGINT)
+DELETE FROM mock_locations WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_locations_get
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_locations_get;
+
+CREATE PROCEDURE sp_mock_locations_get()
+SELECT id, public_id, location_code, location_description, is_ignored, is_active, created_utc, updated_utc
+FROM mock_locations
+ORDER BY id ASC;
+
+
+-- Create procedure: sp_mock_locations_insert
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_locations_insert;
+
+CREATE PROCEDURE sp_mock_locations_insert(
+    IN p_location_code VARCHAR(50),
+    IN p_location_description VARCHAR(255),
+    IN p_is_ignored TINYINT
+)
+INSERT INTO mock_locations (location_code, location_description, is_ignored, public_id, is_active, created_utc, updated_utc)
+VALUES (NULLIF(TRIM(p_location_code), ''), NULLIF(TRIM(p_location_description), ''), p_is_ignored, UUID(), 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+
+-- Create procedure: sp_mock_locations_update
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_locations_update;
+
+CREATE PROCEDURE sp_mock_locations_update(
+    IN p_id BIGINT,
+    IN p_location_code VARCHAR(50),
+    IN p_location_description VARCHAR(255),
+    IN p_is_ignored TINYINT
+)
+UPDATE mock_locations
+SET location_code = NULLIF(TRIM(p_location_code), ''), location_description = NULLIF(TRIM(p_location_description), ''), is_ignored = p_is_ignored, updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_master_tables_registry_delete
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_master_tables_registry_delete;
+
+CREATE PROCEDURE sp_mock_master_tables_registry_delete(IN p_id BIGINT)
+DELETE FROM mock_master_tables_registry WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_master_tables_registry_get
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_master_tables_registry_get;
+
+CREATE PROCEDURE sp_mock_master_tables_registry_get()
+SELECT id, public_id, table_name, ui_display_name, description_text, sort_rank, is_active, created_utc, updated_utc
+FROM mock_master_tables_registry
+ORDER BY id ASC;
+
+
+-- Create procedure: sp_mock_master_tables_registry_insert
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_master_tables_registry_insert;
+
+CREATE PROCEDURE sp_mock_master_tables_registry_insert(
+    IN p_table_name VARCHAR(128),
+    IN p_ui_display_name VARCHAR(128),
+    IN p_description_text VARCHAR(500),
+    IN p_sort_rank INT
+)
+INSERT INTO mock_master_tables_registry (table_name, ui_display_name, description_text, sort_rank, public_id, is_active, created_utc, updated_utc)
+VALUES (NULLIF(TRIM(p_table_name), ''), NULLIF(TRIM(p_ui_display_name), ''), NULLIF(TRIM(p_description_text), ''), p_sort_rank, UUID(), 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+
+-- Create procedure: sp_mock_master_tables_registry_update
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_master_tables_registry_update;
+
+CREATE PROCEDURE sp_mock_master_tables_registry_update(
+    IN p_id BIGINT,
+    IN p_table_name VARCHAR(128),
+    IN p_ui_display_name VARCHAR(128),
+    IN p_description_text VARCHAR(500),
+    IN p_sort_rank INT
+)
+UPDATE mock_master_tables_registry
+SET table_name = NULLIF(TRIM(p_table_name), ''), ui_display_name = NULLIF(TRIM(p_ui_display_name), ''), description_text = NULLIF(TRIM(p_description_text), ''), sort_rank = p_sort_rank, updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_parts_delete
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_parts_delete;
+
+CREATE PROCEDURE sp_mock_parts_delete(IN p_id BIGINT)
+DELETE FROM mock_parts WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_parts_get
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_parts_get;
+
+CREATE PROCEDURE sp_mock_parts_get()
+SELECT id, public_id, part_number, part_category, part_description, unit_of_measure, is_active, created_utc, updated_utc
+FROM mock_parts
+ORDER BY id ASC;
+
+
+-- Create procedure: sp_mock_parts_insert
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_parts_insert;
+
+CREATE PROCEDURE sp_mock_parts_insert(
+    IN p_part_number VARCHAR(50),
+    IN p_part_category VARCHAR(32),
+    IN p_part_description VARCHAR(500),
+    IN p_unit_of_measure VARCHAR(20)
+)
+INSERT INTO mock_parts (part_number, part_category, part_description, unit_of_measure, public_id, is_active, created_utc, updated_utc)
+VALUES (NULLIF(TRIM(p_part_number), ''), NULLIF(TRIM(p_part_category), ''), NULLIF(TRIM(p_part_description), ''), NULLIF(TRIM(p_unit_of_measure), ''), UUID(), 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+
+-- Create procedure: sp_mock_parts_update
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_parts_update;
+
+CREATE PROCEDURE sp_mock_parts_update(
+    IN p_id BIGINT,
+    IN p_part_number VARCHAR(50),
+    IN p_part_category VARCHAR(32),
+    IN p_part_description VARCHAR(500),
+    IN p_unit_of_measure VARCHAR(20)
+)
+UPDATE mock_parts
+SET part_number = NULLIF(TRIM(p_part_number), ''), part_category = NULLIF(TRIM(p_part_category), ''), part_description = NULLIF(TRIM(p_part_description), ''), unit_of_measure = NULLIF(TRIM(p_unit_of_measure), ''), updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_request_types_delete
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_request_types_delete;
+
+CREATE PROCEDURE sp_mock_request_types_delete(IN p_id BIGINT)
+DELETE FROM mock_request_types WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_request_types_get
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_request_types_get;
+
+CREATE PROCEDURE sp_mock_request_types_get()
+SELECT id, public_id, request_type, subtype, is_active, created_utc, updated_utc
+FROM mock_request_types
+ORDER BY id ASC;
+
+
+-- Create procedure: sp_mock_request_types_insert
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_request_types_insert;
+
+CREATE PROCEDURE sp_mock_request_types_insert(
+    IN p_request_type VARCHAR(64),
+    IN p_subtype VARCHAR(128)
+)
+INSERT INTO mock_request_types (request_type, subtype, public_id, is_active, created_utc, updated_utc)
+VALUES (NULLIF(TRIM(p_request_type), ''), NULLIF(TRIM(p_subtype), ''), UUID(), 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+
+-- Create procedure: sp_mock_request_types_update
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_request_types_update;
+
+CREATE PROCEDURE sp_mock_request_types_update(
+    IN p_id BIGINT,
+    IN p_request_type VARCHAR(64),
+    IN p_subtype VARCHAR(128)
+)
+UPDATE mock_request_types
+SET request_type = NULLIF(TRIM(p_request_type), ''), subtype = NULLIF(TRIM(p_subtype), ''), updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_requesters_delete
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_requesters_delete;
+
+CREATE PROCEDURE sp_mock_requesters_delete(IN p_id BIGINT)
+DELETE FROM mock_requesters WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_requesters_get
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_requesters_get;
+
+CREATE PROCEDURE sp_mock_requesters_get()
+SELECT id, public_id, employee_number, display_name, is_active, created_utc, updated_utc
+FROM mock_requesters
+ORDER BY id ASC;
+
+
+-- Create procedure: sp_mock_requesters_insert
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_requesters_insert;
+
+CREATE PROCEDURE sp_mock_requesters_insert(
+    IN p_employee_number VARCHAR(32),
+    IN p_display_name VARCHAR(128)
+)
+INSERT INTO mock_requesters (employee_number, display_name, public_id, is_active, created_utc, updated_utc)
+VALUES (NULLIF(TRIM(p_employee_number), ''), NULLIF(TRIM(p_display_name), ''), UUID(), 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+
+-- Create procedure: sp_mock_requesters_update
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_requesters_update;
+
+CREATE PROCEDURE sp_mock_requesters_update(
+    IN p_id BIGINT,
+    IN p_employee_number VARCHAR(32),
+    IN p_display_name VARCHAR(128)
+)
+UPDATE mock_requesters
+SET employee_number = NULLIF(TRIM(p_employee_number), ''), display_name = NULLIF(TRIM(p_display_name), ''), updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_work_centers_delete
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_work_centers_delete;
+
+CREATE PROCEDURE sp_mock_work_centers_delete(IN p_id BIGINT)
+DELETE FROM mock_work_centers WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_work_centers_get
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_work_centers_get;
+
+CREATE PROCEDURE sp_mock_work_centers_get()
+SELECT id, public_id, work_center_code, work_center_description, building, is_active, created_utc, updated_utc
+FROM mock_work_centers
+ORDER BY id ASC;
+
+
+-- Create procedure: sp_mock_work_centers_insert
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_work_centers_insert;
+
+CREATE PROCEDURE sp_mock_work_centers_insert(
+    IN p_work_center_code VARCHAR(32),
+    IN p_work_center_description VARCHAR(255),
+    IN p_building VARCHAR(128)
+)
+INSERT INTO mock_work_centers (work_center_code, work_center_description, building, public_id, is_active, created_utc, updated_utc)
+VALUES (NULLIF(TRIM(p_work_center_code), ''), NULLIF(TRIM(p_work_center_description), ''), NULLIF(TRIM(p_building), ''), UUID(), 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+
+-- Create procedure: sp_mock_work_centers_update
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_work_centers_update;
+
+CREATE PROCEDURE sp_mock_work_centers_update(
+    IN p_id BIGINT,
+    IN p_work_center_code VARCHAR(32),
+    IN p_work_center_description VARCHAR(255),
+    IN p_building VARCHAR(128)
+)
+UPDATE mock_work_centers
+SET work_center_code = NULLIF(TRIM(p_work_center_code), ''), work_center_description = NULLIF(TRIM(p_work_center_description), ''), building = NULLIF(TRIM(p_building), ''), updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_work_orders_delete
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_work_orders_delete;
+
+CREATE PROCEDURE sp_mock_work_orders_delete(IN p_id BIGINT)
+DELETE FROM mock_work_orders WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_work_orders_get
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_work_orders_get;
+
+CREATE PROCEDURE sp_mock_work_orders_get()
+SELECT id, public_id, work_order_number, part_number, work_center_code, is_coil_bearing, is_active, created_utc, updated_utc
+FROM mock_work_orders
+ORDER BY id ASC;
+
+
+-- Create procedure: sp_mock_work_orders_insert
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_work_orders_insert;
+
+CREATE PROCEDURE sp_mock_work_orders_insert(
+    IN p_work_order_number VARCHAR(64),
+    IN p_part_number VARCHAR(50),
+    IN p_work_center_code VARCHAR(32),
+    IN p_is_coil_bearing TINYINT
+)
+INSERT INTO mock_work_orders (work_order_number, part_number, work_center_code, is_coil_bearing, public_id, is_active, created_utc, updated_utc)
+VALUES (NULLIF(TRIM(p_work_order_number), ''), NULLIF(TRIM(p_part_number), ''), NULLIF(TRIM(p_work_center_code), ''), p_is_coil_bearing, UUID(), 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+
+-- Create procedure: sp_mock_work_orders_update
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_work_orders_update;
+
+CREATE PROCEDURE sp_mock_work_orders_update(
+    IN p_id BIGINT,
+    IN p_work_order_number VARCHAR(64),
+    IN p_part_number VARCHAR(50),
+    IN p_work_center_code VARCHAR(32),
+    IN p_is_coil_bearing TINYINT
+)
+UPDATE mock_work_orders
+SET work_order_number = NULLIF(TRIM(p_work_order_number), ''), part_number = NULLIF(TRIM(p_part_number), ''), work_center_code = NULLIF(TRIM(p_work_center_code), ''), is_coil_bearing = p_is_coil_bearing, updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+
+-- Create procedure: sp_waitlist_request_subtypes_get
+-- Engine: MySQL 5.7
+-- Purpose: Return the active real (non-mock) request-subtype catalog rows for the New-Request wizard.
+--          Source of truth for request subtypes (was Assets/Config/waitlist-request-types.json).
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_subtypes_get;
+
+CREATE PROCEDURE sp_waitlist_request_subtypes_get()
+SELECT
+    id,
+    public_id,
+    request_type_id,
+    subtype_name,
+    control,
+    flow,
+    requires_text_input,
+    prompt_text,
+    min_length,
+    max_length,
+    default_image_path,
+    center_data_grid_fields_json,
+    is_active
+FROM waitlist_request_subtypes
+WHERE is_active = 1
+ORDER BY request_type_id ASC, id ASC;
+
+
+-- Create procedure: sp_waitlist_request_types_get
+-- Engine: MySQL 5.7
+-- Purpose: Return the active real (non-mock) request-type catalog rows for the New-Request wizard.
+--          Source of truth for request types (was Assets/Config/waitlist-request-types.json).
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_types_get;
+
+CREATE PROCEDURE sp_waitlist_request_types_get()
+SELECT
+    id,
+    public_id,
+    request_type,
+    control,
+    flow,
+    requires_text_input,
+    prompt_text,
+    min_length,
+    max_length,
+    default_image_path,
+    center_data_grid_fields_json,
+    is_active
+FROM waitlist_request_types
+WHERE is_active = 1
+ORDER BY id ASC;
+
+
+-- Create procedure: sp_waitlist_request_types_insert
+-- Engine: MySQL 5.7
+-- Purpose: Insert a real (non-mock) request type into waitlist_request_types.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_types_insert;
+
+CREATE PROCEDURE sp_waitlist_request_types_insert(
+    IN p_request_type VARCHAR(64),
+    IN p_control VARCHAR(255),
+    IN p_flow VARCHAR(64),
+    IN p_requires_text_input TINYINT,
+    IN p_prompt_text VARCHAR(500),
+    IN p_min_length INT,
+    IN p_max_length INT,
+    IN p_default_image_path VARCHAR(500),
+    IN p_center_data_grid_fields_json JSON,
+    IN p_is_active TINYINT
+)
+INSERT INTO waitlist_request_types (
+    public_id, request_type, control, flow, requires_text_input, prompt_text,
+    min_length, max_length, default_image_path, center_data_grid_fields_json,
+    is_active, created_utc, updated_utc
+)
+VALUES (
+    UUID(),
+    NULLIF(TRIM(p_request_type), ''),
+    NULLIF(TRIM(p_control), ''),
+    NULLIF(TRIM(COALESCE(p_flow, 'direct-to-confirmation')), ''),
+    COALESCE(p_requires_text_input, 0),
+    NULLIF(TRIM(COALESCE(p_prompt_text, '')), ''),
+    COALESCE(p_min_length, 0),
+    COALESCE(p_max_length, 200),
+    NULLIF(TRIM(COALESCE(p_default_image_path, '')), ''),
+    p_center_data_grid_fields_json,
+    COALESCE(p_is_active, 1),
+    UTC_TIMESTAMP(),
+    UTC_TIMESTAMP()
+);
+
+
+-- Create procedure: sp_waitlist_request_types_update
+-- Engine: MySQL 5.7
+-- Purpose: Update a real (non-mock) request type in waitlist_request_types by id.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_types_update;
+
+CREATE PROCEDURE sp_waitlist_request_types_update(
+    IN p_id BIGINT,
+    IN p_request_type VARCHAR(64),
+    IN p_control VARCHAR(255),
+    IN p_flow VARCHAR(64),
+    IN p_requires_text_input TINYINT,
+    IN p_prompt_text VARCHAR(500),
+    IN p_min_length INT,
+    IN p_max_length INT,
+    IN p_default_image_path VARCHAR(500),
+    IN p_center_data_grid_fields_json JSON,
+    IN p_is_active TINYINT
+)
+UPDATE waitlist_request_types
+SET request_type = NULLIF(TRIM(p_request_type), ''),
+    control = NULLIF(TRIM(p_control), ''),
+    flow = NULLIF(TRIM(COALESCE(p_flow, 'direct-to-confirmation')), ''),
+    requires_text_input = COALESCE(p_requires_text_input, 0),
+    prompt_text = NULLIF(TRIM(COALESCE(p_prompt_text, '')), ''),
+    min_length = COALESCE(p_min_length, 0),
+    max_length = COALESCE(p_max_length, 200),
+    default_image_path = NULLIF(TRIM(COALESCE(p_default_image_path, '')), ''),
+    center_data_grid_fields_json = p_center_data_grid_fields_json,
+    is_active = COALESCE(p_is_active, 1),
+    updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+
+-- Create procedure: sp_waitlist_request_types_delete
+-- Engine: MySQL 5.7
+-- Purpose: Delete a real (non-mock) request type and its subtypes by type id.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_types_delete;
+
+CREATE PROCEDURE sp_waitlist_request_types_delete(IN p_id BIGINT)
+DELETE waitlist_request_subtypes, waitlist_request_types
+FROM waitlist_request_types
+LEFT JOIN waitlist_request_subtypes ON waitlist_request_subtypes.request_type_id = waitlist_request_types.id
+WHERE waitlist_request_types.id = p_id;
+
+
+-- Create procedure: sp_waitlist_request_subtypes_insert
+-- Engine: MySQL 5.7
+-- Purpose: Insert a real (non-mock) request subtype into waitlist_request_subtypes.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_subtypes_insert;
+
+CREATE PROCEDURE sp_waitlist_request_subtypes_insert(
+    IN p_request_type_id BIGINT,
+    IN p_subtype_name VARCHAR(128),
+    IN p_control VARCHAR(255),
+    IN p_flow VARCHAR(64),
+    IN p_requires_text_input TINYINT,
+    IN p_prompt_text VARCHAR(500),
+    IN p_min_length INT,
+    IN p_max_length INT,
+    IN p_default_image_path VARCHAR(500),
+    IN p_center_data_grid_fields_json JSON,
+    IN p_is_active TINYINT
+)
+INSERT INTO waitlist_request_subtypes (
+    public_id, request_type_id, subtype_name, control, flow, requires_text_input, prompt_text,
+    min_length, max_length, default_image_path, center_data_grid_fields_json,
+    is_active, created_utc, updated_utc
+)
+VALUES (
+    UUID(),
+    p_request_type_id,
+    NULLIF(TRIM(p_subtype_name), ''),
+    NULLIF(TRIM(p_control), ''),
+    NULLIF(TRIM(COALESCE(p_flow, 'direct-to-confirmation')), ''),
+    COALESCE(p_requires_text_input, 0),
+    NULLIF(TRIM(COALESCE(p_prompt_text, '')), ''),
+    COALESCE(p_min_length, 0),
+    COALESCE(p_max_length, 200),
+    NULLIF(TRIM(COALESCE(p_default_image_path, '')), ''),
+    p_center_data_grid_fields_json,
+    COALESCE(p_is_active, 1),
+    UTC_TIMESTAMP(),
+    UTC_TIMESTAMP()
+);
+
+
+-- Create procedure: sp_waitlist_request_subtypes_update
+-- Engine: MySQL 5.7
+-- Purpose: Update a real (non-mock) request subtype in waitlist_request_subtypes by id.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_subtypes_update;
+
+CREATE PROCEDURE sp_waitlist_request_subtypes_update(
+    IN p_id BIGINT,
+    IN p_request_type_id BIGINT,
+    IN p_subtype_name VARCHAR(128),
+    IN p_control VARCHAR(255),
+    IN p_flow VARCHAR(64),
+    IN p_requires_text_input TINYINT,
+    IN p_prompt_text VARCHAR(500),
+    IN p_min_length INT,
+    IN p_max_length INT,
+    IN p_default_image_path VARCHAR(500),
+    IN p_center_data_grid_fields_json JSON,
+    IN p_is_active TINYINT
+)
+UPDATE waitlist_request_subtypes
+SET request_type_id = p_request_type_id,
+    subtype_name = NULLIF(TRIM(p_subtype_name), ''),
+    control = NULLIF(TRIM(p_control), ''),
+    flow = NULLIF(TRIM(COALESCE(p_flow, 'direct-to-confirmation')), ''),
+    requires_text_input = COALESCE(p_requires_text_input, 0),
+    prompt_text = NULLIF(TRIM(COALESCE(p_prompt_text, '')), ''),
+    min_length = COALESCE(p_min_length, 0),
+    max_length = COALESCE(p_max_length, 200),
+    default_image_path = NULLIF(TRIM(COALESCE(p_default_image_path, '')), ''),
+    center_data_grid_fields_json = p_center_data_grid_fields_json,
+    is_active = COALESCE(p_is_active, 1),
+    updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+
+-- Create procedure: sp_waitlist_request_subtypes_delete
+-- Engine: MySQL 5.7
+-- Purpose: Delete a real (non-mock) request subtype by id.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_subtypes_delete;
+
+CREATE PROCEDURE sp_waitlist_request_subtypes_delete(IN p_id BIGINT)
+DELETE FROM waitlist_request_subtypes WHERE id = p_id;
+
+
+-- Create procedure: sp_mock_master_table_columns_get
+-- Engine: MySQL 5.7
+-- Purpose: Return the editable-column metadata for a Developer-editable mock master table so the
+--          editor can render an appropriate grid. Column names come from information_schema and are
+--          never interpolated; the table name is validated against the known mock tables first.
+-- NOTE: This SP does NOT cover the real (non-mock) request-type/subtype tables; they have their own
+--       dedicated SPs + real-catalog service.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_mock_master_table_columns_get;
+
+CREATE PROCEDURE sp_mock_master_table_columns_get(IN p_table_name VARCHAR(128))
+SELECT
+    c.COLUMN_NAME AS column_name,
+    c.DATA_TYPE   AS data_type,
+    c.IS_NULLABLE AS is_nullable,
+    CASE WHEN c.COLUMN_NAME IN ('id','public_id','created_utc','updated_utc') THEN 1 ELSE 0 END AS is_audit
+FROM information_schema.COLUMNS c
+JOIN mock_master_tables_registry r
+  ON r.table_name = c.TABLE_NAME
+ AND r.is_active = 1
+WHERE c.TABLE_SCHEMA = DATABASE()
+  AND c.TABLE_NAME = TRIM(p_table_name)
+ORDER BY c.ORDINAL_POSITION;
+
+-- Create procedure: sp_waitlist_request_types_get_all
+-- Engine: MySQL 5.7
+-- Purpose: Return ALL real (non-mock) request-type catalog rows INCLUDING inactive ones, for the
+--          Developer/Admin editor (so an inactive type can be viewed, edited, and re-activated).
+--          The wizard uses sp_waitlist_request_types_get (active only); this is the admin variant.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_types_get_all;
+
+CREATE PROCEDURE sp_waitlist_request_types_get_all()
+SELECT
+    id,
+    public_id,
+    request_type,
+    control,
+    flow,
+    requires_text_input,
+    prompt_text,
+    min_length,
+    max_length,
+    default_image_path,
+    center_data_grid_fields_json,
+    is_active,
+    created_utc,
+    updated_utc
+FROM waitlist_request_types
+ORDER BY id ASC;
+
+-- Create procedure: sp_waitlist_request_subtypes_get_all
+-- Engine: MySQL 5.7
+-- Purpose: Return ALL real (non-mock) request-subtype catalog rows INCLUDING inactive ones, for the
+--          Developer/Admin editor (so an inactive subtype can be viewed, edited, and re-activated).
+--          The wizard uses sp_waitlist_request_subtypes_get (active only); this is the admin variant.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_subtypes_get_all;
+
+CREATE PROCEDURE sp_waitlist_request_subtypes_get_all()
+SELECT
+    id,
+    public_id,
+    request_type_id,
+    subtype_name,
+    control,
+    flow,
+    requires_text_input,
+    prompt_text,
+    min_length,
+    max_length,
+    default_image_path,
+    center_data_grid_fields_json,
+    is_active,
+    created_utc,
+    updated_utc
+FROM waitlist_request_subtypes
+ORDER BY request_type_id ASC, id ASC;

@@ -6,6 +6,7 @@ USE mtm_waitlist;
 DROP PROCEDURE IF EXISTS sp_waitlist_request_insert;
 
 CREATE PROCEDURE sp_waitlist_request_insert(
+    IN p_public_id CHAR(36),
     IN p_building VARCHAR(64),
     IN p_work_center VARCHAR(64),
     IN p_request_type VARCHAR(64),
@@ -20,7 +21,8 @@ CREATE PROCEDURE sp_waitlist_request_insert(
     IN p_target_time_utc DATETIME,
     IN p_is_overdue TINYINT,
     IN p_assigned_material_handler VARCHAR(128),
-    IN p_cancellation_reason VARCHAR(255)
+    IN p_cancellation_reason VARCHAR(255),
+    IN p_note VARCHAR(500)
 )
 INSERT INTO waitlist_requests_queue (
     public_id,
@@ -39,11 +41,12 @@ INSERT INTO waitlist_requests_queue (
     is_overdue,
     assigned_material_handler,
     cancellation_reason,
+    note,
     created_utc,
     updated_utc
 )
 VALUES (
-    UUID(),
+    TRIM(p_public_id),
     TRIM(p_building),
     TRIM(p_work_center),
     TRIM(p_request_type),
@@ -59,6 +62,7 @@ VALUES (
     COALESCE(p_is_overdue, 0),
     NULLIF(TRIM(COALESCE(p_assigned_material_handler, '')) COLLATE utf8mb4_unicode_ci, ''),
     NULLIF(TRIM(COALESCE(p_cancellation_reason, '')) COLLATE utf8mb4_unicode_ci, ''),
+    NULLIF(TRIM(COALESCE(p_note, '')) COLLATE utf8mb4_unicode_ci, ''),
     UTC_TIMESTAMP(),
     UTC_TIMESTAMP()
 );

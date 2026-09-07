@@ -1,8 +1,9 @@
-﻿<Page
+<Page
     x:Class="MTM_Waitlist.Module_Core.Views.ShellPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="using:MTM_Waitlist.Module_Core.Behaviors"
+    xmlns:converters="using:MTM_Waitlist.Module_Settings.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:headerModels="using:MTM_Waitlist.Module_Core.Models"
     xmlns:helpers="using:MTM_Waitlist.Module_Core.Helpers"
@@ -16,6 +17,7 @@
     Loaded="OnLoaded">
 
     <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         <SolidColorBrush x:Key="HeaderStepCurrentBrush" Color="#FFF7630C" />
         <DataTemplate x:Key="HeaderStepPendingTemplate" x:DataType="headerModels:HeaderStep">
             <Grid Width="120">
@@ -245,7 +247,7 @@
             ExpandedModeThresholdWidth="1280"
             OpenPaneLength="260"
             CompactPaneLength="48"
-            Header="{x:Bind ViewModel.HeaderText, Mode=OneWay}"
+            Header="{x:Bind ViewModel}"
             IsBackButtonVisible="Visible"
             IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
             IsSettingsVisible="True"
@@ -282,27 +284,48 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock
                                 Grid.Column="0"
                                 VerticalAlignment="Center"
                                 Style="{ThemeResource BodyLargeStrongTextBlockStyle}"
-                                Text="{Binding}" />
+                                Text="{Binding HeaderText}" />
+                            <StackPanel
+                                Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="6"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding IsMyRequestsVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Style="{ThemeResource BodyTextBlockStyle}"
+                                    Text="{Binding MyRequestsFilterLabel}" />
+                                <ToggleSwitch
+                                    MinWidth="0"
+                                    MinHeight="0"
+                                    VerticalAlignment="Center"
+                                    IsOn="{Binding ShowMyRequestsOnly, Mode=TwoWay}"
+                                    Toggled="MyRequestsToggle_Toggled"
+                                    OffContent=""
+                                    OnContent=""
+                                    AutomationProperties.Name="Show only my requests" />
+                            </StackPanel>
                             <ComboBox
                                 x:Name="FacilitySelectorComboBox"
-                                Grid.Column="1"
+                                Grid.Column="2"
                                 MinWidth="160"
                                 MaxWidth="220"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
-                                ItemsSource="{Binding ViewModel.Buildings, ElementName=RootPage}"
-                                SelectedItem="{Binding ViewModel.SelectedBuilding, ElementName=RootPage, Mode=TwoWay}"
+                                ItemsSource="{Binding Buildings}"
+                                SelectedItem="{Binding SelectedBuilding, Mode=TwoWay}"
                                 shared:TooltipBehavior.ResourceKey="Shell_SelectFacility_Tooltip"
                                 shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Core/Contracts/Services/IBuildingSelectionService.cs|Module_Core/Services/BuildingSelectionService.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
                                 shared:TooltipBehavior.FallbackText="Select the active facility." />
                             <Button
                                 x:Name="CurrentUserButton"
-                                Grid.Column="2"
+                                Grid.Column="3"
                                 Margin="16,0,0,0"
                                 Padding="8"
                                 HorizontalAlignment="Right"
@@ -315,12 +338,12 @@
                                     <Border
                                         Width="32"
                                         Height="32"
-                                        Background="{Binding ViewModel.CurrentUserBadgeBrush, ElementName=RootPage}"
+                                        Background="{Binding CurrentUserBadgeBrush}"
                                         CornerRadius="16">
                                         <FontIcon
                                             FontSize="16"
                                             Foreground="White"
-                                            Glyph="{Binding ViewModel.CurrentUserIconGlyph, ElementName=RootPage}"
+                                            Glyph="{Binding CurrentUserIconGlyph}"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center" />
                                     </Border>
@@ -328,7 +351,7 @@
                                         VerticalAlignment="Center"
                                         MaxWidth="220"
                                         Style="{ThemeResource BodyTextBlockStyle}"
-                                        Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}"
+                                        Text="{Binding CurrentUserDisplayName}"
                                         TextTrimming="CharacterEllipsis"
                                         TextWrapping="NoWrap" />
                                 </StackPanel>
@@ -341,10 +364,10 @@
                             HorizontalScrollMode="Auto"
                             VerticalScrollBarVisibility="Disabled"
                             VerticalScrollMode="Disabled"
-                            Visibility="{Binding ViewModel.IsHeaderProgressVisible, ElementName=RootPage, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Visibility="{Binding IsHeaderProgressVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                             <ItemsControl
                                 ItemTemplateSelector="{StaticResource HeaderStepTemplateSelector}"
-                                ItemsSource="{Binding ViewModel.HeaderSteps, ElementName=RootPage}">
+                                ItemsSource="{Binding HeaderSteps}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Horizontal" Spacing="0" />
@@ -357,7 +380,7 @@
                 </DataTemplate>
             </NavigationView.HeaderTemplate>
             <i:Interaction.Behaviors>
-                <behaviors:NavigationViewHeaderBehavior DefaultHeader="{x:Bind ViewModel.HeaderText, Mode=OneWay}">
+                <behaviors:NavigationViewHeaderBehavior DefaultHeader="{x:Bind ViewModel}">
                     <behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
                         <DataTemplate>
                             <Grid MinHeight="64" Margin="0,0,60,0" RowSpacing="6">
@@ -370,27 +393,48 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
                                         Grid.Column="0"
                                         VerticalAlignment="Center"
                                         Style="{ThemeResource BodyLargeStrongTextBlockStyle}"
-                                        Text="{Binding}" />
+                                        Text="{Binding HeaderText}" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Spacing="6"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding IsMyRequestsVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Style="{ThemeResource BodyTextBlockStyle}"
+                                            Text="{Binding MyRequestsFilterLabel}" />
+                                        <ToggleSwitch
+                                            MinWidth="0"
+                                            MinHeight="0"
+                                            VerticalAlignment="Center"
+                                            IsOn="{Binding ShowMyRequestsOnly, Mode=TwoWay}"
+                                            Toggled="MyRequestsToggle_Toggled"
+                                            OffContent=""
+                                            OnContent=""
+                                            AutomationProperties.Name="Show only my requests" />
+                                    </StackPanel>
                                     <ComboBox
                                         x:Name="FacilitySelectorComboBoxDefault"
-                                        Grid.Column="1"
+                                        Grid.Column="2"
                                         MinWidth="160"
                                         MaxWidth="220"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
-                                        ItemsSource="{Binding ViewModel.Buildings, ElementName=RootPage}"
-                                        SelectedItem="{Binding ViewModel.SelectedBuilding, ElementName=RootPage, Mode=TwoWay}"
+                                        ItemsSource="{Binding Buildings}"
+                                        SelectedItem="{Binding SelectedBuilding, Mode=TwoWay}"
                                         shared:TooltipBehavior.ResourceKey="Shell_SelectFacility_Tooltip"
                                         shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Core/Contracts/Services/IBuildingSelectionService.cs|Module_Core/Services/BuildingSelectionService.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
                                         shared:TooltipBehavior.FallbackText="Select the active facility." />
                                     <Button
                                         x:Name="CurrentUserButtonDefault"
-                                        Grid.Column="2"
+                                        Grid.Column="3"
                                         Margin="16,0,0,0"
                                         Padding="8"
                                         HorizontalAlignment="Right"
@@ -403,12 +447,12 @@
                                             <Border
                                                 Width="32"
                                                 Height="32"
-                                                Background="{Binding ViewModel.CurrentUserBadgeBrush, ElementName=RootPage}"
+                                                Background="{Binding CurrentUserBadgeBrush}"
                                                 CornerRadius="16">
                                                 <FontIcon
                                                     FontSize="16"
                                                     Foreground="White"
-                                                    Glyph="{Binding ViewModel.CurrentUserIconGlyph, ElementName=RootPage}"
+                                                    Glyph="{Binding CurrentUserIconGlyph}"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center" />
                                             </Border>
@@ -416,7 +460,7 @@
                                                 VerticalAlignment="Center"
                                                 MaxWidth="220"
                                                 Style="{ThemeResource BodyTextBlockStyle}"
-                                                Text="{Binding ViewModel.CurrentUserDisplayName, ElementName=RootPage}"
+                                                Text="{Binding CurrentUserDisplayName}"
                                                 TextTrimming="CharacterEllipsis"
                                                 TextWrapping="NoWrap" />
                                         </StackPanel>
@@ -429,10 +473,10 @@
                                     HorizontalScrollMode="Auto"
                                     VerticalScrollBarVisibility="Disabled"
                                     VerticalScrollMode="Disabled"
-                                    Visibility="{Binding ViewModel.IsHeaderProgressVisible, ElementName=RootPage, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    Visibility="{Binding IsHeaderProgressVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <ItemsControl
                                         ItemTemplateSelector="{StaticResource HeaderStepTemplateSelector}"
-                                        ItemsSource="{Binding ViewModel.HeaderSteps, ElementName=RootPage}">
+                                        ItemsSource="{Binding HeaderSteps}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
                                                 <StackPanel Orientation="Horizontal" Spacing="0" />

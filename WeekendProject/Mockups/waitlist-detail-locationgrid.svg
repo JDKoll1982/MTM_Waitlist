@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 760" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Waitlist detail — sortable inventory location grid (Part/Location/Qty)</title>
+  <rect width="1180" height="760" fill="#F3F3F3"/>
+  <rect width="1180" height="40" fill="#FFFFFF"/><text x="20" y="26" font-size="13" font-weight="600" fill="#1B1B1B">Waitlist detail — Inventory locations (sortable grid)</text>
+  <text x="1140" y="26" font-size="11" fill="#8A8A8A" text-anchor="end">waitlist-detail-locationgrid</text>
+  <line x1="0" y1="40" x2="1180" y2="40" stroke="#E2E2E2"/>
+
+  <!-- section card -->
+  <rect x="40" y="64" width="1100" height="560" rx="12" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <text x="64" y="96" font-size="16" font-weight="600" fill="#1B1B1B">Inventory locations</text>
+  <text x="64" y="118" font-size="12" fill="#5E5E5E">On-hand ≥ 1 · each location pools all transactions for that part into ONE pooled on-hand weight (lb) · ignored locations (WC, NCM, V-WC, NCM-VITS, SHIP) hidden · click a header to sort.</text>
+
+  <!-- header row -->
+  <rect x="64" y="136" width="1052" height="40" rx="8" fill="#F0F3F6"/>
+  <text x="84" y="161" font-size="13" font-weight="600" fill="#1B1B1B">Part # ▲</text>
+  <text x="430" y="161" font-size="13" font-weight="600" fill="#1B1B1B">Location</text>
+  <text x="820" y="161" font-size="13" font-weight="600" fill="#1B1B1B">Quantity (lb) ⇅</text>
+
+  <!-- rows (alternating) -->
+  <g font-size="13">
+    <rect x="64" y="176" width="1052" height="46" fill="#FFFFFF"/>
+    <text x="84" y="205" fill="#1B1B1B">MMC0001000</text><text x="430" y="205" fill="#1B1B1B">V-A0-01</text><text x="820" y="205" fill="#1B1B1B">15,000</text>
+    <rect x="64" y="222" width="1052" height="46" fill="#F9FAFB"/>
+    <text x="84" y="251" fill="#1B1B1B">MMC0001000</text><text x="430" y="251" fill="#1B1B1B">V-A0-04</text><text x="820" y="251" fill="#1B1B1B">25,000</text>
+    <rect x="64" y="268" width="1052" height="46" fill="#FFFFFF"/>
+    <text x="84" y="297" fill="#1B1B1B">MMC0001000</text><text x="430" y="297" fill="#1B1B1B">V-B2-10</text><text x="820" y="297" fill="#1B1B1B">6,000</text>
+    <rect x="64" y="314" width="1052" height="46" fill="#F9FAFB"/>
+    <text x="84" y="343" fill="#1B1B1B">MMC0001040</text><text x="430" y="343" fill="#1B1B1B">V-A0-05</text><text x="820" y="343" fill="#1B1B1B">12,500</text>
+  </g>
+
+  <!-- dropped examples -->
+  <rect x="64" y="380" width="1052" height="150" rx="8" fill="#FBF6F6" stroke="#E8C9C5"/>
+  <text x="84" y="404" font-size="12" font-weight="600" fill="#8C3A2F">Not shown in this view</text>
+  <text x="84" y="428" font-size="12" fill="#5E5E5E">• V-A0-00 holds MMC0001000 @ 0.00 → dropped (on-hand &lt; 1)</text>
+  <text x="84" y="452" font-size="12" fill="#5E5E5E">• Locations WC, NCM, V-WC, NCM-VITS, SHIP → hidden (ignored-locations setting)</text>
+  <text x="84" y="476" font-size="12" fill="#5E5E5E">Source: Infor Visual when mock is OFF; sample data when mock is ON.</text>
+
+  <text x="64" y="600" font-size="12" fill="#8A8A8A">Data grid on the Waitlist detail page (file 06) — quantities are pooled on-hand weight (lb) per location, as Infor Visual reports them.</text>
+</svg>

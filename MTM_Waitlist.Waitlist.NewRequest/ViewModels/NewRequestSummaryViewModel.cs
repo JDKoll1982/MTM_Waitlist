@@ -18,6 +18,7 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
 {
     private readonly INavigationService _navigationService;
     private readonly IWaitlistRequestService _requestService;
+    private readonly ICoilAvailabilityService _coilAvailabilityService;
 
     private NewRequestFlowState? _state;
 
@@ -58,6 +59,36 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
     }
 
     [ObservableProperty]
+    public partial bool IsCoilVisible
+    {
+        get; set;
+    }
+
+    [ObservableProperty]
+    public partial string CoilNumber
+    {
+        get; set;
+    } = string.Empty;
+
+    [ObservableProperty]
+    public partial string CoilQuantityOnHand
+    {
+        get; set;
+    } = string.Empty;
+
+    [ObservableProperty]
+    public partial string CoilDescription
+    {
+        get; set;
+    } = string.Empty;
+
+    [ObservableProperty]
+    public partial string CoilAverageWeight
+    {
+        get; set;
+    } = string.Empty;
+
+    [ObservableProperty]
     public partial bool IsSubmitting
     {
         get; set;
@@ -85,10 +116,11 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
 
     partial void OnIsSubmittingChanged(bool value) => OnPropertyChanged(nameof(CanSubmit));
 
-    public NewRequestSummaryViewModel(INavigationService navigationService, IWaitlistRequestService requestService)
+    public NewRequestSummaryViewModel(INavigationService navigationService, IWaitlistRequestService requestService, ICoilAvailabilityService coilAvailabilityService)
     {
         _navigationService = navigationService;
         _requestService = requestService;
+        _coilAvailabilityService = coilAvailabilityService;
     }
 
     public void OnNavigatedTo(object parameter)
@@ -110,6 +142,53 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         IsStatusVisible = false;
         IsStatusError = false;
         StatusMessage = string.Empty;
+
+        ResetCoilDetail();
+        if (IsCoilRequest(state))
+        {
+            _ = LoadCoilAsync();
+        }
+    }
+
+    private static bool IsCoilRequest(NewRequestFlowState state)
+        => state.RequestType is not null && string.Equals(state.RequestType.RequestType, "Coil", StringComparison.OrdinalIgnoreCase);
+
+    private void ResetCoilDetail()
+    {
+        IsCoilVisible = false;
+        CoilNumber = string.Empty;
+        CoilQuantityOnHand = string.Empty;
+        CoilDescription = string.Empty;
+        CoilAverageWeight = string.Empty;
+    }
+
+    private async Task LoadCoilAsync()
+    {
+        if (_state is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var coil = await _coilAvailabilityService.GetCoilForJobAsync(_state.WorkCenter).ConfigureAwait(true);
+            if (!coil.HasCoil || string.IsNullOrWhiteSpace(coil.CoilNumber))
+            {
+                ResetCoilDetail();
+                return;
+            }
+
+            IsCoilVisible = true;
+            CoilNumber = coil.CoilNumber;
+            CoilQuantityOnHand = coil.QuantityOnHand;
+            CoilDescription = coil.Description;
+            CoilAverageWeight = coil.AverageWeight;
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("NewRequestSummary", ex, "Failed to resolve coil details for the confirm screen.");
+            ResetCoilDetail();
+        }
     }
 
     public void OnNavigatedFrom()

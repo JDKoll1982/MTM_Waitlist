@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 360" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Notification toast — new request (packaged app, deep-link)</title>
+  <rect width="1180" height="360" fill="#F3F3F3"/>
+  <rect width="1180" height="40" fill="#FFFFFF"/><text x="20" y="26" font-size="13" font-weight="600" fill="#1B1B1B">Toast — New waitlist request (deep-links to the request)</text>
+  <text x="1140" y="26" font-size="11" fill="#8A8A8A" text-anchor="end">notifications-request-toast</text>
+  <line x1="0" y1="40" x2="1180" y2="40" stroke="#E2E2E2"/>
+
+  <!-- desktop toast card -->
+  <rect x="700" y="80" width="420" height="150" rx="8" fill="#202020"/>
+  <text x="724" y="116" font-size="13" fill="#FFFFFF">MTM Waitlist</text>
+  <text x="724" y="142" font-size="15" font-weight="600" fill="#FFFFFF">New Coil request: COIL-204</text>
+  <text x="724" y="166" font-size="13" fill="#D0D0D0">by D. Vance · Press P-12 · 0:42 left</text>
+  <rect x="1096" y="80" width="24" height="24" fill="none"/>
+  <text x="1090" y="166" font-size="12" fill="#8A8A8A" text-anchor="end">tap opens detail</text>
+
+  <text x="60" y="300" font-size="13" fill="#5E5E5E">Shown only when the per-user "Alert me on new requests" toggle is ON and the app is packaged (RuntimeHelper.IsMSIX).</text>
+  <text x="60" y="324" font-size="13" fill="#5E5E5E">Unpackaged or OFF = no-op fallback. Tapping deep-links via AppNotificationActivationHandler to the request detail.</text>
+</svg>

@@ -178,6 +178,17 @@ public sealed class StartupCoordinator : IStartupCoordinator
             _startupState.CurrentRole = "Developer";
         }
 
+        // Expose the signed-in user's identity so services (Waitlist submit/accept/
+        // complete/release/cancel, analytics) can attribute actions to a person.
+        // Source: core_users_profiles.display_name + employee_identifier carried on the
+        // session snapshot (Subphase 1.1).
+        _startupState.EmployeeName = sessionSnapshot.DisplayName?.Trim() ?? string.Empty;
+        _startupState.EmployeeNumber = sessionSnapshot.EmployeeIdentifier?.Trim() ?? string.Empty;
+
+        StartupDebugLog.Info(
+            "StartupCoordinator",
+            $"Resolved signed-in identity. User='{_startupState.Username}', Role='{_startupState.CurrentRole}', EmployeeNumber='{_startupState.EmployeeNumber}', EmployeeName='{_startupState.EmployeeName}', UserMatched={isUserMatched}.");
+
         var centralizedDestination = await ResolveCentralizedDestinationAsync();
         if (string.IsNullOrWhiteSpace(centralizedDestination))
         {

@@ -87,6 +87,8 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                     IsComputerRegistered = computerRegistered,
                     IsComputerRegistrationAuthoritative = true,
                     CurrentRole = string.Empty,
+                    DisplayName = string.Empty,
+                    EmployeeIdentifier = string.Empty,
                     HasDatabaseSession = false,
                     DatabaseSessionExpiresUtc = null
                 };
@@ -100,6 +102,8 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                 IsComputerRegistered = computerRegistered,
                 IsComputerRegistrationAuthoritative = true,
                 CurrentRole = userRow.CurrentRole,
+                DisplayName = userRow.DisplayName,
+                EmployeeIdentifier = userRow.EmployeeIdentifier,
                 HasDatabaseSession = sessionExpiry.HasValue,
                 DatabaseSessionExpiresUtc = sessionExpiry
             };
@@ -134,7 +138,9 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                        COALESCE(r.role_name, '') AS role_name,
                        u.password_hash,
                        u.password_salt,
-                       u.require_password_change
+                       u.require_password_change,
+                       COALESCE(u.display_name, '') AS display_name,
+                       COALESCE(u.employee_identifier, '') AS employee_identifier
                 FROM core_users_profiles u
                 LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
                 LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
@@ -158,6 +164,8 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
             var passwordHash = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
             var passwordSalt = reader.IsDBNull(3) ? null : (byte[])reader[3];
             var requirePasswordChange = !reader.IsDBNull(4) && reader.GetBoolean(4);
+            var displayName = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
+            var employeeIdentifier = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
 
             if (IsTemporaryDefaultPassword(passwordHash))
             {
@@ -166,7 +174,7 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                     return StartupCredentialCheckResult.Failed();
                 }
 
-                return StartupCredentialCheckResult.Success(userId, currentRole, true);
+                return StartupCredentialCheckResult.Success(userId, currentRole, true, displayName, employeeIdentifier);
             }
 
             if (!VerifyPassword(password, passwordHash, passwordSalt))
@@ -174,7 +182,7 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                 return StartupCredentialCheckResult.Failed();
             }
 
-            return StartupCredentialCheckResult.Success(userId, currentRole, requirePasswordChange);
+            return StartupCredentialCheckResult.Success(userId, currentRole, requirePasswordChange, displayName, employeeIdentifier);
         }, cancellationToken);
     }
 
@@ -249,14 +257,17 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         return count > 0;
     }
 
-    private static async Task<(bool IsUserMatched, long UserId, string CurrentRole)> ReadUserRowAsync(
+    private static async Task<(bool IsUserMatched, long UserId, string CurrentRole, string DisplayName, string EmployeeIdentifier)> ReadUserRowAsync(
         MySqlConnection connection,
         string username,
         CancellationToken cancellationToken)
     {
         await using var command = new MySqlCommand(
             """
-            SELECT u.id, COALESCE(r.role_name, '') AS role_name
+            SELECT u.id,
+                   COALESCE(r.role_name, '') AS role_name,
+                   COALESCE(u.display_name, '') AS display_name,
+                   COALESCE(u.employee_identifier, '') AS employee_identifier
             FROM core_users_profiles u
             LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
             LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
@@ -272,12 +283,14 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken))
         {
-            return (false, 0, string.Empty);
+            return (false, 0, string.Empty, string.Empty, string.Empty);
         }
 
         var userId = reader.GetInt64(0);
         var role = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-        return (true, userId, role);
+        var displayName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+        var employeeIdentifier = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
+        return (true, userId, role, displayName, employeeIdentifier);
     }
 
     private static async Task<DateTimeOffset?> ReadSessionExpiryUtcAsync(

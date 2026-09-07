@@ -20,4 +20,8 @@ public sealed class WaitlistRequest
     public string? CancellationReason { get; init; }
     public DateTimeOffset? CanceledUtc { get; init; }
     public string? CanceledByEmployeeNumber { get; init; }
+    public string? Note { get; init; }
+    public DateTimeOffset? AcceptedUtc { get; init; }
+    public DateTimeOffset? CompletedUtc { get; init; }
+    public DateTimeOffset? ReleasedUtc { get; init; }
 }

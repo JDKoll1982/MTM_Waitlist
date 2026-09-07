@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 300" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Waitlist request card — current base state (Edit/Cancel/Accept unwired)</title>
+  <rect width="1180" height="300" fill="#F3F3F3"/>
+  <text x="20" y="24" font-size="13" font-weight="600" fill="#1B1B1B">Waitlist request card (WaitlistLineCardView) — current, all action squares present but unwired</text>
+  <text x="1140" y="24" font-size="11" fill="#8A8A8A" text-anchor="end">waitlist-card-basestate</text>
+
+  <!-- card -->
+  <rect x="60" y="60" width="1060" height="140" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <rect x="60" y="60" width="6" height="140" fill="#6E839C"/>
+  <!-- image tile with badge -->
+  <rect x="82" y="86" width="86" height="86" rx="10" fill="#EAF0F7"/>
+  <rect x="88" y="90" width="54" height="20" rx="999" fill="#D4E2EF"/><text x="115" y="104" font-size="10" font-weight="700" fill="#2E3B47" text-anchor="middle">COIL</text>
+  <rect x="110" y="120" width="30" height="30" rx="15" fill="#6E839C"/><text x="125" y="140" font-size="16" font-weight="700" fill="#FFF" text-anchor="middle">C</text>
+  <!-- text col -->
+  <text x="190" y="104" font-size="20" font-weight="600" fill="#1B1B1B">COIL-204</text>
+  <text x="190" y="130" font-size="12" fill="#5E5E5E"><tspan font-weight="600">Requested by: </tspan>D. Vance</text>
+  <text x="190" y="150" font-size="12" fill="#5E5E5E"><tspan font-weight="600">Press: </tspan>P-12</text>
+  <text x="190" y="170" font-size="12" fill="#107C10"><tspan font-weight="600">Remaining time: </tspan>0:42</text>
+  <!-- details -->
+  <text x="560" y="104" font-size="12" fill="#1B1B1B"><tspan font-weight="600">Requested coil:</tspan> COIL-204</text>
+  <text x="560" y="126" font-size="12" fill="#1B1B1B"><tspan font-weight="600">Qty in house:</tspan> 46,000 lb</text>
+  <text x="560" y="148" font-size="12" fill="#1B1B1B"><tspan font-weight="600">Avg coil weight:</tspan> 5,000 lb</text>
+  <!-- action squares (right): Edit / Cancel / Accept -->
+  <rect x="1010" y="104" width="40" height="52" rx="9" fill="#0078D4"/><text x="1030" y="139" font-size="20" fill="#FFF" text-anchor="middle">✎</text>
+  <rect x="1055" y="104" width="40" height="52" rx="9" fill="#C42B1C"/><text x="1075" y="139" font-size="18" fill="#FFF" text-anchor="middle">✕</text>
+  <rect x="1100" y="104" width="40" height="52" rx="9" fill="#0F7B0F"/><text x="1120" y="139" font-size="18" fill="#FFF" text-anchor="middle">✓</text>
+  <text x="1030" y="230" font-size="11" fill="#8A8A8A" text-anchor="middle">Edit (blue)</text>
+  <text x="1075" y="230" font-size="11" fill="#8A8A8A" text-anchor="middle">Cancel (red)</text>
+  <text x="1120" y="230" font-size="11" fill="#8A8A8A" text-anchor="middle">Accept (green)</text>
+  <text x="60" y="270" font-size="12" fill="#5E5E5E">Today all three colored squares render on every card with no command (comment: "must be wired before enabled"). Phase-2 makes them role/state-aware (see next mockups).</text>
+</svg>

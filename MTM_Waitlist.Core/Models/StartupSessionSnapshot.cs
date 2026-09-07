@@ -10,6 +10,10 @@ public sealed class StartupSessionSnapshot
 
     public string CurrentRole { get; init; } = string.Empty;
 
+    public string DisplayName { get; init; } = string.Empty;
+
+    public string EmployeeIdentifier { get; init; } = string.Empty;
+
     public bool HasDatabaseSession { get; init; }
 
     public DateTimeOffset? DatabaseSessionExpiresUtc { get; init; }

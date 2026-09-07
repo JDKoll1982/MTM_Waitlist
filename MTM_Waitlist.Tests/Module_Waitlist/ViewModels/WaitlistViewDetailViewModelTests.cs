@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
+using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
@@ -76,6 +77,104 @@ public sealed class WaitlistViewDetailViewModelTests
         viewModel.BackCommand.Execute(null);
 
         Assert.AreEqual(1, navigationService.GoBackCallCount);
+    }
+
+    [TestMethod]
+    public async Task OnNavigatedTo_RealSubmittedCoilRequest_ResolvesNonNullItemAsync()
+    {
+        var requestService = new WaitlistRequestService();
+        var draft = new WaitlistRequestDraft
+        {
+            Building = "Expo Drive",
+            WorkCenter = "100-3",
+            RequestType = "Coil",
+            Subtype = "Pickup Coil",
+            ActiveSetupJobId = "100-3",
+            WorkCenterName = "100-3",
+            RequesterEmployeeNumber = "6229",
+            RequesterEmployeeName = "John Koll",
+        };
+        var submit = await requestService.SubmitAsync(draft, allowDuplicate: false);
+        var requestId = submit.Request!.Id;
+
+        // Empty sample rows => the item must be resolved from the request service.
+        var viewModel = new WaitlistViewDetailViewModel(
+            new RecordingNavigationService(),
+            new StubSampleDataService(),
+            new StubBuildingSelectionService(),
+            requestService: requestService);
+
+        viewModel.OnNavigatedTo(requestId.GetHashCode());
+
+        Assert.IsNotNull(viewModel.Item);
+        Assert.AreEqual(requestId.GetHashCode(), viewModel.Item!.Id);
+        Assert.IsTrue(viewModel.TemplateSections.Any(section => string.Equals(section.Title, "Coil material", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [TestMethod]
+    public async Task OnNavigatedTo_CoilRequest_WorkOrderAndRequestShowsRealRequestValuesAsync()
+    {
+        var requestService = new WaitlistRequestService();
+        var draft = new WaitlistRequestDraft
+        {
+            Building = "Expo Drive",
+            WorkCenter = "100-3",
+            RequestType = "Coil",
+            Subtype = "Pickup Coil",
+            ActiveSetupJobId = "WO-204",
+            WorkCenterName = "100-3",
+            RequesterEmployeeNumber = "6229",
+            RequesterEmployeeName = "John Koll",
+        };
+        var submit = await requestService.SubmitAsync(draft, allowDuplicate: false);
+        var requestId = submit.Request!.Id;
+
+        var viewModel = new WaitlistViewDetailViewModel(
+            new RecordingNavigationService(),
+            new StubSampleDataService(),
+            new StubBuildingSelectionService(),
+            requestService: requestService);
+
+        viewModel.OnNavigatedTo(requestId.GetHashCode());
+
+        var section = viewModel.TemplateSections.First(section =>
+            string.Equals(section.Title, "Work order and request", StringComparison.OrdinalIgnoreCase));
+        Assert.AreEqual("WO-204", SectionField(section, "Work order"), "Work order should come from the request's active job id.");
+        Assert.AreEqual("100-3", SectionField(section, "Work center"));
+        Assert.AreEqual("John Koll", SectionField(section, "Requesting user"));
+        Assert.AreEqual("6229", SectionField(section, "Employee number"), "Employee number should come from the requester.");
+    }
+
+    private static string? SectionField(WaitlistDetailTemplateSection section, string label)
+        => section.Fields.FirstOrDefault(field => string.Equals(field.Label, label, StringComparison.OrdinalIgnoreCase))?.Value;
+
+    [TestMethod]
+    public void OnNavigatedTo_NoItemResolved_SetsFriendlyEmptyStateMessage()
+    {
+        var viewModel = new WaitlistViewDetailViewModel(
+            new RecordingNavigationService(),
+            new StubSampleDataService(),   // empty sample, no request service -> nothing resolves
+            new StubBuildingSelectionService());
+
+        viewModel.OnNavigatedTo(9999);
+
+        Assert.IsNull(viewModel.Item);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(viewModel.EmptyStateMessage));
+    }
+
+    [TestMethod]
+    public void OnNavigatedTo_ItemResolved_ClearsEmptyStateMessage()
+    {
+        var item = new SampleOrder { Id = 7, Title = "Coil Request" };
+        var viewModel = new WaitlistViewDetailViewModel(
+            new RecordingNavigationService(),
+            new StubSampleDataService(item),
+            new StubBuildingSelectionService());
+
+        viewModel.OnNavigatedTo(7);
+
+        Assert.IsNotNull(viewModel.Item);
+        Assert.AreEqual(string.Empty, viewModel.EmptyStateMessage);
     }
 
     private sealed class RecordingNavigationService : INavigationService

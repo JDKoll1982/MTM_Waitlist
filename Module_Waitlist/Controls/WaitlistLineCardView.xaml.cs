@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI;
+using Microsoft.UI.Text;
 using MTM_Waitlist.Module_Waitlist.Models;
 
 namespace MTM_Waitlist.Module_Waitlist.Controls;
@@ -19,6 +20,12 @@ public partial class WaitlistLineCardView : UserControl
         typeof(Brush),
         typeof(WaitlistLineCardView),
         new PropertyMetadata(new SolidColorBrush(Colors.MediumSeaGreen)));
+
+    public static readonly DependencyProperty RemainingTimeFontWeightProperty = DependencyProperty.Register(
+        nameof(RemainingTimeFontWeight),
+        typeof(Windows.UI.Text.FontWeight),
+        typeof(WaitlistLineCardView),
+        new PropertyMetadata(FontWeights.Normal));
 
     public static readonly DependencyProperty AccentBrushProperty = DependencyProperty.Register(
         nameof(AccentBrush),
@@ -67,6 +74,12 @@ public partial class WaitlistLineCardView : UserControl
         set => SetValue(RemainingTimeBrushProperty, value);
     }
 
+    public Windows.UI.Text.FontWeight RemainingTimeFontWeight
+    {
+        get => (Windows.UI.Text.FontWeight)GetValue(RemainingTimeFontWeightProperty);
+        set => SetValue(RemainingTimeFontWeightProperty, value);
+    }
+
     public Brush? AccentBrush
     {
         get => (Brush?)GetValue(AccentBrushProperty);
@@ -108,6 +121,18 @@ public partial class WaitlistLineCardView : UserControl
     private void UpdateRemainingTimeBrush()
     {
         var remainingTimeText = Order?.RemainingTimeText;
+        var isOverdue = Order?.IsOverdue == true
+            || string.Equals(remainingTimeText?.Trim(), "Overdue", System.StringComparison.OrdinalIgnoreCase);
+
+        if (isOverdue)
+        {
+            RemainingTimeBrush = new SolidColorBrush(Colors.IndianRed);
+            RemainingTimeFontWeight = FontWeights.Bold;
+            return;
+        }
+
+        RemainingTimeFontWeight = FontWeights.Normal;
+
         if (string.IsNullOrWhiteSpace(remainingTimeText) || !TimeSpan.TryParse(remainingTimeText, out var parsedRemainingTime))
         {
             RemainingTimeBrush = new SolidColorBrush(Colors.MediumSeaGreen);

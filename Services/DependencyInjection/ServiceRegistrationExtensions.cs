@@ -24,6 +24,7 @@ using MTM_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Shared.ViewModels;
 using MTM_Waitlist.Module_Shared.Views;
 using MTM_Waitlist.Notifications;
+using MTM_Waitlist.Services.MockMode;
 
 namespace MTM_Waitlist.Services.DependencyInjection;
 
@@ -45,6 +46,7 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<ISetupDialogService, SetupDialogService>();
         services.AddSingleton<IWorkCenterImageService, MTM_Waitlist.Module_Settings.Services.ImageLocationService>();
         services.AddSingleton<ILocalSettingsService, MTM_Waitlist.Module_Settings.Services.LocalSettingsService>();
+        services.AddSingleton<IIgnoredLocationsService, MTM_Waitlist.Module_Core.Services.IgnoredLocationsService>();
         services.AddSingleton<IStartupRecoveryService, MTM_Waitlist.Module_Startup.Services.StartupRecoveryService>();
         services.AddSingleton<IStartupRegistrationService, MTM_Waitlist.Module_Startup.Services.StartupRegistrationService>();
         services.AddSingleton<IStartupSessionRepository, MTM_Waitlist.Module_Startup.Services.StartupSessionRepository>();
@@ -96,6 +98,26 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<MySqlHelperServer>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMySqlHelperServer>(
             sp => sp.GetRequiredService<MySqlHelperServer>());
+        services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMockMasterDataService, MTM_Waitlist.Module_Core.Services.MockMasterDataService>();
+        services.AddSingleton<IRequestTypeEditorService, MTM_Waitlist.Module_Core.Services.RequestTypeEditorService>();
+        services.AddSingleton<IExternalConnectionInfoProvider, ExternalConnectionInfoProvider>();
+        services.AddSingleton<IConnectionHealthService, MTM_Waitlist.Module_Core.Services.ConnectionHealthService>();
+        services.AddSingleton<IMockConfigurationService, MTM_Waitlist.Module_Core.Services.MockConfigurationService>();
+        services.AddSingleton<IMockRoutingService, MTM_Waitlist.Module_Core.Services.MockRoutingService>();
+        services.AddSingleton<IMockRoutingCoordinator, MTM_Waitlist.Module_Core.Services.MockRoutingCoordinator>();
+        services.AddSingleton<IMockFallbackDebouncer, MTM_Waitlist.Module_Core.Services.MockFallbackDebouncer>();
+        services.AddSingleton<IMockRoutingRefreshService, MTM_Waitlist.Module_Core.Services.MockRoutingRefreshService>();
+        services.AddSingleton<IMockRoutingMonitorService, MTM_Waitlist.Module_Core.Services.MockRoutingMonitorService>();
+        services.AddSingleton<IMockModePollingHost, MTM_Waitlist.Module_Core.Services.MockModePollingHost>();
+        services.AddSingleton<IPollScheduler, DispatcherPollScheduler>();
+        services.AddSingleton<MockModeToastCoordinator>();
+        services.AddSingleton<IDeveloperEditableCatalogService, MTM_Waitlist.Module_Core.Services.DeveloperEditableCatalogService>();
+        services.AddSingleton<IDeveloperAccessGuard, MTM_Waitlist.Module_Core.Services.DeveloperAccessGuard>();
+        services.AddSingleton<IMockToggleService, MTM_Waitlist.Module_Core.Services.MockToggleService>();
+        services.AddSingleton<INewRequestAlertService, MTM_Waitlist.Module_Core.Services.NewRequestAlertService>();
+        services.AddSingleton<INewRequestAlertNotifier, MTM_Waitlist.Module_Core.Services.NewRequestAlertNotifier>();
+        services.AddSingleton<IUrgencySettingsService, MTM_Waitlist.Module_Core.Services.UrgencySettingsService>();
+        services.AddSingleton<IUrgencyDeadlineService, MTM_Waitlist.Module_Core.Services.UrgencyDeadlineService>();
         services.AddSingleton<IFileService, FileService>();
         services.AddSingleton<IReportPrintService, ReportPrintService>();
 
@@ -103,6 +125,7 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<SplashViewModel>();
         services.AddTransient<LoginViewModel>();
         services.AddTransient<SettingsViewModel>();
+        services.AddTransient<UrgencyAllotmentEditorViewModel>();
         services.AddTransient<LoginWindow>();
         services.AddTransient<LoginPage>();
         services.AddTransient<SettingsPage>();
@@ -146,7 +169,8 @@ public static class ServiceRegistrationExtensions
             provider.GetRequiredService<IBuildingSelectionService>(),
             provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
             provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>(),
-            DispatcherQueue.GetForCurrentThread()));
+            DispatcherQueue.GetForCurrentThread(),
+            provider.GetRequiredService<MTM_Waitlist.Module_Core.Models.StartupState>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();

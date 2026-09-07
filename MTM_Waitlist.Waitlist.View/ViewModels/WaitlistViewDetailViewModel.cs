@@ -1,11 +1,14 @@
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
+using MTM_Waitlist.Module_Waitlist.Services;
 
 namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 
@@ -14,7 +17,10 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     private readonly INavigationService _navigationService;
     private readonly ISampleDataService _sampleDataService;
     private readonly IBuildingSelectionService _buildingSelectionService;
+    private readonly IWaitlistRequestService? _requestService;
+    private readonly IWaitlistInventoryService? _inventoryService;
     private readonly IImageLocationService? _imageLocationService;
+    private readonly IAverageCoilWeightService? _averageCoilWeightService;
     private IDisposable? _imageLocationSubscription;
 
     [ObservableProperty]
@@ -23,13 +29,55 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         get; set;
     }
 
+    [ObservableProperty]
+    public partial string EmptyStateMessage
+    {
+        get; set;
+    } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsEmptyStateVisible
+    {
+        get; set;
+    }
+
+    [ObservableProperty]
+    public partial bool IsItemPresent
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// True when the location grid has no rows to show (no part resolved, service absent, or
+    /// every row was filtered by the on-hand &gt;= 1 / ignored-location rules).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsInventoryEmpty
+    {
+        get; set;
+    } = true;
+
+    public ObservableCollection<InventoryLocationRow> InventoryRows { get; } = new();
+
+    public ICommand? SortInventoryCommand
+    {
+        get;
+        private set;
+    }
+
+    private string? _inventorySortColumn;
+    private bool _inventorySortDescending;
+
     public ObservableCollection<WaitlistDetailTemplateSection> TemplateSections { get; } = new();
 
     public WaitlistViewDetailViewModel(
         INavigationService navigationService,
         ISampleDataService sampleDataService,
         IBuildingSelectionService buildingSelectionService,
-        IImageLocationService? imageLocationService = null)
+        IImageLocationService? imageLocationService = null,
+        IWaitlistRequestService? requestService = null,
+        IWaitlistInventoryService? inventoryService = null,
+        IAverageCoilWeightService? averageCoilWeightService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(sampleDataService);
@@ -39,8 +87,53 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _sampleDataService = sampleDataService;
         _buildingSelectionService = buildingSelectionService;
         _imageLocationService = imageLocationService;
+        _requestService = requestService;
+        _inventoryService = inventoryService;
+        _averageCoilWeightService = averageCoilWeightService;
+        SortInventoryCommand = new RelayCommand<string>(SortInventoryBy);
     }
 
+    /// <summary>
+    /// Re-sorts <see cref="InventoryRows"/> by a column (PartNumber / Quantity / Location).
+    /// Clicking the same column again toggles ascending/descending; default ascending.
+    /// </summary>
+    public void SortInventoryBy(string? column)
+    {
+        var normalized = (column ?? string.Empty).Trim();
+        if (normalized.Length == 0 || InventoryRows.Count == 0)
+        {
+            return;
+        }
+
+        var descending = string.Equals(_inventorySortColumn, normalized, StringComparison.OrdinalIgnoreCase)
+            ? !_inventorySortDescending
+            : false;
+        _inventorySortColumn = normalized;
+        _inventorySortDescending = descending;
+
+        IEnumerable<InventoryLocationRow> sorted = normalized.ToLowerInvariant() switch
+        {
+            "partnumber" => descending
+                ? InventoryRows.OrderByDescending(row => row.PartNumber, StringComparer.OrdinalIgnoreCase).ThenBy(row => row.Location, StringComparer.OrdinalIgnoreCase)
+                : InventoryRows.OrderBy(row => row.PartNumber, StringComparer.OrdinalIgnoreCase).ThenBy(row => row.Location, StringComparer.OrdinalIgnoreCase),
+            "quantity" => descending
+                ? InventoryRows.OrderByDescending(row => row.OnHandQuantity)
+                : InventoryRows.OrderBy(row => row.OnHandQuantity),
+            _ => descending
+                ? InventoryRows.OrderByDescending(row => row.Location, StringComparer.OrdinalIgnoreCase).ThenBy(row => row.PartNumber, StringComparer.OrdinalIgnoreCase)
+                : InventoryRows.OrderBy(row => row.Location, StringComparer.OrdinalIgnoreCase).ThenBy(row => row.PartNumber, StringComparer.OrdinalIgnoreCase),
+        };
+
+        // Materialize BEFORE clearing the source collection (OrderBy is deferred).
+        var materialized = sorted.ToArray();
+        InventoryRows.Clear();
+        foreach (var row in materialized)
+        {
+            InventoryRows.Add(row);
+        }
+
+        StartupDebugLog.Info("WaitlistDetail", $"SortInventoryBy '{normalized}' descending={descending}. Count={InventoryRows.Count}.");
+    }
     public void OnNavigatedTo(object parameter)
     {
         var orderId = parameter switch
@@ -54,7 +147,26 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         {
             var data = _sampleDataService.GetSampleOrders(_buildingSelectionService.SelectedBuilding);
             Item = data.OfType<SampleOrder>().FirstOrDefault(i => i.Id == orderId.Value);
+
+            // A real submitted request is not in the sample rows; resolve it from the request
+            // service (the list surfaces each request as a SampleOrder whose Id is the hash of
+            // the request Guid) so the detail page is not blank for live requests.
+            if (Item is null && _requestService is not null)
+            {
+                var requests = _requestService.GetActiveRequests(_buildingSelectionService.SelectedBuilding);
+                var match = requests.FirstOrDefault(request => request.Id.GetHashCode() == orderId.Value);
+                if (match is not null)
+                {
+                    Item = WaitlistViewViewModel.CreateSessionOrder(match);
+                }
+            }
         }
+
+        EmptyStateMessage = Item is null
+            ? "No waitlist request or coil details are available to show."
+            : string.Empty;
+        IsEmptyStateVisible = Item is null;
+        IsItemPresent = Item is not null;
 
         if (_imageLocationSubscription is null
             && _imageLocationService is not null
@@ -64,6 +176,16 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
 
         LoadTemplateSections();
+        _ = EnrichCoilAverageWeightAsync();
+
+        if (_inventoryService is not null && Item is not null)
+        {
+            var inventoryPart = ResolveInventoryPartNumber(Item);
+            if (!string.IsNullOrWhiteSpace(inventoryPart))
+            {
+                _ = LoadInventoryAsync(inventoryPart);
+            }
+        }
     }
 
     public void OnNavigatedFrom()
@@ -71,6 +193,38 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _imageLocationSubscription?.Dispose();
         _imageLocationSubscription = null;
     }
+
+    /// <summary>
+    /// For a coil request card, replace the baked-in "Average coil weight" with the value pulled
+    /// from <c>mtm_receiving_application.receiving_history</c> (RecvMockData ON = sample, OFF =
+    /// real query) and rebuild the sections so the UI reflects it.
+    /// </summary>
+    private async Task EnrichCoilAverageWeightAsync()
+    {
+        if (_averageCoilWeightService is null || Item is null)
+        {
+            return;
+        }
+
+        // Only coil cards carry an "Average coil weight" field; skip every other request type.
+        var field = Item.Fields.FirstOrDefault(f => string.Equals(f.Label, "Average coil weight", StringComparison.Ordinal));
+        if (field is null)
+        {
+            return;
+        }
+
+        var resolved = await _averageCoilWeightService.ResolveAverageCoilWeightTextAsync(CoilReceivingPartId).ConfigureAwait(true);
+        if (string.IsNullOrWhiteSpace(resolved) || string.Equals(resolved, field.Value, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        field.Value = resolved;
+        LoadTemplateSections();
+    }
+
+    /// <summary>The coil part keyed in the receiving_history seed for the sample coil (MMC0001000).</summary>
+    private const string CoilReceivingPartId = "MMC0001000";
 
     [RelayCommand]
     private void Back()
@@ -112,6 +266,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
     private void LoadCoilSections(SampleOrder item)
     {
+        var request = ResolveRequest(item);
         TemplateSections.Add(CreateTemplateSection(
             "Coil material",
             "Material and inventory information needed to select and stage the requested coil.",
@@ -123,10 +278,10 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         TemplateSections.Add(CreateTemplateSection(
             "Work order and request",
             "Request ownership and work-order context for the coil movement.",
-            ("Work order", "Not available"),
+            ("Work order", WorkOrderText(item, request)),
             ("Work center", FieldValue(item, "Requesting work center", item.RequestedPressName)),
             ("Requesting user", item.RequestedByName),
-            ("Employee number", "Not available")));
+            ("Employee number", EmployeeNumberText(request, item))));
 
         TemplateSections.Add(CreateTemplateSection(
             "Handling",
@@ -258,6 +413,44 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         return item.Fields.FirstOrDefault(field => string.Equals(field.Label, label, StringComparison.OrdinalIgnoreCase))?.Value ?? fallback;
     }
 
+    /// <summary>
+    /// Resolves the underlying <see cref="WaitlistRequest"/> for a live request row (via its
+    /// <see cref="SampleOrder.RequestId"/>), or null for static sample rows / when the service is absent.
+    /// </summary>
+    private WaitlistRequest? ResolveRequest(SampleOrder item)
+    {
+        if (item.RequestId is Guid requestId && _requestService is not null)
+        {
+            return _requestService.GetRequest(requestId);
+        }
+
+        return null;
+    }
+
+    /// <summary>Work-order/job context for the request: a 'Work order' field when present, else the active job id.</summary>
+    private static string WorkOrderText(SampleOrder item, WaitlistRequest? request)
+    {
+        var fieldValue = item.Fields
+            .FirstOrDefault(field => string.Equals(field.Label, "Work order", StringComparison.OrdinalIgnoreCase))
+            ?.Value;
+        if (!string.IsNullOrWhiteSpace(fieldValue) && !string.Equals(fieldValue, "Not available", StringComparison.OrdinalIgnoreCase))
+        {
+            return fieldValue!;
+        }
+
+        var jobId = request?.ActiveSetupJobId;
+        return string.IsNullOrWhiteSpace(jobId) ? "Not available" : jobId!;
+    }
+
+    /// <summary>Requester employee number for the request, or 'Not available' when none is known.</summary>
+    private static string EmployeeNumberText(WaitlistRequest? request, SampleOrder item)
+    {
+        var employeeNumber = request is not null && !string.IsNullOrWhiteSpace(request.RequesterEmployeeNumber)
+            ? request.RequesterEmployeeNumber
+            : item.RequesterEmployeeNumber;
+        return string.IsNullOrWhiteSpace(employeeNumber) ? "Not available" : employeeNumber;
+    }
+
     private static WaitlistDetailTemplateSection CreateTemplateSection(
         string title,
         string summary,
@@ -279,6 +472,55 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
 
         return section;
+    }
+
+    /// <summary>
+    /// Loads the filtered inventory-location rows for a part into <see cref="InventoryRows"/>.
+    /// </summary>
+    public async Task LoadInventoryAsync(string? partNumber, CancellationToken cancellationToken = default)
+    {
+        InventoryRows.Clear();
+        var normalizedPart = (partNumber ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalizedPart) || _inventoryService is null)
+        {
+            IsInventoryEmpty = true;
+            return;
+        }
+
+        var rows = await _inventoryService.GetInventoryLocationRowsAsync(normalizedPart, cancellationToken).ConfigureAwait(false);
+        foreach (var row in rows)
+        {
+            InventoryRows.Add(row);
+        }
+
+        IsInventoryEmpty = InventoryRows.Count == 0;
+        StartupDebugLog.Info("WaitlistDetail", $"LoadInventoryAsync completed. Part='{normalizedPart}', Rows={InventoryRows.Count}.");
+    }
+
+    /// <summary>
+    /// Best-effort part/inventory token for an order: prefers a real Part number/Part field,
+    /// then the coil's "Requested coil" identifier, so the coil detail grid has something to
+    /// query (mock inventory is keyed per part token).
+    /// </summary>
+    public static string? ResolveInventoryPartNumber(SampleOrder? item)
+    {
+        if (item is null)
+        {
+            return null;
+        }
+
+        foreach (var label in new[] { "Part number", "Part", "Requested coil" })
+        {
+            var candidate = FieldValue(item, label).Trim();
+            if (string.IsNullOrWhiteSpace(candidate) || string.Equals(candidate, "Not available", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            return candidate;
+        }
+
+        return null;
     }
 
     private void OnImageLocationChanged(ImageLocationChangedEventArgs args)

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 720" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Settings — Ignored Infor Visual inventory locations (Expander panel)</title>
+  <rect width="1180" height="720" fill="#F3F3F3"/>
+  <rect width="1180" height="40" fill="#FFFFFF"/><text x="20" y="26" font-size="13" font-weight="600" fill="#1B1B1B">Settings — Ignored Infor Visual inventory locations</text>
+  <text x="1140" y="26" font-size="11" fill="#8A8A8A" text-anchor="end">settings-ignoredlocations-panel</text>
+  <line x1="0" y1="40" x2="1180" y2="40" stroke="#E2E2E2"/>
+
+  <!-- search box (SettingsPage has Search settings box on top) -->
+  <rect x="48" y="64" width="1084" height="46" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <text x="70" y="91" font-size="13" fill="#8A8A8A">🔍 Search settings</text>
+
+  <!-- expander header row -->
+  <rect x="48" y="132" width="1084" height="54" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <text x="70" y="166" font-size="20" fill="#1B1B1B">▾</text>
+  <circle cx="120" cy="159" r="14" fill="#EAF3FB"/><text x="120" y="164" font-size="12" fill="#004578" text-anchor="middle">✦</text>
+  <text x="152" y="158" font-size="15" font-weight="600" fill="#1B1B1B">Ignored Infor Visual inventory locations</text>
+  <text x="152" y="178" font-size="12" fill="#5E5E5E">Waitlist · edited by roles above Material Handler</text>
+  <text x="1060" y="166" font-size="13" fill="#5E5E5E" text-anchor="end">5 codes</text>
+
+  <!-- expanded content card -->
+  <rect x="48" y="194" width="1084" height="330" rx="8" fill="#F9FAFB" stroke="#E5E5E5"/>
+  <text x="70" y="224" font-size="13" fill="#5E5E5E">Locations in this list are omitted from location lists and totals app-wide (WC, NCM, V-WC, NCM-VITS are defaults).</text>
+
+  <!-- code rows -->
+  <g font-size="13">
+    <rect x="70" y="242" width="560" height="44" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="90" y="269" fill="#1B1B1B">WC</text><text x="610" y="269" fill="#C42B1C" text-anchor="middle">✕</text>
+    <rect x="70" y="292" width="560" height="44" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="90" y="319" fill="#1B1B1B">NCM</text><text x="610" y="319" fill="#C42B1C" text-anchor="middle">✕</text>
+    <rect x="70" y="342" width="560" height="44" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="90" y="369" fill="#1B1B1B">V-WC</text><text x="610" y="369" fill="#C42B1C" text-anchor="middle">✕</text>
+    <rect x="70" y="392" width="560" height="44" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="90" y="419" fill="#1B1B1B">NCM-VITS</text><text x="610" y="419" fill="#C42B1C" text-anchor="middle">✕</text>
+    <rect x="70" y="442" width="560" height="44" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="90" y="469" fill="#1B1B1B">SHIP</text><text x="610" y="469" fill="#C42B1C" text-anchor="middle">✕</text>
+  </g>
+  <!-- add row -->
+  <rect x="660" y="242" width="300" height="40" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="680" y="266" font-size="13" fill="#8A8A8A">Add a location code…</text>
+  <rect x="974" y="242" width="90" height="40" rx="8" fill="#0078D4"/><text x="1019" y="266" font-size="13" font-weight="600" fill="#FFF" text-anchor="middle">Add</text>
+  <text x="660" y="320" font-size="12" fill="#8A8A8A">Codes are auto-uppercased. Only Material Handler+ roles can edit.</text>
+</svg>

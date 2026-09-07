@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 300" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Waitlist card — requester's own Waiting request (Edit TODO + Cancel)</title>
+  <rect width="1180" height="300" fill="#F3F3F3"/>
+  <text x="20" y="24" font-size="13" font-weight="600" fill="#1B1B1B">Waiting request — the requester (creator) view: Edit (TODO) + Cancel</text>
+  <text x="1140" y="24" font-size="11" fill="#8A8A8A" text-anchor="end">waitlist-card-cancelown</text>
+
+  <rect x="60" y="60" width="1060" height="140" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <rect x="60" y="60" width="6" height="140" fill="#6E839C"/>
+  <rect x="82" y="86" width="86" height="86" rx="10" fill="#EAF0F7"/>
+  <rect x="88" y="90" width="54" height="20" rx="999" fill="#D4E2EF"/><text x="115" y="104" font-size="10" font-weight="700" fill="#2E3B47" text-anchor="middle">COIL</text>
+  <rect x="110" y="120" width="30" height="30" rx="15" fill="#6E839C"/><text x="125" y="140" font-size="16" font-weight="700" fill="#FFF" text-anchor="middle">C</text>
+  <text x="190" y="104" font-size="20" font-weight="600" fill="#1B1B1B">COIL-204</text>
+  <text x="190" y="130" font-size="12" fill="#5E5E5E"><tspan font-weight="600">Requested by: </tspan>D. Vance (you)</text>
+  <text x="190" y="150" font-size="12" fill="#5E5E5E"><tspan font-weight="600">Press: </tspan>P-12</text>
+  <text x="190" y="170" font-size="12" fill="#107C10"><tspan font-weight="600">Remaining time: </tspan>0:42</text>
+  <text x="560" y="104" font-size="12" fill="#1B1B1B"><tspan font-weight="600">Requested coil:</tspan> COIL-204</text>
+  <text x="560" y="126" font-size="12" fill="#1B1B1B"><tspan font-weight="600">Qty in house:</tspan> 18</text>
+  <!-- Edit (blue, TODO) + Cancel (red) -->
+  <rect x="1005" y="104" width="48" height="52" rx="9" fill="#0078D4"/><text x="1029" y="139" font-size="20" fill="#FFF" text-anchor="middle">✎</text>
+  <text x="1029" y="230" font-size="11" fill="#8A8A8A" text-anchor="middle">Edit (TODO)</text>
+  <rect x="1058" y="104" width="48" height="52" rx="9" fill="#C42B1C"/><text x="1082" y="139" font-size="18" fill="#FFF" text-anchor="middle">✕</text>
+  <text x="1082" y="230" font-size="11" fill="#8A8A8A" text-anchor="middle">Cancel</text>
+  <text x="60" y="270" font-size="12" fill="#5E5E5E">Requester may Cancel their own request while Waiting → records Cancelled (persists to DB). Edit stays a TODO. Not shown to others / after accept.</text>
+</svg>

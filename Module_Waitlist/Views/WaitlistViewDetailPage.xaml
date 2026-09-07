@@ -9,21 +9,13 @@
     mc:Ignorable="d">
 
     <Grid x:Name="ContentArea">
-        <Image
-            Margin="0"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            IsHitTestVisible="False"
-            Opacity="0.14"
-            Source="{x:Bind ViewModel.Item.EffectiveWorkCenterImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-            Stretch="UniformToFill" />
-
         <ScrollViewer IsTabStop="True">
             <Grid
                 x:Name="ContentPanel"
                 Padding="24"
                 RowSpacing="16">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -40,6 +32,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -58,12 +51,38 @@
                             MaxHeight="110"
                             Padding="12"
                             Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
-                            CornerRadius="12">
+                            CornerRadius="12"
+                            Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Image
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
+                                AutomationProperties.Name="View larger request type image"
                                 Source="{x:Bind ViewModel.Item.EffectiveImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-                                Stretch="Uniform" />
+                                Stretch="Uniform"
+                                Tapped="OpenImageViewer_Tapped" />
+                        </Border>
+
+                        <!-- The active work center / press image, shown like the request-type image
+                             on the right of the same hero card (click to enlarge). -->
+                        <Border
+                            Grid.Column="3"
+                            Grid.RowSpan="5"
+                            MinWidth="110"
+                            MinHeight="110"
+                            MaxWidth="150"
+                            MaxHeight="150"
+                            Padding="12"
+                            VerticalAlignment="Center"
+                            Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                            CornerRadius="12"
+                            Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Image
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="View larger work center image"
+                                Source="{x:Bind ViewModel.Item.EffectiveWorkCenterImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                Stretch="Uniform"
+                                Tapped="OpenImageViewer_Tapped" />
                         </Border>
 
                         <TextBlock
@@ -193,7 +212,128 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
+                <Border
+                    Grid.Row="3"
+                    Margin="0,0,0,16"
+                    Padding="18"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Visibility="{x:Bind ViewModel.IsInventoryEmpty, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}">
+                    <StackPanel Spacing="8">
+                        <TextBlock
+                            Style="{ThemeResource SubtitleTextBlockStyle}"
+                            Text="Inventory by Location" />
+
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Button
+                                Grid.Column="0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Left"
+                                Command="{x:Bind ViewModel.SortInventoryCommand}"
+                                CommandParameter="PartNumber"
+                                Style="{ThemeResource DefaultButtonStyle}"
+                                FontWeight="SemiBold"
+                                Content="Part #" />
+                            <Button
+                                Grid.Column="1"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Left"
+                                Command="{x:Bind ViewModel.SortInventoryCommand}"
+                                CommandParameter="Location"
+                                Style="{ThemeResource DefaultButtonStyle}"
+                                FontWeight="SemiBold"
+                                Content="Location" />
+                            <Button
+                                Grid.Column="2"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Left"
+                                Command="{x:Bind ViewModel.SortInventoryCommand}"
+                                CommandParameter="Quantity"
+                                Style="{ThemeResource DefaultButtonStyle}"
+                                FontWeight="SemiBold"
+                                Content="Quantity (lb)" />
+                        </Grid>
+
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.InventoryRows, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid
+                                        Padding="4,2"
+                                        ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Text="{Binding PartNumber}" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Text="{Binding Location}" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            Text="{Binding OnHandQuantity}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel
+                    Grid.RowSpan="3"
+                    Padding="24"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="12"
+                    Visibility="{x:Bind ViewModel.IsEmptyStateVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        Style="{ThemeResource TitleTextBlockStyle}"
+                        Text="Nothing to show"
+                        TextWrapping="WrapWholeWords" />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.EmptyStateMessage, Mode=OneWay}"
+                        TextAlignment="Center"
+                        TextWrapping="WrapWholeWords" />
+                </StackPanel>
             </Grid>
         </ScrollViewer>
+
+        <!-- Enlarged-image viewer (lightbox). Clicking either hero image opens it with the
+             full-size image; the X (top right) or tapping the scrim closes it. -->
+        <Grid
+            x:Name="ImageViewerOverlay"
+            Background="#CC000000"
+            Visibility="Collapsed"
+            Tapped="ImageViewerScrim_Tapped">
+            <Button
+                Margin="16"
+                Padding="10"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                AutomationProperties.Name="Close image viewer"
+                Click="ImageViewerClose_Click"
+                FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                Content="&#xE711;" />
+            <Image
+                x:Name="ImageViewerImage"
+                Margin="64"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsHitTestVisible="False"
+                Stretch="Uniform" />
+        </Grid>
     </Grid>
 </Page>

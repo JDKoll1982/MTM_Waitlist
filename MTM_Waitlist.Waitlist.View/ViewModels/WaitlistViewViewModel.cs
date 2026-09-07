@@ -9,6 +9,7 @@ using Microsoft.UI.Dispatching;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
@@ -21,8 +22,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly ISampleDataService _sampleDataService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService _waitlistRequestService;
     private readonly IImageLocationService? _imageLocationService;
+    private readonly MTM_Waitlist.Module_Waitlist.Services.IAverageCoilWeightService? _averageCoilWeightService;
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly DispatcherQueue? _dispatcherQueue;
+    private readonly string _currentRequesterEmployeeNumber;
     private IDisposable? _imageLocationSubscription;
     private long _refreshVersion;
     private bool _isSubscribed;
@@ -33,6 +36,19 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     [ObservableProperty]
     public partial bool IsWaitlistEmpty { get; private set; } = true;
 
+    /// <summary>
+    /// When true, the list is narrowed to the signed-in user's own submitted requests
+    /// (the "My Requests" quick view). Toggling reloads the current building's list.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowMyRequestsOnly { get; set; }
+
+    partial void OnShowMyRequestsOnlyChanged(bool value)
+    {
+        StartupDebugLog.Info("Waitlist", $"My-Requests filter {(value ? "enabled" : "disabled")} for requester '{_currentRequesterEmployeeNumber}'.");
+        _ = LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+    }
+
     public string SelectedBuilding => _buildingSelectionService.SelectedBuilding;
 
     public WaitlistViewViewModel(
@@ -41,7 +57,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IBuildingSelectionService buildingSelectionService,
         MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService waitlistRequestService,
         IImageLocationService? imageLocationService = null,
-        DispatcherQueue? dispatcherQueue = null)
+        DispatcherQueue? dispatcherQueue = null,
+        StartupState? startupState = null,
+        MTM_Waitlist.Module_Waitlist.Services.IAverageCoilWeightService? averageCoilWeightService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(sampleDataService);
@@ -54,9 +72,31 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _waitlistRequestService = waitlistRequestService;
         _imageLocationService = imageLocationService;
         _dispatcherQueue = dispatcherQueue;
+        _currentRequesterEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
+        _averageCoilWeightService = averageCoilWeightService;
 
         Source.CollectionChanged += OnSourceCollectionChanged;
         IsWaitlistEmpty = Source.Count == 0;
+    }
+
+    private async Task EnrichCoilAverageWeightAsync(SampleOrder order)
+    {
+        if (_averageCoilWeightService is null || order is null)
+        {
+            return;
+        }
+
+        var field = order.Fields.FirstOrDefault(f => string.Equals(f.Label, "Average coil weight", StringComparison.Ordinal));
+        if (field is null)
+        {
+            return;
+        }
+
+        var resolved = await _averageCoilWeightService.ResolveAverageCoilWeightTextAsync("MMC0001000").ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(resolved))
+        {
+            field.Value = resolved;
+        }
     }
 
     public async void OnNavigatedTo(object parameter)
@@ -141,6 +181,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             return;
         }
 
+        await _waitlistRequestService.RefreshFromDatabaseAsync(building).ConfigureAwait(false);
         var activeRequests = _waitlistRequestService.GetActiveRequests(building);
         var activeRequestCount = activeRequests.Count;
         var workCenterImageLookup = await BuildWorkCenterImageLookupAsync(cancellationToken: default).ConfigureAwait(false);
@@ -148,6 +189,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         {
             var sessionOrder = CreateSessionOrder(request);
             await ApplyResolvedImagesAsync(sessionOrder, request, workCenterImageLookup).ConfigureAwait(false);
+            await EnrichCoilAverageWeightAsync(sessionOrder).ConfigureAwait(false);
             newItems.Add(sessionOrder);
         }
 
@@ -156,8 +198,14 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             return;
         }
 
+        // "My Requests": keep only the signed-in user's own submitted request rows.
+        if (ShowMyRequestsOnly)
+        {
+            newItems = newItems.Where(order => IsRequesterOrder(order, _currentRequesterEmployeeNumber)).ToList();
+        }
+
         await ApplySourceUpdateAsync(newItems, refreshVersion);
-        StartupDebugLog.Info("Waitlist", $"Loaded building '{building}'. SampleRows={sampleCount}, SessionRequests={activeRequestCount}, TotalRows={Source.Count}, SearchQuery='{SearchQuery}'.");
+        StartupDebugLog.Info("Waitlist", $"Loaded building '{building}'. SampleRows={sampleCount}, SessionRequests={activeRequestCount}, TotalRows={Source.Count}, MyRequestsOnly={ShowMyRequestsOnly}, SearchQuery='{SearchQuery}'.");
         UpdateSearchSuggestions(SearchQuery);
     }
 
@@ -217,11 +265,14 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         var item = new SampleOrder
         {
             Id = request.Id.GetHashCode(),
-            Title = string.IsNullOrWhiteSpace(request.Subtype) ? request.RequestType : $"{request.RequestType} / {request.Subtype}",
+            RequestId = request.Id,
+            RequesterEmployeeNumber = request.RequesterEmployeeNumber,
+            Title = WaitlistRequestTitles.For(request.RequestType, request.Subtype),
             Status = request.Status,
-            RequestedByName = "Current user",
+            RequestedByName = string.IsNullOrWhiteSpace(request.RequesterEmployeeName) ? "Current user" : request.RequesterEmployeeName,
             RequestedPressName = request.WorkCenter,
             RemainingTimeText = GetRemainingTimeText(request.TargetTimeUtc, request.IsOverdue),
+            WaitingForText = GetWaitingForText(request.RequestedUtc),
             ImagePath = ResolveImagePath(request.RequestType, request.Subtype),
             IsOverdue = request.IsOverdue,
             RequestTypeStableId = requestTypeId,
@@ -247,6 +298,37 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         {
             item.Fields.Add(new WaitlistField { Label = string.Empty, Value = string.Empty });
         }
+    }
+
+    /// <summary>
+    /// Human-friendly waiting-age for a request, e.g. "Waiting 35m" / "Waiting 1h 20m" / "Waiting 2d",
+    /// so leads can prioritize the oldest requests first.
+    /// </summary>
+    public static string GetWaitingForText(DateTimeOffset requestedUtc, DateTimeOffset? referenceUtc = null)
+    {
+        var reference = referenceUtc ?? DateTimeOffset.UtcNow;
+        var elapsed = reference - requestedUtc;
+        if (elapsed < TimeSpan.Zero)
+        {
+            elapsed = TimeSpan.Zero;
+        }
+
+        if (elapsed.TotalMinutes < 1)
+        {
+            return "Waiting < 1m";
+        }
+
+        if (elapsed.TotalHours < 1)
+        {
+            return $"Waiting {(int)elapsed.TotalMinutes}m";
+        }
+
+        if (elapsed.TotalDays < 1)
+        {
+            return $"Waiting {(int)elapsed.TotalHours}h {(int)(elapsed.TotalMinutes % 60)}m";
+        }
+
+        return $"Waiting {(int)elapsed.TotalDays}d";
     }
 
     private static string GetRemainingTimeText(DateTimeOffset? targetTimeUtc, bool isOverdue)
@@ -431,10 +513,17 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
         if (requestType == "coil")
         {
-            item.Fields.Add(new WaitlistField { Label = "Requested coil", Value = normalizedSubtype.Contains("wrong") ? "Wrong coil" : (string.IsNullOrWhiteSpace(subtype) ? "Not provided" : subtype) });
-            item.Fields.Add(new WaitlistField { Label = "Quantity in house", Value = "Not provided" });
-            item.Fields.Add(new WaitlistField { Label = "Coil description", Value = details });
-            item.Fields.Add(new WaitlistField { Label = "Average coil weight", Value = "Not provided" });
+            // A "Wrong Coil" request is reporting the current coil is incorrect, so keep that
+            // signal on the "Requested coil" field. The coil subtype is an ACTION (e.g. Bring,
+            // Pickup), never the coil identifier, so otherwise always show the actual coil on
+            // the job (sample/mock value until the live Infor Visual coil lookup is wired)
+            // instead of the subtype or the old "Not provided" placeholders.
+            var wrongCoil = normalizedSubtype.Contains("wrong");
+            var coilNumber = wrongCoil ? "Wrong coil" : "COIL-204";
+            item.Fields.Add(new WaitlistField { Label = "Requested coil", Value = coilNumber });
+            item.Fields.Add(new WaitlistField { Label = "Quantity in house", Value = "46,000 lb" });
+            item.Fields.Add(new WaitlistField { Label = "Coil description", Value = wrongCoil ? details : "0.060 x 48 in galvanized coil" });
+            item.Fields.Add(new WaitlistField { Label = "Average coil weight", Value = "5,000 lb" });
             item.Fields.Add(new WaitlistField { Label = "Requesting work center", Value = request.WorkCenter });
             return;
         }
@@ -480,9 +569,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             {
                 item.Fields.Add(new WaitlistField { Label = "Subtype", Value = subtype });
                 item.Fields.Add(new WaitlistField { Label = "Requested coil", Value = "COIL-204" });
-                item.Fields.Add(new WaitlistField { Label = "Quantity in house", Value = "18 coils" });
+                item.Fields.Add(new WaitlistField { Label = "Quantity in house", Value = "46,000 lb" });
                 item.Fields.Add(new WaitlistField { Label = "Coil description", Value = "0.060 x 48 in galvanized coil" });
-                item.Fields.Add(new WaitlistField { Label = "Average coil weight", Value = "1,240 lb" });
+                item.Fields.Add(new WaitlistField { Label = "Average coil weight", Value = "5,000 lb" });
                 item.Fields.Add(new WaitlistField { Label = "Requesting work center", Value = request.WorkCenter });
                 return;
             }
@@ -546,6 +635,48 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         item.Fields.Add(new WaitlistField { Label = "Subtype", Value = string.IsNullOrWhiteSpace(subtype) ? "Not provided" : subtype });
         item.Fields.Add(new WaitlistField { Label = "Work center", Value = request.WorkCenter });
         item.Fields.Add(new WaitlistField { Label = "Request ID", Value = request.Id.ToString("N") });
+    }
+
+    /// <summary>
+    /// Whether a row was submitted by the given requester (compares the underlying request's
+    /// employee number; static sample rows carry no requester number and are not "mine").
+    /// </summary>
+    public static bool IsRequesterOrder(SampleOrder order, string employeeNumber)
+    {
+        if (order is null)
+        {
+            return false;
+        }
+
+        var normalizedRequester = (employeeNumber ?? string.Empty).Trim();
+        return !string.IsNullOrWhiteSpace(normalizedRequester)
+            && string.Equals(order.RequesterEmployeeNumber, normalizedRequester, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Whether a requester-visible Cancel affordance should be shown: the row maps to a real
+    /// request that is still Waiting (Pending). The service still authoritatively gates on the
+    /// actual creator identity and state when the action is invoked.
+    /// </summary>
+    public static bool CanRequesterCancel(SampleOrder order)
+    {
+        return order is not null
+            && order.RequestId.HasValue
+            && string.Equals(order.Status, "Pending", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Narrows a set of rows to those submitted by the given requester (used by the "My
+    /// Requests" quick view). Static sample rows carry no requester identity and are excluded.
+    /// </summary>
+    public static IReadOnlyList<SampleOrder> FilterToMyRequests(IEnumerable<SampleOrder> source, string requesterEmployeeNumber)
+    {
+        if (source is null)
+        {
+            return Array.Empty<SampleOrder>();
+        }
+
+        return source.Where(order => IsRequesterOrder(order, requesterEmployeeNumber)).ToArray();
     }
 
     public Task RefreshAsync() => LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 720" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Admin — Cancelled requests monitor</title>
+  <rect width="1180" height="720" fill="#F3F3F3"/>
+  <rect width="1180" height="40" fill="#FFFFFF"/><text x="20" y="26" font-size="13" font-weight="600" fill="#1B1B1B">Admin — Cancelled requests monitor (Developer/admin)</text>
+  <text x="1140" y="26" font-size="11" fill="#8A8A8A" text-anchor="end">admin-cancellations-monitor</text>
+  <line x1="0" y1="40" x2="1180" y2="40" stroke="#E2E2E2"/>
+
+  <text x="40" y="92" font-size="24" font-weight="600" fill="#1B1B1B">Cancelled requests</text>
+  <text x="40" y="116" font-size="13" fill="#5E5E5E">Retained cancellations (requester cancels). Distinct from the Plant Manager analytics screen.</text>
+  <rect x="980" y="66" width="120" height="34" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="1040" y="88" font-size="13" fill="#1B1B1B" text-anchor="middle">Last 30 days ▾</text>
+
+  <!-- sortable table -->
+  <rect x="40" y="140" width="1100" height="40" rx="8" fill="#F0F3F6"/>
+  <text x="60" y="165" font-size="12" font-weight="600" fill="#1B1B1B">Cancelled on</text>
+  <text x="250" y="165" font-size="12" font-weight="600" fill="#1B1B1B">Request</text>
+  <text x="430" y="165" font-size="12" font-weight="600" fill="#1B1B1B">Type / subtype</text>
+  <text x="660" y="165" font-size="12" font-weight="600" fill="#1B1B1B">Cancelled by</text>
+  <text x="880" y="165" font-size="12" font-weight="600" fill="#1B1B1B">Reason</text>
+
+  <g font-size="13">
+    <rect x="40" y="180" width="1100" height="46" fill="#FFFFFF"/><text x="60" y="207" fill="#1B1B1B">09/04 08:12</text><text x="250" y="207" fill="#1B1B1B">COIL-204</text><text x="430" y="207" fill="#1B1B1B">Coil · Bring</text><text x="660" y="207" fill="#1B1B1B">D. Vance</text><text x="880" y="207" fill="#5E5E5E">job no longer needed</text>
+    <rect x="40" y="226" width="1100" height="46" fill="#F9FAFB"/><text x="60" y="253" fill="#1B1B1B">09/03 14:40</text><text x="250" y="253" fill="#1B1B1B">FG-10042</text><text x="430" y="253" fill="#1B1B1B">Pickup · Pickup FG</text><text x="660" y="253" fill="#1B1B1B">A. Reyes</text><text x="880" y="253" fill="#5E5E5E">wrong part number</text>
+    <rect x="40" y="272" width="1100" height="46" fill="#FFFFFF"/><text x="60" y="299" fill="#1B1B1B">09/02 11:05</text><text x="250" y="299" fill="#1B1B1B">SC-901</text><text x="430" y="299" fill="#1B1B1B">Scrap</text><text x="660" y="299" fill="#1B1B1B">K. Osei</text><text x="880" y="299" fill="#5E5E5E">duplicate request</text>
+  </g>
+  <text x="60" y="360" font-size="12" fill="#8A8A8A">Cancelled rows are never purged so admin/analytics can report on them.</text>
+</svg>

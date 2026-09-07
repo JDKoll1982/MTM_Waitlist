@@ -101,6 +101,25 @@ public partial class ShellViewModel : ObservableRecipient
         get; set;
     }
 
+    /// <summary>True while the Waitlist (list) page is the active view, so the header's My Requests filter is shown.</summary>
+    [ObservableProperty]
+    public partial bool IsMyRequestsVisible
+    {
+        get; set;
+    }
+
+    /// <summary>Header My Requests filter state (kept in sync with the active Waitlist view model).</summary>
+    [ObservableProperty]
+    public partial bool ShowMyRequestsOnly
+    {
+        get; set;
+    }
+
+    /// <summary>Label text reflecting the current filter: "My Requests" when filtering, else "All Requests".</summary>
+    public string MyRequestsFilterLabel => ShowMyRequestsOnly ? "My Requests" : "All Requests";
+
+    partial void OnShowMyRequestsOnlyChanged(bool value) => OnPropertyChanged(nameof(MyRequestsFilterLabel));
+
     /// <summary>
     /// Ordered steps shown in the shell header stepper while a multi-step
     /// workflow (Work Center Setup or New Request) is active.
@@ -206,6 +225,7 @@ public partial class ShellViewModel : ObservableRecipient
     {
         _currentPageType = e.SourcePageType;
         IsBackEnabled = NavigationService.CanGoBack;
+        IsMyRequestsVisible = e.SourcePageType == typeof(WaitlistViewPage);
 
         if (e.SourcePageType == typeof(WaitlistViewDetailPage))
         {

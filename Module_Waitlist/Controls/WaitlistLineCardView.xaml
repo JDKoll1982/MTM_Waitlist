@@ -14,32 +14,35 @@
         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
         BorderThickness="1"
         CornerRadius="10">
-        <Grid RowSpacing="6" ColumnSpacing="10">
+        <Grid RowSpacing="8" ColumnSpacing="10">
             <Grid.RowDefinitions>
-                <RowDefinition MinHeight="96" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="6" />
                 <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" MinWidth="140" MaxWidth="260" />
-                    <ColumnDefinition Width="2*" MinWidth="180" />
+                <ColumnDefinition Width="*" MinWidth="180" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
+            <!-- Accent bar spans the full card height on the far left -->
             <Border
                 Grid.Row="0"
+                Grid.RowSpan="2"
                 Grid.Column="0"
                 Background="{Binding AccentBrush, ElementName=Root}"
                 CornerRadius="6" />
 
+            <!-- Type/subtype image + badge (fixed square, not stretched) -->
             <Border
                 Grid.Row="0"
+                Grid.RowSpan="2"
                 Grid.Column="1"
-                MinWidth="72"
-                MinHeight="72"
-                MaxWidth="96"
-                MaxHeight="96"
+                Width="96"
+                Height="96"
                 Padding="7"
+                VerticalAlignment="Center"
                 Background="{Binding AccentSurfaceBrush, ElementName=Root}"
                 CornerRadius="10">
                 <Grid>
@@ -63,98 +66,145 @@
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Top" Spacing="4">
-                <TextBlock
-                    FontSize="20"
-                    MaxLines="2"
-                    Style="{ThemeResource BodyStrongTextBlockStyle}"
-                    Text="{Binding Order.Title, ElementName=Root}"
-                    TextTrimming="CharacterEllipsis"
-                    TextWrapping="WrapWholeWords" />
-                <TextBlock
-                    FontSize="12"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    TextTrimming="CharacterEllipsis"
-                    TextWrapping="NoWrap">
-                    <Run FontWeight="SemiBold" Text="Requested by: " />
-                    <Run Text="{Binding Order.RequestedByName, ElementName=Root}" />
-                </TextBlock>
-                <TextBlock
-                    FontSize="12"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    TextTrimming="CharacterEllipsis"
-                    TextWrapping="NoWrap">
-                    <Run FontWeight="SemiBold" Text="Press: " />
-                    <Run Text="{Binding Order.RequestedPressName, ElementName=Root}" />
-                </TextBlock>
-                <TextBlock
-                    FontSize="12"
-                    Foreground="{Binding RemainingTimeBrush, ElementName=Root}"
-                    TextTrimming="CharacterEllipsis"
-                    TextWrapping="NoWrap">
-                    <Run FontWeight="SemiBold" Text="Remaining time: " />
-                    <Run Text="{Binding Order.RemainingTimeText, ElementName=Root}" />
-                </TextBlock>
-            </StackPanel>
-
-            <StackPanel
+            <!-- Title on its own row, above the content -->
+            <TextBlock
                 Grid.Row="0"
-                    Grid.Column="4"
-                Orientation="Horizontal"
-                Spacing="5"
-                VerticalAlignment="Center">
-                <Button
-                    MinWidth="40"
-                    MinHeight="40"
-                    MaxWidth="48"
-                    MaxHeight="48"
-                    AutomationProperties.Name="Edit"
-                    Background="{ThemeResource SystemAccentColor}"
-                    CornerRadius="9">
-                    <FontIcon
-                        FontSize="18"
-                        Foreground="White"
-                        Glyph="&#xE70F;" />
-                </Button>
-                <Button
-                    MinWidth="40"
-                    MinHeight="40"
-                    MaxWidth="48"
-                    MaxHeight="48"
-                    AutomationProperties.Name="Cancel"
-                    Background="{ThemeResource SystemFillColorCriticalBrush}"
-                    CornerRadius="9">
-                    <FontIcon
-                        FontSize="18"
-                        Foreground="White"
-                        Glyph="&#xE10A;" />
-                </Button>
-                <Button
-                    MinWidth="40"
-                    MinHeight="40"
-                    MaxWidth="48"
-                    MaxHeight="48"
-                    AutomationProperties.Name="Accept"
-                    Background="{ThemeResource SystemFillColorSuccessBrush}"
-                    CornerRadius="9">
-                    <FontIcon
-                        FontSize="18"
-                        Foreground="White"
-                        Glyph="&#xE10B;" />
-                </Button>
-            </StackPanel>
+                Grid.Column="2"
+                FontSize="20"
+                MaxLines="2"
+                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                Text="{Binding Order.Title, ElementName=Root}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="WrapWholeWords" />
 
-            <ScrollViewer
+            <!-- Row 1 content: metadata (left) + details (right) -->
+            <Grid
+                Grid.Row="1"
+                Grid.Column="2"
+                ColumnSpacing="24"
+                RowSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- 4 metadata rows (label/value aligned) -->
+                <Grid ColumnSpacing="10" RowSpacing="4" VerticalAlignment="Top">
+                    <Grid.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontSize" Value="14" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock FontWeight="SemiBold" Text="Requested by" />
+                    <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.RequestedByName, ElementName=Root}" TextTrimming="CharacterEllipsis" />
+
+                    <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Press" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.RequestedPressName, ElementName=Root}" TextTrimming="CharacterEllipsis" />
+
+                    <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Remaining time" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="{Binding RemainingTimeFontWeight, ElementName=Root}" Foreground="{Binding RemainingTimeBrush, ElementName=Root}" Text="{Binding Order.RemainingTimeText, ElementName=Root}" TextTrimming="CharacterEllipsis" />
+
+                    <TextBlock Grid.Row="3" FontWeight="SemiBold" Text="Waiting" Visibility="{Binding Order.HasWaitingFor, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.WaitingForText, ElementName=Root}" TextTrimming="CharacterEllipsis" Visibility="{Binding Order.HasWaitingFor, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </Grid>
+
+                <!-- Type-specific detail fields -->
+                <ScrollViewer
+                    Grid.Column="1"
+                    Margin="0,0,4,0"
+                    HorizontalScrollBarVisibility="Disabled"
+                    HorizontalScrollMode="Disabled"
+                    VerticalScrollBarVisibility="Auto"
+                    VerticalScrollMode="Auto">
+                    <ContentPresenter
+                        Content="{Binding DetailsContent, ElementName=Root}"
+                        HorizontalContentAlignment="Stretch" />
+                </ScrollViewer>
+            </Grid>
+
+            <!-- Action buttons (vertically centered) + compact status pill below spanning button width -->
+            <Grid
+                Grid.Row="0"
+                Grid.RowSpan="2"
                 Grid.Column="3"
-                Margin="0,0,4,0"
-                HorizontalScrollBarVisibility="Disabled"
-                HorizontalScrollMode="Disabled"
-                VerticalScrollBarVisibility="Auto"
-                VerticalScrollMode="Auto">
-                <ContentPresenter
-                    Content="{Binding DetailsContent, ElementName=Root}"
-                    HorizontalContentAlignment="Stretch" />
-            </ScrollViewer>
+                Width="150">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel
+                    Grid.Row="0"
+                    Orientation="Horizontal"
+                    Spacing="6"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                    <Button
+                        MinWidth="44"
+                        MinHeight="44"
+                        AutomationProperties.Name="Edit"
+                        Background="{ThemeResource SystemAccentColor}"
+                        CornerRadius="9">
+                        <FontIcon
+                            FontSize="18"
+                            Foreground="White"
+                            Glyph="&#xE70F;" />
+                    </Button>
+                    <Button
+                        MinWidth="44"
+                        MinHeight="44"
+                        AutomationProperties.Name="Cancel"
+                        Background="{ThemeResource SystemFillColorCriticalBrush}"
+                        CornerRadius="9">
+                        <FontIcon
+                            FontSize="18"
+                            Foreground="White"
+                            Glyph="&#xE10A;" />
+                    </Button>
+                    <Button
+                        MinWidth="44"
+                        MinHeight="44"
+                        AutomationProperties.Name="Accept"
+                        Background="{ThemeResource SystemFillColorSuccessBrush}"
+                        CornerRadius="9">
+                        <FontIcon
+                            FontSize="18"
+                            Foreground="White"
+                            Glyph="&#xE10B;" />
+                    </Button>
+                </StackPanel>
+
+                <!-- Status pill: compact height, spans the 3 combined buttons' width -->
+                <Border
+                    Grid.Row="1"
+                    Height="36"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom"
+                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                    CornerRadius="12"
+                    Margin="0,8,0,0"
+                    Visibility="{Binding Order.HasStatusBadge, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock
+                        FontSize="13"
+                        FontWeight="SemiBold"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                        Text="{Binding Order.StatusBadgeText, ElementName=Root}" />
+                </Border>
+            </Grid>
         </Grid>
     </Border>
 </UserControl>

@@ -93,6 +93,71 @@
                 </StackPanel>
             </Border>
 
+            <Border
+                Style="{StaticResource SetupSectionCardStyle}"
+                Visibility="{x:Bind ViewModel.IsCoilVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Spacing="10">
+                    <TextBlock Style="{StaticResource RequestDialogTitleStyle}" Text="Coil details" />
+                    <Grid ColumnSpacing="16" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Style="{StaticResource RequestDialogFieldLabelStyle}"
+                            Text="Requested coil" />
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Style="{StaticResource RequestDialogFieldValueStyle}"
+                            Text="{x:Bind ViewModel.CoilNumber, Mode=OneWay}" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Style="{StaticResource RequestDialogFieldLabelStyle}"
+                            Text="Quantity in house" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Style="{StaticResource RequestDialogFieldValueStyle}"
+                            Text="{x:Bind ViewModel.CoilQuantityOnHand, Mode=OneWay}" />
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Style="{StaticResource RequestDialogFieldLabelStyle}"
+                            Text="Coil description" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Style="{StaticResource RequestDialogFieldValueStyle}"
+                            Text="{x:Bind ViewModel.CoilDescription, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords" />
+
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Style="{StaticResource RequestDialogFieldLabelStyle}"
+                            Text="Average coil weight" />
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Style="{StaticResource RequestDialogFieldValueStyle}"
+                            Text="{x:Bind ViewModel.CoilAverageWeight, Mode=OneWay}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <Border Style="{StaticResource SetupSectionCardStyle}">
                 <StackPanel Spacing="6">
                     <TextBlock Style="{StaticResource RequestDialogTitleStyle}" Text="Queue &amp; wait time" />

@@ -9,14 +9,24 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Services;
 using Windows.ApplicationModel;
 
 namespace MTM_Waitlist.Module_Settings.ViewModels;
 
 public partial class SettingsViewModel : ObservableRecipient
 {
-    private const string RecvMockDataSettingKey = "Feature.RecvMockData";
-    private const string InforVisualMockDataSettingKey = "Feature.InforVisualMockData";
+    private static readonly string[] AllowedIgnoredLocationManageRoles =
+    {
+        "Admin",
+        "Developer",
+        "Plant Manager",
+        "Production",
+        "Production Lead",
+        "Setup",
+        "Setup Lead",
+    };
+
     private static readonly string[] AllowedHotWorkCenterManageRoles =
     {
         "Admin",
@@ -36,9 +46,21 @@ public partial class SettingsViewModel : ObservableRecipient
     private readonly ILocalSettingsService _localSettingsService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IDunnageTypeVisibilityCatalogService _dunnageTypeVisibilityCatalogService;
+    private readonly IMockToggleService _mockToggleService;
+    private readonly INewRequestAlertService _newRequestAlertService;
     private readonly StartupState _startupState;
 
+    // Suppresses the OnUseMockDataChanged side effect while the initial value is loaded in the constructor,
+    // so opening the page does not log a misleading "changed" or re-persist both keys.
+    private bool _mockToggleInitializing = true;
+
+    // Suppresses the OnNewRequestAlertsEnabledChanged side effect while the initial value is loaded in the
+    // constructor, so opening the page does not log a misleading "changed" or re-persist.
+    private bool _newRequestAlertInitializing = true;
+
     public ComputerManagementViewModel ComputerManagement { get; }
+
+    public UrgencyAllotmentEditorViewModel UrgencyAllotments { get; }
 
     [ObservableProperty]
     public partial ElementTheme ElementTheme
@@ -53,13 +75,13 @@ public partial class SettingsViewModel : ObservableRecipient
     }
 
     [ObservableProperty]
-    public partial bool UseRecvMockData
+    public partial bool UseMockData
     {
         get; set;
     }
 
     [ObservableProperty]
-    public partial bool UseInforVisualMockData
+    public partial bool NewRequestAlertsEnabled
     {
         get; set;
     }
@@ -100,6 +122,18 @@ public partial class SettingsViewModel : ObservableRecipient
         get; set;
     } = string.Empty;
 
+    [ObservableProperty]
+    public partial string IgnoredLocationInput
+    {
+        get; set;
+    } = string.Empty;
+
+    [ObservableProperty]
+    public partial string IgnoredLocationsStatusMessage
+    {
+        get; set;
+    } = string.Empty;
+
     public ObservableCollection<ComputerOption> AvailableWorkstations { get; } = new();
 
     public ObservableCollection<string> HotWorkCenters { get; } = new();
@@ -110,6 +144,8 @@ public partial class SettingsViewModel : ObservableRecipient
 
     public ObservableCollection<DunnageTypeVisibilityOption> HiddenDunnageTypes { get; } = new();
 
+    public ObservableCollection<string> IgnoredLocations { get; } = new();
+
     public bool CanManageHotWorkCenters => AllowedHotWorkCenterManageRoles.Any(role =>
         string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
 
@@ -118,9 +154,27 @@ public partial class SettingsViewModel : ObservableRecipient
 
     public bool CanManageDunnageTypeVisibility => CanManageHotWorkCenters;
 
+    public bool CanManageIgnoredLocations => AllowedIgnoredLocationManageRoles.Any(role =>
+        string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+
     public bool IsAppearancePanelVisible => MatchesSearch("appearance", "app theme", "light", "dark", "default", SelectedThemeText);
 
     public bool IsMockDataPanelVisible => MatchesSearch("mock data", "infor visual", "receiving", "mysql", "sample data");
+
+    public bool IsNewRequestAlertsPanelVisible => MatchesSearch(
+        "alert",
+        "notification",
+        "notify",
+        "new request",
+        "waitlist");
+
+    public bool IsUrgencyAllotmentsPanelVisible => MatchesSearch(
+        "urgency",
+        "max allotted",
+        "allotted",
+        "deadline",
+        "overdue",
+        "remaining time");
 
     public bool IsHotWorkCentersPanelVisible => MatchesSearch(
         "Local Work Centers",
@@ -137,6 +191,14 @@ public partial class SettingsViewModel : ObservableRecipient
         "hidden",
         string.Join(" ", VisibleDunnageTypes.Select(item => item.Name)),
         string.Join(" ", HiddenDunnageTypes.Select(item => item.Name)));
+
+    public bool IsIgnoredLocationsPanelVisible => MatchesSearch(
+        "ignored",
+        "inventory location",
+        "location",
+        "infor visual",
+        "quantity in house",
+        string.Join(" ", IgnoredLocations));
 
     public bool IsAboutPanelVisible => MatchesSearch("about", "version", "privacy", VersionDescription, "mtm waitlist");
 
@@ -161,7 +223,7 @@ public partial class SettingsViewModel : ObservableRecipient
         "display name",
         string.Join(" ", ComputerManagement.Computers.Select(record => record.GetDisplayLabel())));
 
-    public bool IsOperationsCategoryVisible => IsMockDataPanelVisible || IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsComputersPanelVisible;
+    public bool IsOperationsCategoryVisible => IsMockDataPanelVisible || IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
@@ -178,21 +240,37 @@ public partial class SettingsViewModel : ObservableRecipient
         ILocalSettingsService localSettingsService,
         IWorkCenterCatalogService workCenterCatalogService,
         IDunnageTypeVisibilityCatalogService dunnageTypeVisibilityCatalogService,
+        IMockToggleService mockToggleService,
+        INewRequestAlertService newRequestAlertService,
         StartupState startupState,
-        ComputerManagementViewModel computerManagement)
+        ComputerManagementViewModel computerManagement,
+        UrgencyAllotmentEditorViewModel urgencyAllotments)
     {
         StartupDebugLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
         _localSettingsService = localSettingsService;
         _workCenterCatalogService = workCenterCatalogService;
         _dunnageTypeVisibilityCatalogService = dunnageTypeVisibilityCatalogService;
+        _mockToggleService = mockToggleService;
+        _newRequestAlertService = newRequestAlertService;
         _startupState = startupState;
         ComputerManagement = computerManagement;
+        UrgencyAllotments = urgencyAllotments;
 
         ElementTheme = _themeSelectorService.Theme;
         VersionDescription = GetVersionDescription();
-        UseRecvMockData = _localSettingsService.ReadSettingAsync<bool?>(RecvMockDataSettingKey).GetAwaiter().GetResult() ?? false;
-        UseInforVisualMockData = _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey).GetAwaiter().GetResult() ?? false;
+        var effective = _mockToggleService.GetEffectiveAsync().GetAwaiter().GetResult();
+        UseMockData = effective;
+        _mockToggleInitializing = false;
+        _ = _mockToggleService.SetAsync(effective); // keep both keys equal (mirror = master)
+
+        // Per-user new-request alert toggle, default OFF when never set.
+        _newRequestAlertInitializing = true;
+        NewRequestAlertsEnabled = _newRequestAlertService.GetEnabledAsync().GetAwaiter().GetResult();
+        _newRequestAlertInitializing = false;
+
+        _ = UrgencyAllotments.LoadAsync();
+        InitializeIgnoredLocations();
 
         SwitchThemeCommand = new RelayCommand<ElementTheme>(
             async (param) =>
@@ -207,7 +285,7 @@ public partial class SettingsViewModel : ObservableRecipient
         _ = InitializeHotWorkCentersAsync();
         _ = InitializeDunnageTypeVisibilityAsync();
         RefreshSearchVisibility();
-        StartupDebugLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}', RecvMockData={UseRecvMockData}, InforVisualMockData={UseInforVisualMockData}.");
+        StartupDebugLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}', MockData={UseMockData}.");
     }
 
     // FIX: This partial method is automatically invoked by the MVVM Toolkit source generator 
@@ -219,17 +297,27 @@ public partial class SettingsViewModel : ObservableRecipient
         RefreshSearchVisibility();
     }
 
-    partial void OnUseRecvMockDataChanged(bool value)
+    partial void OnUseMockDataChanged(bool value)
     {
-        StartupDebugLog.Info("SettingsViewModel", $"UseRecvMockData changed to {value}.");
-        _ = _localSettingsService.SaveSettingAsync(RecvMockDataSettingKey, value);
+        if (_mockToggleInitializing)
+        {
+            return; // initial load; do not log/persist as if the user changed it
+        }
+
+        StartupDebugLog.Info("SettingsViewModel", $"UseMockData changed to {value}.");
+        _ = _mockToggleService.SetAsync(value);
         RefreshSearchVisibility();
     }
 
-    partial void OnUseInforVisualMockDataChanged(bool value)
+    partial void OnNewRequestAlertsEnabledChanged(bool value)
     {
-        StartupDebugLog.Info("SettingsViewModel", $"UseInforVisualMockData changed to {value}.");
-        _ = _localSettingsService.SaveSettingAsync(InforVisualMockDataSettingKey, value);
+        if (_newRequestAlertInitializing)
+        {
+            return; // initial load; do not log/persist as if the user changed it
+        }
+
+        StartupDebugLog.Info("SettingsViewModel", $"NewRequestAlertsEnabled changed to {value}.");
+        _ = _newRequestAlertService.SetEnabledAsync(value);
         RefreshSearchVisibility();
     }
 
@@ -579,12 +667,129 @@ public partial class SettingsViewModel : ObservableRecipient
             !string.IsNullOrWhiteSpace(value) && value.Contains(query, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// Uppercases and trims a raw location code entry; returns an empty string when invalid.
+    /// </summary>
+    public static string NormalizeLocationCode(string? locationCode)
+    {
+        var normalized = (locationCode ?? string.Empty).Trim().ToUpperInvariant();
+        return IsValidLocationCode(normalized) ? normalized : string.Empty;
+    }
+
+    /// <summary>
+    /// Validates a location code against a simple code pattern (uppercase letters/digits with
+    /// optional inner hyphens, e.g. WC, NCM, V-WC, NCM-VITS, SHIP).
+    /// </summary>
+    public static bool IsValidLocationCode(string? locationCode)
+    {
+        var value = (locationCode ?? string.Empty).Trim();
+        if (value.Length < 1 || value.Length > 32)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < value.Length; i++)
+        {
+            var c = value[i];
+            var isAlphanumeric = (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+            var isInnerHyphen = c == '-' && i > 0 && i < value.Length - 1;
+            if (!isAlphanumeric && !isInnerHyphen)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void InitializeIgnoredLocations()
+    {
+        var stored = _localSettingsService.ReadSettingAsync<List<string>?>(IgnoredLocationDefaults.SettingKey).GetAwaiter().GetResult();
+        var seed = stored is { Count: > 0 }
+            ? stored
+            : IgnoredLocationDefaults.Locations;
+
+        ReplaceCollectionValues(IgnoredLocations, seed);
+        IgnoredLocationsStatusMessage = string.Empty;
+        StartupDebugLog.Info("SettingsIgnoredLocations", $"InitializeIgnoredLocations completed. StoredCount={(stored is null ? 0 : stored.Count)}, ActiveCount={IgnoredLocations.Count}.");
+    }
+
+    [RelayCommand]
+    private async Task AddIgnoredLocationAsync()
+    {
+        if (!CanManageIgnoredLocations)
+        {
+            return;
+        }
+
+        var code = NormalizeLocationCode(IgnoredLocationInput);
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            IgnoredLocationsStatusMessage = "Enter a valid location code (letters, digits, hyphens).";
+            return;
+        }
+
+        if (IgnoredLocations.Any(value => string.Equals(value, code, StringComparison.OrdinalIgnoreCase)))
+        {
+            IgnoredLocationsStatusMessage = $"{code} is already ignored.";
+            IgnoredLocationInput = string.Empty;
+            return;
+        }
+
+        StartupDebugLog.Info("SettingsIgnoredLocations", $"AddIgnoredLocationAsync adding '{code}'.");
+        IgnoredLocations.Add(code);
+        SortCollection(IgnoredLocations);
+        IgnoredLocationInput = string.Empty;
+        IgnoredLocationsStatusMessage = string.Empty;
+        RefreshSearchVisibility();
+        await SaveIgnoredLocationsAsync().ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private async Task RemoveIgnoredLocationAsync(string? locationCode)
+    {
+        if (!CanManageIgnoredLocations)
+        {
+            return;
+        }
+
+        var code = (locationCode ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return;
+        }
+
+        var updated = IgnoredLocations
+            .Where(value => !string.Equals(value, code, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        ReplaceCollectionValues(IgnoredLocations, updated);
+        IgnoredLocationsStatusMessage = string.Empty;
+        RefreshSearchVisibility();
+        StartupDebugLog.Info("SettingsIgnoredLocations", $"RemoveIgnoredLocationAsync removed '{code}'. Remaining={IgnoredLocations.Count}.");
+        await SaveIgnoredLocationsAsync().ConfigureAwait(true);
+    }
+
+    private async Task SaveIgnoredLocationsAsync()
+    {
+        try
+        {
+            await _localSettingsService.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, IgnoredLocations.ToList()).ConfigureAwait(true);
+            StartupDebugLog.Info("SettingsIgnoredLocations", $"SaveIgnoredLocationsAsync saved {IgnoredLocations.Count} location(s).");
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("SettingsIgnoredLocations", ex, "SaveIgnoredLocationsAsync failed.");
+            IgnoredLocationsStatusMessage = $"Unable to save ignored locations: {ex.Message}";
+        }
+    }
+
     private void RefreshSearchVisibility()
     {
         OnPropertyChanged(nameof(IsAppearancePanelVisible));
         OnPropertyChanged(nameof(IsMockDataPanelVisible));
         OnPropertyChanged(nameof(IsHotWorkCentersPanelVisible));
         OnPropertyChanged(nameof(IsDunnageTypeVisibilityPanelVisible));
+        OnPropertyChanged(nameof(IsIgnoredLocationsPanelVisible));
         OnPropertyChanged(nameof(IsAboutPanelVisible));
         OnPropertyChanged(nameof(IsComputersPanelVisible));
         OnPropertyChanged(nameof(IsAppearanceCategoryVisible));

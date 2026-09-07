@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 420" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Waitlist cards — status chip &amp; remaining-time color states</title>
+  <rect width="1180" height="420" fill="#F3F3F3"/>
+  <text x="20" y="24" font-size="13" font-weight="600" fill="#1B1B1B">Request cards — status chip (top-right) and Remaining-time color states</text>
+  <text x="1140" y="24" font-size="11" fill="#8A8A8A" text-anchor="end">waitlist-card-statuses</text>
+  <text x="20" y="52" font-size="12" fill="#5E5E5E">Proposed status chip sits in the card header (top-right) so the existing badge (type) on the image tile stays. Remaining time uses RemainingTimeBrush.</text>
+
+  <!-- legend -->
+  <g font-size="12">
+    <rect x="20" y="66" width="1140" height="34" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/>
+    <text x="40" y="88" fill="#1B1B1B">Status chips:</text>
+    <rect x="150" y="74" width="66" height="18" rx="9" fill="#EAF3FB"/><text x="183" y="87" fill="#004578" text-anchor="middle">Waiting</text>
+    <rect x="228" y="74" width="86" height="18" rx="9" fill="#FFF4CE"/><text x="271" y="87" fill="#7A5C00" text-anchor="middle">In Progress</text>
+    <rect x="326" y="74" width="56" height="18" rx="9" fill="#E6F4EA"/><text x="354" y="87" fill="#0E5A18" text-anchor="middle">Done</text>
+    <rect x="394" y="74" width="80" height="18" rx="9" fill="#F0F0F0"/><text x="434" y="87" fill="#5E5E5E" text-anchor="middle">Cancelled</text>
+    <text x="500" y="88" fill="#5E5E5E">Remaining: green ok · amber near due · red overdue</text>
+  </g>
+
+  <!-- Card: Done (green ok) -->
+  <rect x="60" y="118" width="1060" height="120" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <rect x="60" y="118" width="6" height="120" fill="#6E839C"/>
+  <rect x="82" y="136" width="66" height="66" rx="9" fill="#EAF0F7"/><rect x="90" y="140" width="44" height="18" rx="999" fill="#D4E2EF"/><text x="112" y="153" font-size="9" font-weight="700" fill="#2E3B47" text-anchor="middle">FG</text>
+  <text x="168" y="158" font-size="17" font-weight="600" fill="#1B1B1B">FG-10042</text>
+  <text x="168" y="180" font-size="11" fill="#5E5E5E">by A. Reyes · Press P-07</text>
+  <rect x="1030" y="126" width="66" height="20" rx="10" fill="#E6F4EA"/><text x="1063" y="140" font-size="11" fill="#0E5A18" text-anchor="middle">Done</text>
+  <text x="168" y="206" font-size="12" fill="#107C10"><tspan font-weight="600">Remaining:</tspan> 1:12</text>
+  <text x="700" y="196" font-size="11" fill="#8A8A8A">Qty 12 · Completed 09:14</text>
+
+  <!-- Card: In Progress near due (amber) -->
+  <rect x="60" y="250" width="1060" height="120" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <rect x="60" y="250" width="6" height="120" fill="#C19C00"/>
+  <rect x="82" y="268" width="66" height="66" rx="9" fill="#EAF0F7"/><rect x="90" y="272" width="52" height="18" rx="999" fill="#D4E2EF"/><text x="116" y="285" font-size="9" font-weight="700" fill="#2E3B47" text-anchor="middle">COIL</text>
+  <text x="168" y="290" font-size="17" font-weight="600" fill="#1B1B1B">COIL-204</text>
+  <text x="168" y="312" font-size="11" fill="#5E5E5E">by D. Vance · Press P-12</text>
+  <rect x="990" y="258" width="106" height="20" rx="10" fill="#FFF4CE"/><text x="1043" y="272" font-size="11" fill="#7A5C00" text-anchor="middle">In Progress</text>
+  <text x="168" y="338" font-size="12" fill="#C19C00"><tspan font-weight="600">Remaining:</tspan> 0:06</text>
+  <text x="700" y="328" font-size="11" fill="#8A8A8A">assigned M. Lewis</text>
+</svg>

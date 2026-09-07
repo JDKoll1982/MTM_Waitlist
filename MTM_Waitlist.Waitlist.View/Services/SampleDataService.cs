@@ -96,9 +96,9 @@ public sealed class SampleDataService : ISampleDataService
         {
             case "coil.png":
                 item.Fields.Add(new WaitlistField { Label = "Requested coil", Value = "COIL-204" });
-                item.Fields.Add(new WaitlistField { Label = "Quantity in house", Value = "18 coils" });
-                item.Fields.Add(new WaitlistField { Label = "Coil description", Value = "0.060 x 48 in galvanized coil" });
-                item.Fields.Add(new WaitlistField { Label = "Average coil weight", Value = "1,240 lb" });
+            item.Fields.Add(new WaitlistField { Label = "Quantity in house", Value = "46,000 lb" });
+            item.Fields.Add(new WaitlistField { Label = "Coil description", Value = "0.060 x 48 in galvanized coil" });
+            item.Fields.Add(new WaitlistField { Label = "Average coil weight", Value = "5,000 lb" });
                 item.Fields.Add(new WaitlistField { Label = "Requesting work center", Value = item.RequestedPressName });
                 break;
             case "pickup_fg.png":

@@ -1,6 +1,8 @@
 using CommunityToolkit.WinUI.UI.Animations;
 
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -39,5 +41,26 @@ public sealed partial class WaitlistViewDetailPage : Page
                 navigationService.SetListDataItemForNextConnectedAnimation(ViewModel.Item);
             }
         }
+    }
+
+    private void OpenImageViewer_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (sender is Image image && image.Source is not null)
+        {
+            ImageViewerImage.Source = image.Source;
+            ImageViewerOverlay.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void ImageViewerClose_Click(object sender, RoutedEventArgs e)
+    {
+        ImageViewerOverlay.Visibility = Visibility.Collapsed;
+        ImageViewerImage.Source = null;
+    }
+
+    private void ImageViewerScrim_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        ImageViewerOverlay.Visibility = Visibility.Collapsed;
+        ImageViewerImage.Source = null;
     }
 }

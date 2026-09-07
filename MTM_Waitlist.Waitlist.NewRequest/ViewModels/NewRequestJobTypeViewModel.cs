@@ -19,6 +19,7 @@ public partial class NewRequestJobTypeViewModel : ObservableRecipient, INavigati
 {
     private readonly INavigationService _navigationService;
     private readonly INewRequestFlowService _flowService;
+    private readonly ICoilAvailabilityService _coilAvailabilityService;
 
     private NewRequestFlowState? _state;
     private IReadOnlyList<NewRequestTypeDefinition> _loadedRequestTypes = Array.Empty<NewRequestTypeDefinition>();
@@ -41,12 +42,25 @@ public partial class NewRequestJobTypeViewModel : ObservableRecipient, INavigati
         get; set;
     }
 
+    [ObservableProperty]
+    public partial bool IsCoilBannerVisible
+    {
+        get; set;
+    }
+
+    [ObservableProperty]
+    public partial string CoilBannerText
+    {
+        get; set;
+    } = string.Empty;
+
     public ObservableCollection<NewRequestOptionItem> JobTypes { get; } = new();
 
-    public NewRequestJobTypeViewModel(INavigationService navigationService, INewRequestFlowService flowService)
+    public NewRequestJobTypeViewModel(INavigationService navigationService, INewRequestFlowService flowService, ICoilAvailabilityService coilAvailabilityService)
     {
         _navigationService = navigationService;
         _flowService = flowService;
+        _coilAvailabilityService = coilAvailabilityService;
     }
 
     public async void OnNavigatedTo(object parameter)
@@ -72,9 +86,23 @@ public partial class NewRequestJobTypeViewModel : ObservableRecipient, INavigati
         IsLoadFailed = false;
         try
         {
+            var workCenter = _state?.WorkCenter?.Trim() ?? string.Empty;
+            var coil = await _coilAvailabilityService.GetCoilForJobAsync(workCenter).ConfigureAwait(true);
+            StartupDebugLog.Info("NewRequestJobType", $"Coil availability for work center '{workCenter}': HasCoil={coil.HasCoil}.");
+
+            // Up-front coil readout: show the coil on the job (or a clear 'none') before the
+            // worker chooses a request type. Hide the banner when we have no meaningful state
+            // (e.g. live source not wired -> HasCoil true with no coil number).
+            var showCoil = coil.HasCoil && !string.IsNullOrWhiteSpace(coil.CoilNumber);
+            var showNoCoil = !coil.HasCoil;
+            IsCoilBannerVisible = showCoil || showNoCoil;
+            CoilBannerText = showCoil
+                ? $"Current coil {coil.CoilNumber} - {coil.Description} - {coil.QuantityOnHand} on hand - {coil.AverageWeight}"
+                : showNoCoil ? $"No coil is loaded on this job." : string.Empty;
+
             var requestTypes = NewRequestFlowRules.ApplyActiveJobEligibility(
                 await _flowService.LoadRequestTypesAsync().ConfigureAwait(true),
-                hasCoilData: true,
+                hasCoilData: coil.HasCoil,
                 hasFlatstockData: true,
                 hasPartData: true,
                 hasWorkOrderData: true);

@@ -11,6 +11,8 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IAppModuleClock, MTM_Waitlist.Module_Core.Services.AppModuleClock>();
         services.AddSingleton<WaitlistModuleService>();
         services.AddSingleton<IWaitlistRequestService, WaitlistRequestService>();
+        services.AddSingleton<IWaitlistInventoryService, WaitlistInventoryService>();
+        services.AddSingleton<IAverageCoilWeightService, AverageCoilWeightService>();
         return services;
     }
 }

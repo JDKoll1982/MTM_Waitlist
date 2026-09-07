@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 760" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Waitlist list — My Requests filter/section</title>
+  <rect width="1180" height="760" fill="#F3F3F3"/>
+  <rect width="1180" height="40" fill="#FFFFFF"/><text x="20" y="26" font-size="13" font-weight="600" fill="#1B1B1B">Waitlist — "My Requests" filter</text>
+  <text x="1140" y="26" font-size="11" fill="#8A8A8A" text-anchor="end">waitlist-list-myrequests</text>
+  <line x1="0" y1="40" x2="1180" y2="40" stroke="#E2E2E2"/>
+
+  <!-- list header with filter toggle (VM-driven; existing page has no chrome bar) -->
+  <text x="40" y="92" font-size="24" font-weight="600" fill="#1B1B1B">Waitlist</text>
+  <rect x="900" y="70" width="90" height="30" rx="15" fill="#EAF3FB"/><text x="945" y="90" font-size="13" fill="#004578" text-anchor="middle">All</text>
+  <rect x="998" y="70" width="122" height="30" rx="15" fill="#0078D4"/><text x="1059" y="90" font-size="13" font-weight="600" fill="#FFF" text-anchor="middle">My Requests</text>
+
+  <!-- my request cards (reuse card anatomy, compact) -->
+  <g font-family="Segoe UI Variable, Segoe UI">
+    <rect x="40" y="118" width="1100" height="120" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+    <rect x="40" y="118" width="6" height="120" fill="#6E839C"/>
+    <rect x="62" y="140" width="64" height="64" rx="9" fill="#EAF0F7"/><rect x="70" y="144" width="44" height="18" rx="999" fill="#D4E2EF"/><text x="92" y="157" font-size="9" font-weight="700" fill="#2E3B47" text-anchor="middle">COIL</text>
+    <text x="150" y="158" font-size="17" font-weight="600" fill="#1B1B1B">COIL-204</text>
+    <text x="150" y="182" font-size="11" fill="#5E5E5E">by D. Vance (you) · Press P-12</text>
+    <text x="150" y="210" font-size="12" fill="#107C10"><tspan font-weight="600">Remaining:</tspan> 0:42</text>
+    <rect x="1020" y="130" width="66" height="20" rx="10" fill="#EAF3FB"/><text x="1053" y="144" font-size="11" fill="#004578" text-anchor="middle">Waiting</text>
+
+    <rect x="40" y="250" width="1100" height="120" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+    <rect x="40" y="250" width="6" height="120" fill="#C19C00"/>
+    <rect x="62" y="272" width="64" height="64" rx="9" fill="#EAF0F7"/><rect x="70" y="276" width="54" height="18" rx="999" fill="#D4E2EF"/><text x="97" y="289" font-size="9" font-weight="700" fill="#2E3B47" text-anchor="middle">PICKUP</text>
+    <text x="150" y="290" font-size="17" font-weight="600" fill="#1B1B1B">Pickup Coil (VITS)</text>
+    <text x="150" y="314" font-size="11" fill="#5E5E5E">by D. Vance (you) · Press P-04</text>
+    <text x="150" y="342" font-size="12" fill="#C19C00"><tspan font-weight="600">Remaining:</tspan> 0:06</text>
+    <rect x="980" y="262" width="106" height="20" rx="10" fill="#FFF4CE"/><text x="1033" y="276" font-size="11" fill="#7A5C00" text-anchor="middle">In Progress</text>
+
+    <rect x="40" y="382" width="1100" height="120" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+    <rect x="40" y="382" width="6" height="120" fill="#6E839C"/>
+    <rect x="62" y="404" width="64" height="64" rx="9" fill="#EDF1F5"/><rect x="70" y="408" width="30" height="18" rx="999" fill="#DDE3E8"/><text x="85" y="421" font-size="9" font-weight="700" fill="#2E3B47" text-anchor="middle">FG</text>
+    <text x="150" y="422" font-size="17" font-weight="600" fill="#1B1B1B">FG-10042</text>
+    <text x="150" y="446" font-size="11" fill="#5E5E5E">by D. Vance (you) · Press P-07</text>
+    <text x="150" y="474" font-size="12" fill="#5E5E5E"><tspan font-weight="600">Completed</tspan> 09:14</text>
+    <rect x="1020" y="394" width="56" height="20" rx="10" fill="#E6F4EA"/><text x="1048" y="408" font-size="11" fill="#0E5A18" text-anchor="middle">Done</text>
+  </g>
+
+  <!-- green FAB (matches existing) -->
+  <circle cx="1120" cy="700" r="34" fill="#0F7B0F"/>
+  <text x="1120" y="708" font-size="30" fill="#FFF" text-anchor="middle">+</text>
+</svg>

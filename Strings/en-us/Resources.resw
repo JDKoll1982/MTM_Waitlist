@@ -504,6 +504,12 @@
   &lt;/actions&gt;
 &lt;/toast&gt;</value>
   </data>
+  <data name="NewRequestAlert_Title" xml:space="preserve">
+    <value>New Waitlist Request</value>
+  </data>
+  <data name="NewRequestAlert_Body" xml:space="preserve">
+    <value>A new request is ready for {0} ({1}).</value>
+  </data>
   <data name="Setup_Header.Step1" xml:space="preserve">
     <value>Work Center</value>
   </data>
@@ -569,5 +575,11 @@
   </data>
   <data name="Setup_NoDunnage.Cancel" xml:space="preserve">
     <value>No</value>
+  </data>
+  <data name="Waitlist_MyRequestsToggle.Header" xml:space="preserve">
+    <value>My Requests</value>
+  </data>
+  <data name="Waitlist_MyRequestsToggle.AutomationProperties.Name" xml:space="preserve">
+    <value>Show only my requests</value>
   </data>
 </root>

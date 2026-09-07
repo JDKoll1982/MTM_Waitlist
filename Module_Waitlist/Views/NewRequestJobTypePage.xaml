@@ -17,6 +17,11 @@
             <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="New Request - Choose Job Type" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkCenterText, Mode=OneWay}" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="Choose a Job Type to continue." />
+            <TextBlock
+                Margin="0,6,0,0"
+                Style="{StaticResource RequestDialogCaptionStyle}"
+                Text="{x:Bind ViewModel.CoilBannerText, Mode=OneWay}"
+                TextWrapping="WrapWholeWords" />
         </StackPanel>
 
         <Grid Grid.Row="1">

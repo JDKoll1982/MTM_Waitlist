@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 300" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Waitlist card — In Progress, assigned handler view (Complete + Release)</title>
+  <rect width="1180" height="300" fill="#F3F3F3"/>
+  <text x="20" y="24" font-size="13" font-weight="600" fill="#1B1B1B">In-Progress request — ASSIGNED handler view: Complete (green) + Release (red)</text>
+  <text x="1140" y="24" font-size="11" fill="#8A8A8A" text-anchor="end">waitlist-card-assignee</text>
+
+  <rect x="60" y="60" width="1060" height="140" rx="10" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <rect x="60" y="60" width="6" height="140" fill="#C19C00"/>
+  <rect x="82" y="86" width="86" height="86" rx="10" fill="#EAF0F7"/>
+  <rect x="88" y="90" width="54" height="20" rx="999" fill="#D4E2EF"/><text x="115" y="104" font-size="10" font-weight="700" fill="#2E3B47" text-anchor="middle">COIL</text>
+  <rect x="110" y="120" width="30" height="30" rx="15" fill="#6E839C"/><text x="125" y="140" font-size="16" font-weight="700" fill="#FFF" text-anchor="middle">C</text>
+  <text x="190" y="104" font-size="20" font-weight="600" fill="#1B1B1B">COIL-204</text>
+  <text x="190" y="130" font-size="12" fill="#5E5E5E"><tspan font-weight="600">Requested by: </tspan>D. Vance</text>
+  <text x="190" y="150" font-size="12" fill="#5E5E5E"><tspan font-weight="600">Press: </tspan>P-12</text>
+  <text x="190" y="170" font-size="12" fill="#C19C00"><tspan font-weight="600">Remaining time: </tspan>0:06</text>
+  <text x="560" y="104" font-size="12" fill="#1B1B1B"><tspan font-weight="600">Requested coil:</tspan> COIL-204</text>
+  <text x="560" y="126" font-size="12" fill="#1B1B1B"><tspan font-weight="600">Location:</tspan> V-A0-01 · on hand 15,000 lb</text>
+  <text x="560" y="148" font-size="12" fill="#1B1B1B"><tspan font-weight="600">Note:</tspan> coil edge has a small dent</text>
+  <!-- Complete (green) + Release (red) -->
+  <rect x="1010" y="104" width="48" height="52" rx="9" fill="#0F7B0F"/><text x="1034" y="139" font-size="20" fill="#FFF" text-anchor="middle">✓</text>
+  <text x="1034" y="230" font-size="11" fill="#8A8A8A" text-anchor="middle">Complete</text>
+  <rect x="1063" y="104" width="48" height="52" rx="9" fill="#C42B1C"/><text x="1087" y="139" font-size="20" fill="#FFF" text-anchor="middle">↺</text>
+  <text x="1087" y="230" font-size="11" fill="#8A8A8A" text-anchor="middle">Release</text>
+  <text x="60" y="270" font-size="12" fill="#5E5E5E">Complete marks Done (single step now). Release returns the job to the open list — it is NOT a cancellation. Only the assigned handler sees these.</text>
+</svg>

@@ -140,7 +140,7 @@ VALUES (
         NULL,
         1,
         'John Koll',
-        'emp-dev-001',
+        '6229',
         1,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
@@ -152,7 +152,7 @@ VALUES (
         NULL,
         1,
         'John Koll',
-        'emp-dev-001',
+        '6229',
         1,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()

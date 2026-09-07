@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 720" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Settings — Max allotted time per request sub-type (Plant Manager+)</title>
+  <rect width="1180" height="720" fill="#F3F3F3"/>
+  <rect width="1180" height="40" fill="#FFFFFF"/><text x="20" y="26" font-size="13" font-weight="600" fill="#1B1B1B">Settings — Max allotted time per request sub-type</text>
+  <text x="1140" y="26" font-size="11" fill="#8A8A8A" text-anchor="end">settings-allotment-subtypes</text>
+  <line x1="0" y1="40" x2="1180" y2="40" stroke="#E2E2E2"/>
+
+  <rect x="48" y="64" width="1084" height="46" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <text x="70" y="91" font-size="13" fill="#8A8A8A">🔍 Search settings</text>
+
+  <!-- expander header -->
+  <rect x="48" y="132" width="1084" height="54" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <text x="70" y="166" font-size="20" fill="#1B1B1B">▾</text>
+  <circle cx="120" cy="159" r="14" fill="#FFF4CE"/><text x="120" y="164" font-size="12" fill="#7A5C00" text-anchor="middle">⏱</text>
+  <text x="152" y="158" font-size="15" font-weight="600" fill="#1B1B1B">Request time limits (max allotted)</text>
+  <text x="152" y="178" font-size="12" fill="#5E5E5E">Plant Manager and above · drives urgency/overdue</text>
+
+  <!-- content card: subtypes with minutes -->
+  <rect x="48" y="194" width="1084" height="360" rx="8" fill="#F9FAFB" stroke="#E5E5E5"/>
+  <text x="70" y="222" font-size="13" fill="#5E5E5E">Due time = created time + this sub-type's max allotted time. Overdue when the remaining time is negative.</text>
+  <!-- header cols -->
+  <text x="90" y="258" font-size="12" font-weight="600" fill="#1B1B1B">Request sub-type</text>
+  <text x="620" y="258" font-size="12" font-weight="600" fill="#1B1B1B">Max allotted (min)</text>
+  <g font-size="13">
+    <rect x="70" y="272" width="540" height="48" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="90" y="300" fill="#1B1B1B">Coil · Bring</text><text x="330" y="300" fill="#5E5E5E">Coil</text>
+    <rect x="628" y="272" width="140" height="48" rx="8" fill="#FFFFFF" stroke="#0078D4"/><text x="698" y="300" fill="#1B1B1B" text-anchor="middle">15</text>
+    <rect x="70" y="330" width="540" height="48" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="90" y="358" fill="#1B1B1B">Coil · Pickup</text><text x="330" y="358" fill="#5E5E5E">Coil</text>
+    <rect x="628" y="330" width="140" height="48" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="698" y="358" fill="#1B1B1B" text-anchor="middle">20</text>
+    <rect x="70" y="388" width="540" height="48" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="90" y="416" fill="#1B1B1B">Coil · Wrong Coil @ press</text><text x="330" y="416" fill="#5E5E5E">Coil</text>
+    <rect x="628" y="388" width="140" height="48" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="698" y="416" fill="#1B1B1B" text-anchor="middle">10</text>
+    <rect x="70" y="446" width="540" height="48" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="90" y="474" fill="#1B1B1B">Pickup · Pickup FG</text><text x="330" y="474" fill="#5E5E5E">Pickup</text>
+    <rect x="628" y="446" width="140" height="48" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/><text x="698" y="474" fill="#1B1B1B" text-anchor="middle">30</text>
+  </g>
+  <text x="70" y="530" font-size="12" fill="#8A8A8A">Values are per sub-type. Defaults provided; edits persist per user's settings store.</text>
+</svg>

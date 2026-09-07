@@ -7,34 +7,28 @@ namespace MTM_Waitlist.Module_Waitlist.Services;
 
 public sealed class NewRequestFlowService : INewRequestFlowService
 {
+    private readonly IRequestTypeCatalogService _requestTypeCatalogService;
     private readonly IImageLocationService _imageLocationService;
 
-    public NewRequestFlowService(IImageLocationService imageLocationService)
+    public NewRequestFlowService(IImageLocationService imageLocationService, IRequestTypeCatalogService requestTypeCatalogService)
     {
         _imageLocationService = imageLocationService;
+        _requestTypeCatalogService = requestTypeCatalogService;
     }
 
     public async Task<IReadOnlyList<NewRequestTypeDefinition>> LoadRequestTypesAsync(CancellationToken cancellationToken = default)
     {
-        var configPath = Path.Combine(AppContext.BaseDirectory, "Assets", "Config", "waitlist-request-types.json");
-
-        if (!File.Exists(configPath))
-        {
-            return NewRequestFlowRules.GetDefaultTypes();
-        }
-
         try
         {
-            var json = await File.ReadAllTextAsync(configPath, cancellationToken).ConfigureAwait(false);
-            var parsed = NewRequestFlowRules.ParseRequestTypes(json);
-            if (parsed.Count > 0)
+            var catalog = await _requestTypeCatalogService.LoadRequestTypesAsync(cancellationToken).ConfigureAwait(false);
+            if (catalog.Count > 0)
             {
-                return parsed;
+                return catalog;
             }
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Info("WaitlistNewRequest", $"Failed to load request type config. Falling back to defaults. Error={ex.Message}");
+            StartupDebugLog.Info("WaitlistNewRequest", $"Failed to load request type catalog from DB. Falling back to defaults. Error={ex.Message}");
         }
 
         return NewRequestFlowRules.GetDefaultTypes();

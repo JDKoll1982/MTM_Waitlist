@@ -9,6 +9,8 @@ public static class ModuleDependencyInjectionExtensions
     public static IServiceCollection AddWaitlistNewRequestServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<INewRequestFlowService, NewRequestFlowService>();
+        services.AddSingleton<IRequestTypeCatalogService, RequestTypeCatalogService>();
+        services.AddSingleton<ICoilAvailabilityService, CoilAvailabilityService>();
         return services;
     }
 }

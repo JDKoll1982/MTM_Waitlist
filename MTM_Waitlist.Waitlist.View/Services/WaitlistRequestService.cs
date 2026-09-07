@@ -16,7 +16,9 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
     private readonly ILocalSettingsService? _localSettingsService;
     private readonly ISampleDataService? _sampleDataService;
-    private readonly MySqlHelperServer? _mySqlHelperServer;
+    private readonly IMySqlHelperServer? _mySqlHelperServer;
+    private readonly INewRequestAlertNotifier? _newRequestAlertNotifier;
+    private readonly IUrgencyDeadlineService? _urgencyDeadlineService;
     private readonly ConcurrentDictionary<Guid, WaitlistRequest> _requests = new();
     private readonly ConcurrentDictionary<Guid, List<WaitlistRequestAuditEntry>> _auditTrail = new();
 
@@ -27,11 +29,133 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
     public WaitlistRequestService(
         ILocalSettingsService? localSettingsService,
         ISampleDataService? sampleDataService,
-        MySqlHelperServer? mySqlHelperServer)
+        IMySqlHelperServer? mySqlHelperServer,
+        INewRequestAlertNotifier? newRequestAlertNotifier = null,
+        IUrgencyDeadlineService? urgencyDeadlineService = null)
     {
         _localSettingsService = localSettingsService;
         _sampleDataService = sampleDataService;
         _mySqlHelperServer = mySqlHelperServer;
+        _newRequestAlertNotifier = newRequestAlertNotifier;
+        _urgencyDeadlineService = urgencyDeadlineService;
+    }
+
+    public async Task<int> RefreshFromDatabaseAsync(string? building = null, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (IsMockDataEnabled())
+        {
+            StartupDebugLog.Info("WaitlistRequest", "RefreshFromDatabaseAsync skipped: mock data is enabled.");
+            return 0;
+        }
+
+        if (_mySqlHelperServer is null)
+        {
+            StartupDebugLog.Info("WaitlistRequest", "RefreshFromDatabaseAsync skipped: no MySQL helper is configured.");
+            return 0;
+        }
+
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            "sp_waitlist_request_list",
+            new Dictionary<string, object?>
+            {
+                ["p_building"] = building,
+                ["p_include_resolved"] = 0,
+            },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        var loaded = new List<WaitlistRequest>(rows.Count);
+        foreach (var row in rows)
+        {
+            var mapped = MapRowToRequest(row);
+            if (mapped is not null)
+            {
+                loaded.Add(mapped);
+            }
+        }
+
+        // The DB is the authoritative source for open requests when mock data is OFF:
+        // replace the in-memory set with the rows read back so the list reflects reality.
+        _requests.Clear();
+        foreach (var request in loaded)
+        {
+            _requests[request.Id] = request;
+        }
+
+        StartupDebugLog.Info("WaitlistRequest", $"RefreshFromDatabaseAsync loaded {loaded.Count} open request(s) from DB. Building='{building ?? "all"}'.");
+        return loaded.Count;
+    }
+
+    private static WaitlistRequest? MapRowToRequest(IReadOnlyDictionary<string, object?> row)
+    {
+        var publicId = ReadString(row, "public_id");
+        if (!Guid.TryParse(publicId, out var requestId))
+        {
+            return null;
+        }
+
+        return new WaitlistRequest
+        {
+            Id = requestId,
+            Building = ReadString(row, "building"),
+            WorkCenter = ReadString(row, "work_center"),
+            RequestType = ReadString(row, "request_type"),
+            Subtype = ReadNullableString(row, "subtype"),
+            InputValue = ReadNullableString(row, "input_value"),
+            ActiveSetupJobId = ReadString(row, "active_setup_job_id"),
+            WorkCenterName = ReadString(row, "work_center_name"),
+            RequesterEmployeeNumber = ReadString(row, "requester_employee_number"),
+            RequesterEmployeeName = ReadString(row, "requester_employee_name"),
+            Status = ReadString(row, "status"),
+            RequestedUtc = ReadDateTimeUtc(row, "requested_utc") ?? DateTimeOffset.UtcNow,
+            TargetTimeUtc = ReadDateTimeUtc(row, "target_time_utc"),
+            IsOverdue = ReadBool(row, "is_overdue"),
+            AssignedMaterialHandler = ReadNullableString(row, "assigned_material_handler"),
+            CancellationReason = ReadNullableString(row, "cancellation_reason"),
+            CanceledUtc = ReadDateTimeUtc(row, "canceled_utc"),
+            CanceledByEmployeeNumber = ReadNullableString(row, "canceled_by_employee_number"),
+            Note = ReadNullableString(row, "note"),
+            AcceptedUtc = ReadDateTimeUtc(row, "accepted_utc"),
+            CompletedUtc = ReadDateTimeUtc(row, "completed_utc"),
+            ReleasedUtc = ReadDateTimeUtc(row, "released_utc"),
+        };
+    }
+
+    private static string ReadString(IReadOnlyDictionary<string, object?> row, string key)
+        => row.TryGetValue(key, out var value) ? Convert.ToString(value)?.Trim() ?? string.Empty : string.Empty;
+
+    private static string? ReadNullableString(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        var value = ReadString(row, key);
+        return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    private static bool ReadBool(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        if (row.TryGetValue(key, out var value) && value is not null)
+        {
+            try { return Convert.ToBoolean(value); }
+            catch (Exception) { /* fall through */ }
+        }
+        return false;
+    }
+
+    private static DateTimeOffset? ReadDateTimeUtc(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        if (row.TryGetValue(key, out var value) && value is not null)
+        {
+            if (value is DateTime dateTime)
+            {
+                return new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc));
+            }
+            if (DateTimeOffset.TryParse(Convert.ToString(value), out var parsed))
+            {
+                return parsed.ToUniversalTime();
+            }
+        }
+        return null;
     }
 
     public IReadOnlyList<WaitlistRequest> GetActiveRequests(string? building = null)
@@ -47,6 +171,22 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
     public WaitlistRequest? GetRequest(Guid requestId)
     {
         return _requests.TryGetValue(requestId, out var request) ? request : null;
+    }
+
+    /// <summary>
+    /// Returns the requests submitted by a given requester (across all statuses so the "My
+    /// Requests" view can show Waiting, In Progress, Done, and Cancelled together), optionally
+    /// scoped to a building, newest first.
+    /// </summary>
+    public IReadOnlyList<WaitlistRequest> GetMyRequests(string requesterEmployeeNumber, string? building = null)
+    {
+        var normalizedRequester = (requesterEmployeeNumber ?? string.Empty).Trim();
+        var normalizedBuilding = building?.Trim();
+        return _requests.Values
+            .Where(request => string.Equals(request.RequesterEmployeeNumber, normalizedRequester, StringComparison.OrdinalIgnoreCase))
+            .Where(request => string.IsNullOrWhiteSpace(normalizedBuilding) || string.Equals(request.Building, normalizedBuilding, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(request => request.RequestedUtc)
+            .ToArray();
     }
 
     public IReadOnlyList<WaitlistRequestAuditEntry> GetAuditTrail(Guid requestId)
@@ -112,19 +252,169 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             CanceledByEmployeeNumber = string.Equals(nextStatus, "Canceled", StringComparison.OrdinalIgnoreCase)
                 ? (string.IsNullOrWhiteSpace(canceledByEmployeeNumber) ? existing.CanceledByEmployeeNumber : canceledByEmployeeNumber.Trim())
                 : null,
+            AcceptedUtc = string.Equals(nextStatus, "Accepted", StringComparison.OrdinalIgnoreCase)
+                ? (existing.AcceptedUtc ?? DateTimeOffset.UtcNow)
+                : existing.AcceptedUtc,
+            CompletedUtc = string.Equals(nextStatus, "Completed", StringComparison.OrdinalIgnoreCase)
+                ? (existing.CompletedUtc ?? DateTimeOffset.UtcNow)
+                : existing.CompletedUtc,
+            ReleasedUtc = existing.ReleasedUtc,
+            Note = existing.Note,
         };
 
         _requests[requestId] = updated;
-        RecordAuditTrail(requestId, nextStatus, canceledByEmployeeNumber, cancellationReason);
+        StartupDebugLog.Info(
+            "WaitlistRequest",
+            $"Request '{requestId}' transitioned from '{existing.Status}' to '{nextStatus}'. AcceptedUtc='{updated.AcceptedUtc}', CompletedUtc='{updated.CompletedUtc}'.");
+        await RecordAuditAsync(requestId, existing.Status, nextStatus, nextStatus, canceledByEmployeeNumber, null, cancellationReason, cancellationToken);
+
+        // Persist the transition to the MySQL DB when not in mock mode and a helper is present.
+        // The in-memory request id equals the DB public_id (client-supplied on insert / DB row id
+        // on load), so the status update targets the correct row.
+        if (!IsMockDataEnabled() && _mySqlHelperServer is not null)
+        {
+            var rowsAffected = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                "sp_waitlist_request_status_update",
+                new Dictionary<string, object?>
+                {
+                    ["p_public_id"] = requestId.ToString(),
+                    ["p_status"] = nextStatus,
+                    ["p_assigned_material_handler"] = updated.AssignedMaterialHandler,
+                    ["p_cancellation_reason"] = string.Equals(nextStatus, "Canceled", StringComparison.OrdinalIgnoreCase) ? cancellationReason : null,
+                    ["p_canceled_by_employee_number"] = string.Equals(nextStatus, "Canceled", StringComparison.OrdinalIgnoreCase) ? canceledByEmployeeNumber : null,
+                    ["p_note"] = updated.Note,
+                },
+                MySqlDatabaseTarget.MtmWaitlist,
+                cancellationToken).ConfigureAwait(false);
+            StartupDebugLog.Info("WaitlistRequest", $"Status transition '{nextStatus}' persisted to DB for request '{requestId}'. RowsAffected={rowsAffected}.");
+        }
+
         RequestsChanged?.Invoke(this, EventArgs.Empty);
         await Task.CompletedTask.ConfigureAwait(false);
         return true;
+    }
+
+    public async Task<WaitlistRequestCancelResult> CancelOwnRequestAsync(
+        Guid requestId,
+        string requesterEmployeeNumber,
+        string? reason = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (!_requests.TryGetValue(requestId, out var existing))
+        {
+            StartupDebugLog.Info("WaitlistRequest", $"Cancel-own skipped: request '{requestId}' not found.");
+            return WaitlistRequestCancelResult.NotFound();
+        }
+
+        var normalizedRequester = (requesterEmployeeNumber ?? string.Empty).Trim();
+        if (!string.Equals(normalizedRequester, existing.RequesterEmployeeNumber, StringComparison.OrdinalIgnoreCase))
+        {
+            StartupDebugLog.Info(
+                "WaitlistRequest",
+                $"Cancel-own denied: requester '{normalizedRequester}' is not the creator of request '{requestId}' (creator '{existing.RequesterEmployeeNumber}').");
+            return WaitlistRequestCancelResult.NotOwnedByRequester();
+        }
+
+        if (!string.Equals(existing.Status, "Pending", StringComparison.OrdinalIgnoreCase))
+        {
+            StartupDebugLog.Info(
+                "WaitlistRequest",
+                $"Cancel-own denied: request '{requestId}' is in state '{existing.Status}', not Waiting (Pending).");
+            return WaitlistRequestCancelResult.NotInCancelableState();
+        }
+
+        var transitioned = await TransitionStatusAsync(requestId, "Canceled", reason, normalizedRequester, cancellationToken).ConfigureAwait(false);
+        if (!transitioned)
+        {
+            return WaitlistRequestCancelResult.Failed();
+        }
+
+        _requests.TryGetValue(requestId, out var cancelled);
+        StartupDebugLog.Info("WaitlistRequest", $"Requester '{normalizedRequester}' cancelled their own request '{requestId}'. Reason='{(reason ?? "null")}'.");
+        return cancelled is null ? WaitlistRequestCancelResult.Failed() : WaitlistRequestCancelResult.Success(cancelled);
     }
 
     public void Reset()
     {
         _requests.Clear();
         _auditTrail.Clear();
+    }
+
+    public async Task<WaitlistRequest?> UpdateNoteAsync(Guid requestId, string? note, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (!_requests.TryGetValue(requestId, out var existing))
+        {
+            StartupDebugLog.Info("WaitlistRequest", $"Update note skipped: request '{requestId}' not found.");
+            return null;
+        }
+
+        var normalizedNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+        if (string.Equals(existing.Note ?? string.Empty, normalizedNote ?? string.Empty, StringComparison.Ordinal))
+        {
+            return existing; // no change
+        }
+
+        var updated = new WaitlistRequest
+        {
+            Id = existing.Id,
+            Building = existing.Building,
+            WorkCenter = existing.WorkCenter,
+            RequestType = existing.RequestType,
+            Subtype = existing.Subtype,
+            InputValue = existing.InputValue,
+            ActiveSetupJobId = existing.ActiveSetupJobId,
+            WorkCenterName = existing.WorkCenterName,
+            RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
+            RequesterEmployeeName = existing.RequesterEmployeeName,
+            Status = existing.Status,
+            RequestedUtc = existing.RequestedUtc,
+            TargetTimeUtc = existing.TargetTimeUtc,
+            IsOverdue = existing.IsOverdue,
+            AssignedMaterialHandler = existing.AssignedMaterialHandler,
+            CancellationReason = existing.CancellationReason,
+            CanceledUtc = existing.CanceledUtc,
+            CanceledByEmployeeNumber = existing.CanceledByEmployeeNumber,
+            AcceptedUtc = existing.AcceptedUtc,
+            CompletedUtc = existing.CompletedUtc,
+            ReleasedUtc = existing.ReleasedUtc,
+            Note = normalizedNote,
+        };
+
+        _requests[requestId] = updated;
+        StartupDebugLog.Info("WaitlistRequest", $"Note updated for request '{requestId}'. Status='{updated.Status}'.");
+        await RecordAuditAsync(requestId, existing.Status, updated.Status, "NoteUpdated", null, null, normalizedNote, cancellationToken).ConfigureAwait(false);
+
+        // Persist the note through the status-update path (status unchanged) when not in mock mode.
+        if (!IsMockDataEnabled() && _mySqlHelperServer is not null)
+        {
+            try
+            {
+                await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                    "sp_waitlist_request_status_update",
+                    new Dictionary<string, object?>
+                    {
+                        ["p_public_id"] = requestId.ToString(),
+                        ["p_status"] = updated.Status,
+                        ["p_assigned_material_handler"] = updated.AssignedMaterialHandler,
+                        ["p_cancellation_reason"] = updated.CancellationReason,
+                        ["p_canceled_by_employee_number"] = updated.CanceledByEmployeeNumber,
+                        ["p_note"] = updated.Note,
+                    },
+                    MySqlDatabaseTarget.MtmWaitlist,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                StartupDebugLog.Error("WaitlistRequest", ex, $"Failed to persist note for request '{requestId}'.");
+            }
+        }
+
+        RequestsChanged?.Invoke(this, EventArgs.Empty);
+        return updated;
     }
 
     private static bool IsValidStatusTransition(string currentStatus, string nextStatus)
@@ -185,6 +475,24 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             return WaitlistRequestSubmitResult.DuplicateWarning(duplicate);
         }
 
+        // Workflow 08: if the flow did not already set a due time, derive one from the request's created time and
+        // its sub-type's max-allotted time (UrgencyDeadlineService) so every submitted request carries a deadline.
+        var resolvedTargetUtc = draft.TargetTimeUtc;
+        if (resolvedTargetUtc is null && _urgencyDeadlineService is not null)
+        {
+            try
+            {
+                var urgency = await _urgencyDeadlineService
+                    .ComputeAsync(draft.RequestedUtc, draft.Subtype, DateTimeOffset.UtcNow, cancellationToken)
+                    .ConfigureAwait(false);
+                resolvedTargetUtc = urgency.DueUtc;
+            }
+            catch (Exception ex)
+            {
+                StartupDebugLog.Error("WaitlistRequest", ex, "Failed to derive the urgency deadline for a new request.");
+            }
+        }
+
         var request = new WaitlistRequest
         {
             Building = draft.Building.Trim(),
@@ -197,27 +505,23 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             RequesterEmployeeNumber = draft.RequesterEmployeeNumber.Trim(),
             RequesterEmployeeName = draft.RequesterEmployeeName.Trim(),
             RequestedUtc = draft.RequestedUtc,
-            TargetTimeUtc = draft.TargetTimeUtc,
+            TargetTimeUtc = resolvedTargetUtc,
             IsOverdue = draft.IsOverdue,
             AssignedMaterialHandler = string.IsNullOrWhiteSpace(draft.AssignedMaterialHandler) ? null : draft.AssignedMaterialHandler.Trim(),
             CancellationReason = string.IsNullOrWhiteSpace(draft.CancellationReason) ? null : draft.CancellationReason.Trim(),
+            Note = string.IsNullOrWhiteSpace(draft.Note) ? null : draft.Note.Trim(),
         };
 
-        if (IsMockDataEnabled())
-        {
-            _requests[request.Id] = request;
-            RecordAuditTrail(request.Id, "Created", request.RequesterEmployeeNumber, request.InputValue);
-            RequestsChanged?.Invoke(this, EventArgs.Empty);
-            StartupDebugLog.Info("WaitlistRequest", $"Mock request stored in session. Id='{request.Id}', Building='{request.Building}', WorkCenter='{request.WorkCenter}', RequestType='{request.RequestType}', Subtype='{request.Subtype ?? string.Empty}', ActiveJobId='{request.ActiveSetupJobId}', Requester='{request.RequesterEmployeeNumber}'.");
-            return WaitlistRequestSubmitResult.Success(request);
-        }
-
+        // Waitlist requests are REAL mtm_waitlist data and are persisted regardless of the Infor Visual / receiving
+        // mock toggles (which only short-circuit external lookups to sample data). Persist whenever a helper server
+        // is configured so a new request added in mock mode still saves to the database.
         if (_mySqlHelperServer is not null)
         {
             var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
                 "sp_waitlist_request_insert",
                 new Dictionary<string, object?>
                 {
+                    ["p_public_id"] = request.Id.ToString(),
                     ["p_building"] = request.Building,
                     ["p_work_center"] = request.WorkCenter,
                     ["p_request_type"] = request.RequestType,
@@ -233,6 +537,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                     ["p_is_overdue"] = request.IsOverdue,
                     ["p_assigned_material_handler"] = request.AssignedMaterialHandler,
                     ["p_cancellation_reason"] = request.CancellationReason,
+                    ["p_note"] = request.Note,
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
@@ -248,20 +553,32 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         }
 
         _requests[request.Id] = request;
-        RecordAuditTrail(request.Id, "Created", request.RequesterEmployeeNumber, request.InputValue);
+        await RecordAuditAsync(request.Id, null, null, "Created", request.RequesterEmployeeNumber, request.RequesterEmployeeName, request.InputValue, cancellationToken);
         RequestsChanged?.Invoke(this, EventArgs.Empty);
         StartupDebugLog.Info("WaitlistRequest", $"Request stored in session and production route acknowledged. Id='{request.Id}', Building='{request.Building}', WorkCenter='{request.WorkCenter}', RequestType='{request.RequestType}', Subtype='{request.Subtype ?? string.Empty}', ActiveJobId='{request.ActiveSetupJobId}', Requester='{request.RequesterEmployeeNumber}'.");
+        await NotifyRequestCreatedAsync(request).ConfigureAwait(false);
         return WaitlistRequestSubmitResult.Success(request);
     }
 
-    private void RecordAuditTrail(Guid requestId, string eventType, string? employeeNumber, string? details)
+    private async Task RecordAuditAsync(
+        Guid requestId,
+        string? fromStatus,
+        string? toStatus,
+        string eventType,
+        string? employeeNumber,
+        string? employeeName,
+        string? details,
+        CancellationToken cancellationToken)
     {
         var entry = new WaitlistRequestAuditEntry
         {
             RequestId = requestId,
-            EventType = eventType,
+            FromStatus = string.IsNullOrWhiteSpace(fromStatus) ? null : fromStatus.Trim(),
+            ToStatus = string.IsNullOrWhiteSpace(toStatus) ? null : toStatus.Trim(),
+            EventType = (eventType ?? string.Empty).Trim(),
             OccurredUtc = DateTimeOffset.UtcNow,
             EmployeeNumber = string.IsNullOrWhiteSpace(employeeNumber) ? null : employeeNumber.Trim(),
+            EmployeeName = string.IsNullOrWhiteSpace(employeeName) ? null : employeeName.Trim(),
             Details = string.IsNullOrWhiteSpace(details) ? null : details.Trim(),
         };
 
@@ -269,6 +586,51 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         lock (auditEntries)
         {
             auditEntries.Add(entry);
+        }
+
+        // Persist the audit entry to the DB (mock OFF only); cancelled records are never purged.
+        if (!IsMockDataEnabled() && _mySqlHelperServer is not null)
+        {
+            await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                "sp_waitlist_request_audit_insert",
+                new Dictionary<string, object?>
+                {
+                    ["p_request_public_id"] = requestId.ToString(),
+                    ["p_from_status"] = entry.FromStatus,
+                    ["p_to_status"] = entry.ToStatus,
+                    ["p_event_type"] = entry.EventType,
+                    ["p_actor_employee_number"] = entry.EmployeeNumber,
+                    ["p_actor_employee_name"] = entry.EmployeeName,
+                    ["p_details"] = entry.Details,
+                },
+                MySqlDatabaseTarget.MtmWaitlist,
+                cancellationToken).ConfigureAwait(false);
+            StartupDebugLog.Info("WaitlistRequest", $"Audit entry persisted for request '{requestId}'. EventType='{entry.EventType}', From='{(entry.FromStatus ?? "null")}', To='{(entry.ToStatus ?? "null")}'.");
+        }
+    }
+
+    private async Task NotifyRequestCreatedAsync(WaitlistRequest request)
+    {
+        if (_newRequestAlertNotifier is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var title = "NewRequestAlert_Title".GetLocalized();
+            var body = string.Format(
+                "NewRequestAlert_Body".GetLocalized(),
+                request.WorkCenter,
+                request.RequestType);
+            await _newRequestAlertNotifier
+                .NotifyNewRequestAsync(request.Id, title, body, RuntimeHelper.IsMSIX)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // A toast failure must never break a successful request submission.
+            StartupDebugLog.Error("WaitlistRequest", ex, "Failed to raise the new-request alert.");
         }
     }
 

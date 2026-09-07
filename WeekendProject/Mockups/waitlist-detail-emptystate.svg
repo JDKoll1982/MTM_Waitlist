@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 720" font-family="Segoe UI Variable, Segoe UI, sans-serif">
+  <title>Friendly empty state (no data / no coil)</title>
+  <rect width="1180" height="720" fill="#F3F3F3"/>
+  <rect width="1180" height="40" fill="#FFFFFF"/><text x="20" y="26" font-size="13" font-weight="600" fill="#1B1B1B">Friendly empty state (replaces blank page/area)</text>
+  <text x="1140" y="26" font-size="11" fill="#8A8A8A" text-anchor="end">waitlist-detail-emptystate</text>
+  <line x1="0" y1="40" x2="1180" y2="40" stroke="#E2E2E2"/>
+
+  <!-- matches existing WaitlistViewPage EmptyWaitlistState card pattern -->
+  <rect x="160" y="90" width="860" height="520" rx="16" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <!-- illustration placeholder -->
+  <rect x="470" y="150" width="240" height="180" rx="12" fill="#EAF0F7"/>
+  <text x="590" y="240" font-size="40" fill="#6E839C" text-anchor="middle">📭</text>
+  <text x="590" y="380" font-size="24" font-weight="600" fill="#1B1B1B" text-anchor="middle">Nothing to show here</text>
+  <text x="590" y="410" font-size="14" fill="#5E5E5E" text-anchor="middle">No coil data was found for this job.</text>
+  <text x="590" y="434" font-size="14" fill="#5E5E5E" text-anchor="middle">Check the work center or try again.</text>
+  <rect x="500" y="470" width="180" height="40" rx="9" fill="#0078D4"/>
+  <text x="590" y="495" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">Refresh</text>
+  <text x="60" y="660" font-size="12" fill="#8A8A8A">Use the same visual language as the existing waitlist empty state (card + illustration + title + body).</text>
+</svg>

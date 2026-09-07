@@ -28,6 +28,10 @@ public sealed class StartupState
 
     public string CurrentRole { get; set; } = string.Empty;
 
+    public string EmployeeNumber { get; set; } = string.Empty;
+
+    public string EmployeeName { get; set; } = string.Empty;
+
     public bool IsUserMatched { get; set; }
 
     public bool IsComputerRegistered { get; set; }
@@ -45,4 +49,8 @@ public sealed class StartupState
     public string LoginHint { get; set; } = string.Empty;
 
     public bool IsDeveloper => string.Equals(CurrentRole, "Developer", StringComparison.OrdinalIgnoreCase);
+
+    public bool IsEmployeeIdentified =>
+        !string.IsNullOrWhiteSpace(EmployeeNumber)
+        || !string.IsNullOrWhiteSpace(EmployeeName);
 }

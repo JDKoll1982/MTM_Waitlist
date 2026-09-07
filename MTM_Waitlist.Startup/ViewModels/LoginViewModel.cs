@@ -29,6 +29,8 @@ public partial class LoginViewModel : ObservableRecipient
     private readonly StartupState _startupState;
     private long _pendingUserIdForPasswordChange;
     private string _pendingRole = string.Empty;
+    private string _pendingDisplayName = string.Empty;
+    private string _pendingEmployeeIdentifier = string.Empty;
     private ComputerGateCheck? _pendingGateCheck;
 
     [ObservableProperty]
@@ -235,6 +237,11 @@ public partial class LoginViewModel : ObservableRecipient
             return;
         }
 
+        _pendingDisplayName = credentialResult.DisplayName;
+        _pendingEmployeeIdentifier = credentialResult.EmployeeIdentifier;
+        _startupState.EmployeeName = credentialResult.DisplayName;
+        _startupState.EmployeeNumber = credentialResult.EmployeeIdentifier;
+
         if (credentialResult.RequiresPasswordChange)
         {
             _pendingUserIdForPasswordChange = credentialResult.UserId;
@@ -317,6 +324,8 @@ public partial class LoginViewModel : ObservableRecipient
     {
         _startupState.Username = Username.Trim().ToLowerInvariant();
         _startupState.CurrentRole = currentRole;
+        _startupState.EmployeeName = string.IsNullOrWhiteSpace(_pendingDisplayName) ? _startupState.EmployeeName : _pendingDisplayName;
+        _startupState.EmployeeNumber = string.IsNullOrWhiteSpace(_pendingEmployeeIdentifier) ? _startupState.EmployeeNumber : _pendingEmployeeIdentifier;
         _startupState.IsUserMatched = true;
         _startupState.IsSessionValid = true;
         _startupState.SessionTokenSource = StartupState.SessionTokenSourceLocal;
