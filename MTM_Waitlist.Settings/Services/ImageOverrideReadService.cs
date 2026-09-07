@@ -532,7 +532,7 @@ LIMIT {maxRecordCount};",
             return 0;
         }
 
-        return value is long longValue ? longValue : Convert.ToInt64(value);
+        return TryConvertToInt64(value, out var number) ? number : 0;
     }
 
     private static long? GetNullableInt64(IReadOnlyDictionary<string, object?>? row, string key)
@@ -542,7 +542,7 @@ LIMIT {maxRecordCount};",
             return null;
         }
 
-        return value is long longValue ? longValue : Convert.ToInt64(value);
+        return TryConvertToInt64(value, out var number) ? number : null;
     }
 
     private static int GetInt32(IReadOnlyDictionary<string, object?>? row, string key)
@@ -552,7 +552,12 @@ LIMIT {maxRecordCount};",
             return 0;
         }
 
-        return value is int intValue ? intValue : Convert.ToInt32(value);
+        if (value is int intValue)
+        {
+            return intValue;
+        }
+
+        return TryConvertToInt64(value, out var number) ? (int)number : 0;
     }
 
     private static bool GetBoolean(IReadOnlyDictionary<string, object?>? row, string key)
@@ -562,7 +567,12 @@ LIMIT {maxRecordCount};",
             return false;
         }
 
-        return value is bool boolValue ? boolValue : (Convert.ToInt32(value) != 0);
+        if (value is bool boolValue)
+        {
+            return boolValue;
+        }
+
+        return TryConvertToInt64(value, out var number) && number != 0;
     }
 
     private static DateTime GetDateTime(IReadOnlyDictionary<string, object?>? row, string key)
@@ -572,6 +582,55 @@ LIMIT {maxRecordCount};",
             return DateTime.UtcNow;
         }
 
-        return value is DateTime dateTime ? dateTime : Convert.ToDateTime(value);
+        if (value is DateTime dateTime)
+        {
+            return dateTime;
+        }
+
+        if (value is string text
+            && DateTime.TryParse(text, out var parsedDate))
+        {
+            return parsedDate;
+        }
+
+        try
+        {
+            return Convert.ToDateTime(value);
+        }
+        catch (Exception ex) when (ex is InvalidCastException or FormatException or OverflowException)
+        {
+            return DateTime.UtcNow;
+        }
+    }
+
+    private static bool TryConvertToInt64(object? value, out long result)
+    {
+        result = 0;
+        if (value is null)
+        {
+            return false;
+        }
+
+        if (value is long longValue)
+        {
+            result = longValue;
+            return true;
+        }
+
+        if (value is bool boolValue)
+        {
+            result = boolValue ? 1 : 0;
+            return true;
+        }
+
+        try
+        {
+            result = Convert.ToInt64(value);
+            return true;
+        }
+        catch (Exception ex) when (ex is InvalidCastException or FormatException or OverflowException)
+        {
+            return false;
+        }
     }
 }

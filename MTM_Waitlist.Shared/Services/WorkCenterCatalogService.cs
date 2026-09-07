@@ -389,7 +389,19 @@ LIMIT 1;",
             return 0;
         }
 
-        return Convert.ToInt64(value);
+        if (value is bool boolValue)
+        {
+            return boolValue ? 1 : 0;
+        }
+
+        try
+        {
+            return Convert.ToInt64(value);
+        }
+        catch (Exception ex) when (ex is InvalidCastException or FormatException or OverflowException)
+        {
+            return 0;
+        }
     }
 
     private static string GetValue(IReadOnlyDictionary<string, object?>? row, string key)

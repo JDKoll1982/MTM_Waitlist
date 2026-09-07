@@ -114,9 +114,11 @@ LIMIT 1;",
 
             if (existingRows.Count > 0)
             {
-                var isActive = existingRows[0].TryGetValue("is_active", out var activeValue)
-                    && activeValue is not null
-                    && Convert.ToInt32(activeValue) != 0;
+                var activeValue = existingRows[0].TryGetValue("is_active", out var raw) ? raw : null;
+                var isActive = activeValue is not null
+                    && (activeValue is bool boolActive
+                        ? boolActive
+                        : TryConvertToInt32(activeValue) != 0);
 
                 if (isActive)
                 {
@@ -681,6 +683,33 @@ WHERE scope = @p_scope
         {
             _logger.LogError(ex, "Failed to deactivate overrides for scope {Scope}", scope);
             throw new InvalidOperationException($"Failed to deactivate overrides for scope '{scope}'", ex);
+        }
+    }
+
+    private static int TryConvertToInt32(object? value)
+    {
+        if (value is null)
+        {
+            return 0;
+        }
+
+        if (value is bool boolValue)
+        {
+            return boolValue ? 1 : 0;
+        }
+
+        if (value is int intValue)
+        {
+            return intValue;
+        }
+
+        try
+        {
+            return Convert.ToInt32(value);
+        }
+        catch (Exception ex) when (ex is InvalidCastException or FormatException or OverflowException)
+        {
+            return 0;
         }
     }
 }

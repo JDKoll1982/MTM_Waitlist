@@ -248,7 +248,27 @@ public sealed class ComputerRegistryService : IComputerRegistryService
             return 0;
         }
 
-        return Convert.ToInt64(value);
+        // TINYINT(1)/BIT columns are surfaced by the MySQL driver as a bool. Convert.ToInt64
+        // on a bool throws InvalidCastException, so guard the type BEFORE converting so the
+        // exception is never raised (not merely caught).
+        if (value is bool boolValue)
+        {
+            return boolValue ? 1 : 0;
+        }
+
+        if (value is long longValue)
+        {
+            return longValue;
+        }
+
+        try
+        {
+            return Convert.ToInt64(value);
+        }
+        catch (Exception ex) when (ex is InvalidCastException or FormatException or OverflowException)
+        {
+            return 0;
+        }
     }
 
     private static string ReadString(IReadOnlyDictionary<string, object?> row, string key)

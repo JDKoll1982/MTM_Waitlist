@@ -58,9 +58,24 @@
   shows the current coil's context (requested coil number, quantity in house, coil description, and average coil
   weight) alongside the request summary, so the worker can verify they are requesting the right coil before
   submitting.
+- **Request cards cleaned up onto one shared layout.** Every request-type card (Coil, Pickup WIP/FG/NCM/Outside
+  Service, Scrap, and the rest) now shares the same anatomy: the press / work-center photo is a fixed **square
+  image** (not stretched), the request title sits on its own row, the detail block reads as four clear rows
+  (Requested by / Press / Remaining time / Waiting) at a larger size, and the action buttons are centered above a
+  compact status badge pinned to the card's lower-right. Redundant text that duplicated the title and work center
+  was removed, and the Coil card was brought back onto the same two-column field grid the other types use, so all
+  request cards look consistent.
+- **Request cards read as clear action phrases.** A request's card now shows a friendly, plain-language title
+  derived from its type and sub-type — for example **Deliver: Coil**, **Return: Coil**, **Pickup: NCM**,
+  **Scrap: Empty**, **General Request** — instead of raw type/sub-type codes.
 
 ### Fixed
 
+- **Overdue requests now show bold red wait time.** A request that is past its due time (or displays
+  "Overdue") now renders its "Remaining time" in **bold red** instead of green, so it stands out at a glance.
+- **Friendly titles now apply to older and mock requests.** Waitlist rows whose stored sub-type used an older
+  label no longer fall back to a raw "Type / Subtype" card title — their data was normalized to the real
+  sub-type catalog names so every card resolves a friendly action phrase.
 - **Work order and employee number now show on the request detail.** The "Work order and request" card on a
   request's detail page previously always read **"Not available"** for both the Work order and the Employee
   number, even though the request carried that data. It now shows the request's real job/work-order reference
@@ -94,6 +109,48 @@ captured under **[Unreleased]** above.
 - **`waitlist_request_types` / `waitlist_request_subtypes` are REAL (non-mock) catalog data.** They are
   NOT mock data and must NOT live in mock-data services/allow-lists. They have dedicated SPs and a
   separate real-catalog read service (`IRequestTypeCatalogService` / `RequestTypeCatalogService`).
+
+### Done — request-card layout + friendly titles + reader hardening (list/detail) — verified 2026-09-06
+
+Card-anatomy rework (see the user-facing **Changed**/**Fixed** entries above) plus the data + reader hardening
+that supports it.
+
+- **Shared card shell** (`Module_Waitlist/Controls/WaitlistLineCardView.xaml/.cs`): columns
+  `6px accent | fixed 96×96 image | title + content | actions`; rows `Auto (title) | * (content)`. Removed the
+  duplicated bottom banner (title + "Work Center" text) that repeated the top row. The action column centers the
+  buttons with a compact **36px status pill** (`CornerRadius=12`, `VerticalAlignment=Bottom`) in the lower-right.
+  Added a `RemainingTimeFontWeight` dependency property (`Windows.UI.Text.FontWeight`); when a request
+  `IsOverdue` or its text is "Overdue", the Remaining-time line renders **IndianRed and bold** — the previous
+  `TimeSpan.TryParse` miss fell through to the green default.
+- **Per-type line views + Coil revert:** removed the now-empty fourth row from all six per-type line views
+  (Coil/PickupWip/PickupFg/PickupNcm/PickupOs/Scrap). Reverted the Coil view to the standard
+  `Auto/*/Auto/*` two-column × three-row four-column field grid (Requested coil / Quantity in house / Coil
+  description / Average coil weight, with Requesting work center spanning) so it matches its siblings again.
+  Documented the approved anatomy in `WeekendProject/PromptFiles/03-100%-Phase1-listdetail.md` ("VERIFIED CARD
+  ANATOMY ... DO NOT REGRESS") so it does not revert.
+- **Friendly card titles** (`MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs`): a static dictionary
+  keyed on `TYPE\u0001SUBTYPE` (uppercase, **catalog** sub-type names) → action phrases; `For(requestType,
+  subtype)` returns the request type alone when there is no sub-type, the matched phrase, or `"Type / Subtype"`
+  for unlisted rows. `WaitlistRequestTitlesTests` assert the user-approved wording (e.g. "Deliver: Coil",
+  "Pickup: NCM", "Scrap: Empty", "Pickup: Outside Service").
+- **Seed/mock normalization** so pre-existing rows resolve friendly titles instead of the fallback: normalized
+  `SampleWaitlistRequestCatalog` mock sub-types and the `create.sql` / `AllSeeds.sql` demo rows to catalog
+  names; added the non-destructive `Database/Seeds/seed_waitlist_requests_default/migrate_subtypes.sql`
+  (UPDATEs only the legacy `(request_type, subtype)` pairs in `waitlist_requests_queue`; idempotent; not
+  auto-run).
+- **DB row-reader hardening (defensive):** type-guard MySQL `bool` (**TINYINT(1)**) reads *before* `Convert`
+  so `Convert.ChangeType` does not raise a first-chance `InvalidCastException` for values the driver already
+  returns as `bool`. Applied across `ComputerRegistryService`, `DunnageTypeVisibilityCatalogService`,
+  `ImageOverrideReadService`/`ImageOverrideWriteService`, `ConfigSettingsValueService`, `ImageLocationService`,
+  `RequestTypeEditorService`/`RequestTypeCatalogService`, and `WorkCenterCatalogService`.
+- **Investigation note — benign binding-noise `InvalidCastException`:** bursts of `InvalidCastException`
+  ("Object must implement IConvertible") when opening Settings were traced conclusively to the **WinUI binding
+  engine**: the full stack holds a single `System.Convert.ChangeType` frame with **no `MTM_Waitlist` frame**
+  (native binding code crossing into managed .NET), scaling with the number of bound rows. They are benign
+  first-chance exceptions (the app works and exits cleanly) — **not** an Infor Visual connection problem and
+  **not** from the SQL readers (which were only hardened defensively). No app-code fix is possible for these
+  binding-noise lines.
+- Build clean; full suite green (522 passed / 0 failed / 12 skipped).
 
 ### Done — mock-mode polling host app wiring (Workflow 13, 1.3/2.2) — verified 2026-09-06
 

@@ -701,6 +701,11 @@ ORDER BY building ASC, sort_rank ASC, work_center_name ASC;";
             return 0;
         }
 
+        if (value is bool boolValue)
+        {
+            return boolValue ? 1 : 0;
+        }
+
         return value is long longValue ? longValue : Convert.ToInt64(value);
     }
 

@@ -198,6 +198,16 @@ public sealed class RequestTypeEditorService : IRequestTypeEditorService
             return fallback;
         }
 
+        if (value is bool boolValue)
+        {
+            return boolValue ? 1 : 0;
+        }
+
+        if (value is int intValue)
+        {
+            return intValue;
+        }
+
         try
         {
             return Convert.ToInt32(value);
@@ -213,6 +223,26 @@ public sealed class RequestTypeEditorService : IRequestTypeEditorService
         if (!row.TryGetValue(column, out var value) || value is null || value == DBNull.Value)
         {
             return fallback;
+        }
+
+        // TINYINT(1)/BIT columns come back from the driver as bool; Convert.ChangeType on a
+        // bool to a numeric target throws InvalidCastException. Guard BEFORE converting so the
+        // exception is never raised (not merely caught).
+        if (value is bool boolValue)
+        {
+            if (typeof(T) == typeof(bool))
+            {
+                return (T)(object)boolValue;
+            }
+
+            try
+            {
+                return (T)Convert.ChangeType(boolValue ? 1 : 0, typeof(T));
+            }
+            catch (Exception)
+            {
+                return fallback;
+            }
         }
 
         try

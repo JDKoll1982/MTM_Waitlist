@@ -207,6 +207,11 @@ WHERE setting_key = @p_setting_key
             return null;
         }
 
+        if (value is bool boolValue)
+        {
+            return boolValue ? 1 : 0;
+        }
+
         return value is long longValue ? longValue : Convert.ToInt64(value);
     }
 
@@ -227,6 +232,11 @@ WHERE setting_key = @p_setting_key
             return null;
         }
 
+        if (value is bool boolValue)
+        {
+            return boolValue ? 1m : 0m;
+        }
+
         return value is decimal decimalValue ? decimalValue : Convert.ToDecimal(value);
     }
 
@@ -235,6 +245,11 @@ WHERE setting_key = @p_setting_key
         if (!row.TryGetValue(key, out var value) || value is null)
         {
             return null;
+        }
+
+        if (value is string text && DateTime.TryParse(text, out var parsedDate))
+        {
+            return parsedDate;
         }
 
         return value is DateTime dateTime ? dateTime : Convert.ToDateTime(value);

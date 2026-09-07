@@ -175,7 +175,12 @@ ORDER BY type_name ASC;",
             return true;
         }
 
-        return Convert.ToInt32(value, CultureInfo.InvariantCulture) != 0;
+        if (value is bool boolValue)
+        {
+            return boolValue;
+        }
+
+        return TryConvertToInt64(value, out var number) ? number != 0 : true;
     }
 
     private static long GetInt64(IReadOnlyDictionary<string, object?> row, string key)
@@ -186,7 +191,38 @@ ORDER BY type_name ASC;",
             return 0;
         }
 
-        return Convert.ToInt64(value, CultureInfo.InvariantCulture);
+        return TryConvertToInt64(value, out var number) ? number : 0;
+    }
+
+    private static bool TryConvertToInt64(object? value, out long result)
+    {
+        result = 0;
+        if (value is null)
+        {
+            return false;
+        }
+
+        if (value is bool boolValue)
+        {
+            result = boolValue ? 1 : 0;
+            return true;
+        }
+
+        if (value is long longValue)
+        {
+            result = longValue;
+            return true;
+        }
+
+        try
+        {
+            result = Convert.ToInt64(value, CultureInfo.InvariantCulture);
+            return true;
+        }
+        catch (Exception ex) when (ex is InvalidCastException or FormatException or OverflowException)
+        {
+            return false;
+        }
     }
 
     private sealed class DunnageTypeRecord
