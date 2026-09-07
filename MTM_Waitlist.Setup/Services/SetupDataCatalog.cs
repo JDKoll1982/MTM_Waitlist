@@ -63,7 +63,12 @@ internal static class SetupDataCatalog
                 new SetupSubordinatePart { Category = "Die", PartNumber = "FGT-001", Description = "No die assigned for this job", Location = string.Empty, OnHandQuantity = 0m },
                 new SetupSubordinatePart { Category = "Component", PartNumber = "23-23451-006", Description = "Left bracket", Location = "Kit Shelf 2", OnHandQuantity = 125000m },
                 new SetupSubordinatePart { Category = "Component", PartNumber = "23-23451-007", Description = "Right bracket", Location = "Kit Shelf 2", OnHandQuantity = 15000m },
-                new SetupSubordinatePart { Category = "Component", PartNumber = "23-23451-006", Description = "Support clip", Location = "Kit Shelf 4", OnHandQuantity = 0m, IsLowStock = true }
+                new SetupSubordinatePart { Category = "Component", PartNumber = "23-23451-006", Description = "Support clip", Location = "Kit Shelf 4", OnHandQuantity = 0m, IsLowStock = true },
+                // Plant inventory-location sample rows: NCM/SHIP are in the default ignored set (file 05),
+                // so SetupLookupService filters them out of lists; kept rows demonstrate non-ignored remain.
+                new SetupSubordinatePart { Category = "Component", PartNumber = "23-23451-008", Description = "Rework components", Location = "NCM", OnHandQuantity = 5000m },
+                new SetupSubordinatePart { Category = "Coil", PartNumber = "MMC0002000", Description = "Shipping overstock coil", Location = "SHIP", OnHandQuantity = 3200m },
+                new SetupSubordinatePart { Category = "Component", PartNumber = "23-23451-009", Description = "Ready-use hardware", Location = "FLOOR-12", OnHandQuantity = 940m }
             };
         }
 

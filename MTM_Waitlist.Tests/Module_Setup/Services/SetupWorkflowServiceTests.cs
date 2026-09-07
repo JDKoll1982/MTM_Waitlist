@@ -97,6 +97,37 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
+    public async Task SelectSequenceAsync_OmitsSubordinatePartsAtDefaultIgnoredPlantLocations()
+    {
+        var service = CreateService();
+
+        await service.SearchWorkOrderAsync("76951");
+        await service.SelectPartAsync("12345679");
+        await service.SelectSequenceAsync("20");
+
+        var ignored = new[] { "WC", "NCM", "V-WC", "NCM-VITS", "SHIP" };
+        Assert.IsFalse(service.State.SubordinateParts.Any(part =>
+            !string.IsNullOrWhiteSpace(part.Location) &&
+            ignored.Contains(part.Location.Trim().ToUpperInvariant())));
+        // Non-ignored rack rows still load after the ignored plant-code rows (NCM/SHIP) are removed.
+        Assert.IsTrue(service.State.SubordinateParts.Any(part => string.Equals(part.Location, "Rack A1", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(service.State.SubordinateParts.Any(part => string.Equals(part.Location, "Kit Shelf 2", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [TestMethod]
+    public async Task SelectSequenceAsync_OmitsSubordinatePartsAtCustomIgnoredLocations()
+    {
+        var service = CreateService(ignoredLocations: new[] { "Kit Shelf 2" });
+
+        await service.SearchWorkOrderAsync("76951");
+        await service.SelectPartAsync("12345679");
+        await service.SelectSequenceAsync("20");
+
+        Assert.IsFalse(service.State.SubordinateParts.Any(part => string.Equals(part.Location, "Kit Shelf 2", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(service.State.SubordinateParts.Any(part => string.Equals(part.Location, "Rack A1", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [TestMethod]
     public async Task SelectSequenceAsync_WhenRecvMockDisabled_DoesNotLoadMockDunnageTypes()
     {
         var service = CreateService(recvMockData: false);
@@ -198,7 +229,7 @@ public sealed class SetupWorkflowServiceTests
         return new DunnageWorkflowService(new MySqlHelperServer(settings, sampleDataService));
     }
 
-    private static SetupWorkflowService CreateService(bool recvMockData = true)
+    private static SetupWorkflowService CreateService(bool recvMockData = true, IReadOnlyList<string>? ignoredLocations = null)
     {
         var state = new SetupWorkflowState();
         var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
@@ -206,11 +237,16 @@ public sealed class SetupWorkflowServiceTests
             ["Feature.InforVisualMockData"] = true,
             ["Feature.RecvMockData"] = recvMockData,
         });
+        if (ignoredLocations is { Count: > 0 })
+        {
+            settings.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, ignoredLocations.ToList()).GetAwaiter().GetResult();
+        }
+
         var sampleDataService = new SampleDataService(settings);
         var sqlHelperServer = new SqlHelperServer(settings, sampleDataService);
         var mySqlHelperServer = new MySqlHelperServer(settings, sampleDataService);
         var workOrderValidationService = new WorkOrderValidationService();
-        var lookupService = new SetupLookupService(sqlHelperServer, new InforVisualSqlQueryService(new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build()));
+        var lookupService = new SetupLookupService(sqlHelperServer, new InforVisualSqlQueryService(new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build()), new IgnoredLocationsService(settings));
         var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer);
         var activeJobCoordinatorService = new SetupActiveJobCoordinatorService();
         var persistenceService = new SetupPersistenceService(activeJobCoordinatorService, mySqlHelperServer);

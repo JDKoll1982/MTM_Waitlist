@@ -490,6 +490,24 @@
   <data name="SettingsPage_PrivacyTermsLink.NavigateUri" xml:space="preserve">
     <value>https://YourPrivacyUrlGoesHere/</value>
   </data>
+  <data name="Settings_IgnoredLocations_Title.Text" xml:space="preserve">
+    <value>Ignored Infor Visual Locations</value>
+  </data>
+  <data name="Settings_IgnoredLocations_Description.Text" xml:space="preserve">
+    <value>Locations omitted from inventory lists and totals (for example WC, NCM, V-WC, NCM-VITS, SHIP). Editing is limited to roles above Material Handler.</value>
+  </data>
+  <data name="Settings_IgnoredLocations_AddPlaceholder.PlaceholderText" xml:space="preserve">
+    <value>Add location code (for example WC)</value>
+  </data>
+  <data name="Settings_IgnoredLocations_Add.Content" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Settings_IgnoredLocations_ListLabel.Text" xml:space="preserve">
+    <value>Ignored locations</value>
+  </data>
+  <data name="Settings_IgnoredLocations_Remove.Content" xml:space="preserve">
+    <value>Remove</value>
+  </data>
   <data name="AppNotificationSamplePayload" xml:space="preserve">
     <value>&lt;toast launch="action=ToastClick"&gt;
   &lt;visual&gt;

@@ -890,6 +890,7 @@
                                 Symbol="Map" />
                             <TextBlock
                                 Grid.Column="1"
+                                x:Uid="Settings_IgnoredLocations_Title"
                                 VerticalAlignment="Center"
                                 FontWeight="SemiBold"
                                 Text="Ignored Infor Visual Locations" />
@@ -910,6 +911,7 @@
 
                             <TextBlock
                                 Grid.Row="0"
+                                x:Uid="Settings_IgnoredLocations_Description"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 Text="Locations omitted from inventory lists and totals (for example WC, NCM, V-WC, NCM-VITS, SHIP). Editing is limited to roles above Material Handler."
                                 TextWrapping="Wrap" />
@@ -924,11 +926,13 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBox
                                     Grid.Column="0"
+                                    x:Uid="Settings_IgnoredLocations_AddPlaceholder"
                                     IsEnabled="{x:Bind ViewModel.CanManageIgnoredLocations, Mode=OneWay}"
                                     PlaceholderText="Add location code (for example WC)"
                                     Text="{x:Bind ViewModel.IgnoredLocationInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 <Button
                                     Grid.Column="1"
+                                    x:Uid="Settings_IgnoredLocations_Add"
                                     VerticalAlignment="Stretch"
                                     Command="{x:Bind ViewModel.AddIgnoredLocationCommand}"
                                     Content="Add"
@@ -937,6 +941,7 @@
 
                             <TextBlock
                                 Grid.Row="2"
+                                x:Uid="Settings_IgnoredLocations_ListLabel"
                                 Margin="0,4,0,0"
                                 FontWeight="SemiBold"
                                 Style="{ThemeResource BodyTextBlockStyle}"
@@ -967,6 +972,7 @@
                                                 Text="{Binding}" />
                                             <Button
                                                 Grid.Column="2"
+                                                x:Uid="Settings_IgnoredLocations_Remove"
                                                 VerticalAlignment="Center"
                                                 Command="{Binding ViewModel.RemoveIgnoredLocationCommand, ElementName=RootPage}"
                                                 CommandParameter="{Binding}"

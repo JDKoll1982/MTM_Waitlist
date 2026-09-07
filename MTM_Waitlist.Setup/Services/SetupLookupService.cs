@@ -1,5 +1,6 @@
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 
@@ -9,11 +10,13 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
 {
     private readonly SqlHelperServer _sqlHelperServer;
     private readonly InforVisualSqlQueryService _inforVisualSqlQueryService;
+    private readonly IIgnoredLocationsService _ignoredLocationsService;
 
-    public SetupLookupService(SqlHelperServer sqlHelperServer, InforVisualSqlQueryService inforVisualSqlQueryService)
+    public SetupLookupService(SqlHelperServer sqlHelperServer, InforVisualSqlQueryService inforVisualSqlQueryService, IIgnoredLocationsService ignoredLocationsService)
     {
         _sqlHelperServer = sqlHelperServer;
         _inforVisualSqlQueryService = inforVisualSqlQueryService;
+        _ignoredLocationsService = ignoredLocationsService;
     }
 
     public async Task<SetupLookupResult> LookupWorkOrderAsync(string normalizedWorkOrder, CancellationToken cancellationToken = default)
@@ -62,17 +65,45 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
         StartupDebugLog.Info("SetupLookup", $"GetSubordinatePartsAsync started. WO='{normalizedWorkOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
         try
         {
-            return await _sqlHelperServer.ExecuteReadOnlyQueueAsync(
+            var parts = await _sqlHelperServer.ExecuteReadOnlyQueueAsync(
                 "Setup.InforVisualSubordinateParts",
                 normalizedWorkOrder,
                 () => GetSubordinatePartsFromMockAsync(normalizedWorkOrder, partNumber, sequenceNumber, cancellationToken),
                 () => GetSubordinatePartsFromBackendAsync(normalizedWorkOrder, partNumber, sequenceNumber, cancellationToken)).ConfigureAwait(false);
+
+            return await ExcludeIgnoredLocationsAsync(parts, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             StartupDebugLog.Error("SetupLookup", ex, $"GetSubordinatePartsAsync failed. WO='{normalizedWorkOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
             return Array.Empty<SetupSubordinatePart>();
         }
+    }
+
+    /// <summary>
+    /// Omits subordinate parts whose <see cref="SetupSubordinatePart.Location"/> is in the shared
+    /// ignored-locations set (plant inventory codes like WC/NCM/SHIP edited in Settings), so Setup
+    /// location lists match the Waitlist/Coil filtering rule. Empty/unassigned locations are kept.
+    /// </summary>
+    private async Task<IReadOnlyList<SetupSubordinatePart>> ExcludeIgnoredLocationsAsync(
+        IReadOnlyList<SetupSubordinatePart> parts,
+        CancellationToken cancellationToken)
+    {
+        if (parts is null || parts.Count == 0)
+        {
+            return parts ?? Array.Empty<SetupSubordinatePart>();
+        }
+
+        var ignored = await _ignoredLocationsService.GetIgnoredLocationsAsync(cancellationToken).ConfigureAwait(false);
+        if (ignored.Count == 0)
+        {
+            return parts;
+        }
+
+        var ignoredSet = new HashSet<string>(ignored, StringComparer.OrdinalIgnoreCase);
+        return parts
+            .Where(part => string.IsNullOrWhiteSpace(part.Location) || !ignoredSet.Contains(part.Location.Trim()))
+            .ToArray();
     }
 
     private static async Task<SetupLookupResult> LookupWorkOrderFromMockAsync(string normalizedWorkOrder, CancellationToken cancellationToken)
