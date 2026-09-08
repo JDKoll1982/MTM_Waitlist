@@ -12,8 +12,8 @@
 
 ## Phase 0 — Task 0: Green build & full-suite baseline
 
-- [ ] **CI/CD: `MTM_Waitlist.sln` builds clean (0 errors, 0 warnings)** via `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false`. (Ref: file 07 Phase 0) | **Persona: DevOps Engineer**
-- [ ] **Testing: full `MTM_Waitlist.Tests` suite passes** (`dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64`). (Ref: file 07 Phase 0) | **Persona: QA Engineer**
+- [x] **CI/CD: `MTM_Waitlist.sln` builds clean (0 errors, 0 warnings)** via `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false`. (Ref: file 07 Phase 0) | **Persona: DevOps Engineer** — verified 2026-09-08: `Build succeeded. 0 Warning(s) 0 Error(s)`.
+- [x] **Testing: full `MTM_Waitlist.Tests` suite passes** (`dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64`). (Ref: file 07 Phase 0) | **Persona: QA Engineer** — verified 2026-09-08: `Passed! Failed: 0, Passed: 552, Skipped: 8` (8 skipped are opt-in MySQL `ConfigImagesLocationsIntegrationTests` gated on `MTM_WAITLIST_TEST_DB_CONNECTION_STRING`; run live against 172.16.1.104 → 8/8 pass). Repaired 4 stale Infor Visual DB-integration tests (stale `EMPLOYEE.NAME` schema + dead WO fixtures) → live green; mirrored `Database/InforVisual/Queues/**` content into `MTM_Waitlist.Tests.csproj` so tests load real scripts.
 **GATE: 0 errors + 0 warnings + full green suite before/after this file.**
 
 ## Phase 1 — Canonical Category/Item catalog (data-driven from CSV)
@@ -23,7 +23,7 @@
 - [x] **Data Model: add canonical Category (umbrella) enum** with `Pickup`, `Deliver`, `Assist`, `Other`. (Ref: CSV col 1/6; Plan-Design-TypeCategoryActionRefactor) | **Persona: Backend Engineer** — verified 2026-09-07: `MTM_Waitlist.Settings/Models/RequestCategory.cs`
 - [x] **Data Model: add canonical Item model** mirroring the CSV 18 rows (id `pickup-coil` … `other`, display, normalized, value type, source). (Ref: CSV rows; col 3/4/5/10) | **Persona: Backend Engineer** — verified 2026-09-07: `RequestItemDefinition.cs`, `RequestItemValueType.cs`, `RequestItemCatalog.cs` (18 rows); 7 tests green in `RequestItemCatalogTests.cs`
 - [ ] **JSON Schema: extend `waitlist-request-types.json`** so each row carries Category + Item + source fields. (Ref: CSV; Plan-Design-TypesSubtypesCatalog) | **Persona: Full Stack Engineer**
-- [ ] **Service Layer: expose catalog loader** returning the 18-row catalog from the CSV/JSON, usable by New Request and card render. (Ref: CSV; `NewRequestFlowRules`) | **Persona: Backend Engineer**
+- [x] **Service Layer: expose catalog loader** returning the 18-row catalog from the CSV/JSON, usable by New Request and card render. (Ref: CSV; `NewRequestFlowRules`) | **Persona: Backend Engineer** — verified 2026-09-08: `MTM_Waitlist.Settings/Services/IRequestItemCatalogService.cs` + `RequestItemCatalogService.cs` (wraps `RequestItemCatalog` mirror of CSV: `GetAllItems`/`GetByCategory`/`FindById`/`GetCategoriesInOrder`), DI-registered; 5/5 green in `RequestItemCatalogServiceTests.cs`. JSON-backed source to follow with the schema-extension task above.
 *Depends on: catalog loader wiring*
 
 ### Subphase 1.2: Category/Item → request model mapping
@@ -82,13 +82,21 @@
 
 ## Phase 6 — FG / WIP / Outside-Service product type (research-gated)
 
-> **Research outcome (2026-09-07):** Infor Visual is a job-shop ERP. FG / WIP / Outside Service is **not** a single product-type field a user sets; it is **derived** from the job + part + operation state. Grounded in the local Infor guide (`Documents/Development/InforVisual/Infor Visual Guide`, ch 03/05) and the schema exports (`DatabaseCSVFiles/ColumnDetails`). Context7 + the Infor cloud portal were unreachable (login-gated / 404), so the remaining step needs live test data.
+> **Research outcome (2026-09-08):** Infor Visual is a job-shop ERP. FG / WIP / Outside Service is
+> **not** a single product-type field a user sets; it is **derived** from the job + part + operation
+> state. Grounded in the local Infor guide (`Documents/Development/InforVisual/Infor Visual Guide`,
+> ch 03/05), the schema exports (`DatabaseCSVFiles/ColumnDetails`), and a **live data pull
+> (2026-09-08)** from `VISUAL/MTMFG` (ENUM_CODES + WORK_ORDER/OPERATION/PART counts) and the MTM WIP
+> Application MySQL DB (`mtm_wip_application_winforms`, floor stock). Status codes confirmed:
+> C=Closed, F=Firmed, R=Released, U=Unreleased, X=Cancelled.
 >
-> **Implementation note (2026-09-07):** the disposition **derivation core is implemented as a pure,
-> config-driven classifier** so it stays stable while the Infor status codes are unknown. All Infor
-> status-code values are isolated in one easily-editable config class; when the real codes are confirmed
-> you edit only that file — no logic change. The remaining open items are the live Infor SQL script, the
-> exact status-code confirmation, and wiring the resolver to the job-item pipeline.
+> **Implementation note (2026-09-08):** the disposition **derivation core is a pure, config-driven
+> classifier**. All Infor status-code values are isolated in one easily-editable config class
+> (`RequestDispositionStatusCodes`) — now confirmed against live data (see Subphase 6.1). The live
+> Infor derivation SQL (`GetDispositionInput.sql`), the MTM WIP App MySQL data path
+> (`GetWipFloorQuantities.sql` + `WipFloorInventoryService`), and the pure mapper/resolver feeding
+> `DispositionInput` are implemented (see Subphase 6.2 groundwork). Remaining open items are wiring a
+> real request Item (part/sequence/disposition) into the Phase 2/3/4 resolver + picker/card pipeline.
 
 ### Subphase 6.0: Config-driven disposition derivation (IMPLEMENTED — pure, testable)
 
@@ -99,11 +107,25 @@
 
 ### Subphase 6.1: Derivation spec from the Infor Visual schema
 
-- [ ] **Database Migration: draft the product-disposition derivation SQL** for a work center's active setup job + part: **Outside Service** = an `OPERATION` row with non-empty `VENDOR_ID` / `SERVICE_ID` / `SERVICE_PART_ID`; **FG** = `PART.QTY_ON_HAND` / `PART_LOCATION.QTY > 0` at a non-ignored finished-goods location; **WIP** = open-quantity on the `WORK_ORDER` / `MT_WIP_INVENTORY` (has `LOCATION`, `QTY`). (Ref: CSV pickup-fg/ncm/wip/outside-service; ColumnDetails WORK_ORDER/OPERATION/MT_WIP_*) | **Persona: Database Engineer**
-- [ ] **Configuration: confirm Infor status codes against live data and update `RequestDispositionStatusCodes`** — `WORK_ORDER.STATUS` (nchar1) and `OPERATION.STATUS` drive open vs completed; replace the placeholder code sets. No classifier logic change needed. (Ref: ColumnDetails WORK_ORDER/OPERATION) | **Persona: Database Engineer**
-- [ ] **Tech Lead: validate the derivation against live Infor Visual test data** for real FG/WIP/Outside parts (the remaining unresolved item — cloud portal and Context7 were unreachable; needs a real data pull). (Ref: research notes) | **Persona: Tech Lead**
+- [x] **Database Migration: draft the product-disposition derivation SQL** for a work center's active setup job + part: **Outside Service** = an `OPERATION` row with non-empty `VENDOR_ID` / `SERVICE_ID` / `SERVICE_PART_ID`; **FG** = `PART.QTY_ON_HAND` / `PART_LOCATION.QTY > 0` at a non-ignored finished-goods location; **WIP** = open-quantity on the `WORK_ORDER` / `MT_WIP_INVENTORY` (has `LOCATION`, `QTY`). (Ref: CSV pickup-fg/ncm/wip/outside-service; ColumnDetails WORK_ORDER/OPERATION/MT_WIP_*) | **Persona: Database Engineer** — verified 2026-09-08: `Database/InforVisual/Queues/Module_Waitlist/Queries/GetDispositionInput.sql` (returns WorkOrderStatus / OpenWorkOrderQuantity = DESIRED−RECEIVED / FinishedGoodsQuantity = PART.QTY_ON_HAND / HasOutsideVendorOperation), validated live: WO-074011/24733431 → R, open 33, on-hand 54, outside 0; WO-074010/12-32754-000 → R, outside 1. `Database/MTMWipApp/Queues/Module_Waitlist/Queues/GetWipFloorQuantities.sql` (floor FG/O-S/NCM/WIP buckets), validated live: A22-77724-100 → O/S 74; 22-77401-001 → NCM 340; 380397.001 → WIP 8,740.
+- [x] **Configuration: confirm Infor status codes against live data and update `RequestDispositionStatusCodes`** — `WORK_ORDER.STATUS` (nchar1) and `OPERATION.STATUS` drive open vs completed; replace the placeholder code sets. No classifier logic change needed. (Ref: ColumnDetails WORK_ORDER/OPERATION) | **Persona: Database Engineer** — verified 2026-09-08 against live `VISUAL/MTMFG`: ENUM_CODES maps C=Closed, F=Firmed, R=Released, U=Unreleased, X=Cancelled; observed counts C 68,278/R 680/U 42,138/X 1,404 (WO), C 244,112/R 2,840/U 13,046/X 9,030 (OP). `OpenStatusCodes` = R,U,F; `ClosedStatusCodes` = C; X excluded (never FG). 10/10 classifier tests green.
+- [x] **Tech Lead: validate the derivation against live Infor Visual test data** for real FG/WIP/Outside parts (the remaining unresolved item — cloud portal and Context7 were unreachable; needs a real data pull). (Ref: research notes) | **Persona: Tech Lead** — verified 2026-09-08 live: Outside = 26.9k OPERATION rows w/ VENDOR_ID/SERVICE_ID/SERVICE_PART_ID (RESOURCE_ID `OUTSIDE_SERVICE`); WIP open qty = `WORK_ORDER.DESIRED_QTY − RECEIVED_QTY` (WO-074011: 84−51=33 open); `MT_WIP_INVENTORY` empty in MTMFG; `PROD_ORDER_TYPE` all NULL. FG locations confirmed in MTM WIP App `md_locations` (FG / DC-FG / FLOOR - FINISHED GOODS). Full note: `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md`.
 
 ### Subphase 6.2: Item resolution implementation
+
+> **GROUNDWORK COMPLETE (2026-09-08, not yet UI-wired):**
+> - MySQL data path added (user decision): `MySqlDatabaseTarget.MtmWipApplication` + env
+>   `MTM_WIP_APPLICATION_DB_CONNECTION_STRING` in `MySqlHelperServer`; floor snapshot model
+>   `MTM_Waitlist.Core/Models/WipFloorQuantitySnapshot.cs`; executor + script store
+>   `MTM_Waitlist.Core/Services/WipFloorInventoryService.cs` (loads `GetWipFloorQuantities.sql` from
+>   `Database/MTMWipApp/Queues/Module_Waitlist/Queues`; app+test csproj content includes added).
+> - Pure composition `MTM_Waitlist.Settings/Services/RequestDispositionMapper.cs`
+>   (`MapInforRow` + `BuildDispositionInput(InforDispositionRow?, WipFloorQuantitySnapshot?)`).
+> - End-to-end `MTM_Waitlist.Settings/Services/RequestDispositionResolver.cs` (runs Infor
+>   `GetDispositionInput.sql` + floor snapshot → `DispositionInput` → `RequestDisposition`); DI-registered.
+> - Tests green: `WipFloorInventoryServiceTests` (5), `RequestDispositionMapperTests` (11),
+>   `RequestDispositionClassifierTests` (10). Remaining = wire a request Item (part/sequence/disposition)
+>   into the Phase 2/3/4 resolver + New Request picker/card pipeline (no mock `FG-10042`).
 
 - [ ] **Service Layer: implement FG / WIP / Outside Item resolution** from the confirmed derivation, reusing the `GetInventoryLocations.sql` / `LookupWorkOrder.sql` / `GetSubordinateParts.sql` join patterns (VISUAL / MTMFG), feeding the classifier's `DispositionInput`. (Ref: CSV rows; Database/InforVisual/Queues) | **Persona: Backend Engineer**
 - [ ] **Service Layer: wire `{PartNumber} / {Sequence}`** from `setup_active_jobs.sequence_number` (already resolved in Phase 2.2) and the derived FG/WIP/Outside type. (Ref: CSV pickup-wip/pickup-outside-service) | **Persona: Backend Engineer**
