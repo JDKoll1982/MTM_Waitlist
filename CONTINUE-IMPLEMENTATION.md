@@ -53,7 +53,7 @@ Use the app's existing connection path (env-var driven). The code reads these en
 - `INFOR_VISUAL_SQL_PASSWORD`
 
 Dev credentials (provided by the user, dev-only, do NOT commit to source control or log them):
-Server `VISUAL`, DB `MTMFG`, user `JKOLL`, password `KOLL`.
+Server ASK, DB ASK, user ASK, password ASK.
 
 > SECURITY: Set these as environment variables (or pass at connect time) rather than hardcoding them into
 > committed files. Do not print the password in output or commit it.
