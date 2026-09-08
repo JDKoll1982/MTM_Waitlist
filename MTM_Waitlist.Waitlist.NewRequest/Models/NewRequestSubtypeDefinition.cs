@@ -17,4 +17,8 @@ public sealed class NewRequestSubtypeDefinition
     public int MaxLength { get; set; } = 200;
 
     public List<string> CenterDataGridFields { get; set; } = new();
+
+    public string? Category { get; set; }
+
+    public string? ItemId { get; set; }
 }

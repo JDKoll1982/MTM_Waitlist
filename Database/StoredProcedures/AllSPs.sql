@@ -801,6 +801,8 @@ SELECT
     min_length,
     max_length,
     default_image_path,
+    category,
+    item_id,
     center_data_grid_fields_json,
     is_active
 FROM waitlist_request_types
@@ -830,6 +832,8 @@ SELECT
     min_length,
     max_length,
     default_image_path,
+    category,
+    item_id,
     center_data_grid_fields_json,
     is_active
 FROM waitlist_request_subtypes
@@ -1325,6 +1329,8 @@ SELECT
     min_length,
     max_length,
     default_image_path,
+    category,
+    item_id,
     center_data_grid_fields_json,
     is_active
 FROM waitlist_request_subtypes
@@ -1353,6 +1359,8 @@ SELECT
     min_length,
     max_length,
     default_image_path,
+    category,
+    item_id,
     center_data_grid_fields_json,
     is_active
 FROM waitlist_request_types
@@ -1595,6 +1603,8 @@ SELECT
     min_length,
     max_length,
     default_image_path,
+    category,
+    item_id,
     center_data_grid_fields_json,
     is_active,
     created_utc,
@@ -1625,6 +1635,8 @@ SELECT
     min_length,
     max_length,
     default_image_path,
+    category,
+    item_id,
     center_data_grid_fields_json,
     is_active,
     created_utc,

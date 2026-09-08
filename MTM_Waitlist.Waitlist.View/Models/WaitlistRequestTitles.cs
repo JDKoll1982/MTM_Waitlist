@@ -1,3 +1,6 @@
+using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
+
 namespace MTM_Waitlist.Module_Waitlist.Models;
 
 /// <summary>
@@ -7,6 +10,12 @@ namespace MTM_Waitlist.Module_Waitlist.Models;
 ///
 /// EDIT THE TITLES HERE: each value below is the exact text shown as the request card title. Add or
 /// change a row to reword any type/subtype. Unlisted combinations fall back to "Type / Subtype".
+///
+/// Type/Category/Item refactor (2026-09-08, Phase 1.2): <see cref="For"/> keeps producing the current
+/// card phrase (visible UI unchanged until Phase 4), while <see cref="ResolveLine1"/> and
+/// <see cref="ResolveItem"/> expose the canonical uniform-card model — Line 1 = umbrella verb
+/// (Pickup/Deliver/Assist/Other) and the canonical <see cref="RequestItemDefinition"/> whose concrete
+/// Line 2 identifier (coil number, part number, …) is supplied by the Phase 2/6 resolvers.
 /// </summary>
 public static class WaitlistRequestTitles
 {
@@ -69,4 +78,22 @@ public static class WaitlistRequestTitles
         var key = type.ToUpperInvariant() + "\u0001" + sub.ToUpperInvariant();
         return Titles.TryGetValue(key, out var title) ? title : $"{type} / {sub}";
     }
+
+    /// <summary>
+    /// Card Line 1 = the umbrella verb for a legacy (RequestType, Subtype) pair. Returns the
+    /// canonical category verb (Pickup/Deliver/Assist/Other) when the pair maps to a catalog row,
+    /// otherwise the legacy request type verbatim (fallback preserves old display behavior).
+    /// Additive Phase 1.2 accessor; the uniform 2-line card consumes it in Phase 4.
+    /// </summary>
+    public static string ResolveLine1(string? requestType, string? subtype) =>
+        RequestItemLegacyMapper.ResolveUmbrellaVerb(requestType, subtype);
+
+    /// <summary>
+    /// The canonical <see cref="RequestItemDefinition"/> (CSV catalog row) for a legacy pair, or
+    /// null when the pair is not one of the mapped leaf rows. The concrete Line 2 identifier
+    /// (coil number, part number, die number, …) hangs off this item and is supplied by the
+    /// Phase 2/6 resolvers; the service layer only exposes the item metadata here.
+    /// </summary>
+    public static RequestItemDefinition? ResolveItem(string? requestType, string? subtype) =>
+        RequestItemLegacyMapper.Map(requestType, subtype);
 }

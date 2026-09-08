@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS waitlist_request_types (
     min_length INT NOT NULL DEFAULT 0 COMMENT 'Minimum text-input length.',
     max_length INT NOT NULL DEFAULT 200 COMMENT 'Maximum text-input length.',
     default_image_path VARCHAR(500) NULL COMMENT 'Optional image path from JSON imagePath (usually null; images resolve via ImageLocationService).',
+    category VARCHAR(16) NULL COMMENT 'Canonical umbrella category (Pickup/Deliver/Assist/Other) this legacy type maps onto when it is a leaf (no subtypes). NULL for grouping types.',
+    item_id VARCHAR(64) NULL COMMENT 'Canonical item id from Request-Config-Template.csv (col 3) this legacy type maps onto when it is a leaf (no subtypes). NULL for grouping types.',
     center_data_grid_fields_json JSON NULL COMMENT 'Ordered center data-grid column labels (centerDataGridFields).',
     is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the request type is offered in the wizard.',
     created_utc DATETIME NOT NULL,

@@ -55,6 +55,8 @@ public sealed class RequestTypeCatalogService : IRequestTypeCatalogService
                 PromptText = As<string>(row, "prompt_text") ?? string.Empty,
                 MinLength = AsInt(row, "min_length"),
                 MaxLength = AsInt(row, "max_length", 200),
+                Category = As<string>(row, "category"),
+                ItemId = As<string>(row, "item_id"),
                 CenterDataGridFields = ReadStringList(row, "center_data_grid_fields_json"),
             };
 
@@ -71,6 +73,8 @@ public sealed class RequestTypeCatalogService : IRequestTypeCatalogService
                         PromptText = As<string>(subtypeRow, "prompt_text") ?? string.Empty,
                         MinLength = AsInt(subtypeRow, "min_length"),
                         MaxLength = AsInt(subtypeRow, "max_length", 200),
+                        Category = As<string>(subtypeRow, "category"),
+                        ItemId = As<string>(subtypeRow, "item_id"),
                         CenterDataGridFields = ReadStringList(subtypeRow, "center_data_grid_fields_json"),
                     });
                 }

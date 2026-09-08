@@ -16,6 +16,12 @@ public sealed class NewRequestTypeDefinition
 
     public int MaxLength { get; set; } = 200;
 
+    /// <summary>Canonical umbrella category when this type is a leaf (no subtypes); null for grouping types.</summary>
+    public string? Category { get; set; }
+
+    /// <summary>Canonical item id (Request-Config-Template.csv col 3) when this type is a leaf (no subtypes); null for grouping types.</summary>
+    public string? ItemId { get; set; }
+
     public List<string> CenterDataGridFields { get; set; } = new();
 
     public List<NewRequestSubtypeDefinition> Subtypes { get; set; } = new();
