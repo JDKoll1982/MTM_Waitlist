@@ -47,6 +47,9 @@
     <Content Include="Database\MTMReceivingApp\Queues\Module_Setup\**\*.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Database\MTMWipApp\Queues\Module_Waitlist\**\*.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Database\MTMReceivingApp\StoredProcedures\**\*.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

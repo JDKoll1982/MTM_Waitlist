@@ -13,7 +13,7 @@ public sealed class RequestDispositionClassifierTests
     public void Classify_OutsideVendorOperation_ReturnsOutsideService()
     {
         var input = new RequestDispositionClassifier.DispositionInput(
-            WorkOrderStatus: "O",
+            WorkOrderStatus: "R",
             FinishedGoodsQuantity: 10m,
             OpenWorkOrderQuantity: 5m,
             HasOutsideVendorOperation: true);
@@ -50,14 +50,41 @@ public sealed class RequestDispositionClassifierTests
     [TestMethod]
     public void Classify_OnHandButOpenStatus_ReturnsWorkInProcess()
     {
-        // Stock on hand but the order is still open => still being worked.
+        // Stock on hand but the order is still open (Released) => still being worked.
         var input = new RequestDispositionClassifier.DispositionInput(
-            WorkOrderStatus: "O",
+            WorkOrderStatus: "R",
             FinishedGoodsQuantity: 120m,
             OpenWorkOrderQuantity: 0m,
             HasOutsideVendorOperation: false);
 
         Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+    }
+
+    [TestMethod]
+    public void Classify_UnreleasedStatus_ReturnsWorkInProcess()
+    {
+        // 'U' (Unreleased) is a confirmed open code (42k rows in WORK_ORDER).
+        var input = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "U",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 0m,
+            HasOutsideVendorOperation: false);
+
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+    }
+
+    [TestMethod]
+    public void Classify_CancelledStatusWithOnHand_ReturnsUnknownNotFinishedGoods()
+    {
+        // 'X' (Cancelled) is deliberately in neither set: on-hand stock under a cancelled order must
+        // not classify as Finished Goods (and with no open qty it is Unknown).
+        var input = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "X",
+            FinishedGoodsQuantity: 80m,
+            OpenWorkOrderQuantity: 0m,
+            HasOutsideVendorOperation: false);
+
+        Assert.AreEqual(RequestDisposition.Unknown, RequestDispositionClassifier.Classify(input));
     }
 
     // --- Work In Process ---
@@ -106,7 +133,7 @@ public sealed class RequestDispositionClassifierTests
     public void Classify_StatusCodeMatching_IsCaseInsensitive()
     {
         var open = new RequestDispositionClassifier.DispositionInput(
-            WorkOrderStatus: "o", FinishedGoodsQuantity: 0m, OpenWorkOrderQuantity: 0m, HasOutsideVendorOperation: false);
+            WorkOrderStatus: "r", FinishedGoodsQuantity: 0m, OpenWorkOrderQuantity: 0m, HasOutsideVendorOperation: false);
         Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(open));
 
         var closed = new RequestDispositionClassifier.DispositionInput(

@@ -19,7 +19,7 @@ public sealed class InforVisualSqlQueryServiceTests
             "LookupWorkOrder",
             new Dictionary<string, object?>
             {
-                ["NormalizedWorkOrder"] = "WO-076951",
+                ["NormalizedWorkOrder"] = "WO-074011",
             });
 
         Assert.IsTrue(rows.Count > 0, "LookupWorkOrder should return at least one row when the Infor Visual server is available.");
@@ -36,8 +36,8 @@ public sealed class InforVisualSqlQueryServiceTests
             "GetSequences",
             new Dictionary<string, object?>
             {
-                ["NormalizedWorkOrder"] = "WO-076952",
-                ["PartNumber"] = "12345679",
+                ["NormalizedWorkOrder"] = "WO-074011",
+                ["PartNumber"] = "24733431",
             });
 
         Assert.IsTrue(rows.Count > 0, "GetSequences should return at least one sequence when the Infor Visual server is available.");
@@ -54,9 +54,9 @@ public sealed class InforVisualSqlQueryServiceTests
             "GetSubordinateParts",
             new Dictionary<string, object?>
             {
-                ["NormalizedWorkOrder"] = "WO-076952",
-                ["PartNumber"] = "12345679",
-                ["SequenceNumber"] = "20",
+                ["NormalizedWorkOrder"] = "WO-074011",
+                ["PartNumber"] = "24733431",
+                ["SequenceNumber"] = "919",
             });
 
         Assert.IsTrue(rows.Count > 0, "GetSubordinateParts should return rows when the Infor Visual server is available.");
@@ -78,7 +78,7 @@ public sealed class InforVisualSqlQueryServiceTests
         await connection.OpenAsync();
 
         await using var command = new SqlCommand(
-            @"SELECT employee.ID AS EmployeeNumber, employee.NAME AS EmployeeName, employee.ACTIVE AS IsActive
+            @"SELECT employee.ID AS EmployeeNumber, employee.FIRST_NAME AS EmployeeFirstName, employee.LAST_NAME AS EmployeeLastName, employee.ACTIVE AS IsActive
               FROM dbo.EMPLOYEE AS employee
               WHERE employee.ID = @EmployeeNumber;",
             connection);
@@ -91,7 +91,8 @@ public sealed class InforVisualSqlQueryServiceTests
         {
             foundRow = true;
             Assert.AreEqual("6229", Convert.ToString(reader["EmployeeNumber"]));
-            Assert.AreEqual("John Koll", Convert.ToString(reader["EmployeeName"]));
+            Assert.AreEqual("John", Convert.ToString(reader["EmployeeFirstName"]));
+            Assert.AreEqual("Koll", Convert.ToString(reader["EmployeeLastName"]));
             Assert.AreEqual("Y", Convert.ToString(reader["IsActive"]));
         }
 

@@ -18,5 +18,33 @@
         "**/*.config"
     ],
 
-    "python-envs.defaultEnvManager": "ms-python.python:system"
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "chat.mcp.serverSampling": {
+        "MTM_Waitlist/.vscode/mcp.json: xamlmcp": {
+            "allowedModels": [
+                "agent-host-copilotcli:deepseek/deepseek-v4-flash",
+                "deepseek/deepseek-v4-flash",
+                "agent-host-copilotcli:deepseek/deepseek-v4-flash-vision-exp",
+                "deepseek/deepseek-v4-flash-vision-exp"
+            ]
+        },
+        "MTM_Waitlist/.vscode/mcp.json: oraios/serena": {
+            "allowedModels": [
+                "agent-host-copilotcli:deepseek/deepseek-v4-flash",
+                "deepseek/deepseek-v4-flash",
+                "agent-host-copilotcli:deepseek/deepseek-v4-flash-vision-exp",
+                "deepseek/deepseek-v4-flash-vision-exp"
+            ]
+        },
+        "MTM_Waitlist/.vscode/mcp.json: csv-mcp-server": {
+            "allowedModels": [
+                "copilotcli/auto",
+                "copilot/auto",
+                "agent-host-copilotcli:deepseek/deepseek-v4-flash",
+                "deepseek/deepseek-v4-flash",
+                "agent-host-copilotcli:deepseek/deepseek-v4-flash-vision-exp",
+                "deepseek/deepseek-v4-flash-vision-exp"
+            ]
+        }
+    }
 }

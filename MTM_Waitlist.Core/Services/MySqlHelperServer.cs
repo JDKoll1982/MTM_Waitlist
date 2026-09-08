@@ -10,6 +10,7 @@ public enum MySqlDatabaseTarget
 {
     MtmWaitlist,
     MtmReceivingApplication,
+    MtmWipApplication,
 }
 
 public sealed class MySqlHelperServer : IMySqlHelperServer
@@ -18,6 +19,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
     private const string WaitlistConnectionStringEnvironmentVariable = "MTM_WAITLIST_DB_CONNECTION_STRING";
     private const string WaitlistStartupConnectionStringEnvironmentVariable = "MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING";
     private const string ReceivingConnectionStringEnvironmentVariable = "MTM_RECEIVING_APPLICATION_DB_CONNECTION_STRING";
+    private const string WipApplicationConnectionStringEnvironmentVariable = "MTM_WIP_APPLICATION_DB_CONNECTION_STRING";
     private const int DefaultCommandTimeoutSeconds = 15;
 
     private readonly ILocalSettingsService _localSettingsService;
@@ -269,6 +271,8 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
                 ?? Environment.GetEnvironmentVariable(WaitlistStartupConnectionStringEnvironmentVariable)?.Trim(),
             MySqlDatabaseTarget.MtmReceivingApplication =>
                 Environment.GetEnvironmentVariable(ReceivingConnectionStringEnvironmentVariable)?.Trim(),
+            MySqlDatabaseTarget.MtmWipApplication =>
+                Environment.GetEnvironmentVariable(WipApplicationConnectionStringEnvironmentVariable)?.Trim(),
             _ => null,
         };
 
@@ -295,9 +299,12 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
 
     private static string GetDatabaseName(MySqlDatabaseTarget databaseTarget)
     {
-        return databaseTarget == MySqlDatabaseTarget.MtmReceivingApplication
-            ? "mtm_receiving_application"
-            : "mtm_waitlist";
+        return databaseTarget switch
+        {
+            MySqlDatabaseTarget.MtmReceivingApplication => "mtm_receiving_application",
+            MySqlDatabaseTarget.MtmWipApplication => "mtm_wip_application_winforms",
+            _ => "mtm_waitlist",
+        };
     }
 
     private static string DescribeParameters(IReadOnlyDictionary<string, object?> parameters)
