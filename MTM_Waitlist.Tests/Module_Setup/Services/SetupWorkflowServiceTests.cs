@@ -246,7 +246,7 @@ public sealed class SetupWorkflowServiceTests
         var sqlHelperServer = new SqlHelperServer(settings, sampleDataService);
         var mySqlHelperServer = new MySqlHelperServer(settings, sampleDataService);
         var workOrderValidationService = new WorkOrderValidationService();
-        var lookupService = new SetupLookupService(sqlHelperServer, new InforVisualSqlQueryService(new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build()), new IgnoredLocationsService(settings));
+        var lookupService = new SetupLookupService(sqlHelperServer, new MTM_Waitlist.Module_Setup.Services.InforVisualSqlQueryService(new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build()), new IgnoredLocationsService(settings));
         var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer);
         var activeJobCoordinatorService = new SetupActiveJobCoordinatorService();
         var persistenceService = new SetupPersistenceService(activeJobCoordinatorService, mySqlHelperServer);

@@ -41,6 +41,9 @@
     <Content Include="Database\InforVisual\Queues\Module_Setup\**\*.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Database\InforVisual\Queues\Module_Waitlist\**\*.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Database\MTMReceivingApp\Queues\Module_Setup\**\*.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

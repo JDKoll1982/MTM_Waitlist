@@ -12,11 +12,16 @@ public sealed class WaitlistInventoryService : IWaitlistInventoryService
 
     private readonly SqlHelperServer _sqlHelperServer;
     private readonly IIgnoredLocationsService _ignoredLocationsService;
+    private readonly InforVisualSqlQueryService _inforVisualSqlQueryService;
 
-    public WaitlistInventoryService(SqlHelperServer sqlHelperServer, IIgnoredLocationsService ignoredLocationsService)
+    public WaitlistInventoryService(
+        SqlHelperServer sqlHelperServer,
+        IIgnoredLocationsService ignoredLocationsService,
+        InforVisualSqlQueryService inforVisualSqlQueryService)
     {
         _sqlHelperServer = sqlHelperServer;
         _ignoredLocationsService = ignoredLocationsService;
+        _inforVisualSqlQueryService = inforVisualSqlQueryService;
     }
 
     public async Task<IReadOnlyList<InventoryLocationRow>> GetInventoryLocationRowsAsync(string partNumber, CancellationToken cancellationToken = default)
@@ -59,12 +64,60 @@ public sealed class WaitlistInventoryService : IWaitlistInventoryService
 
     private async Task<IReadOnlyList<InventoryLocationRow>> GetInventoryLocationsFromBackendAsync(string partNumber, CancellationToken cancellationToken)
     {
-        // Executes the Infor Visual queue script GetInventoryLocations.sql. This requires an
-        // Infor Visual SQL executor accessible to the Waitlist module (mirrors Setup's
-        // InforVisualSqlQueryService); until that shared executor is wired, no live rows are
-        // returned and callers fall back to an empty grid.
-        StartupDebugLog.Info("WaitlistInventory", $"GetInventoryLocationsFromBackendAsync not executed for part '{partNumber}' (Infor Visual executor pending).");
-        await Task.CompletedTask.ConfigureAwait(false);
-        return Array.Empty<InventoryLocationRow>();
+        // Executes the checked-in Infor Visual queue script GetInventoryLocations.sql via the shared
+        // Core executor when Feature.InforVisualMockData is OFF. The executor never throws: a missing
+        // connection or script yields an empty set (zero rows handled), so callers fall back cleanly.
+        StartupDebugLog.Info("WaitlistInventory", $"GetInventoryLocationsFromBackendAsync executing SQL script GetInventoryLocations for part '{partNumber}'.");
+        var rows = await _inforVisualSqlQueryService.ExecuteQueueAsync(
+            "GetInventoryLocations",
+            new Dictionary<string, object?>
+            {
+                ["PartNumber"] = partNumber,
+            },
+            cancellationToken).ConfigureAwait(false);
+
+        return rows
+            .Where(row => row is not null)
+            .Select(MapToInventoryLocationRow)
+            .ToArray();
+    }
+
+    /// <summary>Maps a raw Infor Visual result row (PartNumber/Location/OnHandQuantity) to a grid row.</summary>
+    internal static InventoryLocationRow MapToInventoryLocationRow(IReadOnlyDictionary<string, object?> row)
+    {
+        return new InventoryLocationRow
+        {
+            PartNumber = GetString(row, "PartNumber"),
+            Location = GetString(row, "Location"),
+            OnHandQuantity = GetDecimal(row, "OnHandQuantity"),
+        };
+    }
+
+    private static string GetString(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        if (!row.TryGetValue(key, out var value) || value is null)
+        {
+            return string.Empty;
+        }
+
+        return Convert.ToString(value)?.Trim() ?? string.Empty;
+    }
+
+    private static decimal GetDecimal(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        if (!row.TryGetValue(key, out var value) || value is null)
+        {
+            return 0m;
+        }
+
+        return value switch
+        {
+            decimal decimalValue => decimalValue,
+            double doubleValue => Convert.ToDecimal(doubleValue),
+            float floatValue => Convert.ToDecimal(floatValue),
+            int intValue => intValue,
+            long longValue => longValue,
+            _ => decimal.TryParse(Convert.ToString(value), out var parsed) ? parsed : 0m,
+        };
     }
 }

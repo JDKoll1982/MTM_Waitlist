@@ -417,6 +417,203 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         return updated;
     }
 
+    public async Task<WaitlistRequest?> AcceptAsync(
+        Guid requestId,
+        string handlerEmployeeNumber,
+        string? handlerEmployeeName = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (!_requests.TryGetValue(requestId, out var existing))
+        {
+            return null;
+        }
+
+        var handler = (handlerEmployeeNumber ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(handler))
+        {
+            return null;
+        }
+
+        // Only an available (Pending / unclaimed) request may be accepted.
+        if (!RequestActionPolicy.IsAvailable(existing.Status))
+        {
+            return null;
+        }
+
+        var updated = new WaitlistRequest
+        {
+            Id = existing.Id,
+            Building = existing.Building,
+            WorkCenter = existing.WorkCenter,
+            RequestType = existing.RequestType,
+            Subtype = existing.Subtype,
+            InputValue = existing.InputValue,
+            ActiveSetupJobId = existing.ActiveSetupJobId,
+            WorkCenterName = existing.WorkCenterName,
+            RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
+            RequesterEmployeeName = existing.RequesterEmployeeName,
+            Status = "Accepted",
+            RequestedUtc = existing.RequestedUtc,
+            TargetTimeUtc = existing.TargetTimeUtc,
+            IsOverdue = existing.IsOverdue,
+            AssignedMaterialHandler = handler,
+            CancellationReason = null,
+            CanceledUtc = null,
+            CanceledByEmployeeNumber = null,
+            AcceptedUtc = existing.AcceptedUtc ?? DateTimeOffset.UtcNow,
+            CompletedUtc = existing.CompletedUtc,
+            ReleasedUtc = existing.ReleasedUtc,
+            Note = existing.Note,
+        };
+
+        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Accepted", handler, handlerEmployeeName, handler, cancellationToken).ConfigureAwait(false);
+        StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' accepted by handler '{handler}'. Status 'Pending' -> 'Accepted'.");
+        return updated;
+    }
+
+    public async Task<WaitlistRequest?> CompleteAsync(
+        Guid requestId,
+        string handlerEmployeeNumber,
+        string? handlerEmployeeName = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (!_requests.TryGetValue(requestId, out var existing))
+        {
+            return null;
+        }
+
+        var handler = (handlerEmployeeNumber ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(handler)
+            || !RequestActionPolicy.CanViewerCompleteOrRelease(existing.Status, existing.AssignedMaterialHandler, handler))
+        {
+            return null;
+        }
+
+        var updated = new WaitlistRequest
+        {
+            Id = existing.Id,
+            Building = existing.Building,
+            WorkCenter = existing.WorkCenter,
+            RequestType = existing.RequestType,
+            Subtype = existing.Subtype,
+            InputValue = existing.InputValue,
+            ActiveSetupJobId = existing.ActiveSetupJobId,
+            WorkCenterName = existing.WorkCenterName,
+            RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
+            RequesterEmployeeName = existing.RequesterEmployeeName,
+            Status = "Completed",
+            RequestedUtc = existing.RequestedUtc,
+            TargetTimeUtc = existing.TargetTimeUtc,
+            IsOverdue = existing.IsOverdue,
+            AssignedMaterialHandler = existing.AssignedMaterialHandler,
+            CancellationReason = existing.CancellationReason,
+            CanceledUtc = existing.CanceledUtc,
+            CanceledByEmployeeNumber = existing.CanceledByEmployeeNumber,
+            AcceptedUtc = existing.AcceptedUtc,
+            CompletedUtc = existing.CompletedUtc ?? DateTimeOffset.UtcNow,
+            ReleasedUtc = existing.ReleasedUtc,
+            Note = existing.Note,
+        };
+
+        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Completed", handler, handlerEmployeeName, null, cancellationToken).ConfigureAwait(false);
+        StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' completed by handler '{handler}'. Status 'Accepted' -> 'Completed'.");
+        return updated;
+    }
+
+    public async Task<WaitlistRequest?> ReleaseAsync(
+        Guid requestId,
+        string handlerEmployeeNumber,
+        string? handlerEmployeeName = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (!_requests.TryGetValue(requestId, out var existing))
+        {
+            return null;
+        }
+
+        var handler = (handlerEmployeeNumber ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(handler)
+            || !RequestActionPolicy.CanViewerCompleteOrRelease(existing.Status, existing.AssignedMaterialHandler, handler))
+        {
+            return null;
+        }
+
+        // Release returns the job to the OPEN list: status -> Pending, assignee cleared, ReleasedUtc stamped.
+        // It is NOT a cancellation and must never touch the cancellation metadata.
+        var updated = new WaitlistRequest
+        {
+            Id = existing.Id,
+            Building = existing.Building,
+            WorkCenter = existing.WorkCenter,
+            RequestType = existing.RequestType,
+            Subtype = existing.Subtype,
+            InputValue = existing.InputValue,
+            ActiveSetupJobId = existing.ActiveSetupJobId,
+            WorkCenterName = existing.WorkCenterName,
+            RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
+            RequesterEmployeeName = existing.RequesterEmployeeName,
+            Status = "Pending",
+            RequestedUtc = existing.RequestedUtc,
+            TargetTimeUtc = existing.TargetTimeUtc,
+            IsOverdue = existing.IsOverdue,
+            AssignedMaterialHandler = null,
+            CancellationReason = existing.CancellationReason,
+            CanceledUtc = existing.CanceledUtc,
+            CanceledByEmployeeNumber = existing.CanceledByEmployeeNumber,
+            AcceptedUtc = existing.AcceptedUtc,
+            CompletedUtc = existing.CompletedUtc,
+            ReleasedUtc = DateTimeOffset.UtcNow,
+            Note = existing.Note,
+        };
+
+        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Released", handler, handlerEmployeeName, null, cancellationToken).ConfigureAwait(false);
+        StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' released by handler '{handler}'. Status 'Accepted' -> 'Pending' (not a cancellation).");
+        return updated;
+    }
+
+    /// <summary>
+    /// Stores a handler-action transition, records its audit entry, persists it through the status-update
+    /// path (mock OFF), and raises <see cref="RequestsChanged"/>.
+    /// </summary>
+    private async Task PersistHandlerActionAsync(
+        Guid requestId,
+        string fromStatus,
+        WaitlistRequest updated,
+        string eventType,
+        string? actorNumber,
+        string? actorName,
+        string? details,
+        CancellationToken cancellationToken)
+    {
+        _requests[requestId] = updated;
+        await RecordAuditAsync(requestId, fromStatus, updated.Status, eventType, actorNumber, actorName, details, cancellationToken).ConfigureAwait(false);
+
+        if (!IsMockDataEnabled() && _mySqlHelperServer is not null)
+        {
+            await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                "sp_waitlist_request_status_update",
+                new Dictionary<string, object?>
+                {
+                    ["p_public_id"] = requestId.ToString(),
+                    ["p_status"] = updated.Status,
+                    ["p_assigned_material_handler"] = updated.AssignedMaterialHandler,
+                    ["p_cancellation_reason"] = updated.CancellationReason,
+                    ["p_canceled_by_employee_number"] = updated.CanceledByEmployeeNumber,
+                    ["p_note"] = updated.Note,
+                },
+                MySqlDatabaseTarget.MtmWaitlist,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        RequestsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     private static bool IsValidStatusTransition(string currentStatus, string nextStatus)
     {
         var current = (currentStatus ?? string.Empty).Trim();

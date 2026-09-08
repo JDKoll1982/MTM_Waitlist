@@ -952,6 +952,97 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
+    public async Task AcceptAsync_AssignsToHandlerAndMarksInProgress()
+    {
+        var service = new WaitlistRequestService();
+        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submitResult.Request!;
+
+        var accepted = await service.AcceptAsync(request.Id, "9001", "Hana Handler");
+
+        Assert.IsNotNull(accepted);
+        Assert.AreEqual("Accepted", accepted!.Status);
+        Assert.AreEqual("9001", accepted.AssignedMaterialHandler);
+        Assert.IsNotNull(accepted.AcceptedUtc);
+        Assert.IsNull(accepted.ReleasedUtc);
+        // An accepted job stays on the shared (active) list.
+        Assert.IsTrue(service.GetActiveRequests("Expo Drive").Any(item => item.Id == request.Id));
+        Assert.IsTrue(service.GetAuditTrail(request.Id).Any(entry => entry.EventType == "Accepted"));
+    }
+
+    [TestMethod]
+    public async Task AcceptAsync_NotAvailable_ReturnsNull()
+    {
+        var service = new WaitlistRequestService();
+        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submitResult.Request!;
+
+        var accepted = await service.AcceptAsync(request.Id, "9001");
+        var secondAccept = await service.AcceptAsync(request.Id, "9002");
+
+        Assert.IsNotNull(accepted);
+        Assert.IsNull(secondAccept, "An already-taken request cannot be accepted by another handler.");
+    }
+
+    [TestMethod]
+    public async Task CompleteAsync_OnlyAssignedHandlerCanComplete()
+    {
+        var service = new WaitlistRequestService();
+        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submitResult.Request!;
+        await service.AcceptAsync(request.Id, "9001");
+
+        var wrongHandler = await service.CompleteAsync(request.Id, "9002");
+        var completed = await service.CompleteAsync(request.Id, "9001");
+
+        Assert.IsNull(wrongHandler, "Only the assigned handler may complete a request.");
+        Assert.IsNotNull(completed);
+        Assert.AreEqual("Completed", completed!.Status);
+        Assert.IsNotNull(completed.CompletedUtc);
+        Assert.IsFalse(service.GetActiveRequests("Expo Drive").Any(item => item.Id == request.Id), "A completed request leaves the active list.");
+        Assert.IsTrue(service.GetAuditTrail(request.Id).Any(entry => entry.EventType == "Completed"));
+    }
+
+    [TestMethod]
+    public async Task ReleaseAsync_ReturnsToOpenList_NotACancellation()
+    {
+        var service = new WaitlistRequestService();
+        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submitResult.Request!;
+        await service.AcceptAsync(request.Id, "9001");
+
+        var released = await service.ReleaseAsync(request.Id, "9001");
+
+        Assert.IsNotNull(released);
+        Assert.AreEqual("Pending", released!.Status, "Release returns the request to the open (Waiting) state.");
+        Assert.IsNull(released.AssignedMaterialHandler, "Release clears the assignee so another handler can accept.");
+        Assert.IsNotNull(released.ReleasedUtc);
+        Assert.IsNull(released.CanceledUtc, "Release must NOT be treated as a cancellation.");
+        Assert.IsNull(released.CancellationReason);
+        Assert.IsFalse(service.GetAuditTrail(request.Id).Any(entry => entry.EventType == "Canceled"), "Release must not record a Canceled audit event.");
+        Assert.IsTrue(service.GetAuditTrail(request.Id).Any(entry => entry.EventType == "Released"));
+
+        // After release the request is available again to any handler.
+        var reaccepted = await service.AcceptAsync(request.Id, "9002");
+        Assert.IsNotNull(reaccepted);
+        Assert.AreEqual("9002", reaccepted!.AssignedMaterialHandler);
+    }
+
+    [TestMethod]
+    public async Task ReleaseAsync_NonAssignee_ReturnsNull()
+    {
+        var service = new WaitlistRequestService();
+        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submitResult.Request!;
+        await service.AcceptAsync(request.Id, "9001");
+
+        var wrongHandler = await service.ReleaseAsync(request.Id, "9002");
+
+        Assert.IsNull(wrongHandler);
+        Assert.AreEqual("Accepted", service.GetRequest(request.Id)!.Status);
+    }
+
+    [TestMethod]
     public void GetWaitingForText_FormatsWaitingAge()
     {
         var now = DateTimeOffset.UtcNow;

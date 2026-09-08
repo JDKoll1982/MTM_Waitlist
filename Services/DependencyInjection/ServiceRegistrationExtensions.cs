@@ -95,6 +95,7 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<ISampleDataService>(serviceProvider =>
             new SampleDataService(serviceProvider.GetRequiredService<ILocalSettingsService>()));
         services.AddSingleton<SqlHelperServer>();
+        services.AddSingleton<MTM_Waitlist.Module_Core.Services.InforVisualSqlQueryService>();
         services.AddSingleton<MySqlHelperServer>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMySqlHelperServer>(
             sp => sp.GetRequiredService<MySqlHelperServer>());

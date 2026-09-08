@@ -34,14 +34,16 @@ jobs:
             - name: Build
               run: dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 --no-restore
 
-            # InforVisual tests require the on-premises SQL Server and cannot run on a hosted runner.
+            # InforVisual tests require the on-premises SQL Server and cannot run on a hosted runner,
+            # so all Infor Visual integration tests (Setup executor + Waitlist inventory query) are
+            # excluded from CI; they run locally against the on-prem DB via Assert.Inconclusive gating.
             - name: Test
               run: >
                   dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj
                   -c Debug -p:Platform=x64 -p:RuntimeIdentifier=win-x64
                   --framework net10.0-windows10.0.19041.0
                   --no-build
-                  --filter "FullyQualifiedName!~InforVisualSqlQueryServiceTests"
+                  --filter "FullyQualifiedName!~InforVisual"
                   --logger "trx;LogFileName=test-results.trx"
 
             - name: Upload test results

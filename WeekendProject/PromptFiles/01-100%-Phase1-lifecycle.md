@@ -1,7 +1,6 @@
 # 01 - Phase 1 — Foundation: Identity & Request Lifecycle + Persistence
 
 > **IMPLEMENTATION NOTE (2026-09-05):** The codebase already contains a live Waitlist request lifecycle (submit → DB persist → in-memory session list + audit log). This file is being executed by **building on that existing code**, not rebuilding it. The existing status vocabulary is `Pending / Accepted / Completed / Canceled` and is **retained as-is**; wherever this file/spec says `Waiting / In Progress / Done / Cancelled`, read the equivalents as `Pending / Accepted / Completed / Canceled` respectively. No status rename is performed. Where the spec asks to "add" lifecycle columns/fields that already exist, we extend/verify rather than duplicate.
-
 > **Source:** consolidated in the Master `WeekendProject/PromptFiles/prompt.md`. This file is self-contained so it can be executed after the Master is removed.
 > **Workflow:** execute with the **checklist-execution** skill; adopt each task's persona. Tick `- [x]` only when the work is implemented, builds clean, and its tests pass.
 > **Task 0 scope:** a green build (no errors/warnings) on both projects and a full test-suite pass is a baseline required by **every** file. It must hold BEFORE and AFTER this file.

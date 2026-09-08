@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -12,9 +13,7 @@ public sealed class WaitlistInventoryServiceTests
     [TestMethod]
     public async Task GetInventoryLocationRowsAsync_MockOn_ReturnsFilteredNonIgnoredRows()
     {
-        var settings = new InMemorySettings(mockOn: true);
-        var sqlHelper = new SqlHelperServer(settings, new EmptySampleDataService());
-        var service = new WaitlistInventoryService(sqlHelper, new IgnoredLocationsService(settings));
+        var service = CreateService(mockOn: true);
 
         var rows = await service.GetInventoryLocationRowsAsync("MMC0001000");
 
@@ -30,8 +29,7 @@ public sealed class WaitlistInventoryServiceTests
         // Only SHIP is ignored (defaults are not applied once a non-empty set is stored),
         // so WC/NCM rows with qty >= 1 must remain.
         settings.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, new List<string> { "SHIP" }).GetAwaiter().GetResult();
-        var sqlHelper = new SqlHelperServer(settings, new EmptySampleDataService());
-        var service = new WaitlistInventoryService(sqlHelper, new IgnoredLocationsService(settings));
+        var service = CreateService(settings);
 
         var rows = await service.GetInventoryLocationRowsAsync("MMC0001000");
 
@@ -43,9 +41,7 @@ public sealed class WaitlistInventoryServiceTests
     [TestMethod]
     public async Task GetInventoryLocationRowsAsync_EmptyPartNumber_ReturnsEmpty()
     {
-        var settings = new InMemorySettings(mockOn: true);
-        var sqlHelper = new SqlHelperServer(settings, new EmptySampleDataService());
-        var service = new WaitlistInventoryService(sqlHelper, new IgnoredLocationsService(settings));
+        var service = CreateService(mockOn: true);
 
         var rows = await service.GetInventoryLocationRowsAsync("   ");
 
@@ -53,19 +49,60 @@ public sealed class WaitlistInventoryServiceTests
     }
 
     [TestMethod]
-    public async Task GetInventoryLocationRowsAsync_MockOff_ReturnsEmptyWithoutThrowing()
+    public async Task GetInventoryLocationRowsAsync_MockOff_NoConnection_ReturnsEmptyWithoutThrowing()
     {
-        // With mock OFF the backend Infor Visual executor is not available in the test
-        // environment, so the helper must safely fall back to an empty set (zero rows handled).
-        var settings = new InMemorySettings(mockOn: false);
-        var sqlHelper = new SqlHelperServer(settings, new EmptySampleDataService());
-        var service = new WaitlistInventoryService(sqlHelper, new IgnoredLocationsService(settings));
+        // With mock OFF the service routes to the shared Infor Visual executor. No connection
+        // string is configured in the test environment (and the script is not on the test output
+        // path), so the executor returns an empty set — zero rows handled, no throw.
+        var service = CreateService(mockOn: false);
 
         var rows = await service.GetInventoryLocationRowsAsync("MMC0001000");
 
         Assert.IsNotNull(rows);
         Assert.AreEqual(0, rows.Count);
     }
+
+    [TestMethod]
+    public void MapToInventoryLocationRow_MapsPartLocationAndQuantity()
+    {
+        var row = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["PartNumber"] = "MMC0001000",
+            ["Location"] = "  V-A0-01  ",
+            ["OnHandQuantity"] = 46000m,
+        };
+
+        var mapped = WaitlistInventoryService.MapToInventoryLocationRow(row);
+
+        Assert.AreEqual("MMC0001000", mapped.PartNumber);
+        Assert.AreEqual("V-A0-01", mapped.Location);
+        Assert.AreEqual(46000m, mapped.OnHandQuantity);
+    }
+
+    [TestMethod]
+    public void MapToInventoryLocationRow_HandlesMissingOrNullColumns()
+    {
+        var mapped = WaitlistInventoryService.MapToInventoryLocationRow(new Dictionary<string, object?>());
+
+        Assert.AreEqual(string.Empty, mapped.PartNumber);
+        Assert.AreEqual(string.Empty, mapped.Location);
+        Assert.AreEqual(0m, mapped.OnHandQuantity);
+    }
+
+    private static WaitlistInventoryService CreateService(bool mockOn)
+        => CreateService(new InMemorySettings(mockOn));
+
+    private static WaitlistInventoryService CreateService(InMemorySettings settings)
+    {
+        var sqlHelper = new SqlHelperServer(settings, new EmptySampleDataService());
+        return new WaitlistInventoryService(
+            sqlHelper,
+            new IgnoredLocationsService(settings),
+            CreateExecutor());
+    }
+
+    private static InforVisualSqlQueryService CreateExecutor()
+        => new InforVisualSqlQueryService(new ConfigurationBuilder().Build());
 
     private sealed class InMemorySettings : ILocalSettingsService
     {
