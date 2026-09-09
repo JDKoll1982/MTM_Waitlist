@@ -13,7 +13,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     private static UrgencyAllotmentEditorViewModel Build(
         ILocalSettingsService settings,
         string role,
-        IRequestTypeEditorService? catalog = null)
+        IRequestSubtypeNameReadService? catalog = null)
     {
         var startupState = new StartupState { CurrentRole = role };
         return new UrgencyAllotmentEditorViewModel(
@@ -110,42 +110,15 @@ public sealed class UrgencyAllotmentEditorViewModelTests
         public Task CorruptForTestAsync() => Task.CompletedTask;
     }
 
-    private sealed class EmptyCatalogService : IRequestTypeEditorService
+    private sealed class EmptyCatalogService : IRequestSubtypeNameReadService
     {
-        public Task<IReadOnlyList<RequestTypeEditorItem>> GetCatalogAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult<IReadOnlyList<RequestTypeEditorItem>>(Array.Empty<RequestTypeEditorItem>());
-
-        public Task<int> AddSubtypeAsync(RequestSubtypeEditorItem subtype, CancellationToken cancellationToken = default) => Task.FromResult(0);
-
-        public Task<int> UpdateSubtypeAsync(RequestSubtypeEditorItem subtype, CancellationToken cancellationToken = default) => Task.FromResult(0);
-
-        public Task<int> DeleteSubtypeAsync(long subtypeId, CancellationToken cancellationToken = default) => Task.FromResult(0);
-
-        public Task<int> UpdateTypeAsync(RequestTypeEditorItem type, CancellationToken cancellationToken = default) => Task.FromResult(0);
+        public Task<IReadOnlyList<string>> GetSubtypeNamesAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
     }
 
-    private sealed class TwoSubtypeCatalogService : IRequestTypeEditorService
+    private sealed class TwoSubtypeCatalogService : IRequestSubtypeNameReadService
     {
-        public Task<IReadOnlyList<RequestTypeEditorItem>> GetCatalogAsync(CancellationToken cancellationToken = default)
-        {
-            var type = new RequestTypeEditorItem
-            {
-                Name = "Coil",
-                Subtypes =
-                {
-                    new RequestSubtypeEditorItem { Name = "Pickup Coil" },
-                    new RequestSubtypeEditorItem { Name = "Wrong Coil" },
-                },
-            };
-            return Task.FromResult<IReadOnlyList<RequestTypeEditorItem>>(new[] { type });
-        }
-
-        public Task<int> AddSubtypeAsync(RequestSubtypeEditorItem subtype, CancellationToken cancellationToken = default) => Task.FromResult(0);
-
-        public Task<int> UpdateSubtypeAsync(RequestSubtypeEditorItem subtype, CancellationToken cancellationToken = default) => Task.FromResult(0);
-
-        public Task<int> DeleteSubtypeAsync(long subtypeId, CancellationToken cancellationToken = default) => Task.FromResult(0);
-
-        public Task<int> UpdateTypeAsync(RequestTypeEditorItem type, CancellationToken cancellationToken = default) => Task.FromResult(0);
+        public Task<IReadOnlyList<string>> GetSubtypeNamesAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<string>>(new[] { "Pickup Coil", "Wrong Coil" });
     }
 }

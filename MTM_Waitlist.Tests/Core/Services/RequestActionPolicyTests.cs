@@ -36,14 +36,6 @@ public sealed class RequestActionPolicyTests
     }
 
     [TestMethod]
-    public void CanViewerEdit_OnlyCreatorAndNotDone()
-    {
-        Assert.IsTrue(RequestActionPolicy.CanViewerEdit("Pending", Creator, Creator));
-        Assert.IsFalse(RequestActionPolicy.CanViewerEdit("Pending", Creator, Handler));
-        Assert.IsFalse(RequestActionPolicy.CanViewerEdit("Cancelled", Creator, Creator));
-    }
-
-    [TestMethod]
     public void IsDone_RecognizesTerminalStatuses()
     {
         Assert.IsTrue(RequestActionPolicy.IsDone("done"));

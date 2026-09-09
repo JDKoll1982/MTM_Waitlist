@@ -69,6 +69,7 @@
             <GridView
                 x:Name="PartGridView"
                 HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
                 IsItemClickEnabled="True"
                 ItemClick="OnPartClick"
                 ItemsSource="{x:Bind ViewModel.DisplayedParts, Mode=OneWay}"
@@ -79,7 +80,7 @@
                 SelectionMode="None">
                 <GridView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <ItemsWrapGrid Orientation="Horizontal" />
+                        <ItemsWrapGrid HorizontalAlignment="Center" Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </GridView.ItemsPanel>
                 <GridView.ItemContainerStyle>

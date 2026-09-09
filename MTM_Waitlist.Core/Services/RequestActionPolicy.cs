@@ -39,15 +39,6 @@ public static class RequestActionPolicy
     public static bool CanViewerCompleteOrRelease(string? status, string? assignee, string viewerEmployeeNumber)
         => !IsDone(status) && IsAssignedToViewer(status, assignee, viewerEmployeeNumber);
 
-    /// <summary>
-    /// The creator may Edit (kept as a TODO with no behavior per file 07). A request that is done/cancelled is
-    /// treated as not editable.
-    /// </summary>
-    public static bool CanViewerEdit(string? status, string? creator, string viewerEmployeeNumber)
-        => !IsDone(status)
-           && !string.IsNullOrWhiteSpace(creator)
-           && string.Equals(creator.Trim(), viewerEmployeeNumber.Trim(), StringComparison.OrdinalIgnoreCase);
-
     private static bool In(string[] set, string? status)
         => !string.IsNullOrWhiteSpace(status)
            && set.Any(value => string.Equals(value, status.Trim(), StringComparison.OrdinalIgnoreCase));

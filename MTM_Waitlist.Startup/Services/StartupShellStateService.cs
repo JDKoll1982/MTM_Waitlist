@@ -39,8 +39,32 @@ public sealed class StartupShellStateService : IStartupShellStateService
         }
 
         IsNavigationVisible = true;
-        TryResizeWindow(_windowOptions.MainWidth, _windowOptions.MainHeight, _windowOptions.CenterOnModeSwitch);
+        MaximizeMainWindow();
         StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Maximizes the main window when the app transitions into the main shell so the app
+    /// launches full-screen on the shop floor. Falls back to the configured window size
+    /// when the window presenter cannot be maximized.
+    /// </summary>
+    private void MaximizeMainWindow()
+    {
+        try
+        {
+            var appWindow = _appWindowProvider.MainWindow.AppWindow;
+            if (appWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.Maximize();
+                return;
+            }
+        }
+        catch
+        {
+            // Fall through to the configured window sizing below.
+        }
+
+        TryResizeWindow(_windowOptions.MainWidth, _windowOptions.MainHeight, _windowOptions.CenterOnModeSwitch);
     }
 
     private void TryResizeWindow(int width, int height, bool centerWindow)

@@ -16,7 +16,7 @@
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
             <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="New Request - Choose Job Type" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkCenterText, Mode=OneWay}" />
-            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="Choose a Job Type to continue." />
+            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.PromptText, Mode=OneWay}" />
             <TextBlock
                 Margin="0,6,0,0"
                 Style="{StaticResource RequestDialogCaptionStyle}"
@@ -35,7 +35,7 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <GridView
                     x:Name="JobTypeGridView"
-                    ItemsSource="{x:Bind ViewModel.JobTypes, Mode=OneWay}"
+                    ItemsSource="{x:Bind ViewModel.Options, Mode=OneWay}"
                     IsItemClickEnabled="True"
                     ItemClick="JobTypeGridView_ItemClick"
                     SelectionMode="Single">

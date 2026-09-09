@@ -137,7 +137,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), startupState);
         var urgencyAllotments = new UrgencyAllotmentEditorViewModel(
             new UrgencySettingsService(settings),
-            new FakeRequestTypeEditorService(),
+            new FakeRequestSubtypeNameReadService(),
             startupState);
         return new SettingsViewModel(
             new FakeThemeSelectorService(),
@@ -151,18 +151,10 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             urgencyAllotments);
     }
 
-    private sealed class FakeRequestTypeEditorService : IRequestTypeEditorService
+    private sealed class FakeRequestSubtypeNameReadService : IRequestSubtypeNameReadService
     {
-        public Task<IReadOnlyList<RequestTypeEditorItem>> GetCatalogAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult<IReadOnlyList<RequestTypeEditorItem>>(Array.Empty<RequestTypeEditorItem>());
-
-        public Task<int> AddSubtypeAsync(RequestSubtypeEditorItem subtype, CancellationToken cancellationToken = default) => Task.FromResult(0);
-
-        public Task<int> UpdateSubtypeAsync(RequestSubtypeEditorItem subtype, CancellationToken cancellationToken = default) => Task.FromResult(0);
-
-        public Task<int> DeleteSubtypeAsync(long subtypeId, CancellationToken cancellationToken = default) => Task.FromResult(0);
-
-        public Task<int> UpdateTypeAsync(RequestTypeEditorItem type, CancellationToken cancellationToken = default) => Task.FromResult(0);
+        public Task<IReadOnlyList<string>> GetSubtypeNamesAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
     }
 
     private sealed class FakeThemeSelectorService : IThemeSelectorService

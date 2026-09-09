@@ -23,16 +23,16 @@ public partial class UrgencyAllotmentEditorViewModel : ObservableObject
     };
 
     private readonly IUrgencySettingsService _urgencySettingsService;
-    private readonly IRequestTypeEditorService _requestTypeEditorService;
+    private readonly IRequestSubtypeNameReadService _requestSubtypeNameReadService;
     private readonly StartupState _startupState;
 
     public UrgencyAllotmentEditorViewModel(
         IUrgencySettingsService urgencySettingsService,
-        IRequestTypeEditorService requestTypeEditorService,
+        IRequestSubtypeNameReadService requestSubtypeNameReadService,
         StartupState startupState)
     {
         _urgencySettingsService = urgencySettingsService;
-        _requestTypeEditorService = requestTypeEditorService;
+        _requestSubtypeNameReadService = requestSubtypeNameReadService;
         _startupState = startupState;
     }
 
@@ -59,22 +59,22 @@ public partial class UrgencyAllotmentEditorViewModel : ObservableObject
         try
         {
             var rows = new List<UrgencyAllotmentItem>();
-            IReadOnlyList<RequestTypeEditorItem> catalog;
+            IReadOnlyList<string> subtypeNames;
             try
             {
-                catalog = await _requestTypeEditorService.GetCatalogAsync(cancellationToken).ConfigureAwait(true);
+                subtypeNames = await _requestSubtypeNameReadService.GetSubtypeNamesAsync(cancellationToken).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
-                StartupDebugLog.Error("UrgencyAllotments", ex, "Failed to load the request-type catalog.");
+                StartupDebugLog.Error("UrgencyAllotments", ex, "Failed to load the request sub-types.");
                 StatusMessage = "Unable to load request sub-types from the catalog.";
-                catalog = Array.Empty<RequestTypeEditorItem>();
+                subtypeNames = Array.Empty<string>();
             }
 
-            foreach (var subtype in catalog.SelectMany(type => type.Subtypes).Select(item => item.Name))
+            foreach (var subtypeName in subtypeNames)
             {
-                var minutes = (await _urgencySettingsService.GetMaxAllottedAsync(subtype, cancellationToken).ConfigureAwait(true)).TotalMinutes;
-                var row = new UrgencyAllotmentItem(subtype, minutes);
+                var minutes = (await _urgencySettingsService.GetMaxAllottedAsync(subtypeName, cancellationToken).ConfigureAwait(true)).TotalMinutes;
+                var row = new UrgencyAllotmentItem(subtypeName, minutes);
                 row.PropertyChanged += OnRowPropertyChanged;
                 rows.Add(row);
             }
@@ -85,7 +85,7 @@ public partial class UrgencyAllotmentEditorViewModel : ObservableObject
                 Items.Add(row);
             }
 
-            StatusMessage = catalog.Count == 0 ? "No request sub-types found." : $"{Items.Count} sub-type(s) loaded.";
+            StatusMessage = subtypeNames.Count == 0 ? "No request sub-types found." : $"{Items.Count} sub-type(s) loaded.";
         }
         finally
         {

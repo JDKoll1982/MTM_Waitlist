@@ -66,10 +66,15 @@ public sealed class ExternalConnectionInfoProvider : IExternalConnectionInfoProv
     private string? ResolveReceivingConnectionString()
     {
         var environment = Environment.GetEnvironmentVariable(ReceivingConnectionStringEnv)?.Trim();
+        var configured = _configuration["ReceivingDatabaseOptions:ConnectionString"]?.Trim();
         var fallback = Environment.GetEnvironmentVariable(WaitlistConnectionStringEnv)?.Trim()
             ?? Environment.GetEnvironmentVariable(WaitlistStartupConnectionStringEnv)?.Trim()
             ?? _configuration["StartupDatabaseOptions:ConnectionString"];
-        var resolved = string.IsNullOrWhiteSpace(environment) ? fallback : environment;
+        var resolved = !string.IsNullOrWhiteSpace(environment)
+            ? environment
+            : !string.IsNullOrWhiteSpace(configured)
+                ? configured
+                : fallback;
         if (string.IsNullOrWhiteSpace(resolved))
         {
             return null;

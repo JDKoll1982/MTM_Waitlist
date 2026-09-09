@@ -25,6 +25,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
     private readonly ILocalSettingsService _localSettingsService;
     private readonly ISampleDataService _sampleDataService;
     private readonly StartupDatabaseOptions _startupDatabaseOptions;
+    private readonly ReceivingDatabaseOptions _receivingDatabaseOptions;
 
     public MySqlHelperServer(ILocalSettingsService localSettingsService, ISampleDataService sampleDataService)
         : this(localSettingsService, sampleDataService, Options.Create(new StartupDatabaseOptions()))
@@ -34,11 +35,13 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
     public MySqlHelperServer(
         ILocalSettingsService localSettingsService,
         ISampleDataService sampleDataService,
-        IOptions<StartupDatabaseOptions> startupDatabaseOptions)
+        IOptions<StartupDatabaseOptions> startupDatabaseOptions,
+        IOptions<ReceivingDatabaseOptions>? receivingDatabaseOptions = null)
     {
         _localSettingsService = localSettingsService;
         _sampleDataService = sampleDataService;
         _startupDatabaseOptions = startupDatabaseOptions?.Value ?? new StartupDatabaseOptions();
+        _receivingDatabaseOptions = receivingDatabaseOptions?.Value ?? new ReceivingDatabaseOptions();
     }
 
     public async Task<IReadOnlyList<object>> ExecuteReadWriteAsync(string operationName, string? parameter = null)
@@ -270,7 +273,8 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
                 Environment.GetEnvironmentVariable(WaitlistConnectionStringEnvironmentVariable)?.Trim()
                 ?? Environment.GetEnvironmentVariable(WaitlistStartupConnectionStringEnvironmentVariable)?.Trim(),
             MySqlDatabaseTarget.MtmReceivingApplication =>
-                Environment.GetEnvironmentVariable(ReceivingConnectionStringEnvironmentVariable)?.Trim(),
+                Environment.GetEnvironmentVariable(ReceivingConnectionStringEnvironmentVariable)?.Trim()
+                ?? _receivingDatabaseOptions.ConnectionString?.Trim(),
             MySqlDatabaseTarget.MtmWipApplication =>
                 Environment.GetEnvironmentVariable(WipApplicationConnectionStringEnvironmentVariable)?.Trim(),
             _ => null,

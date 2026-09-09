@@ -36,17 +36,6 @@ public sealed class MockModeQaTests
     }
 
     [TestMethod]
-    public void RoleGating_DeniesOperatorRole_ForConfigAndCatalogEdits()
-    {
-        var guard = new DeveloperAccessGuard();
-
-        Assert.IsTrue(guard.CanChangeCentralMockConfig("developer"));
-        Assert.IsTrue(guard.CanEditRealCatalog("Admin"));
-        Assert.IsFalse(guard.CanChangeCentralMockConfig("material handler"));
-        Assert.IsFalse(guard.CanEditRealCatalog("supervisor"));
-    }
-
-    [TestMethod]
     public async Task ClientRefresh_AppliesChangedCentralValue_AndRaisesOneEvent()
     {
         var env = new RefreshHarness(threshold: 1, reachable: true);

@@ -11,6 +11,7 @@ using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Settings.Views;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
+using MTM_Waitlist.Module_Setup.Services;
 using MTM_Waitlist.Module_Setup.ViewModels;
 using MTM_Waitlist.Module_Setup.Views;
 using MTM_Waitlist.Module_Core.Models;
@@ -105,7 +106,7 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.INewRequestPickerService, MTM_Waitlist.Module_Settings.Services.NewRequestPickerService>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IDefectTypeCatalogService, MTM_Waitlist.Module_Settings.Services.DefectTypeCatalogService>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMockMasterDataService, MTM_Waitlist.Module_Core.Services.MockMasterDataService>();
-        services.AddSingleton<IRequestTypeEditorService, MTM_Waitlist.Module_Core.Services.RequestTypeEditorService>();
+        services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IRequestSubtypeNameReadService, MTM_Waitlist.Module_Core.Services.RequestSubtypeNameReadService>();
         services.AddSingleton<IExternalConnectionInfoProvider, ExternalConnectionInfoProvider>();
         services.AddSingleton<IConnectionHealthService, MTM_Waitlist.Module_Core.Services.ConnectionHealthService>();
         services.AddSingleton<IMockConfigurationService, MTM_Waitlist.Module_Core.Services.MockConfigurationService>();
@@ -117,8 +118,6 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<IMockModePollingHost, MTM_Waitlist.Module_Core.Services.MockModePollingHost>();
         services.AddSingleton<IPollScheduler, DispatcherPollScheduler>();
         services.AddSingleton<MockModeToastCoordinator>();
-        services.AddSingleton<IDeveloperEditableCatalogService, MTM_Waitlist.Module_Core.Services.DeveloperEditableCatalogService>();
-        services.AddSingleton<IDeveloperAccessGuard, MTM_Waitlist.Module_Core.Services.DeveloperAccessGuard>();
         services.AddSingleton<IMockToggleService, MTM_Waitlist.Module_Core.Services.MockToggleService>();
         services.AddSingleton<INewRequestAlertService, MTM_Waitlist.Module_Core.Services.NewRequestAlertService>();
         services.AddSingleton<INewRequestAlertNotifier, MTM_Waitlist.Module_Core.Services.NewRequestAlertNotifier>();
@@ -184,9 +183,14 @@ public static class ServiceRegistrationExtensions
         // Configuration
         services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
         services.Configure<StartupDatabaseOptions>(context.Configuration.GetSection(nameof(StartupDatabaseOptions)));
+        services.Configure<ReceivingDatabaseOptions>(context.Configuration.GetSection(nameof(ReceivingDatabaseOptions)));
         services.Configure<StartupDevelopmentOptions>(context.Configuration.GetSection(nameof(StartupDevelopmentOptions)));
         services.Configure<StartupLoggingOptions>(context.Configuration.GetSection(nameof(StartupLoggingOptions)));
         services.Configure<StartupWindowOptions>(context.Configuration.GetSection(nameof(StartupWindowOptions)));
+
+        // Dunnage images (Setup) resolve against the shared Dunnage image root (the same
+        // root the MTM Receiving Application writes via "Dunnage.Application.DefaultImageLocation").
+        DunnageImagePathResolver.ConfigureRootFolder(context.Configuration["DunnageImageOptions:RootFolder"]);
 
         services.AddModuleServices(context.Configuration);
 

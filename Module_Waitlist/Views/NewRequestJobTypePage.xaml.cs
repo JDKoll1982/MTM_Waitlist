@@ -20,9 +20,9 @@ public sealed partial class NewRequestJobTypePage : Page
 
     private void JobTypeGridView_ItemClick(object sender, ItemClickEventArgs e)
     {
-        if (e.ClickedItem is NewRequestOptionItem item)
+        if (e.ClickedItem is NewRequestPickerTile tile)
         {
-            ViewModel.SelectJobTypeCommand.Execute(item);
+            ViewModel.SelectOptionCommand.Execute(tile);
         }
     }
 }
