@@ -29,6 +29,125 @@ implemented, builds clean, and tests pass.
 
 ## Session status (2026-09-09) — Phase 0, 1.1 (live-green), 1.2 #1/#2, 6.0/6.1/6.2 groundwork, **Phase 2** DONE, **Phase 3 data/flow core (picker rules + picker-option assembly)** DONE, and **Phase 5 NCM defect backend (table + CRUD SPs + role-gated service + tests) DONE** — build 0w/0e; full suite 608 green / 0 failed / 17 opt-in skipped offline (DB-integration incl. defect/SP/catalog tests pass live on localhost). Checklist now `14-55%-Phase2-UnifiedWaitlistCard.md` (26/47 boxes).
 
+## ✅ FULL SESSION RECORD — EVERYTHING DONE (through 2026-09-09)
+
+> Consolidated record of every code/SQL/test change made across this whole session, so you can review,
+> rebuild, and re-verify on any machine (including one with Infor Visual access). All of the below builds
+> `0w/0e`, passes the offline suite (`608 passed / 0 failed / 17 opt-in skipped`), and the MySQL-localhost
+> DB-integration tests pass (`14/14`). Infor-Visual-gated tests are listed in the test section below and
+> only turn green when Infor Visual (`VISUAL`/`MTMFG`) is reachable.
+
+### 1) Infor Visual status-code + disposition derivation (resolved against live data — Objective A)
+- **No C#/SQL changed by me this session for this** (was resolved 2026-09-08 and already committed). Reference:
+  `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md`.
+- Config (single editable source): `MTM_Waitlist.Settings/Services/RequestDispositionStatusCodes.cs`
+  → `OpenStatusCodes = { R, U, F }`, `ClosedStatusCodes = { C }`, `X` in neither.
+- Pure classifier/mapper/resolver already present: `RequestDispositionClassifier`, `RequestDispositionMapper`,
+  `RequestDispositionResolver`; `Core/Models/WipFloorQuantitySnapshot.cs`; `Core/Services/WipFloorInventoryService.cs`;
+  `MySqlDatabaseTarget.MtmWipApplication` + env `MTM_WIP_APPLICATION_DB_CONNECTION_STRING`.
+- Infor SQL read scripts (already committed): `Database/InforVisual/Queues/Module_Waitlist/Queries/GetDispositionInput.sql`
+  (+ `GetSubordinateParts.sql`, etc.); WIP floor script `Database/MTMWipApp/Queues/Module_Waitlist/Queues/GetWipFloorQuantities.sql`.
+
+### 2) Phase 1.1 — DB-first Category/Item mapping (CLOSED, live-green)
+- Table `category`/`item_id` columns + seed mapping already committed (2026-09-08). **This session (2026-09-09):**
+  re-seeded + validated live on localhost and ticked the JSON Schema box. Shipped `waitlist-request-types.json`
+  intentionally NOT extended.
+- New opt-in test: `MTM_Waitlist.Tests/Module_Waitlist/Services/RequestTypeCatalogServiceIntegrationTests.cs` (2).
+- Read path that surfaces Category/ItemId: `RequestTypeCatalogService` → `NewRequestTypeDefinition`/`NewRequestSubtypeDefinition`.
+
+### 3) Phase 2 — Item data resolvers + read-back SPs (COMPLETE)
+- **SP change:** `Database/StoredProcedures/sp_setup_active_jobs_latest_by_work_center_get/create.sql` + `AllSPs.sql`
+  now also `SELECT aj.subordinate_parts_json, aj.selected_dunnage_parts_json`.
+- **New SP:** `Database/MTMReceivingApp/StoredProcedures/sp_receiving_history_average_coil_weight.sql`
+  (`ROUND(AVG(quantity),0)` WHERE part_id, ignores NULL/<=0). Live: `MMC0001000 → 5000`.
+- **Resolver (Setup module):** `MTM_Waitlist.Setup/Services/ActiveJobItemResolverService.cs` +
+  `Contracts/Services/SetupContracts.cs` (`IActiveJobItemResolverService`) + `Models/SetupModels.cs`
+  (`SetupActiveJobSnapshot`). Returns coil/flatstock/die/component, dunnage, sequence, die location.
+  DI-registered in `MTM_Waitlist.Setup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`.
+- Tests: `ActiveJobItemResolverServiceTests` (8), `ActiveJobReadBackSpIntegrationTests` (2).
+
+### 4) Phase 3/4 data foundation — picker rules + option assembly (COMPLETE at data/UI-prep layer)
+- `MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs` (`RequestJobPartKind` + availability record).
+- `MTM_Waitlist.Settings/Services/RequestItemPickerRules.cs` — CSV visibility/destination rules over the 23 items.
+- `MTM_Waitlist.Settings/Services/NewRequestPickerService.cs` (`INewRequestPickerService`) — ordered,
+  availability-filtered Category→Item option sets (what the Phase 3 pages bind to).
+- DI-registered at the composition root (`Services/DependencyInjection/ServiceRegistrationExtensions.cs`).
+- Tests: `RequestItemPickerRulesTests` (9), `NewRequestPickerServiceTests` (4).
+- **UI re-layout (Job Type → Category/Item) is NOT done** — needs in-app work.
+
+### 5) Phase 5 — NCM defect feature (backend COMPLETE; Frontend panel open)
+- **Table:** `Database/Tables/30_waitlist_defect_types/{create,rollback}.sql` + `AllTables.sql` +
+  `Bootstrap/update_table_descriptions.sql`.
+- **CRUD SPs:** `sp_waitlist_defect_types_{get_all,insert,update,delete}` per-artifact (create.sql+rollback) +
+  `AllSPs.sql`.
+- **Backend service:** `MTM_Waitlist.Settings/Services/DefectTypeCatalogService.cs` (`IDefectTypeCatalogService`,
+  `DefectTypeDefinition`, `DefectTypeMutationResult`) — SP-only read/write with an Admin/Developer/Administrator
+  role gate (`CanManage`) on mutations. DI-registered.
+- Tests: `DefectTypesCrudIntegrationTests` (1, live), `DefectTypeCatalogServiceTests` (9).
+- **Open (Frontend):** Module_Settings defect editor panel (surfaces the role gate); NCM Item Line 2 wiring.
+
+### 6) Docs / checklist (this session)
+- Checklist advanced **14 → 26/47 boxes**; current file `WeekendProject/PromptFiles/14-55%-Phase2-UnifiedWaitlistCard.md`
+  (renamed from `14-30%` → `14-45%` → `14-47%` → `14-53%` → `14-55%`).
+- `WeekendProject/PromptFiles/App-Validation-Checklist.md` — in-app validation checklist (sections 0a–8).
+- This `CONTINUE-IMPLEMENTATION.md` — consolidated record + test steps.
+
+### 7) Verification state (as of 2026-09-09)
+- `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` → **0 Warning(s) 0 Error(s)**.
+- Offline suite: `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` → **608 passed /
+  0 failed / 17 opt-in skipped**.
+- MySQL-localhost DB-integration (env `MTM_WAITLIST_TEST_DB_CONNECTION_STRING=Server=localhost;Database=mtm_waitlist;User ID=root;Password=root;`)
+  → **14/14 pass**: ActiveJobReadBackSp (2), RequestTypeCatalogService (2), DefectTypesCrud (1), ConfigImagesLocations (8), +1.
+
+## 🧪 HOW TO TEST ON A PC WITH INFOR VISUAL ACCESS
+
+Run these in order on the machine that can reach Infor Visual (`VISUAL`/`MTMFG`) and your MySQL dev/test DB.
+
+### Step 0 — Preflight
+- [ ] Build: `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` → `0w/0e`.
+- [ ] Kill stale locks if `MSB3026`/`PRI` errors: `Get-Process -Name MTM_Waitlist,VBCSCompiler,MSBuild | Stop-Process -Force`.
+- [ ] Confirm `appsettings.json` `InforVisualDatabaseOptions` points at your Infor SQL Server (`Server=VISUAL`, `Database=MTMFG`,
+      user/password as configured) and your `StartupDatabaseOptions.ConnectionString` at your MySQL. Never hardcode/echo secrets.
+- [ ] Set env (adjust to your server): `$env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING='Server=<host>;Database=mtm_waitlist;User ID=...;Password=...;'`
+      plus the other targets if you use them (`MTM_WIP_APPLICATION_DB_CONNECTION_STRING`, `MTM_RECEIVING_APPLICATION_DB_CONNECTION_STRING`).
+- [ ] Apply the SQL artifacts to the DB being tested (re-runnable):
+      `Database/Tables/30_waitlist_defect_types/create.sql`,
+      `Database/StoredProcedures/sp_waitlist_defect_types_{get_all,insert,update,delete}/create.sql`,
+      `Database/StoredProcedures/sp_setup_active_jobs_latest_by_work_center_get/create.sql`,
+      `Database/MTMReceivingApp/StoredProcedures/sp_receiving_history_average_coil_weight.sql`
+      (or run `Database/Tables/AllTables.sql` + `Database/StoredProcedures/AllSPs.sql`).
+
+### Step 1 — Full suite (Infor + MySQL reachable)
+- [ ] `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` with the env vars set.
+      Expect the **Infor-Visual-gated integration tests to turn GREEN** (not skipped/inconclusive): the disposition
+      derivation + Infor Visual lookup tests that hit `VISUAL`/`MTMFG` (e.g. `InforVisualSqlQueryService`, disposition
+      integration against live `WO-074011`/`24733431`/seq `919`) and the WIP-floor MySQL tests. Locally these are gated off.
+
+### Step 2 — Explicitly validate Phase 6 disposition against live Infor Visual
+- [ ] Run the classifier/config unit tests: filter `RequestDisposition` → all green (pure, no DB).
+- [ ] Run the Infor-disposition live path and confirm the derivation SQL returns expected rows for a real WO/part:
+      `Database/InforVisual/Queues/Module_Waitlist/Queries/GetDispositionInput.sql` (returns WorkOrderStatus /
+      OpenWorkOrderQuantity = DESIRED−RECEIVED / FinishedGoodsQuantity / HasOutsideVendorOperation). Confirm the status
+      codes match config: `R`/`U`/`F` open, `C` closed, `X` excluded.
+- [ ] Confirm Outside Service = OPERATION row with non-empty `VENDOR_ID`/`SERVICE_ID`/`SERVICE_PART_ID`; FG = on-hand at an
+      FG/shipping location; WIP = open qty. Reference: `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md`.
+
+### Step 3 — MySQL DB-integration + defect CRUD (this session's DB/backend)
+- [ ] Run the opt-in MySQL DB-integration tests (as in verification state §7) → expect **14/14**.
+- [ ] Live defect CRUD round-trip via the SPs (insert → list → update → delete) using
+      `sp_waitlist_defect_types_*` (also covered by `DefectTypesCrudIntegrationTests`).
+
+### Step 4 — In-app checks
+- [ ] Follow `WeekendProject/PromptFiles/App-Validation-Checklist.md` sections **0a / 1 / 2 / 3** (DB, resolver,
+      no-regression smoke tests) which are executable now.
+- [ ] Sections 4–8 mark the still-open Phase 3/4 picker+card UI, Phase 5 settings panel, Phase 6.2, and Phase 7 —
+      those need the running WinUI app to verify and are NOT yet wired (see Remaining).
+
+### Step 5 — Report / finish
+- [ ] Leave the repo building clean and the new/affected tests green.
+- [ ] Record which Infor-gated tests passed against live Visual (they will NOT pass on a machine without Infor).
+- [ ] Tick any newly proven boxes in `14-55%-Phase2-UnifiedWaitlistCard.md` with proof notes + bump the `{Completion%}`.
+
 > **Autonomy note (2026-09-09):** Phase 3/4 (New Request picker UI + uniform card) and Phase 5's Frontend
 > panel cannot be visually verified in this environment, so verifiable non-UI Phase 5 DB/backend work
 > was implemented ahead of the strict checklist order (see section F). Phase 3/4 and Phase 5 Frontend remain open.
@@ -179,7 +298,7 @@ and Phase 1.2 #1 (mapper) + #2 (WaitlistRequestTitles accessors) DONE.** Checkli
 
 ### B) Remaining open tasks (next)
 
-Work `- [ ]` tasks in `14-47%-Phase2-UnifiedWaitlistCard.md` in order:
+Work `- [ ]` tasks in `14-55%-Phase2-UnifiedWaitlistCard.md` in order:
 - **Phase 1.1** JSON Schema box — **CLOSED 2026-09-09** (see status section D): DB-first mapping re-seeded +
   validated live on localhost; shipped JSON intentionally untouched.
 - **Phase 1.2** #3 (`ResolveImagePath` ad-hoc → explicit Category/Item) and #4 (`GetDefaultTypes` order by
