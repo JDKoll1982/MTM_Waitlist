@@ -1,0 +1,57 @@
+
+Welcome to .NET 10.0!
+---------------------
+SDK Version: 10.0.401
+
+Telemetry
+---------
+The .NET tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+
+----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate, run 'dotnet dev-certs https --trust'
+Learn about HTTPS: https://aka.ms/dotnet-https
+
+----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+--------------------------------------------------------------------------------------
+  Determining projects to restore...
+  Restored C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\MTM_Waitlist.Tests.csproj (in 613 ms).
+  Restored C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Reporting\MTM_Waitlist.Reporting.csproj (in 3.92 sec).
+  Restored C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Shared\MTM_Waitlist.Shared.csproj (in 3.94 sec).
+  Restored C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Core\MTM_Waitlist.Core.csproj (in 3.94 sec).
+  Restored C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Startup\MTM_Waitlist.Startup.csproj (in 3.94 sec).
+  Restored C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.Controls\MTM_Waitlist.Waitlist.Controls.csproj (in 3.94 sec).
+  Restored C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.View\MTM_Waitlist.Waitlist.View.csproj (in 3.94 sec).
+  Restored C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Setup\MTM_Waitlist.Setup.csproj (in 3.95 sec).
+  Restored C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Settings\MTM_Waitlist.Settings.csproj (in 3.94 sec).
+  Restored C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.NewRequest\MTM_Waitlist.Waitlist.NewRequest.csproj (in 3.95 sec).
+C:\Program Files\dotnet\sdk\10.0.401\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.targets(308,5): warning NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): win10-arm64, win10-x64, win10-x86. Affected libraries: Microsoft.Graphics.Win2D. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details. [C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Core\MTM_Waitlist.Core.csproj]
+  MTM_Waitlist.Core -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Core\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Core.dll
+C:\Program Files\dotnet\sdk\10.0.401\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.targets(308,5): warning NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): win10-arm64, win10-x64, win10-x86. Affected libraries: Microsoft.Graphics.Win2D. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details. [C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Shared\MTM_Waitlist.Shared.csproj]
+  MTM_Waitlist.Shared -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Shared\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Shared.dll
+C:\Program Files\dotnet\sdk\10.0.401\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.targets(308,5): warning NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): win10-arm64, win10-x64, win10-x86. Affected libraries: Microsoft.Graphics.Win2D. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details. [C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Settings\MTM_Waitlist.Settings.csproj]
+  MTM_Waitlist.Settings -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Settings\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Settings.dll
+C:\Program Files\dotnet\sdk\10.0.401\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.targets(308,5): warning NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): win10-arm64, win10-x64, win10-x86. Affected libraries: Microsoft.Graphics.Win2D. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details. [C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Setup\MTM_Waitlist.Setup.csproj]
+  MTM_Waitlist.Setup -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Setup\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Setup.dll
+C:\Program Files\dotnet\sdk\10.0.401\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.targets(308,5): warning NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): win10-arm64, win10-x64, win10-x86. Affected libraries: Microsoft.Graphics.Win2D. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details. [C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Startup\MTM_Waitlist.Startup.csproj]
+  MTM_Waitlist.Startup -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Startup\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Startup.dll
+C:\Program Files\dotnet\sdk\10.0.401\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.targets(308,5): warning NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): win10-arm64, win10-x64, win10-x86. Affected libraries: Microsoft.Graphics.Win2D. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details. [C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.View\MTM_Waitlist.Waitlist.View.csproj]
+  MTM_Waitlist.Waitlist.View -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.View\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.View.dll
+C:\Program Files\dotnet\sdk\10.0.401\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.targets(308,5): warning NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): win10-arm64, win10-x64, win10-x86. Affected libraries: Microsoft.Graphics.Win2D. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details. [C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.NewRequest\MTM_Waitlist.Waitlist.NewRequest.csproj]
+  MTM_Waitlist.Waitlist.NewRequest -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.NewRequest\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.NewRequest.dll
+C:\Program Files\dotnet\sdk\10.0.401\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.targets(308,5): warning NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): win10-arm64, win10-x64, win10-x86. Affected libraries: Microsoft.Graphics.Win2D. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details. [C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.Controls\MTM_Waitlist.Waitlist.Controls.csproj]
+  MTM_Waitlist.Waitlist.Controls -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.Controls\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.Controls.dll
+C:\Program Files\dotnet\sdk\10.0.401\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.targets(308,5): warning NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): win10-arm64, win10-x64, win10-x86. Affected libraries: Microsoft.Graphics.Win2D. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details. [C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Reporting\MTM_Waitlist.Reporting.csproj]
+  MTM_Waitlist.Reporting -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Reporting\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Reporting.dll
+  MTM_Waitlist.Tests -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Tests.dll
+Test run for C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     9, Skipped:     0, Total:     9, Duration: 17 ms - MTM_Waitlist.Tests.dll (net10.0)

@@ -96,3 +96,22 @@ public interface ISetupWorkflowService
 
     Task<SetupSaveResult> SaveAsync(bool forceReplace = false, CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Resolves the latest active setup job's Category/Item data for a work center from
+/// <c>mtm_waitlist.setup_active_jobs</c>. Feeds the Waitlist New-Request picker and
+/// card render: job-item list (coil/flatstock/die/component from
+/// <c>subordinate_parts_json</c>), assigned dunnage (from
+/// <c>selected_dunnage_parts_json</c>), the <c>{Sequence}</c> (<c>sequence_number</c>),
+/// and the die's location (from the die subordinate row's <c>Location</c>).
+/// </summary>
+public interface IActiveJobItemResolverService
+{
+    /// <summary>
+    /// Returns the active job snapshot for <paramref name="workCenter"/>, or <c>null</c>
+    /// when the work center has no active setup job. Subordinate part categories are
+    /// canonicalized (MMC→Coil, MMF→Flatstock, FGT→Die, else Component) so legacy or
+    /// mis-tagged rows still land in the correct bucket.
+    /// </summary>
+    Task<SetupActiveJobSnapshot?> ResolveAsync(string workCenter, CancellationToken cancellationToken = default);
+}

@@ -7,7 +7,9 @@ USE mtm_waitlist;
 DROP PROCEDURE IF EXISTS sp_setup_active_jobs_latest_by_work_center_get;
 
 CREATE PROCEDURE sp_setup_active_jobs_latest_by_work_center_get()
-SELECT aj.work_center, aj.work_order, aj.part_number, aj.sequence_number
+SELECT aj.work_center, aj.work_order, aj.part_number, aj.sequence_number,
+       aj.subordinate_parts_json,
+       aj.selected_dunnage_parts_json
 FROM setup_active_jobs aj
 INNER JOIN (
     SELECT work_center, MAX(id) AS max_id

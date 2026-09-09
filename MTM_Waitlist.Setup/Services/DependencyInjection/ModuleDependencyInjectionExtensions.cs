@@ -20,6 +20,7 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<IActiveJobCoordinatorService, SetupActiveJobCoordinatorService>();
         services.AddSingleton<ISetupPersistenceService, SetupPersistenceService>();
         services.AddSingleton<ISetupWorkflowService, SetupWorkflowService>();
+        services.AddSingleton<IActiveJobItemResolverService, ActiveJobItemResolverService>();
         return services;
     }
 }

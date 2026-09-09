@@ -102,6 +102,8 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<MTM_Waitlist.Module_Core.Services.WipFloorInventoryService>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.RequestDispositionResolver>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IRequestItemCatalogService, MTM_Waitlist.Module_Settings.Services.RequestItemCatalogService>();
+        services.AddSingleton<MTM_Waitlist.Module_Settings.Services.INewRequestPickerService, MTM_Waitlist.Module_Settings.Services.NewRequestPickerService>();
+        services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IDefectTypeCatalogService, MTM_Waitlist.Module_Settings.Services.DefectTypeCatalogService>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMockMasterDataService, MTM_Waitlist.Module_Core.Services.MockMasterDataService>();
         services.AddSingleton<IRequestTypeEditorService, MTM_Waitlist.Module_Core.Services.RequestTypeEditorService>();
         services.AddSingleton<IExternalConnectionInfoProvider, ExternalConnectionInfoProvider>();

@@ -514,3 +514,17 @@ MODIFY COLUMN center_data_grid_fields_json JSON NULL COMMENT 'Ordered center dat
 MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the subtype is offered in the wizard.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
+
+ALTER TABLE waitlist_defect_types COMMENT = 'Managed list of non-conforming (NCM) defect types referenced by Pickup NCM requests (edited from Module_Settings).';
+
+ALTER TABLE waitlist_defect_types
+MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the defect type row.',
+MODIFY COLUMN defect_name VARCHAR(100) NOT NULL COMMENT 'Display name of the NCM defect type (e.g. Scratch, Dent, Wrong Color).',
+MODIFY COLUMN description VARCHAR(500) NULL COMMENT 'Optional short description shown in the editor/picker.',
+MODIFY COLUMN sort_order INT NOT NULL DEFAULT 0 COMMENT 'Display order within the picker list.',
+MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the defect type is offered to workers.',
+MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the defect type.',
+MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the defect type.',
+MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the defect type row was created.',
+MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the defect type row was last updated.';

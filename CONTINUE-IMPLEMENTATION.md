@@ -4,8 +4,8 @@ You are working in the **MTM_Waitlist** WinUI 3 (.NET 10) repo at the workspace 
 Type/Category/Item + Unified Waitlist Card refactor being tracked by the **checklist-execution** skill.
 First, read these to re-establish context before changing anything:
 
-1. `WeekendProject/PromptFiles/14-30%-Phase2-UnifiedWaitlistCard.md` — the active implementation checklist
-   (was `14-0%`; advanced through **26%** to **30%** — 14/47 boxes — on 2026-09-08).
+1. `WeekendProject/PromptFiles/14-55%-Phase2-UnifiedWaitlistCard.md` — the active implementation checklist
+   (was `14-53%`; **Phase 5 defect role-gate service added on 2026-09-09 → 55% — 26/47 boxes**).
 2. `WeekendProject/Documents/Request-Config-Template.csv` — the **source of truth** row spec, **expanded
    2026-09-08 from 18 rows to 23** (Pickup 11 / Deliver 8 / Assist 3 / Other 1) by adding legacy-only
    concepts (Wrong Coil, Wrong Flatstock, Scrap/Offal removal, Pickup Hopper no-return, Table Remove Parts).
@@ -27,13 +27,79 @@ implemented, builds clean, and tests pass.
 - WMC9999 = masked XAML error (see repo instructions) — treat as a real but unspecified XAML problem.
 - This terminal drops dotnet stdout sometimes: redirect to a log file (`*> build_log.txt 2>&1`) and read the tail.
 
+## Session status (2026-09-09) — Phase 0, 1.1 (live-green), 1.2 #1/#2, 6.0/6.1/6.2 groundwork, **Phase 2** DONE, **Phase 3 data/flow core (picker rules + picker-option assembly)** DONE, and **Phase 5 NCM defect backend (table + CRUD SPs + role-gated service + tests) DONE** — build 0w/0e; full suite 608 green / 0 failed / 17 opt-in skipped offline (DB-integration incl. defect/SP/catalog tests pass live on localhost). Checklist now `14-55%-Phase2-UnifiedWaitlistCard.md` (26/47 boxes).
+
+> **Autonomy note (2026-09-09):** Phase 3/4 (New Request picker UI + uniform card) and Phase 5's Frontend
+> panel cannot be visually verified in this environment, so verifiable non-UI Phase 5 DB/backend work
+> was implemented ahead of the strict checklist order (see section F). Phase 3/4 and Phase 5 Frontend remain open.
+>
+> **Phase boundary (2026-09-09):** Every verifiable non-UI unit of Phases 1.1, 1.2, 2, 3 data/flow core, and
+> 5 backend is now implemented, built (0w/0e), offline-tested (608 green), and **live DB-integration verified
+> (14/14 on localhost)**. The remaining open checklist boxes (Phase 3/4 picker+card UI, Phase 5 Frontend panel,
+> Phase 6.2 item wiring, Phase 7 render/cleanup tests) all require building and visually verifying inside the
+> running WinUI app. Adding further non-UI code now would be speculative/unbound, so the next session must be
+> interactive (run the app + XamlMcp) to land those boxes.
+
+### F) DONE 2026-09-09 — Phase 5 NCM defect backend (Database/QA/Backend, done ahead of UI phases)
+
+- `waitlist_defect_types` table (per-artifact + AllTables.sql + update_table_descriptions.sql) + CRUD SPs
+  `sp_waitlist_defect_types_{get_all,insert,update,delete}` (per-artifact + AllSPs.sql); live CRUD validated.
+- Opt-in `DefectTypesCrudIntegrationTests.cs` (1) passes live.
+- Backend editor service `MTM_Waitlist.Settings/Services/DefectTypeCatalogService.cs` (+ `IDefectTypeCatalogService`,
+  `DefectTypeDefinition`, `DefectTypeMutationResult`): SP-only read/write with an Admin/Developer/Administrator
+  role gate (`CanManage`) enforced on Add/Update/Delete; DI-registered. 9/9 `DefectTypeCatalogServiceTests` green.
+- Open (Frontend, next): Module_Settings defect editor panel (surfaces the role gate), and wiring NCM Item
+  Line 2 from the managed list once the Phase 3/4 picker exists.
+
+### E) DONE 2026-09-09 — Phase 3/4 data foundation: canonical picker rules
+
+- New pure `MTM_Waitlist.Settings/Services/RequestItemPickerRules.cs` + `Models/RequestJobPartAvailability.cs`
+  (`RequestJobPartKind`). Encodes CSV visibility + destination rules over the canonical 23-row
+  `RequestItemCatalog`: auto job-part Items (coil/flatstock/die/component/dunnage) show only when the
+  requesting job has that part; Assist table place/remove need any subordinate; FG/WIP/Outside/NCM need an
+  active job; Riser Table/Hopper are always-available manual equipment; Scrap/Other always visible; every
+  Deliver Item's destination = requesting work center. DB-free/DB-agnostic so a Phase 3 caller maps an
+  `IActiveJobItemResolverService` snapshot onto `RequestJobPartAvailability`.
+- 9/9 `RequestItemPickerRulesTests` green (all 23 rows rule-covered).
+- Picker option assembly: `MTM_Waitlist.Settings/Services/NewRequestPickerService.cs` (+ `INewRequestPickerService`)
+  composes the catalog + rules into ordered, availability-filtered Category→Item option sets
+  (`GetCategoriesInOrder`/`GetItems`/`GetVisibleItems`/`GetAllVisible`); DI-registered. 4/4
+  `NewRequestPickerServiceTests` green. This is the exact data surface the Phase 3 Job-Type→Item pages bind to.
+- Phase 3 **UI** re-layout (Job Type step → Category/Item) is NOT yet done — boxes remain open.
+
+### D) DONE 2026-09-09 — Phase 1.1 JSON Schema box closed (DB-first mapping live-green)
+
+- Re-seeded the catalog on localhost: `waitlist_request_types`/`waitlist_request_subtypes` `category`/`item_id`
+  populated (Forklift Assist type-leaf → Other/other; 24/24 subtype leaves mapped per TypeCategoryActionRefactor).
+- `sp_waitlist_request_types_get(_all)`/`sp_waitlist_request_subtypes_get(_all)` return the columns.
+- New opt-in `MTM_Waitlist.Tests/Module_Waitlist/Services/RequestTypeCatalogServiceIntegrationTests.cs`
+  (2/2) reads the live catalog through `RequestTypeCatalogService` and asserts every subtype leaf carries
+  category+item_id and Forklift Assist → Other/other. Live-green on localhost; inconclusive offline.
+
+### C) DONE 2026-09-09 — Phase 2 Item data resolvers + read-back SPs (validated live on localhost)
+
+- **Subphase 2.1 (Database Engineer/QA):**
+  - `sp_setup_active_jobs_latest_by_work_center_get` (create.sql + AllSPs.sql) now also `SELECT`s
+    `subordinate_parts_json` + `selected_dunnage_parts_json`; deployed + validated live on localhost.
+  - New `Database/MTMReceivingApp/StoredProcedures/sp_receiving_history_average_coil_weight.sql`
+    (`ROUND(AVG(quantity),0)` WHERE part_id, ignores NULL/<=0 skids); live-validated `MMC0001000 → 5000`.
+  - Opt-in DB-integration tests `MTM_Waitlist.Tests/Module_Setup/ActiveJobReadBackSpIntegrationTests.cs`
+    (2/2 live green on localhost `MTM_WAITLIST_TEST_DB_CONNECTION_STRING`, inconclusive offline).
+- **Subphase 2.2 (Backend Engineer):** resolver reuses Setup models/module per user —
+  `MTM_Waitlist.Setup/Services/ActiveJobItemResolverService.cs` + `IActiveJobItemResolverService` +
+  `SetupActiveJobSnapshot` model. `ResolveAsync(workCenter)` reads the SP (mtm_waitlist), deserializes
+  `subordinate_parts_json → SetupSubordinatePart[]` (prefix-canonical MMC=Coil / MMF=Flatstock / FGT=Die /
+  else Component-or-stored) and `selected_dunnage_parts_json → SetupDunnagePart[]`; snapshot exposes
+  `Coils/Flatstock/Dies/Components/PrimaryDie/DieLocation/SequenceNumber`. DI-registered. 8/8
+  `ActiveJobItemResolverServiceTests` green. Die location = die row `Location` from the same JSON.
+
 ## Session status (2026-09-08) — build 0w/0e, full suite 582 green / 0 failed / 8 skipped (MySQL-gated)
 
 **Objective A (Infor Visual parse) — DONE.** See
 `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md` + repo memory.
 **Objective B — Phase 0, Phase 6.0/6.1/6.2 (groundwork), Phase 1.1 (catalog expansion + DB-first mapping),
 and Phase 1.2 #1 (mapper) + #2 (WaitlistRequestTitles accessors) DONE.** Checklist now
-`14-30%-Phase2-UnifiedWaitlistCard.md` (14/47 boxes).
+`14-45%-Phase2-UnifiedWaitlistCard.md` (21/47 boxes).
 
 ### A) DONE — Infor Visual status codes + FG/WIP/Outside derivation (resolved against live data)
 
@@ -113,22 +179,27 @@ and Phase 1.2 #1 (mapper) + #2 (WaitlistRequestTitles accessors) DONE.** Checkli
 
 ### B) Remaining open tasks (next)
 
-Work `- [ ]` tasks in `14-30%-Phase2-UnifiedWaitlistCard.md` in order:
-- **Phase 1.1** JSON Schema box — left UNTICKED with a DB-first re-scope note: do NOT extend the shipped
-  JSON; the DB-first mapping above is the carrier. Requires the live re-seed validation noted above before
-  the box is provably green.
+Work `- [ ]` tasks in `14-47%-Phase2-UnifiedWaitlistCard.md` in order:
+- **Phase 1.1** JSON Schema box — **CLOSED 2026-09-09** (see status section D): DB-first mapping re-seeded +
+  validated live on localhost; shipped JSON intentionally untouched.
 - **Phase 1.2** #3 (`ResolveImagePath` ad-hoc → explicit Category/Item) and #4 (`GetDefaultTypes` order by
   Category then Item) — DEFERRED to Phase 3/4 per user additive scope (both flip live UI surfaces that Phase
-  3/4 rebuild). Re-scope notes are written into the two boxes; visible swap + test re-pin lands with the
-  Phase 4 uniform 2-line card / badge-selector, and picker ordering with the Phase 3 Category→Item picker.
-- **Phase 2** read-back SPs (`sp_setup_active_jobs_latest_by_work_center_get` →
-  subordinate/dunnage JSON; avg coil weight SP) + job-item/dunnage/sequence resolvers + die location.
-- **Phase 3** New Request Category → Item picker (visibility, dunnage image cards, user-entry items).
+  3/4 rebuild). Re-scope notes are in the two boxes; visible swap + test re-pin lands with Phase 4 badge/selector,
+  picker ordering with Phase 3.
+- **Phase 2 — DONE 2026-09-09** (see status section C above). Resolver ready to feed Phase 3 picker + Phase 4 card.
+- **Phase 3** New Request Category → Item picker — NEXT. Data/flow core DONE 2026-09-09 (`RequestItemPickerRules`
+  + `RequestJobPartAvailability`, 9 tests). Remaining = re-lay Job Type step to Category (Pickup/Deliver/
+  Assist/Other) then Item; conditional visibility from `IActiveJobItemResolverService` snapshot mapped onto
+  `RequestJobPartAvailability`; dunnage image-card selection; user-entry Item paths; destination = requesting WC
+  for Deliver (rule ready); zero-payload Riser/Hopper. NOTE:
+  `MTM_Waitlist.Waitlist.NewRequest` references Settings (catalog) but NOT Setup — introduce a composition-root
+  bridge (app service or move contract) to reach `IActiveJobItemResolverService` before wiring visibility.
 - **Phase 4** uniform 2-line card (Line1 umbrella / Line2 item), full-width Other card, render-time
   item resolution, badge image family.
-- **Phase 5** NCM defect feature (`waitlist_defect_types` + CRUD SPs + Module_Settings panel, role-gated).
+- **Phase 5** NCM defect feature — backend (table + CRUD SPs + role-gated service + tests) DONE 2026-09-09
+  (see section F); remaining = Module_Settings editor panel (Frontend) and NCM Item Line 2 wiring.
 - **Phase 6.2 (finish)** wire a real FG/WIP/Outside request Item (`{PartNumber} / {Sequence}` from
-  `setup_active_jobs.sequence_number`) into the Phase 2/3/4 pipeline (no mock `FG-10042`).
+  `setup_active_jobs.sequence_number`, via the Phase 2.2 resolver) into the Phase 3/4 pipeline (no mock `FG-10042`).
 - **Phase 7** validation/cleanup (tests across all 23 CSV rows, remove obsolete mock hard-coding, security review).
 
 Keep the DB/SQL status-code knowledge in the single editable config
@@ -137,7 +208,11 @@ Keep the DB/SQL status-code knowledge in the single editable config
 ## When done
 
 - Leave the repo building clean and the new/affected tests green.
-- Update `14-30%-Phase2-UnifiedWaitlistCard.md`: tick completed tasks with proof notes, update the
+- Update `14-55%-Phase2-UnifiedWaitlistCard.md`: tick completed tasks with proof notes, update the
   `{Completion%}` in the filename.
 - Summarize what you resolved from the Infor Visual parse (status codes, FG/WIP/Outside rules) and what
   you implemented next.
+- Run the app-side checks in `WeekendProject/PromptFiles/App-Validation-Checklist.md` to confirm the
+  refactor edits work end to end.
+- The remaining boxes need interactive, in-app development (build/run the app + XamlMcp to visually verify the
+  Phase 3/4 picker+card and Phase 5 settings panel).

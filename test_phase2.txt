@@ -1,0 +1,44 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  MTM_Waitlist.Core -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Core\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Core.dll
+  MTM_Waitlist.Shared -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Shared\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Shared.dll
+  MTM_Waitlist.Settings -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Settings\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Settings.dll
+  MTM_Waitlist.Setup -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Setup\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Setup.dll
+  MTM_Waitlist.Startup -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Startup\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Startup.dll
+  MTM_Waitlist.Waitlist.View -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.View\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.View.dll
+  MTM_Waitlist.Waitlist.NewRequest -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.NewRequest\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.NewRequest.dll
+  MTM_Waitlist.Waitlist.Controls -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.Controls\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.Controls.dll
+  MTM_Waitlist.Reporting -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Reporting\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Reporting.dll
+  MTM_Waitlist.Tests -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Tests.dll
+Test run for C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+  Failed AverageCoilWeight_ReturnsRoundedAvg_ForSeededPart [38 ms]
+  Error Message:
+   Assert.AreEqual failed. Expected:<5000>. Actual:<4800>. (4800 + 5200) / 2 must round to 5000.
+  Stack Trace:
+     at MTM_Waitlist.Tests.Module_Setup.ActiveJobReadBackSpIntegrationTests.AverageCoilWeight_ReturnsRoundedAvg_ForSeededPart() in C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\Module_Setup\ActiveJobReadBackSpIntegrationTests.cs:line 146
+
+  Standard Output Messages:
+ 
+ 
+ Debug Trace:
+ [MySqlHelperServer][2026-09-09T06:52:05.9671205-05:00] ExecuteSqlNonQueryAsync started. Sql='INSERT INTO receiving_history (load_guid, quantity, part_id, part_type, employee_number, received_date, transaction_date, is_non_po_item, is...', Target='mtm_receiving_application', Parameters=p_load_guid=adc698c5-9817-4a8a-8585-69979eceb8d8, p_qty=4800, p_part_id=IT-COIL-00ebd4cb9e44421886356fa5c6f42377.
+ [MySqlHelperServer][2026-09-09T06:52:05.9727259-05:00] ExecuteSqlNonQueryAsync started. Sql='INSERT INTO receiving_history (load_guid, quantity, part_id, part_type, employee_number, received_date, transaction_date, is_non_po_item, is...', Target='mtm_receiving_application', Parameters=p_load_guid=adc698c5-9817-4a8a-8585-69979eceb8d8-2, p_qty=5200, p_part_id=IT-COIL-00ebd4cb9e44421886356fa5c6f42377.
+ [MySqlHelperServer][2026-09-09T06:52:05.9740327-05:00] ERROR: ExecuteSqlNonQueryAsync failed. Sql='INSERT INTO receiving_history (load_guid, quantity, part_id, part_type, employee_number, received_date, transaction_date, is_non_po_item, is...', Target='mtm_receiving_application', Parameters=p_load_guid=adc698c5-9817-4a8a-8585-69979eceb8d8-2, p_qty=5200, p_part_id=IT-COIL-00ebd4cb9e44421886356fa5c6f42377.
+ MySqlConnector.MySqlException (0x80004005): Data too long for column 'load_guid' at row 1
+    at MySqlConnector.Core.ServerSession.ReceiveReplyAsync(IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 1185
+    at MySqlConnector.Core.ResultSet.ReadResultSetHeaderAsync(IOBehavior ioBehavior) in /_/src/MySqlConnector/Core/ResultSet.cs:line 37
+    at MySqlConnector.MySqlDataReader.ActivateResultSet(CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlDataReader.cs:line 133
+    at MySqlConnector.MySqlDataReader.InitAsync(CommandListPosition commandListPosition, ICommandPayloadCreator payloadCreator, IDictionary`2 cachedProcedures, IMySqlCommand command, CommandBehavior behavior, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlDataReader.cs:line 489
+    at MySqlConnector.Core.CommandExecutor.ExecuteReaderAsync(CommandListPosition commandListPosition, ICommandPayloadCreator payloadCreator, CommandBehavior behavior, Activity activity, MySqlConnectorSemanticConventionsKinds conventionsKinds, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/CommandExecutor.cs:line 58
+    at MySqlConnector.MySqlCommand.ExecuteNonQueryAsync(IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlCommand.cs:line 304
+    at MTM_Waitlist.Module_Core.Services.MySqlHelperServer.ExecuteSqlNonQueryAsync(String sql, IReadOnlyDictionary`2 parameters, MySqlDatabaseTarget databaseTarget, CancellationToken cancellationToken) in C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Core\Services\MySqlHelperServer.cs:line 256
+    at MTM_Waitlist.Module_Core.Services.MySqlHelperServer.ExecuteSqlNonQueryAsync(String sql, IReadOnlyDictionary`2 parameters, MySqlDatabaseTarget databaseTarget, CancellationToken cancellationToken) in C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Core\Services\MySqlHelperServer.cs:line 256
+    at MTM_Waitlist.Module_Core.Services.MySqlHelperServer.ExecuteSqlNonQueryAsync(String sql, IReadOnlyDictionary`2 parameters, MySqlDatabaseTarget databaseTarget, CancellationToken cancellationToken) in C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Core\Services\MySqlHelperServer.cs:line 256
+ [MySqlHelperServer][2026-09-09T06:52:05.9824890-05:00] ExecuteStoredProcedureQueryAsync started. Procedure='sp_receiving_history_average_coil_weight', Target='mtm_receiving_application', Parameters=p_part_id=IT-COIL-00ebd4cb9e44421886356fa5c6f42377.
+ [MySqlHelperServer][2026-09-09T06:52:05.9978143-05:00] ExecuteSqlNonQueryAsync started. Sql='DELETE FROM setup_active_jobs WHERE work_center = @p_work_center;', Target='mtm_waitlist', Parameters=p_work_center=IT-WC-426311f28ed34778b61a143cadaf0435.
+ [MySqlHelperServer][2026-09-09T06:52:05.9985808-05:00] ExecuteSqlNonQueryAsync started. Sql='DELETE FROM receiving_history WHERE part_id = @p_part_id;', Target='mtm_receiving_application', Parameters=p_part_id=IT-COIL-00ebd4cb9e44421886356fa5c6f42377.
+
+
+
+Failed!  - Failed:     1, Passed:     9, Skipped:     0, Total:    10, Duration: 1 s - MTM_Waitlist.Tests.dll (net10.0)

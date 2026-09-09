@@ -12,7 +12,9 @@
   MTM_Waitlist.Tests -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Tests.dll
 Test run for C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0)
 A total of 1 test files matched the specified pattern.
-  Skipped ActiveJobsReadBack_ReturnsJsonColumns_ForSeededWorkCenter [4 ms]
+  Skipped LoadRequestTypes_Live_ReturnsCategoryItemMapping [5 ms]
+  Skipped LoadRequestTypes_Live_CatalogIsReachable [< 1 ms]
+  Skipped ActiveJobsReadBack_ReturnsJsonColumns_ForSeededWorkCenter [< 1 ms]
   Skipped AverageCoilWeight_ReturnsRoundedAvg_ForSeededPart [< 1 ms]
   Skipped LookupWorkOrderQuery_ReturnsRows_WhenServerIsAvailable [9 s]
   Skipped GetSequencesQuery_ReturnsRows_WhenServerIsAvailable [1 ms]
@@ -26,5 +28,6 @@ A total of 1 test files matched the specified pattern.
   Skipped CreateAfterDelete_ReactivatesTheExistingRow [< 1 ms]
   Skipped DeleteOverride_WhenNothingExists_ReturnsNotFound [< 1 ms]
   Skipped GetOverridesByScopeAsync_IncludesTheCreatedRow [< 1 ms]
+  Skipped CrudRoundTrip_InsertListUpdateDelete [< 1 ms]
 
-Passed!  - Failed:     0, Passed:   586, Skipped:    14, Total:   600, Duration: 15 s - MTM_Waitlist.Tests.dll (net10.0)
+Passed!  - Failed:     0, Passed:   604, Skipped:    17, Total:   621, Duration: 15 s - MTM_Waitlist.Tests.dll (net10.0)

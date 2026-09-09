@@ -429,3 +429,44 @@ public sealed class SetupSelectionResult
 
     public string Message { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// Read model for the latest active setup job row of a work center, including the
+/// serialized subordinate/dunnage payloads resolved from
+/// <c>setup_active_jobs.subordinate_parts_json</c> /
+/// <c>setup_active_jobs.selected_dunnage_parts_json</c>. Backs the Waitlist
+/// Category/Item resolver (coil/flatstock/die/component/dunnage/sequence).
+/// </summary>
+public sealed class SetupActiveJobSnapshot
+{
+    public string WorkCenter { get; set; } = string.Empty;
+
+    public string WorkOrder { get; set; } = string.Empty;
+
+    public string PartNumber { get; set; } = string.Empty;
+
+    public string SequenceNumber { get; set; } = string.Empty;
+
+    /// <summary>Subordinate parts with canonical category already applied by the resolver.</summary>
+    public IReadOnlyList<SetupSubordinatePart> SubordinateParts { get; set; } = Array.Empty<SetupSubordinatePart>();
+
+    public IReadOnlyList<SetupDunnagePart> DunnageParts { get; set; } = Array.Empty<SetupDunnagePart>();
+
+    public IReadOnlyList<SetupSubordinatePart> Coils => Filter("Coil");
+
+    public IReadOnlyList<SetupSubordinatePart> Flatstock => Filter("Flatstock");
+
+    public IReadOnlyList<SetupSubordinatePart> Dies => Filter("Die");
+
+    public IReadOnlyList<SetupSubordinatePart> Components => Filter("Component");
+
+    public SetupSubordinatePart? PrimaryDie => Dies.FirstOrDefault();
+
+    /// <summary>Die location (Home Location path) read from the die subordinate row's <c>Location</c>.</summary>
+    public string DieLocation => PrimaryDie?.Location ?? string.Empty;
+
+    private IReadOnlyList<SetupSubordinatePart> Filter(string category)
+        => SubordinateParts
+            .Where(part => string.Equals(part.Category, category, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+}

@@ -359,7 +359,9 @@ USE mtm_waitlist;
 DROP PROCEDURE IF EXISTS sp_setup_active_jobs_latest_by_work_center_get;
 
 CREATE PROCEDURE sp_setup_active_jobs_latest_by_work_center_get()
-SELECT aj.work_center, aj.work_order, aj.part_number, aj.sequence_number
+SELECT aj.work_center, aj.work_order, aj.part_number, aj.sequence_number,
+       aj.subordinate_parts_json,
+       aj.selected_dunnage_parts_json
 FROM setup_active_jobs aj
 INNER JOIN (
         SELECT work_center, MAX(id) AS max_id
@@ -1643,3 +1645,94 @@ SELECT
     updated_utc
 FROM waitlist_request_subtypes
 ORDER BY request_type_id ASC, id ASC;
+
+-- Create procedure: sp_waitlist_defect_types_get_all
+-- Engine: MySQL 5.7
+-- Purpose: List active NCM defect types (for the worker picker and the Module_Settings editor).
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_defect_types_get_all;
+
+CREATE PROCEDURE sp_waitlist_defect_types_get_all()
+SELECT
+    id,
+    public_id,
+    defect_name,
+    description,
+    sort_order,
+    is_active,
+    created_by_user_id,
+    updated_by_user_id,
+    created_utc,
+    updated_utc
+FROM waitlist_defect_types
+WHERE is_active = 1
+ORDER BY sort_order ASC, defect_name ASC;
+
+-- Create procedure: sp_waitlist_defect_types_insert
+-- Engine: MySQL 5.7
+-- Purpose: Insert a new active NCM defect type into waitlist_defect_types.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_defect_types_insert;
+
+CREATE PROCEDURE sp_waitlist_defect_types_insert(
+    IN p_defect_name VARCHAR(100),
+    IN p_description VARCHAR(500),
+    IN p_sort_order INT,
+    IN p_created_by_user_id BIGINT
+)
+INSERT INTO waitlist_defect_types (
+    public_id, defect_name, description, sort_order, is_active,
+    created_by_user_id, updated_by_user_id, created_utc, updated_utc
+)
+VALUES (
+    UUID(),
+    NULLIF(TRIM(p_defect_name), ''),
+    NULLIF(TRIM(COALESCE(p_description, '')), ''),
+    COALESCE(p_sort_order, 0),
+    1,
+    p_created_by_user_id,
+    NULL,
+    UTC_TIMESTAMP(),
+    UTC_TIMESTAMP()
+);
+
+-- Create procedure: sp_waitlist_defect_types_update
+-- Engine: MySQL 5.7
+-- Purpose: Update an existing NCM defect type in waitlist_defect_types by id.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_defect_types_update;
+
+CREATE PROCEDURE sp_waitlist_defect_types_update(
+    IN p_id BIGINT,
+    IN p_defect_name VARCHAR(100),
+    IN p_description VARCHAR(500),
+    IN p_sort_order INT,
+    IN p_updated_by_user_id BIGINT
+)
+UPDATE waitlist_defect_types
+SET defect_name = NULLIF(TRIM(p_defect_name), ''),
+    description = NULLIF(TRIM(COALESCE(p_description, '')), ''),
+    sort_order = COALESCE(p_sort_order, 0),
+    updated_by_user_id = p_updated_by_user_id,
+    updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+-- Create procedure: sp_waitlist_defect_types_delete
+-- Engine: MySQL 5.7
+-- Purpose: Remove an NCM defect type from waitlist_defect_types by id (hard delete).
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_defect_types_delete;
+
+CREATE PROCEDURE sp_waitlist_defect_types_delete(
+    IN p_id BIGINT
+)
+DELETE FROM waitlist_defect_types
+WHERE id = p_id;
