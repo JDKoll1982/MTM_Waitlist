@@ -164,8 +164,6 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock
@@ -176,66 +174,6 @@
 
                 <muxc:Expander
                     Grid.Row="1"
-                    x:Name="MockDataExpander"
-                    x:Load="{x:Bind ViewModel.IsMockDataPanelVisible, Mode=OneWay}"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    IsExpanded="False">
-                    <muxc:Expander.Header>
-                        <Grid ColumnSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <SymbolIcon
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                Symbol="PreviewLink" />
-                            <TextBlock
-                                Grid.Column="1"
-                                VerticalAlignment="Center"
-                                FontWeight="SemiBold"
-                                Text="Mock Data" />
-                        </Grid>
-                    </muxc:Expander.Header>
-
-                    <Grid
-                        Margin="0,8,0,0"
-                        RowSpacing="8">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <TextBlock
-                            Grid.Row="0"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="Control sample-data routing for lookup and receiving flows."
-                            TextWrapping="Wrap" />
-
-                        <wct:SettingsCard Grid.Row="1">
-                            <wct:SettingsCard.Header>
-                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Mock Data" />
-                            </wct:SettingsCard.Header>
-                            <wct:SettingsCard.Description>
-                                <TextBlock
-                                    Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
-                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="Use sample/mock data from the mock master tables instead of the live databases. Applies to all mock data sources." />
-                            </wct:SettingsCard.Description>
-                            <wct:SettingsCard.Content>
-                                <ToggleSwitch
-                                    IsOn="{x:Bind ViewModel.UseMockData, Mode=TwoWay}"
-                                    OffContent="Off"
-                                    OnContent="On" />
-                            </wct:SettingsCard.Content>
-                        </wct:SettingsCard>
-                    </Grid>
-                </muxc:Expander>
-
-                <muxc:Expander
-                    Grid.Row="2"
                     x:Name="ImageLocationSettingsExpander"
                     x:Load="{x:Bind ViewModel.IsImageLocationSettingsPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
@@ -343,7 +281,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
-                    Grid.Row="3"
+                    Grid.Row="2"
                     x:Name="HotWorkCentersExpander"
                     x:Load="{x:Bind ViewModel.IsHotWorkCentersPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
@@ -541,7 +479,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
-                    Grid.Row="4"
+                    Grid.Row="3"
                     x:Name="DunnageTypeVisibilityExpander"
                     x:Load="{x:Bind ViewModel.IsDunnageTypeVisibilityPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
@@ -716,7 +654,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
-                    Grid.Row="5"
+                    Grid.Row="4"
                     x:Name="ComputersExpander"
                     x:Load="{x:Bind ViewModel.IsComputersPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
@@ -865,7 +803,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
-                    Grid.Row="6"
+                    Grid.Row="5"
                     x:Name="IgnoredLocationsExpander"
                     x:Load="{x:Bind ViewModel.IsIgnoredLocationsPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
@@ -994,7 +932,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
-                    Grid.Row="7"
+                    Grid.Row="6"
                     x:Name="NewRequestAlertsExpander"
                     x:Load="{x:Bind ViewModel.IsNewRequestAlertsPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
@@ -1055,7 +993,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
-                    Grid.Row="8"
+                    Grid.Row="7"
                     x:Name="UrgencyAllotmentsExpander"
                     x:Load="{x:Bind ViewModel.IsUrgencyAllotmentsPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"

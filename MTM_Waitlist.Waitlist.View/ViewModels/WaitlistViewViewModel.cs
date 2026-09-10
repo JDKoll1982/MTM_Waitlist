@@ -19,7 +19,6 @@ namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAware
 {
     private readonly INavigationService _navigationService;
-    private readonly ISampleDataService _sampleDataService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService _waitlistRequestService;
     private readonly IImageLocationService? _imageLocationService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IAverageCoilWeightService? _averageCoilWeightService;
@@ -53,7 +52,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     public WaitlistViewViewModel(
         INavigationService navigationService,
-        ISampleDataService sampleDataService,
         IBuildingSelectionService buildingSelectionService,
         MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService waitlistRequestService,
         IImageLocationService? imageLocationService = null,
@@ -62,12 +60,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         MTM_Waitlist.Module_Waitlist.Services.IAverageCoilWeightService? averageCoilWeightService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
-        ArgumentNullException.ThrowIfNull(sampleDataService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
         ArgumentNullException.ThrowIfNull(waitlistRequestService);
 
         _navigationService = navigationService;
-        _sampleDataService = sampleDataService;
         _buildingSelectionService = buildingSelectionService;
         _waitlistRequestService = waitlistRequestService;
         _imageLocationService = imageLocationService;
@@ -163,18 +159,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             return;
         }
 
-        // Fetch data on the current context (background thread when called via async void).
-        var data = _sampleDataService.GetSampleOrders(building);
-        var sampleCount = 0;
-        var newItems = new List<SampleOrder>(data.Count());
-        foreach (var item in data)
-        {
-            if (item is SampleOrder sampleOrder)
-            {
-                newItems.Add(sampleOrder);
-                sampleCount++;
-            }
-        }
+        // The list is built from real requests only: the app's own store is always live (FR-001, FR-014).
+        var newItems = new List<SampleOrder>();
 
         if (refreshVersion != Volatile.Read(ref _refreshVersion))
         {
@@ -205,7 +191,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
 
         await ApplySourceUpdateAsync(newItems, refreshVersion);
-        StartupDebugLog.Info("Waitlist", $"Loaded building '{building}'. SampleRows={sampleCount}, SessionRequests={activeRequestCount}, TotalRows={Source.Count}, MyRequestsOnly={ShowMyRequestsOnly}, SearchQuery='{SearchQuery}'.");
+        StartupDebugLog.Info("Waitlist", $"Loaded building '{building}'. SessionRequests={activeRequestCount}, TotalRows={Source.Count}, MyRequestsOnly={ShowMyRequestsOnly}, SearchQuery='{SearchQuery}'.");
         UpdateSearchSuggestions(SearchQuery);
     }
 

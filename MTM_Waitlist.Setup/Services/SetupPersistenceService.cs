@@ -60,9 +60,9 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             };
         }
 
-        // Internal stores are always written live. The former demo short-circuit ("Setup.Save" mock
-        // branch behind Feature.RecvMockData) acknowledged the save without writing it, which is the
-        // reported "save acknowledged but the work-center card never updates" defect (FR-001, SC-001).
+        // Internal stores are always written live. The former demo short-circuit acknowledged the save
+        // without writing it, which is the reported "save acknowledged but the work-center card never
+        // updates" defect (FR-001, SC-001).
         var result = await SaveBackendAsync(request, cancellationToken).ConfigureAwait(false);
 
         StartupDebugLog.Info("SetupPersistence", $"SaveAsync completed. Success={result.Success}, RequiresReplacementConfirmation={result.RequiresReplacementConfirmation}, Message='{result.Message}'.");

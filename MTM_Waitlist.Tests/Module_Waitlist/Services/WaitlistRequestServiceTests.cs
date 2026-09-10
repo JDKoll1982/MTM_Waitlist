@@ -28,15 +28,11 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task SubmitAsync_MockOn_DerivesUrgencyDeadlineWhenDraftHasNone()
+    public async Task SubmitAsync_DerivesUrgencyDeadlineWhenDraftHasNone()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = false,
-        });
+        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>());
         var deadline = new UrgencyDeadlineService(new UrgencySettingsService(settings));
-        var service = new WaitlistRequestService(settings, null, null, null, deadline);
+        var service = new WaitlistRequestService(null, null, deadline);
 
         var result = await service.SubmitAsync(DeadlineLessDraft(), allowDuplicate: false);
 
@@ -50,13 +46,9 @@ public sealed class WaitlistRequestServiceTests
     [TestMethod]
     public async Task SubmitAsync_PreservesExplicitDeadline()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = false,
-        });
+        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>());
         var deadline = new UrgencyDeadlineService(new UrgencySettingsService(settings));
-        var service = new WaitlistRequestService(settings, null, null, null, deadline);
+        var service = new WaitlistRequestService(null, null, deadline);
 
         // CreateDraft already carries an explicit TargetTimeUtc; it must be preserved, not overwritten.
         var result = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
@@ -66,14 +58,9 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task UpdateNote_MockOn_SetsNoteOnRequestAndRecordsAudit()
+    public async Task UpdateNote_SetsNoteOnRequestAndRecordsAudit()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = false,
-        });
-        var service = new WaitlistRequestService(settings, null, null);
+        var service = new WaitlistRequestService();
         var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
         var id = submit.Request!.Id;
 
@@ -88,12 +75,7 @@ public sealed class WaitlistRequestServiceTests
     [TestMethod]
     public async Task UpdateNote_EmptyClearsNote()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = false,
-        });
-        var service = new WaitlistRequestService(settings, null, null);
+        var service = new WaitlistRequestService();
         var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
         var id = submit.Request!.Id;
 
@@ -116,24 +98,18 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task SubmitAsync_MockOn_PersistsNewRequestToDatabase()
+    public async Task SubmitAsync_AlwaysPersistsNewRequestToDatabase()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = false,
-        });
-        var sampleDataService = new SampleDataService(settings);
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
-        var service = new WaitlistRequestService(settings, sampleDataService, helper);
+        var service = new WaitlistRequestService(helper);
 
         var result = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status);
         Assert.IsNotNull(result.Request);
-        // Even in mock mode the request must be written to the mtm_waitlist database.
+        // The app's own store is always written: no setting can short-circuit the insert (FR-001, SC-002).
         Assert.IsTrue(helper.NonQueryProcedures.Contains("sp_waitlist_request_insert"),
-            "A new request added while mock is ON should still be saved to the database.");
+            "A new request must be saved to the mtm_waitlist database on every submit.");
     }
 
     [TestMethod]
@@ -195,14 +171,8 @@ public sealed class WaitlistRequestServiceTests
     [TestMethod]
     public async Task SubmitAsync_ReturnsPersistenceFailureWhenProductionBackendIsUnavailableAsync()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = false,
-            ["Feature.RecvMockData"] = false,
-        });
-        var sampleDataService = new SampleDataService(settings);
         var mySqlHelperServer = new MySqlHelperServer();
-        var service = new WaitlistRequestService(settings, sampleDataService, mySqlHelperServer);
+        var service = new WaitlistRequestService(mySqlHelperServer);
 
         var result = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
 
@@ -212,14 +182,8 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task RefreshFromDatabaseAsync_MockOff_LoadsOpenRequestsFromDb()
+    public async Task RefreshFromDatabaseAsync_LoadsOpenRequestsFromDb()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = false,
-            ["Feature.RecvMockData"] = false,
-        });
-        var sampleDataService = new SampleDataService(settings);
         var helper = new StubMySqlHelperServer(
         [
             new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
@@ -248,7 +212,7 @@ public sealed class WaitlistRequestServiceTests
                 ["released_utc"] = null,
             },
         ]);
-        var service = new WaitlistRequestService(settings, sampleDataService, helper);
+        var service = new WaitlistRequestService(helper);
 
         var count = await service.RefreshFromDatabaseAsync("Expo Drive");
 
@@ -262,35 +226,23 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task RefreshFromDatabaseAsync_MockOn_DoesNotQueryDatabase()
+    public async Task RefreshFromDatabaseAsync_AlwaysQueriesTheDatabase()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = false,
-        });
-        var sampleDataService = new SampleDataService(settings);
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
-        var service = new WaitlistRequestService(settings, sampleDataService, helper);
+        var service = new WaitlistRequestService(helper);
 
         var count = await service.RefreshFromDatabaseAsync("Expo Drive");
 
         Assert.AreEqual(0, count);
-        Assert.AreEqual(0, helper.QueryCallCount);
+        Assert.AreEqual(1, helper.QueryCallCount, "The app's own store is always queried (FR-001).");
         Assert.AreEqual(0, service.GetActiveRequests("Expo Drive").Count);
     }
 
     [TestMethod]
-    public async Task TransitionStatusAsync_MockOff_PersistsStatusUpdateToDb()
+    public async Task TransitionStatusAsync_PersistsStatusUpdateToDb()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = false,
-            ["Feature.RecvMockData"] = false,
-        });
-        var sampleDataService = new SampleDataService(settings);
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
-        var service = new WaitlistRequestService(settings, sampleDataService, helper);
+        var service = new WaitlistRequestService(helper);
 
         var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
@@ -323,16 +275,10 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task AuditTrail_MockOff_PersistsAuditEntriesToDb()
+    public async Task AuditTrail_PersistsAuditEntriesToDb()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = false,
-            ["Feature.RecvMockData"] = false,
-        });
-        var sampleDataService = new SampleDataService(settings);
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
-        var service = new WaitlistRequestService(settings, sampleDataService, helper);
+        var service = new WaitlistRequestService(helper);
 
         var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
@@ -1177,22 +1123,21 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task WaitlistViewViewModel_IgnoresStaleRefreshResults_WhenBuildingChanges()
+    public async Task WaitlistViewViewModel_ReflectsTheSelectedBuilding_WhenBuildingChanges()
     {
         var buildingSelectionService = new StubBuildingSelectionService("Expo Drive");
         var requestService = new WaitlistRequestService();
-        var sampleDataService = new DelayedSampleDataService();
-        var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), sampleDataService, buildingSelectionService, requestService);
+        var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), buildingSelectionService, requestService);
 
+        await requestService.SubmitAsync(CreateDraft(), allowDuplicate: true);
         var expoTask = InvokeLoad(viewModel, "Expo Drive");
-        await Task.Delay(25);
         buildingSelectionService.SelectedBuilding = "VITS";
         var vitsTask = InvokeLoad(viewModel, "VITS");
 
         await Task.WhenAll(expoTask, vitsTask);
 
-        Assert.AreEqual(1, viewModel.Source.Count);
-        Assert.AreEqual("VITS request", viewModel.Source[0].Title);
+        // The Expo Drive request must not leak into the VITS list: a stale load result is discarded.
+        Assert.AreEqual(0, viewModel.Source.Count);
     }
 
     [TestMethod]
@@ -1200,8 +1145,7 @@ public sealed class WaitlistRequestServiceTests
     {
         var buildingSelectionService = new StubBuildingSelectionService("Expo Drive");
         var requestService = new WaitlistRequestService();
-        var sampleDataService = new DelayedSampleDataService();
-        var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), sampleDataService, buildingSelectionService, requestService);
+        var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), buildingSelectionService, requestService);
 
         // The view model only refreshes on RequestsChanged once it subscribes in
         // OnNavigatedTo; without this it never picks up the submitted request.
@@ -1250,9 +1194,8 @@ public sealed class WaitlistRequestServiceTests
     {
         var buildingSelectionService = new StubBuildingSelectionService("Expo Drive");
         var requestService = new WaitlistRequestService();
-        var sampleDataService = new DelayedSampleDataService();
         var startupState = new MTM_Waitlist.Module_Core.Models.StartupState { EmployeeNumber = "6229" };
-        var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), sampleDataService, buildingSelectionService, requestService, startupState: startupState);
+        var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), buildingSelectionService, requestService, startupState: startupState);
 
         viewModel.OnNavigatedTo(null!);
         await viewModel.RefreshAsync();
@@ -1347,16 +1290,10 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task CancelOwnRequestAsync_MockOff_PersistsCancelledRowToDb()
+    public async Task CancelOwnRequestAsync_PersistsCancelledRowToDb()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = false,
-            ["Feature.RecvMockData"] = false,
-        });
-        var sampleDataService = new SampleDataService(settings);
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
-        var service = new WaitlistRequestService(settings, sampleDataService, helper);
+        var service = new WaitlistRequestService(helper);
 
         var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
@@ -1371,15 +1308,9 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task MockMode_MyRequestsFiltersToSignedInUserAndCancelOwnBlockedForNonCreator()
+    public async Task MyRequestsFiltersToSignedInUserAndCancelOwnBlockedForNonCreator()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = true,
-        });
-        var sampleDataService = new SampleDataService(settings);
-        var service = new WaitlistRequestService(settings, sampleDataService, null);
+        var service = new WaitlistRequestService();
 
         var mine = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, mine.Status);
@@ -1400,12 +1331,12 @@ public sealed class WaitlistRequestServiceTests
         Assert.AreEqual(1, mineOnly.Count);
         Assert.AreEqual("6229", mineOnly[0].RequesterEmployeeNumber);
 
-        // A non-creator cannot cancel the signed-in user's Waiting request in mock mode.
+        // A non-creator cannot cancel the signed-in user's Waiting request.
         var denied = await service.CancelOwnRequestAsync(mine.Request!.Id, "5000");
         Assert.AreEqual(WaitlistRequestCancelStatus.NotOwnedByRequester, denied.Status);
         Assert.AreEqual("Pending", service.GetRequest(mine.Request.Id)!.Status);
 
-        // The creator can cancel their own Waiting request in mock mode.
+        // The creator can cancel their own Waiting request.
         var success = await service.CancelOwnRequestAsync(mine.Request.Id, "6229", "No longer needed");
         Assert.AreEqual(WaitlistRequestCancelStatus.Success, success.Status);
         Assert.AreEqual("Canceled", service.GetRequest(mine.Request.Id)!.Status);
@@ -1418,15 +1349,10 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task SubmitAsync_MockOn_InvokesNewRequestAlertNotifier()
+    public async Task SubmitAsync_InvokesNewRequestAlertNotifier()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = false,
-        });
         var notifier = new FakeNewRequestAlertNotifier();
-        var service = new WaitlistRequestService(settings, null, null, notifier);
+        var service = new WaitlistRequestService(null, notifier);
 
         var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
 
@@ -1439,13 +1365,8 @@ public sealed class WaitlistRequestServiceTests
     [TestMethod]
     public async Task SubmitAsync_ValidationFailure_DoesNotInvokeNotifier()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = false,
-        });
         var notifier = new FakeNewRequestAlertNotifier();
-        var service = new WaitlistRequestService(settings, null, null, notifier);
+        var service = new WaitlistRequestService(null, notifier);
 
         var submit = await service.SubmitAsync(new WaitlistRequestDraft(), allowDuplicate: false);
 
@@ -1530,27 +1451,6 @@ public sealed class WaitlistRequestServiceTests
         public IReadOnlyList<string> Buildings => new[] { "Expo Drive", "VITS" };
 
         public string SelectedBuilding { get; set; }
-    }
-
-    private sealed class DelayedSampleDataService : ISampleDataService
-    {
-        public IReadOnlyList<object> GetSampleOrders(string? building = null)
-        {
-            var normalized = building ?? string.Empty;
-            var title = normalized.Equals("VITS", StringComparison.OrdinalIgnoreCase) ? "VITS request" : "Expo request";
-            return new object[]
-            {
-                new SampleOrder
-                {
-                    Id = normalized.Equals("VITS", StringComparison.OrdinalIgnoreCase) ? 101 : 100,
-                    Title = title,
-                    RequestedByName = "Current user",
-                    RequestedPressName = normalized,
-                    RemainingTimeText = "00:05",
-                    IsOverdue = false,
-                }
-            };
-        }
     }
 
     private sealed class InMemoryLocalSettingsService : ILocalSettingsService

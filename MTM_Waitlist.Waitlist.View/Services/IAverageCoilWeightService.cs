@@ -9,8 +9,7 @@ namespace MTM_Waitlist.Module_Waitlist.Services;
 /// <c>part_id</c> matches the coil part. Each row is one received skid; its <c>quantity</c>
 /// is the skid weight the material handler actually grasps (some skids hold 2+ coils, so we
 /// average the whole skid, not individual coils). Current stock is irrelevant here.
-/// Routing follows the mock-toggle rule: <c>Feature.RecvMockData</c> ON returns sample data,
-/// OFF runs the real query against the receiving application database.
+/// The receiving store is always read live: there is no sample/mock short-circuit (FR-001).
 /// </remarks>
 public interface IAverageCoilWeightService
 {

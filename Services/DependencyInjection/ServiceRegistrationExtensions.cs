@@ -26,7 +26,6 @@ using MTM_Waitlist.Module_Shared.ViewModels;
 using MTM_Waitlist.Module_Shared.Views;
 using MTM_Waitlist.Mock.DependencyInjection;
 using MTM_Waitlist.Notifications;
-using MTM_Waitlist.Services.MockMode;
 
 namespace MTM_Waitlist.Services.DependencyInjection;
 
@@ -93,10 +92,8 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<IPageTransitionService, PageTransitionService>();
         services.AddSingleton<INavigationService, NavigationService>();
 
-        // Core services
-        services.AddSingleton<ISampleDataService>(serviceProvider =>
-            new SampleDataService(serviceProvider.GetRequiredService<ILocalSettingsService>()));
-        services.AddSingleton<SqlHelperServer>();
+        // Core services. The app's own store, the floor/WIP store, and the receiving store are always read
+        // and written live: no sample/demo catalog and no mock short-circuit is registered (FR-001, FR-014).
         services.AddSingleton<MTM_Waitlist.Module_Core.Services.InforVisualSqlQueryService>();
         services.AddSingleton<MySqlHelperServer>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMySqlHelperServer>(
@@ -112,20 +109,9 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IRequestItemCatalogService, MTM_Waitlist.Module_Settings.Services.RequestItemCatalogService>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.INewRequestPickerService, MTM_Waitlist.Module_Settings.Services.NewRequestPickerService>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IDefectTypeCatalogService, MTM_Waitlist.Module_Settings.Services.DefectTypeCatalogService>();
-        services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMockMasterDataService, MTM_Waitlist.Module_Core.Services.MockMasterDataService>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IRequestSubtypeNameReadService, MTM_Waitlist.Module_Core.Services.RequestSubtypeNameReadService>();
         services.AddSingleton<IExternalConnectionInfoProvider, ExternalConnectionInfoProvider>();
         services.AddSingleton<IConnectionHealthService, MTM_Waitlist.Module_Core.Services.ConnectionHealthService>();
-        services.AddSingleton<IMockConfigurationService, MTM_Waitlist.Module_Core.Services.MockConfigurationService>();
-        services.AddSingleton<IMockRoutingService, MTM_Waitlist.Module_Core.Services.MockRoutingService>();
-        services.AddSingleton<IMockRoutingCoordinator, MTM_Waitlist.Module_Core.Services.MockRoutingCoordinator>();
-        services.AddSingleton<IMockFallbackDebouncer, MTM_Waitlist.Module_Core.Services.MockFallbackDebouncer>();
-        services.AddSingleton<IMockRoutingRefreshService, MTM_Waitlist.Module_Core.Services.MockRoutingRefreshService>();
-        services.AddSingleton<IMockRoutingMonitorService, MTM_Waitlist.Module_Core.Services.MockRoutingMonitorService>();
-        services.AddSingleton<IMockModePollingHost, MTM_Waitlist.Module_Core.Services.MockModePollingHost>();
-        services.AddSingleton<IPollScheduler, DispatcherPollScheduler>();
-        services.AddSingleton<MockModeToastCoordinator>();
-        services.AddSingleton<IMockToggleService, MTM_Waitlist.Module_Core.Services.MockToggleService>();
         services.AddSingleton<INewRequestAlertService, MTM_Waitlist.Module_Core.Services.NewRequestAlertService>();
         services.AddSingleton<INewRequestAlertNotifier, MTM_Waitlist.Module_Core.Services.NewRequestAlertNotifier>();
         services.AddSingleton<IUrgencySettingsService, MTM_Waitlist.Module_Core.Services.UrgencySettingsService>();
@@ -177,7 +163,6 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<ControlInspectorDetailPage>();
         services.AddTransient<WaitlistViewViewModel>(provider => new WaitlistViewViewModel(
             provider.GetRequiredService<INavigationService>(),
-            provider.GetRequiredService<ISampleDataService>(),
             provider.GetRequiredService<IBuildingSelectionService>(),
             provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
             provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>(),

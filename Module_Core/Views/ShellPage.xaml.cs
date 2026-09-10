@@ -5,7 +5,6 @@ using Microsoft.UI.Xaml.Media;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
-using MTM_Waitlist.Services.MockMode;
 using MTM_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -18,7 +17,6 @@ namespace MTM_Waitlist.Module_Core.Views;
 public sealed partial class ShellPage : Page
 {
     private readonly IStartupShellStateService _startupShellStateService;
-    private readonly MockModeToastCoordinator _mockModeToastCoordinator;
 
     public ShellViewModel ViewModel
     {
@@ -27,12 +25,10 @@ public sealed partial class ShellPage : Page
 
     public ShellPage(
         ShellViewModel viewModel,
-        IStartupShellStateService startupShellStateService,
-        MockModeToastCoordinator mockModeToastCoordinator)
+        IStartupShellStateService startupShellStateService)
     {
         ViewModel = viewModel;
         _startupShellStateService = startupShellStateService;
-        _mockModeToastCoordinator = mockModeToastCoordinator;
         InitializeComponent();
 
         ViewModel.NavigationService.Frame = NavigationFrame;
@@ -46,10 +42,6 @@ public sealed partial class ShellPage : Page
     {
         ViewModel.RefreshUserInfo();
         SyncMyRequestsVisibility();
-
-        // Start the mock-mode polling host (central mock-config refresh + taskbar toasts on state change)
-        // once the shell is up and the signed-in role is known. Unpackaged apps are a no-op.
-        _mockModeToastCoordinator.Start();
 
         if (AppTitleBar is null || AppTitleBarText is null)
         {

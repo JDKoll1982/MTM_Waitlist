@@ -9,13 +9,8 @@ namespace MTM_Waitlist.Module_Waitlist.Services;
 
 public sealed class WaitlistRequestService : IWaitlistRequestService
 {
-    private const string InforVisualMockDataSettingKey = "Feature.InforVisualMockData";
-    private const string RecvMockDataSettingKey = "Feature.RecvMockData";
-
     public event EventHandler? RequestsChanged;
 
-    private readonly ILocalSettingsService? _localSettingsService;
-    private readonly ISampleDataService? _sampleDataService;
     private readonly IMySqlHelperServer? _mySqlHelperServer;
     private readonly INewRequestAlertNotifier? _newRequestAlertNotifier;
     private readonly IUrgencyDeadlineService? _urgencyDeadlineService;
@@ -27,14 +22,10 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
     }
 
     public WaitlistRequestService(
-        ILocalSettingsService? localSettingsService,
-        ISampleDataService? sampleDataService,
-        IMySqlHelperServer? mySqlHelperServer,
+        IMySqlHelperServer? mySqlHelperServer = null,
         INewRequestAlertNotifier? newRequestAlertNotifier = null,
         IUrgencyDeadlineService? urgencyDeadlineService = null)
     {
-        _localSettingsService = localSettingsService;
-        _sampleDataService = sampleDataService;
         _mySqlHelperServer = mySqlHelperServer;
         _newRequestAlertNotifier = newRequestAlertNotifier;
         _urgencyDeadlineService = urgencyDeadlineService;
@@ -44,12 +35,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (IsMockDataEnabled())
-        {
-            StartupDebugLog.Info("WaitlistRequest", "RefreshFromDatabaseAsync skipped: mock data is enabled.");
-            return 0;
-        }
-
+        // The app's own store is always read live: there is no mock/demo short-circuit (FR-001, SC-002).
         if (_mySqlHelperServer is null)
         {
             StartupDebugLog.Info("WaitlistRequest", "RefreshFromDatabaseAsync skipped: no MySQL helper is configured.");
@@ -76,8 +62,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             }
         }
 
-        // The DB is the authoritative source for open requests when mock data is OFF:
-        // replace the in-memory set with the rows read back so the list reflects reality.
+        // The DB is the authoritative source for open requests: replace the in-memory set with the rows
+        // read back so the list reflects reality.
         _requests.Clear();
         foreach (var request in loaded)
         {
@@ -268,10 +254,10 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             $"Request '{requestId}' transitioned from '{existing.Status}' to '{nextStatus}'. AcceptedUtc='{updated.AcceptedUtc}', CompletedUtc='{updated.CompletedUtc}'.");
         await RecordAuditAsync(requestId, existing.Status, nextStatus, nextStatus, canceledByEmployeeNumber, null, cancellationReason, cancellationToken);
 
-        // Persist the transition to the MySQL DB when not in mock mode and a helper is present.
-        // The in-memory request id equals the DB public_id (client-supplied on insert / DB row id
-        // on load), so the status update targets the correct row.
-        if (!IsMockDataEnabled() && _mySqlHelperServer is not null)
+        // Persist the transition to the MySQL DB whenever a helper is present. The in-memory request id
+        // equals the DB public_id (client-supplied on insert / DB row id on load), so the status update
+        // targets the correct row.
+        if (_mySqlHelperServer is not null)
         {
             var rowsAffected = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
                 "sp_waitlist_request_status_update",
@@ -388,8 +374,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         StartupDebugLog.Info("WaitlistRequest", $"Note updated for request '{requestId}'. Status='{updated.Status}'.");
         await RecordAuditAsync(requestId, existing.Status, updated.Status, "NoteUpdated", null, null, normalizedNote, cancellationToken).ConfigureAwait(false);
 
-        // Persist the note through the status-update path (status unchanged) when not in mock mode.
-        if (!IsMockDataEnabled() && _mySqlHelperServer is not null)
+        // Persist the note through the status-update path (status unchanged).
+        if (_mySqlHelperServer is not null)
         {
             try
             {
@@ -579,7 +565,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
     /// <summary>
     /// Stores a handler-action transition, records its audit entry, persists it through the status-update
-    /// path (mock OFF), and raises <see cref="RequestsChanged"/>.
+    /// path, and raises <see cref="RequestsChanged"/>.
     /// </summary>
     private async Task PersistHandlerActionAsync(
         Guid requestId,
@@ -594,7 +580,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         _requests[requestId] = updated;
         await RecordAuditAsync(requestId, fromStatus, updated.Status, eventType, actorNumber, actorName, details, cancellationToken).ConfigureAwait(false);
 
-        if (!IsMockDataEnabled() && _mySqlHelperServer is not null)
+        if (_mySqlHelperServer is not null)
         {
             await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
                 "sp_waitlist_request_status_update",
@@ -709,9 +695,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Note = string.IsNullOrWhiteSpace(draft.Note) ? null : draft.Note.Trim(),
         };
 
-        // Waitlist requests are REAL mtm_waitlist data and are persisted regardless of the Infor Visual / receiving
-        // mock toggles (which only short-circuit external lookups to sample data). Persist whenever a helper server
-        // is configured so a new request added in mock mode still saves to the database.
+        // Waitlist requests are REAL mtm_waitlist data and are always persisted (FR-001, SC-002).
+        // Persist whenever a helper server is configured.
         if (_mySqlHelperServer is not null)
         {
             var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
@@ -785,8 +770,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             auditEntries.Add(entry);
         }
 
-        // Persist the audit entry to the DB (mock OFF only); cancelled records are never purged.
-        if (!IsMockDataEnabled() && _mySqlHelperServer is not null)
+        // Persist the audit entry to the DB; cancelled records are never purged.
+        if (_mySqlHelperServer is not null)
         {
             await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
                 "sp_waitlist_request_audit_insert",
@@ -829,17 +814,5 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             // A toast failure must never break a successful request submission.
             StartupDebugLog.Error("WaitlistRequest", ex, "Failed to raise the new-request alert.");
         }
-    }
-
-    private bool IsMockDataEnabled()
-    {
-        if (_localSettingsService is null)
-        {
-            return false;
-        }
-
-        var inforVisualValue = _localSettingsService.ReadSettingAsync<bool?>(InforVisualMockDataSettingKey).GetAwaiter().GetResult() ?? false;
-        var recvValue = _localSettingsService.ReadSettingAsync<bool?>(RecvMockDataSettingKey).GetAwaiter().GetResult() ?? false;
-        return inforVisualValue || recvValue;
     }
 }

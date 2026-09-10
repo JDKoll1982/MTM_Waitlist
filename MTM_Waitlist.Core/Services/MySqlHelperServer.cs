@@ -36,8 +36,8 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
     /// </summary>
     /// <remarks>
     /// This type previously took a local-settings service and a sample-data service purely so it could
-    /// short-circuit a MySQL target to demo data behind the <c>Feature.RecvMockData</c> setting. Internal
-    /// stores are never mocked (FR-001, constitution II), so the gate and both dependencies are gone.
+    /// short-circuit a MySQL target to demo data behind a retired demo setting. Internal stores are never
+    /// mocked (FR-001, constitution II), so the gate and both dependencies are gone.
     /// </remarks>
     public MySqlHelperServer(
         IOptions<StartupDatabaseOptions>? startupDatabaseOptions = null,

@@ -189,11 +189,6 @@ internal sealed class FakeLocalSettingsService : ILocalSettingsService
     public Task CorruptForTestAsync() => Task.CompletedTask;
 }
 
-internal sealed class FakeSampleDataService : ISampleDataService
-{
-    public IReadOnlyList<object> GetSampleOrders(string? building = null) => Array.Empty<object>();
-}
-
 internal static class TestDoubles
 {
     /// <summary>

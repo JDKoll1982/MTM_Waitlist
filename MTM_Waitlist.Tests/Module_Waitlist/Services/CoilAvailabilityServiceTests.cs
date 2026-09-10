@@ -1,97 +1,49 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Waitlist.Services;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 
+/// <summary>
+/// Coil availability no longer consults a sample catalog (FR-014): the mock toggle and
+/// <c>SampleJobCoilCatalog</c> are gone. These tests pin the interim behavior until the live source
+/// lands (FR-019, task T099), and prove no sample coil data is fabricated in the meantime.
+/// </summary>
 [TestClass]
 public sealed class CoilAvailabilityServiceTests
 {
     [TestMethod]
-    public async Task GetCoilForJobAsync_MockOn_WithCoilBearingJob_ReturnsCoil()
+    public async Task GetCoilForJobAsync_WithoutALiveSource_AssumesCoilAvailableAndFabricatesNoSampleData()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-        });
-        var service = new CoilAvailabilityService(settings);
+        var service = new CoilAvailabilityService();
 
         var coil = await service.GetCoilForJobAsync("100-3");
 
-        Assert.IsTrue(coil.HasCoil);
-        Assert.AreEqual("COIL-204", coil.CoilNumber);
-        Assert.IsFalse(string.IsNullOrWhiteSpace(coil.QuantityOnHand));
-        Assert.IsFalse(string.IsNullOrWhiteSpace(coil.Description));
-        Assert.IsFalse(string.IsNullOrWhiteSpace(coil.AverageWeight));
-    }
-
-    [TestMethod]
-    public async Task GetCoilForJobAsync_MockOn_WithNoCoilJob_ReturnsNoCoil()
-    {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-        });
-        var service = new CoilAvailabilityService(settings);
-
-        var coil = await service.GetCoilForJobAsync("100-17");
-
-        Assert.IsFalse(coil.HasCoil);
+        Assert.IsTrue(coil.HasCoil, "The coil request type must not be hidden while the live source is unconfigured.");
         Assert.AreEqual(string.Empty, coil.CoilNumber);
+        Assert.AreEqual(string.Empty, coil.QuantityOnHand);
+        Assert.AreEqual(string.Empty, coil.Description);
+        Assert.AreEqual(string.Empty, coil.AverageWeight);
     }
 
     [TestMethod]
-    public async Task GetCoilForJobAsync_MockOff_KeepsCoilAvailable()
+    public async Task GetCoilForJobAsync_AcceptsAMissingWorkCenter()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = false,
-        });
-        var service = new CoilAvailabilityService(settings);
+        var service = new CoilAvailabilityService();
 
-        var coil = await service.GetCoilForJobAsync("100-17");
+        var coil = await service.GetCoilForJobAsync(null);
 
         Assert.IsTrue(coil.HasCoil);
     }
 
-    private sealed class InMemoryLocalSettingsService : ILocalSettingsService
+    [TestMethod]
+    public async Task GetCoilForJobAsync_HonorsCancellation()
     {
-        private readonly Dictionary<string, object> _settings;
+        var service = new CoilAvailabilityService();
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
 
-        public InMemoryLocalSettingsService(Dictionary<string, object> settings)
-        {
-            _settings = settings;
-        }
-
-        public Task<T?> ReadSettingAsync<T>(string key)
-        {
-            if (_settings.TryGetValue(key, out var value))
-            {
-                return Task.FromResult((T?)value);
-            }
-
-            return Task.FromResult(default(T));
-        }
-
-        public Task SaveSettingAsync<T>(string key, T value)
-        {
-            _settings[key] = value!;
-            return Task.CompletedTask;
-        }
-
-        public Task ResetSettingAsync(string key, CancellationToken cancellationToken = default)
-        {
-            _settings.Remove(key);
-            return Task.CompletedTask;
-        }
-
-        public Task ResetAsync()
-        {
-            _settings.Clear();
-            return Task.CompletedTask;
-        }
-
-        public Task CorruptForTestAsync() => Task.CompletedTask;
+        await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+            () => service.GetCoilForJobAsync("100-3", cts.Token));
     }
 }

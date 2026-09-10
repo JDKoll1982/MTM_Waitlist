@@ -12,57 +12,64 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 public sealed class WaitlistViewDetailViewModelTests
 {
     [TestMethod]
-    public void OnNavigatedTo_WhenPassedIntId_LoadsMatchingItemAndTemplateSections()
+    public async Task OnNavigatedTo_WhenPassedASubmittedRequestId_LoadsMatchingItemAndTemplateSectionsAsync()
     {
-        var item = new SampleOrder
-        {
-            Id = 7,
-            Title = "Coil Request",
-            RequestedByName = "Jordan Lee",
-            RequestedPressName = "Press 12",
-            RemainingTimeText = "00:27"
-        };
-
-        var viewModel = new WaitlistViewDetailViewModel(
-            new RecordingNavigationService(),
-            new StubSampleDataService(item),
-            new StubBuildingSelectionService());
-
-        viewModel.OnNavigatedTo(7);
-
-        Assert.IsNotNull(viewModel.Item);
-        Assert.AreEqual(7, viewModel.Item!.Id);
-        Assert.AreEqual(3, viewModel.TemplateSections.Count);
-    }
-
-    [TestMethod]
-    public void OnNavigatedTo_WhenPassedSessionRequestId_UsesTheCorrectRequestDetailTemplate()
-    {
-        var request = new WaitlistRequest
-        {
-            Id = Guid.NewGuid(),
-            Building = "Expo Drive",
-            WorkCenter = "Press 12",
-            RequestType = "Coil",
-            Subtype = "Wrong Coil",
-            InputValue = "Wrong material at press",
-            Status = "Pending",
-            RequestedUtc = DateTimeOffset.UtcNow,
-            TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(12),
-            IsOverdue = false,
-        };
-
+        var requestService = new WaitlistRequestService();
+        var request = await SubmitCoilRequestAsync(requestService);
         var item = WaitlistViewViewModel.CreateSessionOrder(request);
+
         var viewModel = new WaitlistViewDetailViewModel(
             new RecordingNavigationService(),
-            new StubSampleDataService(item),
-            new StubBuildingSelectionService());
+            new StubBuildingSelectionService(),
+            requestService: requestService);
 
         viewModel.OnNavigatedTo(item.Id);
 
-        Assert.AreEqual(3, viewModel.TemplateSections.Count);
+        Assert.IsNotNull(viewModel.Item);
+        Assert.AreEqual(item.Id, viewModel.Item!.Id);
+        Assert.IsTrue(viewModel.TemplateSections.Count >= 3);
+    }
+
+    [TestMethod]
+    public async Task OnNavigatedTo_WhenPassedSessionRequestId_UsesTheCorrectRequestDetailTemplateAsync()
+    {
+        var requestService = new WaitlistRequestService();
+        var request = await SubmitCoilRequestAsync(requestService, subtype: "Wrong Coil", inputValue: "Wrong material at press");
+        var item = WaitlistViewViewModel.CreateSessionOrder(request);
+
+        var viewModel = new WaitlistViewDetailViewModel(
+            new RecordingNavigationService(),
+            new StubBuildingSelectionService(),
+            requestService: requestService);
+
+        viewModel.OnNavigatedTo(item.Id);
+
+        Assert.IsTrue(viewModel.TemplateSections.Count >= 3);
         Assert.AreEqual("Coil material", viewModel.TemplateSections[0].Title);
         Assert.AreEqual("Wrong coil", viewModel.TemplateSections[0].Fields[0].Value);
+    }
+
+    private static async Task<WaitlistRequest> SubmitCoilRequestAsync(
+        WaitlistRequestService requestService,
+        string subtype = "Pickup Coil",
+        string inputValue = "COIL-204")
+    {
+        var draft = new WaitlistRequestDraft
+        {
+            Building = "Expo Drive",
+            WorkCenter = "100-3",
+            RequestType = "Coil",
+            Subtype = subtype,
+            InputValue = inputValue,
+            ActiveSetupJobId = "100-3",
+            WorkCenterName = "100-3",
+            RequesterEmployeeNumber = "6229",
+            RequesterEmployeeName = "John Koll",
+        };
+
+        var submit = await requestService.SubmitAsync(draft, allowDuplicate: true);
+        Assert.IsNotNull(submit.Request);
+        return submit.Request!;
     }
 
     [TestMethod]
@@ -71,7 +78,6 @@ public sealed class WaitlistViewDetailViewModelTests
         var navigationService = new RecordingNavigationService();
         var viewModel = new WaitlistViewDetailViewModel(
             navigationService,
-            new StubSampleDataService(),
             new StubBuildingSelectionService());
 
         viewModel.BackCommand.Execute(null);
@@ -97,10 +103,9 @@ public sealed class WaitlistViewDetailViewModelTests
         var submit = await requestService.SubmitAsync(draft, allowDuplicate: false);
         var requestId = submit.Request!.Id;
 
-        // Empty sample rows => the item must be resolved from the request service.
+        // No sample rows exist any more: the item must be resolved from the request service.
         var viewModel = new WaitlistViewDetailViewModel(
             new RecordingNavigationService(),
-            new StubSampleDataService(),
             new StubBuildingSelectionService(),
             requestService: requestService);
 
@@ -131,7 +136,6 @@ public sealed class WaitlistViewDetailViewModelTests
 
         var viewModel = new WaitlistViewDetailViewModel(
             new RecordingNavigationService(),
-            new StubSampleDataService(),
             new StubBuildingSelectionService(),
             requestService: requestService);
 
@@ -153,8 +157,7 @@ public sealed class WaitlistViewDetailViewModelTests
     {
         var viewModel = new WaitlistViewDetailViewModel(
             new RecordingNavigationService(),
-            new StubSampleDataService(),   // empty sample, no request service -> nothing resolves
-            new StubBuildingSelectionService());
+            new StubBuildingSelectionService());   // no request service -> nothing resolves
 
         viewModel.OnNavigatedTo(9999);
 
@@ -163,15 +166,18 @@ public sealed class WaitlistViewDetailViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_ItemResolved_ClearsEmptyStateMessage()
+    public async Task OnNavigatedTo_ItemResolved_ClearsEmptyStateMessageAsync()
     {
-        var item = new SampleOrder { Id = 7, Title = "Coil Request" };
+        var requestService = new WaitlistRequestService();
+        var request = await SubmitCoilRequestAsync(requestService);
+        var item = WaitlistViewViewModel.CreateSessionOrder(request);
+
         var viewModel = new WaitlistViewDetailViewModel(
             new RecordingNavigationService(),
-            new StubSampleDataService(item),
-            new StubBuildingSelectionService());
+            new StubBuildingSelectionService(),
+            requestService: requestService);
 
-        viewModel.OnNavigatedTo(7);
+        viewModel.OnNavigatedTo(item.Id);
 
         Assert.IsNotNull(viewModel.Item);
         Assert.AreEqual(string.Empty, viewModel.EmptyStateMessage);
@@ -204,21 +210,6 @@ public sealed class WaitlistViewDetailViewModelTests
 
         public void SetListDataItemForNextConnectedAnimation(object item)
         {
-        }
-    }
-
-    private sealed class StubSampleDataService : ISampleDataService
-    {
-        private readonly IReadOnlyList<object> _items;
-
-        public StubSampleDataService(params SampleOrder[] items)
-        {
-            _items = items.Length == 0 ? Array.Empty<object>() : items.Cast<object>().ToArray();
-        }
-
-        public IReadOnlyList<object> GetSampleOrders(string? building = null)
-        {
-            return _items;
         }
     }
 

@@ -15,7 +15,6 @@ namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigationAware
 {
     private readonly INavigationService _navigationService;
-    private readonly ISampleDataService _sampleDataService;
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly IWaitlistRequestService? _requestService;
     private readonly IWaitlistInventoryService? _inventoryService;
@@ -72,7 +71,6 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
     public WaitlistViewDetailViewModel(
         INavigationService navigationService,
-        ISampleDataService sampleDataService,
         IBuildingSelectionService buildingSelectionService,
         IImageLocationService? imageLocationService = null,
         IWaitlistRequestService? requestService = null,
@@ -80,11 +78,9 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         IAverageCoilWeightService? averageCoilWeightService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
-        ArgumentNullException.ThrowIfNull(sampleDataService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
 
         _navigationService = navigationService;
-        _sampleDataService = sampleDataService;
         _buildingSelectionService = buildingSelectionService;
         _imageLocationService = imageLocationService;
         _requestService = requestService;
@@ -143,22 +139,15 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             _ => (int?)null
         };
 
-        if (orderId.HasValue)
+        if (orderId.HasValue && _requestService is not null)
         {
-            var data = _sampleDataService.GetSampleOrders(_buildingSelectionService.SelectedBuilding);
-            Item = data.OfType<SampleOrder>().FirstOrDefault(i => i.Id == orderId.Value);
-
-            // A real submitted request is not in the sample rows; resolve it from the request
-            // service (the list surfaces each request as a SampleOrder whose Id is the hash of
-            // the request Guid) so the detail page is not blank for live requests.
-            if (Item is null && _requestService is not null)
+            // The detail page resolves only real submitted requests (the list surfaces each request as a
+            // SampleOrder whose Id is the hash of the request Guid).
+            var requests = _requestService.GetActiveRequests(_buildingSelectionService.SelectedBuilding);
+            var match = requests.FirstOrDefault(request => request.Id.GetHashCode() == orderId.Value);
+            if (match is not null)
             {
-                var requests = _requestService.GetActiveRequests(_buildingSelectionService.SelectedBuilding);
-                var match = requests.FirstOrDefault(request => request.Id.GetHashCode() == orderId.Value);
-                if (match is not null)
-                {
-                    Item = WaitlistViewViewModel.CreateSessionOrder(match);
-                }
+                Item = WaitlistViewViewModel.CreateSessionOrder(match);
             }
         }
 

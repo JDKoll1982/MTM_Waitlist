@@ -189,39 +189,16 @@ public sealed class SetupWorkflowServiceTests
         var mySqlHelperServer = new MySqlHelperServer();
         var workOrderValidationService = new WorkOrderValidationService();
 
-        // The Setup lookups are now served by the read-shape fallbacks, so the workflow tests inject
-        // fakes backed by the same catalogue content the retired mock system used to supply.
-        // TODO(T042/T043): retire these fakes together with SetupDataCatalog.
+        // The Setup lookups are served by the read-shape fallbacks, so the workflow tests inject fakes
+        // backed by fixture data this test owns. The production sample catalog they used to share was
+        // retired with the legacy mock system (FR-014, SC-013).
         var lookupService = new SetupLookupService(
             new FakeVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow>(
-                request => SetupDataCatalog.GetParts(request.NormalizedWorkOrder)
-                    .Select(part => new VisualWorkOrderLookupRow
-                    {
-                        PartNumber = part.PartNumber,
-                        Description = part.Description,
-                        WorkCenter = part.WorkCenter,
-                    })
-                    .ToArray()),
+                request => SetupLookupFixtureData.GetParts(request.NormalizedWorkOrder)),
             new FakeVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow>(
-                request => SetupDataCatalog.GetSequences(request.NormalizedWorkOrder, request.PartNumber)
-                    .Select(sequence => new VisualOperationSequenceRow
-                    {
-                        SequenceNumber = sequence.SequenceNumber,
-                        Description = sequence.Description,
-                    })
-                    .ToArray()),
+                request => SetupLookupFixtureData.GetSequences(request.NormalizedWorkOrder, request.PartNumber)),
             new FakeVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow>(
-                request => SetupDataCatalog.GetSubordinateParts(request.NormalizedWorkOrder, request.PartNumber, request.SequenceNumber)
-                    .Select(part => new VisualSubordinatePartRow
-                    {
-                        Category = part.Category,
-                        PartNumber = part.PartNumber,
-                        Description = part.Description,
-                        Location = part.Location,
-                        User8 = part.User8,
-                        OnHandQuantity = part.OnHandQuantity,
-                    })
-                    .ToArray()),
+                request => SetupLookupFixtureData.GetSubordinateParts(request.NormalizedWorkOrder, request.PartNumber, request.SequenceNumber)),
             new IgnoredLocationsService(settings));
         var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer);
         var activeJobCoordinatorService = new SetupActiveJobCoordinatorService();

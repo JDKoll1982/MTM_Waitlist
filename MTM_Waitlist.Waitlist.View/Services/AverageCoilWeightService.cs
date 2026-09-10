@@ -9,17 +9,14 @@ namespace MTM_Waitlist.Module_Waitlist.Services;
 /// <inheritdoc cref="IAverageCoilWeightService"/>
 public sealed class AverageCoilWeightService : IAverageCoilWeightService
 {
-    private const string RecvMockDataSettingKey = "Feature.RecvMockData";
-
     private const string AverageWeightQuery =
         "SELECT ROUND(AVG(quantity), 0) AS AverageWeight FROM receiving_history WHERE part_id = @partId";
 
-    private readonly ILocalSettingsService _localSettingsService;
     private readonly IMySqlHelperServer _mySqlHelperServer;
 
-    public AverageCoilWeightService(ILocalSettingsService localSettingsService, IMySqlHelperServer mySqlHelperServer)
+    public AverageCoilWeightService(IMySqlHelperServer mySqlHelperServer)
     {
-        _localSettingsService = localSettingsService;
+        ArgumentNullException.ThrowIfNull(mySqlHelperServer);
         _mySqlHelperServer = mySqlHelperServer;
     }
 
@@ -31,14 +28,7 @@ public sealed class AverageCoilWeightService : IAverageCoilWeightService
             return string.Empty;
         }
 
-        var useMockData = await _localSettingsService.ReadSettingAsync<bool?>(RecvMockDataSettingKey).ConfigureAwait(false) ?? false;
-        if (useMockData)
-        {
-            var mockText = SampleAverageCoilWeightCatalog.GetAverageCoilWeightText(normalizedPart);
-            StartupDebugLog.Info("AverageCoilWeight", $"Mock ON. Part='{normalizedPart}' -> '{mockText}'.");
-            return mockText;
-        }
-
+        // The receiving store is always read live (FR-001): there is no sample/mock short-circuit.
         StartupDebugLog.Info("AverageCoilWeight", $"Querying receiving_history. Part='{normalizedPart}'.");
         var parameters = new Dictionary<string, object?>(StringComparer.Ordinal) { ["@partId"] = normalizedPart };
         var rows = await _mySqlHelperServer

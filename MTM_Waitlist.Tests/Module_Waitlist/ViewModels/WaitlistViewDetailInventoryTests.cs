@@ -45,7 +45,7 @@ public sealed class WaitlistViewDetailInventoryTests
         Assert.IsTrue(viewModel.IsInventoryEmpty);
 
         var noService = new WaitlistViewDetailViewModel(
-            new NoOpNavigationService(), new EmptySampleData(), new StubBuildingSelectionService());
+            new NoOpNavigationService(), new StubBuildingSelectionService());
         await noService.LoadInventoryAsync("P1");
         Assert.IsTrue(noService.IsInventoryEmpty);
     }
@@ -99,7 +99,6 @@ public sealed class WaitlistViewDetailInventoryTests
     {
         return new WaitlistViewDetailViewModel(
             new NoOpNavigationService(),
-            new EmptySampleData(),
             new StubBuildingSelectionService(),
             inventoryService: inventory);
     }
@@ -115,11 +114,6 @@ public sealed class WaitlistViewDetailInventoryTests
 
         public Task<IReadOnlyList<InventoryLocationRow>> GetInventoryLocationRowsAsync(string partNumber, CancellationToken cancellationToken = default)
             => Task.FromResult(_rows);
-    }
-
-    private sealed class EmptySampleData : ISampleDataService
-    {
-        public IReadOnlyList<object> GetSampleOrders(string? building = null) => Array.Empty<object>();
     }
 
     private sealed class StubBuildingSelectionService : IBuildingSelectionService

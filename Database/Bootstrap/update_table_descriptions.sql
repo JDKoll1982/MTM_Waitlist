@@ -378,102 +378,6 @@ MODIFY COLUMN actor_employee_name VARCHAR(128) NULL COMMENT 'Display name of the
 MODIFY COLUMN details VARCHAR(255) NULL COMMENT 'Free-text detail (e.g. cancellation reason).',
 MODIFY COLUMN occurred_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the event occurred.';
 
-ALTER TABLE mock_master_tables_registry COMMENT = 'Registry of Developer-editable mock master tables (UI name + plain-language description).';
-
-ALTER TABLE mock_master_tables_registry
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the registry row.',
-MODIFY COLUMN table_name VARCHAR(128) NOT NULL COMMENT 'Machine name of the mock master table (e.g. mock_parts).',
-MODIFY COLUMN ui_display_name VARCHAR(128) NOT NULL COMMENT 'UI-readable name shown in the Developer settings dropdown.',
-MODIFY COLUMN description_text VARCHAR(500) NOT NULL COMMENT 'Plain-language description for non-developers/end-user auditing.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the mock master table is listed/editable.',
-MODIFY COLUMN sort_rank INT NOT NULL DEFAULT 0 COMMENT 'Display ordering within the dropdown.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
-
-ALTER TABLE mock_parts COMMENT = 'Mock master part catalog used to build New-Request mock data (MMC########/MMF########/23-###-####).';
-
-ALTER TABLE mock_parts
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the mock part.',
-MODIFY COLUMN part_number VARCHAR(50) NOT NULL COMMENT 'Mock part number (MMC######## / MMF######## / 23-###-####).',
-MODIFY COLUMN part_category VARCHAR(32) NOT NULL COMMENT 'Category: Coil, Flatstock, Other, Die, Component.',
-MODIFY COLUMN part_description VARCHAR(500) NULL COMMENT 'Human-readable part description.',
-MODIFY COLUMN unit_of_measure VARCHAR(20) NULL COMMENT 'Unit of measure (e.g. lb, each).',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the mock part is active for new requests.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
-
-ALTER TABLE mock_work_orders COMMENT = 'Mock work-order/job master for New-Request mock data.';
-
-ALTER TABLE mock_work_orders
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the mock work order.',
-MODIFY COLUMN work_order_number VARCHAR(64) NOT NULL COMMENT 'Work order / job number (e.g. WO-#######).',
-MODIFY COLUMN part_number VARCHAR(50) NULL COMMENT 'Part number the job runs (references mock_parts.part_number).',
-MODIFY COLUMN work_center_code VARCHAR(32) NULL COMMENT 'Work center the job runs on.',
-MODIFY COLUMN is_coil_bearing TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether the job has a coil on it.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the mock work order is active.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
-
-ALTER TABLE mock_work_centers COMMENT = 'Mock work center / press catalog (Infor codes) for request mock data.';
-
-ALTER TABLE mock_work_centers
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the mock work center.',
-MODIFY COLUMN work_center_code VARCHAR(32) NOT NULL COMMENT 'Infor work center code (e.g. 100-3).',
-MODIFY COLUMN work_center_description VARCHAR(255) NULL COMMENT 'Human-readable work center description.',
-MODIFY COLUMN building VARCHAR(128) NULL COMMENT 'Building the work center belongs to.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the mock work center is active.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
-
-ALTER TABLE mock_locations COMMENT = 'Mock inventory location catalog (Infor codes, incl. ignored WC/NCM/etc.).';
-
-ALTER TABLE mock_locations
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the mock location.',
-MODIFY COLUMN location_code VARCHAR(50) NOT NULL COMMENT 'Infor location code (e.g. V-A0-01, WC, NCM).',
-MODIFY COLUMN location_description VARCHAR(255) NULL COMMENT 'Human-readable location description.',
-MODIFY COLUMN is_ignored TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether the location is in the ignored set (WC/NCM/etc.).',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the mock location is active.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
-
-ALTER TABLE mock_requesters COMMENT = 'Mock requester (employee) catalog used to attribute mock requests.';
-
-ALTER TABLE mock_requesters
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the mock requester.',
-MODIFY COLUMN employee_number VARCHAR(32) NOT NULL COMMENT 'Requester employee number.',
-MODIFY COLUMN display_name VARCHAR(128) NOT NULL COMMENT 'Requester display name shown in the UI.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the mock requester is active.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
-
-ALTER TABLE mock_inventory_locations COMMENT = 'Mock pooled per-part/per-location on-hand inventory (Part # / Location / Quantity lb).';
-
-ALTER TABLE mock_inventory_locations
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the inventory row.',
-MODIFY COLUMN part_number VARCHAR(50) NOT NULL COMMENT 'Part number (references mock_parts.part_number).',
-MODIFY COLUMN location_code VARCHAR(50) NOT NULL COMMENT 'Infor location code (references mock_locations.location_code).',
-MODIFY COLUMN on_hand_quantity DECIMAL(18,2) NOT NULL DEFAULT 0 COMMENT 'Pooled on-hand weight (lb) for the part at this location.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
-
-ALTER TABLE mock_request_types COMMENT = 'Mock request-type/subtype catalog that drives New-Request offerings in mock mode.';
-
-ALTER TABLE mock_request_types
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the request type.',
-MODIFY COLUMN request_type VARCHAR(64) NOT NULL COMMENT 'Request type (e.g. Coil, Pickup, Other, Scrap).',
-MODIFY COLUMN subtype VARCHAR(128) NULL COMMENT 'Request subtype/action (e.g. Bring, Pickup, Pickup Coil).',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the mock request type is offered.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
-
 ALTER TABLE waitlist_request_types COMMENT = 'Real (non-mock) request-type catalog that drives the New-Request wizard (Pickup, Other, Coil, Scrap, Flatstock, Table Handling, Die Handling, Forklift Assist).';
 
 ALTER TABLE waitlist_request_types
@@ -528,3 +432,15 @@ MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the defec
 MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the defect type.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the defect type row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the defect type row was last updated.';
+
+-- ============================================================
+-- Retired objects - feature 001-module-mock-visual-fallback (FR-014)
+-- ============================================================
+-- The database-backed demo/sample family was retired in full. These objects are no longer created
+-- by an artifact in this tree and no longer carry descriptions here; the matching drop statements
+-- remain as the rollback artifacts so a DBA can promote the removal:
+--   Tables (drop via Database/Tables/<name>/rollback.sql):
+--     mock_master_tables_registry, mock_parts, mock_work_orders, mock_work_centers, mock_locations,
+--     mock_requesters, mock_inventory_locations, mock_request_types
+--   Stored procedures (drop via Database/StoredProcedures/sp_mock_*/rollback.sql): the 33 sp_mock_* procedures
+--   Seed: seed_mock_master_default (artifact removed with the tables it populated)

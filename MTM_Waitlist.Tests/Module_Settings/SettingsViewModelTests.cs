@@ -144,7 +144,6 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             settings,
             new FakeWorkCenterCatalogService(),
             new FakeDunnageTypeVisibilityCatalogService(),
-            new MockToggleService(settings),
             new NewRequestAlertService(settings),
             startupState,
             computerManagement,

@@ -14,7 +14,7 @@ public sealed class InventoryLocationFilteringTests
     {
         var ignored = IgnoredLocationDefaults.Locations; // WC, NCM, V-WC, NCM-VITS, SHIP
 
-        var rows = SampleInventoryLocationCatalog.GetRows();
+        var rows = MixedRows();
 
         var result = InventoryLocationFiltering.Apply(rows, ignored);
 
@@ -29,7 +29,7 @@ public sealed class InventoryLocationFilteringTests
     public void Apply_WhenNothingIgnored_OnlyAppliesQuantityFilter()
     {
         var result = InventoryLocationFiltering.Apply(
-            SampleInventoryLocationCatalog.GetRows(),
+            MixedRows(),
             Array.Empty<string>());
 
         // Ignore list empty => only qty 0 row (V-A0-00) is dropped.
@@ -64,13 +64,20 @@ public sealed class InventoryLocationFilteringTests
         Assert.AreEqual(0, result.Count);
     }
 
-    [TestMethod]
-    public void SampleCatalog_IncludesIgnoredAndZeroQuantityRows()
+    /// <summary>
+    /// Inline stand-in for the retired <c>SampleInventoryLocationCatalog</c>: the same mixed set of rows
+    /// (ignored locations, a zero-quantity row, and on-hand rows) so the live filtering rule stays covered.
+    /// </summary>
+    private static InventoryLocationRow[] MixedRows() => new[]
     {
-        var rows = SampleInventoryLocationCatalog.GetRows();
-
-        Assert.IsTrue(rows.Any(r => r.Location == "WC" || r.Location == "NCM" || r.Location == "SHIP"));
-        Assert.IsTrue(rows.Any(r => r.OnHandQuantity == 0m));
-        Assert.IsTrue(rows.Any(r => r.OnHandQuantity >= 1m));
-    }
+        new InventoryLocationRow { PartNumber = "P", Location = "V-A0-00", OnHandQuantity = 0m },
+        new InventoryLocationRow { PartNumber = "P", Location = "V-A0-01", OnHandQuantity = 15000m },
+        new InventoryLocationRow { PartNumber = "P", Location = "V-A0-04", OnHandQuantity = 25000m },
+        new InventoryLocationRow { PartNumber = "P", Location = "V-B2-10", OnHandQuantity = 6000m },
+        new InventoryLocationRow { PartNumber = "P", Location = "WC", OnHandQuantity = 900m },
+        new InventoryLocationRow { PartNumber = "P", Location = "NCM", OnHandQuantity = 800m },
+        new InventoryLocationRow { PartNumber = "P", Location = "V-WC", OnHandQuantity = 700m },
+        new InventoryLocationRow { PartNumber = "P", Location = "NCM-VITS", OnHandQuantity = 600m },
+        new InventoryLocationRow { PartNumber = "P", Location = "SHIP", OnHandQuantity = 500m },
+    };
 }

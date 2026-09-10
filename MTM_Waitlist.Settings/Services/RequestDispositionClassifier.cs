@@ -25,8 +25,7 @@ public static class RequestDispositionClassifier
 {
     /// <summary>
     /// Snapshot of the fields needed to derive disposition. This keeps the classifier a pure function
-    /// (no database access) so it is trivially unit-testable and can be fed either by a live Infor
-    /// queue script or by mock data behind the <c>Feature.InforVisualMockData</c> toggle.
+    /// (no database access) so it is trivially unit-testable and can be fed by any disposition source.
     /// </summary>
     public readonly record struct DispositionInput(
         string? WorkOrderStatus,

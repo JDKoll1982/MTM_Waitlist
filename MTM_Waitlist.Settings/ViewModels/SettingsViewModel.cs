@@ -46,13 +46,8 @@ public partial class SettingsViewModel : ObservableRecipient
     private readonly ILocalSettingsService _localSettingsService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IDunnageTypeVisibilityCatalogService _dunnageTypeVisibilityCatalogService;
-    private readonly IMockToggleService _mockToggleService;
     private readonly INewRequestAlertService _newRequestAlertService;
     private readonly StartupState _startupState;
-
-    // Suppresses the OnUseMockDataChanged side effect while the initial value is loaded in the constructor,
-    // so opening the page does not log a misleading "changed" or re-persist both keys.
-    private bool _mockToggleInitializing = true;
 
     // Suppresses the OnNewRequestAlertsEnabledChanged side effect while the initial value is loaded in the
     // constructor, so opening the page does not log a misleading "changed" or re-persist.
@@ -70,12 +65,6 @@ public partial class SettingsViewModel : ObservableRecipient
 
     [ObservableProperty]
     public partial string VersionDescription
-    {
-        get; set;
-    }
-
-    [ObservableProperty]
-    public partial bool UseMockData
     {
         get; set;
     }
@@ -159,8 +148,6 @@ public partial class SettingsViewModel : ObservableRecipient
 
     public bool IsAppearancePanelVisible => MatchesSearch("appearance", "app theme", "light", "dark", "default", SelectedThemeText);
 
-    public bool IsMockDataPanelVisible => MatchesSearch("mock data", "infor visual", "receiving", "mysql", "sample data");
-
     public bool IsNewRequestAlertsPanelVisible => MatchesSearch(
         "alert",
         "notification",
@@ -223,7 +210,7 @@ public partial class SettingsViewModel : ObservableRecipient
         "display name",
         string.Join(" ", ComputerManagement.Computers.Select(record => record.GetDisplayLabel())));
 
-    public bool IsOperationsCategoryVisible => IsMockDataPanelVisible || IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
+    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
@@ -240,7 +227,6 @@ public partial class SettingsViewModel : ObservableRecipient
         ILocalSettingsService localSettingsService,
         IWorkCenterCatalogService workCenterCatalogService,
         IDunnageTypeVisibilityCatalogService dunnageTypeVisibilityCatalogService,
-        IMockToggleService mockToggleService,
         INewRequestAlertService newRequestAlertService,
         StartupState startupState,
         ComputerManagementViewModel computerManagement,
@@ -251,7 +237,6 @@ public partial class SettingsViewModel : ObservableRecipient
         _localSettingsService = localSettingsService;
         _workCenterCatalogService = workCenterCatalogService;
         _dunnageTypeVisibilityCatalogService = dunnageTypeVisibilityCatalogService;
-        _mockToggleService = mockToggleService;
         _newRequestAlertService = newRequestAlertService;
         _startupState = startupState;
         ComputerManagement = computerManagement;
@@ -259,10 +244,6 @@ public partial class SettingsViewModel : ObservableRecipient
 
         ElementTheme = _themeSelectorService.Theme;
         VersionDescription = GetVersionDescription();
-        var effective = _mockToggleService.GetEffectiveAsync().GetAwaiter().GetResult();
-        UseMockData = effective;
-        _mockToggleInitializing = false;
-        _ = _mockToggleService.SetAsync(effective); // keep both keys equal (mirror = master)
 
         // Per-user new-request alert toggle, default OFF when never set.
         _newRequestAlertInitializing = true;
@@ -285,7 +266,7 @@ public partial class SettingsViewModel : ObservableRecipient
         _ = InitializeHotWorkCentersAsync();
         _ = InitializeDunnageTypeVisibilityAsync();
         RefreshSearchVisibility();
-        StartupDebugLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}', MockData={UseMockData}.");
+        StartupDebugLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}'.");
     }
 
     // FIX: This partial method is automatically invoked by the MVVM Toolkit source generator 
@@ -294,18 +275,6 @@ public partial class SettingsViewModel : ObservableRecipient
     {
         StartupDebugLog.Info("SettingsViewModel", $"Theme changed to '{value}'.");
         OnPropertyChanged(nameof(SelectedThemeText));
-        RefreshSearchVisibility();
-    }
-
-    partial void OnUseMockDataChanged(bool value)
-    {
-        if (_mockToggleInitializing)
-        {
-            return; // initial load; do not log/persist as if the user changed it
-        }
-
-        StartupDebugLog.Info("SettingsViewModel", $"UseMockData changed to {value}.");
-        _ = _mockToggleService.SetAsync(value);
         RefreshSearchVisibility();
     }
 
@@ -786,7 +755,6 @@ public partial class SettingsViewModel : ObservableRecipient
     private void RefreshSearchVisibility()
     {
         OnPropertyChanged(nameof(IsAppearancePanelVisible));
-        OnPropertyChanged(nameof(IsMockDataPanelVisible));
         OnPropertyChanged(nameof(IsHotWorkCentersPanelVisible));
         OnPropertyChanged(nameof(IsDunnageTypeVisibilityPanelVisible));
         OnPropertyChanged(nameof(IsIgnoredLocationsPanelVisible));
