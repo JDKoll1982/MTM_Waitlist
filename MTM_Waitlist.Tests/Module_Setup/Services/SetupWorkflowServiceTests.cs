@@ -9,6 +9,8 @@ using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.Services;
 using MTM_Waitlist.Module_Setup.ViewModels;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Mock.Models;
+using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Setup.Services;
 
@@ -184,11 +186,43 @@ public sealed class SetupWorkflowServiceTests
             settings.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, ignoredLocations.ToList()).GetAwaiter().GetResult();
         }
 
-        var sampleDataService = new SampleDataService(settings);
-        var sqlHelperServer = new SqlHelperServer(settings, sampleDataService);
         var mySqlHelperServer = new MySqlHelperServer();
         var workOrderValidationService = new WorkOrderValidationService();
-        var lookupService = new SetupLookupService(sqlHelperServer, new MTM_Waitlist.Module_Setup.Services.InforVisualSqlQueryService(new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build()), new IgnoredLocationsService(settings));
+
+        // The Setup lookups are now served by the read-shape fallbacks, so the workflow tests inject
+        // fakes backed by the same catalogue content the retired mock system used to supply.
+        // TODO(T042/T043): retire these fakes together with SetupDataCatalog.
+        var lookupService = new SetupLookupService(
+            new FakeVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow>(
+                request => SetupDataCatalog.GetParts(request.NormalizedWorkOrder)
+                    .Select(part => new VisualWorkOrderLookupRow
+                    {
+                        PartNumber = part.PartNumber,
+                        Description = part.Description,
+                        WorkCenter = part.WorkCenter,
+                    })
+                    .ToArray()),
+            new FakeVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow>(
+                request => SetupDataCatalog.GetSequences(request.NormalizedWorkOrder, request.PartNumber)
+                    .Select(sequence => new VisualOperationSequenceRow
+                    {
+                        SequenceNumber = sequence.SequenceNumber,
+                        Description = sequence.Description,
+                    })
+                    .ToArray()),
+            new FakeVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow>(
+                request => SetupDataCatalog.GetSubordinateParts(request.NormalizedWorkOrder, request.PartNumber, request.SequenceNumber)
+                    .Select(part => new VisualSubordinatePartRow
+                    {
+                        Category = part.Category,
+                        PartNumber = part.PartNumber,
+                        Description = part.Description,
+                        Location = part.Location,
+                        User8 = part.User8,
+                        OnHandQuantity = part.OnHandQuantity,
+                    })
+                    .ToArray()),
+            new IgnoredLocationsService(settings));
         var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer);
         var activeJobCoordinatorService = new SetupActiveJobCoordinatorService();
         var persistenceService = new SetupPersistenceService(activeJobCoordinatorService, mySqlHelperServer);

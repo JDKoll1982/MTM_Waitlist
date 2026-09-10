@@ -24,6 +24,7 @@ using MTM_Waitlist.Module_Core.Views;
 using MTM_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Shared.ViewModels;
 using MTM_Waitlist.Module_Shared.Views;
+using MTM_Waitlist.Mock.DependencyInjection;
 using MTM_Waitlist.Notifications;
 using MTM_Waitlist.Services.MockMode;
 
@@ -100,6 +101,12 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<MySqlHelperServer>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMySqlHelperServer>(
             sp => sp.GetRequiredService<MySqlHelperServer>());
+
+        // Infor Visual read fallback: the reachability detector and the five shape fallbacks, so every
+        // Visual read is attempted live and transparently falls back to the mtm_mock mirror only when
+        // the source is unreachable (FR-002, FR-004).
+        services.AddVisualReadFallback();
+
         services.AddSingleton<MTM_Waitlist.Module_Core.Services.WipFloorInventoryService>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.RequestDispositionResolver>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IRequestItemCatalogService, MTM_Waitlist.Module_Settings.Services.RequestItemCatalogService>();

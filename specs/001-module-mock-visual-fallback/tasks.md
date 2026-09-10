@@ -159,18 +159,18 @@ when the source recovers. Owns the `MTM_Waitlist.Mock` library and the routing o
 complete, correctly shaped result with no error and no partial rows; restore the source and confirm live reads return
 without restarting the app; confirm a reachable-but-empty live result is never replaced by cached data.
 
-- [ ] T045 [P] [US2] Create the fallback contracts `MTM_Waitlist.Mock/Contracts/IVisualReachabilityDetector.cs` and `MTM_Waitlist.Mock/Contracts/IVisualReadFallback.cs` exactly as specified in `contracts/visual-read-fallback.md` §1/§2
-- [ ] T046 [P] [US2] Create the fallback model `MTM_Waitlist.Mock/Models/CachedReadResult.cs` (`ServedFromLive | ServedFromCache` + `refreshed_utc` provenance); the detector state enum is `VisualReadStatus` (`Unknown | Live | Cached`), created with the status model in T065
-- [ ] T047 [US2] Implement `MTM_Waitlist.Mock/Services/VisualReachabilityDetector.cs` — an independent connectivity probe (no reference to the retired `MockRoutingService`/`MockModeChangeDetector`/`MockConfigurationService` stack) with 2-consecutive-failure → `Cached`, 1-success → `Live` hysteresis and backoff probing while cached (FR-002/FR-003, flapping edge case, `research.md` R11)
-- [ ] T048 [P] [US2] Implement shape 1 `MTM_Waitlist.Mock/Services/VisualWorkOrderLookupFallback.cs` — attempt live, on unreachability read `sp_visual_work_order_lookup_get`; return live rows **including an empty set**; surface non-unreachability errors (FR-024)
-- [ ] T049 [P] [US2] Implement shape 2 `MTM_Waitlist.Mock/Services/VisualOperationSequencesFallback.cs` (mirror `sp_visual_operation_sequences_get`)
-- [ ] T050 [P] [US2] Implement shape 3 `MTM_Waitlist.Mock/Services/VisualSubordinatePartsFallback.cs` (mirror `sp_visual_subordinate_parts_get`)
-- [ ] T051 [P] [US2] Implement shape 4 `MTM_Waitlist.Mock/Services/VisualInventoryLocationsFallback.cs` (mirror `sp_visual_inventory_locations_get`)
-- [ ] T052 [P] [US2] Implement shape 5 `MTM_Waitlist.Mock/Services/VisualDispositionInputFallback.cs` (mirror `sp_visual_disposition_input_get`)
-- [ ] T053 [US2] Route `MTM_Waitlist.Setup/Services/SetupLookupService.cs` through the fallbacks — `LookupWorkOrderFromBackendAsync` (shape 1), `GetSequencesFromBackendAsync` (shape 2), `GetSubordinatePartsFromBackendAsync` (shape 3) — removing the `*FromMockAsync` paths (FR-002/FR-004)
-- [ ] T054 [US2] Route `MTM_Waitlist.Waitlist.View/Services/WaitlistInventoryService.cs` `GetInventoryLocationsFromBackendAsync` through shape 4, keeping the caller-side on-hand ≥ 1 and ignored-location filtering unchanged
-- [ ] T055 [US2] Route `MTM_Waitlist.Settings/Services/RequestDispositionResolver.cs` `GetDispositionInputAsync` through shape 5, keeping `RequestDispositionStatusCodes` (Open = {R,U,F}, Closed = {C}, X never FG) as the only status authority and keeping the floor/WIP half reading the live WIP store (FR-018)
-- [ ] T056 [US2] Add the fallback DI registrations for the detector and the five `IVisualReadFallback` implementations in the `MTM_Waitlist.Mock` service-registration extension, wired from `Services/DependencyInjection/ServiceRegistrationExtensions.cs` (depends on T047–T052)
+- [x] T045 [P] [US2] Create the fallback contracts `MTM_Waitlist.Mock/Contracts/IVisualReachabilityDetector.cs` and `MTM_Waitlist.Mock/Contracts/IVisualReadFallback.cs` exactly as specified in `contracts/visual-read-fallback.md` §1/§2
+- [x] T046 [P] [US2] Create the fallback model `MTM_Waitlist.Mock/Models/CachedReadResult.cs` (`ServedFromLive | ServedFromCache` + `refreshed_utc` provenance); the detector state enum is `VisualReadStatus` (`Unknown | Live | Cached`), created with the status model in T065
+- [x] T047 [US2] Implement `MTM_Waitlist.Mock/Services/VisualReachabilityDetector.cs` — an independent connectivity probe (no reference to the retired `MockRoutingService`/`MockModeChangeDetector`/`MockConfigurationService` stack) with 2-consecutive-failure → `Cached`, 1-success → `Live` hysteresis and backoff probing while cached (FR-002/FR-003, flapping edge case, `research.md` R11)
+- [x] T048 [P] [US2] Implement shape 1 `MTM_Waitlist.Mock/Services/VisualWorkOrderLookupFallback.cs` — attempt live, on unreachability read `sp_visual_work_order_lookup_get`; return live rows **including an empty set**; surface non-unreachability errors (FR-024)
+- [x] T049 [P] [US2] Implement shape 2 `MTM_Waitlist.Mock/Services/VisualOperationSequencesFallback.cs` (mirror `sp_visual_operation_sequences_get`)
+- [x] T050 [P] [US2] Implement shape 3 `MTM_Waitlist.Mock/Services/VisualSubordinatePartsFallback.cs` (mirror `sp_visual_subordinate_parts_get`)
+- [x] T051 [P] [US2] Implement shape 4 `MTM_Waitlist.Mock/Services/VisualInventoryLocationsFallback.cs` (mirror `sp_visual_inventory_locations_get`)
+- [x] T052 [P] [US2] Implement shape 5 `MTM_Waitlist.Mock/Services/VisualDispositionInputFallback.cs` (mirror `sp_visual_disposition_input_get`)
+- [x] T053 [US2] Route `MTM_Waitlist.Setup/Services/SetupLookupService.cs` through the fallbacks — `LookupWorkOrderFromBackendAsync` (shape 1), `GetSequencesFromBackendAsync` (shape 2), `GetSubordinatePartsFromBackendAsync` (shape 3) — removing the `*FromMockAsync` paths (FR-002/FR-004)
+- [x] T054 [US2] Route `MTM_Waitlist.Waitlist.View/Services/WaitlistInventoryService.cs` `GetInventoryLocationsFromBackendAsync` through shape 4, keeping the caller-side on-hand ≥ 1 and ignored-location filtering unchanged
+- [x] T055 [US2] Route `MTM_Waitlist.Settings/Services/RequestDispositionResolver.cs` `GetDispositionInputAsync` through shape 5, keeping `RequestDispositionStatusCodes` (Open = {R,U,F}, Closed = {C}, X never FG) as the only status authority and keeping the floor/WIP half reading the live WIP store (FR-018)
+- [x] T056 [US2] Add the fallback DI registrations for the detector and the five `IVisualReadFallback` implementations in the `MTM_Waitlist.Mock` service-registration extension, wired from `Services/DependencyInjection/ServiceRegistrationExtensions.cs` (depends on T047–T052)
 - [ ] T057 [US2] Remove the Visual/sample short-circuit branches — the `ExecuteReadOnlyQueueAsync` mock overloads in `MTM_Waitlist.Core/Services/SqlHelperServer.cs` and the mock overloads in `MTM_Waitlist.Core/Services/MySqlHelperServer.cs` — after T053–T055 reroute their consumers (FR-002/FR-014)
 - [ ] T058 [US2] (verification) Add fallback-parity tests in `MTM_Waitlist.Tests/Module_Mock/VisualReadFallbackParityTests.cs` — for all five shapes: live vs mirror are structurally identical (column set + ordering), unreachable → mirror rows served, and a reachable-but-legitimate-empty live result **is not** replaced by cache — `VisualReachabilityDetectorTests.cs` for the hysteresis/backoff state machine, plus a caller test proving a routed caller cannot distinguish the source, and an assertion that the cache is **never** consulted for an internal-store read (FR-027, constitution II); then run the build and full test suite gates (verification)
 
@@ -507,6 +507,28 @@ With multiple developers, after Setup + Foundational:
 - **Naming (resolved 2026-09-09)**: the derived form `sp_visual_<shapeKey>_{get,refresh}` is authoritative. During the
   `/speckit.analyze` remediation, `quickstart.md` §1 and `data-model.md` §3.3 were corrected to match it; the status
   model is `ReadStatusSnapshot` with the `VisualReadStatus` enum (`data-model.md` §8).
+- **Phase 4 architecture decision (2026-09-09, `/speckit.implement`)**: all five read shapes and their live-read
+  plumbing now live in `MTM_Waitlist.Mock` — the shape catalog (`Services/VisualReadShapeCatalog.cs`, moved out of the
+  service so app and service share one catalog), one classified executor (`Services/VisualQueryExecutor.cs`)
+  replacing the two duplicate per-module executors, one script store (`Services/InforVisualScriptStore.cs`), and the
+  per-shape row/request types (`Models/Visual*Row.cs`, `Models/Visual*Request.cs`). This supersedes the
+  delegate-injection option: the dependency direction stays modules → `Mock` and no caller module supplies a
+  live-read delegate. Supporting change: `MySqlHelperServer` gained an `MtmMock` target, because no `mtm_mock` target
+  existed for the fallback to read the mirror through. **Deviates from `plan.md` §Project Structure and needs a
+  Complexity Tracking row on the next `/speckit.plan` touch.**
+- **Phase 4 executor classification (new — not specified in the design docs)**: the retired executors returned an
+  empty list on *every* failure path, so "Infor Visual is unreachable" and "Visual answered with zero rows" were
+  indistinguishable — which would have disabled the fallback entirely (every read returns empty, the cache is never
+  consulted). `VisualQueryExecutor` now classifies each attempt as `Ok` / `Unreachable` (connect, timeout, and login
+  failures: SQL errors −2, 20, 53, 64, 121, 233, 258, 1231, 4060, 10053, 10054, 10060, 10061, 11001, 18456;
+  `COMException`; timeouts) / `Failed` (every other error, plus a missing script or missing connection), and only
+  `Unreachable` reads the mirror.
+- **Phase 4 open gap — `CachedReadResult.RefreshedUtc`**: the cached path returns `null` because
+  `sp_visual_<shape>_get` must not project `refreshed_utc`; adding that column would break the structural identity the
+  fallback guarantees at FR-004. Snapshot age therefore needs a separate metadata read, still owned by T066/T110.
+- **Phase 4 open gap — probe backoff**: T047's hysteresis is implemented and tested, but "backoff probing while
+  cached" is a scheduling concern that the detector interface deliberately does not expose; it belongs to the host
+  that calls `ProbeAsync` (T059/T062).
 - Commit after each task or logical group.
 
 ---

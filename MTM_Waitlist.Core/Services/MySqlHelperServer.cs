@@ -11,6 +11,12 @@ public enum MySqlDatabaseTarget
     MtmWaitlist,
     MtmReceivingApplication,
     MtmWipApplication,
+
+    /// <summary>
+    /// The dedicated Infor Visual mirror cache. Read-only to the application: the only procedure it
+    /// calls is <c>sp_visual_&lt;shape&gt;_get</c>. Never authoritative for internal application data (FR-027).
+    /// </summary>
+    MtmMock,
 }
 
 public sealed class MySqlHelperServer : IMySqlHelperServer
@@ -19,6 +25,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
     private const string WaitlistStartupConnectionStringEnvironmentVariable = "MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING";
     private const string ReceivingConnectionStringEnvironmentVariable = "MTM_RECEIVING_APPLICATION_DB_CONNECTION_STRING";
     private const string WipApplicationConnectionStringEnvironmentVariable = "MTM_WIP_APPLICATION_DB_CONNECTION_STRING";
+    private const string MockConnectionStringEnvironmentVariable = "MTM_MOCK_DB_CONNECTION_STRING";
     private const int DefaultCommandTimeoutSeconds = 15;
 
     private readonly StartupDatabaseOptions _startupDatabaseOptions;
@@ -236,6 +243,11 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
                 ?? _receivingDatabaseOptions.ConnectionString?.Trim(),
             MySqlDatabaseTarget.MtmWipApplication =>
                 Environment.GetEnvironmentVariable(WipApplicationConnectionStringEnvironmentVariable)?.Trim(),
+            // The mock cache normally shares the MySQL host with the application stores, so when no
+            // dedicated connection string is configured the waitlist host is reused with the database
+            // name overridden to mtm_mock below.
+            MySqlDatabaseTarget.MtmMock =>
+                Environment.GetEnvironmentVariable(MockConnectionStringEnvironmentVariable)?.Trim(),
             _ => null,
         };
 
@@ -266,6 +278,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
         {
             MySqlDatabaseTarget.MtmReceivingApplication => "mtm_receiving_application",
             MySqlDatabaseTarget.MtmWipApplication => "mtm_wip_application_winforms",
+            MySqlDatabaseTarget.MtmMock => "mtm_mock",
             _ => "mtm_waitlist",
         };
     }

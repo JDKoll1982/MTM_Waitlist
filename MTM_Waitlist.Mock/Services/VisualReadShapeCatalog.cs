@@ -1,6 +1,6 @@
 using MTM_Waitlist.Mock.Models;
 
-namespace MTM_Waitlist.Mock.Service.Services;
+namespace MTM_Waitlist.Mock.Services;
 
 /// <summary>
 /// The shipped read-shape catalog — the five initial shapes the service refreshes.
@@ -14,6 +14,10 @@ namespace MTM_Waitlist.Mock.Service.Services;
 /// <para>
 /// The catalog is the single place that records each shape's live projection. The refresh engine is
 /// catalog-driven, so it needs no code changes when a shape is added.
+/// </para>
+/// <para>
+/// It lives in <c>MTM_Waitlist.Mock</c> rather than the service so the in-app fallback, the service's
+/// refresh engine, and the startup validation all read the same definitions and cannot drift apart.
 /// </para>
 /// </remarks>
 public static class VisualReadShapeCatalog
@@ -112,4 +116,26 @@ public static class VisualReadShapeCatalog
             ]
         }
     ];
+
+    /// <summary>
+    /// Finds a shape by its stable key.
+    /// </summary>
+    /// <returns>The matching shape, or <see langword="null"/> when the key is not in the catalog.</returns>
+    public static VisualReadShape? FindByKey(string shapeKey)
+    {
+        if (string.IsNullOrWhiteSpace(shapeKey))
+        {
+            return null;
+        }
+
+        foreach (var shape in Create())
+        {
+            if (string.Equals(shape.Key, shapeKey, StringComparison.Ordinal))
+            {
+                return shape;
+            }
+        }
+
+        return null;
+    }
 }

@@ -1,29 +1,37 @@
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
-using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
+using MTM_Waitlist.Mock.Contracts;
+using MTM_Waitlist.Mock.Models;
 
 namespace MTM_Waitlist.Module_Waitlist.Services;
 
 /// <inheritdoc cref="IWaitlistInventoryService"/>
+/// <remarks>
+/// The read is attempted live against Infor Visual and transparently served from the <c>mtm_mock</c>
+/// mirror only when the source is unreachable (FR-002, FR-004). The caller-side filtering — on-hand
+/// &gt;= 1 and the ignored-location set — is unchanged and still applies to whichever source answered.
+/// </remarks>
 public sealed class WaitlistInventoryService : IWaitlistInventoryService
 {
-    private const string QueueName = "Waitlist.InforVisualInventoryLocations";
-
-    private readonly SqlHelperServer _sqlHelperServer;
     private readonly IIgnoredLocationsService _ignoredLocationsService;
-    private readonly InforVisualSqlQueryService _inforVisualSqlQueryService;
+    private readonly IVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow> _inventoryLocationsFallback;
 
+    /// <summary>Creates the service.</summary>
+    /// <param name="ignoredLocationsService">Shared ignored-locations set.</param>
+    /// <param name="inventoryLocationsFallback">Shape 4, inventory locations.</param>
     public WaitlistInventoryService(
-        SqlHelperServer sqlHelperServer,
         IIgnoredLocationsService ignoredLocationsService,
-        InforVisualSqlQueryService inforVisualSqlQueryService)
+        IVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow> inventoryLocationsFallback)
     {
-        _sqlHelperServer = sqlHelperServer;
+        ArgumentNullException.ThrowIfNull(ignoredLocationsService);
+        ArgumentNullException.ThrowIfNull(inventoryLocationsFallback);
+
         _ignoredLocationsService = ignoredLocationsService;
-        _inforVisualSqlQueryService = inforVisualSqlQueryService;
+        _inventoryLocationsFallback = inventoryLocationsFallback;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<InventoryLocationRow>> GetInventoryLocationRowsAsync(string partNumber, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -38,11 +46,11 @@ public sealed class WaitlistInventoryService : IWaitlistInventoryService
         IReadOnlyList<InventoryLocationRow> rows;
         try
         {
-            rows = await _sqlHelperServer.ExecuteReadOnlyQueueAsync(
-                QueueName,
-                normalizedPart,
-                () => GetInventoryLocationsFromMockAsync(normalizedPart, cancellationToken),
-                () => GetInventoryLocationsFromBackendAsync(normalizedPart, cancellationToken)).ConfigureAwait(false);
+            var read = await _inventoryLocationsFallback
+                .ReadAsync(new VisualInventoryLocationRequest(normalizedPart), cancellationToken)
+                .ConfigureAwait(false);
+
+            rows = read.Select(MapToInventoryLocationRow).ToArray();
         }
         catch (Exception ex)
         {
@@ -56,68 +64,16 @@ public sealed class WaitlistInventoryService : IWaitlistInventoryService
         return filtered;
     }
 
-    private static async Task<IReadOnlyList<InventoryLocationRow>> GetInventoryLocationsFromMockAsync(string partNumber, CancellationToken cancellationToken)
+    /// <summary>Maps a shape-4 result row (PartNumber/Location/OnHandQuantity) to a grid row.</summary>
+    internal static InventoryLocationRow MapToInventoryLocationRow(VisualInventoryLocationRow row)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return await Task.FromResult(SampleInventoryLocationCatalog.GetRows(partNumber)).ConfigureAwait(false);
-    }
+        ArgumentNullException.ThrowIfNull(row);
 
-    private async Task<IReadOnlyList<InventoryLocationRow>> GetInventoryLocationsFromBackendAsync(string partNumber, CancellationToken cancellationToken)
-    {
-        // Executes the checked-in Infor Visual queue script GetInventoryLocations.sql via the shared
-        // Core executor when Feature.InforVisualMockData is OFF. The executor never throws: a missing
-        // connection or script yields an empty set (zero rows handled), so callers fall back cleanly.
-        StartupDebugLog.Info("WaitlistInventory", $"GetInventoryLocationsFromBackendAsync executing SQL script GetInventoryLocations for part '{partNumber}'.");
-        var rows = await _inforVisualSqlQueryService.ExecuteQueueAsync(
-            "GetInventoryLocations",
-            new Dictionary<string, object?>
-            {
-                ["PartNumber"] = partNumber,
-            },
-            cancellationToken).ConfigureAwait(false);
-
-        return rows
-            .Where(row => row is not null)
-            .Select(MapToInventoryLocationRow)
-            .ToArray();
-    }
-
-    /// <summary>Maps a raw Infor Visual result row (PartNumber/Location/OnHandQuantity) to a grid row.</summary>
-    internal static InventoryLocationRow MapToInventoryLocationRow(IReadOnlyDictionary<string, object?> row)
-    {
         return new InventoryLocationRow
         {
-            PartNumber = GetString(row, "PartNumber"),
-            Location = GetString(row, "Location"),
-            OnHandQuantity = GetDecimal(row, "OnHandQuantity"),
-        };
-    }
-
-    private static string GetString(IReadOnlyDictionary<string, object?> row, string key)
-    {
-        if (!row.TryGetValue(key, out var value) || value is null)
-        {
-            return string.Empty;
-        }
-
-        return Convert.ToString(value)?.Trim() ?? string.Empty;
-    }
-
-    private static decimal GetDecimal(IReadOnlyDictionary<string, object?> row, string key)
-    {
-        if (!row.TryGetValue(key, out var value) || value is null)
-        {
-            return 0m;
-        }
-
-        return value switch
-        {
-            decimal decimalValue => decimalValue,
-            double doubleValue => Convert.ToDecimal(doubleValue),
-            float floatValue => Convert.ToDecimal(floatValue),
-            int intValue => intValue,
-            long longValue => longValue,
-            _ => decimal.TryParse(Convert.ToString(value), out var parsed) ? parsed : 0m,
+            PartNumber = row.PartNumber,
+            Location = row.Location,
+            OnHandQuantity = row.OnHandQuantity,
         };
     }
 }

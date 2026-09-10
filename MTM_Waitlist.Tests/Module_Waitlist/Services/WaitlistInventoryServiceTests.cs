@@ -1,60 +1,55 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Waitlist.Services;
+using MTM_Waitlist.Mock.Models;
+using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 
+/// <summary>
+/// Verifies the Waitlist inventory-location read: it is served through the shape-4 fallback, and the
+/// caller-side filtering (on-hand &gt;= 1 plus the ignored-location set) still applies to whatever
+/// source answered.
+/// </summary>
 [TestClass]
 public sealed class WaitlistInventoryServiceTests
 {
     [TestMethod]
-    public async Task GetInventoryLocationRowsAsync_MockOn_ReturnsFilteredNonIgnoredRows()
+    public async Task GetInventoryLocationRowsAsync_FiltersQtyZeroAndIgnoredLocations()
     {
-        var service = CreateService(mockOn: true);
-
-        var rows = await service.GetInventoryLocationRowsAsync("MMC0001000");
-
-        var locations = rows.Select(r => r.Location).ToArray();
-        CollectionAssert.AreEquivalent(new[] { "V-A0-01", "V-A0-04", "V-B2-10" }, locations);
-        Assert.IsTrue(rows.All(r => r.OnHandQuantity >= 1m));
-    }
-
-    [TestMethod]
-    public async Task GetInventoryLocationRowsAsync_MockOn_WhenNoIgnoredConfigured_IncludesAllOnHandRows()
-    {
-        var settings = new InMemorySettings(mockOn: true);
-        // Only SHIP is ignored (defaults are not applied once a non-empty set is stored),
-        // so WC/NCM rows with qty >= 1 must remain.
+        var settings = new InMemorySettings();
         settings.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, new List<string> { "SHIP" }).GetAwaiter().GetResult();
         var service = CreateService(settings);
 
         var rows = await service.GetInventoryLocationRowsAsync("MMC0001000");
 
-        Assert.IsFalse(rows.Any(r => r.OnHandQuantity < 1m), "qty-0 rows must be filtered.");
-        Assert.IsTrue(rows.Any(r => r.Location == "WC"), "WC is not ignored here, so it should remain.");
-        Assert.IsFalse(rows.Any(r => r.Location == "SHIP"), "SHIP is ignored, so it must be omitted.");
+        var locations = rows.Select(r => r.Location).ToArray();
+        CollectionAssert.AreEquivalent(new[] { "V-A0-01", "WC" }, locations);
+        Assert.IsTrue(rows.All(r => r.OnHandQuantity >= 1m), "qty-0 rows must be filtered.");
     }
 
     [TestMethod]
-    public async Task GetInventoryLocationRowsAsync_EmptyPartNumber_ReturnsEmpty()
+    public async Task GetInventoryLocationRowsAsync_EmptyPartNumber_ReturnsEmptyWithoutReading()
     {
-        var service = CreateService(mockOn: true);
+        var fallback = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
+            Array.Empty<VisualInventoryLocationRow>());
+        var service = CreateService(new InMemorySettings(), fallback);
 
         var rows = await service.GetInventoryLocationRowsAsync("   ");
 
         Assert.AreEqual(0, rows.Count);
+        Assert.AreEqual(0, fallback.ReadCount, "A blank part number must not reach the fallback.");
     }
 
     [TestMethod]
-    public async Task GetInventoryLocationRowsAsync_MockOff_NoConnection_ReturnsEmptyWithoutThrowing()
+    public async Task GetInventoryLocationRowsAsync_WhenFallbackFails_ReturnsEmptyWithoutThrowing()
     {
-        // With mock OFF the service routes to the shared Infor Visual executor. No connection
-        // string is configured in the test environment (and the script is not on the test output
-        // path), so the executor returns an empty set — zero rows handled, no throw.
-        var service = CreateService(mockOn: false);
+        // A failed Visual read surfaces from the fallback; the service must degrade rather than crash.
+        var fallback = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
+            _ => throw new VisualReadFailedException("inventory_locations", "Unreachable with no cache configured."));
+        var service = CreateService(new InMemorySettings(), fallback);
 
         var rows = await service.GetInventoryLocationRowsAsync("MMC0001000");
 
@@ -65,14 +60,12 @@ public sealed class WaitlistInventoryServiceTests
     [TestMethod]
     public void MapToInventoryLocationRow_MapsPartLocationAndQuantity()
     {
-        var row = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
+        var mapped = WaitlistInventoryService.MapToInventoryLocationRow(new VisualInventoryLocationRow
         {
-            ["PartNumber"] = "MMC0001000",
-            ["Location"] = "  V-A0-01  ",
-            ["OnHandQuantity"] = 46000m,
-        };
-
-        var mapped = WaitlistInventoryService.MapToInventoryLocationRow(row);
+            PartNumber = "MMC0001000",
+            Location = "V-A0-01",
+            OnHandQuantity = 46000m,
+        });
 
         Assert.AreEqual("MMC0001000", mapped.PartNumber);
         Assert.AreEqual("V-A0-01", mapped.Location);
@@ -80,41 +73,45 @@ public sealed class WaitlistInventoryServiceTests
     }
 
     [TestMethod]
-    public void MapToInventoryLocationRow_HandlesMissingOrNullColumns()
+    public void MapToInventoryLocationRow_HandlesEmptyRow()
     {
-        var mapped = WaitlistInventoryService.MapToInventoryLocationRow(new Dictionary<string, object?>());
+        var mapped = WaitlistInventoryService.MapToInventoryLocationRow(new VisualInventoryLocationRow());
 
         Assert.AreEqual(string.Empty, mapped.PartNumber);
         Assert.AreEqual(string.Empty, mapped.Location);
         Assert.AreEqual(0m, mapped.OnHandQuantity);
     }
 
-    private static WaitlistInventoryService CreateService(bool mockOn)
-        => CreateService(new InMemorySettings(mockOn));
-
     private static WaitlistInventoryService CreateService(InMemorySettings settings)
-    {
-        var sqlHelper = new SqlHelperServer(settings, new EmptySampleDataService());
-        return new WaitlistInventoryService(
-            sqlHelper,
-            new IgnoredLocationsService(settings),
-            CreateExecutor());
-    }
+        => CreateService(settings, CreateRowSet());
 
-    private static InforVisualSqlQueryService CreateExecutor()
-        => new InforVisualSqlQueryService(new ConfigurationBuilder().Build());
+    private static WaitlistInventoryService CreateService(
+        InMemorySettings settings,
+        IReadOnlyList<VisualInventoryLocationRow> rows)
+        => CreateService(
+            settings,
+            new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(rows));
+
+    private static WaitlistInventoryService CreateService(
+        InMemorySettings settings,
+        FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow> fallback)
+        => new(new IgnoredLocationsService(settings), fallback);
+
+    /// <summary>
+    /// A row set exercising both filter rules: an ignored location (SHIP) and a zero-quantity location
+    /// (V-B2-10) that must both be omitted.
+    /// </summary>
+    private static IReadOnlyList<VisualInventoryLocationRow> CreateRowSet() =>
+    [
+        new VisualInventoryLocationRow { PartNumber = "MMC0001000", Location = "V-A0-01", OnHandQuantity = 10m },
+        new VisualInventoryLocationRow { PartNumber = "MMC0001000", Location = "WC", OnHandQuantity = 5m },
+        new VisualInventoryLocationRow { PartNumber = "MMC0001000", Location = "SHIP", OnHandQuantity = 3m },
+        new VisualInventoryLocationRow { PartNumber = "MMC0001000", Location = "V-B2-10", OnHandQuantity = 0m },
+    ];
 
     private sealed class InMemorySettings : ILocalSettingsService
     {
-        private readonly Dictionary<string, object> _values = new(StringComparer.Ordinal)
-        {
-            ["Feature.InforVisualMockData"] = false,
-        };
-
-        public InMemorySettings(bool mockOn)
-        {
-            _values["Feature.InforVisualMockData"] = mockOn;
-        }
+        private readonly Dictionary<string, object> _values = new(StringComparer.Ordinal);
 
         public Task<T?> ReadSettingAsync<T>(string key)
         {
@@ -145,10 +142,5 @@ public sealed class WaitlistInventoryServiceTests
         }
 
         public Task CorruptForTestAsync() => Task.CompletedTask;
-    }
-
-    private sealed class EmptySampleDataService : ISampleDataService
-    {
-        public IReadOnlyList<object> GetSampleOrders(string? building = null) => Array.Empty<object>();
     }
 }

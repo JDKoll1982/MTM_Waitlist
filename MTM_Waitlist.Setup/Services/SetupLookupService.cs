@@ -1,34 +1,75 @@
-using MTM_Waitlist.Module_Setup.Contracts.Services;
-using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
-using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Setup.Contracts.Services;
+using MTM_Waitlist.Module_Setup.Models;
+using MTM_Waitlist.Mock.Contracts;
+using MTM_Waitlist.Mock.Models;
 
 namespace MTM_Waitlist.Module_Setup.Services;
 
+/// <summary>
+/// Reads the three Setup Infor Visual shapes (work order, operation sequences, subordinate parts).
+/// </summary>
+/// <remarks>
+/// Each read goes through the shape's fallback, so it is attempted live and transparently served from
+/// the <c>mtm_mock</c> mirror only when Infor Visual is unreachable (FR-002). The previous
+/// mock/backend branching — and the sample-data catalogue behind it — is gone: internal behaviour no
+/// longer depends on a demo toggle (FR-001, FR-014).
+/// </remarks>
 public sealed class SetupLookupService : IInforVisualLookupService, ISubordinatePartService
 {
-    private readonly SqlHelperServer _sqlHelperServer;
-    private readonly InforVisualSqlQueryService _inforVisualSqlQueryService;
+    private const decimal LowStockThreshold = 10m;
+
+    private readonly IVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow> _workOrderLookupFallback;
+    private readonly IVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow> _operationSequencesFallback;
+    private readonly IVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow> _subordinatePartsFallback;
     private readonly IIgnoredLocationsService _ignoredLocationsService;
 
-    public SetupLookupService(SqlHelperServer sqlHelperServer, InforVisualSqlQueryService inforVisualSqlQueryService, IIgnoredLocationsService ignoredLocationsService)
+    /// <summary>Creates the lookup service.</summary>
+    /// <param name="workOrderLookupFallback">Shape 1, work-order parts.</param>
+    /// <param name="operationSequencesFallback">Shape 2, operation sequences.</param>
+    /// <param name="subordinatePartsFallback">Shape 3, subordinate parts.</param>
+    /// <param name="ignoredLocationsService">Shared ignored-locations set.</param>
+    public SetupLookupService(
+        IVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow> workOrderLookupFallback,
+        IVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow> operationSequencesFallback,
+        IVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow> subordinatePartsFallback,
+        IIgnoredLocationsService ignoredLocationsService)
     {
-        _sqlHelperServer = sqlHelperServer;
-        _inforVisualSqlQueryService = inforVisualSqlQueryService;
+        ArgumentNullException.ThrowIfNull(workOrderLookupFallback);
+        ArgumentNullException.ThrowIfNull(operationSequencesFallback);
+        ArgumentNullException.ThrowIfNull(subordinatePartsFallback);
+        ArgumentNullException.ThrowIfNull(ignoredLocationsService);
+
+        _workOrderLookupFallback = workOrderLookupFallback;
+        _operationSequencesFallback = operationSequencesFallback;
+        _subordinatePartsFallback = subordinatePartsFallback;
         _ignoredLocationsService = ignoredLocationsService;
     }
 
+    /// <inheritdoc />
     public async Task<SetupLookupResult> LookupWorkOrderAsync(string normalizedWorkOrder, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupLookup", $"LookupWorkOrderAsync started. NormalizedWorkOrder='{normalizedWorkOrder}'.");
         try
         {
-            return await _sqlHelperServer.ExecuteReadOnlyQueueAsync(
-                "Setup.InforVisualLookup",
-                normalizedWorkOrder,
-                () => LookupWorkOrderFromMockAsync(normalizedWorkOrder, cancellationToken),
-                () => LookupWorkOrderFromBackendAsync(normalizedWorkOrder, cancellationToken)).ConfigureAwait(false);
+            var rows = await _workOrderLookupFallback
+                .ReadAsync(new VisualWorkOrderLookupRequest(normalizedWorkOrder), cancellationToken)
+                .ConfigureAwait(false);
+
+            return new SetupLookupResult
+            {
+                Success = true,
+                Parts = rows
+                    .Select(row => new SetupPartResult
+                    {
+                        PartNumber = row.PartNumber,
+                        Description = row.Description,
+                        WorkCenter = row.WorkCenter,
+                    })
+                    .Where(item => !string.IsNullOrWhiteSpace(item.PartNumber))
+                    .ToArray(),
+            };
         }
         catch (Exception ex)
         {
@@ -42,16 +83,24 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
         }
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<SetupSequenceResult>> GetSequencesAsync(string normalizedWorkOrder, string partNumber, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupLookup", $"GetSequencesAsync started. WO='{normalizedWorkOrder}', Part='{partNumber}'.");
         try
         {
-            return await _sqlHelperServer.ExecuteReadOnlyQueueAsync(
-                "Setup.InforVisualSequences",
-                normalizedWorkOrder,
-                () => GetSequencesFromMockAsync(normalizedWorkOrder, partNumber, cancellationToken),
-                () => GetSequencesFromBackendAsync(normalizedWorkOrder, partNumber, cancellationToken)).ConfigureAwait(false);
+            var rows = await _operationSequencesFallback
+                .ReadAsync(new VisualOperationSequenceRequest(normalizedWorkOrder, partNumber), cancellationToken)
+                .ConfigureAwait(false);
+
+            return rows
+                .Select(row => new SetupSequenceResult
+                {
+                    SequenceNumber = row.SequenceNumber,
+                    Description = row.Description,
+                })
+                .Where(item => !string.IsNullOrWhiteSpace(item.SequenceNumber))
+                .ToArray();
         }
         catch (Exception ex)
         {
@@ -60,16 +109,33 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
         }
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<SetupSubordinatePart>> GetSubordinatePartsAsync(string normalizedWorkOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupLookup", $"GetSubordinatePartsAsync started. WO='{normalizedWorkOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
         try
         {
-            var parts = await _sqlHelperServer.ExecuteReadOnlyQueueAsync(
-                "Setup.InforVisualSubordinateParts",
-                normalizedWorkOrder,
-                () => GetSubordinatePartsFromMockAsync(normalizedWorkOrder, partNumber, sequenceNumber, cancellationToken),
-                () => GetSubordinatePartsFromBackendAsync(normalizedWorkOrder, partNumber, sequenceNumber, cancellationToken)).ConfigureAwait(false);
+            var rows = await _subordinatePartsFallback
+                .ReadAsync(new VisualSubordinatePartRequest(normalizedWorkOrder, partNumber, sequenceNumber), cancellationToken)
+                .ConfigureAwait(false);
+
+            var parts = rows
+                .Select(row =>
+                {
+                    var onHandQuantity = row.OnHandQuantity;
+                    return new SetupSubordinatePart
+                    {
+                        Category = row.Category,
+                        PartNumber = row.PartNumber,
+                        Description = row.Description,
+                        Location = row.Location,
+                        User8 = row.User8,
+                        OnHandQuantity = onHandQuantity,
+                        IsLowStock = onHandQuantity > 0 && onHandQuantity < LowStockThreshold,
+                    };
+                })
+                .Where(item => !string.IsNullOrWhiteSpace(item.PartNumber))
+                .ToArray();
 
             return await ExcludeIgnoredLocationsAsync(parts, cancellationToken).ConfigureAwait(false);
         }
@@ -104,138 +170,5 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
         return parts
             .Where(part => string.IsNullOrWhiteSpace(part.Location) || !ignoredSet.Contains(part.Location.Trim()))
             .ToArray();
-    }
-
-    private static async Task<SetupLookupResult> LookupWorkOrderFromMockAsync(string normalizedWorkOrder, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        return await Task.FromResult(new SetupLookupResult
-        {
-            Parts = SetupDataCatalog.GetParts(normalizedWorkOrder),
-            Success = true
-        }).ConfigureAwait(false);
-    }
-
-    private async Task<SetupLookupResult> LookupWorkOrderFromBackendAsync(string normalizedWorkOrder, CancellationToken cancellationToken)
-    {
-        StartupDebugLog.Info("SetupLookup", "LookupWorkOrderFromBackendAsync executing SQL script LookupWorkOrder.");
-        var rows = await _inforVisualSqlQueryService.ExecuteQueueAsync(
-            "LookupWorkOrder",
-            new Dictionary<string, object?>
-            {
-                ["NormalizedWorkOrder"] = normalizedWorkOrder,
-            },
-            cancellationToken).ConfigureAwait(false);
-
-        var parts = rows
-            .Select(row => new SetupPartResult
-            {
-                PartNumber = GetString(row, "PartNumber"),
-                Description = GetString(row, "Description"),
-                WorkCenter = GetString(row, "WorkCenter"),
-            })
-            .Where(item => !string.IsNullOrWhiteSpace(item.PartNumber))
-            .ToArray();
-
-        return new SetupLookupResult
-        {
-            Success = true,
-            Parts = parts,
-        };
-    }
-
-    private static async Task<IReadOnlyList<SetupSequenceResult>> GetSequencesFromMockAsync(string normalizedWorkOrder, string partNumber, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return await Task.FromResult(SetupDataCatalog.GetSequences(normalizedWorkOrder, partNumber)).ConfigureAwait(false);
-    }
-
-    private async Task<IReadOnlyList<SetupSequenceResult>> GetSequencesFromBackendAsync(string normalizedWorkOrder, string partNumber, CancellationToken cancellationToken)
-    {
-        StartupDebugLog.Info("SetupLookup", "GetSequencesFromBackendAsync executing SQL script GetSequences.");
-        var rows = await _inforVisualSqlQueryService.ExecuteQueueAsync(
-            "GetSequences",
-            new Dictionary<string, object?>
-            {
-                ["NormalizedWorkOrder"] = normalizedWorkOrder,
-                ["PartNumber"] = partNumber,
-            },
-            cancellationToken).ConfigureAwait(false);
-
-        return rows
-            .Select(row => new SetupSequenceResult
-            {
-                SequenceNumber = GetString(row, "SequenceNumber"),
-                Description = GetString(row, "Description"),
-            })
-            .Where(item => !string.IsNullOrWhiteSpace(item.SequenceNumber))
-            .ToArray();
-    }
-
-    private static async Task<IReadOnlyList<SetupSubordinatePart>> GetSubordinatePartsFromMockAsync(string normalizedWorkOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return await Task.FromResult(SetupDataCatalog.GetSubordinateParts(normalizedWorkOrder, partNumber, sequenceNumber)).ConfigureAwait(false);
-    }
-
-    private async Task<IReadOnlyList<SetupSubordinatePart>> GetSubordinatePartsFromBackendAsync(string normalizedWorkOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken)
-    {
-        StartupDebugLog.Info("SetupLookup", "GetSubordinatePartsFromBackendAsync executing SQL script GetSubordinateParts.");
-        var rows = await _inforVisualSqlQueryService.ExecuteQueueAsync(
-            "GetSubordinateParts",
-            new Dictionary<string, object?>
-            {
-                ["NormalizedWorkOrder"] = normalizedWorkOrder,
-                ["PartNumber"] = partNumber,
-                ["SequenceNumber"] = sequenceNumber,
-            },
-            cancellationToken).ConfigureAwait(false);
-
-        return rows
-            .Select(row =>
-            {
-                var onHandQuantity = GetDecimal(row, "OnHandQuantity");
-                return new SetupSubordinatePart
-                {
-                    Category = GetString(row, "Category"),
-                    PartNumber = GetString(row, "PartNumber"),
-                    Description = GetString(row, "Description"),
-                    Location = GetString(row, "Location"),
-                    User8 = GetString(row, "User8"),
-                    OnHandQuantity = onHandQuantity,
-                    IsLowStock = onHandQuantity > 0 && onHandQuantity < 10,
-                };
-            })
-            .Where(item => !string.IsNullOrWhiteSpace(item.PartNumber))
-            .ToArray();
-    }
-
-    private static string GetString(IReadOnlyDictionary<string, object?> row, string key)
-    {
-        if (!row.TryGetValue(key, out var value) || value is null)
-        {
-            return string.Empty;
-        }
-
-        return Convert.ToString(value)?.Trim() ?? string.Empty;
-    }
-
-    private static decimal GetDecimal(IReadOnlyDictionary<string, object?> row, string key)
-    {
-        if (!row.TryGetValue(key, out var value) || value is null)
-        {
-            return 0m;
-        }
-
-        return value switch
-        {
-            decimal decimalValue => decimalValue,
-            double doubleValue => Convert.ToDecimal(doubleValue),
-            float floatValue => Convert.ToDecimal(floatValue),
-            int intValue => intValue,
-            long longValue => longValue,
-            _ => decimal.TryParse(Convert.ToString(value), out var parsed) ? parsed : 0m,
-        };
     }
 }

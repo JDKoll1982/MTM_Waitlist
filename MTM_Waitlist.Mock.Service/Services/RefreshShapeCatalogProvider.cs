@@ -2,6 +2,7 @@ using System.Text;
 using MTM_Waitlist.Mock.Models;
 using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.Models;
+using MTM_Waitlist.Mock.Services;
 
 namespace MTM_Waitlist.Mock.Service.Services;
 

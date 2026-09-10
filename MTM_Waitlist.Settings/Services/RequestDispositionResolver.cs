@@ -1,30 +1,37 @@
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Mock.Contracts;
+using MTM_Waitlist.Mock.Models;
 
 namespace MTM_Waitlist.Module_Settings.Services;
 
 /// <summary>
 /// End-to-end FG / WIP / Outside Service resolution for a finished-product part on a work center's
-/// active setup job. Runs the live Infor Visual <c>GetDispositionInput.sql</c> queue script plus the
-/// MTM WIP Application floor snapshot and feeds the pure <see cref="RequestDispositionClassifier"/>.
+/// active setup job. Reads Infor Visual disposition input through the shape-5 fallback - live first,
+/// and the <c>mtm_mock</c> mirror only when the source is unreachable - plus the MTM WIP Application
+/// floor snapshot, and feeds the pure <see cref="RequestDispositionClassifier"/>.
 ///
-/// Both executors never throw (they return empty results), and the floor lookup is optional, so a
-/// missing connection/script degrades to "classify from whatever snapshot we have" - never a crash.
-/// The non-trivial composition lives in <see cref="RequestDispositionMapper"/> (pure + unit tested);
-/// this class is intentionally thin.
+/// The floor lookup is optional and a failed Visual read is caught here, so the resolver degrades to
+/// "classify from whatever snapshot we have" - never a crash. The non-trivial composition lives in
+/// <see cref="RequestDispositionMapper"/> (pure + unit tested); this class is intentionally thin.
 /// </summary>
 public sealed class RequestDispositionResolver
 {
-    private const string DispositionInputScriptName = "GetDispositionInput";
-
-    private readonly InforVisualSqlQueryService _inforVisualSqlQueryService;
+    private readonly IVisualReadFallback<VisualDispositionInputRequest, VisualDispositionInputRow> _dispositionInputFallback;
     private readonly WipFloorInventoryService _wipFloorInventoryService;
 
+    /// <summary>Creates the resolver.</summary>
+    /// <param name="dispositionInputFallback">Shape 5, disposition input.</param>
+    /// <param name="wipFloorInventoryService">The floor/WIP half, which stays always live (FR-018).</param>
     public RequestDispositionResolver(
-        InforVisualSqlQueryService inforVisualSqlQueryService,
+        IVisualReadFallback<VisualDispositionInputRequest, VisualDispositionInputRow> dispositionInputFallback,
         WipFloorInventoryService wipFloorInventoryService)
     {
-        _inforVisualSqlQueryService = inforVisualSqlQueryService;
+        ArgumentNullException.ThrowIfNull(dispositionInputFallback);
+        ArgumentNullException.ThrowIfNull(wipFloorInventoryService);
+
+        _dispositionInputFallback = dispositionInputFallback;
         _wipFloorInventoryService = wipFloorInventoryService;
     }
 
@@ -42,16 +49,20 @@ public sealed class RequestDispositionResolver
         InforDispositionRow? inforRow = null;
         if (!string.IsNullOrWhiteSpace(normalizedPart))
         {
-            var rows = await _inforVisualSqlQueryService.ExecuteQueueAsync(
-                DispositionInputScriptName,
-                new Dictionary<string, object?>
-                {
-                    ["WorkOrder"] = workOrder ?? string.Empty,
-                    ["PartNumber"] = normalizedPart,
-                },
-                cancellationToken).ConfigureAwait(false);
+            try
+            {
+                var rows = await _dispositionInputFallback
+                    .ReadAsync(new VisualDispositionInputRequest(workOrder ?? string.Empty, normalizedPart), cancellationToken)
+                    .ConfigureAwait(false);
 
-            inforRow = RequestDispositionMapper.MapInforRow(rows.FirstOrDefault());
+                inforRow = ToInforRow(rows.FirstOrDefault());
+            }
+            catch (Exception ex)
+            {
+                // A failed Visual read must not take down disposition resolution - the floor snapshot is
+                // still usable. Note the cache is never substituted for a genuine read failure (FR-024).
+                StartupDebugLog.Error("RequestDisposition", ex, $"Disposition input read failed for part '{normalizedPart}'.");
+            }
         }
 
         var floorSnapshot = await _wipFloorInventoryService.GetFloorSnapshotAsync(normalizedPart, cancellationToken).ConfigureAwait(false);
@@ -67,5 +78,26 @@ public sealed class RequestDispositionResolver
     {
         var input = await GetDispositionInputAsync(workOrder, partNumber, cancellationToken).ConfigureAwait(false);
         return RequestDispositionClassifier.Classify(input);
+    }
+
+    /// <summary>
+    /// Bridges the shape's row onto the existing mapper input. The status code is carried through
+    /// uninterpreted: <c>RequestDispositionStatusCodes</c> remains the only authority over what a
+    /// status means (FR-018).
+    /// </summary>
+    private static InforDispositionRow? ToInforRow(VisualDispositionInputRow? row)
+    {
+        if (row is null)
+        {
+            return null;
+        }
+
+        return new InforDispositionRow
+        {
+            WorkOrderStatus = string.IsNullOrWhiteSpace(row.WorkOrderStatus) ? null : row.WorkOrderStatus,
+            OpenWorkOrderQuantity = row.OpenWorkOrderQuantity,
+            FinishedGoodsQuantity = row.FinishedGoodsQuantity,
+            HasOutsideVendorOperation = row.HasOutsideVendorOperation,
+        };
     }
 }
