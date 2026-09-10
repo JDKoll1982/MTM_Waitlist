@@ -1,6 +1,6 @@
 ---
 name: checklist-execution
-description: "Use when the user asks to work through a markdown checklist (e.g., #file:checklist.md, WAITLIST_REQUEST_WORKFLOW_TASKS.md, Module_Setup_Implementation_Checklist.md) by executing each task with persona adherence. Personas include Database Engineer, Backend Engineer, Frontend Engineer, Tech Lead, Full Stack Engineer."
+description: "Use when the user asks to work through a markdown checklist by executing each task with persona adherence. Personas include Database Engineer, Backend Engineer, Full Stack Engineer, Frontend Engineer, QA Engineer, Security Engineer, Tech Lead, DevOps Engineer."
 ---
 
 # Checklist Execution
@@ -21,9 +21,12 @@ Drive task-by-task completion of a markdown checklist with persona adherence.
 
 - **Database Engineer**: focus on `Database/` SQL artifacts (tables, stored procedures, views, seeds). Follow `database-schema-rules.instructions.md`; keep `create.sql`/`rollback.sql` plus aggregate files (`AllTables.sql`, `AllSPs.sql`, `AllViews.sql`, `AllSeeds.sql`) in sync.
 - **Backend Engineer**: C# services, contracts, DI registration, and stored-procedure wiring.
-- **Frontend Engineer**: XAML views and view models. Follow the WinUI 3 rules in `copilot-instructions.md` (e.g., register new resources in `App.xaml`, keep layout Fluent).
-- **Tech Lead**: architecture decisions, design-decision records (DDRs), checklists, and compliance documents.
 - **Full Stack Engineer**: end-to-end across database + backend + frontend.
+- **Frontend Engineer**: XAML views and view models. Follow the WinUI 3 rules in `.github/instructions/winui3-api-rules.instructions.md` (e.g., register new resources in `App.xaml`, keep layout Fluent).
+- **QA Engineer**: test design and verification — unit/integration coverage, edge cases, regression checks, and clear reproduction steps. Completion requires passing evidence.
+- **Security Engineer**: secrets handling, credential storage, least privilege, input validation, and safe defaults for destructive operations.
+- **Tech Lead**: architecture decisions, design-decision records (DDRs), checklists, and compliance documents.
+- **DevOps Engineer**: build/test pipelines under `.github/workflows/`, packaging, deployment preflight, and environment/tooling reliability.
 
 ## Rules
 

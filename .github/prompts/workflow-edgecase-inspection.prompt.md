@@ -4,21 +4,10 @@ agent: "agent"
 model: "DeepSeek V4 Flash"
 tools: [
   vscode, execute, read, agent,
-  JakubKozera.csharp-dev-tools/buildDotnet, 
-  JakubKozera.csharp-dev-tools/testDotnet, 
-  JakubKozera.csharp-dev-tools/addEfMigration, 
-  JakubKozera.csharp-dev-tools/createDebugRunner, 
-  JakubKozera.csharp-dev-tools/debugSetBreakpoints, 
-  JakubKozera.csharp-dev-tools/debugRunRunner, 
-  JakubKozera.csharp-dev-tools/debugGetState, 
-  JakubKozera.csharp-dev-tools/debugEvaluate, 
-  JakubKozera.csharp-dev-tools/debugContinue, 
-  JakubKozera.csharp-dev-tools/debugStep, 
-  JakubKozera.csharp-dev-tools/debugStop, 
-  ms-dotnettools.vscode-dotnet-runtime/installDotNetSdk, 
-  ms-dotnettools.vscode-dotnet-runtime/listDotNetVersions, 
-  ms-dotnettools.vscode-dotnet-runtime/recommendedDotNetSdkVersion, 
-  ms-dotnettools.vscode-dotnet-runtime/findDotNetPath, 
+  ms-dotnettools.vscode-dotnet-runtime/install_dotnet_sdk,
+  ms-dotnettools.vscode-dotnet-runtime/list_installed_dotnet_versions,
+  ms-dotnettools.vscode-dotnet-runtime/recommended_dotnet_sdk_version,
+  ms-dotnettools.vscode-dotnet-runtime/find_dotnet_executable_path,
   edit, search, web, browser, 'xamlmcp/*', 'microsoftdocs/mcp/*', todo
 ]
 ---

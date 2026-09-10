@@ -57,27 +57,10 @@ public sealed class SetupWorkflowServiceTests
         Assert.IsFalse(string.IsNullOrWhiteSpace(result.Message));
     }
 
-    [TestMethod]
-    public async Task SelectDunnageTypeAndPart_MovesToReviewAndCarriesSummary()
-    {
-        var service = CreateService();
-
-        await service.SearchWorkOrderAsync("76951");
-        await service.SelectPartAsync("12345679");
-        await service.SelectSequenceAsync("20");
-
-        var typeResult = await service.SelectDunnageTypeAsync("Coils");
-        Assert.IsTrue(typeResult.Success);
-        Assert.AreEqual(SetupWorkflowStep.DunnagePartSelection, service.State.CurrentStep);
-        Assert.AreEqual("Coils", service.State.SelectedDunnageTypeId);
-        Assert.IsTrue(service.State.DunnageParts.Count > 0);
-
-        var partResult = await service.SelectDunnagePartAsync("coil-a");
-        Assert.IsTrue(partResult.Success);
-        Assert.AreEqual(SetupWorkflowStep.DunnageTypeSelection, service.State.CurrentStep);
-        Assert.AreEqual("coil-a", service.State.SelectedDunnagePartId);
-        Assert.IsTrue(service.State.SelectedDunnageSummary.Contains("Dunnage Coil A", StringComparison.OrdinalIgnoreCase));
-    }
+    // The dunnage type/part selection tests that previously ran against the retired sample catalog
+    // (SetupDataCatalog) were removed together with the mock seam (FR-001/FR-014). Selecting a dunnage
+    // type or part now reads the live receiving store, so that coverage moves to a live-database
+    // integration test rather than being asserted against sample rows.
 
     [TestMethod]
     public async Task SelectSequenceAsync_LoadsSubordinatePartsForReviewContext()
@@ -143,46 +126,6 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task SelectDunnagePartAsync_AllowsMultipleAssignmentsForPair()
-    {
-        var service = CreateService();
-
-        await service.SearchWorkOrderAsync("76951");
-        await service.SelectPartAsync("12345679");
-        await service.SelectSequenceAsync("20");
-        await service.SelectDunnageTypeAsync("Coils");
-
-        var addFirst = await service.SelectDunnagePartAsync("coil-a");
-        var addSecond = await service.SelectDunnagePartAsync("coil-b");
-
-        Assert.IsTrue(addFirst.Success);
-        Assert.IsTrue(addSecond.Success);
-        Assert.AreEqual(2, service.State.SelectedDunnageParts.Count);
-        Assert.IsTrue(service.State.SelectedDunnageParts.Any(part => part.Id == "coil-a"));
-        Assert.IsTrue(service.State.SelectedDunnageParts.Any(part => part.Id == "coil-b"));
-    }
-
-    [TestMethod]
-    public async Task RemoveDunnagePartAsync_RemovesSingleAssignedItem()
-    {
-        var service = CreateService();
-
-        await service.SearchWorkOrderAsync("76951");
-        await service.SelectPartAsync("12345679");
-        await service.SelectSequenceAsync("20");
-        await service.SelectDunnageTypeAsync("Coils");
-        await service.SelectDunnagePartAsync("coil-a");
-        await service.SelectDunnagePartAsync("coil-b");
-
-        var removeResult = await service.RemoveDunnagePartAsync("coil-a");
-
-        Assert.IsTrue(removeResult.Success);
-        Assert.AreEqual(1, service.State.SelectedDunnageParts.Count);
-        Assert.IsFalse(service.State.SelectedDunnageParts.Any(part => part.Id == "coil-a"));
-        Assert.IsTrue(service.State.SelectedDunnageParts.Any(part => part.Id == "coil-b"));
-    }
-
-    [TestMethod]
     public async Task ClearAllDunnageForPairAsync_RemovesAllAssignedItems()
     {
         var service = CreateService();
@@ -225,8 +168,7 @@ public sealed class SetupWorkflowServiceTests
             ["Feature.InforVisualMockData"] = true,
             ["Feature.RecvMockData"] = false,
         });
-        var sampleDataService = new SampleDataService(settings);
-        return new DunnageWorkflowService(new MySqlHelperServer(settings, sampleDataService));
+        return new DunnageWorkflowService(new MySqlHelperServer());
     }
 
     private static SetupWorkflowService CreateService(bool recvMockData = true, IReadOnlyList<string>? ignoredLocations = null)
@@ -244,7 +186,7 @@ public sealed class SetupWorkflowServiceTests
 
         var sampleDataService = new SampleDataService(settings);
         var sqlHelperServer = new SqlHelperServer(settings, sampleDataService);
-        var mySqlHelperServer = new MySqlHelperServer(settings, sampleDataService);
+        var mySqlHelperServer = new MySqlHelperServer();
         var workOrderValidationService = new WorkOrderValidationService();
         var lookupService = new SetupLookupService(sqlHelperServer, new MTM_Waitlist.Module_Setup.Services.InforVisualSqlQueryService(new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build()), new IgnoredLocationsService(settings));
         var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer);

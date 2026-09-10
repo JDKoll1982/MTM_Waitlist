@@ -51,9 +51,21 @@ function Validate-IdentifierBase {
         }
     }
 
-    $bannedWords = @('class', 'delete', 'order', 'type')
+    # Banned words per database-schema-rules.instructions.md ("Reserved/Banned Terms and
+    # Abbreviations"). `type` was previously enforced here but is NOT part of the documented
+    # ruleset, and it produced false positives on legitimate columns such as `scope_type`
+    # and `selected_dunnage_type_id`.
+    $bannedWords = @('class', 'delete', 'order')
     if ($Name -eq 'value_type') {
         return
+    }
+
+    # `order` is banned to avoid the bare SQL keyword, but it is core domain vocabulary in this
+    # repo as the compound `work_order` (e.g. work_order, normalized_work_order,
+    # open_work_order_quantity). Exempt that compound rather than renaming established
+    # Infor Visual terms. A bare `order` identifier is still rejected.
+    if ($Name -match 'work_order') {
+        $bannedWords = $bannedWords | Where-Object { $_ -ne 'order' }
     }
 
     foreach ($word in $bannedWords) {
@@ -99,11 +111,78 @@ function Validate-ColumnName {
     }
 }
 
+# Returns the file's lines with comment text and string-literal content removed, so that a
+# check for quoted identifiers only sees actual SQL code. A single left-to-right pass tracks
+# both line comments (-- and #) and single-quoted literals, which correctly handles:
+#   - apostrophes inside comments (e.g. "user's \"My Requests\""), which previously desynced a
+#     whole-file regex into treating comment text as code;
+#   - multi-line string literals such as JSON payloads in Mock validate.sql files;
+#   - doubled '' escapes inside literals.
+# Line count is preserved so reported line numbers stay accurate.
+function Get-SanitizedSqlLines {
+    param([string[]]$Lines)
+
+    $result = New-Object System.Collections.Generic.List[string]
+    $inStringLiteral = $false
+
+    foreach ($rawLine in $Lines) {
+        $kept = New-Object System.Text.StringBuilder
+        $i = 0
+        while ($i -lt $rawLine.Length) {
+            $ch = $rawLine[$i]
+
+            if ($inStringLiteral) {
+                if ($ch -eq "'") {
+                    if (($i + 1) -lt $rawLine.Length -and $rawLine[$i + 1] -eq "'") { $i += 2; continue }
+                    $inStringLiteral = $false
+                }
+                $i++
+                continue
+            }
+
+            if ($ch -eq '-' -and ($i + 1) -lt $rawLine.Length -and $rawLine[$i + 1] -eq '-') { break }
+            if ($ch -eq '#') { break }
+
+            if ($ch -eq "'") {
+                if (($i + 1) -lt $rawLine.Length -and $rawLine[$i + 1] -eq "'") { $i += 2; continue }
+                $inStringLiteral = $true
+                $i++
+                continue
+            }
+
+            [void]$kept.Append($ch)
+            $i++
+        }
+
+        $result.Add($kept.ToString())
+    }
+
+    return $result
+}
+
 foreach ($file in $sqlFiles) {
     $relative = Resolve-Path -Relative $file.FullName
     $content = Get-Content -Path $file.FullName
+    $sanitizedLines = Get-SanitizedSqlLines -Lines $content
 
-    if ($file.Name -notmatch '^\d{4}__[a-z0-9_]+(_rollback)?\.sql$' -and $file.Name -notmatch '^seed_[a-z0-9_]+\.sql$') {
+    # Approved filename shapes for the current file-per-artifact layout. The previous rule
+    # checked the retired FluentMigrator layout (NNNN__name.sql / seed_*.sql), which no longer
+    # exists in this repo - it failed every one of the ~302 files under Database/.
+    $approvedFileNamePatterns = @(
+        '^(create|rollback|validate)\.sql$',        # Database/<Artifact>/<NN_name>/...
+        '^All(Tables|SPs|Views|Funct|Seeds)\.sql$', # aggregate files
+        '^create_database\.sql$',                   # Bootstrap
+        '^update_table_descriptions\.sql$',         # Bootstrap
+        '^(sp|fn|vw|tr)_[a-z0-9_]+\.sql$',          # module stored procedures / functions / views
+        '^(Get|List|Lookup)[A-Za-z0-9]*\.sql$',     # Infor Visual + MySQL queue query scripts
+        '^migrate_[a-z0-9_]+\.sql$',                # one-off seed migrations
+        '^\d{2}_[a-z0-9_]+\.sql$'                   # numbered seed config scripts
+    )
+    $fileNameApproved = $false
+    foreach ($pattern in $approvedFileNamePatterns) {
+        if ($file.Name -match $pattern) { $fileNameApproved = $true; break }
+    }
+    if (-not $fileNameApproved) {
         Add-Error -File $relative -Line 1 -Message "Filename '$($file.Name)' does not match approved naming patterns"
     }
 
@@ -111,7 +190,11 @@ foreach ($file in $sqlFiles) {
         $line = $content[$i]
         $lineNo = $i + 1
 
-        if ($line -match '"') {
+        # Comments are not identifiers; string literals were masked above.
+        $identifierCheckLine = $sanitizedLines[$i] -replace '--.*$', ''
+        $identifierCheckLine = $identifierCheckLine -replace '#.*$', ''
+
+        if ($identifierCheckLine -match '"') {
             Add-Error -File $relative -Line $lineNo -Message 'Quoted identifiers are not allowed unless unavoidable'
         }
 

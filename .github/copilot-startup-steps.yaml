@@ -1,25 +1,33 @@
-version: "1.0"
-name: WinUI3 Agentic Environment Initialization
+# =====================================================================================
+# REFERENCE ONLY - NOT consumed by VS Code or GitHub Copilot (verified 2026-09-09).
+#
+# Earlier revisions of this file declared an `on_task_start:` trigger and an
+# `instruction_files:` step key, implying that VS Code Copilot reads this file to bootstrap
+# an agent task. It does not. VS Code Copilot has no repository-YAML "task start" trigger,
+# and no supported mechanism consumes this file - anything here is inert.
+#
+# The authoritative agent guidance lives in:
+#   - .github/copilot-instructions.md          (repository-wide)
+#   - .github/instructions/*.instructions.md   (path-scoped, via `applyTo` frontmatter)
+#   - .github/agents/*.agent.md                (custom agents)
+#   - .github/skills/*/SKILL.md                (skills)
+#
+# Retained only as a human-readable environment summary.
+# =====================================================================================
 
-# Triggers automatically whenever an agentic task loop is initialized
-on_task_start:
-  steps:
-    - name: Resolve Active Tool Chains
-      run: |
-        echo "Mapping active workspace extensions..."
-        echo "Serena Repository Engine [Active]"
-        echo "Context7 Reference Engine [Active]"
+environment:
+  runtime: .NET 10 (SDK 10.0.401)
+  targetFramework: net10.0-windows10.0.19041.0
+  uiFramework: WinUI 3 (Microsoft.WindowsAppSDK 2.3.1)
+  xamlNamespacePolicy: Microsoft.UI.Xaml only - never legacy Windows.UI.Xaml
 
-    - name: Verify Local .NET Environment
-      run: |
-        dotnet --version
-        echo "Target Runtime: .NET 10.0"
-
-    - name: Enforce Architecture Pre-flight
-      run: |
-        echo "Injecting mandatory repository constraint definitions..."
-        echo "Strictly targeting Microsoft.UI.Xaml namespaces."
-
-    - name: Bind Global Workspace Context
-      instruction_files:
-        - .github/copilot-instructions.md
+activeToolChains:
+  - name: Serena
+    role: repository symbol / cross-file navigation
+    registration: workspace MCP server oraios/serena (.vscode/mcp.json)
+  - name: Context7
+    role: library and framework documentation
+    registration: user MCP server io.github.upstash/context7 (user mcp.json)
+  - name: Microsoft Learn
+    role: official Windows / WinUI / Windows App SDK guidance
+    registration: user MCP server microsoftdocs/mcp (user mcp.json)

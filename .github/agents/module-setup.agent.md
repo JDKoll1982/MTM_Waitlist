@@ -3,7 +3,7 @@ name: Work Center Setup Change Agent
 description: "Use when making changes to Module_Setup, setup workflow, dunnage flows, Infor Visual queue SQL, or related registration/navigation/tests. Mandatory MCP-first process: use Serena MCP + Context7 MCP + Microsoft Learn MCP before editing."
 user-invocable: true
 model: GPT-5.3-Codex
-tools: [vscode, execute, read, agent, cweijan.vscode-mysql-client2/dbclient-getDatabases, cweijan.vscode-mysql-client2/dbclient-getTables, cweijan.vscode-mysql-client2/dbclient-executeQuery, GitHub.vscode-pull-request-github/issue_fetch, GitHub.vscode-pull-request-github/labels_fetch, GitHub.vscode-pull-request-github/notification_fetch, GitHub.vscode-pull-request-github/doSearch, GitHub.vscode-pull-request-github/activePullRequest, GitHub.vscode-pull-request-github/pullRequestStatusChecks, GitHub.vscode-pull-request-github/openPullRequest, GitHub.vscode-pull-request-github/create_pull_request, GitHub.vscode-pull-request-github/resolveReviewThread, ms-dotnettools.vscode-dotnet-runtime/installDotNetSdk, ms-dotnettools.vscode-dotnet-runtime/listDotNetVersions, ms-dotnettools.vscode-dotnet-runtime/recommendedDotNetSdkVersion, ms-dotnettools.vscode-dotnet-runtime/findDotNetPath, ms-dotnettools.vscode-dotnet-runtime/uninstallSystemDotNetSdk, ms-dotnettools.vscode-dotnet-runtime/uninstallVSCodeDotNetRuntime, ms-dotnettools.vscode-dotnet-runtime/getDotNetSettingsInfo, ms-dotnettools.vscode-dotnet-runtime/listInstalledDotNetVersions, edit, search, web, browser, 'csv-mcp-server/*', 'oraios/serena/*', 'io.github.upstash/context7/*', 'microsoftdocs/mcp/*', 'context7/*', 'microsoft-learn/*', todo]
+tools: [vscode, execute, read, agent, cweijan.vscode-mysql-client2/dbclient-getDatabases, cweijan.vscode-mysql-client2/dbclient-getTables, cweijan.vscode-mysql-client2/dbclient-executeQuery, GitHub.vscode-pull-request-github/issue_fetch, GitHub.vscode-pull-request-github/labels_fetch, GitHub.vscode-pull-request-github/notification_fetch, GitHub.vscode-pull-request-github/doSearch, GitHub.vscode-pull-request-github/activePullRequest, GitHub.vscode-pull-request-github/pullRequestStatusChecks, GitHub.vscode-pull-request-github/openPullRequest, GitHub.vscode-pull-request-github/create_pull_request, GitHub.vscode-pull-request-github/resolveReviewThread, ms-dotnettools.vscode-dotnet-runtime/install_dotnet_sdk, ms-dotnettools.vscode-dotnet-runtime/list_installed_dotnet_versions, ms-dotnettools.vscode-dotnet-runtime/recommended_dotnet_sdk_version, ms-dotnettools.vscode-dotnet-runtime/find_dotnet_executable_path, ms-dotnettools.vscode-dotnet-runtime/uninstall_system_dotnet_sdk, ms-dotnettools.vscode-dotnet-runtime/uninstall_vscode_owned_dotnet_runtime, ms-dotnettools.vscode-dotnet-runtime/get_settings_info_for_dotnet_installation_managementedit, search, web, browser, 'csv-mcp-server/*', 'oraios/serena/*', 'io.github.upstash/context7/*', 'microsoftdocs/mcp/*', todo]
 argument-hint: "Describe the Module_Setup change, affected workflow step(s), and expected behavior."
 ---
 You are the Module_Setup specialist for this repository.
@@ -35,7 +35,7 @@ Run all discovery tasks first.
 - Map cross-module dependencies:
   - App.xaml.cs
   - Services/DependencyInjection/ServiceRegistrationExtensions.cs (app composition root)
-  - Services/DependencyInjection/CoreModuleDependencyInjectionExtensions.cs (app composition root)
+  - MTM_Waitlist.Core/Services/DependencyInjection/CoreModuleDependencyInjectionExtensions.cs
   - MTM_Waitlist.Core/Services/PageService.cs
   - Services/NavigationViewService.cs (app composition root)
   - Module_Core/Views/ShellPage.xaml (app project, unchanged)
@@ -66,7 +66,7 @@ Output a short dependency and risk summary before editing.
 
 ### Phase 3: Validation
 1. Build using the workspace task:
-- Clean + Build MTM_Waitlist
+- `Build MTM_Waitlist` (run `Clean MTM_Waitlist` first when a clean build is needed)
 2. Run focused Module_Setup tests first, then broader tests if needed.
 3. Report results with file-level change summary and any residual risks.
 

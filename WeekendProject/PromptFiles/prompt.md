@@ -5,17 +5,24 @@
 ## Per-Task Prompt Files (executable checklists — implement in this order)
 | File | Phase | Covers (master tasks) |
 |---|---|---|
-| `01-Phase1-lifecycle.md` | 1 | identity + lifecycle fields/SPs/audit (1, 15) |
-| `02-Phase1-coil.md` | 1 | coil gating/hide/display/up-front + mock (2, 3, 4) |
-| `03-Phase1-listdetail.md` | 1 | list status/wait + detail non-blank + empty states (5, 6, 7, 14) |
-| `04-Phase1-requester.md` | 1 | cancel-own + My Requests (9, 10) |
-| `05-Phase1-locignore.md` | 1 | ignored-locations settings + app-wide apply (11, 12) |
-| `06-Phase1-locgrid.md` | 1 | sortable location grid (13) |
-| `07-Phase2-fulfill.md` | 2 | handler data/note + Accept/Complete/Release/Edit (16) |
-| `08-Phase2-urgency.md` | 2 | max-allotted subtype + urgency/ordering (17, 18) |
-| `09-Phase2-alerts.md` | 2 | new-request toggle + deep-link (19) |
-| `10-Phase3-analytics.md` | 3 | stock snapshot + PM analytics screen (20, 21) |
-| `11-Phase3-admin.md` | 3 | admin cancelled monitor + retention (22, 23) |
+| `01-100%-Phase1-lifecycle.md` | 1 | identity + lifecycle fields/SPs/audit (1, 15) |
+| `02-100%-Phase1-coil.md` | 1 | coil gating/hide/display/up-front + mock (2, 3, 4) |
+| `03-100%-Phase1-listdetail.md` | 1 | list status/wait + detail non-blank + empty states (5, 6, 7, 14) |
+| `04-100%-Phase1-requester.md` | 1 | cancel-own + My Requests (9, 10) |
+| `05-100%-Phase1-locignore.md` | 1 | ignored-locations settings + app-wide apply (11, 12) |
+| `06-80%-Phase1-locgrid.md` | 1 | sortable location grid (13) |
+| `07-8%-Phase2-fulfill.md` | 2 | handler data/note + Accept/Complete/Release/Edit (16) |
+| `08-70%-Phase2-urgency.md` | 2 | max-allotted subtype + urgency/ordering (17, 18) |
+| `09-100%-Phase2-alerts.md` | 2 | new-request toggle + deep-link (19) |
+| `10-0%-Phase3-analytics.md` | 3 | stock snapshot + Plant Manager analytics screen, plus the Supervisor analytics extension (20, 21) |
+| `11-0%-Phase3-admin.md` | 3 | admin cancelled monitor + retention (22, 23) |
+| `12-71%-MockMasterData-DbDriven.md` | — | DB-driven mock master data |
+| `13-63%-Developer-UI.md` | — | Developer UI |
+| `14-57%-Phase2-UnifiedWaitlistCard.md` | 2 | unified waitlist card (earlier `14-*` copies at lower % are retained) |
+| `15-0%-UserManagement.md` | — | Settings → Administration → User Management panel. **Standalone workstream — no master task numbers.** |
+
+> The `NN-P%` prefix on each file name is that file's own completion percentage. The master task numbers in
+> parentheses refer to this document's task list; `15` has none and is tracked independently.
 
 > **CHECKBOX REQUIREMENT:** Every task below is a checklist item with a `- [ ]` checkbox in front of it. As this prompt is executed, mark each task `- [x]` **only** once it is fully implemented, builds, and is verified. Do not leave a task unchecked when it is done, and do not check one that is incomplete. Implement the tasks **in the order listed** (each order is chosen for dependencies), and only move to the next task after the current one is complete.
 

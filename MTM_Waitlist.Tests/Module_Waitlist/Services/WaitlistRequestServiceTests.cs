@@ -201,7 +201,7 @@ public sealed class WaitlistRequestServiceTests
             ["Feature.RecvMockData"] = false,
         });
         var sampleDataService = new SampleDataService(settings);
-        var mySqlHelperServer = new MySqlHelperServer(settings, sampleDataService);
+        var mySqlHelperServer = new MySqlHelperServer();
         var service = new WaitlistRequestService(settings, sampleDataService, mySqlHelperServer);
 
         var result = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);

@@ -13,8 +13,8 @@ Use available MCP servers to ground implementation decisions before writing or c
 
 ## General Libraries and Frameworks
 
-- Always resolve a library first with `mcp_context72_resolve-library-id`.
-- Then fetch focused docs with `mcp_context72_get-library-docs`.
+- Always resolve a library first with `mcp_context7_resolve-library-id`.
+- Then fetch focused docs with `mcp_context7_get-library-docs`.
 - Prefer MCP documentation over memory for APIs that may have changed.
 
 ## Microsoft and Windows Topics

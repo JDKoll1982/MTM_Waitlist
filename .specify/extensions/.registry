@@ -18,6 +18,23 @@
       },
       "registered_skills": [],
       "installed_at": "2026-09-10T00:43:22.689759+00:00"
+    },
+    "changelog": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:6617a231de57a373f812b901c71d7662d36394ca5dc617c25078e1458fd0ae81",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.changelog.generate",
+          "speckit.changelog.release",
+          "speckit.changelog.diff",
+          "speckit.changelog.notify"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-09-10T02:48:44.528533+00:00"
     }
   }
 }

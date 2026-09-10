@@ -15,70 +15,29 @@ public enum MySqlDatabaseTarget
 
 public sealed class MySqlHelperServer : IMySqlHelperServer
 {
-    private const string RecvMockDataSettingKey = "Feature.RecvMockData";
     private const string WaitlistConnectionStringEnvironmentVariable = "MTM_WAITLIST_DB_CONNECTION_STRING";
     private const string WaitlistStartupConnectionStringEnvironmentVariable = "MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING";
     private const string ReceivingConnectionStringEnvironmentVariable = "MTM_RECEIVING_APPLICATION_DB_CONNECTION_STRING";
     private const string WipApplicationConnectionStringEnvironmentVariable = "MTM_WIP_APPLICATION_DB_CONNECTION_STRING";
     private const int DefaultCommandTimeoutSeconds = 15;
 
-    private readonly ILocalSettingsService _localSettingsService;
-    private readonly ISampleDataService _sampleDataService;
     private readonly StartupDatabaseOptions _startupDatabaseOptions;
     private readonly ReceivingDatabaseOptions _receivingDatabaseOptions;
 
-    public MySqlHelperServer(ILocalSettingsService localSettingsService, ISampleDataService sampleDataService)
-        : this(localSettingsService, sampleDataService, Options.Create(new StartupDatabaseOptions()))
-    {
-    }
-
+    /// <summary>
+    /// Creates the helper server.
+    /// </summary>
+    /// <remarks>
+    /// This type previously took a local-settings service and a sample-data service purely so it could
+    /// short-circuit a MySQL target to demo data behind the <c>Feature.RecvMockData</c> setting. Internal
+    /// stores are never mocked (FR-001, constitution II), so the gate and both dependencies are gone.
+    /// </remarks>
     public MySqlHelperServer(
-        ILocalSettingsService localSettingsService,
-        ISampleDataService sampleDataService,
-        IOptions<StartupDatabaseOptions> startupDatabaseOptions,
+        IOptions<StartupDatabaseOptions>? startupDatabaseOptions = null,
         IOptions<ReceivingDatabaseOptions>? receivingDatabaseOptions = null)
     {
-        _localSettingsService = localSettingsService;
-        _sampleDataService = sampleDataService;
         _startupDatabaseOptions = startupDatabaseOptions?.Value ?? new StartupDatabaseOptions();
         _receivingDatabaseOptions = receivingDatabaseOptions?.Value ?? new ReceivingDatabaseOptions();
-    }
-
-    public async Task<IReadOnlyList<object>> ExecuteReadWriteAsync(string operationName, string? parameter = null)
-    {
-        var useMockData = await IsMockDataEnabledAsync(MySqlDatabaseTarget.MtmWaitlist).ConfigureAwait(false);
-        if (useMockData)
-        {
-            return _sampleDataService.GetSampleOrders(parameter).Take(3).ToArray();
-        }
-
-        return Array.Empty<object>();
-    }
-
-    public async Task<T> ExecuteReadWriteAsync<T>(
-        string operationName,
-        string? parameter,
-        Func<Task<T>> mockAction,
-        Func<Task<T>> backendAction)
-    {
-        return await ExecuteReadWriteAsync(operationName, parameter, MySqlDatabaseTarget.MtmWaitlist, mockAction, backendAction).ConfigureAwait(false);
-    }
-
-    public async Task<T> ExecuteReadWriteAsync<T>(
-        string operationName,
-        string? parameter,
-        MySqlDatabaseTarget databaseTarget,
-        Func<Task<T>> mockAction,
-        Func<Task<T>> backendAction)
-    {
-        var useMockData = await IsMockDataEnabledAsync(databaseTarget).ConfigureAwait(false);
-        if (useMockData)
-        {
-            _ = _sampleDataService.GetSampleOrders(parameter);
-            return await mockAction().ConfigureAwait(false);
-        }
-
-        return await backendAction().ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
@@ -330,15 +289,5 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
 
         var trimmed = sql.Trim().ReplaceLineEndings(" ");
         return trimmed.Length <= 140 ? trimmed : trimmed[..140] + "...";
-    }
-
-    private async Task<bool> IsMockDataEnabledAsync(MySqlDatabaseTarget databaseTarget)
-    {
-        if (databaseTarget == MySqlDatabaseTarget.MtmReceivingApplication)
-        {
-            return await _localSettingsService.ReadSettingAsync<bool?>(RecvMockDataSettingKey).ConfigureAwait(false) ?? false;
-        }
-
-        return await _localSettingsService.ReadSettingAsync<bool?>(RecvMockDataSettingKey).ConfigureAwait(false) ?? false;
     }
 }

@@ -29,6 +29,42 @@ to `tasks.md`.
 **Before you start**: confirm a green baseline (build 0 warnings / 0 errors; full suite pass) and record the counts.
 This feature is additive-then-subtractive, so a baseline is what lets you tell a new failure from an existing one.
 
+### Baseline record (T001 — captured 2026-09-09, pre-change)
+
+| Gate | Command | Result |
+|---|---|---|
+| Build | `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` | **0 warnings / 0 errors** |
+| Test | `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` | **605 passed, 0 failed, 17 skipped (622 total)** |
+
+The 17 skipped tests are the opt-in live-database subset gated on `MTM_WAITLIST_TEST_DB_CONNECTION_STRING`
+(not set in this environment). Compare every later gate run against these numbers.
+
+> **Baseline caveat — warm vs clean build (discovered 2026-09-09 during T027; RESOLVED by T112).**
+> The `0 warnings` figure above was produced by a **warm** build (packages already restored). A **cold**
+> restore used to emit a pre-existing warning that this feature neither introduced nor owned:
+>
+> ```text
+> warning NETSDK1206: Found version-specific or distribution-specific runtime identifier(s):
+>   win10-arm64, win10-x64, win10-x86. Affected libraries: Microsoft.Graphics.Win2D.
+> ```
+>
+> It reproduced on `MTM_Waitlist.Setup` (and every other module library) after deleting its `obj/`,
+> because those projects declare non-version-specific `<RuntimeIdentifiers>` while the transitive
+> `Microsoft.Graphics.Win2D` `1.0.0.30` ships `win10-*` assets. It was **not** caused by the new
+> `MTM_Waitlist.Mock` / `MTM_Waitlist.Mock.Service` projects.
+>
+> **Resolution (T112):** `<UseRidGraph>true</UseRidGraph>` in `Directory.Build.props`, the resolution
+> Microsoft documents for NETSDK1206. Verified by deleting every `obj/` and `bin/` and rebuilding:
+> **0 warnings / 0 errors**, full suite green. This is a RID-resolution setting, **not** a `NoWarn`
+> suppression, so every other warning still reports.
+>
+> A verified root-cause alternative is recorded in the `Directory.Build.props` comment: **Win2D `1.4.0`
+> ships portable `win-*` assets** and would let this property be removed, but Win2D is transitive via
+> `CommunityToolkit.WinUI.UI.*` `7.1.2` (compiled against `1.0.0.30`), so the assembly-version change is
+> a runtime binding risk no build or test can validate. Schedule it separately with UI/render validation.
+>
+> The SC-015 build gate is therefore **0 warnings / 0 errors on both a warm and a cold build**.
+
 ---
 
 ## 1. Deploy `mtm_mock` (Phase 1 — additive, no application impact)

@@ -7,4 +7,35 @@
     <!-- WinUIEx exposes its obsolete Icon converter through generated XAML metadata. -->
     <NoWarn>$(NoWarn);CS0618</NoWarn>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <!--
+      NETSDK1206 ("Found version-specific or distribution-specific runtime identifier(s)") fires on a
+      COLD restore of every module library because the transitive Microsoft.Graphics.Win2D 1.0.0.30
+      package ships assets under the version-specific RIDs win10-x64 / win10-x86 / win10-arm64, while
+      these projects declare the portable RIDs win-x64 / win-x86 / win-arm64. .NET 8+ uses a smaller
+      portable RID graph by default, so it no longer resolves those version-specific assets.
+
+      Resolved by restoring the full RID graph, which is the resolution Microsoft documents for
+      NETSDK1206 ("If you need to revert to the previous behavior of using the old, full RID graph,
+      you can set the UseRidGraph MSBuild property to true"):
+      https://learn.microsoft.com/dotnet/core/tools/sdk-errors/netsdk1206
+
+      This keeps the severity of the real signal intact for every other warning — it is a RID
+      resolution setting, not a NoWarn suppression. Verified: a clean restore now builds with
+      0 warnings / 0 errors.
+
+      ROOT-CAUSE ALTERNATIVE (verified, not taken here): Win2D 1.4.0 ships portable win-* assets and
+      would remove the need for this flag entirely (its only constraint is
+      Microsoft.WindowsAppSDK.WinUI >= 1.8.260204000, satisfied by the 2.3.0 in use). It is not taken
+      as part of this change because Win2D is transitive via CommunityToolkit.WinUI.UI.* 7.1.2, which
+      was compiled against Win2D 1.0.0.30 — changing that assembly version is a runtime binding risk
+      that neither the build nor the test suite can validate. Schedule it as a separate change with
+      UI/render validation, then remove this property.
+
+      Note: the old RID graph is not updated for new distributions/architectures and may be removed in
+      a future .NET release; this property is therefore a tracked accommodation, not a permanent fix.
+    -->
+    <UseRidGraph>true</UseRidGraph>
+  </PropertyGroup>
 </Project>

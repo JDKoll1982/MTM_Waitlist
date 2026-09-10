@@ -32,7 +32,11 @@ This document applies your completed naming conventions and database architectur
 - Allowed abbreviations: `id`, `utc`, `mac`, `ip`, `rbac`, `uuid`.
 - Banned abbreviations: `cfg`, `usr`, `ws`, `sess`, `rpt`.
 - Banned words: `class`, `delete`, `order`.
-- Approved exception: `value_type` (explicitly accepted despite `type` in banned list).
+- Approved exceptions:
+  - `value_type` is explicitly accepted.
+  - `order` is allowed where it forms the domain compound `work_order` (for example `work_order`,
+    `normalized_work_order`, `open_work_order_quantity`), because that is established Infor Visual
+    vocabulary. A bare `order` identifier is still banned.
 
 ## Core Startup Tables
 - `core_users_profiles`

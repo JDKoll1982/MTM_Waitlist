@@ -39,8 +39,6 @@ public sealed class ConfigImagesLocationsIntegrationTests
         }
 
         _helper = new MySqlHelperServer(
-            new FakeLocalSettingsService(),
-            new FakeSampleDataService(),
             Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
         _readService = new ImageOverrideReadService(_helper, NullLogger<ImageOverrideReadService>.Instance);
 

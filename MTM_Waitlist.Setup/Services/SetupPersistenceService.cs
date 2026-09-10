@@ -60,11 +60,10 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             };
         }
 
-        var result = await _mySqlHelperServer.ExecuteReadWriteAsync(
-            "Setup.Save",
-            request.WorkOrder,
-            () => SaveMockAsync(),
-            () => SaveBackendAsync(request, cancellationToken)).ConfigureAwait(false);
+        // Internal stores are always written live. The former demo short-circuit ("Setup.Save" mock
+        // branch behind Feature.RecvMockData) acknowledged the save without writing it, which is the
+        // reported "save acknowledged but the work-center card never updates" defect (FR-001, SC-001).
+        var result = await SaveBackendAsync(request, cancellationToken).ConfigureAwait(false);
 
         StartupDebugLog.Info("SetupPersistence", $"SaveAsync completed. Success={result.Success}, RequiresReplacementConfirmation={result.RequiresReplacementConfirmation}, Message='{result.Message}'.");
         return result;
@@ -195,16 +194,6 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
 
         StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeInternalAsync resolved selected_scrap_type='{selectedScrapType}'.");
         return selectedScrapType;
-    }
-
-    private static Task<SetupSaveResult> SaveMockAsync()
-    {
-        StartupDebugLog.Info("SetupPersistence", "SaveMockAsync executed.");
-        return Task.FromResult(new SetupSaveResult
-        {
-            Success = true,
-            Message = LocalizeOrDefault("Setup_Review.Status.MockSaved", "Setup was saved successfully in mock mode.")
-        });
     }
 
     private async Task<SetupSaveResult> SaveBackendAsync(SetupSaveRequest request, CancellationToken cancellationToken)

@@ -14,7 +14,7 @@ Author or repair markdown checklists that the `checklist-execution` skill can co
    - `## Phase N: <Name>` — a coarse milestone with a verifiable end state.
    - `### Subphase N.M: <Name>` — a logical group of tasks owned by one or two personas.
    - Tasks are single bullet lines starting with `- [ ]` (unchecked) or `- [x]` (checked).
-3. **Assign each task exactly one canonical persona.** Use only these names (they match the extraction in `checklist-execution` and the repo's Persona Behavior Matrix):
+3. **Assign each task exactly one canonical persona.** Use only these names (they match the extraction in `checklist-execution`):
    `Database Engineer`, `Backend Engineer`, `Full Stack Engineer`, `Frontend Engineer`, `QA Engineer`, `Security Engineer`, `Tech Lead`, `DevOps Engineer`.
 4. **Write atomic, verifiable tasks.** One deliverable per line, imperative form: `<Category>: <action> <artifact>`. If a task cannot be verified (build / test / read), split it or reword it.
 5. **Mark already-complete work accurately.** Use `- [x]` only for tasks verified against the codebase. Append a short proof note after the persona: `— <what/where/when>`.

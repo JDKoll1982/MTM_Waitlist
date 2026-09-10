@@ -32,34 +32,19 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
     public async Task<IReadOnlyList<SetupDunnageType>> GetDunnageTypesAsync(string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupDunnage", $"GetDunnageTypesAsync started. Part='{partNumber}', Sequence='{sequenceNumber}'.");
-        return await _mySqlHelperServer.ExecuteReadWriteAsync(
-            "Setup.DunnageTypes.Load",
-            partNumber,
-            MySqlDatabaseTarget.MtmReceivingApplication,
-            () => Task.FromResult(SetupDataCatalog.GetDunnageTypes(partNumber, sequenceNumber)),
-            () => GetDunnageTypesFromBackendAsync(partNumber, sequenceNumber, cancellationToken)).ConfigureAwait(false);
+        return await GetDunnageTypesFromBackendAsync(partNumber, sequenceNumber, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<SetupDunnagePart>> GetDunnagePartsAsync(string dunnageTypeId, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupDunnage", $"GetDunnagePartsAsync started. DunnageTypeId='{dunnageTypeId}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
-        return await _mySqlHelperServer.ExecuteReadWriteAsync(
-            "Setup.DunnageParts.Load",
-            dunnageTypeId,
-            MySqlDatabaseTarget.MtmReceivingApplication,
-            () => Task.FromResult(SetupDataCatalog.GetDunnageParts(dunnageTypeId, partNumber, sequenceNumber)),
-            () => GetDunnagePartsFromBackendAsync(dunnageTypeId, partNumber, sequenceNumber, cancellationToken)).ConfigureAwait(false);
+        return await GetDunnagePartsFromBackendAsync(dunnageTypeId, partNumber, sequenceNumber, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<SetupDunnagePart>> GetAllDunnagePartsAsync(CancellationToken cancellationToken = default)
     {
         StartupDebugLog.Info("SetupDunnage", "GetAllDunnagePartsAsync started.");
-        return await _mySqlHelperServer.ExecuteReadWriteAsync(
-            "Setup.DunnageParts.LoadAll",
-            null,
-            MySqlDatabaseTarget.MtmReceivingApplication,
-            () => Task.FromResult(SetupDataCatalog.GetAllDunnageParts()),
-            () => GetAllDunnagePartsFromBackendAsync(cancellationToken)).ConfigureAwait(false);
+        return await GetAllDunnagePartsFromBackendAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<SetupSelectionResult> AddDunnageTypeAsync(string typeName, string currentUserRole, CancellationToken cancellationToken = default)

@@ -23,7 +23,7 @@
     },
     "oraios/serena": {
       "type": "stdio",
-      "command": "C:\\Users\\jkoll\\.local\\bin\\uv.exe",
+      "command": "C:\\Users\\johnk\\.local\\bin\\uv.exe",
       "args": [
         "tool",
         "run",

@@ -37,7 +37,11 @@ applyTo: "Database/**/*.sql"
 - Allowed abbreviations: `id`, `utc`, `mac`, `ip`, `rbac`, `uuid`.
 - Banned abbreviations: `cfg`, `usr`, `ws`, `sess`, `rpt`.
 - Banned words: `class`, `delete`, `order`.
-- Exception: `value_type` is allowed as an explicit approved key-value column name.
+- Exceptions:
+  - `value_type` is allowed as an explicit approved key-value column name.
+  - `order` is allowed where it forms the domain compound `work_order` (for example `work_order`,
+    `normalized_work_order`, `open_work_order_quantity`), because that is established Infor Visual
+    vocabulary. A bare `order` identifier is still banned.
 
 ## Required Startup-Core Tables (v1)
 - `core_users_profiles`

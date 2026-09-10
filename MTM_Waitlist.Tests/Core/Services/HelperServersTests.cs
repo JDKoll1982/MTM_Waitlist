@@ -26,22 +26,6 @@ public sealed class HelperServersTests
         Assert.IsTrue(result.OfType<MTM_Waitlist.Module_Waitlist.Models.SampleOrder>().Any(item => item.Title == "Coil Request"));
     }
 
-    [TestMethod]
-    public async Task MySqlHelperServer_RoutesLoadToMockDataWhenEnabledAsync()
-    {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.RecvMockData"] = true,
-        });
-        var sampleDataService = new SampleDataService(settings);
-        var server = new MySqlHelperServer(settings, sampleDataService);
-
-        var result = await server.ExecuteReadWriteAsync("Waitlist.LoadOrders", "Vits Drive");
-
-        Assert.AreEqual(3, result.Count);
-        Assert.IsTrue(result.OfType<MTM_Waitlist.Module_Waitlist.Models.SampleOrder>().Any(item => item.Title == "Finished Goods Pickup"));
-    }
-
     private sealed class InMemoryLocalSettingsService : ILocalSettingsService
     {
         private readonly Dictionary<string, object> _settings;

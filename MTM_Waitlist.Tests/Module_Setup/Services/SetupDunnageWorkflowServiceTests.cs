@@ -39,8 +39,7 @@ public sealed class SetupDunnageWorkflowServiceTests
             ["Feature.RecvMockData"] = false,
             ["Feature.InforVisualMockData"] = true,
         });
-        var sampleDataService = new SampleDataService(settings);
-        var mySqlHelperServer = new MySqlHelperServer(settings, sampleDataService);
+        var mySqlHelperServer = new MySqlHelperServer();
         return new DunnageWorkflowService(mySqlHelperServer);
     }
 

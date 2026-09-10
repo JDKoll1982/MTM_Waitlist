@@ -4,6 +4,23 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# =====================================================================================
+# ARCHIVED ONE-SHOT MIGRATION - DO NOT RE-RUN (verified spent 2026-09-09).
+#
+# This script migrated the retired FluentMigrator layout (Database/Migrations/NNNN__*.sql,
+# Database/Rollbacks/*_rollback.sql, Database/Validation/0003__*.sql) to the current
+# file-per-artifact layout (Database/<Artifact>/<NN_name>/{create,rollback}.sql).
+#
+# That migration is COMPLETE. Database/Migrations and Database/Rollbacks no longer exist, so
+# the script's first Get-Content throws and it cannot run. Re-running it would also be harmful:
+# it writes unprefixed folder names (e.g. Database/Tables/core_users_profiles) that no longer
+# match the current NN_<name> convention.
+#
+# Retained for historical reference only. Delete if you want a clean tree.
+# =====================================================================================
+Write-Host '[archived] restructure-database-layout.ps1 is a spent one-shot migration and must not be re-run. See the header comment.' -ForegroundColor Yellow
+exit 1
+
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $repoRoot = Split-Path -Parent $repoRoot
 Set-Location $repoRoot

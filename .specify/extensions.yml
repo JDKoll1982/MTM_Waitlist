@@ -1,4 +1,5 @@
-installed: []
+installed:
+- changelog
 settings:
   auto_execute_hooks: true
 hooks:
@@ -121,6 +122,14 @@ hooks:
     optional: true
     prompt: Commit implementation changes?
     description: Auto-commit after implementation
+    condition: null
+  - extension: changelog
+    command: speckit.changelog.generate
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Execute speckit.changelog.generate?
+    description: Offer to generate changelog entry after implementation
     condition: null
   after_checklist:
   - extension: git

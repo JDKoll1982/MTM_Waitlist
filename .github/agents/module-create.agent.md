@@ -3,7 +3,7 @@ name: Module Create Agent
 description: "Use when creating new modules for MTM_Waitlist. Mandatory MCP-first process: use Serena MCP + Context7 MCP + Microsoft Learn MCP before editing."
 user-invocable: true
 model: GPT-5.3-Codex
-tools: [read, search, edit, execute, mcp_context7/*, mcp_microsoft_lea/*, csv-mcp-server/*, oraios/serena/*]
+tools: [read, search, edit, execute, io.github.upstash/context7/*, microsoftdocs/mcp/*, csv-mcp-server/*, oraios/serena/*]
 argument-hint: "Describe the new module, its scope, and expected behavior."
 ---
 
@@ -93,7 +93,7 @@ Map and verify these files before edits:
 
 - Module DI chain:
   - Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs (app composition root)
-  - Services/DependencyInjection/CoreModuleDependencyInjectionExtensions.cs (app composition root)
+  - MTM_Waitlist.Core/Services/DependencyInjection/CoreModuleDependencyInjectionExtensions.cs
   - Existing module DI extension files under MTM_Waitlist.*/Services/DependencyInjection/
 
 - Navigation mapping:
@@ -155,7 +155,7 @@ Execute in this sequence:
 
 Run build task (or equivalent command) after edits:
 
-- dotnet build MTM_Waitlist.csproj -p:Configuration=Debug -p:TargetFramework=net10.0-windows10.0.19041.0 -p:WindowsPackageType=None -p:WinUISDKReferences=false
+- dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false
 
 If build fails:
 

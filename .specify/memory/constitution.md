@@ -1,39 +1,46 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: (unratified template) → 1.0.0
-Bump rationale: MAJOR-equivalent — this is the first ratification; the placeholder template is
-replaced with six concrete, enforceable principles and a governance section.
+Version change: 1.0.0 → 1.1.0
+Bump rationale: MINOR — Principle IV (MCP-First, Grounded Decisions) is materially expanded and
+strengthened to NON-NEGOTIABLE, and a new mandatory Serena location/config self-healing rule is
+added. No principle is removed and no existing obligation is weakened or redefined incompatibly, so
+this is not a MAJOR change.
 
-Modified principles (template placeholder → ratified principle):
-  • Template Principle 1 → I. Spec-First, Verified Delivery
-  • Template Principle 2 → II. Live Data Integrity — Internal Stores Are Never Mocked
-  • Template Principle 3 → III. Stored-Procedure-First Database Discipline
-  • Template Principle 4 → IV. MCP-First, Grounded Decisions
-  • Template Principle 5 → V. WinUI 3 Platform Conformance
-  • (new)                → VI. Evidence-Based Verification Gates
+Modified principles:
+  • IV. MCP-First, Grounded Decisions
+      → IV. MCP-First, Grounded Decisions (NON-NEGOTIABLE)
+      - Consulting Context7 and Microsoft Learn is now explicitly NON-NEGOTIABLE whenever the agent
+        is unsure about anything code-related or does not know how to implement something; model
+        memory alone is insufficient grounds, and substituting a user question or recall for a
+        documentation lookup is prohibited.
+      - Added mandatory Serena self-healing rule for the case where Serena's location cannot be
+        discerned: inspect `~/.serena/serena_config.yml` (and project-level `.serena/*.yml`), account
+        for the work/home user-profile folder change (`jkoll` vs `johnk`), update the config, retry,
+        and report the config path plus observed error if the retry still fails.
 
-Added sections:
-  • Core Principles (6 principles)
-  • Additional Constraints (Security & Secrets; External Integration & Cache Boundaries;
-    Documentation & Extensibility)
-  • Development Workflow & Quality Gates
-  • Governance (supremacy, amendment, versioning, compliance review)
-
-Removed sections:
-  • All template placeholder text / example HTML comments
+Added sections: none
+Removed sections: none
 
 Templates & dependent artifacts:
-  ✅ .specify/templates/plan-template.md   — Constitution Check section is generic; no change needed
-  ✅ .specify/templates/spec-template.md   — no mandatory-section change required
-  ✅ .specify/templates/tasks-template.md  — no task-category change required
+  ✅ .specify/templates/plan-template.md      — Constitution Check is generic; no change required
+  ✅ .specify/templates/spec-template.md      — no mandatory-section change required
+  ✅ .specify/templates/tasks-template.md     — no task-category change required
   ✅ .specify/templates/agent-file-template.md — auto-generated; unaffected
-  ⚠ .github/instructions/spec-kit.instructions.md — stated the constitution was unratified; updated
-  ⚠ specs/001-module-mock-visual-fallback/plan.md — recorded "Constitution Check NOT APPLICABLE";
-    re-run `/speckit.plan` (or `/speckit.analyze`) so the gate is now evaluated against v1.0.0
-  ✅ README.md / .github/copilot-instructions.md — no principle references to reconcile
+  ✅ README.md / .github/copilot-instructions.md — already state the MCP-first policy; consistent
+  ⚠ .github/instructions/mcp-doc-research.instructions.md — should mirror the new NON-NEGOTIABLE
+    Context7/Microsoft Learn rule and the Serena self-healing rule (follow-up; outside this
+    command's write scope, which is limited to the constitution itself)
 
-Follow-up TODOs: none deferred (RATIFICATION_DATE and LAST_AMENDED_DATE are known: 2026-09-09).
+Follow-up TODOs:
+  • TODO(scaffold-drift): this workspace's `.specify/scripts/powershell/common.ps1` is stale — it
+    does not define `Resolve-TemplateContent`, which `.specify/scripts/powershell/resolve-template.ps1`
+    and `setup-tasks.ps1` both call, so template resolution fails with "Resolve-TemplateContent is
+    not recognized as a name of a cmdlet". The template stack was resolved using the version-matched
+    resolver from the installed core pack at
+    `%APPDATA%\uv\tools\specify-cli\Lib\site-packages\specify_cli\core_pack\scripts\powershell`.
+    Repair by re-running `specify init` or syncing the `.specify/scripts/powershell` scripts.
+  • RATIFICATION_DATE and LAST_AMENDED_DATE are both known (2026-09-09) — nothing deferred here.
 -->
 
 # MTM_Waitlist Constitution
@@ -75,16 +82,38 @@ rules and validated against a live database before being declared complete.
 Rationale: centralized, reviewable, versioned data access prevents drift across callers and keeps the
 schema discoverable; ad-hoc inline SQL bypasses both.
 
-### IV. MCP-First, Grounded Decisions
+### IV. MCP-First, Grounded Decisions (NON-NEGOTIABLE)
 
 Before writing or changing code, decisions MUST be grounded in authoritative sources using the
 available MCP servers: Serena for indexed repository exploration, Context7 for library/framework
 documentation, and Microsoft Learn for Windows / WinUI / Windows App SDK guidance. For APIs that may
-have changed, documentation MUST be preferred over model memory. Workarounds that deviate from
-documented guidance MUST be recorded as such.
+have changed, documentation MUST be preferred over model memory.
 
-Rationale: platform and library surfaces evolve; grounding decisions prevents regressions that stem
-from stale assumptions.
+Whenever the agent is unsure about anything code-related, or does not know how to implement
+something, consulting Context7 and Microsoft Learn is NON-NEGOTIABLE. Model memory alone MUST NOT be
+treated as sufficient grounds for a code decision or an implementation approach in that situation.
+This applies at minimum to: API names, signatures, and syntax; configuration and setup; version
+migration and breaking-change behavior; library-specific debugging; CLI and tool usage; and official
+platform guidance. Substituting recall, or deferring the question to the user, MUST NOT replace a
+documentation lookup.
+
+Serena self-healing is mandatory. When Serena fails such that its location or installation cannot be
+discerned — for example the tool cannot be found, or resolves to a path that does not exist — the
+agent MUST NOT abandon the lookup. It MUST: (1) inspect Serena's configuration file
+(`~/.serena/serena_config.yml`, plus project-level `.serena/project.yml` or `.serena/project.local.yml`
+when present); (2) account for the user-profile folder changing between the work and home
+environments (`jkoll` at work, `johnk` at home), which invalidates profile-rooted paths such as
+`C:\Users\<profile>\...` entries in the config and in the MCP server launch command; (3) update the
+configuration accordingly; and (4) retry the operation. If the retry still fails, the agent MUST
+report the config path inspected, the change attempted, and the observed error rather than silently
+falling back to ungrounded guesswork.
+
+Workarounds that deviate from documented guidance MUST be recorded as such.
+
+Rationale: platform and library surfaces evolve, and this repo already carries profile-rooted Serena
+config paths that break when the machine's user profile changes; grounding decisions in retrieved
+documentation — and repairing the retrieval tool instead of bypassing it — prevents regressions that
+stem from stale assumptions.
 
 ### V. WinUI 3 Platform Conformance
 
@@ -165,4 +194,4 @@ reviewed on every change and at each feature phase gate; unjustified violations 
 Runtime development guidance remains in the repo instruction files, which MUST stay consistent with
 this constitution.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-09 | **Last Amended**: 2026-09-09
+**Version**: 1.1.0 | **Ratified**: 2026-09-09 | **Last Amended**: 2026-09-09

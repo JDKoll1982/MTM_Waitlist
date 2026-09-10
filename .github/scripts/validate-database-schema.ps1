@@ -99,6 +99,12 @@ Select-Object -ExpandProperty FullName
 $seedCreatePaths = Get-ChildItem -Path (Join-Path $repoRoot 'Database\Seeds') -Recurse -Filter 'create.sql' |
 Sort-Object FullName |
 Select-Object -ExpandProperty FullName
+$functionCreatePaths = Get-ChildItem -Path (Join-Path $repoRoot 'Database\Functions') -Recurse -Filter 'create.sql' |
+Sort-Object FullName |
+Select-Object -ExpandProperty FullName
+$viewCreatePaths = Get-ChildItem -Path (Join-Path $repoRoot 'Database\Views') -Recurse -Filter 'create.sql' |
+Sort-Object FullName |
+Select-Object -ExpandProperty FullName
 
 $attemptErrors = New-Object System.Collections.Generic.List[string]
 $resolvedConnectionStrings = @()
@@ -198,6 +204,20 @@ function Install-Or-UpdateDatabase {
             Write-Log "Applying table file: $tableCreatePath"
             $tableStatements = (Get-InstallSqlText -Path $tableCreatePath) -split ';'
             Invoke-SqlStatements -Connection $targetConnection -Statements $tableStatements
+        }
+
+        Write-Log 'Install phase: applying function create.sql files.'
+        foreach ($functionCreatePath in $functionCreatePaths) {
+            Write-Log "Applying function file: $functionCreatePath"
+            $functionStatements = (Get-InstallSqlText -Path $functionCreatePath) -split ';'
+            Invoke-SqlStatements -Connection $targetConnection -Statements $functionStatements
+        }
+
+        Write-Log 'Install phase: applying view create.sql files.'
+        foreach ($viewCreatePath in $viewCreatePaths) {
+            Write-Log "Applying view file: $viewCreatePath"
+            $viewStatements = (Get-InstallSqlText -Path $viewCreatePath) -split ';'
+            Invoke-SqlStatements -Connection $targetConnection -Statements $viewStatements
         }
 
         Write-Log 'Install phase: applying stored procedure create.sql files.'

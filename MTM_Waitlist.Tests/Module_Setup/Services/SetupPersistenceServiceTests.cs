@@ -13,36 +13,10 @@ namespace MTM_Waitlist.Tests.Module_Setup.Services;
 public sealed class SetupPersistenceServiceTests
 {
     [TestMethod]
-    public async Task SaveAsync_WhenMockEnabled_ReturnsMockSavedMessageAndSkipsRegisterAsync()
+    public async Task SaveAsync_WhenBackendWritesNoRows_ReturnsFailureAsync()
     {
         var activeJobCoordinator = new FakeActiveJobCoordinatorService(hasActiveJob: false);
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.RecvMockData"] = true
-        });
-        var sampleDataService = new SampleDataService(settings);
-        var mySqlHelperServer = new MySqlHelperServer(settings, sampleDataService);
-        var service = new SetupPersistenceService(activeJobCoordinator, mySqlHelperServer);
-
-        var request = CreateRequest();
-        var result = await service.SaveAsync(request, false);
-
-        Assert.IsTrue(result.Success);
-        Assert.IsFalse(result.RequiresReplacementConfirmation);
-        Assert.IsTrue(result.Message.Contains("Mock", StringComparison.OrdinalIgnoreCase));
-        Assert.AreEqual(0, activeJobCoordinator.RegisterCalls);
-    }
-
-    [TestMethod]
-    public async Task SaveAsync_WhenMockDisabled_AndBackendWritesNoRows_ReturnsFailureAsync()
-    {
-        var activeJobCoordinator = new FakeActiveJobCoordinatorService(hasActiveJob: false);
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.RecvMockData"] = false
-        });
-        var sampleDataService = new SampleDataService(settings);
-        var mySqlHelperServer = new MySqlHelperServer(settings, sampleDataService);
+        var mySqlHelperServer = new MySqlHelperServer();
         var service = new SetupPersistenceService(activeJobCoordinator, mySqlHelperServer);
 
         var request = CreateRequest();
@@ -58,12 +32,7 @@ public sealed class SetupPersistenceServiceTests
     public async Task SaveAsync_WhenActiveJobExistsWithoutForce_ReturnsReplacementPromptAsync()
     {
         var activeJobCoordinator = new FakeActiveJobCoordinatorService(hasActiveJob: true);
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.RecvMockData"] = false
-        });
-        var sampleDataService = new SampleDataService(settings);
-        var mySqlHelperServer = new MySqlHelperServer(settings, sampleDataService);
+        var mySqlHelperServer = new MySqlHelperServer();
         var service = new SetupPersistenceService(activeJobCoordinator, mySqlHelperServer);
 
         var request = CreateRequest();

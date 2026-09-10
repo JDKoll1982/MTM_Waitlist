@@ -71,3 +71,48 @@ Next task: **Subphase 0.1 stock snapshot** | **Persona: Backend Engineer**
 See `../Mockups/` for the target UI for this task:
 
 - `../Mockups/analytics-waitlist-overview.svg` — Plant Manager waitlist analytics screen
+
+## Supervisor Analytics extension (folded in 2026-09-09)
+
+> **Origin:** the standalone `Documents/Analytics/Plan.md` ("Supervisor Analytics Page V1") was folded into
+> this file and then deleted. Its scope is **wider** than Subphase 0.2 (Plant Manager view): it adds a
+> supervisor-facing page, user-type segmentation, per-user persisted preferences, an explicit refresh
+> cadence, and a print-to-PDF export path.
+> Its original execution gate referenced `StartupPhases/README.md`, **which does not exist in this repo** —
+> the gate is restated below against a condition that can actually be evaluated.
+
+**PREREQUISITE: Subphase 0.1 (stock snapshot) and Subphase 0.2 (Plant Manager screen) complete, with a green build and full suite.**
+
+### Subphase 0.3 — Supervisor analytics segmentation & filters
+
+- [ ] **VM: add the Supervisor Analytics page + view model** as a role-gated page at rank >= Production Lead, reusing the Waitlist building-filter interaction model. **[Artifacts: `SupervisorAnalyticsViewModel` + `SupervisorAnalyticsPage.xaml(.cs)`; `pageService.Configure<...>()` + DI in `ServiceRegistrationExtensions.cs`]** | **Persona: Full Stack Engineer**
+- [ ] **Auth Logic: role gate = Production Lead, Setup Lead, Plant Manager, IT Department, Developer**, with explicit deny behavior for every other role. | **Persona: Backend Engineer**
+- [ ] **VM: segment analytics by the day-one user types — Material Handler, Production, Setup** — as composable panels so each user type renders its own KPI + table set without reshaping page architecture. | **Persona: Full Stack Engineer**
+- [ ] **VM: filter contract — User Type, Shift, Building (All / Expo Drive / Vits Drive), plant-wide aggregation, and role-switch behavior.** Keep `BuildingSelectionService` as the building source of truth. | **Persona: Backend Engineer**
+- [ ] **Testing: unit tests for role access, filter composition, segmentation, and role-switch behavior.** | **Persona: QA Engineer**
+
+### Subphase 0.4 — Persisted per-user preferences & refresh cadence
+
+- [ ] **Database: add MySQL `mtm_waitlist` persistence for per-user analytics preferences** (auto-refresh interval, visible KPI/table/chart toggles, default filters) following `database-schema-rules.instructions.md` — table under `Database/Tables/<NN_name>/` with `create.sql` + `rollback.sql`, plus aggregate regeneration. | **Persona: Database Engineer**
+- [ ] **Backend: add stored procedures for user-scoped preference read/write**, with a repository/service boundary that fails gracefully when a preference row is absent. | **Persona: Backend Engineer**
+- [ ] **VM: default auto-refresh cadence of 5 minutes**, with a manual refresh action and a persisted per-user override. | **Persona: Full Stack Engineer**
+- [ ] **Testing: service tests for preference serialization round-trip and refresh-cadence behavior.** | **Persona: QA Engineer**
+
+### Subphase 0.5 — Print-friendly export
+
+- [ ] **Frontend: print-friendly export path (OS/browser print-to-PDF) scoped to the currently filtered data**, excluding hidden sections. **[Excluded for v1: a direct PDF generation engine.]** | **Persona: Frontend Engineer**
+- [ ] **Testing: verify the printed output reflects active filters and excludes hidden sections.** | **Persona: QA Engineer**
+
+### Subphase 0.6 — Mock-first data & localization
+
+- [ ] **Service Layer: mock analytics provider with deterministic seeded data** that mirrors the expected future user/shift source, so the page is demoable and testable without a live DB and swaps cleanly later. | **Persona: Backend Engineer**
+- [ ] **Localization: add `.resw` keys for navigation labels, filter labels, KPI labels, and export action text** (no literal UI text). | **Persona: Frontend Engineer**
+- [ ] **QA: full suite + build green, then summarize v1 limitations.** | **Persona: QA Engineer**
+
+### Carried over from the folded plan (open decisions / exclusions)
+
+- **Excluded** from this workstream: the full user-creation workflow and an authoritative shift data source — user creation is tracked separately in file `15-0%-UserManagement.md`.
+- **User identity (pending implementation):** resolve the App User GUID first, then map to first/last name. Add a mock-friendly GUID-to-name lookup contract that can later be backed by real user-management data.
+- **Charting strategy (open):** native WinUI controls only, a vetted lightweight chart package, or table-first with chart placeholders for a staged rollout. Keep the implementation package-agnostic.
+- **Building source of truth (open):** keep in `BuildingSelectionService`, move to a dedicated Plant/Building settings service, or use a hybrid adapter that preserves the existing API.
+- **Access enforcement depth (open):** UI visibility only, UI + view-model guard, or UI + view-model + service-level authorization.

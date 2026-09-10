@@ -31,8 +31,6 @@ public sealed class DefectTypesCrudIntegrationTests
         }
 
         _helper = new MySqlHelperServer(
-            new MTM_Waitlist.Tests.Module_Settings.FakeLocalSettingsService(),
-            new MTM_Waitlist.Tests.Module_Settings.FakeSampleDataService(),
             Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
 
         _defectName = $"IT-DEFECT-{Guid.NewGuid():N}";

@@ -34,8 +34,6 @@ public sealed class RequestTypeCatalogServiceIntegrationTests
         }
 
         var helper = new MySqlHelperServer(
-            new MTM_Waitlist.Tests.Module_Settings.FakeLocalSettingsService(),
-            new MTM_Waitlist.Tests.Module_Settings.FakeSampleDataService(),
             Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
 
         _service = new RequestTypeCatalogService(helper);

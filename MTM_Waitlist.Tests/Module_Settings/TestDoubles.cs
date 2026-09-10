@@ -198,9 +198,9 @@ internal static class TestDoubles
 {
     /// <summary>
     /// The cascade tests never reach the database, but ImageLocationService requires a non-null helper.
+    /// It no longer takes a settings/sample-data dependency: internal stores are never mocked (FR-001).
     /// </summary>
-    public static MySqlHelperServer CreateUnusedMySqlHelperServer() =>
-        new(new FakeLocalSettingsService(), new FakeSampleDataService());
+    public static MySqlHelperServer CreateUnusedMySqlHelperServer() => new();
 }
 
 internal sealed record ExecutedStatement(string Sql, IReadOnlyDictionary<string, object?> Parameters);
