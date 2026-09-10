@@ -17,7 +17,6 @@
         "**/*.json",
         "**/*.config"
     ],
-
     "python-envs.defaultEnvManager": "ms-python.python:system",
     "chat.mcp.serverSampling": {
         "MTM_Waitlist/.vscode/mcp.json: xamlmcp": {
@@ -46,5 +45,16 @@
                 "deepseek/deepseek-v4-flash-vision-exp"
             ]
         }
+    },
+    "chat.promptFilesRecommendations": {
+        "speckit.constitution": true,
+        "speckit.specify": true,
+        "speckit.plan": true,
+        "speckit.tasks": true,
+        "speckit.implement": true
+    },
+    "chat.tools.terminal.autoApprove": {
+        ".specify/scripts/bash/": true,
+        ".specify/scripts/powershell/": true
     }
 }
