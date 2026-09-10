@@ -194,7 +194,7 @@ SC-009's "verified replacement" claim meaningful rather than asserted.
 
 ---
 
-## R9. Read-shape naming and the one deviation to confirm at DDL review (FR-015, DB rules)
+## R9. Read-shape naming and the one deviation recorded and approved at the Phase 1 DDL review (FR-015, DB rules)
 
 **Decision**: Table and procedure names are exactly the ones fixed by the specification and the grounding docs:
 `visual_work_order_lookup_result`, `visual_operation_sequences_result`, `visual_subordinate_parts_result`,
@@ -204,14 +204,18 @@ SC-009's "verified replacement" claim meaningful rather than asserted.
 **Rationale**: The spec's Key Entities and the grounding docs treat the shape name as the unit of extensibility
 (FR-016), and the Plan's playbook is written against these exact names, so they are treated as frozen inputs rather
 than renegotiable identifiers. The locked DB rules require lowercase snake_case with a module prefix, which these
-satisfy; `mtm_mock` also carries the required `id` primary key, `_utc` timestamp (`refreshed_utc`), and `idx_`-named
-indexes.
+satisfy; `mtm_mock` also carries the required `id` primary key, the `_utc` timestamp (`refreshed_utc`), and its unique
+`uq_` keys. (`data-model.md` §3 is the authoritative index list; there is **no** `idx_`-named index in the initial
+schema.)
 
-**Deviation to record in the Phase 1 DDL review (not a blocker)**: the locked rules list `order` among "banned
-words". `visual_work_order_lookup_result` and the `work_order` key columns retain the term because it names the
-business entity, mirrors the Infor Visual source's own vocabulary, and matches the existing repository precedent
-`Database/Tables/22_mock_work_orders`. Per the rules, an exception requires explicit written approval in the
-migration note — so the DDL review records it rather than silently diverging.
+**Deviation — documented and approved (not a blocker)**: the locked rules list `work_order` among "banned words".
+`visual_work_order_lookup_result` and the `work_order` key columns retain the term because it names the business
+entity, mirrors the Infor Visual source's own vocabulary, and matches the existing repository precedent
+`Database/Tables/22_mock_work_orders`. Per the rules an exception requires explicit written approval, so it is recorded
+as a header comment in the `create.sql` of both `visual_work_order_lookup_result` and
+`visual_disposition_input_result` (and summarized in `data-model.md` §3.1). **Approver: the Tech Lead (database
+reviewer) at the Phase 1 DDL review. Recorded location: the Phase 1 pull-request description, alongside the created
+artifacts.**
 
 **Alternatives considered**: renaming to `visual_wip_document_*` / `job_number` — rejected: it would diverge from the
 spec's frozen shape names and from the source system's terminology, harming the maintainer experience SC-012 measures.
@@ -240,8 +244,8 @@ into it would break the validator's meaning.
 
 **Decision**: `MTM_Waitlist.Mock` exposes one narrow seam per shape (`IVisualReadFallback`), each implemented as
 *attempt live → on unreachability/timeout read `sp_visual_<shape>_get`*. The detector is a separate, newly written
-`VisualReachabilityDetector` publishing `VisualReachabilityState` (`Unknown → Live → Cached → Live`) plus a
-`LastSuccessfulRefreshUtc` used for the cached-data age. Transitions to `Cached` require **two consecutive**
+`VisualReachabilityDetector` publishing `VisualReadStatus` (`Unknown → Live → Cached → Live`) plus a
+`CachedDataAgeUtc` used for the cached-data age. Transitions to `Cached` require **two consecutive**
 failures; transitions back to `Live` require **one** success; the detector probes on a timer with backoff while
 `Cached` so a flapping source cannot thrash the UI or duplicate refreshes.
 

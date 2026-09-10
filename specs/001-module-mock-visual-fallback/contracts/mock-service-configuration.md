@@ -86,8 +86,8 @@ Each enabled shape is described by exactly this record:
 A shape that fails validation is excluded from refresh cycles and reported in `GET /api/status` with a clear reason.
 The service still starts and still serves the other shapes (FR-020 — one bad shape must not take the service down).
 
-**Recorded output-column set for the five initial shapes** (the authoritative list; see `data-model.md` §3 for physical
-types):
+**Recorded output-column set for the five initial shapes** — the **authoritative result-column list** (the physical
+names and types are the authoritative list in `data-model.md` §3, not restated here):
 
 | `shapeKey` | Live projection |
 |---|---|

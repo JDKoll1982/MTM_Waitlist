@@ -15,8 +15,8 @@ interface contract) — there is no network surface here.
 ```csharp
 public interface IVisualReachabilityDetector
 {
-    VisualReachabilityState Current { get; }        // Unknown | Live | Cached
-    event EventHandler<VisualReachabilityState> StateChanged;
+    VisualReadStatus Current { get; }        // Unknown | Live | Cached
+    event EventHandler<VisualReadStatus> StateChanged;
     Task ProbeAsync(CancellationToken cancellationToken);
 }
 ```
@@ -26,7 +26,7 @@ public interface IVisualReachabilityDetector
 | Independence | Must not reference the retired `MockRoutingService` / `MockModeChangeDetector` / `MockConfigurationService` stack (FR-014) |
 | Hysteresis | `Live → Cached` requires **2 consecutive** probe failures; `Cached → Live` requires **1** success (flapping edge case) |
 | Non-manual | No public API sets the state; it is derived only from probe results (FR-003) |
-| Cost | Probing is a cheap connectivity check; it never executes a read shape |
+| Cost | Probing is a lightweight connectivity check (a connection/health round-trip only — it never executes a read shape and returns no rows) |
 | Scheduling | Probing is app-owned. The application **never** performs a scheduled *refresh* (FR-025) |
 
 ## 2. Fallback read contract (one seam per read shape)
@@ -61,8 +61,9 @@ a fresh install returns a usable result rather than an error. The status surface
 
 ## 3. The five shapes
 
-Column names below are the **result** column names (PascalCase in C#, per repo naming rules). The mirror's physical
-column names are in `data-model.md` §3.
+Column names below are the **result** column names (PascalCase in C#, per repo naming rules) — this table is the
+**authoritative result-column list**. The mirror's physical column names and types are the authoritative list in
+`data-model.md` §3, which this table does not restate.
 
 | # | Shape key | Channel / caller to be routed | Inputs | Result rows |
 |---|---|---|---|---|
@@ -91,14 +92,18 @@ public interface IReadStatusProvider
 
 | Field | Requirement |
 |---|---|
-| `IsCachedDataInUse` | `true` **iff** `VisualReachabilityState == Cached`; drives indicator visibility (FR-005) |
+| `Status` | The current `VisualReadStatus` (`Unknown` \| `Live` \| `Cached`) — the detector state |
+| `IsCachedDataInUse` | `true` **iff** `Status == VisualReadStatus.Cached`; drives indicator visibility (FR-005) |
 | `CachedDataAgeUtc` | The last successful refresh time across shapes; `null` when `IsSeedContentOnly` (FR-022) |
 | `IsSeedContentOnly` | `true` before any successful refresh (FR-017) |
 | `PerShapeLastRefreshUtc` | Feeds operator visibility (FR-013) |
 
 **UI rules:** the indicator is non-interactive (`InfoBar` with `IsClosable="False"`, no buttons, no command binding) and
 must not offer any state change; it becomes visible on entering `Cached` and disappears on returning to `Live`
-(FR-003, FR-005, US4). Data is **never** refused based on age (FR-022).
+(FR-003, FR-005, US4). Data is **never** refused based on age (FR-022). All indicator text — the "Infor Visual is
+unreachable" message, the cached-data-in-use statement, and the age display — is resource-backed from
+`Strings/en-us/Resources.resw` via `GetLocalized()` (no inline literals), and any converter or resource the indicator
+needs is registered in `App.xaml` in the same change (constitution V, WinUI 3 Platform Conformance).
 
 ## 5. Force-refresh client contract
 

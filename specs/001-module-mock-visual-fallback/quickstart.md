@@ -8,6 +8,10 @@ This is the end-to-end operator/developer walkthrough: deploy the cache, start t
 prove the defect is fixed. It is written to be run in phase order — every step is independently verifiable, and each
 step names the artifacts it needs and the outcome it proves.
 
+**Phase labels**: section headings use the strategic phases in `plan.md` §3 (0–8). `tasks.md` uses execution Phases
+1–10; the authoritative mapping between the two is in `tasks.md` §Phase numbering. Task IDs referenced anywhere refer
+to `tasks.md`.
+
 ---
 
 ## 0. Prerequisites
@@ -42,7 +46,7 @@ This feature is additive-then-subtractive, so a baseline is what lets you tell a
 
 ```sql
 -- shape reads return the seed content before any refresh has happened (FR-017)
-CALL sp_visual_work_order_lookup_result_get('SEED-WO-1');
+CALL sp_visual_work_order_lookup_get('SEED-WO-1');
 -- metadata proves these are seed rows, not refreshed rows
 SELECT refreshed_utc, is_seed_content FROM visual_work_order_lookup_result LIMIT 5;   -- is_seed_content = 1
 ```
@@ -50,7 +54,7 @@ SELECT refreshed_utc, is_seed_content FROM visual_work_order_lookup_result LIMIT
 5. Run one real refresh and confirm the atomic swap:
 
 ```sql
-CALL sp_visual_work_order_lookup_result_refresh(/* source parameters */);
+CALL sp_visual_work_order_lookup_refresh(/* source parameters */);
 SELECT refreshed_utc, is_seed_content FROM visual_work_order_lookup_result LIMIT 5;   -- is_seed_content = 0
 SELECT COUNT(*) FROM visual_work_order_lookup_result_stage;                            -- previous snapshot
 ```

@@ -44,10 +44,17 @@ of an external read shape.
 - `OutputColumns` is the contract with live reads: it must match the live Visual projection exactly, or the shape's
   refresh is marked failed and the last good snapshot is retained.
 - Adding a shape must not change any other shape's row or artifact.
+- Startup artifact-existence validation is performed by the dedicated `mtm_mock` procedure
+  `sp_visual_read_shape_metadata_get` (§12) — never by inline SQL or a schema-API query in C# (constitution III).
 
 ---
 
 ## 3. Cache tables — the five read shapes (FR-002, FR-004, FR-006, FR-017)
+
+> **Authoritative physical column list.** This section is the single authoritative definition of the mirror tables'
+> physical columns, types, and indexes. `contracts/visual-read-fallback.md` §3 (result column names) and
+> `contracts/mock-service-configuration.md` §3 (catalog projection) reference these definitions rather than restating
+> them.
 
 **Common structure for every mirror table `<shape>_result`** (identical for its `_stage` twin):
 
@@ -60,6 +67,10 @@ of an external read shape.
 | `is_seed_content` | `TINYINT(1) NOT NULL DEFAULT 0` | `is_` prefix (DB rules) | `1` only for baseline seed rows written before the first successful refresh (FR-017); refresh always writes `0` |
 
 Engine/charset for every table: `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`.
+
+Index naming: as listed per table below, the five tables use only `PRIMARY` and their `uq_` unique keys — there is
+**no** `idx_`-named index in the initial schema. Any secondary (non-unique) index added later is named
+`idx_<table>_<columns>` per the ruleset.
 
 > **Why `is_seed_content` exists**: FR-022 requires the indicator to show *the time of the last successful refresh*,
 > and the "cold cache on a fresh install" edge case requires seeded content to be served before any refresh has
@@ -82,6 +93,12 @@ Source: `Module_Setup/Queries/LookupWorkOrder.sql` · Caller: `SetupLookupServic
 | `is_seed_content` | TINYINT(1) NOT NULL DEFAULT 0 | metadata |
 
 Indexes: `PRIMARY (id)`; unique `uq_visual_work_order_lookup_result_work_order (normalized_work_order, part_number)`.
+
+> **Rules deviation — documented and approved.** The locked DB ruleset lists `work_order` as a banned word; the frozen
+> shape key and the spec's read-shape names use it deliberately (mirroring the existing `22_mock_work_orders`
+> precedent). The deviation is recorded as a header comment in this table's and `visual_disposition_input_result`'s
+> `create.sql`, cross-referenced from `research.md` R9, and **approved by the Tech Lead (database reviewer)** at the
+> Phase 1 DDL review — approval recorded in the Phase 1 pull-request description alongside the created artifacts.
 
 ### 3.2 `visual_operation_sequences_result` (shape `operation_sequences`)
 
@@ -128,7 +145,7 @@ Indexes: `PRIMARY (id)`; unique `uq_visual_subordinate_parts_result_lookup_key
 > **Note — the one intentional column rename**: the live read takes the *operation's* part number as an input **and**
 > returns each *subordinate* part's number as an output. Both are called `PartNumber` in the source. The input key is
 > therefore persisted as `parent_part_number` so that `part_number` in the returned row means exactly what it means in
-> the live result. `sp_visual_subordinate_parts_result_get` exposes the parameter as `p_part_number` (the operation
+> the live result. `sp_visual_subordinate_parts_get` exposes the parameter as `p_part_number` (the operation
 > context), so callers see no difference — this keeps FR-004's structural identity at the *result* boundary.
 
 ### 3.4 `visual_inventory_locations_result` (shape `inventory_locations`)
@@ -288,15 +305,20 @@ Verifying → Succeeded | Failed*`.
 
 ---
 
-## 8. Entity: `ReadStatusState` (FR-005, FR-022; in-app, not persisted)
+## 8. Entity: `ReadStatusSnapshot` (FR-005, FR-022; in-app, not persisted)
+
+The single status model type is **`ReadStatusSnapshot`** (`MTM_Waitlist.Mock/Models/ReadStatusSnapshot.cs`), and the
+state enum it carries is **`VisualReadStatus`** (`MTM_Waitlist.Mock/Models/VisualReadStatus.cs`). These two names are
+**authoritative** across `plan.md`, `contracts/visual-read-fallback.md` §4, `research.md` R11/R12, and `tasks.md`.
 
 | Field | Type | Notes |
 |---|---|---|
-| `State` | enum | `Unknown` \| `Live` \| `Cached` |
+| `Status` | `VisualReadStatus` enum | `Unknown` \| `Live` \| `Cached` — the detector state |
+| `IsCachedDataInUse` | bool | `true` iff `Status == Cached`; drives indicator visibility (FR-005) |
 | `ChangedUtc` | DateTime (UTC) | When the state last changed |
-| `LastSuccessfulRefreshUtc` | DateTime? (UTC) | Age source for FR-022; null when only seed content exists |
+| `CachedDataAgeUtc` | DateTime? (UTC) | The last successful refresh time across shapes — the FR-022 age source; null when only seed content exists |
 | `IsSeedContentOnly` | bool | True when the newest served content still has `is_seed_content = 1` |
-| `PerShapeLastRefresh` | map shape → DateTime? | Feeds the status surface |
+| `PerShapeLastRefreshUtc` | map shape → DateTime? | Feeds the status surface (FR-013) |
 
 **State transitions** (see `research.md` R11 for the hysteresis rationale):
 ```
@@ -326,8 +348,10 @@ value is installed).
 ## 10. Internal-store availability state (FR-021)
 
 When an **internal** store is unavailable, the affected screen shows an `Unavailable` state carrying:
-`Store`, `LastAttemptUtc`, `RetryCount`, `NextRetryUtc`, and an operator-facing message. Retries use a short backoff.
-There is **no** cached counterpart and **no** sample-data substitution for internal stores (FR-001, FR-018), and this
+`Store`, `LastAttemptUtc`, `RetryCount`, `NextRetryUtc`, and an operator-facing message. Retries are bounded: up to
+three attempts with delays of approximately 1 s, 2 s, and 4 s; after the third failure the screen shows the
+`Unavailable` state for that screen. There is **no** cached counterpart and **no** sample-data substitution for
+internal stores (FR-001, FR-018), and this
 state is a per-screen condition rather than a persistent banner (FR-021).
 
 ---
@@ -343,4 +367,27 @@ state is a per-screen condition rather than a persistent banner (FR-021).
 | Sample catalog / routing / toggle / toast types | C#, DI, Settings UI, tests | Delete (see `Discovery/01`) |
 
 No schema object from the retired families is migrated into `mtm_mock`; `mtm_mock` contains only the five mirror
-tables, their stage twins, and the ten `sp_visual_*` procedures.
+tables, their stage twins, the ten `sp_visual_*` procedures, and the metadata procedure
+`sp_visual_read_shape_metadata_get` (§12).
+
+---
+
+## 12. Procedure: `sp_visual_read_shape_metadata_get` (FR-016, FR-020; constitution III)
+
+A `mtm_mock` metadata procedure used by the service's shape-catalog startup validation
+(`RefreshShapeCatalogProvider`, tasks T029/T086 and T110/T111). For a requested shape (or all shapes), it returns
+whether the mirror table, stage twin, `..._get` procedure, and `..._refresh` procedure exist, plus the mirror table's
+actual column names derived from `information_schema`.
+
+| Output | Meaning |
+|---|---|
+| `shape_key` | The requested shape key |
+| `mirror_table_exists` | `1` when `visual_<key>_result` exists |
+| `stage_table_exists` | `1` when `visual_<key>_result_stage` exists |
+| `get_procedure_exists` | `1` when `sp_visual_<key>_get` exists |
+| `refresh_procedure_exists` | `1` when `sp_visual_<key>_refresh` exists |
+| `mirror_columns` | Comma-joined actual column names of the mirror table |
+
+**Why a procedure rather than inline SQL:** constitution III forbids inline/hard-coded SQL statement text in C#, and
+the inline-SQL audit (tasks T098) would otherwise flag the schema/metadata reads. Routing the check through this
+procedure keeps the SP-first rule intact with no audit exemption.

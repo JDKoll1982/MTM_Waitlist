@@ -127,7 +127,7 @@ A maintainer needs to add a sixth external read shape. They follow a published p
 ### Edge Cases
 
 - **Cold cache on a fresh install**: The cache has never been populated and the external source is unreachable — reads must return baseline seed content rather than an error.
-- **Stale cache**: The cached copy is significantly older than the normal refresh interval — the system remains usable and the read-only indicator shows the age of the cached data so the user/operator can judge freshness.
+- **Stale cache**: The cached copy is older than the configured refresh interval — the system remains usable and the read-only indicator shows the age of the cached data so the user/operator can judge freshness.
 - **Interrupted refresh**: A refresh fails midway — readers must never observe a partially populated or empty cache; the previous complete snapshot remains in effect.
 - **Flapping source**: The external source alternates between reachable and unreachable — repeated switches must not thrash the UI, duplicate refreshes, or leave the indicator in a wrong state.
 - **Service not running**: The service is stopped or crashed — the application must continue to operate on whatever cached data exists, with no hard dependency on the service.
@@ -155,7 +155,7 @@ A maintainer needs to add a sixth external read shape. They follow a published p
 - **FR-007**: A service MUST run on the database host, start automatically at logon, and continue running minimized with no user interaction.
 - **FR-008**: The service MUST refresh supported external reads on a configurable schedule, MUST skip and log cycles when the external source is unreachable, and MUST leave the last good cached snapshot intact.
 - **FR-009**: The service MUST produce periodic backups of all four internal stores, configurable independently per store (enablement, schedule, retention, destination).
-- **FR-010**: The service MUST support restoring a selected store from a selected backup as a full replacement, performed from the service on the database host; it MUST NOT be exposed on the network interface, and MUST require an explicit confirmation before making any change.
+- **FR-010**: The service MUST support restoring a selected store from a selected backup as a full replacement, performed from the service on the database host, and MUST require an explicit confirmation before making any change.
 - **FR-011**: The service MUST expose a network-reachable, credential-gated interface that supports requesting an immediate refresh and retrieving status; the application and operators MAY request an immediate refresh through it; requests without the shared credential MUST be refused.
 - **FR-012**: The service MUST allow an operator to configure and persist the refresh interval, per-store backup settings, its network endpoint and shared credential, and external-source connection details.
 - **FR-013**: The service MUST record and surface, per item, the outcome and timestamp of the last refresh and the last backup, and MUST report clearly when required backup tooling is unavailable.
@@ -166,9 +166,9 @@ A maintainer needs to add a sixth external read shape. They follow a published p
 - **FR-018**: Request disposition and floor/WIP stock MUST continue to come from their real sources; floor/WIP and receiving data MUST NOT be cached as part of this feature.
 - **FR-019**: Coil availability MUST be determined from a real source rather than assumed, and request-type definitions MUST have a single authoritative source.
 - **FR-020**: The system MUST support a new external read shape being added without downtime for the application, so that already-deployed clients continue to serve existing shapes.
-- **FR-021**: When an internal store (application, floor/WIP, or receiving) is unavailable, the system MUST retry automatically with a short backoff and, if the retries still fail, MUST present a clear unavailable/error state on the affected screen with retry and guidance; it MUST NOT substitute sample data and MUST NOT rely on a persistent empty-state banner.
+- **FR-021**: When an internal store (application, floor/WIP, or receiving) is unavailable, the system MUST retry automatically with a bounded backoff (up to three attempts, with delays of approximately 1 s, 2 s, and 4 s) and, if the retries still fail, MUST present a clear unavailable/error state on the screen that initiated the read, including a manual retry action and guidance; it MUST NOT substitute sample data and MUST NOT rely on a persistent empty-state banner.
 - **FR-022**: While cached data is being served, the read-only indicator MUST include the age of the cached data (the time of the last successful refresh) so users can judge freshness; the system MUST NOT refuse to serve cached data based on its age.
-- **FR-023**: Emergency restore MUST be available only from the service running on the database host and MUST NOT be reachable over the network; the shared credential gates the network refresh/status interface, but restore is a host-only operation.
+- **FR-023**: The shared credential MUST gate only the network refresh/status interface. Restore MUST be host-only and MUST NOT be exposed, routed, or otherwise reachable over the network.
 - **FR-024**: The system MUST prefer live external data whenever the external source is reachable and MUST serve from the cached copy only while that source is unreachable; a reachable source that legitimately returns no rows MUST NOT be replaced by cached data.
 - **FR-025**: The application MUST remain fully functional when the service is not running, relying only on the cached copy's current contents; refresh scheduling MUST be owned by the service, and the application MUST NOT perform its own scheduled refresh.
 - **FR-026**: The service MUST store its shared credential securely (never in plaintext configuration that is exposed to callers) and MUST NOT display or log the credential.
