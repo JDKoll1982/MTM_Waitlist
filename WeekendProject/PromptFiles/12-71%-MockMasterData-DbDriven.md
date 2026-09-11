@@ -1,22 +1,28 @@
-# 12 — Mock Master Data & DB-Driven Mock Sources (Developer-Editable)
+# 12 — Mock Master Data & DB-Driven Mock Sources
+
+> **Status 2026-09-11 — this workstream is closed.** The mock master data described below was removed by
+> `specs/001-module-mock-visual-fallback` (FR-014 — the `mock_*` tables, the registry, `MockMasterDataService`
+> and the sample catalogs are gone). The **Developer Settings page / editor** is **retired as well: no
+> request-type/subtype editor will be used.** Only the real request-type catalog in MySQL survives, and it is
+> **not** editable in the app. Kept as an archive of the original process.
 
 > **Purpose:** Rework every mock catalog used by the New-Request flow so mock parts use proper part ids,
 > locations, and work orders (coils = `MMC########`, flatstock = `MMF########`, other = `23-###-####` to
 > differentiate distinct "Other" items), sourcing canonical values from the MTM_Receiving_Application
 > codebase + database. Store the mock master data as **tables in the app's MySQL `mtm_waitlist` database**
-> (as `mock_*` tables), editable in a **Developer Settings page** (a main-navigation item above Settings,
-> role-gated, separate from normal settings) with a dropdown of each mock table, an editable grid per
-> table, and a UI-readable name + plain-language description per table (shown in the dropdown for
-> end-user auditing). The existing JSON/config + mock catalogs **pull from these mock tables** (driven by
-> the existing `Feature.InforVisualMockData` / `Feature.RecvMockData` toggles) so edits take effect on
-> the next app load.
+> (as `mock_*` tables), to be edited through a role-gated **Developer Settings page** — that page and its
+> editor are **retired (2026-09-11): no request-type/subtype editor will be used.** The mock tables
+> themselves were removed by `specs/001` FR-014. The existing JSON/config + mock catalogs were to **pull
+> from these mock tables** (driven by the `Feature.InforVisualMockData` / `Feature.RecvMockData` toggles).
 > **Workflow:** checklist-execution skill; adopt each task's persona. Tick `- [x]` only when implemented,
 > builds clean, and tests pass.
 >
 > **Related:** `13-Developer-UI.md` is the follow-on Developer UI effort that builds on this file's
-> foundation — it defines the **auto mock-fallback on DB outage** (affects 0.4's routing toggles), the
-> **Developer Settings page / nav** (shares 0.5's page), and the **Option-A request-type/subtype editor**
-> (refines 0.6's "expose real tables via Developer editor" into a concrete drill-in + wizard UI).
+> foundation — it defines the **auto mock-fallback on DB outage** (affects 0.4's routing toggles) and the
+> **startup gate**.
+>
+> *(The `Developer Settings` page / nav and the request-type/subtype editor this file used to share with
+> file 13 were retired 2026-09-11.)*
 
 ## Task 0 — Green baseline + full read
 
@@ -51,11 +57,12 @@
 - [ ] **Backend Engineer: add a MySQL-backed mock-master read service** and route the C# sample catalogs (`SampleDataService`, `SampleJobCoilCatalog`, `SampleInventoryLocationCatalog`, `SampleWaitlistRequestCatalog`, `SetupDataCatalog`, `SampleAverageCoilWeightCatalog`) to read from the `mock_*` tables when the relevant mock toggle is ON (InforVisual for Infor/coil/inventory flows; Recv for receiving/flatstock), so edits take effect on next load. NOTE: `Assets/Config/waitlist-request-types.json` is NOT a mock catalog (it is the real request-type catalog; see Subphase 0.6) and is intentionally excluded here. | **Persona: Backend Engineer**
 - [x] **Backend Engineer: add a mock-master read/write service** for the Developer settings editor (enumerate tables via the registry; read/write rows). NOTE: DB access is SP-only (no inline SQL). Reads route through per-table get SPs (`sp_mock_<table>_get`); writes use the per-table insert/update/delete SPs. Real (non-mock) `waitlist_request_types`/`waitlist_request_subtypes` are NOT part of this mock service — they have their own dedicated SPs + a separate real-catalog service. | **Persona: Backend Engineer** — verified 2026-09-06: `MockMasterDataService` now exposes registry enumeration, per-table row reads, `GetTableColumnsAsync` (via `sp_mock_master_table_columns_get`), and table-driven `AddTableRowAsync`/`UpdateTableRowAsync`/`DeleteTableRowAsync` dispatching to the exact per-table insert/update/delete SPs (editable-column contracts confirmed against the generated SPs). Fixed the registry get SP name to `sp_mock_master_tables_registry_get`. `MockMasterDataServiceTests` (9) pass; live round-trip on `mock_requesters` (insert→read→update→delete) verified; full suite green (390 passed).
 
-## Subphase 0.5 — Developer Settings page (separate from normal Settings)
+## Subphase 0.5 — Developer Settings page — RETIRED (cancelled 2026-09-11)
 
-- [ ] **Frontend/Backend Engineer: add a Developer Settings button to the main navigation UI above Settings** (role-gated like manage-settings) and move all existing Developer-related settings cards into this new page, separating normal and developer settings. | **Persona: Frontend Engineer**
-- [ ] **Frontend/Backend Engineer: on the new Developer Settings page, add the mock-master editor** — a dropdown populated by the registry UI-readable names, showing each selected table's plain-language description, and an editable grid (add/edit/delete) per mock table. | **Persona: Frontend Engineer**
-- [ ] **QA Engineer: tests** for registry enumeration, per-table CRUD, description display, role gating, and that catalog reads reflect DB edits; run the **full suite**; must pass. | **Persona: QA Engineer**
+*This subphase's three tasks (a role-gated Developer Settings nav item, a mock-master editor grid over the
+registry, and its tests) are retired. The mock tables they edited no longer exist, and the page existed only
+to host catalog editors — **no request-type/subtype editor will be used**. They are deliberately not
+reproduced here.*
 
 ## Subphase 0.6 — DB-driven real request-type catalog (waitlist-request-types.json is NOT mock)
 
@@ -64,11 +71,11 @@
 - [x] **Database Engineer: design + create schema-complete reference tables in `mtm_waitlist`** for the real request-type/subtype catalog (`waitlist_request_types`/`waitlist_request_subtypes`, `Database/Tables/28_…`/`29_…`); follow repo DB naming rules and the Migration/Bootstrap artifact layout. | **Persona: Database Engineer** — verified 2026-09-06: tables created in live DB (`mtm_waitlist`), `AllTables.sql` + `update_table_descriptions.sql` updated.
 - [x] **Database Engineer: seed the reference tables** from the exact rows in `Assets/Config/waitlist-request-types.json` (all 8 request types incl. Forklift Assist and every subtype) so the DB matches the current JSON 1:1, and update `Database/Bootstrap/update_table_descriptions.sql` in the same change. | **Persona: Database Engineer** — verified 2026-09-06: `Database/Seeds/seed_waitlist_request_catalog` + `AllSeeds.sql`; live DB shows 8 types / 24 subtypes matching JSON 1:1.
 - [x] **Backend Engineer: add a DB read service** for the request-type catalog (types + subtypes with control/grid-field/validation/image columns) and change `NewRequestFlowService.LoadRequestTypesAsync()` to read from it; keep `NewRequestFlowRules.GetDefaultTypes()` only as the empty-DB/unreachable fallback. | **Persona: Backend Engineer** — verified 2026-09-06: `RequestTypeCatalogService`/`IRequestTypeCatalogService` reads `waitlist_request_types`+`waitlist_request_subtypes`; `NewRequestFlowService` now reads from DB with `GetDefaultTypes()` fallback; DI registered; `RequestTypeCatalogServiceTests` passes; live-DB query returns 8 types/24 subtypes.
-- [x] **Backend Engineer: expose the request-type/subtype tables through the Developer-settings read/write service** (same registry pattern used for `mock_*`, so request types/subtypes are editable alongside the mock tables). | **Persona: Backend Engineer** — verified 2026-09-06: `DeveloperEditableCatalogService`/`IDeveloperEditableCatalogService` (Core) returns the unified Developer-editable table list = the `mock_*` tables (from `mock_master_tables_registry` via `MockMasterDataService`) **plus** the two real request tables (`waitlist_request_types`/`waitlist_request_subtypes`), each flagged by `DeveloperTableSourceKind` (Mock vs RealCatalog) so the editor routes reads/writes to `MockMasterDataService` (per-table SPs) or `RequestTypeEditorService` (dedicated real-catalog SPs). DI-registered; `DeveloperEditableCatalogServiceTests` (3) pass; build clean; full suite green (437 passed). Grid editor UI (Subphase 0.5/0.6) still to build.
-- [ ] **Frontend Engineer: extend the Developer Settings editor** (or add a sibling editor) so each real request-type/subtype table is selectable and its rows (subtype name, control, flow, validation, grid fields, image path) are editable in the grid. | **Persona: Frontend Engineer**
-- [ ] **QA Engineer: tests** that the real catalog loads from DB (types/subtypes + grid fields + validation), DB edits are reflected on next load, `GetDefaultTypes()` fallback works when the DB is empty/unreachable, and the JSON file is no longer the runtime source; run the **full suite**; must pass. | **Persona: QA Engineer**
+- [x] **Backend Engineer: expose the request-type/subtype tables through the Developer-settings read/write service** (same registry pattern used for `mock_*`, so request types/subtypes are editable alongside the mock tables). | **Persona: Backend Engineer** — verified 2026-09-06: `DeveloperEditableCatalogService`/`IDeveloperEditableCatalogService` (Core) returns the unified Developer-editable table list = the `mock_*` tables (from `mock_master_tables_registry` via `MockMasterDataService`) **plus** the two real request tables (`waitlist_request_types`/`waitlist_request_subtypes`), each flagged by `DeveloperTableSourceKind` (Mock vs RealCatalog) so the editor routes reads/writes to `MockMasterDataService` (per-table SPs) or `RequestTypeEditorService` (dedicated real-catalog SPs). DI-registered; `DeveloperEditableCatalogServiceTests` (3) pass; build clean; full suite green (437 passed). NOTE (2026-09-11): this service and both of its consumers have since been **deleted**; the editor UI it was meant to serve is cancelled.
 
-**GATE: `mock_*` tables + registry exist and are seeded; C# sample catalogs read from them under the existing mock toggles; the real request-type/subtype catalog is migrated to schema-complete MySQL reference tables and read by the New-Request flow (JSON retired as the runtime source, defaults kept only as fallback); a role-gated Developer Settings page exists in the main nav above Settings (developer cards moved there) and lists/describes/edits each mock table and the real request-type tables; New-Request mock data uses proper part ids/locations/work orders; no mock type missing; full suite green.**
+*(The two remaining tasks in this subphase — extending the Developer Settings editor over the real catalog tables, and their tests — are removed: no request-type/subtype editor will be used.)*
+
+**GATE (rewritten 2026-09-11): the real request-type/subtype catalog is migrated to schema-complete MySQL reference tables and read by the New-Request flow (JSON retired as the runtime source, defaults kept only as fallback). The `mock_*` half and the Developer-editor half of the original gate are retired — see the status note at the top of this file.**
 
 ---
 > **Out-of-scope work & architecture notes moved to `WeekendProject/ChangeLog.md`** (see its

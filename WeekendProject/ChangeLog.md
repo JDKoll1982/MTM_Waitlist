@@ -7,7 +7,7 @@
 >
 > For the broader, longer-running repo changelog, see the root `CHANGELOG.md`.
 >
-> **Most recent update:** 2026-09-06
+> **Most recent update:** 2026-09-11
 
 ---
 
@@ -15,6 +15,47 @@
 
 > Work landed this weekend but not yet cut into a numbered release. Items are grouped by the type of
 > change, newest first.
+
+### 2026-09-11 — Automatic Infor Visual failover (Module_Mock) lands; the demo/mock-data system is removed
+
+> Full record: `Module_Mock/README.md`. Specification: `specs/001-module-mock-visual-fallback/`.
+
+**Added**
+- **The app keeps working when Infor Visual is down.** The five Infor Visual reads (work-order lookup, operation
+  sequences, subordinate parts, inventory locations, request-disposition input) now fall back automatically to a
+  local cache when Infor Visual cannot be reached. Nothing to turn on, no dialog, no error banner.
+- **Read-only status indicator.** While cached data is being served, a small bar in the app shell says Infor Visual
+  is unreachable and shows how old the cached data is. It is not clickable, has no buttons, and clears itself when
+  the source comes back.
+- **`MTM_Waitlist.Mock` library** — the in-app fallback (one `IVisualReadFallback` per read shape) plus the shared
+  shape catalog and live-read executor.
+- **`MTM_Waitlist.Mock.Service`** — an on-host tray service that keeps the cache warm (3-hour default schedule at
+  00:00/03:00/06:00/09:00/12:00/15:00/18:00/21:00 server-local), exposes a token-gated status/refresh API, and backs
+  up the four MySQL stores. Deployed unpackaged and self-contained (`MTM_Waitlist.Mock.Service/README.md`).
+- **`mtm_mock` database** with five mirror tables (plus stage twins), ten `sp_visual_*` procedures, and baseline seed
+  content, so a fresh install serves a usable answer before the first refresh.
+
+**Changed**
+- **Request-type images now come from the database.** `ImageLocationService` reads the request-type and subtype
+  catalogs through their stored procedures instead of the shipped `Assets/Config/waitlist-request-types.json`.
+- **Coil availability is read, not assumed.** The New-Request Job-Type step reads the coil on the saved Work Center
+  Setup job for the work center; a work center with no saved job reports "no coil" instead of assuming one.
+- **Every data operation now goes through a stored procedure.** All remaining hard-coded MySQL statement text was
+  converted to procedures (dunnage visibility, computers registry, startup/auth session, image overrides, settings
+  values, work-center catalogs, receiving average coil weight), and an audit test fails the build if inline SQL or
+  a retired sample/demo symbol returns.
+
+**Removed**
+- **The whole demo/mock-data system.** The `Feature.InforVisualMockData` / `Feature.RecvMockData` toggles, the
+  Settings "Mock Data" switch, the mock routing / auto-force / monitoring stack, the in-app sample catalogs
+  (`ISampleDataService` and the `Sample*Catalog` family), the DB-backed `mock_*` tables with their `sp_mock_*`
+  procedures, and their seed data are gone. Internal stores (`mtm_waitlist`, `mtm_wip_application_winforms`,
+  `mtm_receiving_application`) are always read and written live; a store failure is reported as a per-screen
+  unavailable state with a manual retry, never replaced by sample rows and never turned into a persistent banner.
+- **The mock receiving-history seed.** `Database/MTMReceivingApp/Seeds/seed_receiving_history_coil_weights/` is
+  gone. It wrote three fake receiving transactions into the receiving application's live `receiving_history`
+  table just to make the "Average coil weight" card show a demo figure. That number now comes only from real
+  receipts, and the receiving tree carries no seed at all.
 
 ### Added
 
@@ -634,18 +675,13 @@ concept first; the per-file prompt documents hold the exact wording/personas/art
   routine. Tests for the monitor/role gate and retention-window filtering/archival; mock parity (aged resolved row).
   (Retention math done: `ResolvedRetentionFilter`; the active-list filtering/archival routine + monitor UI remain.)
 
-## Workflow 12 — mock master data (Developer-editable)
+## Workflow 12 — mock master data — CLOSED
 
-- **0.4 routing** Route the C# sample catalogs (`SampleDataService`, `SampleJobCoilCatalog`,
-  `SampleInventoryLocationCatalog`, `SampleWaitlistRequestCatalog`, `SetupDataCatalog`,
-  `SampleAverageCoilWeightCatalog`) to the `mock_*` tables when the relevant mock toggle is ON (InforVisual for
-  Infor/coil/inventory flows; Recv for receiving/flatstock). (Real `waitlist_request_types`/`subtypes` stay out of
-  mock code.) NOTE: blocked on the routing-toggle partition decision — see "Cross-file review findings" below.
-- **0.5** Role-gated **Developer Settings page** (new main-nav item above Settings) + registry-dropdown mock editor
-  grid (add/edit/delete per mock table); move existing developer settings cards onto it.
-- **0.6 (UI)** Extend the Developer editor so the real request-type/subtype tables are selectable and their rows are
-  editable in the grid; retire the JSON at runtime. (Backend already done: `RequestTypeEditorService` +
-  `_get_all` admin reads.)
+- **CLOSED 2026-09-11.** The `mock_*` tables, registry and sample catalogs were removed by
+  `specs/001-module-mock-visual-fallback` (FR-014), and the **Developer Settings page / editor** is retired:
+  **no request-type/subtype editor will be used.** Entry 0.4's routing, 0.5's page + mock-master grid, and
+  0.6's editor UI are all withdrawn. (0.6's non-editor half — the real request-type catalog living in MySQL,
+  with the JSON retired as the runtime source — is done via `specs/001` T100/T101.)
 
 ## Workflow 13 — Developer UI
 
@@ -658,10 +694,9 @@ concept first; the per-file prompt documents hold the exact wording/personas/art
   concurrent-upsert last-writer-wins is already covered by QA tests, but a dedicated guard design/review is not.
 - **3.1** Polish the splash messaging when `mtm_waitlist` is unreachable (clear, non-technical message + Retry + a
   Cancel that exits) + QA verify of the hard gate.
-- **4.3** Role-gated **Developer Settings page** (main nav above Settings; move Mock Data / Image Location / Computers
-  cards), the Request-Type master list, the type edit view, the 4-step guided wizard modal (Next/Back/Cancel, step
-  indicator, final Save, cancel-confirm on unsaved changes, persist once at final Save), and the per-control card —
-  all backed by the completed Phase 4.2 services/validators.
+- **4.3 — WITHDRAWN (2026-09-11).** The role-gated Developer Settings page, the Request-Type master list, the
+  type edit view, the 4-step guided wizard modal and the per-control card are **cancelled: no
+  request-type/subtype editor will be used.** File 13 records the retirement in full.
 
 ## Task-0 baseline (unticked in files 05–13)
 

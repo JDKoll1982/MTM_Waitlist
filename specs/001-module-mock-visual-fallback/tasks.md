@@ -204,7 +204,7 @@ without restarting the app; confirm a reachable-but-empty live result is never r
 - [x] T055 [US2] Route `MTM_Waitlist.Settings/Services/RequestDispositionResolver.cs` `GetDispositionInputAsync` through shape 5, keeping `RequestDispositionStatusCodes` (Open = {R,U,F}, Closed = {C}, X never FG) as the only status authority and keeping the floor/WIP half reading the live WIP store (FR-018)
 - [x] T056 [US2] Add the fallback DI registrations for the detector and the five `IVisualReadFallback` implementations in the `MTM_Waitlist.Mock` service-registration extension, wired from `Services/DependencyInjection/ServiceRegistrationExtensions.cs` (depends on T047–T052)
 - [x] T057 [US2] Remove the Visual/sample short-circuit branches — the `ExecuteReadOnlyQueueAsync` mock overloads in `MTM_Waitlist.Core/Services/SqlHelperServer.cs` and the mock overloads in `MTM_Waitlist.Core/Services/MySqlHelperServer.cs` — after T053–T055 reroute their consumers (FR-002/FR-014)
-- [ ] T058 [US2] (verification) Add fallback-parity tests in `MTM_Waitlist.Tests/Module_Mock/VisualReadFallbackParityTests.cs` — for all five shapes: live vs mirror are structurally identical (column set + ordering), unreachable → mirror rows served, and a reachable-but-legitimate-empty live result **is not** replaced by cache — `VisualReachabilityDetectorTests.cs` for the hysteresis/backoff state machine, plus a caller test proving a routed caller cannot distinguish the source, and an assertion that the cache is **never** consulted for an internal-store read (FR-027, constitution II); then run the build and full test suite gates (verification)
+- [x] T058 [US2] (verification) Add fallback-parity tests in `MTM_Waitlist.Tests/Module_Mock/VisualReadFallbackParityTests.cs` — for all five shapes: live vs mirror are structurally identical (column set + ordering), unreachable → mirror rows served, and a reachable-but-legitimate-empty live result **is not** replaced by cache — `VisualReachabilityDetectorTests.cs` for the hysteresis/backoff state machine, plus a caller test proving a routed caller cannot distinguish the source, and an assertion that the cache is **never** consulted for an internal-store read (FR-027, constitution II); then run the build and full test suite gates (verification)
 
 **Checkpoint**: US1 **and** US2 both work — with Infor Visual unreachable all five reads serve from `mtm_mock`; with it
 up, live reads are used and return to live without a restart. This completes the P1 MVP.
@@ -311,7 +311,7 @@ observe per-item last-run results; make an unauthenticated request and observe a
 - [x] T075 [US5] Implement `MTM_Waitlist.Mock.Service/Services/ServiceApiHost.cs` — Kestrel host bound to `ApiSettings.BindAddress`/`ApiSettings.Port`, started by the same host the tray app creates; the API host must start with `RestoreService` absent/unregistered (the two are independent registrations) (FR-011/FR-012)
 - [x] T076 [P] [US5] Implement the service settings surface `MTM_Waitlist.Mock.Service/Views/ServiceSettingsPage.xaml` + `.xaml.cs` and `MTM_Waitlist.Mock.Service/ViewModels/ServiceSettingsViewModel.cs` — refresh interval, API bind address/port, credential generate/rotate (write-only, never displayed), Visual connection details, and `mysqldump` path, with save-time validation and no partially written configuration (FR-012, `contracts/mock-service-configuration.md` §1/§2). **Record the shipped default for every setting** (refresh interval, per-store schedule/retention/destination, bind address/port) so SC-007/SC-008 are measured against a known baseline (`data-model.md` §5/§6).
 - [x] T077 [P] [US5] Implement the service status surface `MTM_Waitlist.Mock.Service/Views/ServiceStatusPage.xaml` + `.xaml.cs` and `MTM_Waitlist.Mock.Service/ViewModels/ServiceStatusViewModel.cs` — per-shape last-refresh outcome/timestamp and per-store last-backup outcome/timestamp, and a clear report when the backup tool is unavailable (FR-013)
-- [ ] T078 [US5] (verification) Add `MTM_Waitlist.Tests/Module_Mock_Service/ServiceApiTests.cs` — unauthorized requests are refused 100% of the time, a credential-free `/api/status` payload contains no secret, an on-demand refresh returns per-shape outcomes, and `/api/restore` is unreachable; then run the build and full test suite gates (verification)
+- [x] T078 [US5] (verification) Add `MTM_Waitlist.Tests/Module_Mock_Service/ServiceApiTests.cs` — unauthorized requests are refused 100% of the time, a credential-free `/api/status` payload contains no secret, an on-demand refresh returns per-shape outcomes, and `/api/restore` is unreachable; then run the build and full test suite gates (verification)
 
 **Checkpoint**: Operators can force a refresh and see operational state; the network interface is token-gated and restore-free.
 
@@ -331,7 +331,7 @@ confirm no change, then accept it and confirm verified replacement.
 - [x] T081 [US6] Add the backup endpoints `POST /api/backup` and `GET /api/backups` to `MTM_Waitlist.Mock.Service/Api/ServiceApiEndpoints.cs` (same file as T073; do not parallelize) — `toolUnavailable` returns `200` with no artifact, never a partial or zero-length artifact recorded as success (FR-013)
 - [x] T082 [P] [US6] Add the per-store backup configuration section (enable, schedule, retention, destination) to `MTM_Waitlist.Mock.Service/Views/ServiceSettingsPage.xaml` + `MTM_Waitlist.Mock.Service/ViewModels/ServiceSettingsViewModel.cs` — disabling one store must not change any other store's schedule or artifacts (FR-009, same files as T076; do not parallelize)
 - [x] T083 [US6] Add the host-only restore surface (artifact picker + confirmation prompt + outcome display) to `MTM_Waitlist.Mock.Service/Views/ServiceSettingsPage.xaml`/`.xaml.cs` and `MTM_Waitlist.Mock.Service/ViewModels/ServiceSettingsViewModel.cs` (depends on T080; same files as T076/T082)
-- [ ] T084 [US6] (verification) Add `MTM_Waitlist.Tests/Module_Mock_Service/BackupRestoreTests.cs` — per-store independence, a missing tool yields `toolUnavailable` with no artifact record, an unconfirmed restore is a no-op, a confirmed restore is a verified full replacement, and no code path reaches `RestoreService` from an HTTP request; then run the build and full test suite gates (verification)
+- [x] T084 [US6] (verification) Add `MTM_Waitlist.Tests/Module_Mock_Service/BackupRestoreTests.cs` — per-store independence, a missing tool yields `toolUnavailable` with no artifact record, an unconfirmed restore is a no-op, a confirmed restore is a verified full replacement, and no code path reaches `RestoreService` from an HTTP request; then run the build and full test suite gates (verification)
 
 **Checkpoint**: Every enabled store produces restorable artifacts on its own schedule, and restore is host-only and confirmation-gated.
 
@@ -345,7 +345,7 @@ worked on the cache can add a sixth read shape end-to-end without changing any e
 **Independent Test**: Hand the playbook to a maintainer who has not worked on the cache; they add a read shape
 end-to-end and demonstrate its fallback while the existing five behave unchanged.
 
-- [ ] T085 [P] [US7] Publish the six-step playbook — reproduced from `contracts/mock-service-configuration.md` §4 (capture the read → mirror schema → procedures → service registration → in-app fallback → verify) into `WeekendProject/Module_Mock/Spec.md` §11 and `WeekendProject/Module_Mock/Plan.md` §7, cross-linked from `WeekendProject/Module_Mock/Tasks.md` (FR-016/FR-028)
+- [x] T085 [P] [US7] Publish the six-step playbook — reproduced from `contracts/mock-service-configuration.md` §4 (capture the read → mirror schema → procedures → service registration → in-app fallback → verify) into `WeekendProject/Module_Mock/Spec.md` §11 and `WeekendProject/Module_Mock/Plan.md` §7, cross-linked from `WeekendProject/Module_Mock/Tasks.md` (FR-016/FR-028)
 - [x] T086 [US7] Implement the half-added-shape detection in `MTM_Waitlist.Mock.Service/Services/RefreshShapeCatalogProvider.cs` — a shape with tables/procedures but no catalog entry (never refreshed) and a shape with a catalog entry but no in-app fallback implementation (no fallback) are both reported, not silently ignored; the existence check calls `sp_visual_read_shape_metadata_get` (`data-model.md` §12), never inline SQL (FR-016/FR-020, constitution III, `contracts/mock-service-configuration.md` §4)
 - [x] T087 [US7] (verification) Add `MTM_Waitlist.Tests/Module_Mock_Service/ShapeCatalogValidationTests.cs` proving a catalog-to-artifact mismatch is detected and reported while the service still starts and serves the remaining shapes; then run the build and full test suite gates (verification)
 
@@ -726,24 +726,24 @@ write pairs here), all deployed and registered.
   sweep — that one belongs to T088/T102, not here.
 - Gates: build **0 warnings / 0 errors**; suite **651 total, 0 failed, 638 passed, 13 skipped** (unchanged, as
   expected for a naming reconciliation).
-- [ ] T098 (verification) Add the **inline-SQL audit** test `MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs` that scans C# source and fails on MySQL statement markers (`SELECT`/`INSERT`/`UPDATE`/`DELETE`/`CALL`) outside stored-procedure call sites (SC-013, `research.md` R13)
+- [x] T098 (verification) Add the **inline-SQL audit** test `MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs` that scans C# source and fails on MySQL statement markers (`SELECT`/`INSERT`/`UPDATE`/`DELETE`/`CALL`) outside stored-procedure call sites (SC-013, `research.md` R13)
 
 ### Subphase 10.2 — Real-data gap fixes (FR-019)
 
-- [ ] T099 Wire `MTM_Waitlist.Waitlist.NewRequest/Services/CoilAvailabilityService.cs` to a real source, removing the "coil assumed available" default (FR-019, `research.md` R15)
-- [ ] T100 Make `MTM_Waitlist.Waitlist.NewRequest/Services/RequestTypeCatalogService.cs` (DB stored procedures) the single authoritative request-type source and move `MTM_Waitlist.Settings/Services/ImageLocationService.cs` off `Assets/Config/waitlist-request-types.json` (FR-019, Discovery/01 note 4)
-- [ ] T101 (verification) Add coverage for both gap fixes in `MTM_Waitlist.Tests/Module_Waitlist/` (coil availability comes from a real source; request-type definitions have one authoritative source)
+- [x] T099 Wire `MTM_Waitlist.Waitlist.NewRequest/Services/CoilAvailabilityService.cs` to a real source, removing the "coil assumed available" default (FR-019, `research.md` R15)
+- [x] T100 Make `MTM_Waitlist.Waitlist.NewRequest/Services/RequestTypeCatalogService.cs` (DB stored procedures) the single authoritative request-type source and move `MTM_Waitlist.Settings/Services/ImageLocationService.cs` off `Assets/Config/waitlist-request-types.json` (FR-019, Discovery/01 note 4)
+- [x] T101 (verification) Add coverage for both gap fixes in `MTM_Waitlist.Tests/Module_Waitlist/` (coil availability comes from a real source; request-type definitions have one authoritative source)
 
 ### Subphase 10.3 — Documentation accommodation (FR-028)
 
-- [ ] T102 [P] Update `WeekendProject/ChangeLog.md` and the `WeekendProject/Module_Mock/*` docs with the Module_Mock architecture and the removal record, sweep `WeekendProject/PromptFiles/*` for stale mock-toggle/sample-catalog references, and reconcile `WeekendProject/Module_Mock/Discovery/*` so the docs describe what shipped — **0 stale references** to the retired sample/demo systems (SC-016, FR-028)
+- [x] T102 [P] Update `WeekendProject/ChangeLog.md` and the `WeekendProject/Module_Mock/*` docs with the Module_Mock architecture and the removal record, sweep `WeekendProject/PromptFiles/*` for stale mock-toggle/sample-catalog references, and reconcile `WeekendProject/Module_Mock/Discovery/*` so the docs describe what shipped — **0 stale references** to the retired sample/demo systems (SC-016, FR-028)
 
 ### Subphase 10.4 — Mechanical audits and final gates (SC-013, SC-015)
 
 - [x] T103 (verification) Add the **retired-symbol audit** test `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs` that fails if any retired type/key is present or referenced (`ISampleDataService`, `Sample*Catalog`, `Feature.InforVisualMockData`, `Feature.RecvMockData`, `MockToggleService`, `MockRouting*`, `MockMode*`, `MockConfigurationService`, `MockMasterDataService`, `UseMockData`, `MockDataExpander`, `sp_mock_*`) (SC-013, `research.md` R13)
-- [ ] T104 (verification) Run the **build gate** — `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` — and confirm **0 warnings / 0 errors** (SC-015); treat `PRI175`/`PRI224` as stale-PRI/running-exe issues and `WMC9999` as a masked XAML error to be surfaced, never ignored
-- [ ] T105 (verification) Run the **test gate** — `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` — all green with the retired-symbol and inline-SQL audits included, then re-run with `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` set for the live MySQL subset and record any environment-gated skips explicitly (SC-015/FR-013)
-- [ ] T106 (verification) Execute the end-to-end acceptance walkthrough in `specs/001-module-mock-visual-fallback/quickstart.md` §1–§8 on a running build (cache deploy → service start → fallback proof → defect proof → backup/restore drill → sixth-shape playbook → final validation table). **Note (E5)**: SC-007 and SC-008 use **30-day observation windows** — these are post-deployment measurements, not one-shot tests; record the observation start here and re-check at the 30-day mark.
+- [x] T104 (verification) Run the **build gate** — `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` — and confirm **0 warnings / 0 errors** (SC-015); treat `PRI175`/`PRI224` as stale-PRI/running-exe issues and `WMC9999` as a masked XAML error to be surfaced, never ignored
+- [x] T105 (verification) Run the **test gate** — `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` — all green with the retired-symbol and inline-SQL audits included, then re-run with `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` set for the live MySQL subset and record any environment-gated skips explicitly (SC-015/FR-013) — **done 2026-09-11**: full suite `Failed: 0, Passed: 661, Skipped: 13, Total: 674` with both audits included; the 13 skips are the pre-existing live-database integration suites. **The live subset was completed later the same day** (Phase 19): with `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` pointed at `172.16.1.104`, the suite runs `Failed: 0, Passed: 699, Skipped: 0, Total: 699` — every previously-skipped live-database test now executes, and the 2 failures it first exposed in `MockMirrorRefreshWriterIntegrationTests` were a wrong-schema connection string, now fixed.
+- [ ] T106 (verification) Execute the end-to-end acceptance walkthrough in `specs/001-module-mock-visual-fallback/quickstart.md` §1–§8 on a running build (cache deploy → service start → fallback proof → defect proof → backup/restore drill → sixth-shape playbook → final validation table). **Note (E5)**: SC-007 and SC-008 use **30-day observation windows** — these are post-deployment measurements, not one-shot tests; record the observation start here and re-check at the 30-day mark. — **Not executed (2026-09-11)**: the environment re-probe corrected Phase 18's claim — `mtm_mock` **is** deployed and Infor Visual **is** reachable (Phase 19) — but the walkthrough still cannot run: the service is neither published nor running, the fallback proof needs Infor Visual made unreachable, and the app stops at its **Sign in** gate. **Observation window not started.**
 
 ---
 
@@ -752,11 +752,11 @@ write pairs here), all deployed and registered.
 **Purpose**: Close the findings from the cross-artifact consistency analysis that had no task coverage. Each task names
 the phase/story it belongs to; run it in that position in the phase order.
 
-- [ ] T107 [US1] Implement the internal-store unavailable handling — a bounded retry policy (up to three attempts with delays ≈ 1 s / 2 s / 4 s) in the `MTM_Waitlist.Core` data-access seam used by the affected screens, and a per-screen `Unavailable` state carrying `Store`/`LastAttemptUtc`/`RetryCount`/`NextRetryUtc` plus an operator-facing message with a manual retry action; no sample-data substitution and no persistent banner (`data-model.md` §10, FR-021)
-- [ ] T108 [US1] (verification) Add `MTM_Waitlist.Tests/Module_Mock/InternalStoreAvailabilityTests.cs` — three bounded retries then `Unavailable`; no sample rows on failure; a manual retry recovers once the store returns (`data-model.md` §10, FR-021); then run the build and full test suite gates (verification)
+- [x] T107 [US1] Implement the internal-store unavailable handling — a bounded retry policy (up to three attempts with delays ≈ 1 s / 2 s / 4 s) in the `MTM_Waitlist.Core` data-access seam used by the affected screens, and a per-screen `Unavailable` state carrying `Store`/`LastAttemptUtc`/`RetryCount`/`NextRetryUtc` plus an operator-facing message with a manual retry action; no sample-data substitution and no persistent banner (`data-model.md` §10, FR-021)
+- [x] T108 [US1] (verification) Add `MTM_Waitlist.Tests/Module_Mock/InternalStoreAvailabilityTests.cs` — three bounded retries then `Unavailable`; no sample rows on failure; a manual retry recovers once the store returns (`data-model.md` §10, FR-021); then run the build and full test suite gates (verification)
 - [x] T109 Create the metadata procedure `Database/Mock/StoredProcedures/sp_visual_read_shape_metadata_get/{create.sql,rollback.sql}` (per-shape mirror/stage-table and `get`/`refresh`-procedure existence plus the mirror's actual `information_schema` columns) and register it in `Database/Mock/AllSPs.sql` (`data-model.md` §12, FR-016/FR-020, constitution III; closes finding D1)
 - [x] T110 Wire the shape-catalog startup validation (`RefreshShapeCatalogProvider`, T029/T086) to call `sp_visual_read_shape_metadata_get`, and confirm the inline-SQL audit (T098) needs no exemption for metadata reads (constitution III; closes finding D1)
-- [ ] T111 (verification) Add `MTM_Waitlist.Tests/Module_Mock_Service/ShapeAdditionNoDowntimeTests.cs` — adding a catalog shape changes no existing procedure signature, contract, or result type, and already-deployed clients keep serving the existing shapes (FR-020)
+- [x] T111 (verification) Add `MTM_Waitlist.Tests/Module_Mock_Service/ShapeAdditionNoDowntimeTests.cs` — adding a catalog shape changes no existing procedure signature, contract, or result type, and already-deployed clients keep serving the existing shapes (FR-020)
 
 ---
 
@@ -993,10 +993,10 @@ Existing unticked tasks (T031–T108, T110–T111) are deliberately not duplicat
 - [x] T115 (HIGH) Implement the periodic per-store backup scheduler in `MTM_Waitlist.Mock.Service/` (for example `Services/BackupScheduler.cs`) — fire each store's `BackupEngine` run at its own `BackupPolicy.ScheduleLocalTime`, keep every store's schedule and artifacts independent (disabling one store must not alter another's), and record each run's outcome/timestamp; T062 covers only the refresh loop and T079 implements only the single invocation, so nothing currently triggers backups on schedule per FR-009/SC-008 (missing)
 - [x] T116 (MEDIUM) Implement backup artifact retention pruning in `MTM_Waitlist.Mock.Service/Services/BackupEngine.cs` — enforce each store's `RetentionCount` by removing the oldest artifacts beyond the limit and marking `BackupArtifact.IsRetained = false`, never pruning a store's safety snapshot, and never treating a pruned file as a success; add coverage for per-store independence per FR-009 (missing)
 - [x] T117 (MEDIUM) Add the service's composition root and dependency-injection wiring (for example `MTM_Waitlist.Mock.Service/Services/ServiceHostBuilder.cs`) — register `ServiceConfigurationStore`, `IVisualShapeMetadataReader`, `RefreshShapeCatalogProvider`, `IVisualShapePayloadSource`, `IMockMirrorRefreshWriter`, `RefreshEngine`, and the run-record store, run the catalog validation at startup, and report excluded shapes; `App.xaml.cs` currently starts nothing and no task specifies this wiring per T059/T075 (partial)
-- [ ] T118 (MEDIUM) Add the live-database integration test `MTM_Waitlist.Tests/Module_Mock_Service/MockMirrorRefreshWriterIntegrationTests.cs` (gated on `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` with `Database=mtm_mock`) — prove a payload written through `MockMirrorRefreshWriter` reaches the real `sp_visual_<shape>_refresh`, that the swap is atomic (no partial/empty live table observed, no `_prev` table persists), and that the reported row count matches the loaded snapshot per FR-006/SC-005/FR-013; T064 exercises the engine with fakes only (missing)
-- [ ] T119 (MEDIUM) Define the app-side credential installation path for `IMockServiceRefreshClient` — add the client's service endpoint/token configuration (an `appsettings.json` section plus its environment-variable override) and wire it into the `MTM_Waitlist.Mock` registration added by T056, so a configured client can authenticate and an unconfigured one degrades gracefully and keeps serving cached content, with the token never logged per FR-025/FR-026 and `contracts/visual-read-fallback.md` §5 (partial)
-- [ ] T120 (LOW) Add the service's publish/deployment artifact and instructions for the unpackaged, self-contained `win-x64` build named in `quickstart.md` §2 step 1 (a publish profile or documented `dotnet publish` invocation under `MTM_Waitlist.Mock.Service/`), and reference it from `quickstart.md` §2 (missing)
-- [ ] T121 (LOW) Document or justify the generated master lists — `Database/Mock/AllTables.sql`, `AllSPs.sql`, and `AllSeeds.sql` are produced by `Database/CopilotScripts/build_mtm_mock_masters.ps1` (`-Check` is a staleness gate) rather than hand-maintained as Constitution III's wording assumes; either record the deviation with the rationale in `Database/CopilotScripts/README.md` and the DB ruleset review note, or revert to hand-maintained lists (unrequested)
+- [x] T118 (MEDIUM) Add the live-database integration test `MTM_Waitlist.Tests/Module_Mock_Service/MockMirrorRefreshWriterIntegrationTests.cs` (gated on `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` with `Database=mtm_mock`) — prove a payload written through `MockMirrorRefreshWriter` reaches the real `sp_visual_<shape>_refresh`, that the swap is atomic (no partial/empty live table observed, no `_prev` table persists), and that the reported row count matches the loaded snapshot per FR-006/SC-005/FR-013; T064 exercises the engine with fakes only (missing)
+- [x] T119 (MEDIUM) Define the app-side credential installation path for `IMockServiceRefreshClient` — add the client's service endpoint/token configuration (an `appsettings.json` section plus its environment-variable override) and wire it into the `MTM_Waitlist.Mock` registration added by T056, so a configured client can authenticate and an unconfigured one degrades gracefully and keeps serving cached content, with the token never logged per FR-025/FR-026 and `contracts/visual-read-fallback.md` §5 (partial)
+- [x] T120 (LOW) Add the service's publish/deployment artifact and instructions for the unpackaged, self-contained `win-x64` build named in `quickstart.md` §2 step 1 (a publish profile or documented `dotnet publish` invocation under `MTM_Waitlist.Mock.Service/`), and reference it from `quickstart.md` §2 (missing)
+- [x] T121 (LOW) Document or justify the generated master lists — `Database/Mock/AllTables.sql`, `AllSPs.sql`, and `AllSeeds.sql` are produced by `Database/CopilotScripts/build_mtm_mock_masters.ps1` (`-Check` is a staleness gate) rather than hand-maintained as Constitution III's wording assumes; either record the deviation with the rationale in `Database/CopilotScripts/README.md` and the DB ruleset review note, or revert to hand-maintained lists (unrequested)
 
 ---
 
@@ -1009,11 +1009,11 @@ These tasks close gaps between the specification/plan/constitution and the curre
 covers**. Existing unticked tasks (T032, T034–T044, T057–T108, T110–T111, T113–T121) are deliberately not
 duplicated here — they are already the remaining-work record for their phases. Ordered CRITICAL/HIGH first.
 
-- [ ] T122 (HIGH) Take the repository instruction and agent files off the retired mock-toggle standard and onto the Module_Mock cached-fallback contract: rewrite `.github/copilot-instructions.md` §"Mock Data & Helper Server Guidance" (currently presents `Feature.InforVisualMockData` / `Feature.RecvMockData` and the helper-server mock short-circuit as current behaviour), `.github/instructions/mcp-doc-research.instructions.md` §"Repo-Specific Focus" (same keys), and `.github/agents/module-create.agent.md` §5 "Mock data behavior" / §6 "Data path" + its "Add mock data toggle integration" step (currently *defaults* a new module to "create a new feature toggle and mock short-circuit pattern" and `Feature.<FeatureName>MockData`), so that no instruction still directs a contributor or agent to reintroduce a manual demo/mock mode; per FR-003/FR-014, SC-016, Constitution II (contradicts)
+- [x] T122 (HIGH) Take the repository instruction and agent files off the retired mock-toggle standard and onto the Module_Mock cached-fallback contract: rewrite `.github/copilot-instructions.md` §"Mock Data & Helper Server Guidance" (currently presents `Feature.InforVisualMockData` / `Feature.RecvMockData` and the helper-server mock short-circuit as current behaviour), `.github/instructions/mcp-doc-research.instructions.md` §"Repo-Specific Focus" (same keys), and `.github/agents/module-create.agent.md` §5 "Mock data behavior" / §6 "Data path" + its "Add mock data toggle integration" step (currently *defaults* a new module to "create a new feature toggle and mock short-circuit pattern" and `Feature.<FeatureName>MockData`), so that no instruction still directs a contributor or agent to reintroduce a manual demo/mock mode; per FR-003/FR-014, SC-016, Constitution II (contradicts)
 - [x] T123 (HIGH) Drive the app-side read-status state so the indicator can actually appear: nothing consumes the registered `MTM_Waitlist.Mock/Services/VisualReachabilityDetector.cs` (`IVisualReachabilityDetector.ProbeAsync` has no caller outside its own tests) and the read path in `MTM_Waitlist.Mock/Services/VisualReadFallback.cs` never feeds `IReadStatusProvider`, so the state `Module_Mock/Views/ReadStatusIndicator.xaml` renders can never leave `Unknown`; add the app-side driver (a probe loop with backoff while cached, and/or per-read `CachedReadResult.Source` provenance fed into the provider) in the `MTM_Waitlist.Mock` registration added by T056, scoped to **probing/status only** — refresh scheduling stays owned by the service per FR-025; per FR-005/FR-022, US4/AC1, plan: `ReadStatusProvider` (missing)
 - [x] T124 (HIGH) Give `CachedDataAgeUtc` a real data path: the cached read cannot expose `refreshed_utc` (`sp_visual_<shape>_get` must project exactly the live column shape for FR-004, so `CachedReadResult.RefreshedUtc` is null — recorded in this file's Phase 4 Notes) and `sp_visual_read_shape_metadata_get` reports only artifact existence and the mirror's column list, so `ReadStatusSnapshot.CachedDataAgeUtc` / `IsSeedContentOnly` have no source; add an `mtm_mock` freshness read (a new procedure such as `sp_visual_<shape>_freshness_get`, or an extension of the metadata procedure) returning each shape's last successful `refreshed_utc` and seed-only state, with `create.sql` + `rollback.sql`, `Database/Mock/AllSPs.sql` and `Database/Mock/Bootstrap/update_table_descriptions.sql` registration in the same change, and read it through `IMySqlHelperServer` (`MtmMock` target) with no inline SQL; per FR-017/FR-022, `data-model.md` §12, Constitution III (partial)
-- [ ] T125 (MEDIUM) Extend the documentation accommodation beyond `WeekendProject/*`: `README.md` line 15 still lists `ISampleDataService` in the `MTM_Waitlist.Core` description, and `README.md` / `CHANGELOG.md` / `RELEASE-NOTES.md` contain no Module_Mock or `mtm_mock` documentation at all, so FR-028's "document the new module" and SC-016's "0 stale references in the project documentation" are met only for the `WeekendProject` subtree; sweep and update the root docs (add the new module + service app + `mtm_mock` cache to `README.md`, the end-user `CHANGELOG.md`/`RELEASE-NOTES.md`, and the stale mock reference in `.github/memories/repo/infor-visual-disposition.md`); per FR-014/FR-028, SC-016, Constitution "Documentation & Extensibility" (partial)
-- [ ] T126 (MEDIUM) Record the Phase-4 structural deviations in `plan.md` instead of leaving them in `tasks.md` Notes — `VisualReadShapeCatalog` and the live-read plumbing moved into `MTM_Waitlist.Mock`, `MySqlHelperServer` gained an `MtmMock` target, `VisualQueryExecutor` introduced the `Ok`/`Unreachable`/`Failed` classification that no design document specifies, and `CachedReadResult.RefreshedUtc` is null — so `plan.md` §Project Structure no longer describes the shipped architecture and the Complexity Tracking table has no row for these additions; on the next `/speckit.plan` touch add the Complexity Tracking rows (with the "why needed / simpler alternative rejected" rationale), update the Project Structure listing and `models`, and align `research.md` R1–R15 (especially R11, whose detector-driven design is superseded by per-read classification); per plan: Project Structure/Complexity Tracking, Constitution Governance (contradicts)
+- [x] T125 (MEDIUM) Extend the documentation accommodation beyond `WeekendProject/*`: `README.md` line 15 still lists `ISampleDataService` in the `MTM_Waitlist.Core` description, and `README.md` / `CHANGELOG.md` / `RELEASE-NOTES.md` contain no Module_Mock or `mtm_mock` documentation at all, so FR-028's "document the new module" and SC-016's "0 stale references in the project documentation" are met only for the `WeekendProject` subtree; sweep and update the root docs (add the new module + service app + `mtm_mock` cache to `README.md`, the end-user `CHANGELOG.md`/`RELEASE-NOTES.md`, and the stale mock reference in `.github/memories/repo/infor-visual-disposition.md`); per FR-014/FR-028, SC-016, Constitution "Documentation & Extensibility" (partial)
+- [x] T126 (MEDIUM) Record the Phase-4 structural deviations in `plan.md` instead of leaving them in `tasks.md` Notes — `VisualReadShapeCatalog` and the live-read plumbing moved into `MTM_Waitlist.Mock`, `MySqlHelperServer` gained an `MtmMock` target, `VisualQueryExecutor` introduced the `Ok`/`Unreachable`/`Failed` classification that no design document specifies, and `CachedReadResult.RefreshedUtc` is null — so `plan.md` §Project Structure no longer describes the shipped architecture and the Complexity Tracking table has no row for these additions; on the next `/speckit.plan` touch add the Complexity Tracking rows (with the "why needed / simpler alternative rejected" rationale), update the Project Structure listing and `models`, and align `research.md` R1–R15 (especially R11, whose detector-driven design is superseded by per-read classification); per plan: Project Structure/Complexity Tracking, Constitution Governance (contradicts)
 
 ---
 
@@ -1235,3 +1235,548 @@ Ordered CRITICAL first.
 - [x] T139 **(HIGH)** Correct the release notes to the architecture that shipped, including the refresh cadence — `RELEASE-NOTES.md` states that "a lightweight service … probes the Infor Visual database every 30 seconds" and "signals every running client to start reading from the cache", that while cached "probing continues on a backed-off schedule — 30 seconds, then 1 minute, then 5 minutes, repeating", and that on recovery the service "refreshes it at that moment as well". None of that is the shipped behaviour: the *client application* probes and decides locally (`MTM_Waitlist.Mock/Services/VisualReachabilityProbeHost.cs` — a two-value cadence of 30 s live / 5 min cached, with no 1-minute step and no client-signal broadcast), the service's connectivity probe only reports `visualReachable` in the status payload (`ServiceApiOperations.GetStatusAsync`), and no code path refreshes on recovery (the application is forbidden from refreshing at all by FR-025, and the app-side refresh client is still unwired — T119). The document also never states the real schedule, so its only time figures are the probe's — which is what makes it read as a 5-minute refresh. Rewrite the "How the switch happens" and "Decoupled Architecture" bullets to the shipped design and state the refresh cadence explicitly: **3 hours**, on the eight local-midnight-anchored slots (00:00/03:00/06:00/09:00/12:00/15:00/18:00/21:00 server-local), per `ServiceConfiguration.RefreshInterval` and `ServiceConfigurationStoreTests`; the 30 s / 5 min figures belong to detection, not refresh (FR-028/SC-016, Constitution *Documentation & Extensibility*) (contradicts)
 
 ---
+
+## Phase 17: Execution note — SP-first audit, real-data gaps, credential path, docs (2026-09-11, `/speckit.implement`)
+
+**Gates at the end of this run**: build `dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64
+/m:1 /nodeReuse:false` → `Build succeeded. 0 Warning(s) 0 Error(s)`; full suite
+`dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` →
+`Failed: 0, Passed: 661, Skipped: 13, Total: 674`. The 13 skipped remain the pre-existing live-database
+integration suites (they skip when `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` is unset, and this environment has no
+reachable MySQL/Infor Visual, so the live subset of T105 was not re-run).
+
+### What landed, by task
+
+- **T098 (inline-SQL audit)** — `MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs`, three tests.
+  1. `NoMySqlStatementTextRemainsInApplicationCode` — strips C# comments (preserving string-literal contents,
+     including verbatim, interpolated, and raw literals) and fails on `SELECT` / `INSERT INTO` / `UPDATE … SET` /
+     `DELETE FROM` / `CALL` / DDL markers. Markers are matched **case-sensitively**, because SQL keywords are
+     written upper-case here while `Select…`, `Call Initialize…`, and `selected_*_json` are prose or identifiers.
+     The test project is excluded: its integration suites legitimately seed rows with raw SQL.
+  2. `RawSqlSeamIsConfinedToItsReviewedAllowlist` — the wrong-helper-for-DML guard. The defect shape needs a DML
+     statement somewhere to route, so the raw seams (`ExecuteSqlQueryAsync` / `ExecuteSqlNonQueryAsync`) are pinned
+     to a three-entry allowlist: the contract, the implementation, and `WipFloorInventoryService` (which loads the
+     checked-in MTMWipApp queue script `GetWipFloorQuantities.sql` by name — Discovery/03 §C records it as a file
+     load, not an inline literal). A new raw-SQL call site now fails the audit instead of silently reopening the
+     defect.
+  3. `EveryRawSqlSeamAllowlistEntryIsStillAccurate` — a stale exemption fails rather than lingering.
+  The scan needed no exemption for the shape metadata/freshness reads: they pass a procedure-name constant with
+  `CommandType.StoredProcedure`, so they carry no statement text at all.
+
+- **T099 (coil availability is read, not assumed)** — `MTM_Waitlist.Waitlist.NewRequest/Services/
+  CoilAvailabilityService.cs` rewritten. The coil is taken from the **saved Work Center Setup job** for the work
+  center (`sp_setup_active_jobs_latest_by_work_center_get`, `MtmWaitlist`), selecting the subordinate part whose
+  part number carries the `MMC` prefix — the same rule `ActiveJobItemResolverService.CanonicalCategory` applies to
+  the same payload — and the average skid weight comes from `IAverageCoilWeightService`. No active job, a job for a
+  different work center, no coil part, or a malformed payload all report **no coil** rather than defaulting to one.
+  **Recorded choice:** the interface doc said the source would be "the live Infor Visual job/coil data, resolved
+  through the SQL queue path". The coil already lives on the job payload the Setup workflow populated from Visual
+  (including that workflow's own fallback), so reading the saved record avoids inventing a second, unverifiable
+  Visual query for the same fact. The interface doc was updated to describe what shipped rather than left
+  contradicting the code.
+
+- **T100 (one authoritative request-type source)** — `MTM_Waitlist.Settings/Services/ImageLocationService.cs` no
+  longer reads `Assets/Config/waitlist-request-types.json`. A request type's or subtype's configured
+  `default_image_path` is now read from `sp_waitlist_request_types_get` / `sp_waitlist_request_subtypes_get` by its
+  stable `public_id` GUID. The JSON file is no longer a production source (it remains the documented seed
+  provenance for `waitlist_request_types`, and a test fixture for the flow rules), so `RequestTypeCatalogService` +
+  the catalog procedures are the single authoritative source. The cascade order is now database override → catalog
+  `default_image_path` → default asset.
+
+- **T101 (coverage for both gap fixes)** — `CoilAvailabilityServiceTests` rewritten to the new contract (7 tests:
+  the real coil read with the procedure name, the target, and `SqlCallCount == 0` pinned; no saved job; a job
+  belonging to another work center; a job with no coil part; a malformed payload; a missing work center reading
+  nothing; cancellation). `ImageLocationServiceCascadeTests` gained three catalog tests (request-type path from the
+  catalog procedure, subtype path from its procedure, a missing catalog path falling back to the default asset) and
+  now drives `FakeMySqlHelperServer` instead of a connection-less helper.
+
+- **T119 (app-side credential installation path)** — `MockServiceRefreshClient` **did not exist** (T072's tick
+  covered the contract and model only), so this task implemented the client as well as the installation path:
+  `MTM_Waitlist.Mock/Models/MockServiceClientOptions.cs` (resolved environment-first:
+  `MTM_MOCK_SERVICE_ENDPOINT` / `MTM_MOCK_SERVICE_TOKEN`, then the `MockServiceClient` configuration section) and
+  `MTM_Waitlist.Mock/Services/MockServiceRefreshClient.cs` (`POST /api/refresh` with the `X-MTM-Mock-Token`
+  header). Every failure — no endpoint, no credential, service absent, `401`, `409`, timeout, unreadable response —
+  returns `RefreshRequestResult.Unavailable(...)` and leaves the app on cached content; the credential is never
+  echoed in a result message. Registered in `AddVisualReadFallback`, and `appsettings.json` gained an **empty**
+  `MockServiceClient` section (the credential is installed through the environment, never a committed file, per
+  FR-026). Tests: `MTM_Waitlist.Tests/Module_Mock/MockServiceRefreshClientTests.cs` (7 tests, including that the
+  header carries the credential and that no failure message contains it).
+
+- **T120 (publish/deploy artifact)** — `MTM_Waitlist.Mock.Service/Properties/PublishProfiles/
+  win-x64-selfcontained.pubxml` (unpackaged, self-contained, `win-x64`, folder publish) plus
+  `MTM_Waitlist.Mock.Service/README.md` (publish, deploy, first run, verify, uninstall). `quickstart.md` §2 step 1
+  now names both and shows the CLI equivalent.
+
+- **T121 (generated master lists)** — the deviation is recorded rather than reverted: a review note in
+  `Database/Database-Ruleset.md` → *Artifact Layout and Release Governance* (why generated, why it is safe, that
+  `-Check` is the staleness gate, that `mtm_mock` only is affected, and that the create/rollback +
+  `update_table_descriptions.sql` obligations are unchanged) and a matching section in
+  `Database/CopilotScripts/README.md`.
+
+- **T122 (instructions off the retired standard)** — `.github/copilot-instructions.md`: the "Mock Data & Helper
+  Server Guidance" section (which presented `Feature.InforVisualMockData` / `Feature.RecvMockData`,
+  `MockToggleService`, and the helper-server short-circuit as current behaviour) is replaced by
+  "Cached-Fallback & Helper Server Guidance", stating the five rules that now hold (no demo mode; internal stores
+  always live; external reads fall back automatically on unreachability only; the app never refreshes; every data
+  operation goes through a stored procedure). `.github/agents/module-create.agent.md`: the "Mock data behavior" and
+  "Data path" defaults and the "Add mock data toggle integration" step are replaced by the real contract (live
+  stores, stored-procedure seam, `IVisualReadFallback` for Visual reads); the mockup-UI question is reworded so it
+  cannot be read as demo data. `mcp-doc-research.instructions.md` was already corrected by T136.
+
+- **T125 (root docs)** — `README.md`: `ISampleDataService` removed from the `MTM_Waitlist.Core` description, the
+  new `MTM_Waitlist.Mock` and `MTM_Waitlist.Mock.Service` bullets added, and a new *Infor Visual cache (`mtm_mock`)*
+  section added (what the cache is, where each piece lives, the four rules, and the generated-master-list note).
+  `CHANGELOG.md`: new end-user section 8 describing the automatic failover, the status indicator, and the fact that
+  app data is always live. `RELEASE-NOTES.md` already carried the Module_Mock architecture from T139, so it needed
+  no further change. `.github/memories/repo/infor-visual-disposition.md`: the stale "(no mock FG-10042)" reference
+  replaced with the current boundary.
+
+- **T126 (plan deviations)** — `plan.md` → *Project Structure* now lists the shipped `MTM_Waitlist.Mock` and
+  `MTM_Waitlist.Mock.Service` layouts (including `VisualReadShapeCatalog`, `VisualQueryExecutor`,
+  `VisualShapePayloadSource`, `RefreshRunRecordStore`, `BackupScheduler`, `ServiceHostBuilder`, the publish
+  profile) and the `Database/Mock.Service/Restore/` artifacts; *Complexity Tracking* gained four rows with the
+  why-needed / simpler-alternative-rejected rationale for the Phase-4 additions (the catalog + executor + script
+  store + per-shape types moving into `MTM_Waitlist.Mock`; the `Ok`/`Unreachable`/`Failed` classification; the
+  `MtmMock` target; and `CachedReadResult.RefreshedUtc` being null with freshness owned by
+  `sp_visual_read_shape_freshness_get`). `research.md` R11 gained a *Superseded in part* note explaining that the
+  **indicator** is detector-driven while each **read** decides for itself from the classification, and why that is
+  stronger.
+
+- **T085 (published playbook)** — reproduced, with the step the earlier drafts were missing (step **3b**, the
+  set-based population read plus the shape's `UNION ALL` branch in `sp_visual_read_shape_freshness_get`) and the
+  `populationScriptRelativePath` catalog field, into `WeekendProject/Module_Mock/Spec.md` §11 and
+  `WeekendProject/Module_Mock/Plan.md` §7, and cross-linked from `WeekendProject/Module_Mock/Tasks.md` (Phase 1
+  header). It points at `contracts/mock-service-configuration.md` §4 as the authoritative wording.
+
+- **T102 (documentation accommodation)** — `WeekendProject/ChangeLog.md` gained a dated 2026-09-11 Added / Changed /
+  Removed entry for the failover and the removal. New `WeekendProject/Module_Mock/README.md` records the shipped
+  architecture, the rules enforced by tests, the removal record by family (A / A′ / B, with the deliberately
+  retained `SampleOrder` and `WaitlistCoilInfo`), and which sibling documents are historical. All three
+  `WeekendProject/Module_Mock/Discovery/*` files gained a status banner saying they are historical inventories
+  (Discovery/03 records that every site was converted). `WeekendProject/PromptFiles/` gained a `README.md` archive
+  note explaining that the two stale families there (mock toggles, sample catalogs) describe mechanisms that no
+  longer exist, and that the files are kept as archives rather than rewritten — rewriting a 2026-08/09 checklist to
+  match today's code would erase the record of what was asked for at the time.
+
+- **T111 (shape-addition no-downtime)** — `MTM_Waitlist.Tests/Module_Mock_Service/ShapeAdditionNoDowntimeTests.cs`,
+  four tests: the shipped catalog is exactly the five published keys and they are unique; appending a sixth shape
+  leaves every existing shape's derived artifact names, ordered inputs, and ordered outputs identical and cannot
+  collide with them (the property FR-020 rests on — the names are derived from the key); every shipped shape's
+  mirror table, stage twin, `get`/`refresh` procedures, source query, and population read exist on disk under those
+  derived names; and each shipped shape has exactly one `IVisualReadFallback` registration.
+
+- **T058 (re-reviewed, then closed)** — the parity suite was present and passing but had not been re-reviewed. It
+  now also carries the two assertions the task named and the file did not have:
+  `TheReadSeam_CannotTellACallerWhichSourceAnswered` (reflection over `IVisualReadFallback<,>`: `ReadAsync` returns
+  a plain `IReadOnlyList<TRow>` and not a wrapper, and provenance is opt-in through exactly one method) and
+  `NoFallbackCode_PointsAtAnInternalStore` (no file under `MTM_Waitlist.Mock/` may name
+  `MySqlDatabaseTarget.MtmWaitlist` / `MtmReceivingApplication` / `MtmWipApplication` — the FR-027 guard, asserted
+  by construction rather than by review). One assertion in the first of these was written wrongly on the first
+  attempt (it inspected `IReadOnlyList<TRow>`'s own properties, which always exist) and was corrected to assert the
+  return type's shape; the gate numbers above are the post-correction run.
+
+### Still open after this run (not ticked)
+
+- **T078** and **T084** — the listener-level halves: a real `401` from a running Kestrel host, a real `404` for
+  `/api/restore`, and the `BackupRestoreTests` assertions. `ServiceApiSecurityTests` already covers the
+  operation-level half of both, including the "no code path from the API to a restore" guard.
+- **T106** — the end-to-end acceptance walkthrough needs a running service, a deployed `mtm_mock`, and reachable
+  MySQL/Infor Visual; none is available in this environment, and its SC-007/SC-008 halves are 30-day observation
+  windows rather than one-shot tests.
+- **T107 / T108** — the internal-store bounded-retry policy and the per-screen `Unavailable` surface (FR-021). The
+  design is settled (`data-model.md` §10); the work is a Core retry seam plus the affected screens' state surface,
+  and it was deliberately not started rather than left half-built.
+- **T118** — the live-`mtm_mock` integration test for `MockMirrorRefreshWriter`; gated on a reachable MySQL with
+  `Database=mtm_mock`.
+
+**Build-hygiene note for the next run**: the first full build in this run surfaced two genuine nullable warnings in
+`CoilAvailabilityService.cs` (CS8604 / CS8601) that an incremental build hides, because the project is not
+recompiled once it is up to date. They are fixed (the JSON DTO's string members are non-nullable with
+`string.Empty` defaults, and the coil filter rejects an empty part number explicitly), and the gate above is the
+post-fix whole-solution build. This is the same class of issue T112 recorded for `NETSDK1206`: a warm build can
+report `0 Warning(s)` while a cold build does not.
+
+---
+
+## Phase 18: Execution note — internal-store availability, API/backup verification, live-DB mirror test (2026-09-11, `/speckit.implement`)
+
+**Gates at the end of this run**: build `dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64
+/m:1 /nodeReuse:false` → `Build succeeded. 0 Warning(s) 0 Error(s)`; full suite
+`dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` →
+`Failed: 0, Passed: 684, Skipped: 15, Total: 699`. The skips are the environment-gated live-database suites:
+the 13 that pre-existed plus the 2 methods of the new `MockMirrorRefreshWriterIntegrationTests`, which report
+inconclusive when `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` is unset.
+
+### T107 — internal-store unavailable handling (FR-021, `data-model.md` §10)
+
+The data-access seam used by every affected screen is `MySqlHelperServer`, so the bounded retry lives there
+rather than in each caller:
+
+- **`MTM_Waitlist.Core/Services/InternalStoreRetryPolicy.cs`** — new. Three attempts total, with 1 s before the
+  second and 2 s before the third, and 4 s as the advertised next-retry guidance. The delay is injectable so a
+  test asserts the attempt count without waiting seven seconds.
+  **Ambiguity resolved explicitly**: FR-021's one sentence ("up to three attempts with delays of approximately
+  1 s, 2 s, and 4 s") can be read as three attempts or as three retries after the first; `data-model.md` §10
+  settles it with "after the third failure the screen shows the `Unavailable` state", so the policy is three
+  attempts and the 4 s figure is what the state shows as "next attempt after". The reading is recorded in the
+  type's XML docs so the next reader does not have to re-derive it.
+- **`MTM_Waitlist.Core/Services/StoreAvailabilityTracker.cs`** + **`Contracts/Services/IStoreAvailabilityTracker.cs`**
+  — new. Per-store `InternalStoreAvailability` (`Store`, `Status`, `LastAttemptUtc`, `RetryCount`,
+  `NextRetryUtc`, `Message`) with a `Changed` event. Session-scoped by design: a stale "unavailable" claim must
+  not survive a restart. A change of status notifies; a repeat failure also notifies, so a manual retry that
+  fails again refreshes what the screen is showing; a repeat *success* does not, so a busy screen raises no
+  notification storm.
+- **`MySqlHelperServer`** — every seam method (stored procedure and raw SQL, query and non-query) now runs
+  through one `ExecuteWithBoundedRetryAsync`, which records the outcome in the tracker. Caller cancellation is
+  propagated, not retried and not reported as a store outage. A store with **no connection configured** is not
+  reported as unavailable — an unconfigured deployment is not an outage, and reporting one would show an
+  operator a failure they cannot act on.
+- **`MTM_Waitlist.Core/Models/InternalStoreUnavailableState.cs`** — new. The per-screen state: `IsUnavailable`,
+  `StoreName`, `LastAttemptUtc`, `RetryCount`, `NextRetryUtc`, `Message`, `IsRetrying`, and a generated
+  `RetryCommand` that re-runs that screen's own load. It subscribes to the tracker and clears itself on
+  recovery. It carries no user-facing English — the screen composes the sentence from its own localized labels
+  (constitution V).
+- **Wired into the waitlist list screen** (`MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs` +
+  `Module_Waitlist/Views/WaitlistViewPage.xaml`): the screen owns one state object for `mtm_waitlist`, shows an
+  `InfoBar` in its own surface (not an app-wide banner, not closable), and its retry re-runs
+  `LoadOrdersAsync`. Three new resource keys (`Store_Unavailable.Title` / `.Message` / `.Retry`) carry the text.
+  **Scope recorded honestly**: the state type and retry seam are general and every screen can adopt them, but
+  only the waitlist list screen is wired in this run; the other screens that read an internal store
+  (Work Center Setup, Settings) still surface their failures as they did before.
+
+### T108 — `InternalStoreAvailabilityTests` (11 tests)
+
+Asserts the policy's three attempts and its 1 s/2 s/4 s schedule; that a store which never answers is retried a
+bounded number of times and then reported `Unavailable` with populated `LastAttemptUtc`/`RetryCount=2`/
+`NextRetryUtc`/`Message`; that the failed read returns **no rows at all** (never sample data, FR-001); that an
+unconfigured store is `Unknown` rather than `Unavailable`; that caller cancellation propagates and is not
+reported as an outage; the tracker's notification rules; and the per-screen state's visibility, clearing on
+recovery, fresh detail on a second failure, retry-that-throws containment, and unsubscribe on dispose.
+
+The failing reads are produced against a closed loopback port, so the failure is a real connection refusal
+rather than a stub throwing. Two test-quality decisions are recorded in the file: the connection environment
+variables are cleared per test (a developer machine with them set must still exercise the intended path), and
+the delay delegate is replaced with a no-op while the *durations* are asserted separately.
+
+### T078 — `ServiceApiTests` (6 tests, listener level)
+
+Starts the real Kestrel host on a free loopback port and speaks HTTP to it, which is the only way to assert
+pipeline properties: every routed endpoint returns a real `401` without a credential **and** with a wrong one;
+the `/api/status` payload never contains the credential; a refresh request returns a well-formed outcome
+document; an unknown shape is refused `400` naming the key; and `/api/restore` is a real `404` for both `GET`
+and `POST` even with a valid credential (FR-023).
+
+Two findings from building it, both recorded because they are easy to get wrong again:
+
+- **The listener binds to the configuration store's live settings, not to the record handed to
+  `ServiceHostBuilder.Build`.** The first version built the test client from the configuration it had passed in
+  and every request was refused; the fixture now builds the client from `ServiceConfigurationStore.Current.Api`.
+- **Startup validation must run before the API is served.** Without it `RefreshableShapes` is empty, so the
+  status surface reports zero shapes and a refresh cycle has nothing to attempt. The endpoint's behaviour in
+  that state is correct rather than broken — `results` is an empty array and the *status* payload is where the
+  operator sees each shape's exclusion reason — so the test asserts the contract (a well-formed outcome
+  document whose entries each name their shape and outcome) rather than a count, and says so.
+
+### T084 — `BackupRestoreTests` (6 tests)
+
+Per-store independence (a failed run for one store leaves another store's artifacts and files exactly as they
+were); a missing tool reports `ToolUnavailable` with **no artifact recorded**; `RequestRestore` records the
+intent and changes nothing on disk; a confirmed restore whose pre-restore safety snapshot cannot be taken
+returns `FailedReload` with "nothing was changed" and names no recovery artifact; and confirming with an
+artifact that was not requested, or with a file that has gone, is rejected. `PATH` is cleared per test so the
+engine's `mysqldump` fallback cannot silently find a real client on a developer machine — recorded in the test
+because it is the difference between testing the intended path and testing an accident.
+
+**What this task could not assert here**: "a confirmed restore is a verified full replacement" needs a live
+MySQL server. The refusal half (no recovery point → no destruction) is asserted; the replacement half remains
+gated on the same environment as T118.
+
+### T118 — `MockMirrorRefreshWriterIntegrationTests` (live database, 2 tests)
+
+Gated on `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` (the connection's database is rewritten to `mtm_mock`; the
+procedures resolve their schema through `DATABASE()`), reporting inconclusive without it.
+
+Proves a payload written through `MockMirrorRefreshWriter` reaches the real `sp_visual_work_order_lookup_refresh`,
+that the reported row count equals the payload's, that the live mirror afterwards holds exactly that snapshot,
+and that no seed content survives a real refresh.
+
+**Atomicity is proven by the result of the swap rather than by racing a reader.** The three-name
+`RENAME TABLE` leaves the outgoing snapshot in the stage twin, so the test captures the live table before the
+refresh and asserts the stage twin holds *exactly* that afterwards — a truncate-and-reload, or a swap that moved
+a partial set, cannot produce it, and unlike a concurrent read it cannot pass by timing. The test also asserts
+the transient `_prev` table did not persist. It mutates one shape's snapshot in the disposable cache (which the
+on-host service refreshes on its own schedule) and never touches an internal store (FR-027).
+
+### T106 — end-to-end acceptance walkthrough — still open
+
+Not executed. The walkthrough needs a running service, Infor Visual made unreachable, a signed-in client build,
+and a backup/restore drill; the environment re-probe in Phase 19 shows the first and third of those are absent
+and the second is a deliberate disruption of a live shared system. Its SC-007/SC-008 halves are 30-day
+observation windows rather than one-shot tests, so even on a provisioned host the task completes at the 30-day
+mark.
+
+---
+
+## Phase 19: Execution note — live-database subset and T106 environment re-probe (2026-09-11, `/speckit.implement`)
+
+**Gates at the end of this run**: build `dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64
+/m:1 /nodeReuse:false` → `Build succeeded. 0 Warning(s) 0 Error(s)`; full suite with
+`MTM_WAITLIST_TEST_DB_CONNECTION_STRING` set → `Failed: 0, Passed: 699, Skipped: 0, Total: 699`.
+
+T106 is the only unticked task and it is not ticked here. What this run did instead was **re-probe the
+environment** and then execute every part of the walkthrough the environment actually permits, plus the §8
+final-validation gates. Phase 18 asserted the environment has "a deployed `mtm_mock` … none of which exists"; that is **partly wrong** and is corrected below.
+
+### Environment re-probe (corrects quickstart §0/§1 and the Phase 18 claim)
+
+| Prerequisite | State | Evidence |
+|---|---|---|
+| MySQL host reachable | **yes** | TCP `172.16.1.104:3306` open; `SELECT VERSION()` → **5.7.24** |
+| `mtm_mock` deployed | **yes — already deployed** | 10 tables (5 mirrors + 5 `_stage` twins) and 11 routines; every mirror's `refreshed_utc` reads 2026-09-10 17:35:07 |
+| Seed baseline (FR-017) | **yes** | row counts 1/2/2/2/1, all `is_seed_content = 1` — the cache had never been refreshed since deploy |
+| Infor Visual reachable | **yes** | `VISUAL.mantoolmfg.com` → **172.16.1.75:1433** reachable from this workstation |
+| MySQL client tools | **yes, but not on `PATH`** | `C:\Program Files\MySQL\MySQL Server 8.0\bin\{mysql,mysqldump}.exe` |
+| `MTM_Waitlist.Mock.Service` deployed | **no** | no `MTM_Waitlist.Mock.Service/bin/publish`; host `172.16.1.104:5760` closed; no `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry |
+| `pwsh` (PowerShell 7) | **no** | not installed; `Database/CopilotScripts/*.ps1` needs `powershell -NoProfile -ExecutionPolicy Bypass -File` |
+
+### Executed and verified this run
+
+| Walkthrough / gate | Result |
+|---|---|
+| §8 build gate | `Build succeeded. 0 Warning(s) 0 Error(s)` |
+| §8 offline suite | `Failed: 0, Passed: 684, Skipped: 15, Total: 699` — **not re-run in this run**; this is Phase 18's figure carried forward. The live run below is the strict superset (same suite, same 699 tests, 0 skips) |
+| §8 live DB subset (FR-013) | `Failed: 0, Passed: 699, Skipped: 0, Total: 699` — **first time this has ever run**; the 15 skips drop to 0 |
+| §1 verify — FR-017 seed read | `CALL sp_visual_work_order_lookup_get('SEED-WO-100')` → 1 row (`SEED-PART-100` / `Seeded baseline part` / `SEED-WC-A`) |
+| §1 verify — shape parity (FR-004) | `sp_visual_read_shape_metadata_get(NULL)` → all five shapes report mirror + stage + `_get` + `_refresh` present, and every `mirror_columns` list matches `data-model.md` §3 |
+| §1/§8 — atomic swap on the real host (FR-006/SC-005) | `MockMirrorRefreshWriterIntegrationTests` (2 tests) now pass live: the stage twin holds the complete outgoing snapshot, the transient `_prev` table does not persist, and no seed row survives a refresh |
+| §3 step 1 — client wiring | `MTM_Waitlist.Mock` referenced by `MTM_Waitlist.csproj`, `MTM_Waitlist.Setup`, `MTM_Waitlist.Waitlist.View`, and `MTM_Waitlist.Settings` (plus the service and the test project) |
+
+### Defects found and fixed
+
+1. **`quickstart.md` §1 verify used the wrong seed key.** It called
+   `sp_visual_work_order_lookup_get('SEED-WO-1')`, but the seeded journey defined in
+   `Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql` is **`SEED-WO-100` / `SEED-PART-100`**. Verified
+   live: `SEED-WO-1` returns **0 rows**, `SEED-WO-100` returns the seeded row. The documented check therefore
+   failed on a correct deployment. Corrected in `quickstart.md`.
+
+2. **`MockMirrorRefreshWriterIntegrationTests` addressed the wrong schema** — the only real defect this run
+   found, and it took the live subset to surface it. `TestInitialize` passed the test connection string (which
+   names `mtm_waitlist`) straight to `MockMirrorRefreshWriter`, so the writer called
+   `sp_visual_work_order_lookup_refresh` on the **wrong database** and failed with
+   `PROCEDURE mtm_waitlist.sp_visual_work_order_lookup_refresh does not exist`. The class's own XML doc already
+   claimed the opposite — "the connection's database is rewritten to `mtm_mock`" — so the code contradicted its
+   documented contract. Fixed by resolving the writer's connection string the same way `MySqlHelperServer` does
+   for `MySqlDatabaseTarget.MtmMock`: the dedicated `MTM_MOCK_DB_CONNECTION_STRING` when set, otherwise the test
+   connection string with its `Database` overridden to `mtm_mock` (via `MySqlConnectionStringBuilder`). Both
+   test methods then pass live. **Test-only change; no production code changed.**
+
+**Cache hygiene**: the now-passing integration tests replace shape 1's snapshot in the deployed `mtm_mock` (the
+class documents this — the cache is disposable and the on-host service rewrites it on schedule). The
+`seed_visual_mirror_baseline` seed was re-applied afterwards, and the mirrors were re-verified at 1/2/2/2/1 rows
+with `is_seed_content = 1` and no `_prev` table present, i.e. **byte-equivalent to the pre-test baseline**.
+
+### Still blocked, and the specific blocker
+
+| Step | Blocker |
+|---|---|
+| §2 service deploy/start, §2 step 7–8, §8 "Service end-to-end" | `MTM_Waitlist.Mock.Service` is not published or running. It is a **host-side** install (unpackaged, self-contained, tray-only) that belongs on the MySQL/Infor Visual host, not on a workstation, so deploying it is an infrastructure change to another machine |
+| §3 fallback proof (FR-002/FR-004/FR-005, SC-003/SC-004/SC-006/SC-011) | Needs Infor Visual **made unreachable**. Visual is live and shared at `172.16.1.75`; deliberately disrupting it is out of scope for a verification pass |
+| §4 defect proof (SC-001/SC-002, FR-021) | Needs a signed-in application session; the app stops at the **Sign in** gate and no credential was used |
+| §5 backup/restore drill (SC-008/SC-009) | Needs a running service and a throwaway store. `mysqldump` is installed but off `PATH`, so only the `toolUnavailable` branch is reachable from here (which at least means the absence is *reported*, per FR-013, rather than worked around) |
+| §7 sixth-shape playbook (SC-012) | A maintainer-day exercise, not a mechanical gate |
+| SC-007 / SC-008 | **30-day observation windows — not started.** They cannot start until the service runs on the host |
+
+**Net position: 110 of 111 tasks remain complete. T106 stays unticked**, now with an accurate description of what
+is blocked on a host-side deployment versus what can never be checked from a workstation.
+
+---
+
+## Phase 20: Convergence
+
+> Appended by `/speckit.converge` on 2026-09-11. Non-destructive assessment of the shipped code against
+> `spec.md` (28 FRs, 16 SCs), `plan.md` / `research.md` / `data-model.md` / `contracts/`, and the ratified
+> constitution (Principles I–VI + Security, Cache-boundary and Documentation constraints). No existing task,
+> ID, or phase above was modified. Only the three gaps below are added.
+
+- [x] T140 (CRITICAL) Sweep `WeekendProject/ChangeLog.Simple.md` and remove every stale reference to the retired demo/mock system — the manual "Infor Visual data" Settings toggle, the bundled sample cache, and the fallback notification — then re-verify SC-016 across the whole documentation set, per FR-028 (contradicts) — **Done 2026-09-11:** the outage-fallback section now states the fallback is automatic-only (toggle and bundled-sample claim removed; the notification is replaced by the read-only status indicator + `Retry`), feature 19 is marked `❌ withdrawn` with its own legend entry and a note that the time total is a record of work spent, and both stale "Still in progress" entries are corrected. SC-016 re-verified: sweeping the retired symbols repo-wide now returns **0** hits in any document that describes current behaviour — the only remaining hits are the deliberately historical archives (`ChangeLog.md`, `Module_Mock/**`, `PromptFiles/*`), the spec's own artifacts, and the intentional negative references in `RetiredSymbolAuditTests` and test comments. The two now-resolved rows in `WeekendProject/OPEN-WORK-NEXT-SPEC.md` were annotated so the next spec does not re-open them.
+- [x] T141 (HIGH) Restore the deployed `mtm_mock` shape-1 mirror, which is currently empty while its own refresh run record reports 230 rows, and stop `MockMirrorRefreshWriterIntegrationTests` from leaving the shared deployed cache mutated or empty, per FR-017/FR-006 (partial) — **Done 2026-09-11:** root cause proven from the stage twin (see Phase 21), test now captures and restores the shared snapshot and refuses to run against a seed baseline it cannot put back, and the deployed mirror was re-warmed by a real refresh — all five shapes hold live data and `visual_work_order_lookup_result` = **230 rows**, `is_seed_content` = 0.
+- [x] T142 (MEDIUM) Retire the still-open validation item in `WeekendProject/PromptFiles/App-Validation-Checklist.md` §3 that asserts the removed `Feature.RecvMockData` toggle's behaviour, so the checklist can close, per FR-028/SC-016 (contradicts) — **Done 2026-09-11:** the item is struck through with the reason and its replacement coverage (`InternalStoreAvailabilityTests` for FR-001/FR-021, `MockMirrorRefreshWriterIntegrationTests` for FR-002/FR-006), leaving no unfinishable box in §3.
+
+### T140 — evidence
+
+`WeekendProject/ChangeLog.Simple.md` (a user-facing plain-language doc, header "Last updated: 2026-09-06") still
+describes the retired system as current, at lines 19–32:
+
+- *"the app can automatically fall back to **cached Infor Visual data** (**presently a bundled sample**)"* — the
+  bundled sample catalogs were deleted by T042 (FR-014).
+- *"You can also **switch between live and cached Infor Visual data manually** with the single **\"Infor Visual
+  data\"** toggle under **Settings**"* — that toggle and its Settings control were deleted by T034/T037. The
+  document instructs a user to operate a control that no longer exists.
+- *"When the app is automatically falling back or recovering, a **notification** explains…"* — the toast
+  coordinator was deleted by T035, and FR-003 forbids a manual mode, so no such notification exists.
+
+**Why the sweep missed it:** T102 covered `WeekendProject/ChangeLog.md`, `Module_Mock/*` and `PromptFiles/*`;
+T125 covered root `README.md` / `CHANGELOG.md` / `RELEASE-NOTES.md`. `ChangeLog.Simple.md` appears in **neither**
+list, so the SC-016 claim of "0 stale references" is not actually met and T102 was ticked without full coverage
+(constitution I). Renaming/relocating that file is the durable fix — a path-based sweep cannot miss it again.
+
+### T141 — evidence
+
+Measured directly against the live host on 2026-09-11:
+
+| Object | Rows | Last write |
+|---|---|---|
+| `mtm_mock.visual_work_order_lookup_result` | **0** | 2026-09-11 10:36:33 |
+| `mtm_mock.visual_work_order_lookup_result_stage` | **2** | 2026-09-11 **11:45:27** |
+
+while `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\refresh-run-records.json` reports
+`work_order_lookup | Succeeded | RowCount 230 | 2026-09-11T15:36:33Z` (15:36 UTC = 10:36 local). The other four
+shapes are healthy and hold real refreshed data (242 / 399 / 12711 / 230 rows, `is_seed_content = 0`).
+
+Two candidate causes, both worth the task: (a) the live integration test mutates the **shared deployed** mirror
+(Phase 19 documents that it replaces shape 1's snapshot) and nothing restores it afterwards — Phase 19 had to
+re-apply `seed_visual_mirror_baseline` by hand, and the stage's 11:45:27 timestamp post-dates the service's last
+refresh, which fits a test run rather than a service cycle; or (b) a swap completed with an empty stage while
+still reporting the pre-swap count. The observed pairing — result empty, stage holding test-sized data — *appeared*
+not to match the documented "stage holds the complete outgoing snapshot" semantics either way. **Superseded by T143
+(2026-09-11): cause (a) was confirmed and cause (b) ruled out, and the pairing does in fact match the documented
+semantics — the stage twin receives whatever `result` held immediately before each swap (after test 1: the 230 real
+rows; after test 2: the 2 synthetic rows). See Phase 21 for the proof.**
+
+**Impact if left:** with the primary read shape holding no rows, an Infor Visual outage leaves the work-order lookup
+serving nothing from cache, degrading SC-003.
+
+**Impact corrections (T143, 2026-09-11).** Two further claims in the sentence above were wrong and are withdrawn:
+
+- **Not an FR-017 breach.** FR-017 governs a *fresh installation*, whose seed comes from the artifacts in
+  `Database/Mock/Seeds/seed_visual_mirror_baseline`; those were never damaged, so the fresh-install guarantee held
+  throughout. What broke was the deployed **development cache's** usability — it had already been populated, so
+  FR-017 was not the requirement in play.
+- **`quickstart.md` §1 does not fail on a correctly-deployed cache.** §1 is a **fresh-deploy** verification —
+  *"shape reads return the seed content before any refresh has happened"* — and its own step 5 then performs the
+  refresh and asserts `is_seed_content = 0`. Followed in order it works. The `CALL` returns nothing only if it is
+  run out of sequence, against a cache whose seed a refresh has already consumed — which is what the empty result at
+  the time of writing actually was.
+
+Also fold in: the deployed `subordinate_parts` snapshot was produced by the pre-T141-fix population SQL, so cached
+die locations differ from what the live read now returns until the next refresh — re-refresh after restoring.
+
+### T142 — evidence
+
+`WeekendProject/PromptFiles/App-Validation-Checklist.md` line 86 keeps an **open** item: *"Mock toggles behave:
+`Feature.RecvMockData` ON shows sample coil weight; OFF queries DB."* The key and the sample catalog it exercises
+were deleted (FR-014), so the item can never pass and that checklist can never close. §3's other items are the
+`[NOW]` regression gates and are unaffected.
+
+**Out of scope for this feature, recorded for awareness only** (both already tracked in
+`WeekendProject/OPEN-WORK-NEXT-SPEC.md` §3 for the *next* spec, which owns them):
+`PromptFiles/15-0%-UserManagement.md` line 51 still lists "honor the mock short-circuit pattern
+(`Feature.RecvMockData` / Infor mock toggle)" as a **locked** requirement, and
+`PromptFiles/12-71%-MockMasterData-DbDriven.md` still names the toggles in its purpose text. Neither file belongs
+to this feature, and neither should be implemented as written — constitution II and FR-003 forbid the pattern.
+
+---
+
+## Phase 21: Execution note — convergence gap closure (2026-09-11, `/speckit.implement`)
+
+> Appended by `/speckit.implement` after working through Phase 20. T140–T142 are complete and ticked above;
+> no earlier task or phase was modified. T106 is re-assessed at the end and remains open.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| Build (`MTM_Waitlist.Tests.csproj`, Debug/x64) | **succeeded — 0 warnings / 0 errors** |
+| Offline suite | `Failed: 0, Passed: 692, Skipped: 15, Total: 707` (the 15 skips are the live-database suites, including both mock-cache tests, which report inconclusive without `MTM_WAITLIST_TEST_DB_CONNECTION_STRING`) |
+| Live mock-cache subset | `Failed: 0, Passed: 2, Total: 2` |
+| Deployed `mtm_mock` after the live run | all five shapes hold live data; `visual_work_order_lookup_result` = **230 rows**, `is_seed_content` = 0 |
+
+### T141 root cause (proven, not inferred)
+
+The stage twin held the literal rows `ITEST-A-4e5fc50f` / `ITEST-B-4e5fc50f` — the synthetic payload from
+`MockMirrorRefreshWriterIntegrationTests`. Because `sp_visual_<shape>_refresh` swaps
+`result → _prev → _stage` in one statement, the outgoing snapshot always lands in `_stage`. The sequence was:
+the service refreshed 230 real rows at 10:36 → test 1 swapped in its 2 synthetic rows (the real rows moved to
+`_stage`) → test 2 refreshed with `"[]"` and swapped in an empty snapshot, **destroying the real rows through
+the `TRUNCATE` at the start of its own cycle**. Nothing restored them, so the app's fallback for the primary
+read shape served an empty result while the shape's own run record still reported "Succeeded, RowCount 230".
+
+The test's remarks had justified this on the grounds that "`mtm_mock` … is a disposable cache that the on-host
+service refreshes on its own schedule (FR-025)" — true on the host, **false on a workstation**, which is where
+the suite actually runs.
+
+### T141 fix
+
+`MockMirrorRefreshWriterIntegrationTests` now captures the live mirror in `TestInitialize` (the four
+procedure-facing columns plus `is_seed_content`) and writes it back in `TestCleanup`, then asserts the restored
+projection, so the shared cache is handed back as found. A captured snapshot containing any seed row makes the
+test report **inconclusive without mutating anything**, because the procedure hardcodes `is_seed_content = 0`
+and therefore cannot put a fresh install's baseline (FR-017) back — the one state that could not be restored is
+the one state the test now refuses to destroy. Restoration is data-complete but not byte-identical:
+`refreshed_utc` is necessarily re-stamped.
+
+**Verified live:** the same run that previously left `result` = 0 rows and `_stage` = 2 synthetic rows now leaves
+`result` = 230 real rows (`WO-010089 / Brake Pad / 020-01`, …) and `_stage` = 0.
+
+### T106 re-assessment
+
+Unchanged and still open. Closing it needs a **host-side** service deployment, Infor Visual deliberately made
+unreachable, a signed-in application session, and the 30-day SC-007/SC-008 observation windows — none of which
+this run provides. The convergence discovery that the cache could be left empty by the test suite did not
+account for T106's blockage, and does not remove it.
+
+### Environment side effects (reversed)
+
+Re-warming the mirror required running the workstation copy of `MTM_Waitlist.Mock.Service` once.
+`AutoStartAtLogon` was temporarily set to `false` so no `HKCU\…\Run` entry would be written, and was
+**restored to `true` afterwards**; no Run entry exists (checked). The service was stopped and leaves no orphan
+process. Captured `dotnet test` output was deleted because it contains the connection string.
+
+---
+
+## Phase 22: Convergence
+
+> Appended by `/speckit.converge` on 2026-09-11 (second run on this feature). Non-destructive re-assessment after
+> `/speckit.implement` completed T140–T142. Those three are confirmed closed below and **no existing task, ID, or
+> phase was modified**. One artifact-accuracy gap remains; the pre-existing, environment-blocked T106 is not a code
+> gap and is deliberately not re-appended.
+
+- [x] T143 (LOW) Correct the two superseded claims in Phase 20's T141 evidence block so they agree with the Phase 21 root-cause finding, per Constitution I (contradicts) — **Done 2026-09-11:** both superseded claims are marked as superseded **in place** (the original suspicion is retained, per this file's convention for historical records) and the corrected reading is recorded in Phase 20's T141 evidence, together with two further corrections to the impact sentence that the same review exposed — FR-017 was never breached, and `quickstart.md` §1 does not fail on a correctly-deployed cache. Markdown-only change; no code, build, or test impact.
+
+### T143 — evidence
+
+Phase 20's T141 evidence (lines 1641–1646) records two suspicions that the Phase 21 execution note, in this same
+file, then **disproved** — so the artifact currently contradicts itself:
+
+1. *"The observed pairing — result empty, stage holding test-sized data — does not match the documented 'stage holds
+   the complete outgoing snapshot' semantics either way."* Phase 21 proves it matches **exactly**: after test 1 the
+   stage held the 230 real rows `result` held before that swap; after test 2 it held the 2 synthetic rows `result`
+   held before that swap. Both are the complete outgoing snapshot, precisely as documented.
+2. *"[…] and `quickstart.md` §1's `sp_visual_work_order_lookup_get('SEED-WO-100')` assertion now fails on a
+   correctly-deployed cache."* `quickstart.md` §1 is a **fresh-deploy** verification — *"shape reads return the seed
+   content before any refresh has happened"* — and its step 5 then performs the refresh and states
+   `is_seed_content = 0`. Followed in order it does not fail on a correctly-deployed cache, so the claim is wrong.
+
+The adjacent FR-017 sentence also overstates the impact: the deployed development cache's seed had been consumed by
+a prior test run, but FR-017's fresh-install guarantee comes from the seed artifacts
+(`Database/Mock/Seeds/seed_visual_mirror_baseline`), which were never damaged. Correct all three so the artifact set
+records what actually happened — Constitution I requires completion records to be auditable, and a note that a later
+section of the same file refutes is not.
+
+### Verified closed in this run
+
+| Prior finding | Task | Verification |
+|---|---|---|
+| F1 — stale demo/mock references in `ChangeLog.Simple.md` (CRITICAL) | T140 | A retired-symbol sweep over the whole repository returns **0** hits in any document describing current behaviour; the remaining hits are only the deliberately historical archives (`ChangeLog.md`, `Module_Mock/**`, `PromptFiles/*`), this feature's own artifacts, and the intentional negative references in `RetiredSymbolAuditTests` and its sibling test comments |
+| F2 — empty shape-1 mirror (HIGH) | T141 | `mtm_mock` holds live data in **all five** mirrors — `work_order_lookup` = 230, `disposition_input` = 230, `operation_sequences` = 242, `subordinate_parts` = 399, `inventory_locations` = 12712 — with `is_seed_content` = 0 throughout. The shape-1 stage twin is empty, which is correct: it is scratch, and the next refresh truncates it. **No live mirror is empty** |
+| F3 — unfinishable validation item (MEDIUM) | T142 | `App-Validation-Checklist.md` §3 no longer contains a checkbox for `Feature.RecvMockData`; the retired item is struck through and names the tests that now cover its intent |
+
+Also confirmed this run: T137 is genuinely complete (`plan.md` cites **v1.1.1** with the amendment note and the gate
+verdicts restated against it), and `tasks.md` carries **141 of 142** tasks complete with T106 the only open item.
+
+### T106 — unchanged, and not a code gap
+
+T106 is an environment-gated **verification** task: a host-side service deployment, Infor Visual deliberately made
+unreachable, a signed-in application session, and the 30-day SC-007/SC-008 observation windows. It is already
+triaged in Phases 18, 19 and 21 and is deliberately **not** re-appended as a finding — re-appending it every run
+would add no information and would only inflate the phase list.

@@ -83,7 +83,13 @@
       Result and creates a request (legacy type/subtype behavior intact until Phase 3 re-lay).
 - [ ] **Waitlist board** loads and renders current cards; pinning/`WaitlistRequestTitles.For()` text unchanged.
 - [ ] No binding/null crashes opening a card detail page.
-- [ ] Mock toggles behave: `Feature.RecvMockData` ON shows sample coil weight; OFF queries DB.
+- ~~Mock toggles behave: `Feature.RecvMockData` ON shows sample coil weight; OFF queries DB.~~
+      **Retired 2026-09-11 (T142).** The `Feature.RecvMockData` key and the sample catalogs it exercised
+      were deleted by FR-014 (task T042), so this item could never pass. There is no manual demo/mock mode
+      and none may be reintroduced (FR-003, constitution II). The behaviour it guarded is covered instead by
+      `InternalStoreAvailabilityTests` (internal stores read live, per-screen unavailable state +
+      `RetryCount`/`NextRetryUtc`, FR-001/FR-021) and by `MockMirrorRefreshWriterIntegrationTests`
+      (automatic external-read fallback, FR-002/FR-006).
 - [ ] Settings screen opens without the InvalidCast first-chance noise being app-breaking (benign WinUI
       binding-engine noise documented 2026-09-06); Urgency allotment editor still loads subtype names
       (via `IRequestSubtypeNameReadService` now that the editor stack is gone).

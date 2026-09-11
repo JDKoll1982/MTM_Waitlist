@@ -81,8 +81,10 @@ The 17 skipped tests are the opt-in live-database subset gated on `MTM_WAITLIST_
 **Verify**
 
 ```sql
--- shape reads return the seed content before any refresh has happened (FR-017)
-CALL sp_visual_work_order_lookup_get('SEED-WO-1');
+-- shape reads return the seed content before any refresh has happened (FR-017).
+-- The seeded journey is SEED-WO-100 / SEED-PART-100 — the exact keys are defined in
+-- Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql.
+CALL sp_visual_work_order_lookup_get('SEED-WO-100');
 -- metadata proves these are seed rows, not refreshed rows
 SELECT refreshed_utc, is_seed_content FROM visual_work_order_lookup_result LIMIT 5;   -- is_seed_content = 1
 ```
@@ -101,6 +103,14 @@ snapshot or the complete new one — never a mixture and never an empty table (F
 ## 2. Deploy and start the service (Phase 2)
 
 1. Build and publish `MTM_Waitlist.Mock.Service` (unpackaged, self-contained `win-x64`) onto the MySQL host.
+   The deploy artifact and its instructions are `MTM_Waitlist.Mock.Service/README.md`; the publish profile is
+   `MTM_Waitlist.Mock.Service/Properties/PublishProfiles/win-x64-selfcontained.pubxml`. The CLI equivalent is:
+
+   ```powershell
+   dotnet publish MTM_Waitlist.Mock.Service/MTM_Waitlist.Mock.Service.csproj `
+       -c Release -p:Platform=x64 -p:PublishProfile=win-x64-selfcontained
+   # → MTM_Waitlist.Mock.Service/bin/publish/win-x64/   (copy the whole folder to the host)
+   ```
 2. Launch it. Expected: **no main window** — a tray icon appears and the background engines start.
 3. Open the settings UI from the tray and confirm the configuration surface: refresh interval, per-store backup
    schedule/retention/destination, API bind address/port, Visual connection, and last-run status (FR-012, FR-013).

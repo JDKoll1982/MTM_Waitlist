@@ -3,12 +3,23 @@ Option Explicit
 ' ============================================================================
 ' MTM Waitlist - local / shared database installer
 ' ============================================================================
-' Deploys BOTH databases:
+' Deploys THREE phases:
 '   1. mtm_waitlist  - the application's own store (DROP + RECREATE)
 '   2. mtm_mock      - the Infor Visual mirror cache (created/updated in place;
 '                      existing cache rows are deliberately kept, because the
 '                      cache can be rebuilt by the service but is expensive to
 '                      refill, and the artifacts are re-runnable).
+'   3. mtm_receiving_application - ADDITIVE ONLY. Deploys just the NEW stored
+'                      procedures this repository authors for the receiving
+'                      store. This installer never creates, drops or alters that
+'                      database, its tables, or any procedure it already owns,
+'                      and it never runs a rollback. The database must exist
+'                      first (deployed by MTM_Receiving_Application); when it is
+'                      absent the phase is skipped with a message.
+'
+' mtm_wip_application_winforms is deliberately NOT deployed to. The application
+' reads that store through a shipped query script (read-only SELECT), so no
+' object of any kind needs to be added there.
 '
 ' Target host selection:
 '   The script first checks whether the shared database server
@@ -184,11 +195,43 @@ mockScripts = Array( _
     "Mock\AllSeeds.sql" _
 )
 
+' ----------------------------------------------------------------------------
+' Additive phase: the receiving store, which this installer does NOT own.
+'
+' Only the NEW stored procedures this repository authors for
+' `mtm_receiving_application` are deployed, and only their `create.sql`. Each
+' artifact drops-and-creates exactly its own procedure by name and touches no
+' table, view, function, or procedure the receiving application already owns.
+'
+' Deliberately NOT deployed here, though they live beside the artifacts above:
+'   StoredProcedures\sp_Dunnage_Types_Insert.sql and sp_Dunnage_Parts_Insert.sql
+'   are DEPENDENCY NOTES, not artifacts. They create nothing; the procedures
+'   belong to MTM_Receiving_Application's own deployment and are listed here
+'   only so the app's script store can load their text. Executing them would be
+'   a no-op, and treating them as deployment artifacts would fork definitions
+'   another application owns.
+'
+' This tree carries no seed. The receiving store's data belongs to
+' MTM_Receiving_Application, and the fixture that wrote mock receiving
+' transactions into its live `receiving_history` table was removed 2026-09-11.
+' ----------------------------------------------------------------------------
+Dim receivingDbName
+receivingDbName = "mtm_receiving_application"
+
+' Collected from the file-per-artifact tree rather than hand-listed, so a newly added
+' artifact is deployed automatically and the exclusions below are structural:
+'   * only `<artifact>\create.sql` is taken, so a rollback can never be executed;
+'   * the dependency notes are flat `.sql` files in the tree root, not folders, so they
+'     cannot be picked up.
+Dim receivingScripts
+receivingScripts = CollectArtifactScripts("MTMReceivingApp\StoredProcedures")
+
 Dim failures
 failures = ""
 
 failures = failures & RunScriptPhase("APPLICATION DATABASE (" & dbName & ")", appScripts, mysqlPath, clientConfigPath, logPath, targetHost, dbPort)
 failures = failures & RunScriptPhase("CACHE DATABASE (" & mockDbName & ")", mockScripts, mysqlPath, clientConfigPath, logPath, targetHost, dbPort)
+failures = failures & RunAdditivePhase("RECEIVING DATABASE - new procedures only (" & receivingDbName & ")", receivingDbName, receivingScripts, shell, mysqlPath, clientConfigPath, logPath, targetHost, dbPort)
 
 WriteLine logPath, "==== MTM Waitlist database install finished: " & Now & " ===="
 
@@ -197,7 +240,8 @@ SafeDeleteFile clientConfigPath
 If failures = "" Then
     WScript.Echo "Database install completed successfully (" & targetDescription & ")." & vbCrLf & _
         "  " & dbName & ": dropped and recreated" & vbCrLf & _
-        "  " & mockDbName & ": created/updated in place" & vbCrLf & vbCrLf & _
+        "  " & mockDbName & ": created/updated in place" & vbCrLf & _
+        "  " & receivingDbName & ": new procedures added, nothing else touched" & vbCrLf & vbCrLf & _
         "Log: " & logPath
     WScript.Quit 0
 Else
@@ -332,6 +376,117 @@ Function RunScriptPhase(phaseLabel, scripts, mysqlExe, clientConfig, logFile, ho
     Next
 
     RunScriptPhase = summary
+End Function
+
+' Deploys waitlist-authored procedures into a database this installer does NOT own.
+' Additive only: the database must already exist, and no rollback is ever run.
+Function RunAdditivePhase(phaseLabel, databaseName, scripts, shellObj, mysqlExe, clientConfig, logFile, hostName, portNumber)
+    Dim summary
+    Dim index
+
+    summary = ""
+    WriteLine logFile, "---- " & phaseLabel & " ----"
+
+    If Not DatabaseExists(shellObj, mysqlExe, clientConfig, hostName, portNumber, databaseName) Then
+        Dim skipMsg
+        skipMsg = "SKIPPED: database '" & databaseName & "' does not exist on " & hostName & "."
+        WScript.Echo skipMsg
+        WScript.Echo "  This installer only ADDS procedures to it and never creates it."
+        WriteLine logFile, skipMsg
+        WriteLine logFile, "This installer only ADDS procedures to it and never creates it; deploy that database from its own application first."
+        WriteLine logFile, ""
+        RunAdditivePhase = skipMsg & vbCrLf
+        Exit Function
+    End If
+
+    WriteLine logFile, "Target '" & databaseName & "' exists; adding new procedures only (no CREATE/DROP DATABASE, no ALTER, no rollback)."
+    If UBound(scripts) < 0 Then
+        WriteLine logFile, "No artifacts found to deploy."
+    Else
+        WriteLine logFile, "Artifacts collected: " & CStr(UBound(scripts) + 1)
+    End If
+    WriteLine logFile, ""
+
+    For index = 0 To UBound(scripts)
+        Dim sqlPath
+        sqlPath = scriptDir & "\" & scripts(index)
+
+        If Not fso.FileExists(sqlPath) Then
+            Dim missingMsg
+            missingMsg = "MISSING SCRIPT: " & scripts(index)
+            WScript.Echo missingMsg
+            WriteLine logFile, missingMsg
+            summary = summary & "- " & scripts(index) & " (missing file)" & vbCrLf
+        Else
+            Dim stepMsg
+            stepMsg = "Running: " & scripts(index)
+            WScript.Echo stepMsg
+            WriteLine logFile, stepMsg
+
+            Dim exitCode
+            exitCode = RunSql(shellObj, mysqlExe, clientConfig, sqlPath, logFile, hostName, portNumber)
+
+            If exitCode <> 0 Then
+                Dim errMsg
+                errMsg = "FAILED (exit " & exitCode & "): " & scripts(index)
+                WScript.Echo errMsg
+                WriteLine logFile, errMsg
+                summary = summary & "- " & scripts(index) & " (exit " & exitCode & ")" & vbCrLf
+            Else
+                WriteLine logFile, "SUCCESS: " & scripts(index)
+            End If
+
+            WriteLine logFile, ""
+        End If
+    Next
+
+    RunAdditivePhase = summary
+End Function
+
+' Collects `<name>\create.sql` for every artifact folder under the given tree.
+' Returns an empty array when the tree or an artifact file is absent.
+Function CollectArtifactScripts(relativeFolder)
+    Dim folderPath
+    Dim folder
+    Dim subFolder
+    Dim collected()
+    Dim count
+
+    ReDim collected(-1)
+    count = 0
+    folderPath = scriptDir & "\" & relativeFolder
+
+    If fso.FolderExists(folderPath) Then
+        Set folder = fso.GetFolder(folderPath)
+        For Each subFolder In folder.SubFolders
+            If fso.FileExists(subFolder.Path & "\create.sql") Then
+                ReDim Preserve collected(count)
+                collected(count) = relativeFolder & "\" & subFolder.Name & "\create.sql"
+                count = count + 1
+            End If
+        Next
+    End If
+
+    CollectArtifactScripts = collected
+End Function
+
+' True when the named schema already exists on the target server. Used to keep the
+' additive phase from ever creating a database it does not own.
+Function DatabaseExists(shellObj, mysqlExe, clientConfig, hostName, portNumber, databaseName)
+    Dim cmd
+    Dim execObj
+    Dim countText
+    Dim ignoredError
+
+    cmd = QuoteArg(mysqlExe) & " --defaults-extra-file=" & QuoteArg(clientConfig) & _
+        " --default-character-set=utf8mb4 -h " & hostName & " -P " & CStr(portNumber) & _
+        " -N -B --execute=""SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = '" & databaseName & "';"""
+
+    Set execObj = shellObj.Exec(cmd)
+    countText = Trim(execObj.StdOut.ReadAll())
+    ignoredError = execObj.StdErr.ReadAll()
+
+    DatabaseExists = (execObj.ExitCode = 0 And countText = "1")
 End Function
 
 Function RunSql(shellObj, mysqlExe, clientConfig, scriptPath, logFile, hostName, portNumber)

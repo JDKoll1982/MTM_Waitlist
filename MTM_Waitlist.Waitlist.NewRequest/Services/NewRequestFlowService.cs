@@ -16,6 +16,44 @@ public sealed class NewRequestFlowService : INewRequestFlowService
         _requestTypeCatalogService = requestTypeCatalogService;
     }
 
+    /// <summary>
+    /// Makes sure the image location service is initialized before it is used.
+    /// </summary>
+    /// <remarks>
+    /// The service is initialized during startup, but the first New Request screen can be reached before that
+    /// finishes. Because the guards below used to bail out while it was not ready yet, the work-center step
+    /// rendered placeholder photos on the first visit and the real photos only on the second. Initialization
+    /// is idempotent and lock-guarded, so awaiting it here makes the first render deterministic instead of
+    /// racing startup. A failure to initialize still degrades to the placeholder rather than throwing.
+    /// </remarks>
+    /// <param name="cancellationToken">Cancellation token for initialization.</param>
+    /// <returns><see langword="true"/> when the service is initialized and usable.</returns>
+    private async Task<bool> EnsureImageServiceAsync(CancellationToken cancellationToken)
+    {
+        if (_imageLocationService is null)
+        {
+            return false;
+        }
+
+        if (!_imageLocationService.IsInitialized)
+        {
+            try
+            {
+                await _imageLocationService.InitializeAsync(cancellationToken).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                StartupDebugLog.Error(
+                    "WaitlistNewRequest",
+                    ex,
+                    "Image location service initialization failed while resolving New Request images.");
+                return false;
+            }
+        }
+
+        return _imageLocationService.IsInitialized;
+    }
+
     public async Task<IReadOnlyList<NewRequestTypeDefinition>> LoadRequestTypesAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -36,7 +74,7 @@ public sealed class NewRequestFlowService : INewRequestFlowService
 
     public async Task<string> ResolveRequestTypeImagePathAsync(string requestTypeName, CancellationToken cancellationToken = default)
     {
-        if (_imageLocationService is null || !_imageLocationService.IsInitialized)
+        if (!await EnsureImageServiceAsync(cancellationToken).ConfigureAwait(true))
         {
             return string.Empty;
         }
@@ -64,7 +102,7 @@ public sealed class NewRequestFlowService : INewRequestFlowService
         string subtypeName,
         CancellationToken cancellationToken = default)
     {
-        if (_imageLocationService is null || !_imageLocationService.IsInitialized)
+        if (!await EnsureImageServiceAsync(cancellationToken).ConfigureAwait(true))
         {
             return string.Empty;
         }
@@ -90,7 +128,7 @@ public sealed class NewRequestFlowService : INewRequestFlowService
     public async Task<Dictionary<string, string>> BuildWorkCenterImageLookupAsync(CancellationToken cancellationToken = default)
     {
         var lookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (_imageLocationService is null || !_imageLocationService.IsInitialized)
+        if (!await EnsureImageServiceAsync(cancellationToken).ConfigureAwait(true))
         {
             return lookup;
         }

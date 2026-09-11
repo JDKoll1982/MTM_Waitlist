@@ -40,11 +40,12 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <Border
                             x:Name="ItemHero"
-                            Grid.RowSpan="5"
+                            Grid.RowSpan="6"
                             MinWidth="88"
                             MinHeight="88"
                             MaxWidth="110"
@@ -66,7 +67,7 @@
                              on the right of the same hero card (click to enlarge). -->
                         <Border
                             Grid.Column="3"
-                            Grid.RowSpan="5"
+                            Grid.RowSpan="6"
                             MinWidth="110"
                             MinHeight="110"
                             MaxWidth="150"
@@ -125,13 +126,24 @@
                         <TextBlock
                             Grid.Row="3"
                             Grid.Column="2"
-                            Foreground="{ThemeResource SystemAccentColor}"
+                            Foreground="{x:Bind ViewModel.Item.RemainingTimeText, Mode=OneWay, Converter={StaticResource RemainingTimeToBrushConverter}}"
                             FontWeight="SemiBold"
                             Text="{x:Bind ViewModel.Item.RemainingTimeText, Mode=OneWay}" />
 
+                        <!-- Sits directly under the remaining-time value: that number is evaluated once when
+                             this page opens and the page has no minute tick, so say so rather than letting it
+                             look live. The list card does tick, so only this page carries the caption. -->
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="2"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Text="{x:Bind ViewModel.RemainingTimeNoteText}"
+                            TextWrapping="WrapWholeWords" />
+
                         <TextBlock
                             Grid.Column="1"
-                            Grid.Row="4"
+                            Grid.Row="5"
                             Grid.ColumnSpan="2"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Style="{ThemeResource CaptionTextBlockStyle}"

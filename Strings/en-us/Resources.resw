@@ -601,6 +601,12 @@
     <value>Show only my requests</value>
   </data>
 
+  <!-- Details page: the remaining-time value is evaluated once when the page opens and this page has no
+       minute tick, so the caption states that rather than letting the countdown look live. -->
+  <data name="Waitlist_Detail.RemainingTimeNote" xml:space="preserve">
+    <value>Does not update automatically.</value>
+  </data>
+
   <!-- Module_Mock read-status indicator (FR-003/FR-005/FR-017/FR-022).
        The message keys are format strings: {0} the unreachable statement, {1} the cached-data-in-use
        statement, {2} the cached-data age for the AgeText key only. -->
@@ -630,5 +636,20 @@
   </data>
   <data name="Mock_Indicator.AgeDays" xml:space="preserve">
     <value>{0} days</value>
+  </data>
+  <!--
+       Internal-store unavailable state (FR-021). Shown per screen, in that screen's own surface, only while
+       the store is unavailable; it clears itself as soon as a read succeeds. The message key is a format
+       string: {0} the store name, {1} the last attempt time, {2} how many retries were consumed, {3} when the
+       next attempt is worth making.
+  -->
+  <data name="Store_Unavailable.Title" xml:space="preserve">
+    <value>Database unavailable</value>
+  </data>
+  <data name="Store_Unavailable.Message" xml:space="preserve">
+    <value>{0} did not answer after {2} retries (last attempt {1}). Next attempt after {3}.</value>
+  </data>
+  <data name="Store_Unavailable.Retry" xml:space="preserve">
+    <value>Try again</value>
   </data>
 </root>

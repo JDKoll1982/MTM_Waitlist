@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using System.Text.Json;
 using System.Threading;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
@@ -22,6 +21,16 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
     /// orders by rank rather than building first, and takes no parameters, so it cannot serve this caller (T090).
     /// </summary>
     private const string WorkCentersCatalogProcedure = "sp_setup_work_centers_catalog_get";
+
+    /// <summary>
+    /// The authoritative request-type catalog read. It replaced <c>Assets/Config/waitlist-request-types.json</c>
+    /// as the request-type source (T100) and returns each row's stable <c>public_id</c> GUID beside its
+    /// configured <c>default_image_path</c>.
+    /// </summary>
+    private const string RequestTypesProcedure = "sp_waitlist_request_types_get";
+
+    /// <summary>The authoritative request-subtype catalog read; see <see cref="RequestTypesProcedure"/>.</summary>
+    private const string RequestSubtypesProcedure = "sp_waitlist_request_subtypes_get";
 
     private readonly ILogger<ImageLocationService> _logger;
     private readonly IRequestTypeDisplayLabelService _requestTypeDisplayLabelService;
@@ -110,13 +119,13 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
                 if (!RequestTypeInventory.Items.Any())
                 {
                     throw new InvalidOperationException(
-                        "Request type inventory is empty after initialization. JSON configuration may not be loaded.");
+                        "Request type inventory is empty after initialization. The request-type catalog may not be loaded.");
                 }
 
                 if (!RequestSubtypeInventory.Groups.Any())
                 {
                     throw new InvalidOperationException(
-                        "Request subtype inventory is empty after initialization. JSON configuration may not be loaded.");
+                        "Request subtype inventory is empty after initialization. The request-subtype catalog may not be loaded.");
                 }
 
                 // Validate configuration
@@ -327,17 +336,17 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
         {
             var defaultPath = ImageLocationDefaults.RequestTypeDefaultPath;
 
-            // Cascade order: database override -> JSON imagePath -> default asset.
+            // Cascade order: database override -> catalog default_image_path -> default asset.
             var overridePath = await _imageOverrideReadService.GetOverrideAsync("request_type", typeId.ToString(), cancellationToken).ConfigureAwait(false);
             if (overridePath is not null && !string.IsNullOrWhiteSpace(overridePath.ImagePath))
             {
                 return await ResolveExistingPathAsync(overridePath.ImagePath, defaultPath, "request_type", requestTypeId).ConfigureAwait(false);
             }
 
-            var jsonPath = await TryResolveJsonRequestTypeImagePathAsync(typeId).ConfigureAwait(false);
-            if (!string.IsNullOrWhiteSpace(jsonPath))
+            var catalogPath = await TryResolveCatalogRequestTypeImagePathAsync(typeId, cancellationToken).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(catalogPath))
             {
-                return await ResolveExistingPathAsync(jsonPath, defaultPath, "request_type", requestTypeId).ConfigureAwait(false);
+                return await ResolveExistingPathAsync(catalogPath, defaultPath, "request_type", requestTypeId).ConfigureAwait(false);
             }
 
             return defaultPath;
@@ -384,10 +393,10 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
                 return await ResolveExistingPathAsync(overridePath.ImagePath, defaultPath, "request_subtype", subtypeId).ConfigureAwait(false);
             }
 
-            var jsonPath = await TryResolveJsonSubtypeImagePathAsync(typeId).ConfigureAwait(false);
-            if (!string.IsNullOrWhiteSpace(jsonPath))
+            var catalogPath = await TryResolveCatalogSubtypeImagePathAsync(typeId, cancellationToken).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(catalogPath))
             {
-                return await ResolveExistingPathAsync(jsonPath, defaultPath, "request_subtype", subtypeId).ConfigureAwait(false);
+                return await ResolveExistingPathAsync(catalogPath, defaultPath, "request_subtype", subtypeId).ConfigureAwait(false);
             }
 
             var parentRequestTypeId = _requestSubtypeDisplayLabelService.GetParentRequestTypeId(typeId);
@@ -754,69 +763,71 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
         return File.Exists(appRelative);
     }
 
-    private static async Task<string?> TryResolveJsonRequestTypeImagePathAsync(Guid requestTypeId)
+    /// <summary>
+    /// Reads a request type's configured <c>default_image_path</c> from the authoritative catalog by its
+    /// stable <c>public_id</c> GUID. This replaced <c>Assets/Config/waitlist-request-types.json</c>, which was
+    /// the last production reader of that file (T100, FR-019).
+    /// </summary>
+    private async Task<string?> TryResolveCatalogRequestTypeImagePathAsync(Guid requestTypeId, CancellationToken cancellationToken)
     {
-        var requestTypes = await LoadJsonImageConfigAsync().ConfigureAwait(false);
-        return requestTypes.TryGetValue(requestTypeId.ToString(), out var value) ? value : null;
+        var rows = await _mySqlHelperServer
+            .ExecuteStoredProcedureQueryAsync(
+                RequestTypesProcedure,
+                new Dictionary<string, object?>(),
+                MySqlDatabaseTarget.MtmWaitlist,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return FindCatalogImagePath(rows, "public_id", requestTypeId);
     }
 
-    private static async Task<string?> TryResolveJsonSubtypeImagePathAsync(Guid subtypeId)
+    /// <summary>
+    /// Reads a request subtype's configured <c>default_image_path</c> from the authoritative catalog by its
+    /// stable <c>public_id</c> GUID.
+    /// </summary>
+    private async Task<string?> TryResolveCatalogSubtypeImagePathAsync(Guid subtypeId, CancellationToken cancellationToken)
     {
-        var requestTypes = await LoadJsonImageConfigAsync().ConfigureAwait(false);
-        return requestTypes.TryGetValue(subtypeId.ToString(), out var value) ? value : null;
+        var rows = await _mySqlHelperServer
+            .ExecuteStoredProcedureQueryAsync(
+                RequestSubtypesProcedure,
+                new Dictionary<string, object?>(),
+                MySqlDatabaseTarget.MtmWaitlist,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return FindCatalogImagePath(rows, "public_id", subtypeId);
     }
 
-    private static async Task<Dictionary<string, string>> LoadJsonImageConfigAsync()
+    private static string? FindCatalogImagePath(
+        IReadOnlyList<Dictionary<string, object?>> rows,
+        string publicIdColumn,
+        Guid id)
     {
-        var configPath = Path.Combine(AppContext.BaseDirectory, "Assets", "Config", "waitlist-request-types.json");
-        if (!File.Exists(configPath))
-        {
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        }
+        var publicId = id.ToString();
 
-        await using var stream = File.OpenRead(configPath);
-        using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
-        var mappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        if (document.RootElement.ValueKind != JsonValueKind.Array)
+        foreach (var row in rows)
         {
-            return mappings;
-        }
-
-        foreach (var rootItem in document.RootElement.EnumerateArray())
-        {
-            if (rootItem.ValueKind != JsonValueKind.Object)
+            if (!row.TryGetValue(publicIdColumn, out var rawId)
+                || !string.Equals(Convert.ToString(rawId)?.Trim(), publicId, StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
-            if (rootItem.TryGetProperty("id", out var requestTypeIdElement) &&
-                rootItem.TryGetProperty("imagePath", out var requestTypePathElement) &&
-                !string.IsNullOrWhiteSpace(requestTypePathElement.GetString()))
+            if (row.TryGetValue("default_image_path", out var rawPath)
+                && rawPath is not null
+                && rawPath != DBNull.Value)
             {
-                mappings[requestTypeIdElement.GetString() ?? string.Empty] = requestTypePathElement.GetString() ?? string.Empty;
-            }
-
-            if (rootItem.TryGetProperty("subtypes", out var subtypesElement) && subtypesElement.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var subtype in subtypesElement.EnumerateArray())
+                var path = Convert.ToString(rawPath)?.Trim();
+                if (!string.IsNullOrWhiteSpace(path))
                 {
-                    if (subtype.ValueKind != JsonValueKind.Object)
-                    {
-                        continue;
-                    }
-
-                    if (subtype.TryGetProperty("id", out var subtypeIdElement) &&
-                        subtype.TryGetProperty("imagePath", out var subtypePathElement) &&
-                        !string.IsNullOrWhiteSpace(subtypePathElement.GetString()))
-                    {
-                        mappings[subtypeIdElement.GetString() ?? string.Empty] = subtypePathElement.GetString() ?? string.Empty;
-                    }
+                    return path;
                 }
             }
+
+            return null;
         }
 
-        return mappings;
+        return null;
     }
 
     /// <summary>

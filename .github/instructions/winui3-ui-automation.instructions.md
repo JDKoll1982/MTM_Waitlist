@@ -55,10 +55,30 @@ Start-Process $exe
   and forwards to `StartupLogService`, which appends JSON Lines to
   `%LOCALAPPDATA%\MTM_Waitlist\Logs\Startup\startup_daily_<yyyy_MM_dd>.jsonl`. That directory is
   overridable through `StartupLoggingOptions.HostedVmLogDirectory`.
-- Check the newest file in that folder before trusting it. A file older than your run means the
-  startup log service did not start, so fall back to the UIA text dump and a debugger session.
+- Check the newest file in that folder before trusting it — **but do not conclude the log service is
+  down from this folder alone**. `LocalSettings.json` may override
+  `Startup.Logging.HostedVmLogDirectory`; on `MTMFG-161` it points at the shared path
+  `X:\Software Development\Live Applications\MTM_Waitlist\Logs`, so the **local** daily folder is
+  frozen at `startup_daily_2026_07_30.jsonl` while `startup_forwarded_<yyyy_MM_dd>.jsonl` on `X:` is
+  current. Read both before deciding. (`X:` is a real mapped drive on this workstation.)
 - Read the UIA text dump as the primary signal. It shows what the user sees, which the startup log
   does not.
+- **To get past the startup gate on a workstation whose `appsettings.json` still points at `localhost`,
+  both connection overrides are needed** (`MTM_WAITLIST_DB_CONNECTION_STRING` alone was not enough on
+  2026-09-11):
+
+  ```powershell
+  $cs = 'Server=172.16.1.104;Port=3306;Database=mtm_waitlist;User Id=root;Password=root;AllowPublicKeyRetrieval=True;'
+  $env:MTM_WAITLIST_DB_CONNECTION_STRING = $cs
+  $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING = $cs
+  ```
+
+  With only the first set, the app still showed *"Could not validate startup session from the
+  database"*; with both set it reached the **Sign in** window. That is the difference between testing
+  navigation and testing nothing but the failure dialog.
+- Reaching the **shell** needs a sign-in as well, so a full navigation test needs credentials for a
+  valid account. Without them, steps 3 (header text) and 5 (navigation) cannot be exercised — only the
+  pre-shell windows can.
 
 ## 2. Connect to the window
 
@@ -83,9 +103,12 @@ $windows = [System.Windows.Automation.AutomationElement]::RootElement.FindAll([S
 $windows | ForEach-Object { "$($_.Current.ControlType.ProgrammaticName) | '$($_.Current.Name)' | hwnd=$($_.Current.NativeWindowHandle)" }
 ```
 
-Never locate the MTM_Waitlist window by title. `MainWindow` is a `WinUIEx.WindowEx` and the title
-has been observed to report the framework default `WinUI Desktop` instead of the localized
-`MTM_Waitlist` name.
+Never locate the MTM_Waitlist window by title. The title is **not stable**: `MainWindow` is a
+`WinUIEx.WindowEx`, and on 2026-09-11 the splash window reported the framework default
+`WinUI Desktop` while the sign-in window reported `Sign in`. A title lookup is therefore not merely
+wrong for this app, it is wrong for *some windows and states and not others* — which is worse,
+because it works until it does not. Use the process id (`FromHandle($p.MainWindowHandle)`) or
+enumerate the process's top-level windows as above.
 
 ## 3. Read the current page
 
@@ -134,8 +157,20 @@ $rect = New-Object Win32WindowState+RECT
 size the window returns to when you un-maximize, which is how you confirm that a maximize still
 leaves a sensible restore size.
 
-`Add-Type` fails if the type already exists in the session. Use the same snippet in one session, or
-open a fresh terminal before redefining it.
+`Add-Type` in this workspace behaves the **opposite** way to what a shared session would suggest, so
+this is worth stating plainly (verified 2026-09-11 on Windows PowerShell 5.1.26100.9444):
+
+- **Each command runs in its own session, so a type defined in one step is NOT available in the next.**
+  A later step that only calls `[Win32WindowState]::GetWindowPlacement(...)` fails with *"Cannot find
+  type"*. Re-declare the type in every command that needs it, and prefer putting the declaration and
+  its use in the same command.
+- **Adding the same definition twice inside one session does not fail.** The warning about
+  "`Add-Type` fails if the type already exists" did not reproduce here; the second call was a no-op
+  success. Do not rely on an exception to tell you whether the type is loaded — test for it with
+  `([System.Management.Automation.PSTypeName]'Win32WindowState').Type` if you need to branch.
+
+The practical upshot: combine the window-state read with its own `Add-Type` in a single command rather
+than assuming the type survives from the previous step.
 
 ## 5. Navigate
 
@@ -212,16 +247,65 @@ measuring, and launch fresh before concluding that a sizing change did or did no
 ## What this catches
 
 - Startup that never reaches the shell, for example a database connection `ContentDialog`. The text
-  dump surfaces the failure message and its `Retry` and `Close` buttons immediately.
+  dump surfaces the failure message immediately.
+  **Observed (2026-09-11)** — the dump read exactly:
+
+  ```text
+  Launching MTM Waitlist
+  Could not validate startup session from the database. Try again.
+  We could not connect to the database. Retry or close the application.
+  ```
+
+  The buttons are a **separate query**: `Retry` and `Close` are `ControlType.Button`, so they do *not*
+  appear in the `ControlType.Text` dump. Enumerate `ControlType.Button` to see them:
+
+  ```powershell
+  $bc = New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ControlTypeProperty,[System.Windows.Automation.ControlType]::Button)
+  $root.FindAll([System.Windows.Automation.TreeScope]::Descendants,$bc) | ForEach-Object { $_.Current.Name }
+  # Retry
+  # Close
+  ```
 - Startup or navigation that lands on the wrong page, or on an empty shell.
 - Window regressions such as a window that shows before it is activated, or a page that resizes the
   main window and silently un-maximizes it.
+
+## Verification status (2026-09-11, current Debug build)
+
+The recipes above were exercised against the built app
+(`bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe`, 2026-09-11 07:58) on
+`MTMFG-161`:
+
+| Claim | Result |
+|---|---|
+| Executable path | **correct** — file present and current |
+| `Start-Process` returns immediately and console output is not captured | **correct** |
+| `MainWindowHandle` resolves once a window exists | **correct** |
+| Window lookup by process id | **correct** — 1 top-level window found |
+| Never locate by window title | **confirmed, and worse than documented** — splash reported `WinUI Desktop`, sign-in reported `Sign in` |
+| Text dump identifies the page | **correct** — returned the failure dialog, then the sign-in text |
+| Buttons appear in the text dump | **incorrect as written** — they are `ControlType.Button`; corrected above |
+| `GetWindowPlacement` / `GetWindowRect` recipe | **correct** — returned `showCmd=1`, `760x460` (splash), `820x760` (sign-in) |
+| `showCmd` 1/2/3 = normal/minimized/maximized | **consistent** (`1` on both windows) |
+| Startup log staleness check | **the guidance was wrong and is corrected above** — the local daily folder IS frozen (newest `startup_daily_2026_07_30.jsonl`), but that is a `LocalSettings.json` redirect to the shared `X:` path, **not** a stopped log service: `X:\…\Logs\startup_forwarded_2026_09_11.jsonl` is current and was being written during the run |
+| Close recipe leaves no orphan | **correct** — 0 instances afterwards |
+| `Add-Type` fails on a duplicate type | **did not reproduce** — see the note in step 4; the real hazard here is the opposite (types do not survive between commands) |
+
+**Not verified.** Step 5 (navigation with `SelectionItemPattern`) and the shell header text of step 3.
+Both need the app past the **Sign in** gate, and no valid account credential was used for this test
+run, so the shell was never reached. The `NavigationViewItem` → `ControlType.ListItem` +
+`SelectionItemPattern` claim therefore remains untested against this build; treat it as the next thing
+to check when a sign-in is available.
 
 ## Relationship to XamlMcp
 
 - `.github/copilot-instructions.md` documents `xamlmcp` as the intended in-app UI inspector, and
   records it as **NOT WIRED**: the `XamlMcp.WinUI` in-process agent is absent (no attach call in
   `App.xaml.cs` and no `PackageReference`), so the server has nothing to attach to.
+- **The CLI is not installed on this machine either (verified 2026-09-11).** `xamlmcp` is not on
+  `PATH`, and `%USERPROFILE%\.dotnet\tools` (with its `.store`) is **empty** for the `jkoll` profile —
+  so `xamlmcp check --json` cannot be run here at all. That is stronger than "not wired": there is no
+  tool to attach even if the in-process agent were restored. Check both before spending time on the
+  server, and note that the tool would have to be installed per profile.
 - Until that agent is restored, use the PowerShell UIA recipe in this file. It needs no app change
   and no restored package reference.
 - When XamlMcp is wired again, prefer it for `tree`, `search`, `props`, `set-prop`, `action`,
@@ -242,7 +326,9 @@ measuring, and launch fresh before concluding that a sizing change did or did no
 - Do not modify the build to make automation easier. Automate the same artifact users run.
 - Run one automation session at a time, and avoid it while the user is typing. Automation takes
   focus and can move the cursor.
-- Match privilege levels. A non-elevated shell cannot automate an elevated window.
+- Match privilege levels. A non-elevated shell cannot automate an elevated window. When this workstation needs
+  administrator rights, use the account recorded in `.github/memories/repo/workstation-elevation.md`; raise the
+  prompt and type the password there rather than passing it through a command line.
 - Treat UI driving as read-only by default. Do not trigger destructive actions such as delete,
   approve, or submit unless the user asked for that flow.
 - Always close the app when finished so no orphan process is left holding database connections.

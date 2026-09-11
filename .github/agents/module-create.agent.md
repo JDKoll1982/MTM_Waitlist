@@ -67,13 +67,23 @@ Ask these questions in one batch unless the user already provided the answer:
 
 4. Delivery mode
 - Default: phased migration plan first, then code generation
-- Always ask if mockup UI elements should be generated before implementation
+- Always ask whether placeholder/mockup **UI** elements (markup without data wiring) should be generated before
+  implementation. Placeholder UI is a design scaffold, not demo data: it never fabricates rows and is replaced
+  by the real stored-procedure read in the same plan.
 
-5. Mock data behavior
-- Default: create a new feature toggle and mock short-circuit pattern
+5. Data behavior
+- There is no demo/mock mode and none may be added: no feature toggle may substitute sample data (FR-003/FR-014,
+  constitution II; `RetiredSymbolAuditTests` fails the build if the retired sample/toggle types return).
+- Internal stores (`mtm_waitlist`, `mtm_wip_application_winforms`, `mtm_receiving_application`) are always read and
+  written live; a failure is reported as a per-screen unavailable state with a manual retry, never as sample rows.
 
 6. Data path
-- Default: helper-server routing with optional mock short-circuit
+- Default: stored-procedure calls through `IMySqlHelperServer` — one published procedure per data operation, no
+  inline statement text (`InlineSqlAuditTests` fails the build otherwise), DML through the non-query seam so the
+  affected-row count is real.
+- If the module reads **Infor Visual**, do not call Visual directly: register a read shape in `MTM_Waitlist.Mock`
+  (`IVisualReadFallback<TRequest,TRow>`) so the read falls back to the `mtm_mock` mirror automatically on
+  unreachability, and follow the six-step playbook in `contracts/mock-service-configuration.md` §4.
 
 7. Test baseline
 - Default required tests:
@@ -143,9 +153,11 @@ Execute in this sequence:
 - Update ViewModels/ShellViewModel.cs with module header/selection behavior.
 - Update Strings/en-us/Resources.resw with Shell_<Module>.Content text.
 
-7. Add mock data toggle integration (if approved)
-- Add feature key: Feature.<FeatureName>MockData
-- Route through helper-server style path with local settings short-circuit.
+7. Add the data seam
+- Add one stored procedure per data operation under `Database/StoredProcedures/<name>/{create,rollback}.sql`,
+  register it in the master list and in `Database/Bootstrap/update_table_descriptions.sql` in the same change
+  (constitution III).
+- Call it through `IMySqlHelperServer`; never add a feature toggle or a sample-data path.
 
 8. Add tests
 - Add tests under MTM_Waitlist.Tests/Module_<FeatureName>/

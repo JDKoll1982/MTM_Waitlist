@@ -82,6 +82,28 @@ This document applies your completed naming conventions and database architectur
 - Naming drift in SQL must fail CI/PR checks.
 - Exceptions require explicit written approval in PR notes.
 
+### Review note — generated master lists for the `mtm_mock` cache (approved 2026-09-11)
+
+The rule above that a master list is "hand-maintained" does not fit the `mtm_mock` cache, so the deviation is
+recorded here rather than left implicit (task T121 of `specs/001-module-mock-visual-fallback`):
+
+- **Deviation.** `Database/Mock/AllTables.sql`, `Database/Mock/AllSPs.sql` and `Database/Mock/AllSeeds.sql`
+  are **generated**, not hand-maintained, by `Database/CopilotScripts/build_mtm_mock_masters.ps1`, which
+  concatenates the file-per-artifact `create.sql` sources in dependency order.
+- **Why.** The cache ships 5 mirror tables, 5 stage twins and 10 procedures through the same file-per-artifact
+  convention the rest of `Database/` uses. Hand-copying those bodies into a second place is exactly the drift
+  the naming rule exists to prevent, and it is unreviewable in a diff: a change to one artifact would have to
+  be mirrored by hand in an aggregate no one reads line by line.
+- **Why it is safe.** The generator is not a build-time code path — the master lists are committed files and a
+  DBA reviews them exactly as before. `-Check` regenerates in memory and exits non-zero when a committed list
+  is stale, which is the staleness gate `verify_mtm_mock_deploy.ps1` runs, so a hand-edited or forgotten list
+  fails instead of shipping.
+- **Scope.** `mtm_mock` only. The aggregates for the internal stores
+  (`Database/Tables/AllTables.sql`, `Database/StoredProcedures/AllSPs.sql`, `Database/Seeds/AllSeeds.sql`) stay
+  hand-maintained and are edited directly.
+- **Still mandatory, unchanged.** Every artifact continues to ship `create.sql` + `rollback.sql` in the same
+  change and to be registered in `Database/Mock/Bootstrap/update_table_descriptions.sql`.
+
 ## Waitlist Request Persistence Guidance
 - For waitlist request persistence work, prefer the existing MySQL stored-procedure pattern and current operational tables before introducing new schema objects.
 - Reuse the established helper-server execution style (`MySqlHelperServer` + parameterized stored procedures / SQL) instead of creating ad hoc direct SQL wiring in each feature service.

@@ -16,6 +16,7 @@
                 <ResourceDictionary Source="/Styles/RequestDialogs.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:StringToImageSourceConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="StringToImageSourceConverter" />
+            <converters:RemainingTimeToBrushConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="RemainingTimeToBrushConverter" />
             <settingsConverters:ResolvedImagePathToSourceConverter xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters" x:Key="ResolvedImagePathToSourceConverter" />
             <settingsConverters:BoolToVisibilityConverter xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters" x:Key="BoolToVisibilityConverter" />
         </ResourceDictionary>

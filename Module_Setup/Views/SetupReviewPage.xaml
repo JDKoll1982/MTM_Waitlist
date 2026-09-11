@@ -75,7 +75,8 @@
                                                             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Location" />
                                                             <TextBlock Text="{x:Bind LocationDisplay}" />
                                                         </StackPanel>
-                                                        <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                                                        <!-- Hidden for dies: they are never inventoried, so a 0 here would read as a stock-out. -->
+                                                        <StackPanel Grid.Column="2" HorizontalAlignment="Right" Visibility="{x:Bind ShowsOnHand, Converter={StaticResource BoolToVisibilityConverter}}">
                                                             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="On Hand" />
                                                             <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind OnHandDisplay}" HorizontalAlignment="Right" />
                                                         </StackPanel>

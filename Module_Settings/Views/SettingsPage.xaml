@@ -157,6 +157,15 @@
                 x:Load="{x:Bind ViewModel.IsOperationsCategoryVisible, Mode=OneWay}"
                 RowSpacing="8">
                 <Grid.RowDefinitions>
+                    <!--
+                        Row 0 is the "Operations" heading; rows 1-7 are the seven expanders:
+                        Image Location Settings, Local Work Centers, Dunnage Type Visibility,
+                        Computers, Ignored Infor Visual Locations, New Request Alerts, and
+                        Max Allotted Time. All eight rows must be declared: a Grid.Row beyond the
+                        definitions is clamped to the last row, which silently stacked
+                        "Max Allotted Time" on top of "New Request Alerts".
+                    -->
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />

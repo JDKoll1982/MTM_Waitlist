@@ -11,6 +11,7 @@ public sealed class ImageLocationServiceCascadeTests
     private string _workingDirectory = string.Empty;
     private FakeImageOverrideReadService _overrides = null!;
     private FakeRequestSubtypeDisplayLabelService _subtypeLabels = null!;
+    private FakeMySqlHelperServer _mysql = null!;
     private ImageLocationService _service = null!;
 
     private static readonly Guid RequestTypeId = Guid.Parse("11111111-1111-1111-1111-111111111111");
@@ -24,6 +25,7 @@ public sealed class ImageLocationServiceCascadeTests
 
         _overrides = new FakeImageOverrideReadService();
         _subtypeLabels = new FakeRequestSubtypeDisplayLabelService { ParentRequestTypeId = RequestTypeId };
+        _mysql = new FakeMySqlHelperServer();
 
         _service = new ImageLocationService(
             NullLogger<ImageLocationService>.Instance,
@@ -32,7 +34,7 @@ public sealed class ImageLocationServiceCascadeTests
             _overrides,
             new FakeImageStorageConfigurationResolver { SharedFolderPath = _workingDirectory },
             new FakeWorkCenterCatalogService(),
-            TestDoubles.CreateUnusedMySqlHelperServer());
+            _mysql);
 
         await _service.InitializeAsync();
     }
@@ -144,6 +146,54 @@ public sealed class ImageLocationServiceCascadeTests
 
         Assert.AreEqual(ImageLocationDefaults.WorkCenterDefaultPath, resolved);
     }
+
+    [TestMethod]
+    public async Task ResolveRequestTypeImagePathAsync_WithoutAnOverride_ReadsTheCatalogDefaultImagePath()
+    {
+        var catalogPath = CreateImageFile("catalog-request-type.png");
+        _mysql.EnqueueQueryResult(CatalogRow("public_id", RequestTypeId.ToString(), "default_image_path", catalogPath));
+
+        var resolved = await _service.ResolveRequestTypeImagePathAsync(RequestTypeId.ToString());
+
+        Assert.AreEqual(catalogPath, resolved);
+        Assert.AreEqual(
+            "sp_waitlist_request_types_get",
+            _mysql.ExecutedQueries.Single().Sql,
+            "The catalog procedure — not Assets/Config/waitlist-request-types.json — is the request-type source (T100).");
+    }
+
+    [TestMethod]
+    public async Task ResolveRequestSubtypeImagePathAsync_WithoutAnOverride_ReadsTheSubtypeCatalogDefaultImagePath()
+    {
+        var catalogPath = CreateImageFile("catalog-subtype.png");
+        _mysql.EnqueueQueryResult(CatalogRow("public_id", SubtypeId.ToString(), "default_image_path", catalogPath));
+
+        var resolved = await _service.ResolveRequestSubtypeImagePathAsync(SubtypeId.ToString());
+
+        Assert.AreEqual(catalogPath, resolved);
+        Assert.AreEqual("sp_waitlist_request_subtypes_get", _mysql.ExecutedQueries.Single().Sql);
+    }
+
+    [TestMethod]
+    public async Task ResolveRequestTypeImagePathAsync_WhenTheCatalogPathIsMissing_FallsBackToTheDefaultAsset()
+    {
+        _mysql.EnqueueQueryResult(CatalogRow(
+            "public_id",
+            RequestTypeId.ToString(),
+            "default_image_path",
+            Path.Combine(_workingDirectory, "gone.png")));
+
+        var resolved = await _service.ResolveRequestTypeImagePathAsync(RequestTypeId.ToString());
+
+        Assert.AreEqual(ImageLocationDefaults.RequestTypeDefaultPath, resolved);
+    }
+
+    private static Dictionary<string, object?> CatalogRow(string keyColumn, string keyValue, string valueColumn, string value)
+        => new(StringComparer.OrdinalIgnoreCase)
+        {
+            [keyColumn] = keyValue,
+            [valueColumn] = value,
+        };
 
     [TestMethod]
     public async Task ResolveRequestTypeImagePathAsync_WithNonGuidId_Throws()

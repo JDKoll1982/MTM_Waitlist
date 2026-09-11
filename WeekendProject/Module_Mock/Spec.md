@@ -151,17 +151,26 @@ covers it, otherwise a newly created SP. Full list with file:line and the existi
 
 ## 11. Extensibility — adding a new Visual read shape
 
-The mirror must be trivial to extend. Adding a shape requires, in order:
-1. Add the read's `.sql` under `Database/InforVisual/Queues/**` (if not present).
-2. Add `mtm_mock.visual_<readShape>_result` (+ `_stage`) create/rollback per DB naming rules; register in the
-   mock table master list.
-3. Add `sp_visual_<readShape>_refresh` (populate stage from a passed result set / from Visual) and
-   `sp_visual_<readShape>_get` (typed/parameterized read); register in the SP master list.
-4. Add the shape to the refresh engine's configurable shape catalog (service app).
-5. Add a mirror read service in `MTM_Waitlist.Mock` and route the C# caller through the live→fallback pattern.
-6. Add tests (refresh + fallback parity + caller) and a seed row set.
+The mirror must be trivial to extend. Adding a shape requires, in order, **exactly one artifact per step**:
 
-This playbook is documented for implementers in `Plan.md` §7 and enforced by a `Tasks.md` documentation task.
+| # | Step | Artifact produced |
+|---|---|---|
+| 1 | **Capture the read.** Add the parameterized Visual query and record its input parameters and output columns. | `Database/InforVisual/Queues/<module>/Queries/<Script>.sql` |
+| 2 | **Mirror schema.** Create the mirror table and its `_stage` twin (inputs as keys + outputs + `refreshed_utc` + `is_seed_content`) with create/rollback per the DB naming rules; register both in `Database/Mock/AllTables.sql` and `Bootstrap/update_table_descriptions.sql`. | `Database/Mock/Tables/visual_<shape>_result/{create,rollback}.sql`, `…_stage/{create,rollback}.sql` |
+| 3 | **Procedures.** Create `sp_visual_<shape>_refresh` (truncate stage → load → validate → atomic 3-name `RENAME` swap) and `sp_visual_<shape>_get` (parameterized read of the live mirror); register both in `AllSPs.sql`. | `Database/Mock/StoredProcedures/sp_visual_<shape>_{refresh,get}/{create,rollback}.sql` |
+| 3b | **Population read.** Add the set-based snapshot the service executes: it enumerates the shape's whole driver population and returns the complete result **in one result set**, projecting exactly `inputParameters` then `outputColumns`. Add the shape's `UNION ALL` branch to the freshness report. | `Database/InforVisual/Queues/Module_Mock/Populations/<shape>_population.sql` + the shape's branch in `Database/Mock/StoredProcedures/sp_visual_read_shape_freshness_get/create.sql` |
+| 4 | **Service registration.** Add the shape-catalog entry (including `populationScriptRelativePath`). **No engine code changes** — the engine is catalog-driven. | Config / `RefreshShapeCatalogProvider` entry |
+| 5 | **In-app fallback.** Add the `IVisualReadFallback<TRequest,TRow>` implementation, route the originating caller through it, and register it in DI. No existing shape's contract changes. | `MTM_Waitlist.Mock/Services/Visual<Shape>Fallback.cs` (+ DI registration) |
+| 6 | **Verify.** Add a seed row set, a refresh test (the swap is atomic; a failure leaves the snapshot intact), a fallback-parity test (live vs mirror identical shape, including the empty-live-result case), and a caller test. | `Database/Mock/Seeds/<seed>/{create,rollback}.sql` + tests |
+
+**Half-added detection.** Startup validation reports a shape whose mirror artifacts exist with **no catalog entry**
+("present in `mtm_mock` but not registered in the shape catalog, so nothing refreshes it") and a catalog entry whose
+artifacts or **population read** are missing (excluded, with the reason reported). Skipping step 5 leaves a caller
+with no fallback, which step 6's parity tests surface.
+
+This playbook is reproduced for implementers in `Plan.md` §7, cross-referenced from
+`Tasks.md` (Phase 1 header note), and enforced by a `Tasks.md` documentation task. The authoritative wording lives in
+`specs/001-module-mock-visual-fallback/contracts/mock-service-configuration.md` §4.
 
 ## 12. Behavior changes
 

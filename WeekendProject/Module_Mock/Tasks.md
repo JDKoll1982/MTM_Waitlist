@@ -29,6 +29,12 @@ Next task: **CI/CD: capture green baseline** | **Persona: DevOps Engineer**
 
 ## Phase 1 — `mtm_mock` database + mirror schema + stored procedures (additive)
 
+> **Adding a sixth read shape later?** The ordered six-step playbook (capture the read → mirror schema →
+> procedures → population read → service registration → in-app fallback → verify) is published in `Spec.md` §11 and
+> `Plan.md` §7, and reproduced authoritatively in
+> `specs/001-module-mock-visual-fallback/contracts/mock-service-configuration.md` §4 (task T085). Adding a shape
+> changes no existing shape's procedure signature, contract, or result type (FR-016/FR-020, SC-012).
+
 ### Subphase 1.1: Database + mirror tables
 - [ ] **Database Migration: create `mtm_mock` database** via a re-runnable bootstrap script (created on deploy if absent), on the same MySQL server as the other three DBs. (Ref: Spec §6) | **Persona: Database Engineer**
 - [ ] **Database Table: create `visual_work_order_lookup_result`** (+ `_stage` twin) with inputs (NormalizedWorkOrder) + outputs (PartNumber, Description, WorkCenter) + `refreshed_utc`. (Ref: Spec §6.1) | **Persona: Database Engineer**

@@ -152,21 +152,45 @@ specs/001-module-mock-visual-fallback/
 MTM_Waitlist.sln
 
 # NEW — in-app fallback library (class library, no XAML Views)
+# NOTE (T126, 2026-09-11): this listing is the SHIPPED layout. The live-read plumbing that Phase 4 moved
+# here (shape catalog, script store, classified executor, per-shape row/request models) is listed below and
+# justified in Complexity Tracking.
 MTM_Waitlist.Mock/
 ├── Contracts/
 │   ├── IVisualReachabilityDetector.cs
 │   ├── IReadStatusProvider.cs
 │   ├── IMockServiceRefreshClient.cs
-│   └── IVisualReadFallback.cs            # per-shape live→cached seam (one impl per read shape)
+│   ├── IInforVisualScriptStore.cs
+│   ├── IVisualConnectivityProbe.cs
+│   ├── IVisualConnectionStringProvider.cs
+│   ├── IVisualQueryExecutor.cs
+│   ├── IVisualShapeFreshnessReader.cs
+│   ├── IVisualReadFallback.cs            # per-shape live→cached seam (one impl per read shape)
+│   └── IVisualReachabilityProbeHost.cs
 ├── Models/
 │   ├── VisualReadStatus.cs               # enum: Unknown | Live | Cached (authoritative status enum name)
 │   ├── ReadStatusSnapshot.cs             # status model exposed by IReadStatusProvider (FR-005/FR-022)
 │   ├── VisualReadShape.cs                # shape definition shared by the app and the service catalog (FR-016)
-│   └── CachedReadResult.cs
+│   ├── VisualReadShapeModule.cs          # module folder a shape's scripts live under
+│   ├── VisualShapeColumn.cs / VisualShapeParameter.cs
+│   ├── VisualQueryStatus.cs              # Ok | Unreachable | Failed (classification — see Complexity Tracking)
+│   ├── VisualQueryOutcome.cs
+│   ├── VisualShapeFreshness.cs
+│   ├── MockServiceClientOptions.cs       # app-side endpoint/credential installation (env-first, never a secret in appsettings)
+│   ├── CachedReadResult.cs
+│   └── Visual*Request.cs / Visual*Row.cs # one request + one row type per read shape
 └── Services/
+    ├── VisualReadShapeCatalog.cs        # the ONE catalog both the app and the service read
+    ├── VisualQueryExecutor.cs           # the ONE classified live-read executor (WMC: replaces two per-module executors)
+    ├── InforVisualScriptStore.cs        # the ONE script store (replaces Setup/Waitlist duplicates)
+    ├── VisualConnectionStringProvider.cs
+    ├── VisualConnectivityProbe.cs
+    ├── VisualRowReader.cs
     ├── VisualReachabilityDetector.cs     # independent probe (does NOT reuse the removed MockRouting stack)
+    ├── VisualReachabilityProbeHost.cs    # probing only — never schedules a refresh (FR-025)
     ├── ReadStatusProvider.cs             # state + change event + cached-data age for the indicator
-    ├── MockServiceRefreshClient.cs       # token-gated POST /api/refresh
+    ├── MySqlVisualShapeFreshnessReader.cs# freshness via sp_visual_read_shape_freshness_get (FR-017/FR-022)
+    ├── MockServiceRefreshClient.cs       # token-gated POST /api/refresh (graceful when uninstalled)
     ├── VisualWorkOrderLookupFallback.cs          # shape 1
     ├── VisualOperationSequencesFallback.cs       # shape 2
     ├── VisualSubordinatePartsFallback.cs         # shape 3
@@ -191,15 +215,34 @@ MTM_Waitlist.Mock.Service/
 │   ├── RestoreOutcome.cs
 │   └── SharedCredential.cs        # shape catalog reuses MTM_Waitlist.Mock/Models/VisualReadShape.cs
 ├── Services/
-│   ├── ServiceConfigurationStore.cs       # durable local config; credential via DPAPI
-│   ├── RefreshShapeCatalogProvider.cs     # the shape catalog read by the refresh engine
-│   ├── RefreshEngine.cs                   # staging + atomic RENAME swap; skip-on-unreachable
-│   ├── BackupEngine.cs                    # mysqldump per store; availability probe
+│   ├── ServiceConfigurationStore.cs       # durable local config; DPAPI credential; auto-start reconciliation
+│   ├── RefreshShapeCatalogProvider.cs     # the shape catalog read by the refresh engine (validates via a procedure)
+│   ├── VisualShapeMetadataReader.cs       # wraps sp_visual_read_shape_metadata_get (no inline SQL)
+│   ├── VisualShapeFreshnessReader.cs      # wraps sp_visual_read_shape_freshness_get (no inline SQL)
+│   ├── VisualShapePayloadSource.cs        # one set-based population read per shape (T113)
+│   ├── MockMirrorRefreshWriter.cs         # calls sp_visual_<shape>_refresh with the JSON payload
+│   ├── RefreshEngine.cs                   # staging + atomic RENAME swap; skip-on-unreachable; single-cycle gate
+│   ├── RefreshRunRecordStore.cs / RefreshRunRecordRecorder.cs  # durable per-shape last-run outcomes (FR-013)
+│   ├── BackupEngine.cs                    # mysqldump per store; availability probe; retention pruning
+│   ├── BackupArtifactStore.cs
+│   ├── BackupScheduler.cs                 # per-store independent slots (T115)
 │   ├── RestoreService.cs                  # host-only, confirmation-gated, safety snapshot first
+│   ├── ServiceHostBuilder.cs              # composition root (T117)
+│   ├── ServiceApiOperations.cs            # API operations behind the endpoints
+│   ├── MySqlConnectionSettings.cs / MySqlConnectionStringResolver.cs
 │   └── ServiceApiHost.cs                  # Kestrel host + lifetime wiring
-└── Api/
-    ├── ServiceApiEndpoints.cs
-    └── SharedTokenAuthenticationHandler.cs
+├── Api/
+│   ├── ServiceApiEndpoints.cs
+│   ├── ServiceApiContracts.cs
+│   └── SharedTokenAuthenticationHandler.cs
+└── Properties/PublishProfiles/win-x64-selfcontained.pubxml   # the deploy artifact (T120) — see README.md
+
+# NEW — reviewed SQL artifacts the service streams to the mysql client (T138); not stored procedures,
+# because MySQL rejects DROP/CREATE DATABASE inside a routine (recorded deviation below)
+Database/Mock.Service/Restore/
+├── replace_database.sql
+├── verify_restore.sql
+└── README.md
 
 # EXISTING app — one new read-only status surface (all other edits are removals/reroutes)
 MTM_Waitlist/
@@ -265,6 +308,10 @@ precedent. No existing directory is relocated and no existing project is split.
 | New MySQL database `mtm_mock` | FR-027 requires the cached-data store to be a **dedicated** store, separate from `mtm_waitlist`, and never authoritative for internal data. | Adding mirror tables to `mtm_waitlist` was rejected: it would mix a disposable, wholesale-replaced cache into the always-live store, break the "internal store is sacred" principle, and make the independent per-store backup requirement (FR-009) impossible to express. |
 | `Microsoft.AspNetCore.App` framework reference in the service app | The service must expose a network HTTP API with token gating (FR-011) and status serialization. | `System.Net.HttpListener` was rejected: no routing, no middleware/handler pipeline, and token gating plus JSON binding would be hand-rolled — more code and more room for the auth mistakes SC-010 forbids. |
 | Shared-token auth instead of a role/permission system | Spec Assumptions explicitly scope a single shared credential as acceptable because the service runs on a restricted host and no RBAC is in scope. | A role system was rejected as out of scope (spec Assumptions; service non-goal NG5). |
+| **Phase-4 deviation** — the live-read plumbing moved **into** `MTM_Waitlist.Mock`: one `VisualReadShapeCatalog`, one `VisualQueryExecutor`, one `InforVisualScriptStore`, and the per-shape `Visual*Request`/`Visual*Row` types (T126) | All five shapes need the same live read, and both the app and the on-host service need the same shape definitions. Putting the catalog and executor in the library means one classification rule and one script-resolution rule serve every shape, and the dependency direction stays modules → `Mock` (a caller module never has to supply a live-read delegate). | The design's delegate-injection option was rejected after implementation: with the executor owned by each caller, the two module-local executors had already duplicated the same connect/timeout/login handling, and the service would have needed a third copy to build the mirror. Duplication here is what makes "unreachable" mean different things on different screens — the exact failure that would silently disable the fallback. |
+| **Phase-4 addition** — `VisualQueryExecutor` classifies each attempt as `Ok` / `Unreachable` / `Failed` (`Models/VisualQueryStatus.cs`) | `IVisualReadFallback` may only consult the mirror on *unreachability* (FR-002/FR-024). The classification is what makes that decidable: connect, timeout, and login failures (SQL error numbers −2, 20, 53, 64, 121, 233, 258, 1231, 4060, 10053, 10054, 10060, 10061, 11001, 18456; `COMException`; timeouts) are `Unreachable`; every other error — including a missing script or a missing connection — is `Failed` and surfaces as an error rather than a cache hit. | A boolean "did it work" was rejected: the retired executors returned an empty list on *every* failure path, so "Infor Visual is unreachable" and "Visual answered with zero rows" were indistinguishable — which would have made every read look editable from cache and disabled the fallback entirely. |
+| **Phase-4 addition** — `MySqlHelperServer` gained an `MtmMock` target (`MySqlDatabaseTarget`) | The fallback reads the mirror, and the shape metadata/freshness readers read it too. The seam that owns the four stores' connection resolution is the natural place for the fifth, and it keeps `mtm_mock` read-only to the application by construction (its only procedures are `sp_visual_<shape>_get` and the two metadata reads). | A separate connection factory inside `MTM_Waitlist.Mock` was rejected: it would duplicate the environment-then-configuration resolution that `MySqlHelperServer` already owns and would make the mirror connection invisible to the one place a reviewer checks store wiring. |
+| **Phase-4 known limitation** — `CachedReadResult.RefreshedUtc` is `null` on the cached path | `sp_visual_<shape>_get` must project **exactly** the live column shape (FR-004), so it cannot also return `refreshed_utc`. Cached-data age therefore comes from a separate read, `sp_visual_read_shape_freshness_get` (`IVisualShapeFreshnessReader`, T124), which is what `ReadStatusSnapshot.CachedDataAgeUtc` renders. | Adding `refreshed_utc` to the shape `get` procedures was rejected: it would break the structural identity between live and cached results that FR-004 and the parity tests assert, to carry one value the freshness read already answers for every shape in one round trip. |
 
 ### Recorded deviation — the restore operation's SQL steps (constitution III)
 

@@ -37,7 +37,13 @@ SELECT DISTINCT
     END AS Description,
     CASE
         WHEN req.PART_ID LIKE 'MMC%' THEN COALESCE(NULLIF(req.LOCATION_ID, ''), NULLIF(pl.LOCATION_ID, ''), NULLIF(wh.DESCRIPTION, ''), '')
-        WHEN req.PART_ID LIKE 'FGT%' THEN COALESCE(NULLIF(req.LOCATION_ID, ''), NULLIF(pl.LOCATION_ID, ''), NULLIF(wh.DESCRIPTION, ''), '')
+        -- A die is not inventoried: PART_SITE.QTY_ON_HAND is 0 and every PART_LOCATION row for it carries
+        -- QTY 0, so ranking those rows by quantity is meaningless and picked an arbitrary location
+        -- (alphabetically first among several zero-quantity rows). A die's real home location is the part's
+        -- PRIMARY location. Verified against MTMFG: FGT0602-01 has PRIMARY_LOC_ID 'U-B0-01', while its six
+        -- zero-quantity PART_LOCATION rows would otherwise have yielded 'S-D0-12'. This must stay identical
+        -- to Module_Setup/Queries/GetSubordinateParts.sql so the mirror matches the live read.
+        WHEN req.PART_ID LIKE 'FGT%' THEN COALESCE(NULLIF(site.PRIMARY_LOC_ID, ''), NULLIF(req.LOCATION_ID, ''), '')
         WHEN req.PART_ID LIKE 'MMF%' THEN COALESCE(NULLIF(req.LOCATION_ID, ''), NULLIF(pl.LOCATION_ID, ''), NULLIF(wh.DESCRIPTION, ''), '')
         ELSE ''
     END AS Location,
@@ -52,11 +58,41 @@ INNER JOIN REQUIREMENT AS req
     AND req.WORKORDER_SUB_ID = wo.SUB_ID
 LEFT JOIN PART AS part
     ON part.ID = req.PART_ID
-LEFT JOIN PART_LOCATION AS pl
+-- PART_LOCATION carries one row per STORAGE LOCATION, so a part stocked in several locations within
+-- one warehouse appears many times (one part has 26 rows in warehouse 002, 25 of them empty). Joining
+-- it directly multiplied the result: the extra rows shared this shape's mirror key
+-- (work_order, parent_part, sequence, part_number) while differing in Location/OnHandQuantity, so
+-- SELECT DISTINCT could not collapse them and the refresh aborted with
+-- "Duplicate entry ... for key 'uq_visual_subordinate_parts_result_lookup_key'".
+-- Collapse to ONE row per part+warehouse, deterministically the location holding the most stock and
+-- ties broken by location id, which keeps the single-location semantics the live read returns.
+LEFT JOIN (
+    SELECT
+        PART_ID,
+        WAREHOUSE_ID,
+        LOCATION_ID,
+        QTY,
+        ROW_NUMBER() OVER (
+            PARTITION BY PART_ID, WAREHOUSE_ID
+            ORDER BY QTY DESC, LOCATION_ID ASC) AS stock_rank
+    FROM PART_LOCATION
+) AS pl
     ON pl.PART_ID = req.PART_ID
     AND pl.WAREHOUSE_ID = req.WAREHOUSE_ID
+    AND pl.stock_rank = 1
 LEFT JOIN WAREHOUSE AS wh
     ON wh.ID = COALESCE(req.WAREHOUSE_ID, pl.WAREHOUSE_ID)
+-- A die's home location is its PRIMARY location, which lives on PART_SITE, not on a stock row.
+-- OUTER APPLY with TOP 1 keeps this to a single row per requirement: a part can carry a PART_SITE row per
+-- site, so joining the table directly would multiply the results exactly the way the PART_LOCATION join
+-- used to (the extra rows share this shape's mirror key and SELECT DISTINCT cannot collapse them).
+OUTER APPLY (
+    SELECT TOP 1 ps.PRIMARY_LOC_ID
+    FROM PART_SITE AS ps
+    WHERE ps.PART_ID = req.PART_ID
+        AND NULLIF(ps.PRIMARY_LOC_ID, '') IS NOT NULL
+    ORDER BY ps.SITE_ID
+) AS site
 WHERE
     wo.STATUS IN ('R', 'U', 'F')
     AND wo.BASE_ID IS NOT NULL

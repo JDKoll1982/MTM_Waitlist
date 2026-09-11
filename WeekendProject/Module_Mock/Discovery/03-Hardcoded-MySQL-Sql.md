@@ -4,6 +4,10 @@
 > `IMySqlHelperServer.ExecuteSqlQueryAsync/ExecuteSqlNonQueryAsync`, raw `MySqlCommand`, or `CommandType.Text`).
 > Goal per user: for each, either find the relevant SP or create one; add to the plan with file + line number.
 > Paths abbreviated from repo root.
+>
+> **Status (2026-09-11): historical inventory, now converted.** Every site below was routed to a stored procedure
+> (tasks T088–T097), and `MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs` fails the build if inline
+> statement text returns. §E.1 records the resolution of the naming mismatches. See `../README.md`.
 
 ## A. Inline SQL → mtm_waitlist (no/partial SP coverage)
 **`MTM_Waitlist.Startup/Services/ComputerRegistryService.cs`** — CRUD on `core_computers_registry`, no SP. New SP candidates.

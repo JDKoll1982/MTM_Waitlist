@@ -263,6 +263,17 @@ contract for existing shapes" holds: a sixth shape adds a sixth implementation.
 - Per-call probing with no hysteresis — rejected: flapping would advertise a cache in use and then not use it, and
   the indicator would flicker (SC-006 depends on users trusting the indicator).
 
+**Superseded in part (T126, 2026-09-11) — how the per-read decision is actually made.** This entry's title says the
+detector drives the switch; in the shipped design the detector drives only the **indicator**, and each read decides
+for itself. `VisualQueryExecutor` classifies every attempt as `Ok` / `Unreachable` / `Failed`, and
+`IVisualReadFallback` consults `sp_visual_<shape>_get` on `Unreachable` only. That is stronger than a state machine in
+one respect that matters: a read taken while the detector still says `Live` — because the first failure of the
+two-failure hysteresis is in flight — still falls back correctly, and a `Failed` classification (a real query error)
+never becomes a cache hit. The detector's 2-failure/1-success hysteresis and its backoff are unchanged, and they still
+govern `IReadStatusProvider`, so the indicator cannot flicker. `CachedReadResult.RefreshedUtc` is `null` for the
+reason recorded in `plan.md` → Complexity Tracking; cached-data age comes from
+`sp_visual_read_shape_freshness_get`.
+
 ---
 
 ## R12. Read-only status indicator form and placement (FR-005, FR-022, SC-006)

@@ -2,6 +2,11 @@
 
 > Read-only discovery, 2026-09-09. Infor Visual = SQL Server `VISUAL`, DB `MTMFG`. Only reads (app never writes).
 > These 5 read shapes define the `mtm_mock.visual_*_result` mirror tables.
+>
+> **Status (2026-09-11): historical inventory.** It describes the executors as they were before the fallback
+> library landed; the shipped plumbing is `MTM_Waitlist.Mock/Services/VisualQueryExecutor.cs` +
+> `InforVisualScriptStore.cs` with the catalog in `VisualReadShapeCatalog.cs` (see `../README.md`). The retired
+> `SqlHelperServer` it names no longer exists.
 
 ## Executors (SQL Server, CommandType.Text, never throw → empty on failure)
 - Core: `MTM_Waitlist.Core/Services/InforVisualSqlQueryService.cs` — `ExecuteQueueAsync` L35, scripts under

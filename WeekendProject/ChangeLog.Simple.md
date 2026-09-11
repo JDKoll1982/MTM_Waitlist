@@ -13,24 +13,29 @@
 >
 > - ✅ Completed Feature/Update
 > - 🚧 Partially Completed Feature/Update
+> - ❌ Withdrawn (built, then removed on purpose)
 >
-> **Last updated:** 2026-09-06
+> **Last updated:** 2026-09-11
 
 ## Where Infor Visual data comes from (outage fallback)
 
 **Infor Visual data** is used thoughout the Waitlist Application. Normally the app
 reads that data **live** from the **Infor Visual** database. If that database is **unreachable or
-down**, the app can automatically fall back to **cached Infor Visual data** (presently a bundled sample)
-so the screens still open and stay usable instead of failing or sitting empty. In short:
+down**, the app **automatically** falls back to **cached Infor Visual data** so the screens still open
+and stay usable instead of failing or sitting empty. In short:
 
 - **Infor Visual up** → the app shows **live Infor Visual data**.
 - **Infor Visual down** → the app shows **cached Infor Visual data** so nothing breaks; when the
   database comes back it switches back to live automatically, as long as the Waitlist Database is active everything works as intended.
-- You can also **switch between live and cached Infor Visual data manually** with the single
-  **"Infor Visual data"** toggle under **Settings** (mainly for testing/demo without the real database;
-  I still need to source the cached data from the visual database rather than the bundled sample).
-- When the app is *automatically* falling back or recovering, a **notification** explains which Infor
-  Visual data it's showing (cached, or live again).
+- **The fallback is automatic — there is no manual switch.** The old **"Infor Visual data"** toggle
+  under **Settings** has been **removed on purpose**, and so has the bundled sample data behind it. The
+  cached data is now **real Infor Visual data**, not a sample, kept current by a separate background
+  service that runs on the server.
+- The app shows a **read-only status indicator** telling you how old the cached data is, plus a manual
+  **Retry** on any screen that could not reach its data. There is no pop-up notification.
+- Only **Infor Visual** reads use the cache. The Waitlist, WIP, and Receiving databases are always read
+  and written **live**; if one of them is unreachable the app says so on that screen rather than
+  substituting cached rows.
 
 ## Features (1–19)
 
@@ -71,8 +76,11 @@ so the screens still open and stay usable instead of failing or sitting empty. I
     progress.)* — **~35 min**
 18. ✅ **New Request Alerts (per-user).** **Settings** toggle (default off) → toast on a new request +
     deep-link to the request detail. — **~40 min**
-19. ✅ **Single "Infor Visual data" switch.** One **Settings** switch controls whether the app uses
-    **live** or **cached/sample** Infor Visual data. — **~15 min**
+19. ❌ **Single "Infor Visual data" switch — withdrawn.** One **Settings** switch used to control
+    whether the app used **live** or **cached/sample** Infor Visual data. **Removed on purpose:**
+    picking cached data by hand defeated the point of the fallback and let stale data look current. The
+    fallback is now **automatic only** — the app falls back when Infor Visual is unreachable and
+    switches back on its own. — **~15 min**
 
 ---
 
@@ -101,8 +109,11 @@ so the screens still open and stay usable instead of failing or sitting empty. I
 | 16 | Ignored-location settings | 🚧 | 25 min |
 | 17 | Urgency per-subtype allotment + due/overdue | 🚧 | 35 min |
 | 18 | New Request Alerts toggle + toast + deep link | ✅ | 40 min |
-| 19 | Single "Infor Visual data" switch | ✅ | 15 min |
+| 19 | Single "Infor Visual data" switch *(withdrawn)* | ❌ | 15 min |
 | | **Total** | | **540 min = 9h 00m** |
+
+> Feature 19's time is kept in the total because the work was genuinely done and then deliberately
+> removed; the totals above are a record of time spent, not of what is still in the app.
 
 ---
 
@@ -116,17 +127,14 @@ What I'm still actively working on in this area:
 - **Apply ignored locations everywhere.** The **Settings → Operations** list of hidden locations is in,
   but I still need it to actually hide those locations from the Waitlist/Coil lists, the "Quantity in
   house" totals, and the Setup location lists.
-- **Live location/part lookup.** Route the location grid to the **real** (non-mock) location/part
-  source when Infor Visual is up, not just the sample data.
+- **Live location/part lookup.** Finish switching the location grid to the live Infor Visual
+  location/part read. (The fallback behind it is automatic, and no longer sample data.)
 - **Order the handler list most-urgent-first.** The urgency math and per-sub-type time settings are in;
   I still need to sort the list a handler sees by most urgent first.
 - **Analytics screen.** A supervisor-level analytics view (request volumes, wait times, on-time vs
   overdue, cancellations, handler workload).
 - **Cancelled-request monitor / admin view.** A Developer/Admin view of cancelled requests
   (who/when/type/reason) and archiving of old completed/cancelled ones while keeping them for review.1
-- **Cached Infor Visual data sourced from Infor Visual.** The cached/sample mode currently uses a
-  bundled sample; I still need it to pull that data from the Infor Visual database rather than the
-  bundled sample, and to finalize the automatic fall-back / recovery messaging.
 - **Splash / database-unreachable messaging.** A clearer, non-technical "can't reach the database"
   message with Retry / Cancel instead of a bare error.
 - **Settings freeze fix.** A UI freeze when opening **Settings** is being investigated and fixed.

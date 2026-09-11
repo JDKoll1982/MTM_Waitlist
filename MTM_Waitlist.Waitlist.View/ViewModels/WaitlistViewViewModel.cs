@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -10,6 +11,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
@@ -57,7 +59,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IImageLocationService? imageLocationService = null,
         DispatcherQueue? dispatcherQueue = null,
         StartupState? startupState = null,
-        MTM_Waitlist.Module_Waitlist.Services.IAverageCoilWeightService? averageCoilWeightService = null)
+        MTM_Waitlist.Module_Waitlist.Services.IAverageCoilWeightService? averageCoilWeightService = null,
+        IStoreAvailabilityTracker? storeAvailabilityTracker = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -71,8 +74,40 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _currentRequesterEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
         _averageCoilWeightService = averageCoilWeightService;
 
+        // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
+        // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
+        // It is never replaced by sample rows and it is not an app-wide banner.
+        StoreUnavailable = new InternalStoreUnavailableState(
+            MySqlDatabaseTarget.MtmWaitlist,
+            _ => LoadOrdersAsync(_buildingSelectionService.SelectedBuilding),
+            storeAvailabilityTracker);
+        StoreUnavailable.PropertyChanged += OnStoreUnavailablePropertyChanged;
+
         Source.CollectionChanged += OnSourceCollectionChanged;
         IsWaitlistEmpty = Source.Count == 0;
+    }
+
+    /// <summary>This screen's internal-store unavailable state, shown in this screen and nowhere else.</summary>
+    public InternalStoreUnavailableState StoreUnavailable { get; }
+
+    /// <summary>Localized heading for <see cref="StoreUnavailable"/>.</summary>
+    public string StoreUnavailableTitle => "Store_Unavailable.Title".GetLocalized();
+
+    /// <summary>Localized, detail-bearing sentence for <see cref="StoreUnavailable"/>.</summary>
+    public string StoreUnavailableMessage => string.Format(
+        CultureInfo.CurrentCulture,
+        "Store_Unavailable.Message".GetLocalized(),
+        StoreUnavailable.StoreName,
+        StoreUnavailable.LastAttemptUtc?.ToLocalTime().ToString("g", CultureInfo.CurrentCulture) ?? "-",
+        StoreUnavailable.RetryCount,
+        StoreUnavailable.NextRetryUtc?.ToLocalTime().ToString("t", CultureInfo.CurrentCulture) ?? "-");
+
+    /// <summary>Localized label for the manual retry action.</summary>
+    public string StoreUnavailableRetryText => "Store_Unavailable.Retry".GetLocalized();
+
+    private void OnStoreUnavailablePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(StoreUnavailableMessage));
     }
 
     private async Task EnrichCoilAverageWeightAsync(SampleOrder order)
@@ -110,10 +145,13 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
 
         await LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+        StartMinuteTicker();
     }
 
     public void OnNavigatedFrom()
     {
+        StopMinuteTicker();
+
         if (_isSubscribed)
         {
             _buildingSelectionService.BuildingChanged -= OnBuildingChanged;
@@ -121,6 +159,81 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             _imageLocationSubscription?.Dispose();
             _imageLocationSubscription = null;
             _isSubscribed = false;
+        }
+    }
+
+    /// <summary>One minute: the granularity of both time-derived card texts.</summary>
+    private static readonly TimeSpan MinuteTickInterval = TimeSpan.FromMinutes(1);
+
+    private DispatcherQueueTimer? _minuteTicker;
+
+    /// <summary>
+    /// Starts the once-a-minute tick that keeps each card's waiting-age and countdown texts current.
+    /// </summary>
+    /// <remarks>
+    /// The first tick is aligned to the next wall-clock minute boundary so the text flips when the minute
+    /// changes rather than a full minute after the screen was opened; later ticks settle into a steady
+    /// one-minute cadence. Nothing here touches the database: both texts are derived from timestamps the
+    /// row already carries. A null dispatcher (headless hosting, unit tests) leaves the texts static
+    /// rather than throwing.
+    /// </remarks>
+    private void StartMinuteTicker()
+    {
+        if (_dispatcherQueue is null)
+        {
+            return;
+        }
+
+        if (_minuteTicker is null)
+        {
+            _minuteTicker = _dispatcherQueue.CreateTimer();
+            _minuteTicker.IsRepeating = true;
+            _minuteTicker.Tick += OnMinuteTick;
+        }
+
+        _minuteTicker.Interval = TimeUntilNextMinute(DateTimeOffset.Now);
+        _minuteTicker.Start();
+    }
+
+    private void StopMinuteTicker() => _minuteTicker?.Stop();
+
+    private void OnMinuteTick(DispatcherQueueTimer sender, object args)
+    {
+        // The alignment interval applies to the first tick only.
+        if (sender.Interval != MinuteTickInterval)
+        {
+            sender.Interval = MinuteTickInterval;
+        }
+
+        RefreshTimeDerivedText();
+    }
+
+    /// <summary>
+    /// Time remaining until the next whole minute, used to align the first tick to the minute boundary.
+    /// </summary>
+    /// <param name="now">The current instant.</param>
+    /// <returns>At most one minute; a value on the boundary rolls over to a full minute.</returns>
+    public static TimeSpan TimeUntilNextMinute(DateTimeOffset now)
+    {
+        var elapsedInMinute = TimeSpan.FromSeconds(now.Second) + TimeSpan.FromMilliseconds(now.Millisecond);
+        var remaining = MinuteTickInterval - elapsedInMinute;
+        return remaining > TimeSpan.Zero ? remaining : MinuteTickInterval;
+    }
+
+    /// <summary>
+    /// Recomputes every row's waiting-age and remaining-time text against the current clock.
+    /// </summary>
+    /// <remarks>
+    /// Rows are updated in place. Replacing the collection would restart the list's animations and throw
+    /// away the user's scroll position and selection; <see cref="SampleOrder.RefreshTimeDerivedText"/> only
+    /// notifies for values that actually changed, so an idle minute costs nothing.
+    /// </remarks>
+    public void RefreshTimeDerivedText()
+    {
+        var now = DateTimeOffset.UtcNow;
+        foreach (var order in Source)
+        {
+            order.RefreshTimeDerivedText(now);
         }
     }
 
@@ -259,8 +372,11 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             RequestedPressName = request.WorkCenter,
             RemainingTimeText = GetRemainingTimeText(request.TargetTimeUtc, request.IsOverdue),
             WaitingForText = GetWaitingForText(request.RequestedUtc),
+            RequestedUtc = request.RequestedUtc,
+            TargetTimeUtc = request.TargetTimeUtc,
             ImagePath = ResolveImagePath(request.RequestType, request.Subtype),
             IsOverdue = request.IsOverdue,
+            IsOverdueAtSource = request.IsOverdue,
             RequestTypeStableId = requestTypeId,
             SubtypeStableId = subtypeId,
         };
@@ -290,54 +406,15 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// Human-friendly waiting-age for a request, e.g. "Waiting 35m" / "Waiting 1h 20m" / "Waiting 2d",
     /// so leads can prioritize the oldest requests first.
     /// </summary>
-    public static string GetWaitingForText(DateTimeOffset requestedUtc, DateTimeOffset? referenceUtc = null)
-    {
-        var reference = referenceUtc ?? DateTimeOffset.UtcNow;
-        var elapsed = reference - requestedUtc;
-        if (elapsed < TimeSpan.Zero)
-        {
-            elapsed = TimeSpan.Zero;
-        }
+    /// <remarks>
+    /// The formatting itself lives on <see cref="SampleOrder"/> because the cards re-render these texts
+    /// every minute; this stays as the call site used here and by the tests.
+    /// </remarks>
+    public static string GetWaitingForText(DateTimeOffset requestedUtc, DateTimeOffset? referenceUtc = null) =>
+        SampleOrder.FormatWaitingAge(requestedUtc, referenceUtc);
 
-        if (elapsed.TotalMinutes < 1)
-        {
-            return "Waiting < 1m";
-        }
-
-        if (elapsed.TotalHours < 1)
-        {
-            return $"Waiting {(int)elapsed.TotalMinutes}m";
-        }
-
-        if (elapsed.TotalDays < 1)
-        {
-            return $"Waiting {(int)elapsed.TotalHours}h {(int)(elapsed.TotalMinutes % 60)}m";
-        }
-
-        return $"Waiting {(int)elapsed.TotalDays}d";
-    }
-
-    private static string GetRemainingTimeText(DateTimeOffset? targetTimeUtc, bool isOverdue)
-    {
-        if (isOverdue)
-        {
-            return "Overdue";
-        }
-
-        if (targetTimeUtc is null)
-        {
-            return "New";
-        }
-
-        var remaining = targetTimeUtc.Value - DateTimeOffset.UtcNow;
-        if (remaining <= TimeSpan.Zero)
-        {
-            return "Overdue";
-        }
-
-        var totalMinutes = (int)Math.Ceiling(remaining.TotalMinutes);
-        return totalMinutes <= 0 ? "Overdue" : $"{totalMinutes / 60:00}:{totalMinutes % 60:00}";
-    }
+    private static string GetRemainingTimeText(DateTimeOffset? targetTimeUtc, bool isOverdue) =>
+        SampleOrder.FormatRemainingTime(targetTimeUtc, isOverdue);
 
     private static string ResolveImagePath(string requestType, string? subtype)
     {

@@ -28,6 +28,16 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         get; set;
     }
 
+    /// <summary>
+    /// Caption shown under the remaining-time value on the details page.
+    /// </summary>
+    /// <remarks>
+    /// This view model builds its row once in <see cref="OnNavigatedTo"/> and owns no dispatcher tick, so
+    /// unlike the list card this countdown does not advance while the page is open. The caption says so
+    /// instead of letting the number look live.
+    /// </remarks>
+    public string RemainingTimeNoteText => "Waitlist_Detail.RemainingTimeNote".GetLocalized();
+
     [ObservableProperty]
     public partial string EmptyStateMessage
     {

@@ -66,14 +66,26 @@ For this repository, prioritize MCP-backed validation for:
 - Keep AI features privacy-first: local inference by default, no external endpoint assumptions, and no hardcoded secrets.
 - Add defensive error handling and clear fallback UX when local model service is unavailable.
 
-## Mock Data & Helper Server Guidance
-- The app now supports app-data-backed mock toggles persisted through the existing local settings storage path rather than the database:
-   - `Feature.InforVisualMockData` — master key (the single "Mock Data" toggle in Settings)
-   - `Feature.RecvMockData` — mirror key kept equal to the master for receiving/flatstock readers
-   - Both read as **OFF when unset** (`MockToggleService.GetEffectiveAsync` → `?? false`, asserted by `MockToggleServiceTests`: "absent -> off"). There is no "default On".
-- When the relevant mock toggle is enabled, helper services for read-only and read/write interactions should short-circuit to the mock-data path and call the sample-data service instead of continuing to backend execution.
-- The shared routing pattern is: `SearchButton -> helper server -> mock-data setting check -> sample-data service -> requested action`.
-- Implement helper-server behavior through DI-registered services that depend on `ILocalSettingsService` and `ISampleDataService`.
+## Cached-Fallback & Helper Server Guidance (supersedes the retired mock-toggle standard)
+- **There is no manual demo/mock mode, and none may be reintroduced** (FR-003/FR-014, constitution II). The retired
+  `Feature.InforVisualMockData` / `Feature.RecvMockData` keys, `MockToggleService`, the mock routing/auto-force
+  stack, the sample catalogs and `ISampleDataService` are all deleted; `RetiredSymbolAuditTests` fails the build
+  if any of them returns. Do not add a feature toggle that substitutes demo data.
+- **Internal stores are always read and written live.** `mtm_waitlist`, `mtm_wip_application_winforms` and
+  `mtm_receiving_application` are the operational stores: every read and write goes to MySQL, and a failure is
+  reported as a per-screen unavailable state (`Store`/`LastAttemptUtc`/`RetryCount`/`NextRetryUtc` + a manual
+  retry), never substituted with sample rows and never turned into a persistent banner (FR-001, FR-021).
+- **External reads fall back automatically, never on request.** Only Infor Visual reads use the cache: the five
+  read shapes are resolved through `MTM_Waitlist.Mock` (`IVisualReadFallback<TRequest,TRow>`), which attempts the
+  live Visual query and, on *unreachability only*, serves `sp_visual_<shape>_get` from the `mtm_mock` mirror with
+  an identical result shape (FR-002/FR-004). A reachable-but-empty live result is a real answer and is never
+  replaced by cached data. The cache is never consulted for an internal-store read (FR-027).
+- **The application never refreshes the cache.** Keeping the mirror warm is the on-host
+  `MTM_Waitlist.Mock.Service`'s job (3-hour default cadence on the local-midnight grid). The app only *probes*
+  reachability and reports cached-data age (FR-025).
+- **Every data operation goes through a stored procedure** (constitution III): no inline or hard-coded statement
+  text in application code, DML through the non-query seam that reports affected rows, and every schema artifact
+  ships `create.sql` + `rollback.sql` in the same change. `InlineSqlAuditTests` (T098) fails the build otherwise.
 - Module_Setup dunnage workflow now mirrors receiving-app UI patterns (type selection, part selection, tabbed review) but saves setup pair assignments instead of label-data rows.
 - Quick Add in Module_Setup writes dunnage type/part definitions to `mtm_receiving_application` and is restricted to roles: Admin, Developer, Plant Manager, Setup Lead, Production Lead.
 
@@ -111,6 +123,18 @@ When executing complex, cross-file architectural edits, you must strictly move t
 ## Large-Task Resilience
 - For whole-repo exploration or validation (e.g., "validate all tasks in `<checklist>`", "summarize all docs"), delegate read-only research to the `Explore` subagent instead of reading many files into the main context.
 - Work in small, verifiable steps and state progress as you go. If a long operation fails or is interrupted, explicitly say what completed and resume from that point rather than restarting from scratch.
+
+## Workstation Elevation (this environment)
+- **The normal loop needs no elevation.** `dotnet build`, `dotnet test`, launching the unpackaged `MTM_Waitlist.exe`,
+  running `MTM_Waitlist.Mock.Service.exe` from a user-writable folder, and the service's per-user
+  `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry all run as the signed-in developer account.
+- **When administrator rights are genuinely required** — repairing the Windows App SDK/MSIX tooling, writing
+  machine-wide registry keys or services/firewall rules, or driving an **elevated** window with UI Automation —
+  use the local admin account recorded in `.github/memories/repo/workstation-elevation.md`. Raise the prompt and
+  type the password there rather than passing it through a command line.
+- That note carries an **owner-approved exception** to this repository's "no hardcoded secrets" / "sanitize
+  credentials" rules, scoped to that one workstation. Do not carry the pattern into `appsettings.json`, code,
+  tests, other docs, or any other host.
 
 ## Known Build Quirks
 - `PRI175` / `PRI224 root node not found` during `dotnet build` is usually stale PRI artifacts or a running `MTM_Waitlist.exe` locking the output — not a code error. Stop the running app, delete stale `*.pri` under `obj/`/`bin/`, and rebuild before debugging the code.

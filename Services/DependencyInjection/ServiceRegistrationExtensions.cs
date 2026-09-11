@@ -95,6 +95,12 @@ public static class ServiceRegistrationExtensions
         // Core services. The app's own store, the floor/WIP store, and the receiving store are always read
         // and written live: no sample/demo catalog and no mock short-circuit is registered (FR-001, FR-014).
         services.AddSingleton<MTM_Waitlist.Module_Core.Services.InforVisualSqlQueryService>();
+
+        // Internal-store availability (FR-021): the seam records the outcome of every bounded-retry read here,
+        // and a screen reads it to show its own Unavailable state with a manual retry.
+        services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IStoreAvailabilityTracker,
+            MTM_Waitlist.Module_Core.Services.StoreAvailabilityTracker>();
+        services.AddSingleton(MTM_Waitlist.Module_Core.Services.InternalStoreRetryPolicy.Default);
         services.AddSingleton<MySqlHelperServer>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMySqlHelperServer>(
             sp => sp.GetRequiredService<MySqlHelperServer>());

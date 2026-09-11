@@ -117,6 +117,29 @@
 
         </ListView>
 
+        <!--
+          This screen's internal-store unavailable state (FR-021). It appears only while the waitlist
+          database has failed every bounded retry, in this screen rather than as an app-wide banner, and it
+          clears itself as soon as a read succeeds. The retry re-runs this screen's own load. All text is
+          resource-backed (constitution V).
+        -->
+        <InfoBar
+            x:Name="StoreUnavailableBar"
+            Margin="12,12,12,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            IsClosable="False"
+            IsOpen="{x:Bind ViewModel.StoreUnavailable.IsUnavailable, Mode=OneWay}"
+            Message="{x:Bind ViewModel.StoreUnavailableMessage, Mode=OneWay}"
+            Severity="Error"
+            Title="{x:Bind ViewModel.StoreUnavailableTitle, Mode=OneWay}">
+            <InfoBar.ActionButton>
+                <Button
+                    Command="{x:Bind ViewModel.StoreUnavailable.RetryCommand, Mode=OneWay}"
+                    Content="{x:Bind ViewModel.StoreUnavailableRetryText, Mode=OneWay}" />
+            </InfoBar.ActionButton>
+        </InfoBar>
+
         <Grid
             x:Name="EmptyWaitlistState"
             Visibility="{x:Bind ViewModel.IsWaitlistEmpty, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"

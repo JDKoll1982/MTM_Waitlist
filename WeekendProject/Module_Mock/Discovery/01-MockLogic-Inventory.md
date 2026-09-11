@@ -1,6 +1,9 @@
 # Discovery 01 — Current Mock/Sample Logic Inventory (MTM_Waitlist)
 
 > Read-only discovery, 2026-09-09. Source: repo exploration. Feeds the Module_Mock removal + rebuild.
+>
+> **Status (2026-09-11): historical inventory.** Every system it names below was removed — see `../README.md`.
+> The names appear here deliberately, as the record of what was removed and why; they are not current code.
 
 ## Executive: TWO separate "mock" families (do not conflate)
 - **A. In-app sample / short-circuit system** — legacy dev/demo source driven by `Feature.InforVisualMockData`

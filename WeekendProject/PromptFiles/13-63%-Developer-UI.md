@@ -1,19 +1,20 @@
-# 13 — Developer UI: Mock Auto-Fallback, DB Connection Gates & Request-Type/Subtype Editor
+# 13 — Developer UI: Mock Auto-Fallback, DB Connection Gates & Startup Gate
 
 > **Purpose:** Add a **Developer-oriented** UI & behavior layer on top of the Waitlist app so the app
-> keeps running when its external databases (Infor Visual, the receiving app) are down, and let
-> Developers/Admins **edit the real request-type/subtype catalog** from the app instead of by hand.
+> keeps running when its external databases (Infor Visual, the receiving app) are down.
 >
-> Four asks:
+> Three asks:
 >
 > 1. **Startup/auto mock fallback** — during startup, if the Infor Visual DB can't be reached, use mock
 >    data; do the same for the receiving-app DB.
 > 2. **Live-data-when-available** — both mocks (receiving & Infor Visual) pull from their real database
 >    **only when a connection can be established**, so when either is down the app still runs on mock.
-> 3. **Request-type/subtype editor** — edit the real catalog via a **Developer Settings** page
->    (edit-entry UX = **Option A**: drill-in list → type edit view → **guided wizard modal**).
-> 4. **`mtm_waitlist` is required to start** — no connection to `mtm_waitlist` ⇒ the app must not start
+> 3. **`mtm_waitlist` is required to start** — no connection to `mtm_waitlist` ⇒ the app must not start
 >    (full stop) with clear user-facing reasoning during splash. (Largely already implemented; polish wording.)
+>
+> **RETIRED 2026-09-11:** a former fourth ask — a **request-type/subtype editor** on a Developer Settings
+> page — is **cancelled and will not be built**. All of its content has been removed from this file; do not
+> reintroduce it.
 >
 > **Workflow:** checklist-execution skill; adopt each task's persona. Tick `- [x]` only when implemented,
 > builds clean, and tests pass.
@@ -21,9 +22,11 @@
 > **Related:** `12-MockMasterData-DbDriven.md` provides the foundation this file builds on: the real
 > request-type/subtype **reference tables** (`waitlist_request_types`/`waitlist_request_subtypes` 28/29)
 >
-> + dedicated SPs + `RequestTypeCatalogService` read (Phase 4 here consumes these), the shared role-gated
-> **Developer Settings page** (0.5), and the mock `mock_*` tables/registry + mock-master routing that
-> Phase 1's health fallback extends. Treat file 12 as a prerequisite for Phase 4.
+> + dedicated SPs + `RequestTypeCatalogService` read, and the mock `mock_*` tables/registry + mock-master
+> routing that Phase 1's health fallback extends.
+>
+> *(The `Developer Settings` page and the request-type/subtype editor this file used to name as a
+> prerequisite were retired 2026-09-11 — see the note above.)*
 
 ## Task 0 — Green baseline + full read
 
@@ -93,52 +96,28 @@
 
 ---
 
-## Phase 4 — Request-Type/Subtype editor (item 2) — Option A
+## Phase 4 — RETIRED: Request-Type/Subtype editor (cancelled 2026-09-11)
 
-> **Edit-entry UX = Option A** (chosen 2026-09-06): **Drill-in list → type edit view → subtype wizard
-> modal.** Editing rules locked:
->
-> + **No brand-new top-level request type** via the UI (a new type needs a compiled WinUI control); new
->   types are added in code + seed. Standing rule: whenever a request type/subtype is added, removed, or
->   changed, the **seed data** for it must be reviewed.
-> + Subtypes can be **Add / Edit / Remove** in the UI.
-> + **Order** applies to types and to subtypes.
-> + All fields editable: name, `is_active`, `order`, flow + text-input rules, grid columns, image, control type.
-> + A type's non-General fields edit via the **same 4-step wizard** as subtypes.
-> + **Cancel** confirms before discarding unsaved edits. Changes persist **once at final Save**.
-> + Control-type dropdown reuses **all existing controls across any type**; a per-control card appears
->   when a control type is selected, with proper **error gating**.
-> + Lives on the role-gated **Developer Settings** page (main nav, above Settings).
+> **No request-type/subtype editor will be used.** This phase — the Developer Settings page, the
+> Request-Type master list, the type edit view, the 4-step guided wizard modal, the per-control card, and
+> the real-catalog grid editor — is cancelled, not deferred. Its design rules, Option-A wireframe
+> reference, editor backend and UI tasks have been removed from this file. Do not reintroduce them.
+> The catalog's **data** half is already complete (`RequestTypeCatalogService` reads the MySQL reference
+> tables); none of it is editable in the app.
 
-### Subphase 4.1 — UI reference (from DeveloperUI-VisualPrompts.md Option A)
 
-+ **Master list** — "Request Types": vertical list of the 8 types (Pickup, Other, Coil, Scrap, Flatstock,
-  Table Handling, Die Handling, Forklift Assist); each row = colored icon + name + subtype count + Edit
-  button; back arrow + "Developer Settings" breadcrumb.
-+ **Type edit view** — "Editing: Coil": compact form (Display name, Active, Order) + "Subtypes (N)"
-  section listing each subtype with an Edit button (and Add / Remove); Back top-left; Cancel/Save footer.
-+ **Subtype (and type) wizard modal** — one modal, 4 steps with a step indicator at top and **Next /
-  Back / Cancel**; final step shows **Save**:
-  1. **General** — name, Active, Order.
-  2. **Flow & text input** — Flow, Requires text input, Prompt, Min/Max length.
-  3. **Grid columns** — ordered list editor (up/down, add/remove).
-  4. **Control & image** — Control type dropdown + per-control card; Image path / Upload.
+### Subphase 4.2 — Backend editor services — REMOVED (cancelled 2026-09-11)
 
-### Subphase 4.2 — Backend editor services (SP-only)
+*The three completed backend tasks that used to sit here (the real-catalog CRUD SPs, the
+`IRequestTypeEditorService`/`RequestTypeEditorService` read/write service and its DTOs, and the
+control-type-reuse validation helper) described code that has since been deleted. They are no longer
+documented here: no request-type/subtype editor will be used.*
 
-+ [x] **Database Engineer: confirm the real-catalog tables/SPs (from Workflow 12) are sufficient for read + insert + update + delete** of `waitlist_request_types` / `waitlist_request_subtypes` (add subtype/remove-subtype; update ordering). Add/adjust SPs if needed, keeping `AllSPs.sql` + descriptions in sync. | **Persona: Database Engineer** — verified 2026-09-06: full CRUD SP set already existed (`*_get/_insert/_update/_delete` for both tables). The only editor gap was that the wizard `*_get` SPs filter `is_active = 1`, so an editor could not see/re-activate inactive rows. Added two admin reads **`sp_waitlist_request_types_get_all`** + **`sp_waitlist_request_subtypes_get_all`** (include inactive, no is_active filter, ordered by id). Created `Database/StoredProcedures/sp_waitlist_request_{types,subtypes}_get_all/{create,rollback}.sql`, appended to `AllSPs.sql`, and **applied + verified on the live DB** (returns 8 types / 24 subtypes). NOTE: no explicit `sort_order` column exists on either table yet — display order is the read order by id. Reordering (a schema feature) is tracked as a follow-up.
-+ [x] **Backend Engineer: add a real-catalog **read/write** editor service** (enumerate types with subtypes; add/edit/remove subtype; update type + subtype fields incl. ordering) built on the dedicated real-catalog SPs — NOT part of mock code. | **Persona: Backend Engineer** — verified 2026-09-06: `IRequestTypeEditorService`/`RequestTypeEditorService` (`MTM_Waitlist.Core`) + editor DTOs `RequestTypeEditorItem`/`RequestSubtypeEditorItem` (Core/Models). `GetCatalogAsync` reads via the `_get_all` SPs (types grouped with subtypes, incl. inactive); `AddSubtypeAsync`/`UpdateSubtypeAsync`/`DeleteSubtypeAsync`/`UpdateTypeAsync` dispatch to the dedicated SPs (JSON grid fields serialized; byte bools). DI-registered; deliberately separate from mock code. `RequestTypeEditorServiceTests` (5) pass; build clean; full suite green (417 passed).
-+ [x] **Backend Engineer: validate control-type reuse** — the Control-type dropdown lists code-registered WinUI control types present in the catalog; reject/flag a type whose control isn't available at runtime (error gating). | **Persona: Backend Engineer** — verified 2026-09-06: `RequestCatalogControlValidation` (Core, pure) provides the data-driven control-type source + error gating — `CollectAvailableControlTypes(catalog)` returns the distinct image-view control types present across types/subtypes (for the dropdown; "reuses all existing controls"), and `Validate(catalog, availableControls)` flags any row whose control is empty or not in the available set. Callers can inject the authoritative compiled-control allow-list from the app; the data-driven set needs no runtime reflection so it is unit-testable. `RequestCatalogControlValidationTests` (4) pass; build clean; full suite green (421 passed). UI dropdown binding + live reflection allow-list is the remaining (runtime/UI) part.
-
-### Subphase 4.3 — Developer Settings page + nav (Option A UI)
-
-+ [ ] **Frontend/Backend Engineer: add a role-gated Developer Settings page** reachable from the main nav (above Settings, like manage-settings); move existing developer cards (Mock Data, Image Location, Computers) onto it. | **Persona: Frontend Engineer**
-+ [ ] **Frontend Engineer: implement the Request-Type master list** (Phase 4.1) loading the catalog through the editor service. | **Persona: Frontend Engineer**
-+ [ ] **Frontend Engineer: implement the type edit view** (Display/Active/Order inline + Subtypes list with Add/Edit/Remove). | **Persona: Frontend Engineer**
-+ [ ] **Frontend Engineer: implement the guided wizard modal** (4 steps, Next/Back/Cancel, step indicator, final Save) shared by subtype and type editing; Cancel confirms on unsaved changes; persist at final Save. | **Persona: Frontend Engineer**
-+ [ ] **Frontend Engineer: implement the per-control card** shown when a control type is selected (control-specific options) with error gating. | **Persona: Frontend Engineer**
-+ [ ] **QA Engineer: tests** for master-list load, add/edit/remove subtype, ordering, wizard step navigation + cancel-confirm + final-save, role gating, and that catalog edits are reflected on next wizard run; full suite green. | **Persona: QA Engineer**
 
 ---
 
-**GATE: Infor/receiving reachability health service exists and auto-falls back to mock when down (manual toggle disabled, toast on change); central mock config reflects on all clients with race handling; `mtm_waitlist` is hard-required at startup with clear splash messaging; a role-gated Developer Settings page (main nav, above Settings) hosts an Option-A request-type/subtype editor (list → type view → guided wizard, add/edit/remove subtypes, ordering, control reuse w/ gating); catalog edits reflect on next load; seed reviewed per the standing rule; full suite green.**
+**GATE: `mtm_waitlist` is hard-required at startup with clear splash messaging; full suite green.**
+
+*(The mock-fallback, central-config and request-type-editor clauses that used to sit in this gate are
+retired: the mock systems were removed by `specs/001-module-mock-visual-fallback` (FR-014), and the
+request-type/subtype editor is cancelled as of 2026-09-11.)*

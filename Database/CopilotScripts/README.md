@@ -78,3 +78,20 @@ Diagnostic scripts (not part of the deploy path) live beside their artifacts:
 - Each artifact ships `create.sql` + `rollback.sql` in the same change and is registered
   in the master lists (locked DB ruleset).
 - Never edit `AllTables.sql` / `AllSPs.sql` / `AllSeeds.sql` by hand — regenerate them.
+
+## Deviation from the locked ruleset (approved)
+
+The locked ruleset describes the master lists as hand-maintained. For the `mtm_mock` cache they are generated
+by `build_mtm_mock_masters.ps1` instead, and that deviation is recorded with its rationale in
+`Database/Database-Ruleset.md` → *Artifact Layout and Release Governance* → *Review note — generated master
+lists for the `mtm_mock` cache* (task T121 of `specs/001-module-mock-visual-fallback`).
+
+In short:
+
+- The three `Database/Mock/*.sql` aggregates are generated from the file-per-artifact sources in dependency
+  order; the internal-store aggregates under `Database/Tables`, `Database/StoredProcedures` and `Database/Seeds`
+  remain hand-maintained and are edited directly.
+- `-Check` is the enforcement: it regenerates in memory and exits non-zero when a committed list is stale, so a
+  forgotten regeneration fails the deploy gate instead of shipping a diverged aggregate.
+- The artifacts that must still move by hand are unchanged: every `create.sql` ships with its `rollback.sql`,
+  and `Database/Mock/Bootstrap/update_table_descriptions.sql` is updated in the same change (constitution III).

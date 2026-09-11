@@ -3,7 +3,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI;
 using Microsoft.UI.Text;
+using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
+using System.ComponentModel;
 
 namespace MTM_Waitlist.Module_Waitlist.Controls;
 
@@ -57,9 +59,52 @@ public partial class WaitlistLineCardView : UserControl
         typeof(WaitlistLineCardView),
         new PropertyMetadata(null));
 
+    private SampleOrder? _subscribedOrder;
+
     public WaitlistLineCardView()
     {
         InitializeComponent();
+
+        // The countdown's colour and weight are derived from the row's own texts, so the card must listen
+        // for the once-a-minute refresh as well as for a change of row. Re-subscribing on Loaded keeps
+        // that working when the ListView recycles this container.
+        Loaded += OnCardLoaded;
+        Unloaded += OnCardUnloaded;
+    }
+
+    private void OnCardLoaded(object sender, RoutedEventArgs e) => AttachOrder(Order);
+
+    private void OnCardUnloaded(object sender, RoutedEventArgs e) => DetachOrder(_subscribedOrder);
+
+    private void AttachOrder(SampleOrder? order)
+    {
+        if (order is null || ReferenceEquals(_subscribedOrder, order))
+        {
+            return;
+        }
+
+        order.PropertyChanged += OnOrderPropertyChanged;
+        _subscribedOrder = order;
+    }
+
+    private void DetachOrder(SampleOrder? order)
+    {
+        if (order is null || !ReferenceEquals(_subscribedOrder, order))
+        {
+            return;
+        }
+
+        order.PropertyChanged -= OnOrderPropertyChanged;
+        _subscribedOrder = null;
+    }
+
+    private void OnOrderPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (string.Equals(e.PropertyName, nameof(SampleOrder.RemainingTimeText), System.StringComparison.Ordinal)
+            || string.Equals(e.PropertyName, nameof(SampleOrder.IsOverdue), System.StringComparison.Ordinal))
+        {
+            UpdateRemainingTimeBrush();
+        }
     }
 
     public SampleOrder? Order
@@ -114,6 +159,10 @@ public partial class WaitlistLineCardView : UserControl
     {
         if (dependencyObject is WaitlistLineCardView control)
         {
+            // Drop the previous row's subscription before taking the new one, or a recycled container
+            // would keep repainting a row it no longer shows.
+            control.DetachOrder(args.OldValue as SampleOrder);
+            control.AttachOrder(args.NewValue as SampleOrder);
             control.UpdateRemainingTimeBrush();
         }
     }
@@ -121,37 +170,12 @@ public partial class WaitlistLineCardView : UserControl
     private void UpdateRemainingTimeBrush()
     {
         var remainingTimeText = Order?.RemainingTimeText;
-        var isOverdue = Order?.IsOverdue == true
-            || string.Equals(remainingTimeText?.Trim(), "Overdue", System.StringComparison.OrdinalIgnoreCase);
+        var isOverdue = Order?.IsOverdue == true;
 
-        if (isOverdue)
-        {
-            RemainingTimeBrush = new SolidColorBrush(Colors.IndianRed);
-            RemainingTimeFontWeight = FontWeights.Bold;
-            return;
-        }
-
-        RemainingTimeFontWeight = FontWeights.Normal;
-
-        if (string.IsNullOrWhiteSpace(remainingTimeText) || !TimeSpan.TryParse(remainingTimeText, out var parsedRemainingTime))
-        {
-            RemainingTimeBrush = new SolidColorBrush(Colors.MediumSeaGreen);
-            return;
-        }
-
-        var minutesRemaining = parsedRemainingTime.TotalMinutes;
-        if (minutesRemaining <= 15)
-        {
-            RemainingTimeBrush = new SolidColorBrush(Colors.IndianRed);
-            return;
-        }
-
-        if (minutesRemaining <= 30)
-        {
-            RemainingTimeBrush = new SolidColorBrush(Colors.Goldenrod);
-            return;
-        }
-
-        RemainingTimeBrush = new SolidColorBrush(Colors.MediumSeaGreen);
+        // One palette for the card and the details page, so the two can never disagree about what "red" means.
+        RemainingTimeBrush = RemainingTimePalette.For(remainingTimeText, isOverdue);
+        RemainingTimeFontWeight = isOverdue || RemainingTimePalette.IsOverdueText(remainingTimeText)
+            ? FontWeights.Bold
+            : FontWeights.Normal;
     }
 }

@@ -144,6 +144,42 @@ graph TD
 
 ---
 
+### 8. The app keeps working when Infor Visual is down (automatic failover)
+
+**What changed:** When Infor Visual cannot be reached — a network blip, a maintenance window,
+or a full outage — the app now switches to a local cache of the Infor Visual data on its own.
+There is nothing to turn on, no dialog to accept, and no error banner to dismiss. The five
+Infor Visual reads the app depends on (work-order lookup, operation sequences, subordinate
+parts, inventory locations, and request-disposition input) keep returning results.
+
+**Why it matters:** A dispatcher can keep raising and working requests through an Infor
+Visual outage instead of being stopped by a screen that cannot load. A small status bar in
+the app tells you when cached data is in use and how old it is, so you always know whether
+you are looking at live or cached information — and it clears itself when the source comes
+back. Nothing about the app's own data changed: request, setup, and receiving data always go
+straight to the live database, and there is no demo mode anywhere in the app.
+
+**Time spent:** ~3 days (cache schema, the on-host refresh service, the in-app fallback, and
+the removal of the old demo/mock-data system)
+
+```mermaid
+flowchart TD
+    A[App needs Infor Visual data] --> B{Is Infor Visual reachable?}
+    B -- Yes --> C[Return live data]
+    B -- No --> D[Serve the cached copy, same result shape]
+    D --> E[Status bar: Infor Visual unreachable, cached data in use, age shown]
+    C --> F[Status bar clears]
+    B -- Yes, but empty --> C
+```
+
+> A reachable Infor Visual that legitimately returns no rows is a real answer and is **not**
+> replaced by cached data. The application itself never refreshes the cache: that is the job
+> of a small service on the database host, which refreshes it every 3 hours (at 00:00, 03:00,
+> 06:00, 09:00, 12:00, 15:00, 18:00 and 21:00 server-local time) and can also be asked for an
+> immediate refresh.
+
+---
+
 ## Total time worked on this repo (today)
 
 Per WakaTime, **2026-08-29** — **MTM Waitlist** repo total:

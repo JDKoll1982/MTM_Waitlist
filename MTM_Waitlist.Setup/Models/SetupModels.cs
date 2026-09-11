@@ -308,6 +308,17 @@ public sealed class SetupSubordinatePart
 
     public string OnHandDisplay => OnHandQuantity.ToString("0.##");
 
+    /// <summary>
+    /// Whether the On Hand figure is meaningful for this row.
+    /// </summary>
+    /// <remarks>
+    /// A die is tooling that exists in Visual only so it can be assigned to a part number, so it is never
+    /// inventoried: its On Hand is always 0, and rendering "0" reads as a stock-out rather than as "not
+    /// tracked at all". The review page hides the figure for dies. This is a display rule only, so the
+    /// OnHandQuantity column keeps its shape in the live read and in the mirror.
+    /// </remarks>
+    public bool ShowsOnHand => !string.Equals(Category, "Die", StringComparison.OrdinalIgnoreCase);
+
     public string LocationDisplay => string.IsNullOrWhiteSpace(Location) ? "Unassigned" : Location;
 
     private static string NormalizeCategory(string category)
