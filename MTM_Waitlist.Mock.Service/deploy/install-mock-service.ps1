@@ -13,12 +13,15 @@
       6. installs and verifies the environment secrets the service resolves at runtime;
       7. starts the service and health-checks it (tray-only, port bound, API refusing unauthenticated
          calls, single-instance redirect);
-      8. prints a PASS/FAIL summary and exits non-zero if anything failed.
+      8. puts one shortcut on the operator's desktop that opens the service's control prompt - show the
+         window, restart, or shut down - replacing any shortcut of that name so a redeploy cannot leave a
+         stale target behind;
+      9. prints a PASS/FAIL summary and exits non-zero if anything failed.
 
     The equivalent manual procedure is MTM_Waitlist.Mock.Service/README.md sections 2-4; that file
     remains the narrative authority, this script is the executable form of it.
 
-.SERVER-ONLY — READ THIS BEFORE RUNNING
+.SERVER-ONLY - READ THIS BEFORE RUNNING
     The service belongs on the host that can reach both MySQL and Infor Visual. Running it from a
     developer workstation would install a tray-only auto-starting service on the wrong machine and
     point `HKCU\...\Run` at whatever folder it was launched from.
@@ -63,8 +66,14 @@ param(
     # Do not start the service or run the health checks.
     [switch] $SkipServiceStart,
 
-    # Also delete %LOCALAPPDATA%\MTM_Waitlist.Mock.Service — configuration, the DPAPI credential and backups.
+    # Also delete %LOCALAPPDATA%\MTM_Waitlist.Mock.Service - configuration, the DPAPI credential and backups.
     [switch] $PurgeState,
+
+    # The desktop that receives the restart shortcut. Hardcoded to the operator account by owner decision.
+    [string] $DesktopPath = 'C:\Users\jkoll\Desktop',
+
+    # Do not create or replace the desktop shortcut.
+    [switch] $SkipDesktopShortcut,
 
     # Bypass the server-only guard. Deliberate use only; say why in the change that uses it.
     [switch] $AllowNonServerHost,
@@ -84,6 +93,7 @@ $runKeyPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
 $runValueName = 'MTM_Waitlist.Mock.Service'
 $stateRoot = Join-Path $env:LOCALAPPDATA 'MTM_Waitlist.Mock.Service'
 $apiPort = 5760
+$controlScriptName = 'mock-service-control.ps1'
 
 if (-not $SourcePath) {
     $SourcePath = Join-Path $repoRoot 'MTM_Waitlist.Mock.Service\bin\publish\win-x64'
@@ -114,7 +124,7 @@ function Test-Failed {
 
 Write-Host ''
 Write-Host '============================================================' -ForegroundColor Cyan
-Write-Host ' MTM_Waitlist.Mock.Service — install / redeploy' -ForegroundColor Cyan
+Write-Host ' MTM_Waitlist.Mock.Service - install / redeploy' -ForegroundColor Cyan
 Write-Host '============================================================' -ForegroundColor Cyan
 Write-Host "  repo    : $repoRoot"
 Write-Host "  source  : $SourcePath"
@@ -161,7 +171,7 @@ REFUSING TO RUN: this machine is not the cache host.
   this machine : $(($localAddresses -join ', '))
   expected host: $ServerHost
 
-The service must be installed on the host that reaches both MySQL and Infor Visual — run VS Code on
+The service must be installed on the host that reaches both MySQL and Infor Visual - run VS Code on
 the server itself (verified identity 2026-09-11: V-MTMFG-5 = 172.16.1.104).
 
 If this non-server host is deliberate, re-run with -AllowNonServerHost and record why.
@@ -237,7 +247,7 @@ else {
 if ($PurgeState) {
     if (Test-Path $stateRoot) {
         Remove-Item $stateRoot -Recurse -Force
-        Add-Result 'purge service state' 'WARN' "deleted $stateRoot (configuration, credential, backups) — a new credential must be generated"
+        Add-Result 'purge service state' 'WARN' "deleted $stateRoot (configuration, credential, backups) - a new credential must be generated"
     }
     else {
         Add-Result 'purge service state' 'PASS' 'no state folder existed'
@@ -262,7 +272,7 @@ if ($Publish) {
         $publishOutput | Select-Object -Last 15 | ForEach-Object { Write-Host "      $_" }
     }
     elseif ($profileWarning) {
-        Add-Result 'publish' 'FAIL' 'publish profile win-x64-selfcontained was not applied (NETSDK1198) — the build would not be self-contained'
+        Add-Result 'publish' 'FAIL' 'publish profile win-x64-selfcontained was not applied (NETSDK1198) - the build would not be self-contained'
     }
     else {
         Add-Result 'publish' 'PASS' "dotnet publish (Release, win-x64-selfcontained) with no warnings"
@@ -297,6 +307,7 @@ else {
 
 $required = @(
     $serviceExeName,
+    $controlScriptName,
     'assets\WindowIcon.ico',
     'Database\InforVisual\Queues\Module_Mock\Populations\work_order_lookup_population.sql',
     'Database\InforVisual\Queues\Module_Mock\Populations\operation_sequences_population.sql',
@@ -548,6 +559,110 @@ else {
 }
 
 # ---------------------------------------------------------------------------------------------
+# 8. Desktop shortcut
+# ---------------------------------------------------------------------------------------------
+Write-Host ''
+Write-Host '--- 8. desktop shortcut ---' -ForegroundColor Cyan
+
+if ($SkipDesktopShortcut) {
+    Add-Result 'desktop shortcut' 'SKIP' '-SkipDesktopShortcut given'
+}
+else {
+    # The label is read from the app's own resources so the desktop entry and the window title cannot
+    # drift apart; the file name has to stay legal, so any path character is folded to a space.
+    $appTitle = 'MTM mock cache service'
+    $reswPath = Join-Path $repoRoot 'MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw'
+    if (Test-Path $reswPath) {
+        $titleEntry = ([xml](Get-Content $reswPath -Raw)).root.data | Where-Object { $_.name -eq 'Service_Shell.Title' }
+        if ($titleEntry -and $titleEntry.value) { $appTitle = $titleEntry.value }
+    }
+    $appTitle = $appTitle -replace '[\\/:*?"<>|]', ' '
+
+    $shortcutName = $appTitle
+    $controlScriptPath = Join-Path $TargetPath $controlScriptName
+
+    # The configured path is the operator's desktop. It is absent when the profile's Desktop is
+    # redirected (this host redirects jkoll's into OneDrive), and a shortcut written to a path nobody can
+    # see is worse than no shortcut, so fall back to the shell's Desktop known folder - which is jkoll's,
+    # because this script runs as that account - and report which one was used.
+    $desktopSource = $DesktopPath
+    $resolvedDesktop = $DesktopPath
+    if (-not (Test-Path $resolvedDesktop)) {
+        $knownDesktop = [Environment]::GetFolderPath('Desktop')
+        if ($knownDesktop -and (Test-Path $knownDesktop)) {
+            $resolvedDesktop = $knownDesktop
+            $desktopSource = "$DesktopPath is absent; resolved to $knownDesktop"
+        }
+    }
+    $shortcutPath = Join-Path $resolvedDesktop "$shortcutName.lnk"
+
+    # Prefer PowerShell 7 where the host has it, and fall back to Windows PowerShell, which every Windows
+    # installation carries. The restart script is written to parse under both, and under neither does it
+    # need elevation.
+    $powerShellPath = $null
+    $pwshCommand = Get-Command pwsh -ErrorAction SilentlyContinue
+    if ($pwshCommand) { $powerShellPath = $pwshCommand.Source }
+    if (-not $powerShellPath) {
+        $powerShellPath = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+    }
+
+    if (-not (Test-Path $DesktopPath) -and -not (Test-Path $resolvedDesktop)) {
+        Add-Result 'desktop shortcut' 'FAIL' "there is no desktop folder at $DesktopPath"
+    }
+    elseif (-not (Test-Path $powerShellPath)) {
+        Add-Result 'desktop shortcut' 'FAIL' "there is no PowerShell interpreter at $powerShellPath"
+    }
+    elseif (-not (Test-Path $controlScriptPath)) {
+        Add-Result 'desktop shortcut' 'FAIL' "$controlScriptName was not deployed to $TargetPath"
+    }
+    else {
+        $existed = Test-Path $shortcutPath
+        $failure = $null
+        try {
+            # Owner decision: an existing shortcut of this name is REPLACED rather than left alone, so a
+            # redeploy after the install folder moves cannot leave a shortcut pointing at nothing.
+            if ($existed) { Remove-Item $shortcutPath -Force -ErrorAction Stop }
+
+            $shell = New-Object -ComObject WScript.Shell
+            try {
+                $shortcut = $shell.CreateShortcut($shortcutPath)
+                $shortcut.TargetPath = $powerShellPath
+                # No -Action: the shortcut opens the prompt, so the operator picks what happens and can
+                # read what each choice does first.
+                $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$controlScriptPath`""
+                $shortcut.WorkingDirectory = $TargetPath
+                $shortcut.IconLocation = "$(Join-Path $TargetPath $serviceExeName),0"
+                $shortcut.Description = "Show, restart or shut down $appTitle."
+                $shortcut.Save()
+
+                # Read the saved file back: a shortcut that silently kept an old target would be worse
+                # than no shortcut, because nothing would tell the operator why it did nothing.
+                $saved = $shell.CreateShortcut($shortcutPath)
+                if (-not (Test-Path $shortcutPath)) { $failure = 'the shortcut was not created' }
+                elseif ($saved.TargetPath -ne $powerShellPath) { $failure = "target is '$($saved.TargetPath)'" }
+                elseif ($saved.Arguments -notlike "*$controlScriptPath*") { $failure = "arguments are '$($saved.Arguments)'" }
+            }
+            finally {
+                if ($shell) { [void][System.Runtime.InteropServices.Marshal]::ReleaseComObject($shell) }
+            }
+        }
+        catch {
+            $failure = $_.Exception.Message
+        }
+
+        if ($failure) {
+            Add-Result 'desktop shortcut' 'FAIL' "$shortcutPath : $failure"
+        }
+        elseif ($existed) {
+            Add-Result 'desktop shortcut' 'PASS' "replaced $shortcutPath (opens $controlScriptName)"
+        }
+        else {
+            Add-Result 'desktop shortcut' 'PASS' "created $shortcutPath (opens $controlScriptName); $desktopSource"
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------------------------
 Write-Host ''
@@ -557,12 +672,12 @@ $script:results | Format-Table -AutoSize | Out-String -Width 200 | Write-Host
 $failed = @($script:results | Where-Object { $_.Status -eq 'FAIL' })
 $warned = @($script:results | Where-Object { $_.Status -eq 'WARN' })
 if ($failed.Count -eq 0) {
-    Write-Host "DEPLOYMENT OK — $($script:results.Count) checks, $($warned.Count) warning(s)." -ForegroundColor Green
+    Write-Host "DEPLOYMENT OK - $($script:results.Count) checks, $($warned.Count) warning(s)." -ForegroundColor Green
     Write-Host "Install folder : $TargetPath"
     Write-Host "Service state  : $stateRoot"
     Write-Host ''
     exit 0
 }
-Write-Host "DEPLOYMENT FAILED — $($failed.Count) check(s) failed." -ForegroundColor Red
+Write-Host "DEPLOYMENT FAILED - $($failed.Count) check(s) failed." -ForegroundColor Red
 Write-Host ''
 exit 1

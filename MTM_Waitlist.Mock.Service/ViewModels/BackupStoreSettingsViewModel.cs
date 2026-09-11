@@ -47,7 +47,13 @@ public sealed partial class BackupStoreSettingsViewModel : ObservableObject
         DestinationDirectory = policy.DestinationDirectory;
     }
 
-    /// <summary>The store's database name, used as the row label.</summary>
+    /// <summary>The store's name as an operator sees it, used as the row label.</summary>
+    public string DisplayName => _store.ToDisplayName();
+
+    /// <summary>The note that says what this store holds.</summary>
+    public string DescriptionText => _store.ToDescription();
+
+    /// <summary>The store's database name, for diagnostics and the validation text's fallback.</summary>
     public string StoreName => _store.ToDatabaseName();
 
     /// <summary>The store this editor governs, for the restore picker's selection.</summary>
@@ -56,14 +62,26 @@ public sealed partial class BackupStoreSettingsViewModel : ObservableObject
     /// <summary>Label of the enable toggle for this store.</summary>
     public string EnableLabelText => "Service_Settings.StoreEnable".GetLocalized();
 
+    /// <summary>Note under the enable toggle.</summary>
+    public string EnableDescriptionText => "Service_Settings.StoreEnableDescription".GetLocalized();
+
     /// <summary>Label of the schedule field for this store.</summary>
     public string ScheduleLabelText => "Service_Settings.StoreSchedule".GetLocalized();
+
+    /// <summary>Note under the schedule field.</summary>
+    public string ScheduleDescriptionText => "Service_Settings.StoreScheduleDescription".GetLocalized();
 
     /// <summary>Label of the retention field for this store.</summary>
     public string RetentionLabelText => "Service_Settings.StoreRetention".GetLocalized();
 
+    /// <summary>Note under the retention field.</summary>
+    public string RetentionDescriptionText => "Service_Settings.StoreRetentionDescription".GetLocalized();
+
     /// <summary>Label of the destination field for this store.</summary>
     public string DestinationLabelText => "Service_Settings.StoreDestination".GetLocalized();
+
+    /// <summary>Note under the destination field.</summary>
+    public string DestinationDescriptionText => "Service_Settings.StoreDestinationDescription".GetLocalized();
 
     /// <summary>Converts the edited values back into a policy, rejecting anything invalid.</summary>
     /// <param name="policy">The validated policy.</param>
@@ -84,7 +102,7 @@ public sealed partial class BackupStoreSettingsViewModel : ObservableObject
             validationMessage = string.Format(
                 CultureInfo.CurrentCulture,
                 "Service_Settings.InvalidSchedule".GetLocalized(),
-                StoreName);
+                DisplayName);
             return false;
         }
 
@@ -94,7 +112,7 @@ public sealed partial class BackupStoreSettingsViewModel : ObservableObject
             validationMessage = string.Format(
                 CultureInfo.CurrentCulture,
                 "Service_Settings.InvalidRetention".GetLocalized(),
-                StoreName);
+                DisplayName);
             return false;
         }
 
@@ -103,7 +121,7 @@ public sealed partial class BackupStoreSettingsViewModel : ObservableObject
             validationMessage = string.Format(
                 CultureInfo.CurrentCulture,
                 "Service_Settings.InvalidDestination".GetLocalized(),
-                StoreName);
+                DisplayName);
             return false;
         }
 

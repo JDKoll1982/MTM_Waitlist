@@ -11,6 +11,12 @@ public sealed record BackupStatusRow
     /// <summary>Friendly name for the store, localised, for the status list.</summary>
     public required string DisplayName { get; init; }
 
+    /// <summary>
+    /// The note that says what this store holds, localised. The raw database name is an internal
+    /// identifier and is not shown as the subtitle.
+    /// </summary>
+    public required string DescriptionText { get; init; }
+
     /// <summary>Whether scheduled backups are enabled for this store.</summary>
     public required bool IsEnabled { get; init; }
 

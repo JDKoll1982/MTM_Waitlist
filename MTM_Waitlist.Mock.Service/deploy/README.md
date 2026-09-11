@@ -78,6 +78,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 
 | `-SkipSecrets` | off | Do not set or verify the environment secrets. |
 | `-SkipServiceStart` | off | Do not start the service or run the health checks. |
 | `-PurgeState` | off | Also delete `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service` (configuration, credential, backups). |
+| `-DesktopPath` | `C:\Users\jkoll\Desktop` | Desktop that receives the restart shortcut. **Hardcoded to the operator account by owner decision** — pass it explicitly if the profile ever changes (the agent's own notes record `jkoll` at work, `johnk` at home). When that path is absent the script falls back to the shell's Desktop known folder and says so, because this host redirects `jkoll`'s Desktop into OneDrive (see below). |
+| `-SkipDesktopShortcut` | off | Do not create or replace the desktop shortcut. |
 | `-AllowNonServerHost` | off | Bypass the server-only guard. Deliberate use only. |
 | `-HealthCheckTimeoutSeconds` | 60 | How long to wait for the API port. |
 
@@ -94,10 +96,85 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 
 | 5 | **Verify the deployment** | File count matches source; every required path present (five population reads, tray icon, source queries, restore artifacts, WinAppSDK runtime); self-contained markers `System.Private.CoreLib.dll`/`hostfxr.dll`/`coreclr.dll` present **and** `runtimeconfig.json` using `includedFrameworks`; the corrected work-order addressing guard (T144) present in the deployed population reads. |
 | 6 | **Install and verify secrets** | Sets the four User-scope variables from `appsettings.json`, reads them back from `HKCU\Environment`, applies them to the script's **own** process so the service it launches inherits them, and then **proves** them: connects to `mtm_mock`, `mtm_waitlist`, `mtm_wip_application_winforms` and `mtm_receiving_application`, and authenticates to Infor Visual. |
 | 7 | **Start and health-check** | Starts the service, waits for port 5760, then asserts: process responding, **no top-level window** (tray-only), `GET /api/status` returns **401** without a credential, a **second launch redirects and exits** (single instance), and the `HKCU` auto-start entry points at *this* install folder. |
-| 8 | **Summary** | A PASS/FAIL/WARN table. Exit `0` on success, `1` if any check failed, `2` refused (not the server host), `3` precondition failure. |
+| 8 | **Desktop shortcut** | Puts one product-named shortcut on the operator's desktop that opens the deployed control prompt (`mock-service-control.ps1`, which ships inside the publish output — see the project file). An existing shortcut of that name is replaced, and the saved `.lnk` is read back to prove it opens this install folder — see below. |
+| 9 | **Summary** | A PASS/FAIL/WARN table. Exit `0` on success, `1` if any check failed, `2` refused (not the server host), `3` precondition failure. |
 
 **If any check in steps 1–6 fails, the service is not started** — a half-deployed service that looks
 healthy is worse than a failed deployment.
+
+---
+
+## The desktop shortcut it leaves behind
+
+One shortcut, named after the product, opens a short control prompt:
+
+| | |
+|---|---|
+| Where | `MTM mock cache service.lnk` on `jkoll`'s desktop — `C:\Users\jkoll\Desktop`, or the resolved Desktop known folder when that literal path is absent, which is the case on this host (see the redirect note below). The label is read from `Service_Shell.Title` in the app's `resw`, so it cannot drift from the window title. |
+| Opens | `pwsh.exe` when the host has PowerShell 7 (falling back to `powershell.exe`) with `-NoProfile -ExecutionPolicy Bypass -File "C:\Services\MTM_Waitlist.Mock.Service\mock-service-control.ps1"`, with **no `-Action`**, so the prompt is shown. `ExecutionPolicy Bypass` is required: this machine reports `Undefined` at every scope, so the effective policy is the `Restricted` default. |
+| Working folder | the install folder |
+| Icon | the service executable, so it matches the tray icon |
+| Elevation | none — it writes to the operator's own desktop |
+
+An existing shortcut of that name is **replaced**, not left alone, so a redeploy after the install
+folder moves cannot leave a shortcut pointing at nothing. The saved `.lnk` is read back and its target
+and arguments are compared with what was intended: a shortcut that silently kept an old target would be
+worse than no shortcut, because nothing would tell the operator why double-clicking it did nothing.
+
+**On this host the Desktop is redirected.** `C:\Users\jkoll\Desktop` does not exist — `jkoll`'s Desktop
+is `C:\Users\jkoll\OneDrive - Manitowoc Tool and Manufacturing\Desktop`. The script therefore falls back to
+the shell's Desktop known folder (which is `jkoll`'s, because the installer runs as that account) and
+records the substitution in the step's detail, rather than writing a shortcut into a path nobody can see.
+If a future profile stores its Desktop somewhere the shell cannot resolve, pass `-DesktopPath` explicitly.
+
+### What the prompt offers
+
+| Choice | What it does |
+|---|---|
+| **1. Show the UI** | Opens the service window, where the cache service's state can be seen and its settings changed. Nothing is stopped or restarted. |
+| **2. Restart the service** | Stops the service and starts it again. The window does not open by itself. |
+| **3. Shut the service down** | Stops the service. The applications that read the cached data keep working, but nothing refreshes that data and no backups are taken until it is started again — and because auto-start defaults to on, it returns at the next sign-in unless that is turned off in Settings. |
+
+It is deliberately one prompt rather than three shortcuts: each choice is described where it is offered,
+so the operator can read what it does before choosing it. Pressing Enter with no choice, or typing
+anything unrecognised, closes it **without changing anything**, so a stray double-click is harmless.
+
+### Why the prompt, and not a shortcut straight to the app
+
+The service is deliberately tray-only. A bare launch creates **no window** — the health check above
+asserts exactly that — and because auto-start defaults to on the service is normally already running, so
+a second launch redirects to the running instance and exits.
+
+"Show the UI" therefore does not simply launch the executable. The launch carries `--open-status`, and
+when the service is already running the second launch hands that activation to it
+(`AppInstance.RedirectActivationToAsync` → `AppInstance.Activated`), so the **running** instance opens
+its window. `--open-settings` does the same for the Settings surface. A bare launch still stays
+tray-only, which is why the tray-only health check is unaffected by any of this.
+
+The notification-area icon still works (left-click = **Status**, right-click = **Settings** /
+**Back up now** / **Quit**); Windows frequently keeps that icon in the taskbar overflow.
+
+### `mock-service-control.ps1`
+
+| | |
+|---|---|
+| Default | shows the prompt |
+| `-Action` | `ShowUi`, `Restart`, `ShutDown` — skips the prompt, for scripted use |
+| Exit code | `0` on success or when nothing was chosen, `1` on any failed step |
+
+Two details are load-bearing:
+
+- **It re-reads the four User-scope secrets from `HKCU\Environment` into its own process before it
+  starts the service.** A process launched from the desktop inherits the environment block captured when
+  the shell started, so a service started after the secrets were installed or changed would otherwise
+  come up with no credentials and fail every read with
+  `Access denied for user ''@'localhost' (using password: NO)`. The installer sets the same variables on
+  its own process for the same reason.
+- **The stop is forced.** The service exits only on an explicit tray *Quit*, so there is no scriptable
+  graceful stop — the same constraint step 2 documents.
+
+It touches nothing else: no configuration, no credential and no backup is read or written, and a restart
+reuses the stored state exactly as it is.
 
 ---
 
@@ -129,10 +206,11 @@ healthy is worse than a failed deployment.
 ## Rollback
 
 ```powershell
-# stop it, drop the auto-start entry, remove the install folder
+# stop it, drop the auto-start entry, remove the install folder and the desktop shortcut
 Get-Process MTM_Waitlist.Mock.Service -ErrorAction SilentlyContinue | Stop-Process -Force
 Remove-ItemProperty HKCU:\Software\Microsoft\Windows\CurrentVersion\Run -Name MTM_Waitlist.Mock.Service -ErrorAction SilentlyContinue
 Remove-Item C:\Services\MTM_Waitlist.Mock.Service -Recurse -Force
+Remove-Item "$env:USERPROFILE\Desktop\MTM mock cache service.lnk" -Force -ErrorAction SilentlyContinue
 ```
 
 Add `Remove-Item "$env:LOCALAPPDATA\MTM_Waitlist.Mock.Service" -Recurse -Force` for a full reset — that

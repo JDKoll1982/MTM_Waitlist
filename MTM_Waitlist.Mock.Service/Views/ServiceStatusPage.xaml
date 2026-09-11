@@ -6,10 +6,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Mock.Service.Models"
+    xmlns:wct="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d">
 
-    <ScrollViewer Padding="28">
-        <StackPanel Spacing="20" MaxWidth="1100" HorizontalAlignment="Stretch">
+    <!--
+        The page fills the frame from its left edge: no maximum width and no centring, so the cards start
+        where the title bar and the navigation pane end instead of leaving a band of empty space down the
+        left of the surface.
+    -->
+    <ScrollViewer Padding="24">
+        <StackPanel Spacing="16">
 
             <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
@@ -39,108 +45,57 @@
                 Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
                 Severity="Informational" />
 
-            <Border
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="20">
-                <StackPanel Spacing="16">
-                    <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.SummaryHeaderText}" />
+            <InfoBar
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.HasNoMatches, Mode=OneWay}"
+                Message="{x:Bind ViewModel.NoMatchesText}"
+                Severity="Informational" />
 
-                    <Grid ColumnSpacing="20" RowSpacing="10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="180" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{ThemeResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.SearchSummaryText, Mode=OneWay}"
+                Visibility="{x:Bind ViewModel.HasSearchQuery, Mode=OneWay}" />
 
-                        <TextBlock
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.VersionLabelText}" />
-                        <TextBlock
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            Text="{x:Bind ViewModel.ServiceVersionText, Mode=OneWay}"
-                            TextWrapping="Wrap" />
+            <!--
+                The service summary: one card per value, each carrying the note that says what the value is,
+                so "Started" or "Backup tool" never appears without an explanation under it.
+            -->
+            <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsSummarySectionVisible, Mode=OneWay}">
+                <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.SummaryHeaderText}" />
 
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.StartedLabelText}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Text="{x:Bind ViewModel.StartedText, Mode=OneWay}" />
+                <ItemsControl ItemsSource="{x:Bind ViewModel.SummaryRows, Mode=OneWay}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:ServiceSummaryRow">
+                            <wct:SettingsCard
+                                Margin="0,0,0,8"
+                                HorizontalAlignment="Stretch">
+                                <wct:SettingsCard.Header>
+                                    <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind LabelText}" />
+                                </wct:SettingsCard.Header>
+                                <wct:SettingsCard.Description>
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Style="{ThemeResource CaptionTextBlockStyle}"
+                                        Text="{x:Bind DescriptionText}"
+                                        TextWrapping="Wrap" />
+                                </wct:SettingsCard.Description>
+                                <wct:SettingsCard.Content>
+                                    <TextBlock
+                                        MaxWidth="360"
+                                        HorizontalAlignment="Right"
+                                        Style="{ThemeResource BodyTextBlockStyle}"
+                                        Text="{x:Bind ValueText}"
+                                        TextAlignment="Right"
+                                        TextWrapping="Wrap" />
+                                </wct:SettingsCard.Content>
+                            </wct:SettingsCard>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
 
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="0"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.VisualSourceLabelText}" />
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Text="{x:Bind ViewModel.VisualSourceText, Mode=OneWay}"
-                            TextWrapping="Wrap" />
-
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="0"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.CredentialLabelText}" />
-                        <TextBlock
-                            Grid.Row="3"
-                            Grid.Column="1"
-                            Text="{x:Bind ViewModel.CredentialText, Mode=OneWay}" />
-
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="0"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.RefreshScheduleLabelText}" />
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="1"
-                            Text="{x:Bind ViewModel.RefreshScheduleText, Mode=OneWay}" />
-
-                        <TextBlock
-                            Grid.Row="5"
-                            Grid.Column="0"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.BackupToolLabelText}" />
-                        <TextBlock
-                            Grid.Row="5"
-                            Grid.Column="1"
-                            Text="{x:Bind ViewModel.BackupToolText, Mode=OneWay}"
-                            TextWrapping="Wrap" />
-
-                        <TextBlock
-                            Grid.Row="6"
-                            Grid.Column="0"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.AutoStartLabelText}" />
-                        <TextBlock
-                            Grid.Row="6"
-                            Grid.Column="1"
-                            Text="{x:Bind ViewModel.AutoStartText, Mode=OneWay}"
-                            TextWrapping="Wrap" />
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <StackPanel Spacing="6">
+            <StackPanel Spacing="6" Visibility="{x:Bind ViewModel.IsShapesSectionVisible, Mode=OneWay}">
                 <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.ShapesHeaderText}" />
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -149,7 +104,7 @@
                     TextWrapping="Wrap" />
             </StackPanel>
 
-            <ItemsControl ItemsSource="{x:Bind ViewModel.Shapes, Mode=OneWay}">
+            <ItemsControl ItemsSource="{x:Bind ViewModel.Shapes, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsShapesSectionVisible, Mode=OneWay}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="models:ShapeStatusRow">
                         <Border
@@ -170,9 +125,10 @@
                                     <StackPanel Grid.Column="0" Spacing="2">
                                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" />
                                         <TextBlock
-                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             Style="{ThemeResource CaptionTextBlockStyle}"
-                                            Text="{x:Bind ShapeKey}" />
+                                            Text="{x:Bind DescriptionText}"
+                                            TextWrapping="Wrap" />
                                     </StackPanel>
 
                                     <Border
@@ -239,7 +195,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <StackPanel Spacing="6">
+            <StackPanel Spacing="6" Visibility="{x:Bind ViewModel.IsBackupsSectionVisible, Mode=OneWay}">
                 <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.BackupsHeaderText}" />
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -248,7 +204,7 @@
                     TextWrapping="Wrap" />
             </StackPanel>
 
-            <ItemsControl ItemsSource="{x:Bind ViewModel.Backups, Mode=OneWay}">
+            <ItemsControl ItemsSource="{x:Bind ViewModel.Backups, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsBackupsSectionVisible, Mode=OneWay}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="models:BackupStatusRow">
                         <Border
@@ -269,9 +225,10 @@
                                     <StackPanel Grid.Column="0" Spacing="2">
                                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" />
                                         <TextBlock
-                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             Style="{ThemeResource CaptionTextBlockStyle}"
-                                            Text="{x:Bind Store}" />
+                                            Text="{x:Bind DescriptionText}"
+                                            TextWrapping="Wrap" />
                                     </StackPanel>
 
                                     <Border

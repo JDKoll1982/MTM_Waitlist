@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Mock.Service.Api;
+using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.Models;
 using MTM_Waitlist.Mock.Service.Services;
 
@@ -17,12 +18,18 @@ namespace MTM_Waitlist.Mock.Service.ViewModels;
 /// Every user-facing string is resolved through <c>GetLocalized()</c>, so no literal is embedded in XAML
 /// (constitution V). Reading status has no side effects: it never triggers a refresh or a backup.
 /// </remarks>
-public sealed partial class ServiceStatusViewModel : ObservableObject
+public sealed partial class ServiceStatusViewModel : ObservableObject, IServiceSearchTarget
 {
     private readonly ServiceApiOperations _operations;
     private readonly ServiceConfigurationStore _configurationStore;
     private readonly BackupScheduler? _backupScheduler;
     private readonly TimeProvider _timeProvider;
+
+    private string _searchQuery;
+
+    private List<ServiceSummaryRow> _allSummaryRows = [];
+    private List<ShapeStatusRow> _allShapes = [];
+    private List<BackupStatusRow> _allBackups = [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasStatusMessage))]
@@ -32,28 +39,59 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
     public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
 
     [ObservableProperty]
-    public partial string ServiceVersionText { get; set; }
-
-    [ObservableProperty]
-    public partial string StartedText { get; set; }
-
-    [ObservableProperty]
-    public partial string VisualSourceText { get; set; }
-
-    [ObservableProperty]
-    public partial string CredentialText { get; set; }
-
-    [ObservableProperty]
-    public partial string RefreshScheduleText { get; set; }
-
-    [ObservableProperty]
-    public partial string BackupToolText { get; set; }
-
-    [ObservableProperty]
-    public partial string AutoStartText { get; set; }
-
-    [ObservableProperty]
     public partial bool IsBusy { get; set; }
+
+    /// <summary>The summary rows: what the service reports about itself, each with its own note.</summary>
+    public ObservableCollection<ServiceSummaryRow> SummaryRows { get; } = [];
+
+    /// <summary>The text the title-bar search box currently holds.</summary>
+    public string SearchQuery
+    {
+        get => _searchQuery;
+        private set
+        {
+            if (SetProperty(ref _searchQuery, value))
+            {
+                ApplySearchFilter();
+            }
+        }
+    }
+
+    /// <summary>The suggestions the title-bar search box offers while the operator types.</summary>
+    public ObservableCollection<string> SearchSuggestions { get; } = [];
+
+    /// <inheritdoc />
+    IReadOnlyList<string> IServiceSearchTarget.SearchSuggestions => SearchSuggestions;
+
+    /// <summary>Whether a search is narrowing this surface.</summary>
+    public bool HasSearchQuery => !string.IsNullOrWhiteSpace(_searchQuery);
+
+    /// <summary>Whether the service summary has anything to show for the current search.</summary>
+    public bool IsSummarySectionVisible => !HasSearchQuery || SummaryRows.Count > 0;
+
+    /// <summary>Whether the read-shape section has anything to show for the current search.</summary>
+    public bool IsShapesSectionVisible => !HasSearchQuery || Shapes.Count > 0;
+
+    /// <summary>Whether the backup section has anything to show for the current search.</summary>
+    public bool IsBackupsSectionVisible => !HasSearchQuery || Backups.Count > 0;
+
+    /// <summary>Whether a search excluded everything.</summary>
+    public bool HasNoMatches => HasSearchQuery
+        && SummaryRows.Count == 0
+        && Shapes.Count == 0
+        && Backups.Count == 0;
+
+    /// <summary>What to say when a search excluded everything.</summary>
+    public string NoMatchesText => "Service_Common.NoMatches".GetLocalized();
+
+    /// <summary>How much the search is hiding, or an empty string when nothing is being hidden.</summary>
+    public string SearchSummaryText => HasSearchQuery
+        ? string.Format(
+            CultureInfo.CurrentCulture,
+            "Service_Common.SearchMatches".GetLocalized(),
+            SummaryRows.Count + Shapes.Count + Backups.Count,
+            _allSummaryRows.Count + _allShapes.Count + _allBackups.Count)
+        : string.Empty;
 
     /// <summary>Creates the view model.</summary>
     /// <param name="operations">Supplies the status payload, so the page and the API agree.</param>
@@ -76,13 +114,7 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
 
         // Partial observable properties cannot carry initializers, so the defaults live here.
         StatusMessage = string.Empty;
-        ServiceVersionText = string.Empty;
-        StartedText = string.Empty;
-        VisualSourceText = string.Empty;
-        CredentialText = string.Empty;
-        RefreshScheduleText = string.Empty;
-        BackupToolText = string.Empty;
-        AutoStartText = string.Empty;
+        _searchQuery = string.Empty;
     }
 
     /// <summary>Title text for the page.</summary>
@@ -123,6 +155,27 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
 
     /// <summary>Label: auto-start state.</summary>
     public string AutoStartLabelText => "Service_Status.AutoStartLabel".GetLocalized();
+
+    /// <summary>Note under the service version: what the value is.</summary>
+    public string VersionLabelDescriptionText => "Service_Status.VersionLabelDescription".GetLocalized();
+
+    /// <summary>Note under the started time.</summary>
+    public string StartedLabelDescriptionText => "Service_Status.StartedLabelDescription".GetLocalized();
+
+    /// <summary>Note under the Infor Visual reachability line.</summary>
+    public string VisualSourceLabelDescriptionText => "Service_Status.VisualSourceLabelDescription".GetLocalized();
+
+    /// <summary>Note under the API credential line.</summary>
+    public string CredentialLabelDescriptionText => "Service_Status.CredentialLabelDescription".GetLocalized();
+
+    /// <summary>Note under the refresh schedule line.</summary>
+    public string RefreshScheduleLabelDescriptionText => "Service_Status.RefreshScheduleLabelDescription".GetLocalized();
+
+    /// <summary>Note under the backup tool line.</summary>
+    public string BackupToolLabelDescriptionText => "Service_Status.BackupToolLabelDescription".GetLocalized();
+
+    /// <summary>Note under the start-at-logon line.</summary>
+    public string AutoStartLabelDescriptionText => "Service_Status.AutoStartLabelDescription".GetLocalized();
 
     /// <summary>Explanatory line under the shapes heading.</summary>
     public string ShapesHintText => "Service_Status.ShapesHint".GetLocalized();
@@ -188,84 +241,17 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
 
             var payload = outcome.Payload;
 
-            ServiceVersionText = payload.ServiceVersion;
-            StartedText = payload.StartedUtc.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
-            VisualSourceText = payload.VisualSourceReachable
-                ? "Service_Status.VisualSourceReachable".GetLocalized()
-                : "Service_Status.VisualSourceUnreachable".GetLocalized();
-            CredentialText = payload.CredentialConfigured
-                ? "Service_Settings.CredentialConfigured".GetLocalized()
-                : "Service_Common.NotConfigured".GetLocalized();
-            RefreshScheduleText = string.Format(
-                CultureInfo.CurrentCulture,
-                "Service_Status.RefreshSchedule".GetLocalized(),
-                payload.RefreshIntervalMinutes);
-
-            AutoStartText = payload.AutoStart is null
-                ? "Service_Common.NotConfigured".GetLocalized()
-                : payload.AutoStart.Message;
-
-            Shapes.Clear();
-            foreach (var shape in payload.Shapes)
-            {
-                Shapes.Add(new ShapeStatusRow
-                {
-                    ShapeKey = shape.ShapeKey,
-                    DisplayName = ResolveDisplayName("Service_Shape", shape.ShapeKey),
-                    IsEnabled = shape.IsEnabled,
-                    LastRunText = shape.LastRunUtc is null
-                        ? "Service_Common.Never".GetLocalized()
-                        : shape.LastRunUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
-                    OutcomeText = shape.LastOutcome ?? "Service_Common.Never".GetLocalized(),
-                    RowCountText = shape.LastRowCount?.ToString(CultureInfo.CurrentCulture)
-                        ?? "Service_Common.Unavailable".GetLocalized(),
-                    FreshnessText = BuildFreshnessText(shape),
-                    ValidationErrorText = shape.ValidationError,
-                    LastRunLabelText = LastRunLabelText,
-                    RowsLabelText = RowsLabelText,
-                    FreshnessLabelText = FreshnessLabelText,
-                    ValidationErrorLabelText = ValidationErrorLabelText
-                });
-            }
-
-            Backups.Clear();
-            var toolAvailable = true;
-
-            foreach (var backup in payload.Backups)
-            {
-                toolAvailable &= backup.ToolAvailable;
-
-                var store = ResolveStore(backup.Store);
-                var nextDue = store is null ? null : _backupScheduler?.GetNextDueUtc(store.Value);
-
-                Backups.Add(new BackupStatusRow
-                {
-                    Store = backup.Store,
-                    DisplayName = ResolveDisplayName("Service_Store", backup.Store),
-                    IsEnabled = backup.IsEnabled,
-                    LastRunText = backup.LastRunUtc is null
-                        ? "Service_Common.Never".GetLocalized()
-                        : backup.LastRunUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
-                    OutcomeText = backup.LastOutcome ?? "Service_Common.Never".GetLocalized(),
-                    ArtifactCountText = backup.ArtifactCount.ToString(CultureInfo.CurrentCulture),
-                    ArtifactPathText = backup.LastArtifactPath ?? "Service_Common.Unavailable".GetLocalized(),
-                    ScheduleText = nextDue is null
-                        ? ResolveConfiguredScheduleText(store)
-                        : nextDue.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
-                    LastRunLabelText = LastRunLabelText,
-                    NextDueLabelText = NextDueLabelText,
-                    ArtifactsLabelText = ArtifactsLabelText,
-                    ArtifactPathLabelText = ArtifactPathLabelText
-                });
-            }
-
             // The missing-tool condition is stated explicitly rather than left to be inferred from an
             // outcome string (FR-013, edge case "Backup facility missing").
-            BackupToolText = toolAvailable
-                ? "Service_Settings.BackupToolAvailable".GetLocalized()
-                : "Service_Settings.BackupToolUnavailable".GetLocalized();
+            var toolAvailable = payload.Backups.All(backup => backup.ToolAvailable);
+
+            BuildSummaryRows(payload, toolAvailable);
+            BuildShapeRows(payload);
+            BuildBackupRows(payload);
 
             StatusMessage = string.Empty;
+
+            ApplySearchFilter();
         }
         catch (Exception exception)
         {
@@ -276,6 +262,240 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
             IsBusy = false;
         }
     }
+
+    /// <summary>
+    /// Builds the service summary: every value is paired with a note that says what it is, which is what
+    /// the status surface shows under each row (FR-013).
+    /// </summary>
+    private void BuildSummaryRows(ServiceApiContracts.ServiceStatusPayload payload, bool toolAvailable)
+    {
+        _allSummaryRows =
+        [
+            new ServiceSummaryRow
+            {
+                LabelText = VersionLabelText,
+                DescriptionText = VersionLabelDescriptionText,
+                ValueText = payload.ServiceVersion
+            },
+            new ServiceSummaryRow
+            {
+                LabelText = StartedLabelText,
+                DescriptionText = StartedLabelDescriptionText,
+                ValueText = payload.StartedUtc.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)
+            },
+            new ServiceSummaryRow
+            {
+                LabelText = VisualSourceLabelText,
+                DescriptionText = VisualSourceLabelDescriptionText,
+                ValueText = payload.VisualSourceReachable
+                    ? "Service_Status.VisualSourceReachable".GetLocalized()
+                    : "Service_Status.VisualSourceUnreachable".GetLocalized()
+            },
+            new ServiceSummaryRow
+            {
+                LabelText = CredentialLabelText,
+                DescriptionText = CredentialLabelDescriptionText,
+                ValueText = payload.CredentialConfigured
+                    ? "Service_Settings.CredentialConfigured".GetLocalized()
+                    : "Service_Common.NotConfigured".GetLocalized()
+            },
+            new ServiceSummaryRow
+            {
+                LabelText = RefreshScheduleLabelText,
+                DescriptionText = RefreshScheduleLabelDescriptionText,
+                ValueText = string.Format(
+                    CultureInfo.CurrentCulture,
+                    "Service_Status.RefreshSchedule".GetLocalized(),
+                    payload.RefreshIntervalMinutes)
+            },
+            new ServiceSummaryRow
+            {
+                LabelText = BackupToolLabelText,
+                DescriptionText = BackupToolLabelDescriptionText,
+                ValueText = toolAvailable
+                    ? "Service_Settings.BackupToolAvailable".GetLocalized()
+                    : "Service_Settings.BackupToolUnavailable".GetLocalized()
+            },
+            new ServiceSummaryRow
+            {
+                LabelText = AutoStartLabelText,
+                DescriptionText = AutoStartLabelDescriptionText,
+                ValueText = payload.AutoStart is null
+                    ? "Service_Common.NotConfigured".GetLocalized()
+                    : payload.AutoStart.Message
+            }
+        ];
+    }
+
+    /// <summary>Builds the read-shape rows, each named and explained in operator-facing words.</summary>
+    private void BuildShapeRows(ServiceApiContracts.ServiceStatusPayload payload)
+    {
+        _allShapes =
+        [
+            .. payload.Shapes.Select(shape => new ShapeStatusRow
+            {
+                ShapeKey = shape.ShapeKey,
+                DisplayName = ResolveDisplayName("Service_Shape", shape.ShapeKey),
+                DescriptionText = ResolveOptional($"Service_ShapeDescription.{shape.ShapeKey}"),
+                IsEnabled = shape.IsEnabled,
+                LastRunText = shape.LastRunUtc is null
+                    ? "Service_Common.Never".GetLocalized()
+                    : shape.LastRunUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
+                OutcomeText = ToFriendlyOutcomeText(shape.LastOutcome),
+                RowCountText = shape.LastRowCount?.ToString(CultureInfo.CurrentCulture)
+                    ?? "Service_Common.Unavailable".GetLocalized(),
+                FreshnessText = BuildFreshnessText(shape),
+                ValidationErrorText = shape.ValidationError,
+                LastRunLabelText = LastRunLabelText,
+                RowsLabelText = RowsLabelText,
+                FreshnessLabelText = FreshnessLabelText,
+                ValidationErrorLabelText = ValidationErrorLabelText
+            })
+        ];
+    }
+
+    /// <summary>Builds the per-store backup rows, each named and explained in operator-facing words.</summary>
+    private void BuildBackupRows(ServiceApiContracts.ServiceStatusPayload payload)
+    {
+        _allBackups =
+        [
+            .. payload.Backups.Select(backup =>
+            {
+                var store = ResolveStore(backup.Store);
+                var nextDue = store is null ? null : _backupScheduler?.GetNextDueUtc(store.Value);
+
+                return new BackupStatusRow
+                {
+                    Store = backup.Store,
+                    DisplayName = store?.ToDisplayName() ?? ResolveDisplayName("Service_Store", backup.Store),
+                    DescriptionText = store?.ToDescription() ?? string.Empty,
+                    IsEnabled = backup.IsEnabled,
+                    LastRunText = backup.LastRunUtc is null
+                        ? "Service_Common.Never".GetLocalized()
+                        : backup.LastRunUtc.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
+                    OutcomeText = ToFriendlyOutcomeText(backup.LastOutcome),
+                    ArtifactCountText = backup.ArtifactCount.ToString(CultureInfo.CurrentCulture),
+                    ArtifactPathText = backup.LastArtifactPath ?? "Service_Common.Unavailable".GetLocalized(),
+                    ScheduleText = nextDue is null
+                        ? ResolveConfiguredScheduleText(store)
+                        : nextDue.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
+                    LastRunLabelText = LastRunLabelText,
+                    NextDueLabelText = NextDueLabelText,
+                    ArtifactsLabelText = ArtifactsLabelText,
+                    ArtifactPathLabelText = ArtifactPathLabelText
+                };
+            })
+        ];
+    }
+
+    /// <summary>
+    /// Applies the current search to every list: what does not match is hidden, and the section headings
+    /// disappear with their last row. An empty search restores the full surface.
+    /// </summary>
+    private void ApplySearchFilter()
+    {
+        Replace(SummaryRows, _allSummaryRows.Where(row => MatchesRow(row.LabelText, row.DescriptionText, row.ValueText)));
+        Replace(Shapes, _allShapes.Where(row => MatchesRow(row.DisplayName, row.DescriptionText, row.ShapeKey)));
+        Replace(Backups, _allBackups.Where(row => MatchesRow(row.DisplayName, row.DescriptionText, row.Store)));
+
+        OnPropertyChanged(nameof(HasSearchQuery));
+        OnPropertyChanged(nameof(IsSummarySectionVisible));
+        OnPropertyChanged(nameof(IsShapesSectionVisible));
+        OnPropertyChanged(nameof(IsBackupsSectionVisible));
+        OnPropertyChanged(nameof(HasNoMatches));
+        OnPropertyChanged(nameof(SearchSummaryText));
+    }
+
+    /// <inheritdoc />
+    public void UpdateSearchSuggestions(string query)
+    {
+        SearchQuery = query ?? string.Empty;
+
+        SearchSuggestions.Clear();
+
+        foreach (var suggestion in BuildSearchCatalog().Where(title => MatchesTitle(title, query)).Distinct())
+        {
+            SearchSuggestions.Add(suggestion);
+
+            if (SearchSuggestions.Count == 6)
+            {
+                return;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public void SubmitSearch(string query, string? chosenSuggestion) =>
+        SearchQuery = chosenSuggestion ?? query ?? string.Empty;
+
+    /// <summary>Everything a search can offer as a suggestion on this surface.</summary>
+    private IEnumerable<string> BuildSearchCatalog()
+    {
+        yield return SummaryHeaderText;
+
+        foreach (var row in _allSummaryRows)
+        {
+            yield return row.LabelText;
+        }
+
+        yield return ShapesHeaderText;
+
+        foreach (var shape in _allShapes)
+        {
+            yield return shape.DisplayName;
+        }
+
+        yield return BackupsHeaderText;
+
+        foreach (var backup in _allBackups)
+        {
+            yield return backup.DisplayName;
+        }
+    }
+
+    private static bool MatchesTitle(string title, string? query) =>
+        string.IsNullOrWhiteSpace(query)
+            || title.Contains(query.Trim(), StringComparison.CurrentCultureIgnoreCase);
+
+    private bool MatchesRow(params string?[] values)
+    {
+        if (!HasSearchQuery)
+        {
+            return true;
+        }
+
+        var words = _searchQuery.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        return words.All(word => values.Any(
+            value => !string.IsNullOrWhiteSpace(value)
+                && value.Contains(word, StringComparison.CurrentCultureIgnoreCase)));
+    }
+
+    private static void Replace<T>(ObservableCollection<T> target, IEnumerable<T> source)
+    {
+        target.Clear();
+
+        foreach (var item in source)
+        {
+            target.Add(item);
+        }
+    }
+
+    /// <summary>
+    /// Turns the API's outcome token into words an operator can act on. An unrecognised token is shown
+    /// as-is rather than swallowed.
+    /// </summary>
+    private static string ToFriendlyOutcomeText(string? outcome) => outcome switch
+    {
+        null or "" => "Service_Common.Never".GetLocalized(),
+        "succeeded" => "Service_Outcome.Succeeded".GetLocalized(),
+        "skippedSourceUnreachable" => "Service_Outcome.SkippedSourceUnreachable".GetLocalized(),
+        "failedSchemaMismatch" => "Service_Outcome.FailedSchemaMismatch".GetLocalized(),
+        "failedLoad" => "Service_Outcome.FailedLoad".GetLocalized(),
+        "running" => "Service_Outcome.Running".GetLocalized(),
+        "pending" => "Service_Outcome.Pending".GetLocalized(),
+        _ => outcome
+    };
 
     /// <summary>
     /// States cached-data freshness, including the seed-only case where no age exists yet (FR-017/FR-022).
@@ -317,6 +537,16 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
         var key = $"{prefix}.{identifier}";
         var localized = key.GetLocalized();
         return string.Equals(localized, key, StringComparison.Ordinal) ? identifier : localized;
+    }
+
+    /// <summary>
+    /// Resolves a resource key that may legitimately be absent, returning an empty string rather than the
+    /// key itself. A missing note leaves a row unexplained, which is better than showing the identifier.
+    /// </summary>
+    private static string ResolveOptional(string key)
+    {
+        var localized = key.GetLocalized();
+        return string.Equals(localized, key, StringComparison.Ordinal) ? string.Empty : localized;
     }
 
     private static BackupStore? ResolveStore(string databaseName)

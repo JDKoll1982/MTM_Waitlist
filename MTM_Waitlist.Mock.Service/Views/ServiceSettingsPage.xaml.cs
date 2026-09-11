@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.ViewModels;
 
 namespace MTM_Waitlist.Mock.Service.Views;
@@ -18,8 +19,11 @@ namespace MTM_Waitlist.Mock.Service.Views;
 /// passes the operator's answer to the view model, which does nothing at all when the answer is "no"
 /// (FR-010).
 /// </para>
+/// <para>
+/// The page is the shell's search host, so the title-bar search box narrows the group cards.
+/// </para>
 /// </remarks>
-public sealed partial class ServiceSettingsPage : Page
+public sealed partial class ServiceSettingsPage : Page, IServiceSearchHost
 {
     /// <summary>Creates the page and resolves its view model.</summary>
     public ServiceSettingsPage()
@@ -37,11 +41,8 @@ public sealed partial class ServiceSettingsPage : Page
     /// <summary>The page's view model.</summary>
     public ServiceSettingsViewModel ViewModel { get; }
 
-    private void OnBackupStoreSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        // The restore picker lists the selected store's artifacts, so it follows the store selection.
-        ViewModel.LoadRestoreArtifacts();
-    }
+    /// <inheritdoc />
+    public IServiceSearchTarget? SearchTarget => ViewModel;
 
     private async void OnRestoreClick(object sender, RoutedEventArgs e)
     {

@@ -7,127 +7,721 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Mock.Service.Models"
     xmlns:viewModels="using:MTM_Waitlist.Mock.Service.ViewModels"
+    xmlns:wct="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d">
 
+    <!--
+        The page fills the frame from its left edge: no maximum width and no centring, so the cards start
+        where the title bar and the navigation pane end instead of leaving a band of empty space down the
+        left of the surface.
+
+        Each topic is one collapsible card, and each setting inside it is a settings card with a plain
+        heading and a note that says what the setting is — the same shape the main application's settings
+        window uses.
+    -->
     <ScrollViewer Padding="24">
-        <StackPanel Spacing="16" MaxWidth="900" HorizontalAlignment="Stretch">
+        <StackPanel Spacing="16">
 
-            <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
-
-            <InfoBar
-                IsOpen="True"
-                IsClosable="False"
-                Severity="Informational"
-                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
-
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.RefreshHeaderText}" />
-            <TextBox
-                Header="{x:Bind ViewModel.RefreshIntervalLabelText}"
-                Text="{x:Bind ViewModel.RefreshIntervalMinutes, Mode=TwoWay}" />
-            <ToggleSwitch
-                Header="{x:Bind ViewModel.AutoStartLabelText}"
-                IsOn="{x:Bind ViewModel.AutoStartAtLogon, Mode=TwoWay}" />
-
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.ApiHeaderText}" />
-            <TextBox
-                Header="{x:Bind ViewModel.ApiBindAddressLabelText}"
-                Text="{x:Bind ViewModel.ApiBindAddress, Mode=TwoWay}" />
-            <TextBox
-                Header="{x:Bind ViewModel.ApiPortLabelText}"
-                Text="{x:Bind ViewModel.ApiPort, Mode=TwoWay}" />
-
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.CredentialHeaderText}" />
-            <TextBlock Text="{x:Bind ViewModel.CredentialStatusText, Mode=OneWay}" />
-            <Button Command="{x:Bind ViewModel.RotateCredentialCommand}" Content="{x:Bind ViewModel.RotateCredentialText}" />
-            <TextBlock
-                Style="{ThemeResource CaptionTextBlockStyle}"
-                Text="{x:Bind ViewModel.CredentialWriteOnlyText}"
-                TextWrapping="Wrap" />
-
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.VisualHeaderText}" />
-            <TextBox Header="{x:Bind ViewModel.VisualServerLabelText}" Text="{x:Bind ViewModel.VisualServer, Mode=TwoWay}" />
-            <TextBox Header="{x:Bind ViewModel.VisualDatabaseLabelText}" Text="{x:Bind ViewModel.VisualDatabase, Mode=TwoWay}" />
-            <TextBox Header="{x:Bind ViewModel.VisualUserIdLabelText}" Text="{x:Bind ViewModel.VisualUserId, Mode=TwoWay}" />
-            <TextBox
-                Header="{x:Bind ViewModel.VisualTimeoutLabelText}"
-                Text="{x:Bind ViewModel.VisualConnectionTimeoutSeconds, Mode=TwoWay}" />
-
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.MySqlHeaderText}" />
-            <TextBox Header="{x:Bind ViewModel.MySqlServerLabelText}" Text="{x:Bind ViewModel.MySqlServer, Mode=TwoWay}" />
-            <TextBox Header="{x:Bind ViewModel.MySqlPortLabelText}" Text="{x:Bind ViewModel.MySqlPort, Mode=TwoWay}" />
-            <TextBox Header="{x:Bind ViewModel.MySqlUserIdLabelText}" Text="{x:Bind ViewModel.MySqlUserId, Mode=TwoWay}" />
-            <TextBox
-                Header="{x:Bind ViewModel.MySqlPasswordFileLabelText}"
-                Text="{x:Bind ViewModel.MySqlPasswordFilePath, Mode=TwoWay}" />
-            <TextBox
-                Header="{x:Bind ViewModel.MySqlDumpPathLabelText}"
-                Text="{x:Bind ViewModel.MySqlDumpPath, Mode=TwoWay}" />
-            <TextBlock Text="{x:Bind ViewModel.BackupToolStatusText, Mode=OneWay}" TextWrapping="Wrap" />
-
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.BackupHeaderText}" />
-
-            <ItemsControl ItemsSource="{x:Bind ViewModel.BackupPolicies}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="viewModels:BackupStoreSettingsViewModel">
-                        <Border
-                            Margin="0,0,0,12"
-                            Padding="12"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
-                            CornerRadius="4">
-                            <StackPanel Spacing="6">
-                                <TextBlock FontWeight="SemiBold" Text="{x:Bind StoreName}" />
-                                <ToggleSwitch
-                                    Header="{x:Bind EnableLabelText}"
-                                    IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
-                                <TextBox
-                                    Header="{x:Bind ScheduleLabelText}"
-                                    Text="{x:Bind ScheduleLocalTime, Mode=TwoWay}" />
-                                <TextBox
-                                    Header="{x:Bind RetentionLabelText}"
-                                    Text="{x:Bind RetentionCount, Mode=TwoWay}" />
-                                <TextBox
-                                    Header="{x:Bind DestinationLabelText}"
-                                    Text="{x:Bind DestinationDirectory, Mode=TwoWay}" />
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <ComboBox
-                    ItemsSource="{x:Bind ViewModel.BackupStores}"
-                    SelectedItem="{x:Bind ViewModel.SelectedBackupStore, Mode=TwoWay}"
-                    SelectionChanged="OnBackupStoreSelectionChanged" />
-                <Button Command="{x:Bind ViewModel.BackupNowCommand}" Content="{x:Bind ViewModel.BackupNowText}" />
+            <StackPanel Spacing="4">
+                <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Text="{x:Bind ViewModel.SubtitleText}"
+                    TextWrapping="Wrap" />
             </StackPanel>
 
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.RestoreHeaderText}" />
+            <InfoBar
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay}"
+                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                Severity="Informational" />
 
-            <ComboBox
-                x:Name="RestoreArtifactPicker"
-                MinWidth="420"
-                ItemsSource="{x:Bind ViewModel.RestoreArtifacts}"
-                SelectedItem="{x:Bind ViewModel.SelectedRestoreArtifact, Mode=TwoWay}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate x:DataType="models:BackupArtifactRow">
-                        <TextBlock Text="{x:Bind DisplayText}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+            <InfoBar
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.HasNoMatches, Mode=OneWay}"
+                Message="{x:Bind ViewModel.NoMatchesText}"
+                Severity="Informational" />
 
-            <Button
-                Click="OnRestoreClick"
-                Content="{x:Bind ViewModel.RestoreText}"
-                Style="{ThemeResource AccentButtonStyle}" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{ThemeResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.SearchSummaryText, Mode=OneWay}"
+                Visibility="{x:Bind ViewModel.HasSearchQuery, Mode=OneWay}" />
 
-            <TextBlock Text="{x:Bind ViewModel.RestoreOutcomeText, Mode=OneWay}" TextWrapping="Wrap" />
+            <!-- Refresh and start-up -->
+            <Expander
+                AutomationProperties.Name="{x:Bind ViewModel.RefreshGroup.HeaderText}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                IsExpanded="{x:Bind ViewModel.RefreshGroup.IsExpanded, Mode=OneWay}"
+                Padding="0"
+                Visibility="{x:Bind ViewModel.RefreshGroup.IsVisible, Mode=OneWay}">
+                <Expander.Header>
+                    <Grid Padding="16,12,16,12" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <SymbolIcon Grid.Column="0" VerticalAlignment="Center" Symbol="Refresh" />
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="{x:Bind ViewModel.RefreshGroup.HeaderText}" />
+                    </Grid>
+                </Expander.Header>
 
-            <Button
-                Command="{x:Bind ViewModel.SaveSettingsCommand}"
-                Content="{x:Bind ViewModel.SaveText}"
-                Style="{ThemeResource AccentButtonStyle}" />
+                <StackPanel Padding="16,0,16,16" Spacing="12">
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.RefreshGroup.DescriptionText}"
+                        TextWrapping="Wrap" />
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.RefreshIntervalLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.RefreshIntervalDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="160" Text="{x:Bind ViewModel.RefreshIntervalMinutes, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.AutoStartLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.AutoStartDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <ToggleSwitch IsOn="{x:Bind ViewModel.AutoStartAtLogon, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+                </StackPanel>
+            </Expander>
+
+            <!-- Service API -->
+            <Expander
+                AutomationProperties.Name="{x:Bind ViewModel.ApiGroup.HeaderText}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                IsExpanded="{x:Bind ViewModel.ApiGroup.IsExpanded, Mode=OneWay}"
+                Padding="0"
+                Visibility="{x:Bind ViewModel.ApiGroup.IsVisible, Mode=OneWay}">
+                <Expander.Header>
+                    <Grid Padding="16,12,16,12" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <SymbolIcon Grid.Column="0" VerticalAlignment="Center" Symbol="Globe" />
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="{x:Bind ViewModel.ApiGroup.HeaderText}" />
+                    </Grid>
+                </Expander.Header>
+
+                <StackPanel Padding="16,0,16,16" Spacing="12">
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.ApiGroup.DescriptionText}"
+                        TextWrapping="Wrap" />
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.ApiBindAddressLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.BindAddressDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.ApiBindAddress, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.ApiPortLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.PortDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="160" Text="{x:Bind ViewModel.ApiPort, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+                </StackPanel>
+            </Expander>
+
+            <!-- Shared credential -->
+            <Expander
+                AutomationProperties.Name="{x:Bind ViewModel.CredentialGroup.HeaderText}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                IsExpanded="{x:Bind ViewModel.CredentialGroup.IsExpanded, Mode=OneWay}"
+                Padding="0"
+                Visibility="{x:Bind ViewModel.CredentialGroup.IsVisible, Mode=OneWay}">
+                <Expander.Header>
+                    <Grid Padding="16,12,16,12" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <SymbolIcon Grid.Column="0" VerticalAlignment="Center" Symbol="Permissions" />
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="{x:Bind ViewModel.CredentialGroup.HeaderText}" />
+                    </Grid>
+                </Expander.Header>
+
+                <StackPanel Padding="16,0,16,16" Spacing="12">
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.CredentialGroup.DescriptionText}"
+                        TextWrapping="Wrap" />
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.CredentialStatusLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <StackPanel Spacing="4">
+                                <TextBlock
+                                    Style="{ThemeResource BodyTextBlockStyle}"
+                                    Text="{x:Bind ViewModel.CredentialStatusText, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind ViewModel.CredentialWriteOnlyText}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <Button
+                                MinWidth="180"
+                                Command="{x:Bind ViewModel.RotateCredentialCommand}"
+                                Content="{x:Bind ViewModel.RotateCredentialText}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+                </StackPanel>
+            </Expander>
+
+            <!-- Infor Visual source -->
+            <Expander
+                AutomationProperties.Name="{x:Bind ViewModel.VisualGroup.HeaderText}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                IsExpanded="{x:Bind ViewModel.VisualGroup.IsExpanded, Mode=OneWay}"
+                Padding="0"
+                Visibility="{x:Bind ViewModel.VisualGroup.IsVisible, Mode=OneWay}">
+                <Expander.Header>
+                    <Grid Padding="16,12,16,12" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <SymbolIcon Grid.Column="0" VerticalAlignment="Center" Symbol="Link" />
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="{x:Bind ViewModel.VisualGroup.HeaderText}" />
+                    </Grid>
+                </Expander.Header>
+
+                <StackPanel Padding="16,0,16,16" Spacing="12">
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.VisualGroup.DescriptionText}"
+                        TextWrapping="Wrap" />
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.VisualServerLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.VisualServerDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.VisualServer, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.VisualDatabaseLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.VisualDatabaseDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.VisualDatabase, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.VisualUserIdLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.VisualUserIdDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.VisualUserId, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.VisualTimeoutLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.VisualTimeoutDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="160" Text="{x:Bind ViewModel.VisualConnectionTimeoutSeconds, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+                </StackPanel>
+            </Expander>
+
+            <!-- MySQL host and backup tool -->
+            <Expander
+                AutomationProperties.Name="{x:Bind ViewModel.MySqlGroup.HeaderText}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                IsExpanded="{x:Bind ViewModel.MySqlGroup.IsExpanded, Mode=OneWay}"
+                Padding="0"
+                Visibility="{x:Bind ViewModel.MySqlGroup.IsVisible, Mode=OneWay}">
+                <Expander.Header>
+                    <Grid Padding="16,12,16,12" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <SymbolIcon Grid.Column="0" VerticalAlignment="Center" Symbol="OpenLocal" />
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="{x:Bind ViewModel.MySqlGroup.HeaderText}" />
+                    </Grid>
+                </Expander.Header>
+
+                <StackPanel Padding="16,0,16,16" Spacing="12">
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.MySqlGroup.DescriptionText}"
+                        TextWrapping="Wrap" />
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.MySqlServerLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.MySqlServerDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.MySqlServer, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.MySqlPortLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.MySqlPortDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="160" Text="{x:Bind ViewModel.MySqlPort, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.MySqlUserIdLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.MySqlUserIdDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.MySqlUserId, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.MySqlPasswordFileLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.MySqlPasswordFileDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="280" Text="{x:Bind ViewModel.MySqlPasswordFilePath, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.MySqlDumpPathLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.MySqlDumpPathDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <TextBox MinWidth="280" Text="{x:Bind ViewModel.MySqlDumpPath, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <!-- The state of the backup program is a condition, not a setting, so it is reported
+                         rather than edited. -->
+                    <InfoBar
+                        IsClosable="False"
+                        IsOpen="{x:Bind ViewModel.HasBackupToolStatus, Mode=OneWay}"
+                        Message="{x:Bind ViewModel.BackupToolStatusText, Mode=OneWay}"
+                        Severity="Informational" />
+                </StackPanel>
+            </Expander>
+
+            <!-- Backups, one collapsible card per store -->
+            <Expander
+                AutomationProperties.Name="{x:Bind ViewModel.BackupGroup.HeaderText}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                IsExpanded="{x:Bind ViewModel.BackupGroup.IsExpanded, Mode=OneWay}"
+                Padding="0"
+                Visibility="{x:Bind ViewModel.BackupGroup.IsVisible, Mode=OneWay}">
+                <Expander.Header>
+                    <Grid Padding="16,12,16,12" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <SymbolIcon Grid.Column="0" VerticalAlignment="Center" Symbol="Save" />
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="{x:Bind ViewModel.BackupGroup.HeaderText}" />
+                    </Grid>
+                </Expander.Header>
+
+                <StackPanel Padding="16,0,16,16" Spacing="12">
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.BackupGroup.DescriptionText}"
+                        TextWrapping="Wrap" />
+
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.BackupPolicies}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:BackupStoreSettingsViewModel">
+                                <Expander
+                                    Margin="0,0,0,8"
+                                    AutomationProperties.Name="{x:Bind DisplayName}"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    IsExpanded="False"
+                                    Padding="0">
+                                    <Expander.Header>
+                                        <StackPanel Padding="12,10,12,10" Spacing="2">
+                                            <TextBlock FontWeight="SemiBold" Text="{x:Bind DisplayName}" />
+                                            <TextBlock
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                                Text="{x:Bind DescriptionText}"
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Expander.Header>
+
+                                    <StackPanel Padding="12,0,12,12" Spacing="8">
+                                        <wct:SettingsCard HorizontalAlignment="Stretch">
+                                            <wct:SettingsCard.Header>
+                                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind EnableLabelText}" />
+                                            </wct:SettingsCard.Header>
+                                            <wct:SettingsCard.Description>
+                                                <TextBlock
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                                    Text="{x:Bind EnableDescriptionText}"
+                                                    TextWrapping="Wrap" />
+                                            </wct:SettingsCard.Description>
+                                            <wct:SettingsCard.Content>
+                                                <ToggleSwitch IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
+                                            </wct:SettingsCard.Content>
+                                        </wct:SettingsCard>
+
+                                        <wct:SettingsCard HorizontalAlignment="Stretch">
+                                            <wct:SettingsCard.Header>
+                                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ScheduleLabelText}" />
+                                            </wct:SettingsCard.Header>
+                                            <wct:SettingsCard.Description>
+                                                <TextBlock
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                                    Text="{x:Bind ScheduleDescriptionText}"
+                                                    TextWrapping="Wrap" />
+                                            </wct:SettingsCard.Description>
+                                            <wct:SettingsCard.Content>
+                                                <TextBox MinWidth="120" Text="{x:Bind ScheduleLocalTime, Mode=TwoWay}" />
+                                            </wct:SettingsCard.Content>
+                                        </wct:SettingsCard>
+
+                                        <wct:SettingsCard HorizontalAlignment="Stretch">
+                                            <wct:SettingsCard.Header>
+                                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind RetentionLabelText}" />
+                                            </wct:SettingsCard.Header>
+                                            <wct:SettingsCard.Description>
+                                                <TextBlock
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                                    Text="{x:Bind RetentionDescriptionText}"
+                                                    TextWrapping="Wrap" />
+                                            </wct:SettingsCard.Description>
+                                            <wct:SettingsCard.Content>
+                                                <TextBox MinWidth="120" Text="{x:Bind RetentionCount, Mode=TwoWay}" />
+                                            </wct:SettingsCard.Content>
+                                        </wct:SettingsCard>
+
+                                        <wct:SettingsCard HorizontalAlignment="Stretch">
+                                            <wct:SettingsCard.Header>
+                                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind DestinationLabelText}" />
+                                            </wct:SettingsCard.Header>
+                                            <wct:SettingsCard.Description>
+                                                <TextBlock
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                                    Text="{x:Bind DestinationDescriptionText}"
+                                                    TextWrapping="Wrap" />
+                                            </wct:SettingsCard.Description>
+                                            <wct:SettingsCard.Content>
+                                                <TextBox MinWidth="280" Text="{x:Bind DestinationDirectory, Mode=TwoWay}" />
+                                            </wct:SettingsCard.Content>
+                                        </wct:SettingsCard>
+                                    </StackPanel>
+                                </Expander>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.BackupStoreLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.BackupStoreDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ComboBox MinWidth="200" ItemsSource="{x:Bind ViewModel.BackupStoreNames}" SelectedItem="{x:Bind ViewModel.SelectedBackupStoreName, Mode=TwoWay}" />
+                                <Button Command="{x:Bind ViewModel.BackupNowCommand}" Content="{x:Bind ViewModel.BackupNowText}" />
+                            </StackPanel>
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+                </StackPanel>
+            </Expander>
+
+            <!-- Emergency restore -->
+            <Expander
+                AutomationProperties.Name="{x:Bind ViewModel.RestoreGroup.HeaderText}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                IsExpanded="{x:Bind ViewModel.RestoreGroup.IsExpanded, Mode=OneWay}"
+                Padding="0"
+                Visibility="{x:Bind ViewModel.RestoreGroup.IsVisible, Mode=OneWay}">
+                <Expander.Header>
+                    <Grid Padding="16,12,16,12" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <SymbolIcon Grid.Column="0" VerticalAlignment="Center" Symbol="Undo" />
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="{x:Bind ViewModel.RestoreGroup.HeaderText}" />
+                    </Grid>
+                </Expander.Header>
+
+                <StackPanel Padding="16,0,16,16" Spacing="12">
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.RestoreGroup.DescriptionText}"
+                        TextWrapping="Wrap" />
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.RestorePickerLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.RestorePickerDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <ComboBox
+                                x:Name="RestoreArtifactPicker"
+                                MinWidth="420"
+                                ItemsSource="{x:Bind ViewModel.RestoreArtifacts}"
+                                SelectedItem="{x:Bind ViewModel.SelectedRestoreArtifact, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:BackupArtifactRow">
+                                        <TextBlock Text="{x:Bind DisplayText}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.RestoreText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.RestoreOutcomeDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <StackPanel Spacing="8">
+                                <Button
+                                    Click="OnRestoreClick"
+                                    Content="{x:Bind ViewModel.RestoreText}"
+                                    Style="{ThemeResource AccentButtonStyle}" />
+                                <StackPanel Spacing="2">
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Style="{ThemeResource CaptionTextBlockStyle}"
+                                        Text="{x:Bind ViewModel.RestoreOutcomeLabelText}" />
+                                    <TextBlock Text="{x:Bind ViewModel.RestoreOutcomeText, Mode=OneWay}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </StackPanel>
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+                </StackPanel>
+            </Expander>
+
+            <!-- Saving applies to every group above, so it sits outside them. -->
+            <wct:SettingsCard HorizontalAlignment="Stretch">
+                <wct:SettingsCard.Header>
+                    <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.SaveHeaderText}" />
+                </wct:SettingsCard.Header>
+                <wct:SettingsCard.Description>
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{ThemeResource CaptionTextBlockStyle}"
+                        Text="{x:Bind ViewModel.SaveDescriptionText}"
+                        TextWrapping="Wrap" />
+                </wct:SettingsCard.Description>
+                <wct:SettingsCard.Content>
+                    <Button
+                        MinWidth="180"
+                        Command="{x:Bind ViewModel.SaveSettingsCommand}"
+                        Content="{x:Bind ViewModel.SaveText}"
+                        Style="{ThemeResource AccentButtonStyle}" />
+                </wct:SettingsCard.Content>
+            </wct:SettingsCard>
         </StackPanel>
     </ScrollViewer>
 </Page>

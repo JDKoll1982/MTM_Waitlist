@@ -43,6 +43,34 @@ public partial class App : Application
     private ServiceShellWindow? _shellWindow;
     private CancellationTokenSource? _shutdownSource;
 
+    /// <summary>
+    /// A surface a launch asked for but that has not been shown yet, because the container did not exist
+    /// when the request arrived.
+    /// </summary>
+    private ServiceActivationParser.RequestedSurface _pendingSurface = ServiceActivationParser.RequestedSurface.None;
+
+    /// <summary>
+    /// The UI thread's dispatcher, captured at launch.
+    /// </summary>
+    /// <remarks>
+    /// A show request is served from a background wait, which is not the UI thread, and
+    /// <c>Application</c> does not expose a dispatcher queue in this Windows App SDK version, so the queue
+    /// is taken here - the one place that is guaranteed to be the UI thread - and used to marshal the
+    /// window work.
+    /// </remarks>
+    private Microsoft.UI.Dispatching.DispatcherQueue? _uiDispatcher;
+
+    /// <summary>The event a second launch signals to ask for the status surface.</summary>
+    private readonly EventWaitHandle _showStatusRequest =
+        new(false, EventResetMode.AutoReset, ServiceShowChannel.StatusEventName);
+
+    /// <summary>The event a second launch signals to ask for the settings surface.</summary>
+    private readonly EventWaitHandle _showSettingsRequest =
+        new(false, EventResetMode.AutoReset, ServiceShowChannel.SettingsEventName);
+
+    /// <summary>The background wait that serves those requests.</summary>
+    private Task? _showRequestListener;
+
     /// <summary>Creates the app.</summary>
     public App()
     {
@@ -70,6 +98,23 @@ public partial class App : Application
     /// <inheritdoc />
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        // A launch that asks for a surface (the desktop shortcut's "Show UI") is served once the engines
+        // are up. A bare launch - logon auto-start, or the deployment health check - stays tray-only,
+        // which is the documented lifetime and what that health check asserts.
+        //
+        // An unpackaged launch does not reliably carry the command line in the WinUI arguments, so the
+        // process command line is consulted as well: Environment.GetCommandLineArgs is the documented
+        // route for raw arguments on a plain Launch activation.
+        var requestedSurface = ServiceActivationParser.Parse(args?.Arguments);
+        if (requestedSurface == ServiceActivationParser.RequestedSurface.None)
+        {
+            requestedSurface = ServiceActivationParser.ParseTokens(Environment.GetCommandLineArgs().Skip(1));
+        }
+
+        _pendingSurface = requestedSurface;
+
+        _uiDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+
         _ = StartAsync();
     }
 
@@ -84,7 +129,13 @@ public partial class App : Application
 
             if (!appInstance.IsCurrent)
             {
-                // A second launch hands its activation to the running instance and exits.
+                // A second launch asks the running service for the surface its command line named. The
+                // activation handed over below does not carry the command line for an unpackaged app, so
+                // this process reads its own and signals the service directly.
+                ServiceShowChannel.Request(
+                    ServiceActivationParser.ParseTokens(Environment.GetCommandLineArgs().Skip(1)));
+
+                // Then hand the activation over and exit, so only one instance is ever running (FR-007).
                 await appInstance
                     .RedirectActivationToAsync(AppInstance.GetCurrent().GetActivatedEventArgs())
                     .AsTask()
@@ -94,7 +145,13 @@ public partial class App : Application
                 return;
             }
 
+            // Before the engines, so a request that arrives during startup is served rather than dropped.
             _shutdownSource = new CancellationTokenSource();
+
+            // Started before the engines, so a request that arrives during startup is served rather than
+            // dropped. It has to come after the cancellation source exists: the listener takes that token
+            // to decide when to stop, and a listener that starts without it exits immediately.
+            StartShowRequestListener(_shutdownSource.Token);
 
             _hostBuilder = ServiceHostBuilder.Create();
             var configuration = await _hostBuilder.LoadConfigurationAsync().ConfigureAwait(true);
@@ -116,6 +173,9 @@ public partial class App : Application
             CreateTrayIcon();
 
             await StartBackgroundEnginesAsync().ConfigureAwait(true);
+
+            // Served last, so the window never opens onto a service that cannot answer it yet.
+            ShowRequestedSurface();
         }
         catch (Exception exception)
         {
@@ -255,6 +315,68 @@ public partial class App : Application
         _shellWindow ??= new ServiceShellWindow(_services!);
         _shellWindow.NavigateTo(showSettings);
     }
+    /// <summary>
+    /// Starts waiting for a second launch to ask for a surface.
+    /// </summary>
+    /// <param name="cancellationToken">Cancelled when the service is shutting down.</param>
+    /// <remarks>
+    /// The wait is a background loop with a short timeout so shutdown is noticed promptly, and the window
+    /// work is marshalled to the UI thread. A request that arrives before the container exists is held and
+    /// served once it does, so a launch during startup still opens the window that was asked for.
+    /// </remarks>
+    private void StartShowRequestListener(CancellationToken cancellationToken)
+    {
+        _showRequestListener = Task.Run(() =>
+        {
+            WaitHandle[] requests = [_showStatusRequest, _showSettingsRequest];
+
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    var signalled = WaitHandle.WaitAny(requests, TimeSpan.FromSeconds(1));
+
+                    if (signalled == WaitHandle.WaitTimeout)
+                    {
+                        continue;
+                    }
+
+                    var showSettings = signalled == 1;
+
+                    _uiDispatcher?.TryEnqueue(() =>
+                    {
+                        if (_services is null)
+                        {
+                            _pendingSurface = showSettings
+                                ? ServiceActivationParser.RequestedSurface.Settings
+                                : ServiceActivationParser.RequestedSurface.Status;
+                            return;
+                        }
+
+                        ShowWindow(showSettings);
+                    });
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Shutdown disposed the handles while this was waiting; the process is ending.
+            }
+        });
+    }
+
+    /// <summary>Opens the window a launch asked for, when it asked for one.</summary>
+    private void ShowRequestedSurface()
+    {
+        var surface = _pendingSurface;
+        _pendingSurface = ServiceActivationParser.RequestedSurface.None;
+
+        if (surface == ServiceActivationParser.RequestedSurface.None)
+        {
+            return;
+        }
+
+        ShowWindow(surface == ServiceActivationParser.RequestedSurface.Settings);
+    }
 
     /// <summary>
     /// Backs up the application's own store immediately — the tray's "back up now" action.
@@ -288,6 +410,9 @@ public partial class App : Application
         {
             _shutdownSource?.Cancel();
 
+            // Let the show-request listener notice the cancellation before its handles are disposed.
+            _showRequestListener?.Wait(TimeSpan.FromSeconds(2));
+
             if (_services?.GetService<ServiceApiHost>() is { IsRunning: true } apiHost)
             {
                 apiHost.StopAsync().GetAwaiter().GetResult();
@@ -306,6 +431,8 @@ public partial class App : Application
                 _shellWindow.Close();
             }
 
+            _showStatusRequest.Dispose();
+            _showSettingsRequest.Dispose();
             _trayIcon?.Dispose();
             _services?.Dispose();
             Exit();

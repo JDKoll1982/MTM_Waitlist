@@ -3,6 +3,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.Models;
 using MTM_Waitlist.Mock.Service.Services;
 
@@ -24,7 +25,7 @@ namespace MTM_Waitlist.Mock.Service.ViewModels;
 /// shows its value (FR-026).
 /// </para>
 /// </remarks>
-public sealed partial class ServiceSettingsViewModel : ObservableObject
+public sealed partial class ServiceSettingsViewModel : ObservableObject, IServiceSearchTarget
 {
     private readonly ServiceConfigurationStore _configurationStore;
     private readonly BackupEngine _backupEngine;
@@ -33,7 +34,11 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject
     private readonly TimeProvider _timeProvider;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasStatusMessage))]
     public partial string StatusMessage { get; set; }
+
+    /// <summary>Whether there is a message worth showing (keeps an empty bar out of the layout).</summary>
+    public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
 
     [ObservableProperty]
     public partial bool IsBusy { get; set; }
@@ -81,12 +86,17 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject
     public partial string CredentialStatusText { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasBackupToolStatus))]
     public partial string BackupToolStatusText { get; set; }
+
+    /// <summary>Whether the state of the backup program has something to report.</summary>
+    public bool HasBackupToolStatus => !string.IsNullOrWhiteSpace(BackupToolStatusText);
 
     [ObservableProperty]
     public partial string RestoreOutcomeText { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedBackupStoreName))]
     public partial BackupStore SelectedBackupStore { get; set; }
 
     [ObservableProperty]
@@ -135,12 +145,207 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject
         RestoreOutcomeText = string.Empty;
         SelectedBackupStore = BackupStore.MtmWaitlist;
 
-        BackupStores = [.. BackupStoreExtensions.All];
+        BackupStoreNames = [.. BackupStoreExtensions.All.Select(store => store.ToDisplayName())];
         BackupPolicies = [];
+
+        _searchQuery = string.Empty;
+
+        RefreshGroup = new ServiceSettingsGroupViewModel(
+            "refresh",
+            RefreshHeaderText,
+            "Service_Settings.RefreshGroupDescription".GetLocalized(),
+            "refresh", "interval", "cadence", "schedule", "rebuild", "how", "often", "minutes", "hours", "auto", "start", "logon", "startup", "automatically");
+
+        ApiGroup = new ServiceSettingsGroupViewModel(
+            "api",
+            ApiHeaderText,
+            "Service_Settings.ApiGroupDescription".GetLocalized(),
+            "api", "endpoint", "client", "clients", "network", "interface", "bind", "address", "port", "listen", "connections");
+
+        CredentialGroup = new ServiceSettingsGroupViewModel(
+            "credential",
+            CredentialHeaderText,
+            "Service_Settings.CredentialGroupDescription".GetLocalized(),
+            "credential", "password", "token", "secret", "rotate", "generate", "authentication", "authenticate");
+
+        VisualGroup = new ServiceSettingsGroupViewModel(
+            "visual",
+            VisualHeaderText,
+            "Service_Settings.VisualGroupDescription".GetLocalized(),
+            "infor", "visual", "sql", "server", "database", "login", "user", "timeout", "source", "read", "reads");
+
+        MySqlGroup = new ServiceSettingsGroupViewModel(
+            "mysql",
+            MySqlHeaderText,
+            "Service_Settings.MySqlGroupDescription".GetLocalized(),
+            "mysql", "server", "port", "login", "user", "password", "file", "option", "backup", "tool", "mysqldump", "path");
+
+        BackupGroup = new ServiceSettingsGroupViewModel(
+            "backups",
+            BackupHeaderText,
+            "Service_Settings.BackupGroupDescription".GetLocalized(),
+            "backup", "backups", "schedule", "daily", "copies", "retention", "folder", "destination", "store", "waitlist", "wip", "receiving", "mock", "now");
+
+        RestoreGroup = new ServiceSettingsGroupViewModel(
+            "restore",
+            RestoreHeaderText,
+            "Service_Settings.RestoreGroupDescription".GetLocalized(),
+            "restore", "recover", "replace", "put", "back", "artifact", "file", "emergency", "undo");
+
+        Groups = [RefreshGroup, ApiGroup, CredentialGroup, VisualGroup, MySqlGroup, BackupGroup, RestoreGroup];
     }
+
+    private string _searchQuery;
+
+    /// <summary>The collapsible settings cards, in the order they appear on the page.</summary>
+    public IReadOnlyList<ServiceSettingsGroupViewModel> Groups { get; }
+
+    /// <summary>The refresh and start-up settings.</summary>
+    public ServiceSettingsGroupViewModel RefreshGroup { get; }
+
+    /// <summary>The service API settings.</summary>
+    public ServiceSettingsGroupViewModel ApiGroup { get; }
+
+    /// <summary>The shared credential settings.</summary>
+    public ServiceSettingsGroupViewModel CredentialGroup { get; }
+
+    /// <summary>The Infor Visual source settings.</summary>
+    public ServiceSettingsGroupViewModel VisualGroup { get; }
+
+    /// <summary>The MySQL host and backup tool settings.</summary>
+    public ServiceSettingsGroupViewModel MySqlGroup { get; }
+
+    /// <summary>The per-store backup settings.</summary>
+    public ServiceSettingsGroupViewModel BackupGroup { get; }
+
+    /// <summary>The emergency restore settings.</summary>
+    public ServiceSettingsGroupViewModel RestoreGroup { get; }
+
+    /// <summary>The text the title-bar search box currently holds.</summary>
+    public string SearchQuery
+    {
+        get => _searchQuery;
+        private set
+        {
+            if (SetProperty(ref _searchQuery, value))
+            {
+                RefreshSearch();
+            }
+        }
+    }
+
+    /// <summary>The suggestions the title-bar search box offers while the operator types.</summary>
+    public ObservableCollection<string> SearchSuggestions { get; } = [];
+
+    /// <inheritdoc />
+    IReadOnlyList<string> IServiceSearchTarget.SearchSuggestions => SearchSuggestions;
+
+    /// <summary>Whether a search is narrowing this surface.</summary>
+    public bool HasSearchQuery => !string.IsNullOrWhiteSpace(_searchQuery);
+
+    /// <summary>Whether a search excluded every group.</summary>
+    public bool HasNoMatches => HasSearchQuery && !Groups.Any(group => group.IsVisible);
+
+    /// <summary>How much the search is hiding, or an empty string when nothing is being hidden.</summary>
+    public string SearchSummaryText => HasSearchQuery
+        ? string.Format(
+            CultureInfo.CurrentCulture,
+            "Service_Common.SearchMatches".GetLocalized(),
+            Groups.Count(group => group.IsVisible),
+            Groups.Count)
+        : string.Empty;
+
+    /// <summary>What to say when a search excluded every group.</summary>
+    public string NoMatchesText => "Service_Common.NoMatches".GetLocalized();
+
+    /// <inheritdoc />
+    public void UpdateSearchSuggestions(string query)
+    {
+        SearchQuery = query ?? string.Empty;
+
+        SearchSuggestions.Clear();
+
+        foreach (var suggestion in BuildSearchCatalog().Where(title => MatchesTitle(title, query)))
+        {
+            SearchSuggestions.Add(suggestion);
+
+            if (SearchSuggestions.Count == 6)
+            {
+                return;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public void SubmitSearch(string query, string? chosenSuggestion)
+    {
+        SearchQuery = chosenSuggestion ?? query ?? string.Empty;
+    }
+
+    private void RefreshSearch()
+    {
+        foreach (var group in Groups)
+        {
+            group.ApplySearch(_searchQuery);
+        }
+
+        OnPropertyChanged(nameof(HasSearchQuery));
+        OnPropertyChanged(nameof(HasNoMatches));
+        OnPropertyChanged(nameof(SearchSummaryText));
+    }
+
+    /// <summary>
+    /// Everything a search can offer as a suggestion: the group headings and the name of each setting.
+    /// </summary>
+    private IEnumerable<string> BuildSearchCatalog()
+    {
+        yield return RefreshHeaderText;
+        yield return RefreshIntervalLabelText;
+        yield return AutoStartLabelText;
+        yield return ApiHeaderText;
+        yield return ApiBindAddressLabelText;
+        yield return ApiPortLabelText;
+        yield return CredentialHeaderText;
+        yield return RotateCredentialText;
+        yield return VisualHeaderText;
+        yield return VisualServerLabelText;
+        yield return VisualDatabaseLabelText;
+        yield return VisualUserIdLabelText;
+        yield return VisualTimeoutLabelText;
+        yield return MySqlHeaderText;
+        yield return MySqlServerLabelText;
+        yield return MySqlPortLabelText;
+        yield return MySqlUserIdLabelText;
+        yield return MySqlPasswordFileLabelText;
+        yield return MySqlDumpPathLabelText;
+        yield return BackupHeaderText;
+        yield return RestoreHeaderText;
+    }
+
+    private static bool MatchesTitle(string title, string? query) =>
+        string.IsNullOrWhiteSpace(query)
+            || title.Contains(query.Trim(), StringComparison.CurrentCultureIgnoreCase);
 
     /// <summary>Title text for the page.</summary>
     public string TitleText => "Service_Settings.Title".GetLocalized();
+
+    /// <summary>One-line explanation of what this surface configures.</summary>
+    public string SubtitleText => "Service_Settings.Subtitle".GetLocalized();
+
+    /// <summary>Heading of the shared-credential setting.</summary>
+    public string CredentialStatusLabelText => "Service_Settings.CredentialLabel".GetLocalized();
+
+    /// <summary>Heading of the save setting, which applies to every group above it.</summary>
+    public string SaveHeaderText => "Service_Settings.SaveHeader".GetLocalized();
+
+    /// <summary>Note under the restore picker.</summary>
+    public string RestorePickerDescriptionText => "Service_Settings.RestorePickerDescription".GetLocalized();
+
+    /// <summary>Note under the restore action.</summary>
+    public string RestoreOutcomeDescriptionText => "Service_Settings.RestoreOutcomeDescription".GetLocalized();
+
+    /// <summary>Note under the immediate-backup store picker.</summary>
+    public string BackupStoreDescriptionText => "Service_Settings.BackupStoreDescription".GetLocalized();
 
     /// <summary>Header for the refresh section.</summary>
     public string RefreshHeaderText => "Service_Settings.RefreshHeader".GetLocalized();
@@ -202,6 +407,57 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject
     /// <summary>Label for the mysqldump path.</summary>
     public string MySqlDumpPathLabelText => "Service_Settings.MySqlDumpPath".GetLocalized();
 
+    /// <summary>Note under the refresh interval: what the number means.</summary>
+    public string RefreshIntervalDescriptionText => "Service_Settings.RefreshIntervalMinutesDescription".GetLocalized();
+
+    /// <summary>Note under the auto-start switch: what it does.</summary>
+    public string AutoStartDescriptionText => "Service_Settings.AutoStartDescription".GetLocalized();
+
+    /// <summary>Note under the network interface field.</summary>
+    public string BindAddressDescriptionText => "Service_Settings.BindAddressDescription".GetLocalized();
+
+    /// <summary>Note under the API port field.</summary>
+    public string PortDescriptionText => "Service_Settings.PortDescription".GetLocalized();
+
+    /// <summary>Note under the Infor Visual server field.</summary>
+    public string VisualServerDescriptionText => "Service_Settings.VisualServerDescription".GetLocalized();
+
+    /// <summary>Note under the Infor Visual database field.</summary>
+    public string VisualDatabaseDescriptionText => "Service_Settings.VisualDatabaseDescription".GetLocalized();
+
+    /// <summary>Note under the Infor Visual login field.</summary>
+    public string VisualUserIdDescriptionText => "Service_Settings.VisualUserIdDescription".GetLocalized();
+
+    /// <summary>Note under the Infor Visual timeout field.</summary>
+    public string VisualTimeoutDescriptionText => "Service_Settings.VisualTimeoutSecondsDescription".GetLocalized();
+
+    /// <summary>Note under the MySQL server field.</summary>
+    public string MySqlServerDescriptionText => "Service_Settings.MySqlServerDescription".GetLocalized();
+
+    /// <summary>Note under the MySQL port field.</summary>
+    public string MySqlPortDescriptionText => "Service_Settings.MySqlPortDescription".GetLocalized();
+
+    /// <summary>Note under the MySQL login field.</summary>
+    public string MySqlUserIdDescriptionText => "Service_Settings.MySqlUserIdDescription".GetLocalized();
+
+    /// <summary>Note under the MySQL password file field.</summary>
+    public string MySqlPasswordFileDescriptionText => "Service_Settings.MySqlPasswordFileDescription".GetLocalized();
+
+    /// <summary>Note under the backup tool location field.</summary>
+    public string MySqlDumpPathDescriptionText => "Service_Settings.MySqlDumpPathDescription".GetLocalized();
+
+    /// <summary>Label for the store picker above the back-up-now button.</summary>
+    public string BackupStoreLabelText => "Service_Settings.BackupStoreLabel".GetLocalized();
+
+    /// <summary>Label for the artifact picker in the restore card.</summary>
+    public string RestorePickerLabelText => "Service_Settings.RestorePickerLabel".GetLocalized();
+
+    /// <summary>Label for the restore outcome.</summary>
+    public string RestoreOutcomeLabelText => "Service_Settings.RestoreOutcomeLabel".GetLocalized();
+
+    /// <summary>Note under the save button: what happens to a rejected value.</summary>
+    public string SaveDescriptionText => "Service_Settings.SaveDescription".GetLocalized();
+
     /// <summary>Header for the backup section.</summary>
     public string BackupHeaderText => "Service_Settings.BackupHeader".GetLocalized();
 
@@ -232,8 +488,36 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject
     /// <summary>Statement shown before any artifact has been chosen.</summary>
     public string RestorePickArtifactText => "Service_Settings.RestorePickArtifact".GetLocalized();
 
-    /// <summary>The four stores, for the restore picker.</summary>
-    public ObservableCollection<BackupStore> BackupStores { get; }
+    /// <summary>The four stores as an operator reads them, for the immediate-backup picker.</summary>
+    public ObservableCollection<string> BackupStoreNames { get; }
+
+    /// <summary>
+    /// The selected store as an operator reads it. Selecting a name selects the matching store, which is
+    /// what the immediate backup and the restore picker act on; the database name is never shown.
+    /// </summary>
+    public string SelectedBackupStoreName
+    {
+        get => SelectedBackupStore.ToDisplayName();
+        set
+        {
+            foreach (var store in BackupStoreExtensions.All)
+            {
+                if (!string.Equals(store.ToDisplayName(), value, StringComparison.CurrentCulture))
+                {
+                    continue;
+                }
+
+                if (SelectedBackupStore == store)
+                {
+                    return;
+                }
+
+                SelectedBackupStore = store;
+                LoadRestoreArtifacts();
+                return;
+            }
+        }
+    }
 
     /// <summary>Per-store backup policies being edited.</summary>
     public ObservableCollection<BackupStoreSettingsViewModel> BackupPolicies { get; }
@@ -401,7 +685,7 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject
             StatusMessage = string.Format(
                 CultureInfo.CurrentCulture,
                 "Service_Settings.BackupNowResult".GetLocalized(),
-                SelectedBackupStore.ToDatabaseName(),
+                SelectedBackupStore.ToDisplayName(),
                 record.Outcome.ToString());
 
             LoadRestoreArtifacts();

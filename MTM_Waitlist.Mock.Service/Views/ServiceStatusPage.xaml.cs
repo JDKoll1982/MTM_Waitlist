@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.ViewModels;
 
 namespace MTM_Waitlist.Mock.Service.Views;
@@ -11,9 +12,10 @@ namespace MTM_Waitlist.Mock.Service.Views;
 /// </summary>
 /// <remarks>
 /// Reading status has no side effects — it never triggers a refresh or a backup — and the text is
-/// resolved from resources rather than embedded in XAML (constitution V).
+/// resolved from resources rather than embedded in XAML (constitution V). The page is also the shell's
+/// search host, so the title-bar search box narrows what this surface shows.
 /// </remarks>
-public sealed partial class ServiceStatusPage : Page
+public sealed partial class ServiceStatusPage : Page, IServiceSearchHost
 {
     /// <summary>Creates the page. The view model is attached in <see cref="OnNavigatedTo"/>.</summary>
     public ServiceStatusPage()
@@ -23,6 +25,9 @@ public sealed partial class ServiceStatusPage : Page
 
     /// <summary>The page's view model.</summary>
     public ServiceStatusViewModel ViewModel { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public IServiceSearchTarget? SearchTarget => ViewModel;
 
     /// <inheritdoc />
     protected override void OnNavigatedTo(NavigationEventArgs e)

@@ -122,8 +122,7 @@
   </data>
   <data name="Service_Status.Reload" xml:space="preserve">
     <value>Reload</value>
-  </data>
-  <data name="Service_Status.VisualSourceReachable" xml:space="preserve">
+  </data>  <data name="Service_Status.VisualSourceReachable" xml:space="preserve">
     <value>Infor Visual is reachable</value>
   </data>
   <data name="Service_Status.VisualSourceUnreachable" xml:space="preserve">
@@ -144,19 +143,19 @@
     <value>Settings</value>
   </data>
   <data name="Service_Settings.RefreshHeader" xml:space="preserve">
-    <value>Refresh</value>
+    <value>Refresh and start-up</value>
   </data>
   <data name="Service_Settings.RefreshIntervalMinutes" xml:space="preserve">
-    <value>Refresh interval (minutes)</value>
+    <value>Refresh interval</value>
   </data>
   <data name="Service_Settings.ApiHeader" xml:space="preserve">
     <value>Service API</value>
   </data>
   <data name="Service_Settings.BindAddress" xml:space="preserve">
-    <value>Bind address</value>
+    <value>Network interface</value>
   </data>
   <data name="Service_Settings.Port" xml:space="preserve">
-    <value>Port</value>
+    <value>API port</value>
   </data>
   <data name="Service_Settings.AutoStart" xml:space="preserve">
     <value>Start automatically at logon</value>
@@ -165,49 +164,49 @@
     <value>Shared credential</value>
   </data>
   <data name="Service_Settings.RotateCredential" xml:space="preserve">
-    <value>Generate / rotate credential</value>
+    <value>Generate a new credential</value>
   </data>
   <data name="Service_Settings.CredentialWriteOnly" xml:space="preserve">
-    <value>The credential value is never displayed or logged. Install it on clients through the documented out-of-band procedure.</value>
+    <value>The value is never shown or written to the log. After you rotate it, install the new value on every client.</value>
   </data>
   <data name="Service_Settings.CredentialConfigured" xml:space="preserve">
-    <value>A credential is configured.</value>
+    <value>A shared credential is set.</value>
   </data>
   <data name="Service_Settings.CredentialRotated" xml:space="preserve">
-    <value>A new credential was generated. Existing clients must be updated before they can authenticate again.</value>
+    <value>A new credential was generated. Until every client is updated, their calls to the service are refused.</value>
   </data>
   <data name="Service_Settings.VisualHeader" xml:space="preserve">
     <value>Infor Visual source</value>
   </data>
   <data name="Service_Settings.VisualServer" xml:space="preserve">
-    <value>Server</value>
+    <value>Infor Visual server</value>
   </data>
   <data name="Service_Settings.VisualDatabase" xml:space="preserve">
-    <value>Database</value>
+    <value>Infor Visual database</value>
   </data>
   <data name="Service_Settings.VisualUserId" xml:space="preserve">
-    <value>User</value>
+    <value>Infor Visual login</value>
   </data>
   <data name="Service_Settings.VisualTimeoutSeconds" xml:space="preserve">
-    <value>Connection timeout (seconds)</value>
+    <value>Connection timeout</value>
   </data>
   <data name="Service_Settings.MySqlHeader" xml:space="preserve">
-    <value>MySQL host</value>
+    <value>MySQL host and backup tool</value>
   </data>
   <data name="Service_Settings.MySqlServer" xml:space="preserve">
-    <value>Server</value>
+    <value>MySQL server</value>
   </data>
   <data name="Service_Settings.MySqlPort" xml:space="preserve">
-    <value>Port</value>
+    <value>MySQL port</value>
   </data>
   <data name="Service_Settings.MySqlUserId" xml:space="preserve">
-    <value>User</value>
+    <value>MySQL login</value>
   </data>
   <data name="Service_Settings.MySqlPasswordFile" xml:space="preserve">
-    <value>Password option file</value>
+    <value>Password file</value>
   </data>
   <data name="Service_Settings.MySqlDumpPath" xml:space="preserve">
-    <value>mysqldump path (blank resolves from PATH)</value>
+    <value>Backup tool location</value>
   </data>
   <data name="Service_Settings.BackupHeader" xml:space="preserve">
     <value>Backups</value>
@@ -219,16 +218,16 @@
     <value>mysqldump is not available, so no backup can be taken. Set its path above or add it to PATH.</value>
   </data>
   <data name="Service_Settings.StoreEnable" xml:space="preserve">
-    <value>Enabled</value>
+    <value>Back up this store</value>
   </data>
   <data name="Service_Settings.StoreSchedule" xml:space="preserve">
-    <value>Schedule (HH:mm, local)</value>
+    <value>Daily backup time</value>
   </data>
   <data name="Service_Settings.StoreRetention" xml:space="preserve">
-    <value>Artifacts to keep</value>
+    <value>Copies to keep</value>
   </data>
   <data name="Service_Settings.StoreDestination" xml:space="preserve">
-    <value>Destination folder</value>
+    <value>Folder for the copies</value>
   </data>
   <data name="Service_Settings.BackupNow" xml:space="preserve">
     <value>Back up now</value>
@@ -240,7 +239,7 @@
     <value>Emergency restore</value>
   </data>
   <data name="Service_Settings.Restore" xml:space="preserve">
-    <value>Restore selected artifact</value>
+    <value>Restore the selected backup</value>
   </data>
   <data name="Service_Settings.RestorePickArtifact" xml:space="preserve">
     <value>Select a backup artifact first.</value>
@@ -379,5 +378,203 @@
   </data>
   <data name="Service_Settings.Subtitle" xml:space="preserve">
     <value>Configure the cache, the external source, the API and the backups.</value>
+  </data>
+
+  <!-- Shell chrome (custom title bar + search) -->
+  <data name="Service_Shell.SearchPlaceholder" xml:space="preserve">
+    <value>Search settings and status</value>
+  </data>
+  <data name="Service_Shell.SearchName" xml:space="preserve">
+    <value>Search the service settings and status</value>
+  </data>
+
+  <!-- Shared search feedback -->
+  <data name="Service_Common.NoMatches" xml:space="preserve">
+    <value>Nothing matches your search.</value>
+  </data>
+  <data name="Service_Common.SearchMatches" xml:space="preserve">
+    <value>{0} of {1} shown for your search.</value>
+  </data>
+
+  <!-- Settings group notes (one note per collapsible card) -->
+  <data name="Service_Settings.RefreshGroupDescription" xml:space="preserve">
+    <value>How often the cached data is rebuilt, and whether the service starts with Windows.</value>
+  </data>
+  <data name="Service_Settings.ApiGroupDescription" xml:space="preserve">
+    <value>Where the service listens for the applications that read the cached data.</value>
+  </data>
+  <data name="Service_Settings.CredentialGroupDescription" xml:space="preserve">
+    <value>The single password every client must send with its requests.</value>
+  </data>
+  <data name="Service_Settings.VisualGroupDescription" xml:space="preserve">
+    <value>The Infor Visual database the cached data is read from. The service never writes to it.</value>
+  </data>
+  <data name="Service_Settings.MySqlGroupDescription" xml:space="preserve">
+    <value>The MySQL server that holds the application stores and the cache, and the tool used to back them up.</value>
+  </data>
+  <data name="Service_Settings.BackupGroupDescription" xml:space="preserve">
+    <value>Every store keeps its own schedule and its own set of backup files.</value>
+  </data>
+  <data name="Service_Settings.RestoreGroupDescription" xml:space="preserve">
+    <value>Put a store back the way an earlier backup found it. This runs on this computer only and cannot be undone.</value>
+  </data>
+
+  <!-- Settings card notes -->
+  <data name="Service_Settings.RefreshIntervalMinutesDescription" xml:space="preserve">
+    <value>Minutes between automatic rebuilds of the cached data. 180 means every three hours.</value>
+  </data>
+  <data name="Service_Settings.AutoStartDescription" xml:space="preserve">
+    <value>Start the service automatically when this account signs in, so the cache stays warm after a restart.</value>
+  </data>
+  <data name="Service_Settings.BindAddressDescription" xml:space="preserve">
+    <value>The address the service accepts connections on. Use 0.0.0.0 for every network card, or 127.0.0.1 for this computer only.</value>
+  </data>
+  <data name="Service_Settings.PortDescription" xml:space="preserve">
+    <value>The network port clients connect to. Every client must use this same port. The usual value is 5760.</value>
+  </data>
+  <data name="Service_Settings.VisualServerDescription" xml:space="preserve">
+    <value>Name or address of the SQL Server that holds Infor Visual.</value>
+  </data>
+  <data name="Service_Settings.VisualDatabaseDescription" xml:space="preserve">
+    <value>The Infor Visual database to read work orders and parts from.</value>
+  </data>
+  <data name="Service_Settings.VisualUserIdDescription" xml:space="preserve">
+    <value>The Infor Visual login used for reads. Its password is stored as a secret on this computer and is never shown here.</value>
+  </data>
+  <data name="Service_Settings.VisualTimeoutSecondsDescription" xml:space="preserve">
+    <value>How long to wait for Infor Visual before treating it as unreachable and serving the cached data instead.</value>
+  </data>
+  <data name="Service_Settings.MySqlServerDescription" xml:space="preserve">
+    <value>The MySQL server that holds the application stores and the cached data.</value>
+  </data>
+  <data name="Service_Settings.MySqlPortDescription" xml:space="preserve">
+    <value>The MySQL server's network port. Mysql uses 3306 unless it was changed.</value>
+  </data>
+  <data name="Service_Settings.MySqlUserIdDescription" xml:space="preserve">
+    <value>The MySQL login the service uses to read and write the stores and the cache.</value>
+  </data>
+  <data name="Service_Settings.MySqlPasswordFileDescription" xml:space="preserve">
+    <value>Optional file that holds the MySQL password. Leave it blank when the password is supplied another way.</value>
+  </data>
+  <data name="Service_Settings.MySqlDumpPathDescription" xml:space="preserve">
+    <value>Where to find the backup program. Leave it blank to use the copy that is on this computer's PATH.</value>
+  </data>
+  <data name="Service_Settings.StoreEnableDescription" xml:space="preserve">
+    <value>Take the scheduled backup for this store only.</value>
+  </data>
+  <data name="Service_Settings.StoreScheduleDescription" xml:space="preserve">
+    <value>Time of day, on this computer's clock, when the backup runs.</value>
+  </data>
+  <data name="Service_Settings.StoreRetentionDescription" xml:space="preserve">
+    <value>How many backup files to keep. The oldest files are removed after each backup.</value>
+  </data>
+  <data name="Service_Settings.StoreDestinationDescription" xml:space="preserve">
+    <value>Folder the backup files are written to.</value>
+  </data>
+  <data name="Service_Settings.BackupStoreLabel" xml:space="preserve">
+    <value>Store</value>
+  </data>
+  <data name="Service_Settings.BackupStoreDescription" xml:space="preserve">
+    <value>Which store the immediate backup runs for. The scheduled backups are set per store above.</value>
+  </data>
+  <data name="Service_Settings.RestorePickerLabel" xml:space="preserve">
+    <value>Backup to restore</value>
+  </data>
+  <data name="Service_Settings.RestorePickerDescription" xml:space="preserve">
+    <value>Only the backups taken for the store selected above are listed.</value>
+  </data>
+  <data name="Service_Settings.RestoreOutcomeLabel" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="Service_Settings.RestoreOutcomeDescription" xml:space="preserve">
+    <value>What happened the last time a restore was run. Nothing above changes until the replacement is confirmed.</value>
+  </data>
+  <data name="Service_Settings.CredentialLabel" xml:space="preserve">
+    <value>Credential state</value>
+  </data>
+  <data name="Service_Settings.SaveHeader" xml:space="preserve">
+    <value>Apply your changes</value>
+  </data>
+  <data name="Service_Settings.SaveDescription" xml:space="preserve">
+    <value>Values are checked before they are stored. A rejected value leaves the previous settings in force.</value>
+  </data>
+
+  <!-- Status surface notes -->
+  <data name="Service_Status.VersionLabelDescription" xml:space="preserve">
+    <value>The build of the cache service that is running on this computer.</value>
+  </data>
+  <data name="Service_Status.StartedLabelDescription" xml:space="preserve">
+    <value>When this service was last started.</value>
+  </data>
+  <data name="Service_Status.VisualSourceLabelDescription" xml:space="preserve">
+    <value>Whether Infor Visual answers right now. When it does not, the cached data is served instead.</value>
+  </data>
+  <data name="Service_Status.CredentialLabelDescription" xml:space="preserve">
+    <value>Whether the shared password that clients must send has been set.</value>
+  </data>
+  <data name="Service_Status.RefreshScheduleLabelDescription" xml:space="preserve">
+    <value>How often each cached read is rebuilt from Infor Visual.</value>
+  </data>
+  <data name="Service_Status.BackupToolLabelDescription" xml:space="preserve">
+    <value>Whether the program that writes the backup files can be found on this computer.</value>
+  </data>
+  <data name="Service_Status.AutoStartLabelDescription" xml:space="preserve">
+    <value>Whether the service starts by itself when this account signs in.</value>
+  </data>
+
+  <!-- Read shape notes (what each cached read contains) -->
+  <data name="Service_ShapeDescription.work_order_lookup" xml:space="preserve">
+    <value>The part and work centre a work order belongs to.</value>
+  </data>
+  <data name="Service_ShapeDescription.operation_sequences" xml:space="preserve">
+    <value>The operations on a work order, in the order they run.</value>
+  </data>
+  <data name="Service_ShapeDescription.subordinate_parts" xml:space="preserve">
+    <value>The parts and quantities under an operation, and where they are stored.</value>
+  </data>
+  <data name="Service_ShapeDescription.inventory_locations" xml:space="preserve">
+    <value>Where a part is stored and how much is on hand.</value>
+  </data>
+  <data name="Service_ShapeDescription.disposition_input" xml:space="preserve">
+    <value>The work order status and quantities used to decide what may be requested.</value>
+  </data>
+
+  <!-- Store notes (what each store holds) -->
+  <data name="Service_StoreDescription.mtm_waitlist" xml:space="preserve">
+    <value>The waitlist application's own database. Always read and written live.</value>
+  </data>
+  <data name="Service_StoreDescription.mtm_wip_application_winforms" xml:space="preserve">
+    <value>The shop floor application's database. Always read and written live.</value>
+  </data>
+  <data name="Service_StoreDescription.mtm_receiving_application" xml:space="preserve">
+    <value>The receiving application's database. Always read and written live.</value>
+  </data>
+  <data name="Service_StoreDescription.mtm_mock" xml:space="preserve">
+    <value>The cached copy of the Infor Visual reads. Disposable: it can always be rebuilt.</value>
+  </data>
+
+  <!-- Build variant note -->
+  <data name="Service_Status.BuildVariantDescription" xml:space="preserve">
+    <value>Where the running service was published from.</value>
+  </data>
+
+  <!-- Run outcomes, in words an operator can act on -->
+  <data name="Service_Outcome.Succeeded" xml:space="preserve">
+    <value>Succeeded</value>
+  </data>
+  <data name="Service_Outcome.SkippedSourceUnreachable" xml:space="preserve">
+    <value>Skipped — Infor Visual unreachable</value>
+  </data>
+  <data name="Service_Outcome.FailedSchemaMismatch" xml:space="preserve">
+    <value>Failed — the columns changed</value>
+  </data>
+  <data name="Service_Outcome.FailedLoad" xml:space="preserve">
+    <value>Failed — the new data could not be loaded</value>
+  </data>
+  <data name="Service_Outcome.Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Service_Outcome.Pending" xml:space="preserve">
+    <value>Waiting for the first refresh</value>
   </data>
 </root>

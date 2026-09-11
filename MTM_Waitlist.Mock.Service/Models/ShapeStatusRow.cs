@@ -15,6 +15,12 @@ public sealed record ShapeStatusRow
     /// <summary>Friendly name for the shape, localised, for the status list.</summary>
     public required string DisplayName { get; init; }
 
+    /// <summary>
+    /// The note that says what this cached read contains, localised. The raw shape key is an internal
+    /// identifier and is not shown as the subtitle.
+    /// </summary>
+    public required string DescriptionText { get; init; }
+
     /// <summary>Whether an operator has the shape enabled.</summary>
     public required bool IsEnabled { get; init; }
 

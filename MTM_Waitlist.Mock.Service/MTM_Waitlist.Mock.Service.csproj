@@ -27,6 +27,9 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <!-- SettingsCard/SettingsExpander — the same settings controls the main app's settings window uses,
+         so the service surfaces match that window's look instead of hand-rolled cards. -->
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
     <PackageReference Include="MySqlConnector" Version="2.6.1" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
@@ -67,6 +70,15 @@
              CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Database\InforVisual\Queues\Module_Mock\**\*.sql"
              Link="Database\InforVisual\Queues\Module_Mock\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- The desktop shortcut opens this control prompt (show the window, restart, shut down), so it is part
+       of the deployed payload rather than something the installer adds afterwards. Shipping it here is
+       what keeps the deployed folder an exact copy of the publish output, which the installer verifies. -->
+  <ItemGroup>
+    <Content Include="deploy\mock-service-control.ps1"
+             Link="mock-service-control.ps1"
              CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
