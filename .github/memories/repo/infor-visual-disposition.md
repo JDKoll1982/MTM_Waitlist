@@ -36,3 +36,59 @@
 - sqlcmd (ODBC170) works fine for Infor Visual (VISUAL/MTMFG) with `$env:SQLCMDPASSWORD`.
 - Multi-line inline PowerShell is truncated by the terminal: put queries in a .ps1 file under $env:TEMP and run it.
 - 'RowCount' is a reserved alias in T-SQL; use 'Cnt'.
+- `appsettings.json` has **no `ConnectionStrings` section** — the waitlist string is `StartupDatabaseOptions.ConnectionString`
+  (and the receiving one is `ReceivingDatabaseOptions.ConnectionString`). The live-database test suites are gated on
+  `MTM_WAITLIST_TEST_DB_CONNECTION_STRING`. `pwsh` (PowerShell 7) is now installed on this workstation; Windows
+  PowerShell 5.1 has no ternary operator, and assigning to the reserved `$args` then splatting `@args` does not pass
+  the intended argument list (use `$arguments`). `$host` is also a **read-only automatic variable** — a script that
+  assigns `$host = '172.16.1.104'` silently keeps the PowerShell `Host` object and every DB call then fails with
+  "Unknown MySQL server host 'System.Management.Automation.Internal.Host.InternalHost'". Use `$dbHost`.
+- **The `MTM_Waitlist.Mock.Service` host is the shared MySQL / Infor Visual host at `172.16.1.104`
+  (`V-MTMFG-5.mantoolmfg.com`) — NOT `MTMFG-161`, which `workstation-elevation.md` correctly describes as the
+  development workstation.** Deploy it with `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` (README
+  beside it): it refuses to run unless the local machine's own IPv4 addresses include the expected server address, so
+  **it only runs when VS Code is on the server**. It installs to `C:\Services\MTM_Waitlist.Mock.Service\`; the
+  service's state lives separately under `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\` (config, run records,
+  `backups\<database>\`) — deleting the install folder alone leaves the DPAPI credential and backups behind. The
+  service needs `MTM_MYSQL_PASSWORD` (or a full `MTM_MOCK_DB_CONNECTION_STRING` / `MTM_WAITLIST_DB_CONNECTION_STRING`)
+  and `INFOR_VISUAL_SQL_USER` / `INFOR_VISUAL_SQL_PASSWORD`; without them it starts and reports "no mtm_mock
+  connection" rather than failing. See `.github/memories/repo/workstation-secrets.md` for the owner-approved
+  exception that lets the agent set those.
+
+## Work-order families and addressing (verified live 2026-09-11)
+
+Full evidence and the open defect: `specs/001-module-mock-visual-fallback` → `tasks.md` Phase 23 (T144).
+
+- **How to query Visual faithfully (use this, not `sqlcmd`).** Build the connection string with
+  `VisualConnectionStringProvider.Resolve()`'s rules — `INFOR_VISUAL_SQL_CONNECTION_STRING`, else
+  `INFOR_VISUAL_SQL_{SERVER,DATABASE,USER,PASSWORD}`, else `InforVisualDatabaseOptions:*`, with
+  `TrustServerCertificate=true; Encrypt=false; Connect Timeout=<n>` — and run each script exactly as
+  `VisualQueryExecutor.ExecuteAsync` does: UTF-8 script text from the content root, `CommandType.Text`,
+  15 s timeout, `AddWithValue("@Name", value)`. In PowerShell 7 load
+  `bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\{Microsoft.Data.SqlClient,MySqlConnector}.dll`. Scraping
+  `sqlcmd`'s text output **mis-counts rows** (its `-W -s '|'` separator line looks like a data row), and
+  `SqlConnectionStringBuilder` property assignment resolves to the keyword indexer, which rejects `DataSource` —
+  use `$b['Data Source'] = …`. The terminal truncates multi-line inline PowerShell: put it in a `.ps1` file.
+- Open `WORK_ORDER` rows come in several families (**42,852 open total**): `Q` 37,259 (ids like `CQ-016245-19`,
+  `.054" X .500"`), `M` 4,898 (`BASE_ID` = bare numeric = `PART_ID`, e.g. `10089`; 230 of these are all-digits with
+  `LEN` 5–6), `W` 695 (`BASE_ID` literally `WO-…`, 555 of them `WO-` + digits, e.g. `WO-041652`, `WO-074011`).
+- **The app's work-order key is `WO-` + the 6-digit zero-padded base id** (`WorkOrderValidationService`,
+  `^(?:WO-)?(\d{5,6})$`), which is what `setup_active_jobs.work_order` holds. The real Setup workflow's only saved
+  job is `WO-041652` → live `TYPE=W, BASE_ID='WO-041652'` — i.e. the `W` family, the one the shipped
+  `Module_Mock/Populations/*.sql` selects *out*.
+- The live queue scripts derive `@WorkOrderBaseId` by stripping a leading `WO-` and match
+  `BASE_ID IN (normalized, stripped)`, which resolves `W` and **cannot** resolve `M` (`WO-010618` ≠ `10618` or
+  `010618`). Because normalization collapses `10089` and `010089` into `WO-010089`, a cached `M` row and a live
+  `W` row can answer the *same key* with **different orders**: `WO-010089` → live `24 126 172` / *Bracket, Control*
+  vs cache `10089` / *Brake Pad*; for keys with no `W` twin live returns 0 rows while the cache returns 1. Column
+  shapes agree in every case, so a shape-only parity check cannot detect it.
+- **Which numeric ids are addressable depends on digit count.** The app pads the operator's 5–6 digits to 6, so a
+  **6-digit** numeric id is addressable (key `WO-102776`, which the live predicate matches through its stripped
+  `@WorkOrderBaseId`) but a **5-digit** one is not (`10089` → key `WO-010089`, which the live predicate matches
+  neither verbatim nor stripped). Measured open: 154 six-digit, 76 five-digit, of which 3 coincide with a
+  `WO-0xxxxx` order — i.e. the padded key would answer with a *different* order.
+- **Fixed 2026-09-11 (T144 transparency half).** All five `Module_Mock/Populations/*.sql` guards now accept only the
+  two live-resolvable forms and key them as the app does, so the mirror holds exactly the keys the live read
+  answers: 701 / 893 / 1,746 / 79,457 / 701 rows, every work-order key `WO-` + 6 digits, and sampled keys match the
+  live per-key read 1:1. Still open: the app's `^(?:WO-)?(\d{5,6})$` rule cannot express 42,143 of the 42,852 open
+  orders, so widening coverage is an operator decision about the app's input rule, not about the cache.

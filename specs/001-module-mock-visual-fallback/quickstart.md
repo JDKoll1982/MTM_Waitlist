@@ -102,6 +102,14 @@ snapshot or the complete new one — never a mixture and never an empty table (F
 
 ## 2. Deploy and start the service (Phase 2)
 
+> **Executable form, and the host rule.** Steps 1–4 below are automated by
+> `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` (README beside it): it publishes, stops any running
+> instance, deletes the previous deployment, copies, verifies the deployment is complete and self-contained, installs
+> and proves the secrets, then starts the service and health-checks it. The script **refuses to run unless the local
+> machine is the cache host** — one of this machine's own IPv4 addresses must be the expected server address
+> (`172.16.1.104`, i.e. `V-MTMFG-5.mantoolmfg.com`), so VS Code has to be running on the server. It exits `2` rather
+> than deploying to the wrong machine.
+
 1. Build and publish `MTM_Waitlist.Mock.Service` (unpackaged, self-contained `win-x64`) onto the MySQL host.
    The deploy artifact and its instructions are `MTM_Waitlist.Mock.Service/README.md`; the publish profile is
    `MTM_Waitlist.Mock.Service/Properties/PublishProfiles/win-x64-selfcontained.pubxml`. The CLI equivalent is:

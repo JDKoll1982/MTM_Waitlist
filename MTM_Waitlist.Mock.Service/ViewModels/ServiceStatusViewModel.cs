@@ -25,7 +25,11 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
     private readonly TimeProvider _timeProvider;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasStatusMessage))]
     public partial string StatusMessage { get; set; }
+
+    /// <summary>Whether there is a status message worth showing (keeps an empty bar out of the layout).</summary>
+    public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
 
     [ObservableProperty]
     public partial string ServiceVersionText { get; set; }
@@ -96,6 +100,63 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
     /// <summary>Label of the reload action.</summary>
     public string ReloadText => "Service_Status.Reload".GetLocalized();
 
+    /// <summary>One-line explanation under the page title.</summary>
+    public string SubtitleText => "Service_Status.Subtitle".GetLocalized();
+
+    /// <summary>Label: the service build version.</summary>
+    public string VersionLabelText => "Service_Status.VersionLabel".GetLocalized();
+
+    /// <summary>Label: when the service started.</summary>
+    public string StartedLabelText => "Service_Status.StartedLabel".GetLocalized();
+
+    /// <summary>Label: the external source and its reachability.</summary>
+    public string VisualSourceLabelText => "Service_Status.VisualSourceLabel".GetLocalized();
+
+    /// <summary>Label: whether the API credential exists.</summary>
+    public string CredentialLabelText => "Service_Status.CredentialLabel".GetLocalized();
+
+    /// <summary>Label: the configured refresh cadence.</summary>
+    public string RefreshScheduleLabelText => "Service_Status.RefreshScheduleLabel".GetLocalized();
+
+    /// <summary>Label: whether the backup tool is usable.</summary>
+    public string BackupToolLabelText => "Service_Status.BackupToolLabel".GetLocalized();
+
+    /// <summary>Label: auto-start state.</summary>
+    public string AutoStartLabelText => "Service_Status.AutoStartLabel".GetLocalized();
+
+    /// <summary>Explanatory line under the shapes heading.</summary>
+    public string ShapesHintText => "Service_Status.ShapesHint".GetLocalized();
+
+    /// <summary>Explanatory line under the backups heading.</summary>
+    public string BackupsHintText => "Service_Status.BackupsHint".GetLocalized();
+
+    /// <summary>Field label: last attempt.</summary>
+    public string LastRunLabelText => "Service_Status.LastRunLabel".GetLocalized();
+
+    /// <summary>Field label: the last outcome.</summary>
+    public string OutcomeLabelText => "Service_Status.OutcomeLabel".GetLocalized();
+
+    /// <summary>Field label: rows loaded.</summary>
+    public string RowsLabelText => "Service_Status.RowsLabel".GetLocalized();
+
+    /// <summary>Field label: cached-data freshness.</summary>
+    public string FreshnessLabelText => "Service_Status.FreshnessLabel".GetLocalized();
+
+    /// <summary>Field label: next scheduled backup.</summary>
+    public string NextDueLabelText => "Service_Status.NextDueLabel".GetLocalized();
+
+    /// <summary>Field label: retained artifact count.</summary>
+    public string ArtifactsLabelText => "Service_Status.ArtifactsLabel".GetLocalized();
+
+    /// <summary>Field label: the latest artifact path.</summary>
+    public string ArtifactPathLabelText => "Service_Status.ArtifactPathLabel".GetLocalized();
+
+    /// <summary>Heading for the exclusion reason block.</summary>
+    public string ValidationErrorLabelText => "Service_Status.ValidationErrorLabel".GetLocalized();
+
+    /// <summary>Badge text for a shape or store the operator has turned off.</summary>
+    public string DisabledBadgeText => "Service_Status.DisabledBadge".GetLocalized();
+
     /// <summary>Shapes and their last-run state.</summary>
     public ObservableCollection<ShapeStatusRow> Shapes { get; } = [];
 
@@ -150,6 +211,7 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
                 Shapes.Add(new ShapeStatusRow
                 {
                     ShapeKey = shape.ShapeKey,
+                    DisplayName = ResolveDisplayName("Service_Shape", shape.ShapeKey),
                     IsEnabled = shape.IsEnabled,
                     LastRunText = shape.LastRunUtc is null
                         ? "Service_Common.Never".GetLocalized()
@@ -158,7 +220,11 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
                     RowCountText = shape.LastRowCount?.ToString(CultureInfo.CurrentCulture)
                         ?? "Service_Common.Unavailable".GetLocalized(),
                     FreshnessText = BuildFreshnessText(shape),
-                    ValidationErrorText = shape.ValidationError
+                    ValidationErrorText = shape.ValidationError,
+                    LastRunLabelText = LastRunLabelText,
+                    RowsLabelText = RowsLabelText,
+                    FreshnessLabelText = FreshnessLabelText,
+                    ValidationErrorLabelText = ValidationErrorLabelText
                 });
             }
 
@@ -175,6 +241,7 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
                 Backups.Add(new BackupStatusRow
                 {
                     Store = backup.Store,
+                    DisplayName = ResolveDisplayName("Service_Store", backup.Store),
                     IsEnabled = backup.IsEnabled,
                     LastRunText = backup.LastRunUtc is null
                         ? "Service_Common.Never".GetLocalized()
@@ -184,7 +251,11 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
                     ArtifactPathText = backup.LastArtifactPath ?? "Service_Common.Unavailable".GetLocalized(),
                     ScheduleText = nextDue is null
                         ? ResolveConfiguredScheduleText(store)
-                        : nextDue.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)
+                        : nextDue.Value.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
+                    LastRunLabelText = LastRunLabelText,
+                    NextDueLabelText = NextDueLabelText,
+                    ArtifactsLabelText = ArtifactsLabelText,
+                    ArtifactPathLabelText = ArtifactPathLabelText
                 });
             }
 
@@ -235,6 +306,18 @@ public sealed partial class ServiceStatusViewModel : ObservableObject
             ? "Service_Common.NotConfigured".GetLocalized()
             : _configurationStore.Current.BackupPolicies[store.Value]
                 .ScheduleLocalTime.ToString("HH:mm", CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Friendly name for a shape or store, from <c>Service_Shape.&lt;key&gt;</c> or
+    /// <c>Service_Store.&lt;name&gt;</c>. Falls back to the raw identifier when no string is authored,
+    /// which is how <c>GetLocalized</c> reports a missing resource.
+    /// </summary>
+    private static string ResolveDisplayName(string prefix, string identifier)
+    {
+        var key = $"{prefix}.{identifier}";
+        var localized = key.GetLocalized();
+        return string.Equals(localized, key, StringComparison.Ordinal) ? identifier : localized;
+    }
 
     private static BackupStore? ResolveStore(string databaseName)
     {

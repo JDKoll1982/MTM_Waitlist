@@ -5,9 +5,10 @@
 -- Target: Infor Visual SQL Server (VISUAL / MTMFG)
 -- Parameters: none (the driver population is enumerated here)
 --
--- Scope: for every OPEN work order (STATUS in 'R','U','F'), every requirement row of every one of its
---        operations — exactly the rows GetSubordinateParts.sql returns for the
---        (work order, order part, operation sequence) triples that shape 2 lists.
+-- Scope: for every ADDRESSABLE open work order (STATUS in 'R','U','F'; see the addressability guard
+--        below), every requirement row of every one of its operations — exactly the rows
+--        GetSubordinateParts.sql returns for the (work order, order part, operation sequence) triples
+--        that shape 2 lists.
 --
 -- Projection contract (must match VisualReadShapeCatalog + sp_visual_subordinate_parts_refresh):
 --   NormalizedWorkOrder, ParentPartNumber, SequenceNumber (input keys),
@@ -19,7 +20,10 @@
 SET NOCOUNT ON;
 
 SELECT DISTINCT
-    'WO-' + RIGHT('000000' + LTRIM(RTRIM(wo.BASE_ID)), 6) AS NormalizedWorkOrder,
+    CASE
+        WHEN LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%' THEN LTRIM(RTRIM(wo.BASE_ID))
+        ELSE 'WO-' + LTRIM(RTRIM(wo.BASE_ID))
+    END AS NormalizedWorkOrder,
     wo.PART_ID AS ParentPartNumber,
     req.OPERATION_SEQ_NO AS SequenceNumber,
     CASE
@@ -97,8 +101,16 @@ WHERE
     wo.STATUS IN ('R', 'U', 'F')
     AND wo.BASE_ID IS NOT NULL
     AND wo.PART_ID IS NOT NULL
-    AND LEN(LTRIM(RTRIM(wo.BASE_ID))) BETWEEN 5 AND 6
-    AND LTRIM(RTRIM(wo.BASE_ID)) NOT LIKE '%[^0-9]%'
+    -- Addressable work orders only: the two forms the application can ask for AND the live read
+    -- (GetSubordinateParts.sql) resolves. Full rationale in work_order_lookup_population.sql.
+    AND (
+        (LEN(LTRIM(RTRIM(wo.BASE_ID))) = 9
+         AND LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%'
+         AND SUBSTRING(LTRIM(RTRIM(wo.BASE_ID)), 4, 6) NOT LIKE '%[^0-9]%')
+        OR
+        (LEN(LTRIM(RTRIM(wo.BASE_ID))) = 6
+         AND LTRIM(RTRIM(wo.BASE_ID)) NOT LIKE '%[^0-9]%')
+    )
     AND req.PART_ID IS NOT NULL
 ORDER BY
     NormalizedWorkOrder,

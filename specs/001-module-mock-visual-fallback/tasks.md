@@ -1780,3 +1780,475 @@ T106 is an environment-gated **verification** task: a host-side service deployme
 unreachable, a signed-in application session, and the 30-day SC-007/SC-008 observation windows. It is already
 triaged in Phases 18, 19 and 21 and is deliberately **not** re-appended as a finding — re-appending it every run
 would add no information and would only inflate the phase list.
+
+---
+
+## Phase 23: Execution note — acceptance gates, shape-parity proof, and a cache key-domain defect (2026-09-11, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. No earlier task, ID, or phase was modified. T106 is **not** ticked; this run
+> executed the parts of `quickstart.md` the environment permits, proved FR-004/SC-004 live, and found one defect
+> that is recorded below as **T144 (open)**. Nothing in the shared cache or the deployed service was mutated.
+
+### Gates
+
+| Gate | Command | Result |
+|---|---|---|
+| §8 build (SC-015) | `dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false` | `Build succeeded. 0 Warning(s) 0 Error(s)` |
+| §8 offline suite | `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` | `Total 707, Passed 692, Skipped 15, Failed 0` |
+| §8 live-database subset (FR-013) | same, with `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` set | `Total 707, **Passed 707**, Skipped 0, Failed 0` (17.5 s) |
+
+**The live run is the first time this suite has ever completed with zero skips.** Phase 19 recorded `Passed 699,
+Skipped 0` on the then-current 699-test suite; the suite has since grown to 707, and Phase 21 recorded the offline
+figure only (`692 / 15`). All 15 environment-gated tests — the 12 `ImageLocation`-override cases plus
+`MockMirrorRefreshWriterIntegrationTests` and its siblings — passed against the live host.
+
+**A self-inflicted false alarm, recorded so the next reader does not repeat it.** The first attempt at the live run
+reported `Failed 6`. That was wrong, and the cause was the harness, not the product: `appsettings.json` has **no
+`ConnectionStrings` section** (the waitlist string lives at `StartupDatabaseOptions.ConnectionString`), so the
+script's read produced `$null`, and a `$null` connection string silently degraded into a malformed
+`" AllowPublicKeyRetrieval=True;"` value that made every live test fail on connect. Reading
+`StartupDatabaseOptions.ConnectionString` gives the green run above. Separately, two PowerShell hazards cost time
+here and are worth knowing: Windows PowerShell 5.1 has no ternary operator (`pwsh` is now installed on this
+workstation and is the right shell), and `$args` is a reserved automatic variable — a function that assigns to it
+and then splats `@args` does not pass the intended argument list (the repo's own
+`Database/CopilotScripts/verify_mtm_mock_deploy.ps1` deliberately uses `$arguments` for this reason).
+
+### Environment re-probe (deltas against Phase 19)
+
+| Prerequisite | Phase 19 | Now |
+|---|---|---|
+| `pwsh` (PowerShell 7) | absent | **present** |
+| `mysql` client | installed but **off `PATH`** | **on `PATH`** |
+| MySQL host `172.16.1.104:3306` | reachable | reachable (`5.7.24`) |
+| Infor Visual `172.16.1.75:1433` | reachable | reachable |
+| `mtm_mock` deployed | yes | yes — 5 mirrors + 5 `_stage` twins; `work_order_lookup` 230, `operation_sequences` 242, `subordinate_parts` 399, `inventory_locations` 12712, `disposition_input` 230 rows, all `is_seed_content = 0` |
+| `MTM_Waitlist.Mock.Service` deployed/running | no | still **no** — no `bin/publish/win-x64`, `172.16.1.104:5760` closed, no `HKCU\…\Run` entry |
+
+Each deployed mirror table carries one column the checked-in `create.sql` does not declare — an auto-increment
+`id`. The five `create.sql` files and the deployed schemas otherwise agree exactly, and every shape's
+`sp_visual_<shape>_get` projects only the catalog's columns, so the extra column is invisible to the read contract.
+
+### `quickstart.md` §3 step 5 — cached vs live for the same input (FR-004, SC-004)
+
+Never executed before this run. For each shape, a real cached key was read from the mirror, the same key was run
+through `sp_visual_<shape>_get`, and the same key was run through the shape's **live source script** against
+`VISUAL/MTMFG`. **Result: 5 of 5 shapes return identical, identically ordered column names.**
+
+| Shape | Sampled key | Live columns | Cached columns | Parity |
+|---|---|---|---|---|
+| `work_order_lookup` | `WO-010089` | PartNumber, Description, WorkCenter | same | **MATCH** |
+| `operation_sequences` | `WO-240282` / `240282` | SequenceNumber, Description | same | **MATCH** |
+| `subordinate_parts` | `WO-010089` / `10089` / `20` | Category, PartNumber, Description, Location, User8, OnHandQuantity | same | **MATCH** |
+| `inventory_locations` | `06000 00105` | PartNumber, Location, OnHandQuantity | same | **MATCH** |
+| `disposition_input` | `WO-010089` / `10089` | WorkOrderStatus, OpenWorkOrderQuantity, FinishedGoodsQuantity, HasOutsideVendorOperation | same | **MATCH** |
+
+SC-004's column-set and structure halves are therefore **proven against the real Visual server**, not only against
+the catalog. The **content** half is where the defect below lives.
+
+### T144 — the cache's key domain is not the domain the live read resolves
+
+- [ ] T144 (**transparency half FIXED 2026-09-11**; coverage half open — needs an operator decision) The mirror
+  cached 230 work orders under zero-padded keys the live read cannot resolve and omitted the 555 open work orders the
+  live read *does* resolve, so the same work-order input returned **different content** depending on whether Infor
+  Visual was reachable (FR-002/FR-004/SC-003/SC-004, contradicts). The five population reads now emit exactly the
+  live-resolvable key domain, verified live. What remains open is coverage, not transparency: the application's
+  `^(?:WO-)?(\d{5,6})$` rule cannot express 42,143 of the 42,852 open orders, and widening it is a product decision.
+
+> **Method note (this supersedes the first draft of this section).** The first pass talked to Infor Visual through
+> `sqlcmd` and scraped its text output, which made the row counts unreliable (a `-W -s '|'` separator line was
+> counted as a data row). This section's numbers come from the **production path**: the connection string built by
+> `VisualConnectionStringProvider.Resolve()`, and each shape's script loaded as UTF-8 text and executed exactly as
+> `VisualQueryExecutor.ExecuteAsync` does — `CommandType.Text`, 15 s timeout, `AddWithValue("@Name", value)` — with
+> the mirror read through `sp_visual_<shape>_get` using each fallback's own `BuildCacheParameters` names.
+
+**Evidence (all read live, 2026-09-11).** `WORK_ORDER` carries several families; the two that matter are:
+
+| Family | `BASE_ID` form | Open (`STATUS` in `R`/`U`/`F`) | Example |
+|---|---|---|---|
+| `W` | literally `WO-` + digits | **695** (555 with the `WO-` prefix) | `WO-074011` / part `24733431` |
+| `M` | bare numeric | **4,898** — of which **230** also match the shipped population's `LEN` 5–6 / all-digits guard | `10089` / part `10089` (*Brake Pad*) |
+
+For scale: open orders total **42,852** (`Q` 37,259 · `M` 4,898 · `W` 695).
+
+The app normalizes every accepted input to `WO-` + the 6-digit zero-padded base id
+(`MTM_Waitlist.Setup/Services/WorkOrderValidationService.cs`) and passes that **same string** to both paths —
+`@NormalizedWorkOrder` for the live script and `p_normalized_work_order` for the cache. The two paths then
+diverge:
+
+- The five live source scripts all derive a base id by stripping a leading `WO-` and match
+  `wo.BASE_ID IN (@NormalizedWorkOrderTrimmed, @WorkOrderBaseId)` — verified identical in
+  `LookupWorkOrder.sql`, `GetSequences.sql`, `GetSubordinateParts.sql`, `GetDispositionInput.sql`. That resolves the
+  `W` family and **cannot** resolve the `M` family: for `M` row `10618` the app's key is `WO-010618`, and neither
+  `WO-010618` nor `010618` equals `10618`.
+- `Database/InforVisual/Queues/Module_Mock/Populations/work_order_lookup_population.sql` caches exactly the `M`
+  family, via `LEN(BASE_ID) BETWEEN 5 AND 6` **and** `BASE_ID NOT LIKE '%[^0-9]%'`, padded to the same
+  `WO-`-prefixed 6-digit form. The numeric guard excludes every `W` row, which is why the cache holds 230 rows
+  rather than the ~42,800 the recorded scope approves. **The guard is therefore a deviation from T113's operator
+  decision, not a restatement of it** — the comment that justifies it ("emits only base ids that the application
+  can actually ask for") reasons about a domain the live predicate cannot answer.
+
+Two consequences, both measured through the production path:
+
+| Shape | Key | Live rows | Cache rows | Content |
+|---|---|---|---|---|
+| `work_order_lookup` | `WO-010089` | **1** — `24 126 172` / *Bracket, Control* / `100-04-GRP` | **1** — `10089` / *Brake Pad* / `020-01` | **different order** |
+| `operation_sequences` | `WO-010089` | **0** | **1** — `20` / *Operation 20 / 020-01* | live empty |
+| `subordinate_parts` | `WO-010089` / `10089` / `20` | **0** | **1** — `Flatstock` / `MMF0000250` | live empty |
+| `disposition_input` | `WO-010089` / `10089` | **0** | **1** — status `U`, open 264 | live empty |
+| `inventory_locations` | `06000 00105` | 3 | 3 | agree (keyed by part, not work order) |
+
+1. **Same key, different order.** The one case where live returns a row returns the **`W`** order the padded key
+   literally matches (`WO-010089`, *Bracket, Control*, `STATUS=C`) while the cache returns the **`M`** order
+   (*Brake Pad*, `STATUS=U`). Where no `W` twin exists the live read returns nothing at all, so the same input
+   yields rows with Visual down and an empty result with Visual up. FR-004's "a caller cannot distinguish cached
+   from live" holds for the **column shape** (proven above) and fails for the **rows** — and because both answers
+   have the identical column set, no shape-level assertion can catch it.
+2. **The cache omits the family the live read serves.** Direct probe: `WORK_ORDER` holds `W` order `WO-074011`
+   (`24733431`, the very key Phase 6 validated `GetDispositionInput.sql` against), and
+   `SELECT COUNT(*) FROM visual_work_order_lookup_result WHERE normalized_work_order = 'WO-074011'` = **0**. All
+   cached rows are `M` orders.
+3. **The operator's own domain is the excluded one.** `mtm_waitlist.setup_active_jobs` and `setup_job_history`
+   hold exactly one saved work order between them — `WO-041652` — and live that is
+   `TYPE=W, BASE_ID='WO-041652', PART_ID='0K34360GN0R'`: the family the population selects out. So on a Visual
+   outage the cache can serve neither the order the plant has actually set up nor the family the live read answers.
+4. **Shape 5's mismatch is latent, not live.** `RequestDispositionResolver.GetDispositionInputAsync` forwards the
+   work order **un-normalized** (no trim, no padding), unlike the Setup path, and the resolver has **no caller** —
+   `Services/DependencyInjection/ServiceRegistrationExtensions.cs:114` registers it and nothing invokes it. Its
+   divergence above is therefore recorded as reachable-but-unwired, not as an active runtime failure.
+
+**Resolved in part (2026-09-11, `/speckit.implement` retry).** The transparency half is fixed; the coverage half is a
+recorded operator decision this run deliberately did not take.
+
+*Fixed — the mirror now holds exactly the keys the live read resolves.* All five population reads
+(`Database/InforVisual/Queues/Module_Mock/Populations/*.sql`) had their driver guard and key derivation replaced.
+The guard now accepts the two forms the application can ask for **and** the live read answers — `BASE_ID` literally
+`WO-` + 6 digits (key = the `BASE_ID` itself) and exactly-6-digit numeric ids (key = `WO-` + those digits, which the
+live predicate matches through `@WorkOrderBaseId`) — and drops the 5-digit numeric form, which the application pads
+into a key nothing answers. Verified against the live source through the production client path:
+
+| Shape | Rows before | Rows after | Keys |
+|---|---|---|---|
+| `work_order_lookup` | 230 | **701** | 701, all `WO-` + 6 digits, 0 malformed |
+| `operation_sequences` | 242 | **893** | 683 work orders |
+| `subordinate_parts` | 399 | **1,746** | 683 work orders |
+| `inventory_locations` | 12,712 | **79,457** | 1,478 parts |
+| `disposition_input` | 230 | **701** | 701, all `WO-` + 6 digits, 0 malformed |
+
+Every sampled key's population rows now equal the live per-key read: `work_order_lookup` 1/1 ·
+`operation_sequences` 1/1 · `subordinate_parts` 4/4 · `inventory_locations` 237/237 · `disposition_input` 1/1. The
+old guard's `WO-010089` / `WO-010618` / `WO-010622` keys — where the live read answered with a *different* order —
+are no longer emitted, so the 3 cross-order collisions and the 76 unreachable keys are gone. Offline suite
+unchanged: **707 total, 692 passed, 15 skipped, 0 failed**.
+
+*Left open — coverage, which is an operator decision.* The application's `^(?:WO-)?(\d{5,6})$` input rule cannot
+express **42,143 of the 42,852** open orders (the `Q` family, non-numeric `M` ids, anything over 6 digits), so no
+cache change can reach them: T113's recorded "every open Infor Visual work order" scope is unreachable end-to-end
+without widening `MTM_Waitlist.Setup/Services/WorkOrderValidationService.cs` **and** the five shared live-read
+scripts. That is product behaviour outside this feature's boundary and is therefore recorded, not taken here. Also
+open: the deployed development cache still holds the pre-change 230 rows — it is refreshed by the on-host
+`MTM_Waitlist.Mock.Service` (not deployed on this workstation), so the change takes effect at that service's next
+refresh, not from this run. And §3 step 5 should become a **content** parity gate (identical rows for the same key):
+the shape-only check this run proved is blind to this whole defect class.
+
+### T145 — the service's publish profile never shipped, so the documented publish was not self-contained
+
+- [x] T145 (MEDIUM) Restore the `MTM_Waitlist.Mock.Service` folder-publish profile so the command the README and
+  `quickstart.md` §2 name actually resolves and produces the documented, self-contained artifact, per T120 (contradicts)
+  — **Done 2026-09-11** (verified below).
+
+**Evidence.** `MTM_Waitlist.Mock.Service/Properties/PublishProfiles/win-x64-selfcontained.pubxml` did **not** exist —
+the project had no `Properties` folder at all — while T120's execution note, `MTM_Waitlist.Mock.Service/README.md` §1
+and `quickstart.md` §2 step 1 all name it, and the README's guarantee table rests on it. Running the documented command
+proved the consequence:
+
+```text
+warning NETSDK1198: A publish profile with the name 'win-x64-selfcontained' was not found in the project.
+```
+
+The publish then succeeded **silently into the wrong place and in the wrong shape**:
+`bin/x64/Release/net10.0-windows10.0.19041.0/win-x64/publish/` (not the documented `bin/publish/win-x64/`, which did
+not exist — matching Phase 19's probe), with `runtimeconfig.json` declaring `Microsoft.NETCore.App 10.0.0` and
+`Microsoft.AspNetCore.App 10.0.0` as **`frameworks`** and no `System.Private.CoreLib.dll` / `hostfxr.dll` /
+`coreclr.dll`. So the host **would** have needed the .NET 10 runtime installed, contradicting the README's
+`SelfContained` row. Only the `WindowsAppSDKSelfContained` half held, because that property lives in the `.csproj`
+rather than in the profile.
+
+**Root cause.** `.gitignore:187` carries the stock Visual Studio rule `*.pubxml` (whose comment is about unencrypted
+*web-deploy* connection strings). The profile was therefore never committable — it can only ever have existed on the
+machine that created it, which is why the deliverable T120 ticked is absent from a clean clone.
+
+**Fix.** (1) Created the profile with exactly the four guarantees the README documents, plus `PublishDir` set to the
+documented `bin\publish\win-x64\`. (2) Added a narrow negation, `!MTM_Waitlist.Mock.Service/Properties/PublishProfiles/*.pubxml`,
+with the sensitive-data rationale answered in place, so a real web-deploy profile is still ignored — verified:
+`Some.Web/Properties/PublishProfiles/WebDeploy.pubxml` still matches `*.pubxml`.
+
+**Verified.** The documented command now completes with **no warnings**, writes to
+`MTM_Waitlist.Mock.Service\bin\publish\win-x64\`, and the output is genuinely self-contained: 727 files / 265 MB;
+`System.Private.CoreLib.dll`, `hostfxr.dll`, `coreclr.dll` and `Microsoft.WindowsAppRuntime.dll` all present;
+`runtimeconfig.json` uses **`includedFrameworks`** (`Microsoft.NETCore.App 10.0.11`, `Microsoft.AspNetCore.App 10.0.11`)
+rather than `frameworks`. The content the deploy step requires ships beside the exe: `Assets/WindowIcon.ico`, all five
+`Database/InforVisual/Queues/Module_Mock/Populations/*.sql` (including T144's corrected guards),
+`Database/InforVisual/Queues/{Module_Setup,Module_Waitlist}/**/*.sql`, and `Database/Mock.Service/Restore/**`.
+
+**Not verified — and this is the real remaining gate.** The published artifact was **not launched**. Whether the service
+starts, shows its tray icon, generates the credential, honours auto-start, and serves the API is `quickstart.md` §2,
+still unexecuted (see T106), and launching it here would start refresh and backup engines against the shared cache.
+So: **publish readiness is established; deployment readiness is not.**
+
+### `quickstart.md` §2 — the published artifact launched (2026-09-11, first run ever)
+
+The T145 artifact was launched from `MTM_Waitlist.Mock.Service/bin/publish/win-x64/` on this workstation. This is
+the first time the service has actually run, so it retires part of §2 and part of the T106 blocker list.
+
+| §2 / requirement claim | Result |
+|---|---|
+| §2 step 2 — "no main window: a tray icon appears and the background engines start" | **Pass on the window half**: process responding, `MainWindowHandle = 0`, and **0** top-level windows found by process id. The icon itself is not observable (tray icons are outside the UIA tree and cannot be driven) — only inferred, since the design keeps the process alive through it and the process stayed alive. |
+| FR-007 / research.md R3 — single instance | **Pass.** A second launch redirected to the running instance and exited: pids `20440` → second copy `22164` exited → one survivor, `20440`. |
+| FR-012/FR-013 — the API is up and closed | **Pass.** Bound `0.0.0.0:5760`; `/api/status`, `/api/backups` and `/api/restore` each returned `401 {"Error":"unauthorized","Message":null}` with no credential. |
+| FR-007 — auto-start reconciliation | **Pass, and it acts.** A first run with shipped defaults (`AutoStartAtLogon = true`) wrote `HKCU\…\Run\MTM_Waitlist.Mock.Service` pointing at the published exe. |
+| Shipped defaults are host-appropriate | `VisualSource` = `VISUAL`/`MTMFG`; `MySqlConnection.Server` = `localhost` (correct — the service belongs on the MySQL host); API `0.0.0.0:5760`; 3-hour refresh grid; four backup policies at 01:00/01:20/01:40/02:00 local. No shared credential configured until generated in Settings. |
+| No shared state written | **Pass.** `mtm_mock` unchanged — 230 / 242 / 399 / 12712 / 230 rows with the *same* `refreshed_utc` values as before the run; no `backups/**` artifacts (not due at 14:36); no refresh attempted (no MySQL credential configured). |
+
+**Still not established by this run.** (1) `/api/restore` must be a **404** *with a valid credential*; without one,
+authentication short-circuits to the 401 above, so that half is still covered only by `ServiceApiTests` (T078,
+listener level) and could not be exercised here — a credential can only be generated from the tray Settings UI,
+which UI Automation cannot reach. (2) §2 steps 3–4 (the Settings surface, generating the credential, choosing
+schedules) and surviving a real sign-out/sign-in. (3) §5's backup/restore drill. (4) §1–§4 as a whole, i.e. the
+fallback proof itself, which needs Infor Visual deliberately made unreachable and a signed-in client.
+
+**Side effects reversed.** The process was stopped; the auto-start entry created by the first run was removed; the
+`%LOCALAPPDATA%\MTM_Waitlist.Mock.Service` folder created by the first run was deleted (it did not exist before);
+port 5760 is free again; scratch scripts deleted. **Operational note for the host:** auto-start is on by default and
+is registered from wherever the executable is run, so the publish folder must be copied to its final install
+location *before* the first run — which is the order `README.md` §2 → §3 already prescribes.
+
+### §2 host installation — the "another machine" blocker was wrong (2026-09-11)
+
+Phases 18, 19 and 21 all recorded §2 as blocked because the service "belongs on the MySQL/Infor Visual host, not on a
+workstation, so deploying it is an infrastructure change to another machine". **The operator confirmed that the
+working environment *is* the host machine**, and the machine was then verified to be exactly that: `V-MTMFG-5`
+(`172.16.1.104`) — the shared MySQL / Infor Visual host, whose `localhost` carries all the `mtm*` schemas. (Note for
+later readers: this is **not** `MTMFG-161`, which `workstation-elevation.md` correctly describes as the development
+workstation — an earlier draft of this note conflated the two and was corrected.) The blocker is therefore retired:
+what remains of §2 is configuration and credential work, not a machine move.
+
+| §2 step | State |
+|---|---|
+| step 1 — publish | **Done and installed.** `C:\Services\MTM_Waitlist.Mock.Service\` — 727 files / 265 MB, copied from the publish output with a file-for-file match. Verified present: the exe, the tray icon, all five population reads *including T144's corrected guards*, the Module_Setup/Module_Waitlist queries, `Database/Mock.Service/Restore/**`, and the self-contained runtime. `C:\` proved writable by this account, so no elevation was needed. |
+| step 2 — tray-only start | **Verified** (table above), from the publish folder; the installed copy is byte-identical. |
+| steps 3–4 — Settings surface + credential | **Blocked on operator interaction.** The credential is generated from the tray Settings UI, which UI Automation cannot reach (tray icons are outside the UIA tree), and FR-026 makes it write-once. |
+| secrets | **Set (2026-09-11), under an owner-approved exception scoped to this workstation** — recorded in `.github/memories/repo/workstation-secrets.md` and referenced from `.github/copilot-instructions.md`, mirroring the existing `workstation-elevation.md` precedent. At User scope: `MTM_WAITLIST_DB_CONNECTION_STRING` (the shared string the `mtm_mock` cache and all four backed-up stores reuse, per `MySqlConnectionStringResolver` option 2), `MTM_MYSQL_PASSWORD`, `INFOR_VISUAL_SQL_USER` (`SHOP2` — `VisualSourceSettings.UserId` defaults to empty, so this must come from the environment; `SHOP2` is also the login `appsettings.json` already uses) and `INFOR_VISUAL_SQL_PASSWORD`. Read back from `HKCU\Environment` and verified: all four MySQL databases connect on **5.7.24**, and `VISUAL`/`MTMFG` authenticates as `SHOP2` with 42,852 open work orders visible. (The owner first specified `SHOP` and corrected it to `SHOP2` the same day; both authenticate with password `SHOP`.) The values are the pre-existing development credentials already committed in `appsettings.json`, so this records the approval rather than disclosing anything new. |
+| §5 backup tooling | **Verified present and compatible.** `mysqldumpPath` is unset (resolve from `PATH`) and `PATH` resolves to *MySQL Workbench 8.0*'s `mysqldump 8.0.46` against a **MySQL 5.7.24** server. Tested with `BackupEngine`'s exact argument set (`--host --port --user --single-transaction --routines --databases --result-file`) against `mtm_mock`: **exit 0 with a full 1,704,965-byte artifact**. The `column statistics not supported by the server` message is a stderr **warning** only, and adding `--column-statistics=0` changes nothing but the noise — so no engine change is needed. (The opposite was hypothesised from the version pair and then **disproved by test**, which is why the probe is recorded rather than the guess.) |
+
+**`README.md` corrected as a result.** §5 previously claimed the configuration and run records "live beside the
+executable", which would leave a supposedly clean reinstall still carrying the DPAPI credential, the schedules and the
+backups — they actually live under `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\` (`ServiceHostBuilder.GetDefaultAppDataRoot()`,
+confirmed by the first run). §5 now names each location, and §3 states that auto-start is **on by default**, records
+the launch path, and names the two secrets the configuration deliberately never stores.
+
+### T146 — the deployment is now a repo-bound, self-validating, host-guarded script
+
+- [x] T146 (**MEDIUM**) Replace the throwaway `%TEMP%` install steps with a reviewed deployment script that lives in
+  the repository, redeploys from clean, installs and verifies the secrets, refuses to run anywhere but the cache host,
+  and validates its own work — then document it across the repository and tell the agent never to run it off-server,
+  per FR-007/FR-012 and Constitution I (contradicts the previous "scratch script" state) — **Done 2026-09-11.**
+
+**Artifacts.** `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` and
+`MTM_Waitlist.Mock.Service/deploy/README.md`. Referenced from `MTM_Waitlist.Mock.Service/README.md` §1 (and §2–§4 as
+its narrative authority), `quickstart.md` §2, `.github/copilot-instructions.md`, and
+`.github/memories/repo/{workstation-secrets,infor-visual-disposition}.md`.
+
+**Answers to the four questions that prompted it.**
+
+| Question | Before | Now |
+|---|---|---|
+| Repo-bound, with a README? | **No** — it lived in `%TEMP%` and was deleted after use. | Script + README under `MTM_Waitlist.Mock.Service/deploy/`, committed with the feature. |
+| Kills the running process, deletes the old deployment, redeploys? | **No** — it only copied into an existing folder, so stale files survived. | Stops every instance (waits ≤30 s, then confirms the API port is free), **deletes the install folder outright**, then redeploys. State under `%LOCALAPPDATA%` is kept unless `-PurgeState`. |
+| Installs **and verifies** the secrets? | **No** — I set them by hand once. | Sets the four User-scope variables, reads them back from `HKCU\Environment`, then **proves** them by connecting to all four databases and authenticating to Infor Visual. Values derive from `appsettings.json`, so the script is not a second source of truth and holds no secrets. |
+| Full validation? | **No** — file-existence checks only. | 21 checks: file-count parity, 11 required paths, self-contained markers **and** `includedFrameworks`, the deployed T144 population guard, secret read-back, four MySQL connections, a Visual login, process responding, tray-only (no window), port bound, `401` without a credential, single-instance redirect, and the auto-start entry pointing at *this* install folder. Any failure before step 7 **aborts before starting the service**. |
+
+**The guard, verified.** The script resolves the expected host from `appsettings.json`'s MySQL `Server=` and requires
+one of **this machine's own IPv4 addresses** to match; otherwise it exits `2` without touching anything. Proven both
+ways:
+
+| Scenario | Result |
+|---|---|
+| On the host | `this machine : V-MTMFG-5  addresses: 172.16.1.104` → guard PASS, then **21/21 PASS**, exit 0 |
+| Simulated foreign host (`-ServerHost 10.99.99.99`) | `REFUSING TO RUN: this machine is not the cache host.` → **exit 2**, install folder untouched (727 files intact), service still running |
+
+**Agent rule (also recorded in `.github/copilot-instructions.md`).** Do not run this script, bypass its guard with
+`-AllowNonServerHost`, or hand-roll the steps elsewhere unless the environment *is* the server (`172.16.1.104`,
+`V-MTMFG-5`) — i.e. VS Code running on the host. Otherwise hand the deployment to someone on the host.
+
+**End-to-end run (2026-09-11, on `V-MTMFG-5`).** `-Publish` → publish with no warnings, 727 files deployed,
+`Database/...` content and the corrected population guards present, secrets already correct and re-proven, service
+started as pid 7916, port 5760 listening, no top-level window, `/api/status` → 401, second launch redirected and
+exited, auto-start entry re-pointed at `C:\Services\MTM_Waitlist.Mock.Service\MTM_Waitlist.Mock.Service.exe`.
+Summary line: `DEPLOYMENT OK — 21 checks, 0 warning(s).`
+
+### T147 — the shared API credential is generated but never obtainable
+
+- [ ] T147 (**HIGH** — blocks §2 steps 4 and 7, and the client integration; needs an owner decision) The service
+  generates and stores its shared API credential without operator action, and **no surface can reveal it** — yet the
+  documented deployment step says to record it out of band, the documented verification calls `/api/status` with it,
+  and clients must be given it. As shipped, no operator and no client can ever authenticate, so the service's own
+  status surface is unobservable (FR-026 vs FR-013/SC-010, contradicts).
+
+**Evidence (2026-09-11, from the first real deployment).**
+
+- A credential appeared **without anyone generating one**: `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\service-configuration.json`
+  carries `Api.CredentialProtected` (a DPAPI blob) with `CredentialCreatedUtc: 2026-09-11T19:50:49Z` — the moment the
+  service started.
+- The settings surface is deliberately **write-only**: `ServiceSettingsViewModel` states *"The credential is
+  write-only from this surface — the page can rotate it, and never displays the value"*, exposes only
+  `RotateCredentialText` / `CredentialWriteOnlyText`, and `RotateCredentialAsync` does nothing but call
+  `GenerateCredentialAsync()`. There is no reveal path anywhere.
+- But the documentation assumes the operator has it: `MTM_Waitlist.Mock.Service/README.md` §3 step 3 says *"record it
+  out of band"*, §4 says to call `curl -H "X-MTM-Mock-Token: <credential>" .../api/status`, and the client reads the
+  same value from `MTM_MOCK_SERVICE_TOKEN` (`MTM_Waitlist.Mock/Models/MockServiceClientOptions.cs`).
+- **Observed consequence:** after deploying, all three probed endpoints answered `401`, and the correct token is
+  unknowable — to the operator, to the clients, and to me. §2 step 7 (each shape's `lastOutcome` becomes `succeeded`
+  with a fresh `refreshedUtc`) and step 8 are therefore **not executable**, and neither is the tray-independent
+  verification in `README.md` §4.
+
+**The decision needed:** either the credential is **revealed once** when generated/rotated (so §3's "record it out of
+band" is achievable), or the operator **supplies** the value and the service stores that. FR-026's "never displayed
+or logged" is about not persisting or leaking it, so a deliberate one-time reveal on rotation is compatible with it —
+and is presumably the missing piece rather than a contradiction of it.
+
+**Also unverified this run, for the same reason.** ~2 minutes after startup no refresh run record had been written and
+the mirror's `refreshed_utc` values were unchanged, although all five shapes validate clean against
+`sp_visual_read_shape_metadata_get(NULL)` (mirror, stage, `get` and `refresh` all present) and
+`StartBackgroundEnginesAsync` starts the refresh loop unconditionally. Whether the first cycle was still in flight
+(a 701/893/1,746/79,457/701-row load, with shape 4 alone ~79k rows) or had not started could not be established
+because the status surface is unreachable. This is T106 §2 step 7's gap, now with a concrete, named blocker.
+
+### T148 — the running service is invisible and unreachable, and nothing records why it does not refresh
+
+- [ ] T148 (**HIGH** — the operator-facing half of US3/FR-013; partly a spec-scope decision) Three findings from
+  running the deployed service on the host for ~22 minutes, all observed 2026-09-11.
+
+**(a) The tray icon is created, but Windows 11 hides it — so the UI has no reachable entry point.**
+
+`HKCU\Control Panel\NotifyIconSettings` (the Windows 11 notification-area state) contains **two** entries for this
+service, one per exe it has been launched from — `…\bin\publish\win-x64\MTM_Waitlist.Mock.Service.exe` (the smoke test)
+and `C:\Services\MTM_Waitlist.Mock.Service\MTM_Waitlist.Mock.Service.exe` (the deployment) — and **both have
+`IsPromoted` unset**, i.e. hidden in the overflow. So the icon exists (`App.xaml.cs` sets `IsVisible = true` with a
+valid `Assets/WindowIcon.ico`, verified present in the deployed folder) and the shell registered it; it is simply not
+promoted, which is Windows' default for any new tray icon.
+
+That would be cosmetic **except** that the tray icon is the *only* way to reach the service UI:
+`ServiceShellWindow` (a real NavigationView window with the Status and Settings pages, created lazily and hidden on
+close) is only opened from `_trayIcon.Selected` / its context menu, and **the running instance has no
+`AppInstance.Activated` handler** — so re-launching the exe does not raise the window either; it redirects and exits
+(confirmed: the second copy exits, one process survives, no window appears). With the icon in the overflow there is
+therefore **no route to Settings/Status at all**, which is how a working install comes to look broken.
+
+*Reveal it:* click the taskbar's `∧` overflow, or Settings → Personalization → Taskbar → *Other system tray icons* →
+turn `MTM_Waitlist.Mock.Service` on (that writes the same `IsPromoted` value and takes effect immediately).
+
+*The scope question:* `plan.md` ("tray-only lifetime … no main window required") and T059 ("creates only a
+`WinUIEx.TrayIcon` … (no main window)") deliberately chose this shape, so the code matches the spec; what the spec did
+not anticipate is that a hidden tray icon leaves the UI unreachable. The cheap, in-spirit fix is to make the UI
+reachable without the icon — show the shell window on a second launch/activation — which does not change the
+tray-only *lifetime*, only the entry points to it.
+
+**(b) No refresh has completed, and nothing on the machine says why.** After ~22 minutes running (started 14:50:48,
+observed 15:12) the 15:00 grid slot had passed and: `refresh-run-records.json` **did not exist**, every mirror's
+`refreshed_utc` was unchanged, and process CPU was **2.3 s**. `RefreshRunRecordStore.RecordAsync` persists the whole
+set on every completed run, so a missing file is not a persistence-timing artefact — **no shape refresh has
+completed**. All five shapes pass the startup validation the engine depends on (deployed
+`sp_visual_read_shape_metadata_get(NULL)` returns all four artifacts per shape, and the expected mirror column lists
+derived from `BuildExpectedMirrorColumns` match the deployed tables), and `StartBackgroundEnginesAsync` starts the
+refresh loop unconditionally, so the loop is running and its cycles are failing or stuck — each attempt fitting a
+fast failure plus a bounded retry delay (CPU stayed at 2.3 s while ~4 retries would have elapsed).
+
+**(c) There is no durable diagnostic, so (b) is undiscoverable.** The reason for those failures is written only
+through `StartupDebugLog` → `Debug.WriteLine`, visible only to an attached debugger: the service does not register the
+`MTM_Waitlist.Startup` log service that gives the *client* app its `startup_daily_<date>.jsonl` file, and nothing was
+written to that folder during this run. The two surfaces that *would* report it — `GET /api/status` and the tray's
+Status page — are exactly the ones (a) and T147 put out of reach. A service that cannot be asked why it is not working
+is not operable.
+
+**Next actions, in order:** fix the credential (T147) so `/api/status` can be read; give the service a durable log
+file; then re-run the deployment and re-check §2 step 7. Making the window reachable without the tray icon (a) is
+independent and small.
+
+### T148(b) — root cause found and fixed: the service was started with no credentials (2026-09-11)
+
+The operator's screenshot of the Status page named the cause outright, for all five shapes:
+
+```text
+Could not read <shape> artifact metadata: Access denied for user ''@'localhost' (using password: NO)
+```
+
+**This was my defect, not the service's.** `install-mock-service.ps1` wrote the four secrets at User scope, read
+them back from `HKCU\Environment`, and proved them by connecting — all of which passed — and then launched the
+service with `Start-Process`. But **writing a User-scope variable does not update any existing environment block**,
+and `Start-Process` hands the child a copy of *the script process's* block. The script process had been started
+before the variables existed, so the service inherited an environment with **no** `MTM_*` / `INFOR_VISUAL_*` values.
+It therefore fell back to its own defaults (`MySqlConnection.Server = localhost`, empty login), and every metadata
+read and every refresh cycle failed on the connection — which is exactly T148(b): a running service that never
+refreshed, with nothing on the machine saying why.
+
+**Fixed in three places.**
+
+| Fix | Where |
+|---|---|
+| Apply the secrets to the script's **own** process before starting, and assert they are there, so the child inherits them | `deploy/install-mock-service.ps1` — new `secrets inherited by child` check (deploy is now **22** checks) |
+| Treat a host with **no login** as unconfigured, so the operator sees the designed `NotConfiguredMessage` instead of a raw access-denied | `Services/MySqlConnectionStringResolver.BuildFromSettings` |
+| Poll for process exit after the stop instead of sampling once — a WinUI process lingers briefly after termination, and one sample reported `1 process(es) survived` while the API port was already free | `deploy/install-mock-service.ps1` stop step |
+
+**Verified.** Redeployed and started on the host: **22/22 checks pass**, and the service performed its **first ever
+successful refresh** — all five shapes `Succeeded` in ~4.4 s (`work_order_lookup` 699 · `operation_sequences` 891 ·
+`subordinate_parts` 1,742 · `inventory_locations` 79,305 · `disposition_input` 699 rows), with the row counts
+matching the T144-corrected population reads. A second cycle completed after the UI redeploy. So §2's blocking
+condition — "the service cannot read its own cache" — is gone.
+
+**Not a bug, recorded so nobody chases it:** the screenshot's "refresh interval: **100** minutes" is an OCR misread
+of **180**. The live configuration holds `RefreshIntervalMinutes: 180`, `ServiceApiOperations` passes
+`configuration.RefreshInterval.TotalMinutes` straight through, and the resource string is
+`Refresh interval: {0} minutes` — there is no 100 anywhere in the service. No change made.
+
+### T149 — status and settings surfaces rebuilt (2026-09-11)
+
+- [x] T149 (MEDIUM) The service UI read as a wall of unlabelled values — repeated `Never / Never / Unavailable`
+  triples, raw shape keys, an always-present empty error line and no visual hierarchy — so the two surfaces were
+  rebuilt on Fluent cards; per FR-013 and the "keep layouts Fluent and accessible" rule (`winui3-api-rules`).
+
+**What changed** (presentation and display strings only — no behaviour, no new commands, no converter, no
+`App.xaml` resource):
+
+- **Status page** — a header with the page subtitle and the *Reload* action moved up beside the title; the flat
+  seven-line summary is now a **card** of labelled rows (service version, started, Infor Visual, API credential,
+  refresh schedule, backup tool, start at logon); each read shape and each store is now a **card** with a bold
+  friendly name (`Work order lookup`, `Mock cache`) over its raw key, an outcome chip, and *labelled* detail
+  columns (Last run · Rows · Cached data; Last run · Next due · Artifacts kept · Latest artifact); the
+  startup-validation reason is a **critical-coloured block that is hidden when there is no error**
+  (`Visibility="{x:Bind HasValidationError}"`, the model exposing a `bool`).
+- **Settings page** — sections are cards with subtitles, consistent field spacing and the save action kept last.
+- **Strings** — 35 new `Service_Status.*`, `Service_Shape.*` and `Service_Store.*` keys; friendly names resolve
+  through `GetLocalized()` and fall back to the raw identifier when a string is not authored, so a sixth shape
+  still renders (constitution V: no literal assembled in XAML).
+- **Verified:** `dotnet build ... -c Release` → **0 warnings / 0 errors**, redeployed, service healthy, and the
+  refresh still succeeding. The richer *colour-coded* outcome chips (green/amber/red) are deliberately not done —
+  they need a converter or a brush on the row model, and neither is worth the XAML risk for this pass.
+
+### T106 — still not ticked
+
+§2's publish, install, tray-only start, single-instance and API-gating halves are now **done** — the host install is
+in place and the blocker that stopped Phases 18/19/21 ("a host-side deployment to another machine") is retired. What
+remains of §2 is the tray Settings surface, the write-once credential, and one real refresh cycle, all blocked on
+operator interaction; §3's fallback proof and §4's defect proof need a **signed-in** application session; §5 needs a
+configured service (two secrets) and a throwaway store; §7 is a maintainer-day exercise; SC-007/SC-008 are unstarted
+30-day observation windows. Two of those
+blockers were re-confirmed unchanged this run (`172.16.1.104:5760` closed, no `HKCU\…\Run` entry, no
+`bin/publish/win-x64`). The new finding above adds a fourth reason the walkthrough cannot be signed off: even on a
+fully provisioned host, §3 step 3's "every journey returns a complete, correctly shaped result" would pass on shape
+and could still serve a different work order than the live read for the same input.
+
+**Environment side effects: none.** Every command in this run was a read. No refresh was run, the service was not
+started, no `HKCU\…\Run` entry was written, and the deployed `mtm_mock` snapshots are exactly as found (verified:
+230 / 242 / 399 / 12712 / 230 rows, `is_seed_content = 0`). All scratch scripts under `%TEMP%` were deleted. The
+separate T145 follow-up added one source file (the publish profile) plus one `.gitignore` negation and ran
+`dotnet publish` into the gitignored `bin/publish/win-x64`; it touched no database and no service state either.

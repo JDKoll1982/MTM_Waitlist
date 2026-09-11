@@ -92,7 +92,11 @@ public sealed class MySqlConnectionStringResolver
 
     private string? BuildFromSettings(string databaseName)
     {
-        if (string.IsNullOrWhiteSpace(_settings.Server))
+        // A host with no login is NOT a configuration. Returning a string anyway meant every read ran as
+        // an anonymous local connection and failed with
+        // "Access denied for user ''@'localhost' (using password: NO)" — which tells an operator nothing
+        // about what to fix. Returning null makes the callers report NotConfiguredMessage instead.
+        if (string.IsNullOrWhiteSpace(_settings.Server) || string.IsNullOrWhiteSpace(_settings.UserId))
         {
             return null;
         }

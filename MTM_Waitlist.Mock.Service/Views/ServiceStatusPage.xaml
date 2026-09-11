@@ -8,71 +8,327 @@
     xmlns:models="using:MTM_Waitlist.Mock.Service.Models"
     mc:Ignorable="d">
 
-    <ScrollViewer Padding="24">
-        <StackPanel Spacing="12" MaxWidth="1100" HorizontalAlignment="Stretch">
+    <ScrollViewer Padding="28">
+        <StackPanel Spacing="20" MaxWidth="1100" HorizontalAlignment="Stretch">
 
-            <TextBlock
-                Style="{ThemeResource TitleTextBlockStyle}"
-                Text="{x:Bind ViewModel.TitleText}" />
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{ThemeResource BodyTextBlockStyle}"
+                        Text="{x:Bind ViewModel.SubtitleText}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Button
+                    Grid.Column="1"
+                    VerticalAlignment="Top"
+                    Command="{x:Bind ViewModel.LoadStatusCommand}"
+                    Content="{x:Bind ViewModel.ReloadText}" />
+            </Grid>
 
             <InfoBar
-                IsOpen="True"
                 IsClosable="False"
-                Severity="Informational"
-                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
+                IsOpen="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay}"
+                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                Severity="Informational" />
 
-            <Button
-                Command="{x:Bind ViewModel.LoadStatusCommand}"
-                Content="{x:Bind ViewModel.ReloadText}" />
+            <Border
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.SummaryHeaderText}" />
 
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.SummaryHeaderText}" />
+                    <Grid ColumnSpacing="20" RowSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-            <StackPanel Spacing="4">
-                <TextBlock Text="{x:Bind ViewModel.ServiceVersionText, Mode=OneWay}" />
-                <TextBlock Text="{x:Bind ViewModel.StartedText, Mode=OneWay}" />
-                <TextBlock Text="{x:Bind ViewModel.VisualSourceText, Mode=OneWay}" />
-                <TextBlock Text="{x:Bind ViewModel.CredentialText, Mode=OneWay}" />
-                <TextBlock Text="{x:Bind ViewModel.RefreshScheduleText, Mode=OneWay}" />
-                <TextBlock Text="{x:Bind ViewModel.BackupToolText, Mode=OneWay}" />
-                <TextBlock Text="{x:Bind ViewModel.AutoStartText, Mode=OneWay}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.VersionLabelText}" />
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Text="{x:Bind ViewModel.ServiceVersionText, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.StartedLabelText}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Text="{x:Bind ViewModel.StartedText, Mode=OneWay}" />
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.VisualSourceLabelText}" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Text="{x:Bind ViewModel.VisualSourceText, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.CredentialLabelText}" />
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Text="{x:Bind ViewModel.CredentialText, Mode=OneWay}" />
+
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.RefreshScheduleLabelText}" />
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Text="{x:Bind ViewModel.RefreshScheduleText, Mode=OneWay}" />
+
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="0"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.BackupToolLabelText}" />
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="1"
+                            Text="{x:Bind ViewModel.BackupToolText, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="0"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.AutoStartLabelText}" />
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="1"
+                            Text="{x:Bind ViewModel.AutoStartText, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Spacing="6">
+                <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.ShapesHeaderText}" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{ThemeResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.ShapesHintText}"
+                    TextWrapping="Wrap" />
             </StackPanel>
 
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.ShapesHeaderText}" />
-
-            <ListView ItemsSource="{x:Bind ViewModel.Shapes, Mode=OneWay}" SelectionMode="None">
-                <ListView.ItemTemplate>
+            <ItemsControl ItemsSource="{x:Bind ViewModel.Shapes, Mode=OneWay}">
+                <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="models:ShapeStatusRow">
-                        <StackPanel Spacing="2" Padding="0,6">
-                            <TextBlock FontWeight="SemiBold" Text="{x:Bind ShapeKey}" />
-                            <TextBlock Text="{x:Bind OutcomeText}" />
-                            <TextBlock Text="{x:Bind LastRunText}" />
-                            <TextBlock Text="{x:Bind RowCountText}" />
-                            <TextBlock Text="{x:Bind FreshnessText}" TextWrapping="Wrap" />
-                            <TextBlock
-                                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                Text="{x:Bind ValidationErrorText}"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
+                        <Border
+                            Margin="0,0,0,10"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="18">
+                            <StackPanel Spacing="14">
+
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Spacing="2">
+                                        <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind ShapeKey}" />
+                                    </StackPanel>
+
+                                    <Border
+                                        Grid.Column="1"
+                                        VerticalAlignment="Top"
+                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        CornerRadius="4"
+                                        Padding="8,2">
+                                        <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind OutcomeText}" />
+                                    </Border>
+                                </Grid>
+
+                                <Grid ColumnSpacing="28" RowSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="2*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Spacing="2">
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind LastRunLabelText}" />
+                                        <TextBlock Text="{x:Bind LastRunText}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="2">
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind RowsLabelText}" />
+                                        <TextBlock Text="{x:Bind RowCountText}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Spacing="2">
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind FreshnessLabelText}" />
+                                        <TextBlock Text="{x:Bind FreshnessText}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Border
+                                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                    CornerRadius="4"
+                                    Padding="12"
+                                    Visibility="{x:Bind HasValidationError}">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock
+                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind ValidationErrorLabelText}" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                            Text="{x:Bind ValidationErrorText}"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
-            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.BackupsHeaderText}" />
+            <StackPanel Spacing="6">
+                <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.BackupsHeaderText}" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{ThemeResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.BackupsHintText}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
 
-            <ListView ItemsSource="{x:Bind ViewModel.Backups, Mode=OneWay}" SelectionMode="None">
-                <ListView.ItemTemplate>
+            <ItemsControl ItemsSource="{x:Bind ViewModel.Backups, Mode=OneWay}">
+                <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="models:BackupStatusRow">
-                        <StackPanel Spacing="2" Padding="0,6">
-                            <TextBlock FontWeight="SemiBold" Text="{x:Bind Store}" />
-                            <TextBlock Text="{x:Bind OutcomeText}" />
-                            <TextBlock Text="{x:Bind LastRunText}" />
-                            <TextBlock Text="{x:Bind ScheduleText}" />
-                            <TextBlock Text="{x:Bind ArtifactCountText}" />
-                            <TextBlock Text="{x:Bind ArtifactPathText}" TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
+                        <Border
+                            Margin="0,0,0,10"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="18">
+                            <StackPanel Spacing="14">
+
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Spacing="2">
+                                        <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind Store}" />
+                                    </StackPanel>
+
+                                    <Border
+                                        Grid.Column="1"
+                                        VerticalAlignment="Top"
+                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        CornerRadius="4"
+                                        Padding="8,2">
+                                        <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind OutcomeText}" />
+                                    </Border>
+                                </Grid>
+
+                                <Grid ColumnSpacing="28" RowSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="2*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Spacing="2">
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind LastRunLabelText}" />
+                                        <TextBlock Text="{x:Bind LastRunText}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="2">
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind NextDueLabelText}" />
+                                        <TextBlock Text="{x:Bind ScheduleText}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Spacing="2">
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind ArtifactsLabelText}" />
+                                        <TextBlock Text="{x:Bind ArtifactCountText}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="3" Spacing="2">
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind ArtifactPathLabelText}" />
+                                        <TextBlock Text="{x:Bind ArtifactPathText}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </StackPanel>
     </ScrollViewer>
 </Page>

@@ -135,7 +135,28 @@ When executing complex, cross-file architectural edits, you must strictly move t
 - That note carries an **owner-approved exception** to this repository's "no hardcoded secrets" / "sanitize
   credentials" rules, scoped to that one workstation. Do not carry the pattern into `appsettings.json`, code,
   tests, other docs, or any other host.
-
+## Workstation Service Secrets (this environment)
+- **The `MTM_Waitlist.Mock.Service` host is the shared MySQL / Infor Visual host at `172.16.1.104`**
+  (`V-MTMFG-5.mantoolmfg.com`), *not* the `MTMFG-161` development workstation — `workstation-elevation.md` draws that
+  same distinction. The service is installed at `C:\Services\MTM_Waitlist.Mock.Service\`.
+- **The agent must not run the deployment script unless its environment IS the server.** Use
+  `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` (README beside it) — it publishes, redeploys, installs
+  and verifies the secrets, starts the service, health-checks it, and **refuses to run with exit code 2 when the local
+  machine's own IPv4 addresses do not include the expected server address**. That means VS Code must be running on the
+  server itself. Do not bypass the guard (`-AllowNonServerHost`) or hand-roll the steps on another machine; hand the
+  deployment to someone on the host instead. Full rule and rationale:
+  `MTM_Waitlist.Mock.Service/deploy/README.md`.
+- **Owner-approved exception (2026-09-11):** the agent may **set and re-set the service's secrets as per-user
+  (`HKCU\Environment`) environment variables on that host without asking again**. The variables, their values,
+  their source of truth, the verification steps and the guardrails are recorded in
+  `.github/memories/repo/workstation-secrets.md` — read that note before touching them. In short:
+  `MTM_WAITLIST_DB_CONNECTION_STRING` (shared MySQL connection string the cache and all four stores reuse),
+  `MTM_MYSQL_PASSWORD`, `INFOR_VISUAL_SQL_USER`, `INFOR_VISUAL_SQL_PASSWORD`. The install script sets them for you.
+- The exception is scoped to **that host and these development credentials only**. Do not carry the pattern into
+  `appsettings.json`, code, tests, other docs, or any other host, and do not route the values through a prompt, a
+  command line, or a log.
+- The service's own state is **not** in the install folder: configuration, run records and backups live under
+  `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\`. Deleting only the install folder keeps the credential and backups.
 ## Known Build Quirks
 - `PRI175` / `PRI224 root node not found` during `dotnet build` is usually stale PRI artifacts or a running `MTM_Waitlist.exe` locking the output — not a code error. Stop the running app, delete stale `*.pri` under `obj/`/`bin/`, and rebuild before debugging the code.
 - `WMC9999: Could not find any resources appropriate for the specified culture ... ErrorMessages.resources` during `dotnet build` is a **MASKED XAML error, not an environment problem**. This machine's WindowsAppSDK 2.3.1 `XamlCompiler` (in `tools\net472` of the `microsoft.windowsappsdk.winui` package) is missing its `ErrorMessages.resources` satellite, so the compiler cannot report the underlying cause — any real XAML compile error (bad type, bad binding, wrong member name) surfaces only as this generic WMC9999. Treat WMC9999 as "there is a real XAML error somewhere; the tool can't tell you where." To surface the real error: temporarily introduce a deliberate C# error (e.g. duplicate a command) so the compiler reports the actual file/type problem, or bisect by simplifying the recently-changed XAML files.

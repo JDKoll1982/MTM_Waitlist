@@ -187,6 +187,15 @@ publish/
 *.pubxml
 *.publishproj
 
+# ...EXCEPT the Module_Mock service's folder-publish profile, which is a reviewed deploy artifact, not a
+# web-deploy settings file: MTM_Waitlist.Mock.Service/README.md and
+# specs/001-module-mock-visual-fallback/quickstart.md section 2 step 1 both invoke it by name, and
+# without it `dotnet publish` reports NETSDK1198 and silently falls back to a framework-dependent build
+# in bin/<Config>/<TFM>/<RID>/publish instead of the documented bin/publish/win-x64. It holds no
+# connection strings, credentials, or publish settings - only RuntimeIdentifier, SelfContained,
+# WindowsAppSDKSelfContained, WindowsPackageType, and the documented PublishDir.
+!MTM_Waitlist.Mock.Service/Properties/PublishProfiles/*.pubxml
+
 # Microsoft Azure Web App publish settings. Comment the next line if you want to
 # checkin your Azure Web App publish settings, but sensitive information contained
 # in these scripts will be unencrypted

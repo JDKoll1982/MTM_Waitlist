@@ -293,4 +293,91 @@
   <data name="Service_Settings.InvalidDestination" xml:space="preserve">
     <value>The destination folder for {0} must not be empty.</value>
   </data>
+  <data name="Service_Status.Subtitle" xml:space="preserve">
+    <value>Refresh, API, backups and cached read shapes at a glance.</value>
+  </data>
+  <data name="Service_Status.VersionLabel" xml:space="preserve">
+    <value>Service version</value>
+  </data>
+  <data name="Service_Status.StartedLabel" xml:space="preserve">
+    <value>Started</value>
+  </data>
+  <data name="Service_Status.VisualSourceLabel" xml:space="preserve">
+    <value>Infor Visual</value>
+  </data>
+  <data name="Service_Status.CredentialLabel" xml:space="preserve">
+    <value>API credential</value>
+  </data>
+  <data name="Service_Status.RefreshScheduleLabel" xml:space="preserve">
+    <value>Refresh schedule</value>
+  </data>
+  <data name="Service_Status.BackupToolLabel" xml:space="preserve">
+    <value>Backup tool</value>
+  </data>
+  <data name="Service_Status.AutoStartLabel" xml:space="preserve">
+    <value>Start at logon</value>
+  </data>
+  <data name="Service_Status.ShapesHint" xml:space="preserve">
+    <value>Each read shape is refreshed from Infor Visual on the schedule above. "Unavailable" means the cache could not be read for that shape.</value>
+  </data>
+  <data name="Service_Status.BackupsHint" xml:space="preserve">
+    <value>Every store keeps its own schedule and retention.</value>
+  </data>
+  <data name="Service_Status.LastRunLabel" xml:space="preserve">
+    <value>Last run</value>
+  </data>
+  <data name="Service_Status.OutcomeLabel" xml:space="preserve">
+    <value>Outcome</value>
+  </data>
+  <data name="Service_Status.RowsLabel" xml:space="preserve">
+    <value>Rows</value>
+  </data>
+  <data name="Service_Status.FreshnessLabel" xml:space="preserve">
+    <value>Cached data</value>
+  </data>
+  <data name="Service_Status.NextDueLabel" xml:space="preserve">
+    <value>Next due</value>
+  </data>
+  <data name="Service_Status.ArtifactsLabel" xml:space="preserve">
+    <value>Artifacts kept</value>
+  </data>
+  <data name="Service_Status.ArtifactPathLabel" xml:space="preserve">
+    <value>Latest artifact</value>
+  </data>
+  <data name="Service_Status.ValidationErrorLabel" xml:space="preserve">
+    <value>Excluded from refresh</value>
+  </data>
+  <data name="Service_Status.DisabledBadge" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Service_Shape.work_order_lookup" xml:space="preserve">
+    <value>Work order lookup</value>
+  </data>
+  <data name="Service_Shape.operation_sequences" xml:space="preserve">
+    <value>Operation sequences</value>
+  </data>
+  <data name="Service_Shape.subordinate_parts" xml:space="preserve">
+    <value>Subordinate parts</value>
+  </data>
+  <data name="Service_Shape.inventory_locations" xml:space="preserve">
+    <value>Inventory locations</value>
+  </data>
+  <data name="Service_Shape.disposition_input" xml:space="preserve">
+    <value>Request disposition</value>
+  </data>
+  <data name="Service_Store.mtm_waitlist" xml:space="preserve">
+    <value>Waitlist</value>
+  </data>
+  <data name="Service_Store.mtm_wip_application_winforms" xml:space="preserve">
+    <value>WIP application</value>
+  </data>
+  <data name="Service_Store.mtm_receiving_application" xml:space="preserve">
+    <value>Receiving application</value>
+  </data>
+  <data name="Service_Store.mtm_mock" xml:space="preserve">
+    <value>Mock cache</value>
+  </data>
+  <data name="Service_Settings.Subtitle" xml:space="preserve">
+    <value>Configure the cache, the external source, the API and the backups.</value>
+  </data>
 </root>

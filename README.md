@@ -34,7 +34,21 @@ it is.
 | Mirror schema + procedures | `Database/Mock/` (`Tables/`, `StoredProcedures/`, `Seeds/`, `Bootstrap/`) |
 | In-app fallback | `MTM_Waitlist.Mock/` (`IVisualReadFallback<TRequest,TRow>`, one per shape) |
 | On-host refresh + API + backups | `MTM_Waitlist.Mock.Service/` (see its `README.md`) |
+| **On-host deployment** | `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` (see its `README.md`) |
 | Feature specification | `specs/001-module-mock-visual-fallback/` |
+
+### Deploying the on-host service
+
+`MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` is the deployment step: it publishes, stops any running
+instance, deletes the previous deployment, copies to `C:\Services\MTM_Waitlist.Mock.Service\`, verifies the deployment
+is complete and self-contained, installs and **proves** the environment secrets, then starts the service and
+health-checks it (tray-only, port bound, `401` without a credential, single-instance). It exits non-zero if any check
+fails, and does not start the service when the deployment itself is broken.
+
+**Server-only — `172.16.1.104` / `V-MTMFG-5`.** The script refuses to run unless one of the *local* machine's IPv4
+addresses is the expected server address, because the service belongs on the host that reaches MySQL and Infor Visual.
+**The agent must not run it (or bypass the guard with `-AllowNonServerHost`) unless VS Code is running on that server.**
+Details: `MTM_Waitlist.Mock.Service/deploy/README.md`.
 
 Rules that must not be broken:
 

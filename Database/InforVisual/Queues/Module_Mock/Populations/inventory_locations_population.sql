@@ -5,10 +5,12 @@
 -- Target: Infor Visual SQL Server (VISUAL / MTMFG)
 -- Parameters: none (the driver population is enumerated here)
 --
--- Scope (operator decision, 2026-09-10): the parts of the open work-order population — every part
---        that is on an open order (WORK_ORDER.PART_ID) plus every part that order requires
---        (REQUIREMENT.PART_ID). "All parts" is deliberately NOT cached: the PART table is not bounded
---        by work-order activity and would put unrelated master data in the cache.
+-- Scope (operator decision, 2026-09-10): the parts of the ADDRESSABLE open work-order population —
+--        every part that is on an addressable open order (WORK_ORDER.PART_ID) plus every part that
+--        order requires (REQUIREMENT.PART_ID). "All parts" is deliberately NOT cached: the PART table
+--        is not bounded by work-order activity and would put unrelated master data in the cache.
+--        Addressability is the two forms the live reads resolve; see
+--        work_order_lookup_population.sql for the full rationale.
 --
 -- Projection contract (must match VisualReadShapeCatalog + sp_visual_inventory_locations_refresh):
 --   PartNumber (input key AND returned part number), Location, OnHandQuantity.
@@ -30,8 +32,14 @@ WITH driver_parts AS
         wo.STATUS IN ('R', 'U', 'F')
         AND wo.BASE_ID IS NOT NULL
         AND wo.PART_ID IS NOT NULL
-        AND LEN(LTRIM(RTRIM(wo.BASE_ID))) BETWEEN 5 AND 6
-        AND LTRIM(RTRIM(wo.BASE_ID)) NOT LIKE '%[^0-9]%'
+        AND (
+            (LEN(LTRIM(RTRIM(wo.BASE_ID))) = 9
+             AND LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%'
+             AND SUBSTRING(LTRIM(RTRIM(wo.BASE_ID)), 4, 6) NOT LIKE '%[^0-9]%')
+            OR
+            (LEN(LTRIM(RTRIM(wo.BASE_ID))) = 6
+             AND LTRIM(RTRIM(wo.BASE_ID)) NOT LIKE '%[^0-9]%')
+        )
 
     UNION
 
@@ -46,8 +54,14 @@ WITH driver_parts AS
     WHERE
         wo.STATUS IN ('R', 'U', 'F')
         AND wo.BASE_ID IS NOT NULL
-        AND LEN(LTRIM(RTRIM(wo.BASE_ID))) BETWEEN 5 AND 6
-        AND LTRIM(RTRIM(wo.BASE_ID)) NOT LIKE '%[^0-9]%'
+        AND (
+            (LEN(LTRIM(RTRIM(wo.BASE_ID))) = 9
+             AND LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%'
+             AND SUBSTRING(LTRIM(RTRIM(wo.BASE_ID)), 4, 6) NOT LIKE '%[^0-9]%')
+            OR
+            (LEN(LTRIM(RTRIM(wo.BASE_ID))) = 6
+             AND LTRIM(RTRIM(wo.BASE_ID)) NOT LIKE '%[^0-9]%')
+        )
         AND req.PART_ID IS NOT NULL
 )
 SELECT

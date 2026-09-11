@@ -21,6 +21,10 @@ dotnet publish MTM_Waitlist.Mock.Service/MTM_Waitlist.Mock.Service.csproj `
 The profile is `Properties/PublishProfiles/win-x64-selfcontained.pubxml` and writes to
 `MTM_Waitlist.Mock.Service/bin/publish/win-x64/`.
 
+**Or let the deployment script do sections 1–4 for you.** `deploy/install-mock-service.ps1` publishes, redeploys,
+installs and verifies the secrets, starts the service and health-checks it — and refuses to run unless the local
+machine *is* the cache host. See `deploy/README.md`.
+
 What the profile guarantees, and why each matters:
 
 | Property | Value | Why |
@@ -47,8 +51,14 @@ folder must be copied whole: the service reads its shape population scripts from
 3. Generate the shared credential. It is written DPAPI-protected for the current user and is **never shown
    again**; record it out of band. This is the value the client application installs through
    `MTM_MOCK_SERVICE_TOKEN` (see `MTM_Waitlist.Mock/Models/MockServiceClientOptions.cs`).
-4. Enable auto-start at logon and confirm the per-user `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`
-   entry exists.
+4. Confirm auto-start. It is **on by default** (`ServiceConfiguration.AutoStartAtLogon = true`), so the first
+   run has already registered the per-user `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry — and it
+   records the path the executable was launched from, so **install the folder at its final location before the
+   first run**. Turn the setting off if this host should not auto-start it; the service reconciles the entry.
+5. Set the secrets the configuration deliberately does not store (FR-026): the MySQL password as
+   `MTM_MYSQL_PASSWORD` (or a complete `MTM_MOCK_DB_CONNECTION_STRING` / `MTM_WAITLIST_DB_CONNECTION_STRING`),
+   and the Infor Visual password as `INFOR_VISUAL_SQL_PASSWORD`. Without the cache connection the service still
+   starts and reports the condition; no refresh or backup can run.
 
 ## 4. Verify
 
@@ -72,5 +82,17 @@ curl.exe -i -H "X-MTM-Mock-Token: <credential>" http://<host>:5760/api/restore
 ## 5. Uninstall
 
 Quit from the tray menu (the process exits only on an explicit Quit), then remove the auto-start entry
-from `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` and delete the install folder. The service-local
-configuration and run records live beside the executable; delete them too if a clean reinstall is wanted.
+from `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` and delete the install folder.
+
+A **clean reinstall also needs the service's own app-data folder deleted** — the configuration, the run
+records and the backup artifacts live *there*, not beside the executable:
+
+| Item | Location |
+|---|---|
+| Configuration (`service-configuration.json`) | `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\` |
+| Refresh run records | `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\` |
+| Backup artifacts | `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\backups\<database>\` |
+
+(`ServiceHostBuilder.GetDefaultAppDataRoot()`, confirmed by running the published build on 2026-09-11.)
+Deleting only the install folder therefore leaves the DPAPI-protected credential, the schedules and the
+backups behind on the host.
