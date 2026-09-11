@@ -58,7 +58,7 @@ public sealed class ImageOverrideWriteServiceTests
         Assert.AreEqual("CREATE", result.OperationType);
 
         var insert = _helper.ExecutedNonQueries.Single();
-        StringAssert.Contains(insert.Sql, "INSERT INTO config_images_locations");
+        Assert.AreEqual("sp_config_images_locations_insert", insert.Sql);
         Assert.AreEqual("request_type", insert.Parameters["p_scope"]);
         Assert.AreEqual("abc-123", insert.Parameters["p_scope_item_id"]);
     }
@@ -87,8 +87,7 @@ public sealed class ImageOverrideWriteServiceTests
 
         Assert.IsTrue(result.Success, result.ErrorMessage);
         var statement = _helper.ExecutedNonQueries.Single();
-        StringAssert.Contains(statement.Sql, "UPDATE config_images_locations");
-        StringAssert.Contains(statement.Sql, "is_active = 1");
+        Assert.AreEqual("sp_config_images_locations_reactivate", statement.Sql);
         Assert.AreEqual("new.png", statement.Parameters["p_image_path"]);
     }
 
@@ -154,7 +153,7 @@ public sealed class ImageOverrideWriteServiceTests
 
         Assert.IsTrue(result.Success, result.ErrorMessage);
         var statement = _helper.ExecutedNonQueries.Single();
-        StringAssert.Contains(statement.Sql, "UPDATE config_images_locations");
+        Assert.AreEqual("sp_config_images_locations_update", statement.Sql);
         Assert.AreEqual("new.png", statement.Parameters["p_image_path"]);
     }
 
@@ -167,7 +166,8 @@ public sealed class ImageOverrideWriteServiceTests
 
         Assert.IsTrue(result.Success, result.ErrorMessage);
         var statement = _helper.ExecutedNonQueries.Single();
-        StringAssert.Contains(statement.Sql, "is_active = 0");
+        Assert.AreEqual("sp_config_images_locations_delete", statement.Sql);
+        Assert.AreEqual("42", statement.Parameters["p_scope_item_id"]);
     }
 
     [TestMethod]
@@ -179,5 +179,119 @@ public sealed class ImageOverrideWriteServiceTests
 
         Assert.IsFalse(result.Success);
         Assert.AreEqual("NOT_FOUND", result.ErrorCode);
+    }
+
+    /// <summary>
+    /// Regression: this method used to run its UPDATE through the row-returning helper and decide success from
+    /// `rows.Count > 0`. An UPDATE returns no rows, so the count was always 0 and the method answered NOT_FOUND
+    /// for every call — including the ones that did withdraw the row. The affected-row count is the only correct
+    /// signal, and it is what the non-query path returns.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteByPublicIdAsync_WhenTheRowWasWithdrawn_ReportsSuccess()
+    {
+        _helper.EnqueueNonQueryResult(1);
+
+        var result = await _service.DeleteByPublicIdAsync("11111111-1111-1111-1111-111111111111");
+
+        Assert.IsTrue(result.Success, result.ErrorMessage);
+        var statement = _helper.ExecutedNonQueries.Single();
+        Assert.AreEqual("sp_config_images_locations_delete_by_public_id", statement.Sql);
+        Assert.AreEqual("11111111-1111-1111-1111-111111111111", statement.Parameters["p_public_id"]);
+    }
+
+    [TestMethod]
+    public async Task DeleteByPublicIdAsync_WhenNothingChanged_ReturnsNotFound()
+    {
+        _helper.EnqueueNonQueryResult(0);
+
+        var result = await _service.DeleteByPublicIdAsync("11111111-1111-1111-1111-111111111111");
+
+        Assert.IsFalse(result.Success);
+        Assert.AreEqual("NOT_FOUND", result.ErrorCode);
+    }
+
+    /// <summary>
+    /// Regression: the purge count used to be read from the row-returning helper, which reports 0 for a DELETE,
+    /// so callers were told nothing had been purged however many rows were removed.
+    /// </summary>
+    [TestMethod]
+    public async Task PurgeInactiveOverridesAsync_ReturnsTheAffectedRowCount()
+    {
+        _helper.EnqueueNonQueryResult(3);
+
+        var purged = await _service.PurgeInactiveOverridesAsync();
+
+        Assert.AreEqual(3, purged);
+        Assert.AreEqual("sp_config_images_locations_purge_inactive", _helper.ExecutedNonQueries.Single().Sql);
+    }
+
+    /// <summary>
+    /// Regression: same defect as the purge, on the per-scope bulk withdraw — the UI reported "0 deactivated"
+    /// however many overrides were withdrawn.
+    /// </summary>
+    [TestMethod]
+    public async Task DeactivateAllForScopeAsync_ReturnsTheAffectedRowCount()
+    {
+        _helper.EnqueueNonQueryResult(2);
+
+        var deactivated = await _service.DeactivateAllForScopeAsync("request_subtype");
+
+        Assert.AreEqual(2, deactivated);
+        var statement = _helper.ExecutedNonQueries.Single();
+        Assert.AreEqual("sp_config_images_locations_deactivate_for_scope", statement.Sql);
+        Assert.AreEqual("request_subtype", statement.Parameters["p_scope"]);
+    }
+
+    /// <summary>
+    /// Constitution III: the write service must not carry statement text. Each of its paths is a stored-procedure
+    /// invocation, and the query path is used only where a row comes back (the existence probe).
+    /// </summary>
+    [TestMethod]
+    public async Task EveryWrite_RoutesThroughItsProcedure_AndCarriesNoInlineStatement()
+    {
+        _helper.EnqueueEmptyQueryResult(); // existence probe
+        _helper.EnqueueNonQueryResult(1);  // insert
+        await _service.CreateOverrideAsync("request_type", "abc-123", "new.png");
+
+        _readService.AddOverride("request_type", "abc-123", "old.png");
+        _helper.EnqueueNonQueryResult(1);
+        await _service.UpdateOverrideAsync("request_type", "abc-123", "newer.png");
+
+        _helper.EnqueueNonQueryResult(1);
+        await _service.DeleteOverrideAsync("request_type", "abc-123");
+
+        _helper.EnqueueNonQueryResult(1);
+        await _service.DeleteByPublicIdAsync("11111111-1111-1111-1111-111111111111");
+
+        _helper.EnqueueNonQueryResult(0);
+        await _service.PurgeInactiveOverridesAsync();
+
+        _helper.EnqueueNonQueryResult(0);
+        await _service.DeactivateAllForScopeAsync("work_center");
+
+        var statements = _helper.ExecutedNonQueries.Select(executed => executed.Sql)
+            .Concat(_helper.ExecutedQueries.Select(executed => executed.Sql))
+            .ToList();
+
+        CollectionAssert.AreEqual(
+            new[]
+            {
+                "sp_config_images_locations_insert",
+                "sp_config_images_locations_update",
+                "sp_config_images_locations_delete",
+                "sp_config_images_locations_delete_by_public_id",
+                "sp_config_images_locations_purge_inactive",
+                "sp_config_images_locations_deactivate_for_scope",
+                "sp_config_images_locations_status_get"
+            },
+            statements);
+
+        Assert.IsFalse(
+            statements.Any(statement => statement.Contains("INSERT INTO", StringComparison.OrdinalIgnoreCase)
+                || statement.Contains("UPDATE ", StringComparison.OrdinalIgnoreCase)
+                || statement.Contains("DELETE FROM", StringComparison.OrdinalIgnoreCase)
+                || statement.Contains("SELECT ", StringComparison.OrdinalIgnoreCase)),
+            "A write path is still carrying inline SQL instead of naming a procedure.");
     }
 }

@@ -340,6 +340,50 @@ behind under a new name.
 
 ---
 
+## R16. Refresh scope and cadence (FR-008, SC-007; operator decision 2026-09-10)
+
+**Decision**: two operator-chosen parameters, both recorded here because neither `spec.md` nor the earlier research
+entry (R2) fixed them:
+
+1. **What the mirror holds.** The refresh covers **every Infor Visual work order that is not closed or cancelled** —
+   `WORK_ORDER.STATUS` in `{R (Released), U (Unreleased), F (Firmed)}` — together with its **operation sequences and
+   subordinate parts**. Closed (`C`) and cancelled (`X`) orders are never cached. This is the same set the app already
+   treats as *open*: `RequestDispositionStatusCodes.OpenStatusCodes` (`MTM_Waitlist.Settings`), confirmed against live
+   `VISUAL/MTMFG` data on 2026-09-08 (Closed 68,278 · Cancelled 1,404 · Unreleased 42,138 · Released 680 · Firmed 0
+   — i.e. roughly **42,800 open work orders**). The *inputs* a refresh reads are therefore the open work-order
+   population, not only the work centers the floor currently has set up.
+2. **When it runs.** The shipped default cadence is **eight fixed times per day, three hours apart, anchored at local
+   midnight**: 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00 and 21:00 **server-local time**. The schedule is a
+   grid, not "interval since the last run", so a slow or skipped cycle cannot drag later runs off those times.
+
+**Rationale**: the operator owns the trade-off between freshness and load on the Infor Visual server, and wants a
+predictable whole-population copy rather than a per-dispatcher list. Anchoring the grid to local midnight makes the
+eight runs land on round operator-recognisable times regardless of when the service started, and matches the spec's
+requirement that a missed cycle must not disturb the next one (US3 acceptance 3).
+
+**Scope consequences recorded at the same time** (they change *how much* data `T113` must read, not the fallback
+contract): the five mirror tables keep their approved flattened, wipe-and-swap design (R2) — the cache is **not**
+being normalised into shared "parts/sequences/work-orders" building blocks, and the refresh is **not** a
+merge/upsert. Two earlier design ideas were considered with the operator on 2026-09-10 and **explicitly not
+adopted**: (a) splitting the cache into rarely-refreshed master data plus incrementally merged work orders, and
+(b) having the Module_Setup workflow cache a missing job on demand. Both would have changed the approved cache
+shape and the "service owns the cache" write rule; the operator asked to change only the two parameters above.
+
+**Alternatives considered**:
+- *Cache only the jobs the floor is currently set up on* — rejected by the operator: the copy must cover the whole
+  open work-order population, not just active setups.
+- *Keep the shipped 15-minute interval* — rejected: with ~42,800 open orders (plus sequences and subordinate parts)
+  that is a constant heavy read of Infor Visual for data that changes slowly.
+- *Interval-since-last-run scheduling (what the engine did before this decision)* — rejected: run times would drift
+  with cycle duration, so the eight daily runs would not land on the times the operator expects.
+
+**Verification note**: `RefreshEngine` implements the grid and `RefreshEngineTests` asserts the 3-hour slots
+(04:30 local → 06:00 local → 09:00 local) and the per-shape override grid. The open-order status filter itself lands
+with `T113` (the payload source), since that is where the Infor read is authored; `sp_visual_refresh_inputs_get` (or
+the per-shape bulk scripts) must select `STATUS IN ('R','U','F')`.
+
+---
+
 ## Sources consulted
 
 | Topic | Source |

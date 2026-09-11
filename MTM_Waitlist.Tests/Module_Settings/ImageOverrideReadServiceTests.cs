@@ -37,16 +37,20 @@ public sealed class ImageOverrideReadServiceTests
         Assert.IsTrue(result.IsActive);
     }
 
+    /// <summary>
+    /// The scope and active-flag predicates live in the procedure body now (constitution III), so what the service
+    /// owes the database is the procedure name plus the two keys. The predicates themselves are asserted against
+    /// the artifact and the live server, not here.
+    /// </summary>
     [TestMethod]
-    public async Task GetOverrideAsync_FiltersOnScopeItemAndActiveFlag()
+    public async Task GetOverrideAsync_AsksTheProcedureForTheScopeItemKey()
     {
         _helper.EnqueueEmptyQueryResult();
 
         await _service.GetOverrideAsync("work_center", "42");
 
         var executed = _helper.ExecutedQueries.Single();
-        StringAssert.Contains(executed.Sql, "FROM config_images_locations");
-        StringAssert.Contains(executed.Sql, "is_active = 1");
+        Assert.AreEqual("sp_config_images_locations_get", executed.Sql);
         Assert.AreEqual("work_center", executed.Parameters["p_scope"]);
         Assert.AreEqual("42", executed.Parameters["p_scope_item_id"]);
     }
@@ -107,5 +111,89 @@ public sealed class ImageOverrideReadServiceTests
 
         _helper.EnqueueEmptyQueryResult();
         Assert.IsFalse(await _service.HasOverrideAsync("request_type", "abc"));
+    }
+
+    /// <summary>
+    /// Constitution III: the read service must not carry statement text. Every call it makes is a
+    /// stored-procedure invocation, and each one names the artifact that holds the statement.
+    /// </summary>
+    [TestMethod]
+    public async Task EveryRead_RoutesThroughItsProcedure_AndCarriesNoInlineStatement()
+    {
+        _helper.EnqueueEmptyQueryResult();
+        await _service.GetOverrideAsync("work_center", "1");
+
+        _helper.EnqueueEmptyQueryResult();
+        await _service.GetOverridesByScopeAsync("work_center");
+
+        _helper.EnqueueQueryResult(new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase) { ["count"] = 0 });
+        await _service.CountAllActiveOverridesAsync();
+
+        _helper.EnqueueQueryResult(new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase) { ["count"] = 0 });
+        await _service.CountActiveOverridesByScopeAsync("work_center");
+
+        _helper.EnqueueEmptyQueryResult();
+        await _service.DetectOrphanedOverridesAsync();
+
+        _helper.EnqueueEmptyQueryResult();
+        await _service.GetOverrideByPublicIdAsync("11111111-1111-1111-1111-111111111111");
+
+        _helper.EnqueueEmptyQueryResult();
+        await _service.GetRecentlyUpdatedOverridesAsync(10);
+
+        var statements = _helper.ExecutedQueries.Select(executed => executed.Sql).ToList();
+
+        CollectionAssert.AreEqual(
+            new[]
+            {
+                "sp_config_images_locations_get",
+                "sp_config_images_locations_get_by_scope",
+                "sp_config_images_locations_count_active_get",
+                "sp_config_images_locations_count_by_scope_get",
+                "sp_config_images_locations_get_all",
+                "sp_config_images_locations_get_by_public_id",
+                "sp_config_images_locations_recent_get"
+            },
+            statements);
+
+        Assert.IsFalse(
+            statements.Any(statement => statement.Contains("SELECT", StringComparison.OrdinalIgnoreCase)
+                || statement.Contains("FROM ", StringComparison.OrdinalIgnoreCase)),
+            "A read path is still carrying inline SQL instead of naming a procedure.");
+    }
+
+    /// <summary>
+    /// The record cap used to be interpolated straight into the statement text (`LIMIT {maxRecordCount}`), which
+    /// is the reason this one read needed a procedure at all. It is a bound parameter now.
+    /// </summary>
+    [TestMethod]
+    public async Task GetRecentlyUpdatedOverridesAsync_BindsTheCap_InsteadOfInterpolatingIt()
+    {
+        _helper.EnqueueEmptyQueryResult();
+
+        await _service.GetRecentlyUpdatedOverridesAsync(25);
+
+        var executed = _helper.ExecutedQueries.Single();
+        Assert.AreEqual("sp_config_images_locations_recent_get", executed.Sql);
+        Assert.AreEqual(25, executed.Parameters["p_max_rows"]);
+    }
+
+    /// <summary>
+    /// The orphan path is the only reader that reaches the work-center existence check, so it is where that
+    /// procedure has to be proven wired.
+    /// </summary>
+    [TestMethod]
+    public async Task DetectOrphanedOverridesAsync_ChecksWorkCenterExistenceThroughItsProcedure()
+    {
+        _helper.EnqueueQueryResult(FakeMySqlHelperServer.OverrideRow("work_center", "1", "a.png"));
+        _helper.EnqueueEmptyQueryResult();
+
+        var orphans = await _service.DetectOrphanedOverridesAsync();
+
+        Assert.AreEqual(1, orphans.Count);
+        CollectionAssert.AreEqual(
+            new[] { "sp_config_images_locations_get_all", "sp_setup_work_centers_exists_get" },
+            _helper.ExecutedQueries.Select(executed => executed.Sql).ToList());
+        Assert.AreEqual(1L, _helper.ExecutedQueries[1].Parameters["p_id"]);
     }
 }

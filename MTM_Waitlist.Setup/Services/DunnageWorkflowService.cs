@@ -69,7 +69,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             };
         }
 
-        _ = await SetupReceivingStoredProcedureScriptStore.LoadAsync("sp_setup_dunnage_type_insert", cancellationToken).ConfigureAwait(false);
+        _ = await SetupReceivingStoredProcedureScriptStore.LoadAsync("sp_Dunnage_Types_Insert", cancellationToken).ConfigureAwait(false);
 
         var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
             "sp_Dunnage_Types_Insert",
@@ -126,7 +126,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             };
         }
 
-        _ = await SetupReceivingStoredProcedureScriptStore.LoadAsync("sp_setup_dunnage_part_insert", cancellationToken).ConfigureAwait(false);
+        _ = await SetupReceivingStoredProcedureScriptStore.LoadAsync("sp_Dunnage_Parts_Insert", cancellationToken).ConfigureAwait(false);
 
         var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
             "sp_Dunnage_Parts_Insert",

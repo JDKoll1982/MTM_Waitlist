@@ -18,4 +18,16 @@ public interface IVisualShapeMetadataReader
     /// <param name="shapeKey">The read shape key to inspect.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task<VisualShapeMetadata?> GetShapeMetadataAsync(string shapeKey, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns metadata for <b>every</b> shape whose mirror table exists in <c>mtm_mock</c>.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>One entry per shape found in the cache, whether or not the catalog knows about it.</returns>
+    /// <remarks>
+    /// This is what makes the "half-added shape" edge case detectable: a shape with tables and procedures but
+    /// no catalog entry is never refreshed, and this call is how the service finds it instead of leaving the
+    /// gap to be discovered in production (FR-016/FR-020).
+    /// </remarks>
+    Task<IReadOnlyList<VisualShapeMetadata>> GetAllShapeMetadataAsync(CancellationToken cancellationToken = default);
 }

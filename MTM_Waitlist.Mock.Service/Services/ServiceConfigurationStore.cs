@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.Models;
 
 namespace MTM_Waitlist.Mock.Service.Services;
@@ -166,6 +167,21 @@ public sealed class ServiceConfigurationStore
             throw new ArgumentException($"API port must be between 1 and 65535 (was {configuration.Api.Port}).", nameof(configuration));
         }
 
+        if (configuration.MySqlConnection.Port is < 1 or > 65535)
+        {
+            throw new ArgumentException($"MySQL port must be between 1 and 65535 (was {configuration.MySqlConnection.Port}).", nameof(configuration));
+        }
+
+        if (string.IsNullOrWhiteSpace(configuration.MySqlConnection.Server))
+        {
+            throw new ArgumentException("MySQL server must not be empty.", nameof(configuration));
+        }
+
+        if (configuration.MySqlConnection.PasswordFilePath is { Length: > 0 } passwordFile && !File.Exists(passwordFile))
+        {
+            throw new ArgumentException($"Configured MySQL password file does not exist: '{passwordFile}'.", nameof(configuration));
+        }
+
         if (string.IsNullOrWhiteSpace(configuration.Api.BindAddress))
         {
             throw new ArgumentException("API bind address must not be empty.", nameof(configuration));
@@ -217,6 +233,137 @@ public sealed class ServiceConfigurationStore
         generated = true;
 
         return configuration with { Api = configuration.Api with { Credential = credential } };
+    }
+
+    /// <summary>
+    /// Reconciles the <c>autoStartAtLogon</c> setting with the real per-user <c>Run</c> entry (FR-007).
+    /// </summary>
+    /// <param name="registrationStore">The per-user registration store to reconcile against.</param>
+    /// <param name="executablePath">
+    /// Absolute path of the service executable to register; defaults to the running executable.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The reconciliation outcome, including a secret-free message for the log and status surface.</returns>
+    /// <remarks>
+    /// <para>
+    /// The setting is the operator's intent; the registry entry is the effect. Both directions are
+    /// reconciled: setting on with no entry registers it, setting off with an entry removes it, and
+    /// setting on with an entry pointing somewhere else is re-registered — none of these are silently
+    /// ignored.
+    /// </para>
+    /// <para>
+    /// A registry failure is <b>reported, not fatal</b>: the service still runs, and the operator sees
+    /// that auto-start is not in effect rather than believing it is.
+    /// </para>
+    /// </remarks>
+    public Task<AutoStartReconciliation> ReconcileAutoStartAsync(
+        IStartupRegistrationStore registrationStore,
+        string? executablePath = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(registrationStore);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var expectedCommand = $"\"{executablePath ?? Environment.ProcessPath}\"";
+        var settingEnabled = _current.AutoStartAtLogon;
+
+        string? registered;
+        try
+        {
+            registered = registrationStore.GetRegisteredCommand();
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            return Task.FromResult(new AutoStartReconciliation
+            {
+                SettingEnabled = settingEnabled,
+                WasRegisteredAtLogon = false,
+                WasChanged = false,
+                IsReconciled = false,
+                Message = $"Auto-start could not be read from the per-user Run key: {exception.Message}"
+            });
+        }
+
+        var wasRegistered = !string.IsNullOrWhiteSpace(registered);
+
+        if (!settingEnabled)
+        {
+            if (!wasRegistered)
+            {
+                return Task.FromResult(new AutoStartReconciliation
+                {
+                    SettingEnabled = false,
+                    WasRegisteredAtLogon = false,
+                    WasChanged = false,
+                    IsReconciled = true,
+                    Message = "Auto-start is disabled and no Run entry exists."
+                });
+            }
+
+            try
+            {
+                registrationStore.RemoveRegistration();
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                return Task.FromResult(new AutoStartReconciliation
+                {
+                    SettingEnabled = false,
+                    WasRegisteredAtLogon = true,
+                    WasChanged = false,
+                    IsReconciled = false,
+                    Message = $"Auto-start is disabled but the Run entry could not be removed: {exception.Message}"
+                });
+            }
+
+            return Task.FromResult(new AutoStartReconciliation
+            {
+                SettingEnabled = false,
+                WasRegisteredAtLogon = true,
+                WasChanged = true,
+                IsReconciled = true,
+                Message = "Auto-start is disabled; the stale Run entry was removed."
+            });
+        }
+
+        if (wasRegistered && string.Equals(registered, expectedCommand, StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult(new AutoStartReconciliation
+            {
+                SettingEnabled = true,
+                WasRegisteredAtLogon = true,
+                WasChanged = false,
+                IsReconciled = true,
+                Message = "Auto-start is enabled and registered for the current executable."
+            });
+        }
+
+        try
+        {
+            registrationStore.SetRegisteredCommand(expectedCommand);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            return Task.FromResult(new AutoStartReconciliation
+            {
+                SettingEnabled = true,
+                WasRegisteredAtLogon = wasRegistered,
+                WasChanged = false,
+                IsReconciled = false,
+                Message = $"Auto-start is enabled but the Run entry could not be written: {exception.Message}"
+            });
+        }
+
+        return Task.FromResult(new AutoStartReconciliation
+        {
+            SettingEnabled = true,
+            WasRegisteredAtLogon = wasRegistered,
+            WasChanged = true,
+            IsReconciled = true,
+            Message = wasRegistered
+                ? "Auto-start is enabled; the Run entry pointed at a different executable and was corrected."
+                : "Auto-start is enabled; the Run entry was registered."
+        });
     }
 
     /// <summary>
@@ -317,13 +464,15 @@ public sealed class ServiceConfigurationStore
     /// </summary>
     private sealed record ServiceConfigurationFile
     {
-        public int RefreshIntervalMinutes { get; init; } = 15;
+        public int RefreshIntervalMinutes { get; init; } = 180;
 
         public bool AutoStartAtLogon { get; init; } = true;
 
         public string? MysqldumpPath { get; init; }
 
         public VisualSourceFile VisualSource { get; init; } = new();
+
+        public MySqlConnectionFile MySqlConnection { get; init; } = new();
 
         public ApiFile Api { get; init; } = new();
 
@@ -335,6 +484,7 @@ public sealed class ServiceConfigurationStore
             AutoStartAtLogon = configuration.AutoStartAtLogon,
             MysqldumpPath = configuration.MysqldumpPath,
             VisualSource = VisualSourceFile.From(configuration.VisualSource),
+            MySqlConnection = MySqlConnectionFile.From(configuration.MySqlConnection),
             Api = ApiFile.From(configuration.Api),
             BackupPolicies = configuration.BackupPolicies.ToDictionary(
                 pair => pair.Key.ToString(),
@@ -360,10 +510,39 @@ public sealed class ServiceConfigurationStore
                 AutoStartAtLogon = AutoStartAtLogon,
                 MysqldumpPath = MysqldumpPath,
                 VisualSource = VisualSource.ToSettings(),
+                MySqlConnection = MySqlConnection.ToSettings(),
                 Api = Api.ToSettings(),
                 BackupPolicies = policies
             };
         }
+    }
+
+    private sealed record MySqlConnectionFile
+    {
+        public string Server { get; init; } = "localhost";
+
+        public int Port { get; init; } = 3306;
+
+        public string UserId { get; init; } = string.Empty;
+
+        /// <summary>Path of the MySQL option file holding the password; its contents are never read here.</summary>
+        public string? PasswordFilePath { get; init; }
+
+        public static MySqlConnectionFile From(MySqlConnectionSettings settings) => new()
+        {
+            Server = settings.Server,
+            Port = settings.Port,
+            UserId = settings.UserId,
+            PasswordFilePath = settings.PasswordFilePath
+        };
+
+        public MySqlConnectionSettings ToSettings() => new()
+        {
+            Server = Server,
+            Port = Port,
+            UserId = UserId,
+            PasswordFilePath = PasswordFilePath
+        };
     }
 
     private sealed record VisualSourceFile

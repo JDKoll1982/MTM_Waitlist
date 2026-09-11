@@ -69,6 +69,7 @@ Each enabled shape is described by exactly this record:
 | `shapeKey` | Stable snake_case identifier, e.g. `work_order_lookup` |
 | `module` | `Module_Setup` or `Module_Waitlist` — determines the source-script folder |
 | `sourceScriptRelativePath` | Must exist on disk: `Database/InforVisual/Queues/<module>/Queries/<Script>.sql` |
+| `populationScriptRelativePath` | Must exist on disk: `Database/InforVisual/Queues/Module_Mock/Populations/<shape_key>_population.sql` — the service's **set-based snapshot read** (see below) |
 | `inputParameters` | Ordered `(name, type, isRequired)`; must match the script's parameters |
 | `outputColumns` | Ordered `(name, type)`; **must match the live read's projection exactly** |
 | `mirrorTable` | **Derived**: `visual_<shapeKey>_result` |
@@ -78,10 +79,28 @@ Each enabled shape is described by exactly this record:
 | `refreshIntervalMinutes` | Optional override of the global default |
 | `isEnabled` | Lets an operator park a shape without deleting artifacts |
 
+**The two reads, and why a shape needs both.**
+
+- `sourceScriptRelativePath` is the **per-key** read the *application* attempts live before falling back to the
+  mirror. It takes the shape's inputs and returns one key's rows.
+- `populationScriptRelativePath` is the **set-based** read the *service* runs to build a complete snapshot. The
+  mirror must cover the shape's whole driver population (for the five initial shapes: every open work order with
+  `STATUS IN ('R','U','F')`, plus its operation sequences and subordinate parts), which is tens of thousands of
+  keys — reading them one round trip at a time is not viable, so the population is enumerated and projected
+  **inside** Infor Visual and returned in one result set. It takes **no parameters**, and its projection must be
+  exactly `inputParameters` then `outputColumns` under those names, because those are the JSON keys the refresh
+  procedure reads out of `p_rows`.
+
+A shape without a population read is invalid: startup validation reports it as a half-added shape and excludes it,
+because nothing could ever refresh it.
+
 **Startup validation (must be reported, not thrown as a crash):**
 1. The source script exists.
-2. The mirror table, stage table, and both procedures exist in `mtm_mock`.
-3. `outputColumns` matches the live projection recorded for that shape.
+2. The population script exists.
+3. The mirror table, stage table, and both procedures exist in `mtm_mock`.
+4. `outputColumns` matches the live projection recorded for that shape.
+5. The cache reports no shape whose artifacts exist **without** a catalog entry — such a shape is surfaced as
+   "present in `mtm_mock` but not registered in the shape catalog, so nothing refreshes it".
 
 A shape that fails validation is excluded from refresh cycles and reported in `GET /api/status` with a clear reason.
 The service still starts and still serves the other shapes (FR-020 — one bad shape must not take the service down).
@@ -99,22 +118,25 @@ names and types are the authoritative list in `data-model.md` §3, not restated 
 
 ## 4. Adding a sixth read shape — ordered procedure (the published playbook, FR-016/FR-028)
 
-Every step produces exactly one artifact. Steps 1–3 are database/design work; 4–6 are code.
+Every step produces exactly one artifact. Steps 1–3b are database/design work; 4–6 are code.
 
 | # | Step | Artifact produced |
 |---|---|---|
 | 1 | **Capture the read.** Add the parameterized Visual query and record its input parameters and output columns. | `Database/InforVisual/Queues/<module>/Queries/<Script>.sql` |
 | 2 | **Mirror schema.** Create the mirror table and its `_stage` twin (inputs as indexed keys + outputs + `refreshed_utc` + `is_seed_content`), with create/rollback per the DB rules; register both in `Database/Mock/AllTables.sql` and `Bootstrap/update_table_descriptions.sql`. | `Database/Mock/Tables/visual_<shape>_result/{create,rollback}.sql`, `…_stage/{create,rollback}.sql` |
 | 3 | **Procedures.** Create `sp_visual_<shape>_refresh` (truncate stage → load → validate → atomic 3-name `RENAME` swap) and `sp_visual_<shape>_get` (parameterized read of the live mirror); register in `AllSPs.sql`. | `Database/Mock/StoredProcedures/sp_visual_<shape>_{refresh,get}/{create,rollback}.sql` |
-| 4 | **Service registration.** Add the shape-catalog entry (§3). No engine code changes — the engine is catalog-driven. | Config/`RefreshShapeCatalogProvider` entry |
+| 3b | **Population read.** Add the set-based snapshot query the service executes: it enumerates the shape's whole driver population and returns the complete result in one result set, projecting exactly `inputParameters` then `outputColumns`. Add one `UNION ALL` branch for the shape to the freshness report. | `Database/InforVisual/Queues/Module_Mock/Populations/<shape>_population.sql` + the shape's branch in `Database/Mock/StoredProcedures/sp_visual_read_shape_freshness_get/create.sql` |
+| 4 | **Service registration.** Add the shape-catalog entry (§3, including `populationScriptRelativePath`). No engine code changes — the engine is catalog-driven. | Config/`RefreshShapeCatalogProvider` entry |
 | 5 | **In-app fallback.** Add the `IVisualReadFallback<TRequest,TRow>` implementation, route the originating caller through it, and register it in DI. No existing shape's contract changes. | `MTM_Waitlist.Mock/Services/Visual<Shape>Fallback.cs` (+ DI registration) |
 | 6 | **Verify.** Add a seed row set, a refresh test (swap is atomic; failure leaves the snapshot intact), a
    fallback-parity test (live vs mirror identical shape, including the empty-live-result case), and a caller test. | `Database/Mock/Seeds/<seed>/{create,rollback}.sql` + tests |
 
-**Half-added detection (edge case "New read shape half-added"):** skipping step 4 leaves a shape with tables and
-procedures that are never refreshed; skipping step 5 leaves a caller with no fallback. Both are detected by the
-startup validation in §3 (catalog-to-artifact check) and by the parity tests in step 6, and both are called out in the
-playbook above so the gap is documented rather than discovered in production.
+**Half-added detection (edge case "New read shape half-added"):** the startup validation in §3 detects a shape
+whose mirror artifacts exist with **no catalog entry** — surfaced as "present in `mtm_mock` but not registered in
+the shape catalog, so nothing refreshes it" — and a catalog entry whose artifacts or **population read** are
+missing, which is excluded and reported with the reason. Skipping step 5 leaves a caller with no fallback, which
+the parity tests in step 6 surface. All three cases are called out here so the gap is documented rather than
+discovered in production.
 
 ## 5. Client-side credential installation (operator procedure)
 

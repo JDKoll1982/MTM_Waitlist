@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Tray lifetime (T059) -->
+  <data name="Service_Tray.Tooltip" xml:space="preserve">
+    <value>MTM Waitlist mock cache service</value>
+  </data>
+  <data name="Service_Tray.OpenSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Service_Tray.OpenStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Service_Tray.BackupNow" xml:space="preserve">
+    <value>Back up now</value>
+  </data>
+  <data name="Service_Tray.Quit" xml:space="preserve">
+    <value>Quit</value>
+  </data>
+
+  <!-- Shell window (T059) -->
+  <data name="Service_Shell.Title" xml:space="preserve">
+    <value>MTM mock cache service</value>
+  </data>
+  <data name="Service_Shell.NavigationSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Service_Shell.NavigationStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Service_Shell.CloseHides" xml:space="preserve">
+    <value>Closing this window hides it. The service keeps running in the notification area; use Quit on the tray menu to stop it.</value>
+  </data>
+  <data name="Service_Shell.StartupFailed" xml:space="preserve">
+    <value>The mock cache service could not start its background engines. See the service log for details.</value>
+  </data>
+
+  <!-- Shared text -->
+  <data name="Service_Common.Never" xml:space="preserve">
+    <value>Never</value>
+  </data>
+  <data name="Service_Common.NotConfigured" xml:space="preserve">
+    <value>Not configured</value>
+  </data>
+  <data name="Service_Common.Unavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="Service_Common.SettingsSaved" xml:space="preserve">
+    <value>Settings saved.</value>
+  </data>
+
+  <!-- Status surface (T077) -->
+  <data name="Service_Status.Title" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Service_Status.SummaryHeader" xml:space="preserve">
+    <value>Service</value>
+  </data>
+  <data name="Service_Status.ShapesHeader" xml:space="preserve">
+    <value>Cached read shapes</value>
+  </data>
+  <data name="Service_Status.BackupsHeader" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Service_Status.Reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="Service_Status.VisualSourceReachable" xml:space="preserve">
+    <value>Infor Visual is reachable</value>
+  </data>
+  <data name="Service_Status.VisualSourceUnreachable" xml:space="preserve">
+    <value>Infor Visual is unreachable</value>
+  </data>
+  <data name="Service_Status.RefreshSchedule" xml:space="preserve">
+    <value>Refresh interval: {0} minutes</value>
+  </data>
+  <data name="Service_Status.SeedContentOnly" xml:space="preserve">
+    <value>Baseline seed content only; no refresh has succeeded yet.</value>
+  </data>
+  <data name="Service_Status.RefreshedAgo" xml:space="preserve">
+    <value>Refreshed {0} ({1} ago)</value>
+  </data>
+
+  <!-- Settings surface (T076, T082, T083) -->
+  <data name="Service_Settings.Title" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Service_Settings.RefreshHeader" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Service_Settings.RefreshIntervalMinutes" xml:space="preserve">
+    <value>Refresh interval (minutes)</value>
+  </data>
+  <data name="Service_Settings.ApiHeader" xml:space="preserve">
+    <value>Service API</value>
+  </data>
+  <data name="Service_Settings.BindAddress" xml:space="preserve">
+    <value>Bind address</value>
+  </data>
+  <data name="Service_Settings.Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Service_Settings.AutoStart" xml:space="preserve">
+    <value>Start automatically at logon</value>
+  </data>
+  <data name="Service_Settings.CredentialHeader" xml:space="preserve">
+    <value>Shared credential</value>
+  </data>
+  <data name="Service_Settings.RotateCredential" xml:space="preserve">
+    <value>Generate / rotate credential</value>
+  </data>
+  <data name="Service_Settings.CredentialWriteOnly" xml:space="preserve">
+    <value>The credential value is never displayed or logged. Install it on clients through the documented out-of-band procedure.</value>
+  </data>
+  <data name="Service_Settings.CredentialConfigured" xml:space="preserve">
+    <value>A credential is configured.</value>
+  </data>
+  <data name="Service_Settings.CredentialRotated" xml:space="preserve">
+    <value>A new credential was generated. Existing clients must be updated before they can authenticate again.</value>
+  </data>
+  <data name="Service_Settings.VisualHeader" xml:space="preserve">
+    <value>Infor Visual source</value>
+  </data>
+  <data name="Service_Settings.VisualServer" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="Service_Settings.VisualDatabase" xml:space="preserve">
+    <value>Database</value>
+  </data>
+  <data name="Service_Settings.VisualUserId" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Service_Settings.VisualTimeoutSeconds" xml:space="preserve">
+    <value>Connection timeout (seconds)</value>
+  </data>
+  <data name="Service_Settings.MySqlHeader" xml:space="preserve">
+    <value>MySQL host</value>
+  </data>
+  <data name="Service_Settings.MySqlServer" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="Service_Settings.MySqlPort" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Service_Settings.MySqlUserId" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Service_Settings.MySqlPasswordFile" xml:space="preserve">
+    <value>Password option file</value>
+  </data>
+  <data name="Service_Settings.MySqlDumpPath" xml:space="preserve">
+    <value>mysqldump path (blank resolves from PATH)</value>
+  </data>
+  <data name="Service_Settings.BackupHeader" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Service_Settings.BackupToolAvailable" xml:space="preserve">
+    <value>The backup tool is available.</value>
+  </data>
+  <data name="Service_Settings.BackupToolUnavailable" xml:space="preserve">
+    <value>mysqldump is not available, so no backup can be taken. Set its path above or add it to PATH.</value>
+  </data>
+  <data name="Service_Settings.StoreEnable" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Service_Settings.StoreSchedule" xml:space="preserve">
+    <value>Schedule (HH:mm, local)</value>
+  </data>
+  <data name="Service_Settings.StoreRetention" xml:space="preserve">
+    <value>Artifacts to keep</value>
+  </data>
+  <data name="Service_Settings.StoreDestination" xml:space="preserve">
+    <value>Destination folder</value>
+  </data>
+  <data name="Service_Settings.BackupNow" xml:space="preserve">
+    <value>Back up now</value>
+  </data>
+  <data name="Service_Settings.BackupNowResult" xml:space="preserve">
+    <value>Backup for {0}: {1}</value>
+  </data>
+  <data name="Service_Settings.RestoreHeader" xml:space="preserve">
+    <value>Emergency restore</value>
+  </data>
+  <data name="Service_Settings.Restore" xml:space="preserve">
+    <value>Restore selected artifact</value>
+  </data>
+  <data name="Service_Settings.RestorePickArtifact" xml:space="preserve">
+    <value>Select a backup artifact first.</value>
+  </data>
+  <data name="Service_Settings.RestoreDeclined" xml:space="preserve">
+    <value>The restore was not confirmed, so nothing was changed.</value>
+  </data>
+  <data name="Service_Settings.RestoreConfirmTitle" xml:space="preserve">
+    <value>Replace this store?</value>
+  </data>
+  <data name="Service_Settings.RestoreConfirmBody" xml:space="preserve">
+    <value>This replaces the entire store with the selected backup. A safety snapshot of the current state is taken first, and the store is unavailable until the reload finishes.</value>
+  </data>
+  <data name="Service_Settings.RestoreConfirmPrimary" xml:space="preserve">
+    <value>Replace the store</value>
+  </data>
+  <data name="Service_Settings.RestoreConfirmClose" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Service_Settings.RestoreOutcome" xml:space="preserve">
+    <value>Restore outcome: {0}. {1}</value>
+  </data>
+  <data name="Service_Settings.ArtifactSafetyDisplay" xml:space="preserve">
+    <value>{0} (safety snapshot)</value>
+  </data>
+  <data name="Service_Settings.ArtifactPrunedDisplay" xml:space="preserve">
+    <value>{0} (pruned)</value>
+  </data>
+  <data name="Service_Settings.Save" xml:space="preserve">
+    <value>Save settings</value>
+  </data>
+  <data name="Service_Settings.InvalidRefreshInterval" xml:space="preserve">
+    <value>The refresh interval must be a whole number of minutes greater than zero.</value>
+  </data>
+  <data name="Service_Settings.InvalidBindAddress" xml:space="preserve">
+    <value>The bind address must not be empty.</value>
+  </data>
+  <data name="Service_Settings.InvalidPort" xml:space="preserve">
+    <value>The port must be a number between 1 and 65535.</value>
+  </data>
+  <data name="Service_Settings.InvalidTimeout" xml:space="preserve">
+    <value>The connection timeout must be a whole number of seconds greater than zero.</value>
+  </data>
+  <data name="Service_Settings.InvalidSchedule" xml:space="preserve">
+    <value>The schedule for {0} must be a time of day in HH:mm form.</value>
+  </data>
+  <data name="Service_Settings.InvalidRetention" xml:space="preserve">
+    <value>The retention for {0} must be at least one artifact.</value>
+  </data>
+  <data name="Service_Settings.InvalidDestination" xml:space="preserve">
+    <value>The destination folder for {0} must not be empty.</value>
+  </data>
+</root>

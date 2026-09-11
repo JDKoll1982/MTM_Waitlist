@@ -24,6 +24,17 @@ public sealed class ImageOverrideReadService : IImageOverrideReadService
         "work_center"
     };
 
+    // Stored procedure names. Constitution III keeps every SQL statement in Database/StoredProcedures, so the
+    // statement text lives in the artifact's create.sql and only the name appears here.
+    private const string GetProcedure = "sp_config_images_locations_get";
+    private const string GetByScopeProcedure = "sp_config_images_locations_get_by_scope";
+    private const string CountActiveProcedure = "sp_config_images_locations_count_active_get";
+    private const string CountByScopeProcedure = "sp_config_images_locations_count_by_scope_get";
+    private const string GetAllProcedure = "sp_config_images_locations_get_all";
+    private const string GetByPublicIdProcedure = "sp_config_images_locations_get_by_public_id";
+    private const string RecentProcedure = "sp_config_images_locations_recent_get";
+    private const string WorkCenterExistsProcedure = "sp_setup_work_centers_exists_get";
+
     /// <summary>
     /// Initializes a new ImageOverrideReadService.
     /// Dependencies must be provided; null dependencies throw ArgumentNullException.
@@ -63,23 +74,8 @@ public sealed class ImageOverrideReadService : IImageOverrideReadService
         {
             _logger.LogDebug("Loading override: scope={Scope}, scopeItemId={ScopeItemId}", scope, scopeItemId);
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"SELECT
-    id,
-    public_id,
-    scope,
-    scope_item_id,
-    image_path,
-    is_active,
-    created_by_user_id,
-    updated_by_user_id,
-    created_utc,
-    updated_utc
-FROM config_images_locations
-WHERE scope = @p_scope
-  AND scope_item_id = @p_scope_item_id
-  AND is_active = 1
-LIMIT 1;",
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                GetProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_scope"] = scope,
@@ -130,22 +126,8 @@ LIMIT 1;",
         {
             _logger.LogDebug("Loading all overrides for scope: {Scope}", scope);
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"SELECT
-    id,
-    public_id,
-    scope,
-    scope_item_id,
-    image_path,
-    is_active,
-    created_by_user_id,
-    updated_by_user_id,
-    created_utc,
-    updated_utc
-FROM config_images_locations
-WHERE scope = @p_scope
-  AND is_active = 1
-ORDER BY updated_utc DESC;",
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                GetByScopeProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_scope"] = scope
@@ -183,10 +165,8 @@ ORDER BY updated_utc DESC;",
         {
             _logger.LogDebug("Counting all active overrides");
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"SELECT COUNT(*) as count
-FROM config_images_locations
-WHERE is_active = 1;",
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                CountActiveProcedure,
                 new Dictionary<string, object?>(),
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
@@ -226,11 +206,8 @@ WHERE is_active = 1;",
         {
             _logger.LogDebug("Counting active overrides for scope {Scope}", scope);
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"SELECT COUNT(*) as count
-FROM config_images_locations
-WHERE scope = @p_scope
-  AND is_active = 1;",
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                CountByScopeProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_scope"] = scope
@@ -262,20 +239,8 @@ WHERE scope = @p_scope
             _logger.LogInformation("Detecting orphaned overrides");
 
             // Get all active overrides
-            var allRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"SELECT
-    id,
-    public_id,
-    scope,
-    scope_item_id,
-    image_path,
-    is_active,
-    created_by_user_id,
-    updated_by_user_id,
-    created_utc,
-    updated_utc
-FROM config_images_locations
-WHERE is_active = 1;",
+            var allRows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                GetAllProcedure,
                 new Dictionary<string, object?>(),
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
@@ -321,22 +286,8 @@ WHERE is_active = 1;",
         {
             _logger.LogDebug("Loading override by public ID: {PublicId}", publicId);
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"SELECT
-    id,
-    public_id,
-    scope,
-    scope_item_id,
-    image_path,
-    is_active,
-    created_by_user_id,
-    updated_by_user_id,
-    created_utc,
-    updated_utc
-FROM config_images_locations
-WHERE public_id = @p_public_id
-  AND is_active = 1
-LIMIT 1;",
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                GetByPublicIdProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_public_id"] = publicId
@@ -376,22 +327,14 @@ LIMIT 1;",
         {
             _logger.LogDebug("Loading recently updated overrides (max {Count})", maxRecordCount);
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                $@"SELECT
-    id,
-    public_id,
-    scope,
-    scope_item_id,
-    image_path,
-    is_active,
-    created_by_user_id,
-    updated_by_user_id,
-    created_utc,
-    updated_utc
-FROM config_images_locations
-ORDER BY updated_utc DESC
-LIMIT {maxRecordCount};",
-                new Dictionary<string, object?>(),
+            // The row cap is a bound parameter here, not interpolated text: the procedure clamps it and binds it
+            // through a local variable, which is what replaced `LIMIT {maxRecordCount}` in the inline statement.
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                RecentProcedure,
+                new Dictionary<string, object?>
+                {
+                    ["p_max_rows"] = maxRecordCount
+                },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
 
@@ -473,8 +416,8 @@ LIMIT {maxRecordCount};",
 
         try
         {
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"SELECT id FROM setup_work_centers_catalog WHERE id = @p_id LIMIT 1;",
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                WorkCenterExistsProcedure,
                 new Dictionary<string, object?> { ["p_id"] = id },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);

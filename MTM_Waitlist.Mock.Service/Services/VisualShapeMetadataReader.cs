@@ -27,8 +27,10 @@ public sealed class VisualShapeMetadataReader : IVisualShapeMetadataReader
     /// </param>
     public VisualShapeMetadataReader(string mockConnectionString)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(mockConnectionString);
-        _mockConnectionString = mockConnectionString;
+        // Deliberately permissive: the service must be able to start — tray and settings surfaces included —
+        // so an operator can configure the host. A missing connection is reported by the operation that needs
+        // it rather than thrown here, which would take the whole service down before the UI exists (FR-012).
+        _mockConnectionString = mockConnectionString ?? string.Empty;
     }
 
     /// <inheritdoc />
@@ -38,6 +40,27 @@ public sealed class VisualShapeMetadataReader : IVisualShapeMetadataReader
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(shapeKey);
 
+        var rows = await ReadAsync(shapeKey, cancellationToken).ConfigureAwait(false);
+        return rows.Count == 0 ? null : rows[0];
+    }
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<VisualShapeMetadata>> GetAllShapeMetadataAsync(
+        CancellationToken cancellationToken = default) =>
+        ReadAsync(shapeKey: null, cancellationToken);
+
+    /// <summary>
+    /// Calls the metadata procedure, with <see langword="null"/> meaning "every shape present in the cache".
+    /// </summary>
+    private async Task<IReadOnlyList<VisualShapeMetadata>> ReadAsync(
+        string? shapeKey,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(_mockConnectionString))
+        {
+            throw new InvalidOperationException(MySqlConnectionStringResolver.NotConfiguredMessage);
+        }
+
         await using var connection = new MySqlConnection(_mockConnectionString);
         await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -45,23 +68,29 @@ public sealed class VisualShapeMetadataReader : IVisualShapeMetadataReader
         {
             CommandType = System.Data.CommandType.StoredProcedure
         };
-        command.Parameters.AddWithValue("@p_shape_key", shapeKey);
+        command.Parameters.AddWithValue("@p_shape_key", (object?)shapeKey ?? DBNull.Value);
+
+        var results = new List<VisualShapeMetadata>();
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
 
-        if (!await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+        var mirrorExistsOrdinal = reader.GetOrdinal("mirror_table_exists");
+        var stageExistsOrdinal = reader.GetOrdinal("stage_table_exists");
+        var getExistsOrdinal = reader.GetOrdinal("get_procedure_exists");
+        var refreshExistsOrdinal = reader.GetOrdinal("refresh_procedure_exists");
+        var columnsOrdinal = reader.GetOrdinal("mirror_columns");
+
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
-            return null;
+            results.Add(new VisualShapeMetadata(
+                reader.GetString("shape_key"),
+                Convert.ToInt32(reader.GetValue(mirrorExistsOrdinal)),
+                Convert.ToInt32(reader.GetValue(stageExistsOrdinal)),
+                Convert.ToInt32(reader.GetValue(getExistsOrdinal)),
+                Convert.ToInt32(reader.GetValue(refreshExistsOrdinal)),
+                reader.IsDBNull(columnsOrdinal) ? null : reader.GetString(columnsOrdinal)));
         }
 
-        return new VisualShapeMetadata(
-            reader.GetString("shape_key"),
-            Convert.ToInt32(reader.GetValue(reader.GetOrdinal("mirror_table_exists"))),
-            Convert.ToInt32(reader.GetValue(reader.GetOrdinal("stage_table_exists"))),
-            Convert.ToInt32(reader.GetValue(reader.GetOrdinal("get_procedure_exists"))),
-            Convert.ToInt32(reader.GetValue(reader.GetOrdinal("refresh_procedure_exists"))),
-            reader.IsDBNull(reader.GetOrdinal("mirror_columns"))
-                ? null
-                : reader.GetString("mirror_columns"));
+        return results;
     }
 }

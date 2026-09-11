@@ -11,6 +11,24 @@ namespace MTM_Waitlist.Module_Startup.Services;
 
 public sealed class StartupSessionRepository : IStartupSessionRepository
 {
+    /// <summary>The database server's UTC clock — session validity is judged against the server, not the client.</summary>
+    private const string ServerUtcNowProcedure = "sp_server_utc_now_get";
+
+    /// <summary>Credential material for one active user, so the caller can verify a password.</summary>
+    private const string CredentialsCheckProcedure = "sp_auth_credentials_check";
+
+    /// <summary>Stores a new password hash/salt and clears the forced-change flag.</summary>
+    private const string PasswordUpdateProcedure = "sp_auth_user_password_update";
+
+    /// <summary>Whether the presented machine is a registered workstation.</summary>
+    private const string ComputerRegisteredProcedure = "sp_auth_computer_registered_get";
+
+    /// <summary>One active user's identity and role.</summary>
+    private const string UserRowProcedure = "sp_auth_user_row_get";
+
+    /// <summary>The newest live session's expiry for one user, if any.</summary>
+    private const string SessionExpiryProcedure = "sp_auth_session_expiry_get";
+
     private const int PasswordSaltLengthBytes = 16;
     private const int PasswordHashLengthBytes = 32;
     private const int PasswordIterations = 100_000;
@@ -38,7 +56,10 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
             await using var connection = new MySqlConnection(timeoutConnectionString);
             await connection.OpenAsync(token);
 
-            await using var command = new MySqlCommand("SELECT fn_server_utc_now();", connection);
+            await using var command = new MySqlCommand(ServerUtcNowProcedure, connection)
+            {
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
             return await command.ExecuteScalarAsync(token);
         }, cancellationToken);
 
@@ -132,26 +153,12 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
             await using var connection = new MySqlConnection(timeoutConnectionString);
             await connection.OpenAsync(token);
 
-            await using var command = new MySqlCommand(
-                """
-                SELECT u.id,
-                       COALESCE(r.role_name, '') AS role_name,
-                       u.password_hash,
-                       u.password_salt,
-                       u.require_password_change,
-                       COALESCE(u.display_name, '') AS display_name,
-                       COALESCE(u.employee_identifier, '') AS employee_identifier
-                FROM core_users_profiles u
-                LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
-                LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
-                WHERE u.username_normalized = @username
-                  AND u.is_active = 1
-                ORDER BY ra.assigned_utc DESC
-                LIMIT 1;
-                """,
-                connection);
+            await using var command = new MySqlCommand(CredentialsCheckProcedure, connection)
+            {
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
 
-            command.Parameters.AddWithValue("@username", username.Trim().ToLowerInvariant());
+            command.Parameters.AddWithValue("@p_username", username.Trim().ToLowerInvariant());
 
             await using var reader = await command.ExecuteReaderAsync(token);
             if (!await reader.ReadAsync(token))
@@ -212,21 +219,14 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
             await using var connection = new MySqlConnection(timeoutConnectionString);
             await connection.OpenAsync(token);
 
-            await using var command = new MySqlCommand(
-                """
-                UPDATE core_users_profiles
-                SET password_hash = @passwordHash,
-                    password_salt = @passwordSalt,
-                    require_password_change = 0,
-                    updated_utc = UTC_TIMESTAMP()
-                WHERE id = @userId
-                  AND is_active = 1;
-                """,
-                connection);
+            await using var command = new MySqlCommand(PasswordUpdateProcedure, connection)
+            {
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
 
-            command.Parameters.AddWithValue("@passwordHash", hash);
-            command.Parameters.AddWithValue("@passwordSalt", salt);
-            command.Parameters.AddWithValue("@userId", userId);
+            command.Parameters.AddWithValue("@p_password_hash", hash);
+            command.Parameters.AddWithValue("@p_password_salt", salt);
+            command.Parameters.AddWithValue("@p_user_id", userId);
 
             var rows = await command.ExecuteNonQueryAsync(token);
             return rows > 0;
@@ -239,18 +239,13 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         string macAddressNormalized,
         CancellationToken cancellationToken)
     {
-        await using var command = new MySqlCommand(
-            """
-            SELECT COUNT(1)
-            FROM core_computers_registry
-            WHERE hostname_normalized = @hostname
-              AND mac_address_normalized = @macAddress
-              AND is_registered = 1;
-            """,
-            connection);
+        await using var command = new MySqlCommand(ComputerRegisteredProcedure, connection)
+        {
+            CommandType = System.Data.CommandType.StoredProcedure
+        };
 
-        command.Parameters.AddWithValue("@hostname", hostnameNormalized);
-        command.Parameters.AddWithValue("@macAddress", macAddressNormalized);
+        command.Parameters.AddWithValue("@p_hostname_normalized", hostnameNormalized);
+        command.Parameters.AddWithValue("@p_mac_address_normalized", macAddressNormalized);
 
         var scalar = await command.ExecuteScalarAsync(cancellationToken);
         var count = scalar is null ? 0 : Convert.ToInt32(scalar);
@@ -262,23 +257,12 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         string username,
         CancellationToken cancellationToken)
     {
-        await using var command = new MySqlCommand(
-            """
-            SELECT u.id,
-                   COALESCE(r.role_name, '') AS role_name,
-                   COALESCE(u.display_name, '') AS display_name,
-                   COALESCE(u.employee_identifier, '') AS employee_identifier
-            FROM core_users_profiles u
-            LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
-            LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
-            WHERE u.username_normalized = @username
-              AND u.is_active = 1
-            ORDER BY ra.assigned_utc DESC
-            LIMIT 1;
-            """,
-            connection);
+        await using var command = new MySqlCommand(UserRowProcedure, connection)
+        {
+            CommandType = System.Data.CommandType.StoredProcedure
+        };
 
-        command.Parameters.AddWithValue("@username", username);
+        command.Parameters.AddWithValue("@p_username", username);
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken))
@@ -298,19 +282,12 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         long userId,
         CancellationToken cancellationToken)
     {
-        await using var command = new MySqlCommand(
-            """
-            SELECT expires_utc
-            FROM auth_sessions_tokens
-            WHERE user_id = @userId
-              AND is_active = 1
-              AND revoked_utc IS NULL
-            ORDER BY expires_utc DESC
-            LIMIT 1;
-            """,
-            connection);
+        await using var command = new MySqlCommand(SessionExpiryProcedure, connection)
+        {
+            CommandType = System.Data.CommandType.StoredProcedure
+        };
 
-        command.Parameters.AddWithValue("@userId", userId);
+        command.Parameters.AddWithValue("@p_user_id", userId);
 
         var scalar = await command.ExecuteScalarAsync(cancellationToken);
         if (scalar is DateTime dateTime)

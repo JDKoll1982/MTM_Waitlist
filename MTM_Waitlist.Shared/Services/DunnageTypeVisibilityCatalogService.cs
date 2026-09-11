@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Shared.Models;
@@ -8,6 +7,18 @@ namespace MTM_Waitlist.Module_Shared.Services;
 
 public sealed class DunnageTypeVisibilityCatalogService : IDunnageTypeVisibilityCatalogService
 {
+    /// <summary>The persisted visibility map, one row per stored type.</summary>
+    private const string VisibilityGetProcedure = "sp_config_dunnage_types_visibility_get";
+
+    /// <summary>Clears the map before it is rewritten.</summary>
+    private const string VisibilityDeleteAllProcedure = "sp_config_dunnage_types_visibility_delete_all";
+
+    /// <summary>Writes one type's visibility row.</summary>
+    private const string VisibilityInsertRowProcedure = "sp_config_dunnage_types_visibility_insert_row";
+
+    /// <summary>The receiving store's usable dunnage types, alphabetically.</summary>
+    private const string ReceivingDunnageTypesProcedure = "sp_receiving_dunnage_types_get_all";
+
     private readonly MySqlHelperServer _mySqlHelperServer;
 
     public DunnageTypeVisibilityCatalogService(MySqlHelperServer mySqlHelperServer)
@@ -49,9 +60,8 @@ public sealed class DunnageTypeVisibilityCatalogService : IDunnageTypeVisibility
 
     public async Task<IReadOnlyDictionary<string, bool>> GetVisibilityMapAsync(CancellationToken cancellationToken = default)
     {
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT dunnage_type_id, is_visible
-FROM config_dunnage_types_visibility;",
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            VisibilityGetProcedure,
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -82,44 +92,25 @@ FROM config_dunnage_types_visibility;",
 
         try
         {
-            _ = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-                @"DELETE FROM config_dunnage_types_visibility;",
+            _ = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                VisibilityDeleteAllProcedure,
                 new Dictionary<string, object?>(),
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
 
-            if (allTypes.Count > 0)
+            // One call per type: MySQL 5.7 cannot iterate a collection inside a routine, and the only value that
+            // would have to travel in a list is the free-text type name, which a delimiter cannot carry safely.
+            // The delete-then-write shape is unchanged from the statement this replaces (see the artifact header).
+            foreach (var type in allTypes)
             {
-                var insertSql = new StringBuilder();
-                insertSql.AppendLine("INSERT INTO config_dunnage_types_visibility (");
-                insertSql.AppendLine("    public_id,");
-                insertSql.AppendLine("    dunnage_type_id,");
-                insertSql.AppendLine("    dunnage_type_name,");
-                insertSql.AppendLine("    is_visible,");
-                insertSql.AppendLine("    created_by_user_id,");
-                insertSql.AppendLine("    updated_by_user_id,");
-                insertSql.AppendLine("    created_utc,");
-                insertSql.AppendLine("    updated_utc");
-                insertSql.AppendLine(") VALUES");
-
-                var parameters = new Dictionary<string, object?>();
-                for (var index = 0; index < allTypes.Count; index++)
-                {
-                    if (index > 0)
+                _ = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                    VisibilityInsertRowProcedure,
+                    new Dictionary<string, object?>
                     {
-                        insertSql.AppendLine(",");
-                    }
-
-                    var type = allTypes[index];
-                    insertSql.Append($"(UUID(), @p_dunnage_type_id_{index}, @p_dunnage_type_name_{index}, @p_is_visible_{index}, NULL, NULL, UTC_TIMESTAMP(), UTC_TIMESTAMP())");
-                    parameters[$"p_dunnage_type_id_{index}"] = type.NumericId;
-                    parameters[$"p_dunnage_type_name_{index}"] = type.Name;
-                    parameters[$"p_is_visible_{index}"] = visibleSet.Contains(type.Id) ? 1 : 0;
-                }
-
-                _ = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-                    insertSql.ToString(),
-                    parameters,
+                        ["p_dunnage_type_id"] = type.NumericId,
+                        ["p_dunnage_type_name"] = type.Name,
+                        ["p_is_visible"] = visibleSet.Contains(type.Id) ? 1 : 0,
+                    },
                     MySqlDatabaseTarget.MtmWaitlist,
                     cancellationToken).ConfigureAwait(false);
             }
@@ -136,12 +127,8 @@ FROM config_dunnage_types_visibility;",
 
     private async Task<IReadOnlyList<DunnageTypeRecord>> GetAllDunnageTypesAsync(CancellationToken cancellationToken)
     {
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT id, type_name
-FROM dunnage_types
-WHERE type_name IS NOT NULL
-    AND TRIM(type_name) <> ''
-ORDER BY type_name ASC;",
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            ReceivingDunnageTypesProcedure,
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmReceivingApplication,
             cancellationToken).ConfigureAwait(false);

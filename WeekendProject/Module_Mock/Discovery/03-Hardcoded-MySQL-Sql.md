@@ -42,9 +42,9 @@
 - L52 SELECT visibility; L85 DELETE all; L120–139 dynamic multi-row INSERT (VALUES (UUID(), ...)) — new SP candidates
 
 **`MTM_Waitlist.Shared/Services/WorkCenterCatalogService.cs`** — mixes inline + direct MySqlCommand.
-- L41–48 computers (GetAvailableComputers); L91–113 hot WCs read (overlaps `sp_config_hot_workcenters_get_for_workstation`);
-  L196–206 workstation resolve; L217–220 catalog lookup; **L272–279 direct DELETE hot WCs (→ `sp_config_hot_workcenters_delete_for_workstation`)**;
-  **L284–333 direct multi-row INSERT ... ON DUPLICATE KEY UPDATE (→ `sp_config_hot_workcenters_upsert`)**;
+- L41–48 computers (GetAvailableComputers); L91–113 hot WCs read (overlaps `sp_config_hot_workcenters_get_for_computer`);
+  L196–206 workstation resolve; L217–220 catalog lookup; **L272–279 direct DELETE hot WCs (→ `sp_config_hot_workcenters_delete_for_computer`)**;
+  **L284–333 direct multi-row INSERT ... ON DUPLICATE KEY UPDATE (→ `sp_config_hot_workcenters_upsert`)**; 
   L342–350 available WCs (→ `sp_setup_work_centers_get_all`); L362–372 resolve computer name
 
 ## B. Inline SQL → mtm_receiving_application
@@ -66,19 +66,37 @@
 - SP-wrapper warm-up file loads (executed as SPs): `DunnageWorkflowService.cs` L87/L144; `SetupPersistenceService.cs` L219.
 
 ## E. SP names called in C# that may lack a matching local artifact
-- `DunnageWorkflowService.cs`: `sp_Dunnage_Types_Insert` L90, `sp_Dunnage_Parts_Insert` L147,
-  `sp_Dunnage_Types_GetAll` L181, `sp_Dunnage_Parts_GetByType` L239, `sp_Dunnage_Parts_GetAll` L285/L330
-  — all `MtmReceivingApplication`; naming mismatch to verify vs local wrapper files `sp_setup_dunnage_*`.
-- Verify folder-vs-body name mismatches for `sp_config_hot_workcenters_*_for_workstation`,
-  `sp_setup_workstations_*` (folder name ≠ procedure name inside).
+- `DunnageWorkflowService.cs`: `sp_Dunnage_Types_Insert` L75, `sp_Dunnage_Parts_Insert` L132,
+  `sp_Dunnage_Types_GetAll` L166, `sp_Dunnage_Parts_GetByType` L224, `sp_Dunnage_Parts_GetAll` L270/L315
+  — all `MtmReceivingApplication`, and all **live**: the `sp_Dunnage_*` family is owned by
+  MTM_Receiving_Application (61 routines verified in `information_schema.ROUTINES`), so these are dependency
+  calls, not artifacts to author here.
+
+### E.1 Resolution (2026-09-10, task T097) — every name below was checked against the live server
+- **`sp_Dunnage_*` vs `sp_setup_dunnage_*`: there is no `sp_setup_dunnage_*` procedure anywhere.**
+  `SELECT … FROM information_schema.ROUTINES WHERE ROUTINE_NAME LIKE 'sp_setup_dunnage%'` returns nothing on
+  either schema. The two files that carried that name were flat dependency notes, not artifacts — they contain
+  no `CREATE PROCEDURE` at all — and were renamed to the live names they document:
+  `sp_Dunnage_Types_Insert.sql` and `sp_Dunnage_Parts_Insert.sql`, with the two `LoadAsync` call sites in
+  `DunnageWorkflowService.cs` (L72, L129) updated to match. Each file now states plainly that it is a dependency
+  note for a procedure this repository does not own.
+- **`sp_config_hot_workcenters_*_for_workstation`: no such name exists.** The live names are
+  `sp_config_hot_workcenters_get_for_computer` and `sp_config_hot_workcenters_delete_for_computer` (the table
+  they filter is `core_computers_registry`). The callers were already correct (T089); this document was not, and
+  now is. `sp_config_hot_workcenters_upsert` was always correct.
+- **`sp_setup_workstations_*`: no such name exists either.** The live procedure is `sp_setup_work_centers_touch`.
+  The one caller (`SetupPersistenceService.cs`) already called it correctly; only a **log line** still named
+  `sp_setup_workstations_touch`, which sent an operator looking for a procedure that is not there. Fixed.
+- Standing rule this all follows: **live names win.** Nothing another application calls is renamed or dropped;
+  the repository's text is corrected to match the server.
 
 ## Highest-value replace candidates
 | Inline SQL | Target | Existing SP |
 |---|---|---|
 | `AverageCoilWeightService.cs` L14 | receiving | ✅ `sp_receiving_history_average_coil_weight` (authored, unused) |
-| `WorkCenterCatalogService.cs` L272–333 | waitlist | ✅ `sp_config_hot_workcenters_delete_for_workstation` + `_upsert` |
+| `WorkCenterCatalogService.cs` L272–333 | waitlist | ✅ `sp_config_hot_workcenters_delete_for_computer` + `_upsert` |
 | `WorkCenterCatalogService.cs` L342 | waitlist | ✅ `sp_setup_work_centers_get_all` |
-| `WorkCenterCatalogService.cs` L91 | waitlist | ✅ `sp_config_hot_workcenters_get_for_workstation` |
+| `WorkCenterCatalogService.cs` L91 | waitlist | ✅ `sp_config_hot_workcenters_get_for_computer` |
 | `ConfigSettingsValueService.cs` L38 | waitlist | ⚠️ `sp_config_settings_get_effective` |
 | `ImageLocationService.cs` L671 | waitlist | ⚠️ `sp_setup_work_centers_get_all` (partial) |
 | ComputerRegistryService, StartupSessionRepository, ImageOverrideRead/Write, DunnageTypeVisibility | waitlist | ❌ none → new SP candidates |

@@ -28,7 +28,8 @@ of an external read shape.
 |---|---|---|
 | `Key` | string | Stable shape identifier, e.g. `work_order_lookup`; drives every derived name |
 | `Module` | enum | `Module_Setup` \| `Module_Waitlist` — selects the source script folder |
-| `SourceScriptRelativePath` | string | e.g. `Database/InforVisual/Queues/Module_Setup/Queries/LookupWorkOrder.sql` |
+| `SourceScriptRelativePath` | string | e.g. `Database/InforVisual/Queues/Module_Setup/Queries/LookupWorkOrder.sql` — the **per-key** read the application attempts live |
+| `PopulationScriptRelativePath` | string (nullable) | e.g. `Database/InforVisual/Queues/Module_Mock/Populations/work_order_lookup_population.sql` — the **set-based** read the service executes to build a complete snapshot. `null` means the shape can never be refreshed, so validation excludes it |
 | `InputParameters` | ordered list of `(Name, Type, IsRequired)` | The Visual read's parameter set |
 | `OutputColumns` | ordered list of `(Name, Type)` | The Visual read's exact returned column set |
 | `MirrorTableName` | string | `visual_<key>_result` |
@@ -41,6 +42,13 @@ of an external read shape.
 **Validation rules** (from FR-016 and the playbook):
 - `MirrorTableName`, `StageTableName`, `GetProcedureName`, and `RefreshProcedureName` are **derived** from `Key`; a
   shape whose artifacts do not exist under the derived names is invalid and must be reported at startup.
+- Both reads must exist on disk: the per-key `SourceScriptRelativePath` and the set-based
+  `PopulationScriptRelativePath`. A shape with neither (or only the per-key one) cannot be refreshed, so it is
+  reported as a half-added shape and excluded rather than silently never refreshing.
+- A shape whose artifacts exist in the cache with **no catalog entry** is likewise reported: nothing would refresh it.
+- The population read takes no parameters and must project exactly `InputParameters` then `OutputColumns` under
+  those names — the payload source validates the returned column set and reports a mismatch rather than loading a
+  wrong-shaped snapshot.
 - `OutputColumns` is the contract with live reads: it must match the live Visual projection exactly, or the shape's
   refresh is marked failed and the last good snapshot is retained.
 - Adding a shape must not change any other shape's row or artifact.
@@ -243,7 +251,7 @@ down.
 
 | Field | Type | Default chosen at implementation time | Notes |
 |---|---|---|---|
-| `RefreshInterval` | `TimeSpan` | 15 minutes | Global default; per-shape override via shape catalog |
+| `RefreshInterval` | `TimeSpan` | 3 hours, on a grid anchored at **local midnight** — 00:00/03:00/06:00/09:00/12:00/15:00/18:00/21:00 server-local | Global default; per-shape override via shape catalog (`research.md` R16) |
 | `VisualSource` | object | from existing `InforVisualDatabaseOptions` | Server/database/user; password from the existing env-var path (never plaintext in this file) |
 | `ApiSettings.BindAddress` | string | `0.0.0.0` | Configurable (FR-012); loopback-only is a valid operator choice |
 | `ApiSettings.Port` | int | 5760 | Configurable |
@@ -391,3 +399,45 @@ actual column names derived from `information_schema`.
 **Why a procedure rather than inline SQL:** constitution III forbids inline/hard-coded SQL statement text in C#, and
 the inline-SQL audit (tasks T098) would otherwise flag the schema/metadata reads. Routing the check through this
 procedure keeps the SP-first rule intact with no audit exemption.
+
+`p_shape_key` may be `NULL`, which reports every shape whose mirror table exists — that is how a shape with
+artifacts but **no catalog entry** is found and reported instead of silently never being refreshed.
+
+---
+
+## 12a. Procedure: `sp_visual_read_shape_freshness_get` (FR-017, FR-022)
+
+The freshness report behind the cached-data age on both the app indicator and the service status payload.
+
+| Output | Meaning |
+|---|---|
+| `shape_key` | The shape key |
+| `refreshed_utc` | `MAX(refreshed_utc)` of the live mirror; `NULL` when the mirror is empty |
+| `is_seed_content` | `1` when the mirror holds no refreshed row (empty, or every row is seed content), so no age exists to report |
+| `row_count` | Rows currently in the live mirror |
+
+`p_shape_key` may be `NULL` to report every shape.
+
+**Why it is separate from `sp_visual_<shape>_get`:** that procedure may project only the live read's own columns —
+adding `refreshed_utc` would break the structural identity the fallback guarantees at FR-004 — and
+`sp_visual_read_shape_metadata_get` answers "do the artifacts exist", not "how old is the data". Neither can carry the
+age, so it is read here and nowhere else.
+
+**Why it enumerates the shapes:** freshness is a per-table read, so unlike the metadata procedure it cannot be derived
+from `information_schema`. Adding a shape therefore adds one `UNION ALL` branch here (playbook step 3b). That is
+additive by construction: the output columns are fixed, so no existing shape's contract, procedure signature, or
+result type changes.
+
+---
+
+## 12b. Refresh row tally (the snapshot size bound)
+
+Each `sp_visual_<shape>_refresh` expands its JSON payload into the stage twin through an inline digit-tally derived
+table, then validates that the staged row count equals `JSON_LENGTH(p_rows)` and aborts with `SIGNAL` (leaving the
+live table untouched) when they differ.
+
+The tally covers **0..99999 rows** per shape. It was widened from 0..1999 because the operator-approved driver
+population is every open Infor Visual work order with `STATUS IN ('R','U','F')` — approximately 42,800 orders, plus
+their operation sequences and subordinate parts — which the original bound could not hold. The bound is a hard
+ceiling, not a silent truncation: a payload larger than the tally fails the load validation and the previous snapshot
+stays live.

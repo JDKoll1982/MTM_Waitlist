@@ -600,4 +600,35 @@
   <data name="Waitlist_MyRequestsToggle.AutomationProperties.Name" xml:space="preserve">
     <value>Show only my requests</value>
   </data>
+
+  <!-- Module_Mock read-status indicator (FR-003/FR-005/FR-017/FR-022).
+       The message keys are format strings: {0} the unreachable statement, {1} the cached-data-in-use
+       statement, {2} the cached-data age for the AgeText key only. -->
+  <data name="Mock_Indicator.Title" xml:space="preserve">
+    <value>Cached data in use</value>
+  </data>
+  <data name="Mock_Indicator.Unreachable" xml:space="preserve">
+    <value>Infor Visual is unreachable.</value>
+  </data>
+  <data name="Mock_Indicator.CachedInUse" xml:space="preserve">
+    <value>Cached data is being shown.</value>
+  </data>
+  <data name="Mock_Indicator.AgeText" xml:space="preserve">
+    <value>{0} {1} The cached copy is about {2} old.</value>
+  </data>
+  <data name="Mock_Indicator.SeedContent" xml:space="preserve">
+    <value>{0} {1} Only baseline seed content is available, because no refresh has succeeded yet.</value>
+  </data>
+  <data name="Mock_Indicator.UnknownAge" xml:space="preserve">
+    <value>an unknown amount of time</value>
+  </data>
+  <data name="Mock_Indicator.AgeMinutes" xml:space="preserve">
+    <value>{0} minutes</value>
+  </data>
+  <data name="Mock_Indicator.AgeHours" xml:space="preserve">
+    <value>{0} hours</value>
+  </data>
+  <data name="Mock_Indicator.AgeDays" xml:space="preserve">
+    <value>{0} days</value>
+  </data>
 </root>

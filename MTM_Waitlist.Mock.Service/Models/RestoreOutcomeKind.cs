@@ -17,6 +17,6 @@ public enum RestoreOutcomeKind
     /// <summary>Reloading the artifact failed; recover from the safety snapshot.</summary>
     FailedReload,
 
-    /// <summary>Reload completed but row-count verification failed.</summary>
+    /// <summary>Reload completed but the post-reload verification could not confirm the store.</summary>
     FailedVerification
 }

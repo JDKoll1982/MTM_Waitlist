@@ -159,7 +159,7 @@ Next task: **Service Layer: delete the sample catalogs + contract** | **Persona:
 - [ ] **Database Migration: create a delete SP for `config_settings_values`** and wire `ConfigSettingsValueService.DeleteSettingValueAsync` (`:142–148`). (Ref: Discovery/03 §A) | **Persona: Database Engineer**
 
 ### Subphase 5.3: Name/body consistency
-- [ ] **Database Migration: reconcile SP folder/body/caller name mismatches** (`sp_Dunnage_*` vs `sp_setup_dunnage_*`; `sp_config_hot_workcenters_*_for_workstation`; `sp_setup_workstations_*`) and fix callers. (Ref: Discovery/03 §E) | **Persona: Database Engineer**
+- [x] **Database Migration: reconcile SP folder/body/caller name mismatches** (`sp_Dunnage_*` vs `sp_setup_dunnage_*`; `sp_config_hot_workcenters_*_for_workstation`; `sp_setup_workstations_*`) and fix callers. (Ref: Discovery/03 §E) | **Persona: Database Engineer** — done 2026-09-10 (spec task T097): verified against `information_schema.ROUTINES` that `sp_setup_dunnage_*`, `sp_config_hot_workcenters_*_for_workstation` and `sp_setup_workstations_touch` exist nowhere; renamed the two dependency notes to the live `sp_Dunnage_*` names + updated their two `LoadAsync` call sites, fixed a stale log line naming `sp_setup_workstations_touch`, and corrected Discovery/03 §E. Live procedures untouched.
 
 ### Subphase 5.4: Enforcement
 - [ ] **Testing: assert no inline MySQL SQL remains** (a lint/grep-based test or CI check) so SP-first is enforced. (Ref: Spec §10) | **Persona: QA Engineer**

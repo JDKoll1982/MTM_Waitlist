@@ -27,10 +27,13 @@
   </ItemGroup>
 
   <!-- Mirror the app's queue-script content so integration tests can load real scripts from
-       AppContext.BaseDirectory\Database\InforVisual\Queues\... (same layout the app produces). -->
+       AppContext.BaseDirectory\Database\InforVisual\Queues\... (same layout the app produces).
+       The Module_Mock population reads are the service's own set-based snapshots and are part of the
+       shape catalog's validation surface, so they ship here too. -->
   <ItemGroup>
     <Content Include="..\Database\InforVisual\Queues\Module_Setup\**\*.sql" Link="Database\InforVisual\Queues\Module_Setup\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Database\InforVisual\Queues\Module_Waitlist\**\*.sql" Link="Database\InforVisual\Queues\Module_Waitlist\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Database\InforVisual\Queues\Module_Mock\**\*.sql" Link="Database\InforVisual\Queues\Module_Mock\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Database\MTMWipApp\Queues\Module_Waitlist\**\*.sql" Link="Database\MTMWipApp\Queues\Module_Waitlist\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Database\InforVisual\Queues\Module_Setup\README.md" Link="Database\InforVisual\Queues\Module_Setup\README.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

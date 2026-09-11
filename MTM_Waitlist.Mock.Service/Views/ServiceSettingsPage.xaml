@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.Mock.Service.Views.ServiceSettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Mock.Service.Models"
+    xmlns:viewModels="using:MTM_Waitlist.Mock.Service.ViewModels"
+    mc:Ignorable="d">
+
+    <ScrollViewer Padding="24">
+        <StackPanel Spacing="16" MaxWidth="900" HorizontalAlignment="Stretch">
+
+            <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
+
+            <InfoBar
+                IsOpen="True"
+                IsClosable="False"
+                Severity="Informational"
+                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
+
+            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.RefreshHeaderText}" />
+            <TextBox
+                Header="{x:Bind ViewModel.RefreshIntervalLabelText}"
+                Text="{x:Bind ViewModel.RefreshIntervalMinutes, Mode=TwoWay}" />
+            <ToggleSwitch
+                Header="{x:Bind ViewModel.AutoStartLabelText}"
+                IsOn="{x:Bind ViewModel.AutoStartAtLogon, Mode=TwoWay}" />
+
+            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.ApiHeaderText}" />
+            <TextBox
+                Header="{x:Bind ViewModel.ApiBindAddressLabelText}"
+                Text="{x:Bind ViewModel.ApiBindAddress, Mode=TwoWay}" />
+            <TextBox
+                Header="{x:Bind ViewModel.ApiPortLabelText}"
+                Text="{x:Bind ViewModel.ApiPort, Mode=TwoWay}" />
+
+            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.CredentialHeaderText}" />
+            <TextBlock Text="{x:Bind ViewModel.CredentialStatusText, Mode=OneWay}" />
+            <Button Command="{x:Bind ViewModel.RotateCredentialCommand}" Content="{x:Bind ViewModel.RotateCredentialText}" />
+            <TextBlock
+                Style="{ThemeResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.CredentialWriteOnlyText}"
+                TextWrapping="Wrap" />
+
+            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.VisualHeaderText}" />
+            <TextBox Header="{x:Bind ViewModel.VisualServerLabelText}" Text="{x:Bind ViewModel.VisualServer, Mode=TwoWay}" />
+            <TextBox Header="{x:Bind ViewModel.VisualDatabaseLabelText}" Text="{x:Bind ViewModel.VisualDatabase, Mode=TwoWay}" />
+            <TextBox Header="{x:Bind ViewModel.VisualUserIdLabelText}" Text="{x:Bind ViewModel.VisualUserId, Mode=TwoWay}" />
+            <TextBox
+                Header="{x:Bind ViewModel.VisualTimeoutLabelText}"
+                Text="{x:Bind ViewModel.VisualConnectionTimeoutSeconds, Mode=TwoWay}" />
+
+            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.MySqlHeaderText}" />
+            <TextBox Header="{x:Bind ViewModel.MySqlServerLabelText}" Text="{x:Bind ViewModel.MySqlServer, Mode=TwoWay}" />
+            <TextBox Header="{x:Bind ViewModel.MySqlPortLabelText}" Text="{x:Bind ViewModel.MySqlPort, Mode=TwoWay}" />
+            <TextBox Header="{x:Bind ViewModel.MySqlUserIdLabelText}" Text="{x:Bind ViewModel.MySqlUserId, Mode=TwoWay}" />
+            <TextBox
+                Header="{x:Bind ViewModel.MySqlPasswordFileLabelText}"
+                Text="{x:Bind ViewModel.MySqlPasswordFilePath, Mode=TwoWay}" />
+            <TextBox
+                Header="{x:Bind ViewModel.MySqlDumpPathLabelText}"
+                Text="{x:Bind ViewModel.MySqlDumpPath, Mode=TwoWay}" />
+            <TextBlock Text="{x:Bind ViewModel.BackupToolStatusText, Mode=OneWay}" TextWrapping="Wrap" />
+
+            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.BackupHeaderText}" />
+
+            <ItemsControl ItemsSource="{x:Bind ViewModel.BackupPolicies}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:BackupStoreSettingsViewModel">
+                        <Border
+                            Margin="0,0,0,12"
+                            Padding="12"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4">
+                            <StackPanel Spacing="6">
+                                <TextBlock FontWeight="SemiBold" Text="{x:Bind StoreName}" />
+                                <ToggleSwitch
+                                    Header="{x:Bind EnableLabelText}"
+                                    IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
+                                <TextBox
+                                    Header="{x:Bind ScheduleLabelText}"
+                                    Text="{x:Bind ScheduleLocalTime, Mode=TwoWay}" />
+                                <TextBox
+                                    Header="{x:Bind RetentionLabelText}"
+                                    Text="{x:Bind RetentionCount, Mode=TwoWay}" />
+                                <TextBox
+                                    Header="{x:Bind DestinationLabelText}"
+                                    Text="{x:Bind DestinationDirectory, Mode=TwoWay}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <ComboBox
+                    ItemsSource="{x:Bind ViewModel.BackupStores}"
+                    SelectedItem="{x:Bind ViewModel.SelectedBackupStore, Mode=TwoWay}"
+                    SelectionChanged="OnBackupStoreSelectionChanged" />
+                <Button Command="{x:Bind ViewModel.BackupNowCommand}" Content="{x:Bind ViewModel.BackupNowText}" />
+            </StackPanel>
+
+            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.RestoreHeaderText}" />
+
+            <ComboBox
+                x:Name="RestoreArtifactPicker"
+                MinWidth="420"
+                ItemsSource="{x:Bind ViewModel.RestoreArtifacts}"
+                SelectedItem="{x:Bind ViewModel.SelectedRestoreArtifact, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:BackupArtifactRow">
+                        <TextBlock Text="{x:Bind DisplayText}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <Button
+                Click="OnRestoreClick"
+                Content="{x:Bind ViewModel.RestoreText}"
+                Style="{ThemeResource AccentButtonStyle}" />
+
+            <TextBlock Text="{x:Bind ViewModel.RestoreOutcomeText, Mode=OneWay}" TextWrapping="Wrap" />
+
+            <Button
+                Command="{x:Bind ViewModel.SaveSettingsCommand}"
+                Content="{x:Bind ViewModel.SaveText}"
+                Style="{ThemeResource AccentButtonStyle}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

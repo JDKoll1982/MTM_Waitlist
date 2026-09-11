@@ -29,6 +29,10 @@ public sealed class ComputerRegistryServiceTests
         Assert.AreEqual("d8-43-ae-47-d0-d6", record.MacAddressNormalized);
         Assert.IsTrue(record.IsRegistered);
         Assert.AreEqual(1, helper.QueryCallCount);
+        Assert.AreEqual(
+            "sp_core_computers_registry_lookup_by_name_mac_get",
+            helper.LastStoredProcedureName,
+            "The lookup must go through the registry's procedure (FR-015).");
     }
 
     [TestMethod]
@@ -73,6 +77,10 @@ public sealed class ComputerRegistryServiceTests
         Assert.AreEqual("John's Computer", record.DisplayName);
         Assert.AreEqual(1, helper.NonQueryCallCount);
         Assert.AreEqual(1, helper.QueryCallCount);
+        Assert.AreEqual(
+            "sp_core_computers_registry_upsert",
+            helper.LastNonQueryStoredProcedureName,
+            "Registration must go through the registry's upsert procedure, not inline SQL (FR-015).");
     }
 
     [TestMethod]
@@ -243,6 +251,10 @@ public sealed class ComputerRegistryServiceTests
 
         public int NonQueryCallCount { get; private set; }
 
+        public string? LastStoredProcedureName { get; private set; }
+
+        public string? LastNonQueryStoredProcedureName { get; private set; }
+
         public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(string sql, IReadOnlyDictionary<string, object?> parameters, MySqlDatabaseTarget databaseTarget, CancellationToken cancellationToken = default)
         {
             QueryCallCount++;
@@ -257,12 +269,18 @@ public sealed class ComputerRegistryServiceTests
 
         public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(string storedProcedureName, IReadOnlyDictionary<string, object?> parameters, MySqlDatabaseTarget databaseTarget, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(new List<Dictionary<string, object?>>());
+            // The read half of every registry operation: same result the statement path returns, and it is
+            // still a query, so it counts as one.
+            QueryCallCount++;
+            LastStoredProcedureName = storedProcedureName;
+            return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(QueryResult);
         }
 
         public Task<int> ExecuteStoredProcedureNonQueryAsync(string storedProcedureName, IReadOnlyDictionary<string, object?> parameters, MySqlDatabaseTarget databaseTarget, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(0);
+            NonQueryCallCount++;
+            LastNonQueryStoredProcedureName = storedProcedureName;
+            return Task.FromResult(NonQueryResult);
         }
     }
 }

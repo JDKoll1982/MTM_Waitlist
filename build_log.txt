@@ -1,19 +1,33 @@
-  Determining projects to restore...
+﻿  Determining projects to restore...
   All projects are up-to-date for restore.
-  MTM_Waitlist.Core -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Core\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Core.dll
-  MTM_Waitlist.Shared -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Shared\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Shared.dll
-  MTM_Waitlist.Startup -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Startup\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Startup.dll
-  MTM_Waitlist.Setup -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Setup\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Setup.dll
-  MTM_Waitlist.Settings -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Settings\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Settings.dll
-  MTM_Waitlist.Waitlist.View -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.View\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.View.dll
-  MTM_Waitlist.Waitlist.NewRequest -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.NewRequest\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.NewRequest.dll
-  MTM_Waitlist.Waitlist.Controls -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.Controls\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.Controls.dll
-  MTM_Waitlist.Reporting -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Reporting\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Reporting.dll
-  MTM_Waitlist -> C:\Users\johnk\source\repos\MTM_Waitlist\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.dll
-  MTM_Waitlist.Tests -> C:\Users\johnk\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Tests.dll
+  MTM_Waitlist.Core -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Core\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Core.dll
+  MTM_Waitlist.Shared -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Shared\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Shared.dll
+  MTM_Waitlist.Startup -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Startup\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Startup.dll
+  MTM_Waitlist.Mock -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Mock\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Mock.dll
+  MTM_Waitlist.Setup -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Setup\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Setup.dll
+  MTM_Waitlist.Settings -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Settings\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Settings.dll
+  MTM_Waitlist.Waitlist.View -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.View\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.View.dll
+  MTM_Waitlist.Waitlist.NewRequest -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.NewRequest\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.NewRequest.dll
+  MTM_Waitlist.Waitlist.Controls -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Waitlist.Controls\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Waitlist.Controls.dll
+  MTM_Waitlist.Reporting -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Reporting\bin\x64\Debug\net10.0-windows10.0.19041.0\MTM_Waitlist.Reporting.dll
+C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Mock.Service\Views\ServiceSettingsPage.xaml(114,22): XamlCompiler error WMC0909: Cannot resolve DataType models:BackupArtifactRow [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Mock.Service\Views\ServiceSettingsPage.xaml(71,22): XamlCompiler error WMC0909: Cannot resolve DataType viewModels:BackupStoreSettingsViewModel [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+MTM_Waitlist.Mock.Service\Views\ServiceSettingsPage.xaml(115,26): XamlCompiler error WMC1111: DataTemplates containing x:Bind need a DataType to be specified using 'x:DataType' [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Mock.Service\Views\ServiceStatusPage.xaml(64,22): XamlCompiler error WMC0909: Cannot resolve DataType models:BackupStatusRow [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Mock.Service\Views\ServiceStatusPage.xaml(44,22): XamlCompiler error WMC0909: Cannot resolve DataType models:ShapeStatusRow [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+MTM_Waitlist.Mock.Service\Views\ServiceStatusPage.xaml(66,30): XamlCompiler error WMC1111: DataTemplates containing x:Bind need a DataType to be specified using 'x:DataType' [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+  MTM_Waitlist.Mock.Service -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Mock.Service\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Mock.Service.dll
+  MTM_Waitlist.Tests -> C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Tests\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.Tests.dll
 
-Build succeeded.
+Build FAILED.
+
+C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Mock.Service\Views\ServiceSettingsPage.xaml(114,22): XamlCompiler error WMC0909: Cannot resolve DataType models:BackupArtifactRow [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Mock.Service\Views\ServiceSettingsPage.xaml(71,22): XamlCompiler error WMC0909: Cannot resolve DataType viewModels:BackupStoreSettingsViewModel [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+MTM_Waitlist.Mock.Service\Views\ServiceSettingsPage.xaml(115,26): XamlCompiler error WMC1111: DataTemplates containing x:Bind need a DataType to be specified using 'x:DataType' [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Mock.Service\Views\ServiceStatusPage.xaml(64,22): XamlCompiler error WMC0909: Cannot resolve DataType models:BackupStatusRow [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.Mock.Service\Views\ServiceStatusPage.xaml(44,22): XamlCompiler error WMC0909: Cannot resolve DataType models:ShapeStatusRow [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
+MTM_Waitlist.Mock.Service\Views\ServiceStatusPage.xaml(66,30): XamlCompiler error WMC1111: DataTemplates containing x:Bind need a DataType to be specified using 'x:DataType' [C:\Users\jkoll\source\repos\MTM_Waitlist\MTM_Waitlist.csproj]
     0 Warning(s)
-    0 Error(s)
+    6 Error(s)
 
-Time Elapsed 00:00:44.30
+Time Elapsed 00:00:24.21

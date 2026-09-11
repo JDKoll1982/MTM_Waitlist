@@ -291,7 +291,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupPersistence", $"sp_setup_workstations_touch completed. WorkCenter='{request.WorkCenter}', AffectedRows={touchRows}.");
+        StartupDebugLog.Info("SetupPersistence", $"sp_setup_work_centers_touch completed. WorkCenter='{request.WorkCenter}', AffectedRows={touchRows}.");
 
         await _activeJobCoordinatorService.RegisterActiveJobAsync(request, cancellationToken).ConfigureAwait(false);
         StartupDebugLog.Info("SetupPersistence", "Active job coordinator registration completed.");

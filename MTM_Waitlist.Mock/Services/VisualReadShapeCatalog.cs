@@ -30,6 +30,7 @@ public static class VisualReadShapeCatalog
             Key = "work_order_lookup",
             Module = VisualReadShapeModule.ModuleSetup,
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Setup/Queries/LookupWorkOrder.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/work_order_lookup_population.sql",
             InputParameters =
             [
                 new VisualShapeParameter("NormalizedWorkOrder", "nvarchar(30)", IsRequired: true)
@@ -46,6 +47,7 @@ public static class VisualReadShapeCatalog
             Key = "operation_sequences",
             Module = VisualReadShapeModule.ModuleSetup,
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Setup/Queries/GetSequences.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/operation_sequences_population.sql",
             InputParameters =
             [
                 new VisualShapeParameter("NormalizedWorkOrder", "nvarchar(30)", IsRequired: true),
@@ -62,6 +64,7 @@ public static class VisualReadShapeCatalog
             Key = "subordinate_parts",
             Module = VisualReadShapeModule.ModuleSetup,
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Setup/Queries/GetSubordinateParts.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/subordinate_parts_population.sql",
             InputParameters =
             [
                 new VisualShapeParameter("NormalizedWorkOrder", "nvarchar(30)", IsRequired: true),
@@ -85,6 +88,7 @@ public static class VisualReadShapeCatalog
             Key = "inventory_locations",
             Module = VisualReadShapeModule.ModuleWaitlist,
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetInventoryLocations.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/inventory_locations_population.sql",
             InputParameters =
             [
                 // The same value is both the read's input and one of its output columns.
@@ -102,6 +106,7 @@ public static class VisualReadShapeCatalog
             Key = "disposition_input",
             Module = VisualReadShapeModule.ModuleWaitlist,
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDispositionInput.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/disposition_input_population.sql",
             InputParameters =
             [
                 new VisualShapeParameter("WorkOrder", "nvarchar(30)", IsRequired: true),

@@ -10,6 +10,7 @@
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
+    xmlns:mock="using:MTM_Waitlist.Module_Mock.Views"
     xmlns:selectors="using:MTM_Waitlist.Module_Core.Selectors"
     xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     x:Name="RootPage"
@@ -490,7 +491,22 @@
                 </behaviors:NavigationViewHeaderBehavior>
             </i:Interaction.Behaviors>
             <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
-                <Frame x:Name="NavigationFrame" />
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!--
+                  Read-only fallback status, hosted in the existing shell: no new navigation route and no
+                  interactive control. It appears only while cached data is in use and clears itself when
+                  Infor Visual recovers (FR-003/FR-005, US4).
+                -->
+                <mock:ReadStatusIndicator
+                    Grid.Row="0"
+                    Margin="0,0,0,8"
+                    HorizontalAlignment="Stretch" />
+
+                <Frame x:Name="NavigationFrame" Grid.Row="1" />
             </Grid>
         </NavigationView>
     </Grid>

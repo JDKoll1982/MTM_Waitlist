@@ -1,46 +1,51 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.0.0 → 1.1.0
-Bump rationale: MINOR — Principle IV (MCP-First, Grounded Decisions) is materially expanded and
-strengthened to NON-NEGOTIABLE, and a new mandatory Serena location/config self-healing rule is
-added. No principle is removed and no existing obligation is weakened or redefined incompatibly, so
-this is not a MAJOR change.
+Version change: 1.1.0 → 1.1.1
+Bump rationale: PATCH — no principle is added, removed, redefined, or weakened. This amendment closes the
+two follow-ups the 1.1.0 report recorded as pending and corrects its diagnosis of the scaffold drift.
 
-Modified principles:
-  • IV. MCP-First, Grounded Decisions
-      → IV. MCP-First, Grounded Decisions (NON-NEGOTIABLE)
-      - Consulting Context7 and Microsoft Learn is now explicitly NON-NEGOTIABLE whenever the agent
-        is unsure about anything code-related or does not know how to implement something; model
-        memory alone is insufficient grounds, and substituting a user question or recall for a
-        documentation lookup is prohibited.
-      - Added mandatory Serena self-healing rule for the case where Serena's location cannot be
-        discerned: inspect `~/.serena/serena_config.yml` (and project-level `.serena/*.yml`), account
-        for the work/home user-profile folder change (`jkoll` vs `johnk`), update the config, retry,
-        and report the config path plus observed error if the retry still fails.
+Resolved follow-ups:
+  ✅ TODO(scaffold-drift) — the 1.1.0 report blamed a stale `.specify/scripts/powershell/common.ps1` and
+     pointed at a version-matched resolver under
+     `%APPDATA%\uv\tools\specify-cli\Lib\site-packages\specify_cli\core_pack\scripts\powershell`.
+     Both parts of that diagnosis were wrong. Observed 2026-09-10:
+       • the named core-pack path does not exist on this machine, so there was nothing to re-sync from;
+       • `.specify/scripts/powershell/common.ps1` defines `Resolve-Template` (which returns the template
+         PATH) while `resolve-template.ps1` (L25) and `setup-tasks.ps1` (L60) both call
+         `Resolve-TemplateContent` (which must return the template CONTENT).
+     Fix applied: `Resolve-TemplateContent` was added to `common.ps1` as a thin wrapper over the existing
+     priority stack (overrides → presets → extensions → core), returning `$null` when nothing resolves so
+     both callers keep their own error message and non-zero exit.
+     Verified: `resolve-template.ps1 tasks-template` exits 0 and emits the real template markdown
+     (18,858 bytes), and the function returns a single `System.String`.
+  ✅ `.github/instructions/mcp-doc-research.instructions.md` now mirrors Principle IV as amended: the
+     NON-NEGOTIABLE Context7 / Microsoft Learn rule, the mandatory Serena location-and-config self-healing
+     procedure (including the `jkoll` ↔ `johnk` profile-folder case), and a Repo-Specific Focus list that
+     describes the shipped cached-fallback boundary instead of the retired demo toggles.
 
-Added sections: none
-Removed sections: none
+New prerequisite recorded (environment, not a principle change):
+  • Every `.specify/scripts/powershell/*.ps1` invocation on this machine must pass
+    `-ExecutionPolicy Bypass`. `Get-ExecutionPolicy -List` reports `Undefined` at every scope
+    (MachinePolicy, UserPolicy, Process, CurrentUser, LocalMachine), so the effective policy falls back to
+    Windows' Restricted default and the scripts fail with "running scripts is disabled on this system"
+    before any logic runs. No policy was changed by this amendment.
 
 Templates & dependent artifacts:
-  ✅ .specify/templates/plan-template.md      — Constitution Check is generic; no change required
-  ✅ .specify/templates/spec-template.md      — no mandatory-section change required
-  ✅ .specify/templates/tasks-template.md     — no task-category change required
-  ✅ .specify/templates/agent-file-template.md — auto-generated; unaffected
-  ✅ README.md / .github/copilot-instructions.md — already state the MCP-first policy; consistent
-  ⚠ .github/instructions/mcp-doc-research.instructions.md — should mirror the new NON-NEGOTIABLE
-    Context7/Microsoft Learn rule and the Serena self-healing rule (follow-up; outside this
-    command's write scope, which is limited to the constitution itself)
+  ✅ .specify/templates/*                — unaffected by a PATCH clarification
+  ✅ .specify/scripts/powershell/common.ps1 — repaired (see above); this is the write scope the 1.1.0 report
+     deferred, and it is a script defect, not a principle
+  ✅ .github/instructions/mcp-doc-research.instructions.md — amendment propagated (see above)
+  ⚠ plan.md                              — still cites "v1.0.0, ratified 2026-09-09" and evaluates its
+     Phase 0/Phase 1 gates against six principles; align on the next `/speckit.plan` touch (tracked as T137)
 
-Follow-up TODOs:
-  • TODO(scaffold-drift): this workspace's `.specify/scripts/powershell/common.ps1` is stale — it
-    does not define `Resolve-TemplateContent`, which `.specify/scripts/powershell/resolve-template.ps1`
-    and `setup-tasks.ps1` both call, so template resolution fails with "Resolve-TemplateContent is
-    not recognized as a name of a cmdlet". The template stack was resolved using the version-matched
-    resolver from the installed core pack at
-    `%APPDATA%\uv\tools\specify-cli\Lib\site-packages\specify_cli\core_pack\scripts\powershell`.
-    Repair by re-running `specify init` or syncing the `.specify/scripts/powershell` scripts.
-  • RATIFICATION_DATE and LAST_AMENDED_DATE are both known (2026-09-09) — nothing deferred here.
+Historical entry (superseded wording retained for traceability):
+  Version change: 1.0.0 → 1.1.0
+  Bump rationale: MINOR — Principle IV materially expanded to NON-NEGOTIABLE and the mandatory Serena
+  self-healing rule added. No principle removed and no existing obligation weakened or redefined
+  incompatibly, so this is not a MAJOR change.
+
+Follow-up TODOs: none — every follow-up recorded by the 1.1.0 report is closed above.
 -->
 
 # MTM_Waitlist Constitution
@@ -194,4 +199,4 @@ reviewed on every change and at each feature phase gate; unjustified violations 
 Runtime development guidance remains in the repo instruction files, which MUST stay consistent with
 this constitution.
 
-**Version**: 1.1.0 | **Ratified**: 2026-09-09 | **Last Amended**: 2026-09-09
+**Version**: 1.1.1 | **Ratified**: 2026-09-09 | **Last Amended**: 2026-09-10

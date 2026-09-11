@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="MTM_Waitlist.Module_Mock.Views.ReadStatusIndicator"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+      Read-only status indicator (FR-003/FR-005, research.md R12).
+
+      It is deliberately non-interactive: no buttons, no command binding, no click handler, and
+      IsClosable="False" so it cannot be dismissed into a state where cached data is in use but unstated.
+      There is nothing here that could change the read mode, because there is no read mode to change —
+      cached reads are automatic and clear themselves when the source recovers.
+
+      All text is resource-backed and supplied by the code-behind through GetLocalized() (constitution V).
+    -->
+    <InfoBar
+        x:Name="StatusInfoBar"
+        IsClosable="False"
+        IsOpen="{x:Bind IsCachedDataInUse, Mode=OneWay}"
+        IsTabStop="False"
+        Message="{x:Bind Message, Mode=OneWay}"
+        Severity="Warning"
+        Title="{x:Bind TitleText}" />
+</UserControl>

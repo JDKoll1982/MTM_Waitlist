@@ -47,15 +47,36 @@
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
+  <!-- The tray icon is the service's only always-present surface, so it ships beside the app. -->
+  <ItemGroup>
+    <Content Include="..\Assets\WindowIcon.ico"
+             Link="Assets\WindowIcon.ico"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- The shape catalog validates that each shape's source Visual script exists on disk, and the
        refresh engine reads them at runtime to pull from Infor Visual. Ship them beside the app
-       under the same relative layout the catalog records. -->
+       under the same relative layout the catalog records. The Module_Mock population reads are the
+       service's own set-based snapshots (one Round trip per shape) and are required as well. -->
   <ItemGroup>
     <Content Include="..\Database\InforVisual\Queues\Module_Setup\**\*.sql"
              Link="Database\InforVisual\Queues\Module_Setup\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Database\InforVisual\Queues\Module_Waitlist\**\*.sql"
              Link="Database\InforVisual\Queues\Module_Waitlist\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Database\InforVisual\Queues\Module_Mock\**\*.sql"
+             Link="Database\InforVisual\Queues\Module_Mock\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- The restore operation's SQL steps are reviewed artifacts under Database/, not statement text in C#
+       (constitution III, FR-015). RestoreService reads them beside the app, substitutes the store's
+       database name, and streams the result to the mysql client on stdin. The README records the one
+       step that cannot be a stored procedure. -->
+  <ItemGroup>
+    <Content Include="..\Database\Mock.Service\Restore\**\*"
+             Link="Database\Mock.Service\Restore\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

@@ -12,6 +12,17 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// </summary>
 public sealed class ConfigSettingsValueService : IConfigSettingsValueService
 {
+    /// <summary>
+    /// The exact (setting_key, scope_key) override read. Deliberately not
+    /// <c>sp_config_settings_get_effective</c>: that procedure resolves the *effective* value across the
+    /// scope precedence chain and takes computer/user ids rather than a scope key, so it answers a
+    /// different question and returns a different column set (T091, verified against its live definition).
+    /// </summary>
+    private const string GetSettingValueProcedure = "sp_config_settings_values_get";
+
+    /// <summary>Deletes one exact (setting_key, scope_key) override.</summary>
+    private const string DeleteSettingValueProcedure = "sp_config_settings_values_delete";
+
     private readonly IMySqlHelperServer _mySqlHelperServer;
     private readonly ILogger<ConfigSettingsValueService> _logger;
 
@@ -35,27 +46,8 @@ public sealed class ConfigSettingsValueService : IConfigSettingsValueService
 
         try
         {
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"SELECT
-    id,
-    public_id,
-    setting_key,
-    scope_type,
-    scope_key,
-    computer_id,
-    user_id,
-    setting_value,
-    setting_value_int,
-    setting_value_bool,
-    setting_value_decimal,
-    setting_value_datetime_utc,
-    value_type,
-    updated_by_user_id,
-    updated_utc
-FROM config_settings_values
-WHERE setting_key = @p_setting_key
-  AND scope_key = @p_scope_key
-LIMIT 1;",
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                GetSettingValueProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_setting_key"] = settingKey.Trim(),
@@ -139,10 +131,9 @@ LIMIT 1;",
 
         try
         {
-            await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"DELETE FROM config_settings_values
-WHERE setting_key = @p_setting_key
-  AND scope_key = @p_scope_key;",
+            // Non-query: this is the delete half of the settings override surface (FR-015).
+            await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                DeleteSettingValueProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_setting_key"] = settingKey.Trim(),

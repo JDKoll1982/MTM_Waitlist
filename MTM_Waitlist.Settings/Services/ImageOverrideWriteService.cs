@@ -32,6 +32,17 @@ public sealed class ImageOverrideWriteService : IImageOverrideWriteService
 
     private const int MaxImagePathLength = 500;
 
+    // Stored procedure names. Constitution III keeps every SQL statement in Database/StoredProcedures, so the
+    // statement text lives in the artifact's create.sql and only the name appears here.
+    private const string StatusGetProcedure = "sp_config_images_locations_status_get";
+    private const string InsertProcedure = "sp_config_images_locations_insert";
+    private const string ReactivateProcedure = "sp_config_images_locations_reactivate";
+    private const string UpdateProcedure = "sp_config_images_locations_update";
+    private const string DeleteProcedure = "sp_config_images_locations_delete";
+    private const string DeleteByPublicIdProcedure = "sp_config_images_locations_delete_by_public_id";
+    private const string PurgeInactiveProcedure = "sp_config_images_locations_purge_inactive";
+    private const string DeactivateForScopeProcedure = "sp_config_images_locations_deactivate_for_scope";
+
     /// <summary>
     /// Initializes a new ImageOverrideWriteService.
     /// Dependencies must be provided; null dependencies throw ArgumentNullException.
@@ -98,12 +109,8 @@ public sealed class ImageOverrideWriteService : IImageOverrideWriteService
 
             // The helper swallows MySqlException, so the unique key is checked up front
             // and the affected-row count is used as the failure signal.
-            var existingRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"SELECT is_active
-FROM config_images_locations
-WHERE scope = @p_scope
-  AND scope_item_id = @p_scope_item_id
-LIMIT 1;",
+            var existingRows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                StatusGetProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_scope"] = scope,
@@ -141,28 +148,8 @@ LIMIT 1;",
                     .ConfigureAwait(false);
             }
 
-            var affectedRows = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-                @"INSERT INTO config_images_locations (
-    public_id,
-    scope,
-    scope_item_id,
-    image_path,
-    is_active,
-    created_by_user_id,
-    updated_by_user_id,
-    created_utc,
-    updated_utc
-) VALUES (
-    @p_public_id,
-    @p_scope,
-    @p_scope_item_id,
-    @p_image_path,
-    1,
-    @p_user_id,
-    @p_user_id,
-    UTC_TIMESTAMP(),
-    UTC_TIMESTAMP()
-);",
+            var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                InsertProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_public_id"] = publicId,
@@ -251,14 +238,8 @@ LIMIT 1;",
         long? userId,
         CancellationToken cancellationToken)
     {
-        var affectedRows = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-            @"UPDATE config_images_locations
-SET image_path = @p_image_path,
-    is_active = 1,
-    updated_by_user_id = @p_user_id,
-    updated_utc = UTC_TIMESTAMP()
-WHERE scope = @p_scope
-  AND scope_item_id = @p_scope_item_id;",
+        var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+            ReactivateProcedure,
             new Dictionary<string, object?>
             {
                 ["p_scope"] = scope,
@@ -358,14 +339,8 @@ WHERE scope = @p_scope
                 };
             }
 
-            var rows = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-                @"UPDATE config_images_locations
-SET image_path = @p_image_path,
-    updated_by_user_id = @p_user_id,
-    updated_utc = UTC_TIMESTAMP()
-WHERE scope = @p_scope
-  AND scope_item_id = @p_scope_item_id
-  AND is_active = 1;",
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                UpdateProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_scope"] = scope,
@@ -444,14 +419,8 @@ WHERE scope = @p_scope
         {
             _logger.LogDebug("Deleting override: scope={Scope}, scopeItemId={ScopeItemId}", scope, scopeItemId);
 
-            var rows = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-                @"UPDATE config_images_locations
-SET is_active = 0,
-    updated_by_user_id = @p_user_id,
-    updated_utc = UTC_TIMESTAMP()
-WHERE scope = @p_scope
-  AND scope_item_id = @p_scope_item_id
-  AND is_active = 1;",
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                DeleteProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_scope"] = scope,
@@ -527,13 +496,11 @@ WHERE scope = @p_scope
         {
             _logger.LogDebug("Deleting override by public ID: {PublicId}", publicId);
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"UPDATE config_images_locations
-SET is_active = 0,
-    updated_by_user_id = @p_user_id,
-    updated_utc = UTC_TIMESTAMP()
-WHERE public_id = @p_public_id
-  AND is_active = 1;",
+            // The affected-row count is the success signal, so this must go through the non-query path: the
+            // row-returning helper reports 0 for an UPDATE no matter how many rows it changed, which made this
+            // method answer NOT_FOUND for every call.
+            var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                DeleteByPublicIdProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_public_id"] = publicId,
@@ -542,7 +509,7 @@ WHERE public_id = @p_public_id
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
 
-            var affected = rows.Count > 0;
+            var affected = affectedRows > 0;
 
             if (!affected)
             {
@@ -610,14 +577,14 @@ WHERE public_id = @p_public_id
         {
             _logger.LogWarning("Purging inactive overrides from database");
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"DELETE FROM config_images_locations
-WHERE is_active = 0;",
+            // The affected-row count is the return value, so this must go through the non-query path: the
+            // row-returning helper reports 0 for a DELETE, which made this method claim it had purged nothing.
+            var count = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                PurgeInactiveProcedure,
                 new Dictionary<string, object?>(),
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
 
-            var count = rows.Count;
             _logger.LogInformation("Purged {Count} inactive overrides from database", count);
             return count;
         }
@@ -655,13 +622,11 @@ WHERE is_active = 0;",
         {
             _logger.LogWarning("Deactivating all overrides for scope: {Scope}", scope);
 
-            var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-                @"UPDATE config_images_locations
-SET is_active = 0,
-    updated_by_user_id = @p_user_id,
-    updated_utc = UTC_TIMESTAMP()
-WHERE scope = @p_scope
-  AND is_active = 1;",
+            // The affected-row count is the return value, so this must go through the non-query path: the
+            // row-returning helper reports 0 for an UPDATE, which made this method report "0 deactivated"
+            // however many overrides it withdrew.
+            var count = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                DeactivateForScopeProcedure,
                 new Dictionary<string, object?>
                 {
                     ["p_scope"] = scope,
@@ -670,7 +635,6 @@ WHERE scope = @p_scope
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
 
-            var count = rows.Count;
             _logger.LogInformation("Deactivated {Count} overrides for scope {Scope}", count, scope);
             return count;
         }

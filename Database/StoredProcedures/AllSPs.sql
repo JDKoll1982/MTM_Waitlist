@@ -928,3 +928,877 @@ CREATE PROCEDURE sp_waitlist_defect_types_delete(
 )
 DELETE FROM waitlist_defect_types
 WHERE id = p_id;
+
+-- Create procedure: sp_config_settings_values_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T091)
+-- Purpose: Read the exact (setting_key, scope_key) override row. Not sp_config_settings_get_effective, which
+--          resolves the effective value across the scope precedence chain and takes computer/user ids.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_settings_values_get;
+
+CREATE PROCEDURE sp_config_settings_values_get(
+    IN p_setting_key VARCHAR(190),
+    IN p_scope_key VARCHAR(255)
+)
+SELECT
+    id,
+    public_id,
+    setting_key,
+    scope_type,
+    scope_key,
+    computer_id,
+    user_id,
+    setting_value,
+    setting_value_int,
+    setting_value_bool,
+    setting_value_decimal,
+    setting_value_datetime_utc,
+    value_type,
+    updated_by_user_id,
+    updated_utc
+FROM config_settings_values
+WHERE setting_key = p_setting_key
+  AND scope_key = p_scope_key
+LIMIT 1;
+
+-- Create procedure: sp_config_settings_values_delete
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T096)
+-- Purpose: Delete the exact (setting_key, scope_key) override row.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_settings_values_delete;
+
+CREATE PROCEDURE sp_config_settings_values_delete(
+    IN p_setting_key VARCHAR(190),
+    IN p_scope_key VARCHAR(255)
+)
+DELETE FROM config_settings_values
+WHERE setting_key = p_setting_key
+  AND scope_key = p_scope_key;
+
+-- Create procedure: sp_core_computers_registry_lookup_by_name_mac_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T092)
+-- Purpose: Find the registry row for one exact (computer_name, mac_address_normalized) pair.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_lookup_by_name_mac_get;
+
+CREATE PROCEDURE sp_core_computers_registry_lookup_by_name_mac_get(
+    IN p_computer_name VARCHAR(128),
+    IN p_mac_address_normalized VARCHAR(64)
+)
+SELECT
+    id,
+    computer_name,
+    display_name,
+    description,
+    mac_address_normalized,
+    is_registered
+FROM core_computers_registry
+WHERE computer_name = p_computer_name
+  AND mac_address_normalized = p_mac_address_normalized
+LIMIT 1;
+
+-- Create procedure: sp_core_computers_registry_lookup_by_mac_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T092)
+-- Purpose: Find the most recently updated registry row for a MAC address.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_lookup_by_mac_get;
+
+CREATE PROCEDURE sp_core_computers_registry_lookup_by_mac_get(
+    IN p_mac_address_normalized VARCHAR(64)
+)
+SELECT
+    id,
+    computer_name,
+    display_name,
+    description,
+    mac_address_normalized,
+    is_registered
+FROM core_computers_registry
+WHERE mac_address_normalized = p_mac_address_normalized
+ORDER BY updated_utc DESC
+LIMIT 1;
+
+-- Create procedure: sp_core_computers_registry_lookup_by_name_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T092)
+-- Purpose: Resolve one registry row from a computer name or its normalized hostname, preferring the exact name match.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_lookup_by_name_get;
+
+CREATE PROCEDURE sp_core_computers_registry_lookup_by_name_get(
+    IN p_name VARCHAR(255)
+)
+SELECT
+    id,
+    computer_name,
+    hostname_normalized,
+    display_name,
+    description,
+    mac_address_normalized,
+    is_registered
+FROM core_computers_registry
+WHERE computer_name = p_name
+   OR hostname_normalized = p_name
+ORDER BY CASE WHEN computer_name = p_name THEN 0 ELSE 1 END
+LIMIT 1;
+
+-- Create procedure: sp_core_computers_registry_registered_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T092)
+-- Purpose: The registered machines only, in display order — the computer picker's source.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_registered_get;
+
+CREATE PROCEDURE sp_core_computers_registry_registered_get()
+SELECT
+    computer_name,
+    display_name
+FROM core_computers_registry
+WHERE is_registered = 1
+ORDER BY display_name ASC, computer_name ASC;
+
+-- Create procedure: sp_core_computers_registry_get_all
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T092)
+-- Purpose: The whole registry, in display order — the registry editor's source (includes retired machines).
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_get_all;
+
+CREATE PROCEDURE sp_core_computers_registry_get_all()
+SELECT
+    id,
+    computer_name,
+    display_name,
+    description,
+    mac_address_normalized,
+    is_registered
+FROM core_computers_registry
+ORDER BY display_name ASC, computer_name ASC;
+
+-- Create procedure: sp_core_computers_registry_upsert
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T092)
+-- Purpose: Register a computer at logon, or refresh the row it already has.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_upsert;
+
+CREATE PROCEDURE sp_core_computers_registry_upsert(
+    IN p_computer_name VARCHAR(128),
+    IN p_hostname_normalized VARCHAR(255),
+    IN p_mac_address_normalized VARCHAR(64),
+    IN p_display_name VARCHAR(128),
+    IN p_description VARCHAR(255)
+)
+INSERT INTO core_computers_registry (
+    public_id,
+    computer_name,
+    hostname_normalized,
+    mac_address_normalized,
+    display_name,
+    description,
+    is_registered,
+    created_utc,
+    updated_utc
+)
+VALUES (
+    UUID(),
+    p_computer_name,
+    p_hostname_normalized,
+    p_mac_address_normalized,
+    p_display_name,
+    p_description,
+    1,
+    UTC_TIMESTAMP(),
+    UTC_TIMESTAMP()
+)
+ON DUPLICATE KEY UPDATE
+    computer_name = VALUES(computer_name),
+    display_name = VALUES(display_name),
+    description = VALUES(description),
+    is_registered = 1,
+    updated_utc = UTC_TIMESTAMP();
+
+-- Create procedure: sp_core_computers_registry_update
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T092)
+-- Purpose: Edit one registry row by primary key, including its registration flag.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_update;
+
+CREATE PROCEDURE sp_core_computers_registry_update(
+    IN p_id BIGINT,
+    IN p_computer_name VARCHAR(128),
+    IN p_hostname_normalized VARCHAR(255),
+    IN p_mac_address_normalized VARCHAR(64),
+    IN p_display_name VARCHAR(128),
+    IN p_description VARCHAR(255),
+    IN p_is_registered TINYINT
+)
+UPDATE core_computers_registry
+SET computer_name = p_computer_name,
+    hostname_normalized = p_hostname_normalized,
+    mac_address_normalized = p_mac_address_normalized,
+    display_name = p_display_name,
+    description = p_description,
+    is_registered = p_is_registered,
+    updated_utc = UTC_TIMESTAMP()
+WHERE id = p_id;
+
+-- Create procedure: sp_core_computers_registry_update_by_mac
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T092)
+-- Purpose: Follow a machine that was renamed — update the newest row for a MAC address.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_update_by_mac;
+
+CREATE PROCEDURE sp_core_computers_registry_update_by_mac(
+    IN p_mac_address_normalized VARCHAR(64),
+    IN p_computer_name VARCHAR(128),
+    IN p_hostname_normalized VARCHAR(255),
+    IN p_display_name VARCHAR(128),
+    IN p_description VARCHAR(255)
+)
+UPDATE core_computers_registry
+SET computer_name = p_computer_name,
+    hostname_normalized = p_hostname_normalized,
+    display_name = p_display_name,
+    description = p_description,
+    updated_utc = UTC_TIMESTAMP()
+WHERE mac_address_normalized = p_mac_address_normalized
+ORDER BY id DESC
+LIMIT 1;
+
+-- Create procedure: sp_core_computers_registry_delete
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T092)
+-- Purpose: Remove one registry row by primary key.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_delete;
+
+CREATE PROCEDURE sp_core_computers_registry_delete(
+    IN p_id BIGINT
+)
+DELETE FROM core_computers_registry
+WHERE id = p_id;
+
+-- Create procedure: sp_setup_work_centers_catalog_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T090)
+-- Purpose: The active work-center catalog with its display rank, ordered by building then rank then name — the
+--          order the Settings screen shows. Distinct from sp_setup_work_centers_get_all, which omits sort_rank.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_setup_work_centers_catalog_get;
+
+CREATE PROCEDURE sp_setup_work_centers_catalog_get()
+SELECT
+    id,
+    work_center_name,
+    building,
+    sort_rank,
+    is_active
+FROM vw_setup_work_centers_active
+ORDER BY building ASC, sort_rank ASC, work_center_name ASC;
+
+-- Create procedure: sp_server_utc_now_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T093)
+-- Purpose: The database server's UTC clock, so session validity is judged against the server, not the client.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_server_utc_now_get;
+
+CREATE PROCEDURE sp_server_utc_now_get()
+SELECT fn_server_utc_now() AS server_utc_now;
+
+-- Create procedure: sp_auth_credentials_check
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T093)
+-- Purpose: Credential material for one active user, so the caller can verify a supplied password.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_credentials_check;
+
+CREATE PROCEDURE sp_auth_credentials_check(
+    IN p_username VARCHAR(128)
+)
+SELECT u.id,
+       COALESCE(r.role_name, '') AS role_name,
+       u.password_hash,
+       u.password_salt,
+       u.require_password_change,
+       COALESCE(u.display_name, '') AS display_name,
+       COALESCE(u.employee_identifier, '') AS employee_identifier
+FROM core_users_profiles u
+LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
+LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
+WHERE u.username_normalized = p_username
+  AND u.is_active = 1
+ORDER BY ra.assigned_utc DESC
+LIMIT 1;
+
+-- Create procedure: sp_auth_user_row_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T093)
+-- Purpose: One active user's identity and role. Same shape as the credentials check minus the credential columns.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_row_get;
+
+CREATE PROCEDURE sp_auth_user_row_get(
+    IN p_username VARCHAR(128)
+)
+SELECT u.id,
+       COALESCE(r.role_name, '') AS role_name,
+       COALESCE(u.display_name, '') AS display_name,
+       COALESCE(u.employee_identifier, '') AS employee_identifier
+FROM core_users_profiles u
+LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
+LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
+WHERE u.username_normalized = p_username
+  AND u.is_active = 1
+ORDER BY ra.assigned_utc DESC
+LIMIT 1;
+
+-- Create procedure: sp_auth_user_password_update
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T093)
+-- Purpose: Store a new password hash/salt for one active user and clear the forced-change flag.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_password_update;
+
+CREATE PROCEDURE sp_auth_user_password_update(
+    IN p_user_id BIGINT,
+    IN p_password_hash VARCHAR(128),
+    IN p_password_salt VARBINARY(32)
+)
+UPDATE core_users_profiles
+SET password_hash = p_password_hash,
+    password_salt = p_password_salt,
+    require_password_change = 0,
+    updated_utc = UTC_TIMESTAMP()
+WHERE id = p_user_id
+  AND is_active = 1;
+
+-- Create procedure: sp_auth_computer_registered_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T093)
+-- Purpose: Whether the presented machine is a registered workstation.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_computer_registered_get;
+
+CREATE PROCEDURE sp_auth_computer_registered_get(
+    IN p_hostname_normalized VARCHAR(255),
+    IN p_mac_address_normalized VARCHAR(64)
+)
+SELECT COUNT(1) AS registered_count
+FROM core_computers_registry
+WHERE hostname_normalized = p_hostname_normalized
+  AND mac_address_normalized = p_mac_address_normalized
+  AND is_registered = 1;
+
+-- Create procedure: sp_auth_session_expiry_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T093)
+-- Purpose: The newest live session's expiry for one user, or no row when the user has none.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_session_expiry_get;
+
+CREATE PROCEDURE sp_auth_session_expiry_get(
+    IN p_user_id BIGINT
+)
+SELECT expires_utc
+FROM auth_sessions_tokens
+WHERE user_id = p_user_id
+  AND is_active = 1
+  AND revoked_utc IS NULL
+ORDER BY expires_utc DESC
+LIMIT 1;
+
+-- Create procedure: sp_config_dunnage_types_visibility_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T095)
+-- Purpose: The persisted dunnage-type visibility map, one row per stored type.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_dunnage_types_visibility_get;
+
+CREATE PROCEDURE sp_config_dunnage_types_visibility_get()
+SELECT dunnage_type_id, is_visible
+FROM config_dunnage_types_visibility;
+
+-- Create procedure: sp_config_dunnage_types_visibility_delete_all
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T095)
+-- Purpose: Clear the whole visibility map before it is rewritten.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_dunnage_types_visibility_delete_all;
+
+CREATE PROCEDURE sp_config_dunnage_types_visibility_delete_all()
+DELETE FROM config_dunnage_types_visibility;
+
+-- Create procedure: sp_config_dunnage_types_visibility_insert_row
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T095)
+-- Purpose: Write one dunnage type's visibility row as part of the map rewrite.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_dunnage_types_visibility_insert_row;
+
+CREATE PROCEDURE sp_config_dunnage_types_visibility_insert_row(
+    IN p_dunnage_type_id BIGINT,
+    IN p_dunnage_type_name VARCHAR(128),
+    IN p_is_visible TINYINT
+)
+INSERT INTO config_dunnage_types_visibility (
+    public_id,
+    dunnage_type_id,
+    dunnage_type_name,
+    is_visible,
+    created_by_user_id,
+    updated_by_user_id,
+    created_utc,
+    updated_utc
+)
+VALUES (
+    UUID(),
+    p_dunnage_type_id,
+    p_dunnage_type_name,
+    p_is_visible,
+    NULL,
+    NULL,
+    UTC_TIMESTAMP(),
+    UTC_TIMESTAMP()
+);
+
+-- Create procedure: sp_config_images_locations_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: The active image override for one exact (scope, scope_item_id) pair; no row is the caller's
+--          "no override" answer. is_active = 1 is part of the identity, not an optional filter.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_get;
+
+CREATE PROCEDURE sp_config_images_locations_get(
+    IN p_scope VARCHAR(16),
+    IN p_scope_item_id VARCHAR(190)
+)
+SELECT
+    id,
+    public_id,
+    scope,
+    scope_item_id,
+    image_path,
+    is_active,
+    created_by_user_id,
+    updated_by_user_id,
+    created_utc,
+    updated_utc
+FROM config_images_locations
+WHERE scope = p_scope
+  AND scope_item_id = p_scope_item_id
+  AND is_active = 1
+LIMIT 1;
+
+-- Create procedure: sp_config_images_locations_get_by_scope
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: Every active override in one scope, newest first — the order the Settings list shows.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_get_by_scope;
+
+CREATE PROCEDURE sp_config_images_locations_get_by_scope(
+    IN p_scope VARCHAR(16)
+)
+SELECT
+    id,
+    public_id,
+    scope,
+    scope_item_id,
+    image_path,
+    is_active,
+    created_by_user_id,
+    updated_by_user_id,
+    created_utc,
+    updated_utc
+FROM config_images_locations
+WHERE scope = p_scope
+  AND is_active = 1
+ORDER BY updated_utc DESC;
+
+-- Create procedure: sp_config_images_locations_count_active_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: How many active overrides exist in total. The column alias `count` is part of the contract — the
+--          caller reads the result by name.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_count_active_get;
+
+CREATE PROCEDURE sp_config_images_locations_count_active_get()
+SELECT COUNT(*) as count
+FROM config_images_locations
+WHERE is_active = 1;
+
+-- Create procedure: sp_config_images_locations_count_by_scope_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: How many active overrides one scope holds. Column alias `count`, as above.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_count_by_scope_get;
+
+CREATE PROCEDURE sp_config_images_locations_count_by_scope_get(
+    IN p_scope VARCHAR(16)
+)
+SELECT COUNT(*) as count
+FROM config_images_locations
+WHERE scope = p_scope
+  AND is_active = 1;
+
+-- Create procedure: sp_config_images_locations_get_all
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: Every active override, whatever its scope — the input to the orphan detector. No ordering, because
+--          the caller checks each row against its own source table and collects the orphans.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_get_all;
+
+CREATE PROCEDURE sp_config_images_locations_get_all()
+SELECT
+    id,
+    public_id,
+    scope,
+    scope_item_id,
+    image_path,
+    is_active,
+    created_by_user_id,
+    updated_by_user_id,
+    created_utc,
+    updated_utc
+FROM config_images_locations
+WHERE is_active = 1;
+
+-- Create procedure: sp_config_images_locations_get_by_public_id
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: One active override addressed by its public identifier; no row is "not found". A withdrawn override
+--          is not addressable, so the Settings deep-link cannot resurrect one.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_get_by_public_id;
+
+CREATE PROCEDURE sp_config_images_locations_get_by_public_id(
+    IN p_public_id CHAR(36)
+)
+SELECT
+    id,
+    public_id,
+    scope,
+    scope_item_id,
+    image_path,
+    is_active,
+    created_by_user_id,
+    updated_by_user_id,
+    created_utc,
+    updated_utc
+FROM config_images_locations
+WHERE public_id = p_public_id
+  AND is_active = 1
+LIMIT 1;
+
+-- Create procedure: sp_config_images_locations_recent_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: The most recently updated overrides, capped at p_max_rows. Replaces an interpolated
+--          `LIMIT {maxRecordCount}`: MySQL accepts a routine parameter directly in LIMIT, but any expression is
+--          rejected (LIMIT GREATEST(p,1) fails with ERROR 1327), so the caller's maxRecordCount < 1 guard is what
+--          keeps the cap valid. Deliberately has no is_active filter — this is the audit view and must be able to
+--          show a withdrawn override.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_recent_get;
+
+CREATE PROCEDURE sp_config_images_locations_recent_get(
+    IN p_max_rows INT
+)
+SELECT
+    id,
+    public_id,
+    scope,
+    scope_item_id,
+    image_path,
+    is_active,
+    created_by_user_id,
+    updated_by_user_id,
+    created_utc,
+    updated_utc
+FROM config_images_locations
+ORDER BY updated_utc DESC
+LIMIT p_max_rows;
+
+-- Create procedure: sp_setup_work_centers_exists_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: Does this work center exist, so the orphan detector can tell a live override from an orphaned one.
+--          Deliberately has no is_active filter: filtering to active rows would report every override on a
+--          temporarily inactive work center as an orphan and offer a cleanup that should not happen.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_setup_work_centers_exists_get;
+
+CREATE PROCEDURE sp_setup_work_centers_exists_get(
+    IN p_id BIGINT
+)
+SELECT id
+FROM setup_work_centers_catalog
+WHERE id = p_id
+LIMIT 1;
+
+-- Create procedure: sp_config_images_locations_status_get
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: The is_active state of one (scope, scope_item_id) pair, whether or not the override is live. The only
+--          read of this table with no is_active filter, because the create path must tell "no row" (INSERT) from
+--          "inactive row" (reactivate, since uq_config_images_locations_scope_item spans the pair regardless of
+--          is_active) from "active row" (DUPLICATE_KEY).
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_status_get;
+
+CREATE PROCEDURE sp_config_images_locations_status_get(
+    IN p_scope VARCHAR(16),
+    IN p_scope_item_id VARCHAR(190)
+)
+SELECT is_active
+FROM config_images_locations
+WHERE scope = p_scope
+  AND scope_item_id = p_scope_item_id
+LIMIT 1;
+
+-- Create procedure: sp_config_images_locations_insert
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: Create one override. is_active and both timestamps are generated here; both *_by_user_id columns take
+--          the same parameter. Returns 0 or 1 affected rows, and a duplicate-key error still surfaces as 1062.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_insert;
+
+CREATE PROCEDURE sp_config_images_locations_insert(
+    IN p_public_id CHAR(36),
+    IN p_scope VARCHAR(16),
+    IN p_scope_item_id VARCHAR(190),
+    IN p_image_path VARCHAR(500),
+    IN p_user_id BIGINT
+)
+INSERT INTO config_images_locations (
+    public_id,
+    scope,
+    scope_item_id,
+    image_path,
+    is_active,
+    created_by_user_id,
+    updated_by_user_id,
+    created_utc,
+    updated_utc
+)
+VALUES (
+    p_public_id,
+    p_scope,
+    p_scope_item_id,
+    p_image_path,
+    1,
+    p_user_id,
+    p_user_id,
+    UTC_TIMESTAMP(),
+    UTC_TIMESTAMP()
+);
+
+-- Create procedure: sp_config_images_locations_reactivate
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: Bring a soft-deleted override back to life with a new image path. No is_active predicate in the WHERE,
+--          matching the statement it replaces: the caller only reaches here after the status read reported an
+--          existing inactive row, and the unique key means the pair has exactly one row. created_* are untouched.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_reactivate;
+
+CREATE PROCEDURE sp_config_images_locations_reactivate(
+    IN p_scope VARCHAR(16),
+    IN p_scope_item_id VARCHAR(190),
+    IN p_image_path VARCHAR(500),
+    IN p_user_id BIGINT
+)
+UPDATE config_images_locations
+SET image_path = p_image_path,
+    is_active = 1,
+    updated_by_user_id = p_user_id,
+    updated_utc = UTC_TIMESTAMP()
+WHERE scope = p_scope
+  AND scope_item_id = p_scope_item_id;
+
+-- Create procedure: sp_config_images_locations_update
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: Repoint one live override at a different image. AND is_active = 1 is kept: an update is only
+--          meaningful for a live override. created_* are untouched — repointing an image is not a new row.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_update;
+
+CREATE PROCEDURE sp_config_images_locations_update(
+    IN p_scope VARCHAR(16),
+    IN p_scope_item_id VARCHAR(190),
+    IN p_image_path VARCHAR(500),
+    IN p_user_id BIGINT
+)
+UPDATE config_images_locations
+SET image_path = p_image_path,
+    updated_by_user_id = p_user_id,
+    updated_utc = UTC_TIMESTAMP()
+WHERE scope = p_scope
+  AND scope_item_id = p_scope_item_id
+  AND is_active = 1;
+
+-- Create procedure: sp_config_images_locations_delete
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: Withdraw the override for one (scope, scope_item_id) pair — a soft delete, because the unique key
+--          spans the pair regardless of is_active and a hard delete would let the next create reuse the pair
+--          while losing the audit trail. AND is_active = 1 makes the affected-row count a real "did something
+--          change" signal, so withdrawing an already-withdrawn override reports 0 rather than success.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_delete;
+
+CREATE PROCEDURE sp_config_images_locations_delete(
+    IN p_scope VARCHAR(16),
+    IN p_scope_item_id VARCHAR(190),
+    IN p_user_id BIGINT
+)
+UPDATE config_images_locations
+SET is_active = 0,
+    updated_by_user_id = p_user_id,
+    updated_utc = UTC_TIMESTAMP()
+WHERE scope = p_scope
+  AND scope_item_id = p_scope_item_id
+  AND is_active = 1;
+
+-- Create procedure: sp_config_images_locations_delete_by_public_id
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: Withdraw one override addressed by its public identifier. Soft delete, same reasoning as
+--          sp_config_images_locations_delete. The affected-row count is the caller's success signal — it used to
+--          read a row count after an UPDATE, which is always 0, so every call answered NOT_FOUND.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_delete_by_public_id;
+
+CREATE PROCEDURE sp_config_images_locations_delete_by_public_id(
+    IN p_public_id CHAR(36),
+    IN p_user_id BIGINT
+)
+UPDATE config_images_locations
+SET is_active = 0,
+    updated_by_user_id = p_user_id,
+    updated_utc = UTC_TIMESTAMP()
+WHERE public_id = p_public_id
+  AND is_active = 1;
+
+-- Create procedure: sp_config_images_locations_purge_inactive
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: Permanently remove every withdrawn override — the only hard delete on the table, and the deliberate
+--          escape hatch for the soft-delete design. Unconditional apart from is_active = 0 (no scope parameter).
+--          The affected-row count is the caller's return value; it used to read a row count after a DELETE,
+--          which is always 0, so every caller was told nothing had been purged.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_purge_inactive;
+
+CREATE PROCEDURE sp_config_images_locations_purge_inactive()
+DELETE FROM config_images_locations
+WHERE is_active = 0;
+
+-- Create procedure: sp_config_images_locations_deactivate_for_scope
+-- Engine: MySQL 5.7
+-- Feature: 001-module-mock-visual-fallback (task T094)
+-- Purpose: Withdraw every live override in one scope at once — a bulk soft delete, not a purge. AND is_active = 1
+--          is kept so an already-withdrawn override is not counted. The affected-row count is the caller's return
+--          value; it used to read a row count after an UPDATE, which is always 0, so the UI reported
+--          "0 deactivated" however many rows were withdrawn.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_deactivate_for_scope;
+
+CREATE PROCEDURE sp_config_images_locations_deactivate_for_scope(
+    IN p_scope VARCHAR(16),
+    IN p_user_id BIGINT
+)
+UPDATE config_images_locations
+SET is_active = 0,
+    updated_by_user_id = p_user_id,
+    updated_utc = UTC_TIMESTAMP()
+WHERE scope = p_scope
+  AND is_active = 1;

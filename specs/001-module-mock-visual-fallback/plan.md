@@ -1,7 +1,7 @@
 # Implementation Plan: Module_Mock — Automatic Infor Visual Read Fallback
 
 **Branch**: `001-module-mock-visual-fallback` | **Date**: 2026-09-09 | **Spec**: [spec.md](./spec.md)
-**Constitution**: [constitution.md](../../.specify/memory/constitution.md) — **v1.0.0, ratified 2026-09-09**
+**Constitution**: [constitution.md](../../.specify/memory/constitution.md) — **v1.1.1, last amended 2026-09-10** (Phase-gate verdicts below were originally evaluated against v1.0.0; see the note in the Constitution Check)
 **Input**: Feature specification from `/specs/001-module-mock-visual-fallback/spec.md`
 **Grounding**: `WeekendProject/Module_Mock/Spec.md`, `Plan.md`, `Tasks.md`, `Discovery/01-MockLogic-Inventory.md`,
 `Discovery/02-InforVisual-ReadShapes.md`, `Discovery/03-Hardcoded-MySQL-Sql.md` (read-only inputs; not modified by this plan).
@@ -74,8 +74,15 @@ are planning-time approximations, not commitments; final counts are recorded at 
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-**Constitution in force**: `.specify/memory/constitution.md` — **ratified v1.0.0 (2026-09-09)**; six core principles
+**Constitution in force**: `.specify/memory/constitution.md` — **v1.1.1 (last amended 2026-09-10)**; six core principles
 plus Additional Constraints and Governance, superseding the repo instruction files where they conflict.
+
+**Amendment note (2026-09-10)**: the gate tables below were evaluated against v1.0.0. The intervening amendments were
+**1.1.0** (Principle IV made NON-NEGOTIABLE, plus the mandatory Serena location/config self-healing rule) and **1.1.1**
+(a PATCH closing the two follow-ups that amendment recorded: the `Resolve-TemplateContent` scaffold repair and the
+propagation of Principle IV into `.github/instructions/mcp-doc-research.instructions.md`). Neither amendment adds,
+removes, redefines, or weakens any obligation this plan relies on, so every verdict below still holds; Principle IV is
+in fact now stronger, and this plan's Phase 0 entry for it already recorded the MCP-first grounding evidence it demands.
 
 The previous revision of this plan recorded **"NOT APPLICABLE — constitution is unratified"**. That stub is
 **superseded** by the evaluation below. The former informative repo gates (G1–G6) are now subsumed by principles I–VI
@@ -258,3 +265,34 @@ precedent. No existing directory is relocated and no existing project is split.
 | New MySQL database `mtm_mock` | FR-027 requires the cached-data store to be a **dedicated** store, separate from `mtm_waitlist`, and never authoritative for internal data. | Adding mirror tables to `mtm_waitlist` was rejected: it would mix a disposable, wholesale-replaced cache into the always-live store, break the "internal store is sacred" principle, and make the independent per-store backup requirement (FR-009) impossible to express. |
 | `Microsoft.AspNetCore.App` framework reference in the service app | The service must expose a network HTTP API with token gating (FR-011) and status serialization. | `System.Net.HttpListener` was rejected: no routing, no middleware/handler pipeline, and token gating plus JSON binding would be hand-rolled — more code and more room for the auth mistakes SC-010 forbids. |
 | Shared-token auth instead of a role/permission system | Spec Assumptions explicitly scope a single shared credential as acceptable because the service runs on a restricted host and no RBAC is in scope. | A role system was rejected as out of scope (spec Assumptions; service non-goal NG5). |
+
+### Recorded deviation — the restore operation's SQL steps (constitution III)
+
+Constitution Governance requires a written record for any deviation, so the one deviation this feature
+carries is recorded here rather than left implicit.
+
+**What deviates.** Principle III says *"Every data operation MUST go through a stored procedure."* The
+emergency restore's step 2 — dropping and recreating the target store so the replacement is wholesale —
+is SQL that cannot be expressed as a stored procedure. MySQL rejects `CREATE DATABASE` and `DROP DATABASE`
+inside a stored routine, and a routine performing the replacement would have to live in the database being
+dropped, so it would destroy itself before the reload could restore into it.
+
+**What is preserved.** The part of Principle III that protects this codebase — *"inline or hard-coded SQL
+statement text MUST NOT remain in application code"* (FR-015, SC-013) — is honoured in full. Both SQL steps
+of the restore are reviewed artifacts under `Database/Mock.Service/Restore/` (`replace_database.sql`,
+`verify_restore.sql`), read at run time, given the store's database name from `BackupStore.ToDatabaseName()`
+(one of four fixed names, never operator input), and streamed to the `mysql` client on **stdin**. No SQL
+statement text remains in `RestoreService.cs` or anywhere else in the service.
+
+**Why this is preferable to the alternatives.** The alternative for step 4 (a per-store row-count procedure
+in each of the four schemas) was rejected for a reason discovered while implementing T138: the previous
+hard-coded verification counted rows in two *waitlist* tables, so three of the four stores could only ever
+report "unverified" — and one of those tables (`core_workstations_registry`) no longer exists in the schema,
+so it proved nothing even for the waitlist store. The verification is now store-agnostic (it reports the
+store's base-table count) and needs no per-schema objects at all.
+
+**Evidence.** Both artifacts were executed against the live MySQL 5.7.24 host on 2026-09-10 via the same
+stdin mechanism the service uses: `replace_database.sql` against a throwaway database name exited `0` (the
+throwaway was then dropped), and `verify_restore.sql` returned `10` base tables for `mtm_mock` — exactly the
+five mirrors plus their five stage twins. Recorded in `Database/Mock.Service/Restore/README.md` and in
+`tasks.md` (T138, Phase 16 execution note).

@@ -375,7 +375,11 @@ public sealed class ImageOverrideDialogViewModelTests
         new(StringComparer.OrdinalIgnoreCase)
         {
             ["id"] = id,
-            ["workstation_name"] = name,
+            // The catalog procedure returns `work_center_name` (it is the column the view exposes). This double
+            // used to emit `workstation_name`, which no query ever selected: the old code read the name as an
+            // empty string and the tests stayed green because they only asserted on the building group, so the
+            // mismatch was invisible until the loader started filtering on the name (T090).
+            ["work_center_name"] = name,
             ["building"] = building,
             ["sort_rank"] = 100L,
             ["is_active"] = 1

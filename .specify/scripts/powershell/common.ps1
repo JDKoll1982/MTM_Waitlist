@@ -295,3 +295,24 @@ function Resolve-Template {
     return $null
 }
 
+# Resolve a template name to its CONTENT (the markdown text), using the same priority stack as
+# Resolve-Template. Called by resolve-template.ps1 and setup-tasks.ps1, which both consume the text
+# rather than the path.
+#
+# Returns $null when the template cannot be resolved anywhere in the stack, so callers can fail with
+# their own "Could not resolve required <template> from the template override stack" message and a
+# non-zero exit code instead of emitting an empty template.
+function Resolve-TemplateContent {
+    param(
+        [Parameter(Mandatory=$true)][string]$TemplateName,
+        [Parameter(Mandatory=$true)][string]$RepoRoot
+    )
+
+    $templatePath = Resolve-Template -TemplateName $TemplateName -RepoRoot $RepoRoot
+    if ($null -eq $templatePath -or -not (Test-Path -LiteralPath $templatePath -PathType Leaf)) {
+        return $null
+    }
+
+    return (Get-Content -LiteralPath $templatePath -Raw)
+}
+

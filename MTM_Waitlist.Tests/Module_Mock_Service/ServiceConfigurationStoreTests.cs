@@ -170,7 +170,9 @@ public sealed class ServiceConfigurationStoreTests
             Assert.IsTrue(configuration.BackupPolicies[store].IsEnabled, $"{store} must default to enabled.");
         }
 
-        Assert.AreEqual(TimeSpan.FromMinutes(15), configuration.RefreshInterval);
+        // The shipped default is the eight-slot local schedule: every 3 hours from local midnight
+        // (00:00/03:00/06:00/09:00/12:00/15:00/18:00/21:00 server-local).
+        Assert.AreEqual(TimeSpan.FromHours(3), configuration.RefreshInterval);
         Assert.AreEqual(5760, configuration.Api.Port);
         Assert.IsTrue(configuration.AutoStartAtLogon);
     }

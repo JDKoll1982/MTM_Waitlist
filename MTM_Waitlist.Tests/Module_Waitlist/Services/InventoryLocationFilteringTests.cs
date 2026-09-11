@@ -65,7 +65,7 @@ public sealed class InventoryLocationFilteringTests
     }
 
     /// <summary>
-    /// Inline stand-in for the retired <c>SampleInventoryLocationCatalog</c>: the same mixed set of rows
+    /// Inline stand-in for the retired sample inventory-location catalog: the same mixed set of rows
     /// (ignored locations, a zero-quantity row, and on-hand rows) so the live filtering rule stays covered.
     /// </summary>
     private static InventoryLocationRow[] MixedRows() => new[]

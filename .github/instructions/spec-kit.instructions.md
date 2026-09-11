@@ -29,17 +29,19 @@ Run the core sequence in order; `specify` must precede `plan`, which must preced
   `implement`) resolve the feature from this file, **not** from the git branch name — keep it current.
 - Project constitution: `.specify/memory/constitution.md`. Templates: `.specify/templates/*`.
 - Scripts (Windows/PowerShell): `.specify/scripts/powershell/{create-new-feature,setup-plan,check-prerequisites,
-  update-agent-context}.ps1`; Copilot integration: `.specify/integrations/copilot/scripts/update-context.ps1`.
+  resolve-template,setup-tasks,update-agent-context}.ps1`; Copilot integration: `.specify/integrations/copilot/scripts/update-context.ps1`.
 
 ## Rules
 - **Specs are technology-agnostic** (WHAT/WHY, user value, acceptance scenarios, success criteria). No
   implementation details in `spec.md`; put the technical design in `plan.md` and the work items in `tasks.md`.
 - **One feature per `/speckit.specify`** invocation.
 - Use the **PowerShell** scripts (this repo has no bash); prefix invocations with `pwsh`/`powershell` when run
-  from a shell.
+  from a shell, and pass **`-ExecutionPolicy Bypass`**: this machine reports `Undefined` at every execution-policy
+  scope, so the effective policy is Windows' `Restricted` default and the scripts otherwise fail with
+  "running scripts is disabled on this system" before any logic runs.
 - `tasks.md` is an **executable checklist**: mark `- [x]` only when the work is implemented and verified —
   mirror the `.github/skills/checklist-execution` rule (never tick unverified tasks).
-- The project constitution (`.specify/memory/constitution.md`) is **ratified at v1.0.0 (2026-09-09)**
+- The project constitution (`.specify/memory/constitution.md`) is **ratified at v1.1.1 (last amended 2026-09-10)**
   and governs this repo. Amend it only via `/speckit.constitution`, which must propagate to dependent
   artifacts and emit a Sync Impact Report.
 - Do **not** duplicate existing repo checklists: `WeekendProject/PromptFiles/*` and

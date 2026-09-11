@@ -28,7 +28,32 @@ public sealed record VisualReadShape
     /// Repository-relative path of the parameterized Visual query, for example
     /// <c>Database/InforVisual/Queues/Module_Setup/Queries/LookupWorkOrder.sql</c>.
     /// </summary>
+    /// <remarks>
+    /// This is the per-key read the <b>application</b> attempts live before falling back to the
+    /// mirror. It is not what the service refreshes from — see
+    /// <see cref="PopulationScriptRelativePath"/>.
+    /// </remarks>
     public required string SourceScriptRelativePath { get; init; }
+
+    /// <summary>
+    /// Repository-relative path of the service's set-based population read, for example
+    /// <c>Database/InforVisual/Queues/Module_Mock/Populations/work_order_lookup_population.sql</c>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The mirror is a <b>complete snapshot</b> of the shape's driver population, so the service reads
+    /// it in one set-based statement per shape instead of one round trip per driver key. The script
+    /// must project exactly <see cref="InputParameters"/> + <see cref="OutputColumns"/> under those
+    /// names, because the payload it returns is handed straight to
+    /// <c>sp_visual_&lt;shape&gt;_refresh</c> as JSON.
+    /// </para>
+    /// <para>
+    /// <see langword="null"/> means "this shape has no population read and the service must not refresh
+    /// it". Mirrors <see cref="IsEnabled"/>: both affect external refresh only and never gate an
+    /// internal read (FR-001).
+    /// </para>
+    /// </remarks>
+    public string? PopulationScriptRelativePath { get; init; }
 
     /// <summary>Ordered input parameters; must match the source script's parameters.</summary>
     public IReadOnlyList<VisualShapeParameter> InputParameters { get; init; } = [];

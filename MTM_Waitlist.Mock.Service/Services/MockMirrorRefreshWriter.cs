@@ -25,8 +25,9 @@ public sealed class MockMirrorRefreshWriter : IMockMirrorRefreshWriter
     /// </param>
     public MockMirrorRefreshWriter(string mockConnectionString)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(mockConnectionString);
-        _mockConnectionString = mockConnectionString;
+        // Deliberately permissive, for the same reason as the metadata reader: a missing connection is
+        // reported when a refresh runs, not thrown while the service is starting (FR-012).
+        _mockConnectionString = mockConnectionString ?? string.Empty;
     }
 
     /// <inheritdoc />
@@ -37,6 +38,11 @@ public sealed class MockMirrorRefreshWriter : IMockMirrorRefreshWriter
     {
         ArgumentNullException.ThrowIfNull(shape);
         ArgumentNullException.ThrowIfNull(jsonPayload);
+
+        if (string.IsNullOrWhiteSpace(_mockConnectionString))
+        {
+            throw new InvalidOperationException(MySqlConnectionStringResolver.NotConfiguredMessage);
+        }
 
         await using var connection = new MySqlConnection(_mockConnectionString);
         await connection.OpenAsync(cancellationToken).ConfigureAwait(false);

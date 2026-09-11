@@ -16,6 +16,8 @@ namespace MTM_Waitlist.Mock.Service.Services;
 /// </para>
 /// <list type="number">
 ///   <item><description>the source Visual script exists on disk;</description></item>
+///   <item><description>the shape's set-based population read exists on disk — without it the shape could
+///     never be refreshed, which is the half-added shape the playbook warns about;</description></item>
 ///   <item><description>the mirror table, stage twin, and both procedures exist in <c>mtm_mock</c>;</description></item>
 ///   <item><description>the mirror's actual physical columns match the columns the catalog implies.</description></item>
 /// </list>
@@ -38,6 +40,7 @@ public sealed class RefreshShapeCatalogProvider
     private readonly string _contentRoot;
 
     private IReadOnlyList<RefreshShapeCatalogEntry> _entries = [];
+    private IReadOnlyList<string> _unregisteredShapeKeys = [];
 
     /// <summary>
     /// Creates the provider.
@@ -76,6 +79,17 @@ public sealed class RefreshShapeCatalogProvider
         _entries.Where(entry => entry.IsValid && !entry.Shape.IsEnabled).Select(entry => entry.Shape).ToList();
 
     /// <summary>
+    /// Shapes whose artifacts exist in <c>mtm_mock</c> but which have <b>no catalog entry</b>, so nothing ever
+    /// refreshes them.
+    /// </summary>
+    /// <remarks>
+    /// This is the "new read shape half-added" edge case: the playbook's step 4 was skipped, leaving a mirror
+    /// that is loaded once and then silently goes stale. Reporting it here is what turns that into a visible
+    /// condition (FR-016/FR-020).
+    /// </remarks>
+    public IReadOnlyList<string> UnregisteredShapeKeys => _unregisteredShapeKeys;
+
+    /// <summary>
     /// Validates every catalog shape against the real artifacts.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -94,7 +108,42 @@ public sealed class RefreshShapeCatalogProvider
         }
 
         _entries = entries;
+        _unregisteredShapeKeys = await FindUnregisteredShapeKeysAsync(cancellationToken).ConfigureAwait(false);
+
         return _entries;
+    }
+
+    /// <summary>
+    /// Finds mirror tables in the cache that no catalog shape claims.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The unclaimed shape keys, in ordinal order.</returns>
+    /// <remarks>
+    /// An unreadable cache yields an empty list rather than a failure: an unreachable cache is already reported
+    /// by every shape failing its own validation, and this check must not be the thing that takes the service
+    /// down (FR-020).
+    /// </remarks>
+    private async Task<IReadOnlyList<string>> FindUnregisteredShapeKeysAsync(CancellationToken cancellationToken)
+    {
+        IReadOnlyList<VisualShapeMetadata> present;
+
+        try
+        {
+            present = await _metadataReader.GetAllShapeMetadataAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            return [];
+        }
+
+        var known = _catalog.Select(shape => shape.Key).ToHashSet(StringComparer.Ordinal);
+
+        return present
+            .Select(metadata => metadata.ShapeKey)
+            .Where(key => !string.IsNullOrWhiteSpace(key) && !known.Contains(key))
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(key => key, StringComparer.Ordinal)
+            .ToList();
     }
 
     private async Task<RefreshShapeCatalogEntry> ValidateShapeAsync(
@@ -108,6 +157,22 @@ public sealed class RefreshShapeCatalogProvider
         if (!File.Exists(scriptPath))
         {
             return Invalid(shape, $"Source script not found: '{shape.SourceScriptRelativePath}'.");
+        }
+
+        if (string.IsNullOrWhiteSpace(shape.PopulationScriptRelativePath))
+        {
+            return Invalid(
+                shape,
+                $"Shape '{shape.Key}' declares no population read, so it could never be refreshed (half-added shape).");
+        }
+
+        var populationScriptPath = Path.Combine(
+            _contentRoot,
+            shape.PopulationScriptRelativePath.Replace('/', Path.DirectorySeparatorChar));
+
+        if (!File.Exists(populationScriptPath))
+        {
+            return Invalid(shape, $"Population script not found: '{shape.PopulationScriptRelativePath}'.");
         }
 
         VisualShapeMetadata? metadata;

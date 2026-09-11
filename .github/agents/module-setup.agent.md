@@ -41,8 +41,8 @@ Run all discovery tasks first.
   - Module_Core/Views/ShellPage.xaml (app project, unchanged)
 - Map persistence and SQL dependencies:
   - Database/InforVisual/Queues/Module_Setup/**/*.sql
-  - Database/MTMReceivingApp/StoredProcedures/sp_setup_dunnage_type_insert.sql
-  - Database/MTMReceivingApp/StoredProcedures/sp_setup_dunnage_part_insert.sql
+  - Database/MTMReceivingApp/StoredProcedures/sp_Dunnage_Types_Insert.sql
+  - Database/MTMReceivingApp/StoredProcedures/sp_Dunnage_Parts_Insert.sql
 - Map tests:
   - MTM_Waitlist.Tests/Module_Setup/**/*.cs
 

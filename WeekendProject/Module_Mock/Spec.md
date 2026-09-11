@@ -146,7 +146,7 @@ Every inline/hard-coded MySQL SQL statement is replaced by a stored procedure �
 covers it, otherwise a newly created SP. Full list with file:line and the existing-SP mapping is
 `Discovery/03-Hardcoded-MySQL-Sql.md`. Priority examples: `AverageCoilWeightService.cs:14` →
 `sp_receiving_history_average_coil_weight`; `WorkCenterCatalogService.cs:272–333` →
-`sp_config_hot_workcenters_delete_for_workstation`/`_upsert`; Startup auth/registry + Settings image overrides
+`sp_config_hot_workcenters_delete_for_computer`/`_upsert`; Startup auth/registry + Settings image overrides
 + Shared dunnage visibility → new SPs.
 
 ## 11. Extensibility — adding a new Visual read shape

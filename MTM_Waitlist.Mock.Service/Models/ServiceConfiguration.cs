@@ -19,11 +19,27 @@ namespace MTM_Waitlist.Mock.Service.Models;
 /// </remarks>
 public sealed record ServiceConfiguration
 {
-    /// <summary>Global refresh interval; a shape may override it (see <see cref="VisualReadShape.RefreshIntervalOverride"/>).</summary>
-    public TimeSpan RefreshInterval { get; init; } = TimeSpan.FromMinutes(15);
+    /// <summary>
+    /// Global refresh interval. A shape may override it (see
+    /// <see cref="VisualReadShape.RefreshIntervalOverride"/>).
+    /// </summary>
+    /// <remarks>
+    /// The interval is a <b>grid anchored at local midnight</b>, not "every N minutes since the last
+    /// run": with the shipped default of 3 hours the cache is refreshed at 00:00, 03:00, 06:00,
+    /// 09:00, 12:00, 15:00, 18:00 and 21:00 <b>server-local</b> time. A long-running or skipped
+    /// cycle therefore cannot drag the schedule off those times.
+    /// </remarks>
+    public TimeSpan RefreshInterval { get; init; } = TimeSpan.FromHours(3);
 
     /// <summary>Read-only external Visual connection settings.</summary>
     public VisualSourceSettings VisualSource { get; init; } = new();
+
+    /// <summary>
+    /// MySQL host/login details for the <c>mtm_mock</c> cache and for the four stores' backups. The
+    /// password is never part of this configuration; it comes from the environment and, for
+    /// <c>mysqldump</c>, from an option file (FR-026).
+    /// </summary>
+    public MySqlConnectionSettings MySqlConnection { get; init; } = new();
 
     /// <summary>Network API bind address, port, and credential.</summary>
     public ApiSettings Api { get; init; } = new();
@@ -54,8 +70,9 @@ public sealed record ServiceConfiguration
     /// <param name="serviceAppDataRoot">Root folder for the service's own data (backups live beneath it).</param>
     /// <remarks>
     /// These are the <b>shipped defaults</b> that SC-007 and SC-008 are measured against
-    /// (data-model.md §5/§6): refresh every 15 minutes; per-store backups at 01:00, 01:20, 01:40,
-    /// and 02:00 local; 14 artifacts retained per store; API on <c>0.0.0.0:5760</c>.
+    /// (data-model.md §5/§6): refresh on the eight 3-hour slots anchored at local midnight
+    /// (00:00/03:00/06:00/09:00/12:00/15:00/18:00/21:00 server-local); per-store backups at 01:00,
+    /// 01:20, 01:40, and 02:00 local; 14 artifacts retained per store; API on <c>0.0.0.0:5760</c>.
     /// </remarks>
     public static ServiceConfiguration CreateDefault(string serviceAppDataRoot)
     {

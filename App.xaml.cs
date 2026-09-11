@@ -9,6 +9,7 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Startup.Views;
+using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Notifications;
 using MTM_Waitlist.Services.DependencyInjection;
 
@@ -59,6 +60,19 @@ public partial class App : Application
 
         StartupDebugLog.Configure(Host.Services.GetService<IStartupLogService>());
         StartupDebugLog.Info("App", "Host built.");
+
+        try
+        {
+            // The probe driver is what lets the read state leave Unknown and the shell indicator appear
+            // (T123). Probing only: refresh scheduling belongs to the on-host service (FR-025), and a probe
+            // failure must never block startup.
+            App.GetService<IVisualReachabilityProbeHost>().Start();
+            StartupDebugLog.Info("App", "Visual reachability probe host started.");
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("App", ex, "The Visual reachability probe host failed to start.");
+        }
 
         try
         {

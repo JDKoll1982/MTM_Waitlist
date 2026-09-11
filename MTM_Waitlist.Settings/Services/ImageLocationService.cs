@@ -16,6 +16,13 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// </summary>
 public sealed class ImageLocationService : IImageLocationService, IWorkCenterImageService, IDisposable
 {
+    /// <summary>
+    /// The active work-center catalog with its display rank, ordered the way the Settings screen shows it.
+    /// Deliberately not <c>sp_setup_work_centers_get_all</c>: that procedure does not select <c>sort_rank</c>,
+    /// orders by rank rather than building first, and takes no parameters, so it cannot serve this caller (T090).
+    /// </summary>
+    private const string WorkCentersCatalogProcedure = "sp_setup_work_centers_catalog_get";
+
     private readonly ILogger<ImageLocationService> _logger;
     private readonly IRequestTypeDisplayLabelService _requestTypeDisplayLabelService;
     private readonly IRequestSubtypeDisplayLabelService _requestSubtypeDisplayLabelService;
@@ -647,36 +654,28 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
             return new List<WorkCenterItem>();
         }
 
-        // Parameter names are generated, never interpolated from the caller's values.
-        var parameters = new Dictionary<string, object?>();
-        var placeholders = new List<string>(workCenterNames.Count);
-        for (var i = 0; i < workCenterNames.Count; i++)
-        {
-            var parameterName = $"@p_name_{i}";
-            placeholders.Add(parameterName);
-            parameters[parameterName] = workCenterNames[i];
-        }
+        // The catalog comes from its own procedure; the requested name set is applied here. A variable-length
+        // name list has no safe parameter form in MySQL 5.7, and the active catalog is small and bounded, so
+        // filtering it costs nothing and cannot break on a name that happens to contain a comma (FR-015).
+        var requestedNames = workCenterNames
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var sql = $@"SELECT
-    id,
-    work_center_name,
-    building,
-    sort_rank,
-    is_active
-FROM setup_work_centers_catalog
-WHERE is_active = 1
-  AND work_center_name IN ({string.Join(", ", placeholders)})
-ORDER BY building ASC, sort_rank ASC, work_center_name ASC;";
-
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            sql,
-            parameters,
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            WorkCentersCatalogProcedure,
+            new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
         var items = new List<WorkCenterItem>(rows.Count);
         foreach (var row in rows)
         {
+            if (!requestedNames.Contains(ReadString(row, "work_center_name")))
+            {
+                continue;
+            }
+
             items.Add(new WorkCenterItem
             {
                 WorkCenterId = ReadInt64(row, "id"),

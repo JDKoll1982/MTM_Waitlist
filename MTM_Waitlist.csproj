@@ -149,6 +149,19 @@
     <Compile Remove="MTM_Waitlist.Reporting\**\*.cs" />
     <Compile Remove="MTM_Waitlist.Mock\**\*.cs" />
     <Compile Remove="MTM_Waitlist.Mock.Service\**\*.cs" />
+
+    <!--
+      Sibling projects own their own XAML too. Only .cs was excluded before, so the on-host service app's
+      pages were globbed into this project and compiled here, where their own row and view-model types do
+      not exist (XamlCompiler WMC0909 / WMC1111). XAML, PRI resources, and content from the service app
+      must not be part of the client app's compilation.
+    -->
+    <Page Remove="MTM_Waitlist.Mock.Service\**\*.xaml" />
+    <ApplicationDefinition Remove="MTM_Waitlist.Mock.Service\**\*.xaml" />
+    <PRIResource Remove="MTM_Waitlist.Mock.Service\**\*" />
+    <Content Remove="MTM_Waitlist.Mock.Service\**\*" />
+    <None Remove="MTM_Waitlist.Mock.Service\**\*" />
+
     <None Include="MTM_Waitlist.Tests\**\*" />
   </ItemGroup>
 </Project>

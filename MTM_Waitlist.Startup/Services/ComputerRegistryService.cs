@@ -6,6 +6,14 @@ namespace MTM_Waitlist.Module_Startup.Services;
 
 public sealed class ComputerRegistryService : IComputerRegistryService
 {
+    private const string LookupByNameMacProcedure = "sp_core_computers_registry_lookup_by_name_mac_get";
+    private const string LookupByMacProcedure = "sp_core_computers_registry_lookup_by_mac_get";
+    private const string UpsertProcedure = "sp_core_computers_registry_upsert";
+    private const string UpdateByMacProcedure = "sp_core_computers_registry_update_by_mac";
+    private const string GetAllProcedure = "sp_core_computers_registry_get_all";
+    private const string UpdateProcedure = "sp_core_computers_registry_update";
+    private const string DeleteProcedure = "sp_core_computers_registry_delete";
+
     private readonly IMySqlHelperServer _mySqlHelperServer;
 
     public ComputerRegistryService(IMySqlHelperServer mySqlHelperServer)
@@ -18,18 +26,12 @@ public sealed class ComputerRegistryService : IComputerRegistryService
         string macAddressNormalized,
         CancellationToken cancellationToken = default)
     {
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            """
-            SELECT id, computer_name, display_name, description, mac_address_normalized, is_registered
-            FROM core_computers_registry
-            WHERE computer_name = @computer_name
-              AND mac_address_normalized = @mac_address
-            LIMIT 1;
-            """,
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            LookupByNameMacProcedure,
             new Dictionary<string, object?>
             {
-                ["computer_name"] = computerName.Trim(),
-                ["mac_address"] = macAddressNormalized.Trim(),
+                ["p_computer_name"] = computerName.Trim(),
+                ["p_mac_address_normalized"] = macAddressNormalized.Trim(),
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -41,17 +43,11 @@ public sealed class ComputerRegistryService : IComputerRegistryService
         string macAddressNormalized,
         CancellationToken cancellationToken = default)
     {
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            """
-            SELECT id, computer_name, display_name, description, mac_address_normalized, is_registered
-            FROM core_computers_registry
-            WHERE mac_address_normalized = @mac_address
-            ORDER BY updated_utc DESC
-            LIMIT 1;
-            """,
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            LookupByMacProcedure,
             new Dictionary<string, object?>
             {
-                ["mac_address"] = macAddressNormalized.Trim(),
+                ["p_mac_address_normalized"] = macAddressNormalized.Trim(),
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -67,44 +63,15 @@ public sealed class ComputerRegistryService : IComputerRegistryService
         string? description,
         CancellationToken cancellationToken = default)
     {
-        _ = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-            """
-            INSERT INTO core_computers_registry (
-                public_id,
-                computer_name,
-                hostname_normalized,
-                mac_address_normalized,
-                display_name,
-                description,
-                is_registered,
-                created_utc,
-                updated_utc
-            )
-            VALUES (
-                UUID(),
-                @computer_name,
-                @hostname,
-                @mac_address,
-                @display_name,
-                @description,
-                1,
-                UTC_TIMESTAMP(),
-                UTC_TIMESTAMP()
-            )
-            ON DUPLICATE KEY UPDATE
-                computer_name = VALUES(computer_name),
-                display_name = VALUES(display_name),
-                description = VALUES(description),
-                is_registered = 1,
-                updated_utc = UTC_TIMESTAMP();
-            """,
+        _ = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+            UpsertProcedure,
             new Dictionary<string, object?>
             {
-                ["computer_name"] = computerName.Trim(),
-                ["hostname"] = hostnameNormalized.Trim(),
-                ["mac_address"] = macAddressNormalized.Trim(),
-                ["display_name"] = displayName.Trim(),
-                ["description"] = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+                ["p_computer_name"] = computerName.Trim(),
+                ["p_hostname_normalized"] = hostnameNormalized.Trim(),
+                ["p_mac_address_normalized"] = macAddressNormalized.Trim(),
+                ["p_display_name"] = displayName.Trim(),
+                ["p_description"] = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -121,25 +88,15 @@ public sealed class ComputerRegistryService : IComputerRegistryService
         string? description,
         CancellationToken cancellationToken = default)
     {
-        _ = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-            """
-            UPDATE core_computers_registry
-            SET computer_name = @computer_name,
-                hostname_normalized = @hostname,
-                display_name = @display_name,
-                description = @description,
-                updated_utc = UTC_TIMESTAMP()
-            WHERE mac_address_normalized = @mac_address
-            ORDER BY id DESC
-            LIMIT 1;
-            """,
+        _ = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+            UpdateByMacProcedure,
             new Dictionary<string, object?>
             {
-                ["computer_name"] = newComputerName.Trim(),
-                ["hostname"] = hostnameNormalized.Trim(),
-                ["mac_address"] = macAddressNormalized.Trim(),
-                ["display_name"] = displayName.Trim(),
-                ["description"] = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+                ["p_mac_address_normalized"] = macAddressNormalized.Trim(),
+                ["p_computer_name"] = newComputerName.Trim(),
+                ["p_hostname_normalized"] = hostnameNormalized.Trim(),
+                ["p_display_name"] = displayName.Trim(),
+                ["p_description"] = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -150,12 +107,8 @@ public sealed class ComputerRegistryService : IComputerRegistryService
 
     public async Task<IReadOnlyList<ComputerRecord>> GetAllComputersAsync(CancellationToken cancellationToken = default)
     {
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            """
-            SELECT id, computer_name, display_name, description, mac_address_normalized, is_registered
-            FROM core_computers_registry
-            ORDER BY display_name ASC, computer_name ASC;
-            """,
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            GetAllProcedure,
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -177,27 +130,17 @@ public sealed class ComputerRegistryService : IComputerRegistryService
         bool isRegistered,
         CancellationToken cancellationToken = default)
     {
-        _ = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-            """
-            UPDATE core_computers_registry
-            SET computer_name = @computer_name,
-                hostname_normalized = @hostname,
-                mac_address_normalized = @mac_address,
-                display_name = @display_name,
-                description = @description,
-                is_registered = @is_registered,
-                updated_utc = UTC_TIMESTAMP()
-            WHERE id = @id;
-            """,
+        _ = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+            UpdateProcedure,
             new Dictionary<string, object?>
             {
-                ["id"] = id,
-                ["computer_name"] = computerName.Trim(),
-                ["hostname"] = hostnameNormalized.Trim(),
-                ["mac_address"] = macAddressNormalized.Trim(),
-                ["display_name"] = displayName.Trim(),
-                ["description"] = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
-                ["is_registered"] = isRegistered ? 1 : 0,
+                ["p_id"] = id,
+                ["p_computer_name"] = computerName.Trim(),
+                ["p_hostname_normalized"] = hostnameNormalized.Trim(),
+                ["p_mac_address_normalized"] = macAddressNormalized.Trim(),
+                ["p_display_name"] = displayName.Trim(),
+                ["p_description"] = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+                ["p_is_registered"] = isRegistered ? 1 : 0,
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -208,14 +151,11 @@ public sealed class ComputerRegistryService : IComputerRegistryService
 
     public async Task<bool> DeleteComputerAsync(long id, CancellationToken cancellationToken = default)
     {
-        var affected = await _mySqlHelperServer.ExecuteSqlNonQueryAsync(
-            """
-            DELETE FROM core_computers_registry
-            WHERE id = @id;
-            """,
+        var affected = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+            DeleteProcedure,
             new Dictionary<string, object?>
             {
-                ["id"] = id,
+                ["p_id"] = id,
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);

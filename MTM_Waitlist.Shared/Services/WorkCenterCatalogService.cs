@@ -6,12 +6,29 @@ using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Core.Models;
 using MySqlConnector;
 using System.Globalization;
-using System.Text;
 
 namespace MTM_Waitlist.Module_Shared.Services;
 
 public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
 {
+    /// <summary>One computer's active hot work centers, with the catalog's display order.</summary>
+    private const string HotWorkCentersGetProcedure = "sp_config_hot_workcenters_get_for_computer";
+
+    /// <summary>Clears one computer's hot work centers.</summary>
+    private const string HotWorkCentersDeleteProcedure = "sp_config_hot_workcenters_delete_for_computer";
+
+    /// <summary>Inserts or reactivates one hot work-center assignment.</summary>
+    private const string HotWorkCentersUpsertProcedure = "sp_config_hot_workcenters_upsert";
+
+    /// <summary>The active work-center catalog, ordered by the catalog's own display order.</summary>
+    private const string WorkCentersGetAllProcedure = "sp_setup_work_centers_get_all";
+
+    /// <summary>The registry's registered machines, in display order — the computer picker's source.</summary>
+    private const string RegisteredComputersProcedure = "sp_core_computers_registry_registered_get";
+
+    /// <summary>Resolves one registry row from a computer name or its normalized hostname.</summary>
+    private const string ComputerLookupByNameProcedure = "sp_core_computers_registry_lookup_by_name_get";
+
     private readonly MySqlHelperServer _mySqlHelperServer;
     private readonly StartupState _startupState;
     private readonly StartupDatabaseOptions _startupDatabaseOptions;
@@ -38,11 +55,10 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
 
     public async Task<IReadOnlyList<ComputerOption>> GetAvailableComputersAsync(CancellationToken cancellationToken = default)
     {
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT computer_name, display_name
-FROM core_computers_registry
-WHERE is_registered = 1
-ORDER BY display_name ASC, computer_name ASC;",
+        // Registered machines only: the picker must not offer one an operator has retired, which is why this
+        // is not sp_core_computers_registry_get_all (that one serves the registry editor and returns every row).
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            RegisteredComputersProcedure,
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -88,23 +104,15 @@ ORDER BY display_name ASC, computer_name ASC;",
             .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var hotRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT
-    swc.work_center_name AS work_center_name,
-    cwhc.sort_rank
-FROM config_computer_hot_work_centers cwhc
-INNER JOIN core_computers_registry cwr ON cwr.id = cwhc.computer_id
-INNER JOIN setup_work_centers_catalog swc ON swc.id = cwhc.work_center_id
-WHERE cwhc.is_active = 1
-  AND swc.is_active = 1
-  AND (
-        cwr.computer_name = @p_workstation_name
-        OR cwr.hostname_normalized = @p_workstation_name
-      )
-ORDER BY cwhc.sort_rank ASC, swc.work_center_name ASC;",
+        // Historical note (FR-015): this read used to carry its own JOIN statement text. The procedure is
+        // that same statement — same joins, same is_active filters, same sort_rank ordering, same two
+        // output columns — so nothing but the call site changed. The procedure is named "_for_computer"
+        // because the table it filters on is core_computers_registry.
+        var hotRows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            HotWorkCentersGetProcedure,
             new Dictionary<string, object?>
             {
-                ["p_workstation_name"] = normalizedWorkstationName,
+                ["p_computer_name"] = normalizedWorkstationName,
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -193,16 +201,11 @@ ORDER BY cwhc.sort_rank ASC, swc.work_center_name ASC;",
 
         StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync started. Workstation='{normalizedWorkstationName}', RequestedCount={hotWorkCenters.Count}.");
 
-        var workstationRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT id
-FROM core_computers_registry
-WHERE computer_name = @p_workstation_name
-   OR hostname_normalized = @p_workstation_name
-ORDER BY CASE WHEN computer_name = @p_workstation_name THEN 0 ELSE 1 END
-LIMIT 1;",
+        var workstationRows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            ComputerLookupByNameProcedure,
             new Dictionary<string, object?>
             {
-                ["p_workstation_name"] = normalizedWorkstationName,
+                ["p_name"] = normalizedWorkstationName,
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -214,10 +217,10 @@ LIMIT 1;",
             return "Unable to save Local workcenters: workstation not found.";
         }
 
-        var availableRows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT id, work_center_name
-FROM setup_work_centers_catalog
-WHERE is_active = 1;",
+        // The same procedure also serves the available-work-center list below: it returns id, building,
+        // work_center_name, is_active and updated_utc over the active-work-center view.
+        var availableRows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            WorkCentersGetAllProcedure,
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -269,61 +272,34 @@ WHERE is_active = 1;",
             await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
             await using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
-            await using (var deleteCommand = new MySqlCommand(@"
-DELETE FROM config_computer_hot_work_centers
-WHERE computer_id = @p_core_workstation_id;", connection, transaction))
+            // The clear and the re-assignment stay in one transaction so a failure between them cannot
+            // leave the computer with no hot work centers. Both are procedure calls now: the delete is
+            // that same statement, and the upsert is that same INSERT ... ON DUPLICATE KEY UPDATE done one
+            // row at a time, which is the only shape the procedure has (FR-015).
+            await using (var deleteCommand = new MySqlCommand(HotWorkCentersDeleteProcedure, connection, transaction)
+            {
+                CommandType = System.Data.CommandType.StoredProcedure,
+            })
             {
                 deleteCommand.CommandTimeout = Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds);
-                deleteCommand.Parameters.AddWithValue("@p_core_workstation_id", workstationId);
+                deleteCommand.Parameters.AddWithValue("@p_computer_id", workstationId);
                 _ = await deleteCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            if (resolvedHotWorkCenters.Length > 0)
+            foreach (var item in resolvedHotWorkCenters)
             {
-                var insertSql = new StringBuilder();
-                insertSql.AppendLine("INSERT INTO config_computer_hot_work_centers (");
-                insertSql.AppendLine("    computer_id,");
-                insertSql.AppendLine("    work_center_id,");
-                insertSql.AppendLine("    public_id,");
-                insertSql.AppendLine("    sort_rank,");
-                insertSql.AppendLine("    is_active,");
-                insertSql.AppendLine("    created_by_user_id,");
-                insertSql.AppendLine("    updated_by_user_id,");
-                insertSql.AppendLine("    created_utc,");
-                insertSql.AppendLine("    updated_utc");
-                insertSql.AppendLine(") VALUES");
-
-                for (var index = 0; index < resolvedHotWorkCenters.Length; index++)
+                await using var upsertCommand = new MySqlCommand(HotWorkCentersUpsertProcedure, connection, transaction)
                 {
-                    var parameterSuffix = index.ToString(CultureInfo.InvariantCulture);
-                    if (index > 0)
-                    {
-                        insertSql.AppendLine(",");
-                    }
+                    CommandType = System.Data.CommandType.StoredProcedure,
+                };
 
-                    insertSql.Append($"(@p_core_workstation_id, @p_setup_workstation_id_{parameterSuffix}, UUID(), @p_sort_rank_{parameterSuffix}, 1, @p_modified_by_user_id, @p_modified_by_user_id, UTC_TIMESTAMP(), UTC_TIMESTAMP())");
-                }
+                upsertCommand.CommandTimeout = Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds);
+                upsertCommand.Parameters.AddWithValue("@p_computer_id", workstationId);
+                upsertCommand.Parameters.AddWithValue("@p_work_center_id", item.WorkCenterId);
+                upsertCommand.Parameters.AddWithValue("@p_sort_rank", item.SortRank);
+                upsertCommand.Parameters.AddWithValue("@p_modified_by_user_id", DBNull.Value);
 
-                insertSql.AppendLine();
-                insertSql.AppendLine("ON DUPLICATE KEY UPDATE");
-                insertSql.AppendLine("    sort_rank = VALUES(sort_rank),");
-                insertSql.AppendLine("    is_active = 1,");
-                insertSql.AppendLine("    updated_by_user_id = VALUES(updated_by_user_id),");
-                insertSql.AppendLine("    updated_utc = UTC_TIMESTAMP();");
-
-                await using var insertCommand = new MySqlCommand(insertSql.ToString(), connection, transaction);
-                insertCommand.CommandTimeout = Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds);
-                insertCommand.Parameters.AddWithValue("@p_core_workstation_id", workstationId);
-                insertCommand.Parameters.AddWithValue("@p_modified_by_user_id", DBNull.Value);
-
-                for (var index = 0; index < resolvedHotWorkCenters.Length; index++)
-                {
-                    var item = resolvedHotWorkCenters[index];
-                    insertCommand.Parameters.AddWithValue($"@p_setup_workstation_id_{index}", item.WorkCenterId);
-                    insertCommand.Parameters.AddWithValue($"@p_sort_rank_{index}", item.SortRank);
-                }
-
-                _ = await insertCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+                _ = await upsertCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             }
 
             await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
@@ -339,11 +315,9 @@ WHERE computer_id = @p_core_workstation_id;", connection, transaction))
 
     private async Task<IReadOnlyList<IReadOnlyDictionary<string, object?>>> GetAvailableWorkCenterRowsAsync(CancellationToken cancellationToken)
     {
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT work_center_name, building, updated_utc
-FROM setup_work_centers_catalog
-WHERE is_active = 1
-ORDER BY sort_rank ASC, work_center_name ASC;",
+        // The active-work-center catalog, in the catalog's own display order (FR-015).
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            WorkCentersGetAllProcedure,
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -359,16 +333,11 @@ ORDER BY sort_rank ASC, work_center_name ASC;",
             return Environment.MachineName;
         }
 
-        var rows = await _mySqlHelperServer.ExecuteSqlQueryAsync(
-            @"SELECT computer_name
-FROM core_computers_registry
-WHERE computer_name = @p_workstation_name
-   OR hostname_normalized = @p_workstation_name
-ORDER BY CASE WHEN computer_name = @p_workstation_name THEN 0 ELSE 1 END
-LIMIT 1;",
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            ComputerLookupByNameProcedure,
             new Dictionary<string, object?>
             {
-                ["p_workstation_name"] = key,
+                ["p_name"] = key,
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);

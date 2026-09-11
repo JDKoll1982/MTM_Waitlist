@@ -113,21 +113,6 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task SelectSequenceAsync_WhenRecvMockDisabled_DoesNotLoadMockDunnageTypes()
-    {
-        var service = CreateService(recvMockData: false);
-
-        await service.SearchWorkOrderAsync("76951");
-        await service.SelectPartAsync("12345679");
-
-        var sequenceResult = await service.SelectSequenceAsync("20");
-
-        Assert.IsTrue(sequenceResult.Success);
-        Assert.AreEqual(SetupWorkflowStep.DunnageTypeSelection, service.State.CurrentStep);
-        Assert.AreEqual(0, service.State.DunnageTypes.Count);
-    }
-
-    [TestMethod]
     public async Task ClearAllDunnageForPairAsync_RemovesAllAssignedItems()
     {
         var service = CreateService();
@@ -163,24 +148,16 @@ public sealed class SetupWorkflowServiceTests
         Assert.IsTrue(result.Message.Contains("valid dunnage type", StringComparison.OrdinalIgnoreCase));
     }
 
-    private static DunnageWorkflowService CreateDunnageWorkflowService()
-    {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = false,
-        });
-        return new DunnageWorkflowService(new MySqlHelperServer());
-    }
+    private static DunnageWorkflowService CreateDunnageWorkflowService() =>
+        new(new MySqlHelperServer());
 
-    private static SetupWorkflowService CreateService(bool recvMockData = true, IReadOnlyList<string>? ignoredLocations = null)
+    private static SetupWorkflowService CreateService(IReadOnlyList<string>? ignoredLocations = null)
     {
         var state = new SetupWorkflowState();
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>
-        {
-            ["Feature.InforVisualMockData"] = true,
-            ["Feature.RecvMockData"] = recvMockData,
-        });
+
+        // No mock toggle is seeded: internal stores are always live and the retired demo toggles no longer
+        // exist (FR-003/FR-014). The only setting this fixture needs is the ignored-locations set.
+        var settings = new InMemoryLocalSettingsService([]);
         if (ignoredLocations is { Count: > 0 })
         {
             settings.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, ignoredLocations.ToList()).GetAwaiter().GetResult();

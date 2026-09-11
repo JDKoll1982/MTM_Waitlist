@@ -33,6 +33,9 @@ public sealed record RestoreOutcome
     /// <summary>The restore outcome.</summary>
     public RestoreOutcomeKind Outcome { get; init; } = RestoreOutcomeKind.NotConfirmed;
 
-    /// <summary>Row counts of the store's core tables compared before and after.</summary>
+    /// <summary>
+    /// What the post-reload verification observed — the replaced store's table count, or the reason it
+    /// could not be read. Secret-free and operator-facing.
+    /// </summary>
     public string? VerificationSummary { get; init; }
 }

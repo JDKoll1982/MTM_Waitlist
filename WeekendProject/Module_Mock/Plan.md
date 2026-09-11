@@ -74,7 +74,12 @@
   (`AverageCoilWeightService`, `WorkCenterCatalogService` hot-WCs) and create new SPs for the rest (Startup
   auth/registry, Settings image overrides, Shared dunnage visibility, `ConfigSettingsValueService` delete, etc.).
 - Verify SP name/body/folder consistency for the flagged mismatches (`sp_Dunnage_*`, `sp_config_hot_workcenters_*`,
-  `sp_setup_workstations_*`).
+  `sp_setup_workstations_*`). **Resolved 2026-09-10 (T097)** — none of the three old names exists on the server:
+  the hot-workcenter pair is `…_for_computer` (callers already correct), the touch routine is
+  `sp_setup_work_centers_touch` (only a log line still said `sp_setup_workstations_touch`), and the two
+  `sp_setup_dunnage_*` files were dependency notes for MTM_Receiving_Application's live `sp_Dunnage_*` procedures
+  and were renamed to match. See `Discovery/03` §E.1. **Live names win** — nothing another application calls is
+  renamed.
 - **Exit:** no inline MySQL SQL literals in C#; all calls SP-backed; tests green.
 
 ### Phase 6 — Real-data gap fixes

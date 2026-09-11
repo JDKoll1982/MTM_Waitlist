@@ -144,10 +144,56 @@ public sealed class RefreshShapeCatalogProviderTests
         var provider = CreateProvider(key => Metadata(ColumnsFor(key)));
 
         Assert.AreEqual(0, provider.Entries.Count, "The work list must be empty until validation has run.");
+        Assert.AreEqual(0, provider.UnregisteredShapeKeys.Count);
 
         await provider.ValidateAsync();
 
         Assert.AreEqual(5, provider.Entries.Count);
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_WhenAShapeExistsInTheCacheWithoutACatalogEntry_ReportsItAsUnregistered()
+    {
+        // The "new read shape half-added" edge case: steps 2-3 of the playbook were done (tables and
+        // procedures exist) but step 4 was skipped, so nothing ever refreshes it (FR-016/FR-020).
+        var provider = CreateProvider(
+            key => Metadata(ColumnsFor(key)),
+            overrides: new() { ["newly_added_shape"] = Metadata("id,refreshed_utc,is_seed_content") });
+
+        await provider.ValidateAsync();
+
+        CollectionAssert.AreEqual(
+            new[] { "newly_added_shape" },
+            provider.UnregisteredShapeKeys.ToArray());
+
+        Assert.AreEqual(5, provider.RefreshableShapes.Count, "The five registered shapes still refresh.");
+        Assert.AreEqual(0, provider.InvalidShapes.Count, "An unregistered shape is a gap, not an invalid catalog entry.");
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_WhenTheCacheCannotBeEnumerated_DoesNotFailValidationOrReportFalseGaps()
+    {
+        var reader = new ThrowingEnumerationMetadataReader();
+
+        var provider = new RefreshShapeCatalogProvider(reader, catalog: null, contentRoot: AppContext.BaseDirectory);
+
+        var entries = await provider.ValidateAsync();
+
+        Assert.AreEqual(5, entries.Count, "The catalog shapes are still validated individually.");
+        Assert.AreEqual(0, provider.UnregisteredShapeKeys.Count, "An unreadable cache must not produce phantom gaps.");
+    }
+
+    /// <summary>Reports per-shape metadata but cannot enumerate the cache.</summary>
+    private sealed class ThrowingEnumerationMetadataReader : IVisualShapeMetadataReader
+    {
+        public Task<VisualShapeMetadata?> GetShapeMetadataAsync(
+            string shapeKey,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<VisualShapeMetadata?>(Metadata(ColumnsFor(shapeKey)) with { ShapeKey = shapeKey });
+
+        public Task<IReadOnlyList<VisualShapeMetadata>> GetAllShapeMetadataAsync(
+            CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("cache unreachable");
     }
 
     private static VisualShapeMetadata Metadata(
@@ -201,6 +247,24 @@ public sealed class RefreshShapeCatalogProviderTests
 
             var result = _factory(shapeKey);
             return Task.FromResult(result is null ? null : result with { ShapeKey = shapeKey });
+        }
+
+        /// <summary>
+        /// Reports every catalog shape as present, plus any shape a test adds to the cache directly — the
+        /// mechanism the "shape with artifacts but no catalog entry" case needs (FR-016/FR-020).
+        /// </summary>
+        public Task<IReadOnlyList<VisualShapeMetadata>> GetAllShapeMetadataAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var present = VisualReadShapeCatalog.Create()
+                .Select(shape => shape.Key)
+                .Concat(_overrides.Keys)
+                .Distinct(StringComparer.Ordinal)
+                .OrderBy(key => key, StringComparer.Ordinal)
+                .Select(key => Metadata(ColumnsFor(key)) with { ShapeKey = key })
+                .ToList();
+
+            return Task.FromResult<IReadOnlyList<VisualShapeMetadata>>(present);
         }
     }
 }

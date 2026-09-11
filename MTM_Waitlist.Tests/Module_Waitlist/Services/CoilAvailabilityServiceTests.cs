@@ -6,8 +6,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 
 /// <summary>
 /// Coil availability no longer consults a sample catalog (FR-014): the mock toggle and
-/// <c>SampleJobCoilCatalog</c> are gone. These tests pin the interim behavior until the live source
-/// lands (FR-019, task T099), and prove no sample coil data is fabricated in the meantime.
+/// <c>the retired job-coil sample catalog</c> are gone. These tests pin the interim behavior until the live source/// lands (FR-019, task T099), and prove no sample coil data is fabricated in the meantime.
 /// </summary>
 [TestClass]
 public sealed class CoilAvailabilityServiceTests
