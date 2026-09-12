@@ -6,6 +6,7 @@
 | **Feature area** | Waitlist — request cards (all request types) |
 | **Type** | Visible control with no behaviour; documented feature does not exist in the UI |
 | **Found** | 2026-09-12, working tree at `7bf6857` |
+| **Planned fix** | **Spec `01-truthful-data-and-controls`** — stops offering the buttons until they work (hide them, or show the request's real status instead). **Spec `02-handler-fulfilment-and-urgency`** is where they come back working, wired to the commands and gates set out in §5 of this file. Seeds: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md`, `…/02-handler-fulfilment-and-urgency.md` |
 | **Files** | `Module_Waitlist/Controls/WaitlistLineCardView.xaml` (lines 137–181), `Module_Waitlist/Controls/WaitlistLineCardView.xaml.cs`, `Module_Waitlist/Controls/*/…WaitlistLineView.xaml`, `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs` |
 | **Blocks** | `WeekendProject/OPEN-WORK-NEXT-SPEC.md` §4.3 (Accept / Complete / Release); the ✅ marks on features 1–2 of `WeekendProject/ChangeLog.Simple.md` |
 

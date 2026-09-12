@@ -6,6 +6,7 @@
 | **Feature area** | Work Center Setup result messages; code documentation across the Waitlist/Core services |
 | **Type** | Dead localization entry stating removed behaviour; stale comments describing a retired mechanism |
 | **Found** | 2026-09-12, working tree at `7bf6857` |
+| **Planned fix** | **Spec `01-truthful-data-and-controls`** — deletes the orphan `MockSaved` entry, rewrites the stale comments, extends the retired-symbol audit with the wording patterns in §4 of this file, and absorbs the `OPEN-WORK-NEXT-SPEC.md` §10.2 documentation hygiene (retire the stale backlog sources; reconcile `Module_Mock/Tasks.md`). The `SampleOrder` rename is an open decision in that spec's §7. Seed: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md` |
 | **Files** | `Strings/en-us/Resources.resw` (line 211), `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs` (line 198), `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs` (lines 582, 705, 733), `MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs` (line 18), `MTM_Waitlist.Core/Contracts/Services/IIgnoredLocationsService.cs` (line 7), `MTM_Waitlist.Setup/Services/SetupPersistenceService.cs` (line 303) |
 
 ---

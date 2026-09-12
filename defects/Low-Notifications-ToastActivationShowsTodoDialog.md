@@ -6,6 +6,7 @@
 | **Feature area** | Notifications — toast activation / deep link |
 | **Type** | Shipped placeholder dialog on a user-facing path |
 | **Found** | 2026-09-12, working tree at `7bf6857` |
+| **Planned fix** | **Spec `01-truthful-data-and-controls`** — deletes both placeholder dialogs, factors the deep-link handling into one shared helper, and logs unrecognised arguments instead of showing anything. Because the path is unreachable until the alert can fire, the *proof* lands with **Spec `08-notification-delivery-and-packaging`**, which exercises both activation paths (§6 of its seed). Seeds: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md`, `…/08-notification-delivery-and-packaging.md` |
 | **Files** | `MTM_Waitlist.Core/Services/AppNotificationService.cs` (lines 35–42), `MTM_Waitlist.Core/Activation/AppNotificationActivationHandler.cs` (lines 57–61) |
 
 ---

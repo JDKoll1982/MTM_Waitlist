@@ -6,6 +6,7 @@
 | **Feature area** | New Request — Confirm step (step 6 of 7) |
 | **Type** | Fabricated operational data presented as fact; unimplemented promised feature |
 | **Found** | 2026-09-12, working tree at `7bf6857` |
+| **Planned fix** | **Spec `01-truthful-data-and-controls`** — removes the fabricated "0 active request(s)" / "approximately 15 minutes" card (or binds it to a substantiated figure). If a real queue count and wait estimate are wanted, **Spec `04-waitlist-analytics`** is the spec that can substantiate them; that spec must either adopt it as a requirement or this file must be closed as "removed, not replaced". Seeds: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md`, `…/04-waitlist-analytics.md` |
 | **Files** | `Module_Waitlist/Views/NewRequestSummaryPage.xaml` (lines 161–167), `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSummaryViewModel.cs` |
 | **Related** | `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` (same pattern, different screen) |
 

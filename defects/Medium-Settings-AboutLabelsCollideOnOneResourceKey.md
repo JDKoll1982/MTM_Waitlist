@@ -6,6 +6,7 @@
 | **Feature area** | Settings → About / App Info (and the Settings section header) |
 | **Type** | Localization key collision — the wrong text is shown to every user in every locale |
 | **Found** | 2026-09-12, working tree at `7bf6857` |
+| **Planned fix** | **Spec `01-truthful-data-and-controls`** — gives each element its own key and its own resource entry, and adds the duplicate-`x:Uid` / missing-resource check to the verification (§6 of this file). No other spec owns the Settings page's labels. Seed: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md` |
 | **Files** | `Module_Settings/Views/SettingsPage.xaml` (lines 1175, 1215, 1233), `Strings/en-us/Resources.resw` (line 481) |
 
 ---

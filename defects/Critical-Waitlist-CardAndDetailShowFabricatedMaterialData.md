@@ -6,6 +6,7 @@
 | **Feature area** | Waitlist — request cards and request detail |
 | **Type** | Fabricated data presented as real (spec violation) |
 | **Found** | 2026-09-12, working tree at `7bf6857` |
+| **Planned fix** | **Spec `01-truthful-data-and-controls`** — removes every fabricated value listed in §3 so nothing false is rendered, and adds the test that fails against today's code. The *real* values are restored by **Spec `03-unified-card-and-taxonomy`**, whose item-resolution gate already forbids the `FG-10042` / `WO-073112 / RM-48190` literals. Seeds: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md`, `…/03-unified-card-and-taxonomy.md` |
 | **Files** | `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs` (lines 560–701), `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs` (lines 316–520) |
 | **Blocks** | `specs/001-module-mock-visual-fallback` FR-001 / FR-003 / FR-014, SC-013 — and the whole point of that release |
 

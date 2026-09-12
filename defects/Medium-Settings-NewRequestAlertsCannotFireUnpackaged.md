@@ -6,6 +6,7 @@
 | **Feature area** | Settings → Operations → New Request Alerts (and the new-request toast it controls) |
 | **Type** | Advertised feature that cannot function in the shipped configuration; capability gate reported in prose instead of enforced in the UI |
 | **Found** | 2026-09-12, working tree at `7bf6857` |
+| **Planned fix** | **Spec `01-truthful-data-and-controls`** — gates the toggle on `RuntimeHelper.IsMSIX` (and states the reason) so the surface stops promising a capability this installation lacks; that is option 2 of §5 and is the honest state either way. The delivery decision is **Spec `08-notification-delivery-and-packaging`**, which settles packaging versus an unpackaged alternative and then makes the alert actually fire. Seeds: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md`, `…/08-notification-delivery-and-packaging.md` |
 | **Files** | `MTM_Waitlist.csproj` (line 16), `MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs` (line 809), `MTM_Waitlist.Core/Services/RequestAlertGate.cs`, `NewRequestAlertService.cs`, `NewRequestAlertNotifier.cs`, `AppNotificationService.cs`, `MTM_Waitlist.Settings/Views/SettingsPage.xaml` (lines 954–990) |
 
 ---
