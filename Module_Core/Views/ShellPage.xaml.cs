@@ -49,7 +49,7 @@ public sealed partial class ShellPage : Page
             return;
         }
 
-        // TODO: Set the title bar icon by updating /Assets/WindowIcon.ico.
+        // TODO: Set the title bar icon by updating /Assets/Packaging/window-icon.ico.
         // A custom title bar is required for full window theme and Mica support.
         // https://docs.microsoft.com/windows/apps/develop/title-bar?tabs=winui3#full-customization
         App.MainWindow.ExtendsContentIntoTitleBar = true;

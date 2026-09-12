@@ -33,7 +33,9 @@ A topic search across all ten files of `specs/001` for `unified`, `User Manageme
 workstream is therefore **cancelled**, not deferred — see §3. Do not resurrect the Developer Settings editor
 page, the type edit view, or the guided wizard modal when writing the new spec.
 
-`specs/001/tasks.md` itself stands at **139 boxes: 138 `[x]`, 1 `[ ]`** — the single open one is **T106** (§10).
+`specs/001/tasks.md` now stands at **173 boxes: 173 `[x]`, 0 `[ ]`** — the last two, **T106** and **T151**, were
+verified by the operator on 2026-09-12, so §10 is **documentation hygiene only** (its T106 item is closed; the
+SC-007/SC-008 re-check is due 2026-10-12).
 
 ---
 
@@ -393,14 +395,17 @@ with acting user + timestamp.
 
 ## 10. Workstream 7 — Close out `specs/001` and documentation hygiene
 
-**Source:** `specs/001/tasks.md` T106 (the only open box in that file) plus the gaps found in §1/§3.
+**Source:** `specs/001/tasks.md` T106 (since verified — see §10.1) plus the gaps found in §1/§3. With T106 closed, this
+workstream is **documentation hygiene only**: §10.2 below.
 
-### 10.1 Spec 001 T106 — end-to-end acceptance (verification, environment-blocked)
-- Publish and run `MTM_Waitlist.Mock.Service` **on the database host**, then execute `quickstart.md` §1–§8:
-  fallback proof needs Infor Visual made unreachable; defect proof needs a signed-in build; the backup/restore
-  drill needs a throwaway store.
-- Start the **SC-007 / SC-008 30-day observation windows** (≥ 95 % of scheduled refresh cycles succeeding;
-  100 % of scheduled backup windows producing a restorable artifact per enabled store).
+### 10.1 Spec 001 T106 — end-to-end acceptance — **DONE 2026-09-12**
+- **Executed.** The service was published and run on the database host, and `quickstart.md` §1–§8 was walked on a
+  running build by the operator: the fallback proof with Infor Visual unreachable, the defect proof on a **signed-in**
+  build, and the backup/restore drill. T106 and T151 are ticked in `specs/001/tasks.md` (Phase 39 records the basis).
+- **Started, not measured.** The **SC-007 / SC-008 30-day observation windows** (≥ 95 % of scheduled refresh cycles
+  succeeding; 100 % of scheduled backup windows producing a restorable artifact per enabled store) began
+  **2026-09-12**; the re-check is due **2026-10-12**. That is a dated follow-up rather than an open task, and no tick
+  claims the windows passed.
 
 ### 10.2 Documentation hygiene (docs)
 - Fix `WeekendProject/ChangeLog.Simple.md` — it still documents the removed manual Infor Visual toggle as
@@ -414,7 +419,7 @@ with acting user + timestamp.
 
 | Order | Workstream | Why here |
 | --- | --- | --- |
-| 1 | **§10 Close out `specs/001`** | One task plus an infrastructure action, and it **starts the SC-007/SC-008 clocks** that need 30 days of wall time. |
+| 1 | ~~**§10 Close out `specs/001`**~~ — **done 2026-09-12** | Its T106 item is verified and the SC-007/SC-008 clocks are **started** (re-check due 2026-10-12). Only §10.2 documentation hygiene is left, and it can run alongside any other workstream. |
 | 2 | **§4 Handler fulfilment & urgency** | Smallest, already unblocked, no dependency on the taxonomy refactor, immediate user value. |
 | 3 | **§5 Unified 2-line card + taxonomy** | Largest UI surface; prerequisite for much of §6's card-level metrics. |
 | 4 | **§6 Analytics** | Needs §5 for card-level metrics; resolve its five open decisions first. |

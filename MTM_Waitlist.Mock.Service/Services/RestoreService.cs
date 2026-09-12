@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
 using MySqlConnector;
+using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.Models;
 
 namespace MTM_Waitlist.Mock.Service.Services;
@@ -61,6 +62,7 @@ public sealed class RestoreService
     private readonly ILogger<RestoreService> _logger;
     private readonly TimeProvider _timeProvider;
     private readonly Func<Models.ServiceConfiguration> _configurationAccessor;
+    private readonly IServiceCapabilityGate? _capabilityGate;
 
     /// <summary>Creates the restore service.</summary>
     /// <param name="backupEngine">Takes the safety snapshot and locates the MySQL client tools.</param>
@@ -72,13 +74,18 @@ public sealed class RestoreService
     /// <param name="configurationAccessor">Reads the live configuration, including the option-file path.</param>
     /// <param name="logger">Logger; credential material is never passed to it.</param>
     /// <param name="timeProvider">Time source for the recorded timestamps.</param>
+    /// <param name="capabilityGate">
+    /// Reports which stores this machine can reach. A store it reports as unreachable has its restore refused
+    /// before any destructive step. Omitted or <see langword="null"/> means no gating.
+    /// </param>
     public RestoreService(
         BackupEngine backupEngine,
         BackupArtifactStore artifactStore,
         MySqlConnectionStringResolver connectionResolver,
         Func<Models.ServiceConfiguration> configurationAccessor,
         ILogger<RestoreService> logger,
-        TimeProvider? timeProvider = null)
+        TimeProvider? timeProvider = null,
+        IServiceCapabilityGate? capabilityGate = null)
     {
         ArgumentNullException.ThrowIfNull(backupEngine);
         ArgumentNullException.ThrowIfNull(artifactStore);
@@ -92,6 +99,7 @@ public sealed class RestoreService
         _configurationAccessor = configurationAccessor;
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
+        _capabilityGate = capabilityGate;
     }
 
     /// <summary>
@@ -142,6 +150,29 @@ public sealed class RestoreService
 
         var database = artifact.Store.ToDatabaseName();
         var confirmedUtc = _timeProvider.GetUtcNow().UtcDateTime;
+
+        // Disabled before anything destructive happens: on a host that cannot reach this store's database, a
+        // restore is not a failure to report, it is work this machine does not do. The check comes first so no
+        // safety snapshot is taken for a restore that will not happen.
+        var unavailableReason = await GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false) is { } capabilities
+            && !capabilities.IsStoreAvailable(artifact.Store)
+                ? capabilities.StoreUnavailableReason(artifact.Store)
+                : null;
+
+        if (unavailableReason is not null)
+        {
+            _logger.LogWarning(
+                "Restore refused for {Database}: this machine cannot reach that database, so its backup and restore are disabled here.",
+                database);
+
+            return request with
+            {
+                ConfirmedUtc = confirmedUtc,
+                FinishedUtc = _timeProvider.GetUtcNow().UtcDateTime,
+                Outcome = RestoreOutcomeKind.StoreUnavailable,
+                VerificationSummary = $"{unavailableReason} Nothing was changed."
+            };
+        }
 
         // Resolved before any destructive step, and from the same source every other path uses. The settings
         // record still holds its shipped defaults on a host that supplies its credentials through an environment
@@ -322,6 +353,40 @@ public sealed class RestoreService
             Outcome = RestoreOutcomeKind.Succeeded,
             VerificationSummary = verification
         };
+    }
+
+    /// <summary>
+    /// Reads the host's capabilities, or <see langword="null"/> when there is nothing to gate on.
+    /// </summary>
+    /// <remarks>
+    /// A gate that cannot answer returns <see langword="null"/>, which disables nothing: a probe failure is not
+    /// evidence that a store is unreachable, and the restore's own outcome already reports a real failure.
+    /// </remarks>
+    private async Task<ServiceCapabilitySnapshot?> GetCapabilitiesAsync(CancellationToken cancellationToken)
+    {
+        if (_capabilityGate is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await _capabilityGate
+                .GetCapabilitiesAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(
+                exception,
+                "The host capability check failed; the restore continues, because a failed probe is not evidence that a store is unreachable.");
+
+            return null;
+        }
     }
 
     /// <summary>

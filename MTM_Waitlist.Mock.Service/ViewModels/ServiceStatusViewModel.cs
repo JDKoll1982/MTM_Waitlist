@@ -153,6 +153,9 @@ public sealed partial class ServiceStatusViewModel : ObservableObject, IServiceS
     /// <summary>Label: whether the backup tool is usable.</summary>
     public string BackupToolLabelText => "Service_Status.BackupToolLabel".GetLocalized();
 
+    /// <summary>Label: whether refresh runs on this machine.</summary>
+    public string RefreshAvailabilityLabelText => "Service_Status.RefreshAvailabilityLabel".GetLocalized();
+
     /// <summary>Label: auto-start state.</summary>
     public string AutoStartLabelText => "Service_Status.AutoStartLabel".GetLocalized();
 
@@ -173,6 +176,9 @@ public sealed partial class ServiceStatusViewModel : ObservableObject, IServiceS
 
     /// <summary>Note under the backup tool line.</summary>
     public string BackupToolLabelDescriptionText => "Service_Status.BackupToolLabelDescription".GetLocalized();
+
+    /// <summary>Note under the refresh availability line.</summary>
+    public string RefreshAvailabilityLabelDescriptionText => "Service_Status.RefreshAvailabilityLabelDescription".GetLocalized();
 
     /// <summary>Note under the start-at-logon line.</summary>
     public string AutoStartLabelDescriptionText => "Service_Status.AutoStartLabelDescription".GetLocalized();
@@ -308,6 +314,17 @@ public sealed partial class ServiceStatusViewModel : ObservableObject, IServiceS
             },
             new ServiceSummaryRow
             {
+                LabelText = RefreshAvailabilityLabelText,
+                DescriptionText = RefreshAvailabilityLabelDescriptionText,
+                ValueText = payload.RefreshEnabled
+                    ? "Service_Status.RefreshEnabled".GetLocalized()
+                    : string.Format(
+                        CultureInfo.CurrentCulture,
+                        "Service_Status.RefreshDisabled".GetLocalized(),
+                        payload.RefreshDisabledReason ?? string.Empty)
+            },
+            new ServiceSummaryRow
+            {
                 LabelText = BackupToolLabelText,
                 DescriptionText = BackupToolLabelDescriptionText,
                 ValueText = toolAvailable
@@ -366,7 +383,7 @@ public sealed partial class ServiceStatusViewModel : ObservableObject, IServiceS
                 {
                     Store = backup.Store,
                     DisplayName = store?.ToDisplayName() ?? ResolveDisplayName("Service_Store", backup.Store),
-                    DescriptionText = store?.ToDescription() ?? string.Empty,
+                    DescriptionText = BuildStoreDescription(store, backup),
                     IsEnabled = backup.IsEnabled,
                     LastRunText = backup.LastRunUtc is null
                         ? "Service_Common.Never".GetLocalized()
@@ -384,6 +401,27 @@ public sealed partial class ServiceStatusViewModel : ObservableObject, IServiceS
                 };
             })
         ];
+    }
+
+    /// <summary>
+    /// The note under a store's name: what it holds, plus why its backup and restore are disabled here when this
+    /// machine cannot reach it.
+    /// </summary>
+    private static string BuildStoreDescription(BackupStore? store, ServiceApiContracts.BackupStatusPayload backup)
+    {
+        var description = store?.ToDescription() ?? string.Empty;
+
+        if (backup.IsStoreReachable)
+        {
+            return description;
+        }
+
+        var note = string.Format(
+            CultureInfo.CurrentCulture,
+            "Service_Status.StoreBackupDisabled".GetLocalized(),
+            backup.UnreachableReason ?? string.Empty);
+
+        return string.IsNullOrWhiteSpace(description) ? note : $"{description} {note}";
     }
 
     /// <summary>

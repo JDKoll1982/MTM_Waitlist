@@ -206,7 +206,7 @@
                 Width="16"
                 Height="16"
                 Margin="8,0,4,0"
-                Source="/Assets/WindowIcon.ico" />
+                Source="/Assets/Packaging/window-icon.ico" />
             <TextBlock
                 x:Name="AppTitleBarText"
                 Grid.Column="1"
@@ -258,17 +258,18 @@
                 TODO: Update item titles by updating <x:Uid>.Content entries in Strings/en-us/Resources.resw.
                 https://docs.microsoft.com/windows/uwp/app-resources/localize-strings-ui-manifest#refer-to-a-string-resource-identifier-from-xaml
 
-                TODO: Update item icons by updating FontIcon.Glyph properties.
-                https://docs.microsoft.com/windows/apps/design/style/segoe-fluent-icons-font#icon-list
+                TODO: Update item icons by updating the BitmapIcon.UriSource properties.
+                The Assets/Icons artwork is greyscale, so ShowAsMonochrome must stay false — the
+                default (true) flattens each glyph to a single Foreground-coloured silhouette.
                 -->
                 <NavigationViewItem x:Uid="Shell_WaitlistView" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewViewModel">
                     <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xf0e2;" />
+                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/waitlist.png" ShowAsMonochrome="False" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Uid="Shell_ModuleSetup" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Setup.ViewModels.SetupWorkCenterViewModel">
                     <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7be;" />
+                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/setup.png" ShowAsMonochrome="False" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>

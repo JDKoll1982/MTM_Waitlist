@@ -63,9 +63,15 @@ Request optional; body selects shapes and, if omitted, refreshes **all enabled s
 | `400` | Malformed body, or one or more unknown `shapeKeys` |
 | `401` | No user name presented, or the named user's resolved role is not an approved operator role |
 | `409` | A refresh cycle is already running; body reports the in-flight `runId` |
+| `503` | **Refresh is disabled on this host** — Infor Visual is not reachable from it, so the work is refused with the reason instead of attempted. The service installs anywhere, and this is what a mirror-only host answers |
 
 Because `skippedSourceUnreachable` is `200`, a caller can never mistake an unreachable source for a service failure.
 The refresh **never** returns partial per-shape data — it reports outcomes only.
+
+**Disabled refresh versus a skipped one.** A source that is *configured* but unreachable from a host whose
+reachability is not being gated is the `skippedSourceUnreachable` outcome — a normal cycle result. `503` is for the
+host that has been **measured** as unable to run refresh at all: the scheduled loop skips its cycles there, so
+refusing the on-demand call is the same answer, given before any work starts.
 
 ## 3. `GET /api/status`
 
@@ -76,6 +82,8 @@ The refresh **never** returns partial per-shape data — it reports outcomes onl
   "serviceVersion": "1.0.0",
   "startedUtc": "2026-09-09T06:00:02Z",
   "visualSourceReachable": false,
+  "refreshEnabled": false,
+  "refreshDisabledReason": "Infor Visual did not accept a connection from this machine, so refresh is disabled here.",
   "operatorRoles": "Admin, Developer, Plant Manager, Setup Lead, Production Lead",
   "refreshIntervalMinutes": 15,
   "shapes": [
@@ -83,7 +91,8 @@ The refresh **never** returns partial per-shape data — it reports outcomes onl
       "lastOutcome": "succeeded", "lastRowCount": 184, "refreshedUtc": "2026-09-09T13:50:02Z", "isSeedContentOnly": false }
   ],
   "backups": [
-    { "store": "mtm_waitlist", "isEnabled": true, "lastRunUtc": "2026-09-09T01:00:11Z",
+    { "store": "mtm_waitlist", "isEnabled": true, "isStoreReachable": true, "unreachableReason": null,
+      "lastRunUtc": "2026-09-09T01:00:11Z",
       "lastOutcome": "succeeded", "lastArtifactPath": "…\\backups\\mtm_waitlist\\mtm_waitlist_20260909T010011.sql",
       "artifactCount": 14, "toolAvailable": true }
   ]
@@ -93,6 +102,7 @@ The refresh **never** returns partial per-shape data — it reports outcomes onl
 | Rule | Requirement |
 |---|---|
 | Content | Per-item last-run outcome and timestamp for **every** refresh shape and **every** backup store (FR-013) |
+| Capability | `refreshEnabled` + `refreshDisabledReason` report whether this host refreshes the mirror at all, and `isStoreReachable` + `unreachableReason` report the same per store. A disabled capability is a **reported state**, so an operator can tell "this machine cannot do that" from "the last attempt failed" |
 | Operator roles | `operatorRoles` reports the application roles that may call the API, so an operator can read who is allowed straight off the service (T147) |
 | Tooling | `toolAvailable: false` reports the missing `mysqldump` condition clearly and accompanies a `toolUnavailable` backup outcome (FR-013, edge case "Backup facility missing") |
 | Secrets | The payload contains no credential — none exists (T147) — and no connection-string password |
@@ -102,11 +112,15 @@ The refresh **never** returns partial per-shape data — it reports outcomes onl
 
 | Method | Path | Body / query | Response |
 |---|---|---|---|
-| `POST` | `/api/backup` | `{ "store": "mtm_waitlist" }` | `200` with `{ "artifact": { "store", "createdUtc", "filePath", "sizeBytes", "isRetained" } }`; `400` unknown store, `409` store already backing up |
+| `POST` | `/api/backup` | `{ "store": "mtm_waitlist" }` | `200` with `{ "artifact": { "store", "createdUtc", "filePath", "sizeBytes", "isRetained" } }`; `400` unknown store, `409` store already backing up, **`503` that store cannot be reached from this host** |
 | `GET` | `/api/backups` | `?store=mtm_waitlist` (optional) | `200` with `{ "artifacts": [ … ] }` ordered newest first, each including `isRetained` |
 
 A backup whose tool is unavailable returns `200` with `outcome: "toolUnavailable"` and **no** artifact — a partial or
 zero-length file is never reported as successful (FR-013, SC-008).
+
+**Per store, not per host.** A store this machine cannot reach is refused on its own (`503`,
+`error: "storeUnavailable"`) while every other store keeps working, because the four databases are independent and a
+host that holds three of them must still back those three up. The refusal happens before any `mysqldump` invocation.
 
 ## 5. Restore — explicitly NOT on this surface (FR-010, FR-023)
 
@@ -127,7 +141,7 @@ Constraints this contract encodes:
 ## 6. Error model
 
 ```json
-{ "error": "unauthorized" | "invalidRequest" | "refreshInProgress" | "unknownShape" | "unknownStore" | "internalError",
+{ "error": "unauthorized" | "invalidRequest" | "refreshInProgress" | "refreshUnavailable" | "unknownShape" | "unknownStore" | "storeUnavailable" | "internalError",
   "message": "human-readable, secret-free detail" }
 ```
 

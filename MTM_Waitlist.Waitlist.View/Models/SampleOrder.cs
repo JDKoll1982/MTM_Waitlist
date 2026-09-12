@@ -74,12 +74,12 @@ public sealed class SampleOrder : INotifyPropertyChanged
         !string.IsNullOrWhiteSpace(ResolvedImagePath)
             ? ResolvedImagePath
             : string.IsNullOrWhiteSpace(ImagePath)
-                ? "Assets/Images/default-request-type.png"
+                ? "Assets/Placeholders/default-request-type.png"
                 : $"Assets/{ImagePath}";
 
     public string EffectiveWorkCenterImagePath =>
         string.IsNullOrWhiteSpace(WorkCenterImagePath)
-            ? "Assets/Images/default-workstation-image.png"
+            ? "Assets/Placeholders/default-workstation-image.png"
             : WorkCenterImagePath;
 
     /// <summary>

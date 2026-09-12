@@ -1,6 +1,7 @@
 using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Mock.Models;
 using MTM_Waitlist.Mock.Service.Api;
+using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.Models;
 
 namespace MTM_Waitlist.Mock.Service.Services;
@@ -32,6 +33,7 @@ public sealed class ServiceApiOperations
     private readonly IVisualShapeFreshnessReader _freshnessReader;
     private readonly IVisualConnectivityProbe _connectivityProbe;
     private readonly ServiceConfigurationStore _configurationStore;
+    private readonly IServiceCapabilityGate? _capabilityGate;
     private readonly AutoStartReconciliation? _autoStartState;
     private readonly TimeProvider _timeProvider;
     private readonly DateTimeOffset _startedUtc;
@@ -47,6 +49,11 @@ public sealed class ServiceApiOperations
     /// <param name="configurationStore">Supplies the persisted configuration.</param>
     /// <param name="autoStartState">The startup auto-start reconciliation result, when one has run.</param>
     /// <param name="timeProvider">Time source.</param>
+    /// <param name="capabilityGate">
+    /// Reports what this host can do: refresh is refused when Infor Visual is unreachable, and one store's
+    /// backup is refused when that store's database is. Omitted or <see langword="null"/> means no gating, and
+    /// the status payload then reports every capability as enabled.
+    /// </param>
     public ServiceApiOperations(
         RefreshEngine refreshEngine,
         RefreshShapeCatalogProvider catalogProvider,
@@ -57,7 +64,8 @@ public sealed class ServiceApiOperations
         IVisualConnectivityProbe connectivityProbe,
         ServiceConfigurationStore configurationStore,
         AutoStartReconciliation? autoStartState = null,
-        TimeProvider? timeProvider = null)
+        TimeProvider? timeProvider = null,
+        IServiceCapabilityGate? capabilityGate = null)
     {
         ArgumentNullException.ThrowIfNull(refreshEngine);
         ArgumentNullException.ThrowIfNull(catalogProvider);
@@ -76,6 +84,7 @@ public sealed class ServiceApiOperations
         _freshnessReader = freshnessReader;
         _connectivityProbe = connectivityProbe;
         _configurationStore = configurationStore;
+        _capabilityGate = capabilityGate;
         _autoStartState = autoStartState;
         _timeProvider = timeProvider ?? TimeProvider.System;
         _startedUtc = _timeProvider.GetUtcNow();
@@ -106,6 +115,11 @@ public sealed class ServiceApiOperations
         {
             visualReachable = false;
         }
+
+        // What this host can actually do, as opposed to whether the source answered just now: refresh is
+        // disabled when Visual is known unreachable, and each store's backup and restore are disabled when that
+        // store's database cannot be reached from here.
+        var capabilities = await GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
 
         IReadOnlyList<VisualShapeFreshness> freshness = [];
 
@@ -170,6 +184,8 @@ public sealed class ServiceApiOperations
             backups.Add(new ServiceApiContracts.BackupStatusPayload(
                 store.ToDatabaseName(),
                 policy.IsEnabled,
+                capabilities is null || capabilities.IsStoreAvailable(store),
+                capabilities?.StoreUnavailableReason(store),
                 lastRun?.FinishedUtc ?? lastRun?.StartedUtc,
                 lastRun is null ? null : ToOutcomeText(lastRun.Outcome),
                 lastRun?.ArtifactPath,
@@ -181,6 +197,8 @@ public sealed class ServiceApiOperations
             ServiceVersion,
             _startedUtc,
             visualReachable,
+            capabilities?.IsRefreshAvailable ?? true,
+            capabilities?.RefreshUnavailableReason,
             ServiceOperatorRoles.DisplayText,
             (int)Math.Round(configuration.RefreshInterval.TotalMinutes),
             shapes,
@@ -212,6 +230,17 @@ public sealed class ServiceApiOperations
     {
         var refreshable = _catalogProvider.RefreshableShapes;
         var selected = new List<VisualReadShape>();
+
+        var capabilities = await GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
+
+        if (capabilities is not null && !capabilities.IsRefreshAvailable)
+        {
+            // Disabled on this host: refused with the reason, rather than attempted and recorded as a skip.
+            return ServiceApiOutcome<ServiceApiContracts.RefreshResponsePayload>.Fail(
+                503,
+                "refreshUnavailable",
+                capabilities.RefreshUnavailableReason ?? "Refresh is disabled on this host.");
+        }
 
         if (shapeKeys is null || shapeKeys.Count == 0)
         {
@@ -299,6 +328,18 @@ public sealed class ServiceApiOperations
                 $"A backup for '{store.ToDatabaseName()}' is already running.");
         }
 
+        var capabilities = await GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
+
+        if (capabilities is not null && !capabilities.IsStoreAvailable(store))
+        {
+            // Disabled on this host, not a failed backup: this machine does not hold that database, so there is
+            // no artifact to produce and nothing to explain beyond the reachability reason.
+            return ServiceApiOutcome<ServiceApiContracts.BackupResponsePayload>.Fail(
+                503,
+                "storeUnavailable",
+                capabilities.StoreUnavailableReason(store)
+                    ?? $"'{store.ToDatabaseName()}' is not reachable from this machine.");
+        }
         var record = await _backupEngine.RunAsync(store, isSafetySnapshot: false, cancellationToken)
             .ConfigureAwait(false);
 
@@ -348,6 +389,37 @@ public sealed class ServiceApiOperations
 
         return ServiceApiOutcome<ServiceApiContracts.BackupListPayload>.Ok(
             new ServiceApiContracts.BackupListPayload(artifacts));
+    }
+
+    /// <summary>
+    /// Reads the host's capabilities, or <see langword="null"/> when there is nothing to gate on.
+    /// </summary>
+    /// <remarks>
+    /// A gate that cannot answer returns <see langword="null"/>, which refuses nothing: a failed probe is not
+    /// evidence that a target is unreachable, and status is exactly what an operator asks for when something
+    /// is wrong.
+    /// </remarks>
+    private async Task<ServiceCapabilitySnapshot?> GetCapabilitiesAsync(CancellationToken cancellationToken)
+    {
+        if (_capabilityGate is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await _capabilityGate
+                .GetCapabilitiesAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     /// <summary>Maps a store's database name back onto the fixed store set.</summary>

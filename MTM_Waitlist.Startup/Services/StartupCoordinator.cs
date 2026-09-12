@@ -246,6 +246,55 @@ public sealed class StartupCoordinator : IStartupCoordinator
             return result;
         }
 
+        // A temporary default password ('0000') has to be replaced before the account is used. Resolve it here,
+        // before the login window is shown: the Windows user is already known and their row has already been
+        // read, so the login surface can open directly on "set a new password" instead of making the operator
+        // sign in with the temporary password first (Phase 32).
+        var passwordResetRequirement = StartupPasswordResetRequirement.None;
+        if (isUserMatched)
+        {
+            try
+            {
+                passwordResetRequirement = await _startupSessionRepository.ReadPasswordResetRequirementAsync(
+                    _startupState.Username,
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // A store that cannot answer must not block startup: fall back to the ordinary sign-in form,
+                // which performs its own credential check.
+                StartupDebugLog.Error("StartupCoordinator", ex, "Password-reset requirement lookup failed.");
+            }
+        }
+
+        _startupState.RequirePasswordChange = passwordResetRequirement.IsRequired;
+        _startupState.PasswordChangeUserId = passwordResetRequirement.UserId;
+
+        if (passwordResetRequirement.IsRequired)
+        {
+            // Keep the developer override already applied above, but adopt the store's identity for attribution.
+            if (string.IsNullOrWhiteSpace(_startupState.CurrentRole))
+            {
+                _startupState.CurrentRole = passwordResetRequirement.CurrentRole;
+            }
+
+            if (!string.IsNullOrWhiteSpace(passwordResetRequirement.DisplayName))
+            {
+                _startupState.EmployeeName = passwordResetRequirement.DisplayName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(passwordResetRequirement.EmployeeIdentifier))
+            {
+                _startupState.EmployeeNumber = passwordResetRequirement.EmployeeIdentifier;
+            }
+
+            _startupState.LoginHint = "Your password is still the temporary default. Set a new password to continue.";
+            StartupDebugLog.Info(
+                "StartupCoordinator",
+                $"Startup routed to the password-change surface for '{_startupState.Username}' (temporary default password still in place).");
+            return StartupResult.Success(typeof(LoginViewModel).FullName!, _startupState.LoginHint);
+        }
+
         _startupState.LoginHint = _startupState.RequireNewUserAction
             ? "This computer is not registered. Choose New User to request access."
             : "Sign in to continue.";

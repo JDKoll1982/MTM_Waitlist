@@ -46,6 +46,15 @@ public sealed class StartupState
 
     public bool RequireNewUserAction { get; set; }
 
+    /// <summary>
+    /// Set when the resolved account still holds its temporary default password, so the login surface opens
+    /// straight onto "set a new password" and never shows the sign-in form.
+    /// </summary>
+    public bool RequirePasswordChange { get; set; }
+
+    /// <summary>The account the startup-resolved password change applies to, from the store.</summary>
+    public long PasswordChangeUserId { get; set; }
+
     public string LoginHint { get; set; } = string.Empty;
 
     public bool IsDeveloper => string.Equals(CurrentRole, "Developer", StringComparison.OrdinalIgnoreCase);

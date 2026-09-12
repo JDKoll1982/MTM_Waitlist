@@ -1351,6 +1351,37 @@ WHERE user_id = p_user_id
 ORDER BY expires_utc DESC
 LIMIT 1;
 
+-- Create procedure: sp_auth_password_reset_required_get
+-- Engine: MySQL 5.7
+-- Purpose: Report whether one account still holds its temporary default password, so startup can show
+--          the set-a-new-password surface before the sign-in form. Returns
+--          user_id/role_name/display_name/employee_identifier/password_reset_required.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_password_reset_required_get;
+
+CREATE PROCEDURE sp_auth_password_reset_required_get(
+    IN p_username VARCHAR(128)
+)
+SELECT u.id AS user_id,
+       COALESCE(r.role_name, '') AS role_name,
+       COALESCE(u.display_name, '') AS display_name,
+       COALESCE(u.employee_identifier, '') AS employee_identifier,
+       CASE
+           WHEN u.require_password_change = 1 THEN 1
+           WHEN COALESCE(u.password_hash, '') = '' THEN 1
+           WHEN u.password_hash = '0000' THEN 1
+           ELSE 0
+       END AS password_reset_required
+FROM core_users_profiles u
+LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
+LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
+WHERE u.username_normalized = p_username
+  AND u.is_active = 1
+ORDER BY ra.assigned_utc DESC
+LIMIT 1;
+
 -- Create procedure: sp_config_dunnage_types_visibility_get
 -- Engine: MySQL 5.7
 -- Feature: 001-module-mock-visual-fallback (task T095)

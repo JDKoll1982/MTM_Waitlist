@@ -89,6 +89,18 @@ public partial class LoginViewModel : ObservableRecipient
         set;
     }
 
+    /// <summary>
+    /// Whether the sign-in form (title, credentials, remember-me, Sign In) is shown. False while the
+    /// password-change panel is active, so a temporary-default password opens straight onto "set a new
+    /// password" and the sign-in screen never appears.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowSignInForm
+    {
+        get;
+        set;
+    }
+
     [ObservableProperty]
     public partial ComputerGateStatus ComputerGateState
     {
@@ -185,6 +197,7 @@ public partial class LoginViewModel : ObservableRecipient
             : _startupState.LoginHint;
         ShowNewUserAction = _startupState.RequireNewUserAction;
         ShowPasswordChangePrompt = false;
+        ShowSignInForm = true;
         ComputerGateState = ComputerGateStatus.Registered;
         ComputerGateHint = string.Empty;
         DetectedComputerName = string.Empty;
@@ -193,6 +206,20 @@ public partial class LoginViewModel : ObservableRecipient
         ComputerDisplayName = string.Empty;
         ComputerDescription = string.Empty;
         ComputerGateError = string.Empty;
+
+        // Startup already established that this account still holds its temporary default password, so open
+        // on the set-a-new-password surface: the operator must not have to sign in with that password first
+        // (Phase 32). Everything the change needs — the account id for the update, and the identity and role
+        // for the sign-in that follows — was resolved before the window was shown.
+        if (_startupState.RequirePasswordChange && _startupState.PasswordChangeUserId > 0)
+        {
+            _pendingUserIdForPasswordChange = _startupState.PasswordChangeUserId;
+            _pendingRole = _startupState.CurrentRole;
+            _pendingDisplayName = _startupState.EmployeeName;
+            _pendingEmployeeIdentifier = _startupState.EmployeeNumber;
+            ShowPasswordChangePrompt = true;
+            ShowSignInForm = false;
+        }
     }
 
     public async Task InitializeAsync()
@@ -247,6 +274,7 @@ public partial class LoginViewModel : ObservableRecipient
             _pendingUserIdForPasswordChange = credentialResult.UserId;
             _pendingRole = credentialResult.CurrentRole;
             ShowPasswordChangePrompt = true;
+            ShowSignInForm = false;
             LoginHint = "You signed in with temporary password 0000. Set a new password now.";
             _startupState.LoginHint = LoginHint;
             Password = string.Empty;
@@ -296,6 +324,7 @@ public partial class LoginViewModel : ObservableRecipient
         }
 
         ShowPasswordChangePrompt = false;
+        ShowSignInForm = true;
         LoginHint = "Password updated. Completing sign-in...";
         _startupState.LoginHint = LoginHint;
         await CompleteLoginAsync(_pendingUserIdForPasswordChange, _pendingRole, NewPassword);

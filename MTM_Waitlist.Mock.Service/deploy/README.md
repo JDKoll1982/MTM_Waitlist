@@ -7,34 +7,51 @@ Executable deployment for the on-host half of the Module_Mock cached fallback:
 (publish, deploy, first run, verify, uninstall). This folder is the **executable form** of it: one
 idempotent script that does all of it and refuses to lie about the result.
 
+Run the script with **no argument** and it asks what you are trying to do before it changes anything — see
+[Usage](#usage). Passing any argument skips the prompts, so the hand-run and the automated path are the same
+code with the same exit codes.
+
 ---
 
-## ⛔ Server-only — do not run this from a developer workstation
+## ✅ Any host — the service installs anywhere, and does what that machine can reach
 
-**Run it only when VS Code (and therefore the agent) is running on the cache host itself.**
+**There is no server-only guard any more.** The service installs on any machine. What it *does* there is
+decided by reachability, not by the installation:
 
-The service belongs on the machine that reaches both MySQL and Infor Visual. Running this from a
-workstation would install a tray-only, auto-starting service on the wrong machine and point
-`HKCU\Software\Microsoft\Windows\CurrentVersion\Run` at whatever folder it was launched from.
+| Work | Needs | On a machine without it |
+|---|---|---|
+| Refresh the `mtm_mock` mirror | Infor Visual | **Refresh is disabled** — the scheduled loop skips its cycles, `POST /api/refresh` is refused with the reason, and the status surface says so. |
+| Back up or restore a store | That store's MySQL database | **Backup and restore are disabled for that store only** — its scheduled slot is skipped with no run record, `POST /api/backup` is refused with the reason, and the settings surface refuses the action. The other stores are unaffected. |
+| Serve the mirror over the API and the tray | A reachable `mtm_mock` | Always attempted — this is what a workstation is for. |
 
-The script enforces this. It checks that one of **this machine's own IPv4 addresses** is the expected
-server address — by default the MySQL `Server=` value in `appsettings.json`, i.e. `172.16.1.104` — and
-**refuses to run with exit code 2 otherwise**:
+The service probes at startup and every minute, so a machine that **gains** access starts the work again
+without a restart. The authoritative per-store answer is the service's own: it opens a connection to each
+database, because a reachable server with a missing database is not a store that can be backed up.
+
+The **secret proofs follow the same rule**, so a mirror-only host can still complete a deployment: the MySQL
+credentials are proved against the configured host when it answers, otherwise against this machine's own MySQL
+(which is what the service falls back to), and the Visual login is a **`WARN`** rather than a failure when the
+server cannot be reached from here. Only a proof that actually ran can fail — a reachable server that refused
+the credentials is still a hard `FAIL`, because no fallback can hide a wrong password.
+
+The script **reports rather than refuses**. It never fails a deployment because the machine is not the cache
+host, and it prints what it can see so the operator knows what to expect:
 
 ```text
-REFUSING TO RUN: this machine is not the cache host.
-  this machine : 10.0.0.5
-  expected host: 172.16.1.104
+[PASS] cache host       this machine is the cache host (172.16.1.104)
+[WARN] infor visual     VISUAL did not answer on port 1433; the service will disable refresh on this machine
+[PASS] mysql host       172.16.1.104 answered on port 3306; the service probes each store and disables only the ones it cannot reach
 ```
 
 | | |
 |---|---|
 | Verified cache host (2026-09-11) | `V-MTMFG-5.mantoolmfg.com` = `172.16.1.104` |
-| Override for a deliberately chosen non-server host | `-AllowNonServerHost` — and record *why* in the change that uses it |
+| `-ServerHost` | Only what the *cache host* comparison names; a mismatch is a `WARN`, never a refusal |
+| `-VisualPort` | The port the Infor Visual report probes (default `1433`) |
 
-**Agent instruction: do not attempt to run this script, and do not work around the guard, unless the
-environment is the server (`172.16.1.104`).** If you are not on that machine, hand the deployment to
-someone who is, or move the workspace to the server.
+**The workstation install is a supported configuration**, not a workaround: `HKCU\...\Run` and the tray are
+per-user, the install folder is local, and the only consequence of installing off the cache host is that the
+work that machine cannot do is disabled and reported.
 
 ---
 
@@ -42,7 +59,7 @@ someone who is, or move the workspace to the server.
 
 | Requirement | Why |
 |---|---|
-| Running **on the cache host** | The guard above; and the install folder must be local to the host. |
+| An install folder local to this machine | A first run registers auto-start with the path it was launched from. |
 | `appsettings.json` present in the repo | The script derives the expected server address, the MySQL connection string and the Infor Visual login/password from it, so it is **not a second source of truth** and holds **no secrets of its own**. |
 | The solution built at least once | `bin\x64\Debug\...\win-x64\{MySqlConnector,Microsoft.Data.SqlClient}.dll` are loaded to *prove* the secrets by connecting, not merely by reading them back. |
 | `dotnet` SDK | Only when `-Publish` is used. |
@@ -55,32 +72,90 @@ describes, and nothing else.
 
 ## Usage
 
+**Run it with no argument and it asks what you are trying to do.** That is the intended way to run it by hand:
+
+```powershell
+# guided: deploy, publish-then-deploy, install elsewhere, or a clean sweep
+.\install-mock-service.ps1
+```
+
+The guided flow asks the menu below, then the questions that are independent of it, then shows a summary with
+**the equivalent command line** and waits for a yes/no before it touches anything:
+
+| Menu choice | What it means |
+|---|---|
+| **Deploy** | Deploy the publish output already on disk; the service's stored state is kept. |
+| **Publish and deploy** | Build a fresh Release publish output first, then deploy it. |
+| **Install elsewhere** | Deploy to a different install folder, which it asks you for. |
+| **Clean sweep** | Deploy and also delete ALL service state — configuration, backups, run records. |
+| **Quit** | Change nothing. |
+
+Then, each defaulting to the safe answer: build a fresh publish output? set and verify the environment secrets?
+start the service and health-check it? put the shortcut on this machine's desktops? and — off by default except
+after **Clean sweep** — also delete the service's stored state. In guided mode the script waits for Enter after
+the summary, so a window that closes on exit still lets the result be read.
+
+**Passing ANY argument skips the prompts entirely**, so automation and the hand-run path are the same script with
+the same exit codes:
+
 ```powershell
 # normal deployment: publish fresh, deploy, install + verify secrets, start and health-check
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 -Publish
 
-# redeploy an existing publish output (no rebuild)
-pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1
+# redeploy an existing publish output (no rebuild); -NonInteractive says "no prompts, defaults"
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 -NonInteractive
 
-# deploy to a different folder (must still be the cache host)
+# deploy to a different folder
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 -TargetPath D:\Services\MTM_Waitlist.Mock.Service
 
-# a clean sweep: also delete the stored configuration, the DPAPI credential and the backups
+# a clean sweep: also delete the stored configuration and the backups
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 -PurgeState
 ```
 
+### Where it installs
+
+There is no hard-coded install folder. With no `-TargetPath` the script picks one, in this order:
+
+| # | Folder | When |
+|---|---|---|
+| 1 | `C:\Services\MTM_Waitlist.Mock.Service` | A deployment is **already there**. An existing install is never moved — auto-start, the shortcut and the control script all point at it. |
+| 2 | the same folder | This account can **actually create** it. This is the machine-level location, which is right for the cache host. |
+| 3 | `%LOCALAPPDATA%\Programs\MTM_Waitlist.Mock.Service` | Neither of the above — the per-user folder, which needs no elevation. |
+
+"Can it be used" is tested by **creating the folder**, not inferred from elevation, and the banner prints which one
+was chosen and why:
+
+```text
+  target  : C:\Services\MTM_Waitlist.Mock.Service
+            (default - the machine-level location)
+```
+
+A `-TargetPath` the account cannot write fails immediately, naming both candidates, instead of failing partway
+through a deployment. The guided workflow shows the resolved folder as a default you accept with Enter.
+
+### The publish output can be stale
+
+Deploying what is already on disk is the fast path and the right one when the output is current. The moment a source
+file or an asset changes it is the wrong one — the copy succeeds and the missing piece surfaces later as a validation
+failure or a service that cannot find its icon. So the script checks **before** the copy: reusing an output that is
+missing required content or older than the project reports a `WARN`, the step-5 failure names the cause, and the
+guided workflow pre-selects a fresh publish output when that is the case.
+
 | Parameter | Default | Effect |
 |---|---|---|
-| `-TargetPath` | `C:\Services\MTM_Waitlist.Mock.Service` | Install folder. **Must be final before the first run** — a first run registers auto-start with the path it was launched from. |
-| `-SourcePath` | `MTM_Waitlist.Mock.Service/bin/publish/win-x64` | Publish output to deploy from. |
-| `-ServerHost` | MySQL `Server=` from `appsettings.json` | Expected cache host for the guard. |
-| `-Publish` | off | Run `dotnet publish -c Release -p:PublishProfile=win-x64-selfcontained` first. |
+| `-TargetPath` | resolved, see below | Install folder. **Must be final before the first run** — a first run registers auto-start with the path it was launched from. |
+| `-SourcePath` | `MTM_Waitlist.Mock.Service/bin/publish/win-x64` | Publish output to deploy from. || `-ServerHost` | MySQL `Server=` from `appsettings.json` | Names the cache host for the disposition report. A mismatch is a `WARN`, never a refusal. |
+| `-VisualPort` | `1433` | Port the Infor Visual reachability report probes. |
+| `-Publish` | off | Run `dotnet publish -c Release -p:PublishProfile=win-x64-selfcontained` first. Without it the output
+on disk is deployed as-is, and the script **warns** when that output is missing required content or older than the
+project, because that is a source-only change waiting to look like a deployment failure. |
 | `-SkipSecrets` | off | Do not set or verify the environment secrets. |
 | `-SkipServiceStart` | off | Do not start the service or run the health checks. |
 | `-PurgeState` | off | Also delete `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service` (configuration, run records, log files, backups). |
 | `-DesktopPath` | `C:\Users\jkoll\Desktop` | Desktop that receives the restart shortcut. **Hardcoded to the operator account by owner decision** — pass it explicitly if the profile ever changes (the agent's own notes record `jkoll` at work, `johnk` at home). When that path is absent the script falls back to the shell's Desktop known folder and says so, because this host redirects `jkoll`'s Desktop into OneDrive (see below). |
+| `-AdditionalDesktopPaths` | `@('C:\Users\johnk\Desktop')` | Extra desktops that **also** receive the shortcut, so one installer works on both operator machines without arguments. Best effort by owner request: a profile that is not on this machine is **skipped**, an unwritable folder is a **warning**, and neither fails the deployment. A redirected desktop is found by looking beside the literal path (another profile's OneDrive folder), since `GetFolderPath` only answers for the account running the script. |
 | `-SkipDesktopShortcut` | off | Do not create or replace the desktop shortcut. |
-| `-AllowNonServerHost` | off | Bypass the server-only guard. Deliberate use only. |
+| `-NonInteractive` | off | Skip the guided prompts. **Passing any argument also skips them**; this exists to say "no prompts, use the defaults" out loud. |
 | `-HealthCheckTimeoutSeconds` | 60 | How long to wait for the API port. |
 
 ---
@@ -89,14 +164,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 
 
 | # | Step | Notes |
 |---|---|---|
-| 1 | **Server-only guard** | Refuses with exit code 2 when this machine is not the host. |
+| 1 | **Host disposition** | Reports whether this machine is the cache host, whether Infor Visual answers, and whether the MySQL host answers. **Never fatal** — the service installs anywhere, and the work this machine cannot do is disabled by the service and reported. |
 | 2 | **Stop the running service** | Force-stops every `MTM_Waitlist.Mock.Service` process, waits up to 30 s, then confirms the API port is free. The service exits only on an explicit tray *Quit*, so a forced stop is the only scriptable option. |
 | 3 | **Delete the previous deployment** | Removes the install folder outright, then redeploys — no stale files can survive a redeploy. State under `%LOCALAPPDATA%` is **kept** unless `-PurgeState`. |
 | 4 | **Publish and copy** | Optional `dotnet publish`, then a full copy. A `NETSDK1198` "publish profile not found" warning is treated as a **failure**, because it means the build silently became framework-dependent. |
 | 5 | **Verify the deployment** | File count matches source; every required path present (five population reads, tray icon, source queries, restore artifacts, WinAppSDK runtime); self-contained markers `System.Private.CoreLib.dll`/`hostfxr.dll`/`coreclr.dll` present **and** `runtimeconfig.json` using `includedFrameworks`; the corrected work-order addressing guard (T144) present in the deployed population reads. |
 | 6 | **Install and verify secrets** | Sets the four User-scope variables from `appsettings.json`, reads them back from `HKCU\Environment`, applies them to the script's **own** process so the service it launches inherits them, and then **proves** them: connects to `mtm_mock`, `mtm_waitlist`, `mtm_wip_application_winforms` and `mtm_receiving_application`, and authenticates to Infor Visual. |
 | 7 | **Start and health-check** | Starts the service, waits for port 5760, then asserts: process responding, **no top-level window** (tray-only), `GET /api/status` returns **401** when it names no operator (T147), a **second launch redirects and exits** (single instance), and the `HKCU` auto-start entry points at *this* install folder. |
-| 8 | **Desktop shortcut** | Puts one product-named shortcut on the operator's desktop that opens the deployed control prompt (`mock-service-control.ps1`, which ships inside the publish output — see the project file). An existing shortcut of that name is replaced, and the saved `.lnk` is read back to prove it opens this install folder — see below. |
+| 8 | **Desktop shortcut** | Puts one product-named shortcut on the operator's desktop that opens the deployed control prompt (`mock-service-control.ps1`, which ships inside the publish output — see the project file). An existing shortcut of that name is replaced, and the saved `.lnk` is read back to prove it opens this install folder — see below. It then **also attempts** the same shortcut on every `-AdditionalDesktopPaths` entry (best effort: skip or warn, never fail). |
 | 9 | **Summary** | A PASS/FAIL/WARN table. Exit `0` on success, `1` if any check failed, `2` refused (not the server host), `3` precondition failure. |
 
 **If any check in steps 1–6 fails, the service is not started** — a half-deployed service that looks
@@ -120,6 +195,19 @@ An existing shortcut of that name is **replaced**, not left alone, so a redeploy
 folder moves cannot leave a shortcut pointing at nothing. The saved `.lnk` is read back and its target
 and arguments are compared with what was intended: a shortcut that silently kept an old target would be
 worse than no shortcut, because nothing would tell the operator why double-clicking it did nothing.
+
+The same shortcut is then **also attempted** on every `-AdditionalDesktopPaths` entry — by default
+`C:\Users\johnk\Desktop` — so one installer serves both operator machines. That half is deliberately
+best effort and cannot fail a deployment: a profile that is not present is reported as a skip, and a
+folder the account cannot write to is reported as a warning with the reason. Each extra shortcut is built
+the same way and points at the same deployed control prompt, so there is still exactly one entry per
+desktop.
+
+**A redirected Desktop wins over the literal path.** `C:\Users\<profile>\Desktop` is often left behind as an
+empty husk when the profile's Desktop is redirected into OneDrive, so "the path exists" is not the answer — a
+shortcut written there is one nobody can see. Each additional path therefore resolves to the profile's
+`OneDrive*\Desktop` when that exists, and is skipped when it resolves to the desktop the primary shortcut
+already covers.
 
 **On this host the Desktop is redirected.** `C:\Users\jkoll\Desktop` does not exist — `jkoll`'s Desktop
 is `C:\Users\jkoll\OneDrive - Manitowoc Tool and Manufacturing\Desktop`. The script therefore falls back to
@@ -184,8 +272,7 @@ reuses the stored state exactly as it is.
 |---|---|
 | `0` | Deployed and validated. |
 | `1` | A validation check failed; the service was not started. |
-| `2` | Refused: this machine is not the cache host. |
-| `3` | Precondition failure (no publish output, expected server undeterminable). |
+| `3` | Precondition failure (no publish output). |
 
 ---
 

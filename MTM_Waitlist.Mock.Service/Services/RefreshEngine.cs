@@ -54,6 +54,7 @@ public sealed class RefreshEngine
     private readonly TimeProvider _timeProvider;
     private readonly TimeSpan _refreshInterval;
     private readonly TimeSpan _minimumScheduledWait;
+    private readonly IServiceCapabilityGate? _capabilityGate;
     private readonly Dictionary<string, DateTime> _nextDueUtc = new(StringComparer.Ordinal);
 
     private IReadOnlyList<RefreshRunRecord> _lastRunRecords = [];
@@ -79,6 +80,12 @@ public sealed class RefreshEngine
     /// Time source. Supplies both the current time and the <b>local time zone</b> the schedule grid is
     /// anchored to, which is what makes the cadence testable.
     /// </param>
+    /// <param name="capabilityGate">
+    /// Reports whether Infor Visual is reachable from this machine. When it reports that it is not, the
+    /// scheduled loop <b>skips its cycles</b> and says so once, instead of attempting work that cannot
+    /// succeed on this host. Omitted or <see langword="null"/> means no gating, which is what a test of the
+    /// cycle itself wants.
+    /// </param>
     public RefreshEngine(
         RefreshShapeCatalogProvider catalogProvider,
         IVisualShapePayloadSource payloadSource,
@@ -86,7 +93,8 @@ public sealed class RefreshEngine
         ILogger<RefreshEngine> logger,
         TimeSpan? refreshInterval = null,
         TimeSpan? minimumScheduledWait = null,
-        TimeProvider? timeProvider = null)
+        TimeProvider? timeProvider = null,
+        IServiceCapabilityGate? capabilityGate = null)
     {
         ArgumentNullException.ThrowIfNull(catalogProvider);
         ArgumentNullException.ThrowIfNull(payloadSource);
@@ -110,6 +118,7 @@ public sealed class RefreshEngine
         _mirrorWriter = mirrorWriter;
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
+        _capabilityGate = capabilityGate;
     }
 
     /// <summary>Raised after each shape attempt so the run-record store and status surface can observe it.</summary>
@@ -217,6 +226,12 @@ public sealed class RefreshEngine
     /// The loop never treats an unreachable source or an unexpected error as fatal: a skipped cycle is
     /// a normal outcome, an error is logged, and the next cycle is attempted on schedule (FR-008,
     /// US3 acceptance 2/3/4).
+    /// <para>
+    /// When the capability gate reports that Infor Visual is unreachable from this machine, the cycle is
+    /// <b>not attempted at all</b> — refresh is disabled on that host — and the loop waits out its normal slot
+    /// before asking again, so a host that regains access resumes without a restart. The transitions are
+    /// logged by the gate, once each, rather than by every cycle here.
+    /// </para>
     /// </remarks>
     public async Task RunScheduledAsync(TimeProvider timeProvider, CancellationToken cancellationToken = default)
     {
@@ -228,9 +243,18 @@ public sealed class RefreshEngine
         {
             try
             {
+                var wait = GetTimeUntilNextDue(timeProvider.GetUtcNow().UtcDateTime);
+
+                if (!await IsRefreshAvailableAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    // Disabled on this host: wait the normal slot, then ask again. Attempting the cycle would
+                    // only produce one skipped record per shape per slot, which is noise, not information.
+                    await Task.Delay(wait, timeProvider, cancellationToken).ConfigureAwait(false);
+                    continue;
+                }
+
                 await TryRunDueShapesAsync(timeProvider.GetUtcNow().UtcDateTime, cancellationToken).ConfigureAwait(false);
 
-                var wait = GetTimeUntilNextDue(timeProvider.GetUtcNow().UtcDateTime);
                 await Task.Delay(wait, timeProvider, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -254,6 +278,43 @@ public sealed class RefreshEngine
         }
 
         _logger.LogInformation("Scheduled refresh loop stopped.");
+    }
+
+    /// <summary>
+    /// Whether refresh may run on this host right now.
+    /// </summary>
+    /// <remarks>
+    /// A gate that cannot answer does <b>not</b> disable refresh: a probe failure is not evidence that Infor
+    /// Visual is unreachable, and a cycle against an unreachable source is already recorded as the normal
+    /// <see cref="RefreshRunOutcome.SkippedSourceUnreachable"/> outcome.
+    /// </remarks>
+    private async Task<bool> IsRefreshAvailableAsync(CancellationToken cancellationToken)
+    {
+        if (_capabilityGate is null)
+        {
+            return true;
+        }
+
+        try
+        {
+            var capabilities = await _capabilityGate
+                .GetCapabilitiesAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            return capabilities.IsRefreshAvailable;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(
+                exception,
+                "The host capability check failed; the refresh cycle continues, because a failed probe is not evidence that Infor Visual is unreachable.");
+
+            return true;
+        }
     }
 
     private bool IsDue(VisualReadShape shape, DateTime utcNow) =>

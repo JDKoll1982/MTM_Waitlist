@@ -11,7 +11,7 @@ namespace MTM_Waitlist.Module_Settings.Converters;
 /// </summary>
 public sealed class ResolvedImagePathToSourceConverter : IValueConverter
 {
-    private const string FallbackAsset = "ms-appx:///Assets/Images/default-request-type.png";
+    private const string FallbackAsset = "ms-appx:///Assets/Placeholders/default-request-type.png";
 
     public object? Convert(object value, Type targetType, object parameter, string language)
     {

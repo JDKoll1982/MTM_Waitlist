@@ -12,7 +12,7 @@ public static class ImageLocationDefaults
     /// Image dimensions: Square (100x100px minimum recommended)
     /// Format: PNG, JPG, JPEG
     /// </summary>
-    public const string RequestTypeDefaultPath = "Assets\\Images\\default-request-type.png";
+    public const string RequestTypeDefaultPath = "Assets\\Placeholders\\default-request-type.png";
 
     /// <summary>
     /// Default image for request subtypes. Used when no override, subtype JSON imagePath, or parent request type image is set.
@@ -20,7 +20,7 @@ public static class ImageLocationDefaults
     /// Image dimensions: Square (100x100px minimum recommended)
     /// Format: PNG, JPG, JPEG
     /// </summary>
-    public const string RequestSubtypeDefaultPath = "Assets\\Images\\default-request-type.png";
+    public const string RequestSubtypeDefaultPath = "Assets\\Placeholders\\default-request-type.png";
 
     /// <summary>
     /// Default image for work centers. Used when no override exists.
@@ -28,7 +28,7 @@ public static class ImageLocationDefaults
     /// Image dimensions: Square (100x100px minimum recommended)
     /// Format: PNG, JPG, JPEG
     /// </summary>
-    public const string WorkCenterDefaultPath = "Assets\\Images\\default-workstation-image.png";
+    public const string WorkCenterDefaultPath = "Assets\\Placeholders\\default-workstation-image.png";
 
     /// <summary>
     /// Gets the default image path for a given image location scope.

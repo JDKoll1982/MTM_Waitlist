@@ -4,7 +4,7 @@ namespace MTM_Waitlist.Module_Shared.Models;
 
 public sealed partial class WorkCenterSelectionItem : ObservableObject
 {
-    private const string DefaultWorkCenterImagePath = "Assets/Images/default-workstation-image.png";
+    private const string DefaultWorkCenterImagePath = "Assets/Placeholders/default-workstation-image.png";
 
     private bool _isSelected;
 

@@ -35,7 +35,18 @@ public sealed partial class LoginPage : Page
         _isInitialized = true;
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
         await ViewModel.InitializeAsync();
-        PasswordBox.Password = ViewModel.Password;
+
+        // When startup already established that the password must be replaced, the sign-in panel is x:Load-ed
+        // away, so the fields it owns are null — put the caret where the operator actually needs it instead.
+        if (PasswordBox is not null)
+        {
+            PasswordBox.Password = ViewModel.Password;
+        }
+
+        if (ViewModel.ShowPasswordChangePrompt && NewPasswordBox is not null)
+        {
+            _ = NewPasswordBox.Focus(FocusState.Programmatic);
+        }
     }
 
     private async void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

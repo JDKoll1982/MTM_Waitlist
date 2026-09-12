@@ -16,7 +16,7 @@ namespace MTM_Waitlist.Module_Setup.ViewModels;
 
 public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigationAware
 {
-    private const string DefaultWorkCenterImagePath = "Assets/Images/default-workstation-image.png";
+    private const string DefaultWorkCenterImagePath = "Assets/Placeholders/default-workstation-image.png";
 
     private static readonly string[] AllowedManageRoles =
     {

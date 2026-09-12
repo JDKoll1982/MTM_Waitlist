@@ -62,13 +62,18 @@
         </Border>
         
 
-        <!-- Error banner (e.g., load/save failures) -->
+        <!-- Error banner (e.g., image-validation failures, load/save failures) -->
         <InfoBar
             x:Name="ErrorInfoBar"
             Grid.Row="1"
             IsOpen="False"
             IsClosable="False"
-            Severity="Error" />
+            Severity="Error">
+            <InfoBar.IconSource>
+                <!-- validation.png is the app's validation-logic mark; it replaces the built-in Severity glyph. -->
+                <BitmapIconSource UriSource="ms-appx:///Assets/Icons/validation.png" ShowAsMonochrome="False" />
+            </InfoBar.IconSource>
+        </InfoBar>
 
         <!-- Status banner (e.g., save confirmation) -->
         <InfoBar

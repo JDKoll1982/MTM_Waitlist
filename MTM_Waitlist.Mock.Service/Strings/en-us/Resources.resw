@@ -131,6 +131,21 @@
   <data name="Service_Status.RefreshSchedule" xml:space="preserve">
     <value>Refresh interval: {0} minutes</value>
   </data>
+  <data name="Service_Status.RefreshAvailabilityLabel" xml:space="preserve">
+    <value>Scheduled refresh</value>
+  </data>
+  <data name="Service_Status.RefreshAvailabilityLabelDescription" xml:space="preserve">
+    <value>Whether this machine refreshes the cache, which needs Infor Visual.</value>
+  </data>
+  <data name="Service_Status.RefreshEnabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Service_Status.RefreshDisabled" xml:space="preserve">
+    <value>Disabled here — {0}</value>
+  </data>
+  <data name="Service_Status.StoreBackupDisabled" xml:space="preserve">
+    <value>Backup and restore are disabled for this store on this machine — {0}</value>
+  </data>
   <data name="Service_Status.SeedContentOnly" xml:space="preserve">
     <value>Baseline seed content only; no refresh has succeeded yet.</value>
   </data>
@@ -225,6 +240,9 @@
   </data>
   <data name="Service_Settings.BackupNowResult" xml:space="preserve">
     <value>Backup for {0}: {1}</value>
+  </data>
+  <data name="Service_Settings.BackupStoreDisabled" xml:space="preserve">
+    <value>{0}: backup and restore are disabled on this machine — {1}</value>
   </data>
   <data name="Service_Settings.RestoreHeader" xml:space="preserve">
     <value>Emergency restore</value>

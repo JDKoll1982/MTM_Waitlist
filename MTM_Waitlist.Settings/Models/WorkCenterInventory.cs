@@ -11,7 +11,7 @@ namespace MTM_Waitlist.Module_Settings.Models;
 /// Source: setup_workstations_catalog database table
 /// Row Key: setup_workstations_catalog.id (numeric BIGINT)
 /// Image Scope: "work_center" in config_images_locations
-/// Default Image: Assets\Images\default-workstation-image.png
+/// Default Image: Assets\Placeholders\default-workstation-image.png
 /// </summary>
 public sealed class WorkCenterInventory
 {

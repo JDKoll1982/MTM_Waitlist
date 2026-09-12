@@ -31,6 +31,11 @@ public sealed class ServiceHostBuilder
 
     private readonly IServiceCollection _services = new ServiceCollection();
 
+    /// <summary>
+    /// Whether the engines were told to skip the work this host cannot do. Set by <see cref="Build"/>.
+    /// </summary>
+    private bool _gateOnHostCapabilities;
+
     private ServiceConfigurationStore? _configurationStoreInstance;
 
     private Models.ServiceConfiguration _loadedConfiguration =
@@ -105,14 +110,23 @@ public sealed class ServiceHostBuilder
     /// The startup auto-start reconciliation result, when the host has already reconciled it. Registered
     /// only when present so the status payload can report a mismatch (FR-007).
     /// </param>
+    /// <param name="gateOnHostCapabilities">
+    /// Whether the refresh loop, the backup schedule, restore and the API should consult
+    /// <see cref="Contracts.IServiceCapabilityGate"/> and skip work this machine cannot do — refresh when Infor
+    /// Visual is unreachable, and one store's backup and restore when that store's database is. The service's
+    /// own startup passes <see langword="true"/>; the default is <see langword="false"/> so a test of an
+    /// engine, a loop or an endpoint does not depend on what the machine running it can reach.
+    /// </param>
     public ServiceProvider Build(
         Models.ServiceConfiguration configuration,
         ILoggerFactory? loggerFactory = null,
-        AutoStartReconciliation? autoStartState = null)
+        AutoStartReconciliation? autoStartState = null,
+        bool gateOnHostCapabilities = false)
     {
         ArgumentNullException.ThrowIfNull(configuration);
 
         _loadedConfiguration = configuration;
+        _gateOnHostCapabilities = gateOnHostCapabilities;
 
         // The durable sink: without it the container's log messages reach nothing an operator can read on
         // the host, which is what made a service that never refreshed undiscoverable (T148(c)).
@@ -189,6 +203,11 @@ public sealed class ServiceHostBuilder
 
         _services.AddSingleton<IVisualShapePayloadSource, VisualShapePayloadSource>();
 
+        // What this host can reach: the probe resolves each store the same way every other path does, and the
+        // gate combines it with Infor Visual into one cached verdict the engines and the API share.
+        _services.AddSingleton<IMySqlStoreConnectivityProbe, MySqlStoreConnectivityProbe>();
+        _services.AddSingleton<IServiceCapabilityGate, ServiceCapabilityProbe>();
+
         _services.AddSingleton<IMockMirrorRefreshWriter>(_ =>
             new MockMirrorRefreshWriter(ResolveCacheConnection(resolver)));
 
@@ -199,7 +218,8 @@ public sealed class ServiceHostBuilder
             provider.GetRequiredService<IVisualShapePayloadSource>(),
             provider.GetRequiredService<IMockMirrorRefreshWriter>(),
             provider.GetRequiredService<ILogger<RefreshEngine>>(),
-            refreshInterval: configuration.RefreshInterval));
+            refreshInterval: configuration.RefreshInterval,
+            capabilityGate: ResolveCapabilityGate(provider)));
 
         // Resolving this is what subscribes the store to the engine's completed runs, so per-item last-run
         // status is actually recorded (FR-013). It is a singleton for the service's lifetime.
@@ -208,6 +228,12 @@ public sealed class ServiceHostBuilder
             provider.GetRequiredService<RefreshRunRecordStore>(),
             provider.GetRequiredService<ILogger<RefreshRunRecordRecorder>>()));
     }
+
+    /// <summary>
+    /// Resolves the capability gate when this host asked to gate on its capabilities, otherwise nothing.
+    /// </summary>
+    private IServiceCapabilityGate? ResolveCapabilityGate(IServiceProvider provider) =>
+        _gateOnHostCapabilities ? provider.GetRequiredService<IServiceCapabilityGate>() : null;
 
     /// <summary>
     /// Reads the configuration currently in force, so a settings save applies without a restart.
@@ -253,14 +279,16 @@ public sealed class ServiceHostBuilder
         _services.AddSingleton(provider => new BackupScheduler(
             provider.GetRequiredService<BackupEngine>(),
             configurationAccessor,
-            provider.GetRequiredService<ILogger<BackupScheduler>>()));
+            provider.GetRequiredService<ILogger<BackupScheduler>>(),
+            capabilityGate: ResolveCapabilityGate(provider)));
 
         _services.AddSingleton(provider => new RestoreService(
             provider.GetRequiredService<BackupEngine>(),
             provider.GetRequiredService<BackupArtifactStore>(),
             provider.GetRequiredService<MySqlConnectionStringResolver>(),
             configurationAccessor,
-            provider.GetRequiredService<ILogger<RestoreService>>()));
+            provider.GetRequiredService<ILogger<RestoreService>>(),
+            capabilityGate: ResolveCapabilityGate(provider)));
     }
 
     /// <summary>
@@ -290,7 +318,8 @@ public sealed class ServiceHostBuilder
             provider.GetRequiredService<IVisualShapeFreshnessReader>(),
             provider.GetRequiredService<IVisualConnectivityProbe>(),
             provider.GetRequiredService<ServiceConfigurationStore>(),
-            provider.GetService<AutoStartReconciliation>()));
+            provider.GetService<AutoStartReconciliation>(),
+            capabilityGate: ResolveCapabilityGate(provider)));
 
         _services.AddSingleton(provider => new ServiceApiHost(
             provider.GetRequiredService<ServiceApiOperations>(),
@@ -305,7 +334,8 @@ public sealed class ServiceHostBuilder
             provider.GetRequiredService<BackupEngine>(),
             provider.GetRequiredService<BackupArtifactStore>(),
             provider.GetRequiredService<RestoreService>(),
-            provider.GetRequiredService<TimeProvider>()));
+            provider.GetRequiredService<TimeProvider>(),
+            capabilityGate: ResolveCapabilityGate(provider)));
 
         _services.AddSingleton(provider => new ViewModels.ServiceStatusViewModel(
             provider.GetRequiredService<ServiceApiOperations>(),

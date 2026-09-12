@@ -33,6 +33,7 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     private readonly BackupEngine _backupEngine;
     private readonly BackupArtifactStore _artifactStore;
     private readonly RestoreService _restoreService;
+    private readonly IServiceCapabilityGate? _capabilityGate;
     private readonly TimeProvider _timeProvider;
 
     [ObservableProperty]
@@ -111,12 +112,18 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     /// <param name="artifactStore">Supplies the restore picker's artifact list.</param>
     /// <param name="restoreService">Performs the confirmed, host-only restore.</param>
     /// <param name="timeProvider">Time source for display text.</param>
+    /// <param name="capabilityGate">
+    /// Reports which stores this machine can reach. A store it reports as unreachable has its backup and restore
+    /// refused on this surface too, with the reason, rather than attempted. Omitted or <see langword="null"/> 
+    /// means no gating.
+    /// </param>
     public ServiceSettingsViewModel(
         ServiceConfigurationStore configurationStore,
         BackupEngine backupEngine,
         BackupArtifactStore artifactStore,
         RestoreService restoreService,
-        TimeProvider? timeProvider = null)
+        TimeProvider? timeProvider = null,
+        IServiceCapabilityGate? capabilityGate = null)
     {
         ArgumentNullException.ThrowIfNull(configurationStore);
         ArgumentNullException.ThrowIfNull(backupEngine);
@@ -127,6 +134,7 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
         _backupEngine = backupEngine;
         _artifactStore = artifactStore;
         _restoreService = restoreService;
+        _capabilityGate = capabilityGate;
         _timeProvider = timeProvider ?? TimeProvider.System;
 
         // Partial observable properties cannot carry initializers, so the defaults live here.
@@ -681,6 +689,13 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
 
         try
         {
+            if (await GetStoreUnavailableReasonAsync(SelectedBackupStore).ConfigureAwait(true) is { } unavailable)
+            {
+                // Disabled here, not failed: this machine does not hold that database, so there is nothing to run.
+                StatusMessage = unavailable;
+                return;
+            }
+
             var record = await _backupEngine.RunAsync(SelectedBackupStore).ConfigureAwait(true);
 
             StatusMessage = string.Format(
@@ -737,6 +752,12 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
 
         try
         {
+            if (await GetStoreUnavailableReasonAsync(selected.Artifact.Store).ConfigureAwait(true) is { } unavailable)
+            {
+                RestoreOutcomeText = unavailable;
+                return;
+            }
+
             var request = _restoreService.RequestRestore(selected.Artifact);
             var outcome = await _restoreService.ConfirmAndRestoreAsync(request, selected.Artifact).ConfigureAwait(true);
 
@@ -755,6 +776,41 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// The reason a store's backup and restore are disabled here, or <see langword="null"/> when they are not.
+    /// </summary>
+    /// <remarks>
+    /// A gate that cannot answer yields <see langword="null"/>, which disables nothing: a failed probe is not
+    /// evidence that a store is unreachable.
+    /// </remarks>
+    private async Task<string?> GetStoreUnavailableReasonAsync(BackupStore store)
+    {
+        if (_capabilityGate is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var capabilities = await _capabilityGate.GetCapabilitiesAsync().ConfigureAwait(true);
+
+            if (capabilities.IsStoreAvailable(store))
+            {
+                return null;
+            }
+
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                "Service_Settings.BackupStoreDisabled".GetLocalized(),
+                store.ToDisplayName(),
+                capabilities.StoreUnavailableReason(store) ?? string.Empty);
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 

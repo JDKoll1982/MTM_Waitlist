@@ -171,7 +171,11 @@ public partial class App : Application
 
             ServiceLog.Info("ServiceApp", $"Auto-start reconciliation: {autoStartState.Message}");
 
-            _services = _hostBuilder.Build(configuration, autoStartState: autoStartState);
+            // The service is installable on any machine, so the engines are told to gate on what THIS one can
+            // reach: refresh is skipped when Infor Visual is unreachable, and a store's backup and restore are
+            // skipped when that store's database is. The mirror is still served either way — that is the point
+            // of a cache.
+            _services = _hostBuilder.Build(configuration, autoStartState: autoStartState, gateOnHostCapabilities: true);
 
             // Tray first, engines second: the operator's route to configuring the service must exist even when
             // the engines cannot do any work yet (an unconfigured cache, an unreachable cache, a missing
@@ -279,7 +283,7 @@ public partial class App : Application
     {
         _trayIcon = new TrayIcon(
             1,
-            Path.Combine(AppContext.BaseDirectory, "Assets", "WindowIcon.ico"),
+            Path.Combine(AppContext.BaseDirectory, "Assets", "mock-service.ico"),
             "Service_Tray.Tooltip".GetLocalized())
         {
             IsVisible = true

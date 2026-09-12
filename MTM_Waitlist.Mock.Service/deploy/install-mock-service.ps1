@@ -3,9 +3,11 @@
     Installs or redeploys MTM_Waitlist.Mock.Service onto the Infor Visual / MySQL cache host.
 
 .DESCRIPTION
-    One idempotent deployment step for the on-host half of the Module_Mock cached fallback. It:
+    One idempotent deployment step for the host half of the Module_Mock cached fallback. It:
 
-      1. refuses to run unless the LOCAL MACHINE IS THE CACHE HOST (see SERVER-ONLY below);
+      0. asks what you are trying to do, when it is run with no argument at all (see GUIDED MODE below);
+      1. reports what this machine can reach - whether it is the cache host, whether Infor Visual answers, and
+         whether the MySQL host answers (see ANY HOST below);
       2. stops the running service process, if any;
       3. deletes the previous deployment folder (state under %LOCALAPPDATA% is kept unless -PurgeState);
       4. publishes (with -Publish) and/or copies the publish output to the install folder;
@@ -21,26 +23,46 @@
     The equivalent manual procedure is MTM_Waitlist.Mock.Service/README.md sections 2-4; that file
     remains the narrative authority, this script is the executable form of it.
 
-.SERVER-ONLY - READ THIS BEFORE RUNNING
-    The service belongs on the host that can reach both MySQL and Infor Visual. Running it from a
-    developer workstation would install a tray-only auto-starting service on the wrong machine and
-    point `HKCU\...\Run` at whatever folder it was launched from.
+.GUIDED MODE - NO ARGUMENT
+    Run this file with NO argument (double-click it, right-click - Run with PowerShell, or just
+    `.\install-mock-service.ps1`) and it asks what you are trying to do instead of guessing: deploy,
+    publish-then-deploy, install to another folder, or a clean sweep that also deletes the service's stored
+    state. It then asks the four independent questions (publish, secrets, start and health-check, shortcut)
+    and one destructive one (delete the stored state), shows a summary with the equivalent command line, and
+    waits for a yes/no before touching anything.
 
-    The script therefore verifies that one of this machine's own IPv4 addresses is the expected
-    server address (default: the MySQL `Server=` value in appsettings.json, i.e. 172.16.1.104) and
-    REFUSES TO RUN otherwise, with exit code 2. In other words: **VS Code (and therefore the agent)
-    must be running on the server.** `-AllowNonServerHost` exists only for a deliberately chosen
-    non-server host and must be justified in the change that uses it.
+    **Passing ANY argument skips the prompts entirely**, so the scriptable path and the hand-run path are the
+    same code with the same exit codes. `-NonInteractive` is the explicit way to say "no prompts, use the
+    defaults" when no other argument is needed.
 
-    Verified identity of the cache host (2026-09-11): `V-MTMFG-5.mantoolfg.com` = `172.16.1.104`.
+    In guided mode the script waits for Enter after the summary, so a window that closes on exit still lets
+    the result be read.
+
+.ANY HOST - READ THIS BEFORE RUNNING
+    The service installs on any machine. What it can DO there is decided by reachability, not by the
+    installation: it refreshes the mtm_mock mirror only where Infor Visual answers, and backs up or restores
+    only the stores it can connect to. On a machine that reaches neither, it still serves the mirror over the
+    API and the tray - which is exactly what a workstation needs.
+
+    This script therefore REPORTS rather than refuses. It never fails a deployment because the machine is not
+    the cache host: the cache host is named by the MySQL `Server=` value in appsettings.json (default
+    `172.16.1.104`, verified 2026-09-11 as `V-MTMFG-5`), and a machine that is not it is installed as a
+    mirror-only host with a warning that says so.
+
+    The per-store answer is the service's own: it probes each store at startup and every minute, disables the
+    work it cannot do, and reports the reason on the status surface and in `GET /api/status`.
 
 .EXAMPLE
-    # the normal case: publish fresh, deploy, install/verify secrets, start and health-check
+    # the ordinary way: ask me what I am trying to do
+    .\install-mock-service.ps1
+
+.EXAMPLE
+    # the normal automation case: publish fresh, deploy, install/verify secrets, start and health-check
     pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 -Publish
 
 .EXAMPLE
     # redeploy an existing publish output without touching the service's stored state
-    pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1
+    pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 -NonInteractive
 
 .EXAMPLE
     # a clean sweep: also delete the service's configuration, credential and backups
@@ -48,14 +70,21 @@
 #>
 [CmdletBinding()]
 param(
-    # Install folder. Must be final before the first run: a first run registers auto-start with the path it was launched from.
-    [string] $TargetPath = 'C:\Services\MTM_Waitlist.Mock.Service',
+    # Install folder. Must be final before the first run: a first run registers auto-start with the path it was
+    # launched from. Omitted, the script chooses: the established machine-level folder when this account can
+    # create it, otherwise the per-user folder - see INSTALL FOLDER below.
+    [string] $TargetPath,
 
     # Publish output to deploy from. Defaults to the project's folder-publish profile output.
     [string] $SourcePath,
 
-    # Expected cache host. Defaults to the MySQL Server= value in appsettings.json.
+    # Expected cache host. Defaults to the MySQL Server= value in appsettings.json. Used only to report
+    # whether this machine IS that host; it never refuses a deployment.
     [string] $ServerHost,
+
+    # Port the Infor Visual reachability report probes. Named instances resolve through the SQL Browser
+    # service, which a TCP probe cannot see, so this is configurable rather than inferred.
+    [int] $VisualPort = 1433,
 
     # Run `dotnet publish` (Release, win-x64-selfcontained) before copying.
     [switch] $Publish,
@@ -72,11 +101,17 @@ param(
     # The desktop that receives the restart shortcut. Hardcoded to the operator account by owner decision.
     [string] $DesktopPath = 'C:\Users\jkoll\Desktop',
 
+    # Additional desktops that also receive the shortcut, best effort: a profile that is not on this machine
+    # is skipped and an unwritable folder is a warning, never a failure. Hardcoded to the second operator
+    # profile by owner request (the agent's notes record jkoll at work, johnk at home).
+    [string[]] $AdditionalDesktopPaths = @('C:\Users\johnk\Desktop'),
+
     # Do not create or replace the desktop shortcut.
     [switch] $SkipDesktopShortcut,
 
-    # Bypass the server-only guard. Deliberate use only; say why in the change that uses it.
-    [switch] $AllowNonServerHost,
+    # Skip the guided prompts even when no other argument is passed. Passing ANY argument also skips them,
+    # so this exists to say "I mean the defaults" out loud in automation.
+    [switch] $NonInteractive,
 
     # Seconds to wait for the service to start listening.
     [int] $HealthCheckTimeoutSeconds = 60
@@ -94,12 +129,19 @@ $runValueName = 'MTM_Waitlist.Mock.Service'
 $stateRoot = Join-Path $env:LOCALAPPDATA 'MTM_Waitlist.Mock.Service'
 $apiPort = 5760
 $controlScriptName = 'mock-service-control.ps1'
+# The pane's Status entry uses a BitmapIcon, so the PNG has to ship with the app. Without it the icon
+# silently renders as nothing rather than failing loudly, so the deploy guards treat it as required.
+$statusIconRelativePath = 'Assets\Icons\service-status.png'
 
 if (-not $SourcePath) {
     $SourcePath = Join-Path $repoRoot 'MTM_Waitlist.Mock.Service\bin\publish\win-x64'
 }
 
 $script:results = [System.Collections.Generic.List[object]]::new()
+
+# Set by the guided workflow below; read by the summary so a window that was opened by double-clicking the
+# script is not closed before the result can be read.
+$script:guidedMode = $false
 
 function Add-Result {
     param([string] $Step, [string] $Status, [string] $Detail)
@@ -115,11 +157,307 @@ function Stop-Deployment {
     Write-Host ''
     Write-Host '=== SUMMARY ===' -ForegroundColor Cyan
     $script:results | Format-Table -AutoSize | Out-String -Width 200 | Write-Host
+    Wait-GuidedClose
     exit $ExitCode
 }
 
 function Test-Failed {
     return [bool]($script:results | Where-Object { $_.Status -eq 'FAIL' })
+}
+
+function Test-TcpEndpoint {
+    param([string] $HostName, [int] $Port, [int] $TimeoutMilliseconds = 3000)
+
+    if (-not $HostName) { return $false }
+
+    $client = $null
+    try {
+        $client = [System.Net.Sockets.TcpClient]::new()
+        $connect = $client.ConnectAsync($HostName, $Port)
+        if (-not $connect.Wait($TimeoutMilliseconds)) { return $false }
+        return $client.Connected
+    }
+    catch {
+        return $false
+    }
+    finally {
+        if ($client) { $client.Dispose() }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+# Install folder
+#
+# The installed location is a machine-level folder, which is right on the cache host where the service is
+# installed once for the machine. It is not always usable: an account may not be able to create it, and a
+# service that runs per user belongs in a per-user folder anyway. So the default is RESOLVED rather than
+# assumed, by testing whether this account can actually create the folder it intends to use, and the choice
+# and the reason are reported in the banner so nobody has to guess which one is in play.
+# ---------------------------------------------------------------------------------------------
+$establishedInstallFolder = 'C:\Services\MTM_Waitlist.Mock.Service'
+$perUserInstallFolder = Join-Path $env:LOCALAPPDATA 'Programs\MTM_Waitlist.Mock.Service'
+
+$targetPathGiven = [bool]$PSBoundParameters['TargetPath']
+$targetPathSource = 'given with -TargetPath'
+
+function Test-CanUseFolder {
+    param([string] $Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path)) { return $false }
+
+    try {
+        New-Item -ItemType Directory -Path $Path -Force -ErrorAction Stop | Out-Null
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+# Is the publish output stale?
+#
+# Deploying what is already on disk is the fast path, and it is the right one when the output is current.
+# It is the wrong one the moment a source or asset changes - the copy succeeds, the deployment validates,
+# and the missing piece only shows up as a FAIL in step 5 or as a service that cannot find its icon. So the
+# question is answered before the copy, and the guided workflow defaults to rebuilding when the answer is yes.
+# ---------------------------------------------------------------------------------------------
+function Test-PublishOutputStale {
+    param([string] $OutputPath)
+
+    if (-not (Test-Path $OutputPath)) { return $true }
+
+    # Missing content is unambiguous: the output cannot be current if it does not hold the files the project
+    # says must ship beside the app.
+    foreach ($requiredInOutput in @($serviceExeName, 'Assets\mock-service.ico', $statusIconRelativePath)) {
+        if (-not (Test-Path (Join-Path $OutputPath $requiredInOutput))) { return $true }
+    }
+
+    $newestSource = Get-ChildItem -Path (Join-Path $repoRoot 'MTM_Waitlist.Mock.Service') -Recurse -File -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.Extension -in @('.cs', '.xaml', '.resw', '.csproj', '.ico', '.png', '.json', '.ps1') `
+                -and $_.Name -ne 'install-mock-service.ps1' `
+                -and $_.FullName -notmatch '\\(bin|obj)\\'
+        } |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+
+    $newestOutput = Get-ChildItem -Path $OutputPath -Recurse -File -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+
+    if (-not $newestSource -or -not $newestOutput) { return $false }
+
+    return $newestSource.LastWriteTime -gt $newestOutput.LastWriteTime
+}
+
+if ($targetPathGiven) {
+    if (-not (Test-CanUseFolder $TargetPath)) {
+        Stop-Deployment @"
+The install folder cannot be created by this account.
+
+  requested      : $TargetPath
+  default instead: $establishedInstallFolder when this machine can create it, otherwise $perUserInstallFolder
+
+Pass a folder this account can write to, or leave -TargetPath off and let the script choose.
+"@ 3
+    }
+}
+elseif (Test-Path $establishedInstallFolder) {
+    # An existing deployment is never moved: auto-start, the shortcut and the control script all point at it.
+    $TargetPath = $establishedInstallFolder
+    $targetPathSource = 'default - an existing deployment is already here'
+}
+elseif (Test-CanUseFolder $establishedInstallFolder) {
+    $TargetPath = $establishedInstallFolder
+    $targetPathSource = 'default - the machine-level location'
+}
+else {
+    $TargetPath = $perUserInstallFolder
+    $targetPathSource = "default - $establishedInstallFolder cannot be created by this account, so the per-user folder is used"
+
+    if (-not (Test-CanUseFolder $TargetPath)) {
+        Stop-Deployment @"
+No install folder could be used.
+
+  neither '$establishedInstallFolder'
+  nor     '$TargetPath'
+  could be created by this account. Pass one it can write to with -TargetPath.
+"@ 3
+    }
+}
+
+$resolvedTargetPath = $TargetPath
+
+# ---------------------------------------------------------------------------------------------
+# Guided workflow
+#
+# Running the script with NO argument asks what you are trying to do and builds the same parameter set the
+# command line would have. Passing ANY argument skips it entirely, so the scriptable and the
+# double-click path are the same code with the same exit codes.
+# ---------------------------------------------------------------------------------------------
+
+function Wait-GuidedClose {
+    if (-not $script:guidedMode) { return }
+
+    Write-Host ''
+    [void](Read-Host 'Press Enter to close')
+}
+
+function Read-GuidedChoice {
+    param(
+        [string] $Caption,
+        [string] $Message,
+        [System.Management.Automation.Host.ChoiceDescription[]] $Choices,
+        [int] $Default = 0
+    )
+
+    return $Host.UI.PromptForChoice($Caption, $Message, $Choices, $Default)
+}
+
+function Read-GuidedYesNo {
+    param([string] $Caption, [string] $Message, [bool] $DefaultYes = $true)
+
+    $choices = @(
+        [System.Management.Automation.Host.ChoiceDescription]::new('&Yes', 'Yes'),
+        [System.Management.Automation.Host.ChoiceDescription]::new('&No', 'No')
+    )
+
+    $default = if ($DefaultYes) { 0 } else { 1 }
+
+    return (Read-GuidedChoice -Caption $Caption -Message $Message -Choices $choices -Default $default) -eq 0
+}
+
+function Get-GuidedCommandLine {
+    $parts = @('.\install-mock-service.ps1')
+
+    foreach ($pair in @(
+        @{ Given = $Publish; Flag = '-Publish' },
+        @{ Given = $PurgeState; Flag = '-PurgeState' },
+        @{ Given = $SkipSecrets; Flag = '-SkipSecrets' },
+        @{ Given = $SkipServiceStart; Flag = '-SkipServiceStart' },
+        @{ Given = $SkipDesktopShortcut; Flag = '-SkipDesktopShortcut' }))
+    {
+        if ($pair.Given) { $parts += $pair.Flag }
+    }
+
+    if ($TargetPath -ne $resolvedTargetPath) {
+        $parts += "-TargetPath '$TargetPath'"
+    }
+
+    return ($parts -join ' ')
+}
+
+# Guided mode needs a console that can answer a prompt. A redirected stdin cannot, so it falls through to the
+# non-interactive defaults rather than failing on a prompt nobody can see.
+$canPrompt = [Environment]::UserInteractive
+if ($canPrompt) {
+    try { $canPrompt = -not [Console]::IsInputRedirected }
+    catch { $canPrompt = $false }
+}
+
+if ($PSBoundParameters.Count -eq 0 -and -not $NonInteractive -and $canPrompt) {
+    $script:guidedMode = $true
+
+    Write-Host ''
+    Write-Host '============================================================' -ForegroundColor Cyan
+    Write-Host ' Guided deployment' -ForegroundColor Cyan
+    Write-Host '============================================================' -ForegroundColor Cyan
+    Write-Host ' No argument was passed, so this asks what you are trying to do.' -ForegroundColor Gray
+    Write-Host ' Passing any argument skips these prompts - that is what automation should do.' -ForegroundColor Gray
+    Write-Host ''
+
+    $intentChoices = @(
+        [System.Management.Automation.Host.ChoiceDescription]::new('&Deploy', 'Deploy the publish output that is already on disk. The service state is kept.'),
+        [System.Management.Automation.Host.ChoiceDescription]::new('&Publish and deploy', 'Build a fresh Release publish output first, then deploy it.'),
+        [System.Management.Automation.Host.ChoiceDescription]::new('&Clean sweep', 'Deploy and also delete ALL service state: configuration, backups and run records.'),
+        [System.Management.Automation.Host.ChoiceDescription]::new('&Quit', 'Change nothing and exit.')
+    )
+
+    $intent = Read-GuidedChoice -Caption 'Deployment' -Message 'What are you trying to do?' -Choices $intentChoices -Default 0
+
+    if ($intent -eq 3) {
+        Write-Host ''
+        Write-Host 'Nothing was changed.' -ForegroundColor Yellow
+        Wait-GuidedClose
+        exit 0
+    }
+
+    Write-Host ''
+
+    # The folder question is asked on every path, with the resolved default already in the prompt, so the
+    # default is something you can see and accept rather than something you have to know.
+    while ($true) {
+        $typedPath = Read-Host "Install folder [$TargetPath]"
+
+        if ([string]::IsNullOrWhiteSpace($typedPath)) { break }
+
+        $candidate = $typedPath.Trim()
+
+        if (Test-CanUseFolder $candidate) {
+            $TargetPath = $candidate
+            $targetPathSource = 'chosen in the guided workflow'
+            break
+        }
+
+        Write-Host ("  '{0}' cannot be created by this account. Try another path, or press Enter for {1}." -f $candidate, $TargetPath) -ForegroundColor Yellow
+    }
+
+    $publishRecommended = Test-PublishOutputStale -OutputPath $SourcePath
+
+    $Publish = Read-GuidedYesNo `
+        -Caption 'Build' `
+        -Message $(if ($publishRecommended) {
+            'Build a fresh Release publish output first? RECOMMENDED - the output on disk is missing required content or older than the project.'
+        }
+        else {
+            'Build a fresh Release publish output first? Slower, but the deployed build is then the one in the working tree.'
+        }) `
+        -DefaultYes ($publishRecommended -or ($intent -eq 1))
+
+    $SkipSecrets = -not (Read-GuidedYesNo `
+        -Caption 'Secrets' `
+        -Message 'Set and verify the MySQL and Infor Visual environment variables on this machine?' `
+        -DefaultYes $true)
+
+    $SkipServiceStart = -not (Read-GuidedYesNo `
+        -Caption 'Service' `
+        -Message 'Start the service and run the health checks once the copy is done?' `
+        -DefaultYes $true)
+
+    $SkipDesktopShortcut = -not (Read-GuidedYesNo `
+        -Caption 'Shortcut' `
+        -Message "Put the restart shortcut on this machine's desktops?" `
+        -DefaultYes $true)
+
+    $PurgeState = Read-GuidedYesNo `
+        -Caption 'State' `
+        -Message "ALSO delete the service's stored state? That removes the configuration, every backup artifact and the run records." `
+        -DefaultYes ($intent -eq 2)
+
+    Write-Host ''
+    Write-Host '--- what will run ---' -ForegroundColor Cyan
+    Write-Host ("  install folder : {0}" -f $TargetPath)
+    Write-Host ("                   {0}" -f $targetPathSource) -ForegroundColor Gray
+    Write-Host ("  publish first  : {0}" -f $(if ($Publish) { 'yes' } else { 'no - the publish output on disk is deployed as-is' }))
+    Write-Host ("  secrets        : {0}" -f $(if ($SkipSecrets) { 'skipped' } else { 'set and verified' }))
+    Write-Host ("  service start  : {0}" -f $(if ($SkipServiceStart) { 'skipped' } else { 'started and health-checked' }))
+    Write-Host ("  shortcut       : {0}" -f $(if ($SkipDesktopShortcut) { 'skipped' } else { 'placed on this machine' }))
+    Write-Host ("  service state  : {0}" -f $(if ($PurgeState) { 'DELETED (configuration, backups, run records)' } else { 'kept' }))
+    Write-Host ("  source         : {0}" -f $SourcePath)
+    Write-Host ''
+    Write-Host '  Equivalent command line:' -ForegroundColor Gray
+    Write-Host ("    {0}" -f (Get-GuidedCommandLine)) -ForegroundColor Gray
+    Write-Host ''
+
+    if (-not (Read-GuidedYesNo -Caption 'Confirm' -Message 'Proceed with this deployment?' -DefaultYes $true)) {
+        Write-Host ''
+        Write-Host 'Nothing was changed.' -ForegroundColor Yellow
+        Wait-GuidedClose
+        exit 0
+    }
+
+    Write-Host ''
 }
 
 Write-Host ''
@@ -129,25 +467,32 @@ Write-Host '============================================================' -Foreg
 Write-Host "  repo    : $repoRoot"
 Write-Host "  source  : $SourcePath"
 Write-Host "  target  : $TargetPath"
+Write-Host "            ($targetPathSource)" -ForegroundColor Gray
 Write-Host ''
 
 # ---------------------------------------------------------------------------------------------
-# 1. Server-only guard
+# 1. Host disposition - what this machine can reach (never fatal)
 # ---------------------------------------------------------------------------------------------
-Write-Host '--- 1. server-only guard ---' -ForegroundColor Cyan
+Write-Host '--- 1. host disposition ---' -ForegroundColor Cyan
 
 $appSettingsPath = Join-Path $repoRoot 'appsettings.json'
-if (-not $ServerHost) {
-    $ServerHost = ([regex]::Match((Get-Content $appSettingsPath -Raw | ConvertFrom-Json).StartupDatabaseOptions.ConnectionString,
-        'Server=([^;]+)')).Groups[1].Value
-}
-if (-not $ServerHost) { Stop-Deployment 'Could not determine the expected server host.' 3 }
+$appSettings = Get-Content $appSettingsPath -Raw | ConvertFrom-Json
+$mysqlConnectionString = $appSettings.StartupDatabaseOptions.ConnectionString
+$mysqlHost = ([regex]::Match($mysqlConnectionString, 'Server=([^;]+)')).Groups[1].Value
+$mysqlPortMatch = [regex]::Match($mysqlConnectionString, 'Port=([0-9]+)')
+$mysqlPort = if ($mysqlPortMatch.Success) { [int]$mysqlPortMatch.Groups[1].Value } else { 3306 }
 
+if (-not $ServerHost) { $ServerHost = $mysqlHost }
+
+$visualServer = $appSettings.InforVisualDatabaseOptions.Server
+
+# The cache-host comparison is REPORTING, not a gate: the service installs anywhere, and what it can do there
+# is decided at runtime by what it can reach.
 $localAddresses = @(Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
     Where-Object { $_.IPAddress -ne '127.0.0.1' } | Select-Object -ExpandProperty IPAddress)
 
 $expectedAddresses = @($ServerHost)
-if ($ServerHost -notmatch '^\d+\.\d+\.\d+\.\d+$') {
+if ($ServerHost -and $ServerHost -notmatch '^\d+\.\d+\.\d+\.\d+$') {
     $expectedAddresses = @(
         try { [System.Net.Dns]::GetHostAddresses($ServerHost) | Where-Object { $_.AddressFamily -eq 'InterNetwork' } | ForEach-Object { $_.IPAddressToString } }
         catch { @() }
@@ -156,27 +501,50 @@ if ($ServerHost -notmatch '^\d+\.\d+\.\d+\.\d+$') {
 
 $serverMatched = [bool](@($localAddresses | Where-Object { $expectedAddresses -contains $_ }).Count)
 Write-Host "  this machine : $([System.Net.Dns]::GetHostName())  addresses: $($localAddresses -join ', ')"
-Write-Host "  expected host: $ServerHost  addresses: $($expectedAddresses -join ', ')"
+Write-Host "  cache host   : $ServerHost  addresses: $($expectedAddresses -join ', ')"
 
 if ($serverMatched) {
-    Add-Result 'server host guard' 'PASS' "local machine is the cache host ($ServerHost)"
-}
-elseif ($AllowNonServerHost) {
-    Add-Result 'server host guard' 'WARN' "-AllowNonServerHost given: deploying to a machine that is NOT $ServerHost"
+    Add-Result 'cache host' 'PASS' "this machine is the cache host ($ServerHost)"
 }
 else {
-    Stop-Deployment @"
-REFUSING TO RUN: this machine is not the cache host.
-
-  this machine : $(($localAddresses -join ', '))
-  expected host: $ServerHost
-
-The service must be installed on the host that reaches both MySQL and Infor Visual - run VS Code on
-the server itself (verified identity 2026-09-11: V-MTMFG-5 = 172.16.1.104).
-
-If this non-server host is deliberate, re-run with -AllowNonServerHost and record why.
-"@ 2
+    Add-Result 'cache host' 'WARN' "not the cache host ($ServerHost); installing as a mirror-only host - refresh and store work are enabled only where they can run"
 }
+
+# Infor Visual: refresh needs it. A TCP probe is the honest expectation-setter here (the service does the real
+# probe with the SQL provider); a name that does not resolve and a port that does not answer both mean the same
+# thing to an operator - refresh will be disabled on this machine.
+if (-not $visualServer) {
+    Add-Result 'infor visual' 'WARN' 'no InforVisualDatabaseOptions.Server in appsettings.json; the service will disable refresh here until it is configured'
+}
+else {
+    $visualAddresses = @(
+        try { [System.Net.Dns]::GetHostAddresses($visualServer) | Where-Object { $_.AddressFamily -eq 'InterNetwork' } | ForEach-Object { $_.IPAddressToString } }
+        catch { @() }
+    )
+
+    $visualReachable = [bool](@($visualAddresses | Where-Object { Test-TcpEndpoint -HostName $_ -Port $VisualPort }).Count)
+    Write-Host "  infor visual : $visualServer  addresses: $($visualAddresses -join ', ')  port: $VisualPort"
+
+    if ($visualReachable) {
+        Add-Result 'infor visual' 'PASS' "$visualServer answered on port $VisualPort; refresh runs on this machine"
+    }
+    else {
+        Add-Result 'infor visual' 'WARN' "$visualServer did not answer on port $VisualPort; the service will disable refresh on this machine"
+    }
+}
+
+# MySQL: the four stores' backups and restores need it. The per-store answer is the service's own - it probes
+# each database, because a reachable server with a missing database is not a store that can be backed up.
+if (-not $mysqlHost) {
+    Add-Result 'mysql host' 'WARN' 'no MySQL Server= in appsettings.json; the service will disable backup and restore for every store until it is configured'
+}
+elseif (Test-TcpEndpoint -HostName $mysqlHost -Port $mysqlPort) {
+    Add-Result 'mysql host' 'PASS' "$mysqlHost answered on port $mysqlPort; the service probes each store and disables only the ones it cannot reach"
+}
+else {
+    Add-Result 'mysql host' 'WARN' "$mysqlHost did not answer on port $mysqlPort; the service will disable backup and restore for every store it cannot reach"
+}
+
 
 # ---------------------------------------------------------------------------------------------
 # 2. Stop the running service
@@ -332,7 +700,14 @@ if ($Publish) {
     }
 }
 else {
-    Add-Result 'publish' 'SKIP' 'reusing the existing publish output (-Publish not given)'
+    # Reusing the output is the fast path; a STALE output is not, and saying so here keeps the failure out of
+    # step 5, where it would read as a deployment problem rather than an un-built change.
+    if (Test-PublishOutputStale -OutputPath $SourcePath) {
+        Add-Result 'publish' 'WARN' 'reusing an existing publish output that is missing content or older than the project - re-run with -Publish to rebuild it'
+    }
+    else {
+        Add-Result 'publish' 'SKIP' 'reusing the existing publish output (-Publish not given)'
+    }
 }
 
 if (-not (Test-Path (Join-Path $SourcePath $serviceExeName))) {
@@ -361,7 +736,8 @@ else {
 $required = @(
     $serviceExeName,
     $controlScriptName,
-    'assets\WindowIcon.ico',
+    'assets\mock-service.ico',
+    $statusIconRelativePath,
     'Database\InforVisual\Queues\Module_Mock\Populations\work_order_lookup_population.sql',
     'Database\InforVisual\Queues\Module_Mock\Populations\operation_sequences_population.sql',
     'Database\InforVisual\Queues\Module_Mock\Populations\subordinate_parts_population.sql',
@@ -377,7 +753,7 @@ if ($missing.Count -eq 0) {
     Add-Result 'required content present' 'PASS' "$($required.Count) required paths (scripts, tray icon, restore artifacts)"
 }
 else {
-    Add-Result 'required content present' 'FAIL' "missing: $($missing -join ', ')"
+    Add-Result 'required content present' 'FAIL' "missing: $($missing -join ', ') - the publish output is probably stale; re-run with -Publish"
 }
 
 # Self-contained: the host must not need a .NET or Windows App SDK runtime installed.
@@ -433,7 +809,12 @@ else {
     $changed = [System.Collections.Generic.List[string]]::new()
     foreach ($name in $desired.Keys) {
         if (-not $desired[$name]) { Add-Result 'secrets' 'FAIL' "$name has no source value in appsettings.json"; break }
-        $current = $persisted.PSObject.Properties[$name].Value
+
+        # Property access on a key that does not exist yields $null, and under Set-StrictMode that is an error
+        # rather than a null - which is how a first run on a machine with no secrets set used to abort here.
+        $existing = $persisted.PSObject.Properties[$name]
+        $current = if ($existing) { $existing.Value } else { $null }
+
         if ($current -ne $desired[$name]) {
             [Environment]::SetEnvironmentVariable($name, $desired[$name], 'User')
             $changed.Add($name)
@@ -450,7 +831,8 @@ else {
     $persisted = Get-ItemProperty $userEnvironmentKey
     $bad = @()
     foreach ($name in $desired.Keys) {
-        $value = $persisted.PSObject.Properties[$name].Value
+        $existing = $persisted.PSObject.Properties[$name]
+        $value = if ($existing) { $existing.Value } else { $null }
         if (-not $value -or $value -ne $desired[$name]) { $bad += $name }
     }
     if ($bad.Count -eq 0) {
@@ -487,40 +869,88 @@ else {
         [void][System.Reflection.Assembly]::LoadFrom((Join-Path $clientBin 'MySqlConnector.dll'))
         [void][System.Reflection.Assembly]::LoadFrom((Join-Path $clientBin 'Microsoft.Data.SqlClient.dll'))
 
-        $dbFailures = @()
-        foreach ($database in @('mtm_mock', 'mtm_waitlist', 'mtm_wip_application_winforms', 'mtm_receiving_application')) {
-            $builder = [MySqlConnector.MySqlConnectionStringBuilder]::new($effective['MTM_WAITLIST_DB_CONNECTION_STRING'])
-            $builder.Database = $database
-            try {
-                $connection = [MySqlConnector.MySqlConnection]::new($builder.ConnectionString)
-                $connection.Open(); $connection.Dispose()
+        # Which server these credentials are proved against.
+        #
+        # The secrets are set from appsettings.json, so they name the plant host. A machine that cannot reach
+        # it has NOT been given wrong credentials, and the service falls back to this machine's own MySQL - so
+        # the proof follows the same rule: the configured host when it answers, otherwise this machine's server
+        # when that answers, otherwise the credentials cannot be proved from here and it is reported as such.
+        # Only a proof that actually ran can FAIL.
+        $waitlistBuilder = [MySqlConnector.MySqlConnectionStringBuilder]::new($effective['MTM_WAITLIST_DB_CONNECTION_STRING'])
+        $configuredHost = $waitlistBuilder.Server
+        $configuredPort = if ($waitlistBuilder.Port -gt 0) { [int]$waitlistBuilder.Port } else { 3306 }
+
+        $proofHost = $configuredHost
+        $proofSubstitution = $null
+
+        if (-not (Test-TcpEndpoint -HostName $configuredHost -Port $configuredPort)) {
+            if (Test-TcpEndpoint -HostName 'localhost' -Port $configuredPort) {
+                $proofHost = 'localhost'
+                $proofSubstitution = "$configuredHost did not answer, so the credentials were proved against this machine's MySQL, which is what the service falls back to here"
             }
-            catch { $dbFailures += "$database ($($_.Exception.Message))" }
-        }
-        if ($dbFailures.Count -eq 0) {
-            Add-Result 'MySQL connections' 'PASS' 'mtm_mock, mtm_waitlist, mtm_wip_application_winforms, mtm_receiving_application'
-        }
-        else {
-            Add-Result 'MySQL connections' 'FAIL' ($dbFailures -join '; ')
+            else {
+                $proofHost = $null
+            }
         }
 
-        $visualBuilder = [Microsoft.Data.SqlClient.SqlConnectionStringBuilder]::new()
-        $visualBuilder['Data Source'] = $config.InforVisualDatabaseOptions.Server
-        $visualBuilder['Initial Catalog'] = $config.InforVisualDatabaseOptions.Database
-        $visualBuilder['User ID'] = $effective['INFOR_VISUAL_SQL_USER']
-        $visualBuilder['Password'] = $effective['INFOR_VISUAL_SQL_PASSWORD']
-        $visualBuilder['TrustServerCertificate'] = $true
-        $visualBuilder['Encrypt'] = $false
-        $visualBuilder['Connect Timeout'] = 15
-        try {
-            $connection = [Microsoft.Data.SqlClient.SqlConnection]::new($visualBuilder.ConnectionString)
-            $connection.Open()
-            $command = $connection.CreateCommand(); $command.CommandText = 'SELECT SUSER_SNAME();'
-            Add-Result 'Infor Visual connection' 'PASS' "login=$($command.ExecuteScalar()) on $($config.InforVisualDatabaseOptions.Server)/$($config.InforVisualDatabaseOptions.Database)"
-            $connection.Dispose()
+        if (-not $proofHost) {
+            Add-Result 'MySQL connections' 'WARN' "neither $configuredHost nor this machine's MySQL answered, so the credentials could not be proved from here; the service disables the MySQL work it cannot do"
         }
-        catch {
-            Add-Result 'Infor Visual connection' 'FAIL' $_.Exception.Message
+        else {
+            $dbFailures = @()
+            foreach ($database in @('mtm_mock', 'mtm_waitlist', 'mtm_wip_application_winforms', 'mtm_receiving_application')) {
+                $builder = [MySqlConnector.MySqlConnectionStringBuilder]::new($effective['MTM_WAITLIST_DB_CONNECTION_STRING'])
+                $builder.Database = $database
+                $builder.Server = $proofHost
+                try {
+                    $connection = [MySqlConnector.MySqlConnection]::new($builder.ConnectionString)
+                    $connection.Open(); $connection.Dispose()
+                }
+                catch { $dbFailures += "$database ($($_.Exception.Message))" }
+            }
+            if ($dbFailures.Count -eq 0) {
+                $detail = 'mtm_mock, mtm_waitlist, mtm_wip_application_winforms, mtm_receiving_application'
+                if ($proofSubstitution) { $detail = "$detail - $proofSubstitution" }
+                Add-Result 'MySQL connections' 'PASS' $detail
+            }
+            else {
+                # A reachable server that refused these credentials is a real failure: no fallback can hide a
+                # wrong password, and the service would fail the same way.
+                Add-Result 'MySQL connections' 'FAIL' ($dbFailures -join '; ')
+            }
+        }
+
+        $visualServer = $config.InforVisualDatabaseOptions.Server
+        $visualAddresses = @(
+            try { [System.Net.Dns]::GetHostAddresses($visualServer) | Where-Object { $_.AddressFamily -eq 'InterNetwork' } | ForEach-Object { $_.IPAddressToString } }
+            catch { @() }
+        )
+        $visualReachable = [bool](@($visualAddresses | Where-Object { Test-TcpEndpoint -HostName $_ -Port $VisualPort }).Count)
+
+        if (-not $visualReachable) {
+            # Nothing to prove and no local stand-in exists, so this is reported, not failed. Refresh needs
+            # Infor Visual and the service will disable it on this machine (T167).
+            Add-Result 'Infor Visual connection' 'WARN' "$visualServer did not answer on port $VisualPort, so the login could not be proved from here; the service disables refresh on this machine"
+        }
+        else {
+            $visualBuilder = [Microsoft.Data.SqlClient.SqlConnectionStringBuilder]::new()
+            $visualBuilder['Data Source'] = $config.InforVisualDatabaseOptions.Server
+            $visualBuilder['Initial Catalog'] = $config.InforVisualDatabaseOptions.Database
+            $visualBuilder['User ID'] = $effective['INFOR_VISUAL_SQL_USER']
+            $visualBuilder['Password'] = $effective['INFOR_VISUAL_SQL_PASSWORD']
+            $visualBuilder['TrustServerCertificate'] = $true
+            $visualBuilder['Encrypt'] = $false
+            $visualBuilder['Connect Timeout'] = 15
+            try {
+                $connection = [Microsoft.Data.SqlClient.SqlConnection]::new($visualBuilder.ConnectionString)
+                $connection.Open()
+                $command = $connection.CreateCommand(); $command.CommandText = 'SELECT SUSER_SNAME();'
+                Add-Result 'Infor Visual connection' 'PASS' "login=$($command.ExecuteScalar()) on $($config.InforVisualDatabaseOptions.Server)/$($config.InforVisualDatabaseOptions.Database)"
+                $connection.Dispose()
+            }
+            catch {
+                Add-Result 'Infor Visual connection' 'FAIL' $_.Exception.Message
+            }
         }
     }
 }
@@ -712,6 +1142,62 @@ else {
         else {
             Add-Result 'desktop shortcut' 'PASS' "created $shortcutPath (opens $controlScriptName); $desktopSource"
         }
+
+        # Also attempt the same shortcut on the other operator profile. Best effort by design: this is a
+        # convenience for whoever signs in there, so a profile that is not on this machine is skipped and an
+        # unwritable folder is a warning — either way the deployment still succeeds.
+        if (-not $failure -and $AdditionalDesktopPaths) {
+            foreach ($extraDesktop in $AdditionalDesktopPaths) {
+                $extraTarget = $extraDesktop
+
+                # Which folder the profile's desktop ACTUALLY is. A redirected Desktop leaves the literal
+                # path behind as an empty husk on some machines, so "it exists" is not the answer - the
+                # OneDrive-redirected folder is where the shell shows things, and GetFolderPath only answers
+                # for the account running this script. The redirected folder therefore wins when it exists.
+                $profileRoot = Split-Path -Parent $extraDesktop
+                $redirected = @(
+                    Get-ChildItem -Path $profileRoot -Directory -Filter 'OneDrive*' -ErrorAction SilentlyContinue |
+                        ForEach-Object { Join-Path $_.FullName 'Desktop' } |
+                        Where-Object { Test-Path $_ }
+                )
+                if ($redirected.Count -gt 0) { $extraTarget = $redirected[0] }
+
+                if (-not (Test-Path $extraTarget)) {
+                    Add-Result 'desktop shortcut (extra)' 'SKIP' "$extraTarget is not on this machine"
+                    continue
+                }
+
+                if ($extraTarget -eq $resolvedDesktop) {
+                    # The primary desktop already received it; writing it twice would be two rows for one icon.
+                    Add-Result 'desktop shortcut (extra)' 'SKIP' "$extraTarget is already covered by the shortcut above"
+                    continue
+                }
+
+                $extraShortcutPath = Join-Path $extraTarget "$shortcutName.lnk"
+                try {
+                    if (Test-Path $extraShortcutPath) { Remove-Item $extraShortcutPath -Force -ErrorAction Stop }
+
+                    $extraShell = New-Object -ComObject WScript.Shell
+                    try {
+                        $extraShortcut = $extraShell.CreateShortcut($extraShortcutPath)
+                        $extraShortcut.TargetPath = $powerShellPath
+                        $extraShortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$controlScriptPath`""
+                        $extraShortcut.WorkingDirectory = $TargetPath
+                        $extraShortcut.IconLocation = "$(Join-Path $TargetPath $serviceExeName),0"
+                        $extraShortcut.Description = "Show, restart or shut down $appTitle."
+                        $extraShortcut.Save()
+                    }
+                    finally {
+                        if ($extraShell) { [void][System.Runtime.InteropServices.Marshal]::ReleaseComObject($extraShell) }
+                    }
+
+                    Add-Result 'desktop shortcut (extra)' 'PASS' "created $extraShortcutPath (opens $controlScriptName)"
+                }
+                catch {
+                    Add-Result 'desktop shortcut (extra)' 'WARN' "$extraShortcutPath : $($_.Exception.Message)"
+                }
+            }
+        }
     }
 }
 
@@ -729,8 +1215,10 @@ if ($failed.Count -eq 0) {
     Write-Host "Install folder : $TargetPath"
     Write-Host "Service state  : $stateRoot"
     Write-Host ''
+    Wait-GuidedClose
     exit 0
 }
 Write-Host "DEPLOYMENT FAILED - $($failed.Count) check(s) failed." -ForegroundColor Red
 Write-Host ''
+Wait-GuidedClose
 exit 1

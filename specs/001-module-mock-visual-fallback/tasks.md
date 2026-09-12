@@ -743,7 +743,7 @@ write pairs here), all deployed and registered.
 - [x] T103 (verification) Add the **retired-symbol audit** test `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs` that fails if any retired type/key is present or referenced (`ISampleDataService`, `Sample*Catalog`, `Feature.InforVisualMockData`, `Feature.RecvMockData`, `MockToggleService`, `MockRouting*`, `MockMode*`, `MockConfigurationService`, `MockMasterDataService`, `UseMockData`, `MockDataExpander`, `sp_mock_*`) (SC-013, `research.md` R13)
 - [x] T104 (verification) Run the **build gate** — `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` — and confirm **0 warnings / 0 errors** (SC-015); treat `PRI175`/`PRI224` as stale-PRI/running-exe issues and `WMC9999` as a masked XAML error to be surfaced, never ignored
 - [x] T105 (verification) Run the **test gate** — `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` — all green with the retired-symbol and inline-SQL audits included, then re-run with `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` set for the live MySQL subset and record any environment-gated skips explicitly (SC-015/FR-013) — **done 2026-09-11**: full suite `Failed: 0, Passed: 661, Skipped: 13, Total: 674` with both audits included; the 13 skips are the pre-existing live-database integration suites. **The live subset was completed later the same day** (Phase 19): with `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` pointed at `172.16.1.104`, the suite runs `Failed: 0, Passed: 699, Skipped: 0, Total: 699` — every previously-skipped live-database test now executes, and the 2 failures it first exposed in `MockMirrorRefreshWriterIntegrationTests` were a wrong-schema connection string, now fixed.
-- [ ] T106 (verification) Execute the end-to-end acceptance walkthrough in `specs/001-module-mock-visual-fallback/quickstart.md` §1–§8 on a running build (cache deploy → service start → fallback proof → defect proof → backup/restore drill → sixth-shape playbook → final validation table). **Note (E5)**: SC-007 and SC-008 use **30-day observation windows** — these are post-deployment measurements, not one-shot tests; record the observation start here and re-check at the 30-day mark. — **Not executed (2026-09-11)**: the environment re-probe corrected Phase 18's claim — `mtm_mock` **is** deployed and Infor Visual **is** reachable (Phase 19) — but the walkthrough still cannot run: the service is neither published nor running, the fallback proof needs Infor Visual made unreachable, and the app stops at its **Sign in** gate. **Observation window not started.**
+- [x] T106 (verification) **EXECUTED 2026-09-12 — see Phase 39** Execute the end-to-end acceptance walkthrough in `specs/001-module-mock-visual-fallback/quickstart.md` §1–§8 on a running build (cache deploy → service start → fallback proof → defect proof → backup/restore drill → sixth-shape playbook → final validation table). **Note (E5)**: SC-007 and SC-008 use **30-day observation windows** — these are post-deployment measurements, not one-shot tests; record the observation start here and re-check at the 30-day mark. — **Not executed (2026-09-11)**: the environment re-probe corrected Phase 18's claim — `mtm_mock` **is** deployed and Infor Visual **is** reachable (Phase 19) — but the walkthrough still cannot run: the service is neither published nor running, the fallback proof needs Infor Visual made unreachable, and the app stops at its **Sign in** gate. **Observation window not started.** **→ Superseded 2026-09-12:** the walkthrough was executed on a running build and the SC-007/SC-008 windows were started that day, which is what the task asked be recorded here. See **Phase 39**.
 
 ---
 
@@ -2368,15 +2368,16 @@ intact.
 green (`747 / 728 / 19 / 0`). **Not verified here:** the live row counts, because the population read executes on
 the cache host against Infor Visual and that service is not deployed on this workstation.
 
-- [ ] T151 (verification) Confirm on the cache host, after the next `MTM_Waitlist.Mock.Service` refresh, that
+- [x] T151 (verification) **CONFIRMED 2026-09-12 — see Phase 39** Confirm on the cache host, after the next `MTM_Waitlist.Mock.Service` refresh, that
   `visual_inventory_locations_result` holds **no** row with `on_hand_quantity < 1`, that the row count dropped
   materially from the 79,457 pre-change figure, and that the Waitlist detail grid still returns the same locations
   for a sampled part as the live read does.
 
-  **Two of the three parts are confirmed — host, 2026-09-12 (Phase 26).** After the redeploy's startup cycle:
-  `visual_inventory_locations_result` held **2,012** rows with **none** below 1 on hand (minimum `1.0000`), against the
-  79,457 pre-change figure. The task stays unticked because the third part — the grid-vs-live read comparison for a
-  sampled part — needs a **signed-in** application session, which no credential was available for.
+  **All three parts are confirmed — host 2026-09-12 (Phase 26), signed-in session 2026-09-12 (Phase 39).** After the
+  redeploy's startup cycle: `visual_inventory_locations_result` held **2,012** rows with **none** below 1 on hand
+  (minimum `1.0000`), against the 79,457 pre-change figure. The third part — the grid-vs-live read comparison for a
+  sampled part — was confirmed on a **signed-in** application session the same day, which is the part this note
+  previously recorded as outstanding.
 
 **Open question left with the operator (not a code change).** `Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql`
 is a **capture** of the live mirror taken 2026-09-12 and carries 79,218 shape-4 rows, overwhelmingly zero-stock
@@ -2986,3 +2987,402 @@ adding them.
   30-day SC-007/SC-008 observation clocks.
 - **T151** — two of its three parts are verified (2,012 shape-4 rows with none below 1 on hand, confirmed on the host
   after a redeploy); the grid-versus-live comparison for a sampled part needs a signed-in session.
+
+---
+
+## Phase 32 — the temporary-default password now opens on the change panel, before sign-in (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. Operator request: *"when the waitlist app first boots and the user's password on
+> the DB is 0000 (default value) currently the user has to still attempt to log in then the reset password screen pops
+> up. this needs to change to happen automatically, before the login screen even appears."*
+
+### T164 — resolve the requirement before the window, not after a failed attempt
+
+- [x] T164 (**DONE 2026-09-12** — see below) An account whose stored password is still the temporary default
+  (`'0000'`, or the `require_password_change` flag) had to be signed into with that password before the change panel
+  appeared. It now appears first, and the sign-in form is never shown.
+
+**The identity was already available, which is what makes this possible.** `StartupCoordinator.RunAsync` resolves the
+Windows username and reads that account's row from the store while the splash window is up, long before the login
+window exists. It only lacked the credential verdict, because `sp_auth_user_row_get` (the logon read) deliberately
+returns identity and role and nothing else.
+
+| Artifact | Change |
+|---|---|
+| `Database/StoredProcedures/sp_auth_password_reset_required_get/{create,rollback}.sql` (**new**) | Returns the same identity columns as the logon read plus `password_reset_required` (0/1), computed from the two signals the sign-in read already honours: `require_password_change = 1`, or a temporary-marker hash (`''`/`'0000'`). **No credential material is returned**, so it is safe to call before any authentication. Registered in `Database/StoredProcedures/AllSPs.sql`. |
+| `MTM_Waitlist.Core/Models/StartupPasswordResetRequirement.cs` (**new**) | The verdict plus the identity needed to finish the reset and the sign-in. `None` is the answer for an unknown/inactive user, an unreachable store, or a real password — none of which should prompt. |
+| `MTM_Waitlist.Core/Contracts/Services/IStartupSessionRepository.cs`, `MTM_Waitlist.Startup/Services/StartupSessionRepository.cs` | New `ReadPasswordResetRequirementAsync`. Called **only on the branch that routes to login**, so a user who is sent straight to the shell pays nothing. A store that throws is logged and treated as "no prompt" — startup must not be blocked by this. |
+| `MTM_Waitlist.Core/Models/StartupState.cs` | `RequirePasswordChange` + `PasswordChangeUserId`, carried from startup to the login surface. |
+| `MTM_Waitlist.Startup/Services/StartupCoordinator.cs` | When the account must change its password, adopts the store's identity for attribution (without clobbering the developer override), sets a clear hint, and returns the login route with the state armed. |
+| `MTM_Waitlist.Startup/ViewModels/LoginViewModel.cs` | The constructor pre-arms `ShowPasswordChangePrompt` from that state and clears the new `ShowSignInForm`, so `_pendingUserIdForPasswordChange`/`_pendingRole` come from startup rather than from a signed-in attempt. `SignInAsync` now also clears `ShowSignInForm` on the post-sign-in path, so both routes behave identically. |
+| `Module_Startup/Views/LoginPage.xaml`, `.xaml.cs` | The title, subtitle, username, password, remember-me and **Sign In** button moved into a `SignInPanel` gated by `ShowSignInForm`; the change panel gets a heading and an explanatory line and is the only thing on the card when it is active. The code-behind no longer dereferences the unloaded fields, and focuses the *new password* box instead. |
+
+**Neither the update nor the sign-in needed new plumbing.** `UpdatePasswordAsync` already clears
+`require_password_change`, `ChangePasswordAsync` already completes the sign-in from the pending identity, and
+`sp_auth_user_password_update` already exists — the only missing input was *when* to ask.
+
+**The promise is preserved.** The change panel still refuses `0000`, still requires a matching confirmation, and the
+sign-in that follows still runs the computer gate and the local-session write in `FinishLoginNavigationAsync`.
+Skipping the `0000` entry is not a weakening: `0000` is a published default, and the app already signs a user in
+without any password at all when a valid session token and a registered computer are present.
+
+**Verified.** `StartupCoordinatorTests` + `LoginViewModelTests` → **35 passed / 0 failed**, including two new
+coordinator cases (armed when the requirement is answered, untouched when it is `None`) and three new view-model
+cases (panel opens without the sign-in form; the form is shown when nothing is required; the update targets the id
+startup resolved). Full suite → **`Failed: 0, Passed: 747, Skipped: 19, Total: 766`**.
+**Not verified:** the rendered window, and the new procedure against a live store — the startup suites are
+environment-gated, and reaching the login page needs a running build on a configured host.
+
+### Deliberately left alone, stated so it is not assumed
+
+The **auto-login** path (`isUserMatched && sessionIsValid && isComputerRegistered`) still goes straight to the shell
+without consulting this read, so an account that still holds the default password but has a live session token is not
+prompted. That is unchanged behaviour, not a regression: `require_password_change` was already ignored on that path,
+and tightening it is a policy decision about already-signed-in sessions rather than part of this request.
+
+---
+
+## Phase 33 — T165: the configured host falls back to this machine, and T166: the installer shortcut reaches the second operator profile (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. Operator requests: *"investigate and fix. currently no visual db is accessable,
+> should just use mock"* / *"when checking 172.16.1.104, if its not accessable then attempt to use localhost, if thats
+> not available then error out"*, and *"for the shortuct creation, have it also attempt to put them to user johnk"*.
+
+### T165 — the app on a workstation that cannot reach the cache host
+
+- [x] T165 (**DONE 2026-09-12** — see below) A workstation that could not reach the configured cache host blocked
+  startup instead of using the identical stores on the machine running the app.
+
+**The failure.** Running the Debug build on the home workstation (`JohnsPC`, user `johnk`) blocked startup with
+`Could not validate startup session from the database. Try again.` The debug log showed why:
+
+```text
+MySqlConnector.MySqlException: Connect Timeout expired.
+   at MTM_Waitlist.Mock.Services.VisualReadShapeFreshnessProbe ...
+StartupCoordinator ... Database-backed startup session lookup failed: Connect Timeout expired.
+```
+
+The configured host is the plant cache host (`172.16.1.104`, `V-MTMFG-5`). This workstation cannot reach it — and
+yet every store the app needs (`mtm_mock`, `mtm_waitlist`, `mtm_wip_application_winforms`,
+`mtm_receiving_application`) is present on `localhost`. The app had no way to say so.
+
+**The rule, as requested:** *"when checking 172.16.1.104, if it's not accessible then attempt to use localhost, if
+that's not available then error out."*
+
+| Artifact | Change |
+|---|---|
+| `MTM_Waitlist.Core/Services/MySqlHostFallback.cs` (**new**) | `Apply(connectionString)` keeps the configured server when it answers, otherwise repoints `Server=` at `localhost` **only when localhost answers too**, and otherwise returns the string unchanged so the operation fails and is reported exactly as before — that is the "error out" half. A blank/malformed string, or one that already targets this machine (`localhost`, `127.0.0.1`, `::1`, `(local)`, `.`), is returned untouched **without probing**. Reachability is a 1 s TCP connect, and the verdict is cached for 30 s so a startup that resolves several connection strings probes once. |
+| `MTM_Waitlist.Core/Services/MySqlHelperServer.cs` | `ResolveConnectionString` ends with `MySqlHostFallback.Apply(...)`, so every store read/write in the app inherits the rule from one place. |
+| `MTM_Waitlist.Startup/Services/StartupSessionRepository.cs` | Both `ResolveConnectionString` returns are wrapped the same way — the startup session read is what blocked the splash. |
+| `MTM_Waitlist.Tests/Core/Services/MySqlHostFallbackTests.cs` (**new**) | Five cases over the internal `Apply(string, Func<string,uint,bool>)` overload: configured host answers → unchanged; only localhost answers → `Server=localhost` with port/database/user preserved; neither answers → unchanged; already-local → unchanged **and the probe never runs**; nothing to resolve → unchanged. |
+
+**Nothing else changed, deliberately.** The constitution's rule that internal stores are always read and written live
+(and that only Infor Visual reads fall back to the cache) is untouched: this is not a data fallback, it is the same
+live read pointed at the machine that actually has the database.
+
+**Verified.** Build → `0 Warning(s) 0 Error(s)`. Full suite → **`Failed: 0, Passed: 752, Skipped: 19, Total: 771`**
+(766 before, +5 new). **Not verified:** a real run on the workstation — that needs the rebuilt app plus a republish,
+and is the operator's next check.
+
+### T166 — the desktop shortcut also lands on the second operator profile
+
+- [x] T166 (**DONE 2026-09-12** — see below) The installer's desktop shortcut reached only `-DesktopPath` (the work
+  profile), so the same deploy left the other operator machine without one.
+
+`deploy/install-mock-service.ps1` step 8 wrote exactly one shortcut, to `-DesktopPath` (default `C:\Users\jkoll\Desktop`,
+the work profile) or to the shell's Desktop known folder when that literal path is absent. One installer therefore
+served one of the two operator machines.
+
+| Change | Detail |
+|---|---|
+| New parameter `-AdditionalDesktopPaths` | Defaults to `@('C:\Users\johnk\Desktop')`. Each entry gets the **same** shortcut: same name, same target (`pwsh`/`powershell`), same arguments, same working folder, same icon, same description. |
+| Best effort by construction | A profile that is not on the machine is a **`SKIP`** ("`…` is not on this machine"); a folder the account cannot write is a **`WARN`** carrying the reason. Neither can fail the deployment, so the cache host — which has no `johnk` profile — still reports `0 warning(s)`. |
+| Redirected desktop handling | Another profile's Desktop is often in OneDrive, and `[Environment]::GetFolderPath('Desktop')` only answers for the account running the script, so when the literal path is absent the script looks for `OneDrive*\Desktop` beside it and uses the first that exists. |
+| Docs | `deploy/README.md`: parameter-table row, step 8 row, and the "desktop shortcut it leaves behind" section now state the second, best-effort target. `VALIDATION-PROMPT-SERVER.md`: expected check count **24 → 25**. |
+
+**Verified.** The installer parses with `[System.Management.Automation.Language.Parser]::ParseFile` → **0 errors**. It was
+**not executed**, because at the time of this pass it still refused to run on a machine that is not the cache host —
+a guard Phase 34 (T167) removes.
+
+---
+
+## Phase 34 — T167: installable on any host, with refresh disabled where Infor Visual cannot be reached, and T168: per-store backup and restore disabled where that store cannot be reached (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. Operator requests: *"update the mock service by allowing it to be installed on any
+> machine, but if that machine can not reach visual then disable the refresh"*, then *"if visual cant be reached disable
+> the refresh functionality. for each of the mysql dbs if they can not be accessed, disable the backup / restore
+> funcionaltiy for that db"*.
+
+### T167 — a mirror-only host is a supported configuration, not a refusal
+
+- [x] T167 (**DONE 2026-09-12** — see below) The service refused to install anywhere but the cache host, and on a host
+  that could not reach Infor Visual it attempted every refresh cycle anyway. It now installs anywhere, and refresh is
+  **disabled** — not attempted — on a machine that has been measured unable to reach Visual.
+
+### T168 — backup and restore are disabled per store, not per host
+
+- [x] T168 (**DONE 2026-09-12** — see below) One unreachable database took the whole backup surface with it: the
+  scheduled slot attempted it, the tray's *Back up now* attempted it, and a restore would have gone as far as taking a
+  safety snapshot before failing. Each store's backup and restore are now disabled on their own, with the reason.
+
+**The rule, stated once.** Reachability decides, and only *evidence* disables work:
+
+| Measured | Effect |
+|---|---|
+| Infor Visual unreachable (and configured) | Scheduled refresh loop skips its cycles; `POST /api/refresh` → `503 refreshUnavailable`; status reports `refreshEnabled: false` with the reason |
+| Store unreachable (and configured) | That store's scheduled slot is skipped with **no run record**; `POST /api/backup` → `503 storeUnavailable`; restore is refused (`RestoreOutcomeKind.StoreUnavailable`) before any safety snapshot; status reports `isStoreReachable: false` with the reason |
+| Not configured | Nothing is disabled. "Unknown" is not "unreachable", or a host that has not been pointed at the plant yet would silently never refresh |
+| Probe could not run | Nothing is disabled, and it is logged. A failed probe is not evidence that the target is unreachable |
+
+| Artifact | Change |
+|---|---|
+| `MTM_Waitlist.Mock.Service/Models/ServiceCapabilitySnapshot.cs` (**new**) | The verdict: `VisualCapabilityState` + per-store `StoreCapabilityState`, each carrying `IsAvailable` and the reason. `Unknown` disables nothing. |
+| `MTM_Waitlist.Mock.Service/Models/StoreProbeResult.cs` (**new**) | One store's probe answer. `IsConfigured` is separate from `IsReachable` for the reason above. |
+| `MTM_Waitlist.Mock.Service/Contracts/IServiceCapabilityGate.cs`, `IMySqlStoreConnectivityProbe.cs` (**new**) | The two seams: ask what this host can do; ask whether one database answers. |
+| `MTM_Waitlist.Mock.Service/Services/MySqlStoreConnectivityProbe.cs` (**new**) | Opens a connection per store through `MySqlConnectionStringResolver`, so the probe cannot disagree with the backup path about where a store lives. Carries no statement text (SP-first rule untouched, no audit exemption). |
+| `MTM_Waitlist.Mock.Service/Services/ServiceCapabilityProbe.cs` (**new**) | One measurement for Visual and all four stores, **cached for a minute** and re-measured after that, so a host that *gains* access resumes without a restart — the direction that matters. One probe at a time, so a status request and a scheduled cycle share a measurement. Transitions are logged once, not once per cycle. |
+| `Services/RefreshEngine.cs` | The scheduled loop consults the gate and **skips the cycle** while refresh is disabled, waiting its normal slot before asking again. |
+| `Services/BackupScheduler.cs` | A due slot for a store the gate reports unreachable is skipped, the slot still advances, and nothing is recorded — so the store's last real backup stays visible instead of being overwritten by a pretend run. |
+| `Services/RestoreService.cs` | Refuses before the safety snapshot: nothing is taken, nothing is changed. |
+| `Services/ServiceApiOperations.cs`, `Api/ServiceApiContracts.cs` | The two `503` refusals, plus `refreshEnabled`/`refreshDisabledReason` and per-store `isStoreReachable`/`unreachableReason` in `GET /api/status`. Contract updated (`contracts/mock-service-http-api.md` §2/§3/§4/§6). |
+| `Services/ServiceHostBuilder.cs`, `App.xaml.cs` | The gate is registered in the container and wired into the four consumers **only when `Build(..., gateOnHostCapabilities: true)` is passed**, which the service's own startup does. Tests keep the default, so no engine or endpoint test depends on what the machine running it can reach. |
+| `ViewModels/ServiceStatusViewModel.cs`, `ServiceSettingsViewModel.cs`, `Strings/en-us/Resources.resw` | The status surface gains a "Scheduled refresh" row and a per-store note saying backup and restore are disabled here; the settings surface refuses *Back up now* and *Restore* with the same reason instead of attempting them. |
+| `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` | The server-only guard becomes a **host disposition report**: `cache host`, `infor visual` and `mysql host` rows, each `PASS` or `WARN`, **never** a failure. `-AllowNonServerHost` is removed (there is nothing to bypass); `-VisualPort` is added. Deployment is now **27 checks**. |
+| `deploy/README.md`, `VALIDATION-PROMPT-SERVER.md` | The server-only policy is replaced by the capability policy, the removed switch and the retired exit code `2` are dropped, and the expected check count is updated. |
+
+**Verified.** Build → `0 Warning(s) 0 Error(s)`. New tests: `ServiceCapabilityGatingTests` (9 — the measurement rules
+above, including the cache lifetime, the re-measure that picks up restored access, and both fail-open cases) and
+`ServiceCapabilityEnforcementTests` (7 — the refusal statuses and reasons, that one unreachable store does not disable
+another, that a skip records no run, and that a refused restore takes no safety snapshot). Full suite → **`Failed: 0,
+Passed: 768, Skipped: 19, Total: 787`** (771 before, +16). The installer parses with 0 errors and was **not executed**.
+
+**Not verified:** a live mirror-only install. That needs a host that cannot reach `172.16.1.104` — the next thing to
+check is the status surface on such a machine showing *Scheduled refresh: Disabled here*, and the log line the gate
+writes once when it measures that.
+
+---
+
+## Phase 35 — T169: the installer asks what you are trying to do when it is run with no argument (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. Operator request: *"add a guided workflow to the installer, if an argument is used
+> in the terminal when opening it it can be bypassed, this way i can just run the ps1 file and select what i am trying
+> to do."*
+
+- [x] T169 (**DONE 2026-09-12** — see below) Running the installer by hand meant knowing five switches by heart, and
+  running it with no argument silently deployed the defaults. It now asks.
+
+**The trigger is the absence of arguments, and that is the whole design.** `$PSBoundParameters.Count -eq 0` (plus a
+console that can actually answer a prompt) enters the guided flow; **any** argument — even one that only says "use the
+defaults" — skips it. So the hand-run path and the scriptable path are the same code, with the same exit codes and the
+same section order, and no automation can be surprised by a prompt.
+
+| Step | Detail |
+|---|---|
+| Intent menu | **Deploy** (the publish output on disk), **Publish and deploy**, **Install elsewhere** (asks for the folder), **Clean sweep** (deploy and delete all stored state), **Quit**. `PromptForChoice`, so it is a menu with a default rather than a free-text parse. |
+| Then the independent questions | Build a fresh publish output? (default: only for *Publish and deploy*) · set and verify the environment secrets? · start the service and health-check it? · put the shortcut on this machine's desktops? · **and also delete the service's stored state?** — the one destructive question, defaulted off unless *Clean sweep* was chosen, and worded so the consequence is read before it is answered |
+| Before anything runs | A summary of every choice, the resolved source and target, and **the equivalent command line** (`.\install-mock-service.ps1 -Publish -SkipSecrets …`), then a yes/no confirmation defaulting to yes |
+| After it runs | The guided flow waits for Enter, so a window opened by double-clicking the script does not close before the PASS/FAIL summary can be read. The `-NonInteractive` switch exists to say "no prompts, defaults" explicitly. |
+
+**Verified.** The script parses with `[System.Management.Automation.Language.Parser]::ParseFile` → **0 errors**, and the
+**argument path was actually executed** against a throwaway target
+(`-TargetPath %TEMP%\mtm-mock-install-dryrun -SkipSecrets -SkipServiceStart -SkipDesktopShortcut -NonInteractive`):
+`DEPLOYMENT OK - 17 checks, 3 warning(s)`, exit `0`, no prompt, 732 files verified, and the throwaway folder removed
+afterwards with no orphan process. Those three warnings are this workstation's correct disposition — not the cache
+host, `VISUAL` unresolvable, `172.16.1.104:3306` unreachable — which is T167's reporting working.
+
+**Not verified:** the prompt flow itself. Answering a menu needs a real console, so it cannot be exercised headlessly;
+running the script with no argument and a redirected stdin deliberately **skips** the prompts instead of failing on one
+nobody can see. Run `.\install-mock-service.ps1` in a terminal to exercise it.
+
+---
+
+## Phase 36 — T170: the installer chooses its own install folder, and notices a stale publish output (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. Operator request: *"need a default install folder"*, after a no-argument run on a
+> workstation ended in `exit 1` with `[FAIL] required content present — missing: assets\mock-service.ico`.
+
+- [x] T170 (**DONE 2026-09-12** — see below) The install folder was a hard-coded default that only works where the
+  account can create `C:\Services`, and a run that reused a **stale publish output** failed its content check — which
+  reads as a deployment fault when the real cause is an un-built source change.
+
+**The folder is now chosen, not assumed.** With no `-TargetPath` the script resolves it in order — an existing
+`C:\Services\MTM_Waitlist.Mock.Service` (an install is never moved; auto-start, the shortcut and the control script
+point at it) → the same folder when this account can **actually create** it → `%LOCALAPPDATA%\Programs\...` (per-user,
+no elevation). Usability is tested by creating the folder rather than inferred from elevation, the banner prints the
+choice and the reason, a `-TargetPath` that cannot be written fails immediately with both candidates named, and the
+guided flow shows the resolved folder as a default accepted with Enter.
+
+**A stale publish output is now named where it happens.** `Test-PublishOutputStale` compares the output against the
+project (required content present? anything newer than the newest file in the output?) and the answer is used twice:
+section 4 reports `WARN` when it reuses such an output, and the guided flow pre-selects *Publish and deploy*. The
+step-5 failure text now says "the publish output is probably stale; re-run with -Publish" instead of leaving the
+operator to guess. Deployment check count is unchanged (the rows already existed).
+
+**Verified by running it**, which is the point: two real deployments on this workstation, no argument needed for the
+folder.
+
+| Run | Result |
+|---|---|
+| No `-TargetPath`, no `-Publish` | `target : C:\Services\MTM_Waitlist.Mock.Service (default - the machine-level location)`; the stale output was **caught** as `[FAIL] required content present — missing: assets\mock-service.ico … the publish output is probably stale; re-run with -Publish`, exit `1` |
+| `-Publish`, no `-TargetPath` | `default - an existing deployment is already here`; `publish PASS`, `required content present PASS` (12 paths), **`DEPLOYMENT OK - 17 checks, 3 warning(s)`**, exit `0`, and `Assets\mock-service.ico` present in the install folder |
+
+The three warnings are this workstation's correct disposition — not the cache host, `VISUAL` unresolvable,
+`172.16.1.104:3306` unreachable — i.e. T167's reporting on a real machine. The icon reorganization in the working tree
+(the `Assets/Icons` + per-module icon layout) deploys cleanly once published; the failure the operator hit was the
+**stale output**, not the change.
+
+---
+
+## Phase 37 — T171: the service reads the mirror on a machine that cannot reach the plant, and T172: the installer can finish there (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. Operator report, after a deployment that had deliberately skipped its last three
+> steps: *"ui not showing, icons did not go to desktop, no service running"*. The skips explain the last two; fixing it
+> for real exposed three defects that only a mirror-only host can reveal.
+
+- [x] T171 (**DONE 2026-09-12** — see below) The **service** had no configured-host fallback, so on a machine that
+  cannot reach the plant host every read failed even though the app on the same machine reached the same databases
+  through `MySqlHostFallback` (T165).
+- [x] T172 (**DONE 2026-09-12** — see below) The installer could not complete at all off the plant network, its
+  shortcut could land on an invisible Desktop, and a first run with no secrets set aborted on a StrictMode error.
+
+| Defect | Cause | Fix |
+|---|---|---|
+| Service could not read `mtm_mock` locally | `MySqlConnectionStringResolver` returned the configured server untouched, while `MySqlHelperServer` (the app) substitutes this machine's server when the configured host does not answer (T165). The service references `MTM_Waitlist.Core`, so the two now share **one** helper and cannot disagree about which host a store lives on | Both returns of `MySqlConnectionStringResolver.Resolve` are wrapped in `MySqlHostFallback.Apply` |
+| Deployment failed at the secret proofs | The MySQL and Visual proofs connected to `172.16.1.104` and recorded a `FAIL` when it did not answer — so a mirror-only host could never finish a deployment, contradicting T167's "install anywhere" | Proofs are capability-aware: prove against the configured host when it answers, otherwise against **this machine's** MySQL, otherwise `WARN`; the Visual login is a `WARN` when the server cannot be reached. A proof that *ran* against a reachable server still `FAIL`s — a wrong password is not a reachability problem |
+| First run with no secrets set aborted | `$persisted.PSObject.Properties[$name].Value` on a key that does not exist is `$null`, and under `Set-StrictMode -Version Latest` that access throws "The property 'Value' cannot be found" — latent because every earlier run had either skipped the step or found the variables already set | Both loops read the property object first and treat its absence as "not set" |
+| Shortcut written where nobody could see it | `C:\Users\johnk\Desktop` exists as an **empty husk** on this machine while the shell's Desktop is `C:\Users\johnk\OneDrive\Desktop`, and the extra-desktop rule only looked for the OneDrive folder when the literal path was *absent* | A redirected `OneDrive*\Desktop` now wins when it exists, and an extra path that resolves to the desktop the primary shortcut already covers is skipped rather than written twice |
+
+**Verified by running it on this workstation, with no skip flags:** `DEPLOYMENT OK - 27 checks, 4 warning(s)`, exit `0`,
+and then, against the running service — `pid=22456`, `API port bound 5760`, `tray-only`, `401` for an unnamed caller,
+single-instance redirect, `auto-start registration` pointing at the install folder, and
+`desktop shortcut created C:\Users\johnk\OneDrive\Desktop\MTM mock cache service.lnk`. The four warnings are the
+host's real disposition.
+
+**The three symptoms, answered from the running install:**
+
+| Reported | Actual state |
+|---|---|
+| *no service running* | The earlier verification runs passed `-SkipServiceStart` on purpose, so nothing was started. Now running, and registered to start at logon. |
+| *icons did not go to desktop* | Those runs passed `-SkipDesktopShortcut`. The shortcut now exists on the desktop the shell actually shows (the OneDrive-redirected one — see the husk in the table above). |
+| *ui not showing* | The service is tray-only by design; the window opens from the shortcut or `mock-service-control.ps1 -Action ShowUi`. It was asked to show, and its **UI Automation tree** confirms it rendered the Status page — including *Scheduled refresh: **Disabled here** — Infor Visual did not accept a connection from this machine, so refresh is disabled here*, which is T167's capability reporting on a real mirror-only host |
+
+**The fallback is proven end-to-end, not just unit-tested:** `GET /api/status` with `X-MTM-Mock-User: johnk` answers
+**`200`** with the new `refreshEnabled`/`refreshDisabledReason` fields — the role lookup reached `mtm_waitlist` on this
+machine, through the same helper the app uses, while the deployment's secrets still name the plant host.
+
+---
+
+## Phase 38 — T173: the cached-data indicator is drawn from the probe's own thread (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. Operator input: the **full Debug output of a run**, with no accompanying
+> question. Its only error-level line was
+> `FirstChance: First-chance COMException in MTM_Waitlist stack. HResult=0x8001010E`.
+
+- [x] T173 (**DONE 2026-09-12** — see below) The US4 indicator did not appear on a real outage. Its status event is
+  raised on the reachability probe's **background** thread, and every member it touches through `x:Bind` is
+  thread-affine, so the transition threw `RPC_E_WRONG_THREAD` instead of opening the `InfoBar`.
+
+**The state was right and the rendering was wrong, which is the worst shape for this defect.** The pasted trace names
+it exactly — `ReadStatusIndicator.set_IsCachedDataInUse` → `Set_Microsoft_UI_Xaml_Controls_InfoBar_IsOpen` →
+`The application called an interface that was marshalled for a different thread`, reached from
+`VisualReachabilityDetector.ProbeAsync`. The probe loop runs from `VisualReachabilityProbeHost.Start`'s `Task.Run`, so
+`IReadStatusProvider.Changed` is raised there, not on the UI thread. `ShowSplashWindow`, the login window and the
+probe all predate the shell, and `ShellPage` (which hosts the indicator) is built during activation — so the crash
+fires even before sign-in, on a run that never reaches the shell.
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| The indicator never opens and states nothing while cached data is being served (FR-005) | `Apply` set bound properties straight from the probe's thread; `InfoBar` members are thread-affine and threw `0x8001010E` | `Module_Mock/Views/ReadStatusIndicator.xaml.cs` captures `this.DispatcherQueue` during construction and hands each snapshot to it — `Apply` inline only when `HasThreadAccess`, otherwise `TryEnqueue` (the documented WinUI 3 pattern) |
+| The failure never corrected itself | The provider publishes **only when the snapshot changes** (`ReadStatusProvider.Publish`), so a swallowed exception at the transition left the indicator wrong for the whole outage | Same hop. The field was already set before the throwing setter ran, which is why the state and the UI disagreed rather than both being stale |
+| Resource lookups also ran off the UI thread | `BuildMessage`/`FormatAge` call `"Mock_Indicator.*".GetLocalized()` — WinRT resource loading, which `SetupPersistenceService` already documents as unsafe off the UI thread | The same hop covers it; nothing in the update path now runs on the probe's thread |
+
+**Grounded against Microsoft Learn, not memory** (constitution IV): *Keep the UI thread responsive* — *"You can't
+update the UI from a background thread, but you can post a message to it with `DispatcherQueue.TryEnqueue`"*;
+*Threading functionality migration* — the `HasThreadAccess`-else-`TryEnqueue` shape used here; *Using Windows Runtime
+objects in a multithreaded environment* — the button example that throws on exactly this class of call, and the note
+that `DispatcherQueue` itself is safe to read from another thread. The `using Microsoft.UI.Dispatching;` import is the
+first in `Module_Mock/Views`.
+
+### Verified
+
+| Gate | Result |
+|---|---|
+| `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` | **0 warnings / 0 errors** |
+| `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` | **`Failed: 0, Passed: 768, Skipped: 19, Total: 787`** |
+| The indicator renders on a real outage | **Yes** — UI Automation on the running build returned `Cached data in use` and `Infor Visual is unreachable. Cached data is being shown. The cached copy is about 3 hours old.` |
+| The cross-thread exception is gone | **Yes** — the daily log held **1** `8001010E` before this run (the pasted one) and **1** after it, while the `Cached` transition demonstrably fired |
+| The run is otherwise clean | **41 new log lines, 41 `INFO`, 0 `ERROR`/`WARN`** — the pre-fix run logged its `FirstChance` entry at `ERROR` |
+
+The rendered statement is also what makes the fix provable rather than merely plausible: the `InfoBar` opens only when
+`IsCachedDataInUse` becomes `true` **on the UI thread**, and its initial value at construction is `false` (the
+detector is `Unknown` while the shell is being built). There is no path to an open indicator other than the marshalled
+one. The probe cadence is unchanged and untouched: the transition was observed at the second consecutive failure,
+~30 s in, exactly as `VisualReachabilityProbeHost` documents.
+
+**Nothing else in the pasted output is a defect.** The `System.Net.Sockets.SocketException` and
+`Microsoft.Data.SqlClient.SqlException` first-chance entries are the expected reachability failures being detected —
+`sp_visual_read_shape_freshness_get` answers with `Store 'mtm_mock' is now Available`, and the Infor-side
+`GetInventoryLocations.sql` failure is the unreachability that T048–T052 exist to handle. `Raw=0, Displayed=0` for
+`RM-50218 / Customer RM-77` is the mirror's honest answer for a part with no rows, which FR-004 requires be served as
+a real empty result rather than replaced.
+
+**Not verified:** the same transition on a machine that *can* reach Infor Visual (nothing there raises `Changed` at
+all, so the recovery path — indicator closing on return to `Live` — is untested), and the login-window case, where
+the shell exists but is not the active window. Both need the plant network.
+
+**T106 stays open and is not affected.** This phase fixes a defect the walkthrough surfaced; it does not perform the
+walkthrough, and it settles none of T106's remaining environment-gated steps. **Superseded the same day by Phase 39**,
+where the operator executed the walkthrough and T106 was ticked.
+
+---
+
+## Phase 39 — T106 and T151: the feature's last two boxes are closed (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. Operator instruction: *"T151 verifed, T106 Verfied"*. These were the only two
+> unticked tasks in this file, so `specs/001` now stands at **173 boxes: 173 `[x]`, 0 `[ ]`** — the first time every
+> box in the active feature has been closed.
+
+**T106 — DONE 2026-09-12.** The end-to-end acceptance walkthrough (`quickstart.md` §1–§8) was executed on a running
+build, and the SC-007/SC-008 observation windows were started. Tick on the original task line above.
+
+**T151 — DONE 2026-09-12.** The third part is confirmed: the Waitlist detail grid matches the live read for a sampled
+part, which was the one piece the host run could not reach without a signed-in session. Tick on the original task line
+above.
+
+### What is recorded here, and on what basis
+
+**T106 and T151 were verified by the operator, not re-derived by this pass.** That distinction is the honest one and
+is stated deliberately: this file records the walkthrough as executed on the operator's authority, with the parts of
+it that left a trace in the run output named below. It does not re-assert each of §1–§8 as independently observed.
+
+| Task | Basis | Trace in the run output |
+|---|---|---|
+| T106 §3 (fallback proof) | Operator verification | `GetInventoryLocations.sql` could not reach Infor Visual, and the read was served from the `mtm_mock` mirror by `sp_visual_inventory_locations_get` — the fallback firing on unreachability, which is exactly §3 |
+| T106 §3/§4 (signed-in surface) | Operator verification | A **signed-in** session (auto-login from the stored session token) rendered the Waitlist shell and the request detail surface; the same run is what makes T151's third part reachable |
+| T106 SC-007 / SC-008 | **Started, not measured** | The windows need 30 days of wall time. Recorded start: **2026-09-12**; re-check due **2026-10-12** (≥ 95 % of scheduled refresh cycles succeeding; 100 % of scheduled backup windows producing a restorable artifact per enabled store) |
+| T151 parts 1–2 | Host run, Phase 26 | `visual_inventory_locations_result` at **2,012** rows, minimum `1.0000`, against 79,457 pre-change |
+| T151 part 3 | Operator verification | `GetInventoryLocationRowsAsync` answered the detail surface for the sampled part `RM-50218 / Customer RM-77` on the signed-in session; `Raw=0, Displayed=0` is a **real empty answer** for a part the mirror holds no locations for, which FR-004 requires be served as-is rather than treated as a miss |
+
+**The observation windows are the one thing a tick cannot mean yet.** T106's own text asked that the observation
+start be recorded and re-checked at the 30-day mark; that start is recorded above. The measurement itself is a dated
+follow-up, not an open task, so it does not keep the box unticked — but it also cannot be reported as passed, and
+nothing in this note claims it is.
+
+### Documentation brought into line in the same pass
+
+The status was claimed in three other live documents, and each one is updated rather than left to diverge — the trap
+`OPEN-TASKS.md` §4 exists to catch:
+
+| Document | Was | Now |
+|---|---|---|
+| `OPEN-TASKS.md` | §1 "**172 boxes: 170 `[x]`, 2 `[ ]`**", T106/T151 listed as the live open pair, §5 item 7 telling the reader to start the clocks | §1 "**173 boxes: 173 `[x]`, 0 `[ ]`**", both rows struck through with their resolutions, §5 item 7 marked done and the clock-start date recorded |
+| `WeekendProject/OPEN-WORK-NEXT-SPEC.md` | §1 "the single open one is **T106**"; §10 sourced from it; §10.1 the environment-blocked workstream; §11 ranked it as item 1 | §1 restated at 173/173/0; §10.1 marked done with the residual being the dated 30-day re-check; §11's item 1 is now documentation hygiene only |
+| `VALIDATION-PROMPT-SERVER.md` | Told a future host run that SC-007/SC-008 "start them if you can, but do not attempt to complete them" | Records that the walkthrough is executed and the windows are **started**, with the same 30-day re-check |
+
+**Earlier notes in this file are left as history**, per its established convention: the phases that say *"T106 stays
+unticked"* (Phases 18–38) were true when written and are not rewritten. Phase 38's closing sentence carries a
+supersession pointer so a reader lands on this phase instead of a stale verdict.
+
+**Still true, and not a task:** T173's fix is verified in one direction only — the indicator was observed *opening* on
+the cached transition. Its **recovery** path (closing again on return to `Live`) still needs Infor Visual to become
+reachable from the machine running the app, so it remains unverified and is recorded as such in Phase 38.

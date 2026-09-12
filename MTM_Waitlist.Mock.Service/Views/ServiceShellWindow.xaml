@@ -61,7 +61,7 @@
                 <NavigationViewItem x:Name="StatusNavigationItem" Tag="status">
                     <NavigationViewItem.Icon>
                         <!-- Diagnostic: this surface reports the service's health and last run. -->
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE9D9;" />
+                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/service-status.png" ShowAsMonochrome="False" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>

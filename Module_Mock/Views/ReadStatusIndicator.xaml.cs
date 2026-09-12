@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Helpers;
@@ -25,10 +26,25 @@ namespace MTM_Waitlist.Module_Mock.Views;
 /// successful refresh the control says the content is baseline seed data rather than reporting a
 /// meaningless age (FR-017).
 /// </para>
+/// <para>
+/// <b>The status event arrives off the UI thread.</b> The probe host raises it from a background task, and
+/// <see cref="InfoBar"/> members are thread-affine — touching them from there fails with
+/// <c>RPC_E_WRONG_THREAD</c> (0x8001010E), which would leave the indicator closed and its statement unset
+/// even though cached data is in use. Every update is therefore marshalled onto this control's
+/// <see cref="DispatcherQueue"/> before any bound member is touched, and only when it did not come from the
+/// UI thread already. The same hop also keeps the resource lookups in <see cref="BuildMessage"/> off a
+/// background thread.
+/// </para>
 /// </remarks>
 public sealed partial class ReadStatusIndicator : UserControl, INotifyPropertyChanged
 {
     private readonly IReadStatusProvider _statusProvider;
+
+    /// <summary>
+    /// The UI thread's queue, captured while the control is still being constructed there. It cannot be
+    /// resolved later from the background thread that raises <see cref="IReadStatusProvider.Changed"/>.
+    /// </summary>
+    private readonly DispatcherQueue? _dispatcherQueue;
 
     private bool _isCachedDataInUse;
     private string _message = string.Empty;
@@ -39,6 +55,8 @@ public sealed partial class ReadStatusIndicator : UserControl, INotifyPropertyCh
         _statusProvider = App.GetService<IReadStatusProvider>();
 
         InitializeComponent();
+
+        _dispatcherQueue = this.DispatcherQueue;
 
         _statusProvider.Changed += OnStatusChanged;
         Unloaded += OnUnloaded;
@@ -84,7 +102,20 @@ public sealed partial class ReadStatusIndicator : UserControl, INotifyPropertyCh
     /// <summary>The indicator's title, resolved from resources.</summary>
     public string TitleText => "Mock_Indicator.Title".GetLocalized();
 
-    private void OnStatusChanged(object? sender, ReadStatusSnapshot snapshot) => Apply(snapshot);
+    private void OnStatusChanged(object? sender, ReadStatusSnapshot snapshot)
+    {
+        // Raised from the probe host's background loop, so this handler is not on the UI thread. Setting the
+        // bound properties from here reaches InfoBar through the generated x:Bind setters, which throws
+        // RPC_E_WRONG_THREAD and leaves the indicator closed with no statement — and because the provider only
+        // publishes a changed snapshot, that state would never be corrected on a later probe.
+        if (_dispatcherQueue is null || _dispatcherQueue.HasThreadAccess)
+        {
+            Apply(snapshot);
+            return;
+        }
+
+        _ = _dispatcherQueue.TryEnqueue(() => Apply(snapshot));
+    }
 
     private void Apply(ReadStatusSnapshot snapshot)
     {

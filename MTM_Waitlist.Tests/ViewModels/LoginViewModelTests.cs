@@ -296,6 +296,51 @@ public sealed class LoginViewModelTests
         Assert.AreEqual(1, window.ExitCallCount);
     }
 
+    [TestMethod]
+    public void Constructor_WhenStartupRequiresAPasswordChange_OpensOnTheChangePanelWithoutTheSignInForm()
+    {
+        // Startup already established this from the store, so the operator must never see (or have to use)
+        // the sign-in form: the window opens on the set-a-new-password surface (Phase 32).
+        var startupState = SignedInState();
+        startupState.RequirePasswordChange = true;
+        startupState.PasswordChangeUserId = 42;
+
+        var viewModel = CreateViewModel(startupState);
+
+        Assert.IsTrue(viewModel.ShowPasswordChangePrompt);
+        Assert.IsFalse(viewModel.ShowSignInForm, "The sign-in form must not appear when the password must change.");
+    }
+
+    [TestMethod]
+    public void Constructor_WhenNoPasswordChangeIsRequired_ShowsTheSignInFormOnly()
+    {
+        var viewModel = CreateViewModel(SignedInState());
+
+        Assert.IsFalse(viewModel.ShowPasswordChangePrompt);
+        Assert.IsTrue(viewModel.ShowSignInForm);
+    }
+
+    [TestMethod]
+    public async Task ChangePasswordAsync_WhenOpenedFromStartup_UpdatesTheResolvedAccountAsync()
+    {
+        var startupState = SignedInState();
+        startupState.RequirePasswordChange = true;
+        startupState.PasswordChangeUserId = 42;
+        var repository = new RecordingStartupSessionRepository();
+        var viewModel = CreateViewModel(
+            startupState,
+            gateService: new FakeComputerGateService { CheckResult = new ComputerGateCheck(ComputerGateStatus.Registered) },
+            navigationService: new RecordingNavigationService(),
+            windowService: new RecordingStartupWindowService(),
+            sessionRepository: repository);
+        viewModel.NewPassword = "pw-4321";
+        viewModel.ConfirmPassword = "pw-4321";
+
+        await viewModel.ChangePasswordCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(42, repository.LastUpdatedUserId, "The update must target the account startup resolved.");
+    }
+
     private static StartupState SignedInState()
     {
         return new StartupState
@@ -333,6 +378,10 @@ public sealed class LoginViewModelTests
     {
         public StartupCredentialCheckResult CheckCredentialsResult { get; set; } = StartupCredentialCheckResult.Success(1, "Developer", false);
 
+        public StartupPasswordResetRequirement PasswordResetRequirement { get; set; } = StartupPasswordResetRequirement.None;
+
+        public long LastUpdatedUserId { get; private set; }
+
         public Task<DateTimeOffset?> ReadServerTimeUtcAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult<DateTimeOffset?>(null);
@@ -343,6 +392,11 @@ public sealed class LoginViewModelTests
             return Task.FromResult(new StartupSessionSnapshot());
         }
 
+        public Task<StartupPasswordResetRequirement> ReadPasswordResetRequirementAsync(string username, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(PasswordResetRequirement);
+        }
+
         public Task<StartupCredentialCheckResult> CheckCredentialsAsync(string username, string password, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(CheckCredentialsResult);
@@ -350,6 +404,7 @@ public sealed class LoginViewModelTests
 
         public Task<bool> UpdatePasswordAsync(long userId, string newPassword, CancellationToken cancellationToken = default)
         {
+            LastUpdatedUserId = userId;
             return Task.FromResult(true);
         }
     }

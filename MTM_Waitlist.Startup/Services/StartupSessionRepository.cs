@@ -6,6 +6,7 @@ using System.Text;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Services;
 
 namespace MTM_Waitlist.Module_Startup.Services;
 
@@ -28,6 +29,13 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
 
     /// <summary>The newest live session's expiry for one user, if any.</summary>
     private const string SessionExpiryProcedure = "sp_auth_session_expiry_get";
+
+    /// <summary>
+    /// Whether one account still holds its temporary default password, resolved before the sign-in form is
+    /// shown. Returns the same identity columns as the logon read plus a 0/1 verdict, and never any credential
+    /// material.
+    /// </summary>
+    private const string PasswordResetRequiredProcedure = "sp_auth_password_reset_required_get";
 
     private const int PasswordSaltLengthBytes = 16;
     private const int PasswordHashLengthBytes = 32;
@@ -127,6 +135,59 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                 EmployeeIdentifier = userRow.EmployeeIdentifier,
                 HasDatabaseSession = sessionExpiry.HasValue,
                 DatabaseSessionExpiresUtc = sessionExpiry
+            };
+        }, cancellationToken);
+    }
+
+    public async Task<StartupPasswordResetRequirement> ReadPasswordResetRequirementAsync(
+        string username,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return StartupPasswordResetRequirement.None;
+        }
+
+        var connectionString = ResolveConnectionString();
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return StartupPasswordResetRequirement.None;
+        }
+
+        var timeoutConnectionString = BuildTimeoutConnectionString(connectionString);
+        return await ExecuteWithRetryAsync(async token =>
+        {
+            await using var connection = new MySqlConnection(timeoutConnectionString);
+            await connection.OpenAsync(token);
+
+            await using var command = new MySqlCommand(PasswordResetRequiredProcedure, connection)
+            {
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
+
+            // Normalized exactly as the credential check does: the column is `username_normalized`, and the
+            // startup username arrives from the Windows environment, which is not case-normalized.
+            command.Parameters.AddWithValue("@p_username", username.Trim().ToLowerInvariant());
+
+            await using var reader = await command.ExecuteReaderAsync(token);
+            if (!await reader.ReadAsync(token))
+            {
+                return StartupPasswordResetRequirement.None;
+            }
+
+            var isRequired = !reader.IsDBNull(4) && Convert.ToInt32(reader[4]) == 1;
+            if (!isRequired)
+            {
+                return StartupPasswordResetRequirement.None;
+            }
+
+            return new StartupPasswordResetRequirement
+            {
+                IsRequired = true,
+                UserId = reader.GetInt64(0),
+                CurrentRole = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                DisplayName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                EmployeeIdentifier = reader.IsDBNull(3) ? string.Empty : reader.GetString(3)
             };
         }, cancellationToken);
     }
@@ -306,11 +367,13 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
             var environmentConnectionString = Environment.GetEnvironmentVariable(environmentVariableName)?.Trim();
             if (!string.IsNullOrWhiteSpace(environmentConnectionString))
             {
-                return environmentConnectionString;
+                return MySqlHostFallback.Apply(environmentConnectionString);
             }
         }
 
-        return _startupDatabaseOptions.ConnectionString?.Trim();
+        // Same fallback the store reads use: the configured host when it answers, else the local server when
+        // that answers, else unchanged so startup blocks and reports the outage as it always has.
+        return MySqlHostFallback.Apply(_startupDatabaseOptions.ConnectionString?.Trim());
     }
 
     private async Task<T> ExecuteWithRetryAsync<T>(Func<CancellationToken, Task<T>> action, CancellationToken cancellationToken)

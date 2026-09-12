@@ -174,7 +174,7 @@
                             Height="240"
                             HorizontalAlignment="Center"
                             Stretch="Uniform"
-                            Source="ms-appx:///Assets/Images/waitlist-empty-state.png"
+                            Source="ms-appx:///Assets/Placeholders/waitlist-empty-state.png"
                             AutomationProperties.Name="No requests available illustration" />
 
                         <TextBlock

@@ -58,8 +58,10 @@ hostname
 (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '127.*' }).IPAddress
 ```
 
-**Expect** `V-MTMFG-5` and `172.16.1.104`. If not, **stop** — do not run the deploy script anywhere else; its own
-guard refuses, and the guard must not be bypassed with `-AllowNonServerHost`.
+**Expect** `V-MTMFG-5` and `172.16.1.104`. The deploy script no longer refuses on any host — it *reports* the
+cache-host comparison, and installing elsewhere is a supported mirror-only configuration (refresh and per-store
+backup are disabled where they cannot run). This prompt's checks are still written for the host, because they are
+the ones that prove refresh and the per-store work actually run. `-AllowNonServerHost` has been **removed**.
 
 ### Step 2 — get the changes and build
 
@@ -131,9 +133,10 @@ cd MTM_Waitlist.Mock.Service\deploy
 .\install-mock-service.ps1 -Publish
 ```
 
-**Expect** `DEPLOYMENT OK — 24 checks, 0 warning(s)` and exit code `0`. Do **not** pass `-AllowNonServerHost`, and do
-not hand-roll the steps. The script publishes, stops the running instance, deletes the old install folder, redeploys,
-sets and proves the four secrets, starts the service, and health-checks it. One of its checks is now labelled
+**Expect** `DEPLOYMENT OK — 27 checks, 0 warning(s)` and exit code `0`. Do not hand-roll the steps. The script publishes,
+stops the running instance, deletes the old install folder, redeploys, sets and proves the four secrets, starts the
+service, and health-checks it. Step 1 of the summary now reports the host disposition — **`cache host`**,
+**`infor visual`** and **`mysql host`** — which should all be `PASS` on this machine. One of its checks is labelled
 **`API refuses an unnamed caller`** — it must report `PASS` (`GET /api/status -> 401`).
 
 ### Step 6 — verify the API's authorization behaviour (the core of T147)
@@ -221,9 +224,10 @@ of T148(c).
   remove any auto-start entry you created.
 - Report a PASS/FAIL table covering steps 1–9, with the exact commands and the observed output for anything that
   failed.
-- If everything passed, update `specs/001-module-mock-visual-fallback/tasks.md` and `OPEN-TASKS.md` to record the
-  host verification (T147/T148 are currently ticked on the strength of code + off-server tests only) and note that
-  T106 §2 step 7 is now satisfied.
+- If everything passed, record the outcome in `OPEN-TASKS.md` (§1) and `specs/001-module-mock-visual-fallback/tasks.md`.
+  **Already done for T147/T148/T106** — the host verification is recorded (§1.3, §1.4), T147/T148 were ticked on that
+  basis, and T106's §2 step 7 is satisfied. T106 itself closed on 2026-09-12 when the walkthrough was executed and the
+  observation windows were started.
 
 ### Explicitly out of scope for this run
 
@@ -231,6 +235,7 @@ of T148(c).
   42,143 of 42,852 open orders and that was treated as a product decision. The operator took it the other way: the
   application now accepts **only** the `WO-######` form (`^WO-(\d{6})$`), and the cache guards and the live reads were
   narrowed to match. Nothing about it is left for this run.
-- **T106's SC-007/SC-008** 30-day observation windows: start them if you can, but do not attempt to complete them.
+- **T106's SC-007/SC-008** 30-day observation windows: they were **started 2026-09-12** (the pass that closed T106).
+  Do not attempt to complete them — the re-check is due on the 30-day mark, **2026-10-12**.
 - Do **not** reintroduce a shared credential, a token header, or a mock/demo toggle. `RetiredSymbolAuditTests` and the
   inline-SQL audit must both still pass.

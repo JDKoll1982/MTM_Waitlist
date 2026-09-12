@@ -9,7 +9,7 @@ public enum ImageLocationScope
     /// <summary>
     /// Top-level request type image (e.g., Pickup, Coil, Scrap, etc.)
     /// Database value: "request_type"
-    /// Default image: Assets\Images\default-request-type.png
+    /// Default image: Assets\Placeholders\default-request-type.png
     /// Inventory: 8 request types (static, defined in waitlist-request-types.json)
     /// </summary>
     RequestType,
@@ -17,7 +17,7 @@ public enum ImageLocationScope
     /// <summary>
     /// Request subtype image (e.g., Pickup Other, Pickup NCM, Pickup WIP, etc.)
     /// Database value: "request_subtype"
-    /// Default image: Assets\Images\default-request-type.png (same as parent request type)
+    /// Default image: Assets\Placeholders\default-request-type.png (same as parent request type)
     /// Cascade: Subtype Override → Subtype JSON → Parent Request Type → Default
     /// Inventory: 24 subtypes across 8 parents (static, defined in waitlist-request-types.json)
     /// Uniqueness: Subtype names are NOT globally unique; GUIDs in JSON are.
@@ -27,7 +27,7 @@ public enum ImageLocationScope
     /// <summary>
     /// Work center image representing each facility work center in selection and detail surfaces.
     /// Database value: "work_center"
-    /// Default image: Assets\Images\default-workstation-image.png
+    /// Default image: Assets\Placeholders\default-workstation-image.png
     /// Cascade: Work Center Override → Default (no JSON config)
     /// Inventory: Dynamic (from setup_workstations_catalog, live database)
     /// </summary>

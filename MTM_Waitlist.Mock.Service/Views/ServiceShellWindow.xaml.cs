@@ -117,7 +117,7 @@ public sealed partial class ServiceShellWindow : Window
 
         // The icon is set on the window rather than through IconSource, because SetIcon is the documented
         // route for an .ico and the file already ships beside the executable.
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "WindowIcon.ico");
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "mock-service.ico");
 
         if (File.Exists(iconPath))
         {

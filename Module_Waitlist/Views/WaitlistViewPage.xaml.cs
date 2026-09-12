@@ -43,7 +43,7 @@ public sealed partial class WaitlistViewPage : Page
             return;
         }
 
-        EmptyStateImage.Source = new BitmapImage(new Uri("ms-appx:///Assets/Images/waitlist-empty-state.png"));
+            EmptyStateImage.Source = new BitmapImage(new Uri("ms-appx:///Assets/Placeholders/waitlist-empty-state.png"));
     }
 
     private void ListView_ItemClick(object sender, ItemClickEventArgs e)

@@ -224,6 +224,100 @@ public sealed class StartupCoordinatorTests
     }
 
     [TestMethod]
+    public async Task RunAsync_WhenTheTemporaryPasswordIsStillInPlace_ArmsTheChangeBeforeTheSignInFormAsync()
+    {
+        // The Windows user is already known and their row already read, so the requirement is resolved here —
+        // before the login window exists — rather than after a failed sign-in attempt with '0000' (Phase 32).
+        var fileService = new InMemoryFileService(new Dictionary<string, object>());
+        var localSettingsService = CreateLocalSettingsService(fileService);
+        var startupState = new StartupState();
+
+        var repository = new FakeStartupSessionRepository
+        {
+            Snapshot = new StartupSessionSnapshot
+            {
+                IsUserMatched = true,
+                IsComputerRegistered = true,
+                CurrentRole = "Developer",
+                DisplayName = "John Koll",
+                EmployeeIdentifier = "6229"
+            },
+            PasswordResetRequirement = new StartupPasswordResetRequirement
+            {
+                IsRequired = true,
+                UserId = 42,
+                CurrentRole = "Developer",
+                DisplayName = "John Koll",
+                EmployeeIdentifier = "6229"
+            }
+        };
+
+        var coordinator = CreateCoordinator(
+            new LocalSettingsOptions
+            {
+                ApplicationDataFolder = "MTM_Waitlist/ApplicationData",
+                LocalSettingsFile = "LocalSettings.json"
+            },
+            localSettingsService,
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
+            repository,
+            startupState,
+            startupDevelopmentOptions: new StartupDevelopmentOptions
+            {
+                DefaultDeveloperUsernames = new List<string>()
+            });
+
+        var result = await coordinator.RunAsync();
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.AreEqual(typeof(LoginViewModel).FullName, result.RouteTarget);
+        Assert.IsTrue(startupState.RequirePasswordChange, "Startup must tell the login surface to open on the change panel.");
+        Assert.AreEqual(42, startupState.PasswordChangeUserId);
+        StringAssert.Contains(startupState.LoginHint, "temporary default");
+    }
+
+    [TestMethod]
+    public async Task RunAsync_WhenTheAccountHasARealPassword_LeavesTheOrdinarySignInAloneAsync()
+    {
+        // The default fake answers None, which is what an account with a real password (or an unreachable
+        // store) resolves to: no prompt, the sign-in form as before.
+        var fileService = new InMemoryFileService(new Dictionary<string, object>());
+        var localSettingsService = CreateLocalSettingsService(fileService);
+        var startupState = new StartupState();
+
+        var repository = new FakeStartupSessionRepository
+        {
+            Snapshot = new StartupSessionSnapshot
+            {
+                IsUserMatched = true,
+                IsComputerRegistered = true,
+                CurrentRole = "Developer"
+            }
+        };
+
+        var coordinator = CreateCoordinator(
+            new LocalSettingsOptions
+            {
+                ApplicationDataFolder = "MTM_Waitlist/ApplicationData",
+                LocalSettingsFile = "LocalSettings.json"
+            },
+            localSettingsService,
+            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
+            repository,
+            startupState,
+            startupDevelopmentOptions: new StartupDevelopmentOptions
+            {
+                DefaultDeveloperUsernames = new List<string>()
+            });
+
+        var result = await coordinator.RunAsync();
+
+        Assert.AreEqual(typeof(LoginViewModel).FullName, result.RouteTarget);
+        Assert.IsFalse(startupState.RequirePasswordChange);
+        Assert.AreEqual(0, startupState.PasswordChangeUserId);
+    }
+
+    [TestMethod]
     public async Task RunAsync_UsesLocalSessionOverDatabase_WhenBothExistAsync()
     {
         var fileService = new InMemoryFileService(new Dictionary<string, object>
@@ -729,6 +823,8 @@ public sealed class StartupCoordinatorTests
 
         public StartupCredentialCheckResult CredentialCheckResult { get; init; } = StartupCredentialCheckResult.Failed();
 
+        public StartupPasswordResetRequirement PasswordResetRequirement { get; set; } = StartupPasswordResetRequirement.None;
+
         public bool UpdatePasswordResult { get; init; } = true;
 
         public Task<DateTimeOffset?> ReadServerTimeUtcAsync(CancellationToken cancellationToken = default)
@@ -748,6 +844,13 @@ public sealed class StartupCoordinatorTests
         public Task<StartupCredentialCheckResult> CheckCredentialsAsync(string username, string password, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(CredentialCheckResult);
+        }
+
+        public Task<StartupPasswordResetRequirement> ReadPasswordResetRequirementAsync(
+            string username,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(PasswordResetRequirement);
         }
 
         public Task<bool> UpdatePasswordAsync(long userId, string newPassword, CancellationToken cancellationToken = default)

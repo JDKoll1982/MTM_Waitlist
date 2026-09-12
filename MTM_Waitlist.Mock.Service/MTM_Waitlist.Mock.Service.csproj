@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+    <ApplicationIcon>..\Assets\Icons\mock-service.ico</ApplicationIcon>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>MTM_Waitlist.Mock.Service</RootNamespace>
@@ -50,10 +51,15 @@
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
-  <!-- The tray icon is the service's only always-present surface, so it ships beside the app. -->
+  <!-- The tray icon is the service's only always-present surface, so it ships beside the app. The pane's
+       Status glyph is a BitmapIcon, so the PNG must travel with the same Assets\Icons\ layout the XAML
+       asks for at ms-appx:///Assets/Icons/service-status.png. -->
   <ItemGroup>
-    <Content Include="..\Assets\WindowIcon.ico"
-             Link="Assets\WindowIcon.ico"
+    <Content Include="..\Assets\Icons\mock-service.ico"
+             Link="Assets\mock-service.ico"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Assets\Icons\service-status.png"
+             Link="Assets\Icons\service-status.png"
              CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

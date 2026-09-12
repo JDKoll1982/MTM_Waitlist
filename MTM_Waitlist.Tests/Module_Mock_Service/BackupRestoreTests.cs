@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Mock.Service.Models;
 using MTM_Waitlist.Mock.Service.Services;
+using MTM_Waitlist.Module_Core.Services;
 
 namespace MTM_Waitlist.Tests.Module_Mock_Service;
 
@@ -200,7 +201,16 @@ public sealed class BackupRestoreTests
         Assert.IsNotNull(run.ArtifactPath);
 
         var arguments = File.ReadAllText(fixture.FakeToolArgumentsPath);
-        StringAssert.Contains(arguments, "--host=172.16.1.104", "The resolved host must be the dump target.");
+
+        // The expectation is "the dump targets the host the connection resolved to", not a literal address:
+        // the resolver substitutes this machine's own server when the configured one does not answer
+        // (MySqlHostFallback, T165/T171), so a literal would make this test pass or fail by machine rather
+        // than by behaviour. Applying the same rule to the same input keeps the assertion about the engine.
+        var effectiveConnection = MySqlHostFallback.Apply(
+            Environment.GetEnvironmentVariable("MTM_MOCK_DB_CONNECTION_STRING"))!;
+        var resolvedHost = new MySqlConnector.MySqlConnectionStringBuilder(effectiveConnection).Server;
+
+        StringAssert.Contains(arguments, $"--host={resolvedHost}", "The resolved host must be the dump target.");
         StringAssert.Contains(arguments, "--port=3306");
         StringAssert.Contains(arguments, "--user=root");
         StringAssert.Contains(

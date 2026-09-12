@@ -20,7 +20,7 @@ namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 /// </summary>
 public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavigationAware
 {
-    private const string DefaultWorkCenterImagePath = "Assets/Images/default-workstation-image.png";
+    private const string DefaultWorkCenterImagePath = "Assets/Placeholders/default-workstation-image.png";
 
     private readonly INavigationService _navigationService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;

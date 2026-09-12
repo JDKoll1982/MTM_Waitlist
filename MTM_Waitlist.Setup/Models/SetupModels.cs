@@ -164,7 +164,7 @@ public sealed class SetupWorkflowState : ObservableObject
 
 public sealed class SetupWorkCenter : ObservableObject
 {
-    private const string DefaultWorkstationImagePath = "Assets/Images/default-workstation-image.png";
+    private const string DefaultWorkstationImagePath = "Assets/Placeholders/default-workstation-image.png";
 
     private bool _isSelected;
 
@@ -362,7 +362,7 @@ public sealed class SetupDunnageType
 
 public sealed class SetupDunnagePart
 {
-    private const string NoImagePath = "Assets/WindowIcon.ico";
+    private const string NoImagePath = "Assets/Packaging/window-icon.ico";
 
     public string Id { get; set; } = string.Empty;
 

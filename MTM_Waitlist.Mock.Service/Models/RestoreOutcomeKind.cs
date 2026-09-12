@@ -8,6 +8,12 @@ public enum RestoreOutcomeKind
     /// <summary>The operator declined the confirmation prompt; nothing changed.</summary>
     NotConfirmed,
 
+    /// <summary>
+    /// The store's database is not reachable from this machine, so restore is disabled for it here; nothing
+    /// was changed and no safety snapshot was taken.
+    /// </summary>
+    StoreUnavailable,
+
     /// <summary>The store was replaced and verified.</summary>
     Succeeded,
 

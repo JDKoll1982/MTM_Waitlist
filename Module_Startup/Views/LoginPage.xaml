@@ -24,30 +24,35 @@
                 BorderThickness="1"
                 CornerRadius="12">
                 <StackPanel Spacing="16">
-                <TextBlock
-                    FontSize="28"
-                    FontWeight="SemiBold"
-                    Text="Sign In" />
+                <StackPanel
+                    x:Name="SignInPanel"
+                    Spacing="16"
+                    x:Load="{x:Bind ViewModel.ShowSignInForm, Mode=OneWay}">
+                    <TextBlock
+                        FontSize="28"
+                        FontWeight="SemiBold"
+                        Text="Sign In" />
 
-                <TextBlock
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="Use your assigned credentials to continue." />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="Use your assigned credentials to continue." />
 
-                <TextBox
-                    x:Name="UsernameTextBox"
-                    Header="Username"
-                    PlaceholderText="Username"
-                    Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" shared:TooltipBehavior.ResourceKey="Startup_UsernameTextBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Username."/>
+                    <TextBox
+                        x:Name="UsernameTextBox"
+                        Header="Username"
+                        PlaceholderText="Username"
+                        Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" shared:TooltipBehavior.ResourceKey="Startup_UsernameTextBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Username."/>
 
-                <PasswordBox
-                    x:Name="PasswordBox"
-                    Header="Password"
-                    PlaceholderText="Password"
-                    PasswordChanged="PasswordBox_OnPasswordChanged" shared:TooltipBehavior.ResourceKey="Startup_PasswordBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Password."/>
+                    <PasswordBox
+                        x:Name="PasswordBox"
+                        Header="Password"
+                        PlaceholderText="Password"
+                        PasswordChanged="PasswordBox_OnPasswordChanged" shared:TooltipBehavior.ResourceKey="Startup_PasswordBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Password."/>
 
-                <CheckBox
-                    Content="Remember me on this device"
-                    IsChecked="{x:Bind ViewModel.RememberPassword, Mode=TwoWay}" />
+                    <CheckBox
+                        Content="Remember me on this device"
+                        IsChecked="{x:Bind ViewModel.RememberPassword, Mode=TwoWay}" />
+                </StackPanel>
 
                 <StackPanel
                     x:Name="PasswordChangePanel"
@@ -55,8 +60,12 @@
                     x:Load="{x:Bind ViewModel.ShowPasswordChangePrompt, Mode=OneWay}">
                     <TextBlock
                         Text="Update Password"
-                        FontSize="18"
+                        FontSize="28"
                         FontWeight="SemiBold" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="This account still uses its temporary default password. Choose a new one to continue."
+                        TextWrapping="Wrap" />
                     <PasswordBox
                         x:Name="NewPasswordBox"
                         Header="New password"
@@ -70,7 +79,8 @@
                     <Button
                         Content="Update Password"
                         Command="{x:Bind ViewModel.ChangePasswordCommand, Mode=OneWay}"
-                        Style="{ThemeResource AccentButtonStyle}" />
+                        Style="{ThemeResource AccentButtonStyle}"
+                        HorizontalAlignment="Left" />
                 </StackPanel>
 
                 <TextBlock
@@ -80,9 +90,11 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <Button
+                        x:Name="SignInButton"
                         Content="Sign In"
                         Command="{x:Bind ViewModel.SignInCommand, Mode=OneWay}"
-                        Style="{ThemeResource AccentButtonStyle}" />
+                        Style="{ThemeResource AccentButtonStyle}"
+                        x:Load="{x:Bind ViewModel.ShowSignInForm, Mode=OneWay}" />
                     <Button
                         Content="Back"
                         Command="{x:Bind ViewModel.CancelCommand, Mode=OneWay}" />

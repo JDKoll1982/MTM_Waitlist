@@ -16,10 +16,17 @@ public static class ServiceApiContracts
     /// The application roles permitted to call this API, as one readable list. Reported so an operator can
     /// see who may use the service without reading its source (T147).
     /// </param>
+    /// <param name="RefreshEnabled">
+    /// Whether refresh runs on this host. <see langword="false"/> means Infor Visual is not reachable from
+    /// here, so the scheduled loop and <c>POST /api/refresh</c> are disabled rather than failing repeatedly.
+    /// </param>
+    /// <param name="RefreshDisabledReason">Why refresh is disabled, or <see langword="null"/> when it is enabled.</param>
     public sealed record ServiceStatusPayload(
         string ServiceVersion,
         DateTimeOffset StartedUtc,
         bool VisualSourceReachable,
+        bool RefreshEnabled,
+        string? RefreshDisabledReason,
         string OperatorRoles,
         int RefreshIntervalMinutes,
         IReadOnlyList<ShapeStatusPayload> Shapes,
@@ -42,9 +49,16 @@ public static class ServiceApiContracts
         string? ValidationError);
 
     /// <summary>Per-store last-run and artifact status.</summary>
+    /// <param name="IsStoreReachable">
+    /// Whether this machine can reach the store's database. <see langword="false"/> means that store's backup
+    /// and restore are disabled here, which is what a host that does not hold that database should report.
+    /// </param>
+    /// <param name="UnreachableReason">Why the store is unreachable, or <see langword="null"/> when it is.</param>
     public sealed record BackupStatusPayload(
         string Store,
         bool IsEnabled,
+        bool IsStoreReachable,
+        string? UnreachableReason,
         DateTime? LastRunUtc,
         string? LastOutcome,
         string? LastArtifactPath,

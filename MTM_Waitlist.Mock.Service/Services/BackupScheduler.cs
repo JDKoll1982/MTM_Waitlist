@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.Models;
 
 namespace MTM_Waitlist.Mock.Service.Services;
@@ -21,6 +22,11 @@ namespace MTM_Waitlist.Mock.Service.Services;
 /// Every store's own <c>BackupEngine</c> gate rejects an overlapping run, so a slow dump cannot be
 /// started twice — a manual trigger and the schedule cannot collide.
 /// </para>
+/// <para>
+/// A store this machine cannot reach has its backup <b>disabled</b> rather than repeatedly attempted: the
+/// slot still advances, nothing is recorded as a run, and the reason is reported by the capability gate —
+/// which is the honest answer for a host that simply does not hold that database.
+/// </para>
 /// </remarks>
 public sealed class BackupScheduler
 {
@@ -31,6 +37,7 @@ public sealed class BackupScheduler
     private readonly Func<Models.ServiceConfiguration> _configurationAccessor;
     private readonly ILogger<BackupScheduler> _logger;
     private readonly TimeSpan _minimumWait;
+    private readonly IServiceCapabilityGate? _capabilityGate;
     private readonly Dictionary<BackupStore, DateTime> _nextDueUtc = [];
 
     /// <summary>Creates the scheduler.</summary>
@@ -38,11 +45,16 @@ public sealed class BackupScheduler
     /// <param name="configurationAccessor">Reads the live configuration, so schedule edits apply without a restart.</param>
     /// <param name="logger">Logger.</param>
     /// <param name="minimumWait">Floor on the loop's sleep; tests lower it.</param>
+    /// <param name="capabilityGate">
+    /// Reports which stores this machine can reach. A store it reports as unreachable is skipped without a
+    /// run record. Omitted or <see langword="null"/> means no gating.
+    /// </param>
     public BackupScheduler(
         BackupEngine engine,
         Func<Models.ServiceConfiguration> configurationAccessor,
         ILogger<BackupScheduler> logger,
-        TimeSpan? minimumWait = null)
+        TimeSpan? minimumWait = null,
+        IServiceCapabilityGate? capabilityGate = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(configurationAccessor);
@@ -52,6 +64,7 @@ public sealed class BackupScheduler
         _configurationAccessor = configurationAccessor;
         _logger = logger;
         _minimumWait = minimumWait ?? s_defaultMinimumWait;
+        _capabilityGate = capabilityGate;
     }
 
     /// <summary>The next scheduled run time for a store, or <see langword="null"/> when it has not been scheduled yet.</summary>
@@ -122,6 +135,7 @@ public sealed class BackupScheduler
 
         var configuration = _configurationAccessor();
         var attempted = new List<BackupStore>();
+        var capabilities = await GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
 
         foreach (var store in BackupStoreExtensions.All)
         {
@@ -149,6 +163,17 @@ public sealed class BackupScheduler
                 continue;
             }
 
+            if (capabilities is not null && !capabilities.IsStoreAvailable(store))
+            {
+                // Disabled on this host, not failed: nothing is recorded as a run, the slot has already
+                // advanced, and the capability gate reports the reason.
+                _logger.LogWarning(
+                    "Backup slot for {Store} arrived but this machine cannot reach that database, so its backup and restore are disabled here: {Reason}",
+                    store.ToDatabaseName(),
+                    capabilities.StoreUnavailableReason(store));
+                continue;
+            }
+
             attempted.Add(store);
 
             try
@@ -170,6 +195,40 @@ public sealed class BackupScheduler
         }
 
         return attempted;
+    }
+
+    /// <summary>
+    /// Reads the host's capabilities, or <see langword="null"/> when there is nothing to gate on.
+    /// </summary>
+    /// <remarks>
+    /// A gate that cannot answer returns <see langword="null"/>, which disables nothing: a probe failure is not
+    /// evidence that a store is unreachable, and the run's own outcome already reports a real failure.
+    /// </remarks>
+    private async Task<ServiceCapabilitySnapshot?> GetCapabilitiesAsync(CancellationToken cancellationToken)
+    {
+        if (_capabilityGate is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await _capabilityGate
+                .GetCapabilitiesAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(
+                exception,
+                "The host capability check failed; the scheduled backup continues, because a failed probe is not evidence that a store is unreachable.");
+
+            return null;
+        }
     }
 
     /// <summary>

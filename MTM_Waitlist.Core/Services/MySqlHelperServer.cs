@@ -317,7 +317,9 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
             Database = GetDatabaseName(databaseTarget),
         };
 
-        return builder.ConnectionString;
+        // A workstation off the plant network cannot reach the configured host; use the local server instead
+        // when one answers, and leave the string alone (so this fails and reports as usual) when none does.
+        return MySqlHostFallback.Apply(builder.ConnectionString);
     }
 
     private static string GetDatabaseName(MySqlDatabaseTarget databaseTarget)
