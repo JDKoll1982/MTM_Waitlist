@@ -3,6 +3,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Mock.Service.Api;
 using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.Models;
 using MTM_Waitlist.Mock.Service.Services;
@@ -10,7 +11,7 @@ using MTM_Waitlist.Mock.Service.Services;
 namespace MTM_Waitlist.Mock.Service.ViewModels;
 
 /// <summary>
-/// Backs the service settings surface: configuration editing, credential rotation, backup-now, and the
+/// Backs the service settings surface: configuration editing, operator access, backup-now, and the
 /// host-only restore flow (FR-012, FR-009, FR-010).
 /// </summary>
 /// <remarks>
@@ -21,8 +22,9 @@ namespace MTM_Waitlist.Mock.Service.ViewModels;
 /// <para>
 /// A save is validated before it is persisted: an invalid port, an unwritable destination, or a
 /// schedule that cannot be parsed is rejected with a message instead of being accepted and failing
-/// later (FR-012). The credential is write-only from this surface — the page can rotate it, and never
-/// shows its value (FR-026).
+/// later (FR-012). Operator access is read-only from this surface: the page states which application roles
+/// may call the API and shows that list, because there is no shared credential to rotate or distribute
+/// (T147).
 /// </para>
 /// </remarks>
 public sealed partial class ServiceSettingsViewModel : ObservableObject, IServiceSearchTarget
@@ -83,9 +85,6 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     public partial string MySqlDumpPath { get; set; }
 
     [ObservableProperty]
-    public partial string CredentialStatusText { get; set; }
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasBackupToolStatus))]
     public partial string BackupToolStatusText { get; set; }
 
@@ -140,7 +139,6 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
         MySqlUserId = string.Empty;
         MySqlPasswordFilePath = string.Empty;
         MySqlDumpPath = string.Empty;
-        CredentialStatusText = string.Empty;
         BackupToolStatusText = string.Empty;
         RestoreOutcomeText = string.Empty;
         SelectedBackupStore = BackupStore.MtmWaitlist;
@@ -162,11 +160,11 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
             "Service_Settings.ApiGroupDescription".GetLocalized(),
             "api", "endpoint", "client", "clients", "network", "interface", "bind", "address", "port", "listen", "connections");
 
-        CredentialGroup = new ServiceSettingsGroupViewModel(
-            "credential",
-            CredentialHeaderText,
-            "Service_Settings.CredentialGroupDescription".GetLocalized(),
-            "credential", "password", "token", "secret", "rotate", "generate", "authentication", "authenticate");
+        OperatorAccessGroup = new ServiceSettingsGroupViewModel(
+            "operatoraccess",
+            OperatorAccessHeaderText,
+            "Service_Settings.OperatorAccessGroupDescription".GetLocalized(),
+            "access", "role", "roles", "permission", "permissions", "operator", "operators", "user", "user name", "username", "allowed", "approved", "who");
 
         VisualGroup = new ServiceSettingsGroupViewModel(
             "visual",
@@ -192,7 +190,7 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
             "Service_Settings.RestoreGroupDescription".GetLocalized(),
             "restore", "recover", "replace", "put", "back", "artifact", "file", "emergency", "undo");
 
-        Groups = [RefreshGroup, ApiGroup, CredentialGroup, VisualGroup, MySqlGroup, BackupGroup, RestoreGroup];
+        Groups = [RefreshGroup, ApiGroup, OperatorAccessGroup, VisualGroup, MySqlGroup, BackupGroup, RestoreGroup];
     }
 
     private string _searchQuery;
@@ -206,8 +204,8 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     /// <summary>The service API settings.</summary>
     public ServiceSettingsGroupViewModel ApiGroup { get; }
 
-    /// <summary>The shared credential settings.</summary>
-    public ServiceSettingsGroupViewModel CredentialGroup { get; }
+    /// <summary>The operator-access settings.</summary>
+    public ServiceSettingsGroupViewModel OperatorAccessGroup { get; }
 
     /// <summary>The Infor Visual source settings.</summary>
     public ServiceSettingsGroupViewModel VisualGroup { get; }
@@ -305,8 +303,8 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
         yield return ApiHeaderText;
         yield return ApiBindAddressLabelText;
         yield return ApiPortLabelText;
-        yield return CredentialHeaderText;
-        yield return RotateCredentialText;
+        yield return OperatorAccessHeaderText;
+        yield return ApprovedRolesLabelText;
         yield return VisualHeaderText;
         yield return VisualServerLabelText;
         yield return VisualDatabaseLabelText;
@@ -332,8 +330,8 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     /// <summary>One-line explanation of what this surface configures.</summary>
     public string SubtitleText => "Service_Settings.Subtitle".GetLocalized();
 
-    /// <summary>Heading of the shared-credential setting.</summary>
-    public string CredentialStatusLabelText => "Service_Settings.CredentialLabel".GetLocalized();
+    /// <summary>Heading of the operator-access setting.</summary>
+    public string ApprovedRolesLabelText => "Service_Settings.ApprovedRolesLabel".GetLocalized();
 
     /// <summary>Heading of the save setting, which applies to every group above it.</summary>
     public string SaveHeaderText => "Service_Settings.SaveHeader".GetLocalized();
@@ -365,14 +363,14 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     /// <summary>Label for the auto-start setting.</summary>
     public string AutoStartLabelText => "Service_Settings.AutoStart".GetLocalized();
 
-    /// <summary>Header for the credential section.</summary>
-    public string CredentialHeaderText => "Service_Settings.CredentialHeader".GetLocalized();
+    /// <summary>Header for the operator-access section.</summary>
+    public string OperatorAccessHeaderText => "Service_Settings.OperatorAccessHeader".GetLocalized();
 
-    /// <summary>Label of the credential rotate action.</summary>
-    public string RotateCredentialText => "Service_Settings.RotateCredential".GetLocalized();
+    /// <summary>The application roles permitted to call the service API, as one readable list.</summary>
+    public string ApprovedRolesText => ServiceOperatorRoles.DisplayText;
 
-    /// <summary>Statement that the credential value is never displayed.</summary>
-    public string CredentialWriteOnlyText => "Service_Settings.CredentialWriteOnly".GetLocalized();
+    /// <summary>Statement that a caller is identified by user name rather than by a password.</summary>
+    public string OperatorAccessDescriptionText => "Service_Settings.OperatorAccessDescription".GetLocalized();
 
     /// <summary>Header for the Infor Visual section.</summary>
     public string VisualHeaderText => "Service_Settings.VisualHeader".GetLocalized();
@@ -555,10 +553,6 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
         {
             BackupPolicies.Add(new BackupStoreSettingsViewModel(configuration.BackupPolicies[store]));
         }
-
-        CredentialStatusText = _configurationStore.HasCredential
-            ? "Service_Settings.CredentialConfigured".GetLocalized()
-            : "Service_Common.NotConfigured".GetLocalized();
     }
 
     /// <summary>
@@ -625,38 +619,6 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
         {
             // A rejected save leaves the previous configuration in force, because the store validates
             // before it writes anything.
-            StatusMessage = exception.Message;
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    /// <summary>
-    /// Generates a new shared credential and persists it. The value is never displayed here (FR-026).
-    /// </summary>
-    [RelayCommand]
-    private async Task RotateCredentialAsync()
-    {
-        if (IsBusy)
-        {
-            return;
-        }
-
-        IsBusy = true;
-
-        try
-        {
-            // The plaintext return value is deliberately discarded: this surface is write-only, and the
-            // operator installs the value on clients through the documented out-of-band procedure.
-            _ = await _configurationStore.GenerateCredentialAsync().ConfigureAwait(true);
-
-            CredentialStatusText = "Service_Settings.CredentialRotated".GetLocalized();
-            StatusMessage = "Service_Settings.CredentialRotated".GetLocalized();
-        }
-        catch (Exception exception)
-        {
             StatusMessage = exception.Message;
         }
         finally

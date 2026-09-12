@@ -9,7 +9,7 @@ most expensive mistake available in this repo:
 
 | Kind | Where | Count |
 | --- | --- | ---: |
-| **Live, actionable now** | `specs/001-module-mock-visual-fallback/tasks.md` | **4** |
+| **Live, actionable now** | `specs/001-module-mock-visual-fallback/tasks.md` | **2** |
 | **Carry-forward for a future spec** | `WeekendProject/**` source checklists | **127** |
 | **Not work at all** (retired sources + obsolete requirements) | see §3 | **223** |
 
@@ -22,14 +22,15 @@ file is the itemised breakdown. Duplicating it would create a divergent third co
 
 ## 1. Live open work — `specs/001-module-mock-visual-fallback/tasks.md`
 
-**149 boxes: 145 `[x]`, 4 `[ ]`.** These four are the only tasks in the active feature that are not done.
+**149 boxes: 147 `[x]`, 2 `[ ]`.** These two are the only tasks in the active feature that are not done. T147 and
+T148 were resolved on 2026-09-12 (see §1.3 and §1.4).
 
 | ID | Severity | Summary | Blocker / decision needed |
 | --- | --- | --- | --- |
 | **T106** | verification | End-to-end acceptance walkthrough — `quickstart.md` §1–§8 on a running build | Environment + operator interaction; see §1.1 |
 | **T144** | coverage | The cache's key domain still can't express most open work orders (transparency half is fixed) | **Operator/product decision** |
-| **T147** | **HIGH** | The service's API credential is generated but never obtainable | **Owner decision** |
-| **T148** | **HIGH** | The service UI has no reachable entry point, and there is no durable diagnostic | **Partly a spec-scope decision** |
+| ~~T147~~ | ~~HIGH~~ | **RESOLVED 2026-09-12** — the shared credential was retired; the API is authorized by the caller's application role | — |
+| ~~T148~~ | ~~HIGH~~ | **RESOLVED 2026-09-12** — (a) the show-request channel + desktop shortcut shipped; (c) the service now writes its own daily log file | — |
 
 ### 1.1 T106 — end-to-end acceptance walkthrough
 
@@ -41,7 +42,7 @@ Still outstanding, and why:
 
 | Part | Blocked on |
 | --- | --- |
-| §2 steps 3–4 (tray Settings surface, write-once credential), step 7 (one real refresh cycle) | Operator interaction; **T147** |
+| §2 steps 3–4 (tray Settings surface, operator access), step 7 (one real refresh cycle) | Operator interaction on the host. **T147 is no longer a blocker** — there is nothing to generate or record |
 | §3 fallback proof, §4 defect proof | A **signed-in** application session |
 | §5 backup/restore drill | A configured service (two secrets) and a throwaway store |
 | §7 sixth-shape playbook | A maintainer-day exercise, not a mechanical gate |
@@ -73,39 +74,35 @@ behaviour outside this feature — hence a decision, not a fix. **3** of the 76 
 cross-order collision, which is why simply adding the bare numeric form to the live scripts is *not* a safe
 shortcut: one key would then match two different orders.
 
-### 1.3 T147 — the API credential is generated but never obtainable
+### 1.3 T147 — RESOLVED 2026-09-12 (role-based authorization replaced the shared credential)
 
-The service generates and stores a DPAPI-protected shared credential **without operator action**
-(`Api.CredentialProtected`, `CredentialCreatedUtc` set at first start), and **no surface can reveal it** —
-`ServiceSettingsViewModel` is deliberately write-only (*"the page can rotate it, and never displays the
-value"*), and there is no reveal path anywhere.
+The owner decision was taken on 2026-09-12: the shared credential was **removed** rather than made obtainable, and a
+caller is now authorized by the **application role** of the user it names. `SharedTokenAuthenticationHandler` and
+`SharedCredential` are deleted; `ApiSettings` carries no credential; the settings surface shows the approved roles
+instead of offering a rotate button; and the client presents `X-MTM-Mock-User` (`MTM_MOCK_SERVICE_TOKEN` →
+`MTM_MOCK_SERVICE_USER`). `ServiceOperatorAuthenticationHandler` + `ServiceOperatorRoleResolver` resolve the named
+user through `sp_auth_user_row_get` against `mtm_waitlist` and require one of `Admin`, `Developer`, `Plant Manager`,
+`Setup Lead`, `Production Lead`; every refusal answers `401 {"error":"unauthorized"}` indistinguishably, and an
+unreachable store fails closed. The spec (FR-011/FR-012/FR-023/FR-026, SC-010), both service contracts and
+`data-model.md` §9 were amended in the same change.
 
-Yet `MTM_Waitlist.Mock.Service/README.md` §3 says *"record it out of band"*, §4 says to call `/api/status`
-with it, and clients read the same value from `MTM_MOCK_SERVICE_TOKEN`. **As shipped, no operator and no
-client can authenticate**, so the service's own status surface is unobservable (FR-026 vs FR-013/SC-010).
+**Known limitation, accepted by the owner:** the user name is asserted over plain HTTP, so this is authorization
+without cryptographic authentication. **Host verification is outstanding** — see `VALIDATION-PROMPT-SERVER.md`.
 
-**Decision needed:** reveal the credential **once** when generated/rotated (so §3 is achievable), **or** have
-the operator **supply** it and the service store that. FR-026's *"never displayed or logged"* concerns
-persistence and leakage, so a deliberate one-time reveal on rotation is compatible with it.
+### 1.4 T148 — RESOLVED 2026-09-12 ((a) already shipped; (c) implemented; (b) fixed 2026-09-11)
 
-Knock-on effect: the app-side `IMockServiceRefreshClient` cannot authenticate either.
+- **(a) The UI is now reachable without the tray icon.** This was already implemented in commit `c2d5e04` and the task
+text was stale: a second launch parses `--open-status` / `--open-settings`
+(`Services/ServiceActivationParser.cs`), signals the running instance over session-local named events
+(`Services/ServiceShowChannel.cs`), and `deploy/mock-service-control.ps1` — opened by the desktop shortcut the
+installer places — is the operator's entry point. The tray-only *lifetime* is unchanged; only the *entry points* are.
+- **(c) The service now keeps a durable log file.** Root cause was worse than "no log service": every diagnostic went
+through `StartupDebugLog`, whose methods are `[Conditional("DEBUG")]`, so a published `Release` build compiled them
+out. The service now writes JSON Lines to
+`%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\Logs\service_daily_<yyyy_MM_dd>.jsonl` via `Services/ServiceLog.cs` and an
+`ILoggerProvider` registered in `ServiceHostBuilder.Build` (`Services/ServiceFileLoggerProvider.cs`), so every
+container log message — the refresh engine's cycle failures above all — is durable and readable on the host.
 
-### 1.4 T148 — the running service is invisible and unreachable
-
-Three findings from running the deployed service on the host for ~22 minutes. **(b) is fixed; (a) and (c) are
-open.**
-
-- **(a) — OPEN. The tray icon is created but Windows 11 hides it, so the UI has no reachable entry point.**
-  `HKCU\Control Panel\NotifyIconSettings` holds two entries (one per exe it has been launched from) and
-  **both have `IsPromoted` unset**, i.e. hidden in the `∧` overflow — Windows' default for a new tray icon.
-  That would be cosmetic except the tray icon is the *only* route to the service UI: `ServiceShellWindow` opens
-  only from `_trayIcon.Selected` / its context menu, and the running instance has **no `AppInstance.Activated`
-  handler**, so re-launching the exe just redirects and exits.
-  *Reveal it:* taskbar `∧` overflow, or Settings → Personalization → Taskbar → *Other system tray icons*.
-  *The scope question:* `plan.md` and T059 deliberately chose a tray-only lifetime, so the code matches the
-  spec; what the spec did not anticipate is a hidden icon leaving the UI unreachable. The in-spirit fix is to
-  make the UI reachable without the icon (show the shell window on a second launch/activation), which changes
-  the *entry points*, not the tray-only *lifetime*.
 - **(b) — FIXED 2026-09-11. No refresh had ever completed.** Root cause was **our deploy script**, not the
   service: `install-mock-service.ps1` wrote the secrets at User scope and launched the service with
   `Start-Process`, which hands the child a copy of *the script process's* environment block — and that process
@@ -114,14 +111,9 @@ open.**
   and assert it — deploy is now **22** checks; treat a host with no login as unconfigured so the designed
   message shows instead of a raw access-denied; poll for process exit after the stop instead of sampling once).
   **Verified:** first ever successful refresh — all five shapes `Succeeded` in ~4.4 s.
-- **(c) — OPEN. There is no durable diagnostic.** Failures are written only through `StartupDebugLog` →
-  `Debug.WriteLine`, visible to an attached debugger only; the service does not register the
-  `MTM_Waitlist.Startup` log service that gives the client app its `startup_daily_<date>.jsonl`. The two
-  surfaces that *would* report it (`GET /api/status`, the tray Status page) are exactly the ones (a) and T147
-  put out of reach. A service that cannot be asked why it is not working is not operable.
 
-**Order of attack:** T147 (unblocks `/api/status`) → durable log file (c) → re-run the deployment and re-check
-§2 step 7. (a) is independent and small.
+**Order of attack (as executed, 2026-09-12):** T147 and (c) are done; the remaining host step is to re-run the
+deployment and re-check §2 step 7, which is now the first item of `VALIDATION-PROMPT-SERVER.md`.
 
 ---
 
@@ -195,16 +187,19 @@ is why 27, not 45, appears in §2.
 
 ## 5. Recommended order
 
-1. **T147** — the highest-value unblock: it makes the service observable (`/api/status`) and unblocks the
-   client, and it is a decision you can make in one line.
-2. **T148(c)** — give the service a durable log file. Small, decision-free, and it makes any future
-   "why isn't it refreshing" diagnosable rather than invisible.
-3. **T148(a)** — make the UI reachable without the tray icon. Small and independent.
-4. **T144 (coverage)** — needs your product decision on the work-order input rule. Do it before §3's fallback
+**1–3 are done (2026-09-12).** T147 and T148(c) were implemented in `/speckit.implement`; T148(a) turned out to have
+shipped in `c2d5e04` already. What remains is the host-side proof of those changes, which is
+`VALIDATION-PROMPT-SERVER.md` in the repository root.
+
+1. ~~**T147**~~ — **done.** The shared credential was retired; the API is authorized by the caller's application role.
+2. ~~**T148(c)**~~ — **done.** The service writes its own daily log file (`Logs\service_daily_<date>.jsonl`).
+3. ~~**T148(a)**~~ — **already shipped** in `c2d5e04` (show-request channel + desktop control shortcut).
+4. **Host validation** — run `VALIDATION-PROMPT-SERVER.md` on `V-MTMFG-5` before treating either change as verified.
+5. **T144 (coverage)** — needs your product decision on the work-order input rule. Do it before §3's fallback
    proof is treated as meaningful, since that proof can pass on shape while serving the wrong order.
-5. **T106** — the walkthrough and the SC-007/SC-008 clocks. Start the clocks as early as possible; they need
+6. **T106** — the walkthrough and the SC-007/SC-008 clocks. Start the clocks as early as possible; they need
    30 days of wall time and nothing else in this list is on the critical path for them.
-6. **Next spec** — `/speckit.specify` against `OPEN-WORK-NEXT-SPEC.md` §10 first, then §4 (smallest,
+7. **Next spec** — `/speckit.specify` against `OPEN-WORK-NEXT-SPEC.md` §10 first, then §4 (smallest,
    unblocked, immediate user value).
 
 ---
@@ -212,3 +207,7 @@ is why 27, not 45, appears in §2.
 *Provenance: box counts are exact counts of `- [ ]` / `+ [ ]` markers in the live files, read 2026-09-11 after
 the repository sync (`c2d5e04`, clean tree). T144/T147/T148 detail is quoted from
 `specs/001-module-mock-visual-fallback/tasks.md` Phase 23.*
+
+*Updated 2026-09-12 (`/speckit.implement`): T147 and T148 are resolved — see §1.3/§1.4 and §5. Box counts in §1 were
+re-counted from the file after the change (`147 [x]` / `2 [ ]`). The remaining host-side proof is
+`VALIDATION-PROMPT-SERVER.md` in the repository root.*

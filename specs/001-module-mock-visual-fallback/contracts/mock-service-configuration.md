@@ -1,7 +1,7 @@
 # Contract: `MTM_Waitlist.Mock.Service` Configuration and Shape Catalog
 
-**Feature**: `001-module-mock-visual-fallback` | **Date**: 2026-09-09
-**Implements**: FR-008, FR-009, FR-012, FR-013, FR-016, FR-026
+**Feature**: `001-module-mock-visual-fallback` | **Date**: 2026-09-09 | **Revised**: 2026-09-12 (T147 — shared credential retired)
+**Implements**: FR-008, FR-009, FR-012, FR-013, FR-016
 **Verified by**: SC-007, SC-008, SC-010, SC-012
 
 This is the contract an operator edits (through the service settings UI) and the contract a maintainer extends when
@@ -16,10 +16,10 @@ implementation time.
 |---|---|
 | Location | Service-local durable store under the service's own app-data folder (never a client-shared store) |
 | Durability | Changes survive a service restart (FR-012); settings apply without restart where feasible (FR-013/FR-012 intent) |
-| Credential | Stored **only** as a DPAPI `CurrentUser`-protected blob; never plaintext, never in a file readable as text (FR-026) |
+| Credential | **None.** There is no credential to store (T147): caller authority comes from the caller's application role, resolved against `mtm_waitlist`, so this file holds no secret, hash or key |
 | Validation | Invalid values (bad port, unwritable destination, unknown shape) are rejected at save time with a clear message — never silently accepted and failed later |
 | Atomicity | A settings save is all-or-nothing; a partially written configuration must never be loaded |
-| Logging | Configuration is never logged wholesale (that would defeat §credential rules); only explicitly safe fields are logged |
+| Logging | Configuration is never logged wholesale (it names hosts and logins); only explicitly safe fields are logged |
 
 **Why not store configuration in a database**: the service must be configurable and reportable while the external
 source is unreachable, and a restore replaces an entire store — configuration that lived in a restored store would be
@@ -40,7 +40,7 @@ visualSource:
 api:
   bindAddress: 0.0.0.0              # operator may choose loopback-only
   port: 5760
-  credential: <protected blob>      # DPAPI; generated on first run; never displayed or logged
+  # no credential: callers are authorized by their application role (T147)
 backupPolicies:
   mtm_waitlist:                 { isEnabled: true, scheduleLocalTime: "01:00", retentionCount: 14, destinationDirectory: "…" }
   mtm_wip_application_winforms: { isEnabled: true, scheduleLocalTime: "01:20", retentionCount: 14, destinationDirectory: "…" }
@@ -55,8 +55,8 @@ shapeOverrides:
   or artifacts (FR-009, US6 acceptance 2).
 - The four stores are a **fixed** set; an unknown store key is a configuration error (validation message), not an
   extension point. The extension point is shapes (§3).
-- The `api.credential` blob is write-only from the operator's perspective: the UI can generate/rotate it, and can never
-  display it (FR-026).
+- The `api` section is endpoint-only. Operator access is not a setting: it is the caller's application role, resolved
+  for each request (T147).
 - `autoStartAtLogon` is the *setting*; the effect is the presence/absence of the per-user `Run` entry. A mismatch
   between setting and registry state at startup must be reconciled and reported, never silently ignored.
 
@@ -138,13 +138,17 @@ missing, which is excluded and reported with the reason. Skipping step 5 leaves 
 the parity tests in step 6 surface. All three cases are called out here so the gap is documented rather than
 discovered in production.
 
-## 5. Client-side credential installation (operator procedure)
+## 5. Client-side operator identity (operator procedure) — revised 2026-09-12 (T147)
 
-1. In the service UI, generate the credential (it is never displayed afterwards; the UI offers "rotate" only).
-2. Install the value into each client's configuration, out of band — never in source control, never in
-   `appsettings.json` committed to the repo, never in chat or ticket text (FR-026).
-3. Rotation invalidates existing clients until they are updated; the service reports unauthorized attempts in its log
-   so a mis-installed client is diagnosable without exposing the secret (SC-010).
+1. There is nothing to generate, record or distribute. The service admits a caller whose user name resolves to an
+   approved application role; the signed-in application user therefore already qualifies.
+2. Install the service endpoint on each client: `MTM_MOCK_SERVICE_ENDPOINT` (or the `MockServiceClient:Endpoint`
+   section). If the name the client should present differs from the account it runs as, set
+   `MTM_MOCK_SERVICE_USER` as well.
+3. A caller whose role is not approved is refused, and the service records the refusal — with the user name and the
+   role it resolved — in its own daily log file, so a misconfigured client is diagnosable without disclosing a
+   secret (SC-010). That log is `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\Logs\service_daily_<yyyy_MM_dd>.jsonl`
+   (T148(c)).
 
-If a client has no credential configured, it must treat refresh requests as unavailable and continue operating on
-cached data — the service is never a hard dependency (FR-025, SC-011).
+If a client has no endpoint or no user name configured, it must treat refresh requests as unavailable and continue
+operating on cached data — the service is never a hard dependency (FR-025, SC-011).

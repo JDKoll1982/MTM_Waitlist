@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MTM_Waitlist.Mock.Service.Contracts;
@@ -8,11 +6,11 @@ using MTM_Waitlist.Mock.Service.Models;
 namespace MTM_Waitlist.Mock.Service.Services;
 
 /// <summary>
-/// Durable, service-local configuration persistence, including the DPAPI-protected shared credential.
+/// Durable, service-local configuration persistence.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Implements <c>contracts/mock-service-configuration.md</c> §1/§2, FR-012, and FR-026:
+/// Implements <c>contracts/mock-service-configuration.md</c> §1/§2 and FR-012:
 /// </para>
 /// <list type="bullet">
 ///   <item><description>
@@ -27,27 +25,15 @@ namespace MTM_Waitlist.Mock.Service.Services;
 ///     than accepted and failed later.
 ///   </description></item>
 ///   <item><description>
-///     <b>Credential</b> — stored <i>only</i> as a DPAPI <c>CurrentUser</c> protected blob. It is
-///     never written to a log, never returned from <see cref="Current"/>, and never rendered by
-///     this type.
+///     <b>No secrets</b> — there is no credential to store (T147): the API is authorized by the caller's
+///     application role, and the store holds no shared secret, no hash and no key material.
 ///   </description></item>
 /// </list>
-/// <para>
-/// <b>Credential provisioning interpretation (flagged).</b> FR-026 says the service "MUST NOT
-/// display or log the credential", while <c>contracts/mock-service-configuration.md</c> §5 says the
-/// UI generates it and it is "never displayed <i>afterwards</i>". Those are reconciled here by
-/// keeping every persistent and readable surface free of plaintext and by returning the plaintext
-/// exactly once, from an explicitly named one-time method, so the operator can install it on clients
-/// out of band. Nothing in this type exposes the value again, and nothing writes it to a log.
-/// </para>
 /// </remarks>
 public sealed class ServiceConfigurationStore
 {
     /// <summary>File name of the persisted configuration under the service app-data root.</summary>
     public const string ConfigurationFileName = "service-configuration.json";
-
-    /// <summary>Length in bytes of a generated shared credential.</summary>
-    private const int CredentialByteLength = 32;
 
     private static readonly JsonSerializerOptions s_jsonOptions = new()
     {
@@ -80,23 +66,18 @@ public sealed class ServiceConfigurationStore
     /// <summary>Absolute path of the configuration file.</summary>
     public string ConfigurationFilePath => _configurationFilePath;
 
-    /// <summary>Whether a credential has been generated or installed.</summary>
-    public bool HasCredential => _current.Api.Credential is { ProtectedValue.Length: > 0 };
-
     /// <summary>
-    /// Loads the configuration from disk, generating a first-run credential when absent.
+    /// Loads the configuration from disk, writing the defaults when the file is absent or unreadable.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The loaded configuration, with a credential guaranteed to exist.</returns>
+    /// <returns>The loaded configuration.</returns>
     public async Task<ServiceConfiguration> LoadAsync(CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(_appDataRoot);
 
         if (!File.Exists(_configurationFilePath))
         {
-            _current = EnsureCredentialGenerated(
-                ServiceConfiguration.CreateDefault(_appDataRoot),
-                out _);
+            _current = ServiceConfiguration.CreateDefault(_appDataRoot);
             await SaveAsync(_current, cancellationToken).ConfigureAwait(false);
             return _current;
         }
@@ -106,16 +87,7 @@ public sealed class ServiceConfigurationStore
             .DeserializeAsync<ServiceConfigurationFile>(stream, s_jsonOptions, cancellationToken)
             .ConfigureAwait(false);
 
-        var configuration = dto?.ToConfiguration(_appDataRoot) ?? ServiceConfiguration.CreateDefault(_appDataRoot);
-
-        // A credential is required; generate on first run or after a corrupt/hand-edited file.
-        configuration = EnsureCredentialGenerated(configuration, out var generated);
-        _current = configuration;
-
-        if (generated)
-        {
-            await SaveAsync(_current, cancellationToken).ConfigureAwait(false);
-        }
+        _current = dto?.ToConfiguration(_appDataRoot) ?? ServiceConfiguration.CreateDefault(_appDataRoot);
 
         return _current;
     }
@@ -211,28 +183,6 @@ public sealed class ServiceConfigurationStore
         {
             throw new ArgumentException($"Configured mysqldump path does not exist: '{dumpPath}'.", nameof(configuration));
         }
-    }
-
-    /// <summary>
-    /// Generates the credential if it is absent and persists the DPAPI-protected blob, reporting
-    /// whether a value was generated. The plaintext is deliberately <b>not</b> surfaced here: on a
-    /// silent first-run generation there is no operator present to read it, and FR-026 forbids
-    /// displaying it. Use <see cref="GenerateCredentialAsync"/> when an operator is provisioning a
-    /// client and needs the value once.
-    /// </summary>
-    private ServiceConfiguration EnsureCredentialGenerated(ServiceConfiguration configuration, out bool generated)
-    {
-        if (configuration.Api.Credential is { ProtectedValue.Length: > 0 })
-        {
-            generated = false;
-            return configuration;
-        }
-
-        var plaintext = CreateRandomCredential();
-        var credential = Protect(plaintext);
-        generated = true;
-
-        return configuration with { Api = configuration.Api with { Credential = credential } };
     }
 
     /// <summary>
@@ -364,80 +314,6 @@ public sealed class ServiceConfigurationStore
                 ? "Auto-start is enabled; the Run entry pointed at a different executable and was corrected."
                 : "Auto-start is enabled; the Run entry was registered."
         });
-    }
-
-    /// <summary>
-    /// Generates a fresh credential, persists it, and returns the plaintext <b>once</b> so the
-    /// operator can install it on clients out of band.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The newly generated plaintext credential. Callers must not log it (FR-026).</returns>
-    public async Task<string> GenerateCredentialAsync(CancellationToken cancellationToken = default)
-    {
-        var plaintext = CreateRandomCredential();
-        var updated = _current with { Api = _current.Api with { Credential = Protect(plaintext) } };
-
-        await SaveAsync(updated, cancellationToken).ConfigureAwait(false);
-        return plaintext;
-    }
-
-    /// <summary>
-    /// Verifies a caller-supplied token against the stored credential in constant time.
-    /// </summary>
-    /// <param name="candidate">The token presented by a caller.</param>
-    /// <returns><see langword="true"/> when the token matches.</returns>
-    /// <remarks>
-    /// Constant-time comparison is required by SC-010: a timing side channel must not reveal how
-    /// many leading characters matched.
-    /// </remarks>
-    public bool CredentialMatches(string? candidate)
-    {
-        if (string.IsNullOrEmpty(candidate) || _current.Api.Credential is not { } credential)
-        {
-            return false;
-        }
-
-        var expectedBytes = ProtectedData.Unprotect(
-            credential.ProtectedValue,
-            optionalEntropy: null,
-            DataProtectionScope.CurrentUser);
-
-        var candidateBytes = Encoding.UTF8.GetBytes(candidate);
-
-        try
-        {
-            return CryptographicOperations.FixedTimeEquals(expectedBytes, candidateBytes);
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(expectedBytes);
-            CryptographicOperations.ZeroMemory(candidateBytes);
-        }
-    }
-
-    private static string CreateRandomCredential() =>
-        Convert.ToBase64String(RandomNumberGenerator.GetBytes(CredentialByteLength));
-
-    private static SharedCredential Protect(string plaintext)
-    {
-        var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
-        try
-        {
-            var protectedBytes = ProtectedData.Protect(
-                plaintextBytes,
-                optionalEntropy: null,
-                DataProtectionScope.CurrentUser);
-
-            return new SharedCredential
-            {
-                ProtectedValue = protectedBytes,
-                CreatedUtc = DateTime.UtcNow
-            };
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(plaintextBytes);
-        }
     }
 
     private static void EnsureWritableDirectory(string path, BackupStore store)
@@ -578,32 +454,16 @@ public sealed class ServiceConfigurationStore
 
         public int Port { get; init; } = 5760;
 
-        /// <summary>DPAPI blob, base64-encoded. The only persisted form of the credential (FR-026).</summary>
-        public string? CredentialProtected { get; init; }
-
-        public DateTime? CredentialCreatedUtc { get; init; }
-
         public static ApiFile From(ApiSettings settings) => new()
         {
             BindAddress = settings.BindAddress,
-            Port = settings.Port,
-            CredentialProtected = settings.Credential is { } credential
-                ? Convert.ToBase64String(credential.ProtectedValue)
-                : null,
-            CredentialCreatedUtc = settings.Credential?.CreatedUtc
+            Port = settings.Port
         };
 
         public ApiSettings ToSettings() => new()
         {
             BindAddress = BindAddress,
-            Port = Port,
-            Credential = CredentialProtected is { Length: > 0 } protectedValue
-                ? new SharedCredential
-                {
-                    ProtectedValue = Convert.FromBase64String(protectedValue),
-                    CreatedUtc = CredentialCreatedUtc ?? DateTime.UtcNow
-                }
-                : null
+            Port = Port
         };
     }
 

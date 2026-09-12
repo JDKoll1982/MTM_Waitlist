@@ -62,7 +62,10 @@ public sealed class ServiceStartupTests
         Assert.IsTrue(provider.GetRequiredService<RefreshShapeCatalogProvider>() is not null);
         Assert.IsTrue(provider.GetRequiredService<RefreshEngine>() is not null);
         Assert.IsTrue(provider.GetRequiredService<ServiceApiHost>() is not null);
-        Assert.IsTrue(provider.GetRequiredService<ServiceConfigurationStore>().HasCredential);
+        Assert.IsTrue(
+            provider.GetRequiredService<MTM_Waitlist.Mock.Service.Contracts.IServiceOperatorRoleResolver>() is not null,
+            "The API's role resolver must resolve even when no store is configured, because the listener reports"
+            + " that condition rather than failing the whole container (T147).");
     }
 
     [TestMethod]
@@ -117,7 +120,10 @@ public sealed class ServiceStartupTests
         Assert.IsTrue(outcome.Succeeded, "A missing cache connection must not make the status surface fail.");
         Assert.IsNotNull(outcome.Payload);
         Assert.AreEqual(5, outcome.Payload!.Shapes.Count);
-        Assert.IsTrue(outcome.Payload.CredentialConfigured);
+        StringAssert.Contains(
+            outcome.Payload.OperatorRoles,
+            "Developer",
+            "The status surface states who may call the API, which is the operator-facing half of T147.");
         StringAssert.Contains(
             outcome.Payload.Shapes[0].ValidationError,
             "mtm_mock connection",

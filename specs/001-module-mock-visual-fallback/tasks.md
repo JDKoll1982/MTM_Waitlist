@@ -2088,11 +2088,30 @@ Summary line: `DEPLOYMENT OK — 21 checks, 0 warning(s).`
 
 ### T147 — the shared API credential is generated but never obtainable
 
-- [ ] T147 (**HIGH** — blocks §2 steps 4 and 7, and the client integration; needs an owner decision) The service
+- [x] T147 (**RESOLVED 2026-09-12** — the shared credential was retired and authorization moved to the caller's application role; see the implementation record below) The service
   generates and stores its shared API credential without operator action, and **no surface can reveal it** — yet the
   documented deployment step says to record it out of band, the documented verification calls `/api/status` with it,
   and clients must be given it. As shipped, no operator and no client can ever authenticate, so the service's own
   status surface is unobservable (FR-026 vs FR-013/SC-010, contradicts).
+
+> **Implementation record (2026-09-12, `/speckit.implement`).** Owner decision taken: authorization is by the
+> caller's **application role**, not by a secret. The shared-token scheme was removed rather than repaired —
+> `SharedTokenAuthenticationHandler` and `SharedCredential` are deleted, `ApiSettings` carries no credential, the
+> settings surface no longer offers rotate, and `MockServiceClientOptions`/`MockServiceRefreshClient` present
+> `X-MTM-Mock-User` instead of a token (`MTM_MOCK_SERVICE_TOKEN` → `MTM_MOCK_SERVICE_USER`). A new
+> `ServiceOperatorAuthenticationHandler` plus `ServiceOperatorRoleResolver` resolve the asserted user through
+> `sp_auth_user_row_get` against `mtm_waitlist` and require one of `ServiceOperatorRoles.Approved` (`Admin`,
+> `Developer`, `Plant Manager`, `Setup Lead`, `Production Lead`); unknown user, inactive user, no role and
+> unapproved role all answer `401 {"error":"unauthorized"}`, and an unreachable store **fails closed**. The status
+> payload reports `operatorRoles` in place of `credentialConfigured`. The spec, both service contracts and
+> `data-model.md` §9 were amended in the same change (FR-011/FR-012/FR-023/FR-026, SC-010).
+>
+> **Known limitation, accepted by the owner.** The caller *asserts* its user name over plain HTTP. The service
+> verifies that the asserted user genuinely holds an approved role, so an invented name or an ordinary shop-floor
+> user is refused, but this is authorization without cryptographic authentication.
+>
+> **Not verified here.** The role lookup needs a live `mtm_waitlist` connection and the API needs a deployed,
+> running service; both are the host run handed over in `VALIDATION-PROMPT-SERVER.md`.
 
 **Evidence (2026-09-11, from the first real deployment).**
 
@@ -2125,7 +2144,7 @@ because the status surface is unreachable. This is T106 §2 step 7's gap, now wi
 
 ### T148 — the running service is invisible and unreachable, and nothing records why it does not refresh
 
-- [ ] T148 (**HIGH** — the operator-facing half of US3/FR-013; partly a spec-scope decision) Three findings from
+- [x] T148 (**RESOLVED 2026-09-12** — (a) shipped as the show-request channel + desktop shortcut, (c) shipped as the service's own daily log file; (b) was fixed 2026-09-11) Three findings from
   running the deployed service on the host for ~22 minutes, all observed 2026-09-11.
 
 **(a) The tray icon is created, but Windows 11 hides it — so the UI has no reachable entry point.**
@@ -2198,6 +2217,37 @@ refreshed, with nothing on the machine saying why.
 | Apply the secrets to the script's **own** process before starting, and assert they are there, so the child inherits them | `deploy/install-mock-service.ps1` — new `secrets inherited by child` check (deploy is now **22** checks) |
 | Treat a host with **no login** as unconfigured, so the operator sees the designed `NotConfiguredMessage` instead of a raw access-denied | `Services/MySqlConnectionStringResolver.BuildFromSettings` |
 | Poll for process exit after the stop instead of sampling once — a WinUI process lingers briefly after termination, and one sample reported `1 process(es) survived` while the API port was already free | `deploy/install-mock-service.ps1` stop step |
+
+### T148(a) and T148(c) — closed 2026-09-12
+
+**T148(a) was already shipped, and the task text was stale.** Commit `c2d5e04` contains the fix the task asked for:
+`App.xaml.cs` starts a show-request listener on two session-local named events
+(`Services/ServiceShowChannel.cs`), a second launch parses its own command line
+(`Services/ServiceActivationParser.cs`: `--open-status` / `--open-settings`) and signals the running instance before
+redirecting and exiting, and `deploy/mock-service-control.ps1` — shipped inside the publish output and opened by the
+desktop shortcut the installer places — is what an operator double-clicks. The tray-only *lifetime* is unchanged; only
+the *entry points* to it changed, which is what the task proposed. `ServiceActivationParserTests` and
+`ServiceShowChannelTests` pin the switch names and the event names.
+
+**T148(c) implemented 2026-09-12.** The root cause was worse than "no log service": every service diagnostic went
+through `StartupDebugLog`, whose methods are `[Conditional("DEBUG")]`, so a published `Release` build compiled them
+**out entirely**, and in Debug they only reached `Debug.WriteLine`. Nothing on the host could record a failure.
+
+| Artifact | What it does |
+|---|---|
+| `MTM_Waitlist.Mock.Service/Services/ServiceLog.cs` | Best-effort, thread-safe JSON-Lines append to `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\Logs\service_daily_<yyyy_MM_dd>.jsonl`; 30-day retention keyed off the file name; every failure swallowed after a `Debug.WriteLine` trace so logging can never stop the engines |
+| `MTM_Waitlist.Mock.Service/Services/ServiceFileLoggerProvider.cs` | An `ILoggerProvider` registered in `ServiceHostBuilder.Build`, so every container log message — the refresh engine's cycle failures above all — is durable. The logger category becomes the log `Area` |
+| `App.xaml.cs` / `ServiceShellWindow.xaml.cs` | Every `StartupDebugLog` call replaced with `ServiceLog`, plus a first-line `Start request` record naming the log directory so a launch that dies before the container exists still leaves a trace |
+| `MTM_Waitlist.Tests/Module_Mock_Service/ServiceLogTests.cs` | 7 tests: the daily file is created and appended to, the line carries level/area/message/timestamp, an error keeps the exception text, an unusable directory does not throw, and the provider routes container messages |
+
+**Gates.** Solution build `0 warnings / 0 errors`; full suite `Failed: 0, Passed: 720, Skipped: 19, Total: 739`. The
+skips are the pre-existing live-database integration suites (no `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` in this
+environment).
+
+**Not verified here, and deliberately left to the host run.** Nothing in T147 or T148(c) can be proven from this
+workstation: the role lookup needs a live `mtm_waitlist` connection and the API needs a deployed, running service, and
+the durable log is only exercised by a real service process. `VALIDATION-PROMPT-SERVER.md` in the repository root is
+the handover for that run.
 
 **Verified.** Redeployed and started on the host: **22/22 checks pass**, and the service performed its **first ever
 successful refresh** — all five shapes `Succeeded` in ~4.4 s (`work_order_lookup` 699 · `operation_sequences` 891 ·

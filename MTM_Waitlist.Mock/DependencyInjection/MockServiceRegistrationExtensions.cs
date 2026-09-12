@@ -61,9 +61,10 @@ public static class MockServiceRegistrationExtensions
         services.AddSingleton<IVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>, VisualInventoryLocationsFallback>();
         services.AddSingleton<IVisualReadFallback<VisualDispositionInputRequest, VisualDispositionInputRow>, VisualDispositionInputFallback>();
 
-        // On-demand refresh client (T119). It resolves its endpoint and credential from the environment
-        // first and the MockServiceClient section second; with neither installed it reports "not installed"
-        // as a normal outcome, so registering it costs nothing on a workstation with no service.
+        // On-demand refresh client (T119). It resolves its endpoint and the user name it presents from the
+        // environment first and the MockServiceClient section second; with neither installed it reports
+        // "not installed" as a normal outcome, so registering it costs nothing on a workstation with no
+        // service. There is no credential to supply (T147).
         services.AddSingleton<IMockServiceRefreshClient>(provider => new MockServiceRefreshClient(
             httpClient: null,
             provider.GetService<IConfiguration>()));

@@ -4,17 +4,21 @@ namespace MTM_Waitlist.Mock.Service.Api;
 /// The wire shapes of the service's HTTP API (<c>contracts/mock-service-http-api.md</c> §2/§3/§4/§6).
 /// </summary>
 /// <remarks>
-/// These are the only types the network surface exposes. No payload here carries a credential, a
-/// connection string, or a password (FR-026, SC-010).
+/// These are the only types the network surface exposes. A caller is identified by the user name it presents
+/// (T147); no payload here carries a credential, a connection string, or a password (SC-010).
 /// </remarks>
 public static class ServiceApiContracts
 {
     /// <summary>`GET /api/status` response.</summary>
+    /// <param name="OperatorRoles">
+    /// The application roles permitted to call this API, as one readable list. Reported so an operator can
+    /// see who may use the service without reading its source (T147).
+    /// </param>
     public sealed record ServiceStatusPayload(
         string ServiceVersion,
         DateTimeOffset StartedUtc,
         bool VisualSourceReachable,
-        bool CredentialConfigured,
+        string OperatorRoles,
         int RefreshIntervalMinutes,
         IReadOnlyList<ShapeStatusPayload> Shapes,
         IReadOnlyList<BackupStatusPayload> Backups,

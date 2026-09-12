@@ -11,7 +11,7 @@ namespace MTM_Waitlist.Mock.Service.Services;
 /// <remarks>
 /// <para>
 /// Nothing here touches <see cref="RestoreService"/>. Restore is host-only and must remain unreachable
-/// from the network surface even with a valid token, so the dependency simply does not exist
+/// from the network surface even for an approved operator role, so the dependency simply does not exist
 /// (FR-010/FR-023, <c>contracts/mock-service-http-api.md</c> §5).
 /// </para>
 /// <para>
@@ -43,7 +43,8 @@ public sealed class ServiceApiOperations
     /// <param name="backupEngine">Runs on-demand backups.</param>
     /// <param name="backupArtifactStore">Supplies per-store artifact and last-run status.</param>
     /// <param name="freshnessReader">Supplies cached-data age and seed-only state.</param>
-    /// <param name="connectivityProbe">Reports whether Infor Visual is reachable right now.</param>    /// <param name="configurationStore">Supplies the persisted configuration (never the credential value).</param>
+    /// <param name="connectivityProbe">Reports whether Infor Visual is reachable right now.</param>
+    /// <param name="configurationStore">Supplies the persisted configuration.</param>
     /// <param name="autoStartState">The startup auto-start reconciliation result, when one has run.</param>
     /// <param name="timeProvider">Time source.</param>
     public ServiceApiOperations(
@@ -180,7 +181,7 @@ public sealed class ServiceApiOperations
             ServiceVersion,
             _startedUtc,
             visualReachable,
-            _configurationStore.HasCredential,
+            ServiceOperatorRoles.DisplayText,
             (int)Math.Round(configuration.RefreshInterval.TotalMinutes),
             shapes,
             backups,

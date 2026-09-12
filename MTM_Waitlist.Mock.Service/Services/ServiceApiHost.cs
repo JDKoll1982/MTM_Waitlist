@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MTM_Waitlist.Mock.Service.Api;
+using MTM_Waitlist.Mock.Service.Contracts;
 
 namespace MTM_Waitlist.Mock.Service.Services;
 
@@ -14,8 +15,8 @@ namespace MTM_Waitlist.Mock.Service.Services;
 /// <remarks>
 /// <para>
 /// <b>Restore is independent of this host.</b> The host never resolves <see cref="RestoreService"/> and
-/// no route reaches it, so the API can run on a machine where restore is not registered, and a valid
-/// token still cannot restore a store (FR-010/FR-023).
+/// no route reaches it, so the API can run on a machine where restore is not registered, and an approved
+/// operator role still cannot restore a store (FR-010/FR-023).
 /// </para>
 /// <para>
 /// The listener is bound to the configured address/port. A bind failure is reported to the caller instead
@@ -31,6 +32,7 @@ public sealed class ServiceApiHost : IAsyncDisposable
 {
     private readonly ServiceApiOperations _operations;
     private readonly ServiceConfigurationStore _configurationStore;
+    private readonly IServiceOperatorRoleResolver _roleResolver;
     private readonly ILogger<ServiceApiHost> _logger;
     private readonly TimeProvider _timeProvider;
 
@@ -38,24 +40,29 @@ public sealed class ServiceApiHost : IAsyncDisposable
 
     /// <summary>Creates the host.</summary>
     /// <param name="operations">The operations facade the routes delegate to.</param>
-    /// <param name="configurationStore">
-    /// Supplies the binding and the credential. The store is registered in the API's own container so the
-    /// authentication handler resolves it from the same instance the service uses.
+    /// <param name="configurationStore">Supplies the binding. The store is registered in the API's own
+    /// container so the host and the service surfaces read the same instance.</param>
+    /// <param name="roleResolver">
+    /// Resolves the calling user's application role. Supplied explicitly so the listener and the service
+    /// share one resolver, and so a test can start the host without a live application store.
     /// </param>
     /// <param name="logger">Logger.</param>
     /// <param name="timeProvider">Time source.</param>
     public ServiceApiHost(
         ServiceApiOperations operations,
         ServiceConfigurationStore configurationStore,
+        IServiceOperatorRoleResolver roleResolver,
         ILogger<ServiceApiHost> logger,
         TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(operations);
         ArgumentNullException.ThrowIfNull(configurationStore);
+        ArgumentNullException.ThrowIfNull(roleResolver);
         ArgumentNullException.ThrowIfNull(logger);
 
         _operations = operations;
         _configurationStore = configurationStore;
+        _roleResolver = roleResolver;
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
@@ -79,10 +86,13 @@ public sealed class ServiceApiHost : IAsyncDisposable
             return true;
         }
 
-        if (!_configurationStore.HasCredential)
+        if (!_roleResolver.IsConfigured)
         {
-            // Refuse to open a listener that no client could ever authenticate against.
-            _logger.LogError("The service API was not started because no shared credential has been generated yet.");
+            // Refuse to open a listener no caller could ever be authorized against: the role lookup needs
+            // the application store, and without it every request would be refused anyway.
+            _logger.LogError(
+                "The service API was not started because no mtm_waitlist connection is configured, so no "
+                + "caller's role could be resolved.");
             return false;
         }
 
@@ -107,22 +117,23 @@ public sealed class ServiceApiHost : IAsyncDisposable
         builder.WebHost.ConfigureKestrel(options => options.Listen(address, settings.Port));
 
         builder.Services
-            .AddAuthentication(SharedTokenAuthenticationHandler.SchemeName)
-            .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, SharedTokenAuthenticationHandler>(
-                SharedTokenAuthenticationHandler.SchemeName,
+            .AddAuthentication(ServiceOperatorAuthenticationHandler.SchemeName)
+            .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, ServiceOperatorAuthenticationHandler>(
+                ServiceOperatorAuthenticationHandler.SchemeName,
                 _ => { });
 
         builder.Services.AddAuthorization(options =>
         {
             // Fallback policy: any route that forgets an explicit requirement is still gated (SC-010).
             options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder(
-                    SharedTokenAuthenticationHandler.SchemeName)
+                    ServiceOperatorAuthenticationHandler.SchemeName)
                 .RequireAuthenticatedUser()
                 .Build();
         });
 
         builder.Services.AddSingleton(_operations);
         builder.Services.AddSingleton(_configurationStore);
+        builder.Services.AddSingleton(_roleResolver);
 
         var application = builder.Build();
         application.UseAuthentication();

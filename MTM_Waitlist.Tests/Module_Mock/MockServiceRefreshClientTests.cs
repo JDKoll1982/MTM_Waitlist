@@ -12,19 +12,19 @@ namespace MTM_Waitlist.Tests.Module_Mock;
 
 /// <summary>
 /// The on-demand refresh client is never a hard dependency (FR-025, SC-011): an unconfigured or absent
-/// service degrades to a reported outcome, and the shared credential is only ever sent in its request
-/// header (FR-026).
+/// service degrades to a reported outcome, and the caller identifies itself by user name rather than by a
+/// credential (T147).
 /// </summary>
 [TestClass]
 public sealed class MockServiceRefreshClientTests
 {
     private const string Endpoint = "http://127.0.0.1:5760/";
-    private const string Token = "test-credential-3f19";
+    private const string UserName = "test.operator";
 
     private static readonly string[] s_environmentVariables =
     [
         MockServiceClientOptions.EndpointEnvironmentVariable,
-        MockServiceClientOptions.TokenEnvironmentVariable,
+        MockServiceClientOptions.UserNameEnvironmentVariable,
     ];
 
     private readonly Dictionary<string, string?> _originalEnvironment = new(StringComparer.OrdinalIgnoreCase);
@@ -52,7 +52,7 @@ public sealed class MockServiceRefreshClientTests
     public async Task RequestRefreshAsync_WithoutAnEndpoint_ReportsUnavailableWithoutCallingTheService()
     {
         var handler = new RecordingHandler();
-        var client = CreateClient(handler, endpoint: null, token: Token);
+        var client = CreateClient(handler, endpoint: null, userName: UserName);
 
         var result = await client.RequestRefreshAsync(null);
 
@@ -62,20 +62,20 @@ public sealed class MockServiceRefreshClientTests
     }
 
     [TestMethod]
-    public async Task RequestRefreshAsync_WithoutACredential_ReportsUnavailableWithoutCallingTheService()
+    public async Task RequestRefreshAsync_WithoutAUserName_ReportsUnavailableWithoutCallingTheService()
     {
         var handler = new RecordingHandler();
-        var client = CreateClient(handler, endpoint: Endpoint, token: null);
+        var client = CreateClient(handler, endpoint: Endpoint, userName: null);
 
         var result = await client.RequestRefreshAsync(null);
 
         Assert.IsFalse(result.Succeeded);
-        StringAssert.Contains(result.Message, MockServiceClientOptions.TokenEnvironmentVariable);
+        StringAssert.Contains(result.Message, MockServiceClientOptions.UserNameEnvironmentVariable);
         Assert.AreEqual(0, handler.CallCount);
     }
 
     [TestMethod]
-    public async Task RequestRefreshAsync_WhenConfigured_PostsTheCredentialHeaderAndMapsPerShapeOutcomes()
+    public async Task RequestRefreshAsync_WhenConfigured_PostsTheUserNameHeaderAndMapsPerShapeOutcomes()
     {
         const string body = """
             {"runId":"r1","startedUtc":"2026-09-11T00:00:00Z","finishedUtc":"2026-09-11T00:00:01Z",
@@ -83,50 +83,48 @@ public sealed class MockServiceRefreshClientTests
                         {"shapeKey":"inventory_locations","outcome":"skippedSourceUnreachable","rowCount":0,"durationMs":1,"errorMessage":null}]}
             """;
         var handler = new RecordingHandler(HttpStatusCode.OK, body);
-        var client = CreateClient(handler, Endpoint, Token);
+        var client = CreateClient(handler, Endpoint, UserName);
 
         var result = await client.RequestRefreshAsync(["work_order_lookup"]);
 
         Assert.IsTrue(result.Succeeded);
         Assert.AreEqual("refreshed", result.ShapeOutcomes["work_order_lookup"]);
         Assert.AreEqual("skippedSourceUnreachable", result.ShapeOutcomes["inventory_locations"]);
-        Assert.AreEqual(Token, handler.LastRequest!.Headers.GetValues(MockServiceRefreshClient.TokenHeaderName).Single());
+        Assert.AreEqual(UserName, handler.LastRequest!.Headers.GetValues(MockServiceRefreshClient.UserNameHeaderName).Single());
         Assert.AreEqual(HttpMethod.Post, handler.LastRequest.Method);
         Assert.AreEqual($"{Endpoint}{MockServiceRefreshClient.RefreshPath}", handler.LastRequest.RequestUri!.ToString());
         StringAssert.Contains(handler.LastBody, "work_order_lookup");
     }
 
     [TestMethod]
-    public async Task RequestRefreshAsync_WhenTheCredentialIsRefused_ReportsUnavailableWithoutEchoingIt()
+    public async Task RequestRefreshAsync_WhenTheServiceRefusesTheCaller_ReportsUnavailable()
     {
         var handler = new RecordingHandler(HttpStatusCode.Unauthorized, """{"error":"unauthorized"}""");
-        var client = CreateClient(handler, Endpoint, Token);
+        var client = CreateClient(handler, Endpoint, UserName);
 
         var result = await client.RequestRefreshAsync(null);
 
         Assert.IsFalse(result.Succeeded);
-        Assert.IsFalse(
-            result.Message!.Contains(Token, StringComparison.Ordinal),
-            "A failure message must never echo the shared credential (FR-026).");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(result.Message));
     }
 
     [TestMethod]
     public async Task RequestRefreshAsync_WhenTheServiceIsAbsent_FailsGracefullyWithoutThrowing()
     {
         var handler = new RecordingHandler(new HttpRequestException("connection refused"));
-        var client = CreateClient(handler, Endpoint, Token);
+        var client = CreateClient(handler, Endpoint, UserName);
 
         var result = await client.RequestRefreshAsync(null);
 
         Assert.IsFalse(result.Succeeded);
-        Assert.IsFalse(result.Message!.Contains(Token, StringComparison.Ordinal));
+        Assert.IsFalse(string.IsNullOrWhiteSpace(result.Message));
     }
 
     [TestMethod]
     public async Task RequestRefreshAsync_WhenTheResponseIsUnreadable_ReportsUnavailable()
     {
         var handler = new RecordingHandler(HttpStatusCode.OK, """{"unexpected":true}""");
-        var client = CreateClient(handler, Endpoint, Token);
+        var client = CreateClient(handler, Endpoint, UserName);
 
         var result = await client.RequestRefreshAsync(null);
 
@@ -137,7 +135,7 @@ public sealed class MockServiceRefreshClientTests
     public async Task RequestRefreshAsync_HonorsCallerCancellation()
     {
         var handler = new RecordingHandler();
-        var client = CreateClient(handler, Endpoint, Token);
+        var client = CreateClient(handler, Endpoint, UserName);
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
@@ -145,7 +143,7 @@ public sealed class MockServiceRefreshClientTests
             () => client.RequestRefreshAsync(null, cts.Token));
     }
 
-    private static MockServiceRefreshClient CreateClient(RecordingHandler handler, string? endpoint, string? token)
+    private static MockServiceRefreshClient CreateClient(RecordingHandler handler, string? endpoint, string? userName)
     {
         var values = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         if (endpoint is not null)
@@ -153,9 +151,9 @@ public sealed class MockServiceRefreshClientTests
             values[$"{MockServiceClientOptions.SectionName}:Endpoint"] = endpoint;
         }
 
-        if (token is not null)
+        if (userName is not null)
         {
-            values[$"{MockServiceClientOptions.SectionName}:Token"] = token;
+            values[$"{MockServiceClientOptions.SectionName}:UserName"] = userName;
         }
 
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(values).Build();

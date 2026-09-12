@@ -17,7 +17,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 /// <summary>
 /// Verifies the service API's security-critical behaviour at the operation seam: no secret ever reaches a
 /// payload, an unknown shape or store is refused, and <b>no code path leads from the network surface to a
-/// restore</b> (FR-013, FR-023, FR-026, SC-009, SC-010).
+/// restore</b> (FR-013, FR-023, SC-009, SC-010).
 /// </summary>
 /// <remarks>
 /// Listener-level assertions (a real `401` with the error model, a real `404` for `/api/restore`) are part of
@@ -28,13 +28,9 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 public sealed class ServiceApiSecurityTests
 {
     [TestMethod]
-    public async Task StatusPayload_CarriesNoCredentialOrConnectionSecret()
+    public async Task StatusPayload_CarriesNoConnectionSecret()
     {
         using var fixture = new ServiceApiFixture();
-
-        var credentialPlaintext = await fixture.ConfigurationStore.GenerateCredentialAsync();
-        var protectedBlob = Convert.ToBase64String(
-            fixture.ConfigurationStore.Current.Api.Credential!.ProtectedValue);
 
         var outcome = await fixture.Operations.GetStatusAsync();
 
@@ -44,12 +40,13 @@ public sealed class ServiceApiSecurityTests
             outcome.Payload,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-        Assert.IsFalse(json.Contains(credentialPlaintext, StringComparison.Ordinal), "The shared credential must never appear in a payload.");
-        Assert.IsFalse(json.Contains(protectedBlob, StringComparison.Ordinal), "The protected credential blob must never appear in a payload.");
         Assert.IsFalse(json.Contains("password", StringComparison.OrdinalIgnoreCase), "No password-shaped field may appear in a payload.");
-        Assert.IsTrue(json.Contains("\"credentialConfigured\":true", StringComparison.Ordinal), "The payload reports only that a credential exists.");
-
-        Assert.IsTrue(outcome.Payload!.CredentialConfigured);
+        Assert.IsTrue(
+            json.Contains("\"operatorRoles\"", StringComparison.Ordinal),
+            "The payload reports the application roles that may call the API (T147).");
+        Assert.IsFalse(
+            json.Contains("credential", StringComparison.OrdinalIgnoreCase),
+            "There is no credential any more, so no credential-shaped field may appear in a payload (T147).");
     }
 
     [TestMethod]
@@ -81,8 +78,8 @@ public sealed class ServiceApiSecurityTests
     [TestMethod]
     public void NoCodePathLeadsFromTheApiToARestore()
     {
-        // FR-023: restore is host-only. The surface must not even depend on RestoreService, so no token —
-        // valid or otherwise — can reach a destructive database replacement over the network.
+        // FR-023: restore is host-only. The surface must not even depend on RestoreService, so no approved
+        // operator — and no request at all — can reach a destructive database replacement over the network.
         var apiMembers = typeof(ServiceApiOperations)
             .GetMembers()
             .Select(member => member.Name)

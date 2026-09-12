@@ -77,7 +77,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 
 | `-Publish` | off | Run `dotnet publish -c Release -p:PublishProfile=win-x64-selfcontained` first. |
 | `-SkipSecrets` | off | Do not set or verify the environment secrets. |
 | `-SkipServiceStart` | off | Do not start the service or run the health checks. |
-| `-PurgeState` | off | Also delete `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service` (configuration, credential, backups). |
+| `-PurgeState` | off | Also delete `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service` (configuration, run records, log files, backups). |
 | `-DesktopPath` | `C:\Users\jkoll\Desktop` | Desktop that receives the restart shortcut. **Hardcoded to the operator account by owner decision** — pass it explicitly if the profile ever changes (the agent's own notes record `jkoll` at work, `johnk` at home). When that path is absent the script falls back to the shell's Desktop known folder and says so, because this host redirects `jkoll`'s Desktop into OneDrive (see below). |
 | `-SkipDesktopShortcut` | off | Do not create or replace the desktop shortcut. |
 | `-AllowNonServerHost` | off | Bypass the server-only guard. Deliberate use only. |
@@ -95,7 +95,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 
 | 4 | **Publish and copy** | Optional `dotnet publish`, then a full copy. A `NETSDK1198` "publish profile not found" warning is treated as a **failure**, because it means the build silently became framework-dependent. |
 | 5 | **Verify the deployment** | File count matches source; every required path present (five population reads, tray icon, source queries, restore artifacts, WinAppSDK runtime); self-contained markers `System.Private.CoreLib.dll`/`hostfxr.dll`/`coreclr.dll` present **and** `runtimeconfig.json` using `includedFrameworks`; the corrected work-order addressing guard (T144) present in the deployed population reads. |
 | 6 | **Install and verify secrets** | Sets the four User-scope variables from `appsettings.json`, reads them back from `HKCU\Environment`, applies them to the script's **own** process so the service it launches inherits them, and then **proves** them: connects to `mtm_mock`, `mtm_waitlist`, `mtm_wip_application_winforms` and `mtm_receiving_application`, and authenticates to Infor Visual. |
-| 7 | **Start and health-check** | Starts the service, waits for port 5760, then asserts: process responding, **no top-level window** (tray-only), `GET /api/status` returns **401** without a credential, a **second launch redirects and exits** (single instance), and the `HKCU` auto-start entry points at *this* install folder. |
+| 7 | **Start and health-check** | Starts the service, waits for port 5760, then asserts: process responding, **no top-level window** (tray-only), `GET /api/status` returns **401** when it names no operator (T147), a **second launch redirects and exits** (single instance), and the `HKCU` auto-start entry points at *this* install folder. |
 | 8 | **Desktop shortcut** | Puts one product-named shortcut on the operator's desktop that opens the deployed control prompt (`mock-service-control.ps1`, which ships inside the publish output — see the project file). An existing shortcut of that name is replaced, and the saved `.lnk` is read back to prove it opens this install folder — see below. |
 | 9 | **Summary** | A PASS/FAIL/WARN table. Exit `0` on success, `1` if any check failed, `2` refused (not the server host), `3` precondition failure. |
 
@@ -214,7 +214,7 @@ Remove-Item "$env:USERPROFILE\Desktop\MTM mock cache service.lnk" -Force -ErrorA
 ```
 
 Add `Remove-Item "$env:LOCALAPPDATA\MTM_Waitlist.Mock.Service" -Recurse -Force` for a full reset — that
-is what discards the DPAPI credential, the schedules and the backups. Deleting the install folder alone
+is what discards the schedules, the run records, the log files and the backups. Deleting the install folder alone
 **keeps** all of it (see `MTM_Waitlist.Mock.Service/README.md` §5).
 
 ---

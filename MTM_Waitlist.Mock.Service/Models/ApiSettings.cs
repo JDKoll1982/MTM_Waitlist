@@ -13,10 +13,4 @@ public sealed record ApiSettings
 
     /// <summary>Port Kestrel binds to.</summary>
     public int Port { get; init; } = 5760;
-
-    /// <summary>
-    /// The shared credential gating every API endpoint. <see langword="null"/> until generated on
-    /// first run. Never displayed or logged (FR-026).
-    /// </summary>
-    public SharedCredential? Credential { get; init; }
 }

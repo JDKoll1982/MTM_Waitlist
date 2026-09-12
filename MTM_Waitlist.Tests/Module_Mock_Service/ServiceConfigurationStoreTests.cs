@@ -5,10 +5,13 @@ using MTM_Waitlist.Mock.Service.Services;
 namespace MTM_Waitlist.Tests.Module_Mock_Service;
 
 /// <summary>
-/// Verifies durable, atomic configuration persistence and the FR-026 credential rules:
-/// the credential is stored only as a DPAPI-protected blob, is never persisted in plaintext,
-/// and is compared in constant time.
+/// Verifies durable, atomic configuration persistence.
 /// </summary>
+/// <remarks>
+/// The credential this type used to own is gone (T147): the API is authorized by the caller's application
+/// role, so the store must hold no secret at all. The assertions below pin that — a configuration file that
+/// gained a password, key or token field would be a regression.
+/// </remarks>
 [TestClass]
 public sealed class ServiceConfigurationStoreTests
 {
@@ -31,15 +34,12 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_OnFirstRun_GeneratesACredential()
+    public async Task LoadAsync_OnFirstRun_PersistsTheDefaultConfiguration()
     {
         var store = new ServiceConfigurationStore(_appDataRoot);
 
-        Assert.IsFalse(store.HasCredential, "A brand-new store must not report a credential before loading.");
-
         await store.LoadAsync();
 
-        Assert.IsTrue(store.HasCredential, "Loading on first run must generate a credential.");
         Assert.IsTrue(File.Exists(store.ConfigurationFilePath), "First run must persist the configuration file.");
     }
 
@@ -77,48 +77,29 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public async Task SaveAsync_NeverPersistsTheCredentialInPlaintext()
+    public async Task SaveAsync_NeverPersistsASecret()
     {
         var store = new ServiceConfigurationStore(_appDataRoot);
         await store.LoadAsync();
 
-        var plaintext = await store.GenerateCredentialAsync();
-        Assert.IsFalse(string.IsNullOrWhiteSpace(plaintext), "Generating a credential must yield a value for provisioning.");
+        await store.SaveAsync(store.Current);
 
         var fileContents = await File.ReadAllTextAsync(store.ConfigurationFilePath);
 
         Assert.IsFalse(
-            fileContents.Contains(plaintext, StringComparison.Ordinal),
-            "FR-026: the configuration file must never contain the plaintext credential.");
+            fileContents.Contains("credential", StringComparison.OrdinalIgnoreCase),
+            "T147: there is no credential any more, so none may be persisted.");
+        Assert.IsFalse(
+            fileContents.Contains("password", StringComparison.OrdinalIgnoreCase),
+            "The configuration file must never carry a password field.");
     }
 
     [TestMethod]
-    public async Task CredentialMatches_AcceptsTheGeneratedValue_AndRejectsEverythingElse()
+    public void ApiSettings_ExposesNoCredentialProperty()
     {
-        var store = new ServiceConfigurationStore(_appDataRoot);
-        await store.LoadAsync();
-
-        var plaintext = await store.GenerateCredentialAsync();
-
-        Assert.IsTrue(store.CredentialMatches(plaintext), "The generated credential must match itself.");
-        Assert.IsFalse(store.CredentialMatches(plaintext + "x"), "A longer token must not match.");
-        Assert.IsFalse(store.CredentialMatches(plaintext[..^1]), "A truncated token must not match.");
-        Assert.IsFalse(store.CredentialMatches(null), "A missing token must not match.");
-        Assert.IsFalse(store.CredentialMatches(string.Empty), "An empty token must not match.");
-    }
-
-    [TestMethod]
-    public async Task RotatingTheCredential_InvalidatesThePreviousValue()
-    {
-        var store = new ServiceConfigurationStore(_appDataRoot);
-        await store.LoadAsync();
-
-        var original = await store.GenerateCredentialAsync();
-        var rotated = await store.GenerateCredentialAsync();
-
-        Assert.AreNotEqual(original, rotated, "Rotation must produce a new value.");
-        Assert.IsFalse(store.CredentialMatches(original), "Rotation must invalidate the previous credential.");
-        Assert.IsTrue(store.CredentialMatches(rotated), "The rotated credential must be the one in force.");
+        Assert.IsNull(
+            typeof(ApiSettings).GetProperty("Credential"),
+            "T147 removed the shared credential, so the API settings must not carry one.");
     }
 
     [TestMethod]

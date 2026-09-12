@@ -255,7 +255,7 @@ down.
 | `VisualSource` | object | from existing `InforVisualDatabaseOptions` | Server/database/user; password from the existing env-var path (never plaintext in this file) |
 | `ApiSettings.BindAddress` | string | `0.0.0.0` | Configurable (FR-012); loopback-only is a valid operator choice |
 | `ApiSettings.Port` | int | 5760 | Configurable |
-| `ApiSettings.Credential` | protected blob | generated on first run | DPAPI `CurrentUser`; never displayed or logged (FR-026) |
+| ~~`ApiSettings.Credential`~~ | — | — | **Retired 2026-09-12 (T147)**: the shared credential was replaced by operator-role authorization; the settings record carries no secret at all |
 | `BackupPolicies` | map store → `BackupPolicy` | see §6 | Independent per store (FR-009) |
 | `AutoStartAtLogon` | bool | true | Writes/removes the per-user `Run` entry (FR-007) |
 | `MysqldumpPath` | string? | resolved from `PATH` | Absence is reported, not worked around (FR-013) |
@@ -340,16 +340,26 @@ triggered by the user (FR-003, US4 acceptance 2).
 
 ---
 
-## 9. Entity: `SharedCredential` (FR-026, SC-010)
+## 9. Entity: approved operator role (FR-026, SC-010) — **revised 2026-09-12 (T147)**
 
-| Field | Type | Notes |
+The `SharedCredential` entity is **retired**. A network caller is no longer identified by a secret; it names an
+application user, and the caller's authority is that user's role in the application's own store.
+
+| Aspect | Value | Notes |
 |---|---|---|
-| `ProtectedValue` | byte[] | DPAPI `CurrentUser` ciphertext; the only stored form |
-| `CreatedUtc` | DateTime (UTC) | |
+| Caller header | `X-MTM-Mock-User: <user name>` | `ServiceOperatorRoles.UserNameHeaderName` |
+| Resolution | `sp_auth_user_row_get` against `mtm_waitlist` | The application's own logon read; no inline statement (constitution III) |
+| Approved roles | `Admin`, `Developer`, `Plant Manager`, `Setup Lead`, `Production Lead` | `ServiceOperatorRoles.Approved`, compared case-insensitively and mirroring `DunnageWorkflowService.AllowedQuickAddRoles` |
+| Refusal | `401 {"error":"unauthorized"}` | Unknown user, inactive user, no role assignment, and unapproved role are deliberately indistinguishable |
+| Store unreachable | Refused | Authorization fails **closed** |
 
-**Rules**: never rendered in any UI, never written to any log or status payload, compared in constant time by the API
-authentication handler, and rotated only by explicit operator action (which invalidates existing clients until the new
-value is installed).
+**Rules**: the presented user name is never echoed in a response, header, or error body; refusals are logged with
+source/method/path/timestamp and the refusal reason only; no secret exists to display, log, rotate or distribute.
+
+> **Scope limit (recorded, not hidden).** The caller *asserts* its user name over plain HTTP; the service verifies
+> that the asserted user genuinely holds an approved role, so an invented name or an ordinary shop-floor user is
+> refused, but this is not cryptographic authentication. That trade was accepted by the owner on 2026-09-12 when
+> choosing the application role model over a shared secret.
 
 ---
 

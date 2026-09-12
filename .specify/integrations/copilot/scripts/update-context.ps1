@@ -1,4 +1,4 @@
-# update-context.ps1 — Copilot integration: create/update .github/copilot-instructions.md
+# update-context.ps1 -- Copilot integration: create/update .github/copilot-instructions.md
 #
 # This is the copilot-specific implementation that produces the GitHub
 # Copilot instructions file. The shared dispatcher reads
@@ -29,4 +29,15 @@ if (-not $repoRoot -or -not (Test-Path (Join-Path $repoRoot '.specify'))) {
 
 # Invoke shared update-agent-context script as a separate process.
 # Dot-sourcing is unsafe until that script guards its Main call.
-& "$repoRoot/.specify/scripts/powershell/update-agent-context.ps1" -AgentType copilot
+$dispatcher = Join-Path $repoRoot '.specify/scripts/powershell/update-agent-context.ps1'
+if (-not (Test-Path -LiteralPath $dispatcher -PathType Leaf)) {
+    # This script is a thin delegate; the shared implementation is installed by
+    # 'specify init'. Report the missing path explicitly instead of letting the
+    # call fail with an opaque "term is not recognized" message.
+    [Console]::Error.WriteLine("ERROR: shared dispatcher not found: $dispatcher")
+    [Console]::Error.WriteLine("Run 'specify init' to restore .specify/scripts/powershell/update-agent-context.ps1.")
+    exit 1
+}
+
+& $dispatcher -AgentType copilot
+exit $LASTEXITCODE

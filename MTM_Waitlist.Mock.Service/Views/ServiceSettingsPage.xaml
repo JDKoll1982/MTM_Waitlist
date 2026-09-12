@@ -183,18 +183,18 @@
                 </StackPanel>
             </Expander>
 
-            <!-- Shared credential -->
+            <!-- Operator access -->
             <Expander
-                AutomationProperties.Name="{x:Bind ViewModel.CredentialGroup.HeaderText}"
+                AutomationProperties.Name="{x:Bind ViewModel.OperatorAccessGroup.HeaderText}"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="10"
-                IsExpanded="{x:Bind ViewModel.CredentialGroup.IsExpanded, Mode=OneWay}"
+                IsExpanded="{x:Bind ViewModel.OperatorAccessGroup.IsExpanded, Mode=OneWay}"
                 Padding="0"
-                Visibility="{x:Bind ViewModel.CredentialGroup.IsVisible, Mode=OneWay}">
+                Visibility="{x:Bind ViewModel.OperatorAccessGroup.IsVisible, Mode=OneWay}">
                 <Expander.Header>
                     <Grid Padding="16,12,16,12" ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
@@ -206,39 +206,33 @@
                             Grid.Column="1"
                             VerticalAlignment="Center"
                             FontWeight="SemiBold"
-                            Text="{x:Bind ViewModel.CredentialGroup.HeaderText}" />
+                            Text="{x:Bind ViewModel.OperatorAccessGroup.HeaderText}" />
                     </Grid>
                 </Expander.Header>
 
                 <StackPanel Padding="16,0,16,16" Spacing="12">
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="{x:Bind ViewModel.CredentialGroup.DescriptionText}"
+                        Text="{x:Bind ViewModel.OperatorAccessGroup.DescriptionText}"
                         TextWrapping="Wrap" />
 
                     <wct:SettingsCard HorizontalAlignment="Stretch">
                         <wct:SettingsCard.Header>
-                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.CredentialStatusLabelText}" />
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.ApprovedRolesLabelText}" />
                         </wct:SettingsCard.Header>
                         <wct:SettingsCard.Description>
                             <StackPanel Spacing="4">
                                 <TextBlock
                                     Style="{ThemeResource BodyTextBlockStyle}"
-                                    Text="{x:Bind ViewModel.CredentialStatusText, Mode=OneWay}"
+                                    Text="{x:Bind ViewModel.ApprovedRolesText}"
                                     TextWrapping="Wrap" />
                                 <TextBlock
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                     Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind ViewModel.CredentialWriteOnlyText}"
+                                    Text="{x:Bind ViewModel.OperatorAccessDescriptionText}"
                                     TextWrapping="Wrap" />
                             </StackPanel>
                         </wct:SettingsCard.Description>
-                        <wct:SettingsCard.Content>
-                            <Button
-                                MinWidth="180"
-                                Command="{x:Bind ViewModel.RotateCredentialCommand}"
-                                Content="{x:Bind ViewModel.RotateCredentialText}" />
-                        </wct:SettingsCard.Content>
                     </wct:SettingsCard>
                 </StackPanel>
             </Expander>

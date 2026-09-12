@@ -123,6 +123,12 @@ public partial class App : Application
     /// </summary>
     private async Task StartAsync()
     {
+        // The very first thing the process does, so a launch that dies before the container exists still
+        // leaves a record naming where to look (T148(c)).
+        ServiceLog.Info(
+            "ServiceApp",
+            $"Start requested (pid {Environment.ProcessId}). Log directory: {ServiceLog.Directory}");
+
         try
         {
             var appInstance = AppInstance.FindOrRegisterForKey(SingleInstanceKey);
@@ -163,7 +169,7 @@ public partial class App : Application
                 .ReconcileAutoStartAsync(new CurrentUserRunRegistrationStore())
                 .ConfigureAwait(true);
 
-            StartupDebugLog.Info("ServiceApp", $"Auto-start reconciliation: {autoStartState.Message}");
+            ServiceLog.Info("ServiceApp", $"Auto-start reconciliation: {autoStartState.Message}");
 
             _services = _hostBuilder.Build(configuration, autoStartState: autoStartState);
 
@@ -179,7 +185,7 @@ public partial class App : Application
         }
         catch (Exception exception)
         {
-            StartupDebugLog.Error("ServiceApp", exception, "The service failed to start.");
+            ServiceLog.Error("ServiceApp", exception, "The service failed to start.");
             Exit();
         }
     }
@@ -214,12 +220,12 @@ public partial class App : Application
 
             foreach (var entry in entries.Where(entry => !entry.IsValid))
             {
-                StartupDebugLog.Info("ServiceApp", $"Shape '{entry.Shape.Key}' was excluded: {entry.InvalidReason}");
+                ServiceLog.Info("ServiceApp", $"Shape '{entry.Shape.Key}' was excluded: {entry.InvalidReason}");
             }
 
             foreach (var unregisteredKey in catalogProvider.UnregisteredShapeKeys)
             {
-                StartupDebugLog.Info(
+                ServiceLog.Info(
                     "ServiceApp",
                     $"Shape '{unregisteredKey}' exists in the cache but is not registered in the catalog, so nothing refreshes it.");
             }
@@ -389,11 +395,11 @@ public partial class App : Application
                 .RunAsync(BackupStore.MtmWaitlist)
                 .ConfigureAwait(true);
 
-            StartupDebugLog.Info("ServiceApp", $"Manual backup for mtm_waitlist finished as {record.Outcome}.");
+            ServiceLog.Info("ServiceApp", $"Manual backup for mtm_waitlist finished as {record.Outcome}.");
         }
         catch (Exception exception)
         {
-            StartupDebugLog.Error("ServiceApp", exception, "A manual backup failed.");
+            ServiceLog.Error("ServiceApp", exception, "A manual backup failed.");
         }
     }
 
@@ -420,7 +426,7 @@ public partial class App : Application
         }
         catch (Exception exception)
         {
-            StartupDebugLog.Error("ServiceApp", exception, "The service did not shut down cleanly.");
+            ServiceLog.Error("ServiceApp", exception, "The service did not shut down cleanly.");
         }
         finally
         {
@@ -441,6 +447,6 @@ public partial class App : Application
 
     private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        StartupDebugLog.Error("ServiceApp", e.Exception, "An unhandled exception reached the service application.");
+        ServiceLog.Error("ServiceApp", e.Exception, "An unhandled exception reached the service application.");
     }
 }

@@ -1,7 +1,7 @@
 # MTM_Waitlist.Mock.Service — deploy and run
 
 The on-host half of the Module_Mock cached fallback: a tray-only service that keeps the `mtm_mock` mirror
-warm from Infor Visual, exposes a credential-gated API, and backs up the four MySQL stores.
+warm from Infor Visual, exposes an operator-gated API, and backs up the four MySQL stores.
 
 It is **unpackaged** and **self-contained**. It is installed on the MySQL/Infor Visual host, not on the
 workstations — the workstations run the client application, which reaches the mirror through its own
@@ -48,36 +48,49 @@ folder must be copied whole: the service reads its shape population scripts from
 2. Open **Settings** from the tray and configure the cache connection, the Infor Visual connection, the
    four-store backup settings, the refresh interval (default: **3 hours**, on the local-midnight grid
    `00:00/03:00/06:00/09:00/12:00/15:00/18:00/21:00`), and the API bind address/port (default `0.0.0.0:5760`).
-3. Generate the shared credential. It is written DPAPI-protected for the current user and is **never shown
-   again**; record it out of band. This is the value the client application installs through
-   `MTM_MOCK_SERVICE_TOKEN` (see `MTM_Waitlist.Mock/Models/MockServiceClientOptions.cs`).
+3. **Operator access needs no provisioning.** The API admits a caller whose user name resolves to an approved
+   application role in `mtm_waitlist` (`Admin`, `Developer`, `Plant Manager`, `Setup Lead`, `Production Lead` —
+   `Api/ServiceOperatorRoles.cs`). There is no password, token or key to generate, record or install, and this
+   replaced the old shared credential entirely (T147). The signed-in application user is the operator, so a
+   workstation needs only `MTM_MOCK_SERVICE_ENDPOINT` (and `MTM_MOCK_SERVICE_USER` if the name it should present
+   differs from the account it runs as).
 4. Confirm auto-start. It is **on by default** (`ServiceConfiguration.AutoStartAtLogon = true`), so the first
    run has already registered the per-user `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry — and it
    records the path the executable was launched from, so **install the folder at its final location before the
    first run**. Turn the setting off if this host should not auto-start it; the service reconciles the entry.
-5. Set the secrets the configuration deliberately does not store (FR-026): the MySQL password as
+5. Set the secrets the configuration deliberately does not store: the MySQL password as
    `MTM_MYSQL_PASSWORD` (or a complete `MTM_MOCK_DB_CONNECTION_STRING` / `MTM_WAITLIST_DB_CONNECTION_STRING`),
    and the Infor Visual password as `INFOR_VISUAL_SQL_PASSWORD`. Without the cache connection the service still
-   starts and reports the condition; no refresh or backup can run.
+   starts and reports the condition; no refresh or backup can run. The API also needs the `mtm_waitlist`
+   connection, because that is where a caller's role is resolved.
 
 ## 4. Verify
 
 ```powershell
-# refused without the credential
+# refused when no operator is named
 curl.exe -i http://<host>:5760/api/status
 # 401 {"error":"unauthorized"}
 
-# status with the credential — the payload never contains the credential itself
-curl.exe -H "X-MTM-Mock-Token: <credential>" http://<host>:5760/api/status
+# refused when the named user's role is not approved — the refusal looks the same
+curl.exe -i -H "X-MTM-Mock-User: shop.user" http://<host>:5760/api/status
+# 401 {"error":"unauthorized"}
+
+# status as an approved operator (an application user whose role is one of the approved roles)
+curl.exe -H "X-MTM-Mock-User: <user name>" http://<host>:5760/api/status
 
 # on-demand refresh
-curl.exe -X POST -H "X-MTM-Mock-Token: <credential>" -H "Content-Type: application/json" `
+curl.exe -X POST -H "X-MTM-Mock-User: <user name>" -H "Content-Type: application/json" `
   -d '{\"shapeKeys\":null}' http://<host>:5760/api/refresh
 
 # restore is NOT reachable over the network — it is a host-only, confirmation-gated UI action
-curl.exe -i -H "X-MTM-Mock-Token: <credential>" http://<host>:5760/api/restore
+curl.exe -i -H "X-MTM-Mock-User: <user name>" http://<host>:5760/api/restore
 # 404
 ```
+
+When something is wrong, the answer is in the service's own daily log file — the durable diagnostic (T148(c)):
+`%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\Logs\service_daily_<yyyy_MM_dd>.jsonl`, one JSON object per line with
+`TimestampUtc`, `Level`, `Area`, `Message` and `Exception`. Every container log message and every startup
+decision lands there, including a refusal's reason and the reason a refresh cycle failed.
 
 ## 5. Uninstall
 
@@ -90,9 +103,10 @@ records and the backup artifacts live *there*, not beside the executable:
 | Item | Location |
 |---|---|
 | Configuration (`service-configuration.json`) | `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\` |
+| Daily log files (`service_daily_<yyyy_MM_dd>.jsonl`) | `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\Logs\` |
 | Refresh run records | `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\` |
 | Backup artifacts | `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\backups\<database>\` |
 
 (`ServiceHostBuilder.GetDefaultAppDataRoot()`, confirmed by running the published build on 2026-09-11.)
-Deleting only the install folder therefore leaves the DPAPI-protected credential, the schedules and the
+Deleting only the install folder therefore leaves the configuration, the schedules and the
 backups behind on the host.

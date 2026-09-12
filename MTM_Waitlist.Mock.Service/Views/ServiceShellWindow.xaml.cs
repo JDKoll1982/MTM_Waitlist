@@ -108,7 +108,7 @@ public sealed partial class ServiceShellWindow : Window
             return;
         }
 
-        StartupDebugLog.Info("ServiceShellWindow", $"Window icon was not found at '{iconPath}'.");
+        ServiceLog.Info("ServiceShellWindow", $"Window icon was not found at '{iconPath}'.");
     }
 
     /// <summary>Applies the localized text the title-bar search box needs.</summary>

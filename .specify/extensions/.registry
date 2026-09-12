@@ -35,6 +35,39 @@
       },
       "registered_skills": [],
       "installed_at": "2026-09-10T02:48:44.528533+00:00"
+    },
+    "token-budget": {
+      "version": "1.0.1",
+      "source": "local",
+      "manifest_hash": "sha256:2ea8616666abe014ac37b299cbdeea97b9153856eecc0730faabc8c42a1f7111",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.token-budget.compact",
+          "speckit.token-budget.scope",
+          "speckit.token-budget.concise",
+          "speckit.token-budget.usage"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-09-12T16:25:26.129993+00:00"
+    },
+    "optimize": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:011bc93e18ca788185271fc493d658d66c2544b99c131fcd293b136442af30f1",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-09-12T16:33:07.136465+00:00"
     }
   }
 }

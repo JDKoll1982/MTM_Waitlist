@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Mock.Service.Models;
@@ -14,25 +15,27 @@ using MTM_Waitlist.Mock.Service.Services;
 namespace MTM_Waitlist.Tests.Module_Mock_Service;
 
 /// <summary>
-/// Listener-level proof for the service's network surface (FR-011/FR-012/FR-023/FR-026, SC-010).
+/// Listener-level proof for the service's network surface (FR-011/FR-012/FR-023, SC-010).
 /// </summary>
 /// <remarks>
 /// <para>
 /// These tests start the real Kestrel host on a loopback port and speak HTTP to it, because the properties
-/// being asserted are properties of the <b>pipeline</b> — that the authorization fallback refuses an
-/// anonymous request, that the status payload carries no secret, and that a restore-shaped path is not routed
-/// at all. An operation-level test cannot see any of those: it never passes through authentication or routing.
+/// being asserted are properties of the <b>pipeline</b> — that the authorization fallback refuses a request
+/// that names no operator, that it refuses one whose role is not approved, and that a restore-shaped path is
+/// not routed at all. An operation-level test cannot see any of those: it never passes through
+/// authorization or routing.
 /// </para>
 /// <para>
 /// The cache connection is deliberately unconfigured, which is exactly the state an operator is in while
-/// provisioning the host — the API must still answer (T129).
+/// provisioning the host — the API must still answer (T129). The role lookup is stubbed, because the
+/// assertion is about the pipeline and not about MySQL (T147).
 /// </para>
 /// </remarks>
 [TestClass]
 public sealed class ServiceApiTests
 {
-    /// <summary>The header the shared credential travels in, per `contracts/mock-service-http-api.md`.</summary>
-    private const string TokenHeader = "X-MTM-Mock-Token";
+    /// <summary>The header the operator's user name travels in, per `contracts/mock-service-http-api.md`.</summary>
+    private const string UserNameHeader = "X-MTM-Mock-User";
 
     private static readonly string[] s_connectionEnvironmentVariables =
     [
@@ -74,7 +77,7 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task EveryRoutedEndpoint_RefusesARequestWithNoCredential()
+    public async Task EveryRoutedEndpoint_RefusesARequestThatNamesNoOperator()
     {
         var fixture = await GetFixtureAsync();
 
@@ -82,12 +85,12 @@ public sealed class ServiceApiTests
         // still be covered by the host's fallback policy, and this asserts that it is.
         foreach (var path in new[] { "/api/status", "/api/refresh", "/api/backup", "/api/backups" })
         {
-            using var response = await fixture.SendAsync(HttpMethod.Get, path, token: null).ConfigureAwait(false);
+            using var response = await fixture.SendAsync(HttpMethod.Get, path, userName: null).ConfigureAwait(false);
 
             Assert.AreEqual(
                 HttpStatusCode.Unauthorized,
                 response.StatusCode,
-                $"'{path}' answered {response.StatusCode} without a credential (SC-010).");
+                $"'{path}' answered {response.StatusCode} without an operator name (SC-010).");
             StringAssert.Contains(
                 await response.Content.ReadAsStringAsync().ConfigureAwait(false),
                 "unauthorized");
@@ -95,44 +98,77 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task EveryRoutedEndpoint_RefusesARequestWithTheWrongCredential()
+    public async Task EveryRoutedEndpoint_RefusesAUserWhoseRoleIsNotApproved()
     {
         var fixture = await GetFixtureAsync();
 
+        // 'shop.user' resolves to the ordinary 'Setup' role: a real, active user who is simply not an
+        // operator. The refusal must be indistinguishable from the anonymous case, so the surface cannot be
+        // used to enumerate the plant's users or their roles.
         foreach (var path in new[] { "/api/status", "/api/refresh", "/api/backup", "/api/backups" })
         {
-            using var response = await fixture.SendAsync(HttpMethod.Get, path, token: "not-the-credential").ConfigureAwait(false);
+            using var response = await fixture.SendAsync(HttpMethod.Get, path, "shop.user").ConfigureAwait(false);
 
-            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode, $"'{path}' accepted a wrong credential.");
+            Assert.AreEqual(
+                HttpStatusCode.Unauthorized,
+                response.StatusCode,
+                $"'{path}' admitted a user whose role is not approved.");
         }
     }
 
     [TestMethod]
-    public async Task Status_WithTheCredential_ReportsTheSurfaceWithoutRevealingAnySecret()
+    public async Task EveryRoutedEndpoint_RefusesAUserNameTheStoreDoesNotKnow()
     {
         var fixture = await GetFixtureAsync();
 
-        using var response = await fixture.SendAsync(HttpMethod.Get, "/api/status", fixture.Credential).ConfigureAwait(false);
-        var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        using var response = await fixture.SendAsync(HttpMethod.Get, "/api/status", "nobody.at.all").ConfigureAwait(false);
 
-        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        Assert.IsFalse(
-            body.Contains(fixture.Credential, StringComparison.Ordinal),
-            "The status payload must never echo the shared credential (FR-026).");
-
-        using var payload = JsonDocument.Parse(body);
-        Assert.AreEqual(5, payload.RootElement.GetProperty("shapes").GetArrayLength());
+        Assert.AreEqual(
+            HttpStatusCode.Unauthorized,
+            response.StatusCode,
+            "An invented user name must not be admitted, which is what makes the role lookup worth doing.");
     }
 
     [TestMethod]
-    public async Task Refresh_WithTheCredential_ReturnsPerShapeOutcomes()
+    public async Task Status_WithAnApprovedOperator_ReportsTheSurfaceWithoutAnySecret()
+    {
+        var fixture = await GetFixtureAsync();
+
+        using var response = await fixture.SendAsync(HttpMethod.Get, "/api/status", fixture.OperatorUserName).ConfigureAwait(false);
+        var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+        foreach (var environmentVariable in s_connectionEnvironmentVariables)
+        {
+            // The status surface is reachable by an approved operator and must still not disclose a
+            // connection string: it reports state, not credentials (SC-010).
+            var value = Environment.GetEnvironmentVariable(environmentVariable);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                Assert.IsFalse(
+                    body.Contains(value, StringComparison.Ordinal),
+                    $"The status payload must never echo '{environmentVariable}'.");
+            }
+        }
+
+        using var payload = JsonDocument.Parse(body);
+        Assert.AreEqual(5, payload.RootElement.GetProperty("shapes").GetArrayLength());
+        StringAssert.Contains(
+            payload.RootElement.GetProperty("operatorRoles").GetString(),
+            "Developer",
+            "The payload states which roles may call the API, so an operator can read it off the service.");
+    }
+
+    [TestMethod]
+    public async Task Refresh_WithAnApprovedOperator_ReturnsPerShapeOutcomes()
     {
         var fixture = await GetFixtureAsync();
 
         using var response = await fixture.SendAsync(
             HttpMethod.Post,
             "/api/refresh",
-            fixture.Credential,
+            fixture.OperatorUserName,
             """{"shapeKeys":null}""").ConfigureAwait(false);
         var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -170,7 +206,7 @@ public sealed class ServiceApiTests
         using var response = await fixture.SendAsync(
             HttpMethod.Post,
             "/api/refresh",
-            fixture.Credential,
+            fixture.OperatorUserName,
             """{"shapeKeys":["no_such_shape"]}""").ConfigureAwait(false);
 
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
@@ -178,14 +214,14 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task Restore_IsNotReachableOverTheNetwork_EvenWithAValidCredential()
+    public async Task Restore_IsNotReachableOverTheNetwork_EvenForAnApprovedOperator()
     {
         var fixture = await GetFixtureAsync();
 
         foreach (var method in new[] { HttpMethod.Get, HttpMethod.Post })
         {
             using var response = await fixture
-                .SendAsync(method, "/api/restore", fixture.Credential, "{}")
+                .SendAsync(method, "/api/restore", fixture.OperatorUserName, "{}")
                 .ConfigureAwait(false);
 
             Assert.AreEqual(
@@ -202,8 +238,8 @@ public sealed class ServiceApiTests
     }
 
     /// <summary>
-    /// Builds the service container with no cache connection, generates a credential, and starts the real
-    /// API listener on a free loopback port.
+    /// Builds the service container with no cache connection, arranges role resolution from a fixed table,
+    /// and starts the real API listener on a free loopback port.
     /// </summary>
     private sealed class ApiFixture : IAsyncDisposable
     {
@@ -211,15 +247,16 @@ public sealed class ServiceApiTests
         private readonly HttpClient _client;
         private readonly ServiceApiHost _host;
 
-        private ApiFixture(string root, string credential, HttpClient client, ServiceApiHost host)
+        private ApiFixture(string root, string operatorUserName, HttpClient client, ServiceApiHost host)
         {
             _root = root;
-            Credential = credential;
+            OperatorUserName = operatorUserName;
             _client = client;
             _host = host;
         }
 
-        public string Credential { get; }
+        /// <summary>A user whose resolved role is approved, so it may call the API.</summary>
+        public string OperatorUserName { get; }
 
         public static async Task<ApiFixture> StartAsync()
         {
@@ -243,11 +280,14 @@ public sealed class ServiceApiTests
             var provider = builder.Build(configuration);
             var store = provider.GetRequiredService<ServiceConfigurationStore>();
 
-            // The credential is returned exactly once, which is why the fixture holds it here: the service
-            // itself never displays it again (FR-026).
-            var credential = await store.GenerateCredentialAsync().ConfigureAwait(false);
-
-            var host = provider.GetRequiredService<ServiceApiHost>();
+            // The host is built here rather than resolved from the container so the role lookup comes from the
+            // stubbed table: these tests assert the pipeline, and a live application store is not part of it
+            // (T147). The user names and their roles are the ones FakeOperatorRoleResolver holds.
+            var host = new ServiceApiHost(
+                provider.GetRequiredService<ServiceApiOperations>(),
+                store,
+                new FakeOperatorRoleResolver(),
+                provider.GetRequiredService<ILogger<ServiceApiHost>>());
 
             // Startup validates the catalog before the API is served, so the tests run in the same order:
             // without it the status and refresh surfaces legitimately report no shapes, and the assertions
@@ -261,10 +301,10 @@ public sealed class ServiceApiTests
             // the builder.
             var bound = store.Current.Api;
             var client = new HttpClient { BaseAddress = new Uri($"http://127.0.0.1:{bound.Port}/") };
-            return new ApiFixture(root, credential, client, host);
+            return new ApiFixture(root, "test.operator", client, host);
         }
 
-        public Task<HttpResponseMessage> SendAsync(HttpMethod method, string path, string? token, string? json = null)
+        public Task<HttpResponseMessage> SendAsync(HttpMethod method, string path, string? userName, string? json = null)
         {
             var request = new HttpRequestMessage(method, path.TrimStart('/'));
 
@@ -273,9 +313,9 @@ public sealed class ServiceApiTests
                 request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             }
 
-            if (token is not null)
+            if (userName is not null)
             {
-                request.Headers.TryAddWithoutValidation(TokenHeader, token);
+                request.Headers.TryAddWithoutValidation(UserNameHeader, userName);
             }
 
             return _client.SendAsync(request);

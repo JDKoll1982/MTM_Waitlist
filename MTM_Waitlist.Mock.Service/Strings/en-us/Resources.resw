@@ -160,20 +160,11 @@
   <data name="Service_Settings.AutoStart" xml:space="preserve">
     <value>Start automatically at logon</value>
   </data>
-  <data name="Service_Settings.CredentialHeader" xml:space="preserve">
-    <value>Shared credential</value>
+  <data name="Service_Settings.OperatorAccessHeader" xml:space="preserve">
+    <value>Operator access</value>
   </data>
-  <data name="Service_Settings.RotateCredential" xml:space="preserve">
-    <value>Generate a new credential</value>
-  </data>
-  <data name="Service_Settings.CredentialWriteOnly" xml:space="preserve">
-    <value>The value is never shown or written to the log. After you rotate it, install the new value on every client.</value>
-  </data>
-  <data name="Service_Settings.CredentialConfigured" xml:space="preserve">
-    <value>A shared credential is set.</value>
-  </data>
-  <data name="Service_Settings.CredentialRotated" xml:space="preserve">
-    <value>A new credential was generated. Until every client is updated, their calls to the service are refused.</value>
+  <data name="Service_Settings.OperatorAccessDescription" xml:space="preserve">
+    <value>Callers are identified by the user name they send. There is no password to generate, record or install.</value>
   </data>
   <data name="Service_Settings.VisualHeader" xml:space="preserve">
     <value>Infor Visual source</value>
@@ -305,7 +296,7 @@
     <value>Infor Visual</value>
   </data>
   <data name="Service_Status.CredentialLabel" xml:space="preserve">
-    <value>API credential</value>
+    <value>Operator roles</value>
   </data>
   <data name="Service_Status.RefreshScheduleLabel" xml:space="preserve">
     <value>Refresh schedule</value>
@@ -403,8 +394,8 @@
   <data name="Service_Settings.ApiGroupDescription" xml:space="preserve">
     <value>Where the service listens for the applications that read the cached data.</value>
   </data>
-  <data name="Service_Settings.CredentialGroupDescription" xml:space="preserve">
-    <value>The single password every client must send with its requests.</value>
+  <data name="Service_Settings.OperatorAccessGroupDescription" xml:space="preserve">
+    <value>Which application roles may call the service. Everyone else is refused.</value>
   </data>
   <data name="Service_Settings.VisualGroupDescription" xml:space="preserve">
     <value>The Infor Visual database the cached data is read from. The service never writes to it.</value>
@@ -489,8 +480,8 @@
   <data name="Service_Settings.RestoreOutcomeDescription" xml:space="preserve">
     <value>What happened the last time a restore was run. Nothing above changes until the replacement is confirmed.</value>
   </data>
-  <data name="Service_Settings.CredentialLabel" xml:space="preserve">
-    <value>Credential state</value>
+  <data name="Service_Settings.ApprovedRolesLabel" xml:space="preserve">
+    <value>Approved roles</value>
   </data>
   <data name="Service_Settings.SaveHeader" xml:space="preserve">
     <value>Apply your changes</value>
@@ -510,7 +501,7 @@
     <value>Whether Infor Visual answers right now. When it does not, the cached data is served instead.</value>
   </data>
   <data name="Service_Status.CredentialLabelDescription" xml:space="preserve">
-    <value>Whether the shared password that clients must send has been set.</value>
+    <value>The application roles whose users may call the service API.</value>
   </data>
   <data name="Service_Status.RefreshScheduleLabelDescription" xml:space="preserve">
     <value>How often each cached read is rebuilt from Infor Visual.</value>

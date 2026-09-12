@@ -524,14 +524,14 @@ else {
         }
     }
 
-    # Authenticated endpoints must refuse without the shared credential.
+    # Authenticated endpoints must refuse a caller that names no operator (T147).
     $statusUrl = "http://localhost:$apiPort/api/status"
     $httpCode = (& curl.exe -s -o NUL -w '%{http_code}' $statusUrl 2>$null)
     if ("$httpCode" -eq '401') {
-        Add-Result 'API refuses without credential' 'PASS' "GET /api/status -> 401"
+        Add-Result 'API refuses an unnamed caller' 'PASS' "GET /api/status -> 401"
     }
     else {
-        Add-Result 'API refuses without credential' 'FAIL' "GET /api/status -> '$httpCode' (expected 401)"
+        Add-Result 'API refuses an unnamed caller' 'FAIL' "GET /api/status -> '$httpCode' (expected 401)"
     }
 
     # Single instance: a second launch must redirect and exit.

@@ -13,16 +13,16 @@ namespace MTM_Waitlist.Mock.Services;
 /// <inheritdoc cref="IMockServiceRefreshClient"/>
 /// <remarks>
 /// <para>
-/// <b>Never a hard dependency (FR-025, SC-011).</b> Every failure path — no endpoint installed, no
-/// credential installed, service not running, unauthorized, timeout, malformed response — returns
+/// <b>Never a hard dependency (FR-025, SC-011).</b> Every failure path — no endpoint installed, no user name
+/// available, service not running, refused, timeout, malformed response — returns
 /// <see cref="RefreshRequestResult.Unavailable(string)"/> and leaves the application serving cached content.
 /// No failure is thrown at a caller, and none is retried in a loop.
 /// </para>
 /// <para>
-/// <b>The credential is never recorded.</b> It is read from <see cref="MockServiceClientOptions"/> once per
-/// call, placed in the <c>X-MTM-Mock-Token</c> request header only, and never included in a log line, a
-/// result message, or an exception that escapes. Failure messages name the configuration keys a deployment
-/// must set, never a value.
+/// <b>The caller names itself; the service resolves its role (T147).</b> There is no credential: the user
+/// name travels in the <c>X-MTM-Mock-User</c> request header and the service authorizes it against the
+/// application's own store. Failure messages name the configuration key a deployment must set, never a
+/// value.
 /// </para>
 /// <para>
 /// <b>No side effect on read state.</b> Requesting a refresh does not touch the reachability detector or the
@@ -32,8 +32,8 @@ namespace MTM_Waitlist.Mock.Services;
 /// </remarks>
 public sealed class MockServiceRefreshClient : IMockServiceRefreshClient
 {
-    /// <summary>The header carrying the shared credential, per <c>contracts/mock-service-http-api.md</c>.</summary>
-    public const string TokenHeaderName = "X-MTM-Mock-Token";
+    /// <summary>The header carrying the user name the service authorizes, per <c>contracts/mock-service-http-api.md</c>.</summary>
+    public const string UserNameHeaderName = "X-MTM-Mock-User";
 
     /// <summary>The endpoint path the service exposes for an immediate refresh.</summary>
     public const string RefreshPath = "api/refresh";
@@ -42,9 +42,9 @@ public sealed class MockServiceRefreshClient : IMockServiceRefreshClient
         "The on-host refresh service is not installed on this workstation "
         + $"({MockServiceClientOptions.EndpointEnvironmentVariable} or {MockServiceClientOptions.SectionName}:Endpoint).";
 
-    private const string NoCredentialMessage =
-        "The on-host refresh service credential is not installed on this workstation "
-        + $"({MockServiceClientOptions.TokenEnvironmentVariable}).";
+    private const string NoUserNameMessage =
+        "The on-host refresh service cannot be called because no user name is available to present "
+        + $"({MockServiceClientOptions.UserNameEnvironmentVariable}).";
 
     private static readonly HttpClient s_sharedClient = new() { Timeout = TimeSpan.FromSeconds(10) };
 
@@ -58,7 +58,7 @@ public sealed class MockServiceRefreshClient : IMockServiceRefreshClient
 
     /// <summary>Creates the client.</summary>
     /// <param name="httpClient">Optional client; a shared, 10-second-timeout client is used by default.</param>
-    /// <param name="configuration">Optional configuration supplying the endpoint and credential fallbacks.</param>
+    /// <param name="configuration">Optional configuration supplying the endpoint and user-name fallbacks.</param>
     public MockServiceRefreshClient(HttpClient? httpClient = null, IConfiguration? configuration = null)
     {
         _httpClient = httpClient ?? s_sharedClient;
@@ -79,9 +79,9 @@ public sealed class MockServiceRefreshClient : IMockServiceRefreshClient
             return RefreshRequestResult.Unavailable(NotConfiguredMessage);
         }
 
-        if (string.IsNullOrWhiteSpace(options.Token))
+        if (string.IsNullOrWhiteSpace(options.UserName))
         {
-            return RefreshRequestResult.Unavailable(NoCredentialMessage);
+            return RefreshRequestResult.Unavailable(NoUserNameMessage);
         }
 
         if (!Uri.TryCreate(EnsureTrailingSlash(options.Endpoint), UriKind.Absolute, out var baseUri))
@@ -97,7 +97,7 @@ public sealed class MockServiceRefreshClient : IMockServiceRefreshClient
                 Content = JsonContent.Create(new RefreshRequestBody(
                     shapeKeys is null || shapeKeys.Count == 0 ? null : shapeKeys.ToArray())),
             };
-            request.Headers.TryAddWithoutValidation(TokenHeaderName, options.Token);
+            request.Headers.TryAddWithoutValidation(UserNameHeaderName, options.UserName);
 
             using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
@@ -106,7 +106,7 @@ public sealed class MockServiceRefreshClient : IMockServiceRefreshClient
                 return RefreshRequestResult.Unavailable(response.StatusCode switch
                 {
                     System.Net.HttpStatusCode.Unauthorized =>
-                        "The on-host refresh service refused the installed credential.",
+                        "The on-host refresh service refused the user name this workstation presented.",
                     System.Net.HttpStatusCode.Conflict =>
                         "The on-host refresh service is already running a refresh cycle.",
                     _ => $"The on-host refresh service returned {(int)response.StatusCode} ({response.ReasonPhrase}).",

@@ -121,8 +121,11 @@ snapshot or the complete new one — never a mixture and never an empty table (F
    ```
 2. Launch it. Expected: **no main window** — a tray icon appears and the background engines start.
 3. Open the settings UI from the tray and confirm the configuration surface: refresh interval, per-store backup
-   schedule/retention/destination, API bind address/port, Visual connection, and last-run status (FR-012, FR-013).
-4. Generate the shared credential. **Record it out of band** — the UI will not display it again (FR-026).
+   schedule/retention/destination, API bind address/port, Visual connection, operator access, and last-run status
+   (FR-012, FR-013).
+4. Confirm operator access needs nothing generated: the API admits a caller whose user name resolves to an approved
+   application role in `mtm_waitlist` (`Admin`, `Developer`, `Plant Manager`, `Setup Lead`, `Production Lead`).
+   There is no credential to record or distribute (T147).
 5. Enable auto-start at logon (FR-007) and confirm the per-user `Run` entry exists:
    `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
 6. Sign out and back in; the service must start automatically, minimized, with no user interaction (US3 acceptance 1).
@@ -130,21 +133,28 @@ snapshot or the complete new one — never a mixture and never an empty table (F
 **Verify the API** (see `contracts/mock-service-http-api.md`):
 
 ```powershell
-# refused without the credential (SC-010)
+# refused when no operator is named (SC-010)
 curl.exe -i http://<host>:5760/api/status
 # 401 {"error":"unauthorized"}
 
-# status with the credential — note it never contains the credential itself
-curl.exe -H "X-MTM-Mock-Token: <credential>" http://<host>:5760/api/status
+# refused the same way when the named user's role is not approved
+curl.exe -i -H "X-MTM-Mock-User: shop.user" http://<host>:5760/api/status
+# 401 {"error":"unauthorized"}
+
+# status as an approved operator
+curl.exe -H "X-MTM-Mock-User: <user name>" http://<host>:5760/api/status
 
 # on-demand refresh
-curl.exe -X POST -H "X-MTM-Mock-Token: <credential>" -H "Content-Type: application/json" `
+curl.exe -X POST -H "X-MTM-Mock-User: <user name>" -H "Content-Type: application/json" `
   -d '{\"shapeKeys\":null}' http://<host>:5760/api/refresh
 
 # restore is NOT reachable over the network (FR-023)
-curl.exe -i -H "X-MTM-Mock-Token: <credential>" http://<host>:5760/api/restore
+curl.exe -i -H "X-MTM-Mock-User: <user name>" http://<host>:5760/api/restore
 # 404
 ```
+
+When the API refuses a caller or a refresh cycle fails, the reason is in the service's own daily log file
+(T148(c)): `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\Logs\service_daily_<yyyy_MM_dd>.jsonl`.
 
 7. Leave the service running for one configured interval and confirm each shape's `lastOutcome` in `/api/status`
    becomes `succeeded` with a fresh `refreshedUtc` (US3 acceptance 2, SC-007).

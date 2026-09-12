@@ -144,8 +144,8 @@ public sealed partial class ServiceStatusViewModel : ObservableObject, IServiceS
     /// <summary>Label: the external source and its reachability.</summary>
     public string VisualSourceLabelText => "Service_Status.VisualSourceLabel".GetLocalized();
 
-    /// <summary>Label: whether the API credential exists.</summary>
-    public string CredentialLabelText => "Service_Status.CredentialLabel".GetLocalized();
+    /// <summary>Label: which application roles may call the service API.</summary>
+    public string OperatorRolesLabelText => "Service_Status.CredentialLabel".GetLocalized();
 
     /// <summary>Label: the configured refresh cadence.</summary>
     public string RefreshScheduleLabelText => "Service_Status.RefreshScheduleLabel".GetLocalized();
@@ -166,7 +166,7 @@ public sealed partial class ServiceStatusViewModel : ObservableObject, IServiceS
     public string VisualSourceLabelDescriptionText => "Service_Status.VisualSourceLabelDescription".GetLocalized();
 
     /// <summary>Note under the API credential line.</summary>
-    public string CredentialLabelDescriptionText => "Service_Status.CredentialLabelDescription".GetLocalized();
+    public string OperatorRolesLabelDescriptionText => "Service_Status.CredentialLabelDescription".GetLocalized();
 
     /// <summary>Note under the refresh schedule line.</summary>
     public string RefreshScheduleLabelDescriptionText => "Service_Status.RefreshScheduleLabelDescription".GetLocalized();
@@ -293,11 +293,9 @@ public sealed partial class ServiceStatusViewModel : ObservableObject, IServiceS
             },
             new ServiceSummaryRow
             {
-                LabelText = CredentialLabelText,
-                DescriptionText = CredentialLabelDescriptionText,
-                ValueText = payload.CredentialConfigured
-                    ? "Service_Settings.CredentialConfigured".GetLocalized()
-                    : "Service_Common.NotConfigured".GetLocalized()
+                LabelText = OperatorRolesLabelText,
+                DescriptionText = OperatorRolesLabelDescriptionText,
+                ValueText = payload.OperatorRoles
             },
             new ServiceSummaryRow
             {

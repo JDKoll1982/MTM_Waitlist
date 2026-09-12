@@ -86,7 +86,7 @@ An operator or developer wants fresh cached data now rather than waiting for the
 
 1. **Given** the service is running, **When** an authorized caller requests an immediate refresh, **Then** all configured read shapes are refreshed and the caller receives an outcome.
 2. **Given** the service has run at least one cycle, **When** an authorized caller requests status, **Then** last refresh and last backup outcomes per item are returned.
-3. **Given** a caller does not present the shared credential, **When** any request is made, **Then** the request is refused.
+3. **Given** a caller does not name an application user holding an approved operator role, **When** any request is made, **Then** the request is refused.
 
 ---
 
@@ -135,7 +135,7 @@ A maintainer needs to add a sixth external read shape. They follow a published p
 - **Long-running read during a refresh**: A user read spans a refresh boundary — it must return a single consistent snapshot.
 - **Unconfirmed restore**: A restore is requested but not confirmed — no data changes.
 - **Restore interrupted**: A restore fails partway — the operator must be able to distinguish the failed state and recover from a backup.
-- **Unauthorized network request**: A refresh/status request arrives without the shared credential — it is refused and logged without leaking secrets. Restore is not exposed on the network at all.
+- **Unauthorized network request**: A refresh/status request arrives that names no application user, names an unknown or inactive one, or names one whose role is not an approved operator role — it is refused, with the same response for all three cases, and logged without leaking secrets. Restore is not exposed on the network at all.
 - **Backup facility missing**: The host lacks the backup tooling — reported, no false success.
 - **Source schema drift**: The external read returns an unexpected column set — the refresh for that shape must be marked failed and must not corrupt the last good cached snapshot.
 - **New read shape half-added**: A maintainer adds a cached shape but not the refresh registration — the gap must be detectable (documented in the playbook and covered by verification).
@@ -156,8 +156,8 @@ A maintainer needs to add a sixth external read shape. They follow a published p
 - **FR-008**: The service MUST refresh supported external reads on a configurable schedule, MUST skip and log cycles when the external source is unreachable, and MUST leave the last good cached snapshot intact.
 - **FR-009**: The service MUST produce periodic backups of all four internal stores, configurable independently per store (enablement, schedule, retention, destination).
 - **FR-010**: The service MUST support restoring a selected store from a selected backup as a full replacement, performed from the service on the database host, and MUST require an explicit confirmation before making any change.
-- **FR-011**: The service MUST expose a network-reachable, credential-gated interface that supports requesting an immediate refresh and retrieving status; the application and operators MAY request an immediate refresh through it; requests without the shared credential MUST be refused.
-- **FR-012**: The service MUST allow an operator to configure and persist the refresh interval, per-store backup settings, its network endpoint and shared credential, and external-source connection details.
+- **FR-011**: The service MUST expose a network-reachable, operator-gated interface that supports requesting an immediate refresh and retrieving status; the application and operators MAY request an immediate refresh through it; requests that do not name an application user holding an approved operator role MUST be refused.
+- **FR-012**: The service MUST allow an operator to configure and persist the refresh interval, per-store backup settings, its network endpoint, and external-source connection details.
 - **FR-013**: The service MUST record and surface, per item, the outcome and timestamp of the last refresh and the last backup, and MUST report clearly when required backup tooling is unavailable.
 - **FR-014**: The system MUST remove the legacy sample/demo data systems in full — the in-application sample catalogs and their contract, the demo toggles and their keys, the mock routing/auto-force/monitoring stack and its toasts, the settings "use demo data" control, the database-backed demo master tables with their query routines, seeds, and registry entries — together with the tests that exercised them.
 - **FR-015**: Every data operation against the application's stores MUST be performed through pre-defined, centrally managed query routines. No inline or hard-coded statement text may remain embedded in application code.
@@ -168,10 +168,10 @@ A maintainer needs to add a sixth external read shape. They follow a published p
 - **FR-020**: The system MUST support a new external read shape being added without downtime for the application, so that already-deployed clients continue to serve existing shapes.
 - **FR-021**: When an internal store (application, floor/WIP, or receiving) is unavailable, the system MUST retry automatically with a bounded backoff (up to three attempts, with delays of approximately 1 s, 2 s, and 4 s) and, if the retries still fail, MUST present a clear unavailable/error state on the screen that initiated the read, including a manual retry action and guidance; it MUST NOT substitute sample data and MUST NOT rely on a persistent empty-state banner.
 - **FR-022**: While cached data is being served, the read-only indicator MUST include the age of the cached data (the time of the last successful refresh) so users can judge freshness; the system MUST NOT refuse to serve cached data based on its age.
-- **FR-023**: The shared credential MUST gate only the network refresh/status interface. Restore MUST be host-only and MUST NOT be exposed, routed, or otherwise reachable over the network.
+- **FR-023**: Operator authorization MUST gate only the network refresh/status interface. Restore MUST be host-only and MUST NOT be exposed, routed, or otherwise reachable over the network.
 - **FR-024**: The system MUST prefer live external data whenever the external source is reachable and MUST serve from the cached copy only while that source is unreachable; a reachable source that legitimately returns no rows MUST NOT be replaced by cached data.
 - **FR-025**: The application MUST remain fully functional when the service is not running, relying only on the cached copy's current contents; refresh scheduling MUST be owned by the service, and the application MUST NOT perform its own scheduled refresh.
-- **FR-026**: The service MUST store its shared credential securely (never in plaintext configuration that is exposed to callers) and MUST NOT display or log the credential.
+- **FR-026**: The service MUST authorize a network caller by resolving the caller's user name against the application's own user and role store, MUST fail closed when that resolution is impossible, and MUST NOT disclose which of "unknown user", "no role" or "role not approved" applied.
 - **FR-027**: The cached-data store MUST be a dedicated store, separate from the application's own store, and MUST never be used as an authoritative source for internal application data (only as the external-read fallback).
 - **FR-028**: Project documentation MUST be updated to describe this module and to remove references to the retired sample/demo systems, including the published playbook for adding a new external read shape.
 
@@ -182,10 +182,10 @@ A maintainer needs to add a sixth external read shape. They follow a published p
 - **External read shape**: A distinct result the application consumes from the external source. Five are in initial scope: work-order lookup, operation sequence, subordinate parts, inventory locations, and disposition input. Each is defined by its name, required inputs, returned columns, source query, refresh schedule, and cached counterpart — this definition is the unit of extensibility.
 - **Cached copy**: The stored counterpart of one read shape, holding the read's inputs and outputs plus freshness metadata, and updated only as a complete replacement.
 - **Refresh run record**: The outcome of one refresh attempt for one read shape — start, finish, success/skip/failure, and any error detail.
-- **Service configuration**: Operator-editable settings — refresh interval, per-store backup settings, network endpoint and shared credential, and external-source connection details.
+- **Service configuration**: Operator-editable settings — refresh interval, per-store backup settings, network endpoint, and external-source connection details.
 - **Backup artifact**: A restorable copy of one internal store, with the store it belongs to, its creation time, location, size, and whether it is retained.
 - **Read status state**: Whether reads are currently live or served from cache, the last successful refresh per shape, and the age of the cached data.
-- **Shared credential**: The single secret that gates the service's network interface.
+- **Approved operator role**: One of the application roles permitted to call the service's network interface, resolved from the application's own user and role store rather than from a shared secret.
 
 ## Success Criteria *(mandatory)*
 
@@ -200,7 +200,7 @@ A maintainer needs to add a sixth external read shape. They follow a published p
 - **SC-007**: The cache is refreshed at least once per configured interval, with ≥95% of scheduled cycles succeeding over a 30-day observation window, and every skipped cycle attributable to a logged external-source outage.
 - **SC-008**: 100% of scheduled backup windows over a 30-day window produce a restorable artifact for every store with backups enabled.
 - **SC-009**: A database restore, from request to verified replacement, completes in under 15 minutes in 100% of drills, and 0 restores execute without the confirmation step.
-- **SC-010**: Unauthorized network requests to the service are refused 100% of the time, and no shared credential appears in any log or displayed status.
+- **SC-010**: Unauthorized network requests to the service are refused 100% of the time, and no secret material appears in any log or displayed status.
 - **SC-011**: The application remains fully functional with the service stopped — 0 hard failures caused by the service being absent.
 - **SC-012**: A maintainer who has not previously worked on the cache can add a sixth read shape end-to-end within one working day following only the published playbook.
 - **SC-013**: Automated audit finds 0 references to the retired demo/sample systems and 0 inline database statement text in application code.

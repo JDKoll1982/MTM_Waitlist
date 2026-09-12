@@ -114,7 +114,13 @@ public sealed class ServiceHostBuilder
 
         _loadedConfiguration = configuration;
 
-        _services.AddLogging(builder => builder.SetMinimumLevel(LogLevel.Information));
+        // The durable sink: without it the container's log messages reach nothing an operator can read on
+        // the host, which is what made a service that never refreshed undiscoverable (T148(c)).
+        _services.AddLogging(builder =>
+        {
+            builder.SetMinimumLevel(LogLevel.Information);
+            builder.AddProvider(new ServiceFileLoggerProvider());
+        });
         _services.AddSingleton<TimeProvider>(TimeProvider.System);
 
         if (loggerFactory is not null)
@@ -260,14 +266,20 @@ public sealed class ServiceHostBuilder
     /// Registers the freshness reader, the operations facade, and the API host.
     /// </summary>
     /// <remarks>
-    /// The API's authentication handler resolves <see cref="ServiceConfigurationStore"/> from the API's own
-    /// container, so the host passes that same instance in rather than a copy: a rotated credential must be
-    /// accepted immediately, without restarting the listener.
+    /// The API authorizes a caller by resolving the asserted user's application role, so the resolver is
+    /// built here over the same resolved <c>mtm_waitlist</c> connection the cache and backups use: the
+    /// service stores no second copy of the store's host or login, and no credential exists to rotate or
+    /// distribute (T147).
     /// </remarks>
     private void RegisterServiceApi()
     {
         _services.AddSingleton<IVisualShapeFreshnessReader>(provider =>
             new VisualShapeFreshnessReader(ResolveCacheConnection(provider.GetRequiredService<MySqlConnectionStringResolver>())));
+        // Resolved lazily so a settings save that points the service at another MySQL host takes effect
+        // without a redeploy: the resolver reads the live configuration when the API first authorizes.
+        _services.AddSingleton<IServiceOperatorRoleResolver>(_ => new ServiceOperatorRoleResolver(
+            new MySqlConnectionStringResolver(GetLiveConfiguration().MySqlConnection)
+                .Resolve(ServiceOperatorRoleResolver.ApplicationStoreDatabaseName)));
         _services.AddSingleton(provider => new ServiceApiOperations(
             provider.GetRequiredService<RefreshEngine>(),
             provider.GetRequiredService<RefreshShapeCatalogProvider>(),
@@ -282,6 +294,7 @@ public sealed class ServiceHostBuilder
         _services.AddSingleton(provider => new ServiceApiHost(
             provider.GetRequiredService<ServiceApiOperations>(),
             provider.GetRequiredService<ServiceConfigurationStore>(),
+            provider.GetRequiredService<IServiceOperatorRoleResolver>(),
             provider.GetRequiredService<ILogger<ServiceApiHost>>()));
 
         // The settings and status surfaces resolve their view models from this container, so the pages

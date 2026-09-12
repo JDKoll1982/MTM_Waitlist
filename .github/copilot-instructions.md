@@ -3,7 +3,10 @@ Use available MCP servers to ground implementation decisions before writing or c
 Canonical MCP-first policy (Serena, Context7, Microsoft Learn) is maintained in
 `.github/instructions/mcp-doc-research.instructions.md` — that file is the single source of truth
 for tool names and server roles. Do not restate it here.
-
+# Output Control Invariants
+- Be highly terse and concise. Never explain code unless explicitly requested.
+- Strip all conversational filler, introductory pleasantries, and summarizing conclusions.
+- Output code blocks directly. Prioritize raw information density over prose.
 ## Repo-Specific Focus
 For this repository, prioritize MCP-backed validation for:
 - WinUI 3 and Windows App SDK APIs
@@ -161,3 +164,31 @@ When executing complex, cross-file architectural edits, you must strictly move t
 - `PRI175` / `PRI224 root node not found` during `dotnet build` is usually stale PRI artifacts or a running `MTM_Waitlist.exe` locking the output — not a code error. Stop the running app, delete stale `*.pri` under `obj/`/`bin/`, and rebuild before debugging the code.
 - `WMC9999: Could not find any resources appropriate for the specified culture ... ErrorMessages.resources` during `dotnet build` is a **MASKED XAML error, not an environment problem**. This machine's WindowsAppSDK 2.3.1 `XamlCompiler` (in `tools\net472` of the `microsoft.windowsappsdk.winui` package) is missing its `ErrorMessages.resources` satellite, so the compiler cannot report the underlying cause — any real XAML compile error (bad type, bad binding, wrong member name) surfaces only as this generic WMC9999. Treat WMC9999 as "there is a real XAML error somewhere; the tool can't tell you where." To surface the real error: temporarily introduce a deliberate C# error (e.g. duplicate a command) so the compiler reports the actual file/type problem, or bisect by simplifying the recently-changed XAML files.
 - CommunityToolkit.Mvvm `[RelayCommand]` STRIPS a trailing `Async` from the method name when generating the command: `private async Task ContinueToReviewAsync()` must be bound in XAML as `Command="{x:Bind ViewModel.ContinueToReviewCommand}"` (NOT `...AsyncCommand`). Binding the wrong name is a silent XAML failure that shows up only as the masked `WMC9999` above.
+
+<!-- BEGIN token-budget concise-mode -->
+<!-- toggled: 2026-09-12 -->
+
+## Token Budget — concise mode (active)
+
+When executing any `/speckit.*` command (constitution, specify,
+clarify, plan, tasks, analyze, implement, checklist,
+token-budget.*), follow these output rules:
+
+- Do not narrate plans, intentions, or steps. Run them.
+- Do not recap the user's prompt back to them.
+- Do not announce file writes ("I'll create...", "Now writing..."). Just write.
+- After completing the command, output only:
+  1. The list of files created or changed, one per line.
+  2. Any blocking question or unmet assumption, in one sentence.
+  3. The single line "Done." if there is nothing else to report.
+- Tables, fenced code, and structured data inside artifacts are
+  unaffected — this rule governs only the chat-channel prose around
+  them.
+- Override on request: if the user explicitly asks "explain", "walk
+  me through", "why", or "what did you do", drop concise mode for
+  that single reply and answer normally.
+
+These rules apply only inside `/speckit.*` workflows. Conversational
+replies outside SDD steps are not affected.
+
+<!-- END token-budget concise-mode -->
