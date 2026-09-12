@@ -1,6 +1,6 @@
 # Open Tasks — MTM_Waitlist
 
-**Generated:** 2026-09-11 (from the synced repository at `c2d5e04`, working tree clean).
+**Generated:** 2026-09-11 (from the synced repository at `c2d5e04`, working tree clean); §1 updated 2026-09-12.
 **Scope:** every live open (`- [ ]` / `+ [ ]`) checkbox in the tracked backlog documents, plus the items that
 look open but are not.
 
@@ -22,13 +22,15 @@ file is the itemised breakdown. Duplicating it would create a divergent third co
 
 ## 1. Live open work — `specs/001-module-mock-visual-fallback/tasks.md`
 
-**149 boxes: 147 `[x]`, 2 `[ ]`.** These two are the only tasks in the active feature that are not done. T147 and
-T148 were resolved on 2026-09-12 (see §1.3 and §1.4).
+**151 boxes: 149 `[x]`, 2 `[ ]`.** These two are the only tasks in the active feature that are not done.
+T144, T147 and T148 were all resolved on 2026-09-12 (see §1.2–§1.4); T150 was implemented and T151 (its
+verification counterpart) added the same day (see §1.5).
 
 | ID | Severity | Summary | Blocker / decision needed |
 | --- | --- | --- | --- |
 | **T106** | verification | End-to-end acceptance walkthrough — `quickstart.md` §1–§8 on a running build | Environment + operator interaction; see §1.1 |
-| **T144** | coverage | The cache's key domain still can't express most open work orders (transparency half is fixed) | **Operator/product decision** |
+| **T151** | verification | Confirm the shape-4 cache holds no zero-stock rows after the next host refresh | A host refresh cycle; see §1.5 |
+| ~~T144~~ | ~~coverage~~ | **RESOLVED 2026-09-12** — the operator narrowed the work-order input rule to the `WO-######` form only, then the cache guards and the live reads were narrowed to match | — |
 | ~~T147~~ | ~~HIGH~~ | **RESOLVED 2026-09-12** — the shared credential was retired; the API is authorized by the caller's application role | — |
 | ~~T148~~ | ~~HIGH~~ | **RESOLVED 2026-09-12** — (a) the show-request channel + desktop shortcut shipped; (c) the service now writes its own daily log file | — |
 
@@ -52,27 +54,36 @@ A fifth reason was added on 2026-09-11: §3 step 3's *"every journey returns a c
 result"* would pass on **shape** while still serving a **different work order** than the live read for the same
 input — which is T144.
 
-### 1.2 T144 — cache key domain ≠ live read domain (coverage half)
+### 1.2 T144 — RESOLVED 2026-09-12 (the operator narrowed the input rule to `WO-######`)
 
-The **transparency** half is **fixed**: all five `Database/InforVisual/Queues/Module_Mock/Populations/*.sql`
-now emit exactly the live-resolvable key domain, verified live (`work_order_lookup` 701 · `operation_sequences`
-893 · `subordinate_parts` 1,746 · `inventory_locations` 79,457 · `disposition_input` 701).
+The **transparency** half was **fixed 2026-09-11**: all five `Database/InforVisual/Queues/Module_Mock/Populations/*.sql`
+emit exactly the live-resolvable key domain (`work_order_lookup` 701 · `operation_sequences` 893 ·
+`subordinate_parts` 1,746 · `inventory_locations` 79,457 · `disposition_input` 701).
 
-What remains is **coverage**, and it needs a product decision. The application's input rule
-`^(?:WO-)?(\d{5,6})$` (`MTM_Waitlist.Setup/Services/WorkOrderValidationService.cs`) **cannot express 42,143 of
-the 42,852** open Infor Visual work orders:
+The **coverage** half was open because the application's input rule `^(?:WO-)?(\d{5,6})$`
+(`MTM_Waitlist.Setup/Services/WorkOrderValidationService.cs`) could not express **42,143 of the 42,852** open Infor
+Visual work orders, and widening it meant changing product behaviour. The operator took that decision on 2026-09-12
+— and took the **opposite** branch: the application accepts **only the `WO-######` form** (literal `WO-` + exactly six
+digits). The rule, the five population guards and the four work-order live reads were all narrowed to it in the same
+change:
 
-| Family | `BASE_ID` form | Open | Live-resolvable | In cache |
+| Family | `BASE_ID` form | Open | Before | Now |
 | --- | --- | ---: | --- | --- |
-| `W` | literally `WO-` + digits | 555 | yes (verbatim) | yes (after fix) |
-| `M` | bare numeric, exactly 6 digits | 154 | yes (via stripped form) | yes |
-| `M` | bare numeric, 5 digits | 76 | **no** (padded key matches nothing, or a *different* `WO-` order) | **no** (correctly) |
-| other | `Q` family (37,259) + non-prefixed `W` (140) + remaining `M` (4,668) | 42,067 | **no** — not expressible by the input rule at all | n/a |
+| `W` | literally `WO-` + 6 digits | 555 | reachable, cached | **the only reachable family** |
+| `M` | bare numeric, exactly 6 digits | 154 | reachable via the stripped-form match | **unreachable by design** — no longer accepted, no longer cached |
+| `M` | bare numeric, 5 digits | 76 | unreachable | unreachable |
+| other | `Q` family (37,259) + non-prefixed `W` (140) + remaining `M` (4,668) | 42,067 | unreachable | unreachable |
 
-Widening the rule changes the five shared live scripts **and** `WorkOrderValidationService`, i.e. product
-behaviour outside this feature — hence a decision, not a fix. **3** of the 76 five-digit cases produce a
-cross-order collision, which is why simply adding the bare numeric form to the live scripts is *not* a safe
-shortcut: one key would then match two different orders.
+Narrowing closes the defect class instead of extending it: the key the application asks for is always the verbatim
+Infor Visual `BASE_ID` of a `W`-family order, so the live read and the cached copy are keyed by the same string.
+The stripped-base-id match (`BASE_ID IN (@NormalizedWorkOrderTrimmed, @WorkOrderBaseId)`) was **removed** from
+`LookupWorkOrder.sql`, `GetSequences.sql`, `GetSubordinateParts.sql` and `GetDispositionInput.sql` — leaving it would
+still resolve bare `M` orders the application can no longer ask for, and the **3** five-digit cases that collide with
+a `WO-0xxxxx` order would keep returning a *different* order than the cache served. Placeholder/validation/tooltip
+copy now names the single accepted form. Build + offline suite: **747 total, 728 passed, 19 skipped, 0 failed**.
+The population reads still need a **live** re-run on the cache host to confirm the new row counts.
+
+Full detail: `specs/001-module-mock-visual-fallback/tasks.md` Phase 24.
 
 ### 1.3 T147 — RESOLVED 2026-09-12 (role-based authorization replaced the shared credential)
 
@@ -114,6 +125,25 @@ container log message — the refresh engine's cycle failures above all — is d
 
 **Order of attack (as executed, 2026-09-12):** T147 and (c) are done; the remaining host step is to re-run the
 deployment and re-check §2 step 7, which is now the first item of `VALIDATION-PROMPT-SERVER.md`.
+
+### 1.5 T150 / T151 — shape-4 cache no longer stores zero-stock locations (2026-09-12)
+
+- **T150 (implemented).** `inventory_locations_population.sql` now ends with
+  `HAVING MAX(COALESCE(pl.QTY, part.QTY_ON_HAND, 0)) >= 1`, so a `(part_number, location)` slot is only cached when
+  it holds stock. The mirror carries a unique `(part_number, location)` key and the caller already keeps only
+  on-hand `>= 1` (`MTM_Waitlist.Waitlist.View/Services/InventoryLocationFiltering.cs`), so a zero-stock row was
+  occupying a slot nobody displays — 79,218 seeded rows were overwhelmingly zero-stock.
+- **The replacement semantics were already correct**, and are unchanged: `sp_visual_inventory_locations_refresh`
+  truncates the stage twin, inserts the payload, asserts `v_loaded = JSON_LENGTH(p_rows)`, then swaps the tables by
+  `RENAME TABLE`. The live mirror is replaced wholesale every run, so a location that drops to zero disappears on
+  the next cycle with no stale row. The exclusion is done at the **source** so that row-count assertion stays intact.
+- **T151 (open).** Confirm on the host, after the next refresh, that no row has `on_hand_quantity < 1` and that a
+  sampled part still returns the same locations as the live read.
+
+**Open question for the operator.** `Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql` is a capture of the
+live mirror taken 2026-09-12 and still carries those 79,218 shape-4 rows, 0-quantity included. They are harmless
+(the app filters them) but now diverge from what the population read produces; regenerating the capture needs the
+shared host and was **not** done in this run.
 
 ---
 
@@ -187,19 +217,21 @@ is why 27, not 45, appears in §2.
 
 ## 5. Recommended order
 
-**1–3 are done (2026-09-12).** T147 and T148(c) were implemented in `/speckit.implement`; T148(a) turned out to have
-shipped in `c2d5e04` already. What remains is the host-side proof of those changes, which is
-`VALIDATION-PROMPT-SERVER.md` in the repository root.
+**1–5 are done (2026-09-12).** T144, T147, T148 and T150 were implemented in `/speckit.implement`; T148(a) turned
+out to have shipped in `c2d5e04` already. What remains is host-side proof, which is `VALIDATION-PROMPT-SERVER.md` in
+the repository root plus T151.
 
 1. ~~**T147**~~ — **done.** The shared credential was retired; the API is authorized by the caller's application role.
 2. ~~**T148(c)**~~ — **done.** The service writes its own daily log file (`Logs\service_daily_<date>.jsonl`).
 3. ~~**T148(a)**~~ — **already shipped** in `c2d5e04` (show-request channel + desktop control shortcut).
-4. **Host validation** — run `VALIDATION-PROMPT-SERVER.md` on `V-MTMFG-5` before treating either change as verified.
-5. **T144 (coverage)** — needs your product decision on the work-order input rule. Do it before §3's fallback
-   proof is treated as meaningful, since that proof can pass on shape while serving the wrong order.
-6. **T106** — the walkthrough and the SC-007/SC-008 clocks. Start the clocks as early as possible; they need
+4. ~~**T144 (coverage)**~~ — **done.** The operator narrowed the work-order input rule to the `WO-######` form only,
+   and the five population guards and four work-order live reads were narrowed with it (§1.2).
+5. ~~**T150**~~ — **done.** The shape-4 cache no longer stores zero-stock locations (§1.5).
+6. **Host validation** — run `VALIDATION-PROMPT-SERVER.md` on `V-MTMFG-5`, and check T151's zero-stock condition
+   after the next refresh, before any of these changes is called verified.
+7. **T106** — the walkthrough and the SC-007/SC-008 clocks. Start the clocks as early as possible; they need
    30 days of wall time and nothing else in this list is on the critical path for them.
-7. **Next spec** — `/speckit.specify` against `OPEN-WORK-NEXT-SPEC.md` §10 first, then §4 (smallest,
+8. **Next spec** — `/speckit.specify` against `OPEN-WORK-NEXT-SPEC.md` §10 first, then §4 (smallest,
    unblocked, immediate user value).
 
 ---
@@ -208,6 +240,6 @@ shipped in `c2d5e04` already. What remains is the host-side proof of those chang
 the repository sync (`c2d5e04`, clean tree). T144/T147/T148 detail is quoted from
 `specs/001-module-mock-visual-fallback/tasks.md` Phase 23.*
 
-*Updated 2026-09-12 (`/speckit.implement`): T147 and T148 are resolved — see §1.3/§1.4 and §5. Box counts in §1 were
-re-counted from the file after the change (`147 [x]` / `2 [ ]`). The remaining host-side proof is
-`VALIDATION-PROMPT-SERVER.md` in the repository root.*
+*Updated 2026-09-12 (`/speckit.implement`): T144, T147, T148 and T150 are resolved — see §1.2–§1.5 and §5. Box counts
+in §1 were re-counted from the file after the change (`151 boxes: 149 [x], 2 [ ]`). The remaining host-side proof is
+`VALIDATION-PROMPT-SERVER.md` in the repository root plus T151's zero-stock check.*

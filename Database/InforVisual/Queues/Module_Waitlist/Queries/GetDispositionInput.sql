@@ -10,7 +10,7 @@
 -- Target: Infor Visual SQL Server (VISUAL / MTMFG)
 -- Template: Module_Setup LookupWorkOrder.sql / GetSubordinateParts.sql; Module_Waitlist GetInventoryLocations.sql
 -- Parameters:
---   @WorkOrder    - normalized work order (e.g. WO-074011, or bare base id 074011)
+--   @WorkOrder    - the `WO-######` key (e.g. WO-074011), matched verbatim against WORK_ORDER.BASE_ID
 --   @PartNumber   - finished-product part on the order (e.g. 24733431)
 --
 -- Derivation (file 14 Phase 6, confirmed 2026-09-08 against live data):
@@ -22,14 +22,11 @@
 
 SET NOCOUNT ON;
 
+-- Matches the BASE_ID verbatim: the application accepts only the `WO-######` form (operator decision
+-- 2026-09-12, task T144) and passes that same normalized string to both this live read and the cached
+-- copy. The former stripped-base-id fallback resolved bare `M`-family orders the application can no
+-- longer ask for and could return a DIFFERENT order than the cache served (T144 collisions).
 DECLARE @WorkOrderTrimmed nvarchar(30) = LTRIM(RTRIM(@WorkOrder));
-
-DECLARE @WorkOrderBaseId nvarchar(30) =
-    CASE
-        WHEN CHARINDEX('-', @WorkOrderTrimmed) > 0
-            THEN SUBSTRING(@WorkOrderTrimmed, CHARINDEX('-', @WorkOrderTrimmed) + 1, LEN(@WorkOrderTrimmed))
-        ELSE @WorkOrderTrimmed
-    END;
 
 DECLARE @PartNumberNormalized nvarchar(60) = LTRIM(RTRIM(@PartNumber));
 
@@ -57,6 +54,6 @@ FROM WORK_ORDER AS wo
 LEFT JOIN PART AS part
     ON part.ID = wo.PART_ID
 WHERE
-    wo.BASE_ID IN (@WorkOrderTrimmed, @WorkOrderBaseId)
+    wo.BASE_ID = @WorkOrderTrimmed
     AND wo.PART_ID = @PartNumberNormalized
     AND wo.PART_ID IS NOT NULL;

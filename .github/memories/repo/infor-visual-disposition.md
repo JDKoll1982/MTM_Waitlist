@@ -57,7 +57,8 @@
 
 ## Work-order families and addressing (verified live 2026-09-11)
 
-Full evidence and the open defect: `specs/001-module-mock-visual-fallback` → `tasks.md` Phase 23 (T144).
+Full evidence and the resolution: `specs/001-module-mock-visual-fallback` → `tasks.md` Phase 23 (the defect) and
+Phase 24 (the 2026-09-12 fix).
 
 - **How to query Visual faithfully (use this, not `sqlcmd`).** Build the connection string with
   `VisualConnectionStringProvider.Resolve()`'s rules — `INFOR_VISUAL_SQL_CONNECTION_STRING`, else
@@ -72,23 +73,29 @@ Full evidence and the open defect: `specs/001-module-mock-visual-fallback` → `
 - Open `WORK_ORDER` rows come in several families (**42,852 open total**): `Q` 37,259 (ids like `CQ-016245-19`,
   `.054" X .500"`), `M` 4,898 (`BASE_ID` = bare numeric = `PART_ID`, e.g. `10089`; 230 of these are all-digits with
   `LEN` 5–6), `W` 695 (`BASE_ID` literally `WO-…`, 555 of them `WO-` + digits, e.g. `WO-041652`, `WO-074011`).
-- **The app's work-order key is `WO-` + the 6-digit zero-padded base id** (`WorkOrderValidationService`,
-  `^(?:WO-)?(\d{5,6})$`), which is what `setup_active_jobs.work_order` holds. The real Setup workflow's only saved
-  job is `WO-041652` → live `TYPE=W, BASE_ID='WO-041652'` — i.e. the `W` family, the one the shipped
-  `Module_Mock/Populations/*.sql` selects *out*.
-- The live queue scripts derive `@WorkOrderBaseId` by stripping a leading `WO-` and match
-  `BASE_ID IN (normalized, stripped)`, which resolves `W` and **cannot** resolve `M` (`WO-010618` ≠ `10618` or
-  `010618`). Because normalization collapses `10089` and `010089` into `WO-010089`, a cached `M` row and a live
-  `W` row can answer the *same key* with **different orders**: `WO-010089` → live `24 126 172` / *Bracket, Control*
-  vs cache `10089` / *Brake Pad*; for keys with no `W` twin live returns 0 rows while the cache returns 1. Column
-  shapes agree in every case, so a shape-only parity check cannot detect it.
-- **Which numeric ids are addressable depends on digit count.** The app pads the operator's 5–6 digits to 6, so a
-  **6-digit** numeric id is addressable (key `WO-102776`, which the live predicate matches through its stripped
-  `@WorkOrderBaseId`) but a **5-digit** one is not (`10089` → key `WO-010089`, which the live predicate matches
-  neither verbatim nor stripped). Measured open: 154 six-digit, 76 five-digit, of which 3 coincide with a
-  `WO-0xxxxx` order — i.e. the padded key would answer with a *different* order.
-- **Fixed 2026-09-11 (T144 transparency half).** All five `Module_Mock/Populations/*.sql` guards now accept only the
-  two live-resolvable forms and key them as the app does, so the mirror holds exactly the keys the live read
-  answers: 701 / 893 / 1,746 / 79,457 / 701 rows, every work-order key `WO-` + 6 digits, and sampled keys match the
-  live per-key read 1:1. Still open: the app's `^(?:WO-)?(\d{5,6})$` rule cannot express 42,143 of the 42,852 open
-  orders, so widening coverage is an operator decision about the app's input rule, not about the cache.
+- **The app's work-order key is the `WO-######` form** — `WorkOrderValidationService` carries `^WO-(\d{6})$`
+  (operator decision 2026-09-12, T144; it previously accepted `^(?:WO-)?(\d{5,6})$`) and normalizes to uppercase
+  `WO-` + exactly six digits. That is what `setup_active_jobs.work_order` holds. The real Setup workflow's only saved
+  job is `WO-041652` → live `TYPE=W, BASE_ID='WO-041652'`, i.e. the `W` family — now the **only** reachable family.
+- The live queue scripts match `BASE_ID = @NormalizedWorkOrder[…]` **verbatim**. The old stripped-base-id fallback
+  (`BASE_ID IN (normalized, stripped)`, via `@WorkOrderBaseId`) was **removed 2026-09-12** (T144) from
+  `LookupWorkOrder.sql`, `GetSequences.sql`, `GetSubordinateParts.sql` and `GetDispositionInput.sql`: it could still
+  resolve a bare numeric `M` order the app can no longer ask for, and where the id also existed as a `WO-0xxxxx`
+  order it returned a *different* order than the cache served. Under the old rule, normalization collapsed `10089`
+  and `010089` into `WO-010089`, so a cached `M` row and a live `W` row answered the *same key* with **different
+  orders** (`WO-010089` → live `24 126 172` / *Bracket, Control* vs cache `10089` / *Brake Pad*). That collision
+  class is now unreachable by design, not merely unfixed.
+- **Numeric ids are no longer addressable at all (as of 2026-09-12).** Under the retired rule the app padded the
+  operator's 5–6 digits to 6, so a **6-digit** numeric id was addressable (key `WO-102776`, matched live through the
+  stripped `@WorkOrderBaseId`) but a **5-digit** one was not. Measured open then: 154 six-digit, 76 five-digit, of
+  which 3 coincided with a `WO-0xxxxx` order — i.e. the padded key would answer with a *different* order. The
+  `WO-######`-only rule removes both forms from the accepted domain.
+- **Resolved 2026-09-12 (T144, both halves).** All five `Module_Mock/Populations/*.sql` guards now accept only
+  `BASE_ID` literally `WO-` + 6 digits and key it as the app does, and the four work-order live reads match that
+  verbatim key, so cache and live are keyed by the same string. The bare-6-digit and 5-digit numeric forms are no
+  longer accepted or cached: 42,143 of the 42,852 open orders were never expressible, and the operator decided on
+  2026-09-12 to accept the `WO-######` form **only**, i.e. to narrow rather than widen. The mirror is correspondingly
+  smaller (the 146 numeric-form keys are gone). Shape 4 additionally drops zero-stock locations
+  (`HAVING MAX(COALESCE(pl.QTY, part.QTY_ON_HAND, 0)) >= 1`, T150, 2026-09-12) — the same rule the caller applies, so
+  a location that drops to zero simply disappears at the next refresh, which always replaces the mirror wholesale.
+  The population reads still need a live re-run on the cache host to confirm the new row counts.

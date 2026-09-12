@@ -17,6 +17,17 @@ Option Explicit
 '                      first (deployed by MTM_Receiving_Application); when it is
 '                      absent the phase is skipped with a message.
 '
+'                      The existence test is two-step and privilege-aware, because
+'                      a schema catalog only lists schemas the connecting account
+'                      can see: probe 1 asks information_schema.schemata, and when
+'                      that does not list the schema, probe 2 asks the server to
+'                      USE it. "Unknown database" (1049) means absent and the phase
+'                      is skipped; any other refusal means the schema EXISTS but
+'                      this account cannot use it, which is a FAILURE of the phase
+'                      and is reported as one rather than being misreported as
+'                      "does not exist". Both probes' exit codes and stderr are
+'                      written to the log.
+'
 ' mtm_wip_application_winforms is deliberately NOT deployed to. The application
 ' reads that store through a shipped query script (read-only SELECT), so no
 ' object of any kind needs to be added there.
@@ -64,6 +75,15 @@ localHost = "localhost"
 
 Dim dbPort
 dbPort = 3306
+
+' Outcomes of the additive phase's schema probe. The schema catalog only lists
+' schemas the connecting account can see, so "not listed" is NOT the same as
+' "does not exist" — that conflation is what previously made this installer
+' report an already-deployed database as missing.
+Const SchemaAccessible = 0
+Const SchemaAbsent = 1
+Const SchemaNotAccessible = 2
+Const SchemaProbeFailed = 3
 
 ' How long a single ping attempt waits for a reply, in milliseconds.
 Dim pingTimeoutMs
@@ -132,6 +152,7 @@ WriteLine logPath, "Cache database:       " & mockDbName & " (created/updated in
 WriteLine logPath, "Host selection:       " & hostSelectionNote
 WriteLine logPath, "Target:               " & targetHost & ":" & dbPort & " (" & targetDescription & ")"
 WriteLine logPath, "mysql.exe:            " & mysqlPath
+WriteLine logPath, "Account:              " & username & " (password never logged)"
 WriteLine logPath, ""
 
 Dim clientConfigPath
@@ -291,7 +312,7 @@ Function ResolveMysqlPath(shellObj)
 
     cmd = "cmd /c where mysql"
     Set execObj = shellObj.Exec(cmd)
-    output = Trim(execObj.StdOut.ReadAll())
+    output = TrimOutput(execObj.StdOut.ReadAll())
 
     If execObj.ExitCode = 0 And output <> "" Then
         ResolveMysqlPath = Split(output, vbCrLf)(0)
@@ -387,7 +408,38 @@ Function RunAdditivePhase(phaseLabel, databaseName, scripts, shellObj, mysqlExe,
     summary = ""
     WriteLine logFile, "---- " & phaseLabel & " ----"
 
-    If Not DatabaseExists(shellObj, mysqlExe, clientConfig, hostName, portNumber, databaseName) Then
+    Dim access
+    access = ResolveSchemaAccess(logFile, shellObj, mysqlExe, clientConfig, hostName, portNumber, databaseName)
+
+    If access = SchemaProbeFailed Then
+        Dim probeFailedMsg
+        probeFailedMsg = "FAILED: could not determine whether database '" & databaseName & "' exists on " & hostName & "."
+        WScript.Echo probeFailedMsg
+        WScript.Echo "  The probe's exit code and error output are in " & logFile & "."
+        WriteLine logFile, probeFailedMsg
+        WriteLine logFile, ""
+        RunAdditivePhase = probeFailedMsg & vbCrLf
+        Exit Function
+    End If
+
+    If access = SchemaNotAccessible Then
+        ' The database is there; this account simply cannot see or use it. Saying
+        ' "does not exist" here would be false and would send the operator looking
+        ' for a database that is already deployed.
+        Dim notAccessibleMsg
+        notAccessibleMsg = "FAILED: database '" & databaseName & "' exists on " & hostName & _
+            " but account '" & usernameFromConfig(clientConfig) & "' cannot use it."
+        WScript.Echo notAccessibleMsg
+        WScript.Echo "  The schema catalog only lists databases the connecting account can see."
+        WScript.Echo "  Re-run the installer with an account that has rights on '" & databaseName & "' (for example root)."
+        WriteLine logFile, notAccessibleMsg
+        WriteLine logFile, "The schema catalog only lists databases the connecting account can see, so this database looks absent to that account. Re-run the installer with an account that has rights on '" & databaseName & "', or grant the account access and run it again."
+        WriteLine logFile, ""
+        RunAdditivePhase = notAccessibleMsg & vbCrLf
+        Exit Function
+    End If
+
+    If access = SchemaAbsent Then
         Dim skipMsg
         skipMsg = "SKIPPED: database '" & databaseName & "' does not exist on " & hostName & "."
         WScript.Echo skipMsg
@@ -470,23 +522,135 @@ Function CollectArtifactScripts(relativeFolder)
     CollectArtifactScripts = collected
 End Function
 
-' True when the named schema already exists on the target server. Used to keep the
-' additive phase from ever creating a database it does not own.
-Function DatabaseExists(shellObj, mysqlExe, clientConfig, hostName, portNumber, databaseName)
-    Dim cmd
+' Strips spaces, tabs and line breaks from both ends of captured command output.
+'
+' VBScript's Trim() removes spaces ONLY - unlike .NET's String.Trim(), it leaves
+' carriage returns and line feeds in place. `mysql -N -B --execute="SELECT ..."`
+' terminates its single value with CRLF, so `Trim(StdOut.ReadAll()) = "1"` was
+' comparing "1" & vbCrLf with "1" and never matched. Every schema was therefore
+' reported as absent, which is why the additive receiving phase always reported
+' 'mtm_receiving_application' does not exist on a server where it plainly did.
+Function TrimOutput(value)
+    Dim result
+    Dim boundary
+
+    If IsNull(value) Then
+        TrimOutput = ""
+        Exit Function
+    End If
+
+    result = CStr(value)
+
+    ' Line breaks are stripped by character, not with vbCrLf, so a response that
+    ' ends in one but not the other is handled as well.
+    Do While Len(result) > 0
+        boundary = Left(result, 1)
+        If boundary = " " Or boundary = vbTab Or boundary = vbCr Or boundary = vbLf Then
+            result = Mid(result, 2)
+        Else
+            Exit Do
+        End If
+    Loop
+
+    Do While Len(result) > 0
+        boundary = Right(result, 1)
+        If boundary = " " Or boundary = vbTab Or boundary = vbCr Or boundary = vbLf Then
+            result = Left(result, Len(result) - 1)
+        Else
+            Exit Do
+        End If
+    Loop
+
+    TrimOutput = result
+End Function
+
+' Runs one mysql --execute probe and returns the process exit code, with the
+' captured stdout and stderr handed back through ByRef parameters.
+Function RunProbe(shellObj, commandText, ByRef standardOut, ByRef standardError)
     Dim execObj
-    Dim countText
-    Dim ignoredError
+    Set execObj = shellObj.Exec(commandText)
+    standardOut = execObj.StdOut.ReadAll()
+    standardError = execObj.StdErr.ReadAll()
+    RunProbe = execObj.ExitCode
+End Function
 
-    cmd = QuoteArg(mysqlExe) & " --defaults-extra-file=" & QuoteArg(clientConfig) & _
-        " --default-character-set=utf8mb4 -h " & hostName & " -P " & CStr(portNumber) & _
-        " -N -B --execute=""SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = '" & databaseName & "';"""
+' Reads the user name back out of the mysql client option file, so a refusal can
+' name the account it applied to without the caller having to thread the name
+' through. The file holds one `user=` line in its `[client]` group.
+Function usernameFromConfig(clientConfig)
+    Dim stream
+    Dim line
+    Dim value
 
-    Set execObj = shellObj.Exec(cmd)
-    countText = Trim(execObj.StdOut.ReadAll())
-    ignoredError = execObj.StdErr.ReadAll()
+    value = "(unknown)"
+    On Error Resume Next
+    Set stream = fso.OpenTextFile(clientConfig, 1, False)
+    Do While Not stream.AtEndOfStream
+        line = Trim(stream.ReadLine())
+        If LCase(Left(line, 5)) = "user=" Then
+            value = Trim(Mid(line, 6))
+            Exit Do
+        End If
+    Loop
+    stream.Close
+    On Error GoTo 0
 
-    DatabaseExists = (execObj.ExitCode = 0 And countText = "1")
+    usernameFromConfig = value
+End Function
+
+' Classifies what the target server can tell us about a schema.
+'
+' `information_schema.schemata` only lists schemas the connecting account is
+' permitted to see, so a database that exists can be absent from it. That is why
+' this probe does not trust the catalog alone: when the catalog does not list the
+' schema it makes a second attempt to USE it, which separates the two cases the
+' old probe merged - MySQL reports 1049 / "Unknown database" for a schema that is
+' genuinely gone, and 1044 / 1142 for one that exists but is refused to this
+' account. The old code turned both into "does not exist", which is how a
+' deployed database came to be reported as missing.
+'
+' Every probe's command, exit code and stderr are written to the log, so a future
+' disagreement between this installer and the server is diagnosable from the log
+' alone rather than from a re-run.
+Function ResolveSchemaAccess(logFile, shellObj, mysqlExe, clientConfig, hostName, portNumber, databaseName)
+    Dim baseCommand
+    Dim outText
+    Dim errText
+    Dim exitCode
+
+    baseCommand = QuoteArg(mysqlExe) & " --defaults-extra-file=" & QuoteArg(clientConfig) & _
+        " --default-character-set=utf8mb4 -h " & hostName & " -P " & CStr(portNumber) & " -N -B --execute="
+
+    ' Probe 1: does the schema catalog list it?
+    exitCode = RunProbe(shellObj, baseCommand & QuoteArg("SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = '" & databaseName & "';"), outText, errText)
+    WriteLine logFile, "  probe 1 (schema catalog): exit " & CStr(exitCode) & _
+        "; stdout=" & QuoteArg(TrimOutput(outText)) & "; stderr=" & QuoteArg(TrimOutput(errText))
+
+    If exitCode <> 0 Then
+        ResolveSchemaAccess = SchemaProbeFailed
+        Exit Function
+    End If
+
+    If TrimOutput(outText) = "1" Then
+        ResolveSchemaAccess = SchemaAccessible
+        Exit Function
+    End If
+
+    ' Probe 2: not listed by the catalog. Ask the server to USE it, which answers
+    ' "gone" and "present but not permitted" differently.
+    exitCode = RunProbe(shellObj, baseCommand & QuoteArg("USE `" & databaseName & "`; SELECT 1;"), outText, errText)
+    WriteLine logFile, "  probe 2 (USE " & databaseName & "): exit " & CStr(exitCode) & _
+        "; stdout=" & QuoteArg(TrimOutput(outText)) & "; stderr=" & QuoteArg(TrimOutput(errText))
+
+    If exitCode = 0 Then
+        ' The server accepted the schema even though the catalog did not list it.
+        ' Present is present; deploy.
+        ResolveSchemaAccess = SchemaAccessible
+    ElseIf InStr(errText, "Unknown database") > 0 Or InStr(errText, "1049") > 0 Then
+        ResolveSchemaAccess = SchemaAbsent
+    Else
+        ResolveSchemaAccess = SchemaNotAccessible
+    End If
 End Function
 
 Function RunSql(shellObj, mysqlExe, clientConfig, scriptPath, logFile, hostName, portNumber)
@@ -556,11 +720,11 @@ Function RunCommandCapture(shellObj, commandText, logFile, label)
     output = execObj.StdOut.ReadAll()
     errorOutput = execObj.StdErr.ReadAll()
 
-    If Trim(output) <> "" Then
+    If TrimOutput(output) <> "" Then
         WriteLine logFile, output
     End If
 
-    If Trim(errorOutput) <> "" Then
+    If TrimOutput(errorOutput) <> "" Then
         WriteLine logFile, errorOutput
     End If
 

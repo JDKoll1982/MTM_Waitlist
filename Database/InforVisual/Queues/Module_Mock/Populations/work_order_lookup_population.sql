@@ -10,26 +10,20 @@
 -- (WORK_ORDER.STATUS in ('R' Released, 'U' Unreleased, 'F' Firmed); closed 'C' and cancelled 'X' are
 -- never cached), but only those the application can ask for AND the live read can answer are keyed.
 --
--- Key domain (T144 — corrected):
---   The application only ever queries a work order it accepted from the operator, and
---   WorkOrderValidationService accepts exactly `^(?:WO-)?(\d{5,6})$` and normalizes it to
---   `WO-` + the 6-digit, zero-padded base id. The mirror is keyed by that exact normalized string
---   (sp_visual_work_order_lookup_get matches `normalized_work_order = p_normalized_work_order`), so
---   this script emits keys in that same form. Two source shapes produce such a key, and both are
---   matched by the live read:
---     * `WO-` + 6 digits  - the live predicate matches BASE_ID verbatim.
---     * exactly 6 digits  - the live predicate matches it through @WorkOrderBaseId (the stripped
---                           form), so `WO-` + those digits is the key the caller uses.
---   A 5-digit numeric BASE_ID is deliberately EXCLUDED. The application pads it to `WO-0xxxxx`,
---   which the live predicate matches neither verbatim nor stripped, so a cached row for that key
---   would answer an input the live read answers with nothing — the fallback would not be transparent
---   (FR-002/FR-004). Worse, for the three ids that also exist as a `WO-0xxxxx` order the padded key
---   would answer with a DIFFERENT order than the live read returns. Measured live on 2026-09-11:
---   76 open 5-digit numeric orders, 3 of them colliding; excluding them leaves 154 + 555 = 709
---   addressable keys (701 of them carrying a PART_ID) where cache and live agree.
---   OPEN ITEM (not a cache concern): the application's `^(?:WO-)?(\d{5,6})$` rule cannot express
---   42,143 of the 42,852 open orders at all (the `Q`, non-numeric-`M` and 7+-digit families), so
---   widening coverage is an operator decision about the application's input rule, not about this read.
+-- Key domain (operator decision 2026-09-12, task T144 — narrowed to the `WO-######` form ONLY):
+--   The application now accepts only `WO-` + exactly six digits and keys the cache by that exact
+--   normalized string (WorkOrderValidationService; sp_visual_work_order_lookup_get matches
+--   `normalized_work_order = p_normalized_work_order`), so this script emits a key only where BASE_ID
+--   is literally `WO-` + 6 digits and uses the BASE_ID itself as the key. The live per-key read
+--   (LookupWorkOrder.sql) matches that same verbatim `BASE_ID`, so cached and live answers are keyed
+--   by exactly the same string.
+--   Everything else is deliberately EXCLUDED because the application can no longer ask for it:
+--     * bare 6-digit numeric BASE_IDs (the `M` family) - the former rule accepted the bare form and
+--       padded it to `WO-0xxxxx`, a key the live read resolved only through its stripped-form match;
+--       for ids that also exist as a `WO-0xxxxx` order that answered with a DIFFERENT order (the T144
+--       cross-order collisions). Not reachable now that the rule requires the prefix.
+--     * 5-digit numeric ids - the application would have padded them to a key nothing answered.
+--     * the `Q`, non-numeric-`M` and 7+-digit families - never expressible by the rule.
 --
 -- Projection contract (must match VisualReadShapeCatalog + sp_visual_work_order_lookup_refresh):
 --   NormalizedWorkOrder (input key), PartNumber, Description, WorkCenter.
@@ -54,33 +48,18 @@ WITH open_work_orders AS
         wo.STATUS IN ('R', 'U', 'F')
         AND wo.BASE_ID IS NOT NULL
         AND wo.PART_ID IS NOT NULL
-        -- Addressable work orders only. The mirror must hold exactly the keys the application can ask
-        -- for AND the live per-key read (LookupWorkOrder.sql) resolves, or the fallback is not
-        -- transparent (FR-002/FR-004): a key the live read cannot answer would let an outage serve an
-        -- order that a healthy Infor Visual never returns for that input.
-        --   * 'W' form  - BASE_ID is literally 'WO-' + 6 digits. The live read matches it verbatim
-        --                 (@NormalizedWorkOrderTrimmed), so the key is the BASE_ID as stored.
-        --   * numeric form - BASE_ID is exactly 6 digits. The application normalizes the operator's
-        --                 6-digit input to 'WO-' + those digits, and the live read matches it through
-        --                 @WorkOrderBaseId (the stripped form), so the key is 'WO-' + the BASE_ID.
-        -- A 5-digit numeric BASE_ID is deliberately excluded: the application would pad it to
-        -- 'WO-0xxxxx', which the live read matches neither verbatim nor stripped, so caching it would
-        -- put an order in the mirror that no live read can corroborate (and for the three ids that
-        -- also exist as 'WO-0xxxxx', the padded key would answer with a DIFFERENT order).
-        AND (
-            (LEN(LTRIM(RTRIM(wo.BASE_ID))) = 9
-             AND LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%'
-             AND SUBSTRING(LTRIM(RTRIM(wo.BASE_ID)), 4, 6) NOT LIKE '%[^0-9]%')
-            OR
-            (LEN(LTRIM(RTRIM(wo.BASE_ID))) = 6
-             AND LTRIM(RTRIM(wo.BASE_ID)) NOT LIKE '%[^0-9]%')
-        )
+        -- Addressable work orders only (operator decision 2026-09-12, task T144). The mirror must hold
+        -- exactly the keys the application can ask for AND the live per-key read (LookupWorkOrder.sql)
+        -- resolves, or the fallback is not transparent (FR-002/FR-004): a key the live read cannot
+        -- answer would let an outage serve an order that a healthy Infor Visual never returns for that
+        -- input. The application now accepts only the `WO-######` form, so BASE_ID must literally be
+        -- `WO-` + 6 digits. Full rationale in the header.
+        AND LEN(LTRIM(RTRIM(wo.BASE_ID))) = 9
+        AND LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%'
+        AND SUBSTRING(LTRIM(RTRIM(wo.BASE_ID)), 4, 6) NOT LIKE '%[^0-9]%'
 )
 SELECT DISTINCT
-    CASE
-        WHEN LTRIM(RTRIM(ow.BaseId)) LIKE 'WO-%' THEN LTRIM(RTRIM(ow.BaseId))
-        ELSE 'WO-' + LTRIM(RTRIM(ow.BaseId))
-    END AS NormalizedWorkOrder,
+    LTRIM(RTRIM(ow.BaseId)) AS NormalizedWorkOrder,
     ow.PartId AS PartNumber,
     COALESCE(part.DESCRIPTION, '') AS Description,
     COALESCE(op.RESOURCE_ID, '') AS WorkCenter

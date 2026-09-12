@@ -172,7 +172,7 @@
     <value>Continue.</value>
   </data>
   <data name="Setup_WorkOrderTextBox_Tooltip" xml:space="preserve">
-    <value>Enter work order (for example 76951, 076951, or WO-076951).</value>
+    <value>Enter work order (for example WO-076951).</value>
   </data>
   <data name="Setup_SetupWorkOrderPage_Button1_Tooltip" xml:space="preserve">
     <value>Activate Button.</value>

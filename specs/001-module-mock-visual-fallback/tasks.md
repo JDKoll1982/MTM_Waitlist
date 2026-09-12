@@ -1847,12 +1847,14 @@ the catalog. The **content** half is where the defect below lives.
 
 ### T144 — the cache's key domain is not the domain the live read resolves
 
-- [ ] T144 (**transparency half FIXED 2026-09-11**; coverage half open — needs an operator decision) The mirror
+- [x] T144 (**transparency half FIXED 2026-09-11**; **coverage half RESOLVED 2026-09-12** — the operator decided
+  the application accepts ONLY the `WO-######` form, so the rule was narrowed rather than widened; see Phase 24) The mirror
   cached 230 work orders under zero-padded keys the live read cannot resolve and omitted the 555 open work orders the
   live read *does* resolve, so the same work-order input returned **different content** depending on whether Infor
   Visual was reachable (FR-002/FR-004/SC-003/SC-004, contradicts). The five population reads now emit exactly the
-  live-resolvable key domain, verified live. What remains open is coverage, not transparency: the application's
-  `^(?:WO-)?(\d{5,6})$` rule cannot express 42,143 of the 42,852 open orders, and widening it is a product decision.
+  live-resolvable key domain, verified live. The coverage half was closed by narrowing, not widening: the application's
+  `^(?:WO-)?(\d{5,6})$` rule could not express 42,143 of the 42,852 open orders, and on 2026-09-12 the operator decided
+  the accepted domain is the `WO-######` form only.
 
 > **Method note (this supersedes the first draft of this section).** The first pass talked to Infor Visual through
 > `sqlcmd` and scraped its text output, which made the row counts unreliable (a `-W -s '|'` separator line was
@@ -2302,3 +2304,74 @@ started, no `HKCU\…\Run` entry was written, and the deployed `mtm_mock` snapsh
 230 / 242 / 399 / 12712 / 230 rows, `is_seed_content = 0`). All scratch scripts under `%TEMP%` were deleted. The
 separate T145 follow-up added one source file (the publish profile) plus one `.gitignore` negation and ran
 `dotnet publish` into the gitignored `bin/publish/win-x64`; it touched no database and no service state either.
+
+---
+
+## Phase 24: T144 coverage resolved by narrowing the input rule, and zero-stock locations dropped from the shape-4 cache (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. No earlier task, ID, or phase was modified except the T144 checkbox, which is
+> now ticked.
+
+### T144 — coverage RESOLVED 2026-09-12 (operator decision: the `WO-######` form only)
+
+The note above left coverage open because widening `^(?:WO-)?(\d{5,6})$` meant changing product behaviour. The
+operator took the decision on 2026-09-12, and it was the **opposite** branch: the application accepts **only the
+`WO-######` form** — the literal `WO-` prefix and exactly six digits. Narrowing closes the defect class outright
+instead of extending it, because the key the application asks for is then always the verbatim Infor Visual
+`BASE_ID` of a `W`-family order, and both the live read and the cached copy are keyed by that same string.
+
+| Artifact | Change |
+|---|---|
+| `MTM_Waitlist.Setup/Services/WorkOrderValidationService.cs` | `^(?:WO-)?(\d{5,6})$` → `^WO-(\d{6})$`; normalizes to uppercase `WO-` + the six digits |
+| `Strings/en-us/Resources.resw`, `Strings/en-us/TooltipResources.resw`, `Module_Setup/Views/SetupWorkOrderPage.xaml` | Placeholder, validation message and tooltip now name the single accepted form (`WO-076951`) |
+| The five `Database/InforVisual/Queues/Module_Mock/Populations/*.sql` | The addressability guard accepts **only** `BASE_ID` literally `WO-` + 6 digits and the key is the `BASE_ID` itself; the bare-6-digit and 5-digit numeric forms are no longer emitted |
+| `LookupWorkOrder.sql`, `GetSequences.sql`, `GetSubordinateParts.sql`, `GetDispositionInput.sql` | Predicate is now `BASE_ID = @NormalizedWorkOrder[…Trimmed]`; the stripped-base-id match (`@WorkOrderBaseId`) is removed |
+
+**Why removing the stripped match matters.** The live read used to match `BASE_ID IN (@NormalizedWorkOrderTrimmed,
+@WorkOrderBaseId)`. Even with the rule narrowed, that second term could still resolve a **bare numeric** `M`-family
+order — an order the application can no longer ask for — and where an id also existed as a `WO-0xxxxx` order it
+returned a *different* order than the cache served (the three collisions recorded in Phase 23). Keying both paths by
+the verbatim `WO-######` string is what FR-002/FR-004 actually require.
+
+**Accepted consequence.** The reachable domain shrinks to the `W` family. Everything Phase 23 listed as "not
+expressible" (`Q`, non-numeric `M`, 7+-digit) *and* the bare-numeric `M` family (154 + 76 open orders) is now
+unreachable **by design** rather than silently unresolvable, and the mirror no longer carries the 146 numeric-form
+keys.
+
+**Verified here.** `dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64` → `Build succeeded, 0
+Warning(s) 0 Error(s)`. `dotnet test MTM_Waitlist.Tests -c Debug -p:Platform=x64` → **747 total, 728 passed, 19
+skipped, 0 failed** (the 19 skips are the live-database suites; the count rose from 739 to 747 because
+`WorkOrderValidationServiceTests` gained eight cases). The six `SetupWorkflowServiceTests` call sites that fed the
+bare `76951` were updated to `WO-076951`.
+
+### T150 — zero-stock locations are no longer cached for shape 4 (2026-09-12)
+
+- [x] T150 (MEDIUM) `Database/InforVisual/Queues/Module_Mock/Populations/inventory_locations_population.sql` now
+  emits only locations that hold stock: `HAVING MAX(COALESCE(pl.QTY, part.QTY_ON_HAND, 0)) >= 1`. The mirror carries
+  a unique `(part_number, location)` key, so a pooled row below 1 was occupying a slot the caller never displays —
+  the Waitlist detail grid keeps only on-hand `>= 1` (`MTM_Waitlist.Waitlist.View/Services/InventoryLocationFiltering.cs`)
+  — and 79,218 seed/cache rows were mostly zero-stock. This applies **the same rule the caller applies**, so the
+  mirror holds exactly the rows the application can show.
+
+**The cache was already a complete replacement, and still is.** `sp_visual_inventory_locations_refresh` truncates
+`visual_inventory_locations_result_stage`, inserts the payload, verifies `v_loaded = JSON_LENGTH(p_rows)`, then
+swaps by `RENAME TABLE` (`…_result` → `…_prev`, `…_stage` → `…_result`, `…_prev` → `…_stage`). So the live mirror is
+not updated row by row — it is replaced wholesale every run, and a location that drops to zero simply disappears on
+the next cycle with no stale row left behind. The payload-length assertion is deliberately **not** relaxed: the
+exclusion is done at the source (the Visual population read), which keeps the staged/generated row-count proof
+intact.
+
+**Verified here.** The script's SQL parses and the mirror contract is unchanged; the build and offline suite are
+green (`747 / 728 / 19 / 0`). **Not verified here:** the live row counts, because the population read executes on
+the cache host against Infor Visual and that service is not deployed on this workstation.
+
+- [ ] T151 (verification) Confirm on the cache host, after the next `MTM_Waitlist.Mock.Service` refresh, that
+  `visual_inventory_locations_result` holds **no** row with `on_hand_quantity < 1`, that the row count dropped
+  materially from the 79,457 pre-change figure, and that the Waitlist detail grid still returns the same locations
+  for a sampled part as the live read does.
+
+**Open question left with the operator (not a code change).** `Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql`
+is a **capture** of the live mirror taken 2026-09-12 and carries 79,218 shape-4 rows, overwhelmingly zero-stock
+(`(1,'00658500','DC-DOCK',0.0000, …)`). Those rows are app-filtered and harmless, but they now diverge from what
+the population read produces. Regenerating the capture needs the shared host; it is recorded here rather than
+changed in this run.

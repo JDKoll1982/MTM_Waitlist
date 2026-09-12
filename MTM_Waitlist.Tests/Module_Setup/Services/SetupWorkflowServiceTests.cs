@@ -22,7 +22,7 @@ public sealed class SetupWorkflowServiceTests
     {
         var service = CreateService();
 
-        var result = await service.SearchWorkOrderAsync("76951");
+        var result = await service.SearchWorkOrderAsync("WO-076951");
 
         Assert.IsTrue(result.Success);
         Assert.AreEqual(SetupWorkflowStep.PartSelection, service.State.CurrentStep);
@@ -48,7 +48,7 @@ public sealed class SetupWorkflowServiceTests
     {
         var service = CreateService();
 
-        await service.SearchWorkOrderAsync("76951");
+        await service.SearchWorkOrderAsync("WO-076951");
         await service.SelectPartAsync("12345679");
         await service.SelectSequenceAsync("20");
 
@@ -69,7 +69,7 @@ public sealed class SetupWorkflowServiceTests
     {
         var service = CreateService();
 
-        await service.SearchWorkOrderAsync("76951");
+        await service.SearchWorkOrderAsync("WO-076951");
         await service.SelectPartAsync("12345679");
 
         var sequenceResult = await service.SelectSequenceAsync("20");
@@ -86,7 +86,7 @@ public sealed class SetupWorkflowServiceTests
     {
         var service = CreateService();
 
-        await service.SearchWorkOrderAsync("76951");
+        await service.SearchWorkOrderAsync("WO-076951");
         await service.SelectPartAsync("12345679");
         await service.SelectSequenceAsync("20");
 
@@ -104,7 +104,7 @@ public sealed class SetupWorkflowServiceTests
     {
         var service = CreateService(ignoredLocations: new[] { "Kit Shelf 2" });
 
-        await service.SearchWorkOrderAsync("76951");
+        await service.SearchWorkOrderAsync("WO-076951");
         await service.SelectPartAsync("12345679");
         await service.SelectSequenceAsync("20");
 
@@ -117,7 +117,7 @@ public sealed class SetupWorkflowServiceTests
     {
         var service = CreateService();
 
-        await service.SearchWorkOrderAsync("76951");
+        await service.SearchWorkOrderAsync("WO-076951");
         await service.SelectPartAsync("12345679");
         await service.SelectSequenceAsync("20");
         await service.SelectDunnageTypeAsync("Coils");

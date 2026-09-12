@@ -21,10 +21,7 @@
 SET NOCOUNT ON;
 
 SELECT
-    CASE
-        WHEN LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%' THEN LTRIM(RTRIM(wo.BASE_ID))
-        ELSE 'WO-' + LTRIM(RTRIM(wo.BASE_ID))
-    END AS WorkOrder,
+    LTRIM(RTRIM(wo.BASE_ID)) AS WorkOrder,
     wo.PART_ID AS PartNumber,
     LTRIM(RTRIM(wo.STATUS)) AS WorkOrderStatus,
     CAST(
@@ -52,16 +49,12 @@ WHERE
     wo.STATUS IN ('R', 'U', 'F')
     AND wo.BASE_ID IS NOT NULL
     AND wo.PART_ID IS NOT NULL
-    -- Addressable work orders only: the two forms the application can ask for AND the live read
-    -- (GetDispositionInput.sql) resolves. Full rationale in work_order_lookup_population.sql.
-    AND (
-        (LEN(LTRIM(RTRIM(wo.BASE_ID))) = 9
-         AND LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%'
-         AND SUBSTRING(LTRIM(RTRIM(wo.BASE_ID)), 4, 6) NOT LIKE '%[^0-9]%')
-        OR
-        (LEN(LTRIM(RTRIM(wo.BASE_ID))) = 6
-         AND LTRIM(RTRIM(wo.BASE_ID)) NOT LIKE '%[^0-9]%')
-    )
+    -- Addressable work orders only (operator decision 2026-09-12, task T144): the application accepts
+    -- only the `WO-######` form AND the live read (GetDispositionInput.sql) resolves it verbatim, so
+    -- BASE_ID must literally be `WO-` + 6 digits. Full rationale in work_order_lookup_population.sql.
+    AND LEN(LTRIM(RTRIM(wo.BASE_ID))) = 9
+    AND LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%'
+    AND SUBSTRING(LTRIM(RTRIM(wo.BASE_ID)), 4, 6) NOT LIKE '%[^0-9]%'
 ORDER BY
     WorkOrder,
     PartNumber;
