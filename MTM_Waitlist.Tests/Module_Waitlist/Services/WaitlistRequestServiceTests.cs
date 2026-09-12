@@ -171,6 +171,11 @@ public sealed class WaitlistRequestServiceTests
     [TestMethod]
     public async Task SubmitAsync_ReturnsPersistenceFailureWhenProductionBackendIsUnavailableAsync()
     {
+        // This test asserts the failure path of the real production helper server, so its premise is that no
+        // store answers. Checked before the call: on a host where one does answer, the submission succeeds and
+        // the assertion below would fail on a row it had just written (see ProductionBackendAvailability).
+        ProductionBackendAvailability.SkipWhenConfigured();
+
         var mySqlHelperServer = new MySqlHelperServer();
         var service = new WaitlistRequestService(mySqlHelperServer);
 

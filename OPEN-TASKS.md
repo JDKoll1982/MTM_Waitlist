@@ -98,7 +98,16 @@ unreachable store fails closed. The spec (FR-011/FR-012/FR-023/FR-026, SC-010), 
 `data-model.md` §9 were amended in the same change.
 
 **Known limitation, accepted by the owner:** the user name is asserted over plain HTTP, so this is authorization
-without cryptographic authentication. **Host verification is outstanding** — see `VALIDATION-PROMPT-SERVER.md`.
+without cryptographic authentication.
+
+**Host verification: DONE 2026-09-12** on `V-MTMFG-5` (an earlier revision of this note said it was outstanding).
+On the host: `sp_auth_user_row_get` is deployed and resolves `jkoll`/`johnk` to `Developer`; anonymous, an invented
+name, a real-but-unassigned name and the retired `X-MTM-Mock-Token` all answer a byte-identical
+`401 {"error":"unauthorized"}`; an approved operator answers `200` with
+`"operatorRoles":"Admin, Developer, Plant Manager, Setup Lead, Production Lead"` and no secret-shaped field; the
+listener binds `0.0.0.0:5760`, answers a non-loopback call, and an inbound allow rule exists. Four defects the run
+exposed were fixed the same day — recorded in `specs/001-module-mock-visual-fallback/tasks.md` **Phase 24**, which
+also carries the residuals (T153-T156). Nothing about T147 is outstanding.
 
 ### 1.4 T148 — RESOLVED 2026-09-12 ((a) already shipped; (c) implemented; (b) fixed 2026-09-11)
 
@@ -119,12 +128,20 @@ container log message — the refresh engine's cycle failures above all — is d
   `Start-Process`, which hands the child a copy of *the script process's* environment block — and that process
   predated the variables. The service therefore started with **no** `MTM_*`/`INFOR_VISUAL_*` values and failed
   every metadata read and refresh cycle. Fixed in three places (apply the secrets to the script's own process
-  and assert it — deploy is now **22** checks; treat a host with no login as unconfigured so the designed
+  and assert it — deploy is now **23** checks; treat a host with no login as unconfigured so the designed
   message shows instead of a raw access-denied; poll for process exit after the stop instead of sampling once).
   **Verified:** first ever successful refresh — all five shapes `Succeeded` in ~4.4 s.
 
-**Order of attack (as executed, 2026-09-12):** T147 and (c) are done; the remaining host step is to re-run the
-deployment and re-check §2 step 7, which is now the first item of `VALIDATION-PROMPT-SERVER.md`.
+**Host verification of (a) and (c): DONE 2026-09-12** on `V-MTMFG-5`. `mock-service-control.ps1 -Action ShowUi`
+opened the service window on the Status page while the tray icon stayed unpromoted, and
+`%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\Logs\service_daily_2026_09_12.jsonl` recorded the startup (naming its log
+directory), every refusal with its reason, and each shape's refresh outcome — written by a **Release** publish, which
+previously wrote nothing at all. **§2 step 7 is satisfied:** `POST /api/refresh` returned all five shapes
+`succeeded`. The operator-facing hint in `mock-service-control.ps1` that still pointed at a debugger and the Windows
+Event Log was corrected in the same pass.
+
+**Order of attack:** T147 and T148(a)/(c) are complete and host-verified. No host step remains for them; the
+residuals from that run are T153-T156 in `specs/001-module-mock-visual-fallback/tasks.md` Phase 24.
 
 ### 1.5 T150 / T151 — shape-4 cache no longer stores zero-stock locations (2026-09-12)
 

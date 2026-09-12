@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace MTM_Waitlist.Mock.Service.Api;
 
 /// <summary>
@@ -91,5 +93,12 @@ public static class ServiceApiContracts
         bool IsSafetySnapshot);
 
     /// <summary>The error model (`contracts/mock-service-http-api.md` §6).</summary>
-    public sealed record ApiErrorPayload(string Error, string? Message);
+    /// <remarks>
+    /// <see cref="Message"/> is omitted when there is no detail to give: the refusal path has none, and the
+    /// contract writes that body as an error code on its own. The wire names are camelCase because every route
+    /// serializes this record with web defaults — see <c>ServiceOperatorAuthenticationHandler</c>.
+    /// </remarks>
+    public sealed record ApiErrorPayload(
+        string Error,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Message);
 }

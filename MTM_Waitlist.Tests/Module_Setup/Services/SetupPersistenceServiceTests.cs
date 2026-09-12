@@ -15,6 +15,11 @@ public sealed class SetupPersistenceServiceTests
     [TestMethod]
     public async Task SaveAsync_WhenBackendWritesNoRows_ReturnsFailureAsync()
     {
+        // "Writes no rows" is a property of a store that cannot answer. Checked before the call: on a host
+        // where the save succeeds it writes real rows into mtm_waitlist and then fails the assertion below
+        // (see ProductionBackendAvailability).
+        ProductionBackendAvailability.SkipWhenConfigured();
+
         var activeJobCoordinator = new FakeActiveJobCoordinatorService(hasActiveJob: false);
         var mySqlHelperServer = new MySqlHelperServer();
         var service = new SetupPersistenceService(activeJobCoordinator, mySqlHelperServer);

@@ -49,6 +49,9 @@ Set-StrictMode -Version Latest
 $serviceExeName = 'MTM_Waitlist.Mock.Service.exe'
 $processName = 'MTM_Waitlist.Mock.Service'
 $apiPort = 5760
+
+# The service keeps its own state and its daily log here (T148c); the hint below sends an operator to it.
+$logDirectory = Join-Path $env:LOCALAPPDATA 'MTM_Waitlist.Mock.Service\Logs'
 $secretNames = @(
     'MTM_WAITLIST_DB_CONNECTION_STRING'
     'MTM_MYSQL_PASSWORD'
@@ -240,8 +243,9 @@ function Invoke-Action {
     Write-Host ''
     if ($script:failed) {
         Write-Host '  That did not work - see the lines above.' -ForegroundColor Red
-        Write-Host '  The service logs only to a debugger, so if this repeats, check that nothing else' -ForegroundColor Yellow
-        Write-Host '  holds port 5760 and look for MTM_Waitlist.Mock.Service errors in the Windows Event Log.' -ForegroundColor Yellow
+        Write-Host '  The service writes a daily log, so if this repeats, read the newest file matching' -ForegroundColor Yellow
+        Write-Host "  $logDirectory\service_daily_*.jsonl" -ForegroundColor Yellow
+        Write-Host "  and check that nothing else holds port $apiPort." -ForegroundColor Yellow
         return 1
     }
 

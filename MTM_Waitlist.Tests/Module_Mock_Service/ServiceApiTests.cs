@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -263,6 +264,17 @@ public sealed class ServiceApiTests
             var root = Path.Combine(Path.GetTempPath(), "mtm-service-api-tests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
 
+            // The listener binds the configuration store's live settings, not the record handed to the builder,
+            // and the store takes a binding only through its own file (`SaveAsync` would reject the deliberately
+            // blank MySQL login this fixture configures, and `LoadAsync` does not validate). So the binding is
+            // seeded into the file the builder's store will load. Without it the listener binds the default
+            // 5760 and every test here fails on a host where the deployed service already holds that port.
+            var bindAddress = "127.0.0.1";
+            var apiPort = FindFreePort();
+            var seedStore = new ServiceConfigurationStore(root);
+            await seedStore.LoadAsync().ConfigureAwait(false);
+            SeedApiBinding(seedStore.ConfigurationFilePath, bindAddress, apiPort);
+
             var builder = ServiceHostBuilder.Create(appDataRoot: root, contentRoot: AppContext.BaseDirectory);
             var loaded = await builder.LoadConfigurationAsync().ConfigureAwait(false);
 
@@ -274,11 +286,16 @@ public sealed class ServiceApiTests
                     Port = loaded.MySqlConnection.Port,
                     UserId = string.Empty,
                 },
-                Api = loaded.Api with { BindAddress = "127.0.0.1", Port = FindFreePort() },
+                Api = loaded.Api with { BindAddress = bindAddress, Port = apiPort },
             };
 
             var provider = builder.Build(configuration);
             var store = provider.GetRequiredService<ServiceConfigurationStore>();
+
+            Assert.AreEqual(
+                apiPort,
+                store.Current.Api.Port,
+                "The store did not take the fixture's binding, so the listener would bind the default port.");
 
             // The host is built here rather than resolved from the container so the role lookup comes from the
             // stubbed table: these tests assert the pipeline, and a live application store is not part of it
@@ -357,6 +374,33 @@ public sealed class ServiceApiTests
             var port = ((IPEndPoint)listener.LocalEndpoint).Port;
             listener.Stop();
             return port;
+        }
+
+        /// <summary>
+        /// Replaces the API binding in the configuration file the store loads.
+        /// </summary>
+        /// <remarks>
+        /// The file is written by the store itself, so its shape stays the store's; only the two binding fields
+        /// are replaced. An absent <c>Api</c> object is created rather than assumed. If the file's property
+        /// names ever change this fails loudly at <see cref="Assert.AreEqual(int, int, string)"/> above, which is
+        /// the point: a silently inert binding is what let these tests bind the production port.
+        /// </remarks>
+        private static void SeedApiBinding(string configurationFilePath, string bindAddress, int port)
+        {
+            var document = JsonNode.Parse(File.ReadAllText(configurationFilePath))!.AsObject();
+
+            if (document["Api"] is not JsonObject api)
+            {
+                api = [];
+                document["Api"] = api;
+            }
+
+            api["BindAddress"] = bindAddress;
+            api["Port"] = port;
+
+            File.WriteAllText(
+                configurationFilePath,
+                document.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
         }
     }
 }

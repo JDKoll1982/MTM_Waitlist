@@ -2246,12 +2246,13 @@ through `StartupDebugLog`, whose methods are `[Conditional("DEBUG")]`, so a publ
 skips are the pre-existing live-database integration suites (no `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` in this
 environment).
 
-**Not verified here, and deliberately left to the host run.** Nothing in T147 or T148(c) can be proven from this
-workstation: the role lookup needs a live `mtm_waitlist` connection and the API needs a deployed, running service, and
-the durable log is only exercised by a real service process. `VALIDATION-PROMPT-SERVER.md` in the repository root is
-the handover for that run.
+**Host run completed 2026-09-12.** Nothing in T147 or T148(c) could be proven from this workstation — the role
+lookup needs a live `mtm_waitlist` connection and the durable log is only exercised by a real service process — so
+`VALIDATION-PROMPT-SERVER.md` in the repository root was executed **on the cache host** (`V-MTMFG-5` / `172.16.1.104`).
+See **Phase 24** at the end of this file for the evidence and for the defects the run exposed; T153-T156 carry the
+residuals, and T150-T152 record what was fixed. Both tasks stay resolved.
 
-**Verified.** Redeployed and started on the host: **22/22 checks pass**, and the service performed its **first ever
+**Verified.** Redeployed and started on the host: **23/23 checks pass**, and the service performed its **first ever
 successful refresh** — all five shapes `Succeeded` in ~4.4 s (`work_order_lookup` 699 · `operation_sequences` 891 ·
 `subordinate_parts` 1,742 · `inventory_locations` 79,305 · `disposition_input` 699 rows), with the row counts
 matching the T144-corrected population reads. A second cycle completed after the UI redeploy. So §2's blocking
@@ -2290,10 +2291,10 @@ of **180**. The live configuration holds `RefreshIntervalMinutes: 180`, `Service
 
 §2's publish, install, tray-only start, single-instance and API-gating halves are now **done** — the host install is
 in place and the blocker that stopped Phases 18/19/21 ("a host-side deployment to another machine") is retired. What
-remains of §2 is the tray Settings surface, the write-once credential, and one real refresh cycle, all blocked on
-operator interaction; §3's fallback proof and §4's defect proof need a **signed-in** application session; §5 needs a
-configured service (two secrets) and a throwaway store; §7 is a maintainer-day exercise; SC-007/SC-008 are unstarted
-30-day observation windows. Two of those
+remains of §2 is the tray Settings surface; §3's fallback proof and §4's defect proof need a **signed-in** application
+session; §5 needs a configured service and a throwaway store; §7 is a maintainer-day exercise; SC-007/SC-008 are
+unstarted 30-day observation windows. (The write-once credential and the “one real refresh cycle” items this list
+used to carry are both retired — T147 deleted the credential, and Phase 24 ran the cycle on the host.) Two of those
 blockers were re-confirmed unchanged this run (`172.16.1.104:5760` closed, no `HKCU\…\Run` entry, no
 `bin/publish/win-x64`). The new finding above adds a fourth reason the walkthrough cannot be signed off: even on a
 fully provisioned host, §3 step 3's "every journey returns a complete, correctly shaped result" would pass on shape
@@ -2375,3 +2376,99 @@ is a **capture** of the live mirror taken 2026-09-12 and carries 79,218 shape-4 
 (`(1,'00658500','DC-DOCK',0.0000, …)`). Those rows are app-filtered and harmless, but they now diverge from what
 the population read produces. Regenerating the capture needs the shared host; it is recorded here rather than
 changed in this run.
+## Phase 24 — T147/T148(c) host verification (2026-09-12, `/speckit.implement`)
+
+Appended by `/speckit.implement`. No earlier task, ID, or phase was modified. T147 and T148 remain **resolved**. The
+defects this run exposed were fixed in the same session (T150-T152) and the residuals are filed as T153-T156.
+
+The handover in `VALIDATION-PROMPT-SERVER.md` was executed **on the cache host** (`V-MTMFG-5` / `172.16.1.104`, install
+folder `C:\Services\MTM_Waitlist.Mock.Service\`), because neither change can be proven anywhere else.
+
+### Result
+
+| Step | Result |
+|---|---|
+| 1 Host identity | **PASS** — `V-MTMFG-5` / `172.16.1.104`, install folder present |
+| 2 Fetch + build | **PASS** — `Build succeeded. 0 Warning(s) 0 Error(s)` |
+| 3 Tests | **PASS after the T150/T151 fixes** — no-store pass `Failed: 0, Passed: 724, Skipped: 15`; live-store pass `Failed: 0, Passed: 737, Skipped: 2` |
+| 4 Role lookup vs the real store | **PASS** — `sp_auth_user_row_get` is deployed; `jkoll`/`johnk` resolve to `Developer` (approved); an unknown name returns no row |
+| 5 Deploy | **PASS** — `DEPLOYMENT OK - 23 checks, 0 warning(s)`, exit 0; `API refuses an unnamed caller` PASS |
+| 6 API authorization | **PASS** — anonymous, retired-token, invented-user and unassigned-user all answer a byte-identical `401 {"error":"unauthorized"}`; an approved operator answers `200` with `operatorRoles` and no secret-shaped field |
+| 7 Durable log | **PASS** — `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\Logs\service_daily_2026_09_12.jsonl`, 1,074 lines: `Start requested (pid …)` naming the log directory, per-refusal `WARN` lines carrying reason/source/method/path, per-shape refresh outcomes, and no password, connection string or key material |
+| 8 Operator entry point | **PASS** — `mock-service-control.ps1 -Action ShowUi` opened the window on the Status page while the tray icon stayed unpromoted (`IsPromoted` absent) |
+| 9 Real refresh cycle | **PASS** — `POST /api/refresh` answered `200` with all five shapes `succeeded`; `/api/status` then reported each shape `lastOutcome: succeeded` with a fresh `refreshedUtc` |
+
+**§2 step 7 is satisfied** — the service reads its own cache and a real refresh cycle completed on the host. That
+retires two of the three §2 items the T106 note above still lists as remaining: the **write-once credential no longer
+exists** (T147 retired it) and the **real refresh cycle has now run**.
+
+### What the run changed
+
+- `MTM_Waitlist.Tests/Module_Mock_Service/ServiceApiTests.cs` — the fixture's free-port override was **inert** (T150):
+  `ServiceHostBuilder.Build` never pushed the record into the store, so the listener bound
+  `ServiceConfiguration.CreateDefault().Api` = `0.0.0.0:5760` regardless. The fixture now seeds the store's own
+  configuration file, and asserts the store took the binding. Verified by running the suite **with the service up**:
+  `Failed: 0`.
+- `MTM_Waitlist.Tests/ProductionBackendAvailability.cs` (new) + the two tests in T151 — tests whose premise is that
+  the production backend is *unreachable* now report inconclusive when a live connection is configured, instead of
+  failing **and writing rows into the operational store**.
+- `MTM_Waitlist.Mock.Service/Api/ServiceOperatorAuthenticationHandler.cs`, `Api/ServiceApiContracts.cs` — the refusal
+  was serialized with a bare `JsonSerializer.Serialize(…)`, which uses PascalCase, while every route serializes with
+  web defaults; one API therefore emitted two error envelopes. The challenge now writes the contract's camelCase body
+  and omits an absent detail, so the body is exactly `{"error":"unauthorized"}`. The **contract was right and the
+  code was wrong**, so no contract text was changed.
+- `MTM_Waitlist.Mock.Service/deploy/mock-service-control.ps1` — the failure hint sent operators to a debugger and the
+  Windows Event Log, which T148(c) made false; it now names the daily log.
+- Host state: the DPAPI credential blob T147 retired was **still in the persisted configuration** and was removed
+  after a backup (`service-configuration.json.bak-20260912`); the service was redeployed and restarted against the
+  cleaned file.
+
+### Filed from this run — fixed
+
+- [x] T150 (**FIXED 2026-09-12**) `ServiceApiTests`' free-port override was **inert**: `ServiceHostBuilder.Build` only
+  assigns `_loadedConfiguration` and never pushes the record into `ServiceConfigurationStore`, so the listener
+  bound `ServiceConfiguration.CreateDefault().Api` = `0.0.0.0:5760` and every test in the class failed whenever the
+  deployed service was running. The fixture now seeds the store's own configuration file and asserts the store took the
+  binding, so a future property rename fails loudly instead of silently rebinding the production port. Verified by
+  running the full suite **with the service up**: `Failed: 0, Passed: 724, Skipped: 15`.
+- [x] T151 (**FIXED 2026-09-12**) Two tests whose premise is an *unreachable* production backend failed **and wrote
+  rows into the operational store** on a host where `MTM_WAITLIST_DB_CONNECTION_STRING` is set. The new
+  `MTM_Waitlist.Tests/ProductionBackendAvailability.cs` reports them inconclusive instead. Verified: the live-store
+  pass is `Failed: 0, Passed: 737, Skipped: 2`, and the store's row counts were unchanged across the run.
+- [x] T152 (**FIXED 2026-09-12**) The refusal body was serialized with PascalCase while every route used camelCase web
+  defaults, so one API emitted two error envelopes and neither matched `contracts/mock-service-http-api.md` §6. The
+  challenge now writes exactly `{"error":"unauthorized"}`. The contract was correct and the code was wrong.
+
+### Still open
+
+- [ ] T153 (MEDIUM) `ProductionBackendAvailability` detects only the two `MTM_WAITLIST_*_CONNECTION_STRING` variables,
+  while `MySqlHelperServer` also falls back to `StartupDatabaseOptions.ConnectionString` from `appsettings.json`. A host
+  whose configuration points at a reachable store **without** any environment variable would still fail and write.
+  Either extend the guard to probe the resolved connection, or convert the two tests to `StubMySqlHelperServer`.
+- [ ] T154 (MEDIUM) The retired-credential purge was manual and host-specific. Any other install that ran a pre-T147
+  build still carries `Api.CredentialProtected` in its `service-configuration.json`, and neither the deploy script nor
+  the service removes it. Add an upgrade step (or a load-time drop) so the blob cannot outlive the feature it belonged
+  to. Also purge the same field wherever a pre-T147 configuration has been backed up.
+- [ ] T155 (LOW) No real account holds a non-approved role: `core_users_profiles` has two users, both `Developer`, so
+  the *unapproved role* refusal branch is exercised only by `ServiceApiTests`' stub resolver — the host check could not
+  reach it. (`Admin` is additionally in `ServiceOperatorRoles.Approved` but absent from `auth_roles_catalog`.) Seed a
+  shop-floor account, or record the acceptance.
+- [ ] T156 (LOW) All four backup stores report `lastOutcome: failed` with `toolAvailable: true`. Pre-existing and not
+  investigated in this run; the reason should now be readable in the durable log.
+
+### Unrun and out of scope, stated so it is not assumed
+
+- **Step 6's remote-client check was not run from a plant PC.** On the host the listener binds `0.0.0.0:5760`, a call
+  to `http://172.16.1.104:5760/api/status` with an approved operator answers `200`, and an inbound allow rule exists —
+  necessary but not the remote proof itself.
+- A settings save from the UI was not exercised, and SC-007/SC-008 remain unstarted observation windows.
+- The live-store test pass wrote 14 rows into the operational store during this session (four
+  `waitlist_requests_queue` rows with their four `waitlist_requests_audit` rows, `setup_active_jobs` id 4 with its
+  custom-data row and four `setup_job_history` rows). All 14 were **deleted** transactionally afterwards; rollback
+  exports are in the gitignored `obj/testdata-rollback/`.
+
+### Host state at the end
+
+Service running as the production deployment: `C:\Services\MTM_Waitlist.Mock.Service\MTM_Waitlist.Mock.Service.exe`,
+pid 848, tray-only (`MainWindowHandle=0`), `0.0.0.0:5760` listening, auto-start entry intact, configuration free of any
+credential-shaped field.

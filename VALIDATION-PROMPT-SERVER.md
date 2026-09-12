@@ -86,6 +86,11 @@ dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x6
 **Expect** `Failed: 0`. The off-server run was `Passed: 720, Skipped: 19, Total: 739`; the 19 skips are the
 live-database integration suites. On the host, re-run with the live connection so the skips execute:
 
+> **On the host the baseline reads `Passed: 724, Skipped: 15`, not 720/19.** `MTM_WAITLIST_DB_CONNECTION_STRING`
+is set here for the service, so clear it *and* `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` for the no-store pass,
+and the four extra executions are the Infor Visual suites, which run because `INFOR_VISUAL_SQL_USER` /
+`INFOR_VISUAL_SQL_PASSWORD` are set here too. Verified 2026-09-12.
+
 ```powershell
 $env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING = $env:MTM_WAITLIST_DB_CONNECTION_STRING
 dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1
@@ -121,7 +126,7 @@ cd MTM_Waitlist.Mock.Service\deploy
 .\install-mock-service.ps1 -Publish
 ```
 
-**Expect** `DEPLOYMENT OK — 22 checks, 0 warning(s)` and exit code `0`. Do **not** pass `-AllowNonServerHost`, and do
+**Expect** `DEPLOYMENT OK — 23 checks, 0 warning(s)` and exit code `0`. Do **not** pass `-AllowNonServerHost`, and do
 not hand-roll the steps. The script publishes, stops the running instance, deletes the old install folder, redeploys,
 sets and proves the four secrets, starts the service, and health-checks it. One of its checks is now labelled
 **`API refuses an unnamed caller`** — it must report `PASS` (`GET /api/status -> 401`).

@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
-using System.Text.Json;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -121,10 +120,12 @@ public sealed class ServiceOperatorAuthenticationHandler : AuthenticationHandler
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
         Response.StatusCode = StatusCodes.Status401Unauthorized;
-        Response.ContentType = "application/json";
 
-        await Response.WriteAsync(
-            JsonSerializer.Serialize(new ServiceApiContracts.ApiErrorPayload("unauthorized", null)))
+        // Written through the response's own JSON writer so a refusal is the same camelCase envelope every
+        // route produces. A bare JsonSerializer.Serialize() uses PascalCase and made this one path disagree
+        // with the contract, emitting {"Error":"unauthorized","Message":null} on the wire.
+        await Response.WriteAsJsonAsync(
+                new ServiceApiContracts.ApiErrorPayload("unauthorized", null))
             .ConfigureAwait(false);
     }
 
