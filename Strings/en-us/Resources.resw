@@ -95,10 +95,10 @@
     <value>Work Order</value>
   </data>
   <data name="Setup_WorkOrder.Input.PlaceholderText" xml:space="preserve">
-    <value>Enter work order (for example WO-076951)</value>
+    <value>Enter work order (for example 76951, 076951, or WO-076951)</value>
   </data>
   <data name="Setup_WorkOrder.Validation.InvalidFormat" xml:space="preserve">
-    <value>Enter a valid work order in the WO-###### format (for example WO-076951).</value>
+    <value>Enter a valid work order with 5 or 6 digits (for example 76951, 076951, or WO-076951).</value>
   </data>
   <data name="Setup_WorkOrder.Validation.NoMatchingParts" xml:space="preserve">
     <value>No parts were found for this work order.</value>

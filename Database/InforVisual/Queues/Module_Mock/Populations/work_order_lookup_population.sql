@@ -10,14 +10,15 @@
 -- (WORK_ORDER.STATUS in ('R' Released, 'U' Unreleased, 'F' Firmed); closed 'C' and cancelled 'X' are
 -- never cached), but only those the application can ask for AND the live read can answer are keyed.
 --
--- Key domain (operator decision 2026-09-12, task T144 — narrowed to the `WO-######` form ONLY):
---   The application now accepts only `WO-` + exactly six digits and keys the cache by that exact
---   normalized string (WorkOrderValidationService; sp_visual_work_order_lookup_get matches
---   `normalized_work_order = p_normalized_work_order`), so this script emits a key only where BASE_ID
---   is literally `WO-` + 6 digits and uses the BASE_ID itself as the key. The live per-key read
---   (LookupWorkOrder.sql) matches that same verbatim `BASE_ID`, so cached and live answers are keyed
+-- Key domain (operator decision 2026-09-12, task T144 — the key is the `WO-######` form ONLY):
+--   WorkOrderValidationService accepts lenient operator input (`76951`, `076951`, `WO-076951`) and
+--   AUTOFORMATS it to `WO-` + the six-digit, zero-padded base id before anything is sent, so the key
+--   that reaches Visual and this cache is always that canonical string (sp_visual_work_order_lookup_get
+--   matches `normalized_work_order = p_normalized_work_order`). This script therefore emits a key only
+--   where BASE_ID is literally `WO-` + 6 digits and uses the BASE_ID itself as the key. The live per-key
+--   read (LookupWorkOrder.sql) matches that same verbatim `BASE_ID`, so cached and live answers are keyed
 --   by exactly the same string.
---   Everything else is deliberately EXCLUDED because the application can no longer ask for it:
+--   Everything else is deliberately EXCLUDED because that key can never be asked for:
 --     * bare 6-digit numeric BASE_IDs (the `M` family) - the former rule accepted the bare form and
 --       padded it to `WO-0xxxxx`, a key the live read resolved only through its stripped-form match;
 --       for ids that also exist as a `WO-0xxxxx` order that answered with a DIFFERENT order (the T144
@@ -52,8 +53,8 @@ WITH open_work_orders AS
         -- exactly the keys the application can ask for AND the live per-key read (LookupWorkOrder.sql)
         -- resolves, or the fallback is not transparent (FR-002/FR-004): a key the live read cannot
         -- answer would let an outage serve an order that a healthy Infor Visual never returns for that
-        -- input. The application now accepts only the `WO-######` form, so BASE_ID must literally be
-        -- `WO-` + 6 digits. Full rationale in the header.
+        -- input. The application sends only the canonical `WO-######` key (it autoformats whatever the
+        -- operator typed), so BASE_ID must literally be `WO-` + 6 digits. Full rationale in the header.
         AND LEN(LTRIM(RTRIM(wo.BASE_ID))) = 9
         AND LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%'
         AND SUBSTRING(LTRIM(RTRIM(wo.BASE_ID)), 4, 6) NOT LIKE '%[^0-9]%'

@@ -10,8 +10,9 @@
 
 SET NOCOUNT ON;
 
--- Matches the BASE_ID verbatim: the application accepts only the `WO-######` form (operator decision
--- 2026-09-12, task T144) and passes that same normalized string to both this live read and the cached
+-- Matches the BASE_ID verbatim: the application sends only the canonical `WO-######` key (it accepts
+-- lenient operator input and autoformats it first; operator decision 2026-09-12, task T144) and passes
+-- that same string to both this live read and the cached
 -- copy. The former stripped-base-id fallback resolved bare `M`-family orders the application can no
 -- longer ask for and could return a DIFFERENT order than the cache served (T144 collisions).
 DECLARE @NormalizedWorkOrderTrimmed nvarchar(30) = LTRIM(RTRIM(@NormalizedWorkOrder));

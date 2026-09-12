@@ -32,7 +32,7 @@ verification counterpart) added the same day (see §1.5). T159 and T160 were res
 | --- | --- | --- | --- |
 | **T106** | verification | End-to-end acceptance walkthrough — `quickstart.md` §1–§8 on a running build | Environment + operator interaction; see §1.1 |
 | **T151** | verification | Confirm the shape-4 cache holds no zero-stock rows after the next host refresh | **Two parts verified 2026-09-12** (2,012 rows, none below 1); the grid-vs-live comparison needs a signed-in session — see §1.5 |
-| ~~T144~~ | ~~coverage~~ | **RESOLVED 2026-09-12** — the operator narrowed the work-order input rule to the `WO-######` form only, then the cache guards and the live reads were narrowed to match | — |
+| ~~T144~~ | ~~coverage~~ | **RESOLVED 2026-09-12** — the cache guards, the live reads and the key the app sends were all narrowed to the canonical `WO-######` string; the operator's raw input stays lenient and is auto-formatted to that key before the lookup | — |
 | ~~T147~~ | ~~HIGH~~ | **RESOLVED 2026-09-12** — the shared credential was retired; the API is authorized by the caller's application role | — |
 | ~~T148~~ | ~~HIGH~~ | **RESOLVED 2026-09-12** — (a) the show-request channel + desktop shortcut shipped; (c) the service now writes its own daily log file | — |
 
@@ -54,10 +54,11 @@ Still outstanding, and why:
 
 A fifth reason was added on 2026-09-11 and **retired 2026-09-12**: §3 step 3's *"every journey returns a complete,
 correctly shaped result"* would pass on **shape** while still serving a **different work order** than the live read
-for the same input — which was T144. The operator narrowed the work-order input rule to the `WO-######` form only, so
-the colliding bare-numeric key is no longer expressible at all (§1.2).
+for the same input — which was T144. The cache guards and the live reads were narrowed to the canonical
+`WO-######` key, so the colliding bare-numeric key is no longer sent at all (the operator's raw input is still
+accepted and auto-formatted to that key; §1.2).
 
-### 1.2 T144 — RESOLVED 2026-09-12 (the operator narrowed the input rule to `WO-######`)
+### 1.2 T144 — RESOLVED 2026-09-12 (the key sent is the canonical `WO-######`; the raw input is auto-formatted to it)
 
 The **transparency** half was **fixed 2026-09-11**: all five `Database/InforVisual/Queues/Module_Mock/Populations/*.sql`
 emit exactly the live-resolvable key domain (`work_order_lookup` 701 · `operation_sequences` 893 ·
@@ -66,9 +67,13 @@ emit exactly the live-resolvable key domain (`work_order_lookup` 701 · `operati
 The **coverage** half was open because the application's input rule `^(?:WO-)?(\d{5,6})$`
 (`MTM_Waitlist.Setup/Services/WorkOrderValidationService.cs`) could not express **42,143 of the 42,852** open Infor
 Visual work orders, and widening it meant changing product behaviour. The operator took that decision on 2026-09-12
-— and took the **opposite** branch: the application accepts **only the `WO-######` form** (literal `WO-` + exactly six
-digits). The rule, the five population guards and the four work-order live reads were all narrowed to it in the same
-change:
+and took the **opposite** branch: the *key the application asks for* is **only** the `WO-######` form, and that is what
+the five population guards and the four work-order live reads were narrowed to.
+
+The operator's *raw input* is deliberately still lenient — `76951`, `076951` and `WO-076951` all name the same order —
+and `WorkOrderValidationService` **auto-formats it to the canonical `WO-######` string before anything is sent**, so
+Infor Visual and the cache only ever receive that canonical key. The distinction matters: accepting the loose forms is
+a formatting convenience, whereas the key domain is what T144 was actually about, and it is the key domain that closed:
 
 | Family | `BASE_ID` form | Open | Before | Now |
 | --- | --- | ---: | --- | --- |
@@ -82,8 +87,9 @@ Infor Visual `BASE_ID` of a `W`-family order, so the live read and the cached co
 The stripped-base-id match (`BASE_ID IN (@NormalizedWorkOrderTrimmed, @WorkOrderBaseId)`) was **removed** from
 `LookupWorkOrder.sql`, `GetSequences.sql`, `GetSubordinateParts.sql` and `GetDispositionInput.sql` — leaving it would
 still resolve bare `M` orders the application can no longer ask for, and the **3** five-digit cases that collide with
-a `WO-0xxxxx` order would keep returning a *different* order than the cache served. Placeholder/validation/tooltip
-copy now names the single accepted form. Build + offline suite: **747 total, 728 passed, 19 skipped, 0 failed**.
+a `WO-0xxxxx` order would keep returning a *different* order than the cache served. Placeholder, validation and tooltip
+copy names the accepted input forms again (`76951, 076951, or WO-076951`) because the service auto-formats them.
+Offline suite at the narrowing: **747 / 728 / 19 / 0**; after the auto-format restoration: **760 / 741 / 19 / 0**.
 The population reads still need a **live** re-run on the cache host to confirm the new row counts.
 
 Full detail: `specs/001-module-mock-visual-fallback/tasks.md` Phase 24.
@@ -261,8 +267,10 @@ out to have shipped in `c2d5e04` already. The host-side proof has since run too 
 1. ~~**T147**~~ — **done.** The shared credential was retired; the API is authorized by the caller's application role.
 2. ~~**T148(c)**~~ — **done.** The service writes its own daily log file (`Logs\service_daily_<date>.jsonl`).
 3. ~~**T148(a)**~~ — **already shipped** in `c2d5e04` (show-request channel + desktop control shortcut).
-4. ~~**T144 (coverage)**~~ — **done.** The operator narrowed the work-order input rule to the `WO-######` form only,
-   and the five population guards and four work-order live reads were narrowed with it (§1.2).
+4. ~~**T144 (coverage)**~~ — **done.** The key the app sends is now the canonical `WO-######` form, and the five
+   population guards and four work-order live reads were narrowed with it. The operator's raw input stays lenient
+   (`76951`, `076951`, `WO-076951`) and is auto-formatted to that key **before** the lookup, so the autoformatter
+   still works while the collision class stays closed (§1.2).
 5. ~~**T150**~~ — **done.** The shape-4 cache no longer stores zero-stock locations (§1.5).
 6. ~~**Host validation**~~ — **done 2026-09-12.** `VALIDATION-PROMPT-SERVER.md` was executed on `V-MTMFG-5`
    (`tasks.md` Phase 25), the service and the app were both redeployed (Phase 26), and T151's zero-stock condition is

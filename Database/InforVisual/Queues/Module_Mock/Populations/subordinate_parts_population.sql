@@ -98,8 +98,8 @@ WHERE
     wo.STATUS IN ('R', 'U', 'F')
     AND wo.BASE_ID IS NOT NULL
     AND wo.PART_ID IS NOT NULL
-    -- Addressable work orders only (operator decision 2026-09-12, task T144): the application accepts
-    -- only the `WO-######` form AND the live read (GetSubordinateParts.sql) resolves it verbatim, so
+    -- Addressable work orders only (operator decision 2026-09-12, task T144): the application sends only
+    -- the canonical `WO-######` key AND the live read (GetSubordinateParts.sql) resolves it verbatim, so
     -- BASE_ID must literally be `WO-` + 6 digits. Full rationale in work_order_lookup_population.sql.
     AND LEN(LTRIM(RTRIM(wo.BASE_ID))) = 9
     AND LTRIM(RTRIM(wo.BASE_ID)) LIKE 'WO-%'

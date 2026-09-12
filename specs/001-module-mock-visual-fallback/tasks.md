@@ -1847,8 +1847,10 @@ the catalog. The **content** half is where the defect below lives.
 
 ### T144 — the cache's key domain is not the domain the live read resolves
 
-- [x] T144 (**transparency half FIXED 2026-09-11**; **coverage half RESOLVED 2026-09-12** — the operator decided
-  the application accepts ONLY the `WO-######` form, so the rule was narrowed rather than widened; see Phase 24) The mirror
+- [x] T144 (**transparency half FIXED 2026-09-11**; **coverage half RESOLVED 2026-09-12** — the operator decided the
+  *key the application sends* is only the `WO-######` form, so the cache guards and the live reads were narrowed rather
+  than widened; the operator's raw input stays lenient and is auto-formatted to that key — see Phase 24, and Phase 30
+  for the T162 correction) The mirror
   cached 230 work orders under zero-padded keys the live read cannot resolve and omitted the 555 open work orders the
   live read *does* resolve, so the same work-order input returned **different content** depending on whether Infor
   Visual was reachable (FR-002/FR-004/SC-003/SC-004, contradicts). The five population reads now emit exactly the
@@ -2840,3 +2842,64 @@ the live server, but the drop/recreate/reload sequence replaces a live store. `m
 full rehearsal is wanted — it is disposable and the refresh rebuilds it from Infor Visual — but it should be triggered
 deliberately rather than as a side effect of a test run.
 - **T151's signed-in remainder** is unchanged by this pass.
+
+---
+
+## Phase 30 — the work-order autoformatter restored, and the settings image cards regrouped (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. Corrects the over-narrowing recorded in Phase 24 and regroups the settings image
+> cards. No earlier task ID or phase text was modified.
+
+### T162 — the input rule was narrowed one step too far, and it broke the autoformatter
+
+- [x] T162 (**FIXED 2026-09-12** — see below) The Setup work-order textbox had always **auto-formatted** loose input:
+  `76951`, `076951` and `WO-076951` all name the same order, and the value written back into the box and sent onward
+  was the canonical `WO-######` string. Phase 24 narrowed the input rule itself to `^WO-(\d{6})$`, which rejected the
+  first two forms, so the autoformatter stopped working (contradicts the Setup workflow's long-standing behaviour).
+
+**The two concerns are separable, and they are now separate.** Input *acceptance* is a formatting convenience; the key
+*domain* is what T144 was actually about. `WorkOrderValidationService` accepts the loose forms again, zero-pads to six
+digits, and emits the canonical `WO-######` string — which is the only thing that ever reaches Infor Visual or
+`mtm_mock`. **The key domain is unchanged**, so the T144 collision class stays closed: the retired stripped-form match
+in the four live reads is still removed, and the string sent is byte-identical to what Phase 24 produced for the same
+order.
+
+| Artifact | Change |
+|---|---|
+| `MTM_Waitlist.Setup/Services/WorkOrderValidationService.cs` | `^WO-(\d{6})$` → `^(?:WO-)?(\d{5,6})$`, normalizing with `PadLeft(6, '0')`. The comment now states the input/key split explicitly, so the next reader does not re-narrow it. |
+| `Strings/en-us/Resources.resw`, `Strings/en-us/TooltipResources.resw`, `Module_Setup/Views/SetupWorkOrderPage.xaml` | Placeholder, validation message and tooltip name the accepted input forms again and state that the value is formatted as `WO-######` before the lookup runs. |
+| `MTM_Waitlist.Tests/Module_Setup/Services/WorkOrderValidationServiceTests.cs` | Renamed to describe the contract; **seven** accepted inputs (`76951` → `WO-076951`, `076951`, `WO-076951`, `wo-076951`, `WO-76951` → `WO-076951`, `100089`, whitespace-padded) and **six** rejected ones (7 digits, non-digit, 4 digits, `WO-`, prose, empty). |
+
+No service or view-model change was needed: `SetupWorkflowService.SearchWorkOrderAsync` already passed
+`normalizedWorkOrder` — not the raw input — to the lookup, and `SetupWorkOrderViewModel` already wrote
+`State.NormalizedWorkOrder` back into `WorkOrderInput`. The defect was entirely in the rule.
+
+**Only one work-order entry textbox exists.** `Module_Setup/Views/SetupWorkOrderPage.xaml` is the sole work-order
+input; the other text boxes are search filters (`Setup_WorkCenterPage`, `NewRequestWorkCenterPage`), a free-text
+description (`NewRequestDetailsPage`), or unrelated settings fields.
+
+**Verified.** `dotnet build MTM_Waitlist.sln` → `Build succeeded, 0 Warning(s) 0 Error(s)`. Focused
+`WorkOrderValidationServiceTests` + `SetupWorkflowServiceTests` → **22 passed / 0 failed**. Full suite (no live store)
+→ **`Failed: 0, Passed: 741, Skipped: 19, Total: 760`** (the Phase 29 total of 759 plus one net new case).
+**Not verified:** the rendered textbox behaviour in a running app — reaching the Setup page needs a signed-in session.
+
+### T163 — the settings image cards regrouped
+
+- [x] T163 (**DONE 2026-09-12**) Inside the **Image Location Settings** expander the three `SettingsCard`s were
+  `Request Type Images`, `Work Center Images`, `Request Subtype Images` — the type and subtype cards separated by an
+  unrelated one, and each with its own single-action card.
+
+`Request Type Images` and `Request Subtype Images` are now **one** card, **`Request Type & Subtype Images`**, carrying
+two actions (`Manage types`, `Manage subtypes`). The `Work Center Images` card follows it — the position swap that was
+asked for. The now-unused fourth `RowDefinition` was removed and the section subtitle reordered to match
+(`request type, subtype, and work-center`).
+
+**Verified:** build clean, so the XAML compiles and both `Click` handlers still resolve. **Not verified:** the rendered
+layout — Settings requires a signed-in session.
+
+### Correction to Phase 24
+
+Phase 24's heading and its "Accepted consequence" paragraph state that the application "accepts only the `WO-######`
+form". That is now true **of the key sent** and false of the operator's input. The open-order table in Phase 24 stands:
+the `M` family is still not addressable, because an operator typing `100089` normalizes to `WO-100089`, which the live
+read matches only against a `W`-family `BASE_ID`.

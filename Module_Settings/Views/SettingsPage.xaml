@@ -222,31 +222,38 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <TextBlock
                             Grid.Row="0"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="Manage request type, work-center, and subtype image overrides for authorized staff."
+                            Text="Manage request type, subtype, and work-center image overrides for authorized staff."
                             TextWrapping="Wrap" />
 
                         <wct:SettingsCard Grid.Row="1">
                             <wct:SettingsCard.Header>
-                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Request Type Images" />
+                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Request Type &amp; Subtype Images" />
                             </wct:SettingsCard.Header>
                             <wct:SettingsCard.Description>
                                 <TextBlock
                                     Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
                                     Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="Manage the default visuals used for request type cards and summaries." />
+                                    Text="Manage the default visuals used for request type cards and summaries, and subtype-specific artwork while preserving the inherited fallback chain."
+                                    TextWrapping="Wrap" />
                             </wct:SettingsCard.Description>
                             <wct:SettingsCard.Content>
-                                <Button
-                                    MinWidth="120"
-                                    Content="Manage"
-                                    Click="RequestTypeImages_Click"
-                                    AutomationProperties.Name="Manage request type images" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button
+                                        MinWidth="120"
+                                        Content="Manage types"
+                                        Click="RequestTypeImages_Click"
+                                        AutomationProperties.Name="Manage request type images" />
+                                    <Button
+                                        MinWidth="120"
+                                        Content="Manage subtypes"
+                                        Click="RequestSubtypeImages_Click"
+                                        AutomationProperties.Name="Manage request subtype images" />
+                                </StackPanel>
                             </wct:SettingsCard.Content>
                         </wct:SettingsCard>
 
@@ -266,25 +273,6 @@
                                     Content="Manage"
                                     Click="WorkCenterImages_Click"
                                     AutomationProperties.Name="Manage work center images" />
-                            </wct:SettingsCard.Content>
-                        </wct:SettingsCard>
-
-                        <wct:SettingsCard Grid.Row="3">
-                            <wct:SettingsCard.Header>
-                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Request Subtype Images" />
-                            </wct:SettingsCard.Header>
-                            <wct:SettingsCard.Description>
-                                <TextBlock
-                                    Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
-                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="Assign subtype-specific artwork while preserving the inherited fallback chain." />
-                            </wct:SettingsCard.Description>
-                            <wct:SettingsCard.Content>
-                                <Button
-                                    MinWidth="120"
-                                    Content="Manage"
-                                    Click="RequestSubtypeImages_Click"
-                                    AutomationProperties.Name="Manage request subtype images" />
                             </wct:SettingsCard.Content>
                         </wct:SettingsCard>
                     </Grid>

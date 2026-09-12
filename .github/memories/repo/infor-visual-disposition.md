@@ -73,10 +73,13 @@ Phase 24 (the 2026-09-12 fix).
 - Open `WORK_ORDER` rows come in several families (**42,852 open total**): `Q` 37,259 (ids like `CQ-016245-19`,
   `.054" X .500"`), `M` 4,898 (`BASE_ID` = bare numeric = `PART_ID`, e.g. `10089`; 230 of these are all-digits with
   `LEN` 5–6), `W` 695 (`BASE_ID` literally `WO-…`, 555 of them `WO-` + digits, e.g. `WO-041652`, `WO-074011`).
-- **The app's work-order key is the `WO-######` form** — `WorkOrderValidationService` carries `^WO-(\d{6})$`
-  (operator decision 2026-09-12, T144; it previously accepted `^(?:WO-)?(\d{5,6})$`) and normalizes to uppercase
-  `WO-` + exactly six digits. That is what `setup_active_jobs.work_order` holds. The real Setup workflow's only saved
-  job is `WO-041652` → live `TYPE=W, BASE_ID='WO-041652'`, i.e. the `W` family — now the **only** reachable family.
+- **The app's work-order key is the `WO-######` form** — `WorkOrderValidationService` **auto-formats** the operator's
+  raw input to uppercase `WO-` + exactly six digits (zero-padded), and that canonical string is what it hands to
+  Visual and to the cache. The **input** stays deliberately lenient — `76951`, `076951`, `WO-76951` and `WO-076951`
+  all normalize to `WO-076951` — so the textbox autoformatter keeps working; only the **key sent** is strict. (The
+  rule was briefly tightened to `^WO-(\d{6})$` for input too, then restored on 2026-09-12 because it broke the
+  autoformatter.) That key is what `setup_active_jobs.work_order` holds. The real Setup workflow's only saved
+  job is `WO-041652` → live `TYPE=W, BASE_ID='WO-041652'`, i.e. the `W` family — the only family that key resolves.
 - The live queue scripts match `BASE_ID = @NormalizedWorkOrder[…]` **verbatim**. The old stripped-base-id fallback
   (`BASE_ID IN (normalized, stripped)`, via `@WorkOrderBaseId`) was **removed 2026-09-12** (T144) from
   `LookupWorkOrder.sql`, `GetSequences.sql`, `GetSubordinateParts.sql` and `GetDispositionInput.sql`: it could still
