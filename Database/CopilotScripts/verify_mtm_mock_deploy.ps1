@@ -95,21 +95,37 @@ Invoke-SqlFile -Path (Join-Path $mockRoot 'AllTables.sql') -Database 'mtm_mock'
 Invoke-SqlFile -Path (Join-Path $mockRoot 'AllSPs.sql') -Database 'mtm_mock'
 
 $tableCount = Get-Scalar -Sql 'SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ''mtm_mock'';' -Database 'mtm_mock'
-$procCount = Get-Scalar -Sql 'SELECT COUNT(*) FROM information_schema.routines WHERE routine_schema = ''mtm_mock'' AND routine_type = ''PROCEDURE'';' -Database 'mtm_mock'
+# 12 procedures, not 10: the ten shape procedures (5 shapes x {get,refresh}) plus the two
+# read-shape reporting procedures (sp_visual_read_shape_freshness_get,
+# sp_visual_read_shape_metadata_get). Filtered to `sp_visual%` so the assertion means what its
+# label says rather than counting anything else that may live in mtm_mock.
+$procCount = Get-Scalar -Sql 'SELECT COUNT(*) FROM information_schema.routines WHERE routine_schema = ''mtm_mock'' AND routine_type = ''PROCEDURE'' AND routine_name LIKE ''sp_visual%'';' -Database 'mtm_mock'
 Assert-Equal $tableCount 10 'tables deployed (5 mirrors + 5 stage twins)'
-Assert-Equal $procCount 10 'procedures deployed (sp_visual_<shape>_{get,refresh})'
+Assert-Equal $procCount 12 'procedures deployed (10 shape ops + 2 read-shape reporting)'
 
 Write-Host "3. Cold cache serves baseline seed content (FR-017)" -ForegroundColor Cyan
 Invoke-SqlFile -Path (Join-Path $mockRoot 'AllSeeds.sql') -Database 'mtm_mock' | Out-Null
 
-$seedHit = (Invoke-Sql -Sql "CALL sp_visual_work_order_lookup_get('SEED-WO-100');" -Database 'mtm_mock') -join "`n"
-if ($seedHit -notmatch 'SEED-PART-100') {
+# The seed is a capture of the live mirror content, so it is proved through the same read the
+# fallback uses: a work order the capture contains must read back its captured part number.
+$seedHit = (Invoke-Sql -Sql "CALL sp_visual_work_order_lookup_get('WO-055298');" -Database 'mtm_mock') -join "`n"
+if ($seedHit -notmatch 'S22919') {
     $failures.Add('FR-017: a never-refreshed cache did not serve the baseline seed content.')
 }
 else { Write-Host '  ok   never-refreshed cache serves baseline seed content' -ForegroundColor DarkGray }
 
-$seedFlags = Get-Scalar -Sql "SELECT COUNT(*) FROM visual_work_order_lookup_result WHERE is_seed_content = 1;" -Database 'mtm_mock'
-Assert-Equal $seedFlags 1 'seeded rows are marked is_seed_content = 1'
+# EVERY seeded row must carry is_seed_content = 1. A copied row is not a refresh, and the flag is
+# what stops the read-status surface reporting a cache age for content that was captured rather
+# than read from Infor Visual (FR-022).
+foreach ($shape in @(
+        'work_order_lookup'
+        'operation_sequences'
+        'subordinate_parts'
+        'inventory_locations'
+        'disposition_input')) {
+    $seedOnly = Get-Scalar -Sql "SELECT CASE WHEN COUNT(*) > 0 AND SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END FROM visual_${shape}_result;" -Database 'mtm_mock'
+    Assert-Equal $seedOnly 1 "visual_${shape}_result holds only is_seed_content = 1 rows"
+}
 
 Write-Host "4. All-shapes round trip (FR-004)" -ForegroundColor Cyan
 Invoke-SqlFile -Path (Join-Path $mockRoot 'Validation/all_shapes_roundtrip/validate.sql') -Database 'mtm_mock' | Out-Null

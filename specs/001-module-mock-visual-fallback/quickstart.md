@@ -82,9 +82,9 @@ The 17 skipped tests are the opt-in live-database subset gated on `MTM_WAITLIST_
 
 ```sql
 -- shape reads return the seed content before any refresh has happened (FR-017).
--- The seeded journey is SEED-WO-100 / SEED-PART-100 — the exact keys are defined in
--- Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql.
-CALL sp_visual_work_order_lookup_get('SEED-WO-100');
+-- The seed is a capture of the live mirror content, so it is keyed by that snapshot's own work
+-- orders — see Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql for the full list.
+CALL sp_visual_work_order_lookup_get('WO-055298');                                     -- -> part S22919
 -- metadata proves these are seed rows, not refreshed rows
 SELECT refreshed_utc, is_seed_content FROM visual_work_order_lookup_result LIMIT 5;   -- is_seed_content = 1
 ```
