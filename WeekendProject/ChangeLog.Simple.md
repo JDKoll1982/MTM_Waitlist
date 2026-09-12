@@ -3,11 +3,16 @@
 > **🕐 Times for Shawn to enter**
 >
 > | Date | Day | Clock in | Clock out | ~Hours |
-> |---|---|---|---:|---:|
+> | --- | --- | --- | ---: | ---: |
 > | 2026-09-05 | Sat | 9:00 AM | 11:00 AM | ~2h |
 > | 2026-09-06 | Sun | 10:30 AM | 6:00 PM | ~7h |
+> | 2026-09-09 | Wed | 5:40 AM | 11:10 PM | ~4h |
+> | 2026-09-12 | Sat | 11:26 AM | 5:32 PM | ~3h 45m |
 >
-
+> The first two rows are estimates; the **2026-09-09 and 2026-09-12 rows are measured** (WakaTime
+> heartbeats for this repo: 764 and 669). **2026-09-10 and 2026-09-11 show no hours from this
+> workstation** — that work landed from the cache host and a second workstation, so those two days are
+> unmeasured here, not idle.
 >
 > **Legend:**
 >
@@ -15,11 +20,15 @@
 > - 🚧 Partially Completed Feature/Update
 > - ❌ Withdrawn (built, then removed on purpose)
 >
-> **Last updated:** 2026-09-11
+> **Last updated:** 2026-09-12
+>
+> **Source of this update:** `specs/001-module-mock-visual-fallback/` — feature 001, **173 / 173 tasks
+> complete**, build clean and the full test suite green as of 2026-09-12 — plus the `[Unreleased]` entry in
+> `WeekendProject/ChangeLog.md`.
 
 ## Where Infor Visual data comes from (outage fallback)
 
-**Infor Visual data** is used thoughout the Waitlist Application. Normally the app
+**Infor Visual data** is used throughout the Waitlist Application. Normally the app
 reads that data **live** from the **Infor Visual** database. If that database is **unreachable or
 down**, the app **automatically** falls back to **cached Infor Visual data** so the screens still open
 and stay usable instead of failing or sitting empty. In short:
@@ -36,8 +45,12 @@ and stay usable instead of failing or sitting empty. In short:
 - Only **Infor Visual** reads use the cache. The Waitlist, WIP, and Receiving databases are always read
   and written **live**; if one of them is unreachable the app says so on that screen rather than
   substituting cached rows.
+- **Cached answers are the same answers.** Work order numbers are normalized to the real Infor Visual
+  form (`WO-076951`) — you can still type `76951` or `076951` and the app fixes it up before it looks
+  anything up — and locations showing **zero stock** are no longer cached. The cached location list is
+  now ~2,000 real rows instead of ~79,400, so what you see cached matches what you would see live.
 
-## Features (1–19)
+## Features (1–19) — Waitlist core (2026-09-05 → 2026-09-06)
 
 1. 🚧 **Request lifecycle with statuses + history.** Requests move through **Pending → Accepted →
    Completed** (or **Canceled**); every step is recorded with who/what/when and shown on the card.
@@ -84,13 +97,55 @@ and stay usable instead of failing or sitting empty. In short:
 
 ---
 
+## Features (20–30) — server service, backups, and the Infor Visual release (2026-09-09 → 2026-09-12)
+
+ 1. ✅ **Your saves are real, everywhere.** Saving a workstation setup or working a request always
+    reaches the live database now. The old "save was acknowledged but the card never changed" behavior —
+    and the setting that caused it — are gone.
+ 2. ✅ **The cache is kept warm by the server, not by the app.** `MTM_Waitlist.Mock.Service` starts with
+    the server's login, sits in the notification area, and refreshes the cached Infor Visual data every
+    3 hours (00:00 / 03:00 / … / 21:00 server time). It can also be asked for an immediate refresh.
+ 3. ✅ **A backup for each of the four databases, set up per database.** Enablement, schedule, retention
+    and destination are configured independently. A database that cannot be reached has **only its own**
+    backup disabled — it no longer stops the other three.
+ 4. ✅ **Emergency restore from the server, with a confirmation.** Restore a chosen database from a chosen
+    backup. It is host-only, never reachable over the network, and an unconfirmed request changes nothing.
+ 5. ✅ **No shared secret for the service.** An operator asks for a status or a refresh with their own
+    application account (Admin, Developer, Plant Manager, Setup Lead or Production Lead). Anyone else is
+    refused, every refusal is logged, and the retired shared token is gone.
+ 6. ✅ **"Cached Infor Visual data" panel in Settings** (Plant Manager and above): ask for a refresh right
+    now and see the result. A stopped service, an unconfigured client and a refusal all read as a plain
+    message — never an error pop-up.
+ 7. ✅ **The server service installs in one step.** The installer asks what you are trying to do when it
+    is run with no arguments, chooses its own install folder, notices a stale build, and can install on a
+    machine that cannot reach the plant (refresh is simply disabled there).
+ 8. ✅ **The app has a real deploy path.** A self-contained publish profile copies to
+    `%LOCALAPPDATA%\Programs\MTM_Waitlist`, so a workstation no longer needs the .NET runtime installed
+    as a prerequisite.
+ 9. ✅ **A Waitlist, WIP or Receiving database that is down says so.** The screen retries three times
+    (about 1s, 2s, then 4s) and then shows a clear unavailable state with a manual **Retry**. It never
+    shows sample rows and never turns into a permanent banner.
+10. ✅ **Backups that actually produced files.** All four databases were failing their backup with
+    "Access denied for user 'ODBC'@'localhost'" — the backup was talking to a shipped default host with no
+    login. All four now back up successfully on the server, and the restore path had the same bug and was
+    fixed with it.
+11. ✅ **Under the hood.** Every database call now goes through a stored procedure (a build-time audit
+    fails the build if inline SQL returns), request-type pictures come from the database instead of a
+    shipped file, coil availability is read from the saved setup job instead of assumed, the API now
+    answers one consistent refusal for anonymous / unknown / unapproved callers, and the fake
+    receiving-history seed was deleted so the average-coil-weight figure is real receipts only.
+
+---
+
 ## Time summary
+
+### Weekend 1 — 2026-09-05 → 2026-09-06 (features 1–19)
 
 **Measured (WakaTime, MTM_Waitlist, since yesterday → now):** ~8h 58m
 **Rounded total used:** **9h 00m** (540 min)
 
 | # | Feature | Status | Est. time |
-|---|---------|:------:|----------:|
+| --- | --------- | :------: | ----------: |
 | 1 | Request lifecycle with statuses + history | 🚧 | 40 min |
 | 2 | Cancel your own request | ✅ | 15 min |
 | 3 | "My Requests" filter | ✅ | 20 min |
@@ -114,6 +169,24 @@ and stay usable instead of failing or sitting empty. In short:
 
 > Feature 19's time is kept in the total because the work was genuinely done and then deliberately
 > removed; the totals above are a record of time spent, not of what is still in the app.
+
+### Release work — 2026-09-09 → 2026-09-12 (features 20–30)
+
+**Measured (WakaTime, MTM_Waitlist):** 4h 03m on Wed 2026-09-09 + 3h 48m on Sat 2026-09-12 = **7h 51m**
+**Rounded total used:** **7h 50m (470 min)**
+
+| Date | Day | Session window (heartbeats) | Measured |
+| --- | --- | ---: | ---: |
+| 2026-09-09 | Wed | 5:40 AM → 11:10 PM | 4h 03m |
+| 2026-09-12 | Sat | 11:26 AM → 5:32 PM | 3h 48m |
+| | | **Total** | **7h 51m** |
+
+> The 2026-09-09 window is wide because that session was broken up; the measured figure is active coding
+> time, not the span. 2026-09-10 and 2026-09-11 read zero because that work landed from the cache host and
+> a second workstation (see the note under the times table at the top). Per-feature splits for 20–30 are
+> **not** broken out: the two figures above are measured, and dividing them per feature would be a guess.
+
+**Grand total, both blocks:** 540 min + 470 min = **1,010 min (16h 50m)**
 
 ---
 
