@@ -258,6 +258,7 @@ public sealed class ServiceHostBuilder
         _services.AddSingleton(provider => new RestoreService(
             provider.GetRequiredService<BackupEngine>(),
             provider.GetRequiredService<BackupArtifactStore>(),
+            provider.GetRequiredService<MySqlConnectionStringResolver>(),
             configurationAccessor,
             provider.GetRequiredService<ILogger<RestoreService>>()));
     }

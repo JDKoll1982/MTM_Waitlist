@@ -96,7 +96,11 @@ $env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING = $env:MTM_WAITLIST_DB_CONNECTION_ST
 dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1
 ```
 
-**Expect** `Failed: 0, Skipped: 0` (the previously skipped live suites now run). Report the two totals separately.
+**Expect** `Failed: 0, Skipped: 2` — **not** `Skipped: 0`. The two skips are
+`WaitlistRequestServiceTests.SubmitAsync_ReturnsPersistenceFailureWhenProductionBackendIsUnavailableAsync` and
+`SetupPersistenceServiceTests.SaveAsync_WhenBackendWritesNoRows_ReturnsFailureAsync`: both assert the *failure* path
+of the real backend, so with a live store configured they report inconclusive rather than fail **and write rows into
+`mtm_waitlist`** (fixed 2026-09-12; see `ProductionBackendAvailability`). Report the two totals separately.
 
 The new/updated tests that specifically cover the changes:
 
@@ -222,8 +226,10 @@ of T148(c).
 
 ### Explicitly out of scope for this run
 
-- **T144** (the work-order input rule cannot express 42,143 of 42,852 open orders) is a product decision, not a bug
-  to fix here.
+- **T144 — since RESOLVED (2026-09-12).** When this handover was written the work-order input rule could not express
+  42,143 of 42,852 open orders and that was treated as a product decision. The operator took it the other way: the
+  application now accepts **only** the `WO-######` form (`^WO-(\d{6})$`), and the cache guards and the live reads were
+  narrowed to match. Nothing about it is left for this run.
 - **T106's SC-007/SC-008** 30-day observation windows: start them if you can, but do not attempt to complete them.
 - Do **not** reintroduce a shared credential, a token header, or a mock/demo toggle. `RetiredSymbolAuditTests` and the
   inline-SQL audit must both still pass.

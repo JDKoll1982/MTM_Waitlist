@@ -30,7 +30,51 @@ public sealed class BackupRestoreTests
 {
     private static readonly DateTime BaseUtc = new(2026, 9, 11, 8, 0, 0, DateTimeKind.Utc);
 
+    /// <summary>
+    /// Every variable the connection resolver consults. A machine that carries real credentials — the cache host
+    /// does — would otherwise let a backup reach a live server, and the "nothing is configured" case could not be
+    /// tested at all.
+    /// </summary>
+    private static readonly string[] s_connectionEnvironmentVariables =
+    [
+        "MTM_MOCK_DB_CONNECTION_STRING",
+        "MTM_WAITLIST_DB_CONNECTION_STRING",
+        "MTM_WIP_APPLICATION_DB_CONNECTION_STRING",
+        "MTM_RECEIVING_APPLICATION_DB_CONNECTION_STRING",
+        "MTM_MYSQL_PASSWORD",
+    ];
+
     private string? _originalPath;
+    private string?[] _originalConnectionVariables = [];
+
+    /// <summary>
+    /// A stand-in for <c>mysqldump</c>: it answers the version probe, records the command line it was handed, and
+    /// writes a non-empty file at the dump path. It uses only cmd.exe built-ins, so the cleared <c>PATH</c> in the
+    /// fixture cannot affect it.
+    /// </summary>
+    /// <remarks>
+    /// <b>Why the last argument.</b> cmd.exe splits its batch parameters at <c>=</c> as well as at spaces, so
+    /// <c>--result-file=C:\path</c> arrives as the two tokens <c>--result-file</c> and <c>C:\path</c> — the flag and
+    /// its value cannot be matched together. The engine appends <c>--result-file</c> last
+    /// (<see cref="BackupEngine.BuildArguments"/>), so the final token is the path, and this reads it that way. A
+    /// fixture that depends on argument order is a fair trade for exercising the real engine against a real process;
+    /// the genuine end-to-end dump needs live MySQL and is covered by T118.
+    /// </remarks>
+    private const string FakeToolScript = """
+        @echo off
+        setlocal enabledelayedexpansion
+        echo %* > "%~dp0args.txt"
+        if "%~1"=="--version" ( echo mysqldump  Ver 8.0.46 & exit /b 0 )
+        set "LAST="
+        :parse
+        if "%~1"=="" goto parsed
+        set "LAST=%~1"
+        shift
+        goto parse
+        :parsed
+        if defined LAST >"%LAST%" echo -- fake dump
+        exit /b 0
+        """;
 
     /// <summary>
     /// <see cref="BackupEngine.ResolveToolPath"/> falls back to searching <c>PATH</c> for <c>mysqldump.exe</c>,
@@ -43,12 +87,28 @@ public sealed class BackupRestoreTests
     {
         _originalPath = Environment.GetEnvironmentVariable("PATH");
         Environment.SetEnvironmentVariable("PATH", string.Empty);
+
+        _originalConnectionVariables = s_connectionEnvironmentVariables
+            .Select(Environment.GetEnvironmentVariable)
+            .ToArray();
+
+        foreach (var variable in s_connectionEnvironmentVariables)
+        {
+            Environment.SetEnvironmentVariable(variable, null);
+        }
     }
 
     [TestCleanup]
-    public void RestorePath()
+    public void RestoreEnvironment()
     {
         Environment.SetEnvironmentVariable("PATH", _originalPath);
+
+        for (var index = 0; index < s_connectionEnvironmentVariables.Length; index++)
+        {
+            Environment.SetEnvironmentVariable(
+                s_connectionEnvironmentVariables[index],
+                _originalConnectionVariables[index]);
+        }
     }
 
     [TestMethod]
@@ -84,6 +144,98 @@ public sealed class BackupRestoreTests
         Assert.IsTrue(
             other.All(artifact => File.Exists(artifact.FilePath)),
             "Another store's files must still be on disk.");
+    }
+
+    [TestMethod]
+    public void BuildArguments_TargetsTheResolvedConnection_NotTheSettingsRecord()
+    {
+        var arguments = BackupEngine.BuildArguments(
+            "mtm_waitlist",
+            @"C:\state\artifacts\mtm_waitlist_20260912T060000Z.sql",
+            "Server=172.16.1.104;Port=3307;Database=mtm_waitlist;User Id=root;Password=root;",
+            "--defaults-extra-file=C:\\state\\mysql-client-abc.cnf");
+
+        StringAssert.Contains(arguments, "--host=172.16.1.104", "The dump must target the resolved host.");
+        StringAssert.Contains(arguments, "--port=3307", "The dump must use the resolved port.");
+        StringAssert.Contains(arguments, "--user=root", "The dump must use the resolved login.");
+        StringAssert.Contains(arguments, "--defaults-extra-file=", "The credentials file must be passed.");
+        StringAssert.Contains(arguments, "--databases mtm_waitlist");
+        StringAssert.Contains(arguments, "--single-transaction");
+        StringAssert.Contains(arguments, "--routines");
+        StringAssert.Contains(arguments, "--result-file=");
+    }
+
+    [TestMethod]
+    public void BuildArguments_NeverPutsThePasswordOnTheCommandLine()
+    {
+        var arguments = BackupEngine.BuildArguments(
+            "mtm_mock",
+            @"C:\state\artifacts\mtm_mock.sql",
+            "Server=172.16.1.104;Port=3306;Database=mtm_mock;User Id=root;Password=sup3r-s3cret;",
+            credentialsFileArgument: null);
+
+        Assert.IsFalse(
+            arguments.Contains("sup3r-s3cret", StringComparison.Ordinal),
+            "The password must never reach the command line (FR-026).");
+        Assert.IsFalse(
+            arguments.Contains("--password", StringComparison.Ordinal),
+            "The password is supplied only through an option file (FR-026).");
+    }
+
+    [TestMethod]
+    public async Task RunAsync_WhenTheResolvedConnectionSuppliesTheCredentials_DumpsAgainstThatHost()
+    {
+        using var fixture = new StoreFixture();
+        var toolPath = fixture.CreateFakeMySqlDump();
+        var engine = fixture.CreateEngine(mysqldumpPath: toolPath);
+
+        // The store's own variable, which is the one a read of mtm_mock resolves through as well.
+        Environment.SetEnvironmentVariable(
+            "MTM_MOCK_DB_CONNECTION_STRING",
+            "Server=172.16.1.104;Port=3306;Database=mtm_mock;User Id=root;Password=sup3r-s3cret;");
+
+        var run = await engine.RunAsync(BackupStore.MtmMock);
+
+        Assert.AreEqual(BackupRunOutcome.Succeeded, run.Outcome, run.ErrorMessage);
+        Assert.IsNotNull(run.ArtifactPath);
+
+        var arguments = File.ReadAllText(fixture.FakeToolArgumentsPath);
+        StringAssert.Contains(arguments, "--host=172.16.1.104", "The resolved host must be the dump target.");
+        StringAssert.Contains(arguments, "--port=3306");
+        StringAssert.Contains(arguments, "--user=root");
+        StringAssert.Contains(
+            arguments,
+            "--defaults-extra-file=",
+            "The password must travel through a credentials file, not the command line.");
+        Assert.IsFalse(
+            arguments.Contains("sup3r-s3cret", StringComparison.Ordinal),
+            "The password must never appear on the command line (FR-026).");
+
+        Assert.AreEqual(
+            0,
+            Directory.GetFiles(fixture.Root, "*.cnf", SearchOption.AllDirectories).Length,
+            "A generated credentials file must not outlive the invocation.");
+    }
+
+    [TestMethod]
+    public async Task RunAsync_WhenNoConnectionIsConfigured_ReportsTheDesignedReasonAndDumpsNothing()
+    {
+        using var fixture = new StoreFixture();
+        var toolPath = fixture.CreateFakeMySqlDump();
+        var engine = fixture.CreateEngine(mysqldumpPath: toolPath);
+
+        var run = await engine.RunAsync(BackupStore.MtmWaitlist);
+
+        Assert.AreEqual(BackupRunOutcome.Failed, run.Outcome);
+        Assert.AreEqual(MySqlConnectionStringResolver.NotConfiguredMessage, run.ErrorMessage);
+        Assert.IsNull(run.ArtifactPath, "An unconfigured backup produces no artifact.");
+
+        // The version probe legitimately runs the tool; the dump must not be requested on top of it.
+        var arguments = File.ReadAllText(fixture.FakeToolArgumentsPath);
+        StringAssert.Contains(arguments, "--version");
+        Assert.IsFalse(
+            arguments.Contains("--result-file", StringComparison.Ordinal),
+            "Nothing is configured, so no dump may be requested.");
     }
 
     [TestMethod]
@@ -194,6 +346,29 @@ public sealed class BackupRestoreTests
                 NullLogger<BackupEngine>.Instance);
         }
 
+        /// <summary>Where the fake tool records the command line it was given.</summary>
+        public string FakeToolArgumentsPath => Path.Combine(Root, "fake-tool", "args.txt");
+
+        /// <summary>
+        /// Writes a stand-in for <c>mysqldump</c> that answers the version probe, records its command line, and
+        /// writes a non-empty file at <c>--result-file</c>.
+        /// </summary>
+        /// <remarks>
+        /// A <c>.cmd</c> rather than a stub type: the engine runs a real process, and the behaviour under test —
+        /// which host the command line names and where the password does <i>not</i> appear — is only observable on
+        /// a real command line. It uses no external command, so the cleared <c>PATH</c> in the fixture is harmless.
+        /// </remarks>
+        public string CreateFakeMySqlDump()
+        {
+            var directory = Path.Combine(Root, "fake-tool");
+            Directory.CreateDirectory(directory);
+
+            var toolPath = Path.Combine(directory, "fake-mysqldump.cmd");
+            File.WriteAllText(toolPath, FakeToolScript, new System.Text.UTF8Encoding(false));
+
+            return toolPath;
+        }
+
         public RestoreService CreateRestoreService()
         {
             var engine = CreateEngine(Path.Combine(Root, "no-such-tool.exe"));
@@ -202,6 +377,7 @@ public sealed class BackupRestoreTests
             return new RestoreService(
                 engine,
                 Store,
+                new MySqlConnectionStringResolver(configuration.MySqlConnection),
                 () => configuration,
                 NullLogger<RestoreService>.Instance);
         }

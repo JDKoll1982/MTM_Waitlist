@@ -158,13 +158,14 @@
                 RowSpacing="8">
                 <Grid.RowDefinitions>
                     <!--
-                        Row 0 is the "Operations" heading; rows 1-7 are the seven expanders:
+                        Row 0 is the "Operations" heading; rows 1-8 are the eight expanders:
                         Image Location Settings, Local Work Centers, Dunnage Type Visibility,
-                        Computers, Ignored Infor Visual Locations, New Request Alerts, and
-                        Max Allotted Time. All eight rows must be declared: a Grid.Row beyond the
-                        definitions is clamped to the last row, which silently stacked
+                        Computers, Ignored Infor Visual Locations, New Request Alerts,
+                        Max Allotted Time, and Cached Infor Visual Data. All nine rows must be declared: a
+                        Grid.Row beyond the definitions is clamped to the last row, which silently stacked
                         "Max Allotted Time" on top of "New Request Alerts".
                     -->
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -1093,6 +1094,81 @@
                             Text="{x:Bind ViewModel.UrgencyAllotments.StatusMessage, Mode=OneWay}"
                             TextWrapping="Wrap" />
                     </Grid>
+                </muxc:Expander>
+
+                <muxc:Expander
+                    Grid.Row="8"
+                    x:Name="CacheRefreshExpander"
+                    x:Load="{x:Bind ViewModel.IsCacheRefreshPanelVisible, Mode=OneWay}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    IsExpanded="False"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="0">
+                    <muxc:Expander.Header>
+                        <Grid
+                            Padding="16,12,16,12"
+                            ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <SymbolIcon
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Symbol="Refresh" />
+                            <TextBlock
+                                Grid.Column="1"
+                                x:Uid="Settings_CacheRefresh_Title"
+                                VerticalAlignment="Center"
+                                FontWeight="SemiBold"
+                                Text="Cached Infor Visual data" />
+                        </Grid>
+                    </muxc:Expander.Header>
+
+                    <Border
+                        Padding="16"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="8">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock
+                                Grid.Row="0"
+                                x:Uid="Settings_CacheRefresh_Description"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Ask the cache service to rebuild the cached Infor Visual reads now instead of waiting for its next scheduled cycle. Plant Manager and above only. A workstation that is not pointed at the service is told so rather than failing."
+                                TextWrapping="Wrap" />
+
+                            <StackPanel
+                                Grid.Row="1"
+                                Margin="0,4,0,0"
+                                Orientation="Horizontal"
+                                Spacing="12">
+                                <Button
+                                    x:Uid="Settings_CacheRefresh_Refresh"
+                                    Command="{x:Bind ViewModel.RequestCacheRefreshCommand}"
+                                    Content="Refresh cached data" />
+                                <ProgressRing
+                                    Width="20"
+                                    Height="20"
+                                    VerticalAlignment="Center"
+                                    IsActive="{x:Bind ViewModel.IsCacheRefreshing, Mode=OneWay}" />
+                            </StackPanel>
+
+                            <TextBlock
+                                Grid.Row="2"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.CacheRefreshStatusMessage, Mode=OneWay}"
+                                TextWrapping="Wrap" />
+                        </Grid>
+                    </Border>
                 </muxc:Expander>
             </Grid>
 

@@ -468,11 +468,17 @@
   <data name="Service_Settings.BackupStoreDescription" xml:space="preserve">
     <value>Which store the immediate backup runs for. The scheduled backups are set per store above.</value>
   </data>
+  <data name="Service_Settings.RestoreStoreLabel" xml:space="preserve">
+    <value>Database to restore</value>
+  </data>
+  <data name="Service_Settings.RestoreStoreDescription" xml:space="preserve">
+    <value>Which store's backups are listed below. Choosing a database only changes that list — nothing is replaced until you pick a backup and confirm it.</value>
+  </data>
   <data name="Service_Settings.RestorePickerLabel" xml:space="preserve">
     <value>Backup to restore</value>
   </data>
   <data name="Service_Settings.RestorePickerDescription" xml:space="preserve">
-    <value>Only the backups taken for the store selected above are listed.</value>
+    <value>Only the backups taken for the selected database are listed. The newest entry may be the safety snapshot taken by an earlier attempt.</value>
   </data>
   <data name="Service_Settings.RestoreOutcomeLabel" xml:space="preserve">
     <value>Result</value>

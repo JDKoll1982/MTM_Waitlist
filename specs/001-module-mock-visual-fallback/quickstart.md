@@ -138,6 +138,8 @@ curl.exe -i http://<host>:5760/api/status
 # 401 {"error":"unauthorized"}
 
 # refused the same way when the named user's role is not approved
+#   (this store currently holds only approved accounts, so substitute a real shop-floor name
+#    where one exists; an unknown name is refused for the same, indistinguishable reason)
 curl.exe -i -H "X-MTM-Mock-User: shop.user" http://<host>:5760/api/status
 # 401 {"error":"unauthorized"}
 
@@ -166,7 +168,10 @@ When the API refuses a caller or a refresh cycle fails, the reason is in the ser
 
 1. Confirm `MTM_Waitlist.Mock` is referenced by the app and by `MTM_Waitlist.Setup`,
    `MTM_Waitlist.Waitlist.View`, and `MTM_Waitlist.Settings`, and registered in DI.
-2. Configure each client with the shared credential (§2 step 4). A client without it must still work on cached data.
+2. Point each client at the service (§2 step 4): set `MTM_MOCK_SERVICE_ENDPOINT`, and `MTM_MOCK_SERVICE_USER` to the
+   user name the client runs as — that user's application role must be one of the approved operator roles. There is no
+   token to install (T147). A client that is unconfigured, or whose user is not an approved operator, must still work
+   on cached data.
 3. Launch the app and confirm the read-only status indicator is **absent** while Visual is reachable (FR-005).
 
 **Prove the fallback (US2, SC-003, SC-004)**
@@ -243,7 +248,7 @@ not worked on the cache can complete it in one working day using only that playb
 | Retired-symbol audit | the audit test added in Phase 4 | 0 references to the retired demo/sample systems (SC-013) |
 | Inline-SQL audit | the audit test added in Phase 5 | 0 inline database statement text in application code (SC-013) |
 | In-app verification | UI inspection of the fallback + indicator and the work-center card after a save | US1/US2/US4 demonstrated on a running build |
-| Service end-to-end | scheduled refresh, per-store backups, one throwaway restore, token-gated API | US3/US5/US6 demonstrated |
+| Service end-to-end | scheduled refresh, per-store backups, one throwaway restore, role-authorized API | US3/US5/US6 demonstrated |
 | Documentation | `WeekendProject/ChangeLog.md`, the Module_Mock docs, and the published playbook | 0 stale references to the retired demo systems; the playbook is published (SC-016, FR-028) |
 
 **Troubleshooting notes carried over from this repository's build conventions**: a `PRI175`/`PRI224` PRI failure is

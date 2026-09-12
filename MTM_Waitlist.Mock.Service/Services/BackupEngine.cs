@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
+using MySqlConnector;
 using MTM_Waitlist.Mock.Service.Models;
 
 namespace MTM_Waitlist.Mock.Service.Services;
@@ -245,14 +246,46 @@ public sealed class BackupEngine
             return disappeared;
         }
 
+        var database = store.ToDatabaseName();
+
+        // The dump targets the RESOLVED connection, never the settings record. On a host whose credentials arrive
+        // through an environment variable the settings still hold their shipped defaults (host "localhost", no
+        // login), and dumping against those fails with "Access denied for user ...@localhost" while every other
+        // path in the service talks to the real server (FR-009/FR-012).
+        var connectionString = _connectionResolver.Resolve(database, store.ToConnectionStringEnvironmentVariable());
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            var notConfigured = new BackupRunRecord
+            {
+                Store = store,
+                StartedUtc = startedUtc,
+                FinishedUtc = _timeProvider.GetUtcNow().UtcDateTime,
+                Outcome = BackupRunOutcome.Failed,
+                IsSafetySnapshot = isSafetySnapshot,
+                ErrorMessage = MySqlConnectionStringResolver.NotConfiguredMessage
+            };
+
+            _logger.LogError(
+                "Backup for {Store} was not started: no MySQL connection is configured for it.",
+                database);
+
+            await _artifactStore.RecordAsync(notConfigured, artifact: null, cancellationToken).ConfigureAwait(false);
+            return notConfigured;
+        }
+
         Directory.CreateDirectory(policy.DestinationDirectory);
 
-        var database = store.ToDatabaseName();
         var artifactPath = Path.Combine(
             policy.DestinationDirectory,
             BuildFileName(database, startedUtc, isSafetySnapshot));
 
-        var arguments = BuildArguments(database, artifactPath, configuration);
+        // The password travels in a file, never on this command line (FR-026, research.md R7).
+        using var credentials = MySqlClientCredentials.Create(
+            configuration.MySqlConnection.PasswordFilePath,
+            connectionString,
+            CredentialsDirectory);
+
+        var arguments = BuildArguments(database, artifactPath, connectionString, credentials.Argument);
 
         try
         {
@@ -370,25 +403,52 @@ public sealed class BackupEngine
         }
     }
 
-    private string BuildArguments(
+    /// <summary>
+    /// Where a generated credentials file is written: the service's own app-data root, which is where the artifact
+    /// record already lives and which is already a per-user location the service keeps state in. Never the backup
+    /// destination folder, which exists to hold artifacts and is on a retention schedule.
+    /// </summary>
+    private string CredentialsDirectory =>
+        Path.GetDirectoryName(_artifactStore.FilePath) ?? Path.GetTempPath();
+
+    /// <summary>
+    /// Builds the <c>mysqldump</c> command line for one store.
+    /// </summary>
+    /// <param name="database">The database to dump.</param>
+    /// <param name="artifactPath">The absolute path the dump is written to.</param>
+    /// <param name="connectionString">The resolved connection, which is what names the target and the login.</param>
+    /// <param name="credentialsFileArgument">The <c>--defaults-extra-file</c> argument, or <see langword="null"/>.</param>
+    /// <remarks>
+    /// <b>The target comes from the resolved connection, not from the settings record.</b> Reading host, port and
+    /// login out of <c>configuration.MySqlConnection</c> meant a host that supplies its credentials through an
+    /// environment variable dumped against the shipped defaults — <c>localhost</c> with no login — and every backup
+    /// failed with <c>Access denied</c> while the rest of the service worked.
+    /// <para>
+    /// Internal rather than private so the command line can be asserted directly. Driving it through a stand-in
+    /// tool would test the stand-in; the real <c>mysqldump</c> cannot be run in a unit test.
+    /// </para>
+    /// </remarks>
+    internal static string BuildArguments(
         string database,
         string artifactPath,
-        Models.ServiceConfiguration configuration)
+        string connectionString,
+        string? credentialsFileArgument)
     {
+        var connection = new MySqlConnectionStringBuilder(connectionString);
         var arguments = new List<string>();
 
         // The password travels only through the option file (FR-026, research.md R7).
-        if (configuration.MySqlConnection.PasswordFilePath is { Length: > 0 } passwordFile)
+        if (!string.IsNullOrWhiteSpace(credentialsFileArgument))
         {
-            arguments.Add($"--defaults-extra-file={passwordFile}");
+            arguments.Add(credentialsFileArgument);
         }
 
-        arguments.Add($"--host={configuration.MySqlConnection.Server}");
-        arguments.Add($"--port={configuration.MySqlConnection.Port.ToString(CultureInfo.InvariantCulture)}");
+        arguments.Add($"--host={connection.Server}");
+        arguments.Add($"--port={connection.Port.ToString(CultureInfo.InvariantCulture)}");
 
-        if (!string.IsNullOrWhiteSpace(configuration.MySqlConnection.UserId))
+        if (!string.IsNullOrWhiteSpace(connection.UserID))
         {
-            arguments.Add($"--user={configuration.MySqlConnection.UserId}");
+            arguments.Add($"--user={connection.UserID}");
         }
 
         // Consistent, non-locking snapshot of an InnoDB store, including its routines.
@@ -400,7 +460,7 @@ public sealed class BackupEngine
 
         return string.Join(' ', arguments.Select(QuoteArgument));
 
-        // Only the option-file path, the host, and the port are ever named; no secret is added here.
+        // Only the option-file path, the host, the port and the login are ever named; no secret is added here.
         static string QuoteArgument(string argument) =>
             argument.Contains(' ', StringComparison.Ordinal) ? $"\"{argument}\"" : argument;
     }

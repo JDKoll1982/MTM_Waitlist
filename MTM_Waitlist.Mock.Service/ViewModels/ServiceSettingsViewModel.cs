@@ -99,6 +99,10 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     public partial BackupStore SelectedBackupStore { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedRestoreStoreName))]
+    public partial BackupStore SelectedRestoreStore { get; set; }
+
+    [ObservableProperty]
     public partial BackupArtifactRow? SelectedRestoreArtifact { get; set; }
 
     /// <summary>Creates the view model.</summary>
@@ -142,6 +146,7 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
         BackupToolStatusText = string.Empty;
         RestoreOutcomeText = string.Empty;
         SelectedBackupStore = BackupStore.MtmWaitlist;
+        SelectedRestoreStore = BackupStore.MtmWaitlist;
 
         BackupStoreNames = [.. BackupStoreExtensions.All.Select(store => store.ToDisplayName())];
         BackupPolicies = [];
@@ -336,6 +341,9 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     /// <summary>Heading of the save setting, which applies to every group above it.</summary>
     public string SaveHeaderText => "Service_Settings.SaveHeader".GetLocalized();
 
+    /// <summary>Note under the restore store picker.</summary>
+    public string RestoreStoreDescriptionText => "Service_Settings.RestoreStoreDescription".GetLocalized();
+
     /// <summary>Note under the restore picker.</summary>
     public string RestorePickerDescriptionText => "Service_Settings.RestorePickerDescription".GetLocalized();
 
@@ -447,6 +455,9 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     /// <summary>Label for the store picker above the back-up-now button.</summary>
     public string BackupStoreLabelText => "Service_Settings.BackupStoreLabel".GetLocalized();
 
+    /// <summary>Label for the store picker in the restore card.</summary>
+    public string RestoreStoreLabelText => "Service_Settings.RestoreStoreLabel".GetLocalized();
+
     /// <summary>Label for the artifact picker in the restore card.</summary>
     public string RestorePickerLabelText => "Service_Settings.RestorePickerLabel".GetLocalized();
 
@@ -511,7 +522,29 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
                 }
 
                 SelectedBackupStore = store;
-                LoadRestoreArtifacts();
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// The store being restored, as an operator reads it. Restoring is its own intent — an operator may back up one
+    /// store and restore another — so the restore card carries its own picker rather than following the backup one.
+    /// Selecting a name selects the matching store, and the artifact list follows.
+    /// </summary>
+    public string SelectedRestoreStoreName
+    {
+        get => SelectedRestoreStore.ToDisplayName();
+        set
+        {
+            foreach (var store in BackupStoreExtensions.All)
+            {
+                if (!string.Equals(store.ToDisplayName(), value, StringComparison.CurrentCulture))
+                {
+                    continue;
+                }
+
+                SelectedRestoreStore = store;
                 return;
             }
         }
@@ -556,14 +589,20 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     }
 
     /// <summary>
-    /// Rebuilds the restore picker for the selected store.
+    /// Rebuilds the restore picker whenever the store being restored changes, so the list in the restore card
+    /// always belongs to the database the operator picked there.
+    /// </summary>
+    partial void OnSelectedRestoreStoreChanged(BackupStore value) => LoadRestoreArtifacts();
+
+    /// <summary>
+    /// Rebuilds the restore picker for the store being restored.
     /// </summary>
     public void LoadRestoreArtifacts()
     {
         RestoreArtifacts.Clear();
         SelectedRestoreArtifact = null;
 
-        foreach (var artifact in _artifactStore.GetArtifacts(SelectedBackupStore))
+        foreach (var artifact in _artifactStore.GetArtifacts(SelectedRestoreStore))
         {
             RestoreArtifacts.Add(new BackupArtifactRow
             {
@@ -650,7 +689,12 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
                 SelectedBackupStore.ToDisplayName(),
                 record.Outcome.ToString());
 
-            LoadRestoreArtifacts();
+            // The new artifact belongs to the store that was just backed up, so only the restore list for that same
+            // store gained a row.
+            if (SelectedRestoreStore == SelectedBackupStore)
+            {
+                LoadRestoreArtifacts();
+            }
         }
         catch (Exception exception)
         {

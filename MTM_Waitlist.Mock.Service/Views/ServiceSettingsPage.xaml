@@ -642,6 +642,26 @@
 
                     <wct:SettingsCard HorizontalAlignment="Stretch">
                         <wct:SettingsCard.Header>
+                            <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.RestoreStoreLabelText}" />
+                        </wct:SettingsCard.Header>
+                        <wct:SettingsCard.Description>
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.RestoreStoreDescriptionText}"
+                                TextWrapping="Wrap" />
+                        </wct:SettingsCard.Description>
+                        <wct:SettingsCard.Content>
+                            <ComboBox
+                                AutomationProperties.Name="{x:Bind ViewModel.RestoreStoreLabelText}"
+                                MinWidth="200"
+                                ItemsSource="{x:Bind ViewModel.BackupStoreNames}"
+                                SelectedItem="{x:Bind ViewModel.SelectedRestoreStoreName, Mode=TwoWay}" />
+                        </wct:SettingsCard.Content>
+                    </wct:SettingsCard>
+
+                    <wct:SettingsCard HorizontalAlignment="Stretch">
+                        <wct:SettingsCard.Header>
                             <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.RestorePickerLabelText}" />
                         </wct:SettingsCard.Header>
                         <wct:SettingsCard.Description>
@@ -654,6 +674,7 @@
                         <wct:SettingsCard.Content>
                             <ComboBox
                                 x:Name="RestoreArtifactPicker"
+                                AutomationProperties.Name="{x:Bind ViewModel.RestorePickerLabelText}"
                                 MinWidth="420"
                                 ItemsSource="{x:Bind ViewModel.RestoreArtifacts}"
                                 SelectedItem="{x:Bind ViewModel.SelectedRestoreArtifact, Mode=TwoWay}">

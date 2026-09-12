@@ -42,13 +42,42 @@ it is.
 `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` is the deployment step: it publishes, stops any running
 instance, deletes the previous deployment, copies to `C:\Services\MTM_Waitlist.Mock.Service\`, verifies the deployment
 is complete and self-contained, installs and **proves** the environment secrets, then starts the service and
-health-checks it (tray-only, port bound, `401` without a credential, single-instance). It exits non-zero if any check
+health-checks it (tray-only, port bound, `401` without an operator, single-instance). It exits non-zero if any check
 fails, and does not start the service when the deployment itself is broken.
 
 **Server-only — `172.16.1.104` / `V-MTMFG-5`.** The script refuses to run unless one of the *local* machine's IPv4
 addresses is the expected server address, because the service belongs on the host that reaches MySQL and Infor Visual.
 **The agent must not run it (or bypass the guard with `-AllowNonServerHost`) unless VS Code is running on that server.**
 Details: `MTM_Waitlist.Mock.Service/deploy/README.md`.
+
+### Deploying the desktop application
+
+The app is **unpackaged** (`WindowsPackageType=None`), so there is no MSIX install step: it is deployed by publishing
+and copying the folder to the operator's **per-user** app folder.
+
+```powershell
+# from the repository root
+# publish with the profile; without it MSBuild reports NETSDK1198 and silently produces a framework-dependent build
+dotnet publish MTM_Waitlist.csproj -p:PublishProfile=win-x64-selfcontained
+# -> bin\publish\win-x64\   (the whole folder is the deployment)
+
+$target = "$env:LOCALAPPDATA\Programs\MTM_Waitlist"
+New-Item -ItemType Directory -Force -Path $target | Out-Null
+Copy-Item .\bin\publish\win-x64\* $target -Recurse -Force
+```
+
+| Property | Value | Why |
+|---|---|---|
+| Install location | `%LOCALAPPDATA%\Programs\MTM_Waitlist` | Per user, so installing or updating needs no elevation, and the binaries stay separate from the app's own data (`%LOCALAPPDATA%\MTM_Waitlist\ApplicationData`). |
+| `SelfContained` | `true` | A workstation needs **no .NET runtime prerequisite**. |
+| `WindowsAppSDKSelfContained` | `true` | Same guarantee for the Windows App SDK. |
+| `WindowsPackageType` | `None` | Unpackaged: no MSIX identity, signing, or Store packaging is involved. |
+
+Close the app before copying over an existing install — the copy fails on the locked `MTM_Waitlist.exe`.
+
+A deployed client also needs `MTM_MOCK_SERVICE_ENDPOINT` and `MTM_MOCK_SERVICE_USER` (or the equivalent
+`MockServiceClient` section) before it can ask the service for an early refresh; the two settings and the panel that
+uses them are described under **Cached Infor Visual data** on the app's Settings page.
 
 Rules that must not be broken:
 

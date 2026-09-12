@@ -10,6 +10,8 @@ using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Mock.Contracts;
+using MTM_Waitlist.Mock.Models;
 using Windows.ApplicationModel;
 
 namespace MTM_Waitlist.Module_Settings.ViewModels;
@@ -42,12 +44,24 @@ public partial class SettingsViewModel : ObservableRecipient
         "Developer",
     };
 
+    // "Plant Manager and above" (T160) - the same trio the Max Allotted Time panel gates on. It is also a
+    // STRICT SUBSET of the service's ServiceOperatorRoles.Approved, so a caller this panel admits can never
+    // be refused by the service for its role (the service would answer 401 and the operator would have been
+    // shown a control that cannot work).
+    private static readonly string[] AllowedCacheRefreshRoles =
+    {
+        "Admin",
+        "Developer",
+        "Plant Manager",
+    };
+
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly ILocalSettingsService _localSettingsService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IDunnageTypeVisibilityCatalogService _dunnageTypeVisibilityCatalogService;
     private readonly INewRequestAlertService _newRequestAlertService;
     private readonly StartupState _startupState;
+    private readonly IMockServiceRefreshClient _mockServiceRefreshClient;
 
     // Suppresses the OnNewRequestAlertsEnabledChanged side effect while the initial value is loaded in the
     // constructor, so opening the page does not log a misleading "changed" or re-persist.
@@ -123,6 +137,18 @@ public partial class SettingsViewModel : ObservableRecipient
         get; set;
     } = string.Empty;
 
+    [ObservableProperty]
+    public partial bool IsCacheRefreshing
+    {
+        get; set;
+    }
+
+    [ObservableProperty]
+    public partial string CacheRefreshStatusMessage
+    {
+        get; set;
+    } = string.Empty;
+
     public ObservableCollection<ComputerOption> AvailableWorkstations { get; } = new();
 
     public ObservableCollection<string> HotWorkCenters { get; } = new();
@@ -145,6 +171,24 @@ public partial class SettingsViewModel : ObservableRecipient
 
     public bool CanManageIgnoredLocations => AllowedIgnoredLocationManageRoles.Any(role =>
         string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// Whether this operator may ask the on-host service to rebuild the cache now (T160).
+    /// </summary>
+    /// <remarks>
+    /// Authorization is layered, and this is the outer layer: the service independently resolves the
+    /// presented user name's application role and refuses anything outside its own approved set. This gate
+    /// exists so an operator who could never be authorized is not shown the control at all.
+    /// </remarks>
+    public bool CanRequestCacheRefresh => AllowedCacheRefreshRoles.Any(role =>
+        string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+
+    public bool IsCacheRefreshPanelVisible => CanRequestCacheRefresh && MatchesSearch(
+        "cache",
+        "refresh",
+        "cached data",
+        "infor visual",
+        "stale");
 
     public bool IsAppearancePanelVisible => MatchesSearch("appearance", "app theme", "light", "dark", "default", SelectedThemeText);
 
@@ -230,7 +274,8 @@ public partial class SettingsViewModel : ObservableRecipient
         INewRequestAlertService newRequestAlertService,
         StartupState startupState,
         ComputerManagementViewModel computerManagement,
-        UrgencyAllotmentEditorViewModel urgencyAllotments)
+        UrgencyAllotmentEditorViewModel urgencyAllotments,
+        IMockServiceRefreshClient mockServiceRefreshClient)
     {
         StartupDebugLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
@@ -239,6 +284,7 @@ public partial class SettingsViewModel : ObservableRecipient
         _dunnageTypeVisibilityCatalogService = dunnageTypeVisibilityCatalogService;
         _newRequestAlertService = newRequestAlertService;
         _startupState = startupState;
+        _mockServiceRefreshClient = mockServiceRefreshClient;
         ComputerManagement = computerManagement;
         UrgencyAllotments = urgencyAllotments;
 
@@ -752,12 +798,80 @@ public partial class SettingsViewModel : ObservableRecipient
         }
     }
 
+    /// <summary>
+    /// Asks the on-host service to rebuild the cached Infor Visual reads now (T160).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This does not make the application refresh its own cache - the on-host service still owns the schedule
+    /// and the write (FR-025). It asks that service to run one cycle early, and the same request can be made
+    /// from the host with `POST /api/refresh`.
+    /// </para>
+    /// <para>
+    /// Every failure path is a reported outcome, never an exception: an absent service, an unconfigured
+    /// client and a refusal all land in <see cref="CacheRefreshStatusMessage"/> and leave the application
+    /// serving cached content (FR-025, SC-011).
+    /// </para>
+    /// </remarks>
+    [RelayCommand]
+    private async Task RequestCacheRefreshAsync()
+    {
+        if (!CanRequestCacheRefresh)
+        {
+            return;
+        }
+
+        IsCacheRefreshing = true;
+        CacheRefreshStatusMessage = string.Empty;
+
+        try
+        {
+            StartupDebugLog.Info("SettingsCacheRefresh", "RequestCacheRefreshAsync started.");
+
+            var result = await _mockServiceRefreshClient.RequestRefreshAsync(null).ConfigureAwait(true);
+
+            if (!result.Succeeded)
+            {
+                CacheRefreshStatusMessage = result.Message
+                    ?? "The cache refresh service did not accept the request.";
+                StartupDebugLog.Info("SettingsCacheRefresh", $"Request not completed: {CacheRefreshStatusMessage}");
+                return;
+            }
+
+            var rows = result.ShapeOutcomes
+                .Count(outcome => string.Equals(outcome.Value, "refreshed", StringComparison.OrdinalIgnoreCase));
+            var notRefreshed = result.ShapeOutcomes
+                .Where(outcome => !string.Equals(outcome.Value, "refreshed", StringComparison.OrdinalIgnoreCase))
+                .Select(outcome => $"{outcome.Key}: {outcome.Value}")
+                .ToArray();
+
+            CacheRefreshStatusMessage = notRefreshed.Length == 0
+                ? $"The cache was rebuilt. {rows} read shape(s) refreshed."
+                : $"The cache was rebuilt, with {notRefreshed.Length} shape(s) not refreshed - "
+                    + string.Join("; ", notRefreshed)
+                    + ".";
+
+            StartupDebugLog.Info("SettingsCacheRefresh", $"Request completed. {CacheRefreshStatusMessage}");
+        }
+        catch (Exception ex)
+        {
+            CacheRefreshStatusMessage = $"Unable to request a cache refresh: {ex.Message}";
+            StartupDebugLog.Error("SettingsCacheRefresh", ex, "RequestCacheRefreshAsync failed.");
+        }
+        finally
+        {
+            IsCacheRefreshing = false;
+            RefreshSearchVisibility();
+        }
+    }
+
     private void RefreshSearchVisibility()
     {
         OnPropertyChanged(nameof(IsAppearancePanelVisible));
         OnPropertyChanged(nameof(IsHotWorkCentersPanelVisible));
         OnPropertyChanged(nameof(IsDunnageTypeVisibilityPanelVisible));
         OnPropertyChanged(nameof(IsIgnoredLocationsPanelVisible));
+        OnPropertyChanged(nameof(IsCacheRefreshPanelVisible));
         OnPropertyChanged(nameof(IsAboutPanelVisible));
         OnPropertyChanged(nameof(IsComputersPanelVisible));
         OnPropertyChanged(nameof(IsAppearanceCategoryVisible));

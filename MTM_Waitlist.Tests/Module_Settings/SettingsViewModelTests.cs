@@ -7,6 +7,8 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Settings.ViewModels;
+using MTM_Waitlist.Mock.Contracts;
+using MTM_Waitlist.Mock.Models;
 
 namespace MTM_Waitlist.Tests.Module_Settings;
 
@@ -131,7 +133,110 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         Assert.IsTrue(stored == true, "Toggling on should persist true under the alert key.");
     }
 
-    private static SettingsViewModel BuildViewModel(RecordingLocalSettingsService settings, string role)
+    [TestMethod]
+    public void CanRequestCacheRefresh_IsRestrictedToPlantManagerAndAbove()
+    {
+        // The gate is a strict subset of the service's approved operator roles, so it must exclude both the
+        // leads and the shop-floor roles, and include the three the Max Allotted Time panel already gates on.
+        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Material Handler").CanRequestCacheRefresh);
+        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Production").CanRequestCacheRefresh);
+        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Production Lead").CanRequestCacheRefresh);
+        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Setup").CanRequestCacheRefresh);
+        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Setup Lead").CanRequestCacheRefresh);
+        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager").CanRequestCacheRefresh);
+        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Admin").CanRequestCacheRefresh);
+        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Developer").CanRequestCacheRefresh);
+
+        // The panel is "access only": a role outside the gate must not even see the surface.
+        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Setup Lead").IsCacheRefreshPanelVisible);
+        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager").IsCacheRefreshPanelVisible);
+    }
+
+    [TestMethod]
+    public void CanRequestCacheRefresh_MatchesTheRoleCaseInsensitively()
+    {
+        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "plant manager").CanRequestCacheRefresh);
+        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "ADMIN").CanRequestCacheRefresh);
+    }
+
+    [TestMethod]
+    public async Task RequestCacheRefresh_DoesNotReachTheService_WhenTheRoleIsNotAllowed()
+    {
+        var client = new FakeMockServiceRefreshClient();
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Setup Lead", client);
+
+        await viewModel.RequestCacheRefreshCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(0, client.CallCount, "A role outside the gate must never reach the service.");
+        Assert.AreEqual(string.Empty, viewModel.CacheRefreshStatusMessage);
+    }
+
+    [TestMethod]
+    public async Task RequestCacheRefresh_ReportsTheShapesThatRefreshed()
+    {
+        var client = new FakeMockServiceRefreshClient
+        {
+            Result = new RefreshRequestResult
+            {
+                Succeeded = true,
+                ShapeOutcomes = new Dictionary<string, string>
+                {
+                    ["work_order_lookup"] = "refreshed",
+                    ["inventory_locations"] = "refreshed",
+                },
+            },
+        };
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager", client);
+
+        await viewModel.RequestCacheRefreshCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(1, client.CallCount);
+        Assert.IsNull(client.LastShapeKeys, "The panel asks for every enabled shape, not a subset.");
+        StringAssert.Contains(viewModel.CacheRefreshStatusMessage, "2 read shape(s) refreshed");
+        Assert.IsFalse(viewModel.IsCacheRefreshing, "The busy indicator must clear when the request finishes.");
+    }
+
+    [TestMethod]
+    public async Task RequestCacheRefresh_NamesAShapeThatCouldNotRefresh()
+    {
+        var client = new FakeMockServiceRefreshClient
+        {
+            Result = new RefreshRequestResult
+            {
+                Succeeded = true,
+                ShapeOutcomes = new Dictionary<string, string>
+                {
+                    ["work_order_lookup"] = "refreshed",
+                    ["inventory_locations"] = "skippedSourceUnreachable",
+                },
+            },
+        };
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Developer", client);
+
+        await viewModel.RequestCacheRefreshCommand.ExecuteAsync(null);
+
+        StringAssert.Contains(viewModel.CacheRefreshStatusMessage, "inventory_locations: skippedSourceUnreachable");
+    }
+
+    [TestMethod]
+    public async Task RequestCacheRefresh_ReportsAnUnconfiguredOrAbsentService_WithoutThrowing()
+    {
+        var client = new FakeMockServiceRefreshClient
+        {
+            Result = RefreshRequestResult.Unavailable("No endpoint is installed."),
+        };
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Admin", client);
+
+        await viewModel.RequestCacheRefreshCommand.ExecuteAsync(null);
+
+        Assert.AreEqual("No endpoint is installed.", viewModel.CacheRefreshStatusMessage);
+        Assert.IsFalse(viewModel.IsCacheRefreshing);
+    }
+
+    private static SettingsViewModel BuildViewModel(
+        RecordingLocalSettingsService settings,
+        string role,
+        IMockServiceRefreshClient? refreshClient = null)
     {
         var startupState = new StartupState { CurrentRole = role };
         var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), startupState);
@@ -147,7 +252,30 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             new NewRequestAlertService(settings),
             startupState,
             computerManagement,
-            urgencyAllotments);
+            urgencyAllotments,
+            refreshClient ?? new FakeMockServiceRefreshClient());
+    }
+
+    /// <summary>
+    /// Stands in for the on-host refresh client so the panel's command can be driven without a service.
+    /// </summary>
+    private sealed class FakeMockServiceRefreshClient : IMockServiceRefreshClient
+    {
+        public int CallCount { get; private set; }
+
+        public IReadOnlyCollection<string>? LastShapeKeys { get; private set; }
+
+        public RefreshRequestResult Result { get; init; } =
+            new() { Succeeded = true, ShapeOutcomes = new Dictionary<string, string>() };
+
+        public Task<RefreshRequestResult> RequestRefreshAsync(
+            IReadOnlyCollection<string>? shapeKeys,
+            CancellationToken cancellationToken = default)
+        {
+            CallCount++;
+            LastShapeKeys = shapeKeys;
+            return Task.FromResult(Result);
+        }
     }
 
     private sealed class FakeRequestSubtypeNameReadService : IRequestSubtypeNameReadService

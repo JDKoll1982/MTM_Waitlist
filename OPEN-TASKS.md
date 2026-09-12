@@ -22,14 +22,16 @@ file is the itemised breakdown. Duplicating it would create a divergent third co
 
 ## 1. Live open work — `specs/001-module-mock-visual-fallback/tasks.md`
 
-**151 boxes: 149 `[x]`, 2 `[ ]`.** These two are the only tasks in the active feature that are not done.
+**161 boxes: 156 `[x]`, 5 `[ ]`.** Five tasks in the active feature are not done: **T106** and **T151** (see §1.1 and
+§1.5) and the residuals of the 2026-09-12 host run, **T155-T157** (§1.6).
 T144, T147 and T148 were all resolved on 2026-09-12 (see §1.2–§1.4); T150 was implemented and T151 (its
-verification counterpart) added the same day (see §1.5).
+verification counterpart) added the same day (see §1.5). T159 and T160 were resolved the same day, and
+**T158 — the failing backups — and T161 — the restore that connected to the wrong server — are both fixed** (§1.6).
 
 | ID | Severity | Summary | Blocker / decision needed |
 | --- | --- | --- | --- |
 | **T106** | verification | End-to-end acceptance walkthrough — `quickstart.md` §1–§8 on a running build | Environment + operator interaction; see §1.1 |
-| **T151** | verification | Confirm the shape-4 cache holds no zero-stock rows after the next host refresh | A host refresh cycle; see §1.5 |
+| **T151** | verification | Confirm the shape-4 cache holds no zero-stock rows after the next host refresh | **Two parts verified 2026-09-12** (2,012 rows, none below 1); the grid-vs-live comparison needs a signed-in session — see §1.5 |
 | ~~T144~~ | ~~coverage~~ | **RESOLVED 2026-09-12** — the operator narrowed the work-order input rule to the `WO-######` form only, then the cache guards and the live reads were narrowed to match | — |
 | ~~T147~~ | ~~HIGH~~ | **RESOLVED 2026-09-12** — the shared credential was retired; the API is authorized by the caller's application role | — |
 | ~~T148~~ | ~~HIGH~~ | **RESOLVED 2026-09-12** — (a) the show-request channel + desktop shortcut shipped; (c) the service now writes its own daily log file | — |
@@ -44,15 +46,16 @@ Still outstanding, and why:
 
 | Part | Blocked on |
 | --- | --- |
-| §2 steps 3–4 (tray Settings surface, operator access), step 7 (one real refresh cycle) | Operator interaction on the host. **T147 is no longer a blocker** — there is nothing to generate or record |
+| §2 steps 3–4 (tray Settings surface, operator access) | Operator interaction on the host. **T147 is no longer a blocker** — there is nothing to generate or record. §2 **step 7 (one real refresh cycle) is done**: host-verified 2026-09-12 |
 | §3 fallback proof, §4 defect proof | A **signed-in** application session |
 | §5 backup/restore drill | A configured service (two secrets) and a throwaway store |
 | §7 sixth-shape playbook | A maintainer-day exercise, not a mechanical gate |
 | **SC-007 / SC-008** | **30-day observation windows — not started.** They cannot start until the service runs continuously on the host |
 
-A fifth reason was added on 2026-09-11: §3 step 3's *"every journey returns a complete, correctly shaped
-result"* would pass on **shape** while still serving a **different work order** than the live read for the same
-input — which is T144.
+A fifth reason was added on 2026-09-11 and **retired 2026-09-12**: §3 step 3's *"every journey returns a complete,
+correctly shaped result"* would pass on **shape** while still serving a **different work order** than the live read
+for the same input — which was T144. The operator narrowed the work-order input rule to the `WO-######` form only, so
+the colliding bare-numeric key is no longer expressible at all (§1.2).
 
 ### 1.2 T144 — RESOLVED 2026-09-12 (the operator narrowed the input rule to `WO-######`)
 
@@ -106,8 +109,8 @@ name, a real-but-unassigned name and the retired `X-MTM-Mock-Token` all answer a
 `401 {"error":"unauthorized"}`; an approved operator answers `200` with
 `"operatorRoles":"Admin, Developer, Plant Manager, Setup Lead, Production Lead"` and no secret-shaped field; the
 listener binds `0.0.0.0:5760`, answers a non-loopback call, and an inbound allow rule exists. Four defects the run
-exposed were fixed the same day — recorded in `specs/001-module-mock-visual-fallback/tasks.md` **Phase 24**, which
-also carries the residuals (T153-T156). Nothing about T147 is outstanding.
+exposed were fixed the same day — recorded in `specs/001-module-mock-visual-fallback/tasks.md` **Phase 25**, which
+also carries the residuals (T155-T158). Nothing about T147 is outstanding.
 
 ### 1.4 T148 — RESOLVED 2026-09-12 ((a) already shipped; (c) implemented; (b) fixed 2026-09-11)
 
@@ -141,7 +144,7 @@ previously wrote nothing at all. **§2 step 7 is satisfied:** `POST /api/refresh
 Event Log was corrected in the same pass.
 
 **Order of attack:** T147 and T148(a)/(c) are complete and host-verified. No host step remains for them; the
-residuals from that run are T153-T156 in `specs/001-module-mock-visual-fallback/tasks.md` Phase 24.
+residuals from that run are T155-T158 in `specs/001-module-mock-visual-fallback/tasks.md` Phase 25.
 
 ### 1.5 T150 / T151 — shape-4 cache no longer stores zero-stock locations (2026-09-12)
 
@@ -154,13 +157,31 @@ residuals from that run are T153-T156 in `specs/001-module-mock-visual-fallback/
   truncates the stage twin, inserts the payload, asserts `v_loaded = JSON_LENGTH(p_rows)`, then swaps the tables by
   `RENAME TABLE`. The live mirror is replaced wholesale every run, so a location that drops to zero disappears on
   the next cycle with no stale row. The exclusion is done at the **source** so that row-count assertion stays intact.
-- **T151 (open).** Confirm on the host, after the next refresh, that no row has `on_hand_quantity < 1` and that a
-  sampled part still returns the same locations as the live read.
+- **T151 (open; two of its three parts verified).** Host-confirmed 2026-09-12, after the redeploy's startup cycle:
+  `visual_inventory_locations_result` held **2,012** rows with **none** below 1 on hand (minimum `1.0000`), against the
+  79,457 pre-change figure, and the other four shapes repopulated normally. The third part — that a sampled part's
+  Waitlist detail grid matches the live read — needs a **signed-in** application session, so the task stays open.
 
 **Open question for the operator.** `Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql` is a capture of the
 live mirror taken 2026-09-12 and still carries those 79,218 shape-4 rows, 0-quantity included. They are harmless
 (the app filters them) but now diverge from what the population read produces; regenerating the capture needs the
 shared host and was **not** done in this run.
+
+### 1.6 Residuals of the host run, and the app deployment gaps (T155-T160)
+
+Full detail: `specs/001-module-mock-visual-fallback/tasks.md` **Phase 25** (the host run and the three defects it
+exposed and fixed — filed as T152-T154) and **Phase 26** (the cross-machine reconciliation, the suite gates and the
+redeployment of both artifacts).
+
+| ID | Severity | What it is |
+| --- | --- | --- |
+| **T155** | MEDIUM | `ProductionBackendAvailability` detects only the two `MTM_WAITLIST_*_CONNECTION_STRING` variables, while `MySqlHelperServer` also falls back to `StartupDatabaseOptions.ConnectionString`. Extend the guard, or convert the two tests to `StubMySqlHelperServer`. |
+| **T156** | MEDIUM | The retired DPAPI credential blob was purged **by hand on this host only**. Any other install that ran a pre-T147 build still carries `Api.CredentialProtected` in its `service-configuration.json`, and neither the deploy script nor the service removes it. |
+| **T157** | LOW | No real account holds a non-approved role (this store has two users, both `Developer`), so the *unapproved role* refusal branch is exercised only by the tests' stub resolver. |
+| ~~T158~~ | ~~LOW~~ | **RESOLVED 2026-09-12.** All four backup stores failed because `BackupEngine` built the `mysqldump` command line from the raw settings — `localhost`, no login, no credentials file — instead of the resolver it was already being handed and never used. All four stores now dump successfully on the cache host (180 KB / 7.0 MB / 3.7 MB / 985 KB). See `tasks.md` Phase 28. |
+| ~~T161~~ | ~~MEDIUM~~ | **RESOLVED 2026-09-12.** `RestoreService` had the same defect T158 fixed in `BackupEngine`, so a restore connected to `localhost` with no login and failed with `Access denied for user 'ODBC'@'localhost'` — after its safety snapshot had succeeded. It now resolves the connection per store and shares one credentials file across its three invocations. The restore card also gained its **own database picker**, so the database to restore no longer has to be chosen in the backup card. See `tasks.md` Phase 29. |
+| ~~T159~~ | ~~MEDIUM~~ | **RESOLVED 2026-09-12.** The app now has a publish profile (`Properties/PublishProfiles/win-x64-selfcontained.pubxml`) and a documented deploy step. Operator decision: **self-contained**, into the per-user folder `%LOCALAPPDATA%\Programs\MTM_Waitlist`. Verified: 662 files / 243.5 MB with `hostfxr.dll` + `coreclr.dll` present, and the published exe reached the Sign in window. See `tasks.md` Phase 27. |
+| ~~T160~~ | ~~MEDIUM~~ | **RESOLVED 2026-09-12.** The client now has a consumer: a **Cached Infor Visual data** panel on the Settings page, restricted to **Plant Manager and above** — the same `{Admin, Developer, Plant Manager}` trio the Max Allotted Time panel uses. All failure paths are reported, never thrown. The two `MockServiceClient` values stay empty in the shipped file on purpose (the environment variables are the per-machine install mechanism). See `tasks.md` Phase 27. |
 
 ---
 
@@ -235,8 +256,7 @@ is why 27, not 45, appears in §2.
 ## 5. Recommended order
 
 **1–5 are done (2026-09-12).** T144, T147, T148 and T150 were implemented in `/speckit.implement`; T148(a) turned
-out to have shipped in `c2d5e04` already. What remains is host-side proof, which is `VALIDATION-PROMPT-SERVER.md` in
-the repository root plus T151.
+out to have shipped in `c2d5e04` already. The host-side proof has since run too — see item 6.
 
 1. ~~**T147**~~ — **done.** The shared credential was retired; the API is authorized by the caller's application role.
 2. ~~**T148(c)**~~ — **done.** The service writes its own daily log file (`Logs\service_daily_<date>.jsonl`).
@@ -244,8 +264,9 @@ the repository root plus T151.
 4. ~~**T144 (coverage)**~~ — **done.** The operator narrowed the work-order input rule to the `WO-######` form only,
    and the five population guards and four work-order live reads were narrowed with it (§1.2).
 5. ~~**T150**~~ — **done.** The shape-4 cache no longer stores zero-stock locations (§1.5).
-6. **Host validation** — run `VALIDATION-PROMPT-SERVER.md` on `V-MTMFG-5`, and check T151's zero-stock condition
-   after the next refresh, before any of these changes is called verified.
+6. ~~**Host validation**~~ — **done 2026-09-12.** `VALIDATION-PROMPT-SERVER.md` was executed on `V-MTMFG-5`
+   (`tasks.md` Phase 25), the service and the app were both redeployed (Phase 26), and T151's zero-stock condition is
+   confirmed (§1.5). The only piece of T151 left is the signed-in grid-vs-live comparison.
 7. **T106** — the walkthrough and the SC-007/SC-008 clocks. Start the clocks as early as possible; they need
    30 days of wall time and nothing else in this list is on the critical path for them.
 8. **Next spec** — `/speckit.specify` against `OPEN-WORK-NEXT-SPEC.md` §10 first, then §4 (smallest,
@@ -257,6 +278,8 @@ the repository root plus T151.
 the repository sync (`c2d5e04`, clean tree). T144/T147/T148 detail is quoted from
 `specs/001-module-mock-visual-fallback/tasks.md` Phase 23.*
 
-*Updated 2026-09-12 (`/speckit.implement`): T144, T147, T148 and T150 are resolved — see §1.2–§1.5 and §5. Box counts
-in §1 were re-counted from the file after the change (`151 boxes: 149 [x], 2 [ ]`). The remaining host-side proof is
-`VALIDATION-PROMPT-SERVER.md` in the repository root plus T151's zero-stock check.*
+*Updated 2026-09-12 (`/speckit.implement`, fifth pass): **the restore path is fixed too** — it now connects through the
+same resolved connection the backups and reads use, and the restore card has its own database picker so the database to
+restore is chosen in the restore card rather than in the backup one (T161). Box counts in §1 were re-counted from the
+file (`161 boxes: 156 [x], 5 [ ]`). What remains: **T106**, the signed-in remainder of **T151**, and the residuals
+**T155-T157**.*

@@ -135,9 +135,73 @@ public sealed class ServiceStartupTests
     /// explicitly because the shipped default is <c>localhost</c>, which on a developer machine with MySQL
     /// running would make the cache look configured-but-rejected rather than unconfigured.
     /// </summary>
+    [TestMethod]
+    public void RestorePicker_FollowsItsOwnStore_NotTheBackupStore()
+    {
+        using var fixture = new StartupFixture();
+        var viewModel = fixture.Build()
+            .GetRequiredService<MTM_Waitlist.Mock.Service.ViewModels.ServiceSettingsViewModel>();
+
+        Assert.AreEqual(
+            BackupStore.MtmWaitlist,
+            viewModel.SelectedRestoreStore,
+            "The restore picker starts on the application store.");
+
+        viewModel.SelectedBackupStoreName = BackupStore.MtmMock.ToDisplayName();
+
+        Assert.AreEqual(BackupStore.MtmMock, viewModel.SelectedBackupStore);
+        Assert.AreEqual(
+            BackupStore.MtmWaitlist,
+            viewModel.SelectedRestoreStore,
+            "Choosing which store to back up must not change which store is being restored: the operator may"
+            + " legitimately back up one store and restore another, and the restore card has its own picker.");
+
+        viewModel.SelectedRestoreStoreName = BackupStore.MtmMock.ToDisplayName();
+
+        Assert.AreEqual(
+            BackupStore.MtmMock,
+            viewModel.SelectedRestoreStore,
+            "The restore store must be selectable directly.");
+    }
+
+    [TestMethod]
+    public async Task RestorePicker_ListsOnlyTheArtifactsOfTheStoreBeingRestored()
+    {
+        using var fixture = new StartupFixture();
+        var provider = fixture.Build();
+        var viewModel = provider.GetRequiredService<MTM_Waitlist.Mock.Service.ViewModels.ServiceSettingsViewModel>();
+        var artifactStore = provider.GetRequiredService<BackupArtifactStore>();
+
+        await fixture.RecordArtifactAsync(artifactStore, BackupStore.MtmWaitlist);
+        await fixture.RecordArtifactAsync(artifactStore, BackupStore.MtmMock);
+
+        // The page loads the list as the surface opens; do the same here rather than relying on a store change,
+        // because selecting the store that is already selected is deliberately a no-op.
+        viewModel.LoadRestoreArtifacts();
+
+        Assert.AreEqual(1, viewModel.RestoreArtifacts.Count);
+        Assert.AreEqual(
+            BackupStore.MtmWaitlist,
+            viewModel.RestoreArtifacts[0].Store,
+            "Only the artifacts of the store being restored are offered.");
+
+        viewModel.SelectedRestoreStoreName = BackupStore.MtmMock.ToDisplayName();
+
+        Assert.AreEqual(1, viewModel.RestoreArtifacts.Count);
+        Assert.AreEqual(
+            BackupStore.MtmMock,
+            viewModel.RestoreArtifacts[0].Store,
+            "Switching the store being restored switches the artifact list with it.");
+    }
+
+    /// <summary>
+    /// One throwaway app-data root, with the cache connection deliberately unconfigured, so building the
+    /// surface is tested in the state an operator first meets it: a host that is not yet pointed at MySQL.
+    /// </summary>
     private sealed class StartupFixture : IDisposable
     {
         private readonly string _root;
+        private int _sequence;
 
         public StartupFixture()
         {
@@ -164,6 +228,39 @@ public sealed class ServiceStartupTests
         public ServiceConfiguration Configuration { get; }
 
         public ServiceProvider Build() => Builder.Build(Configuration);
+
+        /// <summary>Writes an artifact file for the store and records it, so the restore picker has something to list.</summary>
+        public async Task RecordArtifactAsync(BackupArtifactStore artifactStore, BackupStore store)
+        {
+            var directory = Path.Combine(_root, "artifacts", store.ToDatabaseName());
+            Directory.CreateDirectory(directory);
+
+            var filePath = Path.Combine(directory, $"{store.ToDatabaseName()}_{_sequence++:D3}.sql");
+            await File.WriteAllTextAsync(filePath, "-- dump").ConfigureAwait(false);
+
+            var artifact = new BackupArtifact
+            {
+                Store = store,
+                CreatedUtc = new DateTime(2026, 9, 12, 6, 0, 0, DateTimeKind.Utc).AddMinutes(_sequence),
+                FilePath = filePath,
+                SizeBytes = new FileInfo(filePath).Length,
+                IsRetained = true,
+                IsSafetySnapshot = false,
+            };
+
+            await artifactStore
+                .RecordAsync(
+                    new BackupRunRecord
+                    {
+                        Store = store,
+                        StartedUtc = artifact.CreatedUtc,
+                        FinishedUtc = artifact.CreatedUtc,
+                        Outcome = BackupRunOutcome.Succeeded,
+                        ArtifactPath = filePath,
+                    },
+                    artifact)
+                .ConfigureAwait(false);
+        }
 
         public void Dispose()
         {

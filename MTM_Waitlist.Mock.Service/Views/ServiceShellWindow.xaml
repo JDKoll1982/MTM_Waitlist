@@ -39,18 +39,31 @@
             </TitleBar.Content>
         </TitleBar>
 
+        <!--
+            The settings entry is the NavigationView's own item (IsSettingsVisible), which the control pins to the
+            BOTTOM of the pane and which carries the settings gear. It is deliberately not a NavigationViewItem of
+            our own: one placed in MenuItems would sit at the top with the destinations, and the conventional place
+            for settings is the foot of the pane.
+
+            Every entry carries an icon because the pane collapses to LeftCompact, where the control shows icons
+            only. An item without one renders as blank space in that state.
+        -->
         <NavigationView
             x:Name="ShellNavigationView"
             Grid.Row="1"
             IsBackButtonVisible="Collapsed"
-            IsSettingsVisible="False"
+            IsSettingsVisible="True"
             PaneDisplayMode="Left"
             OpenPaneLength="200"
             SelectionChanged="OnNavigationSelectionChanged">
 
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Name="SettingsNavigationItem" Tag="settings" />
-                <NavigationViewItem x:Name="StatusNavigationItem" Tag="status" />
+                <NavigationViewItem x:Name="StatusNavigationItem" Tag="status">
+                    <NavigationViewItem.Icon>
+                        <!-- Diagnostic: this surface reports the service's health and last run. -->
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE9D9;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" />

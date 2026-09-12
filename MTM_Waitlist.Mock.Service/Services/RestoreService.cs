@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
+using MySqlConnector;
 using MTM_Waitlist.Mock.Service.Models;
 
 namespace MTM_Waitlist.Mock.Service.Services;
@@ -56,6 +57,7 @@ public sealed class RestoreService
 
     private readonly BackupEngine _backupEngine;
     private readonly BackupArtifactStore _artifactStore;
+    private readonly MySqlConnectionStringResolver _connectionResolver;
     private readonly ILogger<RestoreService> _logger;
     private readonly TimeProvider _timeProvider;
     private readonly Func<Models.ServiceConfiguration> _configurationAccessor;
@@ -63,23 +65,30 @@ public sealed class RestoreService
     /// <summary>Creates the restore service.</summary>
     /// <param name="backupEngine">Takes the safety snapshot and locates the MySQL client tools.</param>
     /// <param name="artifactStore">Records the outcome and resolves the safety snapshot's identity.</param>
+    /// <param name="connectionResolver">
+    /// Supplies the connection the client invocations use. Resolving it is what makes a restore reach the same
+    /// server a read of the same store reaches.
+    /// </param>
     /// <param name="configurationAccessor">Reads the live configuration, including the option-file path.</param>
     /// <param name="logger">Logger; credential material is never passed to it.</param>
     /// <param name="timeProvider">Time source for the recorded timestamps.</param>
     public RestoreService(
         BackupEngine backupEngine,
         BackupArtifactStore artifactStore,
+        MySqlConnectionStringResolver connectionResolver,
         Func<Models.ServiceConfiguration> configurationAccessor,
         ILogger<RestoreService> logger,
         TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(backupEngine);
         ArgumentNullException.ThrowIfNull(artifactStore);
+        ArgumentNullException.ThrowIfNull(connectionResolver);
         ArgumentNullException.ThrowIfNull(configurationAccessor);
         ArgumentNullException.ThrowIfNull(logger);
 
         _backupEngine = backupEngine;
         _artifactStore = artifactStore;
+        _connectionResolver = connectionResolver;
         _configurationAccessor = configurationAccessor;
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
@@ -133,6 +142,36 @@ public sealed class RestoreService
 
         var database = artifact.Store.ToDatabaseName();
         var confirmedUtc = _timeProvider.GetUtcNow().UtcDateTime;
+
+        // Resolved before any destructive step, and from the same source every other path uses. The settings
+        // record still holds its shipped defaults on a host that supplies its credentials through an environment
+        // variable, and connecting with those fails with "Access denied ...@localhost" — while the safety
+        // snapshot that precedes the replacement succeeds, because the backup path resolves properly.
+        var connectionString = _connectionResolver.Resolve(database, artifact.Store.ToConnectionStringEnvironmentVariable());
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            _logger.LogError(
+                "Restore aborted for {Database}: no MySQL connection is configured for it.",
+                database);
+
+            return request with
+            {
+                ConfirmedUtc = confirmedUtc,
+                FinishedUtc = _timeProvider.GetUtcNow().UtcDateTime,
+                Outcome = RestoreOutcomeKind.FailedReload,
+                VerificationSummary =
+                    $"No MySQL connection is configured for '{database}', so nothing was changed."
+            };
+        }
+
+        // One credentials file for the whole restore: the replace, reload and verify invocations all use it, and
+        // the password never reaches a command line (FR-026).
+        using var credentials = MySqlClientCredentials.Create(
+            _configurationAccessor().MySqlConnection.PasswordFilePath,
+            connectionString,
+            CredentialsDirectory);
+
+        var clientConnection = new ClientConnection(connectionString, credentials.Argument);
 
         _logger.LogWarning(
             "Restore confirmed for {Database} from {ArtifactPath}.",
@@ -215,7 +254,7 @@ public sealed class RestoreService
         {
             replaceExitCode = (await RunClientAsync(
                 mysqlPath,
-                BuildConnectionArguments(),
+                BuildConnectionArguments(clientConnection),
                 cancellationToken,
                 standardInputPath: replaceScriptPath).ConfigureAwait(false)).ExitCode;
         }
@@ -246,7 +285,7 @@ public sealed class RestoreService
         // 3. Reload without --force, so a genuine error stops the restore instead of being skipped.
         var reloadExitCode = (await RunClientAsync(
             mysqlPath,
-            BuildReloadArguments(database),
+            BuildReloadArguments(clientConnection, database),
             cancellationToken,
             standardInputPath: artifact.FilePath).ConfigureAwait(false)).ExitCode;
 
@@ -270,7 +309,7 @@ public sealed class RestoreService
         }
 
         // 4. Verify the store came back: a reload that "succeeded" but left nothing behind is visible here.
-        var verification = await BuildVerificationSummaryAsync(mysqlPath, database, artifact.SizeBytes, cancellationToken)
+        var verification = await BuildVerificationSummaryAsync(mysqlPath, database, artifact.SizeBytes, clientConnection, cancellationToken)
             .ConfigureAwait(false);
 
         _logger.LogWarning("Restore completed for {Database}. {Verification}", database, verification);
@@ -332,30 +371,35 @@ public sealed class RestoreService
     /// The connection arguments every client invocation shares. The password travels only through the
     /// option-file reference, never as a command-line value (FR-026).
     /// </summary>
-    private List<string> BuildConnectionArguments()
+    /// <param name="connection">
+    /// The store's resolved connection. It is resolved once per restore from the same source every other path
+    /// uses, and never read from the settings record — which is what left a restore connecting to the shipped
+    /// default <c>localhost</c> with no login while the rest of the service worked.
+    /// </param>
+    private static List<string> BuildConnectionArguments(ClientConnection connection)
     {
-        var connection = _configurationAccessor().MySqlConnection;
+        var resolved = new MySqlConnectionStringBuilder(connection.ConnectionString);
         var arguments = new List<string>();
 
-        if (connection.PasswordFilePath is { Length: > 0 } passwordFile)
+        if (!string.IsNullOrWhiteSpace(connection.CredentialsFileArgument))
         {
-            arguments.Add($"--defaults-extra-file={passwordFile}");
+            arguments.Add(connection.CredentialsFileArgument);
         }
 
-        arguments.Add($"--host={connection.Server}");
-        arguments.Add($"--port={connection.Port.ToString(CultureInfo.InvariantCulture)}");
+        arguments.Add($"--host={resolved.Server}");
+        arguments.Add($"--port={resolved.Port.ToString(CultureInfo.InvariantCulture)}");
 
-        if (!string.IsNullOrWhiteSpace(connection.UserId))
+        if (!string.IsNullOrWhiteSpace(resolved.UserID))
         {
-            arguments.Add($"--user={connection.UserId}");
+            arguments.Add($"--user={resolved.UserID}");
         }
 
         return arguments;
     }
 
-    private List<string> BuildReloadArguments(string database)
+    private static List<string> BuildReloadArguments(ClientConnection connection, string database)
     {
-        var arguments = BuildConnectionArguments();
+        var arguments = BuildConnectionArguments(connection);
 
         // No --force: a reload error must stop the restore rather than be skipped over.
         arguments.Add("--database");
@@ -363,6 +407,18 @@ public sealed class RestoreService
 
         return arguments;
     }
+
+    /// <summary>
+    /// Where a generated credentials file is written: the service's own app-data root, which is where the
+    /// artifact record already lives. Never a shared temporary folder, because it briefly holds a password.
+    /// </summary>
+    private string CredentialsDirectory =>
+        Path.GetDirectoryName(_artifactStore.FilePath) ?? Path.GetTempPath();
+
+    /// <summary>One restore's shared client connection.</summary>
+    /// <param name="ConnectionString">The resolved connection, which names the host, the port and the login.</param>
+    /// <param name="CredentialsFileArgument">The <c>--defaults-extra-file</c> argument, or <see langword="null"/>.</param>
+    private readonly record struct ClientConnection(string ConnectionString, string? CredentialsFileArgument);
 
     /// <summary>
     /// Writes a reviewed restore script with the store's database name substituted, and returns the
@@ -503,6 +559,7 @@ public sealed class RestoreService
     /// <param name="mysqlPath">The located MySQL client.</param>
     /// <param name="database">The store that was just replaced.</param>
     /// <param name="artifactSizeBytes">Size of the reloaded artifact, reported beside the table count.</param>
+    /// <param name="connection">The store's resolved connection, shared with the other two invocations.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An operator-facing, secret-free summary.</returns>
     /// <remarks>
@@ -516,6 +573,7 @@ public sealed class RestoreService
         string mysqlPath,
         string database,
         long artifactSizeBytes,
+        ClientConnection connection,
         CancellationToken cancellationToken)
     {
         string scriptPath;
@@ -535,7 +593,7 @@ public sealed class RestoreService
         {
             var result = await RunClientAsync(
                 mysqlPath,
-                BuildConnectionArguments(),
+                BuildConnectionArguments(connection),
                 cancellationToken,
                 standardInputPath: scriptPath).ConfigureAwait(false);
 

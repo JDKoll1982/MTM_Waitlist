@@ -40,8 +40,23 @@ public sealed partial class ServiceShellWindow : Window
 
         Title = "Service_Shell.Title".GetLocalized();
 
-        SettingsNavigationItem.Content = "Service_Shell.NavigationSettings".GetLocalized();
-        StatusNavigationItem.Content = "Service_Shell.NavigationStatus".GetLocalized();
+        var statusLabel = "Service_Shell.NavigationStatus".GetLocalized();
+        StatusNavigationItem.Content = statusLabel;
+
+        // The pane collapses to an icon-only strip, so each entry's label has to survive the collapse as a
+        // tooltip, and UI automation has to be able to name it.
+        ToolTipService.SetToolTip(StatusNavigationItem, statusLabel);
+        AutomationProperties.SetName(StatusNavigationItem, statusLabel);
+
+        // The settings entry belongs to the control rather than to this window's markup: the NavigationView
+        // places it at the bottom of the pane and gives it the gear icon. Its tooltip and automation name are
+        // taken from this app's resources so both read it in the app's own words.
+        if (ShellNavigationView.SettingsItem is NavigationViewItem settingsItem)
+        {
+            var settingsLabel = "Service_Shell.NavigationSettings".GetLocalized();
+            ToolTipService.SetToolTip(settingsItem, settingsLabel);
+            AutomationProperties.SetName(settingsItem, settingsLabel);
+        }
 
         ConfigureTitleBar();
         ConfigureSearchBox();
@@ -61,7 +76,9 @@ public sealed partial class ServiceShellWindow : Window
     /// <param name="showSettings"><see langword="true"/> for settings, <see langword="false"/> for status.</param>
     public void NavigateTo(bool showSettings)
     {
-        ShellNavigationView.SelectedItem = showSettings ? SettingsNavigationItem : StatusNavigationItem;
+        ShellNavigationView.SelectedItem = showSettings
+            ? ShellNavigationView.SettingsItem
+            : StatusNavigationItem;
 
         // Activate both shows a hidden window and raises an already-visible one.
         Activate();
@@ -170,12 +187,14 @@ public sealed partial class ServiceShellWindow : Window
 
     private void OnNavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (args.SelectedItem is not NavigationViewItem item)
+        if (args.SelectedItem is null && !args.IsSettingsSelected)
         {
             return;
         }
 
-        var isSettings = ReferenceEquals(item, SettingsNavigationItem);
+        // The settings entry is the control's own item, so it is identified by the event argument rather than by
+        // a reference to a menu item of ours.
+        var isSettings = args.IsSettingsSelected;
 
         // A Frame needs a parameterless page constructor; the container travels as the navigation
         // parameter and each page reads it in OnNavigatedTo.

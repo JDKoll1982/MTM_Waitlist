@@ -196,6 +196,12 @@ publish/
 # WindowsAppSDKSelfContained, WindowsPackageType, and the documented PublishDir.
 !MTM_Waitlist.Mock.Service/Properties/PublishProfiles/*.pubxml
 
+# ...and the desktop app's folder-publish profile, for the same reason: README.md's "Deploying the desktop
+# application" section invokes it by name, and without it the app is published framework-dependent, which
+# silently gives every workstation a .NET runtime prerequisite. It likewise holds nothing but the runtime,
+# the self-contained flags, the package type, and PublishDir.
+!Properties/PublishProfiles/*.pubxml
+
 # Microsoft Azure Web App publish settings. Comment the next line if you want to
 # checkin your Azure Web App publish settings, but sensitive information contained
 # in these scripts will be unencrypted

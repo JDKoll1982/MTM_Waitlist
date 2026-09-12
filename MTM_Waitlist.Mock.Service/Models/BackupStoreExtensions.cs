@@ -1,4 +1,5 @@
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Mock.Service.Services;
 
 namespace MTM_Waitlist.Mock.Service.Models;
 
@@ -15,6 +16,21 @@ public static class BackupStoreExtensions
         BackupStore.MtmReceivingApplication => "mtm_receiving_application",
         BackupStore.MtmMock => "mtm_mock",
         _ => throw new ArgumentOutOfRangeException(nameof(store), store, "Unknown backup store.")
+    };
+
+    /// <summary>
+    /// Returns the store's own connection-string environment variable, so the store resolves its target the same
+    /// way whether it is being read, backed up, or restored. The shared fallback variable still applies when this
+    /// one is unset — see <see cref="MySqlConnectionStringResolver"/>. A store with no variable of its own returns
+    /// <see langword="null"/> and resolves through the shared one alone.
+    /// </summary>
+    public static string? ToConnectionStringEnvironmentVariable(this BackupStore store) => store switch
+    {
+        BackupStore.MtmWaitlist => MySqlConnectionStringResolver.WaitlistConnectionStringEnvironmentVariable,
+        BackupStore.MtmWipApplicationWinforms => MySqlConnectionStringResolver.WipApplicationConnectionStringEnvironmentVariable,
+        BackupStore.MtmReceivingApplication => MySqlConnectionStringResolver.ReceivingApplicationConnectionStringEnvironmentVariable,
+        BackupStore.MtmMock => MySqlConnectionStringResolver.MockConnectionStringEnvironmentVariable,
+        _ => null
     };
 
     /// <summary>

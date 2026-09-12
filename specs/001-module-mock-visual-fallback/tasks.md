@@ -2249,8 +2249,8 @@ environment).
 **Host run completed 2026-09-12.** Nothing in T147 or T148(c) could be proven from this workstation — the role
 lookup needs a live `mtm_waitlist` connection and the durable log is only exercised by a real service process — so
 `VALIDATION-PROMPT-SERVER.md` in the repository root was executed **on the cache host** (`V-MTMFG-5` / `172.16.1.104`).
-See **Phase 24** at the end of this file for the evidence and for the defects the run exposed; T153-T156 carry the
-residuals, and T150-T152 record what was fixed. Both tasks stay resolved.
+See **Phase 25** at the end of this file for the evidence and for the defects the run exposed; T155-T158 carry the
+residuals, and T152-T154 record what was fixed. Both tasks stay resolved.
 
 **Verified.** Redeployed and started on the host: **23/23 checks pass**, and the service performed its **first ever
 successful refresh** — all five shapes `Succeeded` in ~4.4 s (`work_order_lookup` 699 · `operation_sequences` 891 ·
@@ -2294,7 +2294,7 @@ in place and the blocker that stopped Phases 18/19/21 ("a host-side deployment t
 remains of §2 is the tray Settings surface; §3's fallback proof and §4's defect proof need a **signed-in** application
 session; §5 needs a configured service and a throwaway store; §7 is a maintainer-day exercise; SC-007/SC-008 are
 unstarted 30-day observation windows. (The write-once credential and the “one real refresh cycle” items this list
-used to carry are both retired — T147 deleted the credential, and Phase 24 ran the cycle on the host.) Two of those
+used to carry are both retired — T147 deleted the credential, and Phase 25 ran the cycle on the host.) Two of those
 blockers were re-confirmed unchanged this run (`172.16.1.104:5760` closed, no `HKCU\…\Run` entry, no
 `bin/publish/win-x64`). The new finding above adds a fourth reason the walkthrough cannot be signed off: even on a
 fully provisioned host, §3 step 3's "every journey returns a complete, correctly shaped result" would pass on shape
@@ -2371,15 +2371,31 @@ the cache host against Infor Visual and that service is not deployed on this wor
   materially from the 79,457 pre-change figure, and that the Waitlist detail grid still returns the same locations
   for a sampled part as the live read does.
 
+  **Two of the three parts are confirmed — host, 2026-09-12 (Phase 26).** After the redeploy's startup cycle:
+  `visual_inventory_locations_result` held **2,012** rows with **none** below 1 on hand (minimum `1.0000`), against the
+  79,457 pre-change figure. The task stays unticked because the third part — the grid-vs-live read comparison for a
+  sampled part — needs a **signed-in** application session, which no credential was available for.
+
 **Open question left with the operator (not a code change).** `Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql`
 is a **capture** of the live mirror taken 2026-09-12 and carries 79,218 shape-4 rows, overwhelmingly zero-stock
 (`(1,'00658500','DC-DOCK',0.0000, …)`). Those rows are app-filtered and harmless, but they now diverge from what
 the population read produces. Regenerating the capture needs the shared host; it is recorded here rather than
 changed in this run.
-## Phase 24 — T147/T148(c) host verification (2026-09-12, `/speckit.implement`)
+
+- [x] T161 (**FIXED 2026-09-12** — see Phase 29) `RestoreService` built the `mysql` client's connection from
+  `_configurationAccessor().MySqlConnection` — the same defect T158 fixed in `BackupEngine` — so on this host a restore
+  connected to `localhost` with no login and failed with `Access denied for user 'ODBC'@'localhost'`, while the safety
+  snapshot that precedes it succeeded (that path had already been fixed). It now resolves the connection per store
+  through `MySqlConnectionStringResolver` and shares one `MySqlClientCredentials` file across its three invocations.
+## Phase 25 — T147/T148(c) host verification (2026-09-12, `/speckit.implement`)
 
 Appended by `/speckit.implement`. No earlier task, ID, or phase was modified. T147 and T148 remain **resolved**. The
-defects this run exposed were fixed in the same session (T150-T152) and the residuals are filed as T153-T156.
+defects this run exposed were fixed in the same session (T152-T154) and the residuals are filed as T155-T158.
+
+> **IDs renumbered 2026-09-12.** This section first filed its items as T150-T156 under a **Phase 24** heading, but a
+> `/speckit.implement` run on another workstation had already claimed **T150/T151** for the shape-4 cache work and the
+> **Phase 24** heading for it (see Phase 24 above). Nothing was re-scoped: only the numbers and this heading changed,
+> from T150-T156 / Phase 24 to T152-T158 / Phase 25.
 
 The handover in `VALIDATION-PROMPT-SERVER.md` was executed **on the cache host** (`V-MTMFG-5` / `172.16.1.104`, install
 folder `C:\Services\MTM_Waitlist.Mock.Service\`), because neither change can be proven anywhere else.
@@ -2390,7 +2406,7 @@ folder `C:\Services\MTM_Waitlist.Mock.Service\`), because neither change can be 
 |---|---|
 | 1 Host identity | **PASS** — `V-MTMFG-5` / `172.16.1.104`, install folder present |
 | 2 Fetch + build | **PASS** — `Build succeeded. 0 Warning(s) 0 Error(s)` |
-| 3 Tests | **PASS after the T150/T151 fixes** — no-store pass `Failed: 0, Passed: 724, Skipped: 15`; live-store pass `Failed: 0, Passed: 737, Skipped: 2` |
+| 3 Tests | **PASS after the T152/T153 fixes** — no-store pass `Failed: 0, Passed: 724, Skipped: 15`; live-store pass `Failed: 0, Passed: 737, Skipped: 2` |
 | 4 Role lookup vs the real store | **PASS** — `sp_auth_user_row_get` is deployed; `jkoll`/`johnk` resolve to `Developer` (approved); an unknown name returns no row |
 | 5 Deploy | **PASS** — `DEPLOYMENT OK - 23 checks, 0 warning(s)`, exit 0; `API refuses an unnamed caller` PASS |
 | 6 API authorization | **PASS** — anonymous, retired-token, invented-user and unassigned-user all answer a byte-identical `401 {"error":"unauthorized"}`; an approved operator answers `200` with `operatorRoles` and no secret-shaped field |
@@ -2404,12 +2420,12 @@ exists** (T147 retired it) and the **real refresh cycle has now run**.
 
 ### What the run changed
 
-- `MTM_Waitlist.Tests/Module_Mock_Service/ServiceApiTests.cs` — the fixture's free-port override was **inert** (T150):
+- `MTM_Waitlist.Tests/Module_Mock_Service/ServiceApiTests.cs` — the fixture's free-port override was **inert** (T152):
   `ServiceHostBuilder.Build` never pushed the record into the store, so the listener bound
   `ServiceConfiguration.CreateDefault().Api` = `0.0.0.0:5760` regardless. The fixture now seeds the store's own
   configuration file, and asserts the store took the binding. Verified by running the suite **with the service up**:
   `Failed: 0`.
-- `MTM_Waitlist.Tests/ProductionBackendAvailability.cs` (new) + the two tests in T151 — tests whose premise is that
+- `MTM_Waitlist.Tests/ProductionBackendAvailability.cs` (new) + the two tests in T153 — tests whose premise is that
   the production backend is *unreachable* now report inconclusive when a live connection is configured, instead of
   failing **and writing rows into the operational store**.
 - `MTM_Waitlist.Mock.Service/Api/ServiceOperatorAuthenticationHandler.cs`, `Api/ServiceApiContracts.cs` — the refusal
@@ -2425,36 +2441,40 @@ exists** (T147 retired it) and the **real refresh cycle has now run**.
 
 ### Filed from this run — fixed
 
-- [x] T150 (**FIXED 2026-09-12**) `ServiceApiTests`' free-port override was **inert**: `ServiceHostBuilder.Build` only
+- [x] T152 (**FIXED 2026-09-12**) `ServiceApiTests`' free-port override was **inert**: `ServiceHostBuilder.Build` only
   assigns `_loadedConfiguration` and never pushes the record into `ServiceConfigurationStore`, so the listener
   bound `ServiceConfiguration.CreateDefault().Api` = `0.0.0.0:5760` and every test in the class failed whenever the
   deployed service was running. The fixture now seeds the store's own configuration file and asserts the store took the
   binding, so a future property rename fails loudly instead of silently rebinding the production port. Verified by
   running the full suite **with the service up**: `Failed: 0, Passed: 724, Skipped: 15`.
-- [x] T151 (**FIXED 2026-09-12**) Two tests whose premise is an *unreachable* production backend failed **and wrote
+- [x] T153 (**FIXED 2026-09-12**) Two tests whose premise is an *unreachable* production backend failed **and wrote
   rows into the operational store** on a host where `MTM_WAITLIST_DB_CONNECTION_STRING` is set. The new
   `MTM_Waitlist.Tests/ProductionBackendAvailability.cs` reports them inconclusive instead. Verified: the live-store
   pass is `Failed: 0, Passed: 737, Skipped: 2`, and the store's row counts were unchanged across the run.
-- [x] T152 (**FIXED 2026-09-12**) The refusal body was serialized with PascalCase while every route used camelCase web
+- [x] T154 (**FIXED 2026-09-12**) The refusal body was serialized with PascalCase while every route used camelCase web
   defaults, so one API emitted two error envelopes and neither matched `contracts/mock-service-http-api.md` §6. The
   challenge now writes exactly `{"error":"unauthorized"}`. The contract was correct and the code was wrong.
 
 ### Still open
 
-- [ ] T153 (MEDIUM) `ProductionBackendAvailability` detects only the two `MTM_WAITLIST_*_CONNECTION_STRING` variables,
+- [ ] T155 (MEDIUM) `ProductionBackendAvailability` detects only the two `MTM_WAITLIST_*_CONNECTION_STRING` variables,
   while `MySqlHelperServer` also falls back to `StartupDatabaseOptions.ConnectionString` from `appsettings.json`. A host
   whose configuration points at a reachable store **without** any environment variable would still fail and write.
   Either extend the guard to probe the resolved connection, or convert the two tests to `StubMySqlHelperServer`.
-- [ ] T154 (MEDIUM) The retired-credential purge was manual and host-specific. Any other install that ran a pre-T147
+- [ ] T156 (MEDIUM) The retired-credential purge was manual and host-specific. Any other install that ran a pre-T147
   build still carries `Api.CredentialProtected` in its `service-configuration.json`, and neither the deploy script nor
   the service removes it. Add an upgrade step (or a load-time drop) so the blob cannot outlive the feature it belonged
-  to. Also purge the same field wherever a pre-T147 configuration has been backed up.
-- [ ] T155 (LOW) No real account holds a non-approved role: `core_users_profiles` has two users, both `Developer`, so
+  to. Also purge the same field wherever a pre-T147 configuration has been backed up. - validate completion
+- [ ] T157 (LOW) No real account holds a non-approved role: `core_users_profiles` has two users, both `Developer`, so
   the *unapproved role* refusal branch is exercised only by `ServiceApiTests`' stub resolver — the host check could not
   reach it. (`Admin` is additionally in `ServiceOperatorRoles.Approved` but absent from `auth_roles_catalog`.) Seed a
-  shop-floor account, or record the acceptance.
-- [ ] T156 (LOW) All four backup stores report `lastOutcome: failed` with `toolAvailable: true`. Pre-existing and not
-  investigated in this run; the reason should now be readable in the durable log.
+  shop-floor account, or record the acceptance. - Seed a test role for each user type
+- [x] T158 (**FIXED 2026-09-12** — see Phase 28) All four backup stores reported `lastOutcome: failed` with
+  `toolAvailable: true` and no artifact on disk. Root cause: `BackupEngine` built the `mysqldump` command line from the
+  raw `MySqlConnectionSettings` — `localhost`, an empty login, no password file — instead of from the
+  `MySqlConnectionStringResolver` it was already being handed and never used, so every dump ran against the shipped
+  defaults and failed with `Access denied for user 'ODBC'@'localhost'`. All four stores now back up successfully on the
+  cache host.
 
 ### Unrun and out of scope, stated so it is not assumed
 
@@ -2472,3 +2492,351 @@ exists** (T147 retired it) and the **real refresh cycle has now run**.
 Service running as the production deployment: `C:\Services\MTM_Waitlist.Mock.Service\MTM_Waitlist.Mock.Service.exe`,
 pid 848, tray-only (`MainWindowHandle=0`), `0.0.0.0:5760` listening, auto-start entry intact, configuration free of any
 credential-shaped field.
+
+---
+
+## Phase 26 — cross-machine reconciliation, full suite, and redeployment of both artifacts (2026-09-12, `/speckit.implement`)
+
+Appended by `/speckit.implement` on the cache host (`V-MTMFG-5`), after changes were made on another workstation and
+the local and shared databases were rebuilt from `Database/install_local_database.vbs`.
+
+### What arrived from the other workstation
+
+`562b050` (*Refine Work Order Input Handling and Validation*) plus this machine's own `af8badb` (the Phase 25 host run).
+`562b050` is the **T144 resolution**: the application's input rule is narrowed to `^WO-(\d{6})$`
+(`MTM_Waitlist.Setup/Services/WorkOrderValidationService.cs`), the addressability guard in all five
+`Database/InforVisual/Queues/Module_Mock/Populations/*.sql` accepts only a literal `WO-` + six digits, the four
+Module_Setup live queries drop the stripped-base-id match that produced the cross-order collisions, and the
+placeholder/message/tooltip strings were retargeted. It also implemented a new **T150** (shape-4
+`inventory_locations_population.sql` now emits only on-hand `>= 1`) and left **T151** open for host confirmation.
+
+### Reconciliation the merge required
+
+Both workstations independently claimed the same identifiers, and neither was wrong on its own:
+
+| Collision | Resolution |
+|---|---|
+| Two `## Phase 24` headings — theirs (T144) and this machine's (T147/T148(c) host run) | This machine's section became **Phase 25** |
+| Task IDs — theirs `T150`/`T151`, this machine's `T150`-`T156` | This machine's became **T152**-**T158** (three fixed, four residuals) |
+
+Nothing was re-scoped; only the numbers and the heading changed, and the renumbered section says so in place. Every
+cross-reference in this file and in `OPEN-TASKS.md` was updated, and there are no duplicate task definitions.
+
+### Documentation corrected in this pass
+
+- `specs/001-module-mock-visual-fallback/quickstart.md` §3 step 2 still told an operator to *"configure each client
+  with the shared credential"* — retired by T147. It now names `MTM_MOCK_SERVICE_ENDPOINT` and
+  `MTM_MOCK_SERVICE_USER` (confirmed against `MockServiceClientOptions`), and says plainly that no token is installed.
+  The §2 `shop.user` example gained a note that this store holds only approved accounts, so an unknown name and an
+  unapproved one are refused for the same indistinguishable reason. The §8 validation row said "token-gated API" and
+  now says "role-authorized API".
+- `VALIDATION-PROMPT-SERVER.md` — T144 is no longer "explicitly out of scope" (it is resolved), and the live-store
+  test pass is documented as `Skipped: 2`, not `0`, because of the `ProductionBackendAvailability` guard.
+- `OPEN-TASKS.md` — §2 **step 7 is done**, so it left the blocked list; the "fifth reason" for T106 was retired with
+  T144; the box totals and the Phase/ID references were corrected.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64` | **Build succeeded, 0 Warning(s) 0 Error(s)** |
+| Full suite, no live store | **`Failed: 0, Passed: 732, Skipped: 15, Total: 747`** |
+| Full suite, live store | **`Failed: 0, Passed: 745, Skipped: 2, Total: 747`** |
+| Mock service redeploy | **`DEPLOYMENT OK - 23 checks, 0 warning(s)`**, exit 0, pid 21588, `0.0.0.0:5760`, tray-only |
+| App publish + launch | published to `bin/publish/win-x64`; launched and reached the **Sign in** window |
+
+The 747 total (up from 739) is `562b050`'s eight new `WorkOrderValidationServiceTests` cases. The two live-store skips
+are the guarded premise tests from T153, still reporting inconclusive rather than failing and writing.
+
+### T151 — host confirmation, part done
+
+`T151` asked for three things after a host refresh. Two are confirmed:
+
+- `visual_inventory_locations_result` holds **2,012** rows, **none** with `on_hand_quantity < 1` (minimum `1.0000`) —
+  down from the 79,457 pre-change figure, so the drop is material.
+- The other four shapes repopulated normally: `work_order_lookup` 540 · `operation_sequences` 718 ·
+  `subordinate_parts` 1,463 · `disposition_input` 540.
+
+**Not confirmed, and it is why T151 stays unticked:** the third part — that the Waitlist detail grid returns the same
+locations for a sampled part as the live read — needs a **signed-in** application session, which no credential was
+available for. The task text now records which part is done.
+
+### Operational note worth keeping
+
+`install_local_database.vbs` **empties the mirror**: after the rebuild, all ten `mtm_mock` tables held 0 rows and the
+scheduled loop was reporting `Refresh cycle starting for 0 shape(s)`. That message is **not** a fault — the scheduled
+loop logs the *due* subset via `TryRunDueShapesAsync`, so 0 shapes means nothing had reached its interval yet. The
+mirror was repopulated by the redeploy's startup cycle. The shape catalog itself is code-defined
+(`VisualReadShapeCatalog.Create()`), and `sp_visual_read_shape_metadata_get` confirmed all five shapes' tables and both
+procedures present in the rebuilt schema, so nothing was missing.
+
+### Filed from this pass
+
+- [x] T159 (**DONE 2026-09-12** — see Phase 27) The desktop app had **no documented publish/deploy path**: no publish
+  profile for `MTM_Waitlist.csproj`, `Package.appinstaller` an unfilled template, and `WindowsPackageType=None` so it
+  ships unpackaged. A plain `dotnet publish -c Release -p:Platform=x64` also produced a **framework-dependent**
+  artifact, putting the .NET 10 runtime on every workstation's prerequisite list.
+
+  **Decision (operator, 2026-09-12):** **self-contained**, deployed to the **per-user** folder
+  `%LOCALAPPDATA%\Programs\MTM_Waitlist`. A publish profile now exists for the app, and README.md documents the step.
+- [x] T160 (**DONE 2026-09-12** — see Phase 27) `IMockServiceRefreshClient` (T119) was registered in DI with **no
+  consumer**, so the two installation settings (`MTM_MOCK_SERVICE_ENDPOINT` / `MTM_MOCK_SERVICE_USER`, or
+  `MockServiceClient:Endpoint` / `:UserName`) were inert and shipping them empty changed nothing observable.
+
+  **Decision (operator, 2026-09-12):** the surface **is** wanted — a **Cached Infor Visual data** panel on the client
+  app's **Settings** page, restricted to **Plant Manager and above**. The client now has a consumer; the two settings
+  stay empty in the shipped `appsettings.json` on purpose, because a machine-local install (the environment variables)
+  is the mechanism and the panel reports an unconfigured client as a normal outcome.
+
+---
+
+## Phase 27 — T159 and T160 implemented from the operator's decisions (2026-09-12, `/speckit.implement`)
+
+Appended by `/speckit.implement`. T159 and T160 are now ticked; no other task, ID, or phase was modified.
+
+### T159 — the app's publish/deploy path
+
+The operator decided **self-contained** into the **per-user** folder `%LOCALAPPDATA%\Programs\MTM_Waitlist`.
+
+| Artifact | Change |
+|---|---|
+| `Properties/PublishProfiles/win-x64-selfcontained.pubxml` (**new**) | The app had no publish profile. Mirrors the service's: `PublishDir=bin\publish\win-x64\`, `RuntimeIdentifier=win-x64`, `SelfContained=true`, `WindowsAppSDKSelfContained=true`, `WindowsPackageType=None`, and single-file/ReadyToRun off so the deploy stays "copy the whole folder". |
+| `README.md` | New **Deploying the desktop application** section: the publish command, what the artifact is, the per-user copy step, and a table of the four properties with why each is set. |
+
+**Verified.** `dotnet publish MTM_Waitlist.csproj -p:PublishProfile=win-x64-selfcontained` → **662 files / 243.5 MB**
+with `hostfxr.dll`, `coreclr.dll` and `System.Private.CoreLib.dll` present, i.e. genuinely self-contained (the
+framework-dependent build was 475 files / 167 MB and had none of them). The published executable **launched and reached
+the Sign in window**, so the artifact is functional and not merely complete.
+
+**Why the profile matters, not just the command.** Without it MSBuild reports `NETSDK1198` and *silently* falls back to
+a framework-dependent publish — which is how the app acquired an undocumented .NET runtime prerequisite in the first
+place. The profile's own header comment records that trap.
+
+**The profile also needed a `.gitignore` negation.** `.gitignore` ignores `*.pubxml`, so the new profile was invisible
+to git. The service's profile escapes that with a documented `!` rule; the app's now has the same one beside it. Without
+it the file that makes this deploy reproducible would never have been committed, and a fresh clone would hit
+`NETSDK1198` and fall back to framework-dependent — the exact trap above.
+
+### T160 — the on-demand cache refresh panel
+
+Operator decision: the surface **is** wanted, on the client app's **Settings** page, restricted to **Plant Manager and
+above**. That phrase already had a meaning in this codebase — `AllowedUrgencyManageRoles` is exactly
+`{ Admin, Developer, Plant Manager }` and the Max Allotted Time panel labels it *"Plant Manager+ can edit"* — so the new
+gate reuses that trio rather than inventing a second vocabulary.
+
+| Artifact | Change |
+|---|---|
+| `MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs` | New `AllowedCacheRefreshRoles` + `CanRequestCacheRefresh` + `IsCacheRefreshPanelVisible`; `IMockServiceRefreshClient` injected; `RequestCacheRefreshAsync` `[RelayCommand]` with `IsCacheRefreshing` / `CacheRefreshStatusMessage`. |
+| `Module_Settings/Views/SettingsPage.xaml` | A ninth expander, **Cached Infor Visual data**, at `Grid.Row="8"` in `OperationsCategoryPanel`, with a ninth `RowDefinition` and the row-inventory comment updated. |
+| `Strings/en-us/Resources.resw` | `Settings_CacheRefresh_Title`, `_Description`, `_Refresh`. |
+| `MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs` | Six new cases (see below). |
+
+**The gate is a strict subset of the service's authority.** `ServiceOperatorRoles.Approved` is
+`{Admin, Developer, Plant Manager, Setup Lead, Production Lead}`; the panel admits only the first three. So an operator
+this UI admits can never be refused by the service for its role — the failure mode a wider UI gate would have produced
+(a visible control that always answers `401`). The service still authorizes independently; the UI gate only decides who
+is shown the control.
+
+**Every failure path is reported, never thrown** (FR-025, SC-011): an absent service, an unconfigured client and a
+refusal all land in `CacheRefreshStatusMessage`, and the application keeps serving cached content. A successful cycle
+names any shape that did not refresh rather than reporting a bare success.
+
+**This does not make the app refresh its own cache.** FR-025 is intact: the on-host service still owns the schedule and
+the write. The panel asks that service to run one cycle early — the same request `POST /api/refresh` makes from the host.
+
+**The case-insensitive match is pinned.** `CanRequestCacheRefresh` compares with `OrdinalIgnoreCase`, the same way every
+other role gate in the file does, and one test asserts `plant manager` / `ADMIN` are admitted.
+
+**The XAML compiler requires `x:Name` on anything using `x:Load`.** Omitting it (the naming rule says add `x:Name` only
+when code references it) failed the build with `WMC0907: Element must have an x:Name attribute specified since it uses
+x:Load`. That is *why* every sibling panel carries one, and the ninth expander now does too.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64` | **Build succeeded, 0 Warning(s) 0 Error(s)** |
+| Full suite, no live store | **`Failed: 0, Passed: 738, Skipped: 15, Total: 753`** |
+| Full suite, live store | **`Failed: 0, Passed: 751, Skipped: 2, Total: 753`** |
+| Publish + run | self-contained artifact produced; published exe reached the **Sign in** window |
+
+The 753 total is the previous 747 plus these six cases. The two live-store skips remain the T153 guard.
+
+**A trap worth recording.** A first pass-1 run failed
+`StartupCoordinatorTests.RunAsync_WhenDatabaseConnectionStringIsMalformed_ReturnsBlockedAsync`, which looked like a
+regression. It was **the shell's own environment**: launching the app had exported `MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING`
+into the terminal session, and that variable overrides the malformed connection string the test sets on its options
+object, so startup routed to login instead of blocking. Clearing every `MTM_*` variable made all 16
+`StartupCoordinatorTests` pass. **Clear the connection-string variables before running the suite in a shell that has
+launched the app** — otherwise the result is not the suite's.
+
+### Not verified, and stated so it is not assumed
+
+- The panel's **rendered** state was not seen in a running app: reaching Settings needs a signed-in session, and no
+  credential was available. The gate, the command and the status text are covered by the six unit cases instead.
+- The published artifact was launched from `bin\publish\win-x64`. Nothing was **installed** into
+  `%LOCALAPPDATA%\Programs\MTM_Waitlist` on this machine — that folder is a client-workstation target, and this is the
+  cache host.
+- A pre-existing gap found while editing: `IsUrgencyAllotmentsPanelVisible` is missing from
+  `SettingsViewModel.RefreshSearchVisibility()`, so a search that should show or hide the Max Allotted Time panel does
+  not re-evaluate it. Not touched here (out of scope), but it is a one-line fix in the method this change edited.
+
+---
+
+## Phase 28 — the failing backups, root-caused and fixed (2026-09-12, `/speckit.implement`)
+
+Appended by `/speckit.implement`. T158 is now ticked, and T161 is filed for the same defect on the restore path.
+
+### What was wrong
+
+All four stores reported `lastOutcome: failed`, `artifactCount: 0`, `toolAvailable: true`, and every destination folder
+was empty. The runs that failed (01:00–02:00 local) were made by the **pre-T148(c) build**, which compiled its
+`StartupDebugLog` calls out of a Release publish, so the reason had never been recorded anywhere — the durable log
+only had the schedule lines, written by later builds.
+
+Reproduced directly. `BackupEngine` built the command line from `configuration.MySqlConnection`:
+
+```
+mysqldump --host=localhost --port=3306 --single-transaction --routines --databases mtm_waitlist --result-file=…
+→ mysqldump: Got error: 1045: Access denied for user 'ODBC'@'localhost' (using password: NO)   (exit 2)
+```
+
+Three things were wrong at once in that line: the host was the **shipped default `localhost`** rather than the real
+server, there was **no login**, and there was **no credentials file**. Meanwhile every other path in the service — the
+refresh, the shape metadata read, the mirror writer, the operator role lookup — resolves its connection through
+`MySqlConnectionStringResolver`, which prefers `MTM_WAITLIST_DB_CONNECTION_STRING` and friends. The engine was handed
+that very resolver and **never called it**; the field was assigned and unused, which is what made this look like an
+unfinished wiring rather than a design choice.
+
+### The fix
+
+| Artifact | Change |
+|---|---|
+| `Services/MySqlClientCredentials.cs` (**new**) | Produces the `--defaults-extra-file` argument for one client invocation: the operator's configured option file when there is one, otherwise a single-use file containing **only the password**, written into the service's own app-data root and deleted on `Dispose`. |
+| `Services/BackupEngine.cs` | Resolves the connection per store (through the store's own environment variable, then the shared fallback, exactly as a read of that store does); records `Failed` with the resolver's `NotConfiguredMessage` when nothing resolves, instead of dumping against defaults; and builds the command line from the resolved connection. `BuildArguments` became `internal static` so the command line can be asserted directly. |
+
+**The password still never touches a command line** (FR-026): it travels in an option file, which is what `mysqldump`
+requires. When the operator has provisioned `PasswordFilePath`, the service writes nothing at all; the generated file
+exists only for the duration of one invocation and carries nothing but the password — host, port and login travel as
+ordinary arguments, so even a file that somehow outlived its run would not name its server or its account.
+
+### Verified on the cache host
+
+| Store | Result | Artifact |
+|---|---|---|
+| `mtm_mock` | `succeeded` | 985,151 bytes |
+| `mtm_waitlist` | `succeeded` | 180,715 bytes |
+| `mtm_wip_application_winforms` | `succeeded` | 7,028,130 bytes |
+| `mtm_receiving_application` | `succeeded` | 3,674,283 bytes |
+
+`/api/status` reports `succeeded` and `artifactCount: 1` for all four. The dump header reads
+`-- Host: 172.16.1.104  Database: mtm_mock` / `-- Server version 5.7.24`, which is the resolved host and not the
+configured default — the fix in one line. It contains 10 `CREATE TABLE` statements and the routines, and the only
+`root` occurrences are the schema's own `CREATE DEFINER=`root`@`%`` clauses: **no connection credential is echoed**.
+No generated `.cnf` file is left behind.
+
+**Gates.** Build `0 Warning(s) 0 Error(s)`; full suite `Failed: 0, Passed: 742, Skipped: 15, Total: 757` (no store) and
+`Failed: 0, Passed: 755, Skipped: 2, Total: 757` (live store). The 757 is the previous 753 plus four new cases.
+
+### Two things worth knowing beyond the fix
+
+- **The `column-statistics` trap is not what bit.** `mysqldump` here is 8.0.46 against a 5.7.24 server, which is the
+  classic pairing that fails with `Unknown table 'COLUMN_STATISTICS'`. This build only *warns*
+  (`column statistics not supported by the server`) and completes, so no `--column-statistics=0` was added — and
+  deliberately so: that flag does not exist in a 5.7 client, so adding it unconditionally would break a host that has
+  the older tools installed. Worth remembering if a future host *does* fail on it.
+- **`RestoreService` has the identical defect (filed as T161).** Its `BuildConnectionArguments()` reads
+  `_configurationAccessor().MySqlConnection` the same way, so on this host a restore would connect to `localhost` with
+  no login and fail. It was **not** changed here: it is the most destructive path in the service, it has three call
+  sites, and its behaviour can only be exercised end to end against a throwaway store, so it deserves its own change
+  rather than riding along with this one.
+
+### How the new tests reach a real process
+
+Four cases were added. Two assert the command line directly through the now-internal `BuildArguments`; one asserts that
+nothing is dumped when no connection resolves. The fourth drives the **real engine against a real process** using a
+`cmd.exe` stand-in for `mysqldump` which answers `--version`, records its command line, and writes the dump.
+
+That stand-in cannot match `--result-file=…` as a flag-and-value pair, because **cmd.exe splits its batch parameters
+at `=` as well as at spaces**, so the two arrive as separate tokens. It therefore takes the *final* argument as the dump
+path, which is safe only because the engine appends `--result-file` last — a dependency on argument order, recorded in
+the fixture's comment, and a fair trade for exercising the real engine end to end.
+
+---
+
+## Phase 29 — T161 fixed, and the restore picker made explicit (2026-09-12, `/speckit.implement`)
+
+Appended by `/speckit.implement`. T161 is now ticked; the restore card gained a store picker of its own.
+
+### T161 — the restore path connected to the wrong server
+
+The operator's own attempt produced `Restore outcome: FailedDrop. Dropping and recreating 'mtm_waitlist' failed
+(exit 1)`, and the durable log named the cause exactly:
+
+```
+MySQL client 'mysql.exe' exited 1: ERROR 1045 (28000): Access denied for user 'ODBC'@'localhost' (using password: NO)
+```
+
+Two details in that sequence are worth keeping. The **safety snapshot succeeded** (180,715 bytes, recorded as a safety
+artifact) — because that runs through `BackupEngine`, which Phase 28 had already fixed — and only then did the replace
+step fail. So the operator was left with a recovery point and an unchanged store, which is the sequence working as
+designed: `FailedDrop` is reported, and nothing was lost.
+
+| Artifact | Change |
+|---|---|
+| `Services/RestoreService.cs` | Injects `MySqlConnectionStringResolver`; resolves the store's connection **before any destructive step** and reports "No MySQL connection is configured for '<store>', so nothing was changed." when it cannot; shares one `MySqlClientCredentials` file across the replace, reload and verify invocations; `BuildConnectionArguments`/`BuildReloadArguments` are now static and take the resolved connection. |
+| `Models/BackupStoreExtensions.cs` | New `ToConnectionStringEnvironmentVariable()`, so a store resolves its target the same way when read, backed up **and** restored. `BackupEngine`'s private copy of that mapping was removed in favour of it. |
+| `Services/ServiceHostBuilder.cs` | Passes the resolver to `RestoreService`. |
+
+**Verified without changing a single row.** The repair was exercised by invoking the real `mysql` client with exactly
+the arguments the fixed code builds — a generated credentials file plus the **resolved** host and login — streaming the
+deployed `verify_restore.sql` through stdin, which is precisely what the verify step does and what the other two steps
+share:
+
+```
+mysql --defaults-extra-file=<generated> --host=172.16.1.104 --port=3306 --user=root  < verify.sql
+→ table_count: 22   (exit 0)      # was: Access denied for user 'ODBC'@'localhost'
+```
+
+The whole replacement was deliberately **not** run: it drops and recreates a live operational store, and that is the
+operator's action to take with the confirmation dialog in front of them.
+
+### The restore card now has its own database picker
+
+The restore section had no store selector at all: it silently followed `SelectedBackupStore`, which lives in the
+**Backup now** card, and its own description said so (*"Only the backups taken for the store selected above are
+listed"*). Restoring to a different database therefore meant first changing a control in a different section.
+
+| Artifact | Change |
+|---|---|
+| `ViewModels/ServiceSettingsViewModel.cs` | New `SelectedRestoreStore` (+ `SelectedRestoreStoreName`), defaulting to `mtm_waitlist`; `LoadRestoreArtifacts()` reads it, and `OnSelectedRestoreStoreChanged` reloads the list. The backup picker no longer triggers a restore-list reload. |
+| `Views/ServiceSettingsPage.xaml` | A **Database to restore** picker above the artifact picker, with an `AutomationProperties.Name` so UI automation can find it. |
+| `Strings/en-us/Resources.resw` | `RestoreStoreLabel`, `RestoreStoreDescription`, and a corrected `RestorePickerDescription` (the old text pointed at a control "above" that no longer governs the list). |
+
+**Restoring is its own intent.** Letting the backup card pick the restore target was the actual defect in the UX: an
+operator may legitimately back up one store and restore another, and the two selections are now independent. A backup
+refreshes the restore list only when it was taken for the store currently being restored, which is the only case in
+which a row was added.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64` | **Build succeeded, 0 Warning(s) 0 Error(s)** |
+| Full suite, no live store | **`Failed: 0, Passed: 744, Skipped: 15, Total: 759`** |
+| Full suite, live store | **`Failed: 0, Passed: 757, Skipped: 2, Total: 759`** |
+| Service redeploy | **`DEPLOYMENT OK - 23 checks, 0 warning(s)`**, exit 0 |
+| Restore connection, against the live server | exit 0, `table_count = 22` (was `Access denied ...@localhost`) |
+
+The 759 is the previous 757 plus the two new picker cases. Those two assert the part that was actually wrong: choosing
+a store to **back up** must not move what is being **restored**, and the artifact list must follow the store picked in
+the restore card. Both needed a `BackupArtifactStore` seeded with one artifact per store, which the startup fixture now
+provides.
+
+### Still not done, and why
+
+- **The replacement itself has not been run end to end.** Every step is wired and the connection half is proven against
+the live server, but the drop/recreate/reload sequence replaces a live store. `mtm_mock` is the safe candidate if a
+full rehearsal is wanted — it is disposable and the refresh rebuilds it from Infor Visual — but it should be triggered
+deliberately rather than as a side effect of a test run.
+- **T151's signed-in remainder** is unchanged by this pass.

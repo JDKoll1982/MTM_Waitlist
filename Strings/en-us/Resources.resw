@@ -508,6 +508,15 @@
   <data name="Settings_IgnoredLocations_Remove.Content" xml:space="preserve">
     <value>Remove</value>
   </data>
+  <data name="Settings_CacheRefresh_Title.Text" xml:space="preserve">
+    <value>Cached Infor Visual data</value>
+  </data>
+  <data name="Settings_CacheRefresh_Description.Text" xml:space="preserve">
+    <value>Ask the cache service to rebuild the cached Infor Visual reads now instead of waiting for its next scheduled cycle. Plant Manager and above only. A workstation that is not pointed at the service is told so rather than failing.</value>
+  </data>
+  <data name="Settings_CacheRefresh_Refresh.Content" xml:space="preserve">
+    <value>Refresh cached data</value>
+  </data>
   <data name="AppNotificationSamplePayload" xml:space="preserve">
     <value>&lt;toast launch="action=ToastClick"&gt;
   &lt;visual&gt;
