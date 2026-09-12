@@ -15,13 +15,11 @@ public sealed class SetupPersistenceServiceTests
     [TestMethod]
     public async Task SaveAsync_WhenBackendWritesNoRows_ReturnsFailureAsync()
     {
-        // "Writes no rows" is a property of a store that cannot answer. Checked before the call: on a host
-        // where the save succeeds it writes real rows into mtm_waitlist and then fails the assertion below
-        // (see ProductionBackendAvailability).
-        ProductionBackendAvailability.SkipWhenConfigured();
-
+        // "Writes no rows" is what the store reports when its procedure affects nothing. Driven by a stub so the
+        // premise is deterministic and the test can never write to a live store (T155): the previous version
+        // stood up the real helper server and relied on there being no store behind it.
         var activeJobCoordinator = new FakeActiveJobCoordinatorService(hasActiveJob: false);
-        var mySqlHelperServer = new MySqlHelperServer();
+        var mySqlHelperServer = new StubMySqlHelperServer(affectedRows: 0);
         var service = new SetupPersistenceService(activeJobCoordinator, mySqlHelperServer);
 
         var request = CreateRequest();
@@ -31,13 +29,15 @@ public sealed class SetupPersistenceServiceTests
         Assert.IsFalse(result.RequiresReplacementConfirmation);
         Assert.IsTrue(result.Message.Contains("no rows", StringComparison.OrdinalIgnoreCase));
         Assert.AreEqual(0, activeJobCoordinator.RegisterCalls);
+        // The failure came from the store's own save procedure, on the application store (FR-001).
+        CollectionAssert.Contains(mySqlHelperServer.NonQueryProcedures, "sp_setup_save_setup");
     }
 
     [TestMethod]
     public async Task SaveAsync_WhenActiveJobExistsWithoutForce_ReturnsReplacementPromptAsync()
     {
         var activeJobCoordinator = new FakeActiveJobCoordinatorService(hasActiveJob: true);
-        var mySqlHelperServer = new MySqlHelperServer();
+        var mySqlHelperServer = new StubMySqlHelperServer(affectedRows: 1);
         var service = new SetupPersistenceService(activeJobCoordinator, mySqlHelperServer);
 
         var request = CreateRequest();
@@ -46,6 +46,8 @@ public sealed class SetupPersistenceServiceTests
         Assert.IsFalse(result.Success);
         Assert.IsTrue(result.RequiresReplacementConfirmation);
         Assert.AreEqual(0, activeJobCoordinator.RegisterCalls);
+        // The prompt is asked before anything is written, so no store is touched at all.
+        Assert.AreEqual(0, mySqlHelperServer.NonQueryProcedures.Count);
     }
 
     private static SetupSaveRequest CreateRequest()
@@ -80,6 +82,52 @@ public sealed class SetupPersistenceServiceTests
             RegisterCalls++;
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class StubMySqlHelperServer : IMySqlHelperServer
+    {
+        private static readonly IReadOnlyList<Dictionary<string, object?>> s_noRows =
+            Array.Empty<Dictionary<string, object?>>();
+
+        private readonly int _affectedRows;
+
+        public StubMySqlHelperServer(int affectedRows)
+        {
+            _affectedRows = affectedRows;
+        }
+
+        public List<string> NonQueryProcedures { get; } = new();
+
+        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
+            string storedProcedureName,
+            IReadOnlyDictionary<string, object?> parameters,
+            MySqlDatabaseTarget databaseTarget,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult(s_noRows);
+
+        public Task<int> ExecuteStoredProcedureNonQueryAsync(
+            string storedProcedureName,
+            IReadOnlyDictionary<string, object?> parameters,
+            MySqlDatabaseTarget databaseTarget,
+            CancellationToken cancellationToken = default)
+        {
+            NonQueryProcedures.Add(storedProcedureName);
+            return Task.FromResult(_affectedRows);
+        }
+
+        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
+            string sql,
+            IReadOnlyDictionary<string, object?> parameters,
+            MySqlDatabaseTarget databaseTarget,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult(s_noRows);
+
+        public Task<int> ExecuteSqlNonQueryAsync(
+            string sql,
+            IReadOnlyDictionary<string, object?> parameters,
+            MySqlDatabaseTarget databaseTarget,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult(0);
     }
 
     private sealed class InMemoryLocalSettingsService : ILocalSettingsService

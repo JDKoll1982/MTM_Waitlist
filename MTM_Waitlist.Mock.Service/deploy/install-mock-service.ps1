@@ -258,6 +258,59 @@ else {
 }
 
 # ---------------------------------------------------------------------------------------------
+# 3b. Upgrade step (T156): drop retired shared-credential material
+# ---------------------------------------------------------------------------------------------
+# T147 retired the shared API credential, but an install that ran a pre-T147 build still carries the DPAPI
+# blob it wrote. The service strips it on load; this also cleans the file — and any backup copy of it — for
+# an install that is never re-saved, so the secret cannot outlive the feature that owned it.
+if (-not $PurgeState) {
+    $configName = 'service-configuration.json'
+    $retiredNames = @('CredentialProtected', 'CredentialCreatedUtc', 'Credential')
+    $scrubbed = @()
+
+    $candidates = @()
+    if (Test-Path $stateRoot) {
+        $candidates = @(Get-ChildItem -Path $stateRoot -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like "$configName*" })
+    }
+
+    foreach ($candidate in $candidates) {
+        $json = $null
+        try {
+            $json = Get-Content -LiteralPath $candidate.FullName -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        }
+        catch {
+            # Unparseable: leave it alone. The service's own load path also declines to rewrite a file it
+            # cannot read, so malformed content stays visible as the clue it is.
+            continue
+        }
+
+        if ($null -eq $json -or $null -eq $json.Api) { continue }
+
+        $hit = $false
+        foreach ($name in $retiredNames) {
+            $property = $json.Api.PSObject.Properties | Where-Object { $_.Name -eq $name }
+            if ($property) {
+                $json.Api.PSObject.Properties.Remove($property.Name)
+                $hit = $true
+            }
+        }
+
+        if ($hit) {
+            [System.IO.File]::WriteAllText($candidate.FullName, ($json | ConvertTo-Json -Depth 12))
+            $scrubbed += $candidate.Name
+        }
+    }
+
+    if ($scrubbed.Count -gt 0) {
+        Add-Result 'purge retired credential' 'PASS' ("removed from: " + ($scrubbed -join ', '))
+    }
+    else {
+        Add-Result 'purge retired credential' 'PASS' 'no retired credential material found'
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
 # 4. Publish and copy
 # ---------------------------------------------------------------------------------------------
 Write-Host ''

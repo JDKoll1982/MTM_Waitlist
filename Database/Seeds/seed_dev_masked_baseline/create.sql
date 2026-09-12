@@ -63,6 +63,13 @@ VALUES (
         'Developer',
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'admin',
+        'Admin',
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
     )
 ON DUPLICATE KEY UPDATE
     role_name = VALUES(role_name),
@@ -156,7 +163,20 @@ VALUES (
         1,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
-    )
+    ),
+    -- One masked account per user type (T157), so every service-operator authorization branch can be
+    -- exercised against a real store instead of only the tests' stub resolver. The credential is the
+    -- placeholder the accounts above use, so none of these can log in; the operator-role lookup the
+    -- service performs needs identity and role only (`sp_auth_user_row_get`).
+    (UUID(), 'test.admin', '0000', NULL, 1, 'Test Admin', '9001', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.developer', '0000', NULL, 1, 'Test Developer', '9002', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.plant.manager', '0000', NULL, 1, 'Test Plant Manager', '9003', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.setup.lead', '0000', NULL, 1, 'Test Setup Lead', '9004', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.production.lead', '0000', NULL, 1, 'Test Production Lead', '9005', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    -- Deliberately NOT approved operator roles: these are the accounts that prove the refusal branch.
+    (UUID(), 'test.setup', '0000', NULL, 1, 'Test Setup', '9006', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.production', '0000', NULL, 1, 'Test Production', '9007', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.material.handler', '0000', NULL, 1, 'Test Material Handler', '9008', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP())
 ON DUPLICATE KEY UPDATE
     password_hash = VALUES(password_hash),
     password_salt = VALUES(password_salt),
@@ -178,9 +198,32 @@ INSERT INTO
 SELECT UUID(), users.id, roles.id, UTC_TIMESTAMP(), users.id
 FROM
     core_users_profiles users
-    INNER JOIN auth_roles_catalog roles ON roles.role_code = 'developer'
+    INNER JOIN auth_roles_catalog roles
+        ON roles.role_code = CASE users.username_normalized
+            WHEN 'johnk' THEN 'developer'
+            WHEN 'jkoll' THEN 'developer'
+            WHEN 'test.admin' THEN 'admin'
+            WHEN 'test.developer' THEN 'developer'
+            WHEN 'test.plant.manager' THEN 'plant_manager'
+            WHEN 'test.setup.lead' THEN 'setup_lead'
+            WHEN 'test.production.lead' THEN 'production_lead'
+            WHEN 'test.setup' THEN 'setup'
+            WHEN 'test.production' THEN 'production'
+            WHEN 'test.material.handler' THEN 'material_handler'
+        END
 WHERE
-    users.username_normalized IN ('johnk', 'jkoll')
+    users.username_normalized IN (
+        'johnk',
+        'jkoll',
+        'test.admin',
+        'test.developer',
+        'test.plant.manager',
+        'test.setup.lead',
+        'test.production.lead',
+        'test.setup',
+        'test.production',
+        'test.material.handler'
+    )
 ON DUPLICATE KEY UPDATE
     assigned_utc = VALUES(assigned_utc),
     assigned_by_user_id = VALUES(assigned_by_user_id);

@@ -96,18 +96,19 @@ $env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING = $env:MTM_WAITLIST_DB_CONNECTION_ST
 dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1
 ```
 
-**Expect** `Failed: 0, Skipped: 2` — **not** `Skipped: 0`. The two skips are
-`WaitlistRequestServiceTests.SubmitAsync_ReturnsPersistenceFailureWhenProductionBackendIsUnavailableAsync` and
-`SetupPersistenceServiceTests.SaveAsync_WhenBackendWritesNoRows_ReturnsFailureAsync`: both assert the *failure* path
-of the real backend, so with a live store configured they report inconclusive rather than fail **and write rows into
-`mtm_waitlist`** (fixed 2026-09-12; see `ProductionBackendAvailability`). Report the two totals separately.
+**Expect** `Failed: 0, Skipped: 0`. The two previously-skipped premise tests
+(`WaitlistRequestServiceTests.SubmitAsync_WhenTheInsertAffectsNoRows_ReturnsPersistenceFailureAsync` and
+`SetupPersistenceServiceTests.SaveAsync_WhenBackendWritesNoRows_ReturnsFailureAsync`) now drive a stub whose
+non-query affects **0 rows**, so they exercise the same failure branch deterministically, run on any host, and can no
+longer write rows into `mtm_waitlist`. The old `ProductionBackendAvailability` guard is deleted — see `tasks.md`
+Phase 31 — so nothing is inconclusive for environment reasons. Report the two totals separately.
 
 The new/updated tests that specifically cover the changes:
 
 | Test | What it proves |
 |---|---|
 | `Module_Mock_Service/ServiceApiTests.cs` | no operator name → `401`; a real user with a non-approved role → `401`; an unknown user name → `401`; an approved operator gets `200` and the payload carries `operatorRoles` and no connection secret; `/api/restore` is `404` |
-| `Module_Mock_Service/ServiceConfigurationStoreTests.cs` | the configuration file persists no `credential`/`password` field and `ApiSettings` has no `Credential` property |
+| `Module_Mock_Service/ServiceConfigurationStoreTests.cs` | the configuration file persists no `credential`/`password` field and `ApiSettings` has no `Credential` property; and a file that still carries a pre-T147 `CredentialProtected`/`CredentialCreatedUtc` blob has it **removed on load**, leaving the operator's settings intact and no `.tmp` behind |
 | `Module_Mock_Service/ServiceLogTests.cs` | the daily file is created and appended to, the line carries level/area/message/timestamp, an error keeps the exception text, an unusable directory does not throw, and the `ILoggerProvider` routes container messages into it |
 | `Module_Mock/Module_Mock/MockServiceRefreshClientTests.cs` | the client posts `X-MTM-Mock-User`, and an unconfigured endpoint/user name degrades to a reported outcome without calling the service |
 
@@ -130,7 +131,7 @@ cd MTM_Waitlist.Mock.Service\deploy
 .\install-mock-service.ps1 -Publish
 ```
 
-**Expect** `DEPLOYMENT OK — 23 checks, 0 warning(s)` and exit code `0`. Do **not** pass `-AllowNonServerHost`, and do
+**Expect** `DEPLOYMENT OK — 24 checks, 0 warning(s)` and exit code `0`. Do **not** pass `-AllowNonServerHost`, and do
 not hand-roll the steps. The script publishes, stops the running instance, deletes the old install folder, redeploys,
 sets and proves the four secrets, starts the service, and health-checks it. One of its checks is now labelled
 **`API refuses an unnamed caller`** — it must report `PASS` (`GET /api/status -> 401`).

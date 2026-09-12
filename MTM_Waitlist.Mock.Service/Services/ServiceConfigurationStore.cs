@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.Models;
@@ -42,6 +43,18 @@ public sealed class ServiceConfigurationStore
         Converters = { new JsonStringEnumConverter() }
     };
 
+    /// <summary>
+    /// Properties of the retired shared-credential feature (T147). An install that ran a pre-T147 build still
+    /// carries the DPAPI blob this build can no longer use, and nothing rewrites the file unless an operator
+    /// saves — so the secret would otherwise outlive the feature that owned it (T156).
+    /// </summary>
+    private static readonly string[] s_retiredApiProperties =
+    [
+        "CredentialProtected",
+        "CredentialCreatedUtc",
+        "Credential",
+    ];
+
     private readonly string _appDataRoot;
     private readonly string _configurationFilePath;
 
@@ -82,6 +95,15 @@ public sealed class ServiceConfigurationStore
             return _current;
         }
 
+        // Upgrade step (T156): strip any retired credential material before the configuration is read, so a blob
+        // written by a pre-T147 build cannot survive on this host. The rewrite is atomic, like every other save.
+        if (TryDropRetiredCredentialProperties())
+        {
+            ServiceLog.Info(
+                "ServiceConfiguration",
+                $"Removed retired credential material from '{_configurationFilePath}'.");
+        }
+
         await using var stream = File.OpenRead(_configurationFilePath);
         var dto = await JsonSerializer
             .DeserializeAsync<ServiceConfigurationFile>(stream, s_jsonOptions, cancellationToken)
@@ -90,6 +112,57 @@ public sealed class ServiceConfigurationStore
         _current = dto?.ToConfiguration(_appDataRoot) ?? ServiceConfiguration.CreateDefault(_appDataRoot);
 
         return _current;
+    }
+
+    /// <summary>
+    /// Removes credential-shaped properties from the <c>Api</c> block of the persisted file, if present.
+    /// </summary>
+    /// <returns><see langword="true"/> when the file was rewritten; <see langword="false"/> when it was clean.</returns>
+    /// <remarks>
+    /// Matching is case-insensitive because the file is plain JSON an operator can edit by hand; the property
+    /// names this type writes are PascalCase. A file that cannot be parsed is left untouched — the load path
+    /// already falls back to defaults for an unreadable configuration, and silently rewriting malformed content
+    /// would destroy the operator's evidence of what went wrong.
+    /// </remarks>
+    private bool TryDropRetiredCredentialProperties()
+    {
+        JsonObject? root;
+
+        try
+        {
+            root = JsonNode.Parse(File.ReadAllText(_configurationFilePath)) as JsonObject;
+        }
+        catch (Exception exception) when (exception is JsonException or IOException or UnauthorizedAccessException)
+        {
+            return false;
+        }
+
+        if (root is null || root["Api"] is not JsonObject api)
+        {
+            return false;
+        }
+
+        var removed = false;
+        foreach (var retired in s_retiredApiProperties)
+        {
+            var match = api.Select(pair => pair.Key)
+                .FirstOrDefault(key => string.Equals(key, retired, StringComparison.OrdinalIgnoreCase));
+
+            if (match is not null && api.Remove(match))
+            {
+                removed = true;
+            }
+        }
+
+        if (!removed)
+        {
+            return false;
+        }
+
+        var temporaryPath = _configurationFilePath + ".tmp";
+        File.WriteAllText(temporaryPath, root.ToJsonString(s_jsonOptions));
+        File.Move(temporaryPath, _configurationFilePath, overwrite: true);
+        return true;
     }
 
     /// <summary>

@@ -1,3 +1,4 @@
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
@@ -12,7 +13,7 @@ namespace MTM_Waitlist.Module_Setup.Services;
 public sealed class SetupPersistenceService : ISetupPersistenceService
 {
     private readonly IActiveJobCoordinatorService _activeJobCoordinatorService;
-    private readonly MySqlHelperServer _mySqlHelperServer;
+    private readonly IMySqlHelperServer _mySqlHelperServer;
 
     private static string LocalizeOrDefault(string key, string fallback)
     {
@@ -40,7 +41,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
         return string.Equals(localized, key, StringComparison.Ordinal) ? fallback : localized;
     }
 
-    public SetupPersistenceService(IActiveJobCoordinatorService activeJobCoordinatorService, MySqlHelperServer mySqlHelperServer)
+    public SetupPersistenceService(IActiveJobCoordinatorService activeJobCoordinatorService, IMySqlHelperServer mySqlHelperServer)
     {
         _activeJobCoordinatorService = activeJobCoordinatorService;
         _mySqlHelperServer = mySqlHelperServer;

@@ -22,11 +22,11 @@ file is the itemised breakdown. Duplicating it would create a divergent third co
 
 ## 1. Live open work — `specs/001-module-mock-visual-fallback/tasks.md`
 
-**161 boxes: 156 `[x]`, 5 `[ ]`.** Five tasks in the active feature are not done: **T106** and **T151** (see §1.1 and
-§1.5) and the residuals of the 2026-09-12 host run, **T155-T157** (§1.6).
-T144, T147 and T148 were all resolved on 2026-09-12 (see §1.2–§1.4); T150 was implemented and T151 (its
-verification counterpart) added the same day (see §1.5). T159 and T160 were resolved the same day, and
-**T158 — the failing backups — and T161 — the restore that connected to the wrong server — are both fixed** (§1.6).
+**163 boxes: 161 `[x]`, 2 `[ ]`** (re-counted from the file after this pass). Two tasks in the active feature are not
+done — **T106** and **T151** (§1.1, §1.5), both environment-gated verifications. T144, T147 and T148 were resolved on
+2026-09-12 (§1.2–§1.4); T150 was implemented and T151 (its verification counterpart) added the same day (§1.5).
+T159 and T160 were resolved the same day, **T158 — the failing backups — and T161 — the restore that connected to the
+wrong server — are fixed**, and **T155, T156 and T157 are now closed too** (§1.6).
 
 | ID | Severity | Summary | Blocker / decision needed |
 | --- | --- | --- | --- |
@@ -176,14 +176,14 @@ shared host and was **not** done in this run.
 ### 1.6 Residuals of the host run, and the app deployment gaps (T155-T160)
 
 Full detail: `specs/001-module-mock-visual-fallback/tasks.md` **Phase 25** (the host run and the three defects it
-exposed and fixed — filed as T152-T154) and **Phase 26** (the cross-machine reconciliation, the suite gates and the
-redeployment of both artifacts).
+exposed and fixed — filed as T152-T154), **Phase 26** (the cross-machine reconciliation, the suite gates and the
+redeployment of both artifacts) and **Phase 31** (T155-T157).
 
 | ID | Severity | What it is |
 | --- | --- | --- |
-| **T155** | MEDIUM | `ProductionBackendAvailability` detects only the two `MTM_WAITLIST_*_CONNECTION_STRING` variables, while `MySqlHelperServer` also falls back to `StartupDatabaseOptions.ConnectionString`. Extend the guard, or convert the two tests to `StubMySqlHelperServer`. |
-| **T156** | MEDIUM | The retired DPAPI credential blob was purged **by hand on this host only**. Any other install that ran a pre-T147 build still carries `Api.CredentialProtected` in its `service-configuration.json`, and neither the deploy script nor the service removes it. |
-| **T157** | LOW | No real account holds a non-approved role (this store has two users, both `Developer`), so the *unapproved role* refusal branch is exercised only by the tests' stub resolver. |
+| ~~T155~~ | ~~MEDIUM~~ | **RESOLVED 2026-09-12.** Not widened but **replaced**: the guard asked about the environment, so the two tests now drive a stub whose non-query affects **0 rows** — the exact branch that produces the failure they assert. `SetupPersistenceService` was moved onto `IMySqlHelperServer` to allow it, and `ProductionBackendAvailability.cs` was **deleted**. The task's stated blind spot turned out not to exist: both tests built the helper server with no options, so the `appsettings.json` fallback was never in play. See `tasks.md` Phase 31. |
+| ~~T156~~ | ~~MEDIUM~~ | **RESOLVED 2026-09-12 (validated).** Dropped at **load time** by `ServiceConfigurationStore.TryDropRetiredCredentialProperties()` — covering an install that is never re-saved — **and** scrubbed from the live file and every backup copy of it by a new `purge retired credential` check in `install-mock-service.ps1` (deployment is now 24 checks). See `tasks.md` Phase 31. |
+| ~~T157~~ | ~~LOW~~ | **RESOLVED 2026-09-12.** Seeded one account per user type as asked: eight `test.*` accounts in `seed_dev_masked_baseline` — five holding **approved** operator roles and three (`test.setup`, `test.production`, `test.material.handler`) deliberately **not** approved, so the refusal branch is reachable against a real store. The catalog also gained the `admin` role. No seeded account can log in (the `'0000'` placeholder, unchanged from the existing accounts). See `tasks.md` Phase 31. |
 | ~~T158~~ | ~~LOW~~ | **RESOLVED 2026-09-12.** All four backup stores failed because `BackupEngine` built the `mysqldump` command line from the raw settings — `localhost`, no login, no credentials file — instead of the resolver it was already being handed and never used. All four stores now dump successfully on the cache host (180 KB / 7.0 MB / 3.7 MB / 985 KB). See `tasks.md` Phase 28. |
 | ~~T161~~ | ~~MEDIUM~~ | **RESOLVED 2026-09-12.** `RestoreService` had the same defect T158 fixed in `BackupEngine`, so a restore connected to `localhost` with no login and failed with `Access denied for user 'ODBC'@'localhost'` — after its safety snapshot had succeeded. It now resolves the connection per store and shares one credentials file across its three invocations. The restore card also gained its **own database picker**, so the database to restore no longer has to be chosen in the backup card. See `tasks.md` Phase 29. |
 | ~~T159~~ | ~~MEDIUM~~ | **RESOLVED 2026-09-12.** The app now has a publish profile (`Properties/PublishProfiles/win-x64-selfcontained.pubxml`) and a documented deploy step. Operator decision: **self-contained**, into the per-user folder `%LOCALAPPDATA%\Programs\MTM_Waitlist`. Verified: 662 files / 243.5 MB with `hostfxr.dll` + `coreclr.dll` present, and the published exe reached the Sign in window. See `tasks.md` Phase 27. |

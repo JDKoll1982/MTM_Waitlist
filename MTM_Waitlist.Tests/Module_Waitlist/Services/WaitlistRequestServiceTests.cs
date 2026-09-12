@@ -169,14 +169,13 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task SubmitAsync_ReturnsPersistenceFailureWhenProductionBackendIsUnavailableAsync()
+    public async Task SubmitAsync_WhenTheInsertAffectsNoRows_ReturnsPersistenceFailureAsync()
     {
-        // This test asserts the failure path of the real production helper server, so its premise is that no
-        // store answers. Checked before the call: on a host where one does answer, the submission succeeds and
-        // the assertion below would fail on a row it had just written (see ProductionBackendAvailability).
-        ProductionBackendAvailability.SkipWhenConfigured();
-
-        var mySqlHelperServer = new MySqlHelperServer();
+        // The production route reports "not configured or failed" when sp_waitlist_request_insert affects no
+        // rows, which is the same branch a store that cannot answer takes. Driven by a stub so the premise is
+        // deterministic: the previous version stood up the real helper server and, on a host with a configured
+        // connection, both failed the assertion and wrote rows into the operational store (T153/T155).
+        var mySqlHelperServer = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>(), affectedRows: 0);
         var service = new WaitlistRequestService(mySqlHelperServer);
 
         var result = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
@@ -298,14 +297,16 @@ public sealed class WaitlistRequestServiceTests
     private sealed class StubMySqlHelperServer : IMySqlHelperServer
     {
         private readonly IReadOnlyList<Dictionary<string, object?>> _rows;
+        private readonly int _affectedRows;
 
         public int QueryCallCount { get; private set; }
 
         public List<string> NonQueryProcedures { get; } = new();
 
-        public StubMySqlHelperServer(IReadOnlyList<Dictionary<string, object?>> rows)
+        public StubMySqlHelperServer(IReadOnlyList<Dictionary<string, object?>> rows, int affectedRows = 1)
         {
             _rows = rows;
+            _affectedRows = affectedRows;
         }
 
         public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
@@ -325,7 +326,7 @@ public sealed class WaitlistRequestServiceTests
             CancellationToken cancellationToken = default)
         {
             NonQueryProcedures.Add(storedProcedureName);
-            return Task.FromResult(1);
+            return Task.FromResult(_affectedRows);
         }
 
         public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(

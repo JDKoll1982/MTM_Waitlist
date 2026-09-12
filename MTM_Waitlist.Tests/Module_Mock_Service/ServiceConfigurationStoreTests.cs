@@ -95,6 +95,42 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
+    public async Task LoadAsync_WhenARetiredCredentialBlobIsPresent_DropsItFromTheFile()
+    {
+        // An install that ran a pre-T147 build still carries the DPAPI blob, and nothing rewrites the file
+        // unless an operator saves — so the load path has to remove it (T156).
+        var store = new ServiceConfigurationStore(_appDataRoot);
+        await store.LoadAsync();
+
+        var current = await File.ReadAllTextAsync(store.ConfigurationFilePath);
+        var withBlob = current.Replace(
+            "\"Api\": {",
+            "\"Api\": {\n    \"CredentialProtected\": \"AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA\",\n    \"CredentialCreatedUtc\": \"2026-09-11T07:00:00Z\",",
+            StringComparison.Ordinal);
+
+        Assert.IsTrue(
+            withBlob.Contains("CredentialProtected", StringComparison.Ordinal),
+            "The fixture must actually inject the retired property, or the test proves nothing.");
+        await File.WriteAllTextAsync(store.ConfigurationFilePath, withBlob);
+
+        var reloaded = await new ServiceConfigurationStore(_appDataRoot).LoadAsync();
+
+        var afterLoad = await File.ReadAllTextAsync(store.ConfigurationFilePath);
+        Assert.IsFalse(
+            afterLoad.Contains("CredentialProtected", StringComparison.OrdinalIgnoreCase),
+            "A blob written by a pre-T147 build must not survive the upgrade load.");
+        Assert.IsFalse(afterLoad.Contains("CredentialCreatedUtc", StringComparison.OrdinalIgnoreCase));
+        Assert.AreEqual(
+            TimeSpan.FromMinutes(180),
+            reloaded.RefreshInterval,
+            "Dropping the retired blob must not disturb the operator's settings.");
+        Assert.AreEqual(
+            0,
+            Directory.GetFiles(_appDataRoot, "*.tmp").Length,
+            "The upgrade rewrite must be atomic, like every other save.");
+    }
+
+    [TestMethod]
     public void ApiSettings_ExposesNoCredentialProperty()
     {
         Assert.IsNull(

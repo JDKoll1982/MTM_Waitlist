@@ -2459,18 +2459,17 @@ exists** (T147 retired it) and the **real refresh cycle has now run**.
 
 ### Still open
 
-- [ ] T155 (MEDIUM) `ProductionBackendAvailability` detects only the two `MTM_WAITLIST_*_CONNECTION_STRING` variables,
+- [x] T155 (**FIXED 2026-09-12** — see Phase 31) `ProductionBackendAvailability` detects only the two `MTM_WAITLIST_*_CONNECTION_STRING` variables,
   while `MySqlHelperServer` also falls back to `StartupDatabaseOptions.ConnectionString` from `appsettings.json`. A host
   whose configuration points at a reachable store **without** any environment variable would still fail and write.
   Either extend the guard to probe the resolved connection, or convert the two tests to `StubMySqlHelperServer`.
-- [ ] T156 (MEDIUM) The retired-credential purge was manual and host-specific. Any other install that ran a pre-T147
+- [x] T156 (**FIXED 2026-09-12** — see Phase 31; validated) The retired-credential purge was manual and host-specific. Any other install that ran a pre-T147
   build still carries `Api.CredentialProtected` in its `service-configuration.json`, and neither the deploy script nor
-  the service removes it. Add an upgrade step (or a load-time drop) so the blob cannot outlive the feature it belonged
-  to. Also purge the same field wherever a pre-T147 configuration has been backed up. - validate completion
-- [ ] T157 (LOW) No real account holds a non-approved role: `core_users_profiles` has two users, both `Developer`, so
+  the service removes it. Now dropped at **load time** by `ServiceConfigurationStore` and scrubbed from the file (and
+  every backup copy of it) by `install-mock-service.ps1`.
+- [x] T157 (**DONE 2026-09-12** — see Phase 31; "seed a test role for each user type") No real account holds a non-approved role: `core_users_profiles` has two users, both `Developer`, so
   the *unapproved role* refusal branch is exercised only by `ServiceApiTests`' stub resolver — the host check could not
-  reach it. (`Admin` is additionally in `ServiceOperatorRoles.Approved` but absent from `auth_roles_catalog`.) Seed a
-  shop-floor account, or record the acceptance. - Seed a test role for each user type
+  reach it. (`Admin` is additionally in `ServiceOperatorRoles.Approved` but absent from `auth_roles_catalog`.)
 - [x] T158 (**FIXED 2026-09-12** — see Phase 28) All four backup stores reported `lastOutcome: failed` with
   `toolAvailable: true` and no artifact on disk. Root cause: `BackupEngine` built the `mysqldump` command line from the
   raw `MySqlConnectionSettings` — `localhost`, an empty login, no password file — instead of from the
@@ -2903,3 +2902,87 @@ Phase 24's heading and its "Accepted consequence" paragraph state that the appli
 form". That is now true **of the key sent** and false of the operator's input. The open-order table in Phase 24 stands:
 the `M` family is still not addressable, because an operator typing `100089` normalizes to `WO-100089`, which the live
 read matches only against a `W`-family `BASE_ID`.
+
+---
+
+## Phase 31 — T155, T156 and T157 closed (2026-09-12, `/speckit.implement`)
+
+> Appended by `/speckit.implement`. T155 and T156 are ticked; T157's definition is added below. No earlier task ID or
+> phase text was modified.
+
+### T155 — the premise guard was removed, not widened
+
+The task offered two routes: extend `ProductionBackendAvailability` to probe the resolved connection, or convert the
+two tests to a stub. **The second was taken, because the first would not have helped.** Reading `MySqlHelperServer`
+settles it: for `MySqlDatabaseTarget.MtmWaitlist` the only inputs are the two `MTM_WAITLIST_*_CONNECTION_STRING`
+environment variables and `_startupDatabaseOptions.ConnectionString` — and both premise-dependent tests construct
+`new MySqlHelperServer()` with **no options**, so that options value is the class default, `string.Empty`. The
+`appsettings.json` fallback the task describes therefore never reaches these two tests at all: the guard was already
+covering every input they consult. The fragility was that they observed an **environment** instead of a **behaviour**,
+and the environment differs between the workstation and the host.
+
+| Artifact | Change |
+|---|---|
+| `MTM_Waitlist.Setup/Services/SetupPersistenceService.cs` | Depends on `IMySqlHelperServer` — the seam every other consumer already uses — instead of the sealed `MySqlHelperServer`, which is what made it untestable without a store. DI already registers the interface over the concrete instance. |
+| `MTM_Waitlist.Tests/Module_Setup/Services/SetupPersistenceServiceTests.cs` | Both tests drive a stub whose non-query returns **0 affected rows** — exactly the `affectedRows <= 0` branch that produces "no rows were written to setup_active_jobs". The replacement-prompt test now also asserts that **nothing** was written. |
+| `MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs` | Renamed to `SubmitAsync_WhenTheInsertAffectsNoRows_ReturnsPersistenceFailureAsync` and driven by the same 0-row stub, which is the documented cause of the message it asserts. The file's stub gained an `affectedRows` parameter (default 1, so its other tests are unchanged). |
+| `MTM_Waitlist.Tests/ProductionBackendAvailability.cs` | **Deleted.** No test consults the environment any more, so neither the guard nor its blind spot exists. |
+
+**This removes the write hazard rather than reporting it.** The old tests could not merely fail on a configured host —
+they *wrote to the operational store* and then failed. A stub cannot.
+
+### T156 — the retired credential blob can no longer outlive its feature
+
+T147 deleted the shared credential, but purging the blob from the host's `service-configuration.json` was done by hand,
+and the store only rewrites that file when an operator saves — so an install that ran a pre-T147 build and was never
+re-saved would keep the DPAPI blob indefinitely. Two layers now remove it:
+
+| Artifact | Change |
+|---|---|
+| `MTM_Waitlist.Mock.Service/Services/ServiceConfigurationStore.cs` | `LoadAsync` calls a new `TryDropRetiredCredentialProperties()` before deserializing: it parses the file, removes `CredentialProtected`, `CredentialCreatedUtc` and `Credential` (case-insensitively, since the file is operator-editable JSON) from the `Api` block, and rewrites it with the same atomic temp-then-move swap every save uses. A file that cannot be parsed is left untouched — malformed content is itself the clue, and the load path already falls back to defaults for it. |
+| `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` | New check **`purge retired credential`**: over every `service-configuration.json*` under the state root — the live file *and* any backup copy — it removes the same three properties; a parse failure is skipped, never rewritten. Deployment is now **24 checks**. |
+
+**Verified:** `ServiceConfigurationStoreTests` → **10/10**, including a new test that injects
+`CredentialProtected`/`CredentialCreatedUtc` into a real configuration file, loads it, and asserts the properties are
+gone from disk, the operator's settings survived, and no `.tmp` was left behind. The deploy script parses with **0
+syntax errors** (PowerShell AST parse); it is deliberately not executed here, because it refuses to run off the host.
+
+### T157 — one seeded account per user type
+
+T157 above is ticked by this pass: the seed now covers every user type, so the *unapproved role* refusal branch is
+reachable against a real store instead of only through the tests' stub resolver.
+
+`Database/Seeds/seed_dev_masked_baseline` now seeds eight `test.*` accounts — `test.admin`, `test.developer`,
+`test.plant.manager`, `test.setup.lead` and `test.production.lead` (all **approved** operator roles), plus
+`test.setup`, `test.production` and `test.material.handler` (deliberately **not** approved, i.e. the refusal branch).
+The roles catalog also gained the `admin` role, which `ServiceOperatorRoles.Approved` lists but the seed never defined.
+The single role-assignment statement became a `CASE`-mapped select so each account receives its own role.
+
+**Every seeded credential is the `'0000'` placeholder the existing accounts use, so none of these can log in.** That is
+sufficient for T157 because `sp_auth_user_row_get` — the read the service authorizes with — returns identity and role
+only and never touches the credential columns. `rollback.sql` removes the accounts, their assignments and the `admin`
+role. `AllSeeds.sql` was updated in lockstep; the two files are line-for-line identical over the changed region.
+
+**Not verified:** the seed was not applied to a live database from this workstation. It mirrors the statements already
+in the same file, and `install_local_database.vbs` applies it on the next run.
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `SetupPersistenceServiceTests` + `WaitlistRequestServiceTests` | **64 passed / 0 failed** |
+| `ServiceConfigurationStoreTests` | **10 passed / 0 failed** |
+| Full suite | **`Failed: 0, Passed: 742, Skipped: 19, Total: 761`** |
+| `install-mock-service.ps1` syntax | **0 parse errors** |
+
+The 761 is the previous 760 plus the new configuration-store test. The skip count is unchanged at 19 on this
+workstation, where no connection is configured; the deleted guard used to add 2 *inconclusive* results on a configured
+host, and that becomes 0 — `Assert.Inconclusive` counts toward `Skipped`, so removing it removes skips rather than
+adding them.
+
+### Still open
+
+- **T106** — the acceptance walkthrough. Environment-gated: the host, a signed-in application session, and the
+  30-day SC-007/SC-008 observation clocks.
+- **T151** — two of its three parts are verified (2,012 shape-4 rows with none below 1 on hand, confirmed on the host
+  after a redeploy); the grid-versus-live comparison for a sampled part needs a signed-in session.
