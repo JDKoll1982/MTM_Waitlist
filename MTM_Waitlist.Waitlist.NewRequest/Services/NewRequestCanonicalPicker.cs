@@ -9,7 +9,7 @@ namespace MTM_Waitlist.Module_Waitlist.Services;
 /// (<see cref="NewRequestTypeDefinition"/> / <see cref="NewRequestSubtypeDefinition"/>, whose leaf rows
 /// carry the canonical <c>Category</c> + <c>ItemId</c> added in Phase 1.1). This helper:
 ///   • walks the eligibility-filtered tree leaves (subtype leaves + type leaves),
-///   • groups them into canonical Category → Item groups (per <c>Request-Config-Template.csv</c>),
+///   • groups them into canonical Category → Item groups (per the catalog contract),
 ///   • resolves each group to ONE deterministic legacy leaf (the wizard must submit a legacy
 ///     RequestType + Subtype because downstream persistence is still legacy),
 ///   • orders categories Pickup → Deliver → Assist → Other and items by CSV Order.

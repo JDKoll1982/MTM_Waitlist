@@ -1,5 +1,8 @@
 -- Create procedure: sp_waitlist_request_insert
 -- Engine: MySQL 5.7
+-- Re-keyed by specs/004-unified-card-item-picker: a new request is raised with the Category and the Item the
+-- requester chose, and no longer with a request type or a subtype (FR-004). The lifecycle columns this
+-- procedure writes are unchanged, because the request lifecycle does not change with the Item (FR-032).
 
 USE mtm_waitlist;
 
@@ -9,8 +12,8 @@ CREATE PROCEDURE sp_waitlist_request_insert(
     IN p_public_id CHAR(36),
     IN p_building VARCHAR(64),
     IN p_work_center VARCHAR(64),
-    IN p_request_type VARCHAR(64),
-    IN p_subtype VARCHAR(64),
+    IN p_category VARCHAR(16),
+    IN p_item VARCHAR(64),
     IN p_input_value VARCHAR(255),
     IN p_active_setup_job_id VARCHAR(64),
     IN p_work_center_name VARCHAR(64),
@@ -28,8 +31,8 @@ INSERT INTO waitlist_requests_queue (
     public_id,
     building,
     work_center,
-    request_type,
-    subtype,
+    category,
+    item,
     input_value,
     active_setup_job_id,
     work_center_name,
@@ -49,8 +52,8 @@ VALUES (
     TRIM(p_public_id),
     TRIM(p_building),
     TRIM(p_work_center),
-    TRIM(p_request_type),
-    NULLIF(TRIM(COALESCE(p_subtype, '')) COLLATE utf8mb4_unicode_ci, ''),
+    TRIM(p_category),
+    TRIM(p_item),
     NULLIF(TRIM(COALESCE(p_input_value, '')) COLLATE utf8mb4_unicode_ci, ''),
     TRIM(p_active_setup_job_id),
     TRIM(p_work_center_name),

@@ -2,8 +2,8 @@
   "workflow": "companion",
   "specName": "unified card item picker",
   "branch": "004-unified-card-item-picker",
-  "currentStep": "tasks",
-  "status": "ready-to-implement",
+  "currentStep": "implement",
+  "status": "implementing",
   "history": [
     {
       "step": "specify",
@@ -67,10 +67,145 @@
       "kind": "complete",
       "by": "extension",
       "at": "2026-09-13T17:55:23.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T17:58:54.560Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:00:45.528Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:02:27.140Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:02:50.680Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:06:18.953Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:06:19.036Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:06:19.122Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:06:19.207Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:06:19.291Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:06:19.376Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:07:20.403Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:08:25.796Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:08:25.882Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:08:25.965Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:08:26.048Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:08:26.133Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:10:43.376Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
-  "last_action": "living specs evaluated — no capabilities matched",
+  "last_action": "stopped at the Phase 2 wave-4 boundary with 16/117 tasks done; build 0W/0E, tests 0 failed / 890 passed / 19 skipped; next task is T017 (Phase 2 wave 5 models), which is where C# consumers start to be affected",
   "coverage": {
     "FR-001": {
       "title": "A person raising a request MUST choose a Category, and then an Item, in that order.",
@@ -355,6 +490,10 @@
         "T002",
         "T007",
         "T112"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Mock/DocumentInputAuditTests.cs::NoShippedFileReferencesTheDesignDocuments",
+        "MTM_Waitlist.Tests/Module_Mock/DocumentInputAuditTests.cs::DesignDocumentScan_ReachesAFixtureThatReferencesThem"
       ]
     },
     "FR-028": {
@@ -478,6 +617,21 @@
       "decision": "Correct the merged pickup Item rule to require a coil OR flatstock, and drop the dead pickup-flatstock arm",
       "why": "pickup-coil is the CSV merged Pickup row whose source is MMC=>Coil, MMF=>Flatstock and whose visibility requires either, so the current Coil-only rule withholds a supported Item from a flatstock-only job, which SC-004 measures; pickup-flatstock is not one of the 23 pinned Item codes",
       "rejected": "Leaving the rule and seeding no flatstock-only job (SC-004 requires that configuration proven); splitting Pickup back into two Items (the spec pins 23 codes and the merged display name)"
+    },
+    {
+      "decision": "Validate the re-keyed table and procedures against throwaway twins (zz_ddlcheck_*) instead of applying them to the live mtm_waitlist",
+      "why": "CREATE TABLE IF NOT EXISTS cannot re-key an existing table in place, and applying the re-keyed procedures live would break the running app until the owner reinstalls; the twins exercise the real artifact text and are dropped afterwards",
+      "rejected": "Dropping and recreating the live queue table, which would destroy the seeded demo rows and is the owner's reinstall action"
+    },
+    {
+      "decision": "Seed assist-table-remove with no allotted minutes, so the labelled 15-minute default is real data rather than hypothetical",
+      "why": "FR-017 requires the default to be a state a screen can actually show; the four out-of-scope Items carry none either, because none has been agreed for an Item that is never offered",
+      "rejected": "Seeding all 23 Items with a figure, which would leave the default path reachable only by editing the store first"
+    },
+    {
+      "decision": "Check master-list agreement as presence plus absence of the retired vocabulary, not byte-identical text",
+      "why": "the internal-store master lists are hand-maintained and their blocks deliberately omit the USE/Engine preamble the per-file artifacts carry, so a verbatim comparison can never be true",
+      "rejected": "Forcing the master blocks to be byte-identical copies of the per-file artifacts"
     }
   ],
   "step_summaries": {
@@ -487,6 +641,9 @@
     },
     "tasks": {
       "summary": "117 tasks across 8 phases (Setup 3, Foundational 29, US1 23, US2 16, US3 11, US4 5, US5 13, Polish 17), laid out as 51 dependency-ordered waves with explicit join points"
+    },
+    "implement": {
+      "summary": "Phase 1 and Phase 2 waves 1-4 delivered: the FR-027 guard, the six new stored artifacts, the request re-key, the observed-average read, the rewritten seed and the four master files - 16 of 117 tasks, build and suite green"
     }
   },
   "concerns": [
@@ -514,6 +671,198 @@
       "note": "FR-020 says both configuration screens reuse the role gate that already governs them (singular), but today they are governed by two different gates: CanManageUrgencySettings on the minutes editor and CanManageImageLocationSettings on the picture screen. The plan keeps each screens own gate and collapses neither.",
       "step": "plan",
       "kind": "ambiguity-resolved"
+    },
+    {
+      "note": "The re-keyed request table and the three re-keyed request procedures cannot be validated against a live mtm_waitlist until the owner reinstalls: CREATE TABLE IF NOT EXISTS is a no-op on the existing table, and applying the new procedure text live would leave the running app broken against the old columns. T115 owns that hand-over.",
+      "step": "implement"
+    },
+    {
+      "note": "The Master library's internal-store master lists are hand-maintained and abbreviated, so no artifact can be proved present by byte comparison; T016 verified presence plus the absence of every retired parameter name.",
+      "step": "implement"
+    }
+  ],
+  "currentTask": "T016",
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Baseline recorded at ea2190a: build 0W/0E, tests 0 failed / 888 passed / 19 skipped",
+      "files": [
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "FR-027 document-input guard added; observed 13 real hits first, then removed the design-document names from 13 source comments and the guard reads 0 failed / 2 passed",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Mock/DocumentInputAuditTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/Fixtures/DocumentInputFixture.cs"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "UI harness baseline: with both connection overrides the Debug exe reached the shell directly (no Sign in gate, developer account) - text dump read cards with the legacy Subtype rows, window found by process id, app closed with 0 orphans",
+      "files": [
+        "bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Added waitlist_request_item_configs (15 columns, uq on item) with paired rollback; applied and reversed against the live local mtm_waitlist",
+      "files": [
+        "Database/Tables/31_waitlist_request_item_configs/create.sql",
+        "Database/Tables/31_waitlist_request_item_configs/rollback.sql"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Added the no-parameter configuration read; live database returns header + 23 rows with the contract columns",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_item_configs_get/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_item_configs_get/rollback.sql"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Added the single writer of a configured allotment (clamped 1..1440, NULL clears, reports affected rows)",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_item_allotted_minutes_update/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_item_allotted_minutes_update/rollback.sql"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Seeded 23 configuration rows, one per catalogued Item; 5 carry no allotment and 5 require an answer",
+      "files": [
+        "Database/Seeds/seed_waitlist_request_item_configs/create.sql",
+        "Database/Seeds/seed_waitlist_request_item_configs/rollback.sql"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Seeded 9 image rows under the new request_item and request_category scopes, pointing only at shipped assets",
+      "files": [
+        "Database/Seeds/seed_waitlist_request_item_images/create.sql",
+        "Database/Seeds/seed_waitlist_request_item_images/rollback.sql"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Seeded the eight-configuration active-job matrix in the write path own JSON shape; 7 rows plus the deliberate absence for 900-8",
+      "files": [
+        "Database/Seeds/seed_setup_active_jobs_eight_configurations/create.sql",
+        "Database/Seeds/seed_setup_active_jobs_eight_configurations/rollback.sql"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Re-keyed the request table to category+item; validated by applying the artifact DDL under a throwaway name (columns confirmed, request_type/subtype gone) and dropping it",
+      "files": [
+        "Database/Tables/18_waitlist_requests_queue/create.sql",
+        "Database/Tables/18_waitlist_requests_queue/rollback.sql"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Re-keyed the single-request read to category+item; validated against a throwaway twin of the re-keyed table",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_get/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_get/rollback.sql"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Re-keyed the insert to p_category+p_item and dropped p_request_type/p_subtype; applied cleanly against a throwaway twin",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_insert/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_insert/rollback.sql"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Re-keyed the list to select category+item; applied cleanly against throwaway twins of both tables",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_list/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_list/rollback.sql"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Added the observed-average read; over the seeded population it returns 4 Items with a real mean and never reads released_utc, so a released-then-completed request counts once",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_item_observed_average_get/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_item_observed_average_get/rollback.sql"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Rewrote the requests seed in the new vocabulary: 18 requests across 10 Items and 4 Categories, with completed populations on 4 Items (2 in scope) so SC-008 has real data",
+      "files": [
+        "Database/Seeds/seed_waitlist_requests_default/create.sql",
+        "Database/Seeds/seed_waitlist_requests_default/rollback.sql"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Registered the new table, the three new procedures and the four new seeds in AllTables/AllSPs/AllSeeds, refreshed the changed artifacts' blocks there, and added the new table to update_table_descriptions; all nine new/changed artifacts verified present and no retired parameter name left",
+      "files": [
+        "Database/Tables/AllTables.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "Database/Seeds/AllSeeds.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "Baseline build at ea2190a (T001)",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "result": "Build succeeded - 0 Warning(s) 0 Error(s)",
+      "warnings": [
+        "PRI/XAML compiler processes cleared before the run"
+      ]
+    },
+    {
+      "what": "Baseline full test suite at ea2190a (T001)",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "Failed: 0, Passed: 888, Skipped: 19, Total: 907",
+      "warnings": [
+        "ambient MTM_* environment variables cleared first"
+      ]
+    },
+    {
+      "what": "FR-027 document-input guard (T002)",
+      "command": "dotnet test --filter FullyQualifiedName~DocumentInputAuditTests",
+      "result": "observed 13 real hits first, then 0 - Failed: 0, Passed: 2",
+      "warnings": []
+    },
+    {
+      "what": "Live-DB apply and reverse of the six new Wave 1 artifacts",
+      "command": "mysql mtm_waitlist < create.sql; then < rollback.sql, six pairs",
+      "result": "all twelve exit 0; 23 config rows readable through the get procedure, 9 image rows, 7 active jobs; after reverse 0 table / 0 procedures / 0 rows",
+      "warnings": [
+        "local server is MySQL 9.6, not 5.7 - the DDL is 5.7-compatible and applied cleanly"
+      ]
+    },
+    {
+      "what": "Wave 3 procedures and seed against throwaway twins of the re-keyed tables",
+      "command": "mysql mtm_waitlist with waitlist_requests_queue/audit renamed to zz_ddlcheck_*",
+      "result": "18 requests across 10 Items and 4 Categories, 12 audit rows; observed average returns 4 Items with a real mean (3000/4200/4800/3000 seconds); get procedure returns Deliver/deliver-wrong-coil; twins dropped and live database confirmed untouched",
+      "warnings": []
+    },
+    {
+      "what": "Final build and test gates at the stopping point",
+      "command": "dotnet build ... ; dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "build 0 Warning(s) 0 Error(s); tests Failed: 0, Passed: 890, Skipped: 19, Total: 909",
+      "warnings": []
+    },
+    {
+      "what": "T003 UI harness baseline",
+      "command": "Start-Process the Debug exe with both connection overrides, then a PowerShell UI Automation text dump",
+      "result": "reached the shell directly (no Sign in gate, developer account) and the dump showed the pre-change cards with Subtype rows; window found by process id; 0 orphan processes after close",
+      "warnings": [
+        "the window title was MTM_Waitlist, confirming the never-locate-by-title rule"
+      ]
     }
   ]
 }

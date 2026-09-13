@@ -3,9 +3,9 @@ using MTM_Waitlist.Module_Settings.Models;
 namespace MTM_Waitlist.Module_Settings.Services;
 
 /// <summary>
-/// Loader over the canonical Category/Item catalog (mirror of
-/// <c>WeekendProject/Documents/Request-Config-Template.csv</c>, 23 rows: Pickup 11 / Deliver 8 /
-/// Assist 3 / Other 1). A single injection point for the New Request picker (Phase 3) and the
+/// Loader over the canonical Category/Item catalog mirror of
+/// specs/004-unified-card-item-picker/contracts/request-picker-flow.md §4
+/// (23 rows: Pickup 11 / Deliver 8 / Assist 3 / Other 1). A single injection point for the New Request picker (Phase 3) and the
 /// uniform card renderer (Phase 4) so both consume the same Category → Item definition list instead
 /// of duplicating ad-hoc lookups.
 /// </summary>

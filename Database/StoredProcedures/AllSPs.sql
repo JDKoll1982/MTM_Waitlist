@@ -541,6 +541,9 @@ ON DUPLICATE KEY UPDATE
     
     -- Create procedure: sp_waitlist_request_insert
 -- Engine: MySQL 5.7
+-- Re-keyed by specs/004-unified-card-item-picker: a new request is raised with the Category and the Item the
+-- requester chose, and no longer with a request type or a subtype (FR-004). The lifecycle columns this
+-- procedure writes are unchanged, because the request lifecycle does not change with the Item (FR-032).
 
 DROP PROCEDURE IF EXISTS sp_waitlist_request_insert;
 
@@ -548,8 +551,8 @@ CREATE PROCEDURE sp_waitlist_request_insert(
     IN p_public_id CHAR(36),
     IN p_building VARCHAR(64),
     IN p_work_center VARCHAR(64),
-    IN p_request_type VARCHAR(64),
-    IN p_subtype VARCHAR(64),
+    IN p_category VARCHAR(16),
+    IN p_item VARCHAR(64),
     IN p_input_value VARCHAR(255),
     IN p_active_setup_job_id VARCHAR(64),
     IN p_work_center_name VARCHAR(64),
@@ -567,8 +570,8 @@ INSERT INTO waitlist_requests_queue (
     public_id,
     building,
     work_center,
-    request_type,
-    subtype,
+    category,
+    item,
     input_value,
     active_setup_job_id,
     work_center_name,
@@ -588,8 +591,8 @@ VALUES (
     TRIM(p_public_id),
     TRIM(p_building),
     TRIM(p_work_center),
-    TRIM(p_request_type),
-    NULLIF(TRIM(COALESCE(p_subtype, '')) COLLATE utf8mb4_unicode_ci, ''),
+    TRIM(p_category),
+    TRIM(p_item),
     NULLIF(TRIM(COALESCE(p_input_value, '')) COLLATE utf8mb4_unicode_ci, ''),
     TRIM(p_active_setup_job_id),
     TRIM(p_work_center_name),
@@ -608,6 +611,8 @@ VALUES (
 
 -- Create procedure: sp_waitlist_request_list
 -- Engine: MySQL 5.7
+-- Re-keyed by specs/004-unified-card-item-picker: the list carries each request's Category and Item, which is
+-- what the one card shape is built from, and no longer carries a request type or a subtype (FR-004).
 
 USE mtm_waitlist;
 
@@ -626,8 +631,8 @@ SELECT
     q.public_id,
     q.building,
     q.work_center,
-    q.request_type,
-    q.subtype,
+    q.category,
+    q.item,
     q.input_value,
     q.active_setup_job_id,
     q.work_center_name,
@@ -659,6 +664,8 @@ ORDER BY q.requested_utc ASC;
 
 -- Create procedure: sp_waitlist_request_get
 -- Engine: MySQL 5.7
+-- Re-keyed by specs/004-unified-card-item-picker: a request is identified by the Category and the Item the
+-- requester chose, and the two legacy columns this procedure used to return no longer exist (FR-004).
 
 USE mtm_waitlist;
 
@@ -672,8 +679,8 @@ SELECT
     public_id,
     building,
     work_center,
-    request_type,
-    subtype,
+    category,
+    item,
     input_value,
     active_setup_job_id,
     work_center_name,
@@ -814,6 +821,111 @@ SELECT
 FROM waitlist_requests_audit
 WHERE request_public_id = TRIM(p_request_public_id)
 ORDER BY occurred_utc ASC, id ASC;
+
+-- Create procedure: sp_waitlist_request_item_configs_get
+-- Engine: MySQL 5.7
+-- Purpose: Return one row per configured Item: the behaviour the application reads once, as the wizard's
+--          Item step is entered (never per keystroke and never per row render).
+-- Contract: specs/004-unified-card-item-picker/contracts/item-configuration.md section 2.
+--           No parameters. Every column of waitlist_request_item_configs except id, and except the audit
+--           column updated_by_user_id, which is not part of the read contract.
+--           detail_fields_json and options_json are returned as JSON strings and parsed by the application:
+--           the schema targets MySQL 5.7, where JSON_TABLE is unavailable.
+--           A row whose item is not in the code catalog is dropped by the application, not here, because the
+--           catalog lives in code.
+-- Read-only: this procedure writes nothing and must not be reused to write anything.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_item_configs_get;
+
+CREATE PROCEDURE sp_waitlist_request_item_configs_get()
+SELECT
+    public_id,
+    item,
+    category,
+    control_flow,
+    requires_answer,
+    answer_value_type,
+    prompt_text,
+    min_length,
+    max_length,
+    options_json,
+    detail_fields_json,
+    allotted_minutes
+FROM waitlist_request_item_configs
+ORDER BY item ASC;
+
+-- Create procedure: sp_waitlist_request_item_allotted_minutes_update
+-- Engine: MySQL 5.7
+-- Purpose: Write the configured allotment for one Item. This is the ONLY writer of a configured allotment:
+--          the observed average is display data, and it is never written back as though it were configured
+--          (FR-018, FR-019).
+-- Contract: specs/004-unified-card-item-picker/contracts/item-configuration.md section 3.
+--   p_item            the Item code whose allotment is being set.
+--   p_allotted_minutes the configured minutes. A non-NULL value is clamped here to 1..1440 as well as in the
+--                     caller (UrgencySettingsService.SetMaxAllottedAsync clamps to the same range). A NULL
+--                     value clears the configured figure, so the Item falls back to the labelled 15-minute
+--                     default rather than to a stale number.
+--   p_updated_by_user_id the auditing column this table's row carries, matching the repo's other update
+--                     procedures.
+-- Returns the affected-row count through the caller's non-query seam, so a caller can tell an Item that does
+-- not exist (0 rows) from one that does.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_item_allotted_minutes_update;
+
+CREATE PROCEDURE sp_waitlist_request_item_allotted_minutes_update(
+    IN p_item VARCHAR(64),
+    IN p_allotted_minutes INT,
+    IN p_updated_by_user_id BIGINT
+)
+UPDATE waitlist_request_item_configs
+SET allotted_minutes = CASE
+        WHEN p_allotted_minutes IS NULL THEN NULL
+        ELSE LEAST(GREATEST(p_allotted_minutes, 1), 1440)
+    END,
+    updated_by_user_id = p_updated_by_user_id,
+    updated_utc = UTC_TIMESTAMP()
+WHERE item = TRIM(COALESCE(p_item, ''));
+
+-- Create procedure: sp_waitlist_request_item_observed_average_get
+-- Engine: MySQL 5.7
+-- Purpose: Per Item, how long its completed requests actually took. This is the observed half of the pair a
+--          screen shows beside the configured allotment, and it is derived and never stored (FR-019).
+-- Contract: specs/004-unified-card-item-picker/contracts/item-configuration.md section 4.
+--   item                    the Item code.
+--   completed_request_count  how many of that Item's requests completed.
+--   average_seconds         the mean of completed_utc - accepted_utc over those requests.
+-- The rules, and why each is written the way it is:
+--   * Completed requests only. The stored status vocabulary is unchanged (FR-032), so this filters on the
+--     existing 'Completed' value and adds no status.
+--   * A request missing either endpoint is excluded; the average never treats a missing timestamp as zero.
+--   * released_utc is deliberately NOT read. A request that was released and later completed is one row with
+--     one accepted -> completed pair, so it contributes exactly once. Reading released_utc as a second
+--     interval is how such a request would be counted twice, which is why it is absent here.
+--   * No time window. The average covers all of an Item's completed requests.
+--   * An Item with no completed request yields no row, so the screen shows the configured minutes alone
+--     rather than a fabricated zero (FR-026).
+-- Read-only: this procedure writes nothing, and the observed value never reaches
+-- sp_waitlist_request_item_allotted_minutes_update (FR-018).
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_item_observed_average_get;
+
+CREATE PROCEDURE sp_waitlist_request_item_observed_average_get()
+SELECT
+    q.item,
+    COUNT(*) AS completed_request_count,
+    AVG(TIMESTAMPDIFF(SECOND, q.accepted_utc, q.completed_utc)) AS average_seconds
+FROM waitlist_requests_queue q
+WHERE q.status = 'Completed'
+  AND q.accepted_utc IS NOT NULL
+  AND q.completed_utc IS NOT NULL
+GROUP BY q.item
+ORDER BY q.item ASC;
 
 -- Create procedure: sp_waitlist_request_types_get
 -- Engine: MySQL 5.7

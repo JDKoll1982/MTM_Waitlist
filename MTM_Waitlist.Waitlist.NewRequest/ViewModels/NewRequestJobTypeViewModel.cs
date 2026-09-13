@@ -15,7 +15,7 @@ namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 /// <summary>
 /// Second step of the New Request wizard. Re-laid (Phase 3) as a canonical Category→Item picker:
 /// the worker first picks an umbrella Category (Pickup / Deliver / Assist / Other) then an Item
-/// under it. Items are the canonical rows (Request-Config-Template.csv) grouped from the real DB
+/// under it. Items are the canonical catalog rows grouped from the real DB
 /// request-type tree by <see cref="NewRequestCanonicalPicker"/>, so selecting an Item submits its
 /// resolved legacy leaf (RequestType + Subtype) and the downstream Details/Summary/persist steps are
 /// unchanged. When no canonical categories can be built (DB empty/unreachable → default types carry no

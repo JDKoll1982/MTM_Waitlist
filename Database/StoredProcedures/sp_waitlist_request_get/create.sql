@@ -1,5 +1,7 @@
 -- Create procedure: sp_waitlist_request_get
 -- Engine: MySQL 5.7
+-- Re-keyed by specs/004-unified-card-item-picker: a request is identified by the Category and the Item the
+-- requester chose, and the two legacy columns this procedure used to return no longer exist (FR-004).
 
 USE mtm_waitlist;
 
@@ -13,8 +15,8 @@ SELECT
     public_id,
     building,
     work_center,
-    request_type,
-    subtype,
+    category,
+    item,
     input_value,
     active_setup_job_id,
     work_center_name,

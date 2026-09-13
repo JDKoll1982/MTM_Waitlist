@@ -94,7 +94,8 @@ public sealed class ActiveJobItemResolverService : IActiveJobItemResolverService
 
     /// <summary>
     /// Canonicalizes a subordinate part's category per the Waitlist spec
-    /// (GetSubordinateParts.sql + Request-Config-Template.csv Source columns):
+    /// (GetSubordinateParts.sql plus the part-number prefixes recorded in
+    /// specs/004-unified-card-item-picker/contracts/request-picker-flow.md §3):
     /// <c>MMC→Coil</c>, <c>MMF→Flatstock</c>, <c>FGT→Die</c>, otherwise the stored
     /// category when recognized, else <c>Component</c>. Prefix is authoritative so a
     /// legacy/mis-tagged part still lands in the correct bucket (e.g. the sample

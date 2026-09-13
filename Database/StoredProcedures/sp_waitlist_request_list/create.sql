@@ -1,5 +1,7 @@
 -- Create procedure: sp_waitlist_request_list
 -- Engine: MySQL 5.7
+-- Re-keyed by specs/004-unified-card-item-picker: the list carries each request's Category and Item, which is
+-- what the one card shape is built from, and no longer carries a request type or a subtype (FR-004).
 
 USE mtm_waitlist;
 
@@ -18,8 +20,8 @@ SELECT
     q.public_id,
     q.building,
     q.work_center,
-    q.request_type,
-    q.subtype,
+    q.category,
+    q.item,
     q.input_value,
     q.active_setup_job_id,
     q.work_center_name,

@@ -32,16 +32,16 @@ Shared prerequisites for every phase. No user-visible behaviour, but every later
 
 **Wave 1 — independent (different files):**
 
-- [ ] **T001** [P] Record the baseline: build the solution and run the full suite at `ea2190a`, so every later gate
+- [x] **T001** [P] Record the baseline: build the solution and run the full suite at `ea2190a`, so every later gate
   result is attributable to a change rather than to the starting tree. Evidence: the two gate commands above
   produce `0 Warning(s) 0 Error(s)` and `Failed: 0` **before** T004 edits a file. · `MTM_Waitlist.sln`,
   `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
-- [ ] **T002** [P] Add the FR-027 document-is-not-an-input guard (§D19): a test that fails the build if any `.cs`,
+- [x] **T002** [P] Add the FR-027 document-is-not-an-input guard (§D19): a test that fails the build if any `.cs`,
   `.xaml`, `.csproj`, `.props`, `.targets` or `.json` file in the tree references
   `Request-Config-Template.csv` or `unified-item-picker-workflows.md`. **Write it to fail first** — point it at a
   fixture that does reference the CSV, record that failure, then assert the real tree is clean. · new
   `MTM_Waitlist.Tests/Module_Mock/DocumentInputAuditTests.cs`
-- [ ] **T003** [P] Establish the scripted-UI verification harness baseline that every UI gate in Phase 8 depends on:
+- [x] **T003** [P] Establish the scripted-UI verification harness baseline that every UI gate in Phase 8 depends on:
   confirm the Debug exe reaches the **Sign in** window with **both** connection overrides set
   (`MTM_WAITLIST_DB_CONNECTION_STRING` *and* `MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING`), and record the
   process-id window-discovery recipe. Evidence: a text dump showing the sign-in window, then the app closed with no
@@ -57,7 +57,7 @@ done.**
 
 ### Wave 1 — the new stored artifacts, independent (different files)
 
-- [ ] **T004** [P] Create the Item-configuration table: `waitlist_request_item_configs`, one row per Item, with the
+- [x] **T004** [P] Create the Item-configuration table: `waitlist_request_item_configs`, one row per Item, with the
   columns, types, nulls, defaults and unique keys fixed by `data-model.md` §3 (`public_id`, `item`, `category`,
   `control_flow`, `requires_answer`, `answer_value_type`, `prompt_text`, `min_length`, `max_length`, `options_json`,
   `detail_fields_json`, `allotted_minutes`, `created_utc`, `updated_utc`; `uq_waitlist_request_item_configs_item`
@@ -65,25 +65,25 @@ done.**
   lowercase snake_case identifiers. Ship the paired rollback in the same change. · new
   `Database/Tables/31_waitlist_request_item_configs/create.sql`,
   `Database/Tables/31_waitlist_request_item_configs/rollback.sql`
-- [ ] **T005** [P] Create `sp_waitlist_request_item_configs_get` — no parameters, one row per configured Item,
+- [x] **T005** [P] Create `sp_waitlist_request_item_configs_get` — no parameters, one row per configured Item,
   returning every column except `id` (contract §2). Read-only. Paired rollback in the same change. · new
   `Database/StoredProcedures/sp_waitlist_request_item_configs_get/create.sql`, `…/rollback.sql`
-- [ ] **T006** [P] Create `sp_waitlist_request_item_allotted_minutes_update` — `p_item VARCHAR(64)`,
+- [x] **T006** [P] Create `sp_waitlist_request_item_allotted_minutes_update` — `p_item VARCHAR(64)`,
   `p_allotted_minutes INT`, plus the auditing columns the repo's other update procedures carry. It is the **only**
   writer of a configured allotment and must never be called with an observed average (contract §3). Paired rollback
   in the same change. · new `Database/StoredProcedures/sp_waitlist_request_item_allotted_minutes_update/create.sql`,
   `…/rollback.sql`
-- [ ] **T007** [P] Author the configuration seed: **one row for each of the twenty-three Item codes** (including the
+- [x] **T007** [P] Author the configuration seed: **one row for each of the twenty-three Item codes** (including the
   four out-of-scope Items — a hidden Item and a missing row are different states, FR-028), carrying each Item's flow,
   answer requirement, prompt, length limits, options and allotted minutes from
   `contracts/request-picker-flow.md` §4 and §6. Design-time sources only (FR-027): the spreadsheet's per-Item field
   definitions and the retiring catalogs' populated `category` / `item_id` columns. Paired rollback in the same
   change. · new `Database/Seeds/seed_waitlist_request_item_configs/create.sql`, `…/rollback.sql`
-- [ ] **T008** [P] Author the image seed: `config_images_locations` rows under the two new scopes `request_item`
+- [x] **T008** [P] Author the image seed: `config_images_locations` rows under the two new scopes `request_item`
   (keyed by Item code) and `request_category` (keyed by Category code), so the card's two-hop fallback of FR-009 has
   something to fall back to. Data rows only — the column is already free-form, so this is not DDL. Paired rollback
   in the same change. · new `Database/Seeds/seed_waitlist_request_item_images/create.sql`, `…/rollback.sql`
-- [ ] **T009** [P] Author the eight-configuration active-job seed (§D18): active jobs covering coil, flatstock, die,
+- [x] **T009** [P] Author the eight-configuration active-job seed (§D18): active jobs covering coil, flatstock, die,
   components, dunnage, everything at once, a job with **no** subordinate part, and a work centre with **no** active
   job. `subordinate_parts_json` is written in the exact shape `sp_setup_save_setup` stores, because the read path
   normalises `MMC→Coil`, `MMF→Flatstock`, `FGT→Die` from the part-number prefix — a hand-written `category` field
@@ -94,7 +94,7 @@ done.**
 
 ### Wave 2 — the request table re-key (single task; nothing else may touch this file)
 
-- [ ] **T010** Re-key `waitlist_requests_queue`: **remove** `request_type` and `subtype`, **add**
+- [x] **T010** Re-key `waitlist_requests_queue`: **remove** `request_type` and `subtype`, **add**
   `category VARCHAR(16) NOT NULL` and `item VARCHAR(64) NOT NULL`. Keep `input_value`, `status`, `requested_utc`,
   `target_time_utc`, `accepted_utc`, `completed_utc`, `released_utc` and the requester/work-centre/assignment/
   cancellation columns untouched (FR-004, FR-032). No back-fill and no migration path — the database is reinstalled
@@ -105,21 +105,21 @@ done.**
 
 ### Wave 3 — the request procedures re-keyed and the observed average added, independent (different files)
 
-- [ ] **T011** [P] Re-key `sp_waitlist_request_get` to carry `category` + `item` and stop carrying the two legacy
+- [x] **T011** [P] Re-key `sp_waitlist_request_get` to carry `category` + `item` and stop carrying the two legacy
   columns. Paired rollback in the same change. · `Database/StoredProcedures/sp_waitlist_request_get/create.sql`,
   `…/rollback.sql`
-- [ ] **T012** [P] Re-key `sp_waitlist_request_insert` to take `category` + `item` and stop taking the two legacy
+- [x] **T012** [P] Re-key `sp_waitlist_request_insert` to take `category` + `item` and stop taking the two legacy
   columns. Paired rollback in the same change. · `Database/StoredProcedures/sp_waitlist_request_insert/create.sql`,
   `…/rollback.sql`
-- [ ] **T013** [P] Re-key `sp_waitlist_request_list` to select and group on `category` + `item`. Paired rollback in
+- [x] **T013** [P] Re-key `sp_waitlist_request_list` to select and group on `category` + `item`. Paired rollback in
   the same change. · `Database/StoredProcedures/sp_waitlist_request_list/create.sql`, `…/rollback.sql`
-- [ ] **T014** [P] Create `sp_waitlist_request_item_observed_average_get` (§D6, FR-019): per Item, the request count
+- [x] **T014** [P] Create `sp_waitlist_request_item_observed_average_get` (§D6, FR-019): per Item, the request count
   and the average of `completed_utc - accepted_utc` over requests whose status is `Completed`; a request missing
   either endpoint is excluded; a released-then-completed request contributes **once** through its final
   accepted → completed pair; **no time window**. Read-only; must not be reusable to write anything. Paired rollback
   in the same change. · new `Database/StoredProcedures/sp_waitlist_request_item_observed_average_get/create.sql`,
   `…/rollback.sql`
-- [ ] **T015** [P] Rewrite `seed_waitlist_requests_default` in the new vocabulary: every seeded request carries a
+- [x] **T015** [P] Rewrite `seed_waitlist_requests_default` in the new vocabulary: every seeded request carries a
   `category` and an `item` drawn from the twenty-three codes, and no request carries a type or subtype. Cover enough
   distinct Items — and enough completed requests — that the observed average has a non-empty population for at least
   two different Items (SC-008). Paired rollback in the same change. ·
@@ -130,7 +130,7 @@ done.**
 
 ### Wave 4 — the master lists in sync (single task; one owner for four files)
 
-- [ ] **T016** Bring the four master lists in sync with the files on disk in the same change (FR-025, constitution
+- [x] **T016** Bring the four master lists in sync with the files on disk in the same change (FR-025, constitution
   III): add the new table, the three new procedures and the four new seeds; add the new table's description to the
   mandatory maintenance file. The retired artifacts' removals land with their own retirement tasks in Phase 8 — do
   **not** remove them here, or their owners' rollbacks will have nothing to match. ·

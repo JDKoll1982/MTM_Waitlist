@@ -15,7 +15,8 @@ public static class RequestItemPickerRules
 {
     /// <summary>
     /// The active-job part an auto-populated Item depends on for visibility, or <see cref="RequestJobPartKind.None"/>
-    /// for manual / always-available Items. Grounded in Request-Config-Template.csv Source + Notes columns.
+    /// for manual / always-available Items. Grounded in the visibility rules recorded in
+    /// specs/004-unified-card-item-picker/contracts/request-picker-flow.md §4.
     /// </summary>
     public static RequestJobPartKind RequiredJobPart(RequestItemDefinition item)
     {

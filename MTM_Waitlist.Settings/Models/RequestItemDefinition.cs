@@ -3,7 +3,8 @@ namespace MTM_Waitlist.Module_Settings.Models;
 /// <summary>
 /// Canonical request Item (the thing being handled) in the Type/Category/Item model.
 /// Type/Category refactor (2026-09-07): Item hangs under a Category umbrella and is shown as the
-/// card Line 2 identifier. Mirror of one row of Request-Config-Template.csv (18 rows total).
+/// card Line 2 identifier. Mirror of one row of the catalog recorded in
+/// specs/004-unified-card-item-picker/contracts/request-picker-flow.md §4.
 /// </summary>
 public sealed class RequestItemDefinition
 {

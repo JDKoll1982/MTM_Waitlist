@@ -6,7 +6,8 @@ namespace MTM_Waitlist.Module_Settings.Models;
 /// Type/Category refactor (2026-09-07): the Finished Product grouping node branches into these
 /// dispositions. NCM is handled separately by the defect feature (file 14 Phase 5); FG / WIP /
 /// Outside Service are derived from the Infor Visual job state (file 14 Phase 6).
-/// Source: WeekendProject/Documents/Request-Config-Template.csv (pickup-fg / pickup-wip / pickup-outside-service).
+/// Dispositions are recorded by specs/004-unified-card-item-picker/contracts/request-picker-flow.md §6
+/// (pickup-fg / pickup-wip / pickup-outside-service).
 /// </summary>
 public enum RequestDisposition
 {

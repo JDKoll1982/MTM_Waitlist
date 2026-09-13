@@ -14,7 +14,7 @@ public sealed class NewRequestCanonicalItem
     /// <summary>Umbrella category this item hangs under (Pickup/Deliver/Assist/Other).</summary>
     public RequestCategory Category { get; init; }
 
-    /// <summary>Canonical CSV item id (Request-Config-Template.csv col 3), e.g. "pickup-coil".</summary>
+    /// <summary>Canonical item id, e.g. "pickup-coil".</summary>
     public string ItemId { get; init; } = string.Empty;
 
     /// <summary>Canonical display name (CSV col 4); falls back to the primary leaf name.</summary>

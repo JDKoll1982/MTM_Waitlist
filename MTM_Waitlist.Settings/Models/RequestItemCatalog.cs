@@ -2,8 +2,9 @@ namespace MTM_Waitlist.Module_Settings.Models;
 
 /// <summary>
 /// Canonical Category → Item catalog for the Type/Category/Item model.
-/// Type/Category refactor (2026-09-07). Mirror of the authoritative implementation spec
-/// WeekendProject/Documents/Request-Config-Template.csv (23 rows: Pickup 11 / Deliver 8 / Assist 3 / Other 1).
+/// Type/Category refactor (2026-09-07). Mirror of the authoritative implementation spec recorded in
+/// specs/004-unified-card-item-picker/contracts/request-picker-flow.md §4 and §6
+/// (23 rows: Pickup 11 / Deliver 8 / Assist 3 / Other 1).
 /// Expanded 2026-09-08 with legacy-only concepts confirmed by the user: Wrong Coil / Wrong Flatstock
 /// (Deliver-correct + Pickup-wrong replacements), Scrap offal removal, Pickup Hopper (do not return),
 /// and Table Remove Parts (Assist). Keeps stable GUID relationships intact via the existing

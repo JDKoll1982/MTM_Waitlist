@@ -433,6 +433,26 @@ MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the 
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the defect type row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the defect type row was last updated.';
 
+ALTER TABLE waitlist_request_item_configs COMMENT = 'One row per catalogued request Item: flow, answer requirement, prompt, limits, options, page fields and allotted minutes. Behaviour as data.';
+
+ALTER TABLE waitlist_request_item_configs
+MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the configuration row.',
+MODIFY COLUMN item VARCHAR(64) NOT NULL COMMENT 'Catalog item code (e.g. pickup-coil, deliver-wrong-flatstock, other). One row per Item.',
+MODIFY COLUMN category VARCHAR(16) NOT NULL COMMENT 'The Category the Item belongs to: Pickup, Deliver, Assist or Other.',
+MODIFY COLUMN control_flow VARCHAR(64) NOT NULL DEFAULT 'direct-to-confirmation' COMMENT 'How far the flow goes before confirmation: direct-to-confirmation or collect-input-then-confirm.',
+MODIFY COLUMN requires_answer TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether the Details step asks for an answer for this Item.',
+MODIFY COLUMN answer_value_type VARCHAR(16) NULL COMMENT 'enum or text where an answer is required; NULL otherwise.',
+MODIFY COLUMN prompt_text VARCHAR(500) NULL COMMENT 'The question shown where an answer is required.',
+MODIFY COLUMN min_length INT NOT NULL DEFAULT 0 COMMENT 'Minimum length of a text answer; ignored where none is required.',
+MODIFY COLUMN max_length INT NOT NULL DEFAULT 200 COMMENT 'Maximum length of a text answer; ignored where none is required.',
+MODIFY COLUMN options_json JSON NULL COMMENT 'Ordered options for an enumerated answer, where the options are fixed by configuration.',
+MODIFY COLUMN detail_fields_json JSON NULL COMMENT 'The ordered fields the Item page shows: label, value_type, source, order, is_required.',
+MODIFY COLUMN allotted_minutes INT NULL COMMENT 'The Item configured allotment in minutes. NULL means not configured, and the application then uses the labelled 15-minute default.',
+MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last changed this configuration row. Audit only; not part of the read contract.',
+MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the configuration row was created.',
+MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the configuration row was last updated.';
+
 -- ============================================================
 -- Retired objects - feature 001-module-mock-visual-fallback (FR-014)
 -- ============================================================

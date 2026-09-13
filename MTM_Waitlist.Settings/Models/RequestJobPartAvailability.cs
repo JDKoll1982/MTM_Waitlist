@@ -2,8 +2,8 @@ namespace MTM_Waitlist.Module_Settings.Models;
 
 /// <summary>
 /// Which active-job part (if any) an auto-populated canonical Item depends on for
-/// visibility in the New Request picker / card render. Derived from
-/// <c>Request-Config-Template.csv</c> (Item Source + Notes visibility columns).
+/// visibility in the New Request picker / card render. The per-Item visibility rules are recorded in
+/// specs/004-unified-card-item-picker/contracts/request-picker-flow.md §4.
 /// </summary>
 public enum RequestJobPartKind
 {

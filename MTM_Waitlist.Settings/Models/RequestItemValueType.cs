@@ -2,7 +2,8 @@ namespace MTM_Waitlist.Module_Settings.Models;
 
 /// <summary>
 /// The data type of the value captured for a request item's Line 2 identifier / payload.
-/// Type/Category/Item refactor (2026-09-07). Source: Request-Config-Template.csv (col 10).
+/// Type/Category/Item refactor (2026-09-07). The declared value types are recorded in
+/// specs/004-unified-card-item-picker/contracts/item-configuration.md §4.
 /// </summary>
 public enum RequestItemValueType
 {

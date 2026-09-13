@@ -4,7 +4,8 @@ namespace MTM_Waitlist.Module_Settings.Models;
 /// Canonical umbrella Category for waitlist requests.
 /// Type/Category refactor (2026-09-07): Category is the umbrella verb shown as the card Line 1
 /// (Pickup / Deliver / Assist / Other); the Item (thing being handled) hangs underneath it.
-/// Source: WeekendProject/Documents/Request-Config-Template.csv (col 1 / col 6).
+/// The four Categories are fixed by specs/004-unified-card-item-picker/contracts/request-picker-flow.md
+/// §4; the design documents that produced them are design-time inputs and are never shipped (FR-027).
 /// </summary>
 public enum RequestCategory
 {
