@@ -946,6 +946,14 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-13T22:21:17.798Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T110",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:25:19.442Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
@@ -1452,6 +1460,11 @@
       "decision": "The request-type dialog tests were re-pointed at the live Item-keyed dialog and the retired-symbol tests deleted",
       "why": "the shared ImageOverrideDialogViewModel base owns hydrate, filter, reset, cancel and the single batched commit, so deleting the class would have lost that coverage; only tests whose actual subject was the retired vocabulary were removed",
       "rejected": "deleting the whole class, or keeping it alive against a scope value the services no longer accept"
+    },
+    {
+      "decision": "The audit patterns are identifier-shaped and the guard carries a per-pattern re-introduction self-test",
+      "why": "honest retirement prose (for example the description file recording what was retired) must stay legal, while a stray identifier must not; asserting that each pattern matches its own reintroduction keeps a silently-blunted regex from reporting clean forever",
+      "rejected": "broad word patterns that would flag the retirement record itself, and no self-test, which cannot distinguish a clean tree from a dead pattern"
     }
   ],
   "step_summaries": {
@@ -1532,7 +1545,7 @@
       "step": "implement"
     }
   ],
-  "currentTask": "T109",
+  "currentTask": "T110",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2413,6 +2426,16 @@
         "MTM_Waitlist.Tests/Module_Settings/ImageOverrideDialogViewModelTests.cs",
         "MTM_Waitlist.Tests/Module_Settings/ImageLocationServiceCascadeTests.cs"
       ]
+    },
+    "T110": {
+      "status": "DONE",
+      "did": "Extended RetiredSymbolAuditTests with this feature's retired symbols, wording and scope values, excluded the generated .codegraphy graph cache and added a per-pattern re-introduction self-test; proved all 24 guards fail on a re-introduced representative (24 violations, one per pattern) and pass once removed",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs",
+        "Strings/en-us/TooltipResources.resw",
+        "Strings/en-us/TooltipResources.developer.resw",
+        "MTM_Waitlist.Tests/Module_Mock/InternalStoreAvailabilityTests.cs"
+      ]
     }
   },
   "verified": [
@@ -2518,6 +2541,14 @@
       "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
       "result": "Passed! - Failed: 0, Passed: 956, Skipped: 26, Total: 982 (baseline before this dispatch was 908 passed)",
       "warnings": []
+    },
+    {
+      "what": "Every retirement guard bites on its own symbol then passes once it is gone",
+      "command": "dotnet test --filter FullyQualifiedName~RetiredSymbolAuditTests with and without MTM_Waitlist.Tests/RetiredSymbolAuditProbe.cs",
+      "result": "with the probe: Assert.AreEqual failed. Expected:<0>. Actual:<24>, one violation line per retired pattern; without it: 7/7 passed",
+      "warnings": [
+        "the .codegraphy graph cache held indexed copies of the retired symbol names, so it is now excluded as generated output alongside bin/ and obj/"
+      ]
     }
   ]
 }

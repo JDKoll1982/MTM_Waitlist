@@ -66,13 +66,10 @@
   <data name="Settings_SettingsPage_ToggleSwitch2_Tooltip" xml:space="preserve">
     <value>Off.</value>
   </data>
-  <data name="Settings_Manage_request_type_images_Tooltip" xml:space="preserve">
-    <value>Manage.</value>
-  </data>
   <data name="Settings_Manage_work_center_images_Tooltip" xml:space="preserve">
     <value>Manage.</value>
   </data>
-  <data name="Settings_Manage_request_subtype_images_Tooltip" xml:space="preserve">
+  <data name="Settings_Manage_request_item_images_Tooltip" xml:space="preserve">
     <value>Manage.</value>
   </data>
   <data name="Settings_SettingsPage_ComboBox1_Tooltip" xml:space="preserve">

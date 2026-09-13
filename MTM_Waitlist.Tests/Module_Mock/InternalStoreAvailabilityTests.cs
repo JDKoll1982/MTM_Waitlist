@@ -77,7 +77,7 @@ public sealed class InternalStoreAvailabilityTests
         var helper = CreateUnreachableHelper(tracker);
 
         var rows = await helper.ExecuteStoredProcedureQueryAsync(
-            "sp_waitlist_request_types_get",
+            "sp_waitlist_request_item_configs_get",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist);
 

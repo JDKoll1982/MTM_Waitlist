@@ -120,7 +120,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
         Assert.AreEqual("DUPLICATE_KEY", second.ErrorCode);
 
         var rows = await _helper.ExecuteSqlQueryAsync(
-            "SELECT COUNT(*) AS c FROM config_images_locations WHERE scope = 'request_type' AND scope_item_id = @p_scope_item_id;",
+            "SELECT COUNT(*) AS c FROM config_images_locations WHERE scope = 'request_item' AND scope_item_id = @p_scope_item_id;",
             new Dictionary<string, object?> { ["p_scope_item_id"] = _scopeItemId },
             MySqlDatabaseTarget.MtmWaitlist);
 

@@ -13,7 +13,9 @@ namespace MTM_Waitlist.Tests.Module_Mock;
 /// <b>Scope.</b> This audit scans production and test source (`.cs`, `.xaml`, `.resw`, `.csproj`, `.json`)
 /// and live database artifacts (`.sql`). Design documents under <c>specs/</c> and the workstream notes under
 /// <c>WeekendProject/</c> legitimately record the retirement and are therefore excluded here; the
-/// documentation sweep is tracked by its own tasks (T102, T122, T125).
+/// documentation sweep is tracked by its own tasks (T102, T122, T125). The CodeGraphy graph cache under
+/// <c>.codegraphy/</c> is generated build output, like <c>bin/</c> and <c>obj/</c>: it holds a snapshot of
+/// symbol names taken at index time and is rebuilt from the source, not written by hand.
 /// </para>
 /// <para>
 /// <b>Two deliberate SQL exemptions.</b> A retired object's <c>rollback.sql</c> is the drop artifact the
@@ -39,6 +41,23 @@ public sealed class RetiredSymbolAuditTests
         ("mock master-data service", new Regex(@"\bI?MockMasterDataService\b", RegexOptions.Compiled)),
         ("settings mock control", new Regex(@"\b(UseMockData|MockDataExpander)\b", RegexOptions.Compiled)),
         ("retired mock procedure", new Regex(@"\bsp_mock_", RegexOptions.Compiled)),
+
+        // ── feature 004-unified-card-item-picker (FR-023, SC-012): the request type and subtype vocabulary ──
+        // Identifier-shaped on purpose. Honest retirement prose — "the type/subtype catalog retired with the
+        // vocabulary" — must stay legal; a stray identifier, symbol or scope value must not.
+        ("retired catalog table", new Regex(@"\bwaitlist_request_(types|subtypes)\b", RegexOptions.Compiled)),
+        ("retired catalog read procedure", new Regex(@"\bsp_waitlist_request_(types|subtypes)_get\b", RegexOptions.Compiled)),
+        ("retired catalog seed", new Regex(@"\bseed_waitlist_request_catalog\b", RegexOptions.Compiled)),
+        ("retired type inventory", new Regex(@"\bRequest(Type|Subtype)Inventory\b", RegexOptions.Compiled)),
+        ("retired display-label service", new Regex(@"\bI?Request(Type|Subtype)DisplayLabelService\b", RegexOptions.Compiled)),
+        ("retired subtype name reader", new Regex(@"\bI?RequestSubtypeNameReadService\b", RegexOptions.Compiled)),
+        ("retired legacy mapper", new Regex(@"\bRequestItemLegacyMapper\b", RegexOptions.Compiled)),
+        ("retired image mapping model", new Regex(@"\bRequest(Type|Subtype)ImageMapping\b", RegexOptions.Compiled)),
+        ("retired request-type picture dialog", new Regex(@"\bRequestTypeImagesDialog\w*\b", RegexOptions.Compiled)),
+        ("retired subtype picture dialog", new Regex(@"\bRequestSubtypeImagesDialog\w*\b", RegexOptions.Compiled)),
+        ("retired image scope value", new Regex(@"\brequest_(type|subtype)\b", RegexOptions.Compiled)),
+        ("retired per-subtype local-settings key", new Regex(@"\bMaxAllottedMinutes\b", RegexOptions.Compiled)),
+        ("retired user-visible picture wording", new Regex(@"Request Type & Subtype Images|Request Subtype Images|Manage subtypes|subtype images", RegexOptions.Compiled)),
     ];
 
     /// <summary>File extensions this audit treats as code or database artifacts.</summary>
@@ -50,6 +69,7 @@ public sealed class RetiredSymbolAuditTests
         $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
         $"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}",
         $"{Path.DirectorySeparatorChar}.git{Path.DirectorySeparatorChar}",
+        $"{Path.DirectorySeparatorChar}.codegraphy{Path.DirectorySeparatorChar}",
         $"{Path.DirectorySeparatorChar}specs{Path.DirectorySeparatorChar}",
         $"{Path.DirectorySeparatorChar}WeekendProject{Path.DirectorySeparatorChar}",
         $"{Path.DirectorySeparatorChar}.github{Path.DirectorySeparatorChar}",
@@ -154,6 +174,80 @@ public sealed class RetiredSymbolAuditTests
 
         Assert.AreEqual(0, hits.Count, RepositoryPatternScan.Describe(hits));
     }
+
+    /// <summary>
+    /// The mirror of the scan, and the reason each retirement guard can be trusted: every pattern must bite on a
+    /// representative re-introduction of the symbol it forbids.
+    /// </summary>
+    /// <remarks>
+    /// A pattern that has quietly stopped matching — a widened escape, a renamed symbol, a mistyped group — is a
+    /// guard that reports clean forever, which is worse than no guard at all. The sample set is required to cover
+    /// every declared pattern, so adding a pattern without proving it bites fails the build.
+    /// </remarks>
+    [TestMethod]
+    public void EveryRetiredPattern_BitesOnAReintroductionOfItsSymbol()
+    {
+        var samples = ReintroductionSamples();
+
+        var unsampled = s_retiredSymbols
+            .Select(entry => entry.Description)
+            .Where(description => !samples.ContainsKey(description))
+            .ToList();
+
+        Assert.AreEqual(
+            0,
+            unsampled.Count,
+            "These retired symbols have no re-introduction sample, so nothing proves their pattern still bites: "
+                + string.Join(", ", unsampled));
+
+        var blind = new List<string>();
+        foreach (var (description, pattern) in s_retiredSymbols)
+        {
+            if (!pattern.IsMatch(samples[description]))
+            {
+                blind.Add($"{description} ({pattern}) does not match its own re-introduction: {samples[description]}");
+            }
+        }
+
+        Assert.AreEqual(
+            0,
+            blind.Count,
+            "A retired-symbol pattern that no longer matches its own symbol is a guard that can never fail:"
+                + Environment.NewLine
+                + string.Join(Environment.NewLine, blind));
+    }
+
+    /// <summary>
+    /// One representative re-introduction per retired symbol: the smallest piece of text that should make the
+    /// scan fail if it were ever put back into the repository.
+    /// </summary>
+    private static Dictionary<string, string> ReintroductionSamples() => new(StringComparer.Ordinal)
+    {
+        ["sample-data contract"] = "public interface ISampleDataService { }",
+        ["sample-data service"] = "public sealed class SampleDataService { }",
+        ["sample catalog"] = "public static class SampleOrderCatalog { }",
+        ["mock-toggle setting key"] = "\"Feature.InforVisualMockData\": true",
+        ["mock-toggle service"] = "public interface IMockToggleService { }",
+        ["mock routing stack"] = "public sealed class MockRoutingResolver { }",
+        ["mock mode stack"] = "public enum MockModeState { }",
+        ["mock configuration service"] = "public sealed class MockConfigurationService { }",
+        ["mock master-data service"] = "public interface IMockMasterDataService { }",
+        ["settings mock control"] = "<ToggleSwitch x:Name=\"UseMockData\" />",
+        ["retired mock procedure"] = "\"sp_mock_parts_get\"",
+        ["retired catalog table"] = "CREATE TABLE waitlist_request_types (",
+        ["retired catalog read procedure"] = "CREATE PROCEDURE sp_waitlist_request_subtypes_get()",
+        ["retired catalog seed"] = "-- Seed: seed_waitlist_request_catalog",
+        ["retired type inventory"] = "RequestSubtypeInventory.Groups",
+        ["retired display-label service"] = "public interface IRequestTypeDisplayLabelService { }",
+        ["retired subtype name reader"] = "public interface IRequestSubtypeNameReadService { }",
+        ["retired legacy mapper"] = "RequestItemLegacyMapper.Map(\"Forklift Assist\", null)",
+        ["retired image mapping model"] = "public sealed class RequestSubtypeImageMapping { }",
+        ["retired request-type picture dialog"] = "new RequestTypeImagesDialogViewModel(",
+        ["retired subtype picture dialog"] = "new RequestSubtypeImagesDialogViewModel(",
+        ["retired image scope value"] = "<value>request_subtype</value>",
+        ["retired per-subtype local-settings key"] = "SaveSettingAsync(\"Urgency.MaxAllottedMinutes.Pickup Coil\", 45)",
+        ["retired user-visible picture wording"] = "<value>Manage subtypes</value>",
+    };
 
     /// <summary>
     /// T026's placeholder-resource gate: no shipped resource <i>value</i> is a placeholder address, a sample

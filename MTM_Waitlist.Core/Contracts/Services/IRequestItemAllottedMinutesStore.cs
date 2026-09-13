@@ -13,9 +13,9 @@ namespace MTM_Waitlist.Module_Core.Contracts.Services;
 /// implementation is supplied by the composition root.
 /// </para>
 /// <para>
-/// <b>Neither member may be answered by a per-Windows-user local key.</b> The retired
-/// <c>Urgency.MaxAllottedMinutes.&lt;subtype&gt;</c> keys are gone; a value keyed to a profile cannot be shown
-/// beside a value read through a stored procedure.
+/// <b>Neither member may be answered by a per-Windows-user local key.</b> The retired per-subtype local
+/// settings keys are gone; a value keyed to a profile cannot be shown beside a value read through a stored
+/// procedure.
 /// </para>
 /// <para>
 /// <b>The observed average never reaches <see cref="SetAllottedMinutesAsync"/>.</b> It is display data read

@@ -39,7 +39,7 @@ public sealed class UrgencySettingsServiceTests
     {
         Assert.IsNull(
             typeof(UrgencySettingsService).GetConstructor([typeof(ILocalSettingsService)]),
-            "The allotment is no longer written to Urgency.MaxAllottedMinutes.<subtype> in %LOCALAPPDATA% (§D4).");
+            "The allotment is no longer written to a per-subtype local-settings key in %LOCALAPPDATA% (§D4).");
     }
 
     [TestMethod]

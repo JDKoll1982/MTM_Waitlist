@@ -66,14 +66,11 @@
   <data name="Settings_SettingsPage_ToggleSwitch2_Tooltip" xml:space="preserve">
     <value>Toggle Switch</value>
   </data>
-  <data name="Settings_Manage_request_type_images_Tooltip" xml:space="preserve">
-    <value>Manage Request Type Images</value>
-  </data>
   <data name="Settings_Manage_work_center_images_Tooltip" xml:space="preserve">
     <value>Manage Work Center Images</value>
   </data>
-  <data name="Settings_Manage_request_subtype_images_Tooltip" xml:space="preserve">
-    <value>Manage Request Subtype Images</value>
+  <data name="Settings_Manage_request_item_images_Tooltip" xml:space="preserve">
+    <value>Manage Request Item Images</value>
   </data>
   <data name="Settings_SettingsPage_ComboBox1_Tooltip" xml:space="preserve">
     <value>Combo Box</value>

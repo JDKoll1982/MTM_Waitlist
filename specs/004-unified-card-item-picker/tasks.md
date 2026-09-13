@@ -875,7 +875,7 @@ Cross-cutting retirement, documentation, and validation against the Success Crit
 
 ### Wave 4 — the audit guard that makes the retirement stick (single task)
 
-- [ ] **T110** Extend `RetiredSymbolAuditTests` (FR-023, SC-012): add every symbol, wording and scope value this
+- [x] **T110** Extend `RetiredSymbolAuditTests` (FR-023, SC-012): add every symbol, wording and scope value this
   feature retires — the two catalog tables, the two read procedures, the catalog seed, the retired models, services,
   dialogs, the per-type controls, `request_type` / `request_subtype`, and the retired user-visible wording — so a
   return of any of them fails the build. The existing pattern set is the extension point; do not invent a second
