@@ -607,12 +607,6 @@
     <value>Show only my requests</value>
   </data>
 
-  <!-- Details page: the remaining-time value is evaluated once when the page opens and this page has no
-       minute tick, so the caption states that rather than letting the countdown look live. -->
-  <data name="Waitlist_Detail.RemainingTimeNote" xml:space="preserve">
-    <value>Does not update automatically.</value>
-  </data>
-
   <!-- Details page: a section whose read threw reports the failure in place with a retry, rather than
        rendering as absence or as the page-level store outage (data-model.md §1 invariants 1–3). -->
   <data name="Waitlist_Detail.BlockFailed.Message" xml:space="preserve">
@@ -621,6 +615,107 @@
   <data name="Waitlist_Detail.BlockFailed.Retry" xml:space="preserve">
     <value>Retry</value>
   </data>
+
+  <!-- Waitlist handler actions (file 03). The action labels double as the icon buttons' accessible names,
+       and every refusal is a plain sentence: an action the application cannot perform must say why rather
+       than appearing to do nothing. -->
+  <data name="Waitlist_Action.AcceptRequest" xml:space="preserve">
+    <value>Accept request</value>
+  </data>
+  <data name="Waitlist_Action.CompleteRequest" xml:space="preserve">
+    <value>Complete request</value>
+  </data>
+  <data name="Waitlist_Action.CancelRequest" xml:space="preserve">
+    <value>Cancel request</value>
+  </data>
+  <data name="Waitlist_Action.Refused.AcceptTaken" xml:space="preserve">
+    <value>Another handler already took this request. Please choose a different one.</value>
+  </data>
+  <data name="Waitlist_Action.Refused.AcceptGone" xml:space="preserve">
+    <value>That request is no longer on the list. Please choose a different one.</value>
+  </data>
+  <data name="Waitlist_Action.AcceptRefusedTitle" xml:space="preserve">
+    <value>Request already taken</value>
+  </data>
+  <data name="Waitlist_Action.Refused.CompleteOrRelease" xml:space="preserve">
+    <value>That request is not assigned to you, or it has already been finished.</value>
+  </data>
+  <data name="Waitlist_Action.Refused.Cancel" xml:space="preserve">
+    <value>Only the person who raised a request can cancel it, and only while it is still waiting.</value>
+  </data>
+  <data name="Waitlist_Action.Refused.Unexpected" xml:space="preserve">
+    <value>That action could not be completed. The request is unchanged.</value>
+  </data>
+  <data name="Waitlist_Action.Cancel.DialogTitle" xml:space="preserve">
+    <value>Cancel this request?</value>
+  </data>
+  <data name="Waitlist_Action.Cancel.DialogMessage" xml:space="preserve">
+    <value>This withdraws your request and takes it off the list. Give a reason so the floor knows why.</value>
+  </data>
+  <data name="Waitlist_Action.Cancel.Confirm" xml:space="preserve">
+    <value>Cancel request</value>
+  </data>
+  <data name="Waitlist_Action.Cancel.Dismiss" xml:space="preserve">
+    <value>Keep request</value>
+  </data>
+  <data name="Waitlist_Action.Cancel.ReasonPlaceholder" xml:space="preserve">
+    <value>Reason (optional)</value>
+  </data>
+  <data name="Waitlist_Action.Dismiss" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Waitlist_Note.Label" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Waitlist_Note.Placeholder" xml:space="preserve">
+    <value>Send a short message about this request.</value>
+  </data>
+  <data name="Waitlist_Note.Save" xml:space="preserve">
+    <value>Send message</value>
+  </data>
+  <data name="Waitlist_Note.Saved" xml:space="preserve">
+    <value>Message sent.</value>
+  </data>
+  <data name="Waitlist_Note.Empty" xml:space="preserve">
+    <value>There is nothing to send yet.</value>
+  </data>
+  <data name="Waitlist_Note.Unchanged" xml:space="preserve">
+    <value>That message is already on the request.</value>
+  </data>
+  <data name="Waitlist_Note.Refused" xml:space="preserve">
+    <value>The message could not be sent. The request is unchanged.</value>
+  </data>
+  <data name="Waitlist_History.Title" xml:space="preserve">
+    <value>Request history</value>
+  </data>
+  <data name="Waitlist_History.Summary" xml:space="preserve">
+    <value>Who said what, and when.</value>
+  </data>
+  <data name="Waitlist_History.Empty" xml:space="preserve">
+    <value>Nothing has been recorded against this request yet.</value>
+  </data>
+  <data name="Waitlist_History.SystemActor" xml:space="preserve">
+    <value>System</value>
+  </data>
+
+  <!-- What the history says for the lifecycle events, so a row's message column reads as a sentence rather
+       than a bare employee number or a blank. -->
+  <data name="Waitlist_History.Event.Accepted" xml:space="preserve">
+    <value>Accepted this request.</value>
+  </data>
+  <data name="Waitlist_History.Event.Completed" xml:space="preserve">
+    <value>Completed this request.</value>
+  </data>
+  <data name="Waitlist_History.Event.Released" xml:space="preserve">
+    <value>Released this request back to the open list.</value>
+  </data>
+
+  <!-- The new-message indicator on the request card: a message someone sent on a request since the viewer last
+       opened it. Lifecycle changes (created, accepted, completed, canceled) are not messages and do not raise it. -->
+  <data name="Waitlist_NewMessages.Tooltip" xml:space="preserve">
+    <value>New message. Open the request to read it.</value>
+  </data>
+
 
   <!-- Settings → Operations → New Request Alerts: the panel reports this installation's capability rather
        than making a claim about the platform. -->

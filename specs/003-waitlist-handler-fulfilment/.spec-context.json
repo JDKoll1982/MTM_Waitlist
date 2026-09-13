@@ -1,0 +1,1338 @@
+{
+  "workflow": "companion",
+  "specName": "waitlist handler fulfilment",
+  "branch": "master",
+  "currentStep": "implement",
+  "status": "implemented",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T03:29:02.979Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T03:30:39.367Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T03:30:46.460Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:32:52.582Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:33:26.234Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T03:33:32.896Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T03:33:51.210Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:34:18.928Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T03:34:19.031Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T03:34:36.088Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:35:06.456Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:35:06.687Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:35:06.910Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:35:07.138Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:35:24.266Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:35:24.490Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:06.985Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:07.216Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:07.448Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:07.684Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:07.908Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:08.141Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:08.369Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:08.597Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:14.251Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:14.474Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:14.709Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:14.954Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:15.189Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:15.419Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:15.649Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:45:15.876Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:50:50.506Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:50:50.753Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:50:50.983Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:50:51.226Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:53:34.123Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:53:34.345Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:53:34.574Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:53:34.801Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T03:53:35.034Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T03:53:35.174Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T03:57:01.315Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T04:04:39.771Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T04:04:40.013Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T04:04:40.257Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T04:04:40.500Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T04:10:27.892Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T04:38:13.088Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T04:38:13.174Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T039",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T04:38:17.387Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T04:38:17.622Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T041",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T04:38:22.503Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T04:38:22.732Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T15:50:06.922Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T042",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T15:50:24.705Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T15:50:24.705Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T044",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T15:50:24.705Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T045",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T15:50:24.705Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T046",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T15:50:24.705Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T047",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T15:50:24.705Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T048",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T15:50:24.705Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T15:50:24.705Z"
+    }
+  ],
+  "telemetryInstanceId": "02a6b81f-25c0-4c2d-9585-50fcd988103e",
+  "unattended": true,
+  "last_action": "reported defects fixed and re-verified; history read-back recorded as OPEN (defects/Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md, T036)",
+  "coverage": {
+    "FR-001": {
+      "title": "A handler-or-above viewer is offered an icon Accept affordance on an unassigned, unfinished request",
+      "tasks": [
+        "T001",
+        "T008"
+      ]
+    },
+    "FR-002": {
+      "title": "Accepting records the signed-in viewer as assignee, moves the request to In Progress, and persists it",
+      "tasks": [
+        "T008",
+        "T011"
+      ]
+    },
+    "FR-003": {
+      "title": "An accepted request stays visible on the shared list to every viewer",
+      "tasks": [
+        "T008"
+      ]
+    },
+    "FR-004": {
+      "title": "Once accepted, Accept is not offered on the request to any other viewer",
+      "tasks": [
+        "T002",
+        "T007"
+      ]
+    },
+    "FR-005": {
+      "title": "Complete and Release are offered only to the recorded assignee",
+      "tasks": [
+        "T002",
+        "T007",
+        "T014",
+        "T015",
+        "T016"
+      ]
+    },
+    "FR-006": {
+      "title": "Completing moves the request to Done in one step and persists it",
+      "tasks": [
+        "T014"
+      ]
+    },
+    "FR-007": {
+      "title": "Releasing returns the request to the open list with no assignee and is never recorded as a cancellation",
+      "tasks": [
+        "T013",
+        "T014"
+      ]
+    },
+    "FR-008": {
+      "title": "A non-handler viewer is offered no handler action",
+      "tasks": [
+        "T001",
+        "T007"
+      ]
+    },
+    "FR-009": {
+      "title": "No handler action is offered on a finished or cancelled request",
+      "tasks": [
+        "T007",
+        "T016"
+      ]
+    },
+    "FR-010": {
+      "title": "The requester can cancel their own waiting request after confirming and giving a reason",
+      "tasks": [
+        "T003",
+        "T005",
+        "T020",
+        "T021",
+        "T022"
+      ]
+    },
+    "FR-011": {
+      "title": "A cancelled request is recorded with reason and canceller, leaves the active list, and is never deleted",
+      "tasks": [
+        "T013",
+        "T020",
+        "T022"
+      ]
+    },
+    "FR-012": {
+      "title": "Anyone signed in can send a message, and it saves on the first click",
+      "tasks": [
+        "T042",
+        "T045"
+      ],
+      "tests": [
+        "RequestPage_AnyoneSignedInCanSendAMessage",
+        "RequestPage_ARefresh_KeepsAnUnsavedMessageOnScreen"
+      ]
+    },
+    "FR-013": {
+      "title": "History names the sender and hides the internal event type, one row per message",
+      "tasks": [
+        "T037",
+        "T043",
+        "T046"
+      ],
+      "tests": [
+        "RequestPage_HistoryNamesTheSenderAndNotTheMessageType",
+        "HistoryEntry_WithNoAuthor_IsAttributedToTheSystem",
+        "RequestPage_ReadsTheHistoryFromTheStore_NotJustThisSession"
+      ]
+    },
+    "FR-014": {
+      "title": "The card surfaces the handler-needed data the request truthfully carries without adding sections",
+      "tasks": [
+        "T012"
+      ]
+    },
+    "FR-015": {
+      "title": "The available-request list is ordered most-urgent-first from the computed due, remaining and overdue values",
+      "tasks": [
+        "T017",
+        "T018",
+        "T019"
+      ]
+    },
+    "FR-016": {
+      "title": "Every lifecycle action goes through the existing request-lifecycle stored procedures",
+      "tasks": [
+        "T013"
+      ]
+    },
+    "FR-017": {
+      "title": "Every lifecycle action and note change records who did it and when in the audit history",
+      "tasks": [
+        "T013"
+      ]
+    },
+    "FR-018": {
+      "title": "Every action is authorized by the same role and ownership rules the service enforces",
+      "tasks": [
+        "T001",
+        "T007"
+      ]
+    },
+    "FR-019": {
+      "title": "A refused action is reported to the user in plain, actionable language",
+      "tasks": [
+        "T008",
+        "T011",
+        "T020",
+        "T022"
+      ]
+    },
+    "FR-020": {
+      "title": "No control is drawn in the card action area whose activation has no effect",
+      "tasks": [
+        "T002",
+        "T009",
+        "T010",
+        "T015",
+        "T021"
+      ]
+    },
+    "FR-021": {
+      "title": "The accepted card anatomy is not regressed",
+      "tasks": [
+        "T009",
+        "T010",
+        "T026",
+        "T027",
+        "T028"
+      ]
+    },
+    "FR-022": {
+      "title": "Every new user-visible string is localized through the existing resource mechanism",
+      "tasks": [
+        "T004",
+        "T024",
+        "T025"
+      ]
+    },
+    "FR-023": {
+      "title": "After a successful action the list and detail reflect the new stored state without a reload",
+      "tasks": [
+        "T008",
+        "T023"
+      ]
+    },
+    "FR-024": {
+      "tasks": [
+        "T031"
+      ],
+      "title": "Of two handlers claiming one request, exactly one wins and the loser is warned",
+      "tests": [
+        "Accept_TwoHandlersRaceForTheSameRequest_FirstWinsAndSecondIsWarned",
+        "LostClaimWarning_SaysAnotherHandlerTookItAndToChooseSomethingElse"
+      ]
+    },
+    "FR-031": {
+      "title": "A card keeps its own image rather than the resolver placeholder",
+      "tasks": [
+        "T049"
+      ],
+      "tests": [
+        "RequestImagePathPolicyTests"
+      ]
+    },
+    "FR-025": {
+      "title": "Lifecycle actions live on the card, not on the request detail page",
+      "tasks": [
+        "T038",
+        "T039"
+      ],
+      "tests": [
+        "RequestPage_DrawsNoActionButton",
+        "Card_ActionButtonsAreGatedByTheRowsOwnFlags"
+      ]
+    },
+    "FR-026": {
+      "title": "The detail page reloads the request and its history every 30 seconds while open",
+      "tasks": [
+        "T039",
+        "T041"
+      ],
+      "tests": [
+        "RequestPage_RefreshIntervalIsThirtySeconds"
+      ]
+    },
+    "FR-027": {
+      "title": "A card shows a new-message indicator until the viewer has read the message",
+      "tasks": [
+        "T040"
+      ],
+      "tests": [
+        "Card_MessageTheViewerHasNotRead_ShowsTheMarker",
+        "Card_MessageTheViewerHasAlreadyRead_ShowsNoMarker"
+      ]
+    },
+    "FR-028": {
+      "title": "The indicator fires for human messages only, not lifecycle changes",
+      "tasks": [
+        "T044"
+      ],
+      "tests": [
+        "Card_LifecycleChangeOnly_ShowsNoMessageMarker"
+      ]
+    },
+    "FR-029": {
+      "title": "Each lifecycle state gets its own legible status-badge colour",
+      "tasks": [
+        "T048"
+      ],
+      "tests": [
+        "EveryLifecycleStateGetsItsOwnRole",
+        "NoTwoStatusesShareAColour",
+        "EveryStatusBadgeIsReadable"
+      ]
+    },
+    "FR-030": {
+      "title": "Accept and Complete differ in both colour and icon",
+      "tasks": [
+        "T047"
+      ],
+      "tests": [
+        "Card_AcceptAndCompleteAreUnmistakablyDifferent"
+      ]
+    }
+  },
+  "size": "oversized",
+  "classification": {
+    "projectedFiles": 12,
+    "projectedTasks": 24,
+    "scopeSignal": "none",
+    "verdict": "oversized"
+  },
+  "context": [
+    "living spec: none matched (registry covers startup/startup-diagnostics only)",
+    "area: MTM_Waitlist.Waitlist.View (WaitlistViewViewModel, WaitlistViewDetailViewModel, WaitlistRequestService)",
+    "area: Module_Waitlist/Controls/WaitlistLineCardView.xaml + per-type line views",
+    "area: MTM_Waitlist.Core/Services/RequestActionPolicy.cs, UrgencyCalculator.cs",
+    "constraint: verified card anatomy block is frozen - actions occupy the existing action area only",
+    "constraint: no fabricated material identifiers on the card; real item resolution is the separate unified-card workstream"
+  ],
+  "intent": "Make the waitlist workable: handlers can accept, complete and release requests, requesters can cancel their own, and the list leads with the most urgent work.",
+  "expectations": [
+    "Re-implementing the status model, audit trail or transitions - they already exist and are tested",
+    "Real material identifier resolution (coil/part number, quantity, stock location) - owned by the unified card and taxonomy workstream",
+    "Multi-step handoff after completion - hooks only, no behaviour",
+    "A creator Edit affordance with no behaviour behind it",
+    "Analytics on handler performance"
+  ],
+  "approach": "Wire the already-built lifecycle to the screens, with the card in the list as the one surface that offers an action: carry the accept/complete/release/cancel commands and their policy gates on the row so the frozen card reaches them through Order, add a confirm-and-reason prompt seam implemented as a ContentDialog in the composition root, order the list with UrgencyCalculator.OrderMostUrgentFirst off the due value the card already shows, and put the note thread plus the audit history on the read-only detail page, which refreshes itself every 30 seconds while it is open.",
+  "decisions": [
+    {
+      "decision": "Carry the action commands and gate flags on the SampleOrder row",
+      "why": "The card sits inside a DataTemplate whose DataContext is the row, so Order is the only channel that already crosses the template boundary; it changes exactly one XAML file",
+      "rejected": "RelativeSource FindAncestor binding (undocumented for WinUI and unused in the repo) or command dependency properties threaded through the card plus six per-type line views"
+    },
+    {
+      "decision": "Add CanViewerHandleRequests to the existing RequestActionPolicy with the handler role set",
+      "why": "Keeps the UI gate and the service gate provable against each other and stays pure and unit-testable; the vocabulary already exists in SettingsViewModel and ShellViewModel",
+      "rejected": "A new cross-module role-rank service, or an inline literal role check in the view model"
+    },
+    {
+      "decision": "Introduce IWaitlistRequestActionPrompt in the module with a ContentDialog implementation in the composition root",
+      "why": "Mirrors the existing ISetupDialogService/SetupDialogService/NoOpSetupDialogService pair, so the dialog is injectable and the unit gates run headless",
+      "rejected": "Constructing a ContentDialog inside the view model, which throws without a XamlRoot and puts UI composition in a view model"
+    },
+    {
+      "decision": "Order the list by the same due value the card displays, falling back to created plus the sub-type max-allotted",
+      "why": "Keeps the list order and each card remaining-time number from ever disagreeing; GetActiveRequests currently orders by requested time descending, the opposite of most urgent first",
+      "rejected": "Sorting inside GetActiveRequests, whose domain records carry no urgency state, or adding a new sort helper when UrgencyCalculator already owns the rule"
+    },
+    {
+      "decision": "Revise WaitlistLineCardMarkupTests to assert the action buttons are gated rather than absent",
+      "why": "The absence assertion was true only while the buttons were inert; the honest rule now is every button has a Command and a Visibility gate",
+      "rejected": "Deleting the check or keeping an assertion that the wired feature must violate"
+    },
+    {
+      "decision": "Show the lost-claim warning as an acknowledgement-required ContentDialog and keep the inline refusal set",
+      "why": "Two handlers can claim the same request at the same moment; the loser must be told plainly that another handler took it and to choose a different request, not left looking at an unchanged row",
+      "rejected": "An inline message only, which a handler who has already scrolled on may never see"
+    },
+    {
+      "decision": "Read the request back after a refused accept to choose between taken-by-someone-else and gone-from-the-list",
+      "why": "Blaming another handler for a request that has left the list would be a false statement about what happened",
+      "rejected": "One generic refusal sentence for both cases"
+    },
+    {
+      "decision": "Keep Accept offered to any handler on any unclaimed request",
+      "why": "That is the shared-queue design the spec, the seed and OPEN-WORK-NEXT-SPEC 4.3 all require, and it is what makes Release meaningful (a released request goes back so another handler can take it). Runtime evidence confirmed the gate itself is correct: a request claimed by another handler offers no actions at all",
+      "rejected": "Restricting Accept to the viewer own requests, which would make the shared list and Release pointless and contradict FR-003/FR-007"
+    },
+    {
+      "decision": "A card keeps its own image when the image resolver answers with its \"no image available\" placeholder; the resolver only wins when it returns a real image.",
+      "why": "Every waitlist_request_types.default_image_path is NULL and config_images_locations is empty, so the resolver could only ever answer with the placeholder - and it did so without saying which answer it was giving, so the card took it over a working image.",
+      "rejected": "Returning null from the service (breaks the Settings image dialogs, which legitimately show the placeholder as the effective path); initializing the service at startup (moves the defect to the first load); populating the catalog (a data change hiding a code defect)."
+    },
+    {
+      "decision": "The new-message indicator compares against last_message_utc - the newest NoteUpdated entry that carries an author - rather than the queue row's updated_utc.",
+      "why": "updated_utc moves for every lifecycle change, so accepting, completing or cancelling a job flagged the card as though somebody had spoken.",
+      "rejected": "Filtering client-side by re-reading each row's audit trail (N extra reads per list load for a value the list query can produce once); keeping updated_utc and suppressing the marker for a recent status change (a heuristic where a predicate will do)."
+    },
+    {
+      "decision": "Writing on a request has no role gate; anyone signed in may send a message.",
+      "why": "The box was gated on the handler role, and the people who raise requests are the ones with something to say - the floor could not tell a handler anything."
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Plan: wiring-only feature across 2 view models, the row model, the action policy, the card XAML, the detail page, one new prompt seam and its DI line, plus gates G1-G10",
+      "key_finding": "The entire lifecycle service, policy and urgency math already exist and are tested; GetActiveRequests orders newest-first and GetAuditTrail has no caller, so the gap is purely the missing screen surface"
+    },
+    "tasks": {
+      "summary": "30 tasks across Foundational + five user-story phases + Polish, each phase laid out as explicit waves with join lines; no Setup phase because nothing is installed or configured"
+    },
+    "implement": {
+      "summary": "Wired the lifecycle to the screens, then followed it with four fix passes driven by using the build: the actions live on the card (primary action plus Cancel), the request page reads a request rather than acting on it and refreshes itself every 30 seconds, a new-message indicator marks cards with unread human messages, writing is open to anyone signed in and the history names the sender, Accept and Complete are distinguishable, each status has its own badge colour, and a card keeps its own image instead of the resolvers placeholder. Two database artifacts changed: sp_waitlist_request_audit_list was added and sp_waitlist_request_list gained last_message_utc. Final gates: 0 warnings, 0 errors; 888 passed, 0 failed, 19 skipped of 907.",
+      "key_finding": "Every defect found after shipping came from the running app, not the unit gates - text lost to a LostFocus binding and a refresh timer, the message marker firing on lifecycle changes, the resolver placeholder overwriting a working image, and the history rendering an event name where a message belonged. Two of them looked like they worked.",
+      "risks": "Done and Cancelled badge colours are unreachable because the list reads active requests only; no per-request-type image is configured in this database, so card images come from each rows legacy mapping; and the spec is shipped, so its companion journal could not record the post-completion passes."
+    }
+  },
+  "currentTask": "T049",
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Added CanViewerHandleRequests and the handler role set to RequestActionPolicy",
+      "files": [
+        "MTM_Waitlist.Core/Services/RequestActionPolicy.cs"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Added row action state to SampleOrder: urgency, gate flags, commands and action texts",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Added the IWaitlistRequestActionPrompt confirmation and reason seam",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/IWaitlistRequestActionPrompt.cs"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Added the new waitlist action, refusal, note and history strings to the resource file",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Implemented the prompt seam as a ContentDialog against the live XAML root and registered it in DI",
+      "files": [
+        "Services/WaitlistRequestActionPrompt.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Added the headless no-op double for the prompt seam",
+      "files": [
+        "MTM_Waitlist.Tests/NoOpWaitlistRequestActionPrompt.cs"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Added the gate matrix proving every offered action matches RequestActionPolicy for each viewer and state",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Added the signed-in role gate, the Accept command, per-row gates and the refusal message to the list view model",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Restored the gated Accept icon button in the card action area above the compact status pill",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Revised the card markup test: every button carries a Command and every action button is gated",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Added the accept identity and refusal gates to the action tests",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Added handler-data and fixed-layout checks to the card field tests",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelFieldTests.cs"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Added the Complete and Release commands gated to the recorded assignee",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Added the gated Complete and Release icon buttons to the same action area",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Added the complete and release identity gates to the action tests",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Gave each row its urgency state and ordered the list with UrgencyCalculator.OrderMostUrgentFirst",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Wired IUrgencyDeadlineService into the list view model and confirmed the container already registers it",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Added the ordering gates including the countdown-agrees-with-order check",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Added the Cancel command with confirmation and reason through the prompt seam",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Added the gated Cancel affordance to the card action area",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Added the cancel prompt, dismissal, empty-reason and refusal gates",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Added the acknowledgement-required lost-claim warning for concurrent accepts, with pinned copy",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/IWaitlistRequestActionPrompt.cs",
+        "Services/WaitlistRequestActionPrompt.cs",
+        "MTM_Waitlist.Tests/NoOpWaitlistRequestActionPrompt.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Verified and extended the service-level release-vs-cancel gates: a released request is back on the open list the screen reads",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Added the four action commands, the note draft and save, and the audit history rows to the detail view model",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestAuditEntry.cs"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Added the action bar, note editor and request-history blocks to the detail page",
+      "files": [
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Added the detail action, note, history and localization gates",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewDetailActionTests.cs"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Closed the inert-buttons defect with the tests that prove the actions now work",
+      "files": [
+        "defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Added the release entry describing the delivered surface and pointing the older claims at it",
+      "files": [
+        "WeekendProject/ChangeLog.md"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Added the frozen-anatomy guard: 96x96 image, title row, four metadata rows, 36px pill, per-type 2x3 grid",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Validated the Success Criteria: clean build 0 warnings 0 errors and full suite 860 passed / 0 failed",
+      "files": [
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Ran the app as a smoke pass: the list renders, ordering leads with the most overdue work, and the offered actions match ownership at runtime",
+      "files": [
+        "bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Stopped the view-model action continuations resuming off the UI thread; the RPC_E_WRONG_THREAD crash made Complete on the request page appear to do nothing",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Named every constructor parameter in the list view model DI factory so the confirmation seam and deadline service are supplied, plus a registration guard test",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewRegistrationTests.cs"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Rendered each history entry Details so a note shows its text, and recorded the note author",
+      "files": [
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "MTM_Waitlist.Waitlist.View/Services/IWaitlistRequestService.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewDetailActionTests.cs"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Added the stored Canceled spelling to the action policy finished set",
+      "files": [
+        "MTM_Waitlist.Core/Services/RequestActionPolicy.cs"
+      ]
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "Added sp_waitlist_request_audit_list plus the service read that merges store rows with the in-session trail",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_audit_list/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_audit_list/rollback.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "MTM_Waitlist.Waitlist.View/Services/IWaitlistRequestService.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs"
+      ]
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "Two-button card chrome: primary Accept-to-Complete plus Cancel, Release button removed",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T039": {
+      "status": "DONE",
+      "did": "Took the actions off the request page and added the 30-second refresh plus the empty-history state",
+      "files": [
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+      ]
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "New-message marker on the request-type image with a tooltip, cleared by reading the request",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/IWaitlistMessageSeenStore.cs",
+        "MTM_Waitlist.Waitlist.View/Services/LocalWaitlistMessageSeenStore.cs",
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T041": {
+      "status": "DONE",
+      "did": "Resolved the dispatcher when the container hands over none, and made an unusable one leave the page static with a logged reason instead of throwing",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Closed by T037: the request history is now read back from the store",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_audit_list/create.sql"
+      ]
+    },
+    "T042": {
+      "status": "DONE",
+      "did": "Made the message box store on the first click and keep an unsent draft through a refresh",
+      "files": [
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+      ]
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "Stopped the history rendering one note twice by truncating the merge key to seconds",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs"
+      ]
+    },
+    "T044": {
+      "status": "DONE",
+      "did": "Raised the new-message marker only for authored messages via last_message_utc on sp_waitlist_request_list",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_list/create.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs"
+      ]
+    },
+    "T045": {
+      "status": "DONE",
+      "did": "Removed the handler-role gate so anyone signed in can send a message",
+      "files": [
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+      ]
+    },
+    "T046": {
+      "status": "DONE",
+      "did": "History rows name the sender in full and no longer show the message type",
+      "files": [
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestAuditEntry.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs"
+      ]
+    },
+    "T047": {
+      "status": "DONE",
+      "did": "Made Accept and Complete differ in both colour and icon (E8FB versus E930)",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T048": {
+      "status": "DONE",
+      "did": "Gave each lifecycle status its own legible badge colour through RequestStatusPalette",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/RequestStatusPalette.cs",
+        "MTM_Waitlist.Waitlist.View/Converters/RequestStatusToBrushConverter.cs",
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
+        "App.xaml"
+      ]
+    },
+    "T049": {
+      "status": "DONE",
+      "did": "Kept the card own image when the resolver answers with its no-image placeholder",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/RequestImagePathPolicy.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Settings/Services/ImageLocationService.cs"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "Full unit suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "Failed: 0, Passed: 860, Skipped: 19, Total: 879",
+      "warnings": [
+        "GetLocalized() returns the resource key in the headless test host, so localization tests assert against the key lookup rather than English copy; the English copy is pinned separately by a resw-reading test"
+      ]
+    },
+    {
+      "what": "Concurrent claim (FR-024)",
+      "command": "dotnet test --filter FullyQualifiedName~WaitlistViewViewModelActionTests",
+      "result": "The first claim stands, the request stays on the shared list, the winner is not warned, the loser gets exactly one acknowledgement-required warning",
+      "warnings": []
+    },
+    {
+      "what": "Running application smoke pass",
+      "command": "Start-Process win-x64/MTM_Waitlist.exe then UI Automation read of the waitlist list",
+      "result": "List rendered 12 rows most-overdue-first; offered actions at runtime matched ownership exactly: 8 Accept on unclaimed rows, 2 Complete + 2 Release on the signed-in handler own claimed rows, 6 Cancel on the signed-in requester own waiting rows, none elsewhere",
+      "warnings": [
+        "No destructive click was made against live data, so the accept/complete/release round trip itself was not exercised in the running app",
+        "The request detail page was not navigated to by automation; it is covered by the unit gates and the XAML build"
+      ]
+    },
+    {
+      "what": "Clean solution build",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "result": "Build succeeded. 0 Warning(s) 0 Error(s)",
+      "warnings": [
+        "PRI175/PRI278 hit first because a resource key named Waitlist_Action.Cancel was also a scope for Waitlist_Action.Cancel.DialogTitle; renamed the leaf keys to *Request"
+      ]
+    },
+    {
+      "what": "Complete on the request page after the UI-thread fix",
+      "command": "running app: UI Automation Invoke on the request page Complete button, then read the app log",
+      "result": "Request completed and persisted, audit row written, page then offered no actions, no COMException in the log",
+      "warnings": []
+    },
+    {
+      "what": "Full unit suite after the fixes",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "Failed: 0, Passed: 863, Skipped: 19, Total: 882",
+      "warnings": []
+    },
+    {
+      "what": "Card images survive a round trip through the New Request workflow (FR-031)",
+      "result": "pass",
+      "command": "UIA pass on the built app: open the list, read the tiles, enter New Request, return, read the tiles again",
+      "warnings": "Before the fix all three tiles had become the placeholder; after it all three keep their own image and the log carries keeping the row own image pickup_ncm.png instead of the resolver placeholder. Only a navigation reproduces this defect."
+    },
+    {
+      "what": "A message is stored by a click that never focuses the send button (FR-012)",
+      "result": "pass",
+      "command": "UIA InvokePattern on the built app, the exact case that silently lost the text before",
+      "warnings": "Logged Message sent. and produced a single history row naming the sender."
+    },
+    {
+      "what": "The post-completion passes T042-T049 were journaled after all",
+      "result": "pass",
+      "command": "Spec reopened by the human on 2026-09-13, then write-context.py --step implement --status implemented --tasks-file specs/003-waitlist-handler-fulfilment/tasks.md plus --task/--did/--files for the eight summaries",
+      "warnings": "This supersedes the earlier concern that they could not be journaled. The refusal was the shipped status, not a hard limit: with status moved off completed the capture synced 8 new task events (49/49 complete) and closed at status=implemented, and task_summaries rows were then written for T042-T049. Nothing needed to be undone in the record - the task entries were simply absent until the reopen."
+    }
+  ],
+  "concerns": [
+    {
+      "note": "The running-application pass is read-only by design against live plant data, so the accept/complete/release round trip and the detail page were verified by unit gates rather than by clicking through the app",
+      "step": "implement"
+    },
+    {
+      "note": "Two of the three reported defects were invisible to the test suite: a positional DI factory silently dropped optional dependencies, and a view-model await resumed off the UI thread. Both are now guarded where a guard is possible (registration names every parameter) or fixed at the source (no ConfigureAwait(false) in action paths); the thread affinity itself cannot be unit tested without a UI host",
+      "step": "implement"
+    },
+    {
+      "note": "The request history is only as complete as the current session: audit rows are written to the store but never read back, so the history block shows nothing for a request the user has not acted on. Recorded as defects/Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md and left as open task T036 rather than patched, because the read path is a stored procedure that needs live-database validation",
+      "step": "implement"
+    },
+    {
+      "note": "Supersedes the earlier read-only-pass note: the request page WAS exercised in the running app after the fixes - a claimed request was opened, its action bar read, Complete invoked through UI Automation, and the outcome confirmed on screen and in the log. The earlier note describes the first pass only",
+      "step": "implement"
+    },
+    {
+      "note": "The post-completion passes (T042-T049) could not be journaled: the spec had already reached status=completed and the companion writer refuses to append a task finish to a shipped spec (already shipped; not appending). Their ticks are recorded in tasks.md prose instead, and the exception is declared in that file.",
+      "step": "implement",
+      "kind": "workflow"
+    },
+    {
+      "note": "The Done and Cancelled status-badge colours cannot currently be seen: the list is built from GetActiveRequests alone, which returns Pending and Accepted only. They are mapped and tested, but surfacing resolved requests on the list is a product decision.",
+      "step": "implement",
+      "kind": "product"
+    }
+  ]
+}

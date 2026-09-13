@@ -15,6 +15,14 @@ public interface IWaitlistRequestService
 
     IReadOnlyList<WaitlistRequestAuditEntry> GetAuditTrail(Guid requestId);
 
+    /// <summary>
+    /// Reads the request's persisted audit entries from the store and merges them with the ones this session
+    /// already holds, so the request page can show the history that was recorded before the app started.
+    /// Idempotent: re-reading never duplicates an entry. Returns the merged trail, oldest first; a failed read
+    /// leaves the in-memory trail intact rather than reporting an empty history.
+    /// </summary>
+    Task<IReadOnlyList<WaitlistRequestAuditEntry>> LoadAuditTrailAsync(Guid requestId, CancellationToken cancellationToken = default);
+
     void Reset();
 
     Task<int> RefreshFromDatabaseAsync(string? building = null, CancellationToken cancellationToken = default);
@@ -32,9 +40,15 @@ public interface IWaitlistRequestService
 
     /// <summary>
     /// Sets the short handler note on a request (mock + production). Persists the note through the status-update
-    /// path (status unchanged) and records an audit entry. Returns the updated request, or null when not found.
+    /// path (status unchanged) and records an audit entry naming the author. Returns the updated request, or null
+    /// when not found.
     /// </summary>
-    Task<WaitlistRequest?> UpdateNoteAsync(Guid requestId, string? note, CancellationToken cancellationToken = default);
+    Task<WaitlistRequest?> UpdateNoteAsync(
+        Guid requestId,
+        string? note,
+        string? actorEmployeeNumber = null,
+        string? actorEmployeeName = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// A Material-Handler-or-above handler claims an available (Pending) request: auto-assigns it to the given

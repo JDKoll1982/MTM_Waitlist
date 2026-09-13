@@ -19,6 +19,9 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Border
                     Grid.Row="0"
@@ -129,17 +132,6 @@
                             Foreground="{x:Bind ViewModel.Item.RemainingTimeText, Mode=OneWay, Converter={StaticResource RemainingTimeToBrushConverter}}"
                             FontWeight="SemiBold"
                             Text="{x:Bind ViewModel.Item.RemainingTimeText, Mode=OneWay}" />
-
-                        <!-- Sits directly under the remaining-time value: that number is evaluated once when
-                             this page opens and the page has no minute tick, so say so rather than letting it
-                             look live. The list card does tick, so only this page carries the caption. -->
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="2"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Style="{ThemeResource CaptionTextBlockStyle}"
-                            Text="{x:Bind ViewModel.RemainingTimeNoteText}"
-                            TextWrapping="WrapWholeWords" />
 
                         <TextBlock
                             Grid.Column="1"
@@ -328,8 +320,113 @@
                     </StackPanel>
                 </Border>
 
+                <!-- The accept / complete / release / cancel actions are NOT here: they live on the list card,
+                     which is where a handler works through the queue. This page reads the request, takes a note
+                     and shows what has happened to it. -->
+
+                <!-- The request's message box. Anyone signed in may send one — this is how the floor tells whoever
+                     picks the request up what is happening — so it is not gated on the handler role. Text is pushed
+                     to the view model as it is typed: x:Bind defaults TextBox.Text to LostFocus, which meant the
+                     first click read an empty draft and saved nothing. -->
+                <Border
+                    Grid.Row="4"
+                    Margin="0,0,0,16"
+                    Padding="18"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Spacing="8">
+                        <TextBlock
+                            Style="{ThemeResource SubtitleTextBlockStyle}"
+                            Text="{x:Bind ViewModel.NoteLabel, Mode=OneWay}" />
+                        <TextBox
+                            AcceptsReturn="True"
+                            AutomationProperties.Name="{x:Bind ViewModel.NoteLabel, Mode=OneWay}"
+                            PlaceholderText="{x:Bind ViewModel.NotePlaceholder, Mode=OneWay}"
+                            Text="{x:Bind ViewModel.NoteDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextWrapping="Wrap" />
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="12"
+                            Visibility="{x:Bind ViewModel.HasNoteMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.NoteMessage, Mode=OneWay}"
+                                TextWrapping="WrapWholeWords" />
+                        </StackPanel>
+                        <Button
+                            HorizontalAlignment="Left"
+                            Command="{x:Bind ViewModel.SaveNoteCommand}"
+                            Content="{x:Bind ViewModel.NoteSaveText, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- The request's audit trail, read from the store so it covers what happened before this
+                     session, and refreshed every 30 seconds while the page is open. A request with nothing
+                     recorded says so rather than hiding the block, so an empty history stays distinguishable
+                     from one that could not be read. -->
+                <Border
+                    Grid.Row="5"
+                    Margin="0,0,0,16"
+                    Padding="18"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Spacing="8">
+                        <TextBlock
+                            Style="{ThemeResource SubtitleTextBlockStyle}"
+                            Text="{x:Bind ViewModel.HistoryTitle, Mode=OneWay}" />
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{ThemeResource BodyTextBlockStyle}"
+                            Text="{x:Bind ViewModel.HistorySummary, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords" />
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.HistoryRows, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:WaitlistRequestAuditEntry">
+                                    <Grid
+                                        Padding="0,4"
+                                        ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" MinWidth="140" />
+                                            <ColumnDefinition Width="Auto" MinWidth="140" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind OccurredLocalText}" />
+                                        <!-- Who sent it, by name. The message type (created / accepted / completed /
+                                             canceled / note updated) is deliberately not shown: the user needs to
+                                             know who said something, not which audit event carried it. -->
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind ActorDisplayName}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <!-- What was said, in the entry's own words. -->
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            Text="{x:Bind Details}"
+                                            TextWrapping="WrapWholeWords" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.HistoryEmptyText, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords"
+                            Visibility="{x:Bind ViewModel.IsHistoryEmpty, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </StackPanel>
+                </Border>
+
                 <StackPanel
-                    Grid.RowSpan="3"
+                    Grid.RowSpan="6"
                     Padding="24"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"

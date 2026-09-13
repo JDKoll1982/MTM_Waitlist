@@ -102,6 +102,40 @@ public sealed class WaitlistViewViewModelFieldTests
         }
     }
 
+    [TestMethod]
+    public void CreateSessionOrder_SurfacesTheHandlerNeededDataTheRequestCarries()
+    {
+        // FR-014: a handler must be able to read who asked, where it goes, and how urgent it is off the card
+        // itself. Every one of these comes from the request — nothing is derived into a value the request
+        // does not carry, which is why the absent ones stay absent rather than being filled in.
+        var request = Shape("Pickup", "Pickup NCM");
+        var order = WaitlistViewViewModel.CreateSessionOrder(request);
+
+        Assert.AreEqual(request.RequesterEmployeeName, order.RequestedByName, "The handler cannot see who asked.");
+        Assert.AreEqual(request.WorkCenter, order.RequestedPressName, "The handler cannot see where the material goes.");
+        Assert.IsTrue(order.HasWaitingFor, "The handler cannot see how long the request has been waiting.");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(order.RemainingTimeText), "The handler cannot see how urgent the request is.");
+        Assert.AreEqual(
+            request.RequesterEmployeeNumber,
+            order.RequesterEmployeeNumber,
+            "The handler cannot see which employee raised the request.");
+    }
+
+    [TestMethod]
+    public void CreateSessionOrder_AddsNoHandlerSectionToTheCardsFixedLayout()
+    {
+        // FR-021: handler data is surfaced through the card's existing slots, never by adding a section.
+        foreach (var request in EveryRequestShape)
+        {
+            var order = WaitlistViewViewModel.CreateSessionOrder(request);
+
+            Assert.AreEqual(
+                5,
+                order.Fields.Count,
+                $"{Describe(request)}: the card's fixed layout carries five detail slots; this row exposes {order.Fields.Count}.");
+        }
+    }
+
     /// <summary>Builds a request of the given shape carrying distinctive, non-fabricated values.</summary>
     /// <param name="requestType">The request type under test.</param>
     /// <param name="subtype">The subtype, or null for the no-subtype shape.</param>

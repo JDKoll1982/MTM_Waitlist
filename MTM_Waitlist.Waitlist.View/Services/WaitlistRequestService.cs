@@ -106,6 +106,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             AcceptedUtc = ReadDateTimeUtc(row, "accepted_utc"),
             CompletedUtc = ReadDateTimeUtc(row, "completed_utc"),
             ReleasedUtc = ReadDateTimeUtc(row, "released_utc"),
+            UpdatedUtc = ReadDateTimeUtc(row, "updated_utc"),
+            LastMessageUtc = ReadDateTimeUtc(row, "last_message_utc"),
         };
     }
 
@@ -185,6 +187,108 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         return Array.Empty<WaitlistRequestAuditEntry>();
     }
 
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<WaitlistRequestAuditEntry>> LoadAuditTrailAsync(Guid requestId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (_mySqlHelperServer is null)
+        {
+            return GetAuditTrail(requestId);
+        }
+
+        IReadOnlyList<IReadOnlyDictionary<string, object?>> rows;
+        try
+        {
+            rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                "sp_waitlist_request_audit_list",
+                new Dictionary<string, object?>
+                {
+                    ["p_request_public_id"] = requestId.ToString(),
+                },
+                MySqlDatabaseTarget.MtmWaitlist,
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // A history that cannot be read is reported by leaving the in-memory trail in place. Replacing it
+            // with the empty set would render a failed read as "this request has no history".
+            StartupDebugLog.Error("WaitlistRequest", ex, $"Reading the audit trail for request '{requestId}' failed; keeping what this session already holds.");
+            return GetAuditTrail(requestId);
+        }
+
+        var merged = new List<WaitlistRequestAuditEntry>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+
+        void Add(WaitlistRequestAuditEntry entry)
+        {
+            // An entry this session already holds is also in the store, so the two sources overlap. The key is
+            // the entry's own content, which makes the merge idempotent however many times it runs.
+            //
+            // The time component is truncated to whole seconds on purpose. occurred_utc is a MySQL datetime
+            // with no fractional part, so the store returns 04:38:00 while this session stamped 04:38:00.897 —
+            // comparing full precision made one note look like two, and the history showed it twice.
+            var key = string.Join(
+                '|',
+                TruncateToSeconds(entry.OccurredUtc).ToString("O", System.Globalization.CultureInfo.InvariantCulture),
+                entry.EventType,
+                entry.EmployeeNumber ?? string.Empty,
+                entry.Details ?? string.Empty);
+
+            if (seen.Add(key))
+            {
+                merged.Add(entry);
+            }
+        }
+
+        foreach (var row in rows)
+        {
+            var mapped = MapRowToAuditEntry(requestId, row);
+            if (mapped is not null)
+            {
+                Add(mapped);
+            }
+        }
+
+        foreach (var entry in GetAuditTrail(requestId))
+        {
+            Add(entry);
+        }
+
+        var ordered = merged.OrderBy(entry => entry.OccurredUtc).ToArray();
+        _auditTrail[requestId] = ordered.ToList();
+        StartupDebugLog.Info("WaitlistRequest", $"Audit trail loaded for request '{requestId}'. Entries={ordered.Length}.");
+        return ordered;
+    }
+
+    /// <summary>
+    /// Drops the sub-second part of a timestamp, matching the precision the store can hold
+    /// (<c>occurred_utc</c> is a MySQL <c>datetime</c>). This is what lets an entry this session recorded be
+    /// recognised as the same entry the store returns, instead of being merged in beside it as a duplicate.
+    /// </summary>
+    private static DateTimeOffset TruncateToSeconds(DateTimeOffset value) =>
+        new(value.Ticks - (value.Ticks % TimeSpan.TicksPerSecond), value.Offset);
+
+    private static WaitlistRequestAuditEntry? MapRowToAuditEntry(Guid requestId, IReadOnlyDictionary<string, object?> row)    {
+        var eventType = ReadString(row, "event_type");
+        if (string.IsNullOrWhiteSpace(eventType))
+        {
+            return null;
+        }
+
+        return new WaitlistRequestAuditEntry
+        {
+            RequestId = requestId,
+            FromStatus = ReadNullableString(row, "from_status"),
+            ToStatus = ReadNullableString(row, "to_status"),
+            EventType = eventType,
+            OccurredUtc = ReadDateTimeUtc(row, "occurred_utc") ?? DateTimeOffset.UtcNow,
+            EmployeeNumber = ReadNullableString(row, "actor_employee_number"),
+            EmployeeName = ReadNullableString(row, "actor_employee_name"),
+            Details = ReadNullableString(row, "details"),
+        };
+    }
+
     public async Task<bool> TransitionStatusAsync(Guid requestId, string status, string? cancellationReason = null, string? canceledByEmployeeNumber = null, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -246,6 +350,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                 : existing.CompletedUtc,
             ReleasedUtc = existing.ReleasedUtc,
             Note = existing.Note,
+            LastMessageUtc = existing.LastMessageUtc,
         };
 
         _requests[requestId] = updated;
@@ -328,7 +433,12 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         _auditTrail.Clear();
     }
 
-    public async Task<WaitlistRequest?> UpdateNoteAsync(Guid requestId, string? note, CancellationToken cancellationToken = default)
+    public async Task<WaitlistRequest?> UpdateNoteAsync(
+        Guid requestId,
+        string? note,
+        string? actorEmployeeNumber = null,
+        string? actorEmployeeName = null,
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -343,6 +453,11 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         {
             return existing; // no change
         }
+
+        // The audit entry is written first so the row can carry the very instant the message was recorded. The
+        // card's new-message indicator compares against it, and a second clock reading would drift from the
+        // timestamp the store holds.
+        var entry = await RecordAuditAsync(requestId, existing.Status, existing.Status, "NoteUpdated", actorEmployeeNumber, actorEmployeeName, normalizedNote, cancellationToken).ConfigureAwait(false);
 
         var updated = new WaitlistRequest
         {
@@ -367,12 +482,15 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             AcceptedUtc = existing.AcceptedUtc,
             CompletedUtc = existing.CompletedUtc,
             ReleasedUtc = existing.ReleasedUtc,
+            UpdatedUtc = existing.UpdatedUtc,
             Note = normalizedNote,
+            // A note written by a person is a message; clearing the note is not, so the marker keeps the time of
+            // the last thing somebody actually said.
+            LastMessageUtc = string.IsNullOrWhiteSpace(normalizedNote) ? existing.LastMessageUtc : entry.OccurredUtc,
         };
 
         _requests[requestId] = updated;
         StartupDebugLog.Info("WaitlistRequest", $"Note updated for request '{requestId}'. Status='{updated.Status}'.");
-        await RecordAuditAsync(requestId, existing.Status, updated.Status, "NoteUpdated", null, null, normalizedNote, cancellationToken).ConfigureAwait(false);
 
         // Persist the note through the status-update path (status unchanged).
         if (_mySqlHelperServer is not null)
@@ -452,9 +570,10 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             CompletedUtc = existing.CompletedUtc,
             ReleasedUtc = existing.ReleasedUtc,
             Note = existing.Note,
+            LastMessageUtc = existing.LastMessageUtc,
         };
 
-        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Accepted", handler, handlerEmployeeName, handler, cancellationToken).ConfigureAwait(false);
+        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Accepted", handler, handlerEmployeeName, "Waitlist_History.Event.Accepted".GetLocalized(), cancellationToken).ConfigureAwait(false);
         StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' accepted by handler '{handler}'. Status 'Pending' -> 'Accepted'.");
         return updated;
     }
@@ -503,9 +622,10 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             CompletedUtc = existing.CompletedUtc ?? DateTimeOffset.UtcNow,
             ReleasedUtc = existing.ReleasedUtc,
             Note = existing.Note,
+            LastMessageUtc = existing.LastMessageUtc,
         };
 
-        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Completed", handler, handlerEmployeeName, null, cancellationToken).ConfigureAwait(false);
+        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Completed", handler, handlerEmployeeName, "Waitlist_History.Event.Completed".GetLocalized(), cancellationToken).ConfigureAwait(false);
         StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' completed by handler '{handler}'. Status 'Accepted' -> 'Completed'.");
         return updated;
     }
@@ -556,9 +676,10 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             CompletedUtc = existing.CompletedUtc,
             ReleasedUtc = DateTimeOffset.UtcNow,
             Note = existing.Note,
+            LastMessageUtc = existing.LastMessageUtc,
         };
 
-        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Released", handler, handlerEmployeeName, null, cancellationToken).ConfigureAwait(false);
+        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Released", handler, handlerEmployeeName, "Waitlist_History.Event.Released".GetLocalized(), cancellationToken).ConfigureAwait(false);
         StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' released by handler '{handler}'. Status 'Accepted' -> 'Pending' (not a cancellation).");
         return updated;
     }
@@ -742,7 +863,11 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         return WaitlistRequestSubmitResult.Success(request);
     }
 
-    private async Task RecordAuditAsync(
+    /// <summary>
+    /// Appends an audit entry in memory and to the store, and hands the entry back so a caller can use the
+    /// instant it recorded rather than taking its own clock reading a moment later.
+    /// </summary>
+    private async Task<WaitlistRequestAuditEntry> RecordAuditAsync(
         Guid requestId,
         string? fromStatus,
         string? toStatus,
@@ -789,6 +914,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                 cancellationToken).ConfigureAwait(false);
             StartupDebugLog.Info("WaitlistRequest", $"Audit entry persisted for request '{requestId}'. EventType='{entry.EventType}', From='{(entry.FromStatus ?? "null")}', To='{(entry.ToStatus ?? "null")}'.");
         }
+
+        return entry;
     }
 
     private async Task NotifyRequestCreatedAsync(WaitlistRequest request)

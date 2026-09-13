@@ -2,10 +2,13 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
@@ -19,24 +22,35 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     private readonly IWaitlistRequestService? _requestService;
     private readonly IWaitlistInventoryService? _inventoryService;
     private readonly IImageLocationService? _imageLocationService;
+    private readonly string _currentEmployeeNumber;
+    private readonly string _currentEmployeeName;
+    private readonly string _currentRole;
+    private DispatcherQueue? _dispatcherQueue;
+    private readonly IWaitlistMessageSeenStore? _messageSeenStore;
     private IDisposable? _imageLocationSubscription;
     private int? _lastOrderId;
+
+    /// <summary>
+    /// How often the page re-reads the request and its history while it stays open, so activity another
+    /// handler caused — an accept, a completion, a note — shows up without the viewer reloading.
+    /// </summary>
+    public static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(30);
+
+    private DispatcherQueueTimer? _refreshTimer;
+
+    /// <summary>
+    /// The request this page is showing, remembered once it has been resolved so the page stays on the same
+    /// request across a transition. Without it, completing or cancelling would resolve nothing on the reload
+    /// — the request is no longer on the open list it was found on — and the page would blank instead of
+    /// showing the state the action produced.
+    /// </summary>
+    private Guid? _resolvedRequestId;
 
     [ObservableProperty]
     public partial SampleOrder? Item
     {
         get; set;
     }
-
-    /// <summary>
-    /// Caption shown under the remaining-time value on the details page.
-    /// </summary>
-    /// <remarks>
-    /// This view model builds its row once in <see cref="OnNavigatedTo"/> and owns no dispatcher tick, so
-    /// unlike the list card this countdown does not advance while the page is open. The caption says so
-    /// instead of letting the number look live.
-    /// </remarks>
-    public string RemainingTimeNoteText => "Waitlist_Detail.RemainingTimeNote".GetLocalized();
 
     [ObservableProperty]
     public partial string EmptyStateMessage
@@ -120,7 +134,10 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         IBuildingSelectionService buildingSelectionService,
         IImageLocationService? imageLocationService = null,
         IWaitlistRequestService? requestService = null,
-        IWaitlistInventoryService? inventoryService = null)
+        IWaitlistInventoryService? inventoryService = null,
+        StartupState? startupState = null,
+        DispatcherQueue? dispatcherQueue = null,
+        IWaitlistMessageSeenStore? messageSeenStore = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -130,7 +147,79 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _imageLocationService = imageLocationService;
         _requestService = requestService;
         _inventoryService = inventoryService;
+        _currentEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
+        _currentEmployeeName = startupState?.EmployeeName?.Trim() ?? string.Empty;
+        _currentRole = startupState?.CurrentRole?.Trim() ?? string.Empty;
+        _dispatcherQueue = dispatcherQueue;
+        _messageSeenStore = messageSeenStore;
         SortInventoryCommand = new RelayCommand<string>(SortInventoryBy);
+    }
+
+    /// <summary>
+    /// Starts the periodic refresh. The first tick is one full interval away — the page has just been loaded,
+    /// so there is nothing to refresh yet. A host to which no timer can be given leaves the page static rather
+    /// than throwing out of navigation.
+    /// </summary>
+    /// <remarks>
+    /// The dispatcher is taken from whatever the container handed over and, failing that, from the thread this
+    /// runs on. That fallback matters: a factory resolved while navigation was still completing can find
+    /// <c>GetForCurrentThread()</c> empty and hand over a null, which used to leave the page silently static
+    /// instead of refreshing — the timer simply never started. This runs from <c>OnNavigatedTo</c>, which is the
+    /// UI thread, so the fallback is the right queue whenever there is one at all.
+    /// <para>
+    /// A dispatcher being reachable is not the same as its being usable. A thread can report a queue whose
+    /// timer cannot be constructed, and the queue lookup itself can throw where there is no dispatcher at all
+    /// (the test host does exactly that). Both cases leave the page static and say so in the log, which is the
+    /// difference between a page that does not refresh and a page nobody can tell is not refreshing.
+    /// </para>
+    /// </remarks>
+    private void StartRefreshTimer()
+    {
+        if (_refreshTimer is null)
+        {
+            DispatcherQueueTimer timer;
+
+            try
+            {
+                var dispatcher = _dispatcherQueue ?? DispatcherQueue.GetForCurrentThread();
+
+                if (dispatcher is null)
+                {
+                    StartupDebugLog.Info("WaitlistDetail", "No dispatcher is available, so the request page will not refresh while it is open.");
+                    return;
+                }
+
+                _dispatcherQueue = dispatcher;
+                timer = dispatcher.CreateTimer();
+            }
+            catch (Exception ex)
+            {
+                StartupDebugLog.Error("WaitlistDetail", ex, "The request page could not get a refresh timer, so it will not refresh while it is open.");
+                return;
+            }
+
+            timer.Interval = RefreshInterval;
+            timer.IsRepeating = true;
+            timer.Tick += OnRefreshTick;
+            _refreshTimer = timer;
+        }
+
+        _refreshTimer.Start();
+        StartupDebugLog.Info("WaitlistDetail", $"The request page will refresh every {RefreshInterval.TotalSeconds:0} seconds while it is open.");
+    }
+
+    private void StopRefreshTimer() => _refreshTimer?.Stop();
+
+    private async void OnRefreshTick(DispatcherQueueTimer sender, object args)
+    {
+        try
+        {
+            await RefreshFromStoreAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("WaitlistDetail", ex, "The periodic refresh of the request page failed.");
+        }
     }
 
     /// <summary>
@@ -174,6 +263,206 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
         StartupDebugLog.Info("WaitlistDetail", $"SortInventoryBy '{normalized}' descending={descending}. Count={InventoryRows.Count}.");
     }
+
+    // ── Note and history ──────────────────────────────────────────────────────────────────────────
+    //
+    // The accept / complete / release / cancel actions live on the list card, not here: the card is where a
+    // handler is working through the queue. This page reads the request, lets a handler leave a note, and
+    // shows what has happened to it.
+
+    /// <summary>The message being written, seeded from the message the request carries.</summary>
+    [ObservableProperty]
+    public partial string NoteDraft { get; set; } = string.Empty;
+
+    /// <summary>The stored message the draft was last seeded from, so an in-progress edit is recognisable.</summary>
+    private string _storedNote = string.Empty;
+
+    /// <summary>
+    /// True while the box holds something the viewer has typed that is not stored yet. The periodic refresh
+    /// must not seed over it: this page reloads every 30 seconds, and a tick landing mid-sentence used to erase
+    /// what was being written.
+    /// </summary>
+    private bool _isNoteDirty;
+
+    partial void OnNoteDraftChanged(string value) =>
+        _isNoteDirty = !string.Equals((value ?? string.Empty).Trim(), _storedNote, StringComparison.Ordinal);
+
+    /// <summary>Caption above the message box.</summary>
+    public string NoteLabel => "Waitlist_Note.Label".GetLocalized();
+
+    /// <summary>Placeholder shown in the note editor.</summary>
+    public string NotePlaceholder => "Waitlist_Note.Placeholder".GetLocalized();
+
+    /// <summary>Label for the send action.</summary>
+    public string NoteSaveText => "Waitlist_Note.Save".GetLocalized();
+
+    /// <summary>Plain-language outcome of the last note change, or empty when there is nothing to report.</summary>
+    [ObservableProperty]
+    public partial string NoteMessage { get; private set; } = string.Empty;
+
+    /// <summary>Whether there is a note outcome to show.</summary>
+    public bool HasNoteMessage => !string.IsNullOrWhiteSpace(NoteMessage);
+
+    partial void OnNoteMessageChanged(string value) => OnPropertyChanged(nameof(HasNoteMessage));
+
+    /// <summary>
+    /// The request's audit trail, newest last, read straight from the service. A request with no readable
+    /// history produces no rows, and the history block hides itself rather than drawing an empty shell.
+    /// </summary>
+    public ObservableCollection<WaitlistRequestAuditEntry> HistoryRows { get; } = new();
+
+    /// <summary>Heading for the history block.</summary>
+    public string HistoryTitle => "Waitlist_History.Title".GetLocalized();
+
+    /// <summary>One-line description of the history block.</summary>
+    public string HistorySummary => "Waitlist_History.Summary".GetLocalized();
+
+    /// <summary>Whether there is a history to show.</summary>
+    public bool HasHistory => HistoryRows.Count > 0;
+
+    /// <summary>
+    /// Stores the message and records who sent it in the request's history. Anyone signed in may send one: the
+    /// box is how the floor tells whoever picks the request up what is going on, so it is deliberately not
+    /// gated on the handler role. Every click answers — an empty box says there is nothing to send rather than
+    /// looking broken, and an unchanged message says so rather than reporting a write that did not happen.
+    /// </summary>
+    [RelayCommand]
+    private async Task SaveNoteAsync()
+    {
+        if (Item is not { RequestId: Guid requestId } || _requestService is null)
+        {
+            NoteMessage = "Waitlist_Note.Refused".GetLocalized();
+            return;
+        }
+
+        var note = (NoteDraft ?? string.Empty).Trim();
+        var stored = (Item.Note ?? string.Empty).Trim();
+
+        if (note.Length == 0 && stored.Length == 0)
+        {
+            NoteMessage = "Waitlist_Note.Empty".GetLocalized();
+            return;
+        }
+
+        if (string.Equals(note, stored, StringComparison.Ordinal))
+        {
+            // The service treats an identical note as no change and writes nothing, so claiming a save here
+            // would promise a history entry that never appears.
+            NoteMessage = "Waitlist_Note.Unchanged".GetLocalized();
+            return;
+        }
+
+        try
+        {
+            var updated = await _requestService.UpdateNoteAsync(requestId, note, _currentEmployeeNumber, _currentEmployeeName);
+            if (updated is null)
+            {
+                NoteMessage = "Waitlist_Note.Refused".GetLocalized();
+                return;
+            }
+
+            // The write is done, so the draft is no longer an unsaved edit: settle it before the refresh runs,
+            // otherwise the refresh would treat it as dirty and keep the pre-send text on screen.
+            _storedNote = (updated.Note ?? string.Empty).Trim();
+            _isNoteDirty = false;
+            NoteMessage = "Waitlist_Note.Saved".GetLocalized();
+            await RefreshFromStoreAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("WaitlistDetail", ex, "Sending the message failed; the request is unchanged.");
+            NoteMessage = "Waitlist_Note.Refused".GetLocalized();
+        }
+    }
+
+    /// <summary>Clears the note's outcome message.</summary>
+    [RelayCommand]
+    private void DismissNoteMessage() => NoteMessage = string.Empty;
+
+    /// <summary>
+    /// Rebuilds the page from the store and reloads the request's history. This is what keeps the page current:
+    /// it runs after a note is saved and on the periodic refresh while the page stays open, so activity another
+    /// handler caused arrives without the viewer doing anything.
+    /// </summary>
+    private async Task RefreshFromStoreAsync()
+    {
+        try
+        {
+            LoadItemAndSections();
+            await LoadHistoryAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("WaitlistDetail", ex, "Refreshing the request page failed; the page keeps the previous state.");
+        }
+    }
+
+    /// <summary>
+    /// Seeds the message box from the request on screen — but never over an edit in progress. The page reloads
+    /// every 30 seconds, and seeding unconditionally meant a tick could erase what the viewer was typing.
+    /// </summary>
+    private void ApplyItemState(SampleOrder? item)
+    {
+        _storedNote = (item?.Note ?? string.Empty).Trim();
+
+        if (_isNoteDirty)
+        {
+            return;
+        }
+
+        NoteDraft = _storedNote;
+    }
+
+    /// <summary>
+    /// Reads the request's history from the store and renders it. The read merges with whatever this session
+    /// already recorded, so an action taken here and an action taken by someone else both appear (FR-013).
+    /// </summary>
+    /// <remarks>
+    /// Opening the request is also what clears its new-message indicator on the list card, and the marker is the
+    /// newest entry rather than "now" — so an entry that lands while the page is open re-flags the card instead
+    /// of being silently swallowed by a page that was already looking at it.
+    /// </remarks>
+    public async Task LoadHistoryAsync(CancellationToken cancellationToken = default)
+    {
+        HistoryRows.Clear();
+
+        if (Item is not { RequestId: Guid requestId } || _requestService is null)
+        {
+            RaiseHistoryChanged();
+            return;
+        }
+
+        var entries = await _requestService.LoadAuditTrailAsync(requestId, cancellationToken).ConfigureAwait(true);
+
+        foreach (var entry in entries)
+        {
+            HistoryRows.Add(entry);
+        }
+
+        if (_messageSeenStore is not null)
+        {
+            var newest = entries.Count > 0 ? entries[^1].OccurredUtc : DateTimeOffset.UtcNow;
+            await _messageSeenStore.MarkSeenAsync(requestId, newest, cancellationToken).ConfigureAwait(true);
+        }
+
+        RaiseHistoryChanged();
+    }
+
+    /// <summary>
+    /// Whether the request has no history at all. The block says so rather than disappearing, so "nothing has
+    /// happened yet" stays distinguishable from "the history could not be read".
+    /// </summary>
+    public bool IsHistoryEmpty => HistoryRows.Count == 0;
+
+    /// <summary>Localized line shown when a request genuinely has no history yet.</summary>
+    public string HistoryEmptyText => "Waitlist_History.Empty".GetLocalized();
+
+    private void RaiseHistoryChanged()
+    {
+        OnPropertyChanged(nameof(HasHistory));
+        OnPropertyChanged(nameof(IsHistoryEmpty));
+    }
+
     public void OnNavigatedTo(object parameter)
     {
         _lastOrderId = parameter switch
@@ -191,6 +480,10 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
 
         LoadItemAndSections();
+
+        // The history is a store read, so it is awaited separately from the synchronous row/section build.
+        _ = LoadHistoryAsync();
+        StartRefreshTimer();
 
         if (_inventoryService is not null && Item is not null)
         {
@@ -237,15 +530,41 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     {
         Item = null;
 
-        if (_lastOrderId is int orderId && _requestService is not null)
+        if (_requestService is null)
+        {
+            ApplyItemState(null);
+            IsItemPresent = false;
+            IsEmptyStateVisible = true;
+            EmptyStateMessage = "No waitlist request or coil details are available to show.";
+            return;
+        }
+
+        // The request this page already resolved wins, so a transition that takes the request off the open
+        // list shows that new state rather than blanking the page the user is standing on.
+        WaitlistRequest? match = _resolvedRequestId is Guid known
+            ? _requestService.GetRequest(known)
+            : null;
+
+        if (match is null && _lastOrderId is int orderId)
         {
             var requests = _requestService.GetActiveRequests(_buildingSelectionService.SelectedBuilding);
-            var match = requests.FirstOrDefault(request => request.Id.GetHashCode() == orderId);
-            if (match is not null)
-            {
-                Item = WaitlistViewViewModel.CreateSessionOrder(match);
-            }
+            match = requests.FirstOrDefault(request => request.Id.GetHashCode() == orderId);
         }
+
+        if (match is not null)
+        {
+            if (_resolvedRequestId != match.Id)
+            {
+                // A different request means the box starts clean: an unsaved draft belongs to the request it was
+                // written on, not to whatever the viewer opens next.
+                _isNoteDirty = false;
+            }
+
+            _resolvedRequestId = match.Id;
+            Item = WaitlistViewViewModel.CreateSessionOrder(match);
+        }
+
+        ApplyItemState(Item);
 
         IsItemPresent = Item is not null;
         IsEmptyStateVisible = Item is null;
@@ -256,6 +575,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
     public void OnNavigatedFrom()
     {
+        // The page is no longer on screen, so it must stop reading the store every 30 seconds.
+        StopRefreshTimer();
         _imageLocationSubscription?.Dispose();
         _imageLocationSubscription = null;
     }

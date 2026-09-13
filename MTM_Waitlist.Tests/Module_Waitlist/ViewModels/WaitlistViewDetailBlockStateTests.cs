@@ -169,6 +169,9 @@ public sealed class WaitlistViewDetailBlockStateTests
 
         public virtual IReadOnlyList<WaitlistRequestAuditEntry> GetAuditTrail(Guid requestId) => [];
 
+        public virtual Task<IReadOnlyList<WaitlistRequestAuditEntry>> LoadAuditTrailAsync(Guid requestId, CancellationToken cancellationToken = default)
+            => Task.FromResult(GetAuditTrail(requestId));
+
         public virtual void Reset()
         {
         }
@@ -184,7 +187,7 @@ public sealed class WaitlistViewDetailBlockStateTests
         public virtual Task<WaitlistRequestCancelResult> CancelOwnRequestAsync(Guid requestId, string requesterEmployeeNumber, string? reason = null, CancellationToken cancellationToken = default)
             => throw new NotSupportedException();
 
-        public virtual Task<WaitlistRequest?> UpdateNoteAsync(Guid requestId, string? note, CancellationToken cancellationToken = default)
+        public virtual Task<WaitlistRequest?> UpdateNoteAsync(Guid requestId, string? note, string? actorEmployeeNumber = null, string? actorEmployeeName = null, CancellationToken cancellationToken = default)
             => Task.FromResult<WaitlistRequest?>(null);
 
         public virtual Task<WaitlistRequest?> AcceptAsync(Guid requestId, string handlerEmployeeNumber, string? handlerEmployeeName = null, CancellationToken cancellationToken = default)

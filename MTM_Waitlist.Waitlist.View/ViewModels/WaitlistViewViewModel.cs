@@ -14,6 +14,7 @@ using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 
 namespace MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -24,8 +25,31 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService _waitlistRequestService;
     private readonly IImageLocationService? _imageLocationService;
     private readonly IBuildingSelectionService _buildingSelectionService;
-    private readonly DispatcherQueue? _dispatcherQueue;
+    private DispatcherQueue? _dispatcherQueue;
     private readonly string _currentRequesterEmployeeNumber;
+    private readonly string _currentEmployeeName;
+    private readonly string _currentRole;
+    private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt? _actionPrompt;
+    private readonly IUrgencyDeadlineService? _urgencyDeadlineService;
+    private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? _messageSeenStore;
+
+    /// <summary>
+    /// Max-allotted time per sub-type for the load in flight. The urgency of every row needs one, and every
+    /// row of a sub-type needs the same one, so a list of N rows costs one lookup per distinct sub-type
+    /// rather than N. Cleared at the start of each load so a settings change is picked up.
+    /// </summary>
+    private readonly Dictionary<string, TimeSpan> _maxAllottedCache = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>The documented default max-allotted time, used when no deadline service is supplied or the sub-type has no override.</summary>
+    private static readonly TimeSpan DefaultMaxAllotted = TimeSpan.FromMinutes(30);
+
+    /// <summary>
+    /// The ordering key for a row whose due time cannot be derived. It is not overdue and carries the longest
+    /// possible remaining time, so it sorts after every row that does carry an urgency without the ordering
+    /// rule pretending it is something it is not.
+    /// </summary>
+    private static readonly UrgencyState NoUrgency = new() { Remaining = TimeSpan.MaxValue, IsOverdue = false };
+
     private IDisposable? _imageLocationSubscription;
     private long _refreshVersion;
     private bool _isSubscribed;
@@ -58,7 +82,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IImageLocationService? imageLocationService = null,
         DispatcherQueue? dispatcherQueue = null,
         StartupState? startupState = null,
-        IStoreAvailabilityTracker? storeAvailabilityTracker = null)
+        IStoreAvailabilityTracker? storeAvailabilityTracker = null,
+        MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt? actionPrompt = null,
+        IUrgencyDeadlineService? urgencyDeadlineService = null,
+        MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? messageSeenStore = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -70,6 +97,11 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _imageLocationService = imageLocationService;
         _dispatcherQueue = dispatcherQueue;
         _currentRequesterEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
+        _currentEmployeeName = startupState?.EmployeeName?.Trim() ?? string.Empty;
+        _currentRole = startupState?.CurrentRole?.Trim() ?? string.Empty;
+        _actionPrompt = actionPrompt;
+        _urgencyDeadlineService = urgencyDeadlineService;
+        _messageSeenStore = messageSeenStore;
 
         // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
         // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
@@ -105,6 +137,324 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private void OnStoreUnavailablePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         OnPropertyChanged(nameof(StoreUnavailableMessage));
+    }
+
+    /// <summary>
+    /// True when the signed-in viewer's role may handle requests at all (Material Handler or above). The
+    /// screen uses it only to decide what to offer; the service re-checks it on every action, so a screen
+    /// built from stale data can never widen what the viewer is allowed to do (FR-018).
+    /// </summary>
+    public bool CanHandleRequests => RequestActionPolicy.CanViewerHandleRequests(_currentRole);
+
+    /// <summary>
+    /// Plain-language explanation of the last refused action, or empty when nothing was refused. A refusal
+    /// is reported here rather than in a dialog so it never blocks the list, and it is never silent (FR-019).
+    /// </summary>
+    [ObservableProperty]
+    public partial string ActionRefusalMessage { get; private set; } = string.Empty;
+
+    /// <summary>Whether there is a refusal to show.</summary>
+    public bool HasActionRefusalMessage => !string.IsNullOrWhiteSpace(ActionRefusalMessage);
+
+    partial void OnActionRefusalMessageChanged(string value) => OnPropertyChanged(nameof(HasActionRefusalMessage));
+
+    /// <summary>Dismisses the refusal message.</summary>
+    [RelayCommand]
+    private void DismissActionRefusal() => ActionRefusalMessage = string.Empty;
+
+    /// <summary>
+    /// Claims an available request for the signed-in handler. Offered only while the row's gate says so.
+    /// </summary>
+    /// <remarks>
+    /// Two handlers may try to claim the same request at the same moment. The store settles it — the first
+    /// claim wins and the second gets nothing back — so the loser must be told plainly that someone else got
+    /// there first and that they should pick another request. That is a warning the user has to acknowledge,
+    /// not a quiet line on a list they have already scrolled past. The winner's claim is never touched here:
+    /// this method only ever reports what the store decided.
+    /// </remarks>
+    [RelayCommand]
+    private async Task AcceptRequestAsync(SampleOrder? order)
+    {
+        if (order is not { RequestId: Guid requestId, CanAccept: true })
+        {
+            return;
+        }
+
+        WaitlistRequest? updated;
+        try
+        {
+            // No ConfigureAwait(false) in any of these action paths: the continuation sets bindable state
+            // (the refusal message) and may open a dialog, and both are UI-thread-only. Resuming on a pool
+            // thread throws RPC_E_WRONG_THREAD (0x8001010E), which surfaces as the action doing nothing.
+            updated = await _waitlistRequestService
+                .AcceptAsync(requestId, _currentRequesterEmployeeNumber, _currentEmployeeName);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("Waitlist", ex, "Claiming the request failed; the row is unchanged.");
+            ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
+            return;
+        }
+
+        if (updated is not null)
+        {
+            ActionRefusalMessage = string.Empty;
+            await MarkActivitySeenAsync(requestId, DateTimeOffset.UtcNow);
+            return;
+        }
+
+        // The store refused the claim. Either another handler got there first, or the request has left the
+        // list; both leave this handler needing to choose something else.
+        var message = _waitlistRequestService.GetRequest(requestId) is null
+            ? "Waitlist_Action.Refused.AcceptGone".GetLocalized()
+            : "Waitlist_Action.Refused.AcceptTaken".GetLocalized();
+
+        ActionRefusalMessage = message;
+        await ShowActionWarningAsync("Waitlist_Action.AcceptRefusedTitle".GetLocalized(), message);
+    }
+
+    /// <summary>
+    /// Shows an action warning the user must acknowledge. A warning that cannot be shown (a headless host, or
+    /// a dialog that throws) must not lose the report: the inline refusal is already set by the caller.
+    /// </summary>
+    private async Task ShowActionWarningAsync(string title, string message)
+    {
+        if (_actionPrompt is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _actionPrompt
+                .ShowWarningAsync(title, message, "Waitlist_Action.Dismiss".GetLocalized());
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("Waitlist", ex, "The action warning could not be shown; the refusal is still reported on the list.");
+        }
+    }
+
+    /// <summary>
+    /// Marks the viewer's own claimed request Done. Offered only to the recorded assignee; refused in plain
+    /// language when the store disagrees with the screen (FR-005/FR-006).
+    /// </summary>
+    [RelayCommand]
+    private async Task CompleteRequestAsync(SampleOrder? order)
+    {
+        if (order is not { RequestId: Guid requestId, CanCompleteOrRelease: true })
+        {
+            return;
+        }
+
+        await RunHandlerActionAsync(
+            requestId,
+            "Waitlist_Action.Refused.CompleteOrRelease".GetLocalized(),
+            () => _waitlistRequestService.CompleteAsync(requestId, _currentRequesterEmployeeNumber, _currentEmployeeName));
+    }
+
+    /// <summary>
+    /// Returns the viewer's own claimed request to the open list so another handler can take it. A release is
+    /// not a cancellation: the request comes back as available with no assignee (FR-007).
+    /// </summary>
+    /// <remarks>
+    /// The card shows two buttons — the primary (Accept, becoming Complete) and Cancel — so this has no button
+    /// of its own since the card was re-laid out. It is kept on the view model rather than deleted because the
+    /// release transition is real, tested and one line from being surfaced again; nothing else can put a
+    /// claimed request back on the open list.
+    /// </remarks>
+    [RelayCommand]
+    private async Task ReleaseRequestAsync(SampleOrder? order)
+    {
+        if (order is not { RequestId: Guid requestId, CanCompleteOrRelease: true })
+        {
+            return;
+        }
+
+        await RunHandlerActionAsync(
+            requestId,
+            "Waitlist_Action.Refused.CompleteOrRelease".GetLocalized(),
+            () => _waitlistRequestService.ReleaseAsync(requestId, _currentRequesterEmployeeNumber, _currentEmployeeName));
+    }
+
+    /// <summary>
+    /// Runs a handler action against the store and reports its outcome: a null answer means the store
+    /// refused (someone else took the request, or it is no longer yours to act on), which is reported rather
+    /// than swallowed. The list itself refreshes through <see cref="IWaitlistRequestService.RequestsChanged"/>,
+    /// which every transition already raises, so the new state arrives without a manual reload (FR-023).
+    /// </summary>
+    private async Task RunHandlerActionAsync(Guid requestId, string refusalMessage, Func<Task<WaitlistRequest?>> action)
+    {
+        try
+        {
+            var updated = await action();
+            ActionRefusalMessage = updated is null ? refusalMessage : string.Empty;
+
+            if (updated is not null)
+            {
+                await MarkActivitySeenAsync(requestId, DateTimeOffset.UtcNow);
+            }
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("Waitlist", ex, "A waitlist request action failed; the row is unchanged.");
+            ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
+        }
+    }
+
+    /// <summary>
+    /// Stops the request in front of the viewer, after confirming and taking a reason. Two viewers may do this,
+    /// and the right rule is chosen from the row rather than from the button: the person who raised a request
+    /// may withdraw it while it is still waiting, and the handler who accepted one may back out of it. A
+    /// dismissed prompt performs no action at all (FR-010/FR-011).
+    /// </summary>
+    [RelayCommand]
+    private async Task CancelRequestAsync(SampleOrder? order)
+    {
+        if (order is not { RequestId: Guid requestId, CanCancelRequest: true })
+        {
+            return;
+        }
+
+        if (_actionPrompt is null)
+        {
+            // No prompt to ask with means no confirmation can be obtained, so the action must not run and
+            // must not pass silently either.
+            ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
+            return;
+        }
+
+        string? reason;
+        try
+        {
+            reason = await _actionPrompt.RequestCancellationReasonAsync(
+                "Waitlist_Action.Cancel.DialogTitle".GetLocalized(),
+                "Waitlist_Action.Cancel.DialogMessage".GetLocalized(),
+                "Waitlist_Action.Cancel.Confirm".GetLocalized(),
+                "Waitlist_Action.Cancel.Dismiss".GetLocalized());
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("Waitlist", ex, "The cancel confirmation could not be shown; nothing was cancelled.");
+            ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
+            return;
+        }
+
+        if (reason is null)
+        {
+            // The viewer backed out. Nothing happened, so there is nothing to report.
+            return;
+        }
+
+        var isRequester = IsRequesterOrder(order, _currentRequesterEmployeeNumber);
+
+        try
+        {
+            bool cancelled;
+            if (isRequester && CanRequesterCancel(order))
+            {
+                var result = await _waitlistRequestService
+                    .CancelOwnRequestAsync(requestId, _currentRequesterEmployeeNumber, reason);
+
+                cancelled = result.Status == WaitlistRequestCancelStatus.Success;
+            }
+            else
+            {
+                // The assignee backing out of a request they took. The service validates who may do this and
+                // from which state; the screen only asks.
+                cancelled = await _waitlistRequestService
+                    .TransitionStatusAsync(requestId, "Canceled", reason, _currentRequesterEmployeeNumber);
+            }
+
+            ActionRefusalMessage = cancelled
+                ? string.Empty
+                : "Waitlist_Action.Refused.Cancel".GetLocalized();
+
+            if (cancelled)
+            {
+                await MarkActivitySeenAsync(requestId, DateTimeOffset.UtcNow);
+            }
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("Waitlist", ex, "Cancelling the request failed; the request is unchanged.");
+            ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
+        }
+    }
+
+    /// <summary>
+    /// Gives every row its gate flags, its carried action commands, its accessible action names and its
+    /// new-message indicator. This is the screen's *view* of the rules the service enforces; a flag is never
+    /// true where the service would refuse, and a button is drawn only while its flag is true.
+    /// </summary>
+    /// <remarks>
+    /// The card draws two buttons: the primary — Accept while the request is available, Complete once the
+    /// viewer has claimed it — and Cancel. Cancel is offered to the requester while their request is still
+    /// waiting, and to the assignee of a claimed request, which is what makes it appear alongside Complete.
+    /// </remarks>
+    private async Task ApplyHandlerActionStateAsync(IReadOnlyList<SampleOrder> orders, DateTimeOffset now)
+    {
+        var canHandle = CanHandleRequests;
+
+        foreach (var order in orders)
+        {
+            var status = order.Status;
+            var assignee = order.AssignedMaterialHandler;
+            var isRequester = IsRequesterOrder(order, _currentRequesterEmployeeNumber);
+            var isAssignee = RequestActionPolicy.CanViewerCompleteOrRelease(status, assignee, _currentRequesterEmployeeNumber, canHandle);
+
+            order.CanAccept = RequestActionPolicy.CanViewerAccept(status, canHandle);
+            order.CanCompleteOrRelease = isAssignee;
+            order.CanCancelRequest = (isRequester && CanRequesterCancel(order)) || isAssignee;
+
+            order.AcceptCommand = order.CanAccept ? AcceptRequestCommand : null;
+            order.AcceptActionText = order.CanAccept ? "Waitlist_Action.AcceptRequest".GetLocalized() : string.Empty;
+
+            order.CompleteCommand = order.CanCompleteOrRelease ? CompleteRequestCommand : null;
+            order.CompleteActionText = order.CanCompleteOrRelease ? "Waitlist_Action.CompleteRequest".GetLocalized() : string.Empty;
+
+            order.CancelCommand = order.CanCancelRequest ? CancelRequestCommand : null;
+            order.CancelActionText = order.CanCancelRequest ? "Waitlist_Action.CancelRequest".GetLocalized() : string.Empty;
+
+            order.HasNewMessages = await HasUnseenActivityAsync(order).ConfigureAwait(false);
+            order.NewMessageTooltip = order.HasNewMessages ? "Waitlist_NewMessages.Tooltip".GetLocalized() : string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Whether a message arrived on this request after the viewer last read it. The signal is the newest
+    /// message <b>written by a person</b>, and the store remembers when the viewer last looked — so the
+    /// indicator clears when they read the request and stays clear across a restart.
+    /// </summary>
+    /// <remarks>
+    /// A lifecycle change deliberately does not raise this. Job created, accepted, completed and canceled are
+    /// things the system recorded, not things somebody said, and flagging them turned every routine transition
+    /// into an unread message. The row carries <see cref="SampleOrder.LastMessageUtc"/> — the newest note entry
+    /// with an author — and a request nobody has written on never raises the indicator at all.
+    /// </remarks>
+    private async Task<bool> HasUnseenActivityAsync(SampleOrder order)
+    {
+        if (_messageSeenStore is null || order.RequestId is not Guid requestId || order.LastMessageUtc is not DateTimeOffset written)
+        {
+            return false;
+        }
+
+        var lastSeen = await _messageSeenStore.GetLastSeenUtcAsync(requestId).ConfigureAwait(false);
+        return lastSeen is null || written > lastSeen;
+    }
+
+    /// <summary>
+    /// Records that the viewer has now seen this request's activity, so its indicator clears. Called when they
+    /// open the request and after they act on it — their own action is not news to them.
+    /// </summary>
+    private async Task MarkActivitySeenAsync(Guid requestId, DateTimeOffset upToUtc)
+    {
+        if (_messageSeenStore is null)
+        {
+            return;
+        }
+
+        await _messageSeenStore.MarkSeenAsync(requestId, upToUtc).ConfigureAwait(false);
     }
 
     public async void OnNavigatedTo(object parameter)
@@ -156,16 +506,34 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// </remarks>
     private void StartMinuteTicker()
     {
-        if (_dispatcherQueue is null)
-        {
-            return;
-        }
-
         if (_minuteTicker is null)
         {
-            _minuteTicker = _dispatcherQueue.CreateTimer();
-            _minuteTicker.IsRepeating = true;
-            _minuteTicker.Tick += OnMinuteTick;
+            DispatcherQueueTimer ticker;
+
+            try
+            {
+                var dispatcher = _dispatcherQueue ?? DispatcherQueue.GetForCurrentThread();
+
+                if (dispatcher is null)
+                {
+                    return;
+                }
+
+                _dispatcherQueue = dispatcher;
+                ticker = dispatcher.CreateTimer();
+            }
+            catch (Exception ex)
+            {
+                // A dispatcher is not always available — the queue lookup itself throws where a thread has none,
+                // and a reachable queue does not always hand out a timer. The countdown text is not worth
+                // throwing out of navigation over: it simply stays where it was.
+                StartupDebugLog.Error("WaitlistRequest", ex, "The list could not get a countdown timer, so the remaining-time text will not tick.");
+                return;
+            }
+
+            ticker.IsRepeating = true;
+            ticker.Tick += OnMinuteTick;
+            _minuteTicker = ticker;
         }
 
         _minuteTicker.Interval = TimeUntilNextMinute(DateTimeOffset.Now);
@@ -261,9 +629,12 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         var activeRequests = _waitlistRequestService.GetActiveRequests(building);
         var activeRequestCount = activeRequests.Count;
         var workCenterImageLookup = await BuildWorkCenterImageLookupAsync(cancellationToken: default).ConfigureAwait(false);
+        var now = DateTimeOffset.UtcNow;
+        _maxAllottedCache.Clear();
         foreach (var request in activeRequests)
         {
             var sessionOrder = CreateSessionOrder(request);
+            sessionOrder.Urgency = await ResolveUrgencyAsync(request, now).ConfigureAwait(false);
             await ApplyResolvedImagesAsync(sessionOrder, request, workCenterImageLookup).ConfigureAwait(false);
             newItems.Add(sessionOrder);
         }
@@ -278,6 +649,14 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         {
             newItems = newItems.Where(order => IsRequesterOrder(order, _currentRequesterEmployeeNumber)).ToList();
         }
+
+        // Most-urgent-first: overdue work first, then the least time remaining. The ordering key is the same
+        // due value the card's countdown is drawn from, so the list order and the number on each card can
+        // never contradict each other (FR-015).
+        newItems = UrgencyCalculator.OrderMostUrgentFirst(newItems, order => order.Urgency ?? NoUrgency).ToList();
+
+        // What this viewer may do to each row is decided here, once, from the rules the service also uses.
+        await ApplyHandlerActionStateAsync(newItems, DateTimeOffset.UtcNow).ConfigureAwait(false);
 
         await ApplySourceUpdateAsync(newItems, refreshVersion);
         StartupDebugLog.Info("Waitlist", $"Loaded building '{building}'. SessionRequests={activeRequestCount}, TotalRows={Source.Count}, MyRequestsOnly={ShowMyRequestsOnly}, SearchQuery='{SearchQuery}'.");
@@ -342,6 +721,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             Id = request.Id.GetHashCode(),
             RequestId = request.Id,
             RequesterEmployeeNumber = request.RequesterEmployeeNumber,
+            AssignedMaterialHandler = request.AssignedMaterialHandler,
+            Note = request.Note,
             Title = WaitlistRequestTitles.For(request.RequestType, request.Subtype),
             Status = request.Status,
             RequestedByName = string.IsNullOrWhiteSpace(request.RequesterEmployeeName) ? "Current user" : request.RequesterEmployeeName,
@@ -350,6 +731,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             WaitingForText = GetWaitingForText(request.RequestedUtc),
             RequestedUtc = request.RequestedUtc,
             TargetTimeUtc = request.TargetTimeUtc,
+            LastMessageUtc = request.LastMessageUtc,
             ImagePath = ResolveImagePath(request.RequestType, request.Subtype),
             IsOverdue = request.IsOverdue,
             IsOverdueAtSource = request.IsOverdue,
@@ -376,6 +758,43 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         {
             item.Fields.Add(new WaitlistField { Label = string.Empty, Value = string.Empty });
         }
+    }
+
+    /// <summary>
+    /// Derives a row's urgency from the same due value the card shows: the stored target time when the
+    /// request carries one, so the ordering key and the countdown are one number. When the request has no
+    /// target the due time is the sub-type's max-allotted window, which is what the New Request flow would
+    /// have stamped onto it.
+    /// </summary>
+    private async Task<UrgencyState?> ResolveUrgencyAsync(WaitlistRequest request, DateTimeOffset now)
+    {
+        if (request.TargetTimeUtc is DateTimeOffset target)
+        {
+            return UrgencyCalculator.Compute(request.RequestedUtc, target - request.RequestedUtc, now);
+        }
+
+        var maxAllotted = await GetMaxAllottedAsync(request.Subtype).ConfigureAwait(false);
+        return UrgencyCalculator.Compute(request.RequestedUtc, maxAllotted, now);
+    }
+
+    /// <summary>
+    /// Max-allotted time for a sub-type, memoised for the load in flight. Falls back to the documented
+    /// default when no deadline service is configured (a headless host) or the sub-type has no override.
+    /// </summary>
+    private async Task<TimeSpan> GetMaxAllottedAsync(string? subtype)
+    {
+        var key = subtype?.Trim() ?? string.Empty;
+        if (_maxAllottedCache.TryGetValue(key, out var cached))
+        {
+            return cached;
+        }
+
+        var maxAllotted = _urgencyDeadlineService is null
+            ? DefaultMaxAllotted
+            : await _urgencyDeadlineService.GetMaxAllottedAsync(key).ConfigureAwait(false);
+
+        _maxAllottedCache[key] = maxAllotted;
+        return maxAllotted;
     }
 
     /// <summary>
@@ -467,9 +886,18 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             try
             {
                 var resolvedImagePath = await ResolveRequestImagePathAsync(request, cancellationToken).ConfigureAwait(false);
-                if (!string.IsNullOrWhiteSpace(resolvedImagePath))
+                if (RequestImagePathPolicy.IsUsableResolvedPath(resolvedImagePath))
                 {
-                    order.ResolvedImagePath = resolvedImagePath;
+                    order.ResolvedImagePath = resolvedImagePath!;
+                }
+                else if (!string.IsNullOrWhiteSpace(resolvedImagePath))
+                {
+                    // The service had nothing configured and answered with its own placeholder. Taking it would
+                    // replace this row's working image with a "no image available" card, so the row keeps the
+                    // image it already has. Logged because the substitution is otherwise invisible.
+                    StartupDebugLog.Info(
+                        "WaitlistRequest",
+                        $"Request '{request.Id}' has no configured image; keeping the row's own image '{order.ImagePath}' instead of the resolver's placeholder.");
                 }
             }
             catch

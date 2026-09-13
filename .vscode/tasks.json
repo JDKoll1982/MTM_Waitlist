@@ -85,6 +85,23 @@
 					"MSBUILDDISABLENODEREUSE": "1"
 				}
 			}
+		},
+		{
+			"label": "Build MTM_Waitlist",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"${workspaceFolder}/MTM_Waitlist.sln",
+				"-p:Configuration=Debug",
+				"-p:Platform=x64",
+				"/m:1",
+				"/nodeReuse:false"
+			],
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
 		}
 	]
 }

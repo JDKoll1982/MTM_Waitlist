@@ -47,6 +47,7 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<IShellContentProvider, ShellContentProvider>();
         services.AddSingleton<IAppLifecycleService, AppLifecycleService>();
         services.AddSingleton<ISetupDialogService, SetupDialogService>();
+        services.AddSingleton<IWaitlistRequestActionPrompt, WaitlistRequestActionPrompt>();
         services.AddSingleton<IWorkCenterImageService, MTM_Waitlist.Module_Settings.Services.ImageLocationService>();
         services.AddSingleton<ILocalSettingsService, MTM_Waitlist.Module_Settings.Services.LocalSettingsService>();
         services.AddSingleton<IIgnoredLocationsService, MTM_Waitlist.Module_Core.Services.IgnoredLocationsService>();
@@ -151,7 +152,15 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<SetupDunnageTypePage>();
         services.AddTransient<SetupReviewPage>();
         services.AddTransient<SetupCompletionPage>();
-        services.AddTransient<WaitlistViewDetailViewModel>();
+        services.AddTransient<WaitlistViewDetailViewModel>(provider => new WaitlistViewDetailViewModel(
+            navigationService: provider.GetRequiredService<INavigationService>(),
+            buildingSelectionService: provider.GetRequiredService<IBuildingSelectionService>(),
+            imageLocationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>(),
+            requestService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
+            inventoryService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistInventoryService>(),
+            startupState: provider.GetRequiredService<MTM_Waitlist.Module_Core.Models.StartupState>(),
+            dispatcherQueue: DispatcherQueue.GetForCurrentThread(),
+            messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>()));
         services.AddTransient<WaitlistViewDetailPage>();
         services.AddTransient<NewRequestWorkCenterViewModel>();
         services.AddTransient<NewRequestWorkCenterPage>();
@@ -169,13 +178,20 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<NewRequestResultPage>();
         services.AddTransient<ControlInspectorDetailViewModel>();
         services.AddTransient<ControlInspectorDetailPage>();
+        // Named arguments on purpose: every constructor parameter is supplied explicitly. A positional call
+        // would silently leave the optional ones null, and a null prompt seam means the handler gets no
+        // confirmation and no lost-claim warning at all — a control the user is shown whose wiring is absent.
         services.AddTransient<WaitlistViewViewModel>(provider => new WaitlistViewViewModel(
-            provider.GetRequiredService<INavigationService>(),
-            provider.GetRequiredService<IBuildingSelectionService>(),
-            provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
-            provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>(),
-            DispatcherQueue.GetForCurrentThread(),
-            provider.GetRequiredService<MTM_Waitlist.Module_Core.Models.StartupState>()));
+            navigationService: provider.GetRequiredService<INavigationService>(),
+            buildingSelectionService: provider.GetRequiredService<IBuildingSelectionService>(),
+            waitlistRequestService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
+            imageLocationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>(),
+            dispatcherQueue: DispatcherQueue.GetForCurrentThread(),
+            startupState: provider.GetRequiredService<MTM_Waitlist.Module_Core.Models.StartupState>(),
+            storeAvailabilityTracker: provider.GetRequiredService<IStoreAvailabilityTracker>(),
+            actionPrompt: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt>(),
+            urgencyDeadlineService: provider.GetRequiredService<IUrgencyDeadlineService>(),
+            messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();

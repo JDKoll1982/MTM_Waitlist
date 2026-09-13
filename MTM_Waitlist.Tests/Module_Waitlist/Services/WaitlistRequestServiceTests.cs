@@ -990,6 +990,13 @@ public sealed class WaitlistRequestServiceTests
         Assert.IsFalse(service.GetAuditTrail(request.Id).Any(entry => entry.EventType == "Canceled"), "Release must not record a Canceled audit event.");
         Assert.IsTrue(service.GetAuditTrail(request.Id).Any(entry => entry.EventType == "Released"));
 
+        // The claim the handler gave up is gone from the stored row, and the request is back on the very list
+        // the screen reads — not merely marked available in memory (FR-007).
+        Assert.IsTrue(
+            service.GetActiveRequests("Expo Drive").Any(item => item.Id == request.Id),
+            "A released request must be back on the open list the screen reads.");
+        Assert.IsNull(service.GetRequest(request.Id)!.AssignedMaterialHandler, "The stored row must carry no assignee after a release.");
+
         // After release the request is available again to any handler.
         var reaccepted = await service.AcceptAsync(request.Id, "9002");
         Assert.IsNotNull(reaccepted);

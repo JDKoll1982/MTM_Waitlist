@@ -7,7 +7,7 @@
 >
 > For the broader, longer-running repo changelog, see the root `CHANGELOG.md`.
 >
-> **Most recent update:** 2026-09-12
+> **Most recent update:** 2026-09-13
 
 ---
 
@@ -15,6 +15,173 @@
 
 > Work landed this weekend but not yet cut into a numbered release. Items are grouped by the type of
 > change, newest first.
+
+### 2026-09-13 — Request images stop disappearing after a visit to New Request
+
+> Specification: `specs/003-waitlist-handler-fulfilment/` (task T049). Defect record:
+> `defects/High-NewRequestVisitReplacesCardImagesWithThePlaceholder.md`.
+
+**Fixed**
+
+- **The pictures on the request cards no longer turn into the "no image available" placeholder after you open
+  the New Request workflow and go back.** Every card used to lose its request-type image the first time you
+  entered that workflow, and it stayed lost until the app was restarted. The picture was never a work-center
+  image — it was the app's own *DEFAULT REQUEST TYPE — NO IMAGE AVAILABLE* card, and the reason it appeared is
+  recorded in the defect note.
+
+The cause was a question of who is allowed to answer "there is no image". The image resolver replies with the
+placeholder whenever nothing is configured for a request type, and the card treated that reply as a real image
+and put it over the picture it already had. Nothing initializes that resolver during start-up, so the first
+list load skipped it and looked correct; opening New Request initialized it as a side effect, and from then on
+every card resolved to the placeholder. The card now keeps its own image when the resolver has nothing real to
+offer, and the case is recorded in the log so it is visible next time.
+
+### 2026-09-13 — Every request state now looks like itself
+
+> Specification: `specs/003-waitlist-handler-fulfilment/` (task T048).
+
+**Changed**
+
+- **The status badge on each request card is coloured by status.** It used to be the same accent-blue pill for
+  every state, which meant the one element whose whole job is to say *where a request is* said nothing — you
+  had to read the label. Now:
+
+  | Badge | Colour |
+  | --- | --- |
+  | **Waiting** | grey |
+  | **In Progress** | blue |
+  | **Done** | green |
+  | **Cancelled** | red |
+
+  The four are far apart in both hue and lightness, so they stay tellable apart at a glance rather than needing
+the words. Every colour was checked against the badge's white text for a contrast ratio of at least 4.5:1,
+which is the accessibility threshold — the obvious WinUI "system fill" colours were **not** used because they
+are built to carry dark text on top (one of them is bright yellow, on which white is unreadable).
+
+**Worth knowing**
+
+- **Only Waiting and In Progress can currently appear on the list.** The list only ever shows *open* work, so a
+  finished or cancelled request never reaches a card. The **Done** and **Cancelled** colours are built, mapped
+  and tested, but you will not see them on the list until resolved requests are shown there — that is a
+  product decision, not an oversight, and it is recorded in the card contract.
+
+### 2026-09-13 — Messaging on a request: it saves on the first click, and it is clearly a message
+
+> Specification: `specs/003-waitlist-handler-fulfilment/` (tasks T042–T047).
+
+**Fixed**
+
+- **Send now works on the first click.** Clicking Send used to do nothing the first time, and the message
+  you were part-way through typing could disappear while you were writing it. Both came from the same cause:
+  the box only told the application what you had typed when focus left it, so the first click read an empty
+  box, and the page's periodic refresh then re-filled the box from the stored value and erased your draft.
+  The box now reports every keystroke and the refresh never overwrites an unsent message. Whenever you press
+  Send, it tells you what happened: **Message sent** — or that there is nothing to send yet, or that the
+  message is already on the request.
+- **A note no longer appears twice.** The history was showing one message as two rows, because the store
+  keeps times to the second and the screen was remembering a more precise time, so it did not recognise the
+  two as the same event.
+- **The message marker means a message.** The dot on a card used to light up for *any* change — including
+  job created, accepted, completed and canceled, which nobody sent and nobody needs telling about. It now
+  reacts only to messages a person wrote.
+- **You can see who sent each message.** The history reads time → **sender's full name** → message, and no
+  longer shows the message type, which you asked not to see. Where the entry was a system change with no
+  sender, it says **System** rather than leaving a blank.
+- **Accept and Complete no longer look the same.** They are the same button in two states, and both used to
+  be a green tick. **Accept** is green with a tick; **Complete** is blue with a tick inside a circle. Both
+  carry a tooltip and a screen-reader name, so the difference does not depend on telling two greens apart.
+
+**Changed**
+
+- **Anyone signed in can now send a message on a request**, not only material handlers. Messages are how the
+  floor tells whoever picks the request up what is going on, so the box is available to every user; the
+  accept/complete/cancel actions remain restricted to handlers as before.
+
+### 2026-09-13 — The actions moved onto the card, and the history is real
+
+> Specification: `specs/003-waitlist-handler-fulfilment/` (tasks T037–T041). Defect closed:
+> `defects/Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md`.
+
+**Changed**
+
+- **Accept, Complete and Cancel now live on the request card, and nowhere else.** Before this change they were
+  on the request page, which meant opening a request to claim it. A handler works from the list, so that is
+  where the buttons are. The request page is now for **reading** a request — its values, its sections, its note
+  and its history — and offers no accept, complete, release or cancel control at all.
+- **The Accept button turns into the Complete button.** The card's action area carries at most two buttons: the
+  primary action and Cancel. While a request is waiting the primary is **Accept**; once you have claimed it the
+  same button becomes **Complete**. Each button now carries a tooltip naming what it does, because Accept and
+  Complete share a tick icon.
+- **Cancel comes with Complete.** Claiming a request offers you both Complete and Cancel — refusing work you
+  have taken is as available as finishing it. A request someone else has claimed offers you nothing, and a
+  request you raised yourself and that is still waiting offers **Accept and Cancel**, so you can still withdraw
+  it.
+- **Release is no longer on the card.** It remains in the application and is one line from being shown again,
+  but the card's action area is deliberately limited to the primary action and Cancel. Nothing can release a
+  request from the screen right now.
+
+**Fixed**
+
+- **The request history is read back from the store, so it is the request's real history.** Every entry was
+  already being written — created, accepted, completed, released, cancelled, note updated — but nothing ever
+  read them back, so the page could only show what had happened since the app started, and it **hid the history
+  block entirely** for a request nobody had touched this session. That is fixed: a request now shows what
+  happened to it whenever it happened, and a request with genuinely no history says so instead of showing
+  nothing. A history that could not be read keeps whatever the session already knows rather than looking like
+  an empty history. This closes the "Known limitation" recorded in the 2026-09-12 entry below.
+- **The request page refreshes itself every 30 seconds while it is open.** Activity another handler causes —
+  an accept, a completion, a note — arrives on its own, so you do not have to leave and come back to see the
+  current state of a request you are reading.
+- **The page also no longer fails to start its refresh in silence.** The refresh timer silently did nothing in
+  the built app, so the page looked like it was refreshing and never was; that is fixed, and the app now logs
+  whether the refresh started.
+
+**Added**
+
+- **A "new message" marker on the card.** A black speech bubble sits on the lower-right corner of the
+  request-type image while a request has changed since you last read it, with a tooltip explaining it. Reading
+  the request clears it. The marker is compared against the newest entry you have seen rather than the moment
+  you looked, so something that lands **while** the page is open still flags the card rather than being quietly
+  swallowed — and the marker survives a restart.
+
+### 2026-09-12 — The waitlist is workable: accept, complete, release, withdraw
+
+> Specification: `specs/003-waitlist-handler-fulfilment/`. Defect closed: `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`.
+> The card's action area carried the actions themselves for the first time — the earlier entry below about
+> cancelling from the detail view, and the "Waitlist request lifecycle" entry, described a surface that did
+> not exist until now. They are accurate as of this change.
+
+- **Accept a request from the list.** A handler — or anyone at that level or above — now gets an Accept
+  button on every unclaimed request. Accepting claims it for that person (their name is recorded as the
+  assignee) and moves it to **In Progress**. The request **stays on the shared list** for everyone, and
+  Accept disappears for every other handler the moment it is claimed.
+- **If two handlers grab the same request at once, only one wins** and the other is warned in a dialog that
+  someone else already took the request and to pick a different one — instead of the button appearing to do
+  nothing.
+- **Complete, for the handler who accepted it.** Complete marks the request **Done** and takes it off the
+  open list. Release — putting a claimed request back on the open list as available with no assignee, and
+  explicitly **not** a cancellation — was on the card when this entry was written; the 2026-09-13 entry above
+  moved it off the card, and it is now reachable only from the application, not from the screen.
+- **Only the actions you can actually take are shown.** No handler actions at all for someone who is not a
+  handler, and none for anyone else on a request someone else has taken. Nothing is shown disabled; there are
+  no buttons that do nothing.
+- **Withdraw your own request.** The requester can cancel their own request while it is still waiting — from
+  the list card, and at this point also from the request page — confirming first and giving a reason. The
+  request is kept with the reason and who cancelled it, and only the person who raised it can do this. The
+  2026-09-13 entry above took the request page's copy of this control away and gave the assignee the same
+  action with the same confirmation and reason.
+- **The most urgent work is at the top.** The list is now ordered most-urgent-first — overdue requests first,
+  then the least time remaining — so the oldest and most overdue work leads.
+- **Notes and a request history.** A handler can add or edit a short note on a request, and the request page
+  shows its history — who did what, and when — including the note's addition. **Known limitation:** the
+  history currently lists only the events raised while the app has been running, because the entries are
+  written to the store but nothing reads them back yet. A request that has not been acted on in the current
+  session therefore shows no history. Tracked as
+  `defects/Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md` — **closed on 2026-09-13** by the entry
+  above, which added the read path.
+- **The card's looks are unchanged.** The approved request-card layout (the square image and badge, the title
+  row, the four metadata rows, the action area above the compact status pill, and the per-type detail grid)
+  is frozen and guarded by a test.
 
 ### 2026-09-12 — Truthful data and truthful controls
 

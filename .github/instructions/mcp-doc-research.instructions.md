@@ -21,6 +21,50 @@ platform guidance.
 - Prefer Serena-driven lookup before fallback text search when identifying existing implementations.
 - Use Serena findings to narrow and validate edits before applying code changes.
 
+### Where the doc servers actually live (verified 2026-09-13)
+
+An audit of this machine found the registrations split across two files, which is why "it is not in
+`.vscode/mcp.json`" is **not** evidence that a server is unavailable:
+
+| Server | Registered in | Transport |
+| --- | --- | --- |
+| `microsoftdocs/mcp` (Microsoft Learn) | **user** `%APPDATA%\Code\User\mcp.json` | http → `https://learn.microsoft.com/api/mcp` |
+| `io.github.upstash/context7` | **user** `%APPDATA%\Code\User\mcp.json` | stdio, `npx @upstash/context7-mcp` |
+| `microsoft/playwright-mcp` | **user** `%APPDATA%\Code\User\mcp.json` | stdio, `npx @playwright/mcp` |
+| `oraios/serena` | **user** `%APPDATA%\Code\User\mcp.json` **and** workspace `.vscode/mcp.json` | stdio |
+| `csv-mcp-server`, `xamlmcp` | **workspace** `.vscode/mcp.json` | stdio |
+
+Check both files before concluding a tool is missing, and check the *tool* name rather than the server name —
+the live MS Learn tools are `mcp_microsoft_lea_microsoft_docs_search`, `..._microsoft_code_sample_search` and
+`..._microsoft_docs_fetch`.
+
+### When a doc MCP tool reports "currently disabled by the user"
+
+1. **It is not the config.** There is no settings-file gate: neither user nor workspace `settings.json` carries
+   any `mcp` / `chat.tools` enable/disable entry (checked 2026-09-13). Do not go looking for one.
+2. **It is usually not the server either.** Prove it in one command before blaming the server — a healthy one
+   answers an MCP `initialize`:
+
+   ```powershell
+   $h = @{ "Accept" = "application/json, text/event-stream" }
+   Invoke-WebRequest -Uri "https://learn.microsoft.com/api/mcp" -Method Post -Headers $h `
+     -ContentType "application/json" -TimeoutSec 25 `
+     -Body '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"probe","version":"1.0"}}}'
+   ```
+
+   The `Accept` header is required — streamable HTTP answers `406 Not Acceptable` without it, which looks like a
+   server fault and is not. Verified 2026-09-13: `200`, `serverInfo.name = Microsoft Learn MCP Server`,
+   `version 1.0.0`, all three tools advertised.
+3. **So it is the session.** A Copilot session that started before the server was registered or enabled holds a
+   **stale tool snapshot** and keeps reporting disabled for the rest of that session. Start a **new chat
+   session** and the tools appear. This is the same class of failure as the XamlMcp one recorded in
+   `.github/copilot-instructions.md`.
+4. **Meanwhile, do the lookup anyway.** "Disabled" is not a licence to answer from memory — the constitution's
+   MCP-first rule is about grounding the answer, not about which tool fetched it. `fetch_webpage` against the
+   same Microsoft Learn page returns the same content the MCP server would have served, and it worked twice on
+   2026-09-13 (the `{x:Bind}` `UpdateSourceTrigger` default, and the Segoe Fluent Icons glyph list).
+   State in the answer which source was used.
+
 ### Serena self-healing (mandatory)
 
 When Serena fails such that its location or installation cannot be discerned — the tool cannot be found,

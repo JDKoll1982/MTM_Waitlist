@@ -188,6 +188,9 @@ public sealed class NewRequestSummaryHonestyTests
 
         public IReadOnlyList<WaitlistRequestAuditEntry> GetAuditTrail(Guid requestId) => [];
 
+        public Task<IReadOnlyList<WaitlistRequestAuditEntry>> LoadAuditTrailAsync(Guid requestId, CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<WaitlistRequestAuditEntry>>([]);
+
         public void Reset()
         {
         }
@@ -203,7 +206,7 @@ public sealed class NewRequestSummaryHonestyTests
         public Task<WaitlistRequestCancelResult> CancelOwnRequestAsync(Guid requestId, string requesterEmployeeNumber, string? reason = null, CancellationToken cancellationToken = default)
             => throw new NotSupportedException();
 
-        public Task<WaitlistRequest?> UpdateNoteAsync(Guid requestId, string? note, CancellationToken cancellationToken = default) => Task.FromResult<WaitlistRequest?>(null);
+        public Task<WaitlistRequest?> UpdateNoteAsync(Guid requestId, string? note, string? actorEmployeeNumber = null, string? actorEmployeeName = null, CancellationToken cancellationToken = default) => Task.FromResult<WaitlistRequest?>(null);
 
         public Task<WaitlistRequest?> AcceptAsync(Guid requestId, string handlerEmployeeNumber, string? handlerEmployeeName = null, CancellationToken cancellationToken = default) => Task.FromResult<WaitlistRequest?>(null);
 

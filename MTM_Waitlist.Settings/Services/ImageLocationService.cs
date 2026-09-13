@@ -349,6 +349,13 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
                 return await ResolveExistingPathAsync(catalogPath, defaultPath, "request_type", requestTypeId).ConfigureAwait(false);
             }
 
+            // Nothing is configured for this type, so the caller gets the placeholder. Said out loud at Debug
+            // because this substitution is otherwise invisible: the card cannot tell a placeholder from a real
+            // answer, and a caller that prefers any resolved path will show "no image available" over a good one.
+            _logger.LogDebug(
+                "No override and no catalog image for request_type:{RequestTypeId}; returning the default placeholder {DefaultPath}",
+                requestTypeId,
+                defaultPath);
             return defaultPath;
         }
         catch (OperationCanceledException)

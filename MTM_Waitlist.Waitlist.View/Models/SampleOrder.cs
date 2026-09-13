@@ -1,6 +1,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
+
+using MTM_Waitlist.Module_Core.Models;
 
 namespace MTM_Waitlist.Module_Waitlist.Models;
 
@@ -16,6 +19,15 @@ public sealed class SampleOrder : INotifyPropertyChanged
 
     /// <summary>The underlying request's requester employee number; empty when the row carries none.</summary>
     public string RequesterEmployeeNumber { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The request's recorded assignee, or null while it is still available. Drives the Complete/Release
+    /// gate, so a row built from the store's own answer is what decides who may finish the work.
+    /// </summary>
+    public string? AssignedMaterialHandler { get; set; }
+
+    /// <summary>The request's short handler note, or null when it has none.</summary>
+    public string? Note { get; set; }
 
     public string Title { get; set; } = string.Empty;
     public string Subtitle { get; set; } = string.Empty;
@@ -119,6 +131,75 @@ public sealed class SampleOrder : INotifyPropertyChanged
     public bool HasWaitingFor => !string.IsNullOrWhiteSpace(WaitingForText);
 
     public ObservableCollection<WaitlistField> Fields { get; } = new();
+
+    /// <summary>
+    /// The urgency state this row was ordered by on the list, or null when no due value could be derived.
+    /// Held on the row so the card's "Remaining time" and the list order can never come from two different
+    /// numbers, and so the ordering helper is the only place the ordering rule lives.
+    /// </summary>
+    public UrgencyState? Urgency { get; set; }
+
+    /// <summary>
+    /// Whether the current viewer is offered Accept: a handler-or-above on an available, unfinished request.
+    /// A view of <c>RequestActionPolicy.CanViewerAccept</c>, never a wider rule than the service enforces.
+    /// </summary>
+    public bool CanAccept { get; set; }
+
+    /// <summary>
+    /// Whether the current viewer is offered Complete and Release: they are the request's recorded assignee.
+    /// A view of <c>RequestActionPolicy.CanViewerCompleteOrRelease</c>.
+    /// </summary>
+    public bool CanCompleteOrRelease { get; set; }
+
+    /// <summary>
+    /// Whether the current viewer is offered Cancel: their own request while it is still waiting, or a request
+    /// they have claimed and can no longer work. The card shows it whenever the Complete button is live, so the
+    /// two appear together.
+    /// </summary>
+    public bool CanCancelRequest { get; set; }
+
+    /// <summary>
+    /// Whether a message arrived on this request since the viewer last opened its details — the card's
+    /// new-message indicator. Derived from the newest human-authored message against the viewer's last-seen time.
+    /// </summary>
+    public bool HasNewMessages { get; set; }
+
+    /// <summary>Localized tooltip for the new-message indicator; empty when there is nothing to announce.</summary>
+    public string NewMessageTooltip { get; set; } = string.Empty;
+
+    /// <summary>The list's Accept command, carried to the card through this row. Null when the gate is false.</summary>
+    public ICommand? AcceptCommand { get; set; }
+
+    /// <summary>The list's Complete command, carried to the card through this row. Null when the gate is false.</summary>
+    public ICommand? CompleteCommand { get; set; }
+
+    /// <summary>The list's Cancel command, carried to the card through this row. Null when the gate is false.</summary>
+    public ICommand? CancelCommand { get; set; }
+
+    /// <summary>
+    /// When the newest message written by a person was added — a note, not a lifecycle change. This is the
+    /// cheap "somebody said something" signal behind the new-message indicator, so the list does not need a
+    /// history read for every row. Null means no person has written on the request, which never raises the
+    /// indicator: job created, accepted, completed and canceled are system events, not messages.
+    /// </summary>
+    public DateTimeOffset? LastMessageUtc { get; set; }
+
+    /// <summary>Localized accessible name for the Accept icon button; empty when the action is not offered.</summary>
+    public string AcceptActionText { get; set; } = string.Empty;
+
+    /// <summary>Localized accessible name for the Complete icon button; empty when the action is not offered.</summary>
+    public string CompleteActionText { get; set; } = string.Empty;
+
+    /// <summary>Localized accessible name for the Cancel icon button; empty when the action is not offered.</summary>
+    public string CancelActionText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The number of buttons this row offers. The card draws [primary][Cancel], where the primary is Accept
+    /// while the request is available and becomes Complete once the viewer has claimed it — so Accept and
+    /// Complete are never both live.
+    /// </summary>
+    public int OfferedActionCount =>
+        (CanAccept ? 1 : 0) + (CanCompleteOrRelease ? 1 : 0) + (CanCancelRequest ? 1 : 0);
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;

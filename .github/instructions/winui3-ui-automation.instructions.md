@@ -301,11 +301,29 @@ to check when a sign-in is available.
 - `.github/copilot-instructions.md` documents `xamlmcp` as the intended in-app UI inspector, and
   records it as **NOT WIRED**: the `XamlMcp.WinUI` in-process agent is absent (no attach call in
   `App.xaml.cs` and no `PackageReference`), so the server has nothing to attach to.
-- **The CLI is not installed on this machine either (verified 2026-09-11).** `xamlmcp` is not on
-  `PATH`, and `%USERPROFILE%\.dotnet\tools` (with its `.store`) is **empty** for the `jkoll` profile —
-  so `xamlmcp check --json` cannot be run here at all. That is stronger than "not wired": there is no
-  tool to attach even if the in-process agent were restored. Check both before spending time on the
-  server, and note that the tool would have to be installed per profile.
+- **The CLI *is* installed on this machine (verified 2026-09-13).** The earlier note in this file said
+  `xamlmcp` was not on `PATH` **and** that `%USERPROFILE%\.dotnet\tools` was empty, and concluded
+  `xamlmcp check --json` "cannot be run here at all". The second half is **wrong for this profile**:
+  `C:\Users\johnk\.dotnet\tools\xamlmcp.exe` exists and runs. The first half still holds — `Get-Command xamlmcp`
+  finds nothing, so it must be invoked by full path. The original note was written against the `jkoll` work
+  profile and did not survive the profile change to `johnk`, which is exactly the hazard the Serena section of
+  `mcp-doc-research.instructions.md` warns about: **check, do not assume.**
+- **What `check` reports here (2026-09-13):** `runtime pass (.NET 10.0.12)`,
+  `server-version pass (1.0.0-preview.3+1718f946cb)`, `discovery-directory pass`,
+  `desktop-instances warning — Removed 12 stale discovery record(s); found 0 live app(s)`.
+- **`0 live app(s)` is the expected result, not a fault.** There is no in-process agent to discover: `XamlMcp`
+  appears in no `.cs` or `.csproj` file, so `list-apps` will stay empty until the `#if DEBUG` attach and the
+  package reference are restored. The 12 stale discovery records are leftovers from when it *was* attached
+  (it was verified working on 2026-08-22).
+- **To capture a screenshot without guessing at timing**, use `tools/capture_app_window.ps1`. It takes
+  `-Maximize` and a `-WaitSeconds` budget and waits for a non-zero `MainWindowHandle`, because the process
+  exists well before its window does — the shell is not shown until the startup session has been validated
+  against the database, which measured **longer than 9 seconds** on 2026-09-13. Capturing on a fixed sleep
+  produced a `0x0` rectangle and a `Parameter is not valid` bitmap error instead of an image.
+- **Re-read a control's bounding rectangle in the same command that clicks it.** A rectangle read before the
+  window was raised or maximized is stale, and a real click at stale coordinates lands on whatever is there
+  now — on 2026-09-13 one such click navigated the app to Work Center Setup instead of toggling the switch it
+  was aimed at.
 - Until that agent is restored, use the PowerShell UIA recipe in this file. It needs no app change
   and no restored package reference.
 - When XamlMcp is wired again, prefer it for `tree`, `search`, `props`, `set-prop`, `action`,

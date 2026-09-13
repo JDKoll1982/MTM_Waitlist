@@ -24,4 +24,19 @@ public sealed class WaitlistRequest
     public DateTimeOffset? AcceptedUtc { get; init; }
     public DateTimeOffset? CompletedUtc { get; init; }
     public DateTimeOffset? ReleasedUtc { get; init; }
+
+    /// <summary>
+    /// When the stored row last changed, from the queue table. The list uses it as the cheap "something
+    /// happened on this request" signal that drives the new-message indicator on the card, so the indicator
+    /// does not need a history read per row.
+    /// </summary>
+    public DateTimeOffset? UpdatedUtc { get; init; }
+
+    /// <summary>
+    /// When the newest message written by a person was added — a note, not a lifecycle change. This is what the
+    /// card's new-message marker compares against: <see cref="UpdatedUtc"/> moves for every change, including the
+    /// system events (created, accepted, completed, canceled) that nobody sent and nobody needs telling about.
+    /// Null when no person has written anything on the request yet.
+    /// </summary>
+    public DateTimeOffset? LastMessageUtc { get; init; }
 }
