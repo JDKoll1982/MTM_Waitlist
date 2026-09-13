@@ -3,7 +3,7 @@
   "specName": "unified card item picker",
   "branch": "004-unified-card-item-picker",
   "currentStep": "implement",
-  "status": "implemented",
+  "status": "completed",
   "history": [
     {
       "step": "specify",
