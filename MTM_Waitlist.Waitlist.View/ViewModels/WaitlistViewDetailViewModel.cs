@@ -9,6 +9,7 @@ using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
@@ -22,6 +23,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     private readonly IWaitlistRequestService? _requestService;
     private readonly IWaitlistInventoryService? _inventoryService;
     private readonly IImageLocationService? _imageLocationService;
+    private readonly IRequestItemConfigurationService? _itemConfigurationService;
     private readonly string _currentEmployeeNumber;
     private readonly string _currentEmployeeName;
     private readonly string _currentRole;
@@ -129,6 +131,21 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
     public ObservableCollection<WaitlistDetailTemplateSection> TemplateSections { get; } = new();
 
+    /// <summary>
+    /// The Item's own declared fields, laid out two per row in declared order (FR-007). An Item's own fields
+    /// belong to this page and never to the card; the grid is built from the Item's configuration row, so
+    /// changing that row changes this page with no code change (FR-013, FR-015). One row per pair, and a field
+    /// alone on its row takes the full width — the span comes from the declared field count, never from the
+    /// Item's identity (§D9, FR-006).
+    /// </summary>
+    public ObservableCollection<WaitlistDetailFieldRow> DeclaredFieldRows { get; } = new();
+
+    /// <summary>Whether the declared-field grid has anything to draw. A grid with nothing to show is hidden.</summary>
+    public bool HasDeclaredFields => DeclaredFieldRows.Count > 0;
+
+    /// <summary>Localized heading of the declared-field grid (FR-022).</summary>
+    public string DeclaredFieldsTitle => "Waitlist_Detail.DeclaredFields.Title".GetLocalized();
+
     public WaitlistViewDetailViewModel(
         INavigationService navigationService,
         IBuildingSelectionService buildingSelectionService,
@@ -137,7 +154,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         IWaitlistInventoryService? inventoryService = null,
         StartupState? startupState = null,
         DispatcherQueue? dispatcherQueue = null,
-        IWaitlistMessageSeenStore? messageSeenStore = null)
+        IWaitlistMessageSeenStore? messageSeenStore = null,
+        IRequestItemConfigurationService? itemConfigurationService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -147,6 +165,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _imageLocationService = imageLocationService;
         _requestService = requestService;
         _inventoryService = inventoryService;
+        _itemConfigurationService = itemConfigurationService;
         _currentEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
         _currentEmployeeName = startupState?.EmployeeName?.Trim() ?? string.Empty;
         _currentRole = startupState?.CurrentRole?.Trim() ?? string.Empty;
@@ -389,6 +408,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         try
         {
             LoadItemAndSections();
+            await LoadDeclaredFieldRowsAsync().ConfigureAwait(true);
             await LoadHistoryAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
@@ -480,6 +500,9 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
 
         LoadItemAndSections();
+
+        // The declared-field grid is a configuration read, so it is loaded alongside the request's own rows.
+        _ = LoadDeclaredFieldRowsAsync();
 
         // The history is a store read, so it is awaited separately from the synchronous row/section build.
         _ = LoadHistoryAsync();
@@ -619,6 +642,75 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             ("Requesting user", Item.RequestedByName),
             ("Employee number", Item.RequesterEmployeeNumber),
             ("Remaining time", Item.RemainingTimeText));
+    }
+
+    /// <summary>
+    /// Builds the declared-field grid from the Item's stored configuration, in declared order (FR-007, FR-013).
+    /// A declared field whose value no source produces is not drawn — the page states only what the request
+    /// truthfully carries (contract C2, FR-002). A read that fails leaves the grid empty and says so in the log
+    /// rather than inventing rows.
+    /// </summary>
+    private async Task LoadDeclaredFieldRowsAsync()
+    {
+        DeclaredFieldRows.Clear();
+        OnPropertyChanged(nameof(HasDeclaredFields));
+
+        var item = Item;
+        if (item is null || _itemConfigurationService is null || string.IsNullOrWhiteSpace(item.ItemCode))
+        {
+            return;
+        }
+
+        try
+        {
+            var configuration = await _itemConfigurationService
+                .GetConfigurationAsync(item.ItemCode)
+                .ConfigureAwait(true);
+            var request = ResolveRequest(item);
+
+            var declared = configuration.DetailFields
+                .OrderBy(field => field.Order)
+                .Select(field => new WaitlistDetailTemplateField
+                {
+                    Label = field.Label,
+                    Value = ResolveDeclaredFieldValue(field, item, request) ?? string.Empty,
+                })
+                .Where(field => !string.IsNullOrWhiteSpace(field.Label) && !string.IsNullOrWhiteSpace(field.Value))
+                .ToList();
+
+            foreach (var row in WaitlistDetailFieldRow.RowsFor(declared))
+            {
+                DeclaredFieldRows.Add(row);
+            }
+        }
+        catch (Exception ex)
+        {
+            DeclaredFieldRows.Clear();
+            StartupDebugLog.Error(
+                "WaitlistDetail",
+                ex,
+                "The declared-field grid could not be read; the page draws no field rows rather than a substitute.");
+        }
+        finally
+        {
+            OnPropertyChanged(nameof(HasDeclaredFields));
+        }
+    }
+
+    /// <summary>
+    /// The value a declared field renders, from a source the page actually holds. <c>answer</c> is the one
+    /// answer the flow captured; every other source is looked up by the field's own label among the values the
+    /// request carries. A label that nothing carries yields nothing, so the row is not drawn — never a
+    /// substituted value, never a blank standing in for one.
+    /// </summary>
+    private static string? ResolveDeclaredFieldValue(RequestItemFieldDefinition field, SampleOrder item, WaitlistRequest? request)
+    {
+        if (string.Equals(field.Source, RequestItemFieldDefinition.Sources.Answer, StringComparison.OrdinalIgnoreCase))
+        {
+            return request?.InputValue;
+        }
+
+        return FieldValue(item, field.Label);
     }
 
     private void AddRequestContextSection(SampleOrder item, string title, string summary)

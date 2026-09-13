@@ -168,7 +168,8 @@ public static class ServiceRegistrationExtensions
             inventoryService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistInventoryService>(),
             startupState: provider.GetRequiredService<MTM_Waitlist.Module_Core.Models.StartupState>(),
             dispatcherQueue: DispatcherQueue.GetForCurrentThread(),
-            messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>()));
+            messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>(),
+            itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>()));
         services.AddTransient<WaitlistViewDetailPage>();
         services.AddTransient<NewRequestWorkCenterViewModel>();
         services.AddTransient<NewRequestWorkCenterPage>();

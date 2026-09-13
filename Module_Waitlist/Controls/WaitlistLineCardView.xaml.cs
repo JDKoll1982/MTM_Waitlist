@@ -41,24 +41,6 @@ public partial class WaitlistLineCardView : UserControl
         typeof(WaitlistLineCardView),
         new PropertyMetadata(null));
 
-    public static readonly DependencyProperty BadgeBackgroundBrushProperty = DependencyProperty.Register(
-        nameof(BadgeBackgroundBrush),
-        typeof(Brush),
-        typeof(WaitlistLineCardView),
-        new PropertyMetadata(null));
-
-    public static readonly DependencyProperty BadgeTextProperty = DependencyProperty.Register(
-        nameof(BadgeText),
-        typeof(string),
-        typeof(WaitlistLineCardView),
-        new PropertyMetadata(string.Empty));
-
-    public static readonly DependencyProperty DetailsContentProperty = DependencyProperty.Register(
-        nameof(DetailsContent),
-        typeof(object),
-        typeof(WaitlistLineCardView),
-        new PropertyMetadata(null));
-
     private SampleOrder? _subscribedOrder;
 
     public WaitlistLineCardView()
@@ -135,24 +117,6 @@ public partial class WaitlistLineCardView : UserControl
     {
         get => (Brush?)GetValue(AccentSurfaceBrushProperty);
         set => SetValue(AccentSurfaceBrushProperty, value);
-    }
-
-    public Brush? BadgeBackgroundBrush
-    {
-        get => (Brush?)GetValue(BadgeBackgroundBrushProperty);
-        set => SetValue(BadgeBackgroundBrushProperty, value);
-    }
-
-    public string BadgeText
-    {
-        get => (string)GetValue(BadgeTextProperty);
-        set => SetValue(BadgeTextProperty, value);
-    }
-
-    public object? DetailsContent
-    {
-        get => GetValue(DetailsContentProperty);
-        set => SetValue(DetailsContentProperty, value);
     }
 
     private static void OnOrderChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs args)

@@ -229,12 +229,85 @@ public sealed class WaitlistLineCardMarkupTests
             "The 36-high element is no longer the status pill.");
     }
 
+    // ── The one card shape (US2, FR-006/FR-007/FR-008). This is a recorded supersession of the
+    //    `specs/003` "DO NOT REGRESS" per-type anatomy: the fifteen per-type controls and the selector that
+    //    chose between them are deleted, and the freeze is lifted in writing rather than deleted, so the
+    //    constraint still guards the *new* shape and an unintended card change still fails.
+
     [TestMethod]
-    public void PerTypeDetailGrids_KeepTheTwoByThreeFourColumnPattern()
+    public void Card_DrawsLine1AndLine2()
     {
+        var texts = LoadCard()
+            .Descendants(s_presentation + "TextBlock")
+            .Select(text => (string?)text.Attribute("Text"))
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .ToList();
+
+        Assert.IsTrue(
+            texts.Any(value => value!.Contains("Order.Title", StringComparison.Ordinal)),
+            "The card no longer draws Line 1 — the Item's umbrella phrase (FR-005).");
+        Assert.IsTrue(
+            texts.Any(value => value!.Contains("Order.Subtitle", StringComparison.Ordinal)),
+            "The card no longer draws Line 2 — the Item's identifier (FR-005).");
+    }
+
+    [TestMethod]
+    public void Card_RendersOneLayoutWithNoSpanChosenByTheItem()
+    {
+        var card = LoadCard();
+
+        // FR-006 admits no Item-selected variant, so no layout-critical attribute may be bound to the row's
+        // identity. A span, a size or a visibility that keyed on the Item would be precisely that variant.
+        foreach (var element in card.Descendants())
+        {
+            foreach (var name in new[] { "Grid.ColumnSpan", "Grid.RowSpan", "Width", "Height", "Visibility" })
+            {
+                var value = (string?)element.Attribute(name);
+
+                Assert.IsFalse(
+                    value?.Contains("ItemCode", StringComparison.Ordinal) == true
+                        || value?.Contains("Order.Title", StringComparison.Ordinal) == true
+                        || value?.Contains("Order.Subtitle", StringComparison.Ordinal) == true,
+                    $"{name}=\"{value}\" selects part of the layout from the Item, which FR-006 forbids: {element.Name}");
+            }
+        }
+    }
+
+    [TestMethod]
+    public void Card_CarriesTheItemsPictureAndItsPlaceholderFallback()
+    {
+        var image = LoadCard()
+            .Descendants(s_presentation + "Image")
+            .FirstOrDefault(candidate => ((string?)candidate.Attribute("Source"))?.Contains("Order.EffectiveImagePath", StringComparison.Ordinal) == true);
+
+        Assert.IsNotNull(image, "The card no longer draws the Item's picture (FR-009).");
+        Assert.IsTrue(
+            ((string?)image!.Attribute("Source"))!.Contains("ResolvedImagePathToSourceConverter", StringComparison.Ordinal),
+            "The picture must go through the resolver that keeps the placeholder from replacing a resolved image (FR-021).");
+    }
+
+    /// <summary>
+    /// FR-007: an Item's own fields belong to the request's page and never appear on the card — so the
+    /// per-type detail grids and their host presenter are gone, and the six per-type line views are deleted.
+    /// </summary>
+    [TestMethod]
+    public void PerTypeDetailGrids_AndTheirPerTypeLineViews_AreGone()
+    {
+        var card = LoadCard();
+
+        var detailHosts = card
+            .Descendants()
+            .Where(element => ((string?)element.Attribute("Content"))?.Contains("DetailsContent", StringComparison.Ordinal) == true)
+            .ToList();
+
+        Assert.AreEqual(
+            0,
+            detailHosts.Count,
+            $"The card still hosts a per-type detail grid, which FR-007 moved to the request page: {detailHosts.FirstOrDefault()}");
+
         var root = RepositoryPatternScan.FindRepositoryRoot();
 
-        string[] files =
+        string[] retired =
         [
             Path.Combine("Coil", "CoilWaitlistLineView.xaml"),
             Path.Combine("PickupFg", "PickupFgWaitlistLineView.xaml"),
@@ -244,21 +317,46 @@ public sealed class WaitlistLineCardMarkupTests
             Path.Combine("Scrap", "ScrapWaitlistLineView.xaml"),
         ];
 
-        foreach (var relative in files)
+        foreach (var relative in retired)
         {
             var path = Path.Combine(root, "Module_Waitlist", "Controls", relative);
-            Assert.IsTrue(File.Exists(path), $"The per-type line view was not found at '{path}'.");
 
-            var document = XDocument.Load(path);
-            var matching = document
-                .Descendants(s_presentation + "Grid")
-                .Where(grid => grid.Elements(s_presentation + "Grid.ColumnDefinitions").Elements(s_presentation + "ColumnDefinition").Count() == 4
-                    && grid.Elements(s_presentation + "Grid.RowDefinitions").Elements(s_presentation + "RowDefinition").Count() == 3)
-                .ToList();
-
-            Assert.IsTrue(
-                matching.Count > 0,
-                $"{relative}: the 2x3 four-column detail grid is gone; every type must render its fields that way.");
+            Assert.IsFalse(
+                File.Exists(path),
+                $"{relative} still exists; every Item renders the one card shape now (FR-006).");
         }
+    }
+
+    /// <summary>
+    /// The single card template is what the list binds: the selector and the templates it chose between are
+    /// gone, so there is nothing left to pick a layout with (FR-006).
+    /// </summary>
+    [TestMethod]
+    public void ListPage_BindsOneCardTemplateAndNoSelector()
+    {
+        var page = XDocument.Load(Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Module_Waitlist",
+            "Views",
+            "WaitlistViewPage.xaml"));
+
+        Assert.IsFalse(
+            page.Descendants().Any(element => ((string?)element.Attribute("ItemTemplateSelector"))?.Contains("WaitlistLineTemplateSelector", StringComparison.Ordinal) == true),
+            "The list still selects a card layout by Item (FR-006).");
+
+        // `x:Key` lives in the XAML namespace, so it is matched by local name rather than by a prefixed name.
+        var declaredKeys = page
+            .Descendants()
+            .Select(element => element.Attributes().FirstOrDefault(attribute => attribute.Name.LocalName == "Key")?.Value)
+            .Where(key => !string.IsNullOrWhiteSpace(key))
+            .ToList();
+
+        Assert.IsFalse(
+            declaredKeys.Any(key => key!.Contains("WaitlistLineTemplate", StringComparison.Ordinal)),
+            $"The per-type line templates are still declared on the list page: {string.Join(", ", declaredKeys)}");
+
+        Assert.IsTrue(
+            declaredKeys.Contains("WaitlistLineCardTemplate", StringComparer.Ordinal),
+            "The list page no longer declares the one card template every row binds.");
     }
 }

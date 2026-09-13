@@ -73,16 +73,22 @@ public sealed class WaitlistViewViewModelFieldTests
         }
     }
 
+    /// <summary>
+    /// Superseded by US2: the card draws no per-Item field, so a row is no longer padded into a per-type
+    /// template's five slots (FR-006, FR-007). The honest check is the reverse of the one this replaces — the
+    /// row carries exactly the slots the request produces, and no invented empty-label filler.
+    /// </summary>
     [TestMethod]
-    public void CreateSessionOrder_PadsToTheFiveCardSlotsTheTemplatesBind()
+    public void CreateSessionOrder_PadsNoRowToATemplatesSlotCount()
     {
         foreach (var request in EveryRequestShape)
         {
             var order = WaitlistViewViewModel.CreateSessionOrder(request);
 
-            Assert.IsTrue(
-                order.Fields.Count >= 5,
-                $"{Describe(request)}: the per-type templates bind Fields[0]..Fields[4], so a row must expose five slots; it exposed {order.Fields.Count}.");
+            Assert.AreEqual(
+                0,
+                order.Fields.Count(field => string.IsNullOrWhiteSpace(field.Label) && string.IsNullOrWhiteSpace(field.Value)),
+                $"{Describe(request)}: the row carries empty padding slots, which only a per-type template's fixed slot count needed.");
         }
     }
 

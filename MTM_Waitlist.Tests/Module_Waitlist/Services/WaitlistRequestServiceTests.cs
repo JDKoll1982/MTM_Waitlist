@@ -689,8 +689,13 @@ public sealed class WaitlistRequestServiceTests
         Assert.AreEqual("pickup-scrap", scrapOrder.ItemCode);
     }
 
+    /// <summary>
+    /// Superseded by US2 (FR-006/FR-007): the card draws no per-Item field, so a session row is no longer
+    /// padded into the five slots the deleted per-type templates bound. The honest check is the reverse — a
+    /// row carries exactly the request's own carried values, and no invented filler.
+    /// </summary>
     [TestMethod]
-    public void WaitlistViewViewModel_PadsSessionOrderFields_ToFiveCardSlots()
+    public void WaitlistViewViewModel_SessionOrderFields_CarryNoPaddingSlots()
     {
         var forklift = new WaitlistRequest
         {
@@ -731,10 +736,13 @@ public sealed class WaitlistRequestServiceTests
             Status = "Pending",
         };
 
-        Assert.IsTrue(WaitlistViewViewModel.CreateSessionOrder(forklift).Fields.Count >= 5);
-        Assert.IsTrue(WaitlistViewViewModel.CreateSessionOrder(flatstock).Fields.Count >= 5);
-        Assert.IsTrue(WaitlistViewViewModel.CreateSessionOrder(other).Fields.Count >= 5);
-        Assert.IsTrue(WaitlistViewViewModel.CreateSessionOrder(pickupOther).Fields.Count >= 5);
+        Assert.AreEqual(
+            0,
+            new[] { forklift, flatstock, other, pickupOther }
+                .Select(WaitlistViewViewModel.CreateSessionOrder)
+                .SelectMany(order => order.Fields)
+                .Count(field => string.IsNullOrWhiteSpace(field.Label) && string.IsNullOrWhiteSpace(field.Value)),
+            "A session row still carries empty padding slots, which only a per-type template's fixed slot count needed.");
     }
 
     [TestMethod]

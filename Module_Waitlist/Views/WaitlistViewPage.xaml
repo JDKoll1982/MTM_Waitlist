@@ -8,13 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
-    xmlns:selectors="using:MTM_Waitlist.Module_Waitlist.Selectors"
-    xmlns:coilControls="using:MTM_Waitlist.Module_Waitlist.Controls.Coil"
-    xmlns:pickupFgControls="using:MTM_Waitlist.Module_Waitlist.Controls.PickupFg"
-    xmlns:pickupNcmControls="using:MTM_Waitlist.Module_Waitlist.Controls.PickupNcm"
-    xmlns:pickupOsControls="using:MTM_Waitlist.Module_Waitlist.Controls.PickupOs"
-    xmlns:pickupWipControls="using:MTM_Waitlist.Module_Waitlist.Controls.PickupWip"
-    xmlns:scrapControls="using:MTM_Waitlist.Module_Waitlist.Controls.Scrap"
+    xmlns:cardControls="using:MTM_Waitlist.Module_Waitlist.Controls"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     xmlns:converters="using:MTM_Waitlist.Module_Settings.Converters"
     mc:Ignorable="d">
@@ -22,34 +16,13 @@
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
-        <DataTemplate x:Key="CoilWaitlistLineTemplate" x:DataType="models:SampleOrder">
-            <coilControls:CoilWaitlistLineView />
+        <!--  One card template for every Item (FR-006): there is nothing left to choose between.  -->
+        <DataTemplate x:Key="WaitlistLineCardTemplate" x:DataType="models:SampleOrder">
+            <cardControls:WaitlistLineCardView
+                AccentBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                AccentSurfaceBrush="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                Order="{Binding}" />
         </DataTemplate>
-        <DataTemplate x:Key="PickupFgWaitlistLineTemplate" x:DataType="models:SampleOrder">
-            <pickupFgControls:PickupFgWaitlistLineView />
-        </DataTemplate>
-        <DataTemplate x:Key="PickupNcmWaitlistLineTemplate" x:DataType="models:SampleOrder">
-            <pickupNcmControls:PickupNcmWaitlistLineView />
-        </DataTemplate>
-        <DataTemplate x:Key="PickupOsWaitlistLineTemplate" x:DataType="models:SampleOrder">
-            <pickupOsControls:PickupOsWaitlistLineView />
-        </DataTemplate>
-        <DataTemplate x:Key="PickupWipWaitlistLineTemplate" x:DataType="models:SampleOrder">
-            <pickupWipControls:PickupWipWaitlistLineView />
-        </DataTemplate>
-        <DataTemplate x:Key="ScrapWaitlistLineTemplate" x:DataType="models:SampleOrder">
-            <scrapControls:ScrapWaitlistLineView />
-        </DataTemplate>
-
-        <selectors:WaitlistLineTemplateSelector
-            x:Key="WaitlistLineTemplateSelector"
-            CoilTemplate="{StaticResource CoilWaitlistLineTemplate}"
-            DefaultTemplate="{StaticResource CoilWaitlistLineTemplate}"
-            PickupFgTemplate="{StaticResource PickupFgWaitlistLineTemplate}"
-            PickupNcmTemplate="{StaticResource PickupNcmWaitlistLineTemplate}"
-            PickupOsTemplate="{StaticResource PickupOsWaitlistLineTemplate}"
-            PickupWipTemplate="{StaticResource PickupWipWaitlistLineTemplate}"
-            ScrapTemplate="{StaticResource ScrapWaitlistLineTemplate}" />
     </Page.Resources>
 
     <Grid x:Name="ContentArea">
@@ -88,7 +61,7 @@
             Padding="6,12,6,92"
             IsItemClickEnabled="True"
             ItemClick="ListView_ItemClick"
-            ItemTemplateSelector="{StaticResource WaitlistLineTemplateSelector}"
+            ItemTemplate="{StaticResource WaitlistLineCardTemplate}"
             ItemsSource="{x:Bind ViewModel.Source, Mode=OneWay}"
             SelectionMode="Single">
 

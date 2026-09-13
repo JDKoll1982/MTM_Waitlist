@@ -17,6 +17,7 @@
         <Grid RowSpacing="8" ColumnSpacing="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -29,15 +30,15 @@
             <!-- Accent bar spans the full card height on the far left -->
             <Border
                 Grid.Row="0"
-                Grid.RowSpan="2"
+                Grid.RowSpan="3"
                 Grid.Column="0"
                 Background="{Binding AccentBrush, ElementName=Root}"
                 CornerRadius="6" />
 
-            <!-- Type/subtype image + badge (fixed square, not stretched) -->
+            <!-- The Item's image + badge (fixed square, not stretched). -->
             <Border
                 Grid.Row="0"
-                Grid.RowSpan="2"
+                Grid.RowSpan="3"
                 Grid.Column="1"
                 Width="96"
                 Height="96"
@@ -52,19 +53,7 @@
                         Source="{Binding Order.EffectiveImagePath, ElementName=Root, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                         Stretch="Uniform" />
 
-                    <Border
-                        Padding="6,3"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        Background="{Binding BadgeBackgroundBrush, ElementName=Root}"
-                        CornerRadius="999">
-                        <TextBlock
-                            FontSize="10"
-                            FontWeight="Bold"
-                            Text="{Binding BadgeText, ElementName=Root}" />
-                    </Border>
-
-                    <!-- New-message indicator, pinned to the lower-right of the request-type image: this
+                    <!-- New-message indicator, pinned to the lower-right of the Item's image: this
                          request changed after the viewer last opened its details. Clicking the card opens the
                          request, which clears it. -->
                     <Border
@@ -82,78 +71,70 @@
                 </Grid>
             </Border>
 
-            <!-- Title on its own row, above the content -->
+            <!-- Line 1 on its own top row: the Item's umbrella phrase (FR-005). -->
             <TextBlock
                 Grid.Row="0"
                 Grid.Column="2"
                 FontSize="20"
-                MaxLines="2"
+                MaxLines="1"
                 Style="{ThemeResource BodyStrongTextBlockStyle}"
                 Text="{Binding Order.Title, ElementName=Root}"
                 TextTrimming="CharacterEllipsis"
-                TextWrapping="WrapWholeWords" />
+                TextWrapping="NoWrap" />
 
-            <!-- Row 1 content: metadata (left) + details (right) -->
-            <Grid
+            <!-- Line 2 beneath it: the Item's identifier (FR-005). -->
+            <TextBlock
                 Grid.Row="1"
                 Grid.Column="2"
-                ColumnSpacing="24"
-                RowSpacing="4">
+                FontSize="16"
+                MaxLines="1"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{Binding Order.Subtitle, ElementName=Root}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+
+            <!-- Row 2 content: the four metadata rows. An Item's own declared fields are not drawn here —
+                 they belong to the request's page (FR-007). -->
+            <Grid
+                Grid.Row="2"
+                Grid.Column="2"
+                ColumnSpacing="10"
+                RowSpacing="4"
+                VerticalAlignment="Top">
+                <Grid.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="14" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                    </Style>
+                </Grid.Resources>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-                <!-- 4 metadata rows (label/value aligned) -->
-                <Grid ColumnSpacing="10" RowSpacing="4" VerticalAlignment="Top">
-                    <Grid.Resources>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="FontSize" Value="14" />
-                            <Setter Property="VerticalAlignment" Value="Center" />
-                        </Style>
-                    </Grid.Resources>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                <TextBlock x:Uid="Waitlist_Card.RequestedBy" FontWeight="SemiBold" Text="Requested by" />
+                <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.RequestedByName, ElementName=Root}" TextTrimming="CharacterEllipsis" />
 
-                    <TextBlock FontWeight="SemiBold" Text="Requested by" />
-                    <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.RequestedByName, ElementName=Root}" TextTrimming="CharacterEllipsis" />
+                <TextBlock x:Uid="Waitlist_Card.Press" Grid.Row="1" FontWeight="SemiBold" Text="Press" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.RequestedPressName, ElementName=Root}" TextTrimming="CharacterEllipsis" />
 
-                    <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Press" />
-                    <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.RequestedPressName, ElementName=Root}" TextTrimming="CharacterEllipsis" />
+                <TextBlock x:Uid="Waitlist_Card.RemainingTime" Grid.Row="2" FontWeight="SemiBold" Text="Remaining time" />
+                <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="{Binding RemainingTimeFontWeight, ElementName=Root}" Foreground="{Binding RemainingTimeBrush, ElementName=Root}" Text="{Binding Order.RemainingTimeText, ElementName=Root}" TextTrimming="CharacterEllipsis" />
 
-                    <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Remaining time" />
-                    <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="{Binding RemainingTimeFontWeight, ElementName=Root}" Foreground="{Binding RemainingTimeBrush, ElementName=Root}" Text="{Binding Order.RemainingTimeText, ElementName=Root}" TextTrimming="CharacterEllipsis" />
-
-                    <TextBlock Grid.Row="3" FontWeight="SemiBold" Text="Waiting" Visibility="{Binding Order.HasWaitingFor, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <TextBlock Grid.Row="3" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.WaitingForText, ElementName=Root}" TextTrimming="CharacterEllipsis" Visibility="{Binding Order.HasWaitingFor, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
-                </Grid>
-
-                <!-- Type-specific detail fields -->
-                <ScrollViewer
-                    Grid.Column="1"
-                    Margin="0,0,4,0"
-                    HorizontalScrollBarVisibility="Disabled"
-                    HorizontalScrollMode="Disabled"
-                    VerticalScrollBarVisibility="Auto"
-                    VerticalScrollMode="Auto">
-                    <ContentPresenter
-                        Content="{Binding DetailsContent, ElementName=Root}"
-                        HorizontalContentAlignment="Stretch" />
-                </ScrollViewer>
+                <TextBlock x:Uid="Waitlist_Card.Waiting" Grid.Row="3" FontWeight="SemiBold" Text="Waiting" Visibility="{Binding Order.HasWaitingFor, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.WaitingForText, ElementName=Root}" TextTrimming="CharacterEllipsis" Visibility="{Binding Order.HasWaitingFor, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>
 
             <!-- Action buttons (vertically centered) + compact status pill below spanning button width -->
             <Grid
                 Grid.Row="0"
-                Grid.RowSpan="2"
+                Grid.RowSpan="3"
                 Grid.Column="3"
                 Width="150">
                 <Grid.RowDefinitions>
@@ -243,20 +224,22 @@
 
 <!--
     Notes
+    One card shape for every Item (FR-006). Nothing above selects a layout, a span or a section from the
+    Item; every difference a person sees comes from the row it is handed.
+
     Card contents:
-    Request image - The request-type image selected by the order's image path.
-    Request badge - The request type label, such as COIL, FG, NCM, O/S, WIP, or SCRAP.
-    Request title - The primary short description of the waitlist request.
+    Item image - The Item's resolved picture, falling back to the Category family and then the placeholder.
+    Item badge - The Item's short label.
+    Line 1 - The Item's umbrella phrase (the Category's word, or the Item's own phrase).
+    Line 2 - The Item's identifier, resolved from the Item's own template.
     Requesting user - The name of the user who created the request.
     Press - The press or resource associated with the request when available.
     Remaining time - The calculated time remaining before the request's target or promise time.
-    Actions - Edit, cancel, and accept controls. Each action must be wired to the appropriate command before being enabled.
+    Waiting - How long the request has been waiting.
+    Actions - Accept, Complete and Cancel controls. Each action is wired to a command and hidden unless the
+              row's own gate says the action is available (FR-018).
 
-    Detail page contents:
-    Shared summary - Reuse the request image, badge, title, requester, press or resource, and remaining time from the card.
-    Type-specific sections - Render the fields listed in the corresponding request-type control's notes.
-    Scheduling section - Show queued time, target or promise date, current status, and assignment when available.
-    Material section - Show part, description, quantity, location, and inventory or WIP information when applicable.
-    Workflow section - Show approval, dispatch, acceptance, cancellation, and audit information when available.
-    Navigation - Provide a clear way to return to the waitlist and preserve the selected request context.
+    Not on the card:
+    An Item's own declared fields. They are laid out on the request's page, two per row in declared order
+    (FR-007, data-model.md §7).
 -->

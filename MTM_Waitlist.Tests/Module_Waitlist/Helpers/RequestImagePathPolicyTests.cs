@@ -64,4 +64,62 @@ public sealed class RequestImagePathPolicyTests
         Assert.IsFalse(RequestImagePathPolicy.IsServicePlaceholder(null));
         Assert.IsFalse(RequestImagePathPolicy.IsServicePlaceholder("   "));
     }
+
+    /// <summary>
+    /// The picture resolves Item → Category family → the existing placeholder (FR-009), and only the *real*
+    /// answers are taken. Both new scopes' placeholders are the service's "nothing configured" answer, so
+    /// neither may be mistaken for a picture.
+    /// </summary>
+    [TestMethod]
+    public void TheItemAndCategoryPlaceholdersAreNotImages()
+    {
+        Assert.IsFalse(
+            RequestImagePathPolicy.IsUsableResolvedPath(ImageLocationDefaults.RequestItemDefaultPath),
+            "The request-item placeholder must not be taken as a resolved image.");
+        Assert.IsFalse(
+            RequestImagePathPolicy.IsUsableResolvedPath(ImageLocationDefaults.RequestCategoryDefaultPath),
+            "The request-category placeholder must not be taken as a resolved image.");
+
+        Assert.IsTrue(RequestImagePathPolicy.IsServicePlaceholder(ImageLocationDefaults.RequestItemDefaultPath));
+        Assert.IsTrue(RequestImagePathPolicy.IsServicePlaceholder(ImageLocationDefaults.RequestCategoryDefaultPath));
+    }
+
+    /// <summary>
+    /// A genuine answer from either hop of the cascade — the Item's own picture, or the Category family's —
+    /// is taken.
+    /// </summary>
+    [TestMethod]
+    public void EitherHopOfTheItemCascadeIsTakenWhenItResolvesARealImage()
+    {
+        Assert.IsTrue(RequestImagePathPolicy.IsUsableResolvedPath(@"X:\Shared\RequestItems\pickup-coil.png"));
+        Assert.IsTrue(RequestImagePathPolicy.IsUsableResolvedPath(@"X:\Shared\RequestCategories\Pickup.png"));
+    }
+
+    /// <summary>
+    /// FR-009/FR-021 stated as the caller's own decision: a request that already resolves a picture keeps it
+    /// when the service answers "nothing configured", whatever hop that answer came from.
+    /// </summary>
+    [TestMethod]
+    public void ANothingConfiguredAnswerNeverReplacesAnImageTheRequestAlreadyResolves()
+    {
+        var alreadyResolved = "Assets/RequestItems/pickup-coil.png";
+
+        foreach (var nothingConfigured in new[]
+        {
+            ImageLocationDefaults.RequestItemDefaultPath,
+            ImageLocationDefaults.RequestCategoryDefaultPath,
+            string.Empty,
+            null,
+        })
+        {
+            var chosen = RequestImagePathPolicy.IsUsableResolvedPath(nothingConfigured)
+                ? nothingConfigured
+                : alreadyResolved;
+
+            Assert.AreEqual(
+                alreadyResolved,
+                chosen,
+                $"'{nothingConfigured}' replaced the image the request already resolves, which FR-009/FR-021 forbid.");
+        }
+    }
 }

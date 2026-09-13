@@ -1,3 +1,5 @@
+using MTM_Waitlist.Module_Core.Helpers;
+
 namespace MTM_Waitlist.Module_Settings.Models;
 
 /// <summary>
@@ -66,12 +68,14 @@ public static class RequestItemCatalog
 
     /// <summary>
     /// The Item's umbrella phrase for card Line 1: the Category's own word, or an Item-specific phrase
-    /// where the Item defines one (contract §2). The two wrong-material phrases are pinned verbatim.
+    /// where the Item defines one (contract §2). The two wrong-material phrases are pinned verbatim and
+    /// resolved through the resource mechanism (FR-022), with the pinned text itself as the fallback so
+    /// Line 1 can never become a bare resource key.
     /// </summary>
     private static string UmbrellaVerbFor(RequestCategory category, string id) => id switch
     {
-        "deliver-wrong-coil" => "Wrong Coil Bring:",
-        "deliver-wrong-flatstock" => "Wrong Flatstock Bring:",
+        "deliver-wrong-coil" => PinnedLine1ForKey(id, "Wrong Coil Bring:"),
+        "deliver-wrong-flatstock" => PinnedLine1ForKey(id, "Wrong Flatstock Bring:"),
         _ => category switch
         {
             RequestCategory.Pickup => "Pickup",
@@ -80,6 +84,25 @@ public static class RequestItemCatalog
             _ => "Other"
         }
     };
+
+    /// <summary>
+    /// The resource key for an Item's own first-line phrase, following the same one-convention rule the
+    /// display name uses (FR-022).
+    /// </summary>
+    public static string Line1ResourceKeyFor(string itemId) => $"RequestItem.{itemId}.Line1";
+
+    /// <summary>
+    /// Resolves an Item's pinned first line through the resource mechanism, falling back to the pinned text
+    /// itself so a missing entry shows the approved wording rather than a resource key.
+    /// </summary>
+    private static string PinnedLine1ForKey(string itemId, string pinnedText)
+    {
+        var key = Line1ResourceKeyFor(itemId);
+        var localized = key.GetLocalized();
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, key, StringComparison.Ordinal)
+            ? pinnedText
+            : localized;
+    }
 
     private static RequestItemDefinition Item(
         RequestCategory category, int order, string id, string normalizedName,

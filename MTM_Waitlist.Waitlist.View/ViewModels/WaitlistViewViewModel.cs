@@ -744,8 +744,11 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             IsOverdueAtSource = request.IsOverdue,
         };
 
+        // One card row per request: the row carries the two lines, the picture, the four metadata values and
+        // the action affordances, and nothing about it selects a layout (FR-006). Its own declared fields are
+        // not padded into template slots any more — the card draws no per-Item field, and the ones the request
+        // does carry are read by the request page (FR-007).
         AddRequestFields(item, request);
-        PadFieldsToCardSlots(item);
         return item;
     }
 
@@ -776,22 +779,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         "pickup-scrap" => "scrap.png",
         _ => "pickup_wip.png",
     };
-
-    /// <summary>
-    /// The type-specific waitlist line-card templates bind exactly five slots
-    /// (<c>Fields[0]</c> through <c>Fields[4]</c>). Requests that map fewer fields
-    /// (e.g. Forklift Assist, Flatstock, Other, Pickup/Other) must be padded to five
-    /// slots or the indexed bindings raise "Failed to connect to index" errors in the
-    /// debug console. The empty-label pad fields never match detail-page label lookups.
-    /// </summary>
-    private static void PadFieldsToCardSlots(SampleOrder item)
-    {
-        const int cardSlotCount = 5;
-        while (item.Fields.Count < cardSlotCount)
-        {
-            item.Fields.Add(new WaitlistField { Label = string.Empty, Value = string.Empty });
-        }
-    }
 
     /// <summary>
     /// Derives a row's urgency from the same due value the card shows: the stored target time when the

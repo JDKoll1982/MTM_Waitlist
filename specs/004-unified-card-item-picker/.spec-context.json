@@ -346,6 +346,302 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-13T18:22:06.377Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:00.638Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:00.724Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:00.814Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:00.903Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T039",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:00.991Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.079Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T041",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.165Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T042",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.255Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.344Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T044",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.431Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T045",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.518Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T046",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.609Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T047",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.696Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T048",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.782Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.869Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T050",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:01.954Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T051",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:02.040Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T052",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:02.127Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T053",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:02.212Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T054",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:02.297Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T055",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:15:02.422Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T056",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:19:27.800Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T057",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:19:27.885Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T058",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:19:27.973Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T059",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:19:28.061Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T061",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:19:28.148Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T062",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:19:28.232Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T063",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:19:28.318Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T060",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:26:10.796Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T064",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:26:10.881Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T065",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:26:10.966Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T066",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:26:11.049Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T067",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:26:11.132Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T068",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:26:11.216Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T069",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:26:11.300Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T070",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:26:11.384Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T071",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:26:11.468Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
@@ -781,6 +1077,11 @@
       "decision": "The request mirror keeps a transitional legacy display pair projected from the Item code (UmbrellaVerb / NormalizedName), and SubmitAsync keeps the draft own pair when it supplied one",
       "why": "The list, the detail page and their tests still read a type/subtype until US2 re-points them at the Item (T061/T062/T065); projecting from the Item keeps the build green and the card honest without inventing a stored column",
       "rejected": "Removing RequestType/Subtype from WaitlistRequest and WaitlistRequestDraft in US1 - that breaks the US2 card layer and would have pre-empted US2 tests-first"
+    },
+    {
+      "decision": "Removed the card per-type label badge (BadgeText/BadgeBackgroundBrush) and kept a single neutral accent for every row",
+      "why": "Its only sources were the per-type wrapper views that T066/T067 delete, and the retired COIL/FG/NCM/O/S/WIP/SCRAP labels are exactly the vocabulary this feature retires; the contract retained-element list does not include it",
+      "rejected": "Keeping the badge with per-Item labels, which would have re-introduced a per-Item ornament the one-card rule forbids"
     }
   ],
   "step_summaries": {
@@ -832,9 +1133,13 @@
     {
       "note": "Phase 3 US1 cannot reach a build-clean checkpoint on its own: T048 re-keys the request pair and the card/detail layer that reads it is US2 (T061/T062/T065). Ten tests stay red in that seam: 6 WaitlistViewDetailViewModel fixtures whose submit helpers pass a legacy pair such as (Coil, Pickup Coil) the retired catalog never carried, 2 of NewRequestItemViewModelTests, SubmitAsync_OnlyFlagsExactDuplicateRequests, and a detail item-resolution assertion.",
       "step": "implement"
+    },
+    {
+      "note": "The declared-field grid renders rows only for fields whose value the request itself carries, so on todays data it is usually empty (most seeded fields declare source job). That is the no-placeholder rule working as specified, not a defect, but it means the full-width lone-field behaviour is proven by unit test rather than visible in the app until item-resolution supplies job values.",
+      "step": "implement"
     }
   ],
-  "currentTask": "T034",
+  "currentTask": "T071",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -1099,6 +1404,299 @@
       "files": [
         "MTM_Waitlist.Tests/Module_Settings/Services/NewRequestPickerServiceTests.cs"
       ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Added NewRequestItemViewModelTests: Item step binds in catalog Order, an Item with no configuration row stops the flow with a plain-language report, and the flow cannot advance without a choice",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestItemViewModelTests.cs"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Reshaped NewRequestFlowState: Category (RequestCategory) and Item (RequestItemDefinition) replace RequestType and Subtype, keeping work centre, job snapshot, captured answer and timestamps",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestFlowState.cs"
+      ]
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "Added NewRequestItemOption: one Item tile built from configuration (Item, resolved display name, Category, captures-answer, IsConfigured)",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestItemOption.cs"
+      ]
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "Reshaped NewRequestFlowRules to Work Centre to Category to Item to Details to Preview to Summary to Result with availability resolved between Category and Item; type and subtype steps removed",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowRules.cs"
+      ]
+    },
+    "T039": {
+      "status": "DONE",
+      "did": "Reshaped NewRequestFlowService: removed the request-type catalog read, hands the Category step the filtered Category list and the Item step the filtered Item list, resolves availability via IRequestJobPartAvailabilityProvider",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowService.cs"
+      ]
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "Re-laid NewRequestJobTypeViewModel as the Category step: binds the filtered Category list from GetVisibleCategories and keeps only the Category selection state",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestJobTypeViewModel.cs"
+      ]
+    },
+    "T041": {
+      "status": "DONE",
+      "did": "Added NewRequestItemViewModel: the Item step binds the filtered list in Order with selection, continue/back and the plain-language unavailable report when the chosen Item has no configuration row",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestItemViewModel.cs"
+      ]
+    },
+    "T042": {
+      "status": "DONE",
+      "did": "Updated NewRequestWorkCenterViewModel to enter the re-laid flow at the Category step and dropped every request-type and subtype reference",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestWorkCenterViewModel.cs"
+      ]
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "Re-laid NewRequestJobTypePage as the Category step: the four Categories, the same tile affordance, localized labels through x:Uid and command bindings",
+      "files": [
+        "Module_Waitlist/Views/NewRequestJobTypePage.xaml",
+        "Module_Waitlist/Views/NewRequestJobTypePage.xaml.cs"
+      ]
+    },
+    "T044": {
+      "status": "DONE",
+      "did": "Added NewRequestItemPage: the Item step binds the filtered Item tiles, the empty state is never reachable and the unavailable report is surfaced in the page text",
+      "files": [
+        "Module_Waitlist/Views/NewRequestItemPage.xaml",
+        "Module_Waitlist/Views/NewRequestItemPage.xaml.cs"
+      ]
+    },
+    "T045": {
+      "status": "DONE",
+      "did": "Re-laid NewRequestDetailsViewModel to render from the configuration row and nothing else: option pick, text input honouring configured prompt and min/max length, own-text message; no branch keys on the Item identity",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestDetailsViewModel.cs"
+      ]
+    },
+    "T046": {
+      "status": "DONE",
+      "did": "Updated NewRequestPreviewViewModel to show the Category and the Item in the new vocabulary instead of a type and a subtype",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestPreviewViewModel.cs"
+      ]
+    },
+    "T047": {
+      "status": "DONE",
+      "did": "Updated NewRequestSummaryViewModel to summarise Category + Item + the captured answer and stop reading anything named for a type or subtype",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSummaryViewModel.cs"
+      ]
+    },
+    "T048": {
+      "status": "DONE",
+      "did": "Updated WaitlistRequestService so the draft to procedure mapping passes category + item to sp_waitlist_request_insert and reads them back from sp_waitlist_request_get and _list",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs"
+      ]
+    },
+    "T049": {
+      "status": "DONE",
+      "did": "Deleted the subtype step: NewRequestSubtypeViewModel and the NewRequestSubtypePage page and code-behind",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSubtypeViewModel.cs",
+        "Module_Waitlist/Views/NewRequestSubtypePage.xaml",
+        "Module_Waitlist/Views/NewRequestSubtypePage.xaml.cs"
+      ]
+    },
+    "T050": {
+      "status": "DONE",
+      "did": "Deleted the wizard type and subtype model layer: NewRequestTypeDefinition, NewRequestSubtypeDefinition, NewRequestCanonicalCategory and NewRequestCanonicalItem",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestTypeDefinition.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestSubtypeDefinition.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestCanonicalCategory.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestCanonicalItem.cs"
+      ]
+    },
+    "T051": {
+      "status": "DONE",
+      "did": "Deleted the tree-grouping indirection: NewRequestCanonicalPicker, RequestTypeCatalogService, the Assets/Config/waitlist-request-types.json asset and its csproj Content Update entry",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestCanonicalPicker.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Services/RequestTypeCatalogService.cs",
+        "Assets/Config/waitlist-request-types.json",
+        "MTM_Waitlist.csproj"
+      ]
+    },
+    "T052": {
+      "status": "DONE",
+      "did": "Deleted the four tests whose subject no longer exists: NewRequestTypeDefinitionTests, NewRequestCanonicalPickerTests, RequestTypeCatalogServiceTests and RequestTypeCatalogServiceIntegrationTests",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/NewRequestTypeDefinitionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/NewRequestCanonicalPickerTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/RequestTypeCatalogServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/RequestTypeCatalogServiceIntegrationTests.cs"
+      ]
+    },
+    "T053": {
+      "status": "DONE",
+      "did": "Added the new user-visible strings through the resource mechanism: four Category names, nineteen Item display names, Category and Item step titles and prompts, and the Item-not-available and no-Item messages; removed the type and subtype step strings",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T054": {
+      "status": "DONE",
+      "did": "Registered NewRequestItemViewModel and NewRequestItemPage in pageService.Configure and the transient block, and removed the NewRequestSubtypeViewModel and NewRequestSubtypePage pairs from both",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T055": {
+      "status": "DONE",
+      "did": "Re-pointed NewRequestJobTypeViewModelTests at the Category step: the filtered Category list, selection, and the absence of any type or subtype concept",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestJobTypeViewModelTests.cs"
+      ]
+    },
+    "T056": {
+      "status": "DONE",
+      "did": "Extended WaitlistRequestTitlesTests: Line 1 umbrella phrase, the two verbatim wrong-material first lines, Line 2 fixed/job/answer sources, the die Home Location conditional, the unresolvable-token report and the no-legacy-pair guard",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs"
+      ]
+    },
+    "T057": {
+      "status": "DONE",
+      "did": "Extended SampleOrderTests: the row exposes Line 1, Line 2, the picture, the four metadata values and the action affordances, reports an unresolvable identifier, and exposes no member that selects a layout by Item",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/SampleOrderTests.cs"
+      ]
+    },
+    "T058": {
+      "status": "DONE",
+      "did": "Extended RequestImagePathPolicyTests with the Item and Category placeholders and the rule that a nothing-configured answer never replaces an image the request already resolves",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Helpers/RequestImagePathPolicyTests.cs",
+        "MTM_Waitlist.Waitlist.View/Helpers/RequestImagePathPolicy.cs"
+      ]
+    },
+    "T059": {
+      "status": "DONE",
+      "did": "Extended ImageLocationServiceCascadeTests: the two new scopes key an override by Item code and Category code and the two-hop Item to Category-family inheritance resolves, with no borrowed family for an uncatalogued Item",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ImageLocationServiceCascadeTests.cs"
+      ]
+    },
+    "T061": {
+      "status": "DONE",
+      "did": "Reshaped WaitlistRequestTitles to ResolveLine1/ResolveLine2 with no legacy fallback: Line 1 from the Item umbrella phrase, Line 2 through RequestItemLine2Resolver with the die Home Location conditional",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs"
+      ]
+    },
+    "T062": {
+      "status": "DONE",
+      "did": "Reshaped SampleOrder into the one card row model: Line 1, Line 2, picture, requested-by, press, remaining time, waiting, status pill, new-message marker, action area and the Item code identity, with no layout selector",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs"
+      ]
+    },
+    "T063": {
+      "status": "DONE",
+      "did": "Added ResolveRequestItemImagePathAsync to ImageLocationService implementing Item then Category family then the existing placeholder, reusing the existing storage and override services",
+      "files": [
+        "MTM_Waitlist.Settings/Services/ImageLocationService.cs",
+        "MTM_Waitlist.Settings/Services/IImageLocationService.cs"
+      ]
+    },
+    "T060": {
+      "status": "DONE",
+      "did": "Rewrote WaitlistLineCardMarkupTests to the new anatomy as a recorded supersession: Line 1 and Line 2 on the card, one layout with no Item-chosen span, the picture and its fallback, the four metadata rows kept, and the per-type detail grids and line views asserted gone",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs"
+      ]
+    },
+    "T064": {
+      "status": "DONE",
+      "did": "Reduced WaitlistLineCardView to one layout for every Item: Line 1 on its own top row, Line 2 beneath it, the Item image as a fixed centred square, the four metadata rows, status pill, new-message marker and action area; removed the per-type detail host and the per-type badge",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml.cs"
+      ]
+    },
+    "T065": {
+      "status": "DONE",
+      "did": "Reshaped WaitlistViewViewModel to one card row per request with the single template: dropped the per-type slot padding and kept the per-screen unavailable state for a failed read",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelFieldTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs"
+      ]
+    },
+    "T066": {
+      "status": "DONE",
+      "did": "Deleted the six per-type line views and their code-behind (Coil, PickupFg, PickupNcm, PickupOs, PickupWip, Scrap)",
+      "files": [
+        "Module_Waitlist/Controls/Coil",
+        "Module_Waitlist/Controls/PickupFg",
+        "Module_Waitlist/Controls/PickupNcm",
+        "Module_Waitlist/Controls/PickupOs",
+        "Module_Waitlist/Controls/PickupWip",
+        "Module_Waitlist/Controls/Scrap"
+      ]
+    },
+    "T067": {
+      "status": "DONE",
+      "did": "Deleted the eight per-type request-type image views and their code-behind (Coil, DieHandling, Flatstock, ForkliftAssist, Other, Pickup, Scrap, TableHandling)",
+      "files": [
+        "Module_Waitlist/Controls/DieHandling",
+        "Module_Waitlist/Controls/Flatstock",
+        "Module_Waitlist/Controls/ForkliftAssist",
+        "Module_Waitlist/Controls/Other",
+        "Module_Waitlist/Controls/Pickup",
+        "Module_Waitlist/Controls/TableHandling"
+      ]
+    },
+    "T068": {
+      "status": "DONE",
+      "did": "Deleted the layout selector and the per-type data templates from WaitlistViewPage.xaml so the list binds the one card template",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Selectors/WaitlistLineTemplateSelector.cs",
+        "Module_Waitlist/Views/WaitlistViewPage.xaml"
+      ]
+    },
+    "T069": {
+      "status": "DONE",
+      "did": "Deleted the per-type control model/view-model layer in MTM_Waitlist.Waitlist.Controls and updated that project dependency-injection extension",
+      "files": [
+        "MTM_Waitlist.Waitlist.Controls/Controls",
+        "MTM_Waitlist.Waitlist.Controls/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs"
+      ]
+    },
+    "T070": {
+      "status": "DONE",
+      "did": "Moved the declared-field grid to the request detail page: declared order, two per row, a field alone on its row spanning the full width with the span derived from the declared field count",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistDetailFieldRow.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T071": {
+      "status": "DONE",
+      "did": "Added the card strings through the resource mechanism: the four metadata row labels, the Item-details heading, and the two pinned wrong-material first lines resolved through RequestItem.<item>.Line1 with the verbatim text as fallback",
+      "files": [
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Settings/Models/RequestItemCatalog.cs"
+      ]
     }
   },
   "verified": [
@@ -1166,6 +1764,22 @@
       "result": "Failed: 10, Passed: 876, Skipped: 26, Total: 912",
       "warnings": [
         "10 seam failures, all in the card/detail layer US2 owns"
+      ]
+    },
+    {
+      "what": "Build of the full solution at the T071 checkpoint",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "result": "Build succeeded. 0 Warning(s) 0 Error(s)",
+      "warnings": [
+        "WMC9999 surfaced once as a real XAML error (duplicate xmlns:controls alias on WaitlistViewPage.xaml) and was fixed, not dismissed as tooling"
+      ]
+    },
+    {
+      "what": "Full test suite after the US2 card work",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "Failed: 0, Passed: 908, Skipped: 26, Total: 934 (baseline was 889 passed)",
+      "warnings": [
+        "The 26 skips are the recorded environment-gated set; no gate was weakened"
       ]
     }
   ]

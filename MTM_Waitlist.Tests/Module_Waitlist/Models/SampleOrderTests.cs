@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Windows.Input;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -30,6 +31,115 @@ public sealed class SampleOrderTests
         Assert.AreEqual(1, order.Fields.Count);
         Assert.AreEqual("Request type", order.Fields[0].Label);
         Assert.AreEqual("Coil", order.Fields[0].Value);
+    }
+
+    /// <summary>
+    /// The one card row model (<c>data-model.md</c> §7). Every Item's row carries the same members, because
+    /// the card is one shape for every Item (FR-006).
+    /// </summary>
+    [TestMethod]
+    public void SampleOrder_CarriesTheTwoLinesThePictureAndTheFourMetadataRows()
+    {
+        var order = new SampleOrder
+        {
+            Title = "Pickup",
+            Subtitle = "MMC0001000",
+            ImagePath = "pickup_wip.png",
+            ItemCode = "pickup-coil",
+            RequestedByName = "Ada Lovelace",
+            RequestedPressName = "Press 4",
+            RemainingTimeText = "01:20",
+            WaitingForText = "Waiting 35m",
+        };
+
+        Assert.AreEqual("Pickup", order.Title, "Line 1 is the Item's umbrella phrase.");
+        Assert.AreEqual("MMC0001000", order.Subtitle, "Line 2 is the Item's identifier.");
+        Assert.AreEqual("pickup-coil", order.ItemCode, "The row's identity is the Item code the request was raised with.");
+        Assert.AreEqual("Assets/pickup_wip.png", order.EffectiveImagePath, "The row's own picture is what the card draws when nothing overrides it.");
+
+        Assert.AreEqual("Ada Lovelace", order.RequestedByName, "The Requested by row.");
+        Assert.AreEqual("Press 4", order.RequestedPressName, "The Press row.");
+        Assert.AreEqual("01:20", order.RemainingTimeText, "The Remaining time row.");
+        Assert.AreEqual("Waiting 35m", order.WaitingForText, "The Waiting row.");
+        Assert.IsTrue(order.HasWaitingFor, "A row that carries a waiting age shows the Waiting row.");
+    }
+
+    /// <summary>
+    /// An unresolvable identifier is reported on the row rather than hidden, so the card can say why it has no
+    /// second line instead of showing a blank (FR-026).
+    /// </summary>
+    [TestMethod]
+    public void SampleOrder_ReportsAnUnresolvableIdentifierInsteadOfLeavingTheLineBlank()
+    {
+        var order = new SampleOrder { Title = "Pickup", Subtitle = "Pickup Coil", Line2Problem = "Its configuration names a value it doesn't have." };
+
+        Assert.IsTrue(order.HasLine2Problem);
+        Assert.AreEqual("Its configuration names a value it doesn't have.", order.Line2Problem);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(order.Subtitle), "The identifier falls back to the Item's display name, never a blank.");
+
+        var resolved = new SampleOrder { Subtitle = "MMC0001000" };
+        Assert.IsFalse(resolved.HasLine2Problem, "A row whose identifier resolved reports no problem.");
+    }
+
+    /// <summary>
+    /// The action area is unchanged by the Item: the same four affordances for the same stored status
+    /// (FR-032, <c>specs/003</c> C7). A row carries the gates, the localized labels and the commands the card
+    /// draws, so the card needs no other source to decide what to offer.
+    /// </summary>
+    [TestMethod]
+    public void SampleOrder_ExposesTheSameActionAffordancesForEveryItem()
+    {
+        var accept = new NoOpCommand();
+        var complete = new NoOpCommand();
+        var cancel = new NoOpCommand();
+        var order = new SampleOrder
+        {
+            Title = "Other",
+            CanAccept = true,
+            CanCompleteOrRelease = false,
+            CanCancelRequest = true,
+            AcceptActionText = "Accept",
+            CompleteActionText = "Complete",
+            CancelActionText = "Cancel",
+            AcceptCommand = accept,
+            CompleteCommand = complete,
+            CancelCommand = cancel,
+        };
+
+        Assert.IsTrue(order.CanAccept);
+        Assert.IsFalse(order.CanCompleteOrRelease);
+        Assert.IsTrue(order.CanCancelRequest);
+
+        Assert.AreEqual("Accept", order.AcceptActionText);
+        Assert.AreEqual("Complete", order.CompleteActionText);
+        Assert.AreEqual("Cancel", order.CancelActionText);
+
+        Assert.IsNotNull(order.AcceptCommand);
+        Assert.IsNotNull(order.CompleteCommand);
+        Assert.IsNotNull(order.CancelCommand);
+    }
+
+    /// <summary>
+    /// FR-006 is absolute: no member of the row selects a layout. The card used to pick one of fifteen
+    /// per-type views from the row, so the honest check is that no such member exists any more — and that no
+    /// member is even shaped like one (a template, a selector, a variant, or a pre-built details control).
+    /// </summary>
+    [TestMethod]
+    public void SampleOrder_ExposesNoMemberThatSelectsALayoutByItem()
+    {
+        var layoutShapedNames = new[] { "Template", "Selector", "Layout", "Variant", "DetailsContent", "CardView", "LineView" };
+
+        var offenders = typeof(SampleOrder)
+            .GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+            .Where(property => layoutShapedNames.Any(name => property.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
+                || property.PropertyType.FullName?.StartsWith("Microsoft.UI.Xaml.DataTemplate", StringComparison.Ordinal) == true)
+            .Select(property => property.Name)
+            .ToArray();
+
+        CollectionAssert.AreEqual(
+            Array.Empty<string>(),
+            offenders,
+            $"The row exposes {string.Join(", ", offenders)}, which is a layout selected by the Item (FR-006).");
     }
 
     [TestMethod]
@@ -135,5 +245,22 @@ public sealed class SampleOrderTests
 
         var onTheBoundary = new DateTimeOffset(2026, 9, 11, 14, 30, 0, TimeSpan.Zero);
         Assert.AreEqual(TimeSpan.FromMinutes(1), WaitlistViewViewModel.TimeUntilNextMinute(onTheBoundary));
+    }
+
+    /// <summary>
+    /// A command that does nothing, so the row's affordance check is about the row carrying a command at all
+    /// rather than about what the command does — which the list's own action tests cover.
+    /// </summary>
+    private sealed class NoOpCommand : ICommand
+    {
+        public event EventHandler? CanExecuteChanged;
+
+        public bool CanExecute(object? parameter) => true;
+
+        public void Execute(object? parameter)
+        {
+        }
+
+        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 }

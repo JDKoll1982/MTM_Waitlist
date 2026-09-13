@@ -293,7 +293,7 @@ subtype (SC-001, SC-002).
   (the five job-independent Items are `pickup-riser-table`, `deliver-riser-table`, `pickup-hopper`,
   `deliver-hopper`, `other` — none of them Assist). Assert the filter runs before binding by asserting the unoffered
   Items are absent from the built collection, not merely hidden. · `MTM_Waitlist.Tests/Module_Settings/Services/NewRequestPickerServiceTests.cs`
-- [ ] **T035** [P] [US1] Add `NewRequestItemViewModelTests`: the Item step binds the filtered list in the catalog's
+- [x] **T035** [P] [US1] Add `NewRequestItemViewModelTests`: the Item step binds the filtered list in the catalog's
   `Order`; an Item with **no** configuration row stops the flow with a plain-language unavailable report rather than
   proceeding half-configured (FR-014); the flow cannot advance past the Item step without a choice. ·
   new `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestItemViewModelTests.cs`
@@ -302,10 +302,10 @@ subtype (SC-001, SC-002).
 
 **Wave 1 — the flow state and the Item tile, independent (different files):**
 
-- [ ] **T036** [P] [US1] Reshape `NewRequestFlowState`: `Category` (`RequestCategory`) and `Item`
+- [x] **T036** [P] [US1] Reshape `NewRequestFlowState`: `Category` (`RequestCategory`) and `Item`
   (`RequestItemDefinition`) replace `RequestType` and `Subtype`; keep the work-centre, job-snapshot, captured-answer
   and timestamp members the later steps read. · `MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestFlowState.cs`
-- [ ] **T037** [P] [US1] Add `NewRequestItemOption` — one Item tile built **from configuration**: the Item, its
+- [x] **T037** [P] [US1] Add `NewRequestItemOption` — one Item tile built **from configuration**: the Item, its
   resolved display name, its Category, whether it captures an answer, and whether its configuration row was found.
   · new `MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestItemOption.cs`
 
@@ -313,11 +313,11 @@ subtype (SC-001, SC-002).
 
 **Wave 2 — the step order and the flow service, independent (different files):**
 
-- [ ] **T038** [P] [US1] Reshape `NewRequestFlowRules` to
+- [x] **T038** [P] [US1] Reshape `NewRequestFlowRules` to
   Work Centre → Category → Item → Details → Preview → Summary → Result, with the availability snapshot resolved
   **between** Category and Item. Remove the type and subtype steps. ·
   `MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowRules.cs`
-- [ ] **T039** [P] [US1] Reshape `NewRequestFlowService`: remove the request-type catalog read, hand the Category step
+- [x] **T039** [P] [US1] Reshape `NewRequestFlowService`: remove the request-type catalog read, hand the Category step
   the **filtered** Category list and the Item step the filtered Item list, and resolve the availability snapshot
   through `IRequestJobPartAvailabilityProvider` (T031). ·
   `MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowService.cs`
@@ -326,13 +326,13 @@ subtype (SC-001, SC-002).
 
 **Wave 3 — the step view models, independent (different files):**
 
-- [ ] **T040** [P] [US1] Re-lay `NewRequestJobTypeViewModel` as the **Category** step: bind the filtered Category
+- [x] **T040** [P] [US1] Re-lay `NewRequestJobTypeViewModel` as the **Category** step: bind the filtered Category
   list from `GetVisibleCategories`, and keep only the Category's own selection state. ·
   `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestJobTypeViewModel.cs`
-- [ ] **T041** [P] [US1] Add `NewRequestItemViewModel` — the **new** Item step: the filtered Item list in `Order`,
+- [x] **T041** [P] [US1] Add `NewRequestItemViewModel` — the **new** Item step: the filtered Item list in `Order`,
   selection, continue/back, and the plain-language unavailable report when a chosen Item has no configuration row.
   · new `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestItemViewModel.cs`
-- [ ] **T042** [P] [US1] Update `NewRequestWorkCenterViewModel` to enter the re-laid flow (available Categories for
+- [x] **T042** [P] [US1] Update `NewRequestWorkCenterViewModel` to enter the re-laid flow (available Categories for
   the chosen work centre's job) and drop every request-type or subtype reference. ·
   `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestWorkCenterViewModel.cs`
 
@@ -340,11 +340,11 @@ subtype (SC-001, SC-002).
 
 **Wave 4 — the step pages, independent (different files):**
 
-- [ ] **T043** [P] [US1] Re-lay `NewRequestJobTypePage` as the Category step: the four Categories, the same tile
+- [x] **T043** [P] [US1] Re-lay `NewRequestJobTypePage` as the Category step: the four Categories, the same tile
   affordance, localized labels through `x:Uid`, every binding on an existing command. Remember the `[RelayCommand]`
   `Async`-stripping rule in T-prefixed bindings. ·
   `Module_Waitlist/Views/NewRequestJobTypePage.xaml`, `Module_Waitlist/Views/NewRequestJobTypePage.xaml.cs`
-- [ ] **T044** [P] [US1] Add `NewRequestItemPage` — the Item step: the filtered Item tiles, the empty state never
+- [x] **T044** [P] [US1] Add `NewRequestItemPage` — the Item step: the filtered Item tiles, the empty state never
   reachable (T030 guarantees at least one Item), and the unavailable report surfaced in the page's own text. ·
   new `Module_Waitlist/Views/NewRequestItemPage.xaml`, `Module_Waitlist/Views/NewRequestItemPage.xaml.cs`
 
@@ -352,22 +352,22 @@ subtype (SC-001, SC-002).
 
 **Wave 5 — the later steps re-laid, independent (different files):**
 
-- [ ] **T045** [P] [US1] Re-lay `NewRequestDetailsViewModel` to render **from the configuration row and nothing
+- [x] **T045** [P] [US1] Re-lay `NewRequestDetailsViewModel` to render **from the configuration row and nothing
   else** (§D16): nothing for a pure flag or a job-derived value; one option pick where the configuration declares an
   enumerated answer; one text input honouring the configured prompt and the configured minimum/maximum length with a
   plain-language out-of-range message; a message where the Item carries its own text. **No branch may key on the
   Item's identity** — every branch keys on the row (FR-013). The `options_json` values are the pinned die options
   `Die Shop`, `Home Location`, `Other`. · `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestDetailsViewModel.cs`
-- [ ] **T046** [P] [US1] Update `NewRequestPreviewViewModel` to show the Category and the Item in the new vocabulary
+- [x] **T046** [P] [US1] Update `NewRequestPreviewViewModel` to show the Category and the Item in the new vocabulary
   instead of a type and a subtype. · `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestPreviewViewModel.cs`
-- [ ] **T047** [P] [US1] Update `NewRequestSummaryViewModel` to summarise Category + Item + the captured answer, and
+- [x] **T047** [P] [US1] Update `NewRequestSummaryViewModel` to summarise Category + Item + the captured answer, and
   stop reading anything named for a type or subtype. · `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSummaryViewModel.cs`
 
 **⟶ Wait for Wave 5 to finish, then:**
 
 **Wave 6 — the write path carries the new pair (single task):**
 
-- [ ] **T048** [US1] Update `WaitlistRequestService` so the draft → procedure mapping passes `category` + `item` to
+- [x] **T048** [US1] Update `WaitlistRequestService` so the draft → procedure mapping passes `category` + `item` to
   `sp_waitlist_request_insert` and reads them back from `sp_waitlist_request_get` / `_list` (FR-004). *Added by this
   task list: `plan.md`'s Project Structure enumerates this project's Models, ViewModels and the three procedures but
   not this service, and FR-004 can only hold if the insert path carries the pair.* ·
@@ -377,14 +377,14 @@ subtype (SC-001, SC-002).
 
 **Wave 7 — the type and subtype steps are gone (FR-003), independent (different files):**
 
-- [ ] **T049** [P] [US1] Delete the subtype step: `NewRequestSubtypeViewModel.cs`,
+- [x] **T049** [P] [US1] Delete the subtype step: `NewRequestSubtypeViewModel.cs`,
   `Module_Waitlist/Views/NewRequestSubtypePage.xaml` and `.xaml.cs`, and their registrations' remaining references.
   · delete `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSubtypeViewModel.cs`, delete
   `Module_Waitlist/Views/NewRequestSubtypePage.xaml`, delete `Module_Waitlist/Views/NewRequestSubtypePage.xaml.cs`
-- [ ] **T050** [P] [US1] Delete the wizard's type and subtype model layer: `NewRequestTypeDefinition.cs`,
+- [x] **T050** [P] [US1] Delete the wizard's type and subtype model layer: `NewRequestTypeDefinition.cs`,
   `NewRequestSubtypeDefinition.cs`, `NewRequestCanonicalCategory.cs`, `NewRequestCanonicalItem.cs`. ·
   delete those four files under `MTM_Waitlist.Waitlist.NewRequest/Models/`
-- [ ] **T051** [P] [US1] Delete the tree-grouping indirection that exists only to read the retiring catalog:
+- [x] **T051** [P] [US1] Delete the tree-grouping indirection that exists only to read the retiring catalog:
   `NewRequestCanonicalPicker.cs`, `RequestTypeCatalogService.cs`, the `Assets/Config/waitlist-request-types.json`
   asset and its `MTM_Waitlist.csproj` `Content Update` entry — **inspect first**: retire the asset only once no
   remaining reader is found (`ImageLocationService` already reads the database catalog instead, but the
@@ -392,7 +392,7 @@ subtype (SC-001, SC-002).
   `MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestCanonicalPicker.cs`, delete
   `MTM_Waitlist.Waitlist.NewRequest/Services/RequestTypeCatalogService.cs`,
   `Assets/Config/waitlist-request-types.json`, `MTM_Waitlist.csproj`
-- [ ] **T052** [P] [US1] Delete the tests whose subject no longer exists: `NewRequestTypeDefinitionTests.cs`,
+- [x] **T052** [P] [US1] Delete the tests whose subject no longer exists: `NewRequestTypeDefinitionTests.cs`,
   `NewRequestCanonicalPickerTests.cs`, `RequestTypeCatalogServiceTests.cs`,
   `RequestTypeCatalogServiceIntegrationTests.cs`. Do **not** weaken a surrounding gate to compensate — 19
   environment-gated skips are the recorded baseline. · delete those four files under `MTM_Waitlist.Tests/Module_Waitlist/`
@@ -401,11 +401,11 @@ subtype (SC-001, SC-002).
 
 **Wave 8 — resources and registration, independent (different files):**
 
-- [ ] **T053** [P] [US1] Add the new user-visible strings through the existing resource mechanism (FR-022): the four
+- [x] **T053** [P] [US1] Add the new user-visible strings through the existing resource mechanism (FR-022): the four
   Category names, the nineteen in-scope Item display names, the Category and Item step titles and prompts, and the
   "Item not available" and "no Item is offered" messages. Remove the strings keyed for the type and subtype steps —
   their screens are gone as of Wave 7. · `Strings/en-us/Resources.resw`
-- [ ] **T054** [P] [US1] Register the new page and view model and drop the retired registrations:
+- [x] **T054** [P] [US1] Register the new page and view model and drop the retired registrations:
   `pageService.Configure<NewRequestItemViewModel, NewRequestItemPage>()`,
   `services.AddTransient<NewRequestItemViewModel>()`, `services.AddTransient<NewRequestItemPage>()`, and remove the
   `NewRequestSubtypeViewModel` / `NewRequestSubtypePage` pairs from both blocks. ·
@@ -415,7 +415,7 @@ subtype (SC-001, SC-002).
 
 **Wave 9 — the Category step's tests follow its subject (single task):**
 
-- [ ] **T055** [US1] Re-point `NewRequestJobTypeViewModelTests` at the Category step: the filtered Category list,
+- [x] **T055** [US1] Re-point `NewRequestJobTypeViewModelTests` at the Category step: the filtered Category list,
   selection, and the absence of any type or subtype concept. · `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestJobTypeViewModelTests.cs`
 
 **Checkpoint — US1 is independently functional and testable.** A request can be raised by choosing a Category and an
@@ -433,24 +433,24 @@ shape, umbrella word first, identifier second, right picture (SC-003).
 
 ### Tests — write these first; they must fail before the implementation lands
 
-- [ ] **T056** [P] [US2] Extend `WaitlistRequestTitlesTests`: Line 1 is the Item's umbrella phrase — the Category's
+- [x] **T056** [P] [US2] Extend `WaitlistRequestTitlesTests`: Line 1 is the Item's umbrella phrase — the Category's
   word, or the Item's own phrase — and Line 2 is the Item's identifier; the die's Line 2 is its **location** when the
   captured destination is `Home Location` and its **number** otherwise; the two wrong-material Items read
   `Wrong Coil Bring:` / `Wrong Flatstock Bring:` with the **correct** material's identifier on Line 2, never the
   wrong one being collected (FR-005, FR-029); an unresolvable token renders the Item's display name and reports the
   problem (FR-026); and **no legacy fallback path exists**. ·
   `MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs`
-- [ ] **T057** [P] [US2] Extend `SampleOrderTests`: the row exposes Line 1, Line 2, the picture, the four metadata
+- [x] **T057** [P] [US2] Extend `SampleOrderTests`: the row exposes Line 1, Line 2, the picture, the four metadata
   values and the action affordances, and exposes **no** member that selects a layout by Item (FR-006). ·
   `MTM_Waitlist.Tests/Module_Waitlist/Models/SampleOrderTests.cs`
-- [ ] **T058** [P] [US2] Extend `RequestImagePathPolicyTests`: resolution order is Item → Category family → the
+- [x] **T058** [P] [US2] Extend `RequestImagePathPolicyTests`: resolution order is Item → Category family → the
   existing placeholder, and a `"nothing configured"` answer **never** replaces an image the request already resolves
   (FR-009, FR-021). · `MTM_Waitlist.Tests/Module_Waitlist/Helpers/RequestImagePathPolicyTests.cs`
-- [ ] **T059** [P] [US2] Extend `ImageLocationServiceCascadeTests`: the two new scopes key an override by Item code
+- [x] **T059** [P] [US2] Extend `ImageLocationServiceCascadeTests`: the two new scopes key an override by Item code
   and by Category code, and the two-hop inheritance resolves through `SupportsGrouping` / `SupportsInheritance` as
   `ImageOverrideDialogViewModel` already implements it (§D10). ·
   `MTM_Waitlist.Tests/Module_Settings/ImageLocationServiceCascadeTests.cs`
-- [ ] **T060** [US2] **Rewrite** `WaitlistLineCardMarkupTests` to the new anatomy — this is a recorded supersession,
+- [x] **T060** [US2] **Rewrite** `WaitlistLineCardMarkupTests` to the new anatomy — this is a recorded supersession,
   not a deletion (§D17): the constraint it guards is lifted in writing, and the test is rewritten to the new shape so
   an **unintended** card change still fails. Assert the single layout (no Item-selected span), Line 1 and Line 2 on
   the card, the four metadata rows, the picture and its fallback, and that the per-type detail grids are **gone**
@@ -462,7 +462,7 @@ shape, umbrella word first, identifier second, right picture (SC-003).
 
 **Wave 1 — the two lines (single task):**
 
-- [ ] **T061** [US2] Reshape `WaitlistRequestTitles` to `ResolveLine1` / `ResolveLine2` with **no legacy fallback**:
+- [x] **T061** [US2] Reshape `WaitlistRequestTitles` to `ResolveLine1` / `ResolveLine2` with **no legacy fallback**:
   Line 1 from the Item's umbrella phrase, Line 2 through `RequestItemLine2Resolver` against the job snapshot and the
   captured answer, with the die's `Home Location` conditional and the two wrong-material Items' correct-material
   identifiers. · `MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs`
@@ -471,7 +471,7 @@ shape, umbrella word first, identifier second, right picture (SC-003).
 
 **Wave 2 — the row model (single task):**
 
-- [ ] **T062** [US2] Reshape `SampleOrder` into the one card row model of `data-model.md` §7: Line 1, Line 2, picture,
+- [x] **T062** [US2] Reshape `SampleOrder` into the one card row model of `data-model.md` §7: Line 1, Line 2, picture,
   requested-by, press, remaining time (`target_time_utc`, else `requested_utc + the Item's allotted minutes`), waiting
   (`requested_utc` → now), the status pill, the new-message marker and the action area. Overdue stays a property of
   the row so every sort can still mark it (FR-012). · `MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs`
@@ -480,7 +480,7 @@ shape, umbrella word first, identifier second, right picture (SC-003).
 
 **Wave 3 — Item-picture resolution (single task):**
 
-- [ ] **T063** [US2] Add `ResolveRequestItemImagePathAsync` to `ImageLocationService`, implementing
+- [x] **T063** [US2] Add `ResolveRequestItemImagePathAsync` to `ImageLocationService`, implementing
   Item → Category family → existing placeholder and refusing to let a `"nothing configured"` answer overwrite a
   resolved image (FR-009, FR-021). Reuse the existing storage service, read/write services and storage root — this is
   a scope addition, not a second image subsystem (§D10). · `MTM_Waitlist.Settings/Services/ImageLocationService.cs`
@@ -489,7 +489,7 @@ shape, umbrella word first, identifier second, right picture (SC-003).
 
 **Wave 4 — the one card (single task):**
 
-- [ ] **T064** [US2] Reduce `WaitlistLineCardView` to **one** layout for every Item (FR-006): the Item's image as a
+- [x] **T064** [US2] Reduce `WaitlistLineCardView` to **one** layout for every Item (FR-006): the Item's image as a
   fixed centred square, Line 1 on its own top row, Line 2 beneath it, the four metadata rows, the compact status
   pill, the new-message marker and the action area — keeping the existing `Auto` / `*` grid with `MinHeight` and
   star widths and adding **no** hardcoded pixel boundary to a layout-critical container (constitution V). Remove the
@@ -501,7 +501,7 @@ shape, umbrella word first, identifier second, right picture (SC-003).
 
 **Wave 5 — the list builds one card per row (single task):**
 
-- [ ] **T065** [US2] Reshape `WaitlistViewViewModel` to populate one card row per request and bind the single
+- [x] **T065** [US2] Reshape `WaitlistViewViewModel` to populate one card row per request and bind the single
   template — no layout selection, no per-type branch, and the per-screen unavailable state
   (`Store` / `LastAttemptUtc` / `RetryCount` / `NextRetryUtc` + manual retry) preserved for a failed read, never an
   empty list and never a fabricated row (FR-026). ·
@@ -511,11 +511,11 @@ shape, umbrella word first, identifier second, right picture (SC-003).
 
 **Wave 6 — the per-type card controls retire, independent (different files):**
 
-- [ ] **T066** [P] [US2] Delete the six per-type line views and their code-behind: `Coil/CoilWaitlistLineView.xaml(.cs)`,
+- [x] **T066** [P] [US2] Delete the six per-type line views and their code-behind: `Coil/CoilWaitlistLineView.xaml(.cs)`,
   `PickupFg/PickupFgWaitlistLineView.xaml(.cs)`, `PickupNcm/PickupNcmWaitlistLineView.xaml(.cs)`,
   `PickupOs/PickupOsWaitlistLineView.xaml(.cs)`, `PickupWip/PickupWipWaitlistLineView.xaml(.cs)`,
   `Scrap/ScrapWaitlistLineView.xaml(.cs)`. · delete those twelve files under `Module_Waitlist/Controls/`
-- [ ] **T067** [P] [US2] Delete the eight per-type request-type image views and their code-behind:
+- [x] **T067** [P] [US2] Delete the eight per-type request-type image views and their code-behind:
   `Coil/CoilRequestTypeImageView.xaml(.cs)`, `DieHandling/…`, `Flatstock/…`, `ForkliftAssist/…`, `Other/…`,
   `Pickup/…`, `Scrap/…`, `TableHandling/…`. *The plan calls these "seven per-type card views"; the tree actually
   holds **six** per-type line views (T066) plus these **eight** image views — fifteen per-type controls in all, which
@@ -526,12 +526,12 @@ shape, umbrella word first, identifier second, right picture (SC-003).
 
 **Wave 7 — the selector and the control model layer, independent (different files):**
 
-- [ ] **T068** [P] [US2] Delete the layout selector and the seven data templates it chooses between in
+- [x] **T068** [P] [US2] Delete the layout selector and the seven data templates it chooses between in
   `WaitlistViewPage.xaml` (`CoilTemplate`, `PickupFgTemplate`, `PickupNcmTemplate`, `PickupOsTemplate`,
   `PickupWipTemplate`, `ScrapTemplate`, `DefaultTemplate`) plus the `ItemTemplateSelector` binding on the list, so
   the page renders the one card template. · delete
   `MTM_Waitlist.Waitlist.View/Selectors/WaitlistLineTemplateSelector.cs`, `Module_Waitlist/Views/WaitlistViewPage.xaml`
-- [ ] **T069** [P] [US2] Delete the per-type control model/view-model layer in `MTM_Waitlist.Waitlist.Controls`
+- [x] **T069** [P] [US2] Delete the per-type control model/view-model layer in `MTM_Waitlist.Waitlist.Controls`
   (`Controls/*/…Model.cs`, `…ViewModel.cs` for Coil, DieHandling, Flatstock, ForkliftAssist, Other, Pickup, Scrap,
   TableHandling) and update that project's dependency-injection extension. ·
   delete `MTM_Waitlist.Waitlist.Controls/Controls/**`, `MTM_Waitlist.Waitlist.Controls/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
@@ -540,7 +540,7 @@ shape, umbrella word first, identifier second, right picture (SC-003).
 
 **Wave 8 — the field grid lands on the request page (single task):**
 
-- [ ] **T070** [US2] Move the declared-field grid off the card and onto the request detail page: lay the Item's fields
+- [x] **T070** [US2] Move the declared-field grid off the card and onto the request detail page: lay the Item's fields
   out in declared order two per row, and let a field alone on its row take that row's **full width** — the span is
   derived from the **declared field count**, never from the Item's identity, which is how `other`'s single field gets
   the full width the design document asks for while FR-006 stays absolute (§D9). · `Module_Waitlist/Views/WaitlistViewDetailPage.xaml`
@@ -549,7 +549,7 @@ shape, umbrella word first, identifier second, right picture (SC-003).
 
 **Wave 9 — resources (single task):**
 
-- [ ] **T071** [US2] Add the card's user-visible strings through the resource mechanism (FR-022), including the two
+- [x] **T071** [US2] Add the card's user-visible strings through the resource mechanism (FR-022), including the two
   wrong-material first lines whose **resolved text is pinned verbatim** — `Wrong Coil Bring:` and
   `Wrong Flatstock Bring:` — and the four metadata row labels. ·
   `Strings/en-us/Resources.resw`
