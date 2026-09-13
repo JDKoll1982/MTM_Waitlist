@@ -111,6 +111,16 @@ public interface IImageLocationService
     Task<string> ResolveWorkCenterImagePathAsync(string workCenterId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Resolves the effective image path for a request Item.
+    /// Resolution order: Item override → the Item's Category family → the existing placeholder
+    /// (<c>contracts/card-and-identifier.md</c> §4, FR-009/FR-021).
+    /// </summary>
+    /// <param name="itemCode">The canonical Item code (e.g. <c>pickup-coil</c>)</param>
+    /// <param name="cancellationToken">Cancellation token for the operation</param>
+    /// <returns>The resolved image path, falling back to the request-item default asset when needed</returns>
+    Task<string> ResolveRequestItemImagePathAsync(string itemCode, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the effective shared folder path for image storage.
     /// Resolution order: Database override → appsettings default → hard-coded fallback.
     /// </summary>

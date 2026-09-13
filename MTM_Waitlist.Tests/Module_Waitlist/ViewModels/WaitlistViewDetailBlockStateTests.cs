@@ -137,14 +137,14 @@ public sealed class WaitlistViewDetailBlockStateTests
         public override IReadOnlyList<WaitlistRequest> GetActiveRequests(string? building = null) => [Request];
     }
 
-    /// <summary>A coil request with no work order, no work centre, no subtype and no typed detail, so no block has a source.</summary>
+    /// <summary>A pickup request with no work order, no work centre and no typed detail, so no block has a source.</summary>
     private static WaitlistRequest Sparse() => new()
     {
         Building = "Expo Drive",
         WorkCenter = string.Empty,
         WorkCenterName = string.Empty,
-        RequestType = "Coil",
-        Subtype = null,
+        Category = "Pickup",
+        Item = "pickup-coil",
         InputValue = null,
         ActiveSetupJobId = string.Empty,
         RequesterEmployeeNumber = "6331",

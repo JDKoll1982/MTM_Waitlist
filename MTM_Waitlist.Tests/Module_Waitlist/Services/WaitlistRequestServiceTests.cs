@@ -23,7 +23,7 @@ public sealed class WaitlistRequestServiceTests
         Assert.IsNotNull(result.Request);
         var requests = service.GetActiveRequests("Expo Drive");
         Assert.AreEqual(1, requests.Count);
-        Assert.AreEqual("Coil", requests[0].RequestType);
+        Assert.AreEqual("deliver-wrong-coil", requests[0].Item);
         Assert.AreEqual("Press 12", requests[0].WorkCenter);
     }
 
@@ -136,8 +136,8 @@ public sealed class WaitlistRequestServiceTests
         {
             Building = draft.Building,
             WorkCenter = draft.WorkCenter,
-            RequestType = draft.RequestType,
-            Subtype = draft.Subtype,
+            Category = draft.Category,
+            Item = draft.Item,
             InputValue = "Different reason for the same request",
             ActiveSetupJobId = draft.ActiveSetupJobId,
             WorkCenterName = draft.WorkCenterName,
@@ -195,8 +195,8 @@ public sealed class WaitlistRequestServiceTests
                 ["public_id"] = "f0000000-00aa-4000-8000-0000000000aa",
                 ["building"] = "Expo Drive",
                 ["work_center"] = "100-3",
-                ["request_type"] = "Coil",
-                ["subtype"] = "Pickup Coil",
+                ["category"] = "Pickup",
+                ["item"] = "pickup-coil",
                 ["input_value"] = null,
                 ["active_setup_job_id"] = "100-3",
                 ["work_center_name"] = "100-3",
@@ -352,9 +352,8 @@ public sealed class WaitlistRequestServiceTests
         {
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-wrong-coil",
-            Subtype = "Wrong Coil",
             InputValue = "Wrong material at press",
             ActiveSetupJobId = "JOB-1001",
             WorkCenterName = "Press 12",
@@ -388,9 +387,8 @@ public sealed class WaitlistRequestServiceTests
         {
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-wrong-coil",
-            Subtype = "Wrong Coil",
             InputValue = "Wrong material at press",
             ActiveSetupJobId = string.Empty,
             WorkCenterName = "Press 12",
@@ -486,7 +484,7 @@ public sealed class WaitlistRequestServiceTests
             {
                 Building = "Expo Drive",
                 WorkCenter = "Press 9",
-                RequestType = "Coil",
+                Category = "Deliver",
                 Item = "deliver-coil",
                 ActiveSetupJobId = "JOB-2002",
                 WorkCenterName = "Press 9",
@@ -503,7 +501,7 @@ public sealed class WaitlistRequestServiceTests
             {
                 Building = "Expo Drive",
                 WorkCenter = "Press 15",
-                RequestType = "Coil",
+                Category = "Deliver",
                 Item = "deliver-coil",
                 ActiveSetupJobId = "JOB-3003",
                 WorkCenterName = "Press 15",
@@ -538,7 +536,7 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-coil",
             Status = "Pending",
             RequesterEmployeeNumber = "6229",
@@ -564,7 +562,7 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-coil",
             Status = "Accepted",
             RequesterEmployeeNumber = "6229",
@@ -577,16 +575,15 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void WaitlistViewViewModel_CreatesSessionOrder_WithSpecificSubtypeRules_ForPickupWrongCoilAndScrapEmpty()
+    public void WaitlistViewViewModel_CreatesSessionOrder_WithSpecificItemRules_ForPickupWrongCoilAndScrapEmpty()
     {
         var wrongCoil = new WaitlistRequest
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-wrong-coil",
-            Subtype = "Wrong Coil",
             InputValue = "Wrong material at press",
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(8),
@@ -596,9 +593,9 @@ public sealed class WaitlistRequestServiceTests
         var wrongCoilOrder = WaitlistViewViewModel.CreateSessionOrder(wrongCoil);
 
         // Both the coil identifier and its average weight come from a coil lookup this surface does not
-        // perform. The card therefore carries the subtype and the typed detail, and no stand-in for a
-        // coil attribute it cannot support (FR-001/FR-002).
-        Assert.AreEqual("Wrong Coil", wrongCoilOrder.Fields.First(item => item.Label == "Subtype").Value);
+        // perform. The card therefore carries the Item it was raised with and the typed detail, and no
+        // stand-in for a coil attribute it cannot support (FR-001/FR-002, FR-004/FR-005).
+        Assert.AreEqual("deliver-wrong-coil", wrongCoilOrder.ItemCode);
         Assert.AreEqual("Wrong material at press", wrongCoilOrder.Fields.First(item => item.Label == "Request details").Value);
         Assert.IsFalse(wrongCoilOrder.Fields.Any(item => string.Equals(item.Label, "Requested coil", StringComparison.Ordinal)));
 
@@ -607,7 +604,7 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "100-3",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-coil",
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(5),
@@ -617,24 +614,23 @@ public sealed class WaitlistRequestServiceTests
         Assert.IsFalse(normalCoilOrder.Fields.Any(item => string.Equals(item.Label, "Requested coil", StringComparison.Ordinal)));
         Assert.IsFalse(normalCoilOrder.Fields.Any(item => string.Equals(item.Label, "Average coil weight", StringComparison.Ordinal)));
 
-        // A Coil request whose subtype is an ACTION (e.g. "Bring") must still report the actual
-        // coil on the job as the "Requested coil" — never the action subtype itself.
+        // A "Bring" request is the deliver-coil Item itself — the action lives in the Item code, not in a
+        // second, derived subtype the card would have to render.
         var bringCoil = new WaitlistRequest
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "100-6",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-coil",
-            Subtype = "Bring",
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(7),
         };
         var bringCoilOrder = WaitlistViewViewModel.CreateSessionOrder(bringCoil);
 
-        // A coil identifier would have to come from the coil lookup, so the card never renders the action
-        // subtype in that slot — and never a stand-in coil either.
-        Assert.AreEqual("Bring", bringCoilOrder.Fields.First(item => item.Label == "Subtype").Value);
+        // A coil identifier would have to come from the coil lookup, so the card never renders a stand-in
+        // coil either.
+        Assert.AreEqual("deliver-coil", bringCoilOrder.ItemCode);
         Assert.IsFalse(bringCoilOrder.Fields.Any(item => string.Equals(item.Label, "Requested coil", StringComparison.Ordinal)));
 
         var statusMappings = new[]
@@ -651,7 +647,7 @@ public sealed class WaitlistRequestServiceTests
                 Id = Guid.NewGuid(),
                 Building = "Expo Drive",
                 WorkCenter = "100-3",
-                RequestType = "Coil",
+                Category = "Deliver",
                 Item = "deliver-coil",
                 Status = status,
                 TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(5),
@@ -665,9 +661,8 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Pickup",
+            Category = "Other",
             Item = "other",
-            Subtype = "Pickup Other",
             InputValue = "Need an outside service",
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(12),
@@ -675,16 +670,15 @@ public sealed class WaitlistRequestServiceTests
         };
 
         var pickupOtherOrder = WaitlistViewViewModel.CreateSessionOrder(pickupOther);
-        Assert.AreEqual("Pickup Other", pickupOtherOrder.Fields.First(item => item.Label == "Subtype").Value);
+        Assert.AreEqual("other", pickupOtherOrder.ItemCode);
 
         var scrapEmpty = new WaitlistRequest
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Scrap",
+            Category = "Pickup",
             Item = "pickup-scrap",
-            Subtype = "Empty",
             InputValue = "Scrap cart empty",
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(6),
@@ -692,7 +686,7 @@ public sealed class WaitlistRequestServiceTests
         };
 
         var scrapOrder = WaitlistViewViewModel.CreateSessionOrder(scrapEmpty);
-        Assert.AreEqual("Empty", scrapOrder.Fields.First(item => item.Label == "Scrap lugger").Value);
+        Assert.AreEqual("pickup-scrap", scrapOrder.ItemCode);
     }
 
     [TestMethod]
@@ -703,7 +697,7 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Forklift Assist",
+            Category = "Other",
             Item = "other",
             InputValue = "HELP ME!!!",
             Status = "Pending",
@@ -713,7 +707,7 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Flatstock",
+            Category = "Deliver",
             Item = "deliver-flatstock",
             Status = "Pending",
         };
@@ -722,9 +716,8 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Other",
+            Category = "Other",
             Item = "other",
-            Subtype = "General Text Entry",
             InputValue = "Please assist",
             Status = "Pending",
         };
@@ -733,9 +726,8 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Pickup",
+            Category = "Other",
             Item = "other",
-            Subtype = "Pickup Other",
             Status = "Pending",
         };
 
@@ -753,9 +745,8 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Pickup",
+            Category = "Pickup",
             Item = "pickup-fg",
-            Subtype = "Pickup FG",
             InputValue = "Finished goods request",
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(8),
@@ -775,7 +766,7 @@ public sealed class WaitlistRequestServiceTests
                 $"A Pickup FG card still renders '{label}', which no source on the request produces.");
         }
 
-        Assert.AreEqual("Pickup FG", order.Fields.First(item => item.Label == "Subtype").Value);
+        Assert.AreEqual("pickup-fg", order.ItemCode);
         Assert.AreEqual("Finished goods request", order.Fields.First(item => item.Label == "Request details").Value);
     }
 
@@ -787,9 +778,8 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-wrong-coil",
-            Subtype = "Wrong Coil",
             InputValue = "Wrong material at press",
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(8),
@@ -806,7 +796,7 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Other",
+            Category = "Other",
             Item = "other",
             InputValue = "Late submission",
             Status = "Accepted",
@@ -828,7 +818,7 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Pickup",
+            Category = "Pickup",
             Item = "pickup-coil",
             InputValue = "Late demand",
             Status = "Accepted",
@@ -1006,9 +996,8 @@ public sealed class WaitlistRequestServiceTests
         {
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-coil",
-            Subtype = "Pickup Coil",
             InputValue = "1",
             ActiveSetupJobId = "Press 12",
             WorkCenterName = "Press 12",
@@ -1142,7 +1131,7 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-coil",
             Status = "Pending",
             RequesterEmployeeNumber = "6229",
@@ -1153,7 +1142,7 @@ public sealed class WaitlistRequestServiceTests
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
             WorkCenter = "Press 15",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-coil",
             Status = "Pending",
             RequesterEmployeeNumber = "5000",
@@ -1184,7 +1173,7 @@ public sealed class WaitlistRequestServiceTests
         {
             Building = "Expo Drive",
             WorkCenter = "Press 15",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-coil",
             ActiveSetupJobId = "JOB-3003",
             WorkCenterName = "Press 15",
@@ -1297,7 +1286,7 @@ public sealed class WaitlistRequestServiceTests
         {
             Building = "Expo Drive",
             WorkCenter = "Press 15",
-            RequestType = "Coil",
+            Category = "Deliver",
             Item = "deliver-coil",
             ActiveSetupJobId = "JOB-3003",
             WorkCenterName = "Press 15",
@@ -1369,9 +1358,8 @@ public sealed class WaitlistRequestServiceTests
     {
         Building = "Expo Drive",
         WorkCenter = "Press 12",
-        RequestType = "Coil",
+        Category = "Deliver",
         Item = "deliver-wrong-coil",
-        Subtype = "Wrong Coil",
         InputValue = "Wrong material at press",
         ActiveSetupJobId = "JOB-1001",
         WorkCenterName = "Press 12",
@@ -1383,9 +1371,8 @@ public sealed class WaitlistRequestServiceTests
     {
         Building = "Expo Drive",
         WorkCenter = "Press 12",
-        RequestType = "Coil",
+        Category = "Deliver",
         Item = "deliver-wrong-coil",
-        Subtype = "Wrong Coil",
         InputValue = "Wrong material at press",
         ActiveSetupJobId = "JOB-1001",
         WorkCenterName = "Press 12",

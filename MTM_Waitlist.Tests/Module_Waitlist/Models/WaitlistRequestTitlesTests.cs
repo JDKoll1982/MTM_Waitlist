@@ -1,91 +1,137 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Models;
 
+/// <summary>
+/// The card's two lines, resolved from the Item the request was raised with (T056, FR-005, FR-029). The
+/// resolver is Item-keyed and has no legacy type/subtype path, so these checks are also the guard that the
+/// retired pair cannot come back as a second way to name a request.
+/// </summary>
 [TestClass]
 public sealed class WaitlistRequestTitlesTests
 {
     [TestMethod]
-    public void For_ReturnsRewordedTitles_ForKnownPairs()
+    public void ResolveLine1_IsTheItemsUmbrellaPhrase()
     {
-        Assert.AreEqual("Deliver: Coil", WaitlistRequestTitles.For("Coil", "Bring"));
-        Assert.AreEqual("Return: Coil", WaitlistRequestTitles.For("Coil", "Pickup"));
-        Assert.AreEqual("Pickup: NCM", WaitlistRequestTitles.For("Pickup", "Pickup NCM"));
-        Assert.AreEqual("Pickup: FG", WaitlistRequestTitles.For("Pickup", "Pickup FG"));
-        Assert.AreEqual("Pickup: WIP", WaitlistRequestTitles.For("Pickup", "Pickup WIP"));
-        Assert.AreEqual("Return: Coil", WaitlistRequestTitles.For("Pickup", "Pickup Coil"));
-        Assert.AreEqual("Pickup: Outside Service", WaitlistRequestTitles.For("Pickup", "Outside Service"));
-        Assert.AreEqual("Scrap: Empty", WaitlistRequestTitles.For("Scrap", "Empty"));
-        Assert.AreEqual("Deliver: Flatstock", WaitlistRequestTitles.For("Flatstock", "Bring"));
-        Assert.AreEqual("Assist: Place parts on table", WaitlistRequestTitles.For("Table Handling", "Table Place Parts"));
-        Assert.AreEqual("General Request", WaitlistRequestTitles.For("Other", "General Text Entry"));
+        Assert.AreEqual("Pickup", WaitlistRequestTitles.ResolveLine1(Find("pickup-die")));
+        Assert.AreEqual("Deliver", WaitlistRequestTitles.ResolveLine1(Find("deliver-coil")));
+        Assert.AreEqual("Assist", WaitlistRequestTitles.ResolveLine1(Find("assist-coil-turn")));
+        Assert.AreEqual("Other", WaitlistRequestTitles.ResolveLine1(Find("other")));
     }
 
     [TestMethod]
-    public void For_NoSubtype_ReturnsRequestType()
+    public void ResolveLine1_UsesTheItemsOwnPhraseForTheWrongMaterialItems()
     {
-        Assert.AreEqual("Forklift Assist", WaitlistRequestTitles.For("Forklift Assist", null));
-        Assert.AreEqual("Coil", WaitlistRequestTitles.For("Coil", ""));
+        // The two wrong-material first lines are pinned verbatim (contract §2).
+        Assert.AreEqual("Wrong Coil Bring:", WaitlistRequestTitles.ResolveLine1(Find("deliver-wrong-coil")));
+        Assert.AreEqual("Wrong Flatstock Bring:", WaitlistRequestTitles.ResolveLine1(Find("deliver-wrong-flatstock")));
     }
 
     [TestMethod]
-    public void For_UnlistedPair_FallsBackToTypeSlashSubtype()
+    public void ResolveLine1_IsEmptyWhenTheStoredCodeIsNotCatalogued()
     {
-        Assert.AreEqual("Coil / Future Subtype", WaitlistRequestTitles.For("Coil", "Future Subtype"));
+        // No legacy fallback: an Item the catalog does not describe gets no invented phrase.
+        Assert.AreEqual(string.Empty, WaitlistRequestTitles.ResolveLine1(null));
+        Assert.AreEqual(string.Empty, WaitlistRequestTitles.ResolveLine1(RequestItemCatalog.FindById("no-such-item")));
     }
 
     [TestMethod]
-    public void ResolveLine1_ReturnsCanonicalUmbrellaVerb_WhenMapped()
+    public void ResolveLine2_ResolvesAFixedIdentifier()
     {
-        // Phase 1.2 uniform-card Line 1 = umbrella verb (Pickup/Deliver/Assist/Other), with the two
-        // wrong-material Items carrying their own pinned first line instead of the plain Category word.
-        Assert.AreEqual("Deliver", WaitlistRequestTitles.ResolveLine1("Coil", "Bring"));
-        Assert.AreEqual("Pickup", WaitlistRequestTitles.ResolveLine1("Coil", "Pickup"));
-        Assert.AreEqual("Wrong Coil Bring:", WaitlistRequestTitles.ResolveLine1("Coil", "Wrong Coil @ press"));
-        Assert.AreEqual("Assist", WaitlistRequestTitles.ResolveLine1("Coil", "Need Coil Turned around"));
-        Assert.AreEqual("Pickup", WaitlistRequestTitles.ResolveLine1("Pickup", "Pickup NCM"));
-        Assert.AreEqual("Pickup", WaitlistRequestTitles.ResolveLine1("Scrap", "Empty"));
-        Assert.AreEqual("Deliver", WaitlistRequestTitles.ResolveLine1("Scrap", "Bring Hopper"));
-        Assert.AreEqual("Assist", WaitlistRequestTitles.ResolveLine1("Table Handling", "Table Remove Parts"));
+        var riserTable = WaitlistRequestTitles.ResolveLine2(Find("pickup-riser-table"), new RequestItemLine2Context());
+        Assert.IsTrue(riserTable.IsResolved);
+        Assert.AreEqual("Riser Table", riserTable.Text);
+
+        Assert.AreEqual("Hopper", WaitlistRequestTitles.ResolveLine2(Find("pickup-hopper"), new RequestItemLine2Context()).Text);
+        Assert.AreEqual("Hopper", WaitlistRequestTitles.ResolveLine2(Find("deliver-hopper"), new RequestItemLine2Context()).Text);
     }
 
     [TestMethod]
-    public void ResolveLine1_FallsBackToLegacyType_WhenUnmappedOrSubtypeLess()
+    public void ResolveLine2_ResolvesTheCapturedAnswerForTheFreeTextItem()
     {
-        // Forklift Assist is a type-level leaf -> Other umbrella.
-        Assert.AreEqual("Other", WaitlistRequestTitles.ResolveLine1("Forklift Assist", null));
-        // Unlisted pairing keeps the legacy type as Line 1.
-        Assert.AreEqual("Coil", WaitlistRequestTitles.ResolveLine1("Coil", "Future Subtype"));
-        // Subtype-less grouping types are not leaves -> legacy type fallback.
-        Assert.AreEqual("Coil", WaitlistRequestTitles.ResolveLine1("Coil", ""));
+        var result = WaitlistRequestTitles.ResolveLine2(
+            Find("other"),
+            new RequestItemLine2Context(Answer: "Skid 4471 is on the wrong dock"));
+
+        Assert.IsTrue(result.IsResolved);
+        Assert.AreEqual("Skid 4471 is on the wrong dock", result.Text);
     }
 
     [TestMethod]
-    public void ResolveItem_ReturnsCanonicalCatalogItem_ForKnownPairs()
+    public void ResolveLine2_PickupDie_ShowsTheLocationAtHomeLocationAndTheNumberOtherwise()
     {
-        var item = WaitlistRequestTitles.ResolveItem("Coil", "Bring");
-        Assert.IsNotNull(item);
-        Assert.AreEqual("deliver-coil", item!.Id);
-        Assert.AreEqual(RequestCategory.Deliver, item.Category);
+        // Home Location is the value that switches the die's second line (contract §3).
+        var atHome = WaitlistRequestTitles.ResolveLine2(
+            Find("pickup-die"),
+            new RequestItemLine2Context(DieNumber: "D-4471", DieLocation: "Rack 12", Destination: "Home Location"));
+        Assert.IsTrue(atHome.IsResolved);
+        Assert.AreEqual("Rack 12", atHome.Text);
 
-        var pickupNcm = WaitlistRequestTitles.ResolveItem("Pickup", "Pickup NCM");
-        Assert.IsNotNull(pickupNcm);
-        Assert.AreEqual("pickup-ncm", pickupNcm!.Id);
-        Assert.AreEqual(RequestCategory.Pickup, pickupNcm.Category);
-
-        var forklift = WaitlistRequestTitles.ResolveItem("Forklift Assist", null);
-        Assert.IsNotNull(forklift);
-        Assert.AreEqual("other", forklift!.Id);
+        var toDieShop = WaitlistRequestTitles.ResolveLine2(
+            Find("pickup-die"),
+            new RequestItemLine2Context(DieNumber: "D-4471", DieLocation: "Rack 12", Destination: "Die Shop"));
+        Assert.IsTrue(toDieShop.IsResolved);
+        Assert.AreEqual("D-4471", toDieShop.Text);
     }
 
     [TestMethod]
-    public void ResolveItem_ReturnsNull_ForGroupingTypeOrUnknownPair()
+    public void ResolveLine2_ReadsWhatTheJobCarries()
     {
-        Assert.IsNull(WaitlistRequestTitles.ResolveItem("Pickup", null));
-        Assert.IsNull(WaitlistRequestTitles.ResolveItem("Coil", "Future Subtype"));
-        Assert.IsNull(WaitlistRequestTitles.ResolveItem("", "Pickup NCM"));
+        var result = WaitlistRequestTitles.ResolveLine2(
+            Find("pickup-coil"),
+            new RequestItemLine2Context(PartNumber: "MMC0001000"));
+
+        Assert.IsTrue(result.IsResolved);
+        Assert.AreEqual("MMC0001000", result.Text);
     }
+
+    [TestMethod]
+    public void ResolveLine2_UnresolvableToken_RendersTheDisplayNameAndReportsTheProblem()
+    {
+        // A job-derived token the request does not carry is reported, never invented and never blank (FR-026).
+        var result = WaitlistRequestTitles.ResolveLine2(Find("pickup-coil"), new RequestItemLine2Context());
+
+        Assert.IsFalse(result.IsResolved, "A token with no source must be reported as unresolved.");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(result.Text), "The card must never be left with a blank identifier.");
+        Assert.AreEqual(
+            RequestItemLine2Resolver.ResolveDisplayName(Find("pickup-coil")!),
+            result.Text,
+            "An unresolvable template renders the Item's own display name.");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(result.Problem), "The configuration problem must be stated, not hidden.");
+        Assert.IsFalse(
+            result.Problem.StartsWith("RequestItem", StringComparison.Ordinal),
+            "The report is plain language, never a bare resource key.");
+    }
+
+    [TestMethod]
+    public void ResolveLine2_WithNoItem_ReportsTheProblemRatherThanInventingAnIdentifier()
+    {
+        var result = WaitlistRequestTitles.ResolveLine2(null, new RequestItemLine2Context(Answer: "anything"));
+
+        Assert.IsFalse(result.IsResolved);
+        Assert.AreEqual(string.Empty, result.Text);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(result.Problem));
+    }
+
+    [TestMethod]
+    public void TheResolverExposesNoLegacyPairOverload()
+    {
+        // FR-003/FR-023: no (requestType, subtype) entry point may exist for the card's lines.
+        var overloads = typeof(WaitlistRequestTitles)
+            .GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+            .Where(method => method.GetParameters().Any(parameter => parameter.ParameterType == typeof(string)))
+            .Select(method => method.Name)
+            .ToArray();
+
+        Assert.AreEqual(
+            0,
+            overloads.Length,
+            $"WaitlistRequestTitles still exposes a string-keyed entry point ({string.Join(", ", overloads)}), which is the retired type/subtype path coming back.");
+    }
+
+    private static RequestItemDefinition? Find(string itemId) => RequestItemCatalog.FindById(itemId);
 }

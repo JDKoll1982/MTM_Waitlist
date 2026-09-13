@@ -44,9 +44,18 @@ public sealed class NewRequestFlowStateTests
         Assert.AreEqual("6229", draft.RequesterEmployeeNumber);
         Assert.AreEqual("John Koll", draft.RequesterEmployeeName);
 
-        // Nothing the wizard produces may name a request type or a subtype any more (FR-003).
-        Assert.IsTrue(string.IsNullOrWhiteSpace(draft.RequestType));
-        Assert.IsTrue(string.IsNullOrWhiteSpace(draft.Subtype));
+        // Nothing the wizard produces may name a request type or a subtype any more (FR-003): the draft has
+        // no such member left, so the retired pair cannot reappear without a deliberate model change.
+        var retiredPair = typeof(WaitlistRequestDraft)
+            .GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+            .Select(property => property.Name)
+            .Where(name => name is "RequestType" or "Subtype")
+            .ToArray();
+
+        Assert.AreEqual(
+            0,
+            retiredPair.Length,
+            $"The draft carries the retired pair again ({string.Join(", ", retiredPair)}).");
     }
 
     [TestMethod]

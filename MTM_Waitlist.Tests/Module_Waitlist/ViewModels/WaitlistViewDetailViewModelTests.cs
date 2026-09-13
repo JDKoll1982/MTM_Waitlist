@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -15,7 +16,7 @@ public sealed class WaitlistViewDetailViewModelTests
     public async Task OnNavigatedTo_WhenPassedASubmittedRequestId_LoadsMatchingItemAndTemplateSectionsAsync()
     {
         var requestService = new WaitlistRequestService();
-        var request = await SubmitCoilRequestAsync(requestService);
+        var request = await SubmitRequestAsync(requestService);
         var item = WaitlistViewViewModel.CreateSessionOrder(request);
 
         var viewModel = new WaitlistViewDetailViewModel(
@@ -34,7 +35,7 @@ public sealed class WaitlistViewDetailViewModelTests
     public async Task OnNavigatedTo_WhenPassedSessionRequestId_UsesTheCorrectRequestDetailTemplateAsync()
     {
         var requestService = new WaitlistRequestService();
-        var request = await SubmitCoilRequestAsync(requestService, subtype: "Wrong Coil", inputValue: "Wrong material at press");
+        var request = await SubmitRequestAsync(requestService, itemCode: "deliver-wrong-coil", inputValue: "Wrong material at press");
         var item = WaitlistViewViewModel.CreateSessionOrder(request);
 
         var viewModel = new WaitlistViewDetailViewModel(
@@ -44,24 +45,29 @@ public sealed class WaitlistViewDetailViewModelTests
 
         viewModel.OnNavigatedTo(item.Id);
 
-        // A coil request carries the subtype and the typed detail; the coil attributes themselves come
-        // from a lookup this page does not perform, so no section claims to have them.
-        Assert.IsTrue(viewModel.TemplateSections.Count >= 2);
-        Assert.AreEqual("Coil material", viewModel.TemplateSections[0].Title);
-        Assert.AreEqual("Wrong Coil", viewModel.TemplateSections[0].Fields[0].Value);
+        // Every request renders the same two blocks: the Item the request names, then the request's own
+        // context. The first block's Item row is the Item's umbrella phrase, so the wrong-material Item reads
+        // its own pinned first line rather than the plain Category word (contract §2, FR-005).
+        Assert.AreEqual(2, viewModel.TemplateSections.Count);
+        Assert.AreEqual("Request", viewModel.TemplateSections[0].Title);
+        Assert.AreEqual("Wrong Coil Bring:", SectionField(viewModel.TemplateSections[0], "Item"));
+        Assert.AreEqual("Wrong material at press", SectionField(viewModel.TemplateSections[0], "Request details"));
     }
 
-    private static async Task<WaitlistRequest> SubmitCoilRequestAsync(
+    private static async Task<WaitlistRequest> SubmitRequestAsync(
         WaitlistRequestService requestService,
-        string subtype = "Pickup Coil",
+        string itemCode = "pickup-coil",
         string inputValue = "COIL-204")
     {
+        var definition = RequestItemCatalog.FindById(itemCode);
+        Assert.IsNotNull(definition, $"The fixture names '{itemCode}', which is not in the Item catalog.");
+
         var draft = new WaitlistRequestDraft
         {
             Building = "Expo Drive",
             WorkCenter = "100-3",
-            RequestType = "Coil",
-            Subtype = subtype,
+            Category = definition!.Category.ToString(),
+            Item = itemCode,
             InputValue = inputValue,
             ActiveSetupJobId = "100-3",
             WorkCenterName = "100-3",
@@ -95,8 +101,8 @@ public sealed class WaitlistViewDetailViewModelTests
         {
             Building = "Expo Drive",
             WorkCenter = "100-3",
-            RequestType = "Coil",
-            Subtype = "Pickup Coil",
+            Category = RequestCategory.Pickup.ToString(),
+            Item = "pickup-coil",
             ActiveSetupJobId = "100-3",
             WorkCenterName = "100-3",
             RequesterEmployeeNumber = "6229",
@@ -115,7 +121,10 @@ public sealed class WaitlistViewDetailViewModelTests
 
         Assert.IsNotNull(viewModel.Item);
         Assert.AreEqual(requestId.GetHashCode(), viewModel.Item!.Id);
-        Assert.IsTrue(viewModel.TemplateSections.Any(section => string.Equals(section.Title, "Coil material", StringComparison.OrdinalIgnoreCase)));
+        Assert.AreEqual("pickup-coil", viewModel.Item!.ItemCode, "The page must carry the Item the request was raised with.");
+        Assert.IsTrue(
+            viewModel.TemplateSections.Any(section => string.Equals(section.Title, "Request", StringComparison.OrdinalIgnoreCase)),
+            "A resolved request must render its block.");
     }
 
     [TestMethod]
@@ -126,8 +135,8 @@ public sealed class WaitlistViewDetailViewModelTests
         {
             Building = "Expo Drive",
             WorkCenter = "100-3",
-            RequestType = "Coil",
-            Subtype = "Pickup Coil",
+            Category = RequestCategory.Pickup.ToString(),
+            Item = "pickup-coil",
             ActiveSetupJobId = "WO-204",
             WorkCenterName = "100-3",
             RequesterEmployeeNumber = "6229",
@@ -143,12 +152,15 @@ public sealed class WaitlistViewDetailViewModelTests
 
         viewModel.OnNavigatedTo(requestId.GetHashCode());
 
-        var section = viewModel.TemplateSections.First(section =>
-            string.Equals(section.Title, "Work order and request", StringComparison.OrdinalIgnoreCase));
-        Assert.AreEqual("WO-204", SectionField(section, "Work order"), "Work order should come from the request's active job id.");
-        Assert.AreEqual("100-3", SectionField(section, "Work center"));
-        Assert.AreEqual("John Koll", SectionField(section, "Requesting user"));
-        Assert.AreEqual("6229", SectionField(section, "Employee number"), "Employee number should come from the requester.");
+        var requestSection = viewModel.TemplateSections.First(section =>
+            string.Equals(section.Title, "Request", StringComparison.OrdinalIgnoreCase));
+        Assert.AreEqual("WO-204", SectionField(requestSection, "Work order"), "Work order should come from the request's active job id.");
+
+        var contextSection = viewModel.TemplateSections.First(section =>
+            string.Equals(section.Title, "Request context", StringComparison.OrdinalIgnoreCase));
+        Assert.AreEqual("100-3", SectionField(contextSection, "Work center"));
+        Assert.AreEqual("John Koll", SectionField(contextSection, "Requesting user"));
+        Assert.AreEqual("6229", SectionField(contextSection, "Employee number"), "Employee number should come from the requester.");
     }
 
     private static string? SectionField(WaitlistDetailTemplateSection section, string label)
@@ -171,7 +183,7 @@ public sealed class WaitlistViewDetailViewModelTests
     public async Task OnNavigatedTo_ItemResolved_ClearsEmptyStateMessageAsync()
     {
         var requestService = new WaitlistRequestService();
-        var request = await SubmitCoilRequestAsync(requestService);
+        var request = await SubmitRequestAsync(requestService);
         var item = WaitlistViewViewModel.CreateSessionOrder(request);
 
         var viewModel = new WaitlistViewDetailViewModel(

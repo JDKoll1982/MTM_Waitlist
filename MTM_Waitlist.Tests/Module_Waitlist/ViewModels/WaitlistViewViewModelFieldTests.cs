@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MTM_Waitlist.Tests.Module_Mock;
@@ -20,26 +21,9 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 [TestClass]
 public sealed class WaitlistViewViewModelFieldTests
 {
-    /// <summary>One request per branch of the field-population switch.</summary>
+    /// <summary>Every catalogued Item, so the audit covers each shape a request can actually be raised with.</summary>
     private static IReadOnlyList<WaitlistRequest> EveryRequestShape { get; } =
-    [
-        Shape("Coil", "Pickup Coil"),
-        Shape("Coil", "Wrong Coil"),
-        Shape("Scrap", "Empty Lugger"),
-        Shape("Scrap", "Full Lugger"),
-        Shape("Pickup", "Pickup FG"),
-        Shape("Pickup", "Pickup NCM"),
-        Shape("Pickup", "Pickup WIP"),
-        Shape("Pickup", "Pickup Coil"),
-        Shape("Pickup", "Outside Service"),
-        Shape("Pickup", "Other"),
-        Shape("Flatstock", null),
-        Shape("Table Handling", null),
-        Shape("Die Handling", null),
-        Shape("Forklift Assist", null),
-        Shape("Other", null),
-        Shape("Other", "General"),
-    ];
+        RequestItemCatalog.Items.Select(item => Shape(item.Id)).ToArray();
 
     [TestMethod]
     public void CreateSessionOrder_ForEveryRequestShape_CarriesOnlyValuesTheRequestCarries()
@@ -108,7 +92,7 @@ public sealed class WaitlistViewViewModelFieldTests
         // FR-014: a handler must be able to read who asked, where it goes, and how urgent it is off the card
         // itself. Every one of these comes from the request — nothing is derived into a value the request
         // does not carry, which is why the absent ones stay absent rather than being filled in.
-        var request = Shape("Pickup", "Pickup NCM");
+        var request = Shape("pickup-ncm");
         var order = WaitlistViewViewModel.CreateSessionOrder(request);
 
         Assert.AreEqual(request.RequesterEmployeeName, order.RequestedByName, "The handler cannot see who asked.");
@@ -136,16 +120,15 @@ public sealed class WaitlistViewViewModelFieldTests
         }
     }
 
-    /// <summary>Builds a request of the given shape carrying distinctive, non-fabricated values.</summary>
-    /// <param name="requestType">The request type under test.</param>
-    /// <param name="subtype">The subtype, or null for the no-subtype shape.</param>
+    /// <summary>Builds a request of the given Item's shape carrying distinctive, non-fabricated values.</summary>
+    /// <param name="itemCode">The Item code under test.</param>
     /// <returns>The request.</returns>
-    private static WaitlistRequest Shape(string requestType, string? subtype) => new()
+    private static WaitlistRequest Shape(string itemCode) => new()
     {
         Building = "Expo Drive",
         WorkCenter = "Expo Line 7",
-        RequestType = requestType,
-        Subtype = subtype,
+        Category = RequestItemCatalog.FindById(itemCode)!.Category.ToString(),
+        Item = itemCode,
         InputValue = "Skid 4471 is on the wrong dock",
         ActiveSetupJobId = "JOB-9001",
         WorkCenterName = "Expo Line 7",
@@ -168,8 +151,8 @@ public sealed class WaitlistViewViewModelFieldTests
         yield return request.Building;
         yield return request.WorkCenter;
         yield return request.WorkCenterName;
-        yield return request.RequestType;
-        yield return request.Subtype ?? string.Empty;
+        yield return request.Category;
+        yield return request.Item;
         yield return request.InputValue ?? string.Empty;
         yield return request.ActiveSetupJobId;
         yield return request.RequesterEmployeeNumber;
@@ -179,5 +162,5 @@ public sealed class WaitlistViewViewModelFieldTests
         yield return request.Id.ToString("D");
     }
 
-    private static string Describe(WaitlistRequest request) => $"{request.RequestType} / {request.Subtype ?? "(no subtype)"}";
+    private static string Describe(WaitlistRequest request) => $"{request.Category} / {request.Item}";
 }

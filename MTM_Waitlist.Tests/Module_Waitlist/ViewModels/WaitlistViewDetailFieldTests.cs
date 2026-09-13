@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -34,18 +35,13 @@ public sealed class WaitlistViewDetailFieldTests
         "Pending pickup",
     ];
 
-    private static IReadOnlyList<(string RequestType, string? Subtype)> EveryDetailShape { get; } =
-    [
-        ("Coil", "Pickup Coil"),
-        ("Scrap", "Empty Lugger"),
-        ("Pickup", "Pickup FG"),
-        ("Pickup", "Pickup NCM"),
-        ("Pickup", "Pickup WIP"),
-        ("Pickup", "Outside Service"),
-        ("Flatstock", null),
-        ("Table Handling", null),
-        ("Die Handling", null),
-    ];
+    /// <summary>
+    /// Every catalogued Item, so the audit covers each shape a request can actually be raised with. The
+    /// fixtures are driven by the Item code the store carries: there is no type/subtype pair to drive them
+    /// with any more (FR-003, FR-004).
+    /// </summary>
+    private static IReadOnlyList<string> EveryDetailShape { get; } =
+        RequestItemCatalog.Items.Select(item => item.Id).ToArray();
 
     [TestMethod]
     public void FieldValue_ExposesNoFallbackDefault()
@@ -65,10 +61,10 @@ public sealed class WaitlistViewDetailFieldTests
     [TestMethod]
     public void LoadedSections_RenderNoInventedAttributeAndNoAbsencePlaceholder()
     {
-        foreach (var (requestType, subtype) in EveryDetailShape)
+        foreach (var itemCode in EveryDetailShape)
         {
-            var viewModel = BuildLoadedViewModel(requestType, subtype);
-            var shape = $"{requestType} / {subtype ?? "(no subtype)"}";
+            var viewModel = BuildLoadedViewModel(itemCode);
+            var shape = itemCode;
 
             Assert.IsTrue(viewModel.Item is not null, $"{shape}: the detail page resolved no item, so this check proved nothing.");
 
@@ -98,9 +94,9 @@ public sealed class WaitlistViewDetailFieldTests
     [TestMethod]
     public void LoadedSections_CarryNoFieldWithoutAValue()
     {
-        foreach (var (requestType, subtype) in EveryDetailShape)
+        foreach (var itemCode in EveryDetailShape)
         {
-            var viewModel = BuildLoadedViewModel(requestType, subtype);
+            var viewModel = BuildLoadedViewModel(itemCode);
 
             foreach (var section in viewModel.TemplateSections)
             {
@@ -108,16 +104,16 @@ public sealed class WaitlistViewDetailFieldTests
                 {
                     Assert.IsFalse(
                         string.IsNullOrWhiteSpace(field.Value),
-                        $"{requestType}/{subtype}: section '{section.Title}' renders the labelled shell '{field.Label}' with no value.");
+                        $"{itemCode}: section '{section.Title}' renders the labelled shell '{field.Label}' with no value.");
                     Assert.IsFalse(
                         string.IsNullOrWhiteSpace(field.Label),
-                        $"{requestType}/{subtype}: section '{section.Title}' renders a value with no label.");
+                        $"{itemCode}: section '{section.Title}' renders a value with no label.");
                 }
             }
         }
     }
 
-    private static WaitlistViewDetailViewModel BuildLoadedViewModel(string requestType, string? subtype)
+    private static WaitlistViewDetailViewModel BuildLoadedViewModel(string itemCode)
     {
         var requestService = new WaitlistRequestService();
         var submit = requestService
@@ -126,8 +122,8 @@ public sealed class WaitlistViewDetailFieldTests
                 {
                     Building = "Expo Drive",
                     WorkCenter = "Expo Line 7",
-                    RequestType = requestType,
-                    Subtype = subtype,
+                    Category = RequestItemCatalog.FindById(itemCode)!.Category.ToString(),
+                    Item = itemCode,
                     InputValue = "Skid 4471 is on the wrong dock",
                     ActiveSetupJobId = "JOB-9001",
                     WorkCenterName = "Expo Line 7",
@@ -138,7 +134,7 @@ public sealed class WaitlistViewDetailFieldTests
             .GetAwaiter()
             .GetResult();
 
-        Assert.IsNotNull(submit.Request, $"{requestType}/{subtype}: submitting the fixture request failed.");
+        Assert.IsNotNull(submit.Request, $"{itemCode}: submitting the fixture request failed.");
 
         var order = WaitlistViewViewModel.CreateSessionOrder(submit.Request!);
         var viewModel = new WaitlistViewDetailViewModel(

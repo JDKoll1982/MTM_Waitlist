@@ -599,113 +599,26 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             return;
         }
 
-        switch (Item.ImagePath.Trim().ToLowerInvariant())
-        {
-            case "pickup_fg.png":
-                LoadFinishedGoodsSections(Item);
-                break;
-            case "pickup_ncm.png":
-                LoadNcmSections(Item);
-                break;
-            case "pickup_os.png":
-                LoadOutsideServiceSections(Item);
-                break;
-            case "pickup_wip.png":
-                LoadWipSections(Item);
-                break;
-            case "scrap.png":
-                LoadScrapSections(Item);
-                break;
-            default:
-                LoadCoilSections(Item);
-                break;
-        }
-    }
-
-    private void LoadCoilSections(SampleOrder item)
-    {
-        var request = ResolveRequest(item);
+        // One section shape for every Item (FR-006, FR-007). Nothing below branches on *which* Item is on
+        // screen: the two lines are the Item's own umbrella phrase and identifier, resolved from the code the
+        // request was stored with, and the remaining rows are what the request itself carries. An Item's own
+        // declared fields are the configuration-driven grid that lands on this page; until that grid is read,
+        // this page states only what it can support and never draws an empty titled block.
+        AddSection(
+            "Request",
+            "What this request asks for, and what the request itself carries.",
+            ("Item", Item.Title),
+            ("Identifier", Item.Subtitle),
+            ("Request details", FieldValue(Item, "Request details")),
+            ("Work order", FieldValue(Item, "Work order")));
 
         AddSection(
-            "Coil material",
-            "Material information carried by the request itself.",
-            ("Subtype", FieldValue(item, "Subtype")),
-            ("Request details", FieldValue(item, "Request details")),
-            ("Requesting work center", FieldValue(item, "Requesting work center")));
-
-        AddSection(
-            "Work order and request",
-            "Request ownership and work-order context for the coil movement.",
-            ("Work order", WorkOrderText(item, request)),
-            ("Work center", item.RequestedPressName),
-            ("Requesting user", item.RequestedByName),
-            ("Employee number", EmployeeNumberText(request, item)),
-            ("Remaining time", item.RemainingTimeText));
-    }
-
-    private void LoadFinishedGoodsSections(SampleOrder item)
-    {
-        AddSection(
-            "Customer order",
-            "Customer and part information for the finished-goods pickup.",
-            ("Subtype", FieldValue(item, "Subtype")),
-            ("Request details", FieldValue(item, "Request details")),
-            ("Part number", FieldValue(item, "Part number")),
-            ("Part description", FieldValue(item, "Part description")),
-            ("Customer", FieldValue(item, "Customer")),
-            ("Packlist", FieldValue(item, "Packlist")),
-            ("Quantity remaining", FieldValue(item, "Quantity remaining")));
-
-        AddRequestContextSection(item, "Finished-goods workflow", "Confirm assignment, pickup, and shipment status before closing the request.");
-    }
-
-    private void LoadNcmSections(SampleOrder item)
-    {
-        AddSection(
-            "NCM pickup",
-            "Material-handler information for moving nonconforming material to the NCM area.",
-            ("Subtype", FieldValue(item, "Subtype")),
-            ("Request details", FieldValue(item, "Request details")),
-            ("Pickup location", FieldValue(item, "Pickup location")));
-
-        AddRequestContextSection(item, "NCM workflow", "Record handler pickup, NCM-area delivery, Quality ownership, and disposition approval.");
-    }
-
-    private void LoadOutsideServiceSections(SampleOrder item)
-    {
-        AddSection(
-            "Pickup and delivery",
-            "Material-handler instructions for moving material from the work center to outside service.",
-            ("Subtype", FieldValue(item, "Subtype")),
-            ("Request details", FieldValue(item, "Request details")),
-            ("Pickup work center", FieldValue(item, "Pickup work center")));
-
-        AddRequestContextSection(item, "Outside-service workflow", "Record handler pickup, delivery acknowledgement, service status, and return tracking.");
-    }
-
-    private void LoadWipSections(SampleOrder item)
-    {
-        AddSection(
-            "WIP pickup and inventory",
-            "Material-handler instructions for moving WIP from the work center into the assigned WIP location.",
-            ("Subtype", FieldValue(item, "Subtype")),
-            ("Work order", FieldValue(item, "Work order")),
-            ("Request details", FieldValue(item, "Request details")),
-            ("Pickup work center", FieldValue(item, "Pickup work center")));
-
-        AddRequestContextSection(item, "WIP workflow", "Record pickup acknowledgement, inventory transaction, destination confirmation, and handler.");
-    }
-
-    private void LoadScrapSections(SampleOrder item)
-    {
-        AddSection(
-            "Scrap pickup and lugger",
-            "Material-handler instructions for moving scrap to the correct lugger.",
-            ("Scrap lugger", FieldValue(item, "Scrap lugger")),
-            ("Pickup work center", FieldValue(item, "Pickup work center")),
-            ("Request details", FieldValue(item, "Request details")));
-
-        AddRequestContextSection(item, "Scrap workflow", "Record handler pickup, lugger placement, confirmation, and any correction to the selected category.");
+            "Request context",
+            "Who asked, where it goes, and how urgent it is.",
+            ("Work center", Item.RequestedPressName),
+            ("Requesting user", Item.RequestedByName),
+            ("Employee number", Item.RequesterEmployeeNumber),
+            ("Remaining time", Item.RemainingTimeText));
     }
 
     private void AddRequestContextSection(SampleOrder item, string title, string summary)
@@ -735,30 +648,6 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
 
         return null;
-    }
-
-    /// <summary>Work-order/job context for the request: a 'Work order' field when present, else the active job id.</summary>
-    private static string? WorkOrderText(SampleOrder item, WaitlistRequest? request)
-    {
-        var fieldValue = item.Fields
-            .FirstOrDefault(field => string.Equals(field.Label, "Work order", StringComparison.OrdinalIgnoreCase))
-            ?.Value;
-        if (!string.IsNullOrWhiteSpace(fieldValue))
-        {
-            return fieldValue;
-        }
-
-        var jobId = request?.ActiveSetupJobId;
-        return string.IsNullOrWhiteSpace(jobId) ? null : jobId;
-    }
-
-    /// <summary>Requester employee number for the request, or null when none is known.</summary>
-    private static string? EmployeeNumberText(WaitlistRequest? request, SampleOrder item)
-    {
-        var employeeNumber = request is not null && !string.IsNullOrWhiteSpace(request.RequesterEmployeeNumber)
-            ? request.RequesterEmployeeNumber
-            : item.RequesterEmployeeNumber;
-        return string.IsNullOrWhiteSpace(employeeNumber) ? null : employeeNumber;
     }
 
     /// <summary>
@@ -858,16 +747,10 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             return;
         }
 
-        if (item.SubtypeStableId.HasValue)
+        if (!string.IsNullOrWhiteSpace(item.ItemCode))
         {
             item.ResolvedImagePath = await _imageLocationService
-                .ResolveRequestSubtypeImagePathAsync(item.SubtypeStableId.Value.ToString())
-                .ConfigureAwait(false);
-        }
-        else if (item.RequestTypeStableId.HasValue)
-        {
-            item.ResolvedImagePath = await _imageLocationService
-                .ResolveRequestTypeImagePathAsync(item.RequestTypeStableId.Value.ToString())
+                .ResolveRequestItemImagePathAsync(item.ItemCode)
                 .ConfigureAwait(false);
         }
 

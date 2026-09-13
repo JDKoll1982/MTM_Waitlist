@@ -33,6 +33,13 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
 
     private NewRequestFlowState? _state;
 
+    /// <summary>
+    /// The configuration rows read once when this step was entered. Held so choosing an Item can record the
+    /// Item together with the behaviour its row declares, without a second read per selection (FR-013, FR-024).
+    /// </summary>
+    private RequestItemConfigurationSet _configurations =
+        RequestItemConfigurationSet.From(Array.Empty<RequestItemConfiguration>());
+
     [ObservableProperty]
     public partial string WorkCenterText
     {
@@ -120,6 +127,7 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
 
             // Read once, as the step is entered — never per row render, never per keystroke (FR-013, FR-024).
             var configurations = await _configurationService.GetConfigurationsAsync().ConfigureAwait(true);
+            _configurations = configurations;
 
             Items.Clear();
             foreach (var item in _flowService.GetVisibleItems(category, state.Availability))
@@ -181,7 +189,7 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
         }
 
         _state.Item = option.Item;
-        _state.ItemConfiguration = null;
+        _state.ItemConfiguration = _configurations.Get(option.Item.Id);
         IsUnavailableVisible = false;
         UnavailableMessage = string.Empty;
     }

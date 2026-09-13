@@ -31,9 +31,20 @@ public static class ImageLocationDefaults
     public const string WorkCenterDefaultPath = "Assets\\Placeholders\\default-workstation-image.png";
 
     /// <summary>
+    /// Default image for request Items. Used when neither an Item override nor the Item's Category family
+    /// has an image. See specs/004-unified-card-item-picker/contracts/card-and-identifier.md §4.
+    /// </summary>
+    public const string RequestItemDefaultPath = "Assets\\Placeholders\\default-request-type.png";
+
+    /// <summary>
+    /// Default image for a request Category family (Pickup / Deliver / Assist / Other).
+    /// </summary>
+    public const string RequestCategoryDefaultPath = "Assets\\Placeholders\\default-request-type.png";
+
+    /// <summary>
     /// Gets the default image path for a given image location scope.
     /// </summary>
-    /// <param name="scope">The scope type: request_type, request_subtype, or work_center</param>
+    /// <param name="scope">The scope type: request_type, request_subtype, work_center, request_item, or request_category</param>
     /// <returns>The relative path to the default image file</returns>
     /// <exception cref="ArgumentException">Thrown if scope is not recognized</exception>
     public static string GetDefaultPathByScope(ImageLocationScope scope) => scope switch
@@ -41,13 +52,15 @@ public static class ImageLocationDefaults
         ImageLocationScope.RequestType => RequestTypeDefaultPath,
         ImageLocationScope.RequestSubtype => RequestSubtypeDefaultPath,
         ImageLocationScope.WorkCenter => WorkCenterDefaultPath,
+        ImageLocationScope.RequestItem => RequestItemDefaultPath,
+        ImageLocationScope.RequestCategory => RequestCategoryDefaultPath,
         _ => throw new ArgumentException($"Unknown scope: {scope}", nameof(scope))
     };
 
     /// <summary>
     /// Gets the default image path for a given scope string.
     /// </summary>
-    /// <param name="scopeString">The scope as a string: request_type, request_subtype, or work_center</param>
+    /// <param name="scopeString">The scope as a string: request_type, request_subtype, work_center, request_item, or request_category</param>
     /// <returns>The relative path to the default image file</returns>
     /// <exception cref="ArgumentException">Thrown if scopeString is not recognized</exception>
     public static string GetDefaultPathByScope(string scopeString)
@@ -62,6 +75,8 @@ public static class ImageLocationDefaults
             "request_type" => RequestTypeDefaultPath,
             "request_subtype" => RequestSubtypeDefaultPath,
             "work_center" => WorkCenterDefaultPath,
+            "request_item" => RequestItemDefaultPath,
+            "request_category" => RequestCategoryDefaultPath,
             _ => throw new ArgumentException($"Unknown scope: {scopeString}", nameof(scopeString))
         };
     }

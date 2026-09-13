@@ -29,7 +29,17 @@ public sealed class SampleOrder : INotifyPropertyChanged
     /// <summary>The request's short handler note, or null when it has none.</summary>
     public string? Note { get; set; }
 
+    /// <summary>
+    /// Card <b>Line 1</b> — the Item's umbrella phrase: the Category's own word, or the Item's own phrase where
+    /// the Item defines one. Read from the Item catalog, never from a stored request type (FR-005).
+    /// </summary>
     public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Card <b>Line 2</b> — the Item's identifier: a fixed value, a value read from the job, or the value the
+    /// flow captured. Resolved from the Item's own template; an unresolvable token renders the Item's display
+    /// name and reports the problem through <see cref="Line2Problem"/> (FR-005, FR-026).
+    /// </summary>
     public string Subtitle { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public string RequestedByName { get; set; } = string.Empty;
@@ -76,8 +86,24 @@ public sealed class SampleOrder : INotifyPropertyChanged
     public bool IsOverdueAtSource { get; set; }
 
     public string ImagePath { get; set; } = string.Empty;
-    public Guid? RequestTypeStableId { get; set; }
-    public Guid? SubtypeStableId { get; set; }
+
+    /// <summary>
+    /// The Item code the request asked for (FR-004). The row's identity: the picture, the request page's
+    /// sections and the sort all resolve from it, so no reader has to be told what the request "really" was
+    /// through a second, derived pair.
+    /// </summary>
+    public string ItemCode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The plain-language report of an Item whose identifier could not be resolved (FR-026), or null when the
+    /// card's second line resolved cleanly. Never blank in place of a value: a card that cannot show the
+    /// identifier says why instead of silently showing nothing.
+    /// </summary>
+    public string? Line2Problem { get; set; }
+
+    /// <summary>True when the Item's identifier could not be resolved and <see cref="Line2Problem"/> says why.</summary>
+    public bool HasLine2Problem => !string.IsNullOrWhiteSpace(Line2Problem);
+
     public long? WorkCenterCatalogId { get; set; }
     public string ResolvedImagePath { get; set; } = string.Empty;
     public string WorkCenterImagePath { get; set; } = string.Empty;

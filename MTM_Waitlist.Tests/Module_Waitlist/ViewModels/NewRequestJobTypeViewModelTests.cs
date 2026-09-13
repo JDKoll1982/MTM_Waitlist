@@ -132,8 +132,18 @@ public sealed class NewRequestJobTypeViewModelTests
 
         var draft = state.ToDraft();
         Assert.IsFalse(string.IsNullOrWhiteSpace(draft.Category));
-        Assert.IsTrue(string.IsNullOrWhiteSpace(draft.RequestType), "The wizard must not carry a request type any more (FR-003).");
-        Assert.IsTrue(string.IsNullOrWhiteSpace(draft.Subtype), "The wizard must not carry a subtype any more (FR-003).");
+
+        // FR-003: the wizard carries no request type and no subtype — the retired pair has no member left to hold.
+        var retiredPair = typeof(WaitlistRequestDraft)
+            .GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+            .Select(property => property.Name)
+            .Where(name => name is "RequestType" or "Subtype")
+            .ToArray();
+
+        Assert.AreEqual(
+            0,
+            retiredPair.Length,
+            $"The draft carries the retired pair again ({string.Join(", ", retiredPair)}).");
     }
 
     [TestMethod]

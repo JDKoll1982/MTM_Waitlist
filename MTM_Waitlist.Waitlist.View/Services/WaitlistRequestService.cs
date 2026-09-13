@@ -91,8 +91,6 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             WorkCenter = ReadString(row, "work_center"),
             Category = ReadString(row, "category"),
             Item = ReadString(row, "item"),
-            RequestType = ProjectLegacyDisplay(ReadString(row, "item")).RequestType,
-            Subtype = ProjectLegacyDisplay(ReadString(row, "item")).Subtype,
             InputValue = ReadNullableString(row, "input_value"),
             ActiveSetupJobId = ReadString(row, "active_setup_job_id"),
             WorkCenterName = ReadString(row, "work_center_name"),
@@ -119,31 +117,12 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         => row.TryGetValue(key, out var value) ? Convert.ToString(value)?.Trim() ?? string.Empty : string.Empty;
 
     /// <summary>
-    /// The transitional display pair the list and the request page still read until US2 re-points them at the
-    /// Item. It is derived from the Item row, never from a stored legacy column — those columns are gone
-    /// (FR-004, FR-023).
-    /// </summary>
-    private static (string RequestType, string? Subtype) ProjectLegacyDisplay(string? itemCode)
-    {
-        var item = RequestItemCatalog.FindById(itemCode);
-        return item is null
-            ? (string.Empty, null)
-            : (item.UmbrellaVerb, string.IsNullOrWhiteSpace(item.NormalizedName) ? null : item.NormalizedName);
-    }
-
-    /// <summary>
-    /// The Item code a draft asks for. A draft raised by the wizard carries it directly; one raised with the
-    /// legacy pair is mapped to its canonical Item row, so every stored request carries a real pair (FR-004).
+    /// The Item code a draft asks for. The wizard sets it from the Item step, and it is the draft's single
+    /// identity — there is no legacy (type, subtype) pair to fall back on, because the store carries neither
+    /// column and a request that carried a second, derived pair could disagree with itself (FR-004, FR-023).
     /// </summary>
     private static string ResolveItemCode(WaitlistRequestDraft draft)
-    {
-        if (!string.IsNullOrWhiteSpace(draft.Item))
-        {
-            return draft.Item.Trim();
-        }
-
-        return RequestItemLegacyMapper.Map(draft.RequestType, draft.Subtype)?.Id ?? string.Empty;
-    }
+        => string.IsNullOrWhiteSpace(draft.Item) ? string.Empty : draft.Item.Trim();
 
     private static string? ReadNullableString(IReadOnlyDictionary<string, object?> row, string key)
     {
@@ -354,8 +333,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Id = existing.Id,
             Building = existing.Building,
             WorkCenter = existing.WorkCenter,
-            RequestType = existing.RequestType,
-            Subtype = existing.Subtype,
+            Category = existing.Category,
+            Item = existing.Item,
             InputValue = existing.InputValue,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
@@ -495,8 +474,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Id = existing.Id,
             Building = existing.Building,
             WorkCenter = existing.WorkCenter,
-            RequestType = existing.RequestType,
-            Subtype = existing.Subtype,
+            Category = existing.Category,
+            Item = existing.Item,
             InputValue = existing.InputValue,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
@@ -582,8 +561,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Id = existing.Id,
             Building = existing.Building,
             WorkCenter = existing.WorkCenter,
-            RequestType = existing.RequestType,
-            Subtype = existing.Subtype,
+            Category = existing.Category,
+            Item = existing.Item,
             InputValue = existing.InputValue,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
@@ -634,8 +613,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Id = existing.Id,
             Building = existing.Building,
             WorkCenter = existing.WorkCenter,
-            RequestType = existing.RequestType,
-            Subtype = existing.Subtype,
+            Category = existing.Category,
+            Item = existing.Item,
             InputValue = existing.InputValue,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
@@ -688,8 +667,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Id = existing.Id,
             Building = existing.Building,
             WorkCenter = existing.WorkCenter,
-            RequestType = existing.RequestType,
-            Subtype = existing.Subtype,
+            Category = existing.Category,
+            Item = existing.Item,
             InputValue = existing.InputValue,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
@@ -833,8 +812,6 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             WorkCenter = draft.WorkCenter.Trim(),
             Category = string.IsNullOrWhiteSpace(draft.Category) ? string.Empty : draft.Category.Trim(),
             Item = resolvedItem,
-            RequestType = string.IsNullOrWhiteSpace(draft.RequestType) ? ProjectLegacyDisplay(resolvedItem).RequestType : draft.RequestType.Trim(),
-            Subtype = string.IsNullOrWhiteSpace(draft.Subtype) ? ProjectLegacyDisplay(resolvedItem).Subtype : draft.Subtype.Trim(),
             InputValue = string.IsNullOrWhiteSpace(draft.InputValue) ? null : draft.InputValue.Trim(),
             ActiveSetupJobId = draft.ActiveSetupJobId.Trim(),
             WorkCenterName = draft.WorkCenterName.Trim(),
@@ -963,7 +940,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             var body = string.Format(
                 "NewRequestAlert_Body".GetLocalized(),
                 request.WorkCenter,
-                request.RequestType);
+                WaitlistRequestTitles.ResolveLine1(request.ItemDefinition));
             await _newRequestAlertNotifier
                 .NotifyNewRequestAsync(request.Id, title, body, RuntimeHelper.IsMSIX)
                 .ConfigureAwait(false);

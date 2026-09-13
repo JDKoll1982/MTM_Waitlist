@@ -8,15 +8,10 @@ public sealed class WaitlistRequestDraft
     /// <summary>The umbrella Category the requester chose (FR-004).</summary>
     public string Category { get; init; } = string.Empty;
 
-    /// <summary>The Item code the requester chose (FR-004).</summary>
+    /// <summary>The Item code the requester chose (FR-004). The draft's single identity: the wizard sets it
+    /// from the Item step, and the store is written from it — there is no second pair to fall back on.</summary>
     public string Item { get; init; } = string.Empty;
 
-    /// <summary>
-    /// Transitional: the legacy display pair the list and the request page still read until they are re-pointed
-    /// at the Item (US2). Nothing new should be written to these, and they are not what the store carries.
-    /// </summary>
-    public string RequestType { get; init; } = string.Empty;
-    public string? Subtype { get; init; }
     public string? InputValue { get; init; }
     public string ActiveSetupJobId { get; init; } = string.Empty;
     public string WorkCenterName { get; init; } = string.Empty;

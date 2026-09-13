@@ -33,7 +33,7 @@ public sealed class NewRequestItemViewModelTests
             .ToArray();
 
         Assert.IsTrue(expected.Length > 1, "The pickup Category must offer more than one Item for this test to mean anything.");
-        CollectionAssert.AreEqual(expected, viewModel.Items.Select(option => option.Item.Id).ToArray());
+        CollectionAssert.AreEqual(expected, viewModel.Items.Select(option => option.Item!.Id).ToArray());
     }
 
     [TestMethod]
@@ -48,7 +48,7 @@ public sealed class NewRequestItemViewModelTests
             .Select(item => item.Id)
             .ToArray();
 
-        CollectionAssert.AreEqual(expected, viewModel.Items.Select(option => option.Item.Id).ToArray());
+        CollectionAssert.AreEqual(expected, viewModel.Items.Select(option => option.Item!.Id).ToArray());
     }
 
     [TestMethod]
@@ -56,13 +56,13 @@ public sealed class NewRequestItemViewModelTests
     {
         var navigation = new RecordingNavigationService();
         var configuredOnly = RequestItemCatalog.Items
-            .Where(item => item.Id != "pickup-wrong-coil")
+            .Where(item => item.Id != "pickup-dunnage")
             .Select(Configured);
         var viewModel = CreateViewModel(navigation: navigation, availability: RequestJobPartAvailability.All, configurations: configuredOnly);
         var state = CreateState(RequestCategory.Pickup, RequestJobPartAvailability.All);
         viewModel.OnNavigatedTo(state);
 
-        var unconfigured = viewModel.Items.Single(option => option.Item.Id == "pickup-wrong-coil");
+        var unconfigured = viewModel.Items.Single(option => option.Item!.Id == "pickup-dunnage");
         Assert.IsFalse(unconfigured.IsConfigured, "The Item with no configuration row must be reported as unconfigured.");
 
         viewModel.SelectItemCommand.Execute(unconfigured);
@@ -84,7 +84,7 @@ public sealed class NewRequestItemViewModelTests
         var state = CreateState(RequestCategory.Other, RequestJobPartAvailability.All);
         viewModel.OnNavigatedTo(state);
 
-        var other = viewModel.Items.Single(option => option.Item.Id == "other");
+        var other = viewModel.Items.Single(option => option.Item!.Id == "other");
         Assert.IsTrue(other.IsConfigured);
 
         viewModel.SelectItemCommand.Execute(other);
@@ -118,7 +118,7 @@ public sealed class NewRequestItemViewModelTests
         var state = CreateState(RequestCategory.Other, RequestJobPartAvailability.All);
         viewModel.OnNavigatedTo(state);
 
-        viewModel.SelectItemCommand.Execute(viewModel.Items.Single(option => option.Item.Id == "other"));
+        viewModel.SelectItemCommand.Execute(viewModel.Items.Single(option => option.Item!.Id == "other"));
         viewModel.ContinueCommand.Execute(null);
 
         Assert.AreEqual(1, navigation.Navigations.Count);

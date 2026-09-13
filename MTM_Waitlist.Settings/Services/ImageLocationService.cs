@@ -466,6 +466,73 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
     }
 
     /// <inheritdoc />
+    public async Task<string> ResolveRequestItemImagePathAsync(string itemCode, CancellationToken cancellationToken = default)
+    {
+        if (!_isInitialized)
+        {
+            var message = "Image location service not initialized. Call InitializeAsync() first.";
+            _logger.LogError(message);
+            throw new InvalidOperationException(message);
+        }
+
+        if (string.IsNullOrWhiteSpace(itemCode))
+        {
+            throw new ArgumentException("Item code cannot be null or empty.", nameof(itemCode));
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        try
+        {
+            var defaultPath = ImageLocationDefaults.RequestItemDefaultPath;
+            var normalizedItem = itemCode.Trim();
+
+            // Cascade order: Item override -> the Item's Category family -> the existing placeholder
+            // (contracts/card-and-identifier.md §4). The Item is keyed by its own code, not by a stable GUID:
+            // it is the same identity the request is stored with.
+            var overridePath = await _imageOverrideReadService
+                .GetOverrideAsync(ImageLocationScope.RequestItem.ToDatabaseString(), normalizedItem, cancellationToken)
+                .ConfigureAwait(false);
+            if (overridePath is not null && !string.IsNullOrWhiteSpace(overridePath.ImagePath))
+            {
+                return await ResolveExistingPathAsync(overridePath.ImagePath, defaultPath, "request_item", normalizedItem).ConfigureAwait(false);
+            }
+
+            // The family hop comes from the catalog, so an Item that is not catalogued simply has no family
+            // rather than being given a borrowed one.
+            var category = RequestItemCatalog.FindById(normalizedItem)?.Category.ToString();
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                var familyPath = await _imageOverrideReadService
+                    .GetOverrideAsync(ImageLocationScope.RequestCategory.ToDatabaseString(), category, cancellationToken)
+                    .ConfigureAwait(false);
+                if (familyPath is not null && !string.IsNullOrWhiteSpace(familyPath.ImagePath))
+                {
+                    return await ResolveExistingPathAsync(familyPath.ImagePath, defaultPath, "request_category", category).ConfigureAwait(false);
+                }
+            }
+
+            // Nothing is configured for this Item, so the caller gets the placeholder. Said out loud at Debug
+            // because the substitution is otherwise invisible: the card cannot tell a placeholder from a real
+            // answer, and a caller that prefers any resolved path will show "no image available" over a good one.
+            _logger.LogDebug(
+                "No override for request_item:{ItemCode} and no family image for its category; returning the default placeholder {DefaultPath}",
+                normalizedItem,
+                defaultPath);
+            return defaultPath;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to resolve request item image path for {ItemCode}", itemCode);
+            return ImageLocationDefaults.RequestItemDefaultPath;
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<string> GetSharedFolderPathAsync()
     {
         if (!_isInitialized)

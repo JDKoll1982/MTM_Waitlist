@@ -713,17 +713,24 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     public static SampleOrder CreateSessionOrder(WaitlistRequest request)
     {
-        var subtypeId = ResolveSubtypeStableId(request);
-        var requestTypeId = ResolveRequestTypeStableId(request.RequestType);
+        // The request's identity is its Item code. Everything the card shows about *what* was asked for —
+        // both lines, the picture, the detail slots — resolves from that one code through the Item catalog,
+        // so no reader is handed a second, derived pair it could disagree with (FR-004, FR-005).
+        var definition = request.ItemDefinition;
+        var line1 = WaitlistRequestTitles.ResolveLine1(definition);
+        var line2 = WaitlistRequestTitles.ResolveLine2(definition, BuildLine2Context(request));
 
         var item = new SampleOrder
         {
             Id = request.Id.GetHashCode(),
             RequestId = request.Id,
+            ItemCode = request.Item,
             RequesterEmployeeNumber = request.RequesterEmployeeNumber,
             AssignedMaterialHandler = request.AssignedMaterialHandler,
             Note = request.Note,
-            Title = WaitlistRequestTitles.For(request.RequestType, request.Subtype),
+            Title = line1,
+            Subtitle = line2.Text,
+            Line2Problem = line2.IsResolved ? null : line2.Problem,
             Status = request.Status,
             RequestedByName = string.IsNullOrWhiteSpace(request.RequesterEmployeeName) ? "Current user" : request.RequesterEmployeeName,
             RequestedPressName = request.WorkCenter,
@@ -732,17 +739,43 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             RequestedUtc = request.RequestedUtc,
             TargetTimeUtc = request.TargetTimeUtc,
             LastMessageUtc = request.LastMessageUtc,
-            ImagePath = ResolveImagePath(request.RequestType, request.Subtype),
+            ImagePath = ResolveItemCardImagePath(definition),
             IsOverdue = request.IsOverdue,
             IsOverdueAtSource = request.IsOverdue,
-            RequestTypeStableId = requestTypeId,
-            SubtypeStableId = subtypeId,
         };
 
         AddRequestFields(item, request);
         PadFieldsToCardSlots(item);
         return item;
     }
+
+    /// <summary>
+    /// The values the Item's second-line template resolves against.
+    /// </summary>
+    /// <remarks>
+    /// The request carries the answer its flow captured, and that is the only identifier source it holds. The
+    /// job-derived tokens (<c>{part_number}</c>, <c>{die_number}</c>, <c>{dunnage_part}</c>, …) belong to the
+    /// later item-resolution work, so a template that needs one is reported as unresolved and the Item's own
+    /// display name is shown — never a substituted value, never a blank
+    /// (<c>contracts/card-and-identifier.md</c> §3).
+    /// </remarks>
+    private static RequestItemLine2Context BuildLine2Context(WaitlistRequest request) => new(
+        Answer: request.InputValue,
+        Destination: request.InputValue);
+
+    /// <summary>
+    /// The card's built-in picture for an Item, before any configured override is applied. An Item the catalog
+    /// does not describe keeps the existing placeholder rather than being given a borrowed image.
+    /// </summary>
+    private static string ResolveItemCardImagePath(RequestItemDefinition? item) => item?.Id switch
+    {
+        "pickup-ncm" => "pickup_ncm.png",
+        "pickup-wip" => "pickup_wip.png",
+        "pickup-fg" => "pickup_fg.png",
+        "pickup-outside-service" => "pickup_os.png",
+        "pickup-scrap" => "scrap.png",
+        _ => "pickup_wip.png",
+    };
 
     /// <summary>
     /// The type-specific waitlist line-card templates bind exactly five slots
@@ -773,17 +806,17 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             return UrgencyCalculator.Compute(request.RequestedUtc, target - request.RequestedUtc, now);
         }
 
-        var maxAllotted = await GetMaxAllottedAsync(request.Subtype).ConfigureAwait(false);
+        var maxAllotted = await GetMaxAllottedAsync(request.Item).ConfigureAwait(false);
         return UrgencyCalculator.Compute(request.RequestedUtc, maxAllotted, now);
     }
 
     /// <summary>
-    /// Max-allotted time for a sub-type, memoised for the load in flight. Falls back to the documented
-    /// default when no deadline service is configured (a headless host) or the sub-type has no override.
+    /// Max-allotted time for an Item, memoised for the load in flight. Falls back to the documented default
+    /// when no deadline service is configured (a headless host) or the Item has no override.
     /// </summary>
-    private async Task<TimeSpan> GetMaxAllottedAsync(string? subtype)
+    private async Task<TimeSpan> GetMaxAllottedAsync(string? itemCode)
     {
-        var key = subtype?.Trim() ?? string.Empty;
+        var key = itemCode?.Trim() ?? string.Empty;
         if (_maxAllottedCache.TryGetValue(key, out var cached))
         {
             return cached;
@@ -810,38 +843,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     private static string GetRemainingTimeText(DateTimeOffset? targetTimeUtc, bool isOverdue) =>
         SampleOrder.FormatRemainingTime(targetTimeUtc, isOverdue);
-
-    private static string ResolveImagePath(string requestType, string? subtype)
-    {
-        var normalizedSubtype = subtype?.Trim().ToLowerInvariant() ?? string.Empty;
-        if (normalizedSubtype.Contains("ncm", StringComparison.Ordinal))
-        {
-            return "pickup_ncm.png";
-        }
-
-        if (normalizedSubtype.Contains("wip", StringComparison.Ordinal))
-        {
-            return "pickup_wip.png";
-        }
-
-        if (normalizedSubtype.Contains("fg", StringComparison.Ordinal) || normalizedSubtype.Contains("finished", StringComparison.Ordinal))
-        {
-            return "pickup_fg.png";
-        }
-
-        if (normalizedSubtype.Contains("outside", StringComparison.Ordinal) || normalizedSubtype.Contains("service", StringComparison.Ordinal))
-        {
-            return "pickup_os.png";
-        }
-
-        return requestType.Trim().ToLowerInvariant() switch
-        {
-            "coil" => "coil.png",
-            "scrap" => "scrap.png",
-            "pickup" => "pickup_wip.png",
-            _ => "pickup_wip.png",
-        };
-    }
 
     private async Task<Dictionary<string, (long WorkCenterId, string ResolvedPath)>> BuildWorkCenterImageLookupAsync(CancellationToken cancellationToken)
     {
@@ -913,6 +914,11 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
     }
 
+    /// <summary>
+    /// Resolves the request's configured picture through the Item, falling back to the Category family and
+    /// then to the resolver's own placeholder (FR-009). The legacy request-type/subtype scopes are not
+    /// consulted: a request's picture is keyed by the Item it names.
+    /// </summary>
     private async Task<string?> ResolveRequestImagePathAsync(WaitlistRequest request, CancellationToken cancellationToken)
     {
         if (_imageLocationService is null || !_imageLocationService.IsInitialized)
@@ -920,58 +926,22 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             return null;
         }
 
-        var subtypeName = request.Subtype?.Trim();
-        if (!string.IsNullOrWhiteSpace(subtypeName))
-        {
-            var subtypeMatch = RequestSubtypeInventory.GetByDisplayNames(request.RequestType, subtypeName);
-            if (subtypeMatch.item is not null)
-            {
-                return await _imageLocationService.ResolveRequestSubtypeImagePathAsync(
-                    subtypeMatch.item.StableId.ToString(),
-                    cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        var requestTypeMatch = RequestTypeInventory.GetByDisplayName(request.RequestType);
-        if (requestTypeMatch is null)
+        if (string.IsNullOrWhiteSpace(request.Item))
         {
             return null;
         }
 
-        return await _imageLocationService.ResolveRequestTypeImagePathAsync(
-            requestTypeMatch.StableId.ToString(),
-            cancellationToken).ConfigureAwait(false);
-    }
-
-    private static Guid? ResolveRequestTypeStableId(string requestTypeName)
-    {
-        var requestType = RequestTypeInventory.GetByDisplayName(requestTypeName);
-        return requestType?.StableId;
-    }
-
-    private static Guid? ResolveSubtypeStableId(WaitlistRequest request)
-    {
-        var subtypeName = request.Subtype?.Trim();
-        if (string.IsNullOrWhiteSpace(subtypeName))
-        {
-            return null;
-        }
-
-        var subtype = RequestSubtypeInventory.GetByDisplayNames(request.RequestType, subtypeName);
-        return subtype.item?.StableId;
+        return await _imageLocationService
+            .ResolveRequestItemImagePathAsync(request.Item, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static void AddRequestFields(SampleOrder item, WaitlistRequest request)
     {
-        var requestType = request.RequestType.Trim().ToLowerInvariant();
-        var subtype = request.Subtype?.Trim() ?? string.Empty;
-        var normalizedSubtype = subtype.ToLowerInvariant();
-        var workCenter = request.WorkCenter?.Trim() ?? string.Empty;
-
-        // Every row below is sourced. A value the request does not carry is left out rather than
-        // defaulted, and its label goes with it: an empty labelled shell is not truthful either
-        // (FR-001/FR-002). The real material attributes are restored by the item-resolution work in
-        // spec 03; until then this surface states only what it can support.
+        // Every row below is sourced from the request itself. Nothing is derived from a retired type/subtype
+        // string and nothing is invented for a value the request does not carry: an Item's own attributes are
+        // restored by the item-resolution work, and until then this surface states only what it can support
+        // (FR-001, FR-002). The two-line identity of the request travels on the card, not in these slots.
         void Add(string label, string? value)
         {
             if (!string.IsNullOrWhiteSpace(value))
@@ -980,111 +950,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             }
         }
 
-        if (requestType == "scrap")
-        {
-            Add("Scrap lugger", subtype);
-            Add("Pickup work center", workCenter);
-            Add("Request details", request.InputValue);
-            return;
-        }
-
-        if (requestType == "coil")
-        {
-            // The coil number, its on-hand weight, its description and its average weight all come from
-            // the coil lookup, which this surface does not perform; showing a substitute was the defect.
-            // The coil subtype is an ACTION (e.g. Bring, Pickup), never the coil identifier.
-            Add("Subtype", subtype);
-            Add("Request details", request.InputValue);
-            Add("Requesting work center", workCenter);
-            return;
-        }
-
-        if (requestType == "pickup")
-        {
-            if (normalizedSubtype.Contains("fg") || normalizedSubtype.Contains("finished"))
-            {
-                Add("Subtype", subtype);
-                Add("Request details", request.InputValue);
-                Add("Work center", workCenter);
-                return;
-            }
-
-            if (normalizedSubtype.Contains("ncm"))
-            {
-                Add("Subtype", subtype);
-                Add("Request details", request.InputValue);
-                Add("Pickup location", workCenter);
-                return;
-            }
-
-            if (normalizedSubtype.Contains("wip"))
-            {
-                Add("Subtype", subtype);
-                Add("Work order", request.ActiveSetupJobId);
-                Add("Request details", request.InputValue);
-                Add("Pickup work center", workCenter);
-                return;
-            }
-
-            if (normalizedSubtype.Contains("coil"))
-            {
-                Add("Subtype", subtype);
-                Add("Request details", request.InputValue);
-                Add("Requesting work center", workCenter);
-                return;
-            }
-
-            if (normalizedSubtype.Contains("outside") || normalizedSubtype.Contains("service"))
-            {
-                Add("Subtype", subtype);
-                Add("Request details", request.InputValue);
-                Add("Pickup work center", workCenter);
-                return;
-            }
-
-            if (normalizedSubtype.Contains("other"))
-            {
-                Add("Subtype", subtype);
-                Add("Request description", request.InputValue);
-                Add("Requested work center", workCenter);
-                return;
-            }
-        }
-
-        if (requestType == "other")
-        {
-            Add("Subtype", subtype);
-            Add("Request description", request.InputValue);
-            Add("Requested work center", workCenter);
-            return;
-        }
-
-        if (requestType == "flatstock")
-        {
-            Add("Work center", workCenter);
-            Add("Request details", request.InputValue);
-            return;
-        }
-
-        if (requestType == "table handling" || requestType == "die handling")
-        {
-            Add("Pickup location", workCenter);
-            Add("Request details", request.InputValue);
-            return;
-        }
-
-        if (requestType == "forklift assist")
-        {
-            Add("Description", request.InputValue);
-            Add("Work center", workCenter);
-            Add("Requested by", request.RequesterEmployeeName);
-            return;
-        }
-
         Add("Request details", request.InputValue);
-        Add("Request type", request.RequestType);
-        Add("Subtype", subtype);
-        Add("Work center", workCenter);
+        Add("Work order", request.ActiveSetupJobId);
+        Add("Work center", request.WorkCenter);
+        Add("Requested by", request.RequesterEmployeeName);
         Add("Request ID", request.Id.ToString("N"));
     }
 

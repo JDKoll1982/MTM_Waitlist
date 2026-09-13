@@ -1,5 +1,7 @@
 namespace MTM_Waitlist.Module_Waitlist.Models;
 
+using MTM_Waitlist.Module_Settings.Models;
+
 public sealed class WaitlistRequest
 {
     public Guid Id { get; init; } = Guid.NewGuid();
@@ -9,16 +11,15 @@ public sealed class WaitlistRequest
     /// <summary>The stored umbrella Category (FR-004).</summary>
     public string Category { get; init; } = string.Empty;
 
-    /// <summary>The stored Item code (FR-004).</summary>
+    /// <summary>The stored Item code (FR-004). The request's single identity: everything the card and the
+    /// request page show about *what* was asked for is resolved from this code through the Item catalog, so
+    /// the request carries no second, invented pair.</summary>
     public string Item { get; init; } = string.Empty;
 
-    /// <summary>
-    /// Transitional: the display pair the list and the request page still read until US2 re-points them at the
-    /// Item. It is projected from <see cref="Item"/> on read, never from a stored column — the retired
-    /// <c>request_type</c> and <c>subtype</c> columns are gone (FR-004, FR-023).
-    /// </summary>
-    public string RequestType { get; init; } = string.Empty;
-    public string? Subtype { get; init; }
+    /// <summary>The catalogued Item this request asks for, or null when the stored code is not in the
+    /// catalog (a row the store holds but the catalog no longer describes).</summary>
+    public RequestItemDefinition? ItemDefinition => RequestItemCatalog.FindById(Item);
+
     public string? InputValue { get; init; }
     public string ActiveSetupJobId { get; init; } = string.Empty;
     public string WorkCenterName { get; init; } = string.Empty;
