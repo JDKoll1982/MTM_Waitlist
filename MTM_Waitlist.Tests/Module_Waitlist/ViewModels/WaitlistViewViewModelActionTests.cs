@@ -196,7 +196,12 @@ public sealed class WaitlistViewViewModelActionTests
 
         var overdue = BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-40), targetUtc: Now.AddMinutes(-10));
         var soon = BuildRequest(soonId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(5));
-        var noTarget = BuildRequest(noTargetId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-20), targetUtc: null);
+
+        // No stored target, so its due time is derived from the app's ONE documented default allotment — the
+        // same 15 minutes the deadline service would have stamped (FR-017). Five minutes of waiting plus fifteen
+        // puts its due time at Now+10, between the soon row and the later one, which is what this ordering check
+        // is about.
+        var noTarget = BuildRequest(noTargetId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: null);
         var later = BuildRequest(laterId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(60));
 
         // Served in a deliberately unhelpful order, so the ordering under test is the list's own.

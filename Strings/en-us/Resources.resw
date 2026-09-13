@@ -927,4 +927,37 @@
   <data name="Shell_SortOrder.Status" xml:space="preserve">
     <value>Status</value>
   </data>
+  <data name="Settings_UrgencyAllotments_ItemColumn.Text" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="Settings_UrgencyAllotments_ConfiguredColumn.Text" xml:space="preserve">
+    <value>Configured minutes</value>
+  </data>
+  <data name="Settings_UrgencyAllotments_ObservedColumn.Text" xml:space="preserve">
+    <value>Observed average</value>
+  </data>
+  <data name="Settings_UrgencyAllotments.ConfiguredValue" xml:space="preserve">
+    <value>configured</value>
+  </data>
+  <data name="Settings_UrgencyAllotments.ConfiguredDefault" xml:space="preserve">
+    <value>default</value>
+  </data>
+  <data name="Settings_UrgencyAllotments.NoObservedAverage" xml:space="preserve">
+    <value>No completed requests yet</value>
+  </data>
+  <data name="Settings_UrgencyAllotments.Loaded" xml:space="preserve">
+    <value>{0} item(s) loaded.</value>
+  </data>
+  <data name="Settings_UrgencyAllotments.NoItems" xml:space="preserve">
+    <value>No items are configured yet.</value>
+  </data>
+  <data name="Settings_UrgencyAllotments.LoadFailed" xml:space="preserve">
+    <value>The allotted minutes could not be read from the store, so nothing is shown. Retry once the store is reachable.</value>
+  </data>
+  <data name="Settings_UrgencyAllotments.SaveFailed" xml:space="preserve">
+    <value>Unable to save '{0}': {1}</value>
+  </data>
+  <data name="Settings_RequestItemImages.Title" xml:space="preserve">
+    <value>Request Item Images</value>
+  </data>
 </root>

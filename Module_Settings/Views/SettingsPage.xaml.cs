@@ -48,9 +48,9 @@ public sealed partial class SettingsPage : Page
         await dialog.ShowAsync();
     }
 
-    private async void RequestSubtypeImages_Click(object sender, RoutedEventArgs e)
+    private async void RequestItemImages_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new RequestSubtypeImagesDialog(App.GetService<RequestSubtypeImagesDialogViewModel>())
+        var dialog = new RequestItemImagesDialog(App.GetService<RequestItemImagesDialogViewModel>())
         {
             XamlRoot = XamlRoot
         };

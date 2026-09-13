@@ -222,42 +222,56 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <TextBlock
                             Grid.Row="0"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="Manage request type, subtype, and work-center image overrides for authorized staff."
+                            Text="Manage the default visuals used for request type, item, and work-center image overrides for authorized staff."
                             TextWrapping="Wrap" />
 
                         <wct:SettingsCard Grid.Row="1">
                             <wct:SettingsCard.Header>
-                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Request Type &amp; Subtype Images" />
+                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Request Type Images" />
                             </wct:SettingsCard.Header>
                             <wct:SettingsCard.Description>
                                 <TextBlock
                                     Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
                                     Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="Manage the default visuals used for request type cards and summaries, and subtype-specific artwork while preserving the inherited fallback chain."
+                                    Text="Manage the default visuals used for request type cards and summaries while preserving the inherited fallback chain."
                                     TextWrapping="Wrap" />
                             </wct:SettingsCard.Description>
                             <wct:SettingsCard.Content>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button
-                                        MinWidth="120"
-                                        Content="Manage types"
-                                        Click="RequestTypeImages_Click"
-                                        AutomationProperties.Name="Manage request type images" />
-                                    <Button
-                                        MinWidth="120"
-                                        Content="Manage subtypes"
-                                        Click="RequestSubtypeImages_Click"
-                                        AutomationProperties.Name="Manage request subtype images" />
-                                </StackPanel>
+                                <Button
+                                    MinWidth="120"
+                                    Content="Manage types"
+                                    Click="RequestTypeImages_Click"
+                                    AutomationProperties.Name="Manage request type images" />
                             </wct:SettingsCard.Content>
                         </wct:SettingsCard>
 
                         <wct:SettingsCard Grid.Row="2">
+                            <wct:SettingsCard.Header>
+                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Item Images" />
+                            </wct:SettingsCard.Header>
+                            <wct:SettingsCard.Description>
+                                <TextBlock
+                                    Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="Manage the picture each item uses. An item with no picture of its own shows its category's picture, so nothing configured for the item replaces a picture the request already resolves."
+                                    TextWrapping="Wrap" />
+                            </wct:SettingsCard.Description>
+                            <wct:SettingsCard.Content>
+                                <Button
+                                    MinWidth="120"
+                                    Content="Manage items"
+                                    Click="RequestItemImages_Click"
+                                    AutomationProperties.Name="Manage request item images" />
+                            </wct:SettingsCard.Content>
+                        </wct:SettingsCard>
+
+                        <wct:SettingsCard Grid.Row="3">
                             <wct:SettingsCard.Header>
                                 <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Work Center Images" />
                             </wct:SettingsCard.Header>
@@ -1025,6 +1039,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <Grid
@@ -1037,7 +1052,7 @@
                             <TextBlock
                                 Grid.Column="0"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="Set how long (in minutes) each request sub-type has before it is considered overdue. Plant Manager+ can edit; others can view."
+                                Text="Set how long (in minutes) each item has before it is considered overdue, beside the average its completed requests have actually taken. Plant Manager+ can edit; others can view."
                                 TextWrapping="Wrap" />
                             <ProgressRing
                                 Grid.Column="1"
@@ -1047,8 +1062,35 @@
                                 IsActive="{x:Bind ViewModel.UrgencyAllotments.IsBusy, Mode=OneWay}" />
                         </Grid>
 
-                        <ItemsControl
+                        <Grid
                             Grid.Row="1"
+                            Margin="0,4"
+                            ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="140" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="170" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                x:Uid="Settings_UrgencyAllotments_ItemColumn"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="Item" />
+                            <TextBlock
+                                Grid.Column="1"
+                                x:Uid="Settings_UrgencyAllotments_ConfiguredColumn"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="Configured minutes" />
+                            <TextBlock
+                                Grid.Column="3"
+                                x:Uid="Settings_UrgencyAllotments_ObservedColumn"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="Observed average" />
+                        </Grid>
+
+                        <ItemsControl
+                            Grid.Row="2"
                             ItemsSource="{x:Bind ViewModel.UrgencyAllotments.Items, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -1058,11 +1100,13 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="170" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock
                                             Grid.Column="0"
                                             VerticalAlignment="Center"
-                                            Text="{Binding SubtypeName}"
+                                            Text="{Binding DisplayName}"
                                             TextWrapping="Wrap" />
                                         <muxc:NumberBox
                                             Grid.Column="1"
@@ -1072,13 +1116,24 @@
                                             SpinButtonPlacementMode="Compact"
                                             Value="{Binding Minutes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             IsEnabled="{Binding ViewModel.UrgencyAllotments.CanManageUrgencySettings, ElementName=RootPage}" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            VerticalAlignment="Center"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                            Text="{Binding ConfiguredValueLabel}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding ObservedAverageText}"
+                                            TextWrapping="Wrap" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
                         <TextBlock
-                            Grid.Row="2"
+                            Grid.Row="3"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Text="{x:Bind ViewModel.UrgencyAllotments.StatusMessage, Mode=OneWay}"
                             TextWrapping="Wrap" />

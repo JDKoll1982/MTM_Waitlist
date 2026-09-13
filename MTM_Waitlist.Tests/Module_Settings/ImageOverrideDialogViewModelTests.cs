@@ -66,10 +66,6 @@ public sealed class ImageOverrideDialogViewModelTests
         new(_imageLocationService, _readService, _writeService, _storageService,
             NullLogger<RequestTypeImagesDialogViewModel>.Instance);
 
-    private RequestSubtypeImagesDialogViewModel CreateSubtypeViewModel() =>
-        new(_imageLocationService, _readService, _writeService, _storageService,
-            NullLogger<RequestSubtypeImagesDialogViewModel>.Instance);
-
     private WorkCenterImagesDialogViewModel CreateWorkCenterViewModel() =>
         new(_imageLocationService, _readService, _writeService, _storageService,
             NullLogger<WorkCenterImagesDialogViewModel>.Instance);
@@ -261,59 +257,6 @@ public sealed class ImageOverrideDialogViewModelTests
 
         Assert.IsFalse(await viewModel.SaveAsync());
         StringAssert.Contains(viewModel.ErrorMessage, "square");
-    }
-
-    [TestMethod]
-    public async Task SubtypeDialog_GroupsRowsByParentRequestType()
-    {
-        var viewModel = CreateSubtypeViewModel();
-
-        await viewModel.LoadAsync();
-
-        Assert.IsTrue(viewModel.SupportsGrouping);
-        CollectionAssert.AreEquivalent(
-            RequestSubtypeInventory.Groups.Select(g => g.ParentDisplayName).ToArray(),
-            viewModel.Groups.Select(g => g.Key).ToArray());
-    }
-
-    [TestMethod]
-    public async Task SubtypeDialog_MarksRowsWithoutAnOverrideAsInherited()
-    {
-        var viewModel = CreateSubtypeViewModel();
-
-        await viewModel.LoadAsync();
-
-        Assert.IsTrue(AllRows(viewModel).Where(r => r.IsEditable).All(r => r.IsInherited));
-    }
-
-    [TestMethod]
-    public async Task SubtypeDialog_ClearsTheInheritedBadgeOnceAnOverrideExists()
-    {
-        var group = RequestSubtypeInventory.Groups.First(g => g.Subtypes.Count > 0);
-        var subtype = group.Subtypes[0];
-        _readService.AddOverride("request_subtype", subtype.StableId.ToString(), "custom.png");
-
-        var viewModel = CreateSubtypeViewModel();
-        await viewModel.LoadAsync();
-
-        var row = AllRows(viewModel).Single(r => r.ItemId == subtype.StableId.ToString());
-        Assert.IsFalse(row.IsInherited);
-    }
-
-    [TestMethod]
-    public async Task SubtypeDialog_ShowsAPlaceholderForParentsWithNoSubtypes()
-    {
-        var emptyGroups = RequestSubtypeInventory.Groups.Where(g => g.Subtypes.Count == 0).ToList();
-
-        var viewModel = CreateSubtypeViewModel();
-        await viewModel.LoadAsync();
-
-        foreach (var group in emptyGroups)
-        {
-            var rendered = viewModel.Groups.Single(g => g.Key == group.ParentDisplayName);
-            Assert.IsTrue(rendered.Rows.Single().IsPlaceholder);
-            Assert.IsFalse(rendered.Rows.Single().IsEditable);
-        }
     }
 
     [TestMethod]

@@ -364,6 +364,44 @@ public sealed class SettingsViewModelIgnoredLocationsTests
                 + string.Join(", ", unregistered));
     }
 
+    [TestMethod]
+    public void TheMinutesPanel_AndThePicturePanel_EachKeepTheirOwnGate()
+    {
+        var plantManager = BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager");
+        var admin = BuildViewModel(new RecordingLocalSettingsService(), "Admin");
+        var handler = BuildViewModel(new RecordingLocalSettingsService(), "Material Handler");
+
+        // The minutes editor is governed by CanManageUrgencySettings: Plant Manager and above may edit, and
+        // everyone else reads the panel without an editable control (FR-020).
+        Assert.IsTrue(plantManager.UrgencyAllotments.CanManageUrgencySettings);
+        Assert.IsTrue(plantManager.IsUrgencyAllotmentsPanelVisible);
+        Assert.IsFalse(handler.UrgencyAllotments.CanManageUrgencySettings);
+        Assert.IsTrue(handler.IsUrgencyAllotmentsPanelVisible, "The panel is a read surface for everyone below the gate.");
+
+        // The picture screen is governed by CanManageImageLocationSettings — a DIFFERENT gate. Collapsing the
+        // two would hand the picture screen to a role that never had it.
+        Assert.IsFalse(plantManager.CanManageImageLocationSettings);
+        Assert.IsFalse(
+            plantManager.IsImageLocationSettingsPanelVisible,
+            "A role outside the picture screen's own gate is not shown its entry point.");
+        Assert.IsTrue(admin.CanManageImageLocationSettings);
+        Assert.IsTrue(admin.IsImageLocationSettingsPanelVisible);
+    }
+
+    [TestMethod]
+    public void SearchQuery_ReachesBothReKeyedConfigurationPanels()
+    {
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Admin");
+
+        viewModel.SearchQuery = "allotted minutes";
+        Assert.IsTrue(viewModel.IsUrgencyAllotmentsPanelVisible, "The minutes panel is keyed by Item and finds the term.");
+        Assert.IsFalse(viewModel.IsImageLocationSettingsPanelVisible);
+
+        viewModel.SearchQuery = "item images";
+        Assert.IsTrue(viewModel.IsImageLocationSettingsPanelVisible, "The picture screen is keyed by Item and finds the term.");
+        Assert.IsFalse(viewModel.IsUrgencyAllotmentsPanelVisible);
+    }
+
     private static IReadOnlyList<string> DeclaredSearchAwareProperties()
     {
         var field = typeof(SettingsViewModel).GetField("s_searchAwareProperties", BindingFlags.NonPublic | BindingFlags.Static);
@@ -414,8 +452,8 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         var startupState = new StartupState { CurrentRole = role };
         var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), startupState);
         var urgencyAllotments = new UrgencyAllotmentEditorViewModel(
-            new UrgencySettingsService(settings),
-            new FakeRequestSubtypeNameReadService(),
+            new UrgencySettingsService(new FakeRequestItemAllottedMinutesStore()),
+            new FakeRequestItemObservedTimeService(),
             startupState);
         return new SettingsViewModel(
             new FakeThemeSelectorService(),
@@ -449,12 +487,6 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             LastShapeKeys = shapeKeys;
             return Task.FromResult(Result);
         }
-    }
-
-    private sealed class FakeRequestSubtypeNameReadService : IRequestSubtypeNameReadService
-    {
-        public Task<IReadOnlyList<string>> GetSubtypeNamesAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
     }
 
     private sealed class FakeThemeSelectorService : IThemeSelectorService

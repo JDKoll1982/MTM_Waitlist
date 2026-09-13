@@ -13,19 +13,19 @@ public sealed class UrgencyDeadlineService : IUrgencyDeadlineService
         _urgencySettingsService = urgencySettingsService;
     }
 
-    public async Task<TimeSpan> GetMaxAllottedAsync(string? subtype, CancellationToken cancellationToken = default)
+    public async Task<TimeSpan> GetMaxAllottedAsync(string? item, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return await _urgencySettingsService.GetMaxAllottedAsync(subtype ?? string.Empty, cancellationToken).ConfigureAwait(false);
+        return await _urgencySettingsService.GetMaxAllottedAsync(item, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<UrgencyState> ComputeAsync(
         DateTimeOffset createdUtc,
-        string? subtype,
+        string? item,
         DateTimeOffset now,
         CancellationToken cancellationToken = default)
     {
-        var maxAllotted = await GetMaxAllottedAsync(subtype, cancellationToken).ConfigureAwait(false);
+        var maxAllotted = await GetMaxAllottedAsync(item, cancellationToken).ConfigureAwait(false);
         return UrgencyCalculator.Compute(createdUtc, maxAllotted, now);
     }
 }

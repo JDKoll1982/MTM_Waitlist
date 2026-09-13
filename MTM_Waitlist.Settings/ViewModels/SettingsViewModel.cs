@@ -243,13 +243,18 @@ public partial class SettingsViewModel : ObservableRecipient
         "new request",
         "waitlist");
 
+    /// <summary>
+    /// The minutes panel: the configured figure per Item beside the average its completed requests took.
+    /// </summary>
     public bool IsUrgencyAllotmentsPanelVisible => MatchesSearch(
         "urgency",
         "max allotted",
         "allotted",
+        "allotted minutes",
         "deadline",
         "overdue",
-        "remaining time");
+        "remaining time",
+        "item minutes");
 
     public bool IsHotWorkCentersPanelVisible => MatchesSearch(
         "Local Work Centers",
@@ -279,15 +284,21 @@ public partial class SettingsViewModel : ObservableRecipient
 
     public bool IsAppearanceCategoryVisible => IsAppearancePanelVisible;
 
+    /// <summary>
+    /// The picture screen's entry point. Its visibility is gated on
+    /// <see cref="CanManageImageLocationSettings"/>, which is <b>not</b> the minutes editor's gate: FR-020's
+    /// "the role gate" is two gates, and collapsing them would hand the picture screen to a role that never had
+    /// it.
+    /// </summary>
     public bool IsImageLocationSettingsPanelVisible => CanManageImageLocationSettings && MatchesSearch(
         "image location",
         "image settings",
         "request type images",
+        "item images",
         "work center images",
-        "subtype images",
         "image path",
         "request type",
-        "subtype",
+        "item",
         "work center");
 
     public bool IsComputersPanelVisible => ComputerManagement.CanManageComputers && MatchesSearch(

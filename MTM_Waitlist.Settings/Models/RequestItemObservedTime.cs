@@ -14,6 +14,13 @@ public sealed class RequestItemObservedTime
     /// <summary>The Item code these figures belong to.</summary>
     public string Item { get; init; } = string.Empty;
 
+    /// <summary>
+    /// The Item's human-friendly name, resolved through the resource mechanism (FR-022), so the screen that
+    /// shows the two numbers also says which Item they belong to. Falls back to the Item code when the
+    /// resource is absent, so a row is never blank.
+    /// </summary>
+    public string DisplayName { get; init; } = string.Empty;
+
     /// <summary>How many of the Item's requests count towards the observed average.</summary>
     public int CompletedRequestCount { get; init; }
 

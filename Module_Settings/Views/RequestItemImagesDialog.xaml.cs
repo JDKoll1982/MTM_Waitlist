@@ -1,13 +1,19 @@
 using Microsoft.UI.Xaml.Controls;
+
 using MTM_Waitlist.Module_Settings.ViewModels;
 
 namespace MTM_Waitlist.Module_Settings.Views;
 
-public sealed partial class RequestSubtypeImagesDialog : ContentDialog
+/// <summary>
+/// The Item-keyed picture screen. Its code-behind constructs
+/// <see cref="RequestItemImagesDialogViewModel"/>, which is what makes the rename and the re-pointing one
+/// change rather than two.
+/// </summary>
+public sealed partial class RequestItemImagesDialog : ContentDialog
 {
-    private readonly RequestSubtypeImagesDialogViewModel _viewModel;
+    private readonly RequestItemImagesDialogViewModel _viewModel;
 
-    public RequestSubtypeImagesDialog(RequestSubtypeImagesDialogViewModel viewModel)
+    public RequestItemImagesDialog(RequestItemImagesDialogViewModel viewModel)
     {
         InitializeComponent();
 

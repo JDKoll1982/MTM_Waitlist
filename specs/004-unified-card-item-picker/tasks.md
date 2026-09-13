@@ -707,22 +707,22 @@ and the average it has actually taken.
 
 ### Tests — write these first; they must fail before the implementation lands
 
-- [ ] **T088** [P] [US5] Extend `UrgencyAllotmentEditorViewModelTests`: each row shows the configured minutes and the
+- [x] **T088** [P] [US5] Extend `UrgencyAllotmentEditorViewModelTests`: each row shows the configured minutes and the
   observed average as **two clearly separate values** (FR-018, SC-008), the observed value is never written back
   (FR-019), the write is clamped to a positive minimum and a twenty-four-hour maximum matching
   `UrgencySettingsService.SetMaxAllottedAsync`'s existing clamp, and the screen's gate is
   **`CanManageUrgencySettings`** — the gate that already governs it (FR-020). ·
   `MTM_Waitlist.Tests/Module_Settings/UrgencyAllotmentEditorViewModelTests.cs`
-- [ ] **T089** [P] [US5] Add `RequestItemImagesDialogViewModelTests`: the picture screen is keyed by Item, its gate is
+- [x] **T089** [P] [US5] Add `RequestItemImagesDialogViewModelTests`: the picture screen is keyed by Item, its gate is
   **`CanManageImageLocationSettings`** — a **different** gate from the minutes editor's, neither collapsed into one
   nor replaced by a new one (FR-020) — and a `"nothing configured"` answer never overwrites a resolved image
   (FR-021). · new `MTM_Waitlist.Tests/Module_Settings/RequestItemImagesDialogViewModelTests.cs`
-- [ ] **T090** [P] [US5] Extend `UrgencySettingsServiceTests`: the allotted minutes are read from the Item's stored
+- [x] **T090** [P] [US5] Extend `UrgencySettingsServiceTests`: the allotted minutes are read from the Item's stored
   configuration rather than a per-Windows-user local key, an Update goes through
   `sp_waitlist_request_item_allotted_minutes_update`, and an Item with no configured minutes uses the **15-minute**
   default, **labelled as a default**, and keeps its place in the urgency order (FR-016, FR-017, SC-007). ·
   `MTM_Waitlist.Tests/Core/Services/UrgencySettingsServiceTests.cs`
-- [ ] **T091** [P] [US5] Add `RequestItemObservedTimeServiceTests`: only `Completed` requests count; the endpoints are
+- [x] **T091** [P] [US5] Add `RequestItemObservedTimeServiceTests`: only `Completed` requests count; the endpoints are
   `accepted_utc` → `completed_utc`; a released-then-completed request contributes **exactly once**; a request missing
   either endpoint is excluded; no time window is applied; and an Item with no completed request yields **no value**
   rather than a fabricated zero (FR-019, FR-026). *New file under `Module_Settings/Services/` per the
@@ -733,14 +733,14 @@ and the average it has actually taken.
 
 **Wave 1 — the deadline source moves into the store, independent (different files):**
 
-- [ ] **T092** [P] [US5] Re-key `IUrgencySettingsService` from subtype to Item and from local settings to the store
+- [x] **T092** [P] [US5] Re-key `IUrgencySettingsService` from subtype to Item and from local settings to the store
   (§D4): the configured value must be visible to everyone and must sit beside a value that comes from a stored
   procedure, which a per-Windows-user key cannot do. · `MTM_Waitlist.Core/Contracts/Services/IUrgencySettingsService.cs`
-- [ ] **T093** [P] [US5] Re-key `UrgencySettingsService` to the Item's stored minutes: read through the
+- [x] **T093** [P] [US5] Re-key `UrgencySettingsService` to the Item's stored minutes: read through the
   configuration read, write through `sp_waitlist_request_item_allotted_minutes_update`, keep
   `DefaultMinutes` at the 15-minute fallback (T027), and stop writing `Urgency.MaxAllottedMinutes.<subtype>` keys. ·
   `MTM_Waitlist.Core/Services/UrgencySettingsService.cs`
-- [ ] **T094** [P] [US5] Re-key `IUrgencyDeadlineService` / `UrgencyDeadlineService` to the Item's allotted minutes, so
+- [x] **T094** [P] [US5] Re-key `IUrgencyDeadlineService` / `UrgencyDeadlineService` to the Item's allotted minutes, so
   the deadline derives from the Item and never from a type or subtype (FR-016). ·
   `MTM_Waitlist.Core/Contracts/Services/IUrgencyDeadlineService.cs`,
   `MTM_Waitlist.Core/Services/UrgencyDeadlineService.cs`
@@ -749,7 +749,7 @@ and the average it has actually taken.
 
 **Wave 2 — the minutes screen (single task):**
 
-- [ ] **T095** [US5] Re-key `UrgencyAllotmentEditorViewModel` from subtype to Item and add the second column:
+- [x] **T095** [US5] Re-key `UrgencyAllotmentEditorViewModel` from subtype to Item and add the second column:
   configured minutes and the observed average as visibly distinct values, with the default labelled as a default
   rather than as configured (FR-017, FR-018, SC-007, SC-008). Keep its **own** role gate
   `CanManageUrgencySettings` — do not collapse it with the picture screen's. Update that module's dependency
@@ -761,7 +761,7 @@ and the average it has actually taken.
 
 **Wave 3 — the picture screen's view model is renamed and re-pointed (single task):**
 
-- [ ] **T096** [US5] Rename `RequestSubtypeImagesDialogViewModel` to `RequestItemImagesDialogViewModel` and re-point
+- [x] **T096** [US5] Rename `RequestSubtypeImagesDialogViewModel` to `RequestItemImagesDialogViewModel` and re-point
   it at the Item: the `request_item` scope per Item, the `request_category` scope as the family it inherits from,
   keeping `SupportsGrouping` / `SupportsInheritance`, the per-row batched commit path and the storage root exactly as
   they are (§D10). This is a **rename**, not a new image subsystem. ·
@@ -772,7 +772,7 @@ and the average it has actually taken.
 
 **Wave 4 — the picture screen's view (single task; its code-behind constructs the renamed view model):**
 
-- [ ] **T097** [US5] Rename and re-point the dialog view: `Module_Settings/Views/RequestItemImagesDialog.xaml(.cs)`,
+- [x] **T097** [US5] Rename and re-point the dialog view: `Module_Settings/Views/RequestItemImagesDialog.xaml(.cs)`,
   with its code-behind constructing the renamed `RequestItemImagesDialogViewModel`. · new
   `Module_Settings/Views/RequestItemImagesDialog.xaml`, `Module_Settings/Views/RequestItemImagesDialog.xaml.cs`
   (renamed from the `RequestSubtypeImagesDialog` pair)
@@ -781,7 +781,7 @@ and the average it has actually taken.
 
 **Wave 5 — the Settings page hosts the re-keyed screens (single task):**
 
-- [ ] **T098** [US5] Update `SettingsViewModel` and `SettingsPage` for the re-keyed screens: the minutes panel's
+- [x] **T098** [US5] Update `SettingsViewModel` and `SettingsPage` for the re-keyed screens: the minutes panel's
   configured + observed columns, the Item-keyed picture entry point (the `RequestSubtypeImages_Click` handler becomes
   the Item handler and opens the renamed dialog), panel visibility, and the settings search reaching both panels.
   Keep **both** role gates separate — `CanManageUrgencySettings` for the minutes editor and
@@ -793,7 +793,7 @@ and the average it has actually taken.
 
 **Wave 6 — resources (single task):**
 
-- [ ] **T099** [US5] Add both screens' new user-visible strings through the resource mechanism (FR-022): the Item
+- [x] **T099** [US5] Add both screens' new user-visible strings through the resource mechanism (FR-022): the Item
   column headers, the configured/observed column labels, the "default" marker, and the picture screen's Item labels.
   · `Strings/en-us/Resources.resw`
 
@@ -801,7 +801,7 @@ and the average it has actually taken.
 
 **Wave 7 — the settings tests follow their subjects (single task):**
 
-- [ ] **T100** [US5] Update `SettingsViewModelTests` and `SettingsPageMarkupTests`: panel visibility, settings search
+- [x] **T100** [US5] Update `SettingsViewModelTests` and `SettingsPageMarkupTests`: panel visibility, settings search
   reaching the re-keyed panels, and that neither screen exposes a control to a viewer without its own gate. ·
   `MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs`,
   `MTM_Waitlist.Tests/Module_Settings/SettingsPageMarkupTests.cs`

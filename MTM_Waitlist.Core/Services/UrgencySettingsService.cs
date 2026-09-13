@@ -1,4 +1,5 @@
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
 
 namespace MTM_Waitlist.Module_Core.Services;
 
@@ -7,38 +8,72 @@ public sealed class UrgencySettingsService : IUrgencySettingsService
 {
     /// <summary>
     /// Default max-allotted minutes applied when an Item has no stored allotment. It is a <b>labelled
-    /// default</b>, not a configured value, and it is the 15-minute fallback of FR-017 (was 30).
+    /// default</b>, not a configured value, and it is the 15-minute fallback of FR-017.
     /// </summary>
     public const int DefaultMinutes = 15;
 
-    /// <summary>Per-sub-type keys are stored as separate scalar int keys (safe for every local-settings store).</summary>
-    public const string KeyPrefix = "Urgency.MaxAllottedMinutes.";
+    /// <summary>The positive minimum a configured allotment is clamped to.</summary>
+    public const int MinimumMinutes = 1;
 
-    private readonly ILocalSettingsService _localSettingsService;
+    /// <summary>The twenty-four hour maximum a configured allotment is clamped to.</summary>
+    public const int MaximumMinutes = 24 * 60;
 
-    public UrgencySettingsService(ILocalSettingsService localSettingsService)
+    private readonly IRequestItemAllottedMinutesStore _allottedMinutesStore;
+
+    public UrgencySettingsService(IRequestItemAllottedMinutesStore allottedMinutesStore)
     {
-        _localSettingsService = localSettingsService;
+        _allottedMinutesStore = allottedMinutesStore ?? throw new ArgumentNullException(nameof(allottedMinutesStore));
     }
 
     public TimeSpan DefaultMaxAllotted => TimeSpan.FromMinutes(DefaultMinutes);
 
-    public async Task<TimeSpan> GetMaxAllottedAsync(string subtype, CancellationToken cancellationToken = default)
+    /// <inheritdoc />
+    /// <remarks>
+    /// The fallback is answered both when the Item has no configured figure and when the store cannot be
+    /// reached: an unreachable store must still produce a sane deadline, which is what keeps the request in
+    /// the urgency order rather than removing it from one (§D5, SC-007). The failure is recorded, never
+    /// silently swallowed.
+    /// </remarks>
+    public async Task<TimeSpan> GetMaxAllottedAsync(string? item, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var minutes = await ReadMinutesAsync(Key(subtype)).ConfigureAwait(false) ?? DefaultMinutes;
-        return TimeSpan.FromMinutes(minutes);
+
+        var itemCode = item?.Trim() ?? string.Empty;
+
+        try
+        {
+            var configured = await _allottedMinutesStore
+                .GetAllottedMinutesAsync(itemCode, cancellationToken)
+                .ConfigureAwait(false);
+
+            return TimeSpan.FromMinutes(configured ?? DefaultMinutes);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "UrgencySettings",
+                ex,
+                $"Could not read the configured allotted minutes for item '{itemCode}'; answering the labelled {DefaultMinutes}-minute default so the request keeps its place in the urgency order (FR-017, SC-007).");
+
+            return DefaultMaxAllotted;
+        }
     }
 
-    public async Task SetMaxAllottedAsync(string subtype, int minutes, CancellationToken cancellationToken = default)
+    /// <inheritdoc />
+    public async Task SetMaxAllottedAsync(string? item, int minutes, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var value = Math.Clamp(minutes, 1, 24 * 60); // at least 1 minute, at most 24 hours
-        await _localSettingsService.SaveSettingAsync(Key(subtype), value).ConfigureAwait(false);
+
+        var itemCode = item?.Trim() ?? string.Empty;
+        var value = Math.Clamp(minutes, MinimumMinutes, MaximumMinutes);
+
+        // A failed write is deliberately NOT swallowed: the minutes screen reports it (FR-026).
+        await _allottedMinutesStore
+            .SetAllottedMinutesAsync(itemCode, value, cancellationToken)
+            .ConfigureAwait(false);
     }
-
-    private static string Key(string subtype) => KeyPrefix + (subtype ?? string.Empty).Trim();
-
-    private async Task<int?> ReadMinutesAsync(string key)
-        => await _localSettingsService.ReadSettingAsync<int?>(key).ConfigureAwait(false);
 }

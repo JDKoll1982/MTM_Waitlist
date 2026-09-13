@@ -85,11 +85,42 @@ public static class RequestItemCatalog
         }
     };
 
-    /// <summary>
-    /// The resource key for an Item's own first-line phrase, following the same one-convention rule the
-    /// display name uses (FR-022).
-    /// </summary>
+    /// <summary>The resource key for an Item's own first-line phrase, following the same one-convention rule the
+    /// display name uses (FR-022).</summary>
     public static string Line1ResourceKeyFor(string itemId) => $"RequestItem.{itemId}.Line1";
+
+    /// <summary>
+    /// The name a person reads for a Category, resolved through the resource mechanism with a readable fallback
+    /// so a missing entry never shows a bare resource key (FR-022). The screens that group by Category — the
+    /// picture screen, for one — resolve it here rather than carrying their own copy of the convention.
+    /// </summary>
+    public static string ResolveCategoryName(RequestCategory category)
+    {
+        var key = $"RequestCategory.{category}.Name";
+        var localized = key.GetLocalized();
+
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, key, StringComparison.Ordinal)
+            ? category.ToString()
+            : localized;
+    }
+
+    /// <summary>
+    /// The name a person reads for an Item, resolved from the Item's own resource key (FR-022), falling back to
+    /// the catalog's normalized name rather than to a bare key.
+    /// </summary>
+    public static string ResolveDisplayName(RequestItemDefinition item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        var key = string.IsNullOrWhiteSpace(item.DisplayNameResourceKey)
+            ? DisplayNameResourceKeyFor(item.Id)
+            : item.DisplayNameResourceKey;
+        var localized = key.GetLocalized();
+
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, key, StringComparison.Ordinal)
+            ? item.NormalizedName
+            : localized;
+    }
 
     /// <summary>
     /// Resolves an Item's pinned first line through the resource mechanism, falling back to the pinned text

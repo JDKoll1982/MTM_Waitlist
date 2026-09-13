@@ -42,14 +42,14 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private string? _sortOrder;
 
     /// <summary>
-    /// Max-allotted time per sub-type for the load in flight. The urgency of every row needs one, and every
-    /// row of a sub-type needs the same one, so a list of N rows costs one lookup per distinct sub-type
-    /// rather than N. Cleared at the start of each load so a settings change is picked up.
+    /// Allotted time per Item for the load in flight. The urgency of every row needs one, and every row of an
+    /// Item needs the same one, so a list of N rows costs one lookup per distinct Item rather than N. Cleared
+    /// at the start of each load so a settings change is picked up.
     /// </summary>
     private readonly Dictionary<string, TimeSpan> _maxAllottedCache = new(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>The documented default max-allotted time, used when no deadline service is supplied or the sub-type has no override.</summary>
-    private static readonly TimeSpan DefaultMaxAllotted = TimeSpan.FromMinutes(30);
+    /// <summary>The documented default allotted time, used when no deadline service is supplied or the Item has no configured allotment.</summary>
+    private static readonly TimeSpan DefaultMaxAllotted = TimeSpan.FromMinutes(UrgencySettingsService.DefaultMinutes);
 
     /// <summary>
     /// The ordering key for a row whose due time cannot be derived. It is not overdue and carries the longest
@@ -885,8 +885,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// <summary>
     /// Derives a row's urgency from the same due value the card shows: the stored target time when the
     /// request carries one, so the ordering key and the countdown are one number. When the request has no
-    /// target the due time is the sub-type's max-allotted window, which is what the New Request flow would
-    /// have stamped onto it.
+    /// target the due time is the Item's allotted window, which is what the New Request flow would have
+    /// stamped onto it.
     /// </summary>
     private async Task<UrgencyState?> ResolveUrgencyAsync(WaitlistRequest request, DateTimeOffset now)
     {
@@ -900,8 +900,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     }
 
     /// <summary>
-    /// Max-allotted time for an Item, memoised for the load in flight. Falls back to the documented default
-    /// when no deadline service is configured (a headless host) or the Item has no override.
+    /// Allotted time for an Item, memoised for the load in flight. Falls back to the one documented default
+    /// when no deadline service is configured (a headless host), so this fallback cannot disagree with the
+    /// service's own 15-minute default (FR-017, SC-007).
     /// </summary>
     private async Task<TimeSpan> GetMaxAllottedAsync(string? itemCode)
     {

@@ -1,18 +1,32 @@
 using System.Collections.ObjectModel;
+
 using CommunityToolkit.Mvvm.ComponentModel;
+
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 
 namespace MTM_Waitlist.Module_Settings.ViewModels;
 
 /// <summary>
-/// Backs the Workflow 08 "max allotted time per request sub-type" editor on the Settings screen. Loads the real
-/// request-type catalog's sub-types, reads each sub-type's current max-allotted minutes from
-/// <see cref="IUrgencySettingsService"/> (default 30 when unset), and persists each row's minutes back on change.
-/// Editing is role-gated to Plant Manager and above.
+/// Backs the "allotted minutes per Item" editor on the Settings screen. One row per catalogued Item, showing the
+/// Item's <b>configured</b> minutes beside the <b>observed</b> average its completed requests actually took —
+/// two values with two meanings, never one (FR-018, SC-008) — and persisting each row's minutes to the Item's
+/// stored configuration on change.
 /// </summary>
+/// <remarks>
+/// <para>
+/// <b>Keyed by Item.</b> The Item is the same identity the request is stored with, and the same one the
+/// deadline derives from (FR-016). The request type and the subtype are gone from this screen entirely.
+/// </para>
+/// <para>
+/// <b>Its own role gate.</b> Editing is gated on <see cref="CanManageUrgencySettings"/> — the gate that already
+/// governs this screen (FR-020). The picture screen keeps <c>CanManageImageLocationSettings</c>; the two are
+/// not collapsed into one and no third gate is introduced.
+/// </para>
+/// </remarks>
 public partial class UrgencyAllotmentEditorViewModel : ObservableObject
 {
     private static readonly string[] AllowedUrgencyManageRoles =
@@ -23,19 +37,20 @@ public partial class UrgencyAllotmentEditorViewModel : ObservableObject
     };
 
     private readonly IUrgencySettingsService _urgencySettingsService;
-    private readonly IRequestSubtypeNameReadService _requestSubtypeNameReadService;
+    private readonly IRequestItemObservedTimeService _observedTimeService;
     private readonly StartupState _startupState;
 
     public UrgencyAllotmentEditorViewModel(
         IUrgencySettingsService urgencySettingsService,
-        IRequestSubtypeNameReadService requestSubtypeNameReadService,
+        IRequestItemObservedTimeService observedTimeService,
         StartupState startupState)
     {
-        _urgencySettingsService = urgencySettingsService;
-        _requestSubtypeNameReadService = requestSubtypeNameReadService;
-        _startupState = startupState;
+        _urgencySettingsService = urgencySettingsService ?? throw new ArgumentNullException(nameof(urgencySettingsService));
+        _observedTimeService = observedTimeService ?? throw new ArgumentNullException(nameof(observedTimeService));
+        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
     }
 
+    /// <summary>One row per catalogued Item, in catalog order.</summary>
     public ObservableCollection<UrgencyAllotmentItem> Items { get; } = new();
 
     public bool CanManageUrgencySettings => AllowedUrgencyManageRoles.Any(role =>
@@ -53,30 +68,44 @@ public partial class UrgencyAllotmentEditorViewModel : ObservableObject
         get; set;
     } = string.Empty;
 
+    /// <summary>
+    /// Loads the configured/observed pair for every Item through the pair service — one read, never one read
+    /// per row (FR-024). A failed read is reported in plain language and leaves the screen empty rather than
+    /// filling it with invented numbers (FR-026).
+    /// </summary>
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
         IsBusy = true;
         try
         {
             var rows = new List<UrgencyAllotmentItem>();
-            IReadOnlyList<string> subtypeNames;
+
             try
             {
-                subtypeNames = await _requestSubtypeNameReadService.GetSubtypeNamesAsync(cancellationToken).ConfigureAwait(true);
+                var pairs = await _observedTimeService
+                    .GetObservedTimesAsync(cancellationToken)
+                    .ConfigureAwait(true);
+
+                foreach (var pair in pairs)
+                {
+                    var row = new UrgencyAllotmentItem(
+                        pair.Item,
+                        pair.DisplayName,
+                        pair.ConfiguredMinutes.TotalMinutes,
+                        pair.IsConfiguredValueDefault,
+                        pair.ObservedAverage);
+
+                    row.PropertyChanged += OnRowPropertyChanged;
+                    rows.Add(row);
+                }
             }
             catch (Exception ex)
             {
-                StartupDebugLog.Error("UrgencyAllotments", ex, "Failed to load the request sub-types.");
-                StatusMessage = "Unable to load request sub-types from the catalog.";
-                subtypeNames = Array.Empty<string>();
-            }
-
-            foreach (var subtypeName in subtypeNames)
-            {
-                var minutes = (await _urgencySettingsService.GetMaxAllottedAsync(subtypeName, cancellationToken).ConfigureAwait(true)).TotalMinutes;
-                var row = new UrgencyAllotmentItem(subtypeName, minutes);
-                row.PropertyChanged += OnRowPropertyChanged;
-                rows.Add(row);
+                StartupDebugLog.Error("UrgencyAllotments", ex, "Failed to read the configured and observed minutes per Item.");
+                StatusMessage = ResolveStatus(
+                    "Settings_UrgencyAllotments.LoadFailed",
+                    "The minutes could not be read from the store, so nothing is shown. Retry once the store is reachable.");
+                return;
             }
 
             Items.Clear();
@@ -85,7 +114,12 @@ public partial class UrgencyAllotmentEditorViewModel : ObservableObject
                 Items.Add(row);
             }
 
-            StatusMessage = subtypeNames.Count == 0 ? "No request sub-types found." : $"{Items.Count} sub-type(s) loaded.";
+            StatusMessage = rows.Count == 0
+                ? ResolveStatus("Settings_UrgencyAllotments.NoItems", "No items are configured yet.")
+                : string.Format(
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    ResolveStatus("Settings_UrgencyAllotments.Loaded", "{0} item(s) loaded."),
+                    Items.Count);
         }
         finally
         {
@@ -93,6 +127,10 @@ public partial class UrgencyAllotmentEditorViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Persists one row's edited minutes to the Item's stored configuration. The observed average is display
+    /// data and is never written back (FR-019).
+    /// </summary>
     private async void OnRowPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(UrgencyAllotmentItem.Minutes) || sender is not UrgencyAllotmentItem row)
@@ -108,13 +146,30 @@ public partial class UrgencyAllotmentEditorViewModel : ObservableObject
         try
         {
             var minutes = (int)Math.Round(row.Minutes);
-            await _urgencySettingsService.SetMaxAllottedAsync(row.SubtypeName, minutes).ConfigureAwait(true);
-            StartupDebugLog.Info("UrgencyAllotments", $"Saved max allotted for '{row.SubtypeName}' = {minutes} min.");
+            await _urgencySettingsService.SetMaxAllottedAsync(row.ItemCode, minutes).ConfigureAwait(true);
+            StartupDebugLog.Info("UrgencyAllotments", $"Saved the allotted minutes for item '{row.ItemCode}' = {minutes} min.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("UrgencyAllotments", ex, $"Failed to save max allotted for '{row.SubtypeName}'.");
-            StatusMessage = $"Unable to save '{row.SubtypeName}': {ex.Message}";
+            StartupDebugLog.Error("UrgencyAllotments", ex, $"Failed to save the allotted minutes for item '{row.ItemCode}'.");
+            StatusMessage = string.Format(
+                System.Globalization.CultureInfo.CurrentCulture,
+                ResolveStatus("Settings_UrgencyAllotments.SaveFailed", "Unable to save '{0}': {1}"),
+                row.ItemCode,
+                ex.Message);
         }
+    }
+
+    /// <summary>
+    /// A message resolved through the existing resource mechanism, with a readable fallback so a person is never
+    /// shown a bare resource key (FR-022).
+    /// </summary>
+    private static string ResolveStatus(string key, string fallback)
+    {
+        var localized = key.GetLocalized();
+
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, key, StringComparison.Ordinal)
+            ? fallback
+            : localized;
     }
 }

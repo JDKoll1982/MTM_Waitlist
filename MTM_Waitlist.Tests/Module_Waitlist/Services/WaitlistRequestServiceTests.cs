@@ -5,6 +5,7 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
+using MTM_Waitlist.Tests.Module_Settings;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 
@@ -30,8 +31,7 @@ public sealed class WaitlistRequestServiceTests
     [TestMethod]
     public async Task SubmitAsync_DerivesUrgencyDeadlineWhenDraftHasNone()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>());
-        var deadline = new UrgencyDeadlineService(new UrgencySettingsService(settings));
+        var deadline = new UrgencyDeadlineService(new UrgencySettingsService(new FakeRequestItemAllottedMinutesStore()));
         var service = new WaitlistRequestService(null, null, deadline);
 
         var result = await service.SubmitAsync(DeadlineLessDraft(), allowDuplicate: false);
@@ -46,8 +46,7 @@ public sealed class WaitlistRequestServiceTests
     [TestMethod]
     public async Task SubmitAsync_PreservesExplicitDeadline()
     {
-        var settings = new InMemoryLocalSettingsService(new Dictionary<string, object>());
-        var deadline = new UrgencyDeadlineService(new UrgencySettingsService(settings));
+        var deadline = new UrgencyDeadlineService(new UrgencySettingsService(new FakeRequestItemAllottedMinutesStore()));
         var service = new WaitlistRequestService(null, null, deadline);
 
         // CreateDraft already carries an explicit TargetTimeUtc; it must be preserved, not overwritten.

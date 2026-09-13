@@ -198,6 +198,130 @@ internal static class TestDoubles
     public static MySqlHelperServer CreateUnusedMySqlHelperServer() => new();
 }
 
+/// <summary>
+/// The Item-keyed allotment store, scripted. Records every read and every write so a test can prove which
+/// Item was asked for, what was written, and — just as importantly — that nothing was written at all.
+/// </summary>
+internal sealed class FakeRequestItemAllottedMinutesStore : IRequestItemAllottedMinutesStore
+{
+    private readonly Dictionary<string, int> _configured = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>When set, every read fails. Used to prove the labelled default survives an unreachable store.</summary>
+    public Exception? ReadFailure { get; set; }
+
+    /// <summary>When set, every write fails. Used to prove a failed write is reported rather than swallowed.</summary>
+    public Exception? WriteFailure { get; set; }
+
+    public List<string> ItemsRead { get; } = new();
+
+    public List<(string Item, int Minutes)> Writes { get; } = new();
+
+    public void Configure(string itemCode, int minutes) => _configured[itemCode] = minutes;
+
+    public Task<int?> GetAllottedMinutesAsync(string itemCode, CancellationToken cancellationToken = default)
+    {
+        ItemsRead.Add(itemCode);
+
+        if (ReadFailure is not null)
+        {
+            return Task.FromException<int?>(ReadFailure);
+        }
+
+        return Task.FromResult(_configured.TryGetValue(itemCode ?? string.Empty, out var minutes)
+            ? (int?)minutes
+            : null);
+    }
+
+    public Task SetAllottedMinutesAsync(string itemCode, int minutes, CancellationToken cancellationToken = default)
+    {
+        Writes.Add((itemCode, minutes));
+
+        return WriteFailure is not null
+            ? Task.FromException(WriteFailure)
+            : Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// The configuration read, scripted: it answers for the Items a test configures and reports a missing row the
+/// way the real reader does, so a caller sees the same unavailable shape either way.
+/// </summary>
+internal sealed class FakeRequestItemConfigurationService : IRequestItemConfigurationService
+{
+    private readonly Dictionary<string, RequestItemConfiguration> _byItem = new(StringComparer.OrdinalIgnoreCase);
+
+    public List<string> ItemsRead { get; } = new();
+
+    public Exception? Failure { get; set; }
+
+    public void Configure(RequestItemConfiguration configuration) => _byItem[configuration.Item] = configuration;
+
+    public void Configure(string itemCode, int? allottedMinutes) => _byItem[itemCode] = new RequestItemConfiguration
+    {
+        Item = itemCode,
+        Category = RequestItemCatalog.FindById(itemCode)?.Category.ToString() ?? string.Empty,
+        AllottedMinutes = allottedMinutes,
+    };
+
+    public Task<RequestItemConfigurationSet> GetConfigurationsAsync(CancellationToken cancellationToken = default)
+    {
+        if (Failure is not null)
+        {
+            return Task.FromException<RequestItemConfigurationSet>(Failure);
+        }
+
+        return Task.FromResult(RequestItemConfigurationSet.From(_byItem.Values));
+    }
+
+    public Task<RequestItemConfiguration> GetConfigurationAsync(string itemCode, CancellationToken cancellationToken = default)
+    {
+        ItemsRead.Add(itemCode);
+
+        if (Failure is not null)
+        {
+            return Task.FromException<RequestItemConfiguration>(Failure);
+        }
+
+        var normalized = itemCode?.Trim() ?? string.Empty;
+
+        return Task.FromResult(_byItem.TryGetValue(normalized, out var configuration)
+            ? configuration
+            : RequestItemConfiguration.Missing(
+                normalized,
+                RequestItemConfigurationSet.UnavailableMessageKey,
+                RequestItemConfigurationSet.ResolveUnavailableMessage()));
+    }
+}
+
+/// <summary>
+/// The configured/observed pair source, scripted. Carries no store of its own: it answers exactly the pairs a
+/// test hands it, so a screen's columns are proved from the pair rather than from a second read path.
+/// </summary>
+internal sealed class FakeRequestItemObservedTimeService : IRequestItemObservedTimeService
+{
+    public List<RequestItemObservedTime> Times { get; } = new();
+
+    public Exception? Failure { get; set; }
+
+    public void Add(string item, TimeSpan? configuredMinutes, TimeSpan? observedAverage, bool isConfiguredValueDefault = false)
+    {
+        Times.Add(new RequestItemObservedTime
+        {
+            Item = item,
+            DisplayName = item,
+            ConfiguredMinutes = configuredMinutes ?? TimeSpan.FromMinutes(15),
+            IsConfiguredValueDefault = isConfiguredValueDefault || configuredMinutes is null,
+            CompletedRequestCount = observedAverage.HasValue ? 1 : 0,
+            ObservedAverage = observedAverage,
+        });
+    }
+
+    public Task<IReadOnlyList<RequestItemObservedTime>> GetObservedTimesAsync(CancellationToken cancellationToken = default)
+        => Failure is not null
+            ? Task.FromException<IReadOnlyList<RequestItemObservedTime>>(Failure)
+            : Task.FromResult<IReadOnlyList<RequestItemObservedTime>>(Times);
+}
+
 internal sealed record ExecutedStatement(string Sql, IReadOnlyDictionary<string, object?> Parameters);
 
 /// <summary>

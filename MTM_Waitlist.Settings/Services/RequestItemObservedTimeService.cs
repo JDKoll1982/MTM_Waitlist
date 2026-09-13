@@ -87,6 +87,7 @@ public sealed class RequestItemObservedTimeService : IRequestItemObservedTimeSer
             result.Add(new RequestItemObservedTime
             {
                 Item = item.Id,
+                DisplayName = RequestItemCatalog.ResolveDisplayName(item),
                 CompletedRequestCount = observed.Count,
                 ConfiguredMinutes = TimeSpan.FromMinutes(configured ?? UrgencySettingsService.DefaultMinutes),
                 IsConfiguredValueDefault = !configured.HasValue,
