@@ -3,7 +3,7 @@
   "specName": "waitlist handler fulfilment",
   "branch": "master",
   "currentStep": "implement",
-  "status": "implemented",
+  "status": "completed",
   "history": [
     {
       "step": "specify",
@@ -498,13 +498,20 @@
   ],
   "telemetryInstanceId": "02a6b81f-25c0-4c2d-9585-50fcd988103e",
   "unattended": true,
-  "last_action": "reported defects fixed and re-verified; history read-back recorded as OPEN (defects/Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md, T036)",
+  "last_action": "implement re-run on 2026-09-13: 49/49 tasks already complete and journaled, G1 0 warnings/0 errors, G2 888 passed/0 failed, no living-spec delta owed",
   "coverage": {
     "FR-001": {
       "title": "A handler-or-above viewer is offered an icon Accept affordance on an unassigned, unfinished request",
       "tasks": [
         "T001",
         "T008"
+      ],
+      "tests": [
+        "CanViewerAccept_OnlyWhenAvailableAndViewerCanHandle",
+        "Gates_MatchThePolicyForEveryViewerAndState",
+        "Accept_CallsTheServiceWithTheSignedInHandlerAndTheRowsRequestId",
+        "Accept_WhenTheViewerIsNotAHandler_IsNotOfferedAndNeverCallsTheService",
+        "Card_ActionButtonsAreGatedByTheRowsOwnFlags"
       ]
     },
     "FR-002": {
@@ -512,12 +519,20 @@
       "tasks": [
         "T008",
         "T011"
+      ],
+      "tests": [
+        "Accept_CallsTheServiceWithTheSignedInHandlerAndTheRowsRequestId",
+        "AcceptAsync_AssignsToHandlerAndMarksInProgress"
       ]
     },
     "FR-003": {
       "title": "An accepted request stays visible on the shared list to every viewer",
       "tasks": [
         "T008"
+      ],
+      "tests": [
+        "AcceptAsync_AssignsToHandlerAndMarksInProgress",
+        "RefreshFromDatabaseAsync_LoadsOpenRequestsFromDb"
       ]
     },
     "FR-004": {
@@ -525,22 +540,40 @@
       "tasks": [
         "T002",
         "T007"
+      ],
+      "tests": [
+        "AssignedToViewer_IsCaseInsensitive_OnlyWhenTaken",
+        "CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo",
+        "Gates_MatchThePolicyForEveryViewerAndState",
+        "AcceptAsync_NotAvailable_ReturnsNull"
       ]
     },
     "FR-005": {
-      "title": "Complete and Release are offered only to the recorded assignee",
+      "title": "Complete is offered only to the recorded assignee, and Cancel is offered whenever Complete is",
       "tasks": [
         "T002",
         "T007",
         "T014",
         "T015",
         "T016"
+      ],
+      "tests": [
+        "CanViewerCompleteOrRelease_OnlyAssignedHandlerAndNotDone",
+        "CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo",
+        "CompleteAsync_OnlyAssignedHandlerCanComplete",
+        "ReleaseAsync_NonAssignee_ReturnsNull"
       ]
     },
     "FR-006": {
       "title": "Completing moves the request to Done in one step and persists it",
       "tasks": [
         "T014"
+      ],
+      "tests": [
+        "Complete_CallsTheServiceWithTheSignedInAssignee",
+        "CompleteAsync_OnlyAssignedHandlerCanComplete",
+        "TransitionStatusAsync_ChangesPendingToAcceptedCompletedAndCanceled",
+        "TransitionStatusAsync_SetsAcceptedAndCompletedTimestamps"
       ]
     },
     "FR-007": {
@@ -548,6 +581,10 @@
       "tasks": [
         "T013",
         "T014"
+      ],
+      "tests": [
+        "ReleaseAsync_ReturnsToOpenList_NotACancellation",
+        "ReleaseAsync_NonAssignee_ReturnsNull"
       ]
     },
     "FR-008": {
@@ -555,6 +592,11 @@
       "tasks": [
         "T001",
         "T007"
+      ],
+      "tests": [
+        "CanViewerAccept_OnlyWhenAvailableAndViewerCanHandle",
+        "Accept_WhenTheViewerIsNotAHandler_IsNotOfferedAndNeverCallsTheService",
+        "Gates_MatchThePolicyForEveryViewerAndState"
       ]
     },
     "FR-009": {
@@ -562,6 +604,11 @@
       "tasks": [
         "T007",
         "T016"
+      ],
+      "tests": [
+        "IsDone_RecognizesTerminalStatuses",
+        "Gates_MatchThePolicyForEveryViewerAndState",
+        "CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo"
       ]
     },
     "FR-010": {
@@ -572,6 +619,12 @@
         "T020",
         "T021",
         "T022"
+      ],
+      "tests": [
+        "Cancel_CallsTheServiceWithTheRequesterIdentityAndThePromptedReason",
+        "Cancel_WithAnEmptyReason_IsStillAConfirmedCancellation",
+        "Cancel_WhenThePromptIsDismissed_PerformsNoActionAndSaysNothing",
+        "CancelOwnRequestAsync_CreatorCancelsOwnWaitingRequest_SucceedsAndRecordsCancelled"
       ]
     },
     "FR-011": {
@@ -580,6 +633,12 @@
         "T013",
         "T020",
         "T022"
+      ],
+      "tests": [
+        "TransitionStatusAsync_WhenCanceled_RecordsCancellationMetadata",
+        "CancelOwnRequestAsync_PersistsCancelledRowToDb",
+        "CancelOwnRequestAsync_AfterAcceptIsDenied",
+        "CancelOwnRequestAsync_NonCreatorIsDenied"
       ]
     },
     "FR-012": {
@@ -610,6 +669,13 @@
       "title": "The card surfaces the handler-needed data the request truthfully carries without adding sections",
       "tasks": [
         "T012"
+      ],
+      "tests": [
+        "CreateSessionOrder_SurfacesTheHandlerNeededDataTheRequestCarries",
+        "CreateSessionOrder_AddsNoHandlerSectionToTheCardsFixedLayout",
+        "CreateSessionOrder_ForEveryRequestShape_CarriesOnlyValuesTheRequestCarries",
+        "CreateSessionOrder_ForEveryRequestShape_RendersNoFabricatedLookingValue",
+        "CreateSessionOrder_ForEveryRequestShape_LeavesAnEmptySlotEmpty"
       ]
     },
     "FR-015": {
@@ -618,18 +684,36 @@
         "T017",
         "T018",
         "T019"
+      ],
+      "tests": [
+        "List_LeadsWithTheMostOverdueRowThenTheLeastRemainingTime",
+        "List_OrderNeverContradictsTheCountdownOnEachCard",
+        "Compute_DueIsCreatedPlusAllotted_RemainingAndOverdue",
+        "WaitlistViewViewModel_CreatesSessionOrder_WithProperRemainingTimeAndOverdueState"
       ]
     },
     "FR-016": {
       "title": "Every lifecycle action goes through the existing request-lifecycle stored procedures",
       "tasks": [
         "T013"
+      ],
+      "tests": [
+        "TransitionStatusAsync_PersistsStatusUpdateToDb",
+        "AcceptAsync_AssignsToHandlerAndMarksInProgress",
+        "NoMySqlStatementTextRemainsInApplicationCode"
       ]
     },
     "FR-017": {
       "title": "Every lifecycle action and note change records who did it and when in the audit history",
       "tasks": [
         "T013"
+      ],
+      "tests": [
+        "AuditTrail_RecordsFromToStatusAcrossLifecycle",
+        "AuditTrail_PersistsAuditEntriesToDb",
+        "GetAuditTrail_RecordsRequestCreationAndLifecycleTransitions",
+        "UpdateNote_SetsNoteOnRequestAndRecordsAudit",
+        "RequestPage_SavingANote_StoresItAndRecordsItInTheHistory"
       ]
     },
     "FR-018": {
@@ -637,6 +721,12 @@
       "tasks": [
         "T001",
         "T007"
+      ],
+      "tests": [
+        "Gates_MatchThePolicyForEveryViewerAndState",
+        "CanViewerCompleteOrRelease_OnlyAssignedHandlerAndNotDone",
+        "AcceptAsync_NotAvailable_ReturnsNull",
+        "CancelOwnRequestAsync_NonCreatorIsDenied"
       ]
     },
     "FR-019": {
@@ -646,6 +736,11 @@
         "T011",
         "T020",
         "T022"
+      ],
+      "tests": [
+        "Accept_WhenTheStoreRefuses_ReportsItAndWarnsTheHandler",
+        "Accept_WhenTheRequestLeftTheList_TellsTheHandlerToChooseSomethingElse",
+        "Cancel_WhenTheStoreRefuses_ReportsItInPlainLanguage"
       ]
     },
     "FR-020": {
@@ -656,6 +751,12 @@
         "T010",
         "T015",
         "T021"
+      ],
+      "tests": [
+        "Card_DrawsNoButtonThatCannotAct",
+        "Card_ActionButtonsAreGatedByTheRowsOwnFlags",
+        "Gates_EveryTrueFlagCarriesACommandAndNoFlagCarriesNone",
+        "Card_ActionButtonsAreNamedFromTheRowNotFromALiteral"
       ]
     },
     "FR-021": {
@@ -666,6 +767,13 @@
         "T026",
         "T027",
         "T028"
+      ],
+      "tests": [
+        "Card_KeepsTheFixedSquareRequestImage",
+        "Card_KeepsTheTitleOnItsOwnTopRow",
+        "Card_KeepsTheFourMetadataRows",
+        "Card_KeepsTheCompactStatusPillBelowTheButtons",
+        "PerTypeDetailGrids_KeepTheTwoByThreeFourColumnPattern"
       ]
     },
     "FR-022": {
@@ -674,6 +782,11 @@
         "T004",
         "T024",
         "T025"
+      ],
+      "tests": [
+        "EveryNewString_ResolvesThroughTheResourceFileAndIsReferencedWhereItIsShown",
+        "Card_ActionButtonsAreNamedFromTheRowNotFromALiteral",
+        "Card_ActionButtonsCarryATooltipFromTheRowNotFromALiteral"
       ]
     },
     "FR-023": {
@@ -681,6 +794,11 @@
       "tasks": [
         "T008",
         "T023"
+      ],
+      "tests": [
+        "RequestsChanged_IsRaised_WhenRequestIsSubmittedOrStatusTransitions",
+        "WaitlistViewViewModel_RefreshesActiveList_WhenRequestIsSubmitted",
+        "RequestPage_ARefreshAfterSending_LeavesTheSentMessageInPlace"
       ]
     },
     "FR-024": {
@@ -699,7 +817,11 @@
         "T049"
       ],
       "tests": [
-        "RequestImagePathPolicyTests"
+        "ARealResolvedPathIsUsed",
+        "TheServicesOwnPlaceholderIsNotAnImage",
+        "ThePlaceholderIsRecognisedWhateverTheSeparatorsOrCasing",
+        "NothingAtAllIsNotUsableEither",
+        "AnEmptyPathIsNotAPlaceholder"
       ]
     },
     "FR-025": {
@@ -776,7 +898,8 @@
     "area: Module_Waitlist/Controls/WaitlistLineCardView.xaml + per-type line views",
     "area: MTM_Waitlist.Core/Services/RequestActionPolicy.cs, UrgencyCalculator.cs",
     "constraint: verified card anatomy block is frozen - actions occupy the existing action area only",
-    "constraint: no fabricated material identifiers on the card; real item resolution is the separate unified-card workstream"
+    "constraint: no fabricated material identifiers on the card; real item resolution is the separate unified-card workstream",
+    "Living specs: the repo registry (living-specs.yml, enabled) resolves NO capability for this feature surface - resolve-spec-paths.py --changed over the waitlist view model, card XAML, image service and list procedure returned []. Both registered capabilities (startup, startup-diagnostics) match only MTM_Waitlist.Startup/** and Module_Startup/**, so there was nothing to fold and no loaded capability to skip-record."
   ],
   "intent": "Make the waitlist workable: handlers can accept, complete and release requests, requesters can cancel their own, and the list leads with the most urgent work.",
   "expectations": [
@@ -1305,6 +1428,30 @@
       "result": "pass",
       "command": "Spec reopened by the human on 2026-09-13, then write-context.py --step implement --status implemented --tasks-file specs/003-waitlist-handler-fulfilment/tasks.md plus --task/--did/--files for the eight summaries",
       "warnings": "This supersedes the earlier concern that they could not be journaled. The refusal was the shipped status, not a hard limit: with status moved off completed the capture synced 8 new task events (49/49 complete) and closed at status=implemented, and task_summaries rows were then written for T042-T049. Nothing needed to be undone in the record - the task entries were simply absent until the reopen."
+    },
+    {
+      "what": "Requirement coverage links for FR-001 - FR-031 are complete and machine-validated",
+      "result": "pass",
+      "command": "write-context.py --coverage-req <FR> --tests <names> for FR-001..FR-023, then a validation pass over every recorded test name against the [TestMethod] methods in MTM_Waitlist.Tests",
+      "warnings": "FR-001..FR-023 shipped with tasks but no tests linked, so the Companion panel read No test linked for the whole original requirement set. All 31 requirements now carry at least one test and 98 links were checked. The validation found one bad link of my own making - FR-031 named the test CLASS (RequestImagePathPolicyTests) instead of its five methods - which is exactly the failure a coverage panel cannot show you."
+    },
+    {
+      "what": "Gate G1 - clean solution build",
+      "result": "pass",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "warnings": "0 Warning(s) 0 Error(s). Stale build processes were stopped first, as the gate requires."
+    },
+    {
+      "what": "Gate G2 - full test suite with MTM_* overrides cleared",
+      "result": "pass",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "warnings": "Failed: 0, Passed: 888, Skipped: 19, Total: 907 - identical to the earlier run that had MTM_AUTH_USER_SECRET_KEY, MTM_MYSQL_PASSWORD and MTM_WAITLIST_DB_CONNECTION_STRING present, so the result does not depend on them."
+    },
+    {
+      "what": "Every artefact the 49 tasks claim to have created exists on disk",
+      "result": "pass",
+      "command": "Test-Path over RequestImagePathPolicy, RequestStatusPalette, RequestStatusToBrushConverter, the two audit-list procedure scripts, LocalWaitlistMessageSeenStore, IWaitlistMessageSeenStore, the image defect record and the two new test files; plus a grep for last_message_utc in sp_waitlist_request_list/create.sql",
+      "warnings": "All present. None of the 49 checkboxes is standing over a missing file."
     }
   ],
   "concerns": [
