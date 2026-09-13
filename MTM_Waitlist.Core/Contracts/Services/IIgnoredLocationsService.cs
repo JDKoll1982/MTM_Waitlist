@@ -4,7 +4,7 @@ namespace MTM_Waitlist.Module_Core.Contracts.Services;
 
 /// <summary>
 /// Shared read of the "ignored Infor Visual inventory locations" list so every consumer
-/// (Waitlist/Coil, Setup, sample/mock paths) filters location lists and summed totals the
+/// (Waitlist inventory, Setup lookups) filters location lists and summed totals the
 /// same way. The list is edited in Settings and persisted via <see cref="ILocalSettingsService"/>.
 /// </summary>
 public interface IIgnoredLocationsService

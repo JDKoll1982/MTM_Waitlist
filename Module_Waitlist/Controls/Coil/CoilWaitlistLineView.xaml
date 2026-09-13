@@ -31,16 +31,16 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock FontWeight="SemiBold" Text="Requested coil" />
-                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Quantity in house" />
-                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Coil description" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="Average coil weight" />
-                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Requesting work center" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock FontWeight="SemiBold" Text="{Binding Fields[0].Label}" Visibility="{Binding Fields[0].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[0].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="{Binding Fields[1].Label}" Visibility="{Binding Fields[1].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[1].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="{Binding Fields[2].Label}" Visibility="{Binding Fields[2].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[2].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="{Binding Fields[3].Label}" Visibility="{Binding Fields[3].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[3].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="{Binding Fields[4].Label}" Visibility="{Binding Fields[4].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[4].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>
         </local:WaitlistLineCardView.DetailsContent>
     </local:WaitlistLineCardView>
@@ -49,24 +49,16 @@
 <!--
     Notes
     Card contents:
-    Requested coil - The coil number associated with the work order. Blank when the request is not tied to a coil.
-    Quantity in house - Pooled on-hand WEIGHT (lb) for the coil's part across inventory locations (one pooled row per
-      location as Infor Visual reports it), excluding ignored/NCM/SHIP locations.
-    Coil description - The description of the coil's part number.
-    Average coil weight - The average received weight for this part number from the MTM Receiving application database.
-    Requesting work center - The work center associated with the user who created the waitlist line.
+    Five fixed slots (Fields[0]..Fields[4]) render each slot's own Label and Value. A slot with no
+    value renders nothing at all, so an attribute with no source simply does not appear. For a coil
+    request the slots carry Subtype, Request details and Requesting work center.
 
     Detail page contents:
-    Requested coil - The coil number associated with the work order. Blank when the request is not tied to a coil.
-    Quantity in house - Pooled on-hand WEIGHT (lb) for the coil's part across inventory locations (one pooled row per
-      location as Infor Visual reports it), excluding ignored/NCM/SHIP locations.
-    Quantity still needed - Work-order coil quantity required minus the quantity already issued or used by the work order.
-    Coil description - The description of the coil's part number.
-    Average coil weight - The average received weight for this part number from the MTM Receiving application database.
-    Work center - The work center associated with the waitlist request.
-    Work center description - The description of the requesting work center.
-    Work order number - The work order identifier associated with the waitlist request.
-    Requesting user - The user who created the waitlist line.
-    Requesting user's employee number - The employee number of the user who created the waitlist line.
-    Coil tipping strategy - Use Crane when the coil height is less than 10 inches; otherwise use Tipper.
+    The detail page renders the same request field set through its sections and merges in the
+    inventory rows it loads itself.
+
+    Not yet sourced: the coil number, its in-house quantity and description, and its average coil
+    weight. No read supplies them to this surface, so no value is shown for them; the follow-on
+    item-resolution specification restores them once a source exists. Rendering a substitute for any
+    of them was the defect this note replaces.
 -->

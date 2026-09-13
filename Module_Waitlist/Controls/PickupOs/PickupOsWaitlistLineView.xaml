@@ -31,16 +31,16 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock FontWeight="SemiBold" Text="Part or work order" />
-                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Quantity to move" />
-                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Pickup work center" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="Destination" />
-                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Vendor or service" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock FontWeight="SemiBold" Text="{Binding Fields[0].Label}" Visibility="{Binding Fields[0].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[0].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="{Binding Fields[1].Label}" Visibility="{Binding Fields[1].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[1].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="{Binding Fields[2].Label}" Visibility="{Binding Fields[2].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[2].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="{Binding Fields[3].Label}" Visibility="{Binding Fields[3].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[3].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="{Binding Fields[4].Label}" Visibility="{Binding Fields[4].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[4].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>
         </local:WaitlistLineCardView.DetailsContent>
     </local:WaitlistLineCardView>
@@ -49,26 +49,16 @@
 <!--
     Notes
     Card contents:
-    Request type - Clearly identify the request as an Outside Service (O/S) pickup.
-    Part or work order - The part and work order associated with the outside-service request.
-    Quantity to move - The quantity the material handler must pick up from the work center.
-    Pickup work center - The work center where the material is staged and ready for pickup.
-    Outside-service destination - The outside-service section or assigned service destination where the material must be delivered.
-    Vendor or service - The outside vendor or service operation receiving the material.
-    Operation sequence - The operation that requires outside-service processing.
-    Pickup priority - Required-by date, scheduled service date, urgency, and current waitlist age.
-    Handling alert - Packaging, weight, safety, equipment, or special transport instructions visible before pickup.
+    Five fixed slots (Fields[0]..Fields[4]) render each slot's own Label and Value. A slot with no
+    value renders nothing at all, so an attribute with no source simply does not appear. For an
+    outside-service pickup the slots carry Subtype, Request details and Pickup work center.
 
     Detail page contents:
-    Request summary - O/S status, request date and time, priority, target completion time, and current owner.
-    Pickup instructions - Source work center, press or resource, warehouse, location, staging point, and work-center contact.
-    Material identification - Part number, part description, revision, unit of measure, lot, serial, heat, batch, or container identifier.
-    Quantity and packaging - Quantity to move, quantity already dispatched, quantity received by the service section, container count, package type, and weight when relevant.
-    Delivery instructions - Outside-service section, vendor or service destination, delivery location, access instructions, and required delivery date.
-    Service details - Vendor, service identifier, operation sequence, operation status, service requirements, and notes.
-    Work-order context - Work order number, operation quantities, required quantity, completed quantity, and related customer order when applicable.
-    Dispatch and receipt history - Handler assignment, pickup acknowledgement, dispatch time, delivery time, receiver acknowledgement, and current service status.
-    Quantity and timing - Quantity still needed, scheduled service dates, expected return date, and remaining waitlist time.
-    Handling and safety - Packaging, weight, lifting equipment, hazardous-material information, and other transport restrictions.
-    Request context - Requesting user, requesting work center, employee number, press, and audit history of status changes.
+    The detail page renders the same request field set through its sections and merges in the
+    inventory rows it loads itself.
+
+    Not yet sourced: the part or work order, the quantity to move, the outside-service destination,
+    the vendor or service and the operation sequence. No read supplies them to this surface, so no
+    value is shown for them; the follow-on item-resolution specification restores them once a
+    source exists.
 -->

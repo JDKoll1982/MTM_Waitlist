@@ -55,6 +55,29 @@ public partial class SettingsViewModel : ObservableRecipient
         "Plant Manager",
     };
 
+    /// <summary>
+    /// Every property whose getter consumes <c>MatchesSearch</c>.
+    /// </summary>
+    /// <remarks>
+    /// Declared as data so <see cref="RefreshSearchVisibility"/> can iterate it and a coverage check can
+    /// prove the next panel was registered rather than silently forgotten — a panel missing from this list
+    /// keeps showing the previous term's answer, which is a wrong result rather than a cosmetic gap
+    /// (FR-019/FR-020/FR-021).
+    /// </remarks>
+    private static readonly string[] s_searchAwareProperties =
+    [
+        nameof(IsAppearancePanelVisible),
+        nameof(IsHotWorkCentersPanelVisible),
+        nameof(IsDunnageTypeVisibilityPanelVisible),
+        nameof(IsIgnoredLocationsPanelVisible),
+        nameof(IsCacheRefreshPanelVisible),
+        nameof(IsAboutPanelVisible),
+        nameof(IsComputersPanelVisible),
+        nameof(IsNewRequestAlertsPanelVisible),
+        nameof(IsUrgencyAllotmentsPanelVisible),
+        nameof(IsImageLocationSettingsPanelVisible),
+    ];
+
     private readonly IThemeSelectorService _themeSelectorService;
     private readonly ILocalSettingsService _localSettingsService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
@@ -191,6 +214,27 @@ public partial class SettingsViewModel : ObservableRecipient
         "stale");
 
     public bool IsAppearancePanelVisible => MatchesSearch("appearance", "app theme", "light", "dark", "default", SelectedThemeText);
+
+    /// <summary>
+    /// Whether this installation can actually deliver a new-request notification.
+    /// </summary>
+    /// <remarks>
+    /// This is the same condition the delivery path evaluates — <c>AppNotificationService.Initialize</c> and
+    /// <c>Show</c> both refuse unless the app has package identity — so the panel can never offer a control
+    /// the notification path would silently ignore. It is a per-installation answer, not a platform rule.
+    /// </remarks>
+    public bool IsNewRequestAlertsAvailable => RuntimeHelper.IsMSIX;
+
+    /// <summary>Localized explanation shown when this installation cannot deliver a notification.</summary>
+    public string NewRequestAlertsUnavailableMessage => "Settings_NewRequestAlerts.Unavailable".GetLocalized();
+
+    /// <summary>
+    /// The panel's description: what the alert does when this installation can deliver one, and why the
+    /// setting is unavailable when it cannot. Evaluated once — the answer cannot change while the app runs.
+    /// </summary>
+    public string NewRequestAlertsDescription => IsNewRequestAlertsAvailable
+        ? "Settings_NewRequestAlerts.Description".GetLocalized()
+        : NewRequestAlertsUnavailableMessage;
 
     public bool IsNewRequestAlertsPanelVisible => MatchesSearch(
         "alert",
@@ -329,6 +373,14 @@ public partial class SettingsViewModel : ObservableRecipient
         if (_newRequestAlertInitializing)
         {
             return; // initial load; do not log/persist as if the user changed it
+        }
+
+        if (!IsNewRequestAlertsAvailable)
+        {
+            // The installation cannot deliver a notification, so there is no preference to record. The
+            // toggle is disabled for this reason; this guard keeps that structural rather than cosmetic.
+            StartupDebugLog.Info("SettingsViewModel", "NewRequestAlertsEnabled was asked for on an installation that cannot deliver a notification; nothing was stored.");
+            return;
         }
 
         StartupDebugLog.Info("SettingsViewModel", $"NewRequestAlertsEnabled changed to {value}.");
@@ -867,13 +919,12 @@ public partial class SettingsViewModel : ObservableRecipient
 
     private void RefreshSearchVisibility()
     {
-        OnPropertyChanged(nameof(IsAppearancePanelVisible));
-        OnPropertyChanged(nameof(IsHotWorkCentersPanelVisible));
-        OnPropertyChanged(nameof(IsDunnageTypeVisibilityPanelVisible));
-        OnPropertyChanged(nameof(IsIgnoredLocationsPanelVisible));
-        OnPropertyChanged(nameof(IsCacheRefreshPanelVisible));
-        OnPropertyChanged(nameof(IsAboutPanelVisible));
-        OnPropertyChanged(nameof(IsComputersPanelVisible));
+        foreach (var propertyName in s_searchAwareProperties)
+        {
+            OnPropertyChanged(propertyName);
+        }
+
+        // The category aggregates are computed from the panels above, so they announce after them.
         OnPropertyChanged(nameof(IsAppearanceCategoryVisible));
         OnPropertyChanged(nameof(IsOperationsCategoryVisible));
         OnPropertyChanged(nameof(IsAboutCategoryVisible));

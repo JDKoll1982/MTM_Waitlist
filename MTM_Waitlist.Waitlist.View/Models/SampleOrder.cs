@@ -9,13 +9,12 @@ public sealed class SampleOrder : INotifyPropertyChanged
     public int Id { get; set; }
 
     /// <summary>
-    /// When this row is a live waitlist request (not a static sample row), the underlying
-    /// request's Guid. Used to target cancel-own and other request-scoped actions from the
-    /// list/detail UI.
+    /// When this row maps to a live waitlist request, the underlying request's Guid. Used to
+    /// target cancel-own and other request-scoped actions from the list/detail UI.
     /// </summary>
     public Guid? RequestId { get; set; }
 
-    /// <summary>The underlying request's requester employee number (empty for static sample rows).</summary>
+    /// <summary>The underlying request's requester employee number; empty when the row carries none.</summary>
     public string RequesterEmployeeNumber { get; set; } = string.Empty;
 
     public string Title { get; set; } = string.Empty;
@@ -85,7 +84,7 @@ public sealed class SampleOrder : INotifyPropertyChanged
     /// <summary>
     /// Friendly lifecycle label shown as the card's status badge/pill. Maps the stored status
     /// (Pending/Accepted/Completed/Canceled) to Waiting/In Progress/Done/Cancelled; empty when
-    /// the row is a static sample row with no lifecycle status.
+    /// the row carries no recognised lifecycle status.
     /// </summary>
     public string StatusBadgeText =>
         Status.Trim().ToLowerInvariant() switch
@@ -131,7 +130,7 @@ public sealed class SampleOrder : INotifyPropertyChanged
     /// <remarks>
     /// Called once a minute while the row is on screen. Change notifications are raised only for values
     /// that actually changed, so a tick that does not cross a minute boundary neither repaints the card
-    /// nor reports a change. Static rows carrying no timestamps are left untouched.
+    /// nor reports a change. Rows that carry no timestamps are left untouched.
     /// </remarks>
     /// <param name="now">The instant to measure the row against.</param>
     /// <returns><see langword="true"/> when at least one displayed value changed.</returns>
@@ -249,9 +248,59 @@ public sealed class SampleOrder : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName ?? string.Empty));
 }
 
-public sealed class WaitlistField
+/// <summary>
+/// One attribute row on a waitlist card's detail area. A slot with no value is not a row: the label goes
+/// with the value, so nothing renders an empty labelled shell (FR-002).
+/// </summary>
+public sealed class WaitlistField : INotifyPropertyChanged
 {
-    public string Label { get; set; } = string.Empty;
-    public string Value { get; set; } = string.Empty;
+    private string _label = string.Empty;
+    private string _value = string.Empty;
+
+    /// <summary>The row's label, or empty for a padding slot.</summary>
+    public string Label
+    {
+        get => _label;
+        set => SetField(ref _label, value);
+    }
+
+    /// <summary>The row's value, or empty when the request carries no source for it.</summary>
+    public string Value
+    {
+        get => _value;
+        set
+        {
+            if (SetField(ref _value, value))
+            {
+                OnPropertyChanged(nameof(HasValue));
+            }
+        }
+    }
+
+    /// <summary>An optional second value for the row.</summary>
     public string? SecondaryValue { get; set; }
+
+    /// <summary>
+    /// Whether this slot carries a value. The card templates hide both the label and the value when it is
+    /// false, and notify when <see cref="Value"/> changes so a row that gains or loses its source re-renders.
+    /// </summary>
+    public bool HasValue => !string.IsNullOrWhiteSpace(Value);
+
+    /// <inheritdoc />
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+        {
+            return false;
+        }
+
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
+
+    private void OnPropertyChanged(string? propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName ?? string.Empty));
 }

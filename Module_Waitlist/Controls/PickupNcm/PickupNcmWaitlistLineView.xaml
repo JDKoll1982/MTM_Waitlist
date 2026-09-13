@@ -31,16 +31,16 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock FontWeight="SemiBold" Text="Part" />
-                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Quantity to move" />
-                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Pickup location" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="Destination" />
-                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Traceability ID" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock FontWeight="SemiBold" Text="{Binding Fields[0].Label}" Visibility="{Binding Fields[0].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[0].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="{Binding Fields[1].Label}" Visibility="{Binding Fields[1].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[1].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="{Binding Fields[2].Label}" Visibility="{Binding Fields[2].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[2].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="{Binding Fields[3].Label}" Visibility="{Binding Fields[3].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[3].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="{Binding Fields[4].Label}" Visibility="{Binding Fields[4].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[4].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>
         </local:WaitlistLineCardView.DetailsContent>
     </local:WaitlistLineCardView>
@@ -49,27 +49,16 @@
 <!--
     Notes
     Card contents:
-    NCM pickup - Clearly identify the request as a pickup of nonconforming material.
-    Part - Internal part number, customer part number, and short part description.
-    Quantity to move - Quantity of nonconforming material that must be picked up.
-    Pickup location - The current work center, press, warehouse, and location where the material is staged.
-    Destination - The NCM area or receiving location where the material must be delivered.
-    Container or traceability ID - Container, lot, serial, heat, or other identifier needed to keep the material segregated and traceable.
-    Customer and order - Customer, customer order number, and work order when applicable.
-    Pickup priority - Required-by or promise date, urgency, and current waitlist age.
-    Handling alert - Safety, equipment, packaging, or special handling instructions visible before pickup.
+    Five fixed slots (Fields[0]..Fields[4]) render each slot's own Label and Value. A slot with no
+    value renders nothing at all, so an attribute with no source simply does not appear. For an NCM
+    pickup the slots carry Subtype, Request details and Pickup location.
 
     Detail page contents:
-    Request summary - NCM status, request date and time, priority, target completion time, and current owner.
-    Material identification - Internal and customer part numbers, description, revision, unit of measure, and material type.
-    Quantity and packaging - Quantity affected, quantity to move, quantity already moved, container count, package type, and weight when relevant.
-    Traceability - Lot, serial, heat, batch, container, work order, operation, and customer order identifiers.
-    Pickup instructions - Source work center, press, warehouse, location, contact, access instructions, and any safe-handling requirements.
-    NCM destination - Assigned NCM area, destination location, segregation requirement, and confirmation that the move was completed.
-    Nonconformance description - Defect or condition, when it was found, who identified it, affected operation, and supporting notes or photos.
-    Containment - Immediate containment action, material quantity placed on hold, related material or work orders, and risk to production or shipment.
-    Quality review - Inspector or Quality owner, inspection status, inspection results, sample or test information, and date reviewed.
-    Disposition - Pending, use as-is, rework, return to vendor, scrap, or other approved disposition; include approver, date, and instructions.
-    Customer and order context - Customer, customer order number, line number, purchase-order reference, desired ship date, and promise date.
-    Audit trail - Requesting user, employee number, pickup acknowledgement, handler, pickup time, delivery time, Quality actions, and status changes.
+    The detail page renders the same request field set through its sections and merges in the
+    inventory rows it loads itself.
+
+    Not yet sourced: the NCM part, the quantity to move, the destination, the container or
+    traceability identifier, and the customer and order details. No read supplies them to this
+    surface, so no value is shown for them; the follow-on item-resolution specification restores
+    them once a source exists.
 -->

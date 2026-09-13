@@ -1,0 +1,60 @@
+# Superpowers detection status — auto-managed by superspec; safe to hand-edit.
+# A skill is "available" when {root}/{skill-name}/SKILL.md exists.
+# Project-local (.agents/skills) takes precedence over user-global (~/.agents/skills).
+
+last_checked: 2026-09-12T19:25:00
+mode: enhanced
+source: obra/superpowers (github, v6.3.0 release line)
+installed_via: "npx --yes skills@latest add obra/superpowers -g -s '*' -y"
+scope: global
+detection_roots:
+  project_local: .agents/skills      # absent in this repository
+  user_global: ~/.agents/skills      # canonical store (real directories; agent
+                                     # directories such as ~/.claude/skills are junctions)
+
+skills:
+  brainstorming:
+    detected: true
+    path: ~/.agents/skills/brainstorming/SKILL.md
+  writing-plans:
+    detected: true
+    path: ~/.agents/skills/writing-plans/SKILL.md
+  executing-plans:
+    detected: true
+    path: ~/.agents/skills/executing-plans/SKILL.md
+  subagent-driven-development:
+    detected: true
+    path: ~/.agents/skills/subagent-driven-development/SKILL.md
+  test-driven-development:
+    detected: true
+    path: ~/.agents/skills/test-driven-development/SKILL.md
+  requesting-code-review:
+    detected: true
+    path: ~/.agents/skills/requesting-code-review/SKILL.md
+
+# Support skills in the same library. No superspec command maps to these, but the
+# mapped skills reference them and Copilot discovers them from the same root.
+support_skills:
+  - using-superpowers              # bootstrap: how to find and invoke skills
+  - writing-skills                 # authoring/editing skills
+  - systematic-debugging           # 4-phase root cause process
+  - verification-before-completion # evidence before success claims
+  - receiving-code-review          # responding to review feedback
+  - dispatching-parallel-agents    # concurrent subagent workflows
+  - using-git-worktrees            # isolated workspace per feature
+  - finishing-a-development-branch # merge / PR / discard decision
+
+summary:
+  mapped_skills: 6
+  detected: 6
+  missing: 0
+  conclusion: "Every superspec command runs in enhanced mode; no fallback is used."
+
+unmapped_skills_present:
+  - codegraphy
+  - gepeto
+  - pinokio
+
+refresh:
+  status_command: /speckit.superspec.status
+  update_skills: "npx --yes skills@latest update -g"

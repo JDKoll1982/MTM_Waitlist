@@ -141,7 +141,249 @@ public sealed class RetiredSymbolAuditTests
     /// <summary>
     /// Walks up from the test binaries until the solution file is found.
     /// </summary>
-    private static string FindRepositoryRoot()
+    private static string FindRepositoryRoot() => RepositoryPatternScan.FindRepositoryRoot();
+
+    /// <summary>
+    /// T003 self-test. An empty pattern set must find nothing: every later use of the helper then proves
+    /// something through its pattern set rather than accidentally through the scanner.
+    /// </summary>
+    [TestMethod]
+    public void PatternScan_WithAnEmptyPatternSet_ReturnsNoHits()
+    {
+        var hits = RepositoryPatternScan.Scan(Array.Empty<(string Description, string Pattern)>());
+
+        Assert.AreEqual(0, hits.Count, RepositoryPatternScan.Describe(hits));
+    }
+
+    /// <summary>
+    /// T026's placeholder-resource gate: no shipped resource <i>value</i> is a placeholder address, a sample
+    /// organisation, filler text, or a developer marker.
+    /// </summary>
+    /// <remarks>
+    /// Only <c>&lt;value&gt;</c> contents are scanned. Key names are deliberately not: the WinUI convention
+    /// names many legitimate keys with the word "Placeholder" (a TextBox's watermark, for instance), so
+    /// scanning names would fail on correct markup.
+    /// </remarks>
+    [TestMethod]
+    public void NoPlaceholderResourceValueShips()
+    {
+        (string Description, Regex Pattern)[] patterns =
+        [
+            ("privacy placeholder address", new Regex(@"YourPrivacyUrlGoesHere", RegexOptions.Compiled | RegexOptions.CultureInvariant)),
+            ("example domain", new Regex(@"\bexample\.(com|org|net)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)),
+            ("sample organisation", new Regex(@"\bContoso\b", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)),
+            ("filler text", new Regex(@"\blorem ipsum\b", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)),
+            ("developer marker", new Regex(@"\bTODO\b", RegexOptions.Compiled | RegexOptions.CultureInvariant)),
+        ];
+
+        var violations = new List<string>();
+        var valueCount = 0;
+
+        foreach (var (fileName, value) in EnumerateResourceValues())
+        {
+            valueCount++;
+
+            foreach (var (description, pattern) in patterns)
+            {
+                if (pattern.IsMatch(value))
+                {
+                    violations.Add($"{fileName}: {description} [{pattern}] -> {value.Trim()}");
+                }
+            }
+        }
+
+        Assert.IsTrue(
+            valueCount > 100,
+            $"The scan reached only {valueCount} resource values, so a clean result would prove nothing.");
+
+        Assert.AreEqual(
+            0,
+            violations.Count,
+            "No shipped resource value may be a placeholder:"
+                + Environment.NewLine
+                + string.Join(Environment.NewLine, violations));
+    }
+
+    /// <summary>
+    /// T036's retired-wording gate, and the standing check for FR-030: no demo, sample or mock mode may
+    /// return, and no shipped text may present one as current.
+    /// </summary>
+    [TestMethod]
+    public void NoRetiredWordingSurvives()
+    {
+        (string Description, Regex Pattern)[] retiredWording =
+        [
+            ("retired mock status key", new Regex(@"\bMockSaved\b", RegexOptions.Compiled | RegexOptions.CultureInvariant)),
+            ("retired receiving mock toggle key", new Regex(@"\bRecvMockData\b", RegexOptions.Compiled | RegexOptions.CultureInvariant)),
+            ("retired Infor Visual mock toggle key", new Regex(@"\bInforVisualMockData\b", RegexOptions.Compiled | RegexOptions.CultureInvariant)),
+        ];
+
+        var hits = RepositoryPatternScan.Scan(retiredWording);
+
+        Assert.AreEqual(
+            0,
+            hits.Count,
+            "No retired mock/sample wording may survive (FR-025/FR-029/FR-030):"
+                + Environment.NewLine
+                + RepositoryPatternScan.Describe(hits));
+
+        // In a shipped resource value these words read as a product statement rather than as a comment saying
+        // the mechanism is gone, so resource values are checked explicitly. Comments that state the absence
+        // ("never replaced by sample rows") are the record of the removal, not a stale claim, which is why the
+        // narrower scan is applied to values only.
+        var sampleWording = new Regex(@"\bsample (data|rows)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        var offenders = new List<string>();
+        var valueCount = 0;
+
+        foreach (var (fileName, value) in EnumerateResourceValues())
+        {
+            valueCount++;
+
+            if (sampleWording.IsMatch(value))
+            {
+                offenders.Add($"{fileName} -> {value.Trim()}");
+            }
+        }
+
+        Assert.IsTrue(
+            valueCount > 100,
+            $"The scan reached only {valueCount} resource values, so a clean result would prove nothing.");
+
+        Assert.AreEqual(
+            0,
+            offenders.Count,
+            "No shipped resource value may describe sample data or sample rows:"
+                + Environment.NewLine
+                + string.Join(Environment.NewLine, offenders));
+    }
+
+    /// <summary>Every <c>&lt;value&gt;</c> shipped in a resource file, with the file it came from.</summary>
+    private static IEnumerable<(string FileName, string Value)> EnumerateResourceValues()
+    {
+        var scope = new RepositoryScanScope { Extensions = [".resw"] };
+
+        foreach (var file in RepositoryPatternScan.EnumerateScannedFiles(RepositoryPatternScan.FindRepositoryRoot(), scope))
+        {
+            foreach (var value in System.Xml.Linq.XDocument.Load(file).Descendants("value"))
+            {
+                yield return (Path.GetFileName(file), value.Value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// T003 self-test. The default scope must actually reach production source, so that a clean scan is
+    /// evidence of compliance rather than of a silently empty enumeration — the failure mode that makes a
+    /// scan check vacuous.
+    /// </summary>
+    [TestMethod]
+    public void PatternScan_WithTheDefaultScope_EnumeratesProductionSource()
+    {
+        var files = RepositoryPatternScan
+            .EnumerateScannedFiles(RepositoryPatternScan.FindRepositoryRoot(), RepositoryScanScope.Default)
+            .ToList();
+
+        Assert.IsTrue(files.Count > 100, $"The default scan scope reached only {files.Count} files.");
+
+        Assert.IsTrue(
+            files.Any(file => file.EndsWith("WaitlistViewViewModel.cs", StringComparison.OrdinalIgnoreCase)),
+            "The default scan scope did not reach MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs.");
+
+        Assert.IsTrue(
+            files.Any(file => file.EndsWith("SettingsPage.xaml", StringComparison.OrdinalIgnoreCase)),
+            "The default scan scope did not reach Module_Settings/Views/SettingsPage.xaml.");
+
+        Assert.IsFalse(
+            files.Any(file => file.Contains($"{Path.DirectorySeparatorChar}specs{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase)
+                || file.Contains($"{Path.DirectorySeparatorChar}defects{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase)),
+            "The default scan scope must exclude specs/ and defects/, which quote the removed values as evidence.");
+    }
+
+    /// <summary>
+    /// T003 self-test. A literal that genuinely exists must be found, so a clean result from a real pattern
+    /// set cannot come from a matcher that never matches.
+    /// </summary>
+    [TestMethod]
+    public void PatternScan_WithAKnownPresentLiteral_FindsIt()
+    {
+        var hits = RepositoryPatternScan.Scan([("waitlist field population", new Regex(@"AddRequestFields", RegexOptions.Compiled))]);
+
+        Assert.IsTrue(hits.Count > 0, "The scan helper failed to find a literal that is present in the repository.");
+        Assert.IsTrue(hits.All(hit => hit.LineNumber > 0), "Every hit must report the line it was found on.");
+    }
+}
+
+/// <summary>One pattern match found by <see cref="RepositoryPatternScan"/>.</summary>
+/// <param name="RelativePath">The file, relative to the repository root.</param>
+/// <param name="LineNumber">The 1-based line the match was found on.</param>
+/// <param name="Description">What the pattern is looking for.</param>
+/// <param name="Pattern">The pattern itself, so the failure message is self-explanatory.</param>
+/// <param name="Text">The matching line, trimmed.</param>
+internal sealed record RepositoryScanHit(string RelativePath, int LineNumber, string Description, string Pattern, string Text);
+
+/// <summary>
+/// Scoping rules for <see cref="RepositoryPatternScan"/>. Every caller states the scope it means rather
+/// than inheriting another caller's, and <see cref="Default"/> is the repository-wide production scope.
+/// </summary>
+internal sealed class RepositoryScanScope
+{
+    /// <summary>
+    /// Repository-wide over production source: the build-output, VCS and design-document directories are
+    /// skipped, and <c>specs/</c> and <c>defects/</c> are excluded deliberately because those files quote
+    /// the removed values as evidence of the removal.
+    /// </summary>
+    internal static RepositoryScanScope Default { get; } = new();
+
+    /// <summary>Directory names that are never scanned, at any depth.</summary>
+    internal string[] ExcludedDirectories { get; init; } = RepositoryPatternScan.DefaultExcludedDirectories;
+
+    /// <summary>File extensions that are scanned.</summary>
+    internal string[] Extensions { get; init; } = RepositoryPatternScan.DefaultScannedExtensions;
+
+    /// <summary>When non-empty, only files under one of these repository-relative paths are scanned.</summary>
+    internal string[] IncludeUnder { get; init; } = [];
+
+    /// <summary>
+    /// File names skipped even when in scope. The defaults are the two files that must name every pattern
+    /// they forbid: this audit, and the fabricated-value guard.
+    /// </summary>
+    internal string[] ExcludedFileNames { get; init; } = RepositoryPatternScan.DefaultExcludedFileNames;
+
+    /// <summary>Returns a copy of this scope with additional file names excluded.</summary>
+    /// <param name="fileNames">The additional file names to skip.</param>
+    internal RepositoryScanScope ExcludingFiles(params string[] fileNames)
+        => new()
+        {
+            ExcludedDirectories = ExcludedDirectories,
+            Extensions = Extensions,
+            IncludeUnder = IncludeUnder,
+            ExcludedFileNames = [.. ExcludedFileNames, .. fileNames],
+        };
+}
+
+/// <summary>
+/// T003's pattern-set scan: one helper that takes a set of regular expressions and reports every matching
+/// line in the repository, so each later check declares a pattern set instead of writing its own traversal.
+/// Used by the fabricated-literal, placeholder-resource and retired-wording gates.
+/// </summary>
+/// <remarks>
+/// Matching is performed line by line so a hit can name its file and line. Patterns are therefore expected
+/// to describe a single-line shape, which every gate in this feature does.
+/// </remarks>
+internal static class RepositoryPatternScan
+{
+    /// <summary>The file types this scan treats as code, resource or database artifacts.</summary>
+    internal static readonly string[] DefaultScannedExtensions = [".cs", ".xaml", ".resw", ".sql", ".csproj", ".json"];
+
+    /// <summary>Directories that are build output, VCS metadata, test output, or design record.</summary>
+    internal static readonly string[] DefaultExcludedDirectories = ["bin", "obj", ".git", "TestResults", "specs", "defects"];
+
+    /// <summary>The files that declare the patterns and so necessarily contain them.</summary>
+    internal static readonly string[] DefaultExcludedFileNames = ["RetiredSymbolAuditTests.cs", "FabricatedValueGuard.cs"];
+
+    /// <summary>Walks up from the test binaries until the solution file is found.</summary>
+    /// <returns>The repository root.</returns>
+    internal static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
 
@@ -158,4 +400,113 @@ public sealed class RetiredSymbolAuditTests
         Assert.Fail($"The repository root could not be located above '{AppContext.BaseDirectory}'.");
         return AppContext.BaseDirectory;
     }
+
+    /// <summary>Scans the scoped repository for a string-pattern set.</summary>
+    /// <param name="patterns">The pattern set, as description plus regular-expression source.</param>
+    /// <param name="scope">The scope to scan; the production default when omitted.</param>
+    /// <returns>One hit per matching line per pattern.</returns>
+    internal static IReadOnlyList<RepositoryScanHit> Scan(
+        IReadOnlyList<(string Description, string Pattern)> patterns,
+        RepositoryScanScope? scope = null)
+    {
+        ArgumentNullException.ThrowIfNull(patterns);
+
+        return Scan(
+            [.. patterns.Select(entry => (entry.Description, new Regex(entry.Pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant)))],
+            scope);
+    }
+
+    /// <summary>Scans the scoped repository for a regular-expression pattern set.</summary>
+    /// <param name="patterns">The pattern set, as description plus compiled expression.</param>
+    /// <param name="scope">The scope to scan; the production default when omitted.</param>
+    /// <returns>One hit per matching line per pattern.</returns>
+    internal static IReadOnlyList<RepositoryScanHit> Scan(
+        IReadOnlyList<(string Description, Regex Pattern)> patterns,
+        RepositoryScanScope? scope = null)
+    {
+        ArgumentNullException.ThrowIfNull(patterns);
+
+        var hits = new List<RepositoryScanHit>();
+        if (patterns.Count == 0)
+        {
+            return hits;
+        }
+
+        scope ??= RepositoryScanScope.Default;
+        var repositoryRoot = FindRepositoryRoot();
+
+        foreach (var file in EnumerateScannedFiles(repositoryRoot, scope))
+        {
+            var relativePath = Path.GetRelativePath(repositoryRoot, file);
+            var lines = File.ReadAllLines(file);
+
+            for (var index = 0; index < lines.Length; index++)
+            {
+                foreach (var (description, pattern) in patterns)
+                {
+                    if (pattern.IsMatch(lines[index]))
+                    {
+                        hits.Add(new RepositoryScanHit(relativePath, index + 1, description, pattern.ToString(), lines[index].Trim()));
+                    }
+                }
+            }
+        }
+
+        return hits;
+    }
+
+    /// <summary>Enumerates the files a scope covers.</summary>
+    /// <param name="repositoryRoot">The repository root.</param>
+    /// <param name="scope">The scope to apply.</param>
+    /// <returns>The files to scan.</returns>
+    internal static IEnumerable<string> EnumerateScannedFiles(string repositoryRoot, RepositoryScanScope scope)
+    {
+        ArgumentNullException.ThrowIfNull(scope);
+
+        foreach (var file in Directory.EnumerateFiles(repositoryRoot, "*", SearchOption.AllDirectories))
+        {
+            if (!scope.Extensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var relativePath = Path.GetRelativePath(repositoryRoot, file);
+
+            if (scope.IncludeUnder.Length > 0
+                && !scope.IncludeUnder.Any(prefix => relativePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            if (scope.ExcludedFileNames.Contains(Path.GetFileName(file), StringComparer.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (scope.ExcludedDirectories.Any(excluded => IsUnderDirectory(relativePath, excluded)))
+            {
+                continue;
+            }
+
+            yield return file;
+        }
+    }
+
+    /// <summary>Renders a hit list for an assertion message.</summary>
+    /// <param name="hits">The hits to render.</param>
+    /// <returns>A readable multi-line report, or a marker when there are none.</returns>
+    internal static string Describe(IReadOnlyList<RepositoryScanHit> hits)
+    {
+        ArgumentNullException.ThrowIfNull(hits);
+
+        return hits.Count == 0
+            ? "(no hits)"
+            : string.Join(
+                Environment.NewLine,
+                hits.Select(hit => $"{hit.RelativePath}:{hit.LineNumber}: {hit.Description} [{hit.Pattern}] -> {hit.Text}"));
+    }
+
+    private static bool IsUnderDirectory(string relativePath, string directoryName)
+        => relativePath.StartsWith(directoryName + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+            || relativePath.Contains(Path.DirectorySeparatorChar + directoryName + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
 }

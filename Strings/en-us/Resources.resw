@@ -208,9 +208,6 @@
   <data name="Setup_Review.Status.Saved" xml:space="preserve">
     <value>Setup saved successfully.</value>
   </data>
-  <data name="Setup_Review.Status.MockSaved" xml:space="preserve">
-    <value>Setup saved using sample data.</value>
-  </data>
   <data name="Setup_Error.LookupUnavailable" xml:space="preserve">
     <value>The lookup service is currently unavailable. Please try again.</value>
   </data>
@@ -481,14 +478,14 @@
   <data name="Settings_About.Text" xml:space="preserve">
     <value>About this application</value>
   </data>
+  <data name="Settings_AppVersion_Title.Text" xml:space="preserve">
+    <value>App Version</value>
+  </data>
+  <data name="Settings_AboutApp_Title.Text" xml:space="preserve">
+    <value>About MTM Waitlist</value>
+  </data>
   <data name="Settings_AboutDescription.Text" xml:space="preserve">
     <value>MTM Waitlist helps teams track, prioritize, and complete material requests in real time.</value>
-  </data>
-  <data name="SettingsPage_PrivacyTermsLink.Content" xml:space="preserve">
-    <value>Privacy Statement</value>
-  </data>
-  <data name="SettingsPage_PrivacyTermsLink.NavigateUri" xml:space="preserve">
-    <value>https://YourPrivacyUrlGoesHere/</value>
   </data>
   <data name="Settings_IgnoredLocations_Title.Text" xml:space="preserve">
     <value>Ignored Infor Visual Locations</value>
@@ -614,6 +611,24 @@
        minute tick, so the caption states that rather than letting the countdown look live. -->
   <data name="Waitlist_Detail.RemainingTimeNote" xml:space="preserve">
     <value>Does not update automatically.</value>
+  </data>
+
+  <!-- Details page: a section whose read threw reports the failure in place with a retry, rather than
+       rendering as absence or as the page-level store outage (data-model.md §1 invariants 1–3). -->
+  <data name="Waitlist_Detail.BlockFailed.Message" xml:space="preserve">
+    <value>Some of this request's details could not be read. The rest of the page is unaffected.</value>
+  </data>
+  <data name="Waitlist_Detail.BlockFailed.Retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+
+  <!-- Settings → Operations → New Request Alerts: the panel reports this installation's capability rather
+       than making a claim about the platform. -->
+  <data name="Settings_NewRequestAlerts.Unavailable" xml:space="preserve">
+    <value>This installation cannot deliver new-request notifications, so the alert setting is unavailable here.</value>
+  </data>
+  <data name="Settings_NewRequestAlerts.Description" xml:space="preserve">
+    <value>Get notified when a new waitlist request is submitted for your work center.</value>
   </data>
 
   <!-- Module_Mock read-status indicator (FR-003/FR-005/FR-017/FR-022).

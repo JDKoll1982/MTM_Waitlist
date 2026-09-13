@@ -661,7 +661,13 @@ public sealed class WaitlistRequestServiceTests
         };
 
         var wrongCoilOrder = WaitlistViewViewModel.CreateSessionOrder(wrongCoil);
-        Assert.AreEqual("Wrong coil", wrongCoilOrder.Fields.First(item => item.Label == "Requested coil").Value);
+
+        // Both the coil identifier and its average weight come from a coil lookup this surface does not
+        // perform. The card therefore carries the subtype and the typed detail, and no stand-in for a
+        // coil attribute it cannot support (FR-001/FR-002).
+        Assert.AreEqual("Wrong Coil", wrongCoilOrder.Fields.First(item => item.Label == "Subtype").Value);
+        Assert.AreEqual("Wrong material at press", wrongCoilOrder.Fields.First(item => item.Label == "Request details").Value);
+        Assert.IsFalse(wrongCoilOrder.Fields.Any(item => string.Equals(item.Label, "Requested coil", StringComparison.Ordinal)));
 
         var normalCoil = new WaitlistRequest
         {
@@ -673,10 +679,9 @@ public sealed class WaitlistRequestServiceTests
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(5),
         };
         var normalCoilOrder = WaitlistViewViewModel.CreateSessionOrder(normalCoil);
-        Assert.AreEqual("COIL-204", normalCoilOrder.Fields.First(item => item.Label == "Requested coil").Value);
-        Assert.AreEqual("46,000 lb", normalCoilOrder.Fields.First(item => item.Label == "Quantity in house").Value);
-        Assert.AreEqual("5,000 lb", normalCoilOrder.Fields.First(item => item.Label == "Average coil weight").Value);
-        Assert.IsFalse(normalCoilOrder.Fields.Any(item => string.Equals(item.Value, "Not provided", StringComparison.Ordinal)));
+
+        Assert.IsFalse(normalCoilOrder.Fields.Any(item => string.Equals(item.Label, "Requested coil", StringComparison.Ordinal)));
+        Assert.IsFalse(normalCoilOrder.Fields.Any(item => string.Equals(item.Label, "Average coil weight", StringComparison.Ordinal)));
 
         // A Coil request whose subtype is an ACTION (e.g. "Bring") must still report the actual
         // coil on the job as the "Requested coil" — never the action subtype itself.
@@ -691,8 +696,11 @@ public sealed class WaitlistRequestServiceTests
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(7),
         };
         var bringCoilOrder = WaitlistViewViewModel.CreateSessionOrder(bringCoil);
-        Assert.AreEqual("COIL-204", bringCoilOrder.Fields.First(item => item.Label == "Requested coil").Value);
-        Assert.IsFalse(string.Equals(bringCoilOrder.Fields.First(item => item.Label == "Requested coil").Value, "Bring", StringComparison.OrdinalIgnoreCase));
+
+        // A coil identifier would have to come from the coil lookup, so the card never renders the action
+        // subtype in that slot — and never a stand-in coil either.
+        Assert.AreEqual("Bring", bringCoilOrder.Fields.First(item => item.Label == "Subtype").Value);
+        Assert.IsFalse(bringCoilOrder.Fields.Any(item => string.Equals(item.Label, "Requested coil", StringComparison.Ordinal)));
 
         var statusMappings = new[]
         {
@@ -746,7 +754,7 @@ public sealed class WaitlistRequestServiceTests
         };
 
         var scrapOrder = WaitlistViewViewModel.CreateSessionOrder(scrapEmpty);
-        Assert.AreEqual("Not selected", scrapOrder.Fields.First(item => item.Label == "Scrap lugger").Value);
+        Assert.AreEqual("Empty", scrapOrder.Fields.First(item => item.Label == "Scrap lugger").Value);
     }
 
     [TestMethod]
@@ -796,7 +804,7 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void WaitlistViewViewModel_CreatesSessionOrder_WithSubtypeSpecificPickupFgFields()
+    public void WaitlistViewViewModel_CreatesSessionOrder_ForAPickupFgRequest_CarriesNoUnsourcedMaterialAttribute()
     {
         var request = new WaitlistRequest
         {
@@ -813,11 +821,19 @@ public sealed class WaitlistRequestServiceTests
 
         var order = WaitlistViewViewModel.CreateSessionOrder(request);
 
-        Assert.AreEqual("FG-10042", order.Fields.First(item => item.Label == "Part number").Value);
-        Assert.AreEqual("Finished bracket assembly", order.Fields.First(item => item.Label == "Part description").Value);
-        Assert.AreEqual("24 each", order.Fields.First(item => item.Label == "Quantity remaining").Value);
-        Assert.AreEqual("Northstar Manufacturing", order.Fields.First(item => item.Label == "Customer").Value);
-        Assert.AreEqual("PL-80421", order.Fields.First(item => item.Label == "Packlist").Value);
+        // The part, description, remaining quantity, customer and packlist all come from an item lookup
+        // this surface does not perform, so none of those rows appears (FR-001/FR-002).
+        string[] unsourcedLabels = ["Part number", "Part description", "Quantity remaining", "Customer", "Packlist"];
+
+        foreach (var label in unsourcedLabels)
+        {
+            Assert.IsFalse(
+                order.Fields.Any(item => string.Equals(item.Label, label, StringComparison.Ordinal)),
+                $"A Pickup FG card still renders '{label}', which no source on the request produces.");
+        }
+
+        Assert.AreEqual("Pickup FG", order.Fields.First(item => item.Label == "Subtype").Value);
+        Assert.AreEqual("Finished goods request", order.Fields.First(item => item.Label == "Request details").Value);
     }
 
     [TestMethod]

@@ -11,7 +11,8 @@ most expensive mistake available in this repo:
 | --- | --- | ---: |
 | **Live, actionable now** | `specs/001-module-mock-visual-fallback/tasks.md` | **0** |
 | **Carry-forward for a future spec** | `WeekendProject/**` source checklists | **127** |
-| **Not work at all** (retired sources + obsolete requirements) | see §3 | **223** |
+| **Not work at all** (retired sources + obsolete requirements) | see §3 | **151** |
+| **Reconciled seed, six rows still open** (not a backlog of shipped work) | `WeekendProject/Module_Mock/Tasks.md` | **6** |
 
 Item-level detail for the carry-forward backlog deliberately lives in **one** place —
 `WeekendProject/OPEN-WORK-NEXT-SPEC.md` §4–§10 — and is **not** duplicated here. This file is the index; that
@@ -279,18 +280,36 @@ editor page, the type edit view, or the guided wizard modal.
 
 ---
 
-## 3. Not work — do not carry these forward (223 boxes)
+## 3. Not work — do not carry these forward (151 boxes)
 
 These sets of open boxes **overstate** the remaining work; treating them as a backlog means re-implementing
-shipped code or rebuilding something deliberately deleted.
+shipped code or rebuilding something deliberately deleted. The **151** counts only the retired sources (138)
+and the obsolete requirements (13); the **six** rows still open in the reconciled `Module_Mock/Tasks.md` are
+neither of those, and are listed in §3.1 for completeness.
 
-### 3.1 Retired sources (counting traps) — 210 boxes, 0 work
+### 3.1 Retired sources (counting traps) — 138 boxes, 0 work, plus one reconciled seed
 
 | Source | Open boxes | Why it is not a backlog |
 | --- | ---: | --- |
-| `WeekendProject/Module_Mock/Tasks.md` | 72 | The **seed** for `specs/001`; the identical work is 145/149 complete there. Ticked once and never reconciled. |
+| `WeekendProject/Module_Mock/Tasks.md` | 6 | The **seed** for `specs/001`. **Reconciled 2026-09-12** (`specs/002-truthful-data-and-controls` T042): 67 of its 73 boxes are ticked against the shipped code, and each of the six left open carries its own `— still open 2026-09-12:` reason. It is no longer a counting trap, and the six are not shipped work. |
 | `PromptFiles/prompt.md` | 23 | The **master Task 1–23 index**; Tasks 1–15 and 19 are 100 % checked in their own files, and the genuinely open ones (16–18, 20–23) already appear in §4/§6/§7. |
 | `PromptFiles/14-30%`, `14-45%`, `14-47%`, `14-53%`, `14-55%` | 115 | Earlier **snapshots** of the same list `14-57%` holds live. Retire; never merge their counts. |
+
+**Retired sources — the six files that must not be reopened** (`specs/002-truthful-data-and-controls` FR-027).
+Each is a counting trap for a different reason:
+
+| Retired source | Why it must not be reopened |
+| --- | --- |
+| `WeekendProject/PromptFiles/prompt.md` | The master Task 1–23 index. Tasks 1–15 and 19 are complete in their own files, and 16–18/20–23 are itemised in `OPEN-WORK-NEXT-SPEC.md` §4/§6/§7 — so its boxes are either done or already counted elsewhere. It also still carries the retired manual external-system routing rule, so reopening it invites re-implementing a mechanism `specs/001` FR-003/FR-014 and constitution II forbid. |
+| `WeekendProject/PromptFiles/14-30%-Phase2-UnifiedWaitlistCard.md` | A 30 % snapshot of the unified-card list. Its unchecked rows were reworded or delivered in later revisions, so implementing them re-does shipped card work. |
+| `WeekendProject/PromptFiles/14-45%-Phase2-UnifiedWaitlistCard.md` | A 45 % snapshot of the same list — same reason. |
+| `WeekendProject/PromptFiles/14-47%-Phase2-UnifiedWaitlistCard.md` | A 47 % snapshot of the same list — same reason. |
+| `WeekendProject/PromptFiles/14-53%-Phase2-UnifiedWaitlistCard.md` | A 53 % snapshot of the same list — same reason. |
+| `WeekendProject/PromptFiles/14-55%-Phase2-UnifiedWaitlistCard.md` | A 55 % snapshot of the same list. `14-57%-Phase2-UnifiedWaitlistCard.md` holds that work live — use the live file, never this one, and never add this file's counts to it. |
+
+**Handling rule.** Treat all six as history: do not tick them, do not merge their counts, and do not add a task
+from them to a new spec. `WeekendProject/OPEN-WORK-NEXT-SPEC.md` §2 lists the same sources — it still counts
+`Module_Mock/Tasks.md` among them, which T042 has since reconciled — and §10.2 points here.
 
 ### 3.2 Obsolete requirements — cannot be built (13 boxes in live files)
 

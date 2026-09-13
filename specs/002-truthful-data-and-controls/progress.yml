@@ -1,0 +1,73 @@
+# Execution state — Truthful Data and Truthful Controls
+#
+# Written by /speckit.superspec.execute. One entry per phase of tasks.md.
+
+feature: specs/002-truthful-data-and-controls
+command: speckit.superspec.execute
+mode: superspec enhanced (6/6 superpowers skills detected; no fallback)
+started: 2026-09-12
+updated: 2026-09-12
+
+phases:
+  - id: 1
+    name: Setup
+    tasks: [T001, T002]
+    status: complete
+    checkpoint: recorded in tasks.md §Phase Notes
+  - id: 2
+    name: Foundational
+    tasks: [T003, T004]
+    status: complete
+    checkpoint: recorded in tasks.md §Phase Notes
+  - id: 3
+    name: US1 — the waitlist tells the truth about a request
+    tasks: [T005, T006, T007, T008, T009, T010, T011, T012, T013, T014, T015]
+    status: complete
+    red: "6 checks failed before the fix; T008's API was absent (CS1061 x3)"
+  - id: 4
+    name: US2 — New Request feedback tells the truth
+    tasks: [T016, T017, T018, T019, T020, T021, T022, T023]
+    status: complete
+    red: "confirm page carried the fabricated card; the alerts capability was absent"
+  - id: 5
+    name: US3 — Settings tells the truth and searches completely
+    tasks: [T024, T025, T026, T027, T028, T029, T030, T031]
+    status: complete
+    red: "4 checks failed with the pre-change state temporarily restored, then restored"
+  - id: 6
+    name: US4 — notification activation behaves like a cold start
+    tasks: [T032, T033, T034, T035]
+    status: complete
+    red: "the dialog check failed with the placeholder temporarily restored, then restored"
+  - id: 7
+    name: US5 — the repository describes only what still exists
+    tasks: [T036, T037, T038, T039, T040, T041, T042, T043, T044, T045]
+    status: complete
+    checkpoint: recorded in tasks.md §Phase Notes
+  - id: 8
+    name: Polish and cross-cutting gates
+    tasks: [T046, T047, T048, T049, T050, T051]
+    status: complete-with-open-items
+    checkpoint: recorded in tasks.md §Phase Notes
+
+gates:
+  build: "0 Warning(s) 0 Error(s)"
+  suite: "Failed: 0, Passed: 809, Skipped: 19, Total: 828"
+  baseline: "Failed: 0, Passed: 768, Skipped: 19, Total: 787"
+  new_checks: 41
+  floor: 10
+  scans: "all six G3 gates return empty (see the Phase 8 scope note for the recorded narrowing)"
+
+open_items:
+  - id: T049
+    summary: >-
+      quickstart.md §3–§7 and the G5 manual pass need a signed-in account and a reachable mtm_waitlist.
+      No credential was available, so these steps are environment-gated and NOT reported as passed.
+  - id: follow-on
+    summary: >-
+      AppNotificationSamplePayload is retained because App.xaml.cs:323 consumes it. The launch-time demo
+      toast is out of this feature's scope and recorded as a follow-on candidate.
+  - id: T042-residual
+    summary: >-
+      Six boxes in WeekendProject/Module_Mock/Tasks.md are left unticked, each with its reason recorded
+      in that file.

@@ -2,7 +2,6 @@
 name: Module Create Agent
 description: "Use when creating new modules for MTM_Waitlist. Mandatory MCP-first process: use Serena MCP + Context7 MCP + Microsoft Learn MCP before editing."
 user-invocable: true
-model: GPT-5.3-Codex
 tools: [read, search, edit, execute, io.github.upstash/context7/*, microsoftdocs/mcp/*, csv-mcp-server/*, oraios/serena/*]
 argument-hint: "Describe the new module, its scope, and expected behavior."
 ---

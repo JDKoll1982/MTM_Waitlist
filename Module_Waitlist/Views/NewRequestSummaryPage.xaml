@@ -148,21 +148,15 @@
                             Grid.Row="3"
                             Grid.Column="0"
                             Style="{StaticResource RequestDialogFieldLabelStyle}"
-                            Text="Average coil weight" />
+                            Text="Average coil weight"
+                            Visibility="{x:Bind ViewModel.HasCoilAverageWeight, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <TextBlock
                             Grid.Row="3"
                             Grid.Column="1"
                             Style="{StaticResource RequestDialogFieldValueStyle}"
-                            Text="{x:Bind ViewModel.CoilAverageWeight, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.CoilAverageWeight, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.HasCoilAverageWeight, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </Grid>
-                </StackPanel>
-            </Border>
-
-            <Border Style="{StaticResource SetupSectionCardStyle}">
-                <StackPanel Spacing="6">
-                    <TextBlock Style="{StaticResource RequestDialogTitleStyle}" Text="Queue &amp; wait time" />
-                    <TextBlock Style="{StaticResource RequestDialogFieldValueStyle}" Text="0 active request(s) for this work center." />
-                    <TextBlock Style="{StaticResource RequestDialogFieldValueStyle}" Text="Estimated wait time: approximately 15 minutes." />
                 </StackPanel>
             </Border>
 

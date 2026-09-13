@@ -1,0 +1,39 @@
+schema_version: "1.0"
+
+extension:
+  id: pr-bridge
+  name: "PR Bridge"
+  version: "1.0.0"
+  description: "Auto-generate pull request descriptions, checklists, and summaries from spec artifacts"
+  author: "Quratulain-bilal"
+  repository: "https://github.com/Quratulain-bilal/spec-kit-pr-bridge"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.4.0"
+
+provides:
+  commands:
+    - name: speckit.pr-bridge.generate
+      file: commands/speckit.pr-bridge.generate.md
+      description: "Generate a complete PR description with title, summary, and requirement checklist from spec artifacts"
+    - name: speckit.pr-bridge.checklist
+      file: commands/speckit.pr-bridge.checklist.md
+      description: "Generate a reviewer checklist that maps each spec requirement to its implementing files"
+    - name: speckit.pr-bridge.summary
+      file: commands/speckit.pr-bridge.summary.md
+      description: "Generate a concise change summary comparing spec intent with actual implementation"
+
+hooks:
+  after_implement:
+    command: speckit.pr-bridge.generate
+    optional: true
+    prompt: "Generate a pull request description from the spec artifacts?"
+    description: "Auto-generate PR description after implementation is complete"
+
+tags:
+  - "pull-request"
+  - "automation"
+  - "traceability"
+  - "workflow"
+  - "review"

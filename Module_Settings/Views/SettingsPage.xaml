@@ -967,7 +967,7 @@
                         <TextBlock
                             Grid.Row="0"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="Get notified when a new waitlist request is submitted. Notifications are only shown when the app is installed as a packaged app."
+                            Text="{x:Bind ViewModel.NewRequestAlertsDescription, Mode=OneWay}"
                             TextWrapping="Wrap" />
 
                         <wct:SettingsCard Grid.Row="1">
@@ -982,6 +982,7 @@
                             </wct:SettingsCard.Description>
                             <wct:SettingsCard.Content>
                                 <ToggleSwitch
+                                    IsEnabled="{x:Bind ViewModel.IsNewRequestAlertsAvailable, Mode=OneWay}"
                                     IsOn="{x:Bind ViewModel.NewRequestAlertsEnabled, Mode=TwoWay}"
                                     OffContent="Off"
                                     OnContent="On" />
@@ -1212,7 +1213,7 @@
                         <wct:SettingsCard Grid.Row="0">
                             <wct:SettingsCard.Header>
                                 <TextBlock
-                                    x:Uid="Settings_About"
+                                    x:Uid="Settings_AppVersion_Title"
                                     Style="{ThemeResource BodyTextBlockStyle}"
                                     Text="App Version" />
                             </wct:SettingsCard.Header>
@@ -1230,7 +1231,7 @@
                         <wct:SettingsCard Grid.Row="1">
                             <wct:SettingsCard.Header>
                                 <TextBlock
-                                    x:Uid="Settings_About"
+                                    x:Uid="Settings_AboutApp_Title"
                                     Style="{ThemeResource BodyTextBlockStyle}"
                                     Text="About MTM Waitlist" />
                             </wct:SettingsCard.Header>
@@ -1239,17 +1240,11 @@
                                     x:Uid="Settings_AboutDescription"
                                     Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
                                     Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="Manage waitlists and local consumer records securely." />
+                                    Text="MTM Waitlist helps teams track, prioritize, and complete material requests in real time." />
                             </wct:SettingsCard.Description>
                             <wct:SettingsCard.HeaderIcon>
                                 <SymbolIcon Symbol="ContactInfo" />
                             </wct:SettingsCard.HeaderIcon>
-                            <wct:SettingsCard.Content>
-                                <HyperlinkButton
-                                    x:Uid="SettingsPage_PrivacyTermsLink"
-                                    VerticalAlignment="Center"
-                                    Content="Privacy Policy" />
-                            </wct:SettingsCard.Content>
                         </wct:SettingsCard>
                     </Grid>
                 </muxc:Expander>

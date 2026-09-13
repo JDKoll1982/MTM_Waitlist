@@ -1,0 +1,12 @@
+enabled: true
+exempt: ["*.config.*", "*.test.*", "**/migrations/**"]
+capabilities:
+  - name: startup
+    match: ["MTM_Waitlist.Startup/**", "Module_Startup/**"]
+    # The diagnostics leaf owns these two files. The resolver scores a capability by the
+    # directory depth of its glob's literal prefix, so a filename glob inside a whole-area
+    # glob can never outscore its parent — without this exclude the leaf is decorative and
+    # every StartupLog* change folds into `startup`.
+    exclude: ["MTM_Waitlist.Startup/Services/StartupLog*.cs"]
+  - name: startup-diagnostics
+    match: ["MTM_Waitlist.Startup/Services/StartupLog*.cs"]

@@ -6,6 +6,7 @@
 | **Feature area** | Settings → About / App Info → Privacy Policy |
 | **Type** | Shipped template placeholder; broken user-facing link |
 | **Found** | 2026-09-12, working tree at `7bf6857` |
+| **Status** | **FIXED — closed by `specs/002-truthful-data-and-controls`**. **Closure:** the privacy hyperlink was removed from `Module_Settings/Views/SettingsPage.xaml` together with its `SettingsPage_PrivacyTermsLink.Content` / `.NavigateUri` entries, so no placeholder destination ships, and the placeholder-value audit from §6 is now a standing gate. **Remainder owned by: none.** **Proof:** `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.NoPlaceholderResourceValueShips` (unfinished-URL marker, `example.com`, `TODO`, `Contoso`, `lorem`). |
 | **Planned fix** | **Spec `01-truthful-data-and-controls`** — points the link at a real policy, ships an in-app document, or removes the link and its resource entries, and adds the placeholder-value audit from §6 of this file. Seed: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md` |
 | **Files** | `Strings/en-us/Resources.resw` (lines 490–492), `Module_Settings/Views/SettingsPage.xaml` (line 1249) |
 

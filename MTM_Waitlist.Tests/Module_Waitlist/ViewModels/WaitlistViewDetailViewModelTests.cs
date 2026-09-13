@@ -27,7 +27,7 @@ public sealed class WaitlistViewDetailViewModelTests
 
         Assert.IsNotNull(viewModel.Item);
         Assert.AreEqual(item.Id, viewModel.Item!.Id);
-        Assert.IsTrue(viewModel.TemplateSections.Count >= 3);
+        Assert.IsTrue(viewModel.TemplateSections.Count >= 2);
     }
 
     [TestMethod]
@@ -44,9 +44,11 @@ public sealed class WaitlistViewDetailViewModelTests
 
         viewModel.OnNavigatedTo(item.Id);
 
-        Assert.IsTrue(viewModel.TemplateSections.Count >= 3);
+        // A coil request carries the subtype and the typed detail; the coil attributes themselves come
+        // from a lookup this page does not perform, so no section claims to have them.
+        Assert.IsTrue(viewModel.TemplateSections.Count >= 2);
         Assert.AreEqual("Coil material", viewModel.TemplateSections[0].Title);
-        Assert.AreEqual("Wrong coil", viewModel.TemplateSections[0].Fields[0].Value);
+        Assert.AreEqual("Wrong Coil", viewModel.TemplateSections[0].Fields[0].Value);
     }
 
     private static async Task<WaitlistRequest> SubmitCoilRequestAsync(

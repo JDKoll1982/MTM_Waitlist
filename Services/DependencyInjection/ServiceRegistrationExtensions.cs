@@ -42,6 +42,8 @@ public static class ServiceRegistrationExtensions
         // Services
         services.AddSingleton<IAppNotificationService, AppNotificationService>();
         services.AddSingleton<IAppWindowProvider, AppWindowProvider>();
+        services.AddSingleton<IDeepLinkWindow, AppWindowDeepLinkWindow>();
+        services.AddSingleton<RequestDeepLinkHandler>();
         services.AddSingleton<IShellContentProvider, ShellContentProvider>();
         services.AddSingleton<IAppLifecycleService, AppLifecycleService>();
         services.AddSingleton<ISetupDialogService, SetupDialogService>();

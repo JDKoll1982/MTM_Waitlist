@@ -6,6 +6,7 @@
 | **Feature area** | Notifications — toast activation / deep link |
 | **Type** | Shipped placeholder dialog on a user-facing path |
 | **Found** | 2026-09-12, working tree at `7bf6857` |
+| **Status** | **FIXED — closed by `specs/002-truthful-data-and-controls`**. **Closure:** both placeholder dialogs were deleted (`AppNotificationService.OnNotificationInvoked` and `AppNotificationActivationHandler`), the deep-link handling was factored into `MTM_Waitlist.Core/Activation/RequestDeepLinkHandler.cs`, a recognised activation opens the request, and an unrecognised one shows nothing and is recorded for diagnosis. **Remainder owned by Spec `08-notification-delivery-and-packaging`**, which exercises a real delivered notification on both activation paths. **Proof:** `MTM_Waitlist.Tests/Module_Core/Activation/RequestDeepLinkHandlerTests`. |
 | **Planned fix** | **Spec `01-truthful-data-and-controls`** — deletes both placeholder dialogs, factors the deep-link handling into one shared helper, and logs unrecognised arguments instead of showing anything. Because the path is unreachable until the alert can fire, the *proof* lands with **Spec `08-notification-delivery-and-packaging`**, which exercises both activation paths (§6 of its seed). Seeds: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md`, `…/08-notification-delivery-and-packaging.md` |
 | **Files** | `MTM_Waitlist.Core/Services/AppNotificationService.cs` (lines 35–42), `MTM_Waitlist.Core/Activation/AppNotificationActivationHandler.cs` (lines 57–61) |
 

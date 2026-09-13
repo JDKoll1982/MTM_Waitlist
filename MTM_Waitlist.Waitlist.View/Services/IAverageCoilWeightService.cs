@@ -13,6 +13,6 @@ namespace MTM_Waitlist.Module_Waitlist.Services;
 /// </remarks>
 public interface IAverageCoilWeightService
 {
-    /// <summary>Returns a display string such as "5,000 lb", or empty when nothing is found.</summary>
+    /// <summary>Returns a display string for the average received weight, or empty when nothing is found.</summary>
     Task<string> ResolveAverageCoilWeightTextAsync(string partId, CancellationToken cancellationToken = default);
 }

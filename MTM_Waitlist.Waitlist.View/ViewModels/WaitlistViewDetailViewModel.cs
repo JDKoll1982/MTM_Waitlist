@@ -19,8 +19,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     private readonly IWaitlistRequestService? _requestService;
     private readonly IWaitlistInventoryService? _inventoryService;
     private readonly IImageLocationService? _imageLocationService;
-    private readonly IAverageCoilWeightService? _averageCoilWeightService;
     private IDisposable? _imageLocationSubscription;
+    private int? _lastOrderId;
 
     [ObservableProperty]
     public partial SampleOrder? Item
@@ -57,6 +57,42 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     }
 
     /// <summary>
+    /// True when a section's read threw or reported an error. The failure is rendered in place, with
+    /// <see cref="RetryLoadCommand"/>, and is never rendered as absence and never as the page-level store
+    /// outage (<c>data-model.md</c> §1 invariants 1–3).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsSectionLoadFailed
+    {
+        get; set;
+    }
+
+    /// <summary>Localized explanation shown in place of the sections whose read failed.</summary>
+    public string SectionFailureMessage => "Waitlist_Detail.BlockFailed.Message".GetLocalized();
+
+    /// <summary>Localized label for the section-failure retry action.</summary>
+    public string SectionFailureRetryText => "Waitlist_Detail.BlockFailed.Retry".GetLocalized();
+
+    /// <summary>
+    /// Re-runs the read that failed and rebuilds the sections. Bound to the retry action on the failure
+    /// block, so a failure is recoverable without leaving the page.
+    /// </summary>
+    [RelayCommand]
+    private void RetryLoad()
+    {
+        LoadItemAndSections();
+
+        if (Item is not null && _inventoryService is not null)
+        {
+            var inventoryPart = ResolveInventoryPartNumber(Item);
+            if (!string.IsNullOrWhiteSpace(inventoryPart))
+            {
+                _ = LoadInventoryAsync(inventoryPart);
+            }
+        }
+    }
+
+    /// <summary>
     /// True when the location grid has no rows to show (no part resolved, service absent, or
     /// every row was filtered by the on-hand &gt;= 1 / ignored-location rules).
     /// </summary>
@@ -84,8 +120,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         IBuildingSelectionService buildingSelectionService,
         IImageLocationService? imageLocationService = null,
         IWaitlistRequestService? requestService = null,
-        IWaitlistInventoryService? inventoryService = null,
-        IAverageCoilWeightService? averageCoilWeightService = null)
+        IWaitlistInventoryService? inventoryService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -95,7 +130,6 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _imageLocationService = imageLocationService;
         _requestService = requestService;
         _inventoryService = inventoryService;
-        _averageCoilWeightService = averageCoilWeightService;
         SortInventoryCommand = new RelayCommand<string>(SortInventoryBy);
     }
 
@@ -142,30 +176,12 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     }
     public void OnNavigatedTo(object parameter)
     {
-        var orderId = parameter switch
+        _lastOrderId = parameter switch
         {
             int intId => intId,
             long longId when longId <= int.MaxValue && longId >= int.MinValue => (int)longId,
             _ => (int?)null
         };
-
-        if (orderId.HasValue && _requestService is not null)
-        {
-            // The detail page resolves only real submitted requests (the list surfaces each request as a
-            // SampleOrder whose Id is the hash of the request Guid).
-            var requests = _requestService.GetActiveRequests(_buildingSelectionService.SelectedBuilding);
-            var match = requests.FirstOrDefault(request => request.Id.GetHashCode() == orderId.Value);
-            if (match is not null)
-            {
-                Item = WaitlistViewViewModel.CreateSessionOrder(match);
-            }
-        }
-
-        EmptyStateMessage = Item is null
-            ? "No waitlist request or coil details are available to show."
-            : string.Empty;
-        IsEmptyStateVisible = Item is null;
-        IsItemPresent = Item is not null;
 
         if (_imageLocationSubscription is null
             && _imageLocationService is not null
@@ -174,8 +190,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             _imageLocationSubscription = _imageLocationService.SubscribeToImageLocationChanges(OnImageLocationChanged);
         }
 
-        LoadTemplateSections();
-        _ = EnrichCoilAverageWeightAsync();
+        LoadItemAndSections();
 
         if (_inventoryService is not null && Item is not null)
         {
@@ -187,39 +202,62 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
     }
 
+    /// <summary>
+    /// Resolves the request row and rebuilds the sections as one unit, so a read that throws produces the
+    /// Failed block state rather than a half-built page or a failure disguised as absence.
+    /// </summary>
+    private void LoadItemAndSections()
+    {
+        try
+        {
+            ResolveItem();
+            LoadTemplateSections();
+            IsSectionLoadFailed = false;
+        }
+        catch (Exception ex)
+        {
+            Item = null;
+            TemplateSections.Clear();
+            IsSectionLoadFailed = true;
+            IsItemPresent = false;
+            IsEmptyStateVisible = false;
+            EmptyStateMessage = string.Empty;
+            StartupDebugLog.Error(
+                "WaitlistDetail",
+                ex,
+                "The request read behind the detail sections failed; the failure is rendered in place with a retry.");
+        }
+    }
+
+    /// <summary>
+    /// Resolves the request on screen. The detail page resolves only real submitted requests (the list
+    /// surfaces each request as a <see cref="SampleOrder"/> whose Id is the hash of the request Guid).
+    /// </summary>
+    private void ResolveItem()
+    {
+        Item = null;
+
+        if (_lastOrderId is int orderId && _requestService is not null)
+        {
+            var requests = _requestService.GetActiveRequests(_buildingSelectionService.SelectedBuilding);
+            var match = requests.FirstOrDefault(request => request.Id.GetHashCode() == orderId);
+            if (match is not null)
+            {
+                Item = WaitlistViewViewModel.CreateSessionOrder(match);
+            }
+        }
+
+        IsItemPresent = Item is not null;
+        IsEmptyStateVisible = Item is null;
+        EmptyStateMessage = Item is null
+            ? "No waitlist request or coil details are available to show."
+            : string.Empty;
+    }
+
     public void OnNavigatedFrom()
     {
         _imageLocationSubscription?.Dispose();
         _imageLocationSubscription = null;
-    }
-
-    /// <summary>
-    /// For a coil request card, replace the baked-in "Average coil weight" with the value pulled
-    /// from <c>mtm_receiving_application.receiving_history</c> (RecvMockData ON = sample, OFF =
-    /// real query) and rebuild the sections so the UI reflects it.
-    /// </summary>
-    private async Task EnrichCoilAverageWeightAsync()
-    {
-        if (_averageCoilWeightService is null || Item is null)
-        {
-            return;
-        }
-
-        // Only coil cards carry an "Average coil weight" field; skip every other request type.
-        var field = Item.Fields.FirstOrDefault(f => string.Equals(f.Label, "Average coil weight", StringComparison.Ordinal));
-        if (field is null)
-        {
-            return;
-        }
-
-        var resolved = await _averageCoilWeightService.ResolveAverageCoilWeightTextAsync(CoilReceivingPartId).ConfigureAwait(true);
-        if (string.IsNullOrWhiteSpace(resolved) || string.Equals(resolved, field.Value, StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        field.Value = resolved;
-        LoadTemplateSections();
     }
 
     /// <summary>The coil part keyed in the receiving_history seed for the sample coil (MMC0001000).</summary>
@@ -266,155 +304,107 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     private void LoadCoilSections(SampleOrder item)
     {
         var request = ResolveRequest(item);
-        TemplateSections.Add(CreateTemplateSection(
-            "Coil material",
-            "Material and inventory information needed to select and stage the requested coil.",
-            ("Requested coil", FieldValue(item, "Requested coil")),
-            ("Quantity in house", FieldValue(item, "Quantity in house")),
-            ("Description", FieldValue(item, "Coil description")),
-            ("Average weight", FieldValue(item, "Average coil weight"))));
 
-        TemplateSections.Add(CreateTemplateSection(
+        AddSection(
+            "Coil material",
+            "Material information carried by the request itself.",
+            ("Subtype", FieldValue(item, "Subtype")),
+            ("Request details", FieldValue(item, "Request details")),
+            ("Requesting work center", FieldValue(item, "Requesting work center")));
+
+        AddSection(
             "Work order and request",
             "Request ownership and work-order context for the coil movement.",
             ("Work order", WorkOrderText(item, request)),
-            ("Work center", FieldValue(item, "Requesting work center", item.RequestedPressName)),
+            ("Work center", item.RequestedPressName),
             ("Requesting user", item.RequestedByName),
-            ("Employee number", EmployeeNumberText(request, item))));
-
-        TemplateSections.Add(CreateTemplateSection(
-            "Handling",
-            "Confirm the equipment and timing required to move the coil safely.",
-            ("Tipping strategy", "Crane below 10 in; otherwise Tipper"),
-            ("Press", item.RequestedPressName),
-            ("Remaining time", item.RemainingTimeText)));
+            ("Employee number", EmployeeNumberText(request, item)),
+            ("Remaining time", item.RemainingTimeText));
     }
 
     private void LoadFinishedGoodsSections(SampleOrder item)
     {
-        TemplateSections.Add(CreateTemplateSection(
+        AddSection(
             "Customer order",
             "Customer and part information for the finished-goods pickup.",
-            ("Customer", FieldValue(item, "Customer")),
+            ("Subtype", FieldValue(item, "Subtype")),
+            ("Request details", FieldValue(item, "Request details")),
             ("Part number", FieldValue(item, "Part number")),
-            ("Description", FieldValue(item, "Part description")),
-            ("Order number", "Not available")));
-
-        TemplateSections.Add(CreateTemplateSection(
-            "Shipment",
-            "Shipment identifiers and delivery timing for the requested finished goods.",
+            ("Part description", FieldValue(item, "Part description")),
+            ("Customer", FieldValue(item, "Customer")),
             ("Packlist", FieldValue(item, "Packlist")),
-            ("Ship via", "Not available"),
-            ("Expected delivery", "Not available"),
-            ("Remaining quantity", FieldValue(item, "Quantity remaining"))));
+            ("Quantity remaining", FieldValue(item, "Quantity remaining")));
 
         AddRequestContextSection(item, "Finished-goods workflow", "Confirm assignment, pickup, and shipment status before closing the request.");
     }
 
     private void LoadNcmSections(SampleOrder item)
     {
-        TemplateSections.Add(CreateTemplateSection(
+        AddSection(
             "NCM pickup",
             "Material-handler information for moving nonconforming material to the NCM area.",
-            ("Part", FieldValue(item, "Part")),
-            ("Quantity to move", FieldValue(item, "Quantity to move")),
-            ("Pickup location", FieldValue(item, "Pickup location")),
-            ("Destination", FieldValue(item, "Destination")),
-            ("Traceability", FieldValue(item, "Traceability ID"))));
-
-        TemplateSections.Add(CreateTemplateSection(
-            "Quality review",
-            "Quality must be able to identify the defect, contain affected material, and record its disposition.",
-            ("Nonconformance", "Not available"),
-            ("Containment", "Not available"),
-            ("Inspection status", "Pending"),
-            ("Disposition", "Pending Quality review")));
+            ("Subtype", FieldValue(item, "Subtype")),
+            ("Request details", FieldValue(item, "Request details")),
+            ("Pickup location", FieldValue(item, "Pickup location")));
 
         AddRequestContextSection(item, "NCM workflow", "Record handler pickup, NCM-area delivery, Quality ownership, and disposition approval.");
     }
 
     private void LoadOutsideServiceSections(SampleOrder item)
     {
-        TemplateSections.Add(CreateTemplateSection(
+        AddSection(
             "Pickup and delivery",
             "Material-handler instructions for moving material from the work center to outside service.",
-            ("Part or work order", FieldValue(item, "Part or work order")),
-            ("Quantity to move", FieldValue(item, "Quantity to move")),
-            ("Pickup work center", FieldValue(item, "Pickup work center")),
-            ("Destination", FieldValue(item, "Outside-service destination"))));
-
-        TemplateSections.Add(CreateTemplateSection(
-            "Outside service",
-            "Vendor and operation information needed to dispatch and track the service step.",
-            ("Vendor or service", FieldValue(item, "Vendor or service")),
-            ("Operation sequence", "Not available"),
-            ("Dispatch status", "Pending pickup"),
-            ("Expected return", "Not available")));
+            ("Subtype", FieldValue(item, "Subtype")),
+            ("Request details", FieldValue(item, "Request details")),
+            ("Pickup work center", FieldValue(item, "Pickup work center")));
 
         AddRequestContextSection(item, "Outside-service workflow", "Record handler pickup, delivery acknowledgement, service status, and return tracking.");
     }
 
     private void LoadWipSections(SampleOrder item)
     {
-        TemplateSections.Add(CreateTemplateSection(
+        AddSection(
             "WIP pickup and inventory",
             "Material-handler instructions for moving WIP from the work center into the assigned WIP location.",
+            ("Subtype", FieldValue(item, "Subtype")),
             ("Work order", FieldValue(item, "Work order")),
-            ("Part and quantity", FieldValue(item, "Part and quantity")),
-            ("Pickup work center", FieldValue(item, "Pickup work center")),
-            ("WIP destination", FieldValue(item, "WIP destination"))));
-
-        TemplateSections.Add(CreateTemplateSection(
-            "Work order and operation",
-            "Work-order and operation context used to keep inventoried WIP connected to the job.",
-            ("Operation sequence", FieldValue(item, "Operation sequence")),
-            ("Operation status", "Not available"),
-            ("Quantity still needed", "Not available"),
-            ("Scheduled finish", "Not available")));
+            ("Request details", FieldValue(item, "Request details")),
+            ("Pickup work center", FieldValue(item, "Pickup work center")));
 
         AddRequestContextSection(item, "WIP workflow", "Record pickup acknowledgement, inventory transaction, destination confirmation, and handler.");
     }
 
     private void LoadScrapSections(SampleOrder item)
     {
-        TemplateSections.Add(CreateTemplateSection(
+        AddSection(
             "Scrap pickup and lugger",
             "Material-handler instructions for moving scrap to the correct lugger.",
-            ("Part number", FieldValue(item, "Part number")),
+            ("Scrap lugger", FieldValue(item, "Scrap lugger")),
             ("Pickup work center", FieldValue(item, "Pickup work center")),
-            ("Quantity involved", FieldValue(item, "Quantity involved")),
-            ("Scrap lugger", FieldValue(item, "Scrap lugger"))));
-
-        TemplateSections.Add(CreateTemplateSection(
-            "Material classification",
-            "Confirm the material category before placement so scrap is not mixed into the wrong lugger.",
-            ("Allowed categories", "3003 Aluminum; 5052 Aluminum; Galvanized Steel; Steel; Skeleton Frames; Other"),
-            ("Scrap reason", FieldValue(item, "Scrap reason")),
-            ("Classification approval", "Pending"),
-            ("Safety requirements", "Not available")));
+            ("Request details", FieldValue(item, "Request details")));
 
         AddRequestContextSection(item, "Scrap workflow", "Record handler pickup, lugger placement, confirmation, and any correction to the selected category.");
     }
 
     private void AddRequestContextSection(SampleOrder item, string title, string summary)
-    {
-        TemplateSections.Add(CreateTemplateSection(
+        => AddSection(
             title,
             summary,
             ("Requested by", item.RequestedByName),
             ("Press or resource", item.RequestedPressName),
-            ("Remaining time", item.RemainingTimeText),
-            ("Handler status", "Pending assignment")));
-    }
-
-    private static string FieldValue(SampleOrder item, string label, string fallback = "Not available")
-    {
-        return item.Fields.FirstOrDefault(field => string.Equals(field.Label, label, StringComparison.OrdinalIgnoreCase))?.Value ?? fallback;
-    }
+            ("Remaining time", item.RemainingTimeText));
 
     /// <summary>
-    /// Resolves the underlying <see cref="WaitlistRequest"/> for a live request row (via its
-    /// <see cref="SampleOrder.RequestId"/>), or null for static sample rows / when the service is absent.
+    /// The label-to-value lookup used by every section loader. It has no fallback: a label with no source
+    /// returns <see langword="null" /> and its row is not rendered (FR-002, contract C2).
+    /// </summary>
+    private static string? FieldValue(SampleOrder item, string label)
+        => item.Fields.FirstOrDefault(field => string.Equals(field.Label, label, StringComparison.OrdinalIgnoreCase))?.Value;
+
+    /// <summary>
+    /// Resolves the underlying <see cref="WaitlistRequest"/> for the row on screen (via its
+    /// <see cref="SampleOrder.RequestId"/>), or null when the row carries no request id or the service is absent.
     /// </summary>
     private WaitlistRequest? ResolveRequest(SampleOrder item)
     {
@@ -427,33 +417,35 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     }
 
     /// <summary>Work-order/job context for the request: a 'Work order' field when present, else the active job id.</summary>
-    private static string WorkOrderText(SampleOrder item, WaitlistRequest? request)
+    private static string? WorkOrderText(SampleOrder item, WaitlistRequest? request)
     {
         var fieldValue = item.Fields
             .FirstOrDefault(field => string.Equals(field.Label, "Work order", StringComparison.OrdinalIgnoreCase))
             ?.Value;
-        if (!string.IsNullOrWhiteSpace(fieldValue) && !string.Equals(fieldValue, "Not available", StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(fieldValue))
         {
-            return fieldValue!;
+            return fieldValue;
         }
 
         var jobId = request?.ActiveSetupJobId;
-        return string.IsNullOrWhiteSpace(jobId) ? "Not available" : jobId!;
+        return string.IsNullOrWhiteSpace(jobId) ? null : jobId;
     }
 
-    /// <summary>Requester employee number for the request, or 'Not available' when none is known.</summary>
-    private static string EmployeeNumberText(WaitlistRequest? request, SampleOrder item)
+    /// <summary>Requester employee number for the request, or null when none is known.</summary>
+    private static string? EmployeeNumberText(WaitlistRequest? request, SampleOrder item)
     {
         var employeeNumber = request is not null && !string.IsNullOrWhiteSpace(request.RequesterEmployeeNumber)
             ? request.RequesterEmployeeNumber
             : item.RequesterEmployeeNumber;
-        return string.IsNullOrWhiteSpace(employeeNumber) ? "Not available" : employeeNumber;
+        return string.IsNullOrWhiteSpace(employeeNumber) ? null : employeeNumber;
     }
 
-    private static WaitlistDetailTemplateSection CreateTemplateSection(
-        string title,
-        string summary,
-        params (string Label, string Value)[] fields)
+    /// <summary>
+    /// Adds a section, dropping every row whose value has no source and the section itself when no row
+    /// survives. A block with nothing to show is hidden rather than drawn as an empty titled shell
+    /// (<c>data-model.md</c> §1, invariant 2).
+    /// </summary>
+    private void AddSection(string title, string summary, params (string Label, string? Value)[] fields)
     {
         var section = new WaitlistDetailTemplateSection
         {
@@ -461,16 +453,22 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             Summary = summary
         };
 
-        foreach (var field in fields)
+        foreach (var (label, value) in fields)
         {
-            section.Fields.Add(new WaitlistDetailTemplateField
+            if (!string.IsNullOrWhiteSpace(value))
             {
-                Label = field.Label,
-                Value = field.Value
-            });
+                section.Fields.Add(new WaitlistDetailTemplateField
+                {
+                    Label = label,
+                    Value = value.Trim()
+                });
+            }
         }
 
-        return section;
+        if (section.Fields.Count > 0)
+        {
+            TemplateSections.Add(section);
+        }
     }
 
     /// <summary>
@@ -510,8 +508,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
         foreach (var label in new[] { "Part number", "Part", "Requested coil" })
         {
-            var candidate = FieldValue(item, label).Trim();
-            if (string.IsNullOrWhiteSpace(candidate) || string.Equals(candidate, "Not available", StringComparison.OrdinalIgnoreCase))
+            var candidate = FieldValue(item, label)?.Trim();
+            if (string.IsNullOrWhiteSpace(candidate))
             {
                 continue;
             }

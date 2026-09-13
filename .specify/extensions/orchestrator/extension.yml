@@ -1,0 +1,39 @@
+schema_version: "1.0"
+
+extension:
+  id: "orchestrator"
+  name: "Spec Orchestrator"
+  version: "1.0.0"
+  description: "Cross-feature orchestration — track state, select tasks, and detect conflicts across parallel specs."
+  author: "Quratulain-bilal"
+  repository: "https://github.com/Quratulain-bilal/spec-kit-orchestrator"
+  license: "MIT"
+  homepage: "https://github.com/Quratulain-bilal/spec-kit-orchestrator"
+
+requires:
+  speckit_version: ">=0.4.0"
+
+provides:
+  commands:
+    - name: "speckit.orchestrator.status"
+      file: "commands/speckit.orchestrator.status.md"
+      description: "Multi-feature lifecycle dashboard — show every feature and its SDD phase"
+
+    - name: "speckit.orchestrator.next"
+      file: "commands/speckit.orchestrator.next.md"
+      description: "Query and prioritize tasks across all features by tag, layer, or blocker status"
+
+    - name: "speckit.orchestrator.conflicts"
+      file: "commands/speckit.orchestrator.conflicts.md"
+      description: "Detect when parallel features touch the same files to prevent merge conflicts"
+
+    - name: "speckit.orchestrator.sync"
+      file: "commands/speckit.orchestrator.sync.md"
+      description: "Consolidate feature state into specs/status.json for external tooling"
+
+tags:
+  - "orchestration"
+  - "parallel-development"
+  - "multi-feature"
+  - "coordination"
+  - "visibility"

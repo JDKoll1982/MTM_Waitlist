@@ -23,7 +23,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly INavigationService _navigationService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService _waitlistRequestService;
     private readonly IImageLocationService? _imageLocationService;
-    private readonly MTM_Waitlist.Module_Waitlist.Services.IAverageCoilWeightService? _averageCoilWeightService;
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly DispatcherQueue? _dispatcherQueue;
     private readonly string _currentRequesterEmployeeNumber;
@@ -59,7 +58,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IImageLocationService? imageLocationService = null,
         DispatcherQueue? dispatcherQueue = null,
         StartupState? startupState = null,
-        MTM_Waitlist.Module_Waitlist.Services.IAverageCoilWeightService? averageCoilWeightService = null,
         IStoreAvailabilityTracker? storeAvailabilityTracker = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
@@ -72,7 +70,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _imageLocationService = imageLocationService;
         _dispatcherQueue = dispatcherQueue;
         _currentRequesterEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
-        _averageCoilWeightService = averageCoilWeightService;
 
         // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
         // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
@@ -108,26 +105,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private void OnStoreUnavailablePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         OnPropertyChanged(nameof(StoreUnavailableMessage));
-    }
-
-    private async Task EnrichCoilAverageWeightAsync(SampleOrder order)
-    {
-        if (_averageCoilWeightService is null || order is null)
-        {
-            return;
-        }
-
-        var field = order.Fields.FirstOrDefault(f => string.Equals(f.Label, "Average coil weight", StringComparison.Ordinal));
-        if (field is null)
-        {
-            return;
-        }
-
-        var resolved = await _averageCoilWeightService.ResolveAverageCoilWeightTextAsync("MMC0001000").ConfigureAwait(false);
-        if (!string.IsNullOrWhiteSpace(resolved))
-        {
-            field.Value = resolved;
-        }
     }
 
     public async void OnNavigatedTo(object parameter)
@@ -288,7 +265,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         {
             var sessionOrder = CreateSessionOrder(request);
             await ApplyResolvedImagesAsync(sessionOrder, request, workCenterImageLookup).ConfigureAwait(false);
-            await EnrichCoilAverageWeightAsync(sessionOrder).ConfigureAwait(false);
             newItems.Add(sessionOrder);
         }
 
@@ -561,33 +537,37 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     {
         var requestType = request.RequestType.Trim().ToLowerInvariant();
         var subtype = request.Subtype?.Trim() ?? string.Empty;
-        var details = string.IsNullOrWhiteSpace(request.InputValue) ? "Not provided" : request.InputValue.Trim();
         var normalizedSubtype = subtype.ToLowerInvariant();
+        var workCenter = request.WorkCenter?.Trim() ?? string.Empty;
+
+        // Every row below is sourced. A value the request does not carry is left out rather than
+        // defaulted, and its label goes with it: an empty labelled shell is not truthful either
+        // (FR-001/FR-002). The real material attributes are restored by the item-resolution work in
+        // spec 03; until then this surface states only what it can support.
+        void Add(string label, string? value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                item.Fields.Add(new WaitlistField { Label = label, Value = value.Trim() });
+            }
+        }
 
         if (requestType == "scrap")
         {
-            item.Fields.Add(new WaitlistField { Label = "Part number", Value = "Not provided" });
-            item.Fields.Add(new WaitlistField { Label = "Pickup work center", Value = request.WorkCenter });
-            item.Fields.Add(new WaitlistField { Label = "Quantity involved", Value = "1" });
-            item.Fields.Add(new WaitlistField { Label = "Scrap lugger", Value = normalizedSubtype.Contains("empty") ? "Not selected" : (string.IsNullOrWhiteSpace(subtype) ? "Not selected" : subtype) });
-            item.Fields.Add(new WaitlistField { Label = "Scrap reason", Value = details });
+            Add("Scrap lugger", subtype);
+            Add("Pickup work center", workCenter);
+            Add("Request details", request.InputValue);
             return;
         }
 
         if (requestType == "coil")
         {
-            // A "Wrong Coil" request is reporting the current coil is incorrect, so keep that
-            // signal on the "Requested coil" field. The coil subtype is an ACTION (e.g. Bring,
-            // Pickup), never the coil identifier, so otherwise always show the actual coil on
-            // the job (sample/mock value until the live Infor Visual coil lookup is wired)
-            // instead of the subtype or the old "Not provided" placeholders.
-            var wrongCoil = normalizedSubtype.Contains("wrong");
-            var coilNumber = wrongCoil ? "Wrong coil" : "COIL-204";
-            item.Fields.Add(new WaitlistField { Label = "Requested coil", Value = coilNumber });
-            item.Fields.Add(new WaitlistField { Label = "Quantity in house", Value = "46,000 lb" });
-            item.Fields.Add(new WaitlistField { Label = "Coil description", Value = wrongCoil ? details : "0.060 x 48 in galvanized coil" });
-            item.Fields.Add(new WaitlistField { Label = "Average coil weight", Value = "5,000 lb" });
-            item.Fields.Add(new WaitlistField { Label = "Requesting work center", Value = request.WorkCenter });
+            // The coil number, its on-hand weight, its description and its average weight all come from
+            // the coil lookup, which this surface does not perform; showing a substitute was the defect.
+            // The coil subtype is an ACTION (e.g. Bring, Pickup), never the coil identifier.
+            Add("Subtype", subtype);
+            Add("Request details", request.InputValue);
+            Add("Requesting work center", workCenter);
             return;
         }
 
@@ -595,114 +575,94 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         {
             if (normalizedSubtype.Contains("fg") || normalizedSubtype.Contains("finished"))
             {
-                item.Fields.Add(new WaitlistField { Label = "Subtype", Value = subtype });
-                item.Fields.Add(new WaitlistField { Label = "Part number", Value = "FG-10042" });
-                item.Fields.Add(new WaitlistField { Label = "Part description", Value = "Finished bracket assembly" });
-                item.Fields.Add(new WaitlistField { Label = "Quantity remaining", Value = "24 each" });
-                item.Fields.Add(new WaitlistField { Label = "Customer", Value = "Northstar Manufacturing" });
-                item.Fields.Add(new WaitlistField { Label = "Packlist", Value = "PL-80421" });
-                item.Fields.Add(new WaitlistField { Label = "Work center", Value = request.WorkCenter });
+                Add("Subtype", subtype);
+                Add("Request details", request.InputValue);
+                Add("Work center", workCenter);
                 return;
             }
 
             if (normalizedSubtype.Contains("ncm"))
             {
-                item.Fields.Add(new WaitlistField { Label = "Subtype", Value = subtype });
-                item.Fields.Add(new WaitlistField { Label = "Part", Value = "RM-50218 / Customer RM-77" });
-                item.Fields.Add(new WaitlistField { Label = "Quantity to move", Value = "2 containers" });
-                item.Fields.Add(new WaitlistField { Label = "Pickup location", Value = request.WorkCenter });
-                item.Fields.Add(new WaitlistField { Label = "Destination", Value = "NCM Area" });
-                item.Fields.Add(new WaitlistField { Label = "Traceability ID", Value = "NCM-260803-014" });
-                item.Fields.Add(new WaitlistField { Label = "Work center", Value = request.WorkCenter });
+                Add("Subtype", subtype);
+                Add("Request details", request.InputValue);
+                Add("Pickup location", workCenter);
                 return;
             }
 
             if (normalizedSubtype.Contains("wip"))
             {
-                item.Fields.Add(new WaitlistField { Label = "Subtype", Value = subtype });
-                item.Fields.Add(new WaitlistField { Label = "Work order", Value = "WO-072368" });
-                item.Fields.Add(new WaitlistField { Label = "Part and quantity", Value = "WIP-218 / 12 pieces" });
-                item.Fields.Add(new WaitlistField { Label = "Pickup work center", Value = request.WorkCenter });
-                item.Fields.Add(new WaitlistField { Label = "WIP destination", Value = "WIP Area / Rack B-14" });
-                item.Fields.Add(new WaitlistField { Label = "Operation sequence", Value = "30" });
+                Add("Subtype", subtype);
+                Add("Work order", request.ActiveSetupJobId);
+                Add("Request details", request.InputValue);
+                Add("Pickup work center", workCenter);
                 return;
             }
 
             if (normalizedSubtype.Contains("coil"))
             {
-                item.Fields.Add(new WaitlistField { Label = "Subtype", Value = subtype });
-                item.Fields.Add(new WaitlistField { Label = "Requested coil", Value = "COIL-204" });
-                item.Fields.Add(new WaitlistField { Label = "Quantity in house", Value = "46,000 lb" });
-                item.Fields.Add(new WaitlistField { Label = "Coil description", Value = "0.060 x 48 in galvanized coil" });
-                item.Fields.Add(new WaitlistField { Label = "Average coil weight", Value = "5,000 lb" });
-                item.Fields.Add(new WaitlistField { Label = "Requesting work center", Value = request.WorkCenter });
+                Add("Subtype", subtype);
+                Add("Request details", request.InputValue);
+                Add("Requesting work center", workCenter);
                 return;
             }
 
             if (normalizedSubtype.Contains("outside") || normalizedSubtype.Contains("service"))
             {
-                item.Fields.Add(new WaitlistField { Label = "Subtype", Value = subtype });
-                item.Fields.Add(new WaitlistField { Label = "Part or work order", Value = "WO-073112 / RM-48190" });
-                item.Fields.Add(new WaitlistField { Label = "Quantity to move", Value = "6 pieces" });
-                item.Fields.Add(new WaitlistField { Label = "Pickup work center", Value = request.WorkCenter });
-                item.Fields.Add(new WaitlistField { Label = "Outside-service destination", Value = "Heat Treat Section" });
-                item.Fields.Add(new WaitlistField { Label = "Vendor or service", Value = "Midwest Heat Treat" });
+                Add("Subtype", subtype);
+                Add("Request details", request.InputValue);
+                Add("Pickup work center", workCenter);
                 return;
             }
 
             if (normalizedSubtype.Contains("other"))
             {
-                item.Fields.Add(new WaitlistField { Label = "Subtype", Value = subtype });
-                item.Fields.Add(new WaitlistField { Label = "Request description", Value = details });
-                item.Fields.Add(new WaitlistField { Label = "Requested work center", Value = request.WorkCenter });
+                Add("Subtype", subtype);
+                Add("Request description", request.InputValue);
+                Add("Requested work center", workCenter);
                 return;
             }
         }
 
         if (requestType == "other")
         {
-            item.Fields.Add(new WaitlistField { Label = "Subtype", Value = string.IsNullOrWhiteSpace(subtype) ? "General Text Entry" : subtype });
-            item.Fields.Add(new WaitlistField { Label = "Request description", Value = details });
-            item.Fields.Add(new WaitlistField { Label = "Requested work center", Value = request.WorkCenter });
+            Add("Subtype", subtype);
+            Add("Request description", request.InputValue);
+            Add("Requested work center", workCenter);
             return;
         }
 
         if (requestType == "flatstock")
         {
-            item.Fields.Add(new WaitlistField { Label = "Part", Value = "RM-8201" });
-            item.Fields.Add(new WaitlistField { Label = "Quantity", Value = "12 sheets" });
-            item.Fields.Add(new WaitlistField { Label = "Work center", Value = request.WorkCenter });
-            item.Fields.Add(new WaitlistField { Label = "Destination", Value = "Flatstock staging" });
+            Add("Work center", workCenter);
+            Add("Request details", request.InputValue);
             return;
         }
 
         if (requestType == "table handling" || requestType == "die handling")
         {
-            item.Fields.Add(new WaitlistField { Label = requestType == "die handling" ? "Die" : "Part", Value = requestType == "die handling" ? "Die 4402" : "Part A-12" });
-            item.Fields.Add(new WaitlistField { Label = "Quantity", Value = "1" });
-            item.Fields.Add(new WaitlistField { Label = "Pickup location", Value = request.WorkCenter });
-            item.Fields.Add(new WaitlistField { Label = "Destination", Value = requestType == "die handling" ? "Die shop" : "Table staging" });
+            Add("Pickup location", workCenter);
+            Add("Request details", request.InputValue);
             return;
         }
 
         if (requestType == "forklift assist")
         {
-            item.Fields.Add(new WaitlistField { Label = "Description", Value = details });
-            item.Fields.Add(new WaitlistField { Label = "Work center", Value = request.WorkCenter });
-            item.Fields.Add(new WaitlistField { Label = "Requested by", Value = request.RequesterEmployeeName });
+            Add("Description", request.InputValue);
+            Add("Work center", workCenter);
+            Add("Requested by", request.RequesterEmployeeName);
             return;
         }
 
-        item.Fields.Add(new WaitlistField { Label = "Request details", Value = details });
-        item.Fields.Add(new WaitlistField { Label = "Request type", Value = request.RequestType });
-        item.Fields.Add(new WaitlistField { Label = "Subtype", Value = string.IsNullOrWhiteSpace(subtype) ? "Not provided" : subtype });
-        item.Fields.Add(new WaitlistField { Label = "Work center", Value = request.WorkCenter });
-        item.Fields.Add(new WaitlistField { Label = "Request ID", Value = request.Id.ToString("N") });
+        Add("Request details", request.InputValue);
+        Add("Request type", request.RequestType);
+        Add("Subtype", subtype);
+        Add("Work center", workCenter);
+        Add("Request ID", request.Id.ToString("N"));
     }
 
     /// <summary>
     /// Whether a row was submitted by the given requester (compares the underlying request's
-    /// employee number; static sample rows carry no requester number and are not "mine").
+    /// employee number; a row that carries no requester number never matches).
     /// </summary>
     public static bool IsRequesterOrder(SampleOrder order, string employeeNumber)
     {
@@ -730,7 +690,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     /// <summary>
     /// Narrows a set of rows to those submitted by the given requester (used by the "My
-    /// Requests" quick view). Static sample rows carry no requester identity and are excluded.
+    /// Requests" quick view). A row with no requester identity is excluded.
     /// </summary>
     public static IReadOnlyList<SampleOrder> FilterToMyRequests(IEnumerable<SampleOrder> source, string requesterEmployeeNumber)
     {

@@ -408,10 +408,19 @@ workstream is **documentation hygiene only**: §10.2 below.
   claims the windows passed.
 
 ### 10.2 Documentation hygiene (docs)
-- Fix `WeekendProject/ChangeLog.Simple.md` — it still documents the removed manual Infor Visual toggle as
-  current (line 29, feature 19). This is the concrete gap behind `specs/001` SC-016.
-- Retire the stale backlog sources named in §2 (add a "retired sources" note so they are not reopened).
-- Reconcile `WeekendProject/Module_Mock/Tasks.md`, which is 72 boxes behind reality.
+- ~~Fix `WeekendProject/ChangeLog.Simple.md` — it still documents the removed manual Infor Visual toggle as
+  current (line 29, feature 19).~~ **Done** by `specs/001` T140: the fallback section describes the
+  automatic-only fallback, feature 19 is marked withdrawn, and the "still in progress" claim that the cache was
+  a bundled sample is gone. The same file's feature 18 alert caveat is owned by
+  `specs/002-truthful-data-and-controls` T039.
+- ~~Retire the stale backlog sources named in §2 (add a "retired sources" note so they are not reopened).~~
+  **Done** — the "retired sources" note is in `OPEN-TASKS.md` §3.1, naming each of the six files §2 lists with
+  the reason it must not be reopened; this section points at it rather than repeating it (FR-027).
+- ~~Reconcile `WeekendProject/Module_Mock/Tasks.md`, which is 72 boxes behind reality.~~ **Done** by
+  `specs/002-truthful-data-and-controls` T042: 67 of its 73 boxes are ticked against the shipped code and each
+  of the six left open carries its own `— still open 2026-09-12:` reason.
+- The remaining corrections this pass owns — the changelogs' wording and the ten defect status lines — are the
+  documentation tasks of `specs/002-truthful-data-and-controls` (T039/T040/T043/T044).
 
 ---
 

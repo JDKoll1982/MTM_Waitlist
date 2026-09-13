@@ -1,6 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.Web;
 using Microsoft.Windows.AppNotifications;
+using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 
@@ -10,11 +11,16 @@ public class AppNotificationService : IAppNotificationService
 {
     private readonly INavigationService _navigationService;
     private readonly IAppWindowProvider _appWindowProvider;
+    private readonly RequestDeepLinkHandler _requestDeepLinkHandler;
 
-    public AppNotificationService(INavigationService navigationService, IAppWindowProvider appWindowProvider)
+    public AppNotificationService(
+        INavigationService navigationService,
+        IAppWindowProvider appWindowProvider,
+        RequestDeepLinkHandler requestDeepLinkHandler)
     {
         _navigationService = navigationService;
         _appWindowProvider = appWindowProvider;
+        _requestDeepLinkHandler = requestDeepLinkHandler;
     }
 
     ~AppNotificationService()
@@ -34,11 +40,10 @@ public class AppNotificationService : IAppNotificationService
 
     public void OnNotificationInvoked(AppNotificationManager sender, AppNotificationActivatedEventArgs args)
     {
-        _appWindowProvider.MainWindow.DispatcherQueue.TryEnqueue(() =>
-        {
-            _appWindowProvider.MainWindow.ShowMessageDialogAsync("TODO: Handle notification invocations when your app is already running.", "Notification Invoked");
-            _appWindowProvider.MainWindow.BringToFront();
-        });
+        // The argument the activation carries is the whole point of this handler. It used to be discarded in
+        // favour of a placeholder dialog, so a tap-through did nothing; the same helper the cold-start path
+        // uses now routes it, and the two paths cannot drift (contract C2/C3).
+        _requestDeepLinkHandler.TryHandleRequestDeepLink(args.Argument);
     }
 
     public bool Show(string payload)

@@ -41,6 +41,33 @@ public sealed class CoilAvailabilityServiceTests
     }
 
     [TestMethod]
+    public async Task GetCoilForJobAsync_AsksForTheResolvedCoil_NotAFixedPart()
+    {
+        // A distinctive part proves the average weight is keyed on what the job actually carries: a fixed
+        // key cannot satisfy this assertion, and neither can it satisfy the field being empty below.
+        var helper = new StubMySqlHelperServer(ActiveJobRow("MMC778812", "COIL 0.050 X 48.0 GALV", 4_310m));
+        var weights = new StubAverageCoilWeightService("4180 lb");
+        var service = new CoilAvailabilityService(helper, weights);
+
+        var coil = await service.GetCoilForJobAsync(WorkCenter);
+
+        Assert.AreEqual("MMC778812", coil.CoilNumber);
+        Assert.AreEqual("MMC778812", weights.LastPartNumber, "The average weight must be asked for the coil on the job, not a fixed part.");
+    }
+
+    [TestMethod]
+    public async Task GetCoilForJobAsync_WhenTheWeightCannotBeResolved_LeavesTheFieldEmpty()
+    {
+        var helper = new StubMySqlHelperServer(ActiveJobRow("MMC778812", "COIL 0.050 X 48.0 GALV", 4_310m));
+        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService(string.Empty));
+
+        var coil = await service.GetCoilForJobAsync(WorkCenter);
+
+        Assert.IsTrue(coil.HasCoil);
+        Assert.AreEqual(string.Empty, coil.AverageWeight, "Nothing resolved means nothing shown — never a fixed fallback value.");
+    }
+
+    [TestMethod]
     public async Task GetCoilForJobAsync_WhenNoActiveJobIsSaved_ReportsNoCoil()
     {
         var helper = new StubMySqlHelperServer();

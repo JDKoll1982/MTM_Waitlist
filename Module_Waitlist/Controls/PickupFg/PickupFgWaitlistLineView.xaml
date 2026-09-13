@@ -31,16 +31,16 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock FontWeight="SemiBold" Text="Part number" />
-                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Quantity remaining" />
-                <TextBlock Grid.Column="3" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Part description" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Customer" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="2" Grid.Column="2" FontWeight="SemiBold" Text="Packlist" />
-                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock FontWeight="SemiBold" Text="{Binding Fields[0].Label}" Visibility="{Binding Fields[0].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[0].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="{Binding Fields[2].Label}" Visibility="{Binding Fields[2].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="3" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[2].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="{Binding Fields[1].Label}" Visibility="{Binding Fields[1].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[1].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="{Binding Fields[3].Label}" Visibility="{Binding Fields[3].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[3].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" Grid.Column="2" FontWeight="SemiBold" Text="{Binding Fields[4].Label}" Visibility="{Binding Fields[4].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[4].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>
         </local:WaitlistLineCardView.DetailsContent>
     </local:WaitlistLineCardView>
@@ -49,16 +49,15 @@
 <!--
     Notes
     Card contents:
-    Part number - The finished-goods part being requested.
-    Part description - The description of the finished-goods part.
-    Quantity remaining - Ordered quantity minus fulfilled quantity, never less than zero.
+    Five fixed slots (Fields[0]..Fields[4]) render each slot's own Label and Value. A slot with no
+    value renders nothing at all, so an attribute with no source simply does not appear. For a
+    finished-goods pickup the slots carry Subtype, Request details and Work center.
 
     Detail page contents:
-    Customer and order - Customer, customer order number, line number, and customer purchase-order reference.
-    Part details - Part number, description, customer part number, selling unit, and piece count.
-    Quantities - Ordered, allocated, fulfilled, and remaining quantities.
-    Shipment details - Packlist number, ship via, shipped date, expected delivery date, and shipment status.
-    Schedule details - Desired ship date, promise date, order status, and line status.
-    Work-order context - Related work order, operation, press or resource, and scheduled finish when available.
-    Request context - Requesting user, requesting work center, request time, and remaining waitlist time.
+    The detail page renders the same request field set through its sections and merges in the
+    inventory rows it loads itself.
+
+    Not yet sourced: the finished-goods part, its description and remaining quantity, and the
+    customer, shipment and schedule details. No read supplies them to this surface, so no value is
+    shown for them; the follow-on item-resolution specification restores them once a source exists.
 -->

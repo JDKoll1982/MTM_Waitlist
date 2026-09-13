@@ -88,12 +88,15 @@ and stay usable instead of failing or sitting empty. In short:
     *(Settings + due/overdue math are done; sorting the handler list "most urgent first" is still in
     progress.)* — **~35 min**
 18. ✅ **New Request Alerts (per-user).** **Settings** toggle (default off) → toast on a new request +
-    deep-link to the request detail. — **~40 min**
-19. ❌ **Single "Infor Visual data" switch — withdrawn.** One **Settings** switch used to control
-    whether the app used **live** or **cached/sample** Infor Visual data. **Removed on purpose:**
-    picking cached data by hand defeated the point of the fallback and let stale data look current. The
-    fallback is now **automatic only** — the app falls back when Infor Visual is unreachable and
-    switches back on its own. — **~15 min**
+    deep-link to the request detail. **Packaging caveat:** Windows notifications can only be delivered by a
+    **packaged** install, and the app ships unpackaged today, so the toggle is **disabled on this build** and
+    says why — the alert cannot fire until the delivery question is settled by the notification specification.
+    — **~40 min**
+19. ❌ **Single "Infor Visual data" switch — withdrawn; it is not in the app.** One **Settings** switch used
+    to choose between **live** and **bundled sample** Infor Visual data. **Both the switch and the samples
+    were removed on purpose:** picking data by hand defeated the point of the fallback and let stale data look
+    current. What replaced it is **automatic only** — the app falls back when Infor Visual is unreachable, the
+    fallback serves **real cached** Infor Visual data, and it switches back on its own. — **~15 min**
 
 ---
 
@@ -163,8 +166,8 @@ and stay usable instead of failing or sitting empty. In short:
 | 15 | Detail location/part grid | ✅ | 30 min |
 | 16 | Ignored-location settings | 🚧 | 25 min |
 | 17 | Urgency per-subtype allotment + due/overdue | 🚧 | 35 min |
-| 18 | New Request Alerts toggle + toast + deep link | ✅ | 40 min |
-| 19 | Single "Infor Visual data" switch *(withdrawn)* | ❌ | 15 min |
+| 18 | New Request Alerts toggle + toast + deep link *(packaged install only — see feature 18)* | ✅ | 40 min |
+| 19 | Single "Infor Visual data" switch *(withdrawn; not in the app)* | ❌ | 15 min |
 | | **Total** | | **540 min = 9h 00m** |
 
 > Feature 19's time is kept in the total because the work was genuinely done and then deliberately

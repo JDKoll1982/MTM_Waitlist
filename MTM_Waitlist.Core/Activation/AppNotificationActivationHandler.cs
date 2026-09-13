@@ -11,19 +11,15 @@ namespace MTM_Waitlist.Activation;
 
 public class AppNotificationActivationHandler : ActivationHandler<LaunchActivatedEventArgs>
 {
-    private readonly INavigationService _navigationService;
     private readonly IAppNotificationService _notificationService;
-    private readonly IAppWindowProvider _appWindowProvider;
+    private readonly RequestDeepLinkHandler _requestDeepLinkHandler;
 
-    // The Waitlist request detail page. Navigated by its view-model full name (the page key) rather than a typed
-    // reference, because this handler lives in Core and must not reference the Waitlist module's view model type.
-    private const string WaitlistRequestDetailPageKey = "MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewDetailViewModel";
-
-    public AppNotificationActivationHandler(INavigationService navigationService, IAppNotificationService notificationService, IAppWindowProvider appWindowProvider)
+    public AppNotificationActivationHandler(
+        IAppNotificationService notificationService,
+        RequestDeepLinkHandler requestDeepLinkHandler)
     {
-        _navigationService = navigationService;
         _notificationService = notificationService;
-        _appWindowProvider = appWindowProvider;
+        _requestDeepLinkHandler = requestDeepLinkHandler;
     }
 
     protected override bool CanHandleInternal(LaunchActivatedEventArgs args)
@@ -35,27 +31,9 @@ public class AppNotificationActivationHandler : ActivationHandler<LaunchActivate
     {
         // Deep-link: a new-request alert toast taps through to that request's detail page. The toast payload's
         // <toast launch="..."> argument carries a WaitlistRequestLink (action=openrequest&request=<guid>).
-        if (AppInstance.GetCurrent().GetActivatedEventArgs()?.Data is AppNotificationActivatedEventArgs notificationArgs
-            && WaitlistRequestLink.TryParse(notificationArgs.Argument, out var requestId))
-        {
-            StartupDebugLog.Info("AppNotification", $"Notification deep-link to request '{requestId:D}'.");
-            // The Waitlist detail page resolves a request by its list id, which is request.Id.GetHashCode(). Queue
-            // with low priority so the shell/navigation frame has initialized first.
-            var parameter = requestId.GetHashCode();
-            _appWindowProvider.MainWindow.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
-            {
-                _navigationService.NavigateTo(WaitlistRequestDetailPageKey, parameter);
-                _appWindowProvider.MainWindow.BringToFront();
-            });
-            await Task.CompletedTask;
-            return;
-        }
-
-        // Unrecognized notification arguments: fall back to the original placeholder behaviour.
-        _appWindowProvider.MainWindow.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
-        {
-            _appWindowProvider.MainWindow.ShowMessageDialogAsync("TODO: Handle notification activations.", "Notification Activation");
-        });
+        // An unrecognised argument is recorded and shows nothing — there is no placeholder path here any more.
+        var arguments = (AppInstance.GetCurrent().GetActivatedEventArgs()?.Data as AppNotificationActivatedEventArgs)?.Argument;
+        _requestDeepLinkHandler.TryHandleRequestDeepLink(arguments);
 
         await Task.CompletedTask;
     }

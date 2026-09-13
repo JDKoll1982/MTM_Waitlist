@@ -1,3 +1,5 @@
+using System.Reflection;
+
 using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -110,18 +112,29 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void NewRequestAlerts_PanelAndCategoryMatchSearch()
+    public void NewRequestAlerts_PanelAndCategoryMatchSearch_AndTheChangeIsAnnounced()
     {
         var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Production");
         Assert.IsTrue(viewModel.IsNewRequestAlertsPanelVisible, "Panel visible with no search query.");
 
+        var announced = new List<string>();
+        viewModel.PropertyChanged += (_, args) => announced.Add(args.PropertyName ?? string.Empty);
+
         viewModel.SearchQuery = "notification";
+
         Assert.IsTrue(viewModel.IsNewRequestAlertsPanelVisible, "Panel should match 'notification'.");
         Assert.IsTrue(viewModel.IsOperationsCategoryVisible, "Operations category should include the alerts panel.");
+
+        // A correct value is not enough. The panel only follows the search term if the change is announced,
+        // and the previous form of this check read the property directly so it passed either way (FR-021).
+        CollectionAssert.Contains(
+            announced,
+            nameof(SettingsViewModel.IsNewRequestAlertsPanelVisible),
+            "The panel must announce a change when the search term changes.");
     }
 
     [TestMethod]
-    public async Task NewRequestAlerts_TogglePersistsUnderKey()
+    public async Task NewRequestAlerts_TogglePersistsOnlyWhenTheInstallationCanDeliver()
     {
         var settings = new RecordingLocalSettingsService();
         var viewModel = BuildViewModel(settings, "Production");
@@ -130,7 +143,17 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         await Task.Delay(30);
 
         var stored = settings.ReadSettingAsync<bool?>(NewRequestAlertService.SettingKeyName).GetAwaiter().GetResult();
-        Assert.IsTrue(stored == true, "Toggling on should persist true under the alert key.");
+
+        if (viewModel.IsNewRequestAlertsAvailable)
+        {
+            Assert.IsTrue(stored == true, "An installation that can deliver must persist the preference under the alert key.");
+        }
+        else
+        {
+            Assert.IsNull(
+                stored,
+                "An installation that cannot deliver must not record a preference it cannot honour.");
+        }
     }
 
     [TestMethod]
@@ -231,6 +254,156 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
         Assert.AreEqual("No endpoint is installed.", viewModel.CacheRefreshStatusMessage);
         Assert.IsFalse(viewModel.IsCacheRefreshing);
+    }
+
+    [TestMethod]
+    public void NewRequestAlerts_ReportsTheInstallationCapability()
+    {
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Production");
+
+        // The test host runs unpackaged, and the delivery path refuses to show a notification without
+        // package identity (AppNotificationService.Initialize and Show both gate on RuntimeHelper.IsMSIX),
+        // so this installation cannot deliver one and the panel must say so.
+        Assert.IsFalse(
+            MTM_Waitlist.Module_Core.Helpers.RuntimeHelper.IsMSIX,
+            "This check assumes an unpackaged test host; the capability answer below is derived from it.");
+
+        Assert.IsFalse(
+            viewModel.IsNewRequestAlertsAvailable,
+            "The panel must not offer a capability the delivery path would silently ignore.");
+
+        Assert.IsFalse(
+            string.IsNullOrWhiteSpace(viewModel.NewRequestAlertsUnavailableMessage),
+            "The panel must explain why the control is unavailable.");
+    }
+
+    [TestMethod]
+    public async Task NewRequestAlerts_DoesNotPersistWhileTheInstallationCannotDeliver()
+    {
+        var settings = new RecordingLocalSettingsService();
+        var viewModel = BuildViewModel(settings, "Production");
+
+        Assert.IsFalse(viewModel.IsNewRequestAlertsAvailable, "This check assumes an installation that cannot deliver.");
+
+        viewModel.NewRequestAlertsEnabled = true;
+        await Task.Delay(30);
+
+        var stored = settings.ReadSettingAsync<bool?>(NewRequestAlertService.SettingKeyName).GetAwaiter().GetResult();
+
+        Assert.IsNull(stored, "No preference may be written while the installation cannot deliver a notification.");
+    }
+
+    [TestMethod]
+    public void VersionDescription_IsNotEmptyOnAnUnpackagedBuild()
+    {
+        // The About card's version value must say something on this build too, not only when the
+        // packaged-only API is available (contract C4).
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Production");
+
+        Assert.IsFalse(
+            string.IsNullOrWhiteSpace(viewModel.VersionDescription),
+            "The About card's version value must not be empty on the unpackaged build.");
+    }
+
+    [TestMethod]
+    public void SearchQuery_ChangeAnnouncesEveryPanelThatConsumesTheTerm()
+    {
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager");
+
+        var announced = new List<string>();
+        viewModel.PropertyChanged += (_, args) => announced.Add(args.PropertyName ?? string.Empty);
+
+        viewModel.SearchQuery = "urgency";
+
+        string[] previouslyMissing =
+        [
+            nameof(SettingsViewModel.IsNewRequestAlertsPanelVisible),
+            nameof(SettingsViewModel.IsUrgencyAllotmentsPanelVisible),
+            nameof(SettingsViewModel.IsImageLocationSettingsPanelVisible),
+        ];
+
+        foreach (var name in previouslyMissing)
+        {
+            CollectionAssert.Contains(
+                announced,
+                name,
+                $"{name} must announce a change when the search term changes, or it keeps showing the previous term's answer.");
+        }
+    }
+
+    [TestMethod]
+    public void SearchRegistration_CoversEveryPropertyThatConsumesTheTerm()
+    {
+        var declared = DeclaredSearchAwareProperties();
+
+        Assert.IsTrue(
+            declared.Count >= 10,
+            $"Only {declared.Count} search-aware properties are declared; the list must name every property that consumes the term.");
+
+        var method = typeof(SettingsViewModel).GetMethod("MatchesSearch", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.IsNotNull(method, "The search predicate moved; update this check rather than deleting it.");
+
+        var marker = BitConverter.GetBytes(method.MetadataToken);
+
+        var consumers = typeof(SettingsViewModel)
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(property => GetterMentions(property, marker))
+            .Select(property => property.Name)
+            .ToList();
+
+        Assert.IsTrue(
+            consumers.Count > 0,
+            "No property was found to consume the search term, so a clean result would prove nothing.");
+
+        var unregistered = consumers.Where(name => !declared.Contains(name, StringComparer.Ordinal)).ToList();
+
+        Assert.AreEqual(
+            0,
+            unregistered.Count,
+            "These properties filter on the search term but are not registered, so they never re-evaluate when it changes: "
+                + string.Join(", ", unregistered));
+    }
+
+    private static IReadOnlyList<string> DeclaredSearchAwareProperties()
+    {
+        var field = typeof(SettingsViewModel).GetField("s_searchAwareProperties", BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.IsNotNull(field, "The declared search-registration list is missing; the coverage check depends on it.");
+
+        return (IReadOnlyList<string>)(field.GetValue(null) ?? Array.Empty<string>());
+    }
+
+    /// <summary>
+    /// Whether a property's getter mentions the given metadata token. The search predicate is private, so its
+    /// call site is found in the getter's IL rather than by name — which is what makes this coverage check
+    /// discovery-driven and able to see the next panel that is added.
+    /// </summary>
+    private static bool GetterMentions(PropertyInfo property, byte[] marker)
+    {
+        var il = property.GetGetMethod()?.GetMethodBody()?.GetILAsByteArray();
+        if (il is null)
+        {
+            return false;
+        }
+
+        for (var offset = 0; offset + marker.Length <= il.Length; offset++)
+        {
+            var match = true;
+            for (var index = 0; index < marker.Length; index++)
+            {
+                if (il[offset + index] != marker[index])
+                {
+                    match = false;
+                    break;
+                }
+            }
+
+            if (match)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static SettingsViewModel BuildViewModel(

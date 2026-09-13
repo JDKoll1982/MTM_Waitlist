@@ -31,16 +31,16 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock FontWeight="SemiBold" Text="Work order" />
-                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Part and quantity" />
-                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="Pickup work center" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="WIP destination" />
-                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="Operation sequence" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" />
+                <TextBlock FontWeight="SemiBold" Text="{Binding Fields[0].Label}" Visibility="{Binding Fields[0].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="1" Text="{Binding Fields[0].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[0].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="{Binding Fields[1].Label}" Visibility="{Binding Fields[1].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="3" Text="{Binding Fields[1].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[1].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" FontWeight="SemiBold" Text="{Binding Fields[2].Label}" Visibility="{Binding Fields[2].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Fields[2].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[2].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" Text="{Binding Fields[3].Label}" Visibility="{Binding Fields[3].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fields[3].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[3].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" FontWeight="SemiBold" Text="{Binding Fields[4].Label}" Visibility="{Binding Fields[4].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Fields[4].Value}" TextTrimming="CharacterEllipsis" Visibility="{Binding Fields[4].HasValue, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>
         </local:WaitlistLineCardView.DetailsContent>
     </local:WaitlistLineCardView>
@@ -49,27 +49,15 @@
 <!--
     Notes
     Card contents:
-    Request type - Clearly identify the request as a Work In Process (WIP) pickup.
-    Work order - The work order identifier for the WIP material.
-    Part and quantity - The part number, description, and quantity to be moved.
-    Pickup work center - The work center, press, or resource where the WIP material is staged.
-    WIP destination - The assigned warehouse and location in the WIP area where the material must be inventoried.
-    Operation sequence - The operation associated with the WIP material.
-    Pickup priority - Required-by date, scheduled operation finish, urgency, and current waitlist age.
-    Handling alert - Packaging, weight, safety, equipment, or special transport instructions visible before pickup.
+    Five fixed slots (Fields[0]..Fields[4]) render each slot's own Label and Value. A slot with no
+    value renders nothing at all, so an attribute with no source simply does not appear. For a WIP
+    pickup the slots carry Subtype, Work order, Request details and Pickup work center.
 
     Detail page contents:
-    Request summary - WIP status, request date and time, priority, target completion time, and current owner.
-    Pickup instructions - Source work center, press or resource, warehouse, current location, staging point, and work-center contact.
-    WIP destination - Other locations where this material may be located, derived by querying the MTM WIP Application's inventory system.
-    Work-order details - Work order type, base, lot, split, sub-ID, status, and priority.
-    Part and quantity details - Part number, description, desired, received, allocated, fulfilled, and remaining quantities.
-    Operation details - Operation sequence, press or resource, operation status, completed quantity, and dispatched quantity.
-    Schedule details - Desired release, desired want, scheduled start, scheduled finish, and could-finish dates.
-    Material requirement - Required part, calculated quantity, issued quantity, allocated quantity, fulfilled quantity, and required date.
-    Inventory record - Quantity placed, unit of measure, container or lot identifier, inventory transaction, placement time, and material-handler confirmation.
-    Traceability - Work order, operation, part, lot, serial, heat, batch, or container identifiers needed to keep the WIP material connected to its job.
-    Handling and safety - Packaging, weight, lifting equipment, hazardous-material information, and other transport restrictions.
-    Cost context - Material, labor, burden, and service WIP amounts when authorized and relevant.
-    Request context - Requesting user, employee number, requesting work center, press, pickup acknowledgement, delivery time, and remaining waitlist time.
+    The detail page renders the same request field set through its sections and merges in the
+    inventory rows it loads itself.
+
+    Not yet sourced: the part and its description, the quantity, the WIP destination and the
+    operation sequence. No read supplies them to this surface, so no value is shown for them; the
+    follow-on item-resolution specification restores them once a source exists.
 -->

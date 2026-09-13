@@ -1,0 +1,25 @@
+{
+  "workflow": "companion",
+  "specName": "001-module-mock-visual-fallback",
+  "branch": "001-module-mock-visual-fallback",
+  "selectedAt": "2026-09-13T02:44:18.587Z",
+  "currentStep": "tasks",
+  "status": "ready-to-implement",
+  "history": [
+    {
+      "step": "analyze",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T02:44:36.266Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T02:45:23.005Z"
+    }
+  ],
+  "telemetryInstanceId": "365dca2e-9092-4f08-9469-64546aa63a7d"
+}

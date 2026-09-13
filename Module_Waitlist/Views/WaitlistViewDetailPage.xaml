@@ -157,6 +157,33 @@
                     Style="{ThemeResource SubtitleTextBlockStyle}"
                     Text="Request Details" />
 
+                <!-- Section failure, rendered in place with a retry (contract C2, data-model.md §1). The
+                     element is x:Load-gated, so when nothing failed it is not in the visual tree at all;
+                     x:Name is required on every element that carries x:Load. A section with nothing to
+                     show is hidden instead — it is not added to TemplateSections, so the list below draws
+                     no shell for it and no placeholder value stands in for the missing read. -->
+                <Border
+                    x:Name="SectionFailureBlock"
+                    Grid.Row="2"
+                    Margin="0,0,0,16"
+                    Padding="18"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    x:Load="{x:Bind ViewModel.IsSectionLoadFailed, Mode=OneWay}">
+                    <StackPanel Spacing="8">
+                        <TextBlock
+                            Style="{ThemeResource SubtitleTextBlockStyle}"
+                            Text="{x:Bind ViewModel.SectionFailureMessage, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords" />
+                        <Button
+                            HorizontalAlignment="Left"
+                            Command="{x:Bind ViewModel.RetryLoadCommand}"
+                            Content="{x:Bind ViewModel.SectionFailureRetryText}" />
+                    </StackPanel>
+                </Border>
+
                 <ItemsControl
                     Grid.Row="2"
                     ItemsSource="{x:Bind ViewModel.TemplateSections, Mode=OneWay}">

@@ -7,7 +7,7 @@
 >
 > For the broader, longer-running repo changelog, see the root `CHANGELOG.md`.
 >
-> **Most recent update:** 2026-09-11
+> **Most recent update:** 2026-09-12
 
 ---
 
@@ -15,6 +15,29 @@
 
 > Work landed this weekend but not yet cut into a numbered release. Items are grouped by the type of
 > change, newest first.
+
+### 2026-09-12 — Truthful data and truthful controls
+
+> Specification: `specs/002-truthful-data-and-controls/`. Defect records: `defects/`.
+
+**Changed**
+- **The New Request Alerts switch states its limit instead of promising a capability this installation lacks.**
+  Windows can only deliver a toast from a **packaged** install, and the app ships unpackaged, so the switch is
+  **disabled** and carries the reason rather than accepting a setting that can never fire. Making the alert
+  actually arrive belongs to the notification-delivery workstream
+  (`defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`).
+- **The coil and confirm-screen figures described further down this file are gone, and that is the current
+  state.** The card no longer shows a coil number, an in-house quantity, a coil description or an average coil
+  weight, because nothing available to the card sourced them, and the New Request confirm step no longer shows
+  a queue count or a wait estimate. The real attributes return with the item-resolution workstream; until then
+  the surfaces show only what the request itself carries.
+
+**Removed**
+- **The shipped "Setup saved using sample data." message**, which could only ever describe a mechanism that no
+  longer exists, and the code comments that described that retired mechanism as current. Internal stores
+  (`mtm_waitlist`, `mtm_wip_application_winforms`, `mtm_receiving_application`) are always read and written
+  live, and only Infor Visual reads fall back — automatically, to real cached data. The old manual Infor Visual
+  switch was **removed on purpose** and is not in the app; nothing has to be turned on for the fallback.
 
 ### 2026-09-11 — Automatic Infor Visual failover (Module_Mock) lands; the demo/mock-data system is removed
 

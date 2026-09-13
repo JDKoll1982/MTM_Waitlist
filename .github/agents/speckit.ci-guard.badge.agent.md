@@ -1,0 +1,1 @@
+../../.specify/extensions/ci-guard/.specify-dev/agent-commands/copilot/speckit.ci-guard.badge.agent.md

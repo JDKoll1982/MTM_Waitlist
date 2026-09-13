@@ -10,9 +10,9 @@ using MTM_Waitlist.Module_Waitlist.Services;
 namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 
 /// <summary>
-/// Final confirmation step of the New Request wizard. Replaces the inline
-/// <c>ShowConfirmationAsync</c> dialog: it shows the request summary plus queue and
-/// wait-time information and submits the request when the user confirms.
+/// Final confirmation step of the New Request wizard. It shows the request summary and the coil on the job
+/// current at confirmation time, and submits the request when the user confirms. It presents no queue or
+/// wait figure: no source produces one, so there is nothing to show until a specification defines it.
 /// </summary>
 public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigationAware
 {
@@ -87,6 +87,14 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
     {
         get; set;
     } = string.Empty;
+
+    /// <summary>
+    /// Whether an average coil weight was actually resolved for the coil on the job. The row is hidden when
+    /// it was not, so the confirm step never shows a labelled value nobody produced (FR-012/FR-013).
+    /// </summary>
+    public bool HasCoilAverageWeight => !string.IsNullOrWhiteSpace(CoilAverageWeight);
+
+    partial void OnCoilAverageWeightChanged(string value) => OnPropertyChanged(nameof(HasCoilAverageWeight));
 
     [ObservableProperty]
     public partial bool IsSubmitting

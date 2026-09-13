@@ -71,8 +71,9 @@
 - **A clear message if the database is unavailable.** The screen shows "Database unavailable" with a
   **Try again** button, and it clears itself as soon as the database answers again.
 - **The green + button** in the bottom-right corner starts a new request.
-- ⚠️ **The Cancel (✕) and Accept (✓) buttons on each card do nothing.** Every card shows them, but
-  neither is connected to anything yet, so pressing them has no effect at all — see
+- ⚠️ **The Cancel (✕) and Accept (✓) buttons are gone from the cards, because they did nothing.** A
+  control that cannot act is no longer offered, and the card shows the request's real status instead. The
+  working Accept/Complete/Release actions are owned by the handler-fulfilment specification — see
   `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`.
 
 ## 4. Waitlist — request detail
@@ -91,9 +92,10 @@
 - **A plain note about the remaining time** — the page says "Does not update automatically", because
   the number is worked out when the page opens and does not tick while you sit on it.
 - **"Nothing to show"** with a short reason when there is no request to display.
-- ⚠️ **The material values on this page are not real.** Coil numbers, part numbers, quantities,
-  customers, vendors and traceability numbers are fixed text built into the app rather than read from
-  the request or from Infor Visual — see
+- ⚠️ **This page no longer shows material values it cannot source.** The coil number, part numbers,
+  quantities, customer, packlist, vendor, destination and die values that used to be fixed text built
+  into the app are gone; a value with no read behind it is simply not shown, and a read that fails shows
+  the failure in place with a retry. The real values are owned by the item-resolution workstream — see
   `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md`.
 
 ## 5. Waitlist — creating a request
@@ -107,16 +109,18 @@
   not from a file shipped with the app.
 - **Add the details** — a short multi-line description of what you need.
 - **Preview, then Confirm.** Preview reads everything back before you continue. Confirm shows the
-  request summary, plus a **Coil details** section for coil requests (requested coil, quantity in
-  house, coil description, average coil weight), and refuses a duplicate or a request whose current
-  job has changed.
-- ⚠️ **The "Queue & wait time" section on Confirm is not real.** It always reads "0 active request(s)
-  for this work center." and "Estimated wait time: approximately 15 minutes." no matter how busy the
-  work center is — see `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md`.
+  request summary and refuses a duplicate or a request whose current job has changed. The **Coil
+  details** section (requested coil, quantity in house, coil description, average coil weight) was
+  removed — nothing on that screen could source those values, so they are not shown. Restoring them is
+  owned by the item-resolution workstream.
+- ⚠️ **The "Queue & wait time" section on Confirm is gone, because it was not real.** It always read
+  the same figure no matter how busy the work center was, so the card was removed rather than shown. Any
+  substantiated queue count or wait estimate is owned by the analytics specification — see
+  `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md`.
 - **Finish.** The last screen confirms the outcome and offers **Add Another Request** or **Return to
   Waitlist**; if something went wrong it offers **Retry** and **Close**.
-- ⚠️ **New-request alerts cannot ring in this installation.** The setting exists, but the app is
-  installed in a way that Windows notifications do not support, so no alert is ever raised — see
+- ⚠️ **New-request alerts cannot ring in this installation, and the switch now says so.** The setting is
+  disabled and explains why, instead of accepting a preference the app cannot honour — see
   `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
 
 ## 6. Work Center Setup
@@ -163,11 +167,11 @@
   Nothing is substituted for your data, and the message clears itself once the database answers.
 - **WIP floor quantities** are read live from the WIP application so pickup decisions use the real floor
   picture; if that read is unavailable the app falls back to the Infor-only figures rather than guessing.
-- **Average coil weight** comes from the receiving history, so the figure reflects coils actually
-  received.
-- ⚠️ **But that average is looked up for the wrong coil.** It is always fetched for one fixed part, so
-  every coil request shows the same figure; if that part has no history the screen falls back to a fixed
-  "5,000 lb". See `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md`.
+- ⚠️ **Average coil weight is not shown, and the fixed figure is gone.** It used to be fetched for one
+  fixed part and fell back to a fixed "5,000 lb", so it never described the coil on the request; the
+  lookup and the fallback were removed and no value is shown. Resolving it per coil is owned by the
+  item-resolution workstream — see
+  `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md`.
 
 ## 8. Settings
 
@@ -175,9 +179,9 @@
 
 - **App theme** — Light, Dark or Default, for the whole app.
 - **Search box** — filters which settings panels are shown, each panel matching on its own keywords
-  (for example "appearance", "theme", "version", "privacy"). ⚠️ Three panels — Image Location Settings,
-  New Request Alerts and Max Allotted Time — do not re-evaluate when the search changes, so they ignore
-  it — see `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md`.
+  (for example "appearance", "theme", "version", "privacy"). Every search-aware panel re-evaluates when
+  the search changes, including Image Location Settings, New Request Alerts and Max Allotted Time — see
+  `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md`.
 
 **Operations**
 
@@ -192,8 +196,9 @@
   computer name, hardware address, description, active or not). For Admin and Developer.
 - **Ignored Infor Visual Locations** — keep the list of locations left out of inventory lists and totals
   (for example WC, NCM, V-WC, NCM-VITS, SHIP). For roles above Material Handler.
-- **New Request Alerts** — a personal switch (off by default) for the new-request alert. ⚠️ It cannot
-  work in this installation — see `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
+- **New Request Alerts** — a personal switch (off by default) for the new-request alert. ⚠️ It is disabled
+  in this installation, and says why, because the app as installed cannot deliver a notification — see
+  `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
 - **Max Allotted Time** — how long each request sub-type should reasonably take, which drives the due
   time and the overdue countdown. Plant Manager and above can change it; everyone else can see it.
 - **Cached Infor Visual data** — ask the cache service on the server to rebuild the cached Infor Visual
@@ -203,22 +208,26 @@
 **About**
 
 - **App version** — the version you are running.
-- **About MTM Waitlist** — a short description and a **Privacy Policy** link. ⚠️ The link points at an
-  unfinished placeholder address, so it does not open a real policy — see
+- **About MTM Waitlist** — a short description. The **Privacy Policy** link was removed: it pointed at
+  an unfinished placeholder address, and an app that cannot open a real policy does not offer one — see
   `defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md`.
-- ⚠️ The three headings in this area all read "About this application", because they share one label —
-  see `defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md`.
+- **Each heading in this area now shows its own text** — the section header, the version card and the
+  about card each have their own label, instead of all three reading "About this application" — see
+  `defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md`.
 
 ## 9. Notifications
 
 - **A new-request alert.** When a request is submitted, a notification titled "New Waitlist Request"
   naming the work center and request type is raised for users who have switched alerts on (off by
   default). Tapping it is meant to open that request.
-- ⚠️ **It cannot ring in this installation.** The alert needs the app installed in the way Windows
-  notifications require, and this app is installed differently, so no alert is ever shown — see
+- ⚠️ **It cannot ring in this installation, and the surface says so instead of promising otherwise.** The
+  alert needs the app installed in the way Windows notifications require, and this app is installed
+  differently; making it arrive is owned by the notification-delivery specification — see
   `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
-- ⚠️ **And if it did ring, tapping it while the app is already open shows a "TODO" message** instead of
-  the request — see `defects/Low-Notifications-ToastActivationShowsTodoDialog.md`.
+- ⚠️ **Tapping a notification no longer shows an internal "TODO" message.** The placeholder dialogs were
+  deleted: a recognised tap opens the request, and an unrecognised one does nothing visible and is recorded
+  for diagnosis. Proving it on a delivered notification is owned by the notification-delivery specification
+  — see `defects/Low-Notifications-ToastActivationShowsTodoDialog.md`.
 
 ## 10. The cache service (a separate small app that runs on the database server)
 
@@ -286,8 +295,11 @@ claim that everything works.
 
 - **Accept, Complete and Release — the handler's side of the job — are not available.** The app knows
   the status of every request and records what happens, but the buttons a handler would use to pick up
-  and finish a request are not wired (the two buttons you can see on a card do nothing). Editing a
-  request's note is also not available.
+  and finish a request are not wired, so the card no longer offers them. Editing a request's note is also
+  not available.
+- **The material attributes on a request are not yet sourced.** Coil, part, quantity, customer, vendor and
+  destination values have no read behind them yet, so the card and detail page show only what the request
+  itself carries; the item-resolution workstream restores the rest.
 - **The hidden-locations list is not applied everywhere.** It is respected in the Setup location lookup
   and in the detail page's inventory list, but not yet across the Waitlist/Coil lists, the "Quantity in
   house" totals, and the Setup location lists.
@@ -301,21 +313,22 @@ claim that everything works.
 
 ### Defects found while building this inventory
 
-Each of these has its own file in `defects/` with the evidence needed to fix it. They are listed here
-because they affect features described above.
+Each of these has its own file in `defects/` with the evidence needed to fix it. This feature closes all
+ten; a ⚠️ marks the ones where a follow-on specification owns the remainder, and each row names the checks
+that prove the closure.
 
-| Criticality | Defect | Affected feature |
-| --- | --- | --- |
-| Critical | `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` — card and detail fields show hard-coded coil/part/quantity/customer/vendor values | Waitlist cards, request detail |
-| High | `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` — the Cancel and Accept buttons on every card do nothing | Waitlist cards |
-| High | `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — confirm screen always reads "0 active request(s)" / "~15 minutes" | New Request confirm step |
-| High | `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` — the average is always looked up for the sample coil part `MMC0001000` | Coil cards and detail |
-| Medium | `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` — the alerts toggle cannot fire in the shipped unpackaged app | Settings, notifications |
-| Medium | `defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` — three labels share one resource key, so all three read "About this application" | Settings → About |
-| Low | `defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` — the Privacy Policy link points at `YourPrivacyUrlGoesHere` | Settings → About |
-| Low | `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md` — three panels do not re-evaluate when the settings search changes | Settings search |
-| Low | `defects/Low-Localization-RetiredMockWordingStillShips.md` — "Setup saved using sample data" string and stale sample/mock comments | Setup result, code docs |
-| Low | `defects/Low-Notifications-ToastActivationShowsTodoDialog.md` — tapping a toast while the app runs shows a "TODO" dialog | Notifications |
+| Criticality | Defect | Affected feature | Status |
+| --- | --- | --- | --- |
+| Critical | `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` — card and detail fields show hard-coded coil/part/quantity/customer/vendor values | Waitlist cards, request detail | **Closed by `specs/002-truthful-data-and-controls`** — T005/T009/T010/T012 with the T015 verification: the literals are gone and no substitute renders. ⚠️ The real values are owned by the item-resolution workstream. |
+| High | `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` — the Cancel and Accept buttons on every card do nothing | Waitlist cards | **Closed by `specs/002`** — T007/T011: the buttons are gone and the real status is shown. ⚠️ Working actions are owned by the handler-fulfilment specification. |
+| High | `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — confirm screen always reads "0 active request(s)" / "~15 minutes" | New Request confirm step | **Closed by `specs/002`** — T016/T019: the fabricated card is deleted. ⚠️ Any substantiated figure is owned by the analytics specification. |
+| High | `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` — the average is always looked up for the sample coil part `MMC0001000` | Coil cards and detail | **Closed by `specs/002`** — T017/T020: the fixed-part lookup and its `5,000 lb` fallback are removed and nothing is shown. ⚠️ Per-coil resolution is owned by the item-resolution workstream. |
+| Medium | `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` — the alerts toggle cannot fire in the shipped unpackaged app | Settings, notifications | **Closed by `specs/002`** — T018/T021/T022: the switch is disabled with the reason and no preference is stored. ⚠️ Delivery is owned by the notification-delivery specification. |
+| Medium | `defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` — three labels share one resource key, so all three read "About this application" | Settings → About | **Closed by `specs/002`** — T024/T027: each element has its own key and its own resource entry. |
+| Low | `defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` — the Privacy Policy link points at `YourPrivacyUrlGoesHere` | Settings → About | **Closed by `specs/002`** — T028: the link and its resource entries are removed; T026's placeholder scan is the standing check. |
+| Low | `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md` — three panels do not re-evaluate when the settings search changes | Settings search | **Closed by `specs/002`** — T025/T029/T030: the three panels are registered and the coverage check fails on the next unregistered one. |
+| Low | `defects/Low-Localization-RetiredMockWordingStillShips.md` — "Setup saved using sample data" string and stale sample/mock comments | Setup result, code docs | **Closed by `specs/002`** — T037/T038 with T036's wording scan as the standing check: the orphan entry and the stale comments are gone. |
+| Low | `defects/Low-Notifications-ToastActivationShowsTodoDialog.md` — tapping a toast while the app runs shows a "TODO" dialog | Notifications | **Closed by `specs/002`** — T032/T033/T034: the placeholder dialogs are deleted and one shared deep-link helper handles activation. ⚠️ Proving it on a delivered notification is owned by the notification-delivery specification. |
 
 ---
 
