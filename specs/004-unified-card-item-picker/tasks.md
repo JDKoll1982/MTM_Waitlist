@@ -569,18 +569,18 @@ choice came back (SC-009).
 
 ### Tests — write these first; they must fail before the implementation lands
 
-- [ ] **T072** [P] [US3] Extend `UrgencyCalculatorTests`: the five order keys — most urgent (the default), longest
+- [x] **T072** [P] [US3] Extend `UrgencyCalculatorTests`: the five order keys — most urgent (the default), longest
   waiting, press, requested by, status — each produce the expected order, and an overdue row stays visibly marked
   under every one of them (FR-010, FR-012). Include the case that makes "longest waiting" and "most urgent"
   demonstrably different orders: two requests raised at the same instant for Items with different allotted minutes
   have waited equally but are **not** equally urgent. ·
   `MTM_Waitlist.Tests/Core/Services/UrgencyCalculatorTests.cs`
-- [ ] **T073** [P] [US3] Add `WaitlistSortPreferenceServiceTests`: the default on first run is most urgent; each of
+- [x] **T073** [P] [US3] Add `WaitlistSortPreferenceServiceTests`: the default on first run is most urgent; each of
   the five keys round-trips through `ILocalSettingsService`; the value survives a service re-construction, which is
   the unit-level stand-in for surviving a restart (SC-009). *Test file placed under `Module_Core/` per the test
   conventions' `Module_<Area>` rule for new files; `plan.md` spelled this one under the older `Services/` folder.* ·
   new `MTM_Waitlist.Tests/Module_Core/Services/WaitlistSortPreferenceServiceTests.cs`
-- [ ] **T074** [P] [US3] Extend `WaitlistViewViewModelActionTests`: the list applies the **remembered** order on load,
+- [x] **T074** [P] [US3] Extend `WaitlistViewViewModelActionTests`: the list applies the **remembered** order on load,
   and switching the order does not disturb the action affordances or the overdue marking. ·
   `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs`
 
@@ -588,9 +588,9 @@ choice came back (SC-009).
 
 **Wave 1 — the per-viewer preference, independent (different files):**
 
-- [ ] **T075** [P] [US3] Add `IWaitlistSortPreferenceService` — read/write one of the five option keys for the
+- [x] **T075** [P] [US3] Add `IWaitlistSortPreferenceService` — read/write one of the five option keys for the
   current viewer, defaulting to most urgent. · new `MTM_Waitlist.Core/Contracts/Services/IWaitlistSortPreferenceService.cs`
-- [ ] **T076** [P] [US3] Add `WaitlistSortPreferenceService` over the existing `ILocalSettingsService` — **not** a new
+- [x] **T076** [P] [US3] Add `WaitlistSortPreferenceService` over the existing `ILocalSettingsService` — **not** a new
   table and not the database (§D7), following the scalar-key style `UrgencySettingsService` already uses so it works
   in both the MSIX and unpackaged branches, and the small-store pattern `LocalWaitlistMessageSeenStore` establishes. ·
   new `MTM_Waitlist.Core/Services/WaitlistSortPreferenceService.cs`
@@ -599,7 +599,7 @@ choice came back (SC-009).
 
 **Wave 2 — the four new order keys (single task):**
 
-- [ ] **T077** [US3] Extend `UrgencyCalculator` with the four additional order keys beside `OrderMostUrgentFirst` and
+- [x] **T077** [US3] Extend `UrgencyCalculator` with the four additional order keys beside `OrderMostUrgentFirst` and
   **keep that method as the default path** (§D8). Every order key reads a value the row already carries for the card
   — `UrgencyState`, requested-by, press, status — so no ordering rule adds a data read. ·
   `MTM_Waitlist.Core/Services/UrgencyCalculator.cs`
@@ -608,7 +608,7 @@ choice came back (SC-009).
 
 **Wave 3 — the list applies the preference (single task):**
 
-- [ ] **T078** [US3] Update `WaitlistViewViewModel` to order the rows through the remembered sort key and to re-apply
+- [x] **T078** [US3] Update `WaitlistViewViewModel` to order the rows through the remembered sort key and to re-apply
   it after every refresh, so the order is identical when the list reloads. ·
   `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs`
 
@@ -616,11 +616,11 @@ choice came back (SC-009).
 
 **Wave 4 — the shell control, independent (different files):**
 
-- [ ] **T079** [P] [US3] Add the sort control to the shell beside the existing My Requests and building controls
+- [x] **T079** [P] [US3] Add the sort control to the shell beside the existing My Requests and building controls
   (FR-011) as a `MenuFlyout` of `RadioMenuFlyoutItem` elements sharing a `GroupName` with `IsChecked` on the selected
   one — the documented WinUI 3 mechanism for mutually exclusive menu options. Every item's `Text` binds to a
   localized resource. · `Module_Core/Views/ShellPage.xaml`
-- [ ] **T080** [P] [US3] Add the sort control's state and its preference write to `ShellViewModel`: the five options
+- [x] **T080** [P] [US3] Add the sort control's state and its preference write to `ShellViewModel`: the five options
   in order (most urgent, longest waiting, press, requested by, status), the selected one, and the command that
   persists it for the viewer. Remember the `[RelayCommand]` stripping rule when the command is named. ·
   `ViewModels/ShellViewModel.cs`
@@ -629,9 +629,9 @@ choice came back (SC-009).
 
 **Wave 5 — registration and resources, independent (different files):**
 
-- [ ] **T081** [P] [US3] Register `IWaitlistSortPreferenceService` → `WaitlistSortPreferenceService` in the
+- [x] **T081** [P] [US3] Register `IWaitlistSortPreferenceService` → `WaitlistSortPreferenceService` in the
   composition root. · `Services/DependencyInjection/ServiceRegistrationExtensions.cs`
-- [ ] **T082** [P] [US3] Add the five sort option labels and the flyout's own label through the resource mechanism
+- [x] **T082** [P] [US3] Add the five sort option labels and the flyout's own label through the resource mechanism
   (FR-022). · `Strings/en-us/Resources.resw`
 
 **Checkpoint — US3 is independently functional and testable.** The list defaults to most urgent, the shell control
@@ -649,7 +649,7 @@ and confirm the flow reflects it with no code change and no rebuild (SC-006).
 
 ### Tests — write these first; they must fail before the implementation lands
 
-- [ ] **T083** [P] [US4] Add `RequestItemConfigurationServiceTests`: fields are read from configuration **in the
+- [x] **T083** [P] [US4] Add `RequestItemConfigurationServiceTests`: fields are read from configuration **in the
   declared order**, with the right value types and labels (FR-013) — the **mechanism**, never today's contents
   (FR-015). Include the three failure paths: a catalogued Item with no row is reported unavailable (FR-014); a row
   naming an Item that is not in the catalog is ignored and never offered; a malformed `detail_fields_json` or
@@ -657,7 +657,7 @@ and confirm the flow reflects it with no code change and no rebuild (SC-006).
   **Swap the field set in the fake and assert the render follows** — that negative test is what stops the next
   spreadsheet change from becoming a build failure. · new
   `MTM_Waitlist.Tests/Module_Settings/Services/RequestItemConfigurationServiceTests.cs`
-- [ ] **T084** [P] [US4] Extend `WaitlistViewDetailFieldTests`: the detail view renders whatever fields the
+- [x] **T084** [P] [US4] Extend `WaitlistViewDetailFieldTests`: the detail view renders whatever fields the
   configuration declares, in order, with the declared value types and labels, and **no test in this class asserts a
   frozen field list**. · `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewDetailFieldTests.cs`
 
@@ -665,7 +665,7 @@ and confirm the flow reflects it with no code change and no rebuild (SC-006).
 
 **Wave 1 — the declared-fields payload (single task; adds to the file T025 created):**
 
-- [ ] **T085** [US4] Add the declared-fields layer to `RequestItemConfigurationService`: deserialize
+- [x] **T085** [US4] Add the declared-fields layer to `RequestItemConfigurationService`: deserialize
   `detail_fields_json` and `options_json` with `System.Text.Json` **in the application** (§D13 — the schema targets
   MySQL 5.7, where `JSON_TABLE` is unavailable, and this is the pattern `RequestTypeCatalogService` already used for
   its own JSON column), validate each field's declared order, value type and label, and report a malformed payload as
@@ -676,7 +676,7 @@ and confirm the flow reflects it with no code change and no rebuild (SC-006).
 
 **Wave 2 — the detail view renders what the data declares, independent (different files):**
 
-- [ ] **T086** [P] [US4] Update `WaitlistViewDetailViewModel` and the detail page to render the declared fields in
+- [x] **T086** [P] [US4] Update `WaitlistViewDetailViewModel` and the detail page to render the declared fields in
   declared order with their declared types and labels, sized by the field count (T070 owns the grid's layout; this
   task owns the data binding). Any new converter goes into `App.xaml` in this same change (constitution V). ·
   `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs`,
@@ -686,7 +686,7 @@ and confirm the flow reflects it with no code change and no rebuild (SC-006).
 
 **Wave 3 — the changeability proof (single task):**
 
-- [ ] **T087** [US4] Demonstrate SC-006 and record it: change one Item's configuration **in the store only** — add a
+- [x] **T087** [US4] Demonstrate SC-006 and record it: change one Item's configuration **in the store only** — add a
   declared field, change a length limit, add an enumerated option — and confirm the flow reflects the change with
   **no code change and no rebuild**. Evidence: the row edit, the resulting flow, and an unchanged source tree. ·
   `Database/Seeds/seed_waitlist_request_item_configs/create.sql` (the row the demonstration edits, restored after)

@@ -143,6 +143,25 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     /// <summary>Whether the declared-field grid has anything to draw. A grid with nothing to show is hidden.</summary>
     public bool HasDeclaredFields => DeclaredFieldRows.Count > 0;
 
+    /// <summary>
+    /// Plain-language report of a configuration this page cannot use, or empty when the configuration read
+    /// cleanly. A configuration that cannot be read says so here rather than quietly drawing fewer fields
+    /// (FR-026).
+    /// </summary>
+    [ObservableProperty]
+    public partial string DeclaredFieldsReport { get; private set; } = string.Empty;
+
+    /// <summary>Whether there is a configuration problem to report.</summary>
+    public bool HasDeclaredFieldsReport => !string.IsNullOrWhiteSpace(DeclaredFieldsReport);
+
+    partial void OnDeclaredFieldsReportChanged(string value) => OnPropertyChanged(nameof(HasDeclaredFieldsReport));
+
+    /// <summary>
+    /// Whether the declared-field block is drawn at all: it carries either the Item's own fields or the reason
+    /// they are not there. An empty block is hidden rather than drawn as a titled shell.
+    /// </summary>
+    public bool IsDeclaredFieldsSectionVisible => HasDeclaredFields || HasDeclaredFieldsReport;
+
     /// <summary>Localized heading of the declared-field grid (FR-022).</summary>
     public string DeclaredFieldsTitle => "Waitlist_Detail.DeclaredFields.Title".GetLocalized();
 
@@ -653,7 +672,9 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     private async Task LoadDeclaredFieldRowsAsync()
     {
         DeclaredFieldRows.Clear();
+        DeclaredFieldsReport = string.Empty;
         OnPropertyChanged(nameof(HasDeclaredFields));
+        OnPropertyChanged(nameof(IsDeclaredFieldsSectionVisible));
 
         var item = Item;
         if (item is null || _itemConfigurationService is null || string.IsNullOrWhiteSpace(item.ItemCode))
@@ -666,6 +687,15 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             var configuration = await _itemConfigurationService
                 .GetConfigurationAsync(item.ItemCode)
                 .ConfigureAwait(true);
+
+            if (!configuration.IsAvailable)
+            {
+                // The Item's configuration cannot be used, so the page states that plainly instead of drawing
+                // a grid with fields missing from it (FR-026).
+                DeclaredFieldsReport = configuration.UnavailableMessage;
+                return;
+            }
+
             var request = ResolveRequest(item);
 
             var declared = configuration.DetailFields
@@ -673,6 +703,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
                 .Select(field => new WaitlistDetailTemplateField
                 {
                     Label = field.Label,
+                    ValueType = field.ValueType,
                     Value = ResolveDeclaredFieldValue(field, item, request) ?? string.Empty,
                 })
                 .Where(field => !string.IsNullOrWhiteSpace(field.Label) && !string.IsNullOrWhiteSpace(field.Value))
@@ -686,14 +717,16 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         catch (Exception ex)
         {
             DeclaredFieldRows.Clear();
+            DeclaredFieldsReport = SectionFailureMessage;
             StartupDebugLog.Error(
                 "WaitlistDetail",
                 ex,
-                "The declared-field grid could not be read; the page draws no field rows rather than a substitute.");
+                "The declared-field grid could not be read; the page reports the failure rather than drawing a substitute.");
         }
         finally
         {
             OnPropertyChanged(nameof(HasDeclaredFields));
+            OnPropertyChanged(nameof(IsDeclaredFieldsSectionVisible));
         }
     }
 

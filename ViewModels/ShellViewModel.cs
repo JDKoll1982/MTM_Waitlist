@@ -22,6 +22,7 @@ namespace MTM_Waitlist.ViewModels;
 public partial class ShellViewModel : ObservableRecipient
 {
     private readonly IBuildingSelectionService _buildingSelectionService;
+    private readonly IWaitlistSortPreferenceService _sortPreferenceService;
     private readonly SetupWorkflowState _setupWorkflowState;
     private readonly StartupState _startupState;
     private Type? _currentPageType;
@@ -121,6 +122,79 @@ public partial class ShellViewModel : ObservableRecipient
     partial void OnShowMyRequestsOnlyChanged(bool value) => OnPropertyChanged(nameof(MyRequestsFilterLabel));
 
     /// <summary>
+    /// The order the list is currently shown in, as one of the five <see cref="WaitlistSortOrder"/> keys
+    /// (FR-011). It starts at the default the list itself starts at, and picks up the viewer's remembered
+    /// choice from the list when that screen comes up.
+    /// </summary>
+    [ObservableProperty]
+    public partial string SelectedSortOrder
+    {
+        get; set;
+    } = WaitlistSortOrder.MostUrgent;
+
+    /// <summary>Label of the control itself (FR-022).</summary>
+    public string SortOrderLabel => "Shell_SortOrder.Label".GetLocalized();
+
+    /// <summary>
+    /// The five orders the control offers, in the order it offers them, each resolved through the resource
+    /// mechanism (FR-011, FR-022).
+    /// </summary>
+    public string SortOrderMostUrgentLabel => "Shell_SortOrder.MostUrgent".GetLocalized();
+
+    public string SortOrderLongestWaitingLabel => "Shell_SortOrder.LongestWaiting".GetLocalized();
+
+    public string SortOrderPressLabel => "Shell_SortOrder.Press".GetLocalized();
+
+    public string SortOrderRequestedByLabel => "Shell_SortOrder.RequestedBy".GetLocalized();
+
+    public string SortOrderStatusLabel => "Shell_SortOrder.Status".GetLocalized();
+
+    /// <summary>
+    /// Applies the order the viewer just chose and remembers it for them (FR-011). The list itself is told by
+    /// the shell page, because it is the page that holds the active waitlist view model.
+    /// </summary>
+    public void ApplySortOrder(string? sortOrder)
+    {
+        var normalized = WaitlistSortOrder.Normalize(sortOrder);
+        if (string.Equals(SelectedSortOrder, normalized, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        SelectedSortOrder = normalized;
+        _ = PersistSortOrderAsync(normalized);
+    }
+
+    /// <summary>
+    /// Shows the order the list resolved for this viewer without writing it back — used when the list reports
+    /// the choice it read, so the control opens on the option that is actually in force.
+    /// </summary>
+    public void SyncSortOrder(string? sortOrder)
+    {
+        var normalized = WaitlistSortOrder.Normalize(sortOrder);
+        if (!string.Equals(SelectedSortOrder, normalized, StringComparison.Ordinal))
+        {
+            SelectedSortOrder = normalized;
+        }
+    }
+
+    /// <summary>
+    /// Remembers the choice for the viewer. A preference that cannot be written costs the viewer their choice
+    /// next time, so it is reported rather than swallowed (FR-026); it never blocks the list.
+    /// </summary>
+    private async Task PersistSortOrderAsync(string sortOrder)
+    {
+        try
+        {
+            await _sortPreferenceService.SetSortOrderAsync(sortOrder);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("ShellViewModel", ex, $"The sort order '{sortOrder}' could not be remembered; the list is still ordered by it.");
+        }
+    }
+
+    /// <summary>
     /// Ordered steps shown in the shell header stepper while a multi-step
     /// workflow (Work Center Setup or New Request) is active.
     /// </summary>
@@ -167,18 +241,21 @@ public partial class ShellViewModel : ObservableRecipient
         INavigationViewService navigationViewService,
         IBuildingSelectionService buildingSelectionService,
         SetupWorkflowState setupWorkflowState,
-        StartupState startupState)
+        StartupState startupState,
+        IWaitlistSortPreferenceService sortPreferenceService)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(navigationViewService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
         ArgumentNullException.ThrowIfNull(setupWorkflowState);
         ArgumentNullException.ThrowIfNull(startupState);
+        ArgumentNullException.ThrowIfNull(sortPreferenceService);
 
         NavigationService = navigationService;
         NavigationService.Navigated += OnNavigated;
         NavigationViewService = navigationViewService;
         _buildingSelectionService = buildingSelectionService;
+        _sortPreferenceService = sortPreferenceService;
         _setupWorkflowState = setupWorkflowState;
         _setupWorkflowState.PropertyChanged += OnSetupWorkflowStateChanged;
         _startupState = startupState;

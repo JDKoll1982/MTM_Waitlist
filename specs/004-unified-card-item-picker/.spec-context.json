@@ -642,10 +642,138 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-13T21:26:11.468Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T072",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:33:35.247Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T073",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:33:35.517Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T074",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:33:35.778Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T075",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:33:36.038Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T076",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:33:36.295Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T077",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:33:36.555Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T078",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:33:36.809Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T079",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:36:01.586Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T080",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:36:01.857Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T081",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:36:02.114Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T082",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:36:02.373Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T083",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:43:25.877Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T084",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:43:26.140Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T085",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:43:26.401Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T086",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:43:26.664Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T087",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T21:49:37.309Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
-  "last_action": "US1 wizard reshape landed and builds 0/0; test gate red at 10 seam failures (card/detail layer owned by US2)",
+  "last_action": "T087 done - SC-006 demonstrated and reversed; Phase 6 complete, next open task is T088 (Phase 7)",
   "coverage": {
     "FR-001": {
       "title": "A person raising a request MUST choose a Category, and then an Item, in that order.",
@@ -749,6 +877,11 @@
         "T076",
         "T077",
         "T078"
+      ],
+      "tests": [
+        "Core/Services/UrgencyCalculatorTests.cs::OrderBy_MostUrgent_IsWhatNothingRememberedAndTheDefaultKeyBothGive",
+        "Module_Core/Services/WaitlistSortPreferenceServiceTests.cs::GetSortOrder_FirstRun_IsMostUrgent",
+        "Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::List_NothingRemembered_LeadsWithTheMostUrgentRow"
       ]
     },
     "FR-011": {
@@ -758,6 +891,10 @@
         "T079",
         "T080",
         "T081"
+      ],
+      "tests": [
+        "Module_Core/Services/WaitlistSortPreferenceServiceTests.cs::SetSortOrder_EachOfTheFiveKeys_SurvivesAServiceReconstruction",
+        "Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::List_AppliesTheRememberedOrder_OnLoad"
       ]
     },
     "FR-012": {
@@ -768,6 +905,10 @@
         "T072",
         "T074",
         "T078"
+      ],
+      "tests": [
+        "Core/Services/UrgencyCalculatorTests.cs::OrderBy_EveryOrder_LeavesAnOverdueRowMarkedAndAheadOfItsPeers",
+        "Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::ApplySortOrder_SwitchingTheOrder_KeepsEveryAffordanceAndTheOverdueMarking"
       ]
     },
     "FR-013": {
@@ -780,6 +921,10 @@
         "T083",
         "T085",
         "T086"
+      ],
+      "tests": [
+        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::GetConfigurationsAsync_ReadsTheDeclaredFieldsInDeclaredOrder_WithTheirTypesAndLabels",
+        "Module_Waitlist/ViewModels/WaitlistViewDetailFieldTests.cs::DeclaredFields_AreDrawnInDeclaredOrder_WithTheirDeclaredTypesAndLabels"
       ]
     },
     "FR-014": {
@@ -791,6 +936,9 @@
         "T035",
         "T041",
         "T083"
+      ],
+      "tests": [
+        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::GetConfigurationsAsync_CataloguedItemWithNoRow_IsReportedUnavailableInPlainLanguage"
       ]
     },
     "FR-015": {
@@ -799,6 +947,10 @@
         "T083",
         "T085",
         "T087"
+      ],
+      "tests": [
+        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::GetConfigurationsAsync_ADifferentDeclaredFieldSet_IsReadInsteadOfTheOneBefore",
+        "Module_Waitlist/ViewModels/WaitlistViewDetailFieldTests.cs::DeclaredFields_ADifferentDeclaredSet_IsDrawnInsteadOfTheOneBefore"
       ]
     },
     "FR-016": {
@@ -888,6 +1040,9 @@
         "T025",
         "T027",
         "T093"
+      ],
+      "tests": [
+        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::GetConfigurationsAsync_ReadsThroughItsOwnStoredProcedure"
       ]
     },
     "FR-025": {
@@ -922,6 +1077,10 @@
         "T083",
         "T085",
         "T091"
+      ],
+      "tests": [
+        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::GetConfigurationsAsync_MalformedDetailFieldsJson_IsReportedAndNeverThrown",
+        "Module_Waitlist/ViewModels/WaitlistViewDetailFieldTests.cs::DeclaredFields_AnUnreadableConfiguration_IsReportedInPlainLanguageRatherThanDrawnEmpty"
       ]
     },
     "FR-027": {
@@ -1082,6 +1241,31 @@
       "decision": "Removed the card per-type label badge (BadgeText/BadgeBackgroundBrush) and kept a single neutral accent for every row",
       "why": "Its only sources were the per-type wrapper views that T066/T067 delete, and the retired COIL/FG/NCM/O/S/WIP/SCRAP labels are exactly the vocabulary this feature retires; the contract retained-element list does not include it",
       "rejected": "Keeping the badge with per-Item labels, which would have re-introduced a per-Item ornament the one-card rule forbids"
+    },
+    {
+      "decision": "The five sort options are five declarative RadioMenuFlyoutItems, with the key each stands for in its Tag and its ticked state set from ShellViewModel when the menu opens",
+      "why": "MenuFlyout has no ItemsSource (verified against the Windows App SDK 2.0 API reference for MenuFlyout and MenuFlyoutSubItem), so a data-driven flyout was not available; setting the tick in code on Opening keeps the interaction on the same code-behind pattern the My Requests toggle already uses",
+      "rejected": "A two-way IsChecked binding through a converter with a ConverterParameter per option, and five option properties on the view model"
+    },
+    {
+      "decision": "RequestItemConfigurationService returns declared fields ordered by the payload order value, and treats an unreadable detail_fields_json or options_json as an unavailable Item with its own plain-language report",
+      "why": "The declared order is the order value the configuration carries, and a payload that cannot be read must not be presented as a usable configuration or half-applied (FR-013, FR-026)",
+      "rejected": "Returning the payload array order and letting each consumer sort; returning an empty field list on a malformed payload"
+    },
+    {
+      "decision": "The five sort options are five declarative RadioMenuFlyoutItems, carrying the key each stands for in its Tag, with the ticked option set from ShellViewModel when the menu opens",
+      "why": "MenuFlyout has no ItemsSource, verified against the Windows App SDK 2.0 API reference for MenuFlyout and MenuFlyoutSubItem, so a data-driven flyout was not available; setting the tick on Opening keeps the interaction on the same code-behind pattern the existing My Requests toggle uses",
+      "rejected": "A two-way IsChecked binding through a converter with a ConverterParameter per option, or five option properties on the view model"
+    },
+    {
+      "decision": "Five declarative RadioMenuFlyoutItems carry their key in Tag; the ticked one is set from ShellViewModel on Opening",
+      "why": "MenuFlyout has no ItemsSource, verified against the Windows App SDK 2.0 API reference, and this keeps the interaction on the pattern the My Requests toggle already uses",
+      "rejected": "A two-way IsChecked converter binding with a ConverterParameter per option"
+    },
+    {
+      "decision": "The configuration read returns declared fields ordered by the payload order value, and an unreadable detail_fields_json or options_json makes the Item unavailable with its own plain-language report",
+      "why": "The declared order is the order the configuration carries, and a payload that cannot be read must not be half-applied or presented as usable (FR-013, FR-026)",
+      "rejected": "Returning payload array order and letting each consumer sort; returning an empty field list on a malformed payload"
     }
   ],
   "step_summaries": {
@@ -1093,7 +1277,10 @@
       "summary": "117 tasks across 8 phases (Setup 3, Foundational 29, US1 23, US2 16, US3 11, US4 5, US5 13, Polish 17), laid out as 51 dependency-ordered waves with explicit join points"
     },
     "implement": {
-      "summary": "Phase 1 and Phase 2 waves 1-4 delivered: the FR-027 guard, the six new stored artifacts, the request re-key, the observed-average read, the rewritten seed and the four master files - 16 of 117 tasks, build and suite green"
+      "summary": "Phase 5 (US3) and Phase 6 (US4) delivered: the five list orders with most urgent as the default, the per-viewer remembered sort and its shell control, and the declared-fields layer read, validated and rendered from stored configuration with an SC-006 store-only demonstration. 87 of 117 tasks; build 0 warnings / 0 errors; suite 956 passed / 0 failed / 26 skipped."
+    },
+    "specify": {
+      "summary": "spec.md: the Category/Item feature as WHAT and WHY - five user stories (raise a request by Category then Item, one card for every request, sort the list, an Item that is configured not coded, minutes and pictures), FR-001 to FR-032 and SC-001 to SC-012, with the retired type/subtype vocabulary removed and the configuration spreadsheet named as a design document only (FR-027)."
     }
   },
   "concerns": [
@@ -1137,9 +1324,25 @@
     {
       "note": "The declared-field grid renders rows only for fields whose value the request itself carries, so on todays data it is usually empty (most seeded fields declare source job). That is the no-placeholder rule working as specified, not a defect, but it means the full-width lone-field behaviour is proven by unit test rather than visible in the app until item-resolution supplies job values.",
       "step": "implement"
+    },
+    {
+      "note": "The store half of SC-006 had to be demonstrated by applying the feature own table, read procedure and seed to the local mtm_waitlist database, because the local store had not been reinstalled from seed and the application pins the canonical database name regardless of the connection string database= segment. The row was restored from the seed and the table and procedure were dropped afterwards; the local database is back to its pre-demonstration schema.",
+      "step": "implement"
+    },
+    {
+      "note": "The shell sort control runtime behaviour (menu open, ticked option, click re-ordering the list) could not be exercised in the running app: the configured store host is unreachable from this workstation and no signed-in session was available, so it is verified by the XAML compiling, by the view-model tests, and by the code-behind handlers being on the same pattern as the existing My Requests toggle.",
+      "step": "implement"
+    },
+    {
+      "note": "The store half of SC-006 needed the feature table, read procedure and seed applied to the local mtm_waitlist database first, because the local store had not been reinstalled from seed and the application pins the canonical database name whatever the connection string says. The row was restored from the seed and both artifacts were dropped afterwards, so the local database is back to its pre-demonstration schema.",
+      "step": "implement"
+    },
+    {
+      "note": "The shell sort control runtime behaviour could not be exercised in the running app: the configured store host is unreachable from this workstation and no signed-in session was available. It is verified by the XAML compiling, by the view-model tests, and by the handlers following the existing My Requests toggle pattern; the menu open and click paths remain unverified on screen.",
+      "step": "implement"
     }
   ],
-  "currentTask": "T071",
+  "currentTask": "T087",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -1697,6 +1900,126 @@
         "Strings/en-us/Resources.resw",
         "MTM_Waitlist.Settings/Models/RequestItemCatalog.cs"
       ]
+    },
+    "T072": {
+      "status": "DONE",
+      "did": "Extended UrgencyCalculatorTests with the five order keys, the overdue-stays-marked check and the equal-wait/unequal-urgency case",
+      "files": [
+        "MTM_Waitlist.Tests/Core/Services/UrgencyCalculatorTests.cs"
+      ]
+    },
+    "T073": {
+      "status": "DONE",
+      "did": "Added WaitlistSortPreferenceServiceTests: default on first run, all five keys round-trip across a reconstruction, corrupt values fall back",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Services/WaitlistSortPreferenceServiceTests.cs"
+      ]
+    },
+    "T074": {
+      "status": "DONE",
+      "did": "Extended WaitlistViewViewModelActionTests: remembered order applied on load, and switching the order keeps every affordance and the overdue marking",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs"
+      ]
+    },
+    "T075": {
+      "status": "DONE",
+      "did": "Added IWaitlistSortPreferenceService and the five WaitlistSortOrder keys with Normalize defaulting to most urgent",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IWaitlistSortPreferenceService.cs",
+        "MTM_Waitlist.Core/Contracts/Services/WaitlistSortOrder.cs"
+      ]
+    },
+    "T076": {
+      "status": "DONE",
+      "did": "Added WaitlistSortPreferenceService over ILocalSettingsService: one scalar key, normalized on read and on write",
+      "files": [
+        "MTM_Waitlist.Core/Services/WaitlistSortPreferenceService.cs"
+      ]
+    },
+    "T077": {
+      "status": "DONE",
+      "did": "Extended UrgencyCalculator with OrderBy for the four additional keys, keeping OrderMostUrgentFirst as the default path and urgency as every key's tie-break",
+      "files": [
+        "MTM_Waitlist.Core/Services/UrgencyCalculator.cs"
+      ]
+    },
+    "T078": {
+      "status": "DONE",
+      "did": "WaitlistViewViewModel now orders through the remembered key on load and re-orders in place when the viewer switches it",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T079": {
+      "status": "DONE",
+      "did": "Added the sort control to both shell header templates: a Button over a MenuFlyout of five RadioMenuFlyoutItems sharing one GroupName, with the code-behind Click and Opening handlers",
+      "files": [
+        "Module_Core/Views/ShellPage.xaml",
+        "Module_Core/Views/ShellPage.xaml.cs"
+      ]
+    },
+    "T080": {
+      "status": "DONE",
+      "did": "ShellViewModel holds the selected order and the five resource-resolved option labels, applies a chosen order and remembers it for the viewer",
+      "files": [
+        "ViewModels/ShellViewModel.cs"
+      ]
+    },
+    "T081": {
+      "status": "DONE",
+      "did": "Registered IWaitlistSortPreferenceService in the composition root and passed it into the waitlist view model factory",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T082": {
+      "status": "DONE",
+      "did": "Added the five sort option labels, the control's own label and its tooltip through the resource mechanism",
+      "files": [
+        "Strings/en-us/Resources.resw",
+        "Strings/en-us/TooltipResources.resw",
+        "Strings/en-us/TooltipResources.developer.resw"
+      ]
+    },
+    "T083": {
+      "status": "DONE",
+      "did": "Added RequestItemConfigurationServiceTests: declared order, types and labels; swapped field sets; both directions of disagreement; malformed payloads reported in plain language",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemConfigurationServiceTests.cs"
+      ]
+    },
+    "T084": {
+      "status": "DONE",
+      "did": "Extended WaitlistViewDetailFieldTests: the page draws whatever the configuration declares, in declared order, with the declared types, sized by the declared count, and reports an unreadable configuration",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewDetailFieldTests.cs"
+      ]
+    },
+    "T085": {
+      "status": "DONE",
+      "did": "RequestItemConfigurationService now deserializes and validates detail_fields_json and options_json with System.Text.Json, and reports an unusable payload as a plain-language configuration problem",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestItemConfigurationService.cs",
+        "MTM_Waitlist.Settings/Models/RequestItemConfiguration.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T086": {
+      "status": "DONE",
+      "did": "The detail page renders the declared fields with their declared types and labels, sized by the declared count, and states a configuration it cannot use instead of drawing stillness as absence",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistDetailTemplateSection.cs",
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml"
+      ]
+    },
+    "T087": {
+      "status": "DONE",
+      "did": "Demonstrated SC-006 against the local store through the application's own configuration service: added a declared field, changed max_length 200->120 and added two options in the row only; the same binaries read the change, and the row was restored and the artifacts removed afterwards",
+      "files": [
+        "Database/Seeds/seed_waitlist_request_item_configs/create.sql"
+      ]
     }
   },
   "verified": [
@@ -1781,6 +2104,27 @@
       "warnings": [
         "The 26 skips are the recorded environment-gated set; no gate was weakened"
       ]
+    },
+    {
+      "what": "SC-006 store-only change demonstration",
+      "command": "dotnet test --filter Sc006StoreChangeDemoTests (temporary rig, deleted)",
+      "result": "before: pickup-riser-table max_length=200 options=[] fields=[1:Requesting work center:String:fixed]; after the row edit: max_length=120 options=[Home Location, Die Shop] fields=[1:Requesting work center:String:fixed, 2:Destination:Enum:answer]; reversed and re-read as shipped",
+      "warnings": [
+        "the local mtm_waitlist had no waitlist_request_item_configs table, so the feature table, read procedure and seed were applied to it for the demonstration and dropped afterwards",
+        "MySqlConnector needed AllowPublicKeyRetrieval=True against the local MySQL 9.6 account"
+      ]
+    },
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "result": "Build succeeded. 0 Warning(s) 0 Error(s)",
+      "warnings": []
+    },
+    {
+      "what": "full test suite with no ambient MTM_* variables",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "Passed! - Failed: 0, Passed: 956, Skipped: 26, Total: 982 (baseline before this dispatch was 908 passed)",
+      "warnings": []
     }
   ]
 }

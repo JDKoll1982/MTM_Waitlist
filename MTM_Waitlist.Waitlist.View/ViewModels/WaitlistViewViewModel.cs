@@ -32,6 +32,14 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt? _actionPrompt;
     private readonly IUrgencyDeadlineService? _urgencyDeadlineService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? _messageSeenStore;
+    private readonly IWaitlistSortPreferenceService? _sortPreferenceService;
+
+    /// <summary>
+    /// The order this viewer's list is shown in, resolved from their remembered choice the first time the list
+    /// loads. Null until then, so <see cref="SortOrder"/> answers with the default rather than an empty string
+    /// before anything has been read.
+    /// </summary>
+    private string? _sortOrder;
 
     /// <summary>
     /// Max-allotted time per sub-type for the load in flight. The urgency of every row needs one, and every
@@ -75,6 +83,12 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     public string SelectedBuilding => _buildingSelectionService.SelectedBuilding;
 
+    /// <summary>
+    /// The order the list is currently shown in — the viewer's remembered choice, or the most-urgent default
+    /// when they have never made one (FR-010, FR-011).
+    /// </summary>
+    public string SortOrder => _sortOrder ?? WaitlistSortOrder.MostUrgent;
+
     public WaitlistViewViewModel(
         INavigationService navigationService,
         IBuildingSelectionService buildingSelectionService,
@@ -85,7 +99,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IStoreAvailabilityTracker? storeAvailabilityTracker = null,
         MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt? actionPrompt = null,
         IUrgencyDeadlineService? urgencyDeadlineService = null,
-        MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? messageSeenStore = null)
+        MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? messageSeenStore = null,
+        IWaitlistSortPreferenceService? sortPreferenceService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -102,6 +117,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _actionPrompt = actionPrompt;
         _urgencyDeadlineService = urgencyDeadlineService;
         _messageSeenStore = messageSeenStore;
+        _sortPreferenceService = sortPreferenceService;
 
         // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
         // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
@@ -650,10 +666,11 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             newItems = newItems.Where(order => IsRequesterOrder(order, _currentRequesterEmployeeNumber)).ToList();
         }
 
-        // Most-urgent-first: overdue work first, then the least time remaining. The ordering key is the same
-        // due value the card's countdown is drawn from, so the list order and the number on each card can
-        // never contradict each other (FR-015).
-        newItems = UrgencyCalculator.OrderMostUrgentFirst(newItems, order => order.Urgency ?? NoUrgency).ToList();
+        // The order the viewer left the list in, applied to every build of it: the same rows in the same order
+        // when the list reloads, and the same order after a restart (FR-011, SC-009). The ordering itself is
+        // UrgencyCalculator's single home for the rule (§D8).
+        var sortOrder = await ResolveSortOrderAsync().ConfigureAwait(false);
+        newItems = UrgencyCalculator.OrderBy(newItems, sortOrder, SortValuesOf).ToList();
 
         // What this viewer may do to each row is decided here, once, from the rules the service also uses.
         await ApplyHandlerActionStateAsync(newItems, DateTimeOffset.UtcNow).ConfigureAwait(false);
@@ -662,6 +679,91 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         StartupDebugLog.Info("Waitlist", $"Loaded building '{building}'. SessionRequests={activeRequestCount}, TotalRows={Source.Count}, MyRequestsOnly={ShowMyRequestsOnly}, SearchQuery='{SearchQuery}'.");
         UpdateSearchSuggestions(SearchQuery);
     }
+
+    /// <summary>
+    /// The order this viewer's list is shown in, read from their remembered choice once per list instance and
+    /// held from then on. The read happens on load rather than on every refresh, so a reload cannot change the
+    /// order under the viewer.
+    /// </summary>
+    private async Task<string> ResolveSortOrderAsync()
+    {
+        if (_sortOrder is not null)
+        {
+            return _sortOrder;
+        }
+
+        var remembered = _sortPreferenceService is null
+            ? null
+            : await _sortPreferenceService.GetSortOrderAsync().ConfigureAwait(false);
+
+        _sortOrder = WaitlistSortOrder.Normalize(remembered);
+        return _sortOrder;
+    }
+
+    /// <summary>
+    /// Re-orders the rows already on screen when the viewer changes the order, without re-reading the store: the
+    /// rows, their action affordances and their overdue marking are the ones the load produced, so switching the
+    /// order cannot disturb what the viewer may do or how overdue work is shown (FR-012).
+    /// </summary>
+    public void ApplySortOrder(string? sortOrder)
+    {
+        var normalized = WaitlistSortOrder.Normalize(sortOrder);
+        if (string.Equals(SortOrder, normalized, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _sortOrder = normalized;
+        ReorderSourceInPlace();
+        StartupDebugLog.Info("Waitlist", $"List re-ordered by '{normalized}' without a reload. Rows={Source.Count}.");
+    }
+
+    private void ReorderSourceInPlace()
+    {
+        void Apply()
+        {
+            // Materialize before clearing: the ordering is deferred, and clearing the source mid-enumeration
+            // would re-order an empty list.
+            var ordered = UrgencyCalculator.OrderBy(Source, SortOrder, SortValuesOf).ToList();
+
+            Source.CollectionChanged -= OnSourceCollectionChanged;
+            try
+            {
+                Source.Clear();
+                foreach (var item in ordered)
+                {
+                    Source.Add(item);
+                }
+            }
+            finally
+            {
+                Source.CollectionChanged += OnSourceCollectionChanged;
+            }
+        }
+
+        if (_dispatcherQueue is DispatcherQueue dispatcher)
+        {
+            if (!dispatcher.TryEnqueue(Apply))
+            {
+                StartupDebugLog.Info("Waitlist", "The list could not be re-ordered because the UI queue is not accepting work.");
+            }
+
+            return;
+        }
+
+        Apply();
+    }
+
+    /// <summary>
+    /// The row's already-computed values, as the order keys read them. A row whose urgency could not be derived
+    /// carries <see cref="NoUrgency"/>, so it takes its place at the calm end rather than pretending to be urgent.
+    /// </summary>
+    private static UrgencyCalculator.SortValues SortValuesOf(SampleOrder order) => new(
+        order.Urgency ?? NoUrgency,
+        order.RequestedUtc,
+        order.RequestedPressName,
+        order.RequestedByName,
+        order.Status);
 
     private async Task ApplySourceUpdateAsync(List<SampleOrder> newItems, long refreshVersion)
     {

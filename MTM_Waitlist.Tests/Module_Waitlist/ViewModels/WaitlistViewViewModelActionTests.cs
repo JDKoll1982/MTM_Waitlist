@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
@@ -239,6 +240,100 @@ public sealed class WaitlistViewViewModelActionTests
                 ranks[i] <= ranks[i - 1],
                 $"Row {i} reads '{viewModel.Source[i].RemainingTimeText}', which is more urgent than the row above it ('{viewModel.Source[i - 1].RemainingTimeText}'), so the order contradicts the cards.");
         }
+    }
+
+    // ── US3: the order the viewer remembers (FR-010, FR-011, FR-012) ─────────────────────────────
+
+    [TestMethod]
+    public async Task List_NothingRemembered_LeadsWithTheMostUrgentRow()
+    {
+        var overdueId = Guid.Parse("c0000000-0000-0000-0000-000000000001");
+        var calmId = Guid.Parse("c0000000-0000-0000-0000-000000000002");
+
+        // Served alpha-first, so a list that merely kept the store's order would look sorted and be wrong.
+        var service = new RecordingRequestService(
+            BuildRequest(calmId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(55), workCenter: "Alpha Line"),
+            BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-30), targetUtc: Now.AddMinutes(-10), workCenter: "Bravo Line"));
+        var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service, sortPreferenceService: new StubSortPreferenceService(null));
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+
+        Assert.AreEqual(WaitlistSortOrder.MostUrgent, viewModel.SortOrder, "A viewer who has chosen nothing gets the most-urgent order.");
+        CollectionAssert.AreEqual(
+            new Guid?[] { overdueId, calmId },
+            viewModel.Source.Select(row => row.RequestId).ToArray(),
+            "The list must default to most-urgent-first (FR-010).");
+    }
+
+    [TestMethod]
+    public async Task List_AppliesTheRememberedOrder_OnLoad()
+    {
+        var overdueId = Guid.Parse("d0000000-0000-0000-0000-000000000001");
+        var calmId = Guid.Parse("d0000000-0000-0000-0000-000000000002");
+
+        var service = new RecordingRequestService(
+            BuildRequest(calmId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(55), workCenter: "Alpha Line"),
+            BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-30), targetUtc: Now.AddMinutes(-10), workCenter: "Bravo Line"));
+        var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service, sortPreferenceService: new StubSortPreferenceService(WaitlistSortOrder.Press));
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+
+        Assert.AreEqual(WaitlistSortOrder.Press, viewModel.SortOrder, "The remembered order is the one the list loads with (FR-011).");
+        CollectionAssert.AreEqual(
+            new Guid?[] { calmId, overdueId },
+            viewModel.Source.Select(row => row.RequestId).ToArray(),
+            "The rows must follow the remembered order, not the order the store happened to return (SC-009).");
+    }
+
+    [TestMethod]
+    public async Task ApplySortOrder_SwitchingTheOrder_KeepsEveryAffordanceAndTheOverdueMarking()
+    {
+        var overdueId = Guid.Parse("e0000000-0000-0000-0000-000000000001");
+        var claimedId = Guid.Parse("e0000000-0000-0000-0000-000000000002");
+
+        var service = new RecordingRequestService(
+            BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-30), targetUtc: Now.AddMinutes(-10), workCenter: "Bravo Line"),
+            BuildRequest(claimedId, "Accepted", HandlerEmployeeNumber, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(55), workCenter: "Alpha Line"));
+        var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service);
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+
+        var before = viewModel.Source.ToDictionary(row => row.RequestId!.Value);
+        Assert.AreEqual(2, before.Count, "The fixture must surface both rows, or the check proves nothing.");
+
+        viewModel.ApplySortOrder(WaitlistSortOrder.Press);
+
+        CollectionAssert.AreEqual(
+            new Guid?[] { claimedId, overdueId },
+            viewModel.Source.Select(row => row.RequestId).ToArray(),
+            "Switching the order must re-order the rows the viewer is looking at.");
+
+        foreach (var row in viewModel.Source)
+        {
+            var was = before[row.RequestId!.Value];
+            Assert.AreEqual(was.CanAccept, row.CanAccept, "Re-ordering must not change what the viewer may do to a row (FR-012).");
+            Assert.AreEqual(was.CanCompleteOrRelease, row.CanCompleteOrRelease, "Re-ordering must not change the claimed own work's actions.");
+            Assert.AreEqual(was.CanCancelRequest, row.CanCancelRequest, "Re-ordering must not change the cancel affordance either.");
+            Assert.AreEqual(was.IsOverdue, row.IsOverdue, "Overdue work stays visibly overdue whatever the sort (FR-012).");
+            Assert.AreEqual(was.IsOverdueAtSource, row.IsOverdueAtSource, "The overdue mark the card is drawn from must survive a re-order.");
+            Assert.AreEqual(was.RemainingTimeText, row.RemainingTimeText, "The countdown must survive a re-order unchanged.");
+        }
+
+        Assert.IsTrue(viewModel.Source.Single(row => row.RequestId == overdueId).IsOverdue, "The overdue row must still say so after the sort changed.");
+    }
+
+    [TestMethod]
+    public async Task ApplySortOrder_ChoosingTheOrderAlreadyInForce_LeavesTheRowsInPlace()
+    {
+        var request = BuildRequest(PendingRequestId, "Pending", null, RequesterEmployeeNumber);
+        var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, new RecordingRequestService(request));
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+        var loaded = viewModel.Source.ToArray();
+
+        viewModel.ApplySortOrder(WaitlistSortOrder.MostUrgent);
+
+        CollectionAssert.AreEqual(loaded, viewModel.Source.ToArray(), "Re-applying the order already in force must not rebuild the list.");
     }
 
     [TestMethod]
@@ -499,18 +594,20 @@ public sealed class WaitlistViewViewModelActionTests
         string requesterEmployeeNumber,
         DateTimeOffset? createdUtc = null,
         DateTimeOffset? targetUtc = null,
-        DateTimeOffset? lastMessageUtc = null) => new()
+        DateTimeOffset? lastMessageUtc = null,
+        string workCenter = "Expo Line 7",
+        string requesterName = "Dana Whitfield") => new()
     {
         Id = id,
         Building = "Expo Drive",
-        WorkCenter = "Expo Line 7",
-        WorkCenterName = "Expo Line 7",
+        WorkCenter = workCenter,
+        WorkCenterName = workCenter,
         Category = "Pickup",
         Item = "pickup-ncm",
         InputValue = "Skid 4471 is on the wrong dock",
         ActiveSetupJobId = "JOB-9001",
         RequesterEmployeeNumber = requesterEmployeeNumber,
-        RequesterEmployeeName = "Dana Whitfield",
+        RequesterEmployeeName = requesterName,
         Status = status,
         AssignedMaterialHandler = assignee,
         RequestedUtc = createdUtc ?? Now.AddMinutes(-20),
@@ -524,7 +621,8 @@ public sealed class WaitlistViewViewModelActionTests
         string employeeNumber,
         IWaitlistRequestService requestService,
         IWaitlistRequestActionPrompt? prompt = null,
-        IWaitlistMessageSeenStore? messageSeenStore = null) => new(
+        IWaitlistMessageSeenStore? messageSeenStore = null,
+        IWaitlistSortPreferenceService? sortPreferenceService = null) => new(
         new WaitlistTestNavigationService(),
         new WaitlistTestBuildingSelectionService(),
         requestService,
@@ -538,7 +636,24 @@ public sealed class WaitlistViewViewModelActionTests
         },
         storeAvailabilityTracker: null,
         actionPrompt: prompt ?? new NoOpWaitlistRequestActionPrompt(),
-        messageSeenStore: messageSeenStore);
+        messageSeenStore: messageSeenStore,
+        sortPreferenceService: sortPreferenceService);
+
+    /// <summary>The viewer's remembered order, without a settings file anywhere near the test.</summary>
+    private sealed class StubSortPreferenceService : IWaitlistSortPreferenceService
+    {
+        public StubSortPreferenceService(string? sortOrder) => Current = WaitlistSortOrder.Normalize(sortOrder);
+
+        public string Current { get; private set; }
+
+        public Task<string> GetSortOrderAsync(CancellationToken cancellationToken = default) => Task.FromResult(Current);
+
+        public Task SetSortOrderAsync(string? sortOrder, CancellationToken cancellationToken = default)
+        {
+            Current = WaitlistSortOrder.Normalize(sortOrder);
+            return Task.CompletedTask;
+        }
+    }
 
     // ── The new-message marker answers to messages, not to lifecycle changes ──────────────────────────
 

@@ -15,6 +15,9 @@
   <data name="Shell_SelectFacility_Tooltip" xml:space="preserve">
     <value>Facility selection control</value>
   </data>
+  <data name="Shell_SortOrder_Tooltip" xml:space="preserve">
+    <value>Sort order selection control</value>
+  </data>
   <data name="Shell_CurrentUser_Tooltip" xml:space="preserve">
     <value>Signed-in user summary</value>
   </data>

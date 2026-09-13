@@ -287,6 +287,7 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock
                                 Grid.Column="0"
@@ -313,9 +314,51 @@
                                     OnContent=""
                                     AutomationProperties.Name="Show only my requests" />
                             </StackPanel>
+                            <!-- What the list is sorted by. Every option shares one group name so the control
+                                 offers them as a radio set; which one is ticked is set from the view model when
+                                 the menu opens, because these items live in the shell's own header template. -->
+                            <Button
+                                Grid.Column="2"
+                                Margin="16,0,0,0"
+                                VerticalAlignment="Center"
+                                Content="{Binding SortOrderLabel}"
+                                Visibility="{Binding IsMyRequestsVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                shared:TooltipBehavior.ResourceKey="Shell_SortOrder_Tooltip"
+                                shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/ViewModels/ShellViewModel.cs|MTM_Waitlist.Core/Contracts/Services/WaitlistSortOrder.cs|MTM_Waitlist.Core/Services/UrgencyCalculator.cs"
+                                shared:TooltipBehavior.FallbackText="Choose what the list is sorted by.">
+                                <Button.Flyout>
+                                    <MenuFlyout Opening="SortOrderFlyout_Opening">
+                                        <RadioMenuFlyoutItem
+                                            GroupName="WaitlistSortOrder"
+                                            Tag="most-urgent"
+                                            Text="{Binding SortOrderMostUrgentLabel}"
+                                            Click="SortOrderItem_Click" />
+                                        <RadioMenuFlyoutItem
+                                            GroupName="WaitlistSortOrder"
+                                            Tag="longest-waiting"
+                                            Text="{Binding SortOrderLongestWaitingLabel}"
+                                            Click="SortOrderItem_Click" />
+                                        <RadioMenuFlyoutItem
+                                            GroupName="WaitlistSortOrder"
+                                            Tag="press"
+                                            Text="{Binding SortOrderPressLabel}"
+                                            Click="SortOrderItem_Click" />
+                                        <RadioMenuFlyoutItem
+                                            GroupName="WaitlistSortOrder"
+                                            Tag="requested-by"
+                                            Text="{Binding SortOrderRequestedByLabel}"
+                                            Click="SortOrderItem_Click" />
+                                        <RadioMenuFlyoutItem
+                                            GroupName="WaitlistSortOrder"
+                                            Tag="status"
+                                            Text="{Binding SortOrderStatusLabel}"
+                                            Click="SortOrderItem_Click" />
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
                             <ComboBox
                                 x:Name="FacilitySelectorComboBox"
-                                Grid.Column="2"
+                                Grid.Column="3"
                                 MinWidth="160"
                                 MaxWidth="220"
                                 HorizontalAlignment="Right"
@@ -327,7 +370,7 @@
                                 shared:TooltipBehavior.FallbackText="Select the active facility." />
                             <Button
                                 x:Name="CurrentUserButton"
-                                Grid.Column="3"
+                                Grid.Column="4"
                                 Margin="16,0,0,0"
                                 Padding="8"
                                 HorizontalAlignment="Right"
@@ -396,6 +439,7 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
                                         Grid.Column="0"
@@ -422,9 +466,50 @@
                                             OnContent=""
                                             AutomationProperties.Name="Show only my requests" />
                                     </StackPanel>
+                                    <!-- The same sort control as the navigation-view header carries, for the shell
+                                         state where no page supplies its own header. -->
+                                    <Button
+                                        Grid.Column="2"
+                                        Margin="16,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Content="{Binding SortOrderLabel}"
+                                        Visibility="{Binding IsMyRequestsVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        shared:TooltipBehavior.ResourceKey="Shell_SortOrder_Tooltip"
+                                        shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/ViewModels/ShellViewModel.cs|MTM_Waitlist.Core/Contracts/Services/WaitlistSortOrder.cs|MTM_Waitlist.Core/Services/UrgencyCalculator.cs"
+                                        shared:TooltipBehavior.FallbackText="Choose what the list is sorted by.">
+                                        <Button.Flyout>
+                                            <MenuFlyout Opening="SortOrderFlyout_Opening">
+                                                <RadioMenuFlyoutItem
+                                                    GroupName="WaitlistSortOrder"
+                                                    Tag="most-urgent"
+                                                    Text="{Binding SortOrderMostUrgentLabel}"
+                                                    Click="SortOrderItem_Click" />
+                                                <RadioMenuFlyoutItem
+                                                    GroupName="WaitlistSortOrder"
+                                                    Tag="longest-waiting"
+                                                    Text="{Binding SortOrderLongestWaitingLabel}"
+                                                    Click="SortOrderItem_Click" />
+                                                <RadioMenuFlyoutItem
+                                                    GroupName="WaitlistSortOrder"
+                                                    Tag="press"
+                                                    Text="{Binding SortOrderPressLabel}"
+                                                    Click="SortOrderItem_Click" />
+                                                <RadioMenuFlyoutItem
+                                                    GroupName="WaitlistSortOrder"
+                                                    Tag="requested-by"
+                                                    Text="{Binding SortOrderRequestedByLabel}"
+                                                    Click="SortOrderItem_Click" />
+                                                <RadioMenuFlyoutItem
+                                                    GroupName="WaitlistSortOrder"
+                                                    Tag="status"
+                                                    Text="{Binding SortOrderStatusLabel}"
+                                                    Click="SortOrderItem_Click" />
+                                            </MenuFlyout>
+                                        </Button.Flyout>
+                                    </Button>
                                     <ComboBox
                                         x:Name="FacilitySelectorComboBoxDefault"
-                                        Grid.Column="2"
+                                        Grid.Column="3"
                                         MinWidth="160"
                                         MaxWidth="220"
                                         HorizontalAlignment="Right"
@@ -436,7 +521,7 @@
                                         shared:TooltipBehavior.FallbackText="Select the active facility." />
                                     <Button
                                         x:Name="CurrentUserButtonDefault"
-                                        Grid.Column="3"
+                                        Grid.Column="4"
                                         Margin="16,0,0,0"
                                         Padding="8"
                                         HorizontalAlignment="Right"

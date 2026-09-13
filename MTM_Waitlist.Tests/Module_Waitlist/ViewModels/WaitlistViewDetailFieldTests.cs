@@ -1,11 +1,14 @@
 using System.Reflection;
 
+using Microsoft.UI.Text;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -18,6 +21,12 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 /// attribute that no source produces, and its label/value helper must not be able to re-introduce a
 /// placeholder through a default parameter.
 /// </summary>
+/// <remarks>
+/// US4 adds the declared-field half: the page renders whatever the Item's configuration declares, in the
+/// declared order, with the declared types and labels. <b>No check in this class asserts a frozen field
+/// list</b> — every declared-field expectation is built from the payload the fixture declares, because the
+/// field set is mutable by design (FR-015, §16.15).
+/// </remarks>
 [TestClass]
 public sealed class WaitlistViewDetailFieldTests
 {
@@ -114,8 +123,12 @@ public sealed class WaitlistViewDetailFieldTests
     }
 
     private static WaitlistViewDetailViewModel BuildLoadedViewModel(string itemCode)
+        => BuildLoadedViewModel(itemCode, itemConfigurationService: null);
+
+    private static WaitlistViewDetailViewModel BuildLoadedViewModel(string itemCode, IRequestItemConfigurationService? itemConfigurationService)
     {
         var requestService = new WaitlistRequestService();
+
         var submit = requestService
             .SubmitAsync(
                 new WaitlistRequestDraft
@@ -140,10 +153,34 @@ public sealed class WaitlistViewDetailFieldTests
         var viewModel = new WaitlistViewDetailViewModel(
             new WaitlistTestNavigationService(),
             new WaitlistTestBuildingSelectionService(),
-            requestService: requestService);
+            requestService: requestService,
+            itemConfigurationService: itemConfigurationService);
 
         viewModel.OnNavigatedTo(order.Id);
         return viewModel;
+    }
+
+    /// <summary>
+    /// Serves the declared fields a test declares for one Item, so the page's render is driven by configuration
+    /// rather than by anything compiled in.
+    /// </summary>
+    private sealed class DeclaredConfigurationService : IRequestItemConfigurationService
+    {
+        private readonly RequestItemConfiguration _configuration;
+
+        private DeclaredConfigurationService(RequestItemConfiguration configuration) => _configuration = configuration;
+
+        public static DeclaredConfigurationService Declaring(string itemCode, params RequestItemFieldDefinition[] fields)
+            => new(new RequestItemConfiguration { Item = itemCode, DetailFields = fields });
+
+        public static DeclaredConfigurationService Unreadable(string itemCode)
+            => new(RequestItemConfiguration.Malformed(itemCode, RequestItemConfiguration.ResolveMalformedMessage()));
+
+        public Task<RequestItemConfigurationSet> GetConfigurationsAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(RequestItemConfigurationSet.From([_configuration]));
+
+        public Task<RequestItemConfiguration> GetConfigurationAsync(string itemCode, CancellationToken cancellationToken = default)
+            => Task.FromResult(_configuration);
     }
 }
 

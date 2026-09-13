@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
@@ -205,29 +207,234 @@ public sealed class RequestItemConfigurationService : IRequestItemConfigurationS
             return null;
         }
 
+        var optionsJson = NullIfBlank(ReadString(row, "options_json"));
+        if (!TryParseOptions(optionsJson, out var options, out var optionsProblem))
+        {
+            return Unusable(item, $"its options payload is unusable: {optionsProblem}");
+        }
+
+        var detailFieldsJson = NullIfBlank(ReadString(row, "detail_fields_json"));
+        if (!TryParseDetailFields(detailFieldsJson, out var detailFields, out var fieldsProblem))
+        {
+            return Unusable(item, $"its declared-fields payload is unusable: {fieldsProblem}");
+        }
+
+        var requiresAnswer = ReadBool(row, "requires_answer");
+        var answerValueType = ParseValueType(ReadString(row, "answer_value_type"));
+        if (requiresAnswer && answerValueType is null)
+        {
+            return Unusable(item, "it asks for an answer but declares no usable answer type");
+        }
+
         return new RequestItemConfiguration
         {
             Item = item,
             Category = ReadString(row, "category"),
             ControlFlow = ReadStringOr(row, "control_flow", RequestItemConfiguration.DirectToConfirmation),
-            RequiresAnswer = ReadBool(row, "requires_answer"),
-            AnswerValueType = ParseValueType(ReadString(row, "answer_value_type")),
+            RequiresAnswer = requiresAnswer,
+            AnswerValueType = answerValueType,
             PromptText = NullIfBlank(ReadString(row, "prompt_text")),
             MinLength = ReadInt(row, "min_length") ?? 0,
             MaxLength = ReadInt(row, "max_length") ?? 200,
-            OptionsJson = NullIfBlank(ReadString(row, "options_json")),
-            DetailFieldsJson = NullIfBlank(ReadString(row, "detail_fields_json")),
+            OptionsJson = optionsJson,
+            DetailFieldsJson = detailFieldsJson,
+            Options = options,
+            DetailFields = detailFields.OrderBy(field => field.Order).ToList(),
             AllottedMinutes = ReadInt(row, "allotted_minutes")
         };
     }
 
-    private static RequestItemValueType? ParseValueType(string? value) => value?.Trim().ToLowerInvariant() switch
+    /// <summary>
+    /// Reports a row whose payload cannot be read. The Item is then unavailable rather than half-configured, the
+    /// person is shown a plain-language sentence, and the reason is recorded for whoever maintains the
+    /// configuration — never an empty list, never an exception escaping to the screen (FR-026).
+    /// </summary>
+    private static RequestItemConfiguration Unusable(string item, string problem)
     {
-        "string" => RequestItemValueType.String,
-        "enum" => RequestItemValueType.Enum,
-        "text" => RequestItemValueType.Text,
-        _ => null
-    };
+        StartupDebugLog.Error(
+            "RequestItemConfiguration",
+            new FormatException($"The configuration row for '{item}' cannot be used: {problem}."),
+            $"The configuration row for '{item}' cannot be used, so the item is reported unavailable rather than half-configured (FR-026).");
+
+        return RequestItemConfiguration.Malformed(item, RequestItemConfiguration.ResolveMalformedMessage());
+    }
+
+    /// <summary>
+    /// Reads the ordered options payload. Absent is not a fault — an Item whose options arrive with the requesting
+    /// job declares none here — but a payload that cannot be read as a list of text is (FR-026).
+    /// </summary>
+    private static bool TryParseOptions(string? payload, out List<string> options, out string problem)
+    {
+        options = [];
+        problem = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(payload))
+        {
+            return true;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(payload);
+            if (document.RootElement.ValueKind != JsonValueKind.Array)
+            {
+                problem = "it is not a list";
+                return false;
+            }
+
+            foreach (var element in document.RootElement.EnumerateArray())
+            {
+                if (element.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(element.GetString()))
+                {
+                    problem = "a listed option is not text";
+                    return false;
+                }
+
+                options.Add(element.GetString()!.Trim());
+            }
+
+            return true;
+        }
+        catch (JsonException ex)
+        {
+            problem = $"it is not valid JSON ({ex.Message})";
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Reads the Item's declared page fields, validating each one's label, declared value type, source and
+    /// declared order, so a field set the page cannot honour is reported rather than half-drawn (FR-013, FR-026).
+    /// </summary>
+    /// <remarks>
+    /// The fields come back in the order the payload declares them in; the configuration's own <c>order</c> value
+    /// is what the reader orders by, so a payload whose list order disagrees with its declared positions is still
+    /// read the way the configuration declares it.
+    /// </remarks>
+    private static bool TryParseDetailFields(string? payload, out List<RequestItemFieldDefinition> fields, out string problem)
+    {
+        fields = [];
+        problem = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(payload))
+        {
+            return true;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(payload);
+            if (document.RootElement.ValueKind != JsonValueKind.Array)
+            {
+                problem = "it is not a list of fields";
+                return false;
+            }
+
+            foreach (var element in document.RootElement.EnumerateArray())
+            {
+                if (element.ValueKind != JsonValueKind.Object)
+                {
+                    problem = "a listed field is not an object";
+                    return false;
+                }
+
+                var label = ReadJsonString(element, "label");
+                if (string.IsNullOrWhiteSpace(label))
+                {
+                    problem = "a declared field has no label";
+                    return false;
+                }
+
+                if (!TryParseValueType(ReadJsonString(element, "value_type"), out var valueType))
+                {
+                    problem = $"the field '{label}' declares a value type that does not exist";
+                    return false;
+                }
+
+                var source = ReadJsonString(element, "source");
+                if (!IsKnownSource(source))
+                {
+                    problem = $"the field '{label}' declares a source that does not exist";
+                    return false;
+                }
+
+                if (!TryReadDeclaredOrder(element, out var order))
+                {
+                    problem = $"the field '{label}' has no usable declared order";
+                    return false;
+                }
+
+                fields.Add(new RequestItemFieldDefinition
+                {
+                    Label = label!.Trim(),
+                    ValueType = valueType,
+                    Source = source!.Trim(),
+                    Order = order,
+                    IsRequired = ReadJsonBool(element, "is_required"),
+                });
+            }
+
+            return true;
+        }
+        catch (JsonException ex)
+        {
+            problem = $"it is not valid JSON ({ex.Message})";
+            return false;
+        }
+    }
+
+    /// <summary>Whether a declared source is one the page can resolve a value from.</summary>
+    private static bool IsKnownSource(string? source)
+        => !string.IsNullOrWhiteSpace(source)
+           && (Has(source, RequestItemFieldDefinition.Sources.Job)
+               || Has(source, RequestItemFieldDefinition.Sources.Answer)
+               || Has(source, RequestItemFieldDefinition.Sources.Fixed));
+
+    private static bool Has(string source, string candidate)
+        => string.Equals(source.Trim(), candidate, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The field's declared position. The key lives inside the JSON payload and no bare <c>order</c> column is
+    /// ever introduced (Database/Database-Ruleset.md); a position below one is not a position.
+    /// </summary>
+    private static bool TryReadDeclaredOrder(JsonElement field, out int order)
+    {
+        order = 0;
+        return field.TryGetProperty("order", out var value)
+               && value.ValueKind == JsonValueKind.Number
+               && value.TryGetInt32(out order)
+               && order >= 1;
+    }
+
+    private static string? ReadJsonString(JsonElement element, string name)
+        => element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+            ? value.GetString()
+            : null;
+
+    private static bool ReadJsonBool(JsonElement element, string name)
+        => element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.True;
+
+    private static bool TryParseValueType(string? value, out RequestItemValueType valueType)
+    {
+        switch (value?.Trim().ToLowerInvariant())
+        {
+            case "string":
+                valueType = RequestItemValueType.String;
+                return true;
+            case "enum":
+                valueType = RequestItemValueType.Enum;
+                return true;
+            case "text":
+                valueType = RequestItemValueType.Text;
+                return true;
+            default:
+                valueType = RequestItemValueType.String;
+                return false;
+        }
+    }
+
+    private static RequestItemValueType? ParseValueType(string? value)
+        => TryParseValueType(value, out var valueType) ? valueType : null;
 
     private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
 

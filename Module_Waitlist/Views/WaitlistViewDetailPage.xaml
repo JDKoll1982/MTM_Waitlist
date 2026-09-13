@@ -459,9 +459,10 @@
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="12"
-                    Visibility="{x:Bind ViewModel.HasDeclaredFields, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    Visibility="{x:Bind ViewModel.IsDeclaredFieldsSectionVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid RowSpacing="8">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
@@ -470,9 +471,20 @@
                             Grid.Row="0"
                             Style="{ThemeResource SubtitleTextBlockStyle}"
                             Text="{x:Bind ViewModel.DeclaredFieldsTitle, Mode=OneWay}" />
-                        <ItemsControl
+                        <!--
+                            A configuration this page cannot use is stated here rather than drawn as a grid with
+                            fields quietly missing from it (FR-026).
+                        -->
+                        <TextBlock
                             Grid.Row="1"
-                            ItemsSource="{x:Bind ViewModel.DeclaredFieldRows, Mode=OneWay}">
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.DeclaredFieldsReport, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords"
+                            Visibility="{x:Bind ViewModel.HasDeclaredFieldsReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <ItemsControl
+                            Grid.Row="2"
+                            ItemsSource="{x:Bind ViewModel.DeclaredFieldRows, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.HasDeclaredFields, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="models:WaitlistDetailFieldRow">
                                     <Grid Margin="0,0,0,6" ColumnSpacing="16">
@@ -492,9 +504,10 @@
                                             <TextBlock FontWeight="SemiBold" Text="{x:Bind First.Label}" />
                                             <TextBlock
                                                 Grid.Column="1"
+                                                FontWeight="{x:Bind First.ValueFontWeight}"
                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                 Text="{x:Bind First.Value}"
-                                                TextWrapping="WrapWholeWords" />
+                                                TextWrapping="{x:Bind First.ValueTextWrapping}" />
                                         </Grid>
                                         <Grid
                                             Grid.Column="1"
@@ -507,9 +520,10 @@
                                             <TextBlock FontWeight="SemiBold" Text="{x:Bind Second.Label}" />
                                             <TextBlock
                                                 Grid.Column="1"
+                                                FontWeight="{x:Bind Second.ValueFontWeight}"
                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                 Text="{x:Bind Second.Value}"
-                                                TextWrapping="WrapWholeWords" />
+                                                TextWrapping="{x:Bind Second.ValueTextWrapping}" />
                                         </Grid>
                                     </Grid>
                                 </DataTemplate>

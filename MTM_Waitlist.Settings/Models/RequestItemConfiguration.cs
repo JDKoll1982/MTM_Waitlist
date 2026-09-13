@@ -1,3 +1,5 @@
+using MTM_Waitlist.Module_Core.Helpers;
+
 namespace MTM_Waitlist.Module_Settings.Models;
 
 /// <summary>
@@ -80,6 +82,40 @@ public sealed class RequestItemConfiguration
     /// Empty while the Item is available and nothing is wrong.
     /// </summary>
     public string UnavailableMessage { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Resource key of the report shown when the row exists but its payload cannot be read. A malformed payload
+    /// is a different fault from a missing row — the Item is configured, the configuration just cannot be used —
+    /// so the person is told which of the two they are looking at (FR-026).
+    /// </summary>
+    public const string MalformedMessageKey = "RequestItem_ConfigurationMalformed.Message";
+
+    /// <summary>
+    /// A stand-in for a catalogued Item whose row cannot be used: the declared-fields or options payload is not
+    /// readable, so nothing the row claims about the Item's behaviour can be trusted.
+    /// </summary>
+    public static RequestItemConfiguration Malformed(string item, string message) => new()
+    {
+        Item = item,
+        IsAvailable = false,
+        UnavailableMessageKey = MalformedMessageKey,
+        UnavailableMessage = message,
+    };
+
+    /// <summary>
+    /// The plain-language report for a payload that cannot be read, resolved through the resource mechanism with
+    /// a readable fallback so the person is never shown a bare resource key.
+    /// </summary>
+    public static string ResolveMalformedMessage()
+    {
+        const string fallback =
+            "This item's configuration isn't readable, so a supervisor needs to check it before it can be requested.";
+        var localized = MalformedMessageKey.GetLocalized();
+        return string.IsNullOrWhiteSpace(localized)
+            || string.Equals(localized, MalformedMessageKey, StringComparison.Ordinal)
+                ? fallback
+                : localized;
+    }
 
     /// <summary>
     /// A stand-in for a catalogued Item that has no configuration row: available nowhere, and honest about it.

@@ -133,6 +133,10 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<INewRequestAlertNotifier, MTM_Waitlist.Module_Core.Services.NewRequestAlertNotifier>();
         services.AddSingleton<IUrgencySettingsService, MTM_Waitlist.Module_Core.Services.UrgencySettingsService>();
         services.AddSingleton<IUrgencyDeadlineService, MTM_Waitlist.Module_Core.Services.UrgencyDeadlineService>();
+
+        // The list's order is a per-viewer display preference remembered through the existing local settings,
+        // not a new store (§D7, FR-011).
+        services.AddSingleton<IWaitlistSortPreferenceService, MTM_Waitlist.Module_Core.Services.WaitlistSortPreferenceService>();
         services.AddSingleton<IFileService, FileService>();
         services.AddSingleton<IReportPrintService, ReportPrintService>();
 
@@ -200,7 +204,8 @@ public static class ServiceRegistrationExtensions
             storeAvailabilityTracker: provider.GetRequiredService<IStoreAvailabilityTracker>(),
             actionPrompt: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt>(),
             urgencyDeadlineService: provider.GetRequiredService<IUrgencyDeadlineService>(),
-            messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>()));
+            messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>(),
+            sortPreferenceService: provider.GetRequiredService<IWaitlistSortPreferenceService>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();

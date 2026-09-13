@@ -98,6 +98,11 @@ public sealed partial class ShellPage : Page
             // active; keep its toggle in sync with the active view model's filter state.
             ViewModel.IsMyRequestsVisible = true;
             ViewModel.ShowMyRequestsOnly = waitlistViewModel.ShowMyRequestsOnly;
+
+            // The sort control belongs to the list too, and the list has just resolved the order the viewer
+            // remembers. Showing it here (rather than writing it) is what makes the control open on the order
+            // that is actually in force (FR-011).
+            ViewModel.SyncSortOrder(waitlistViewModel.SortOrder);
         }
         else
         {
@@ -113,6 +118,41 @@ public sealed partial class ShellPage : Page
             && sender is ToggleSwitch toggle)
         {
             waitlistViewModel.ShowMyRequestsOnly = toggle.IsOn;
+        }
+    }
+
+    /// <summary>
+    /// Marks the order the viewer is currently using. The options live in the shell's own header template, so
+    /// their tick is set here when the menu opens rather than by a binding into that template.
+    /// </summary>
+    private void SortOrderFlyout_Opening(object? sender, object e)
+    {
+        if (sender is not MenuFlyout flyout)
+        {
+            return;
+        }
+
+        foreach (var item in flyout.Items.OfType<RadioMenuFlyoutItem>())
+        {
+            // The tag is the order key the option stands for; the service normalizes it, so an option whose tag
+            // no longer names a key simply never shows as the current choice.
+            item.IsChecked = string.Equals((string?)item.Tag, ViewModel.SelectedSortOrder, StringComparison.Ordinal);
+        }
+    }
+
+    private void SortOrderItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (sender is not RadioMenuFlyoutItem item || item.Tag is not string sortOrder)
+        {
+            return;
+        }
+
+        ViewModel.ApplySortOrder(sortOrder);
+
+        // Re-order the rows the viewer is looking at, without re-reading the store.
+        if (NavigationFrame.GetPageViewModel() is WaitlistViewViewModel waitlistViewModel)
+        {
+            waitlistViewModel.ApplySortOrder(ViewModel.SelectedSortOrder);
         }
     }
 

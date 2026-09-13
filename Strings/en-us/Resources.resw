@@ -885,6 +885,9 @@
   <data name="RequestItem_NoneOffered.Message" xml:space="preserve">
     <value>No item is available for this request right now. A supervisor needs to check the item configuration.</value>
   </data>
+  <data name="RequestItem_ConfigurationMalformed.Message" xml:space="preserve">
+    <value>This item's configuration isn't readable, so a supervisor needs to check it before it can be requested.</value>
+  </data>
   <data name="Waitlist_Card.RequestedBy.Text" xml:space="preserve">
     <value>Requested by</value>
   </data>
@@ -905,5 +908,23 @@
   </data>
   <data name="RequestItem.deliver-wrong-flatstock.Line1" xml:space="preserve">
     <value>Wrong Flatstock Bring:</value>
+  </data>
+  <data name="Shell_SortOrder.Label" xml:space="preserve">
+    <value>Sort by</value>
+  </data>
+  <data name="Shell_SortOrder.MostUrgent" xml:space="preserve">
+    <value>Most urgent</value>
+  </data>
+  <data name="Shell_SortOrder.LongestWaiting" xml:space="preserve">
+    <value>Longest waiting</value>
+  </data>
+  <data name="Shell_SortOrder.Press" xml:space="preserve">
+    <value>Press</value>
+  </data>
+  <data name="Shell_SortOrder.RequestedBy" xml:space="preserve">
+    <value>Requested by</value>
+  </data>
+  <data name="Shell_SortOrder.Status" xml:space="preserve">
+    <value>Status</value>
   </data>
 </root>
