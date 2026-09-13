@@ -989,7 +989,7 @@
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
-  "last_action": "T087 done - SC-006 demonstrated and reversed; Phase 6 complete, next open task is T088 (Phase 7)",
+  "last_action": "T088-T114 done (114/117); build 0/0, suite 967/0/26; T115/T116/T117 left unticked - the owner database reinstall is the blocker and the local store has no item-configuration table",
   "coverage": {
     "FR-001": {
       "title": "A person raising a request MUST choose a Category, and then an Item, in that order.",
@@ -1534,7 +1534,7 @@
       "summary": "117 tasks across 8 phases (Setup 3, Foundational 29, US1 23, US2 16, US3 11, US4 5, US5 13, Polish 17), laid out as 51 dependency-ordered waves with explicit join points"
     },
     "implement": {
-      "summary": "Phase 5 (US3) and Phase 6 (US4) delivered: the five list orders with most urgent as the default, the per-viewer remembered sort and its shell control, and the declared-fields layer read, validated and rendered from stored configuration with an SC-006 store-only demonstration. 87 of 117 tasks; build 0 warnings / 0 errors; suite 956 passed / 0 failed / 26 skipped."
+      "summary": "US5 item-keyed minutes and picture screens, the retirement of the request type/subtype vocabulary across schema, code and docs, and the audit guard that makes it stick"
     },
     "specify": {
       "summary": "spec.md: the Category/Item feature as WHAT and WHY - five user stories (raise a request by Category then Item, one card for every request, sort the list, an Item that is configured not coded, minutes and pictures), FR-001 to FR-032 and SC-001 to SC-012, with the retired type/subtype vocabulary removed and the configuration spreadsheet named as a design document only (FR-027)."
@@ -1600,6 +1600,14 @@
     },
     {
       "note": "Pre-existing master-list drift unrelated to this feature: three table dirs (core_workstations_registry, config_workstation_hot_workcenters, setup_workstations_catalog) and six procedure dirs (sp_*_workstation* / sp_setup_workstations_*) ship create.sql but no master-list entry; the workstation-named twins of the work-center artifacts disagree with the master lists. master-not-on-disk is empty, so nothing dangles",
+      "step": "implement"
+    },
+    {
+      "note": "T115 cannot be finished by the agent: applying and reversing the schema artifacts and loading the seeds is the owner reinstall, and the local mtm_waitlist currently has NO item-configuration table (a previous dispatch applied and then removed it), so the three new procedures and four new seeds have nothing to validate against until that reinstall happens",
+      "step": "implement"
+    },
+    {
+      "note": "T116 is blocked on the same reinstall: without the item-configuration table the Settings minutes screen has no rows and no configured figures, so US5 and SC-007/SC-008 cannot be driven against a live store; the list-side parts (SC-003 card shape, SC-009 control present) were observed read-only and recorded",
       "step": "implement"
     }
   ],
@@ -2648,6 +2656,28 @@
       "warnings": [
         "11 of the 26 skips are the live-MySQL integration classes, which cannot run without the owner reinstalling the local database"
       ]
+    },
+    {
+      "what": "Startup smoke test after the DI-graph change (a service constructor lost two collaborators and two registrations were removed)",
+      "command": "Start-Process bin/x64/Debug/.../MTM_Waitlist.exe, then read the UIA tree",
+      "result": "the app came up, auto-signed in and reached the Waitlist shell with real cards rendered - Requested by / Press / Remaining time / Waiting on each, Overdue and In Progress shown, waiting age shown - so the container resolves and the live mtm_waitlist is reachable",
+      "warnings": [
+        "each card container reports its automation name as MTM_Waitlist.Module_Waitlist.Models.SampleOrder rather than a meaningful label; observed, not confirmed as a regression this feature introduced"
+      ]
+    },
+    {
+      "what": "Static half of the T115 master-list check",
+      "command": "compare Database/Tables/*/create.sql against the AllTables.sql markers and the ALTER TABLE blocks in update_table_descriptions.sql",
+      "result": "master-not-on-disk is empty for AllTables and AllSPs; the description file names no table that is not on disk, so the two retired tables are gone from both",
+      "warnings": [
+        "pre-existing and unrelated: three table dirs (core_workstations_registry, config_workstation_hot_workcenters, setup_workstations_catalog) and six sp_*_workstation* procedure dirs ship create.sql with no master-list entry and no description block"
+      ]
+    },
+    {
+      "what": "The running shell exposes the sort control and the New Request entry point after the retirement",
+      "command": "UIA button and list-item dump of the live shell",
+      "result": "buttons Sort by, Show only my requests, Accept request, Cancel request, Add Waitlist Item; nav list items Waitlist, Work Center Setup, Settings",
+      "warnings": []
     }
   ]
 }
