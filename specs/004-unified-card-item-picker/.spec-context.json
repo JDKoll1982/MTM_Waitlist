@@ -1,0 +1,159 @@
+{
+  "workflow": "companion",
+  "specName": "unified card item picker",
+  "branch": "004-unified-card-item-picker",
+  "currentStep": "specify",
+  "status": "specified",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T17:02:40.141Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T17:05:06.581Z"
+    }
+  ],
+  "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
+  "last_action": "living specs evaluated — no capabilities matched",
+  "coverage": {
+    "FR-001": {
+      "title": "A person raising a request chooses a Category and then an Item, in that order"
+    },
+    "FR-002": {
+      "title": "The Item step offers what the job supports plus the job-independent Items, and is never empty"
+    },
+    "FR-003": {
+      "title": "No screen offers a request type or subtype, and the type and subtype steps are gone"
+    },
+    "FR-004": {
+      "title": "A stored request carries its Category and Item and carries no request type or subtype"
+    },
+    "FR-005": {
+      "title": "Every request is one card: the Item's umbrella phrase first, its identifier second, which may depend on a captured answer"
+    },
+    "FR-006": {
+      "title": "One card layout for every Item; no layout variant is selected by Item"
+    },
+    "FR-007": {
+      "title": "An Item's own fields appear on the request page and never on the card"
+    },
+    "FR-008": {
+      "title": "The card keeps its four metadata rows: who asked, work centre, time remaining, waiting age"
+    },
+    "FR-009": {
+      "title": "A card shows the Item's picture, falling back to the Category, and never a placeholder over a real image"
+    },
+    "FR-010": {
+      "title": "The list defaults to most-urgent-first"
+    },
+    "FR-011": {
+      "title": "A viewer can change the sort from a shell control and their choice is remembered for them"
+    },
+    "FR-012": {
+      "title": "Overdue requests stay visibly marked as overdue whatever the sort"
+    },
+    "FR-013": {
+      "title": "An Item's behaviour comes from stored configuration, not compiled-in code"
+    },
+    "FR-014": {
+      "title": "Every Item has a configuration row; a missing row is reported as unavailable"
+    },
+    "FR-015": {
+      "title": "An Item's configuration can change without a code change or a rebuild"
+    },
+    "FR-016": {
+      "title": "A request's deadline derives from its Item's allotted minutes, not from a type or subtype"
+    },
+    "FR-017": {
+      "title": "An Item with no configured minutes uses a 15-minute default, labelled as a default"
+    },
+    "FR-018": {
+      "title": "The minutes screen shows each configured value beside the average the Item actually took"
+    },
+    "FR-019": {
+      "title": "The average counts completed requests only, acceptance to completion, with a released-then-completed request contributing once"
+    },
+    "FR-020": {
+      "title": "Both configuration screens reuse the existing role gate and introduce no new one"
+    },
+    "FR-021": {
+      "title": "An Item's picture is configurable per Item; nothing configured never replaces a resolved image"
+    },
+    "FR-022": {
+      "title": "Every user-visible string comes from the existing resource mechanism"
+    },
+    "FR-023": {
+      "title": "The request type and subtype vocabulary is removed and the schema master lists stay in sync"
+    },
+    "FR-024": {
+      "title": "Every data operation goes through a stored procedure, with no inline statement text"
+    },
+    "FR-025": {
+      "title": "Every schema artifact ships its matching rollback and the schema master lists stay in sync"
+    },
+    "FR-026": {
+      "title": "An unavailable Item, refused action or failed read is reported in plain language, never silently"
+    },
+    "FR-027": {
+      "title": "Per-Item field definitions come solely from the configuration spreadsheet, which the application never reads or ships"
+    },
+    "FR-028": {
+      "title": "The four Items with no value source are not offered until that work lands"
+    },
+    "FR-029": {
+      "title": "The wrong-material Items read as one Deliver request carrying the correct part on the second line"
+    },
+    "FR-030": {
+      "title": "The Scrap Item's value is the job's scrap type and the user is never asked for it"
+    },
+    "FR-031": {
+      "title": "Scrap is offered only on a real scrap decision: set, not No Scrap, and not the Scrap Type Required placeholder"
+    },
+    "FR-032": {
+      "title": "Choosing an Item does not change the request's lifecycle"
+    }
+  },
+  "size": "oversized",
+  "classification": {
+    "projectedFiles": 70,
+    "projectedTasks": 80,
+    "scopeSignal": "larger",
+    "verdict": "oversized"
+  },
+  "context": [
+    "source: WeekendProject/OPEN-WORK-NEXT-SPEC.md §16 — the approved design, seeded by §5 and evidenced by §13/§15",
+    "source: WeekendProject/Documents/Request-Config-Template.csv — 23 rows, sole source of field definitions, design-time only and never shipped",
+    "area: the New Request wizard (Module_Waitlist/Views/NewRequest*)",
+    "area: the waitlist list, card and per-type views (MTM_Waitlist.Waitlist.View, Module_Waitlist/Controls)",
+    "area: the Item catalog and picker service (MTM_Waitlist.Settings)",
+    "area: the request lifecycle procedures and the type/subtype catalog",
+    "area: the two per-subtype Settings screens — urgency allotments and subtype images",
+    "constraint: constitution II — internal stores read live, no mock mode",
+    "constraint: constitution III — stored-procedure-first, paired create/rollback, schema master lists in sync",
+    "constraint: constitution V — no hardcoded layout boundaries, localized strings, converters registered in App.xaml",
+    "found: setup_active_jobs has 0 rows, so the picker job filter has no data to read — the seed must create eight job configurations",
+    "found: the legacy catalog tables already carry category and item_id for all 24 subtypes, so the seed rewrite has its mapping",
+    "found: living specs evaluated — no capabilities matched; the registry covers only the startup areas",
+    "area: specs/004-unified-card-item-picker (specification refreshed in place)",
+    "area: WeekendProject/Documents/Request-Config-Template.csv and unified-item-picker-workflows.md (documents of record)",
+    "area: MTM_Waitlist.Setup SetupWorkflowService.cs and SetupDunnageTypeViewModel.cs (scrap constants, HasScrapDecision)",
+    "constraint: constitution III stored-procedure-first; FR-027 the spreadsheet is never read or shipped"
+  ],
+  "intent": "Let a person raise a request by naming the Category and Item they actually mean, and let every request read as the same two-line card whatever it is.",
+  "expectations": [
+    "The four Items with no value source — finished goods, NCM, WIP and outside service — are hidden until their own spec lands.",
+    "The defect-types editor is not part of this specification.",
+    "The real material identifiers (coil or part number, quantity, stock location) stay deferred to the later item-resolution work.",
+    "No migration path is written: the database is reinstalled from seed, and the reinstall is the owner action.",
+    "Releasing a request keeps no screen control; it remains service-only.",
+    "Verifying with the in-app inspector is superseded by the scripted UI tests."
+  ],
+  "unattended": true
+}

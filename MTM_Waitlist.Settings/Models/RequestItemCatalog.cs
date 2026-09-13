@@ -24,7 +24,7 @@ public static class RequestItemCatalog
         Item(RequestCategory.Pickup, 7, "pickup-outside-service", "Outside Service", "outside-service", RequestItemValueType.String, false, "pickup-outside-service"),
         Item(RequestCategory.Pickup, 8, "pickup-riser-table", "Riser Table", "riser-table", RequestItemValueType.String, false, "pickup-riser-table"),
         Item(RequestCategory.Pickup, 9, "pickup-dunnage", "Dunnage", "dunnage", RequestItemValueType.Enum, true, "pickup-dunnage"),
-        Item(RequestCategory.Pickup, 10, "pickup-scrap", "Scrap / Offal removal", "scrap-offal-removal", RequestItemValueType.Text, true, "pickup-scrap"),
+        Item(RequestCategory.Pickup, 10, "pickup-scrap", "Scrap removal", "scrap-offal-removal", RequestItemValueType.Text, true, "pickup-scrap"),
         Item(RequestCategory.Pickup, 11, "pickup-hopper", "Pickup Hopper (do not return)", "hopper-pickup", RequestItemValueType.String, false, "pickup-hopper"),
 
         // --- Deliver (8) ---

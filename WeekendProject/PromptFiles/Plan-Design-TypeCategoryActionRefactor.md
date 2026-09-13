@@ -80,7 +80,7 @@ Notes:
 | Non-Conforming | rejected material | NCM |
 | Work In Process | WIP between ops | WIP |
 | Outside Service | material to a vendor | O/S |
-| Scrap | scrap / offal removal | SCRAP |
+| Scrap | Scrap removal | SCRAP |
 | Flatstock | flat sheet material | FLATSTOCK |
 | Die | tooling / dies | DIE |
 | Table | parts on/off a table work center | TABLE |
