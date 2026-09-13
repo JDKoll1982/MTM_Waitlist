@@ -24,8 +24,16 @@ public partial class NewRequestPreviewViewModel : ObservableRecipient, INavigati
         get; set;
     } = string.Empty;
 
+    /// <summary>The Category's umbrella word, in the new Category/Item vocabulary.</summary>
     [ObservableProperty]
-    public partial string RequestType
+    public partial string CategoryText
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>The Item the requester chose, in the new Category/Item vocabulary.</summary>
+    [ObservableProperty]
+    public partial string ItemText
     {
         get; set;
     } = string.Empty;
@@ -49,7 +57,7 @@ public partial class NewRequestPreviewViewModel : ObservableRecipient, INavigati
 
     public void OnNavigatedTo(object parameter)
     {
-        if (parameter is not NewRequestFlowState state || state.RequestType is null)
+        if (parameter is not NewRequestFlowState state || state.Item is null)
         {
             _navigationService.GoBack();
             return;
@@ -57,7 +65,8 @@ public partial class NewRequestPreviewViewModel : ObservableRecipient, INavigati
 
         _state = state;
         WorkCenter = state.WorkCenter;
-        RequestType = state.RequestType.RequestType;
+        CategoryText = NewRequestItemViewModel.ResolveCategoryName(state.Category ?? state.Item.Category);
+        ItemText = NewRequestItemViewModel.ResolveItemName(state.Item);
         Detail = state.InputValue ?? string.Empty;
         HasDetail = !string.IsNullOrWhiteSpace(Detail);
     }

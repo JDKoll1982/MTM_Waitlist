@@ -16,35 +16,35 @@ public static class RequestItemCatalog
     public static readonly IReadOnlyList<RequestItemDefinition> Items = new[]
     {
         // --- Pickup (11) ---
-        Item(RequestCategory.Pickup, 1, "pickup-coil", "Coil or Flatstock", "coil-or-flatstock", RequestItemValueType.String, false, "pickup-coil"),
-        Item(RequestCategory.Pickup, 2, "pickup-die", "Die", "die", RequestItemValueType.Enum, true, "pickup-die"),
-        Item(RequestCategory.Pickup, 3, "pickup-component", "Component", "component", RequestItemValueType.Enum, true, "pickup-component"),
-        Item(RequestCategory.Pickup, 4, "pickup-fg", "Finished Goods (FG)", "finished-goods-fg", RequestItemValueType.String, false, "pickup-fg"),
-        Item(RequestCategory.Pickup, 5, "pickup-ncm", "Non-Conforming (NCM)", "non-conforming-ncm", RequestItemValueType.String, true, "pickup-ncm"),
-        Item(RequestCategory.Pickup, 6, "pickup-wip", "Work In Process (WIP)", "work-in-process-wip", RequestItemValueType.String, false, "pickup-wip"),
-        Item(RequestCategory.Pickup, 7, "pickup-outside-service", "Outside Service", "outside-service", RequestItemValueType.String, false, "pickup-outside-service"),
-        Item(RequestCategory.Pickup, 8, "pickup-riser-table", "Riser Table", "riser-table", RequestItemValueType.String, false, "pickup-riser-table"),
-        Item(RequestCategory.Pickup, 9, "pickup-dunnage", "Dunnage", "dunnage", RequestItemValueType.Enum, true, "pickup-dunnage"),
-        Item(RequestCategory.Pickup, 10, "pickup-scrap", "Scrap removal", "scrap-offal-removal", RequestItemValueType.Text, true, "pickup-scrap"),
-        Item(RequestCategory.Pickup, 11, "pickup-hopper", "Pickup Hopper (do not return)", "hopper-pickup", RequestItemValueType.String, false, "pickup-hopper"),
+        Item(RequestCategory.Pickup, 1, "pickup-coil", "coil-or-flatstock", "{part_number}", "pickup-coil"),
+        Item(RequestCategory.Pickup, 2, "pickup-die", "die", "{die_number:die_location=Home Location}", "pickup-die"),
+        Item(RequestCategory.Pickup, 3, "pickup-component", "component", "{component}", "pickup-component"),
+        Item(RequestCategory.Pickup, 4, "pickup-fg", "finished-goods-fg", "{part_number}", "pickup-fg"),
+        Item(RequestCategory.Pickup, 5, "pickup-ncm", "non-conforming-ncm", "{part_number}", "pickup-ncm"),
+        Item(RequestCategory.Pickup, 6, "pickup-wip", "work-in-process-wip", "{part_number}", "pickup-wip"),
+        Item(RequestCategory.Pickup, 7, "pickup-outside-service", "outside-service", "{part_number}", "pickup-outside-service"),
+        Item(RequestCategory.Pickup, 8, "pickup-riser-table", "riser-table", "Riser Table", "pickup-riser-table"),
+        Item(RequestCategory.Pickup, 9, "pickup-dunnage", "dunnage", "{dunnage_part}", "pickup-dunnage"),
+        Item(RequestCategory.Pickup, 10, "pickup-scrap", "scrap-offal-removal", "{scrap_type}", "pickup-scrap"),
+        Item(RequestCategory.Pickup, 11, "pickup-hopper", "hopper-pickup", "Hopper", "pickup-hopper"),
 
         // --- Deliver (8) ---
-        Item(RequestCategory.Deliver, 1, "deliver-coil", "Coil", "coil", RequestItemValueType.String, false, "deliver-coil"),
-        Item(RequestCategory.Deliver, 2, "deliver-riser-table", "Riser Table", "riser-table", RequestItemValueType.String, false, "deliver-riser-table"),
-        Item(RequestCategory.Deliver, 3, "deliver-hopper", "Hopper (scrap)", "hopper", RequestItemValueType.String, false, "deliver-hopper"),
-        Item(RequestCategory.Deliver, 4, "deliver-flatstock", "Flatstock", "flatstock", RequestItemValueType.String, false, "deliver-flatstock"),
-        Item(RequestCategory.Deliver, 5, "deliver-die", "Die", "die", RequestItemValueType.String, false, "deliver-die"),
-        Item(RequestCategory.Deliver, 6, "deliver-dunnage", "Dunnage", "dunnage", RequestItemValueType.Enum, true, "deliver-dunnage"),
-        Item(RequestCategory.Deliver, 7, "deliver-wrong-coil", "Wrong Coil", "wrong-coil", RequestItemValueType.String, true, "deliver-wrong-coil"),
-        Item(RequestCategory.Deliver, 8, "deliver-wrong-flatstock", "Wrong Flatstock", "wrong-flatstock", RequestItemValueType.String, true, "deliver-wrong-flatstock"),
+        Item(RequestCategory.Deliver, 1, "deliver-coil", "coil", "{part_number}", "deliver-coil"),
+        Item(RequestCategory.Deliver, 2, "deliver-riser-table", "riser-table", "Riser Table", "deliver-riser-table"),
+        Item(RequestCategory.Deliver, 3, "deliver-hopper", "hopper", "Hopper", "deliver-hopper"),
+        Item(RequestCategory.Deliver, 4, "deliver-flatstock", "flatstock", "{part_number}", "deliver-flatstock"),
+        Item(RequestCategory.Deliver, 5, "deliver-die", "die", "{die_number} / {die_location}", "deliver-die"),
+        Item(RequestCategory.Deliver, 6, "deliver-dunnage", "dunnage", "{dunnage_part}", "deliver-dunnage"),
+        Item(RequestCategory.Deliver, 7, "deliver-wrong-coil", "wrong-coil", "{part_number}", "deliver-wrong-coil"),
+        Item(RequestCategory.Deliver, 8, "deliver-wrong-flatstock", "wrong-flatstock", "{part_number}", "deliver-wrong-flatstock"),
 
         // --- Assist (3) ---
-        Item(RequestCategory.Assist, 1, "assist-coil-turn", "Coil", "coil", RequestItemValueType.String, false, "assist-coil-turn"),
-        Item(RequestCategory.Assist, 2, "assist-table-place", "Place Parts on Table", "table-parts", RequestItemValueType.String, false, "assist-table-place"),
-        Item(RequestCategory.Assist, 3, "assist-table-remove", "Remove Parts from Table", "table-parts-remove", RequestItemValueType.String, false, "assist-table-remove"),
+        Item(RequestCategory.Assist, 1, "assist-coil-turn", "coil", "{part_number}", "assist-coil-turn"),
+        Item(RequestCategory.Assist, 2, "assist-table-place", "table-parts", "{part_number}", "assist-table-place"),
+        Item(RequestCategory.Assist, 3, "assist-table-remove", "table-parts-remove", "{part_number}", "assist-table-remove"),
 
         // --- Other (1) ---
-        Item(RequestCategory.Other, 1, "other", "Other", "other", RequestItemValueType.Text, true, "other")
+        Item(RequestCategory.Other, 1, "other", "other", "{answer}", "other")
     };
 
     /// <summary>All items belonging to a given umbrella category, ordered by Order.</summary>
@@ -58,28 +58,41 @@ public static class RequestItemCatalog
     /// <summary>Total catalog count (23).</summary>
     public static int TotalCount => Items.Count;
 
+    /// <summary>
+    /// The resource key for an Item's display name. One convention, one place, so the resolver, the
+    /// picker tile and the tests cannot drift apart (FR-022).
+    /// </summary>
+    public static string DisplayNameResourceKeyFor(string itemId) => $"RequestItem.{itemId}.DisplayName";
+
+    /// <summary>
+    /// The Item's umbrella phrase for card Line 1: the Category's own word, or an Item-specific phrase
+    /// where the Item defines one (contract §2). The two wrong-material phrases are pinned verbatim.
+    /// </summary>
+    private static string UmbrellaVerbFor(RequestCategory category, string id) => id switch
+    {
+        "deliver-wrong-coil" => "Wrong Coil Bring:",
+        "deliver-wrong-flatstock" => "Wrong Flatstock Bring:",
+        _ => category switch
+        {
+            RequestCategory.Pickup => "Pickup",
+            RequestCategory.Deliver => "Deliver",
+            RequestCategory.Assist => "Assist",
+            _ => "Other"
+        }
+    };
+
     private static RequestItemDefinition Item(
-        RequestCategory category, int order, string id, string displayName, string normalizedName,
-        RequestItemValueType valueType, bool needsUserEntry, string producedValue) =>
+        RequestCategory category, int order, string id, string normalizedName,
+        string cardLine2Template, string producedValue) =>
         new()
         {
             Category = category,
             Order = order,
             Id = id,
-            DisplayName = displayName,
+            DisplayNameResourceKey = DisplayNameResourceKeyFor(id),
             NormalizedName = normalizedName,
-            UmbrellaVerb = UmbrellaVerbFor(category),
-            ValueType = valueType,
-            NeedsUserEntry = needsUserEntry,
+            UmbrellaVerb = UmbrellaVerbFor(category, id),
+            CardLine2Template = cardLine2Template,
             ProducedValue = producedValue
         };
-
-    /// <summary>Maps a category to its umbrella verb shown as card Line 1.</summary>
-    private static string UmbrellaVerbFor(RequestCategory category) => category switch
-    {
-        RequestCategory.Pickup => "Pickup",
-        RequestCategory.Deliver => "Deliver",
-        RequestCategory.Assist => "Assist",
-        _ => "Other"
-    };
 }

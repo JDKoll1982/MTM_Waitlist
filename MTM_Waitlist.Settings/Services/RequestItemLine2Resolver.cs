@@ -1,0 +1,170 @@
+using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Settings.Models;
+
+namespace MTM_Waitlist.Module_Settings.Services;
+
+/// <summary>
+/// The values a card's Line 2 template resolves against: the active job's fields and the one answer the flow
+/// captured. A pure value so the resolver stays deterministic and DB-free.
+/// </summary>
+public sealed record RequestItemLine2Context(
+    string? PartNumber = null,
+    string? PartDescription = null,
+    string? DieNumber = null,
+    string? DieLocation = null,
+    string? DunnagePart = null,
+    string? SequenceNumber = null,
+    string? ScrapType = null,
+    string? Answer = null,
+    string? Destination = null,
+    string? Component = null,
+    string? Defect = null);
+
+/// <summary>The resolved identifier, and whether it resolved at all.</summary>
+public sealed record RequestItemLine2Result(string Text, bool IsResolved, string ProblemKey, string Problem)
+{
+    /// <summary>A result that resolved cleanly, with nothing to report.</summary>
+    public static RequestItemLine2Result Resolved(string text) => new(text, true, string.Empty, string.Empty);
+}
+
+/// <summary>
+/// Resolves an Item's <see cref="RequestItemDefinition.CardLine2Template"/> — the card's identifier — against
+/// the active-job snapshot and the captured answer (contract §3, FR-005).
+/// <para>
+/// The token set is deliberately closed. An unknown token, or a token whose value is blank, renders the Item's
+/// own display name and reports the configuration problem: never a blank, never a fabricated value (FR-026).
+/// </para>
+/// </summary>
+public sealed class RequestItemLine2Resolver
+{
+    /// <summary>The resource key of the configuration-problem report (FR-022).</summary>
+    public const string ProblemKey = "RequestItem_Line2.Problem";
+
+    /// <summary>
+    /// The captured destination value that switches <c>pickup-die</c>'s identifier from the die's number to the
+    /// die's location. Pinned verbatim (spec Verbatim Constraints).
+    /// </summary>
+    public const string HomeLocation = "Home Location";
+
+    /// <summary>Resolves the Item's Line 2. Never returns null and never returns a bare template.</summary>
+    public RequestItemLine2Result Resolve(RequestItemDefinition item, RequestItemLine2Context context)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        var effectiveContext = context ?? new RequestItemLine2Context();
+        var tokens = BuildTokens(effectiveContext);
+
+        var unresolvedToken = (string?)null;
+        var text = new System.Text.StringBuilder();
+        var template = item.CardLine2Template ?? string.Empty;
+        var index = 0;
+
+        while (index < template.Length)
+        {
+            var open = template.IndexOf('{', index);
+            if (open < 0)
+            {
+                text.Append(template, index, template.Length - index);
+                break;
+            }
+
+            text.Append(template, index, open - index);
+
+            var close = template.IndexOf('}', open + 1);
+            if (close < 0)
+            {
+                // An unterminated brace is a malformed template, not literal text.
+                unresolvedToken = template[open..];
+                break;
+            }
+
+            var body = template[(open + 1)..close];
+            var token = body;
+            var colon = body.IndexOf(':');
+            if (colon >= 0)
+            {
+                // {primary:secondary=conditionValue} — the language's one conditional, evaluated against the
+                // captured destination (pickup-die: the die's location at Home Location, else its number).
+                var alternatives = body[(colon + 1)..];
+                var equals = alternatives.IndexOf('=');
+                var primary = body[..colon];
+                var secondary = equals >= 0 ? alternatives[..equals] : alternatives;
+                var conditionValue = equals >= 0 ? alternatives[(equals + 1)..] : string.Empty;
+                token = string.Equals(effectiveContext.Destination?.Trim(), conditionValue.Trim(), StringComparison.OrdinalIgnoreCase)
+                    ? secondary
+                    : primary;
+            }
+
+            if (!tokens.TryGetValue(token.Trim(), out var value) || string.IsNullOrWhiteSpace(value))
+            {
+                unresolvedToken = token;
+                break;
+            }
+
+            text.Append(value);
+            index = close + 1;
+        }
+
+        if (unresolvedToken is null)
+        {
+            var resolved = text.ToString().Trim();
+            if (resolved.Length > 0)
+            {
+                return RequestItemLine2Result.Resolved(resolved);
+            }
+
+            unresolvedToken = template;
+        }
+
+        return new RequestItemLine2Result(
+            ResolveDisplayName(item),
+            false,
+            ProblemKey,
+            ResolveProblemMessage(item, unresolvedToken));
+    }
+
+    /// <summary>
+    /// The Item's display name, resolved from its resource key (FR-022) with a readable fallback so the card is
+    /// never blank.
+    /// </summary>
+    public static string ResolveDisplayName(RequestItemDefinition item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        var localized = item.DisplayNameResourceKey.GetLocalized();
+        if (!string.IsNullOrWhiteSpace(localized)
+            && !string.Equals(localized, item.DisplayNameResourceKey, StringComparison.Ordinal))
+        {
+            return localized;
+        }
+
+        return !string.IsNullOrWhiteSpace(item.NormalizedName) ? item.NormalizedName : item.Id;
+    }
+
+    /// <summary>
+    /// The plain-language configuration report shown beside the Item's name when a token could not be resolved.
+    /// </summary>
+    public static string ResolveProblemMessage(RequestItemDefinition item, string? token)
+    {
+        const string Fallback =
+            "This item's card can't show its identifier because its configuration names a value it doesn't have. Tell a supervisor so it can be checked.";
+        var localized = ProblemKey.GetLocalized();
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, ProblemKey, StringComparison.Ordinal)
+            ? Fallback
+            : localized;
+    }
+
+    private static Dictionary<string, string?> BuildTokens(RequestItemLine2Context context) =>
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["part_number"] = context.PartNumber,
+            ["part_description"] = context.PartDescription,
+            ["die_number"] = context.DieNumber,
+            ["die_location"] = context.DieLocation,
+            ["dunnage_part"] = context.DunnagePart,
+            ["sequence_number"] = context.SequenceNumber,
+            ["scrap_type"] = context.ScrapType,
+            ["answer"] = context.Answer,
+            ["destination"] = context.Destination,
+            ["component"] = context.Component,
+            ["defect"] = context.Defect
+        };
+}

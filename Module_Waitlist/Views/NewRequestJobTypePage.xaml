@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
-            <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="New Request - Choose Job Type" />
+            <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="New Request - Choose Category" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkCenterText, Mode=OneWay}" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.PromptText, Mode=OneWay}" />
             <TextBlock

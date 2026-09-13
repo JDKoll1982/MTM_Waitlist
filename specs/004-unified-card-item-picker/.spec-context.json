@@ -202,10 +202,154 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-13T18:10:43.376Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:15:24.504Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:15:24.747Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:15:24.987Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:15:25.223Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:15:28.700Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:15:28.934Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:15:29.167Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:18:36.754Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:18:36.987Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:18:37.220Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:18:37.453Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:20:06.748Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:20:06.985Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:20:07.218Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:20:07.454Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:20:07.687Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:22:06.134Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T18:22:06.377Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
-  "last_action": "stopped at the Phase 2 wave-4 boundary with 16/117 tasks done; build 0W/0E, tests 0 failed / 890 passed / 19 skipped; next task is T017 (Phase 2 wave 5 models), which is where C# consumers start to be affected",
+  "last_action": "US1 wizard reshape landed and builds 0/0; test gate red at 10 seam failures (card/detail layer owned by US2)",
   "coverage": {
     "FR-001": {
       "title": "A person raising a request MUST choose a Category, and then an Item, in that order.",
@@ -632,6 +776,11 @@
       "decision": "Check master-list agreement as presence plus absence of the retired vocabulary, not byte-identical text",
       "why": "the internal-store master lists are hand-maintained and their blocks deliberately omit the USE/Engine preamble the per-file artifacts carry, so a verbatim comparison can never be true",
       "rejected": "Forcing the master blocks to be byte-identical copies of the per-file artifacts"
+    },
+    {
+      "decision": "The request mirror keeps a transitional legacy display pair projected from the Item code (UmbrellaVerb / NormalizedName), and SubmitAsync keeps the draft own pair when it supplied one",
+      "why": "The list, the detail page and their tests still read a type/subtype until US2 re-points them at the Item (T061/T062/T065); projecting from the Item keeps the build green and the card honest without inventing a stored column",
+      "rejected": "Removing RequestType/Subtype from WaitlistRequest and WaitlistRequestDraft in US1 - that breaks the US2 card layer and would have pre-empted US2 tests-first"
     }
   ],
   "step_summaries": {
@@ -679,9 +828,13 @@
     {
       "note": "The Master library's internal-store master lists are hand-maintained and abbreviated, so no artifact can be proved present by byte comparison; T016 verified presence plus the absence of every retired parameter name.",
       "step": "implement"
+    },
+    {
+      "note": "Phase 3 US1 cannot reach a build-clean checkpoint on its own: T048 re-keys the request pair and the card/detail layer that reads it is US2 (T061/T062/T065). Ten tests stay red in that seam: 6 WaitlistViewDetailViewModel fixtures whose submit helpers pass a legacy pair such as (Coil, Pickup Coil) the retired catalog never carried, 2 of NewRequestItemViewModelTests, SubmitAsync_OnlyFlagsExactDuplicateRequests, and a detail item-resolution assertion.",
+      "step": "implement"
     }
   ],
-  "currentTask": "T016",
+  "currentTask": "T034",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -811,6 +964,141 @@
         "Database/Seeds/AllSeeds.sql",
         "Database/Bootstrap/update_table_descriptions.sql"
       ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Reshaped RequestItemDefinition: added CardLine2Template and DisplayNameResourceKey, removed ValueType/NeedsUserEntry, dropped the dead IsUserEntryItem rule",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestItemDefinition.cs",
+        "MTM_Waitlist.Settings/Services/RequestItemPickerRules.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Reshaped RequestItemCatalog to the 23 rows with Line 2 templates, resource-keyed display names and the two pinned wrong-material umbrella phrases; re-pointed the catalog tests off the moved behaviour columns",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestItemCatalog.cs",
+        "MTM_Waitlist.Tests/Module_Settings/RequestItemCatalogTests.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Added RequestItemConfiguration mapping the configuration table columns plus the parsed options and declared fields, with the unavailable state",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestItemConfiguration.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Added RequestItemFieldDefinition as the detail_fields_json element shape with the closed source set",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestItemFieldDefinition.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Added RequestItemObservedTime carrying the configured minutes and the never-stored observed average as two distinct values, with the default label and a real absence when nothing has completed",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestItemObservedTime.cs"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Added the request_item and request_category image scopes alongside the two legacy scopes their own retirement task removes",
+      "files": [
+        "MTM_Waitlist.Settings/Models/ImageLocationScope.cs"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Extended RequestJobPartAvailability with HasScrapDecision and a Scrap job-part kind flag so the scrap gate is representable",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Extracted ScrapDecisionRules into Core with the two pinned constants and both predicates, and pointed SetupHasScrapDecision and SetupWorkflowService at it",
+      "files": [
+        "MTM_Waitlist.Core/Services/ScrapDecisionRules.cs",
+        "MTM_Waitlist.Setup/ViewModels/SetupDunnageTypeViewModel.cs",
+        "MTM_Waitlist.Setup/Services/SetupWorkflowService.cs"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Added IRequestItemConfigurationService reading the configuration table once into an Item-keyed lookup that drops non-catalogued rows and reports a catalogued Item with no row as unavailable",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestItemConfigurationService.cs",
+        "MTM_Waitlist.Settings/Models/RequestItemConfiguration.cs"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Added RequestItemLine2Resolver over the closed token set with the die Home Location conditional, falling back to the display name and reporting the problem instead of rendering a blank",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestItemLine2Resolver.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Added RequestItemObservedTimeService composing configured and observed minutes as two values, and moved the labelled fallback to 15 minutes",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestItemObservedTimeService.cs",
+        "MTM_Waitlist.Core/Services/UrgencySettingsService.cs"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Corrected the merged pickup Item to a coil-or-flatstock gate and deleted the dead pickup-flatstock arm",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestItemPickerRules.cs",
+        "MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Gated pickup-scrap on a real scrap decision through the shared rule and excluded the four out-of-scope Items by rule while keeping them in the catalog",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestItemPickerRules.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Added GetVisibleCategories and rebuilt the filtered Item list inside the service so an unsupported Item is never constructed or bound",
+      "files": [
+        "MTM_Waitlist.Settings/Services/NewRequestPickerService.cs"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Declared IRequestJobPartAvailabilityProvider in Settings, implemented the composition-root mapping in the app project and registered the new services",
+      "files": [
+        "MTM_Waitlist.Settings/Services/IRequestJobPartAvailabilityProvider.cs",
+        "Services/RequestJobAvailabilityProvider.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Added the environment-gated seed round-trip test reading the seeded subordinate parts through the resolver own deserializer, including the three-way scrap values and the absent-row case",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Setup/Services/ActiveJobSeedRoundTripTests.cs"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Extended the picker rules tests to the SC-004 matrix: the eight job configurations with their exact visible sets, the flatstock-only merged pickup Item, the scrap three-way gate plus unset, and the four out-of-scope Items hidden but catalogued",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemPickerRulesTests.cs"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Extended the picker service tests: visible Items never empty for a partless job and for no active job, Assist withheld on such a job, and unoffered Items absent from the built collection rather than hidden",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/NewRequestPickerServiceTests.cs"
+      ]
     }
   },
   "verified": [
@@ -862,6 +1150,22 @@
       "result": "reached the shell directly (no Sign in gate, developer account) and the dump showed the pre-change cards with Subtype rows; window found by process id; 0 orphan processes after close",
       "warnings": [
         "the window title was MTM_Waitlist, confirming the never-locate-by-title rule"
+      ]
+    },
+    {
+      "what": "Build gate after the US1 reshape (clear stale PRI, no app running)",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "result": "Build succeeded - 0 Warning(s) 0 Error(s)",
+      "warnings": [
+        "WMC9999 appeared mid-edit and was a real masked XAML error from in-flight XAML edits; it cleared once the pages and view models agreed"
+      ]
+    },
+    {
+      "what": "Test gate after the US1 reshape",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "Failed: 10, Passed: 876, Skipped: 26, Total: 912",
+      "warnings": [
+        "10 seam failures, all in the card/detail layer US2 owns"
       ]
     }
   ]

@@ -14,6 +14,26 @@ namespace MTM_Waitlist.Module_Settings.Services;
 public static class RequestItemPickerRules
 {
     /// <summary>
+    /// Catalogued Items that are <b>never offered</b>: they exist in the catalog so the twenty-three-row
+    /// identity assertion stays true, and are hidden by this rule rather than by deletion — a hidden Item and a
+    /// missing row are different states (FR-028).
+    /// </summary>
+    private static readonly string[] s_outOfScopeItemIds =
+    [
+        "pickup-fg",
+        "pickup-ncm",
+        "pickup-wip",
+        "pickup-outside-service"
+    ];
+
+    /// <summary>Whether the Item is catalogued but deliberately never offered (FR-028).</summary>
+    public static bool IsOutOfScope(RequestItemDefinition item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        return s_outOfScopeItemIds.Contains(item.Id, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
     /// The active-job part an auto-populated Item depends on for visibility, or <see cref="RequestJobPartKind.None"/>
     /// for manual / always-available Items. Grounded in the visibility rules recorded in
     /// specs/004-unified-card-item-picker/contracts/request-picker-flow.md §4.
@@ -23,14 +43,19 @@ public static class RequestItemPickerRules
         ArgumentNullException.ThrowIfNull(item);
         return item.Id switch
         {
-            "pickup-coil" or "deliver-coil" or "assist-coil-turn" or "deliver-wrong-coil" => RequestJobPartKind.Coil,
-            "pickup-flatstock" or "deliver-flatstock" or "deliver-wrong-flatstock" => RequestJobPartKind.Flatstock,
+            // The merged Pickup Item covers a coil or a flatstock — either material lights it up (D21).
+            "pickup-coil" => RequestJobPartKind.CoilOrFlatstock,
+            "deliver-coil" or "assist-coil-turn" or "deliver-wrong-coil" => RequestJobPartKind.Coil,
+            "deliver-flatstock" or "deliver-wrong-flatstock" => RequestJobPartKind.Flatstock,
             "pickup-die" or "deliver-die" => RequestJobPartKind.Die,
             "pickup-component" => RequestJobPartKind.Component,
             "pickup-dunnage" or "deliver-dunnage" => RequestJobPartKind.Dunnage,
+            // The Scrap Item is offered only for a real scrap decision — not for 'No Scrap' and not for the
+            // 'Scrap Type Required' placeholder, which means no decision was made (FR-031, contract §5).
+            "pickup-scrap" => RequestJobPartKind.Scrap,
             "assist-table-place" or "assist-table-remove" => RequestJobPartKind.AnySubordinate,
-            // FG / WIP / Outside / NCM are resolved against a live work order + sequence (Phase 6.2).
-            "pickup-fg" or "pickup-wip" or "pickup-outside-service" or "pickup-ncm" => RequestJobPartKind.RequiresActiveJob,
+            // The four out-of-scope Items fall here rather than on their own arm: they are hidden by
+            // IsOutOfScope regardless of what the job has (FR-028).
             _ => RequestJobPartKind.None,
         };
     }
@@ -50,12 +75,6 @@ public static class RequestItemPickerRules
     }
 
     /// <summary>
-    /// Whether the Item is a user-entry path (needs the operator to enter/select a value). Mirrors
-    /// <see cref="RequestItemDefinition.NeedsUserEntry"/>; kept here so picker call sites have one rule surface.
-    /// </summary>
-    public static bool IsUserEntryItem(RequestItemDefinition item) => item.NeedsUserEntry;
-
-    /// <summary>
     /// Destination rule: every Deliver Item is delivered to the requesting work center (no user entry).
     /// </summary>
     public static bool IsDeliverDestinationWorkCenter(RequestItemDefinition item)
@@ -63,20 +82,28 @@ public static class RequestItemPickerRules
 
     /// <summary>
     /// Conditional-visibility rule: an Item is shown only when the requesting job has what it needs.
-    /// Manual / user-entry / free-text Items are always visible.
+    /// Manual / always-available Items are always visible; a catalogued-but-out-of-scope Item never is.
     /// </summary>
     public static bool IsVisible(RequestItemDefinition item, RequestJobPartAvailability availability)
     {
         ArgumentNullException.ThrowIfNull(item);
         ArgumentNullException.ThrowIfNull(availability);
+
+        if (IsOutOfScope(item))
+        {
+            return false;
+        }
+
         return RequiredJobPart(item) switch
         {
             RequestJobPartKind.None => true,
             RequestJobPartKind.Coil => availability.HasCoil,
+            RequestJobPartKind.CoilOrFlatstock => availability.HasCoil || availability.HasFlatstock,
             RequestJobPartKind.Flatstock => availability.HasFlatstock,
             RequestJobPartKind.Die => availability.HasDie,
             RequestJobPartKind.Component => availability.HasComponent,
             RequestJobPartKind.Dunnage => availability.HasDunnage,
+            RequestJobPartKind.Scrap => availability.HasScrapDecision,
             RequestJobPartKind.AnySubordinate => availability.HasAnySubordinate,
             RequestJobPartKind.RequiresActiveJob => availability.HasActiveJob,
             _ => true,

@@ -29,19 +29,19 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
     } = string.Empty;
 
     [ObservableProperty]
-    public partial string RequestType
+    public partial string CategoryText
     {
         get; set;
     } = string.Empty;
 
     [ObservableProperty]
-    public partial string SubtypeName
+    public partial string ItemText
     {
         get; set;
     } = string.Empty;
 
     [ObservableProperty]
-    public partial bool HasSubtype
+    public partial bool HasItem
     {
         get; set;
     }
@@ -133,7 +133,7 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
 
     public void OnNavigatedTo(object parameter)
     {
-        if (parameter is not NewRequestFlowState state || state.RequestType is null)
+        if (parameter is not NewRequestFlowState state || state.Item is null)
         {
             _navigationService.GoBack();
             return;
@@ -141,9 +141,9 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
 
         _state = state;
         WorkCenter = state.WorkCenter;
-        RequestType = state.RequestType.RequestType;
-        SubtypeName = state.Subtype?.Name ?? string.Empty;
-        HasSubtype = !string.IsNullOrWhiteSpace(SubtypeName);
+        CategoryText = NewRequestItemViewModel.ResolveCategoryName(state.Category ?? state.Item.Category);
+        ItemText = NewRequestItemViewModel.ResolveItemName(state.Item);
+        HasItem = !string.IsNullOrWhiteSpace(ItemText);
         Detail = state.InputValue ?? string.Empty;
         HasDetail = !string.IsNullOrWhiteSpace(Detail);
         IsSubmitting = false;
@@ -158,8 +158,11 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         }
     }
 
-    private static bool IsCoilRequest(NewRequestFlowState state)
-        => state.RequestType is not null && string.Equals(state.RequestType.RequestType, "Coil", StringComparison.OrdinalIgnoreCase);
+    /// <summary>
+    /// Whether to show the job's coil readout. The <b>job</b> has a coil — the availability snapshot says so —
+    /// never a property of the Item the requester chose.
+    /// </summary>
+    private static bool IsCoilRequest(NewRequestFlowState state) => state.Availability.HasCoil;
 
     private void ResetCoilDetail()
     {

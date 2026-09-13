@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -140,7 +141,9 @@ public sealed class NewRequestSummaryHonestyTests
     private static NewRequestFlowState CoilState() => new()
     {
         WorkCenter = "Expo Line 7",
-        RequestType = new NewRequestTypeDefinition { RequestType = "Coil" },
+        Category = RequestCategory.Deliver,
+        Item = RequestItemCatalog.FindById("deliver-coil"),
+        Availability = RequestJobPartAvailability.All,
         InputValue = "Skid 4471 is on the wrong dock",
     };
 

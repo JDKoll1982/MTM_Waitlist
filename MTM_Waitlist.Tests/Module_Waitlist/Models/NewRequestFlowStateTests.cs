@@ -1,14 +1,23 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Models;
 
+/// <summary>
+/// The wizard's accumulated state and step order in the Category/Item vocabulary (T036, T038). The type and
+/// subtype members are gone, so the draft carries the Category and the Item and nothing names a type (FR-003,
+/// FR-004).
+/// </summary>
 [TestClass]
 public sealed class NewRequestFlowStateTests
 {
+    private static readonly RequestItemDefinition OtherItem =
+        RequestItemCatalog.FindById("other") ?? throw new InvalidOperationException("The catalog must carry the 'other' Item.");
+
     [TestMethod]
     public void ToDraft_MapsAccumulatedWizardState()
     {
@@ -16,8 +25,8 @@ public sealed class NewRequestFlowStateTests
         {
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = new NewRequestTypeDefinition { RequestType = "Coil" },
-            Subtype = new NewRequestSubtypeDefinition { Name = "Wrong Coil" },
+            Category = RequestCategory.Other,
+            Item = OtherItem,
             InputValue = "Wrong material at press",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
@@ -27,96 +36,100 @@ public sealed class NewRequestFlowStateTests
 
         Assert.AreEqual("Expo Drive", draft.Building);
         Assert.AreEqual("Press 12", draft.WorkCenter);
-        Assert.AreEqual("Coil", draft.RequestType);
-        Assert.AreEqual("Wrong Coil", draft.Subtype);
+        Assert.AreEqual("Other", draft.Category);
+        Assert.AreEqual("other", draft.Item);
         Assert.AreEqual("Wrong material at press", draft.InputValue);
         Assert.AreEqual("Press 12", draft.ActiveSetupJobId);
         Assert.AreEqual("Press 12", draft.WorkCenterName);
         Assert.AreEqual("6229", draft.RequesterEmployeeNumber);
         Assert.AreEqual("John Koll", draft.RequesterEmployeeName);
+
+        // Nothing the wizard produces may name a request type or a subtype any more (FR-003).
+        Assert.IsTrue(string.IsNullOrWhiteSpace(draft.RequestType));
+        Assert.IsTrue(string.IsNullOrWhiteSpace(draft.Subtype));
     }
 
     [TestMethod]
-    public void ToDraft_HandlesNullSubtypeAndInputValue()
+    public void ToDraft_HandlesNoItemAndNoInputValue()
     {
         var state = new NewRequestFlowState
         {
             Building = "Expo Drive",
             WorkCenter = "Press 12",
-            RequestType = new NewRequestTypeDefinition { RequestType = "Pickup" },
         };
 
         var draft = state.ToDraft();
 
-        Assert.AreEqual("Pickup", draft.RequestType);
-        Assert.IsNull(draft.Subtype);
+        Assert.IsTrue(string.IsNullOrWhiteSpace(draft.Category));
+        Assert.IsTrue(string.IsNullOrWhiteSpace(draft.Item));
         Assert.IsNull(draft.InputValue);
     }
 
-    [TestMethod]
-    public void GetNextStepType_ReturnsDetails_WhenTextInputIsRequired()
+    private static NewRequestFlowState StateWith(RequestItemConfiguration configuration, string? inputValue = null) => new()
     {
-        var state = new NewRequestFlowState
+        WorkCenter = "Press 12",
+        Category = RequestCategory.Other,
+        Item = OtherItem,
+        ItemConfiguration = configuration,
+        InputValue = inputValue,
+    };
+
+    [TestMethod]
+    public void GetNextStepType_ReturnsDetails_WhenTheConfigurationAsksForAnAnswer()
+    {
+        var state = StateWith(new RequestItemConfiguration
         {
-            RequestType = new NewRequestTypeDefinition { RequestType = "Forklift Assist", RequiresTextInput = true },
-        };
+            Item = "other",
+            ControlFlow = RequestItemConfiguration.CollectInputThenConfirm,
+            RequiresAnswer = true,
+            AnswerValueType = RequestItemValueType.Text,
+            MinLength = 5,
+            MaxLength = 200,
+        });
 
         Assert.AreEqual(typeof(NewRequestDetailsViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsPreview_ForNoSubtypeFlows()
+    public void GetNextStepType_ReturnsPreview_WhenTheConfigurationAsksForNothing()
     {
-        var state = new NewRequestFlowState
+        var state = StateWith(new RequestItemConfiguration
         {
-            RequestType = new NewRequestTypeDefinition { RequestType = "Pickup", Subtypes = new List<NewRequestSubtypeDefinition>() },
-        };
+            Item = "other",
+            ControlFlow = RequestItemConfiguration.DirectToConfirmation,
+        });
 
         Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsSummary_ForSubtypeFlowsWithoutTextInput()
+    public void GetNextStepType_ReturnsPreview_OnceTheAnswerIsCaptured()
     {
-        var state = new NewRequestFlowState
-        {
-            RequestType = new NewRequestTypeDefinition
+        var state = StateWith(
+            new RequestItemConfiguration
             {
-                RequestType = "Other",
-                Subtypes = [new NewRequestSubtypeDefinition { Name = "General Text Entry", RequiresTextInput = false }],
+                Item = "other",
+                ControlFlow = RequestItemConfiguration.CollectInputThenConfirm,
+                RequiresAnswer = true,
+                AnswerValueType = RequestItemValueType.Text,
             },
-            Subtype = new NewRequestSubtypeDefinition { Name = "General Text Entry", RequiresTextInput = false },
-        };
-
-        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
-    }
-
-    [TestMethod]
-    public void GetNextStepType_ReturnsPreviewAfterTextInput_ForNoSubtypeTextFlows()
-    {
-        var state = new NewRequestFlowState
-        {
-            RequestType = new NewRequestTypeDefinition { RequestType = "Forklift Assist", RequiresTextInput = true },
-            InputValue = "HELP ME!!!",
-        };
+            inputValue: "Please assist");
 
         Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsSummaryAfterTextInput_ForSubtypeTextFlows()
+    public void GetNextStepType_TreatsTheConfiguredControlFlowAsAnAnswerRequirement()
     {
-        var state = new NewRequestFlowState
+        // A row that says "collect input" but leaves requires_answer unset still asks for an answer: the flow is a
+        // property of the row, and the two columns must not be able to disagree into a skipped step.
+        var state = StateWith(new RequestItemConfiguration
         {
-            RequestType = new NewRequestTypeDefinition
-            {
-                RequestType = "Other",
-                Subtypes = [new NewRequestSubtypeDefinition { Name = "General Text Entry", RequiresTextInput = true }],
-            },
-            Subtype = new NewRequestSubtypeDefinition { Name = "General Text Entry", RequiresTextInput = true },
-            InputValue = "Please assist",
-        };
+            Item = "other",
+            ControlFlow = RequestItemConfiguration.CollectInputThenConfirm,
+            RequiresAnswer = false,
+        });
 
-        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(typeof(NewRequestDetailsViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
 }

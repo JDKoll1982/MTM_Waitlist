@@ -76,7 +76,7 @@ public static class ServiceRegistrationExtensions
             pageService.Configure<WaitlistViewDetailViewModel, WaitlistViewDetailPage>();
             pageService.Configure<NewRequestWorkCenterViewModel, NewRequestWorkCenterPage>();
             pageService.Configure<NewRequestJobTypeViewModel, NewRequestJobTypePage>();
-            pageService.Configure<NewRequestSubtypeViewModel, NewRequestSubtypePage>();
+            pageService.Configure<NewRequestItemViewModel, NewRequestItemPage>();
             pageService.Configure<NewRequestDetailsViewModel, NewRequestDetailsPage>();
             pageService.Configure<NewRequestPreviewViewModel, NewRequestPreviewPage>();
             pageService.Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
@@ -117,6 +117,14 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.RequestDispositionResolver>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IRequestItemCatalogService, MTM_Waitlist.Module_Settings.Services.RequestItemCatalogService>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.INewRequestPickerService, MTM_Waitlist.Module_Settings.Services.NewRequestPickerService>();
+        services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService, MTM_Waitlist.Module_Settings.Services.RequestItemConfigurationService>();
+        services.AddSingleton<MTM_Waitlist.Module_Settings.Services.RequestItemLine2Resolver>();
+        services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IRequestItemObservedTimeService, MTM_Waitlist.Module_Settings.Services.RequestItemObservedTimeService>();
+
+        // The availability snapshot's mapping is owned here, because the composition root is the only place
+        // that sees both the Setup resolver and the Settings snapshot. It is *invoked* when the Item step is
+        // entered, never at registration time (contract §3).
+        services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider, RequestJobAvailabilityProvider>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IDefectTypeCatalogService, MTM_Waitlist.Module_Settings.Services.DefectTypeCatalogService>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IRequestSubtypeNameReadService, MTM_Waitlist.Module_Core.Services.RequestSubtypeNameReadService>();
         services.AddSingleton<IExternalConnectionInfoProvider, ExternalConnectionInfoProvider>();
@@ -166,8 +174,8 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<NewRequestWorkCenterPage>();
         services.AddTransient<NewRequestJobTypeViewModel>();
         services.AddTransient<NewRequestJobTypePage>();
-        services.AddTransient<NewRequestSubtypeViewModel>();
-        services.AddTransient<NewRequestSubtypePage>();
+        services.AddTransient<NewRequestItemViewModel>();
+        services.AddTransient<NewRequestItemPage>();
         services.AddTransient<NewRequestDetailsViewModel>();
         services.AddTransient<NewRequestDetailsPage>();
         services.AddTransient<NewRequestPreviewViewModel>();

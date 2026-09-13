@@ -4,6 +4,17 @@ public sealed class WaitlistRequestDraft
 {
     public string Building { get; init; } = string.Empty;
     public string WorkCenter { get; init; } = string.Empty;
+
+    /// <summary>The umbrella Category the requester chose (FR-004).</summary>
+    public string Category { get; init; } = string.Empty;
+
+    /// <summary>The Item code the requester chose (FR-004).</summary>
+    public string Item { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Transitional: the legacy display pair the list and the request page still read until they are re-pointed
+    /// at the Item (US2). Nothing new should be written to these, and they are not what the store carries.
+    /// </summary>
     public string RequestType { get; init; } = string.Empty;
     public string? Subtype { get; init; }
     public string? InputValue { get; init; }

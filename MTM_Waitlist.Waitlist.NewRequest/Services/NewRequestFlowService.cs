@@ -7,14 +7,53 @@ namespace MTM_Waitlist.Module_Waitlist.Services;
 
 public sealed class NewRequestFlowService : INewRequestFlowService
 {
-    private readonly IRequestTypeCatalogService _requestTypeCatalogService;
     private readonly IImageLocationService _imageLocationService;
+    private readonly IRequestJobPartAvailabilityProvider _availabilityProvider;
+    private readonly INewRequestPickerService _pickerService;
 
-    public NewRequestFlowService(IImageLocationService imageLocationService, IRequestTypeCatalogService requestTypeCatalogService)
+    public NewRequestFlowService(
+        IImageLocationService imageLocationService,
+        IRequestJobPartAvailabilityProvider availabilityProvider,
+        INewRequestPickerService pickerService)
     {
         _imageLocationService = imageLocationService;
-        _requestTypeCatalogService = requestTypeCatalogService;
+        _availabilityProvider = availabilityProvider;
+        _pickerService = pickerService;
     }
+
+    /// <inheritdoc />
+    public async Task<RequestJobPartAvailability> ResolveAvailabilityAsync(string workCenter, CancellationToken cancellationToken = default)
+    {
+        var normalized = (workCenter ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return RequestJobPartAvailability.None;
+        }
+
+        try
+        {
+            var availability = await _availabilityProvider.GetAvailabilityAsync(normalized, cancellationToken).ConfigureAwait(false);
+            StartupDebugLog.Info(
+                "WaitlistNewRequest",
+                $"Availability for work center '{normalized}': ActiveJob={availability.HasActiveJob}, Coil={availability.HasCoil}, Flatstock={availability.HasFlatstock}, Die={availability.HasDie}, Component={availability.HasComponent}, Dunnage={availability.HasDunnage}, ScrapDecision={availability.HasScrapDecision}.");
+            return availability;
+        }
+        catch (Exception ex)
+        {
+            // A snapshot that cannot be read is reported as "no parts", which keeps the job-independent Items
+            // offerable rather than opening an empty step (FR-002).
+            StartupDebugLog.Error("WaitlistNewRequest", ex, $"Reading the availability snapshot for work center '{normalized}' failed. Offering the job-independent Items only.");
+            return RequestJobPartAvailability.None;
+        }
+    }
+
+    /// <inheritdoc />
+    public IReadOnlyList<RequestCategory> GetVisibleCategories(RequestJobPartAvailability availability) =>
+        _pickerService.GetVisibleCategories(availability ?? RequestJobPartAvailability.None);
+
+    /// <inheritdoc />
+    public IReadOnlyList<RequestItemDefinition> GetVisibleItems(RequestCategory category, RequestJobPartAvailability availability) =>
+        _pickerService.GetVisibleItems(category, availability ?? RequestJobPartAvailability.None);
 
     /// <summary>
     /// Makes sure the image location service is initialized before it is used.
@@ -52,77 +91,6 @@ public sealed class NewRequestFlowService : INewRequestFlowService
         }
 
         return _imageLocationService.IsInitialized;
-    }
-
-    public async Task<IReadOnlyList<NewRequestTypeDefinition>> LoadRequestTypesAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var catalog = await _requestTypeCatalogService.LoadRequestTypesAsync(cancellationToken).ConfigureAwait(false);
-            if (catalog.Count > 0)
-            {
-                return catalog;
-            }
-        }
-        catch (Exception ex)
-        {
-            StartupDebugLog.Info("WaitlistNewRequest", $"Failed to load request type catalog from DB. Falling back to defaults. Error={ex.Message}");
-        }
-
-        return NewRequestFlowRules.GetDefaultTypes();
-    }
-
-    public async Task<string> ResolveRequestTypeImagePathAsync(string requestTypeName, CancellationToken cancellationToken = default)
-    {
-        if (!await EnsureImageServiceAsync(cancellationToken).ConfigureAwait(true))
-        {
-            return string.Empty;
-        }
-
-        try
-        {
-            var requestType = RequestTypeInventory.GetByDisplayName(requestTypeName);
-            if (requestType is null)
-            {
-                return string.Empty;
-            }
-
-            return await _imageLocationService
-                .ResolveRequestTypeImagePathAsync(requestType.StableId.ToString(), cancellationToken)
-                .ConfigureAwait(true);
-        }
-        catch (Exception)
-        {
-            return string.Empty;
-        }
-    }
-
-    public async Task<string> ResolveRequestSubtypeImagePathAsync(
-        string requestTypeName,
-        string subtypeName,
-        CancellationToken cancellationToken = default)
-    {
-        if (!await EnsureImageServiceAsync(cancellationToken).ConfigureAwait(true))
-        {
-            return string.Empty;
-        }
-
-        try
-        {
-            var (_, subtype) = RequestSubtypeInventory.GetByDisplayNames(requestTypeName, subtypeName);
-            if (subtype is null)
-            {
-                return string.Empty;
-            }
-
-            return await _imageLocationService
-                .ResolveRequestSubtypeImagePathAsync(subtype.StableId.ToString(), cancellationToken)
-                .ConfigureAwait(true);
-        }
-        catch (Exception)
-        {
-            return string.Empty;
-        }
     }
 
     public async Task<Dictionary<string, string>> BuildWorkCenterImageLookupAsync(CancellationToken cancellationToken = default)

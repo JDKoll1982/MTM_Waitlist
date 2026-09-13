@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 
 namespace MTM_Waitlist.Module_Waitlist.Services;
@@ -87,8 +89,10 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Id = requestId,
             Building = ReadString(row, "building"),
             WorkCenter = ReadString(row, "work_center"),
-            RequestType = ReadString(row, "request_type"),
-            Subtype = ReadNullableString(row, "subtype"),
+            Category = ReadString(row, "category"),
+            Item = ReadString(row, "item"),
+            RequestType = ProjectLegacyDisplay(ReadString(row, "item")).RequestType,
+            Subtype = ProjectLegacyDisplay(ReadString(row, "item")).Subtype,
             InputValue = ReadNullableString(row, "input_value"),
             ActiveSetupJobId = ReadString(row, "active_setup_job_id"),
             WorkCenterName = ReadString(row, "work_center_name"),
@@ -113,6 +117,33 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
     private static string ReadString(IReadOnlyDictionary<string, object?> row, string key)
         => row.TryGetValue(key, out var value) ? Convert.ToString(value)?.Trim() ?? string.Empty : string.Empty;
+
+    /// <summary>
+    /// The transitional display pair the list and the request page still read until US2 re-points them at the
+    /// Item. It is derived from the Item row, never from a stored legacy column — those columns are gone
+    /// (FR-004, FR-023).
+    /// </summary>
+    private static (string RequestType, string? Subtype) ProjectLegacyDisplay(string? itemCode)
+    {
+        var item = RequestItemCatalog.FindById(itemCode);
+        return item is null
+            ? (string.Empty, null)
+            : (item.UmbrellaVerb, string.IsNullOrWhiteSpace(item.NormalizedName) ? null : item.NormalizedName);
+    }
+
+    /// <summary>
+    /// The Item code a draft asks for. A draft raised by the wizard carries it directly; one raised with the
+    /// legacy pair is mapped to its canonical Item row, so every stored request carries a real pair (FR-004).
+    /// </summary>
+    private static string ResolveItemCode(WaitlistRequestDraft draft)
+    {
+        if (!string.IsNullOrWhiteSpace(draft.Item))
+        {
+            return draft.Item.Trim();
+        }
+
+        return RequestItemLegacyMapper.Map(draft.RequestType, draft.Subtype)?.Id ?? string.Empty;
+    }
 
     private static string? ReadNullableString(IReadOnlyDictionary<string, object?> row, string key)
     {
@@ -745,9 +776,10 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             return WaitlistRequestSubmitResult.ValidationFailure("Request details are required.");
         }
 
-        if (string.IsNullOrWhiteSpace(draft.Building) || string.IsNullOrWhiteSpace(draft.WorkCenter) || string.IsNullOrWhiteSpace(draft.RequestType))
+        var resolvedItem = ResolveItemCode(draft);
+        if (string.IsNullOrWhiteSpace(draft.Building) || string.IsNullOrWhiteSpace(draft.WorkCenter) || string.IsNullOrWhiteSpace(resolvedItem))
         {
-            return WaitlistRequestSubmitResult.ValidationFailure("Building, Work Center, and request type are required.");
+            return WaitlistRequestSubmitResult.ValidationFailure("Building, Work Center, and item are required.");
         }
 
         if (string.IsNullOrWhiteSpace(draft.ActiveSetupJobId))
@@ -766,16 +798,14 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         }
 
         var normalizedDraftInput = draft.InputValue?.Trim();
-        var normalizedDraftSubtype = draft.Subtype?.Trim();
         var duplicate = GetActiveRequests(draft.Building).FirstOrDefault(request =>
             string.Equals(request.WorkCenter, draft.WorkCenter.Trim(), StringComparison.OrdinalIgnoreCase)
-            && string.Equals(request.RequestType, draft.RequestType.Trim(), StringComparison.OrdinalIgnoreCase)
-            && string.Equals(request.Subtype ?? string.Empty, normalizedDraftSubtype ?? string.Empty, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(request.Item, resolvedItem, StringComparison.OrdinalIgnoreCase)
             && string.Equals(request.InputValue ?? string.Empty, normalizedDraftInput ?? string.Empty, StringComparison.OrdinalIgnoreCase));
 
         if (duplicate is not null && !allowDuplicate)
         {
-            StartupDebugLog.Info("WaitlistRequest", $"Duplicate request detected. Building='{draft.Building}', WorkCenter='{draft.WorkCenter}', RequestType='{draft.RequestType}', Subtype='{draft.Subtype ?? string.Empty}'.");
+            StartupDebugLog.Info("WaitlistRequest", $"Duplicate request detected. Building='{draft.Building}', WorkCenter='{draft.WorkCenter}', Category='{draft.Category}', Item='{resolvedItem}'.");
             return WaitlistRequestSubmitResult.DuplicateWarning(duplicate);
         }
 
@@ -787,7 +817,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             try
             {
                 var urgency = await _urgencyDeadlineService
-                    .ComputeAsync(draft.RequestedUtc, draft.Subtype, DateTimeOffset.UtcNow, cancellationToken)
+                    .ComputeAsync(draft.RequestedUtc, resolvedItem, DateTimeOffset.UtcNow, cancellationToken)
                     .ConfigureAwait(false);
                 resolvedTargetUtc = urgency.DueUtc;
             }
@@ -801,8 +831,10 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         {
             Building = draft.Building.Trim(),
             WorkCenter = draft.WorkCenter.Trim(),
-            RequestType = draft.RequestType.Trim(),
-            Subtype = string.IsNullOrWhiteSpace(draft.Subtype) ? null : draft.Subtype.Trim(),
+            Category = string.IsNullOrWhiteSpace(draft.Category) ? string.Empty : draft.Category.Trim(),
+            Item = resolvedItem,
+            RequestType = string.IsNullOrWhiteSpace(draft.RequestType) ? ProjectLegacyDisplay(resolvedItem).RequestType : draft.RequestType.Trim(),
+            Subtype = string.IsNullOrWhiteSpace(draft.Subtype) ? ProjectLegacyDisplay(resolvedItem).Subtype : draft.Subtype.Trim(),
             InputValue = string.IsNullOrWhiteSpace(draft.InputValue) ? null : draft.InputValue.Trim(),
             ActiveSetupJobId = draft.ActiveSetupJobId.Trim(),
             WorkCenterName = draft.WorkCenterName.Trim(),
@@ -827,8 +859,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                     ["p_public_id"] = request.Id.ToString(),
                     ["p_building"] = request.Building,
                     ["p_work_center"] = request.WorkCenter,
-                    ["p_request_type"] = request.RequestType,
-                    ["p_subtype"] = request.Subtype,
+                    ["p_category"] = request.Category,
+                    ["p_item"] = request.Item,
                     ["p_input_value"] = request.InputValue,
                     ["p_active_setup_job_id"] = request.ActiveSetupJobId,
                     ["p_work_center_name"] = request.WorkCenterName,
@@ -858,7 +890,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         _requests[request.Id] = request;
         await RecordAuditAsync(request.Id, null, null, "Created", request.RequesterEmployeeNumber, request.RequesterEmployeeName, request.InputValue, cancellationToken);
         RequestsChanged?.Invoke(this, EventArgs.Empty);
-        StartupDebugLog.Info("WaitlistRequest", $"Request stored in session and production route acknowledged. Id='{request.Id}', Building='{request.Building}', WorkCenter='{request.WorkCenter}', RequestType='{request.RequestType}', Subtype='{request.Subtype ?? string.Empty}', ActiveJobId='{request.ActiveSetupJobId}', Requester='{request.RequesterEmployeeNumber}'.");
+        StartupDebugLog.Info("WaitlistRequest", $"Request stored in session and production route acknowledged. Id='{request.Id}', Building='{request.Building}', WorkCenter='{request.WorkCenter}', Category='{request.Category}', Item='{request.Item}', ActiveJobId='{request.ActiveSetupJobId}', Requester='{request.RequesterEmployeeNumber}'.");
         await NotifyRequestCreatedAsync(request).ConfigureAwait(false);
         return WaitlistRequestSubmitResult.Success(request);
     }

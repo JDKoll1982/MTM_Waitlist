@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
+using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -322,14 +323,19 @@ public sealed class NewRequestWorkCenterViewModelTests
 
     private sealed class FakeNewRequestFlowService : INewRequestFlowService
     {
-        public Task<IReadOnlyList<NewRequestTypeDefinition>> LoadRequestTypesAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult<IReadOnlyList<NewRequestTypeDefinition>>(Array.Empty<NewRequestTypeDefinition>());
+        public Task<RequestJobPartAvailability> ResolveAvailabilityAsync(string workCenter, CancellationToken cancellationToken = default) =>
+            Task.FromResult(RequestJobPartAvailability.All);
 
-        public Task<string> ResolveRequestTypeImagePathAsync(string requestTypeName, CancellationToken cancellationToken = default) =>
-            Task.FromResult(string.Empty);
+        public IReadOnlyList<RequestCategory> GetVisibleCategories(RequestJobPartAvailability availability) =>
+        [
+            RequestCategory.Pickup,
+            RequestCategory.Deliver,
+            RequestCategory.Assist,
+            RequestCategory.Other,
+        ];
 
-        public Task<string> ResolveRequestSubtypeImagePathAsync(string requestTypeName, string subtypeName, CancellationToken cancellationToken = default) =>
-            Task.FromResult(string.Empty);
+        public IReadOnlyList<RequestItemDefinition> GetVisibleItems(RequestCategory category, RequestJobPartAvailability availability) =>
+            RequestItemCatalog.GetByCategory(category);
 
         public Task<Dictionary<string, string>> BuildWorkCenterImageLookupAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult(new Dictionary<string, string>());

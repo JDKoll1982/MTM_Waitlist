@@ -4,42 +4,75 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 
+/// <summary>
+/// The Category step (T055): it binds exactly the Categories a job can actually reach, and choosing one moves on
+/// to that Category's Item step. No type or subtype concept is reachable from this step any more (FR-003).
+/// </summary>
 [TestClass]
 public sealed class NewRequestJobTypeViewModelTests
 {
-    // --- Legacy fallback path (DB-down → default types carry no Category/ItemId) ---
-
     [TestMethod]
-    public async Task OnNavigatedTo_LegacyFallback_JobHasNoCoil_CoilTileIsHidden()
+    public async Task OnNavigatedTo_BindsTheVisibleCategoriesInCanonicalOrder()
     {
-        var viewModel = CreateViewModel(coil: new WaitlistCoilInfo { HasCoil = false });
-
-        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-17" });
-
-        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Any(item => item.Name == "Pickup"));
-
-        Assert.IsFalse(viewModel.IsCanonicalPicker);
-        Assert.IsFalse(viewModel.Options.Any(item => string.Equals(item.Name, "Coil", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(viewModel.Options.Any(item => string.Equals(item.Name, "Pickup", StringComparison.OrdinalIgnoreCase)));
-    }
-
-    [TestMethod]
-    public async Task OnNavigatedTo_LegacyFallback_JobHasCoil_CoilTileIsShown()
-    {
-        var viewModel = CreateViewModel(coil: new WaitlistCoilInfo { HasCoil = true, CoilNumber = "COIL-204" });
+        var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
 
         viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-3" });
 
-        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Any(item => item.Name == "Pickup"));
+        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
 
-        Assert.IsFalse(viewModel.IsCanonicalPicker);
-        Assert.IsTrue(viewModel.Options.Any(item => string.Equals(item.Name, "Coil", StringComparison.OrdinalIgnoreCase)));
+        var expected = new NewRequestPickerService(TestCatalog.Instance)
+            .GetVisibleCategories(RequestJobPartAvailability.All)
+            .ToArray();
+
+        CollectionAssert.AreEqual(
+            expected.Select(NewRequestItemViewModel.ResolveCategoryName).ToArray(),
+            viewModel.Options.Select(item => item.Name).ToArray());
+        Assert.IsTrue(viewModel.Options.All(item => item.Category is not null));
+    }
+
+    [TestMethod]
+    public async Task OnNavigatedTo_JobWithNoParts_OffersNoCategoryThatWouldOpenAnEmptyStep()
+    {
+        var viewModel = CreateViewModel(availability: RequestJobPartAvailability.None);
+
+        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-17" });
+
+        await WaitUntilAsync(() => !viewModel.IsLoading);
+
+        var picker = new NewRequestPickerService(TestCatalog.Instance);
+        var expected = picker.GetVisibleCategories(RequestJobPartAvailability.None).ToArray();
+
+        CollectionAssert.AreEqual(
+            expected.Select(NewRequestItemViewModel.ResolveCategoryName).ToArray(),
+            viewModel.Options.Select(item => item.Name).ToArray());
+
+        foreach (var tile in viewModel.Options)
+        {
+            Assert.IsTrue(
+                picker.GetVisibleItems(tile.Category!.Value, RequestJobPartAvailability.None).Count > 0,
+                $"Category '{tile.Name}' was offered but would open an empty Item step.");
+        }
+    }
+
+    [TestMethod]
+    public async Task OnNavigatedTo_ResolvesTheAvailabilitySnapshotAndKeepsItOnTheState()
+    {
+        var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
+        var state = new NewRequestFlowState { WorkCenter = "100-3" };
+
+        viewModel.OnNavigatedTo(state);
+
+        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
+
+        Assert.IsTrue(state.Availability.HasActiveJob);
+        Assert.IsTrue(state.Availability.HasCoil);
     }
 
     [TestMethod]
@@ -49,7 +82,7 @@ public sealed class NewRequestJobTypeViewModelTests
 
         viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-3" });
 
-        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Any(item => item.Name == "Pickup"));
+        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
 
         Assert.IsTrue(viewModel.IsCoilBannerVisible);
         Assert.IsTrue(viewModel.CoilBannerText.Contains("COIL-204", StringComparison.OrdinalIgnoreCase));
@@ -62,157 +95,68 @@ public sealed class NewRequestJobTypeViewModelTests
 
         viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-17" });
 
-        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Any(item => item.Name == "Pickup"));
+        await WaitUntilAsync(() => !viewModel.IsLoading);
 
         Assert.IsTrue(viewModel.IsCoilBannerVisible);
         Assert.IsTrue(viewModel.CoilBannerText.Contains("No coil", StringComparison.OrdinalIgnoreCase));
     }
 
     [TestMethod]
-    public async Task OnNavigatedTo_LivePlaceholderNoCoilNumber_HidesBanner()
+    public async Task SelectCategory_RecordsTheCategoryAndOpensTheItemStep()
     {
-        var viewModel = CreateViewModel(coil: new WaitlistCoilInfo { HasCoil = true });
+        var navigation = new RecordingNavigationService();
+        var viewModel = CreateViewModel(navigation: navigation, availability: RequestJobPartAvailability.All);
+        var state = new NewRequestFlowState { WorkCenter = "100-3" };
+        viewModel.OnNavigatedTo(state);
 
-        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-3" });
+        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
+        var pickup = viewModel.Options.Single(item => item.Category == RequestCategory.Pickup);
 
-        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Any(item => item.Name == "Pickup"));
+        viewModel.SelectOptionCommand.Execute(pickup);
 
-        Assert.IsFalse(viewModel.IsCoilBannerVisible);
+        Assert.AreEqual(RequestCategory.Pickup, state.Category);
+        Assert.IsNull(state.Item, "The Item is its own step; the Category step must not choose one.");
+        Assert.AreEqual(typeof(NewRequestItemViewModel).FullName, navigation.Navigations.Single().PageKey);
+        Assert.AreSame(state, navigation.Navigations.Single().Parameter);
     }
 
-    // --- Canonical Category→Item picker path (real DB tree carries Category/ItemId) ---
+    [TestMethod]
+    public async Task SelectCategory_LeavesNoTypeOrSubtypeBehind()
+    {
+        var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
+        var state = new NewRequestFlowState { WorkCenter = "100-3" };
+        viewModel.OnNavigatedTo(state);
+
+        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
+        viewModel.SelectOptionCommand.Execute(viewModel.Options.First());
+
+        var draft = state.ToDraft();
+        Assert.IsFalse(string.IsNullOrWhiteSpace(draft.Category));
+        Assert.IsTrue(string.IsNullOrWhiteSpace(draft.RequestType), "The wizard must not carry a request type any more (FR-003).");
+        Assert.IsTrue(string.IsNullOrWhiteSpace(draft.Subtype), "The wizard must not carry a subtype any more (FR-003).");
+    }
 
     [TestMethod]
-    public async Task OnNavigatedTo_CanonicalTree_ShowsFourCategoryTiles()
+    public async Task Back_LeavesTheStep()
     {
-        var viewModel = CreateViewModel(
-            types: CanonicalTree(),
-            coil: new WaitlistCoilInfo { HasCoil = true, CoilNumber = "COIL-204" });
-
+        var navigation = new RecordingNavigationService();
+        var viewModel = CreateViewModel(navigation: navigation, availability: RequestJobPartAvailability.All);
         viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-3" });
 
         await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
-
-        Assert.IsTrue(viewModel.IsCanonicalPicker);
-        CollectionAssert.AreEqual(
-            new[] { "Pickup", "Deliver", "Assist", "Other" },
-            viewModel.Options.Select(item => item.Name).ToArray());
-        Assert.IsTrue(viewModel.Options.All(item => item.IsCategoryTile));
-    }
-
-    [TestMethod]
-    public async Task SelectCategory_DrillsIntoCategoryItems()
-    {
-        var viewModel = CreateViewModel(types: CanonicalTree(), coil: new WaitlistCoilInfo { HasCoil = true });
-        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-3" });
-
-        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count == 4);
-        var pickupTile = viewModel.Options.Single(item => item.Category == RequestCategory.Pickup);
-
-        viewModel.SelectOptionCommand.Execute(pickupTile);
-
-        await WaitUntilAsync(() => viewModel.Options.Count == 2 && viewModel.Options.All(item => item.IsItemTile));
-        CollectionAssert.AreEqual(
-            new[] { "pickup-coil", "pickup-ncm" },
-            viewModel.Options.Select(item => item.Item!.ItemId).ToArray());
-        Assert.IsTrue(viewModel.PromptText.StartsWith("Pickup", StringComparison.OrdinalIgnoreCase));
-    }
-
-    [TestMethod]
-    public async Task SelectCanonicalItem_SetsStateAndNavigatesToSummary()
-    {
-        var navigation = new RecordingNavigationService();
-        var viewModel = CreateViewModel(navigation: navigation, types: CanonicalTree(), coil: new WaitlistCoilInfo { HasCoil = true });
-        var state = new NewRequestFlowState { WorkCenter = "100-3" };
-        viewModel.OnNavigatedTo(state);
-
-        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count == 4);
-        viewModel.SelectOptionCommand.Execute(viewModel.Options.Single(item => item.Category == RequestCategory.Pickup));
-        await WaitUntilAsync(() => viewModel.Options.Count == 2 && viewModel.Options.All(item => item.IsItemTile));
-        var coilItem = viewModel.Options.Single(item => item.Item!.ItemId == "pickup-coil");
-
-        viewModel.SelectOptionCommand.Execute(coilItem);
-
-        Assert.AreEqual("Pickup", state.RequestType?.RequestType);
-        Assert.AreEqual("Pickup Coil", state.Subtype?.Name);
-        Assert.AreEqual(typeof(NewRequestSummaryViewModel).FullName, navigation.Navigations.Single().PageKey);
-    }
-
-    [TestMethod]
-    public async Task SelectOtherItem_RequiresTextInput_NavigatesToDetails()
-    {
-        var navigation = new RecordingNavigationService();
-        var viewModel = CreateViewModel(navigation: navigation, types: CanonicalTree(), coil: new WaitlistCoilInfo { HasCoil = true });
-        var state = new NewRequestFlowState { WorkCenter = "100-3" };
-        viewModel.OnNavigatedTo(state);
-
-        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count == 4);
-        viewModel.SelectOptionCommand.Execute(viewModel.Options.Single(item => item.Category == RequestCategory.Other));
-        await WaitUntilAsync(() => viewModel.Options.Count == 1 && viewModel.Options.All(item => item.IsItemTile));
-        var otherItem = viewModel.Options.Single(item => item.Item!.ItemId == "other");
-
-        viewModel.SelectOptionCommand.Execute(otherItem);
-
-        Assert.AreEqual("Other", state.RequestType?.RequestType);
-        Assert.AreEqual("General Text Entry", state.Subtype?.Name);
-        Assert.AreEqual(typeof(NewRequestDetailsViewModel).FullName, navigation.Navigations.Single().PageKey);
-    }
-
-    [TestMethod]
-    public async Task Back_FromItemStage_ReturnsToCategoryTiles()
-    {
-        var navigation = new RecordingNavigationService();
-        var viewModel = CreateViewModel(navigation: navigation, types: CanonicalTree(), coil: new WaitlistCoilInfo { HasCoil = true });
-        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-3" });
-
-        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count == 4);
-        viewModel.SelectOptionCommand.Execute(viewModel.Options.Single(item => item.Category == RequestCategory.Pickup));
-        await WaitUntilAsync(() => viewModel.Options.All(item => item.IsItemTile));
-
         viewModel.BackCommand.Execute(null);
 
-        Assert.AreEqual(0, navigation.GoBackCount);
-        Assert.IsTrue(viewModel.Options.All(item => item.IsCategoryTile));
-        CollectionAssert.AreEqual(
-            new[] { "Pickup", "Deliver", "Assist", "Other" },
-            viewModel.Options.Select(item => item.Name).ToArray());
+        Assert.AreEqual(1, navigation.GoBackCount);
     }
 
     private static NewRequestJobTypeViewModel CreateViewModel(
         RecordingNavigationService? navigation = null,
-        IReadOnlyList<NewRequestTypeDefinition>? types = null,
+        RequestJobPartAvailability? availability = null,
         WaitlistCoilInfo? coil = null)
         => new(
             navigation ?? new RecordingNavigationService(),
-            new FakeNewRequestFlowService(types),
+            new FakeNewRequestFlowService(availability ?? RequestJobPartAvailability.All),
             new FakeCoilService(coil ?? new WaitlistCoilInfo { HasCoil = true, CoilNumber = "COIL-204" }));
-
-    private static IReadOnlyList<NewRequestTypeDefinition> CanonicalTree()
-    {
-        var pickup = Type("Pickup",
-            Sub("Pickup Coil", "Pickup", "pickup-coil"),
-            Sub("Pickup NCM", "Pickup", "pickup-ncm"));
-        var coil = Type("Coil",
-            Sub("Bring", "Deliver", "deliver-coil"),
-            Sub("Pickup", "Pickup", "pickup-coil"),
-            Sub("Need Coil Turned around", "Assist", "assist-coil-turn"));
-        var dieHandling = Type("Die Handling", Sub("Bring Die", "Deliver", "deliver-die"));
-        var other = Type("Other", Sub("General Text Entry", "Other", "other", requiresTextInput: true));
-
-        return new List<NewRequestTypeDefinition> { pickup, coil, dieHandling, other };
-    }
-
-    private static NewRequestTypeDefinition Type(string name, params NewRequestSubtypeDefinition[] subtypes)
-        => new() { RequestType = name, Subtypes = subtypes.ToList() };
-
-    private static NewRequestSubtypeDefinition Sub(string name, string category, string itemId, bool requiresTextInput = false)
-        => new()
-        {
-            Name = name,
-            Category = category,
-            ItemId = itemId,
-            RequiresTextInput = requiresTextInput,
-        };
 
     private static async Task WaitUntilAsync(Func<bool> condition, int timeoutMs = 3000)
     {
@@ -221,11 +165,30 @@ public sealed class NewRequestJobTypeViewModelTests
         {
             if ((DateTime.UtcNow - start).TotalMilliseconds > timeoutMs)
             {
-                Assert.Fail("Timed out waiting for the job type view model to finish loading.");
+                Assert.Fail("Timed out waiting for the category step to finish loading.");
             }
 
             await Task.Delay(20);
         }
+    }
+
+    private sealed class TestCatalog : IRequestItemCatalogService
+    {
+        public static TestCatalog Instance { get; } = new();
+
+        public IReadOnlyList<RequestItemDefinition> GetAllItems() => RequestItemCatalog.Items;
+
+        public IReadOnlyList<RequestItemDefinition> GetByCategory(RequestCategory category) => RequestItemCatalog.GetByCategory(category);
+
+        public RequestItemDefinition? FindById(string? id) => RequestItemCatalog.FindById(id);
+
+        public IReadOnlyList<RequestCategory> GetCategoriesInOrder() =>
+        [
+            RequestCategory.Pickup,
+            RequestCategory.Deliver,
+            RequestCategory.Assist,
+            RequestCategory.Other,
+        ];
     }
 
     private sealed class RecordingNavigationService : INavigationService
@@ -263,21 +226,22 @@ public sealed class NewRequestJobTypeViewModelTests
 
     private sealed class FakeNewRequestFlowService : INewRequestFlowService
     {
-        private readonly IReadOnlyList<NewRequestTypeDefinition> _types;
+        private readonly RequestJobPartAvailability _availability;
+        private readonly INewRequestPickerService _picker = new NewRequestPickerService(TestCatalog.Instance);
 
-        public FakeNewRequestFlowService(IReadOnlyList<NewRequestTypeDefinition>? types)
+        public FakeNewRequestFlowService(RequestJobPartAvailability availability)
         {
-            _types = types ?? NewRequestFlowRules.GetDefaultTypes();
+            _availability = availability;
         }
 
-        public Task<IReadOnlyList<NewRequestTypeDefinition>> LoadRequestTypesAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(_types);
+        public Task<RequestJobPartAvailability> ResolveAvailabilityAsync(string workCenter, CancellationToken cancellationToken = default) =>
+            Task.FromResult(_availability);
 
-        public Task<string> ResolveRequestTypeImagePathAsync(string requestTypeName, CancellationToken cancellationToken = default) =>
-            Task.FromResult(string.Empty);
+        public IReadOnlyList<RequestCategory> GetVisibleCategories(RequestJobPartAvailability availability) =>
+            _picker.GetVisibleCategories(availability);
 
-        public Task<string> ResolveRequestSubtypeImagePathAsync(string requestTypeName, string subtypeName, CancellationToken cancellationToken = default) =>
-            Task.FromResult(string.Empty);
+        public IReadOnlyList<RequestItemDefinition> GetVisibleItems(RequestCategory category, RequestJobPartAvailability availability) =>
+            _picker.GetVisibleItems(category, availability);
 
         public Task<Dictionary<string, string>> BuildWorkCenterImageLookupAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult(new Dictionary<string, string>());

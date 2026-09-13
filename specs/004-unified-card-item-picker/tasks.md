@@ -141,33 +141,33 @@ done.**
 
 ### Wave 5 — models and contracts, independent (different files)
 
-- [ ] **T017** [P] Reshape `RequestItemDefinition`: **add** `CardLine2Template` (the `{token}` template for the
+- [x] **T017** [P] Reshape `RequestItemDefinition`: **add** `CardLine2Template` (the `{token}` template for the
   card's second line, §D3) and `DisplayNameResourceKey` (replacing the literal display text, §D14/FR-022);
   **remove** `ValueType` and `NeedsUserEntry`, which move onto the configuration row. Keep the identity columns —
   `Id`, `Category`, `Order`, `NormalizedName`, `UmbrellaVerb`, `ProducedValue`. ·
   `MTM_Waitlist.Settings/Models/RequestItemDefinition.cs`
-- [ ] **T018** [P] Reshape `RequestItemCatalog` to the twenty-three rows of `data-model.md` §2: the Category split
+- [x] **T018** [P] Reshape `RequestItemCatalog` to the twenty-three rows of `data-model.md` §2: the Category split
   (11 / 8 / 3 / 1), the per-Category `Order`, the umbrella phrase (with `Wrong Coil Bring:` and
   `Wrong Flatstock Bring:` on the two wrong-material Items) and the `CardLine2Template` for each Item — including
   `pickup-die`'s conditional (the die's **location** when the captured destination is `Home Location`, otherwise its
   **number**), `pickup-riser-table`/`deliver-riser-table` → `Riser Table`, and
   `pickup-hopper`/`deliver-hopper` → `Hopper`. Display text becomes resource keys. Do **not** change the code set or
   the order. · `MTM_Waitlist.Settings/Models/RequestItemCatalog.cs`
-- [ ] **T019** [P] Add `RequestItemConfiguration` — one Item's stored behaviour, mapping the table's columns of
+- [x] **T019** [P] Add `RequestItemConfiguration` — one Item's stored behaviour, mapping the table's columns of
   `data-model.md` §3 (`ControlFlow`, `RequiresAnswer`, `AnswerValueType`, `PromptText`, `MinLength`, `MaxLength`,
   `OptionsJson`, `DetailFieldsJson`, `AllottedMinutes`) plus the parsed detail fields and options. · new
   `MTM_Waitlist.Settings/Models/RequestItemConfiguration.cs`
-- [ ] **T020** [P] Add `RequestItemFieldDefinition` — an element of `detail_fields_json` (`Label`, `ValueType`,
+- [x] **T020** [P] Add `RequestItemFieldDefinition` — an element of `detail_fields_json` (`Label`, `ValueType`,
   `Source`, `Order`, `IsRequired`), the shape `data-model.md` §4 fixes. The JSON key stays `order`; no bare `order`
   column is ever introduced (database-schema rules). · new
   `MTM_Waitlist.Settings/Models/RequestItemFieldDefinition.cs`
-- [ ] **T021** [P] Add `RequestItemObservedTime` — the derived, never-stored pair a screen shows side by side: the
+- [x] **T021** [P] Add `RequestItemObservedTime` — the derived, never-stored pair a screen shows side by side: the
   Item, the completed-request count, the observed average, and **whether the configured value is a labelled default**
   (FR-017/FR-018/FR-019). · new `MTM_Waitlist.Settings/Models/RequestItemObservedTime.cs`
-- [ ] **T022** [P] Extend `ImageLocationScope` with `request_item` and `request_category`. Leave `request_subtype`
+- [x] **T022** [P] Extend `ImageLocationScope` with `request_item` and `request_category`. Leave `request_subtype`
   and `request_type` in place — their removal is a retirement task with its own owner (Phase 8), so the scope enum
   and its consumers do not change twice in one pass. · `MTM_Waitlist.Settings/Models/ImageLocationScope.cs`
-- [ ] **T023** [P] Extend `RequestJobPartAvailability` so the snapshot can express FR-031 at all: the record
+- [x] **T023** [P] Extend `RequestJobPartAvailability` so the snapshot can express FR-031 at all: the record
   currently carries `HasActiveJob`, `HasCoil`, `HasFlatstock`, `HasDie`, `HasComponent`, `HasDunnage` and derives
   `HasAnySubordinate` — **no** member can say whether the job has a real scrap decision, so `pickup-scrap`'s gate is
   unrepresentable as written. Add the flag (a real scrap type is set, is not `No Scrap`, and is not
@@ -178,7 +178,7 @@ done.**
 
 ### Wave 6 — the shared rules and the four new providers, independent (different files)
 
-- [ ] **T024** [P] Extract the canonical scrap-decision rule into `MTM_Waitlist.Core` — the **only** project both
+- [x] **T024** [P] Extract the canonical scrap-decision rule into `MTM_Waitlist.Core` — the **only** project both
   `MTM_Waitlist.Settings` and `MTM_Waitlist.Setup` reference — as a `static` predicate alongside the two constant
   values (`No Scrap`, `Scrap Type Required`). This is required, not cosmetic: `SetupDunnageTypeViewModel.HasScrapDecision`
   is an **instance** property, so the picker (in Settings) cannot call it, and it returns `true` for `No Scrap`,
@@ -186,18 +186,18 @@ done.**
   extracted rule so Setup and New Request cannot diverge (§D12). · new
   `MTM_Waitlist.Core/Services/ScrapDecisionRules.cs`, `MTM_Waitlist.Setup/ViewModels/SetupDunnageTypeViewModel.cs`,
   `MTM_Waitlist.Setup/Services/SetupWorkflowService.cs`
-- [ ] **T025** [P] Add `RequestItemConfigurationService` — reads `sp_waitlist_request_item_configs_get` **once** as
+- [x] **T025** [P] Add `RequestItemConfigurationService` — reads `sp_waitlist_request_item_configs_get` **once** as
   the Item step is entered (never per keystroke, never per row render), returns a lookup by Item code, drops rows
   whose `item` is not in the catalog, and reports a catalogued Item with no returned row as **unavailable** in plain
   language rather than half-configured (FR-014, FR-026). This task covers the row and the scalar behaviour only; the
   declared-fields payload is T085. · new `MTM_Waitlist.Settings/Services/RequestItemConfigurationService.cs`
-- [ ] **T026** [P] Add `RequestItemLine2Resolver` — resolves a `CardLine2Template` against the closed token set
+- [x] **T026** [P] Add `RequestItemLine2Resolver` — resolves a `CardLine2Template` against the closed token set
   (job-derived `{part_number}`, `{part_description}`, `{die_number}`, `{die_location}`, `{dunnage_part}`,
   `{sequence_number}`, `{scrap_type}`; captured `{answer}`, `{destination}`, `{component}`, `{defect}`) plus the one
   conditional the die needs. An unresolvable token renders the Item's own display name and reports the
   configuration problem — never a blank, never a fabricated value (FR-026). · new
   `MTM_Waitlist.Settings/Services/RequestItemLine2Resolver.cs`
-- [ ] **T027** [P] Add `RequestItemObservedTimeService` — reads `sp_waitlist_request_item_observed_average_get` and
+- [x] **T027** [P] Add `RequestItemObservedTimeService` — reads `sp_waitlist_request_item_observed_average_get` and
   composes each Item's configured minutes with the observed average as **two distinct values**, marking the
   15-minute fallback as a **default** rather than as configured (FR-017, FR-018, SC-007). The observed value is
   display data and is never written back. Constant for the fallback: `UrgencySettingsService.DefaultMinutes` → 15
@@ -208,7 +208,7 @@ done.**
 
 ### Wave 7 — the merged pickup Item's visibility rule (single task; same file as Wave 8)
 
-- [ ] **T028** Correct `RequestItemPickerRules.RequiredJobPart` (§D21): the merged pickup Item is visible when the
+- [x] **T028** Correct `RequestItemPickerRules.RequiredJobPart` (§D21): the merged pickup Item is visible when the
   requesting job has a coil **or** flatstock — it currently maps to `RequestJobPartKind.Coil` alone, so a
   flatstock-only job silently withholds a supported Item, which is the second half of FR-002 and is measured by
   SC-004. **Delete the dead `pickup-flatstock` arm**: it is not one of the twenty-three pinned codes, it is not in
@@ -219,7 +219,7 @@ done.**
 
 ### Wave 8 — the scrap gate and the out-of-scope Items (single task; same file as Wave 7)
 
-- [ ] **T029** Gate `pickup-scrap` through the canonical predicate rather than letting it fall through to the
+- [x] **T029** Gate `pickup-scrap` through the canonical predicate rather than letting it fall through to the
   always-visible default (FR-031, §D12): offered only when the snapshot says a real scrap decision exists — a value
   that is set, is not `No Scrap`, and is not `Scrap Type Required`. A job that chose `No Scrap` has nothing to
   collect; a stored placeholder means **no decision was made** and must never be presented as a scrap type. In the
@@ -231,7 +231,7 @@ done.**
 
 ### Wave 9 — the filtered list, built after the check (single task)
 
-- [ ] **T030** Reshape `NewRequestPickerService` so the availability filter runs **inside** the build: add
+- [x] **T030** Reshape `NewRequestPickerService` so the availability filter runs **inside** the build: add
   `GetVisibleItems(category, availability)` and `GetVisibleCategories(availability)`. An unsupported Item is
   therefore never constructed, never bound and never offered — the defect FR-002 was written to stop is
   "offered and then refused", so filtering a bound collection afterwards is not an acceptable implementation
@@ -244,7 +244,7 @@ done.**
 
 ### Wave 10 — the availability snapshot at the composition root (single task)
 
-- [ ] **T031** Declare `IRequestJobPartAvailabilityProvider` in `MTM_Waitlist.Settings` and implement it in the app
+- [x] **T031** Declare `IRequestJobPartAvailabilityProvider` in `MTM_Waitlist.Settings` and implement it in the app
   project — the **only** place permitted to see both `IActiveJobItemResolverService` (`MTM_Waitlist.Setup`) and
   `RequestJobPartAvailability` (`MTM_Waitlist.Settings`), which is why nothing has to move between projects. Register
   it together with the new services (`RequestItemConfigurationService`, `RequestItemLine2Resolver`,
@@ -259,7 +259,7 @@ done.**
 
 ### Wave 11 — the seed round-trip proof (single task)
 
-- [ ] **T032** Add the seed round-trip test (§D18): read the seeded `subordinate_parts_json` from
+- [x] **T032** Add the seed round-trip test (§D18): read the seeded `subordinate_parts_json` from
   `setup_active_jobs` back through `ActiveJobItemResolverService`'s **own** deserializer and assert it yields
   `SetupSubordinatePart` rows with the normalised Category (`MMC→Coil`, `MMF→Flatstock`, `FGT→Die`). This is what
   makes the eight-configuration matrix a proof about the real read path rather than about a hand-written seed shape.
@@ -283,12 +283,12 @@ subtype (SC-001, SC-002).
 
 ### Tests — write these first; they must fail before the implementation lands
 
-- [ ] **T033** [P] [US1] Extend `RequestItemPickerRulesTests` to the SC-004 matrix §D18/§D21 drove: for **each of the
+- [x] **T033** [P] [US1] Extend `RequestItemPickerRulesTests` to the SC-004 matrix §D18/§D21 drove: for **each of the
   eight** job configurations, the exact set of visible Items — driven through the rules, not a snapshot of expected
   strings; the merged pickup Item offered for a job with **only** flatstock; the scrap three-way gate (a real scrap
   type → offered; `No Scrap` → not; `Scrap Type Required` → not; unset → not); and the four out-of-scope Items never
   offered while still present in the catalog. · `MTM_Waitlist.Tests/Module_Settings/Services/RequestItemPickerRulesTests.cs`
-- [ ] **T034** [P] [US1] Extend `NewRequestPickerServiceTests`: `GetVisibleItems` is **never empty** for a job with no
+- [x] **T034** [P] [US1] Extend `NewRequestPickerServiceTests`: `GetVisibleItems` is **never empty** for a job with no
   parts and for a work centre with no active job, and `GetVisibleCategories` does **not** offer Assist on such a job
   (the five job-independent Items are `pickup-riser-table`, `deliver-riser-table`, `pickup-hopper`,
   `deliver-hopper`, `other` — none of them Assist). Assert the filter runs before binding by asserting the unoffered

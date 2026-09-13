@@ -40,10 +40,11 @@ public sealed class WaitlistRequestTitlesTests
     [TestMethod]
     public void ResolveLine1_ReturnsCanonicalUmbrellaVerb_WhenMapped()
     {
-        // Phase 1.2 uniform-card Line 1 = umbrella verb (Pickup/Deliver/Assist/Other).
+        // Phase 1.2 uniform-card Line 1 = umbrella verb (Pickup/Deliver/Assist/Other), with the two
+        // wrong-material Items carrying their own pinned first line instead of the plain Category word.
         Assert.AreEqual("Deliver", WaitlistRequestTitles.ResolveLine1("Coil", "Bring"));
         Assert.AreEqual("Pickup", WaitlistRequestTitles.ResolveLine1("Coil", "Pickup"));
-        Assert.AreEqual("Deliver", WaitlistRequestTitles.ResolveLine1("Coil", "Wrong Coil @ press"));
+        Assert.AreEqual("Wrong Coil Bring:", WaitlistRequestTitles.ResolveLine1("Coil", "Wrong Coil @ press"));
         Assert.AreEqual("Assist", WaitlistRequestTitles.ResolveLine1("Coil", "Need Coil Turned around"));
         Assert.AreEqual("Pickup", WaitlistRequestTitles.ResolveLine1("Pickup", "Pickup NCM"));
         Assert.AreEqual("Pickup", WaitlistRequestTitles.ResolveLine1("Scrap", "Empty"));

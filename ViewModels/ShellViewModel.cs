@@ -384,12 +384,12 @@ public partial class ShellViewModel : ObservableRecipient
 
         if (pageType == typeof(NewRequestJobTypePage))
         {
-            return ("New Request — Job Type", 2);
+            return ("New Request — Category", 2);
         }
 
-        if (pageType == typeof(NewRequestSubtypePage))
+        if (pageType == typeof(NewRequestItemPage))
         {
-            return ("New Request — Subtype", 3);
+            return ("New Request — Item", 3);
         }
 
         if (pageType == typeof(NewRequestDetailsPage))

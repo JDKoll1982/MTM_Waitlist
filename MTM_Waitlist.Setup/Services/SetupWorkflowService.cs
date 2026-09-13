@@ -1,6 +1,7 @@
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Services;
 
 namespace MTM_Waitlist.Module_Setup.Services;
 
@@ -9,12 +10,14 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
     /// <summary>
     /// Canonical "No Scrap" value — a selectable option in the scrap picker that
     /// indicates the job has no scrap. It is a real entry in s_defaultScrapTypes.
+    /// The value and the rule live in <see cref="ScrapDecisionRules"/> so Setup and New Request cannot
+    /// diverge on what a real scrap decision is (FR-031).
     /// </summary>
-    private const string NoScrapValue = "No Scrap";
+    private const string NoScrapValue = ScrapDecisionRules.NoScrap;
 
     private static readonly string[] s_defaultScrapTypes =
     [
-        "Scrap Type Required",
+        ScrapDecisionRules.RequiredPlaceholder,
         NoScrapValue,
         "3003 Aluminum",
         "5052 aluminum",

@@ -39,7 +39,7 @@ public sealed class WaitlistRequestServiceTests
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status);
         Assert.IsNotNull(result.Request!.TargetTimeUtc, "A deadline should be derived when the draft has none.");
         var span = result.Request.TargetTimeUtc.Value - result.Request.RequestedUtc;
-        Assert.IsTrue(span >= TimeSpan.FromMinutes(29) && span <= TimeSpan.FromMinutes(31), $"expected ~30 min, got {span}.");
+        Assert.IsTrue(span >= TimeSpan.FromMinutes(14) && span <= TimeSpan.FromMinutes(16), $"expected ~15 min, got {span}.");
         Assert.IsFalse(result.Request.IsOverdue);
     }
 
@@ -353,6 +353,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Coil",
+            Item = "deliver-wrong-coil",
             Subtype = "Wrong Coil",
             InputValue = "Wrong material at press",
             ActiveSetupJobId = "JOB-1001",
@@ -388,6 +389,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Coil",
+            Item = "deliver-wrong-coil",
             Subtype = "Wrong Coil",
             InputValue = "Wrong material at press",
             ActiveSetupJobId = string.Empty,
@@ -437,25 +439,6 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void NewRequestFlowRules_FilterRequestTypesForActiveJob_HidesUnavailableMaterialTypes()
-    {
-        var requestTypes = new List<NewRequestTypeDefinition>
-        {
-            new() { RequestType = "Coil" },
-            new() { RequestType = "Flatstock" },
-            new() { RequestType = "Pickup" },
-            new() { RequestType = "Other" },
-        };
-
-        var filtered = NewRequestFlowRules.ApplyActiveJobEligibility(requestTypes, hasCoilData: false, hasFlatstockData: true, hasPartData: true, hasWorkOrderData: true);
-
-        Assert.AreEqual(3, filtered.Count);
-        Assert.IsFalse(filtered.Any(item => string.Equals(item.RequestType, "Coil", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(filtered.Any(item => string.Equals(item.RequestType, "Flatstock", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(filtered.Any(item => string.Equals(item.RequestType, "Pickup", StringComparison.OrdinalIgnoreCase)));
-    }
-
-    [TestMethod]
     public void NewRequestFlowRules_ValidateCurrentJobState_RequiresRestart_WhenWorkCenterIsNoLongerActive()
     {
         var valid = NewRequestFlowRules.ValidateCurrentJobState("Press 12", "JOB-1001");
@@ -480,68 +463,13 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void NewRequestFlowRules_ShouldShowIntermediateSummary_ForNoSubtypeFlowsOnly()
+    public void NewRequestFlowRules_GetNextStepType_RequiresAChosenItem()
     {
-        var noSubtype = new NewRequestTypeDefinition { RequestType = "Pickup" };
-        var withSubtype = new NewRequestTypeDefinition
-        {
-            RequestType = "Other",
-            Subtypes =
-            [
-                new NewRequestSubtypeDefinition { Name = "General Text Entry" }
-            ],
-        };
+        // The step order is a property of the chosen Item's stored configuration, so a state with no Item has no
+        // next step to resolve — the type/subtype steps that used to decide this are gone (FR-003).
+        var state = new NewRequestFlowState { WorkCenter = "Press 12" };
 
-        Assert.IsTrue(NewRequestFlowRules.ShouldShowIntermediateSummary(noSubtype, null));
-        Assert.IsFalse(NewRequestFlowRules.ShouldShowIntermediateSummary(withSubtype, withSubtype.Subtypes[0]));
-    }
-
-    [TestMethod]
-    public void NewRequestFlowRules_ValidatesWorkCenterSelectionAndSubtypeTextWorkflowSteps()
-    {
-        var validSelection = NewRequestFlowRules.ValidateSelectedWorkCenter("Press 12");
-        var blockedSelection = NewRequestFlowRules.ValidateSelectedWorkCenter("No active job");
-
-        var types = new List<NewRequestTypeDefinition>
-        {
-            new() { RequestType = "Pickup", Subtypes = new List<NewRequestSubtypeDefinition>() },
-            new()
-            {
-                RequestType = "Other",
-                Subtypes =
-                [
-                    new NewRequestSubtypeDefinition { Name = "General Text Entry", RequiresTextInput = true, PromptText = "Enter a short description", MinLength = 5, MaxLength = 200 },
-                ],
-            },
-        };
-
-        var filtered = NewRequestFlowRules.ApplyActiveJobEligibility(types, hasCoilData: true, hasFlatstockData: true, hasPartData: true, hasWorkOrderData: true);
-        Assert.IsTrue(validSelection.IsValid);
-        Assert.IsFalse(blockedSelection.IsValid);
-        Assert.IsTrue(filtered.Any(item => item.RequestType.Equals("Pickup", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(filtered.Any(item => item.RequestType.Equals("Other", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(NewRequestFlowRules.ShouldShowIntermediateSummary(types[0], null));
-        Assert.IsFalse(NewRequestFlowRules.ShouldShowIntermediateSummary(types[1], types[1].Subtypes[0]));
-    }
-
-    [TestMethod]
-    public void NewRequestFlowRules_UsesTextInputRules_ForForkliftAndGeneralTextCases()
-    {
-        var json = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Assets", "Config", "waitlist-request-types.json"));
-        var definitions = NewRequestFlowRules.ParseRequestTypes(json);
-
-        var otherType = definitions.Single(item => string.Equals(item.RequestType, "Other", StringComparison.OrdinalIgnoreCase));
-        var generalTextSubtype = otherType.Subtypes.Single(item => string.Equals(item.Name, "General Text Entry", StringComparison.OrdinalIgnoreCase));
-        Assert.IsTrue(generalTextSubtype.RequiresTextInput);
-        Assert.AreEqual("Enter a short description", generalTextSubtype.PromptText);
-        Assert.AreEqual(5, generalTextSubtype.MinLength);
-        Assert.AreEqual(200, generalTextSubtype.MaxLength);
-
-        var forkliftAssist = definitions.Single(item => string.Equals(item.RequestType, "Forklift Assist", StringComparison.OrdinalIgnoreCase));
-        Assert.IsTrue(forkliftAssist.RequiresTextInput);
-        Assert.AreEqual("Enter description of why you need assistance", forkliftAssist.PromptText);
-        Assert.AreEqual(5, forkliftAssist.MinLength);
-        Assert.AreEqual(50, forkliftAssist.MaxLength);
+        Assert.ThrowsException<ArgumentNullException>(() => NewRequestFlowRules.GetNextStepType(state));
     }
 
     [TestMethod]
@@ -559,6 +487,7 @@ public sealed class WaitlistRequestServiceTests
                 Building = "Expo Drive",
                 WorkCenter = "Press 9",
                 RequestType = "Coil",
+                Item = "deliver-coil",
                 ActiveSetupJobId = "JOB-2002",
                 WorkCenterName = "Press 9",
                 RequesterEmployeeNumber = "6229",
@@ -575,6 +504,7 @@ public sealed class WaitlistRequestServiceTests
                 Building = "Expo Drive",
                 WorkCenter = "Press 15",
                 RequestType = "Coil",
+                Item = "deliver-coil",
                 ActiveSetupJobId = "JOB-3003",
                 WorkCenterName = "Press 15",
                 RequesterEmployeeNumber = "5000",
@@ -609,6 +539,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Coil",
+            Item = "deliver-coil",
             Status = "Pending",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
@@ -634,6 +565,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Coil",
+            Item = "deliver-coil",
             Status = "Accepted",
             RequesterEmployeeNumber = "6229",
         };
@@ -653,6 +585,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Coil",
+            Item = "deliver-wrong-coil",
             Subtype = "Wrong Coil",
             InputValue = "Wrong material at press",
             Status = "Pending",
@@ -675,6 +608,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "100-3",
             RequestType = "Coil",
+            Item = "deliver-coil",
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(5),
         };
@@ -691,6 +625,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "100-6",
             RequestType = "Coil",
+            Item = "deliver-coil",
             Subtype = "Bring",
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(7),
@@ -717,6 +652,7 @@ public sealed class WaitlistRequestServiceTests
                 Building = "Expo Drive",
                 WorkCenter = "100-3",
                 RequestType = "Coil",
+                Item = "deliver-coil",
                 Status = status,
                 TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(5),
             };
@@ -730,6 +666,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Pickup",
+            Item = "other",
             Subtype = "Pickup Other",
             InputValue = "Need an outside service",
             Status = "Pending",
@@ -746,6 +683,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Scrap",
+            Item = "pickup-scrap",
             Subtype = "Empty",
             InputValue = "Scrap cart empty",
             Status = "Pending",
@@ -766,6 +704,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Forklift Assist",
+            Item = "other",
             InputValue = "HELP ME!!!",
             Status = "Pending",
         };
@@ -775,6 +714,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Flatstock",
+            Item = "deliver-flatstock",
             Status = "Pending",
         };
         var other = new WaitlistRequest
@@ -783,6 +723,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Other",
+            Item = "other",
             Subtype = "General Text Entry",
             InputValue = "Please assist",
             Status = "Pending",
@@ -793,6 +734,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Pickup",
+            Item = "other",
             Subtype = "Pickup Other",
             Status = "Pending",
         };
@@ -812,6 +754,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Pickup",
+            Item = "pickup-fg",
             Subtype = "Pickup FG",
             InputValue = "Finished goods request",
             Status = "Pending",
@@ -845,6 +788,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Coil",
+            Item = "deliver-wrong-coil",
             Subtype = "Wrong Coil",
             InputValue = "Wrong material at press",
             Status = "Pending",
@@ -863,6 +807,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Other",
+            Item = "other",
             InputValue = "Late submission",
             Status = "Accepted",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(-3),
@@ -884,6 +829,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Pickup",
+            Item = "pickup-coil",
             InputValue = "Late demand",
             Status = "Accepted",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(-5),
@@ -1061,6 +1007,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Coil",
+            Item = "deliver-coil",
             Subtype = "Pickup Coil",
             InputValue = "1",
             ActiveSetupJobId = "Press 12",
@@ -1072,7 +1019,7 @@ public sealed class WaitlistRequestServiceTests
 
         var result = await service.SubmitAsync(draft, allowDuplicate: false);
 
-        Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status);
+        Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status, result.Message);
         Assert.IsNotNull(result.Request);
         Assert.AreEqual("Handler follow-up note", result.Request!.Note);
     }
@@ -1196,6 +1143,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 12",
             RequestType = "Coil",
+            Item = "deliver-coil",
             Status = "Pending",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
@@ -1206,6 +1154,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 15",
             RequestType = "Coil",
+            Item = "deliver-coil",
             Status = "Pending",
             RequesterEmployeeNumber = "5000",
             RequesterEmployeeName = "Other User",
@@ -1236,6 +1185,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 15",
             RequestType = "Coil",
+            Item = "deliver-coil",
             ActiveSetupJobId = "JOB-3003",
             WorkCenterName = "Press 15",
             RequesterEmployeeNumber = "5000",
@@ -1348,6 +1298,7 @@ public sealed class WaitlistRequestServiceTests
             Building = "Expo Drive",
             WorkCenter = "Press 15",
             RequestType = "Coil",
+            Item = "deliver-coil",
             ActiveSetupJobId = "JOB-3003",
             WorkCenterName = "Press 15",
             RequesterEmployeeNumber = "5000",
@@ -1419,6 +1370,7 @@ public sealed class WaitlistRequestServiceTests
         Building = "Expo Drive",
         WorkCenter = "Press 12",
         RequestType = "Coil",
+        Item = "deliver-wrong-coil",
         Subtype = "Wrong Coil",
         InputValue = "Wrong material at press",
         ActiveSetupJobId = "JOB-1001",
@@ -1432,6 +1384,7 @@ public sealed class WaitlistRequestServiceTests
         Building = "Expo Drive",
         WorkCenter = "Press 12",
         RequestType = "Coil",
+        Item = "deliver-wrong-coil",
         Subtype = "Wrong Coil",
         InputValue = "Wrong material at press",
         ActiveSetupJobId = "JOB-1001",

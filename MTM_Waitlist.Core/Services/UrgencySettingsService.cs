@@ -5,8 +5,11 @@ namespace MTM_Waitlist.Module_Core.Services;
 /// <inheritdoc cref="IUrgencySettingsService"/>
 public sealed class UrgencySettingsService : IUrgencySettingsService
 {
-    /// <summary>Default max-allotted minutes applied when a sub-type has no stored override.</summary>
-    public const int DefaultMinutes = 30;
+    /// <summary>
+    /// Default max-allotted minutes applied when an Item has no stored allotment. It is a <b>labelled
+    /// default</b>, not a configured value, and it is the 15-minute fallback of FR-017 (was 30).
+    /// </summary>
+    public const int DefaultMinutes = 15;
 
     /// <summary>Per-sub-type keys are stored as separate scalar int keys (safe for every local-settings store).</summary>
     public const string KeyPrefix = "Urgency.MaxAllottedMinutes.";

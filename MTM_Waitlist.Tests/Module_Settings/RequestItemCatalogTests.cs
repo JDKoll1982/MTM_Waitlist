@@ -60,33 +60,36 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
-    public void Catalog_NeedsUserEntry_FlagsUserEntryItems()
+    public void Catalog_UmbrellaVerb_OverridesTheWrongMaterialItems()
     {
-        Assert.IsTrue(RequestItemCatalog.FindById("pickup-die")!.NeedsUserEntry);
-        Assert.IsTrue(RequestItemCatalog.FindById("pickup-ncm")!.NeedsUserEntry);
-        Assert.IsTrue(RequestItemCatalog.FindById("other")!.NeedsUserEntry);
-        Assert.IsFalse(RequestItemCatalog.FindById("deliver-coil")!.NeedsUserEntry);
+        // The two wrong-material Items carry their own first line, pinned verbatim, rather than the
+        // plain Category word (contract §2, FR-029).
+        Assert.AreEqual("Wrong Coil Bring:", RequestItemCatalog.FindById("deliver-wrong-coil")!.UmbrellaVerb);
+        Assert.AreEqual("Wrong Flatstock Bring:", RequestItemCatalog.FindById("deliver-wrong-flatstock")!.UmbrellaVerb);
+        Assert.AreEqual("Deliver", RequestItemCatalog.FindById("deliver-coil")!.UmbrellaVerb);
     }
 
     [TestMethod]
-    public void Catalog_DeliverItems_ExceptDunnageAndWrongItems_NeedNoUserEntry()
+    public void Catalog_EveryItemDeclaresADisplayNameResourceKeyAndALine2Template()
     {
-        foreach (var item in RequestItemCatalog.GetByCategory(RequestCategory.Deliver))
+        foreach (var item in RequestItemCatalog.Items)
         {
-            if (item.Id == "deliver-dunnage")
-            {
-                // Dunnage is always user-selected via image cards (clarified 2026-09-07).
-                Assert.IsTrue(item.NeedsUserEntry, $"Deliver item '{item.Id}' requires dunnage selection.");
-            }
-            else if (item.Id is "deliver-wrong-coil" or "deliver-wrong-flatstock")
-            {
-                // Wrong-item replaces capture a user explanation (added 2026-09-08).
-                Assert.IsTrue(item.NeedsUserEntry, $"Deliver item '{item.Id}' requires an explanation.");
-            }
-            else
-            {
-                Assert.IsFalse(item.NeedsUserEntry, $"Deliver item '{item.Id}' should need no user entry.");
-            }
+            Assert.AreEqual(
+                RequestItemCatalog.DisplayNameResourceKeyFor(item.Id),
+                item.DisplayNameResourceKey,
+                $"Item '{item.Id}' must carry its display-name resource key.");
+            Assert.IsFalse(
+                string.IsNullOrWhiteSpace(item.CardLine2Template),
+                $"Item '{item.Id}' must carry a Line 2 template.");
         }
+    }
+
+    [TestMethod]
+    public void Catalog_CardLine2Template_EncodesTheDiesHomeLocationConditional()
+    {
+        // The only conditional in the language: the die's location when the captured destination is
+        // Home Location, otherwise the die's number (contract §3).
+        var die = RequestItemCatalog.FindById("pickup-die")!;
+        Assert.AreEqual("{die_number:die_location=Home Location}", die.CardLine2Template);
     }
 }

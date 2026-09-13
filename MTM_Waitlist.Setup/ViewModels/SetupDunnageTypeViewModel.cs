@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
 
@@ -16,9 +17,10 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
     /// <summary>
     /// Placeholder scrap value used by the workflow to indicate "no scrap choice has
     /// been made yet". It is excluded from the picker so the Continue gate can
-    /// require an explicit decision.
+    /// require an explicit decision. The value and the rule live in
+    /// <see cref="ScrapDecisionRules"/> so Setup and New Request cannot diverge (FR-031).
     /// </summary>
-    private const string RequiredScrapPlaceholder = "Scrap Type Required";
+    private static string RequiredScrapPlaceholder => ScrapDecisionRules.RequiredPlaceholder;
 
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
@@ -68,11 +70,9 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
 
     /// <summary>
     /// Whether the user has made an explicit scrap decision (picked a real scrap
-    /// type or explicitly chose "No Scrap").
+    /// type or explicitly chose "No Scrap"). Delegates to the shared rule (FR-031).
     /// </summary>
-    public bool HasScrapDecision =>
-        !string.IsNullOrWhiteSpace(SelectedScrapType)
-        && !string.Equals(SelectedScrapType, RequiredScrapPlaceholder, StringComparison.OrdinalIgnoreCase);
+    public bool HasScrapDecision => ScrapDecisionRules.HasScrapDecision(SelectedScrapType);
 
     /// <summary>Whether the user still needs to make a scrap decision.</summary>
     public bool IsScrapSelectionMissing => !HasScrapDecision;

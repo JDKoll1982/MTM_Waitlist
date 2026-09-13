@@ -1,8 +1,11 @@
+using System.Collections.ObjectModel;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
+using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 
@@ -49,6 +52,30 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
         get; set;
     }
 
+    /// <summary>True when the configuration declares an answer the requester picks from a list.</summary>
+    [ObservableProperty]
+    public partial bool IsOptionPick
+    {
+        get; set;
+    }
+
+    /// <summary>True when the configuration declares an answer the requester types.</summary>
+    [ObservableProperty]
+    public partial bool IsTextInput
+    {
+        get; set;
+    }
+
+    /// <summary>The picked option when <see cref="IsOptionPick"/> is true.</summary>
+    [ObservableProperty]
+    public partial string? SelectedOption
+    {
+        get; set;
+    }
+
+    /// <summary>The options the configuration declares, in declared order.</summary>
+    public ObservableCollection<string> Options { get; } = new();
+
     public int MinLength
     {
         get;
@@ -66,9 +93,14 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
         _navigationService = navigationService;
     }
 
+    /// <summary>
+    /// Renders the step from the chosen Item's stored configuration row and nothing else (FR-013): the prompt, the
+    /// limits, the options and whether anything is asked for all come from the row, so changing the row changes
+    /// this screen with no code change and no rebuild (FR-015). No branch here keys on the Item's identity.
+    /// </summary>
     public void OnNavigatedTo(object parameter)
     {
-        if (parameter is not NewRequestFlowState state || state.RequestType is null)
+        if (parameter is not NewRequestFlowState state || state.Item is null || state.ItemConfiguration is null)
         {
             _navigationService.GoBack();
             return;
@@ -76,18 +108,26 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
 
         _state = state;
 
-        var requestType = state.RequestType;
-        var subtype = state.Subtype;
-        var targetName = subtype is not null ? subtype.Name : requestType.RequestType;
-        var promptText = subtype is not null ? subtype.PromptText : requestType.PromptText;
+        var configuration = state.ItemConfiguration;
+        Heading = $"{NewRequestItemViewModel.ResolveCategoryName(state.Item.Category)} — {NewRequestItemViewModel.ResolveItemName(state.Item)}";
+        PromptText = string.IsNullOrWhiteSpace(configuration.PromptText)
+            ? $"Enter details for {NewRequestItemViewModel.ResolveItemName(state.Item)}"
+            : configuration.PromptText!;
+        MinLength = configuration.MinLength;
+        MaxLength = configuration.MaxLength;
 
-        Heading = subtype is null ? requestType.RequestType : $"{requestType.RequestType} / {subtype.Name}";
-        PromptText = string.IsNullOrWhiteSpace(promptText)
-            ? $"Enter details for {targetName}"
-            : promptText;
-        MinLength = subtype?.MinLength ?? requestType.MinLength;
-        MaxLength = subtype?.MaxLength ?? requestType.MaxLength;
+        Options.Clear();
+        foreach (var option in configuration.Options)
+        {
+            Options.Add(option);
+        }
+
+        // Which control renders is the configuration's decision, not the Item's.
+        IsOptionPick = configuration.AnswerValueType == RequestItemValueType.Enum;
+        IsTextInput = !IsOptionPick;
+
         InputValue = state.InputValue ?? string.Empty;
+        SelectedOption = IsOptionPick ? state.InputValue : null;
         ValidationMessage = string.Empty;
         IsValidationVisible = false;
     }
@@ -99,27 +139,44 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
     [RelayCommand]
     private void Continue()
     {
-        if (_state is null || _state.RequestType is null)
+        if (_state?.ItemConfiguration is null)
         {
             return;
         }
 
-        var value = InputValue?.Trim() ?? string.Empty;
-        if (value.Length < MinLength || value.Length > MaxLength)
+        if (IsOptionPick)
         {
-            ValidationMessage = $"Please enter between {MinLength} and {MaxLength} characters.";
-            IsValidationVisible = true;
-            return;
+            var chosen = SelectedOption?.Trim() ?? string.Empty;
+            var known = Options.Count == 0
+                || Options.Any(option => string.Equals(option, chosen, StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrWhiteSpace(chosen) || !known)
+            {
+                ValidationMessage = Options.Count == 0
+                    ? "This item's answer options are not configured yet. A supervisor needs to check it."
+                    : "Please choose one of the listed options.";
+                IsValidationVisible = true;
+                return;
+            }
+
+            _state.InputValue = chosen;
+        }
+        else
+        {
+            var value = InputValue?.Trim() ?? string.Empty;
+            if (value.Length < MinLength || value.Length > MaxLength)
+            {
+                ValidationMessage = $"Please enter between {MinLength} and {MaxLength} characters.";
+                IsValidationVisible = true;
+                return;
+            }
+
+            _state.InputValue = value;
         }
 
-        _state.InputValue = value;
+        IsValidationVisible = false;
 
-        // Text input is complete; never route back to this page. No-subtype flows go to
-        // the intermediate preview, subtype flows go straight to confirmation.
-        var nextStep = NewRequestFlowRules.ShouldShowIntermediateSummary(_state.RequestType, _state.Subtype)
-            ? typeof(NewRequestPreviewViewModel)
-            : typeof(NewRequestSummaryViewModel);
-        _navigationService.NavigateTo(nextStep.FullName!, _state);
+        // The answer is complete; never route back to this page.
+        _navigationService.NavigateTo(typeof(NewRequestPreviewViewModel).FullName!, _state);
     }
 
     [RelayCommand]

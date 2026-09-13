@@ -55,26 +55,26 @@
                             Grid.Row="1"
                             Grid.Column="0"
                             Style="{StaticResource RequestDialogFieldLabelStyle}"
-                            Text="Request Type" />
+                            Text="Category" />
                         <TextBlock
                             Grid.Row="1"
                             Grid.Column="1"
                             Style="{StaticResource RequestDialogFieldValueStyle}"
-                            Text="{x:Bind ViewModel.RequestType, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.CategoryText, Mode=OneWay}" />
 
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="0"
                             Style="{StaticResource RequestDialogFieldLabelStyle}"
-                            Text="Subtype"
-                            Visibility="{x:Bind ViewModel.HasSubtype, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            Text="Item"
+                            Visibility="{x:Bind ViewModel.HasItem, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="1"
                             Style="{StaticResource RequestDialogFieldValueStyle}"
-                            Text="{x:Bind ViewModel.SubtypeName, Mode=OneWay}"
+                            Text="{x:Bind ViewModel.ItemText, Mode=OneWay}"
                             TextWrapping="WrapWholeWords"
-                            Visibility="{x:Bind ViewModel.HasSubtype, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            Visibility="{x:Bind ViewModel.HasItem, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                         <TextBlock
                             Grid.Row="3"

@@ -58,7 +58,7 @@
                         Grid.Row="1"
                         Grid.Column="1"
                         Style="{StaticResource RequestDialogFieldValueStyle}"
-                        Text="{x:Bind ViewModel.RequestType, Mode=OneWay}" />
+                        Text="{x:Bind ViewModel.ItemText, Mode=OneWay}" />
 
                     <TextBlock
                         Grid.Row="2"

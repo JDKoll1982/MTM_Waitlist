@@ -22,8 +22,8 @@ public sealed class UrgencyDeadlineServiceTests
         var created = Now.AddMinutes(-10);
         var state = await service.ComputeAsync(created, "Pickup Coil", Now);
 
-        Assert.AreEqual(created + TimeSpan.FromMinutes(30), state.DueUtc);
-        Assert.AreEqual(TimeSpan.FromMinutes(20), state.Remaining);
+        Assert.AreEqual(created + TimeSpan.FromMinutes(UrgencySettingsService.DefaultMinutes), state.DueUtc);
+        Assert.AreEqual(TimeSpan.FromMinutes(5), state.Remaining);
         Assert.IsFalse(state.IsOverdue);
     }
 
@@ -49,8 +49,8 @@ public sealed class UrgencyDeadlineServiceTests
         var service = Build(settings);
 
         Assert.AreEqual(TimeSpan.FromMinutes(45), await service.GetMaxAllottedAsync("Pickup"));
-        Assert.AreEqual(TimeSpan.FromMinutes(30), await service.GetMaxAllottedAsync("Unconfigured"));
-        Assert.AreEqual(TimeSpan.FromMinutes(30), await service.GetMaxAllottedAsync(null));
+        Assert.AreEqual(TimeSpan.FromMinutes(UrgencySettingsService.DefaultMinutes), await service.GetMaxAllottedAsync("Unconfigured"));
+        Assert.AreEqual(TimeSpan.FromMinutes(UrgencySettingsService.DefaultMinutes), await service.GetMaxAllottedAsync(null));
     }
 
     private sealed class StubLocalSettings : ILocalSettingsService

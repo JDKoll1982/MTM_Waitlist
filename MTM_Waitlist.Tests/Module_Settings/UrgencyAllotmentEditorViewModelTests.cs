@@ -45,7 +45,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
 
         Assert.AreEqual(2, vm.Items.Count);
         Assert.AreEqual("Pickup Coil", vm.Items[0].SubtypeName);
-        Assert.AreEqual(30, vm.Items[0].Minutes); // default
+        Assert.AreEqual(15, vm.Items[0].Minutes); // the labelled 15-minute default
         Assert.AreEqual("Wrong Coil", vm.Items[1].SubtypeName);
         Assert.AreEqual(20, vm.Items[1].Minutes); // stored
     }

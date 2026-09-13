@@ -13,6 +13,13 @@ public enum RequestJobPartKind
     /// <summary>Visible only when the requesting job has a coil (MMC / Coil subordinate).</summary>
     Coil,
 
+    /// <summary>
+    /// Visible when the requesting job has a coil <b>or</b> flatstock. This is the merged Pickup Item
+    /// (<c>pickup-coil</c>), whose one request covers either material (FR-002, D21): a flatstock-only job that
+    /// withheld it would silently lose a supported Item, which is what SC-004 measures.
+    /// </summary>
+    CoilOrFlatstock,
+
     /// <summary>Visible only when the requesting job has flatstock (MMF / Flatstock subordinate).</summary>
     Flatstock,
 
@@ -27,6 +34,14 @@ public enum RequestJobPartKind
 
     /// <summary>Visible only when the requesting job has any subordinate part (used by Assist table place/remove).</summary>
     AnySubordinate,
+
+    /// <summary>
+    /// Visible only when the requesting job has a <b>real scrap decision</b> — a scrap value that is set, is
+    /// not <c>No Scrap</c> and is not the <c>Scrap Type Required</c> placeholder (FR-031, contract §5).
+    /// Evaluated through the canonical predicate in <c>MTM_Waitlist.Core</c> so Setup and New Request
+    /// cannot diverge.
+    /// </summary>
+    Scrap,
 
     /// <summary>Visible only when the requesting job has a work order/sequence (FG / WIP / Outside, NCM defect).</summary>
     RequiresActiveJob,
@@ -44,13 +59,14 @@ public sealed record RequestJobPartAvailability(
     bool HasFlatstock,
     bool HasDie,
     bool HasComponent,
-    bool HasDunnage)
+    bool HasDunnage,
+    bool HasScrapDecision)
 {
     /// <summary>An empty job (nothing present) — used for offline "no active job" rendering.</summary>
-    public static RequestJobPartAvailability None { get; } = new(false, false, false, false, false, false);
+    public static RequestJobPartAvailability None { get; } = new(false, false, false, false, false, false, false);
 
     /// <summary>A job with every part present — renders all auto-populated items.</summary>
-    public static RequestJobPartAvailability All { get; } = new(true, true, true, true, true, true);
+    public static RequestJobPartAvailability All { get; } = new(true, true, true, true, true, true, true);
 
     public bool HasAnySubordinate => HasCoil || HasFlatstock || HasDie || HasComponent || HasDunnage;
 }

@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 
@@ -71,32 +72,203 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void ScrapAndOther_AlwaysVisible()
+    public void ScrapItem_IsGatedOnARealScrapDecision_ThreeWaysPlusUnset()
     {
-        var empty = RequestJobPartAvailability.None;
-        Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-scrap")!, empty));
-        Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("other")!, empty));
+        var scrap = RequestItemCatalog.FindById("pickup-scrap")!;
+
+        Assert.IsTrue(
+            RequestItemPickerRules.IsVisible(scrap, WithScrap("Steel Offal")),
+            "A real scrap type means a decision was made and something has to be collected.");
+        Assert.IsFalse(
+            RequestItemPickerRules.IsVisible(scrap, WithScrap(ScrapDecisionRules.NoScrap)),
+            "'No Scrap' is a real answer meaning there is nothing to collect.");
+        Assert.IsFalse(
+            RequestItemPickerRules.IsVisible(scrap, WithScrap(ScrapDecisionRules.RequiredPlaceholder)),
+            "The placeholder means no decision was made, so it is never presented as a scrap type.");
+        Assert.IsFalse(
+            RequestItemPickerRules.IsVisible(scrap, WithScrap(null)),
+            "An unset scrap value is no decision either.");
+        Assert.IsFalse(
+            RequestItemPickerRules.IsVisible(scrap, WithScrap(string.Empty)));
     }
 
     [TestMethod]
-    public void FinishedProductItems_RequireActiveJob()
+    public void OutOfScopeItems_AreNeverOffered_ButStayInTheCatalog()
     {
-        var noJob = RequestJobPartAvailability.None;
-        var withJob = RequestJobPartAvailability.All with
+        string[] outOfScope = ["pickup-fg", "pickup-ncm", "pickup-wip", "pickup-outside-service"];
+
+        // Present in the catalog: a hidden Item and a missing row are different states (FR-028).
+        Assert.AreEqual(23, RequestItemCatalog.TotalCount);
+        foreach (var id in outOfScope)
+        {
+            Assert.IsNotNull(RequestItemCatalog.FindById(id), id);
+        }
+
+        // Never offered — under any job, including the job that has everything.
+        foreach (var availability in EightConfigurations())
+        {
+            foreach (var id in outOfScope)
+            {
+                Assert.IsFalse(
+                    RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById(id)!, availability),
+                    $"'{id}' must never be offered, including for {Describe(availability)}.");
+            }
+        }
+
+        // And the count is exact: no out-of-scope Item leaks into any configuration's visible set.
+        foreach (var availability in EightConfigurations())
+        {
+            foreach (var item in RequestItemCatalog.Items)
+            {
+                if (RequestItemPickerRules.IsVisible(item, availability))
+                {
+                    CollectionAssert.DoesNotContain(outOfScope, item.Id);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// The SC-004 matrix: for each of the eight job configurations §D18 fixes, the exact set of visible Items,
+    /// driven through the rules rather than through a snapshot of expected strings.
+    /// </summary>
+    [TestMethod]
+    public void EightJobConfigurations_OfferTheExactVisibleItemSet()
+    {
+        var jobIndependent = new[]
+        {
+            "pickup-riser-table", "deliver-riser-table", "pickup-hopper", "deliver-hopper", "other"
+        };
+
+        AssertVisible(
+            "coil only, a real scrap type",
+            WithScrap("Steel Offal") with { HasCoil = true, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = false },
+            [
+                .. jobIndependent,
+                "pickup-coil", "pickup-scrap", "deliver-coil", "deliver-wrong-coil",
+                "assist-coil-turn", "assist-table-place", "assist-table-remove"
+            ]);
+
+        AssertVisible(
+            "flatstock only",
+            WithScrap(null) with { HasCoil = false, HasFlatstock = true, HasDie = false, HasComponent = false, HasDunnage = false },
+            [
+                .. jobIndependent,
+                "pickup-coil", "deliver-flatstock", "deliver-wrong-flatstock",
+                "assist-table-place", "assist-table-remove"
+            ]);
+
+        AssertVisible(
+            "die only, the scrap placeholder",
+            WithScrap(ScrapDecisionRules.RequiredPlaceholder) with { HasCoil = false, HasFlatstock = false, HasDie = true, HasComponent = false, HasDunnage = false },
+            [
+                .. jobIndependent,
+                "pickup-die", "deliver-die",
+                "assist-table-place", "assist-table-remove"
+            ]);
+
+        AssertVisible(
+            "component only, 'No Scrap'",
+            WithScrap(ScrapDecisionRules.NoScrap) with { HasCoil = false, HasFlatstock = false, HasDie = false, HasComponent = true, HasDunnage = false },
+            [
+                .. jobIndependent,
+                "pickup-component",
+                "assist-table-place", "assist-table-remove"
+            ]);
+
+        AssertVisible(
+            "dunnage only, no subordinate part",
+            WithScrap(null) with { HasCoil = false, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = true },
+            [
+                .. jobIndependent,
+                "pickup-dunnage", "deliver-dunnage",
+                "assist-table-place", "assist-table-remove"
+            ]);
+
+        AssertVisible(
+            "everything at once, a real scrap type",
+            WithScrap("Steel Offal"),
+            [
+                .. jobIndependent,
+                "pickup-coil", "pickup-die", "pickup-component", "pickup-dunnage", "pickup-scrap",
+                "deliver-coil", "deliver-flatstock", "deliver-die", "deliver-dunnage",
+                "deliver-wrong-coil", "deliver-wrong-flatstock",
+                "assist-coil-turn", "assist-table-place", "assist-table-remove"
+            ]);
+
+        AssertVisible(
+            "an active job with no subordinate part",
+            WithScrap(null) with { HasActiveJob = true, HasCoil = false, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = false },
+            jobIndependent);
+
+        AssertVisible(
+            "a work centre with no active job",
+            RequestJobPartAvailability.None,
+            jobIndependent);
+    }
+
+    [TestMethod]
+    public void MergedPickupCoil_IsOfferedForAFlatstockOnlyJob()
+    {
+        // The second half of FR-002, and what SC-004 measures: a flatstock-only job must still be offered the
+        // merged Pickup Item.
+        var flatstockOnly = WithScrap(null) with
         {
             HasCoil = false,
-            HasFlatstock = false,
+            HasFlatstock = true,
             HasDie = false,
             HasComponent = false,
             HasDunnage = false,
         };
 
-        foreach (var id in new[] { "pickup-fg", "pickup-wip", "pickup-outside-service", "pickup-ncm" })
+        Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-coil")!, flatstockOnly));
+    }
+
+    [TestMethod]
+    public void DeadPickupFlatstockArm_IsGone()
+    {
+        // 'pickup-flatstock' is not one of the twenty-three pinned codes and is not in the catalog, so the
+        // rule that advertised it must not come back.
+        Assert.IsNull(RequestItemCatalog.FindById("pickup-flatstock"));
+        Assert.AreNotEqual(
+            RequestJobPartKind.Flatstock,
+            RequestItemPickerRules.RequiredJobPart(RequestItemCatalog.FindById("pickup-coil")!),
+            "The merged Pickup Item is a coil-OR-flatstock Item, not a flatstock-only one.");
+    }
+
+    private static RequestJobPartAvailability WithScrap(string? scrapType)
+    {
+        // The scrap value is stored per subordinate part; the snapshot only carries the derived decision.
+        return RequestJobPartAvailability.All with
         {
-            var item = RequestItemCatalog.FindById(id)!;
-            Assert.IsFalse(RequestItemPickerRules.IsVisible(item, noJob), id);
-            Assert.IsTrue(RequestItemPickerRules.IsVisible(item, withJob), id);
-        }
+            HasScrapDecision = ScrapDecisionRules.HasRealScrapDecision(scrapType)
+        };
+    }
+
+    private static IEnumerable<RequestJobPartAvailability> EightConfigurations()
+    {
+        yield return WithScrap("Steel Offal") with { HasCoil = true, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = false };
+        yield return WithScrap(null) with { HasCoil = false, HasFlatstock = true, HasDie = false, HasComponent = false, HasDunnage = false };
+        yield return WithScrap(null) with { HasCoil = false, HasFlatstock = false, HasDie = true, HasComponent = false, HasDunnage = false };
+        yield return WithScrap(null) with { HasCoil = false, HasFlatstock = false, HasDie = false, HasComponent = true, HasDunnage = false };
+        yield return WithScrap(null) with { HasCoil = false, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = true };
+        yield return WithScrap("Steel Offal");
+        yield return WithScrap(null) with { HasActiveJob = true, HasCoil = false, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = false };
+        yield return RequestJobPartAvailability.None;
+    }
+
+    private static string Describe(RequestJobPartAvailability availability) =>
+        $"coil={availability.HasCoil}, flatstock={availability.HasFlatstock}, die={availability.HasDie}, "
+        + $"component={availability.HasComponent}, dunnage={availability.HasDunnage}, job={availability.HasActiveJob}";
+
+    private static void AssertVisible(string configuration, RequestJobPartAvailability availability, string[] expected)
+    {
+        var visible = RequestItemCatalog.Items
+            .Where(item => RequestItemPickerRules.IsVisible(item, availability))
+            .Select(item => item.Id)
+            .ToList();
+
+        CollectionAssert.AreEquivalent(expected, visible, $"Visible set for: {configuration} (" + Describe(availability) + ")");
     }
 
     [TestMethod]

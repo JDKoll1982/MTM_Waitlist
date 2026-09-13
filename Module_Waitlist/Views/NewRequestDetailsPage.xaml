@@ -34,7 +34,15 @@
                     PlaceholderText="Enter a short description"
                     MinWidth="360"
                     MaxWidth="520"
-                    HorizontalAlignment="Left" />
+                    HorizontalAlignment="Left"
+                    Visibility="{x:Bind ViewModel.IsTextInput, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <ComboBox
+                    Header="{x:Bind ViewModel.PromptText, Mode=OneWay}"
+                    ItemsSource="{x:Bind ViewModel.Options, Mode=OneWay}"
+                    SelectedItem="{x:Bind ViewModel.SelectedOption, Mode=TwoWay}"
+                    MinWidth="360"
+                    HorizontalAlignment="Left"
+                    Visibility="{x:Bind ViewModel.IsOptionPick, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                 <TextBlock
                     Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                     Text="{x:Bind ViewModel.ValidationMessage, Mode=OneWay}"

@@ -31,7 +31,25 @@ public enum ImageLocationScope
     /// Cascade: Work Center Override → Default (no JSON config)
     /// Inventory: Dynamic (from setup_workstations_catalog, live database)
     /// </summary>
-    WorkCenter
+    WorkCenter,
+
+    /// <summary>
+    /// Request Item image (e.g. pickup-coil, other), keyed by Item code.
+    /// Database value: "request_item"
+    /// Cascade: Item Override → Category family (<see cref="RequestCategory"/>) → the existing placeholder
+    /// Inventory: 23 canonical Items (RequestItemCatalog)
+    /// See specs/004-unified-card-item-picker/contracts/card-and-identifier.md §4.
+    /// </summary>
+    RequestItem,
+
+    /// <summary>
+    /// Request Category image family (Pickup / Deliver / Assist / Other), keyed by Category code — the
+    /// family an Item falls back to when it has no override of its own.
+    /// Database value: "request_category"
+    /// Cascade: Category Override → the existing placeholder
+    /// Inventory: the four "RequestCategory" members
+    /// </summary>
+    RequestCategory
 }
 
 /// <summary>
@@ -49,6 +67,8 @@ public static class ImageLocationScopeExtensions
         ImageLocationScope.RequestType => "request_type",
         ImageLocationScope.RequestSubtype => "request_subtype",
         ImageLocationScope.WorkCenter => "work_center",
+        ImageLocationScope.RequestItem => "request_item",
+        ImageLocationScope.RequestCategory => "request_category",
         _ => throw new ArgumentException($"Unknown scope: {scope}", nameof(scope))
     };
 
@@ -70,6 +90,8 @@ public static class ImageLocationScopeExtensions
             "request_type" => ImageLocationScope.RequestType,
             "request_subtype" => ImageLocationScope.RequestSubtype,
             "work_center" => ImageLocationScope.WorkCenter,
+            "request_item" => ImageLocationScope.RequestItem,
+            "request_category" => ImageLocationScope.RequestCategory,
             _ => throw new ArgumentException($"Unknown scope: {scopeString}", nameof(scopeString))
         };
     }
@@ -78,12 +100,14 @@ public static class ImageLocationScopeExtensions
     /// Determines if this scope has JSON configuration support.
     /// </summary>
     /// <param name="scope">The scope enumeration value</param>
-    /// <returns>True if this scope can be configured via JSON (request_type, request_subtype); false otherwise (work_center)</returns>
+    /// <returns>True if this scope can be configured via JSON (request_type, request_subtype); false otherwise (work_center, request_item, request_category)</returns>
     public static bool HasJsonConfig(this ImageLocationScope scope) => scope switch
     {
         ImageLocationScope.RequestType => true,
         ImageLocationScope.RequestSubtype => true,
         ImageLocationScope.WorkCenter => false, // Work centers are dynamic; no JSON config
+        ImageLocationScope.RequestItem => false, // Items are configured as database rows, not JSON
+        ImageLocationScope.RequestCategory => false, // Categories are configured as database rows, not JSON
         _ => throw new ArgumentException($"Unknown scope: {scope}", nameof(scope))
     };
 }

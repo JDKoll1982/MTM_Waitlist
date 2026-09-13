@@ -9,14 +9,14 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class UrgencySettingsServiceTests
 {
     [TestMethod]
-    public async Task GetMaxAllotted_DefaultsTo30Minutes_WhenUnset()
+    public async Task GetMaxAllotted_DefaultsToTheLabelled15Minutes_WhenUnset()
     {
         var settings = new StubLocalSettings();
         var service = new UrgencySettingsService(settings);
 
         var result = await service.GetMaxAllottedAsync("Pickup Coil");
 
-        Assert.AreEqual(TimeSpan.FromMinutes(30), result);
+        Assert.AreEqual(TimeSpan.FromMinutes(15), result);
         Assert.AreEqual(TimeSpan.FromMinutes(UrgencySettingsService.DefaultMinutes), service.DefaultMaxAllotted);
     }
 
@@ -56,7 +56,7 @@ public sealed class UrgencySettingsServiceTests
 
         // A different, never-configured subtype still uses the default.
         Assert.AreEqual(TimeSpan.FromMinutes(45), await service.GetMaxAllottedAsync("Pickup Coil"));
-        Assert.AreEqual(TimeSpan.FromMinutes(30), await service.GetMaxAllottedAsync("Forklift Assist"));
+        Assert.AreEqual(TimeSpan.FromMinutes(UrgencySettingsService.DefaultMinutes), await service.GetMaxAllottedAsync("Forklift Assist"));
     }
 
     private sealed class StubLocalSettings : ILocalSettingsService
