@@ -52,8 +52,9 @@
                     <TextBlock
                         Grid.Row="1"
                         Grid.Column="0"
+                        x:Uid="NewRequest_Preview.ItemLabel"
                         Style="{StaticResource RequestDialogFieldLabelStyle}"
-                        Text="Request Type" />
+                        Text="Item" />
                     <TextBlock
                         Grid.Row="1"
                         Grid.Column="1"

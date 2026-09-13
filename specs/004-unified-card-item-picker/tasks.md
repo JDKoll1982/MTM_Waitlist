@@ -913,13 +913,13 @@ Cross-cutting retirement, documentation, and validation against the Success Crit
   read **`Failed: 0`** *with* this feature's new tests in place, not instead of them. Environment-gated tests stay
   `Assert.Inconclusive` and are recorded as skipped, never as passing, and no gate is weakened to go green (no
   deletion, no `[Ignore]`, no new skip). · `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
-- [ ] **T115** **Live database validation.** Validate the new and changed schema artifacts against a live local
+- [x] **T115** **Live database validation.** Validate the new and changed schema artifacts against a live local
   `mtm_waitlist` (constitution III): every paired `create.sql` / `rollback.sql` applies **and reverses** cleanly, the
   three new procedures return the shapes `contracts/item-configuration.md` §2–§4 document, and the four new seeds
   load. Confirm the four master lists and the description file agree with the files on disk. **The reinstall is the
   owner's action, never the agent's** — hand it over and wait; no migration is written, and that absence is the
   recorded assumption rather than an omission. · `Database/**`
-- [ ] **T116** **Scripted UI verification.** Drive the running app with the PowerShell UI-Automation recipe and prove
+- [x] **T116** **Scripted UI verification.** Drive the running app with the PowerShell UI-Automation recipe and prove
   what only the running artifact can: a request can be raised by choosing a Category and an Item in one pass without
   ever being asked for a type or a subtype (SC-001); requests for several different Items each draw the **same** card
   shape (SC-003); the sort control changes the order and its choice returns after a restart (SC-009); and both
@@ -933,7 +933,7 @@ Cross-cutting retirement, documentation, and validation against the Success Crit
   `mtm_mock` mirror serves **external Infor Visual reads only**, and the internal stores are always read and written
   live (constitution II). A Setup walk cannot be served by a cache that never holds it.* ·
   `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
-- [ ] **T117** **Validate against Success Criteria.** Walk SC-001 … SC-012 against the recorded gate evidence — SC-011
+- [x] **T117** **Validate against Success Criteria.** Walk SC-001 … SC-012 against the recorded gate evidence — SC-011
   closes on T113's and T114's outputs, so **do not run the suites a second time** — and for each one record the
   evidence that closes it. Any criterion without recorded evidence stays unticked and is reported, never asserted.
   Single-owner validation: `.specify/companion.yml` is empty, so there is **no** `owns: validation` hook and Polish

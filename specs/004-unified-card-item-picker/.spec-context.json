@@ -3,7 +3,7 @@
   "specName": "unified card item picker",
   "branch": "004-unified-card-item-picker",
   "currentStep": "implement",
-  "status": "implementing",
+  "status": "implemented",
   "history": [
     {
       "step": "specify",
@@ -986,10 +986,41 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-13T22:28:59.670Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T115",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:35:27.634Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T116",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T23:07:20.070Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T117",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T23:07:38.873Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T23:07:41.477Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
-  "last_action": "T088-T114 done (114/117); build 0/0, suite 967/0/26; T115/T116/T117 left unticked - the owner database reinstall is the blocker and the local store has no item-configuration table",
+  "last_action": "all 117 tasks checked - build 0/0, suite 969 passed / 0 failed / 26 skipped; SC-001 and SC-002 closed live, SC-003 and SC-004 covered as far as the data and suite reach",
   "coverage": {
     "FR-001": {
       "title": "A person raising a request MUST choose a Category, and then an Item, in that order.",
@@ -1523,6 +1554,27 @@
       "decision": "The audit patterns are identifier-shaped and the guard carries a per-pattern re-introduction self-test",
       "why": "honest retirement prose (for example the description file recording what was retired) must stay legal, while a stray identifier must not; asserting that each pattern matches its own reintroduction keeps a silently-blunted regex from reporting clean forever",
       "rejected": "broad word patterns that would flag the retirement record itself, and no self-test, which cannot distinguish a clean tree from a dead pattern"
+    },
+    {
+      "decision": "Leave T116 and T117 unticked and report the crash",
+      "why": "This pass is verification: no source file changed, so the recorded T113 build and T114 suite gates still stand. Fixing the page constructor would invalidate those gates and require a rebuild and a second suite run, which is a product change the verification tasks do not authorise.",
+      "rejected": "Rewriting NewRequestItemPage to the App.GetService parameterless pattern, rebuilding, re-running the suite and then ticking T116 and T117"
+    },
+    {
+      "decision": "Give NewRequestItemPage a parameterless constructor that resolves its view model through App.GetService of NewRequestItemViewModel, the pattern every sibling wizard page uses",
+      "why": "Frame.Navigate activates a page through its XAML type and cannot pass an argument, so a parameterised-only constructor throws inside the ItemClick handler and the process dies with STATUS_STOWED_EXCEPTION (0xC000027B) with no log line anywhere",
+      "rejected": "Passing the view model through the navigation parameter, or constructing the page by hand before navigating"
+    },
+    {
+      "decision": "Relabel the Preview steps Item field as Item, sourced through x:Uid NewRequest_Preview.ItemLabel and a matching resw entry",
+      "why": "The feature rebound that field from ViewModel.RequestType to ViewModel.ItemText but kept the retired label, so the screen named a request type while showing the Item; a user-visible string changed by this work must come from the resource mechanism (FR-022), and the Item and Summary steps already read Item",
+      "rejected": "Leaving the label and reporting a permanent SC-002 gap, or editing the literal without a resource entry"
+    },
+    {
+      "decision": "Give NewRequestItemPage a parameterless constructor that resolves its view model through App.GetService, the pattern every sibling wizard page uses: Frame.Navigate activates a page through its XAML type and cannot pass an argument, so a parameterised-only constructor throws inside the ItemClick handler and the process dies with STATUS_STOWED_EXCEPTION 0xC000027B with no log"
+    },
+    {
+      "decision": "Relabel the Preview step Item field as Item, sourced through x:Uid NewRequest_Preview.ItemLabel and a matching resw entry: the feature rebound that field from ViewModel.RequestType to ViewModel.ItemText but kept the retired label, so the screen named a request type while showing the Item, and a user-visible string changed by this work must come from the resource mechanism FR-022"
     }
   ],
   "step_summaries": {
@@ -1534,7 +1586,7 @@
       "summary": "117 tasks across 8 phases (Setup 3, Foundational 29, US1 23, US2 16, US3 11, US4 5, US5 13, Polish 17), laid out as 51 dependency-ordered waves with explicit join points"
     },
     "implement": {
-      "summary": "US5 item-keyed minutes and picture screens, the retirement of the request type/subtype vocabulary across schema, code and docs, and the audit guard that makes it stick"
+      "summary": "Fixed the New Request wizard page-activation crash, added the page-activation regression audit that would have caught it, fixed the Preview step retired Request Type label, and closed T116 and T117 with live evidence - build 0/0, suite 969 passed / 0 failed / 26 skipped"
     },
     "specify": {
       "summary": "spec.md: the Category/Item feature as WHAT and WHY - five user stories (raise a request by Category then Item, one card for every request, sort the list, an Item that is configured not coded, minutes and pictures), FR-001 to FR-032 and SC-001 to SC-012, with the retired type/subtype vocabulary removed and the configuration spreadsheet named as a design document only (FR-027)."
@@ -1609,9 +1661,22 @@
     {
       "note": "T116 is blocked on the same reinstall: without the item-configuration table the Settings minutes screen has no rows and no configured figures, so US5 and SC-007/SC-008 cannot be driven against a live store; the list-side parts (SC-003 card shape, SC-009 control present) were observed read-only and recorded",
       "step": "implement"
+    },
+    {
+      "note": "T116 blocked: choosing any Category tile in the New Request wizard kills the process with 0xC000027B (stowed exception) within 2s; reproduced deterministically for Pickup and Other on 100-12, while the Setup wizard and Settings are unaffected. Cause: NewRequestItemPage (new file added by this feature) is the only navigable page with a constructor parameter, so Frame.Navigate cannot activate it; every other page has a parameterless constructor and resolves its view model with App.GetService. No test guards page activation, so the 967-test suite stays green. A request therefore cannot be raised at all - SC-001 cannot be demonstrated.",
+      "step": "implement"
+    },
+    {
+      "note": "SC-003 all nineteen Items in scope and SC-004 all eight job configurations were not driven end to end in the running app; they are covered only as far as the seeded data reaches plus the suite configuration matrix"
+    },
+    {
+      "note": "The local settings file still carries the retired Feature.InforVisualMockData and Feature.RecvMockData keys; they are inert data outside code, database and docs, so the retired-symbol audit does not reach them"
+    },
+    {
+      "note": "The New Request Preview and Summary pages carry hardcoded English literals from commit 0bd33f6, before this feature; only the label this run changed is localized, so a page-level localization sweep is outstanding"
     }
   ],
-  "currentTask": "T114",
+  "currentTask": "T117",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2535,6 +2600,48 @@
       "files": [
         "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
       ]
+    },
+    "T115": {
+      "status": "DONE",
+      "did": "Applied the feature's 13 shipped artifacts to the live local mtm_waitlist in shipped order, reversed all 13, re-applied: all clean; 23 item-config rows, 3 new procs answer the documented shapes, 4 seeds loaded, master lists and descriptions agree (DDL byte-identical)",
+      "files": [
+        "Database/Tables/17_config_images_locations/{create",
+        "rollback}.sql",
+        "Database/Tables/18_waitlist_requests_queue/{create",
+        "rollback}.sql",
+        "Database/Tables/31_waitlist_request_item_configs/{create",
+        "rollback}.sql",
+        "Database/StoredProcedures/sp_waitlist_request_{get",
+        "insert",
+        "list}/{create",
+        "rollback}.sql",
+        "Database/StoredProcedures/sp_waitlist_request_item_{configs_get",
+        "allotted_minutes_update",
+        "observed_average_get}/{create",
+        "rollback}.sql",
+        "Database/Seeds/{seed_waitlist_requests_default",
+        "seed_waitlist_request_item_configs",
+        "seed_waitlist_request_item_images",
+        "seed_setup_active_jobs_eight_configurations}/{create",
+        "rollback}.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T116": {
+      "status": "DONE",
+      "did": "Scripted UI verification: raised two requests end to end on 100-12 (Pickup/Die with a detail, Pickup/Riser Table without) and confirmed both stored (queue ids 19 and 20); 13 cards with identical anatomy across 12 Items and all four Categories; no type/subtype wording on any screen. Found and fixed a second defect live: the Preview step still labelled the Item as 'Request Type'",
+      "files": [
+        "Module_Waitlist/Views/NewRequestPreviewPage.xaml",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T117": {
+      "status": "DONE",
+      "did": "Walked SC-001 to SC-012 against observed evidence: SC-001 and SC-002 closed live (two stored requests; no type/subtype wording on any screen after the Preview label fix), SC-003 on 13 cards / 12 Items / all four Categories, SC-004 on the real-path 100-12 configuration plus the suite's eight-configuration matrix, SC-005-SC-012 on the build/test gates and the live list, minutes, picture and Setup screens. SC-003's 'all nineteen Items' and SC-004's 'all eight configurations' remain covered only as far as the data and the suite reach; recorded, not asserted",
+      "files": [
+        "specs/004-unified-card-item-picker/spec.md",
+        "specs/004-unified-card-item-picker/contracts/verification-gates.md"
+      ]
     }
   },
   "verified": [
@@ -2678,6 +2785,96 @@
       "command": "UIA button and list-item dump of the live shell",
       "result": "buttons Sort by, Show only my requests, Accept request, Cancel request, Add Waitlist Item; nav list items Waitlist, Work Center Setup, Settings",
       "warnings": []
+    },
+    {
+      "what": "T115 live database validation against the local mtm_waitlist",
+      "command": "Get-Content -Raw <artifact> | mysql -h 127.0.0.1 -P 3306 -u root --protocol=TCP (13 feature artifacts and their 13 paired rollbacks, in shipped order)",
+      "result": "all 13 create files applied cleanly, all 13 rollbacks reversed to 0 tables / 0 procedures, all 13 re-applied; 23 item-config rows, queue re-keyed to category+item, 9 image rows, 7 active-job rows, 6 procedures present, 3 new procedures answer their documented shapes, master lists and description file agree with disk (CREATE TABLE text byte-identical whitespace-normalised)",
+      "warnings": [
+        "the Table/Seed master lists condense long header comments and drop USE mtm_waitlist (pre-existing generator behaviour, identical at the merge base)",
+        "the four retired artifacts keep a rollback-only directory (create.sql deleted); their rollbacks were not run because they are irreversible from the shipped files and the reinstall is the owners action"
+      ]
+    },
+    {
+      "what": "T116 SC-003 uniform card shape in the running app",
+      "command": "PowerShell UIA ControlType.Text dump + tools/capture_app_window.ps1 + tools/ocr_png.ps1 (OCR under Windows PowerShell 5.1)",
+      "result": "11 requests spanning Pickup, Deliver and Other Items rendered the identical card structure (status, Line 1, Line 2, Requested by, Press, Remaining time, Waiting) with no per-Item layout variant; screenshot 02-waitlist-cards.png",
+      "warnings": []
+    },
+    {
+      "what": "T116 SC-009 sort changes the order and survives a restart",
+      "command": "UIA Invoke on the Sort by button then a real click on the Press menu item; graceful close; relaunch same overrides; re-read the card order",
+      "result": "default most-urgent order began 100-7, 100-6, 100-16; after choosing Press it began 100-11, 100-12, 100-14, 100-15; after a graceful close (exit 0) and relaunch the order was still 100-11, 100-12, 100-14, 100-15, 100-16, 100-3",
+      "warnings": [
+        "MenuItem exposes no Invoke pattern, so the option needs a real click"
+      ]
+    },
+    {
+      "what": "T116 US5 minutes screen shows and saves per-Item values",
+      "command": "UIA: expand UrgencyAllotmentsExpander, read the per-Item rows, set the first NumberBox and commit with Enter, then SELECT item, allotted_minutes FROM mtm_waitlist.waitlist_request_item_configs",
+      "result": "row-by-row the screen matched the store (pickup-coil 36 after the edit, pickup-die 45, pickup-component 30, Riser Table 20, Dunnage 30, Scrap 30, Pickup Hopper 20) and the four NULL rows rendered the labelled default; a UI edit persisted pickup-coil 30 -> 36 via sp_waitlist_request_item_allotted_minutes_update and was restored to 30 through the same path; observed column showed 1h 20m for Finished Goods and 50m for Scrap - Offal removal against the procedure values 4800s and 3000s",
+      "warnings": [
+        "NumberBox commits on Enter or focus loss, not on ValuePattern.SetValue alone"
+      ]
+    },
+    {
+      "what": "T116 US5 picture screen shows per-Item pictures",
+      "command": "UIA: expand ImageLocationSettingsExpander -> Manage request item images -> read the dialog; capture tools/capture_app_window.ps1 + ocr_png.ps1",
+      "result": "the Item Images dialog lists every Item under its Category with Inherited for Items that have no picture of their own and a resolved path for the six seeded request_item rows (Assets/RequestTypes/table-handling.png for both table Items), matching the 9 seeded config_images_locations rows; the picture save path was not exercised because its storage root X: is not mapped on this workstation",
+      "warnings": []
+    },
+    {
+      "what": "T116 real Setup walk on work centre 100-12 then the picker filter",
+      "command": "UIA: Setup -> 100-12 -> WO-072701 -> operation 19 -> scrap Galvanized Steel -> Confirm; SELECT from setup_active_jobs; then New Request -> 100-12",
+      "result": "Result step reported Setup was saved successfully; setup_active_jobs gained row 22 WO-072701 / 777514 / 19 / 100-12 with one Die subordinate FGT1088-01; the picker then accepted 100-12 and its Category step offered Pickup 4, Deliver 3, Assist 2, Other 1 with the note No coil is loaded on this job",
+      "warnings": [
+        "the coil at location WC is excluded by the ignored-locations default set"
+      ]
+    },
+    {
+      "what": "SC-001: a request is raised end to end by choosing a Category and an Item",
+      "command": "PowerShell UI Automation: Add Waitlist Item then 100-12 then Pickup then Die then Die Shop then Preview then Confirm then Submit; then a SELECT on mtm_waitlist.waitlist_requests_queue",
+      "result": "The Result step read Request completed / Request submitted; queue id 19 stored as 100-12 / Pickup / pickup-die / Die Shop / Pending with a 45-minute target. A second pass with no detail item (Riser Table) stored id 20 with a 20-minute target",
+      "warnings": [
+        "The Infor Visual unreachable banner is expected on this workstation; the cached external read is the recorded fallback"
+      ]
+    },
+    {
+      "what": "SC-002: no screen refers to a request type or a subtype",
+      "command": "UI Automation text dumps of the New Request step strip, the Waitlist, Settings (Max Allotted Time and Item Images) and Work Center Setup",
+      "result": "The step strip reads Work Center, Category, Item, Details, Preview, Confirm, Complete and no dumped screen carries type or subtype wording (only Dunnage Type Visibility, which is dunnage). The Preview step was showing the Item under the retired label Request Type; fixed and re-verified live as Item",
+      "warnings": []
+    },
+    {
+      "what": "SC-003 card anatomy and SC-004 availability filter observed live",
+      "command": "UI Automation card dump of the Waitlist plus SELECTs on setup_active_jobs and waitlist_request_item_configs",
+      "result": "13 cards with identical anatomy across 12 distinct Items and all four Categories. Work centre 100-12 offered No coil is loaded on this job plus Pickup 4 / Deliver 3 / Assist 2 / Other 1, and its Pickup Item step offered exactly Die, Riser Table, Scrap or Offal removal and Pickup Hopper. setup_active_jobs holds the seven seeded configurations plus the row the earlier real Setup walk wrote (100-12 / WO-072701)",
+      "warnings": [
+        "SC-003s all nineteen Items and SC-004s all eight configurations were not exhausted by a live drive; they are covered as far as the seeded data and the suite reach"
+      ]
+    },
+    {
+      "what": "Build and suite gates after the page-activation fix, the regression audit and the Preview label fix",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false and dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "0 Warning(s) 0 Error(s); Passed 969, Failed 0, Skipped 26, Total 995 - up from 967 by the two new audit tests",
+      "warnings": [
+        "StartupCoordinatorTests.RunAsync_WhenDatabaseConnectionStringIsMalformed_ReturnsBlockedAsync fails while the shell exports MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING, because that override supersedes the malformed value the test injects; run the gate with the overrides cleared, then export them for the UI run"
+      ]
+    },
+    {
+      "what": "The new page-activation audit fails against the pre-fix page",
+      "command": "git stash push on NewRequestItemPage.xaml.cs then dotnet test --filter FullyQualifiedName~PageActivationAuditTests",
+      "result": "Failed 1, Passed 1, naming NewRequestItemPage.xaml.cs and the missing public parameterless constructor; both pass once the fix is restored"
+    },
+    {
+      "what": "The app closes with no orphan process after the verification run",
+      "command": "Stop-Process MTM_Waitlist then a Get-Process count",
+      "result": "orphans=0"
+    },
+    {
+      "what": "The fix is in the artifact that was driven",
+      "command": "Get-Item on bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe",
+      "result": "LastWriteTime 6:05:43 PM on 2026-09-13, after the final build, and the wizard reached the Preview step on that build"
     }
   ]
 }

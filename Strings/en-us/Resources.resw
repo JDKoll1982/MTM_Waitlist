@@ -879,6 +879,9 @@
   <data name="NewRequest_Item.ContinueButton.Content" xml:space="preserve">
     <value>Continue</value>
   </data>
+  <data name="NewRequest_Preview.ItemLabel.Text" xml:space="preserve">
+    <value>Item</value>
+  </data>
   <data name="RequestItem_Unavailable.Message" xml:space="preserve">
     <value>This item isn't available right now. Its configuration is missing, so a supervisor needs to check it.</value>
   </data>

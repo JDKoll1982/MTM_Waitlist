@@ -11,11 +11,18 @@ namespace MTM_Waitlist.Module_Waitlist.Views;
 /// </summary>
 public sealed partial class NewRequestItemPage : Page
 {
-    public NewRequestItemViewModel ViewModel { get; }
-
-    public NewRequestItemPage(NewRequestItemViewModel viewModel)
+    public NewRequestItemViewModel ViewModel
     {
-        ViewModel = viewModel;
+        get;
+    }
+
+    // Parameterless on purpose: `Frame.Navigate` activates a page through its XAML type, so it has no way to
+    // supply a constructor argument. A parameterised-only constructor throws inside the click handler, the
+    // exception escapes into WinRT and the process dies with STATUS_STOWED_EXCEPTION (0xC000027B) and no log.
+    // Every sibling wizard page resolves its view model the same way.
+    public NewRequestItemPage()
+    {
+        ViewModel = App.GetService<NewRequestItemViewModel>();
         InitializeComponent();
     }
 
