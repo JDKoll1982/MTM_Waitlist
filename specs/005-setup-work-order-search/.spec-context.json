@@ -1,0 +1,116 @@
+{
+  "workflow": "companion",
+  "specName": "setup work order search",
+  "branch": "005-setup-work-order-search",
+  "currentStep": "specify",
+  "status": "specified",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T23:19:48.070Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T23:26:16.333Z"
+    }
+  ],
+  "unattended": true,
+  "telemetryInstanceId": "1b0909ef-751c-48e7-92ff-e89141d5651a",
+  "last_action": "living specs evaluated — no capabilities matched",
+  "coverage": {
+    "FR-001": {
+      "title": "A partial work order offers its matches in a modal"
+    },
+    "FR-002": {
+      "title": "The modal appears only when the entry is not a complete resolvable work order"
+    },
+    "FR-003": {
+      "title": "A complete work order is formatted and used directly with no modal"
+    },
+    "FR-004": {
+      "title": "The accepted input forms and the formatting rule are unchanged"
+    },
+    "FR-005": {
+      "title": "A partial becomes the prefix plus a trailing wildcard"
+    },
+    "FR-006": {
+      "title": "A partial is never padded to six digits"
+    },
+    "FR-007": {
+      "title": "Matches are shown recognisably with enough context to choose"
+    },
+    "FR-008": {
+      "title": "Choosing a match sets the entry and continues the flow"
+    },
+    "FR-009": {
+      "title": "Dismissing leaves the entry and flow unchanged and does not trap"
+    },
+    "FR-010": {
+      "title": "No matches is reported plainly with a way to retry"
+    },
+    "FR-011": {
+      "title": "An unshowable result stays usable and states how many matched"
+    },
+    "FR-012": {
+      "title": "One shared capability holds the matching; the entry step holds none"
+    },
+    "FR-013": {
+      "title": "The capability takes a caller-described source and knows nothing of work orders"
+    },
+    "FR-014": {
+      "title": "A new searchable source is additive and needs no change to the capability"
+    },
+    "FR-015": {
+      "title": "An unknown source is reported unavailable never silently empty"
+    },
+    "FR-016": {
+      "title": "Trigger pattern and match count are the caller to state"
+    },
+    "FR-017": {
+      "title": "Matching is case-insensitive and tolerates the separators typed"
+    },
+    "FR-018": {
+      "title": "Stored-procedure-first with no run-time-assembled statement text"
+    },
+    "FR-019": {
+      "title": "External search keeps the cached fallback and an empty result is a real answer"
+    },
+    "FR-020": {
+      "title": "Every schema artifact ships its rollback and the master lists stay in sync"
+    },
+    "FR-021": {
+      "title": "Every user-visible string comes through the resource mechanism"
+    },
+    "FR-022": {
+      "title": "The existing rejection for an impossible entry is preserved"
+    }
+  },
+  "intent": "Let a person find a work order by typing only part of it, through one shared picker that any screen can point at its own list.",
+  "context": [
+    "area: Module_Setup/Views/SetupWorkOrderPage.xaml + MTM_Waitlist.Setup/ViewModels/SetupWorkOrderViewModel.cs - the entry step and its existing LostFocus on-blur search",
+    "area: MTM_Waitlist.Setup/Services/WorkOrderValidationService.cs - the normalisation rule this builds on (^(?:WO-)?(\\d{5,6})$, padded to six)",
+    "area: MTM_Waitlist.Setup/Services/SetupWorkflowService.cs - existing Levenshtein best-match helper, candidate for reuse",
+    "area: MTM_Waitlist.Mock read-shape fallback + Database/Mock - the boundary for searching a list outside our own stores",
+    "constraint: constitution III stored-procedure-first; no inline or run-time-assembled statement text"
+  ],
+  "expectations": [
+    "out of scope: the picker ships one caller - a second caller is follow-on work",
+    "not changing: the existing work order formatting rule and accepted input forms",
+    "not in scope: a second source of truth for what a work order is",
+    "out of scope: contains-anywhere matching as the default - prefix is the chosen reading",
+    "owner action, not the agent: reinstalling the database from seed"
+  ],
+  "classification": {
+    "projectedFiles": 34,
+    "projectedTasks": 45,
+    "scopeSignal": "normal",
+    "verdict": "normal"
+  },
+  "size": "normal"
+}
