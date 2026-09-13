@@ -819,23 +819,23 @@ Cross-cutting retirement, documentation, and validation against the Success Crit
 
 ### Wave 1 — the retired database artifacts, independent (different files)
 
-- [ ] **T101** [P] Retire `Database/Tables/28_waitlist_request_types/{create,rollback}.sql` and
+- [x] **T101** [P] Retire `Database/Tables/28_waitlist_request_types/{create,rollback}.sql` and
   `Database/Tables/29_waitlist_request_subtypes/{create,rollback}.sql` (FR-023), consuming the mapping at design time
   — by now the seed authored in T007 has already taken everything those two tables' populated `category` / `item_id`
   columns carried, so nothing at runtime reads them. ·
   `Database/Tables/AllTables.sql` (entries removed with T104)
-- [ ] **T102** [P] Retire the two type/subtype read procedures
+- [x] **T102** [P] Retire the two type/subtype read procedures
   `Database/StoredProcedures/sp_waitlist_request_types_get/{create,rollback}.sql` and
   `Database/StoredProcedures/sp_waitlist_request_subtypes_get/{create,rollback}.sql` (FR-023). ·
   `Database/StoredProcedures/AllSPs.sql` (entry removed with T104)
-- [ ] **T103** [P] Retire `Database/Seeds/seed_waitlist_request_catalog/{create,rollback}.sql` once its `item_id`
+- [x] **T103** [P] Retire `Database/Seeds/seed_waitlist_request_catalog/{create,rollback}.sql` once its `item_id`
   mapping has been consumed (FR-023). · `Database/Seeds/AllSeeds.sql` (entry removed with T104)
 
 **⟶ Wait for Wave 1 to finish, then:**
 
 ### Wave 2 — the master lists and descriptions agree with the disk (single task; one owner for four files)
 
-- [ ] **T104** Remove the retired artifacts from the master lists and from the mandatory description file, so
+- [x] **T104** Remove the retired artifacts from the master lists and from the mandatory description file, so
   `AllTables.sql`, `AllSPs.sql`, `AllSeeds.sql` and the descriptions agree with the files on disk (FR-025,
   constitution III, database-schema rules). Nothing may be added here — T016 already added this feature's artifacts. ·
   `Database/Tables/AllTables.sql`, `Database/StoredProcedures/AllSPs.sql`, `Database/Seeds/AllSeeds.sql`,

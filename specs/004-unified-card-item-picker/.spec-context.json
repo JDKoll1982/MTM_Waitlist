@@ -874,6 +874,38 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-13T22:05:06.346Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T101",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:05:44.962Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T102",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:05:45.199Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T103",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:05:45.466Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T104",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:08:30.148Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
@@ -1370,6 +1402,11 @@
       "decision": "The configuration read returns declared fields ordered by the payload order value, and an unreadable detail_fields_json or options_json makes the Item unavailable with its own plain-language report",
       "why": "The declared order is the order the configuration carries, and a payload that cannot be read must not be half-applied or presented as usable (FR-013, FR-026)",
       "rejected": "Returning payload array order and letting each consumer sort; returning an empty field list on a malformed payload"
+    },
+    {
+      "decision": "Retired schema artifacts keep their rollback.sql and lose only create.sql, matching the feature-001 mock-family precedent already on disk",
+      "why": "the mandatory description file records that retired objects are dropped via Database/<kind>/<name>/rollback.sql, so removing the drop statement would leave a DBA nothing to promote",
+      "rejected": "deleting both create.sql and rollback.sql, which would leave seven sibling retired directories inconsistent with the two new ones"
     }
   ],
   "step_summaries": {
@@ -1444,9 +1481,13 @@
     {
       "note": "The shell sort control runtime behaviour could not be exercised in the running app: the configured store host is unreachable from this workstation and no signed-in session was available. It is verified by the XAML compiling, by the view-model tests, and by the handlers following the existing My Requests toggle pattern; the menu open and click paths remain unverified on screen.",
       "step": "implement"
+    },
+    {
+      "note": "Pre-existing master-list drift unrelated to this feature: three table dirs (core_workstations_registry, config_workstation_hot_workcenters, setup_workstations_catalog) and six procedure dirs (sp_*_workstation* / sp_setup_workstations_*) ship create.sql but no master-list entry; the workstation-named twins of the work-center artifacts disagree with the master lists. master-not-on-disk is empty, so nothing dangles",
+      "step": "implement"
     }
   ],
-  "currentTask": "T100",
+  "currentTask": "T104",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2235,6 +2276,40 @@
         "MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs",
         "MTM_Waitlist.Tests/Module_Settings/SettingsPageMarkupTests.cs",
         "MTM_Waitlist.Tests/Module_Settings/ImageOverrideDialogViewModelTests.cs"
+      ]
+    },
+    "T101": {
+      "status": "DONE",
+      "did": "Retired the two catalog tables: create.sql removed for 28_waitlist_request_types and 29_waitlist_request_subtypes, each rollback.sql kept as the drop artifact a DBA promotes",
+      "files": [
+        "Database/Tables/28_waitlist_request_types/create.sql",
+        "Database/Tables/29_waitlist_request_subtypes/create.sql"
+      ]
+    },
+    "T102": {
+      "status": "DONE",
+      "did": "Retired the two type/subtype read procedures: create.sql removed for sp_waitlist_request_types_get and sp_waitlist_request_subtypes_get, rollback.sql kept as the drop artifact; neither has a runtime reader left after US5",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_types_get/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_subtypes_get/create.sql"
+      ]
+    },
+    "T103": {
+      "status": "DONE",
+      "did": "Retired the seed_waitlist_request_catalog seed in full, plus the dead migrate_subtypes.sql beside the default seed whose request_type and subtype columns stopped existing at T010, so no seeded artifact writes the retired vocabulary",
+      "files": [
+        "Database/Seeds/seed_waitlist_request_catalog",
+        "Database/Seeds/seed_waitlist_requests_default/migrate_subtypes.sql"
+      ]
+    },
+    "T104": {
+      "status": "DONE",
+      "did": "Removed the retired type/subtype objects from AllTables.sql, AllSPs.sql and AllSeeds.sql, dropped their descriptions from the mandatory description file and recorded the retirement there; verified master-not-on-disk is empty for both and no retired name survives in any master list",
+      "files": [
+        "Database/Tables/AllTables.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "Database/Seeds/AllSeeds.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
       ]
     }
   },

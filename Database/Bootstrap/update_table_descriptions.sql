@@ -378,47 +378,6 @@ MODIFY COLUMN actor_employee_name VARCHAR(128) NULL COMMENT 'Display name of the
 MODIFY COLUMN details VARCHAR(255) NULL COMMENT 'Free-text detail (e.g. cancellation reason).',
 MODIFY COLUMN occurred_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the event occurred.';
 
-ALTER TABLE waitlist_request_types COMMENT = 'Real (non-mock) request-type catalog that drives the New-Request wizard (Pickup, Other, Coil, Scrap, Flatstock, Table Handling, Die Handling, Forklift Assist).';
-
-ALTER TABLE waitlist_request_types
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Stable request-type GUID (waitlist-request-types.json id / RequestTypeInventory.StableId).',
-MODIFY COLUMN request_type VARCHAR(64) NOT NULL COMMENT 'Request type display name.',
-MODIFY COLUMN control VARCHAR(255) NOT NULL COMMENT 'WinUI control full type name rendered for this request type.',
-MODIFY COLUMN flow VARCHAR(64) NOT NULL DEFAULT 'direct-to-confirmation' COMMENT 'Wizard flow for the request type.',
-MODIFY COLUMN requires_text_input TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether the request type requires a free-text input step.',
-MODIFY COLUMN prompt_text VARCHAR(500) NULL COMMENT 'Prompt shown for the required text input.',
-MODIFY COLUMN min_length INT NOT NULL DEFAULT 0 COMMENT 'Minimum text-input length.',
-MODIFY COLUMN max_length INT NOT NULL DEFAULT 200 COMMENT 'Maximum text-input length.',
-MODIFY COLUMN default_image_path VARCHAR(500) NULL COMMENT 'Optional image path from JSON imagePath.',
-MODIFY COLUMN category VARCHAR(16) NULL COMMENT 'Canonical umbrella category (Pickup/Deliver/Assist/Other) this legacy type maps onto when it is a leaf (no subtypes); NULL for grouping types.',
-MODIFY COLUMN item_id VARCHAR(64) NULL COMMENT 'Canonical item id (Request-Config-Template.csv col 3) this legacy type maps onto when it is a leaf (no subtypes); NULL for grouping types.',
-MODIFY COLUMN center_data_grid_fields_json JSON NULL COMMENT 'Ordered center data-grid column labels.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the request type is offered in the wizard.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
-
-ALTER TABLE waitlist_request_subtypes COMMENT = 'Real (non-mock) request-subtype/action catalog that drives the New-Request wizard.';
-
-ALTER TABLE waitlist_request_subtypes
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Stable subtype GUID (waitlist-request-types.json id / RequestSubtypeInventory.StableId).',
-MODIFY COLUMN request_type_id BIGINT NOT NULL COMMENT 'Owning request type (waitlist_request_types.id).',
-MODIFY COLUMN subtype_name VARCHAR(128) NOT NULL COMMENT 'Subtype/action display name.',
-MODIFY COLUMN control VARCHAR(255) NOT NULL COMMENT 'WinUI control full type name rendered for this subtype.',
-MODIFY COLUMN flow VARCHAR(64) NOT NULL DEFAULT 'direct-to-confirmation' COMMENT 'Wizard flow for the subtype.',
-MODIFY COLUMN requires_text_input TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether the subtype requires a free-text input step.',
-MODIFY COLUMN prompt_text VARCHAR(500) NULL COMMENT 'Prompt shown for the required text input.',
-MODIFY COLUMN min_length INT NOT NULL DEFAULT 0 COMMENT 'Minimum text-input length.',
-MODIFY COLUMN max_length INT NOT NULL DEFAULT 200 COMMENT 'Maximum text-input length.',
-MODIFY COLUMN default_image_path VARCHAR(500) NULL COMMENT 'Optional image path from JSON imagePath.',
-MODIFY COLUMN category VARCHAR(16) NULL COMMENT 'Canonical umbrella category (Pickup/Deliver/Assist/Other) this legacy subtype maps onto (leaf row).',
-MODIFY COLUMN item_id VARCHAR(64) NULL COMMENT 'Canonical item id (Request-Config-Template.csv col 3) this legacy subtype maps onto (leaf row).',
-MODIFY COLUMN center_data_grid_fields_json JSON NULL COMMENT 'Ordered center data-grid column labels.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the subtype is offered in the wizard.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
-
 ALTER TABLE waitlist_defect_types COMMENT = 'Managed list of non-conforming (NCM) defect types referenced by Pickup NCM requests (edited from Module_Settings).';
 
 ALTER TABLE waitlist_defect_types
@@ -464,3 +423,19 @@ MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the conf
 --     mock_requesters, mock_inventory_locations, mock_request_types
 --   Stored procedures (drop via Database/StoredProcedures/sp_mock_*/rollback.sql): the 33 sp_mock_* procedures
 --   Seed: seed_mock_master_default (artifact removed with the tables it populated)
+
+-- ============================================================
+-- Retired objects - feature 004-unified-card-item-picker (FR-023)
+-- ============================================================
+-- A request carries a Category and an Item, and no longer a request type or a subtype (FR-004/FR-016/FR-023).
+-- The type/subtype catalog is retired in full: these objects are no longer created by an artifact in this
+-- tree and no longer carry descriptions here. The matching rollback artifacts remain, so a DBA can promote
+-- the removal, and the mapping the two tables carried was consumed at design time into
+-- waitlist_request_item_configs before they were removed (their populated category / item_id columns):
+--   Tables (drop via Database/Tables/<name>/rollback.sql):
+--     waitlist_request_types, waitlist_request_subtypes
+--   Stored procedures (drop via Database/StoredProcedures/<name>/rollback.sql):
+--     sp_waitlist_request_types_get, sp_waitlist_request_subtypes_get
+--   Seed: seed_waitlist_request_catalog (artifact removed with the tables it populated), together with the
+--     dead Database/Seeds/seed_waitlist_requests_default/migrate_subtypes.sql whose request_type / subtype
+--     columns stopped existing when waitlist_requests_queue was re-keyed.
