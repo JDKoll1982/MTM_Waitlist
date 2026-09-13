@@ -136,9 +136,11 @@ flowchart TD
 
 A scrap decision counts as **recorded** only when the stored value is a real type: set, not `No Scrap`, and not the
 `Scrap Type Required` placeholder. That placeholder is the workflow's fallback whenever nothing has been saved or a
-suggestion finds no match, so a stored placeholder means **no decision was made** — not "no scrap". The codebase's
-canonical test is `HasScrapDecision` in `SetupDunnageTypeViewModel`; it excludes the placeholder and treats
-`No Scrap` as an explicit, valid decision.
+suggestion finds no match, so a stored placeholder means **no decision was made** — not "no scrap". The
+codebase's `HasScrapDecision` in `SetupDunnageTypeViewModel` is a **different** question: it asks whether the
+operator has decided at all, and it returns **true** for `No Scrap`. It is necessary but **not** sufficient — this
+rule is `HasScrapDecision` **and** the value is not `No Scrap`. It also cannot be reached from
+`MTM_Waitlist.Settings`, where the picker rules live and which holds no reference to `MTM_Waitlist.Setup`.
 
 `No Scrap` is therefore a real answer rather than an absence: a job that chose it has no scrap to collect, so the
 Item is not offered. Otherwise Line 2 carries the job's scrap type.

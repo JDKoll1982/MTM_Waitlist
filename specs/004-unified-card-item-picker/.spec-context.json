@@ -2,8 +2,8 @@
   "workflow": "companion",
   "specName": "unified card item picker",
   "branch": "004-unified-card-item-picker",
-  "currentStep": "plan",
-  "status": "planned",
+  "currentStep": "tasks",
+  "status": "ready-to-implement",
   "history": [
     {
       "step": "specify",
@@ -46,106 +46,358 @@
       "kind": "complete",
       "by": "extension",
       "at": "2026-09-13T17:48:42.994Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T17:49:28.882Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T17:54:08.458Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T17:55:23.812Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
   "last_action": "living specs evaluated — no capabilities matched",
   "coverage": {
     "FR-001": {
-      "title": "A person raising a request chooses a Category and then an Item, in that order"
+      "title": "A person raising a request MUST choose a Category, and then an Item, in that order.",
+      "tasks": [
+        "T030",
+        "T038",
+        "T040",
+        "T041",
+        "T043",
+        "T044"
+      ]
     },
     "FR-002": {
-      "title": "The Item step offers what the job supports plus the job-independent Items, and is never empty"
+      "title": "The Item step MUST offer the Items the requesting job supports plus the job-independent Items and MUST never be empty; unsupported Items MUST NOT appear at all, because the check runs before the choice.",
+      "tasks": [
+        "T028",
+        "T029",
+        "T030",
+        "T033",
+        "T034",
+        "T038",
+        "T039"
+      ]
     },
     "FR-003": {
-      "title": "No screen offers a request type or subtype, and the type and subtype steps are gone"
+      "title": "No screen may offer a request type or a subtype, and the wizard type and subtype steps MUST be gone.",
+      "tasks": [
+        "T038",
+        "T049",
+        "T050",
+        "T051",
+        "T052"
+      ]
     },
     "FR-004": {
-      "title": "A stored request carries its Category and Item and carries no request type or subtype"
+      "title": "A stored request MUST carry the chosen Category and Item, and MUST NOT carry a request type or a subtype.",
+      "tasks": [
+        "T010",
+        "T011",
+        "T012",
+        "T013",
+        "T015",
+        "T048"
+      ]
     },
     "FR-005": {
-      "title": "Every request is one card: the Item's umbrella phrase first, its identifier second, which may depend on a captured answer"
+      "title": "Every request renders as one card whose first line is the Item umbrella phrase and whose second line is the Item identifier.",
+      "tasks": [
+        "T017",
+        "T018",
+        "T026",
+        "T056",
+        "T061",
+        "T062",
+        "T064"
+      ]
     },
     "FR-006": {
-      "title": "One card layout for every Item; no layout variant is selected by Item"
+      "title": "The card MUST use one layout for every Item; no layout variant may be selected by Item.",
+      "tasks": [
+        "T057",
+        "T060",
+        "T064",
+        "T065",
+        "T068",
+        "T070"
+      ]
     },
     "FR-007": {
-      "title": "An Item's own fields appear on the request page and never on the card"
+      "title": "An Item own fields MUST appear on the request page and MUST NOT appear on the card.",
+      "tasks": [
+        "T060",
+        "T064",
+        "T070",
+        "T086"
+      ]
     },
     "FR-008": {
-      "title": "The card keeps its four metadata rows: who asked, work centre, time remaining, waiting age"
+      "title": "The card MUST keep the four metadata rows: who asked, the work centre, the time remaining, and how long it has waited.",
+      "tasks": [
+        "T057",
+        "T060",
+        "T062",
+        "T064"
+      ]
     },
     "FR-009": {
-      "title": "A card shows the Item's picture, falling back to the Category, and never a placeholder over a real image"
+      "title": "A card picture MUST be the Item picture, falling back to the Category picture only when the Item has none; a placeholder MUST NOT replace a resolved picture.",
+      "tasks": [
+        "T008",
+        "T058",
+        "T059",
+        "T063"
+      ]
     },
     "FR-010": {
-      "title": "The list defaults to most-urgent-first"
+      "title": "The list MUST default to most-urgent-first.",
+      "tasks": [
+        "T072",
+        "T073",
+        "T076",
+        "T077",
+        "T078"
+      ]
     },
     "FR-011": {
-      "title": "A viewer can change the sort from a shell control and their choice is remembered for them"
+      "title": "A viewer MUST be able to change the sort from a control beside the existing shell controls, and the choice MUST be remembered.",
+      "tasks": [
+        "T074",
+        "T079",
+        "T080",
+        "T081"
+      ]
     },
     "FR-012": {
-      "title": "Overdue requests stay visibly marked as overdue whatever the sort"
+      "title": "Overdue requests MUST remain visibly marked as overdue whatever the sort.",
+      "tasks": [
+        "T057",
+        "T062",
+        "T072",
+        "T074",
+        "T078"
+      ]
     },
     "FR-013": {
-      "title": "An Item's behaviour comes from stored configuration, not compiled-in code"
+      "title": "An Item behaviour MUST come from stored configuration rather than from compiled-in code.",
+      "tasks": [
+        "T005",
+        "T019",
+        "T025",
+        "T045",
+        "T083",
+        "T085",
+        "T086"
+      ]
     },
     "FR-014": {
-      "title": "Every Item has a configuration row; a missing row is reported as unavailable"
+      "title": "Every Item MUST have a configuration row, and an Item with no row MUST be reported as unavailable rather than half-configured.",
+      "tasks": [
+        "T004",
+        "T007",
+        "T025",
+        "T035",
+        "T041",
+        "T083"
+      ]
     },
     "FR-015": {
-      "title": "An Item's configuration can change without a code change or a rebuild"
+      "title": "An Item configuration MUST be changeable without a code change and without a rebuild.",
+      "tasks": [
+        "T083",
+        "T085",
+        "T087"
+      ]
     },
     "FR-016": {
-      "title": "A request's deadline derives from its Item's allotted minutes, not from a type or subtype"
+      "title": "A request deadline MUST be derived from its Item allotted minutes, never from a type or subtype.",
+      "tasks": [
+        "T090",
+        "T094"
+      ]
     },
     "FR-017": {
-      "title": "An Item with no configured minutes uses a 15-minute default, labelled as a default"
+      "title": "An Item with no configured minutes MUST use a 15-minute default, labelled as a default.",
+      "tasks": [
+        "T021",
+        "T027",
+        "T090",
+        "T095"
+      ]
     },
     "FR-018": {
-      "title": "The minutes screen shows each configured value beside the average the Item actually took"
+      "title": "The minutes screen MUST show, per Item, its configured minutes and the average its completed requests actually took, as visibly distinct values.",
+      "tasks": [
+        "T088",
+        "T095"
+      ]
     },
     "FR-019": {
-      "title": "The average counts completed requests only, acceptance to completion, with a released-then-completed request contributing once"
+      "title": "The average MUST count only completed requests from acceptance to completion, a released-then-completed request contributing exactly once.",
+      "tasks": [
+        "T014",
+        "T027",
+        "T091"
+      ]
     },
     "FR-020": {
-      "title": "Both configuration screens reuse the existing role gate and introduce no new one"
+      "title": "Both configuration screens MUST reuse the role gate that already governs them and MUST NOT introduce a new one.",
+      "tasks": [
+        "T088",
+        "T089",
+        "T095",
+        "T098",
+        "T100"
+      ]
     },
     "FR-021": {
-      "title": "An Item's picture is configurable per Item; nothing configured never replaces a resolved image"
+      "title": "An Item picture MUST be configurable per Item, and a nothing-configured answer MUST NOT replace a resolved image.",
+      "tasks": [
+        "T058",
+        "T063",
+        "T089",
+        "T096"
+      ]
     },
     "FR-022": {
-      "title": "Every user-visible string comes from the existing resource mechanism"
+      "title": "Every user-visible string introduced or changed MUST come from the existing resource mechanism.",
+      "tasks": [
+        "T017",
+        "T018",
+        "T053",
+        "T071",
+        "T082",
+        "T099"
+      ]
     },
     "FR-023": {
-      "title": "The request type and subtype vocabulary is removed and the schema master lists stay in sync"
+      "title": "The request type and subtype vocabulary, its catalogs, seed, read procedure and the services named for it MUST be removed, and the schema master lists kept in sync.",
+      "tasks": [
+        "T101",
+        "T102",
+        "T103",
+        "T104",
+        "T105",
+        "T106",
+        "T107",
+        "T110"
+      ]
     },
     "FR-024": {
-      "title": "Every data operation goes through a stored procedure, with no inline statement text"
+      "title": "Every data operation MUST go through a stored procedure; no inline statement text may be introduced.",
+      "tasks": [
+        "T005",
+        "T006",
+        "T007",
+        "T011",
+        "T012",
+        "T013",
+        "T014",
+        "T025",
+        "T027",
+        "T093"
+      ]
     },
     "FR-025": {
-      "title": "Every schema artifact ships its matching rollback and the schema master lists stay in sync"
+      "title": "Every schema artifact added, changed or removed MUST ship with its matching rollback, and the master lists kept in sync.",
+      "tasks": [
+        "T004",
+        "T005",
+        "T006",
+        "T007",
+        "T008",
+        "T009",
+        "T010",
+        "T011",
+        "T012",
+        "T013",
+        "T014",
+        "T015",
+        "T016",
+        "T101",
+        "T102",
+        "T103",
+        "T104"
+      ]
     },
     "FR-026": {
-      "title": "An unavailable Item, refused action or failed read is reported in plain language, never silently"
+      "title": "An unavailable Item, a refused action or a failed read MUST be reported in plain actionable language; nothing may fail silently.",
+      "tasks": [
+        "T025",
+        "T026",
+        "T041",
+        "T065",
+        "T083",
+        "T085",
+        "T091"
+      ]
     },
     "FR-027": {
-      "title": "Per-Item field definitions come solely from the configuration spreadsheet, which the application never reads or ships"
+      "title": "The per-Item field definitions MUST come solely from the request-configuration spreadsheet, and the application MUST NOT read, embed or ship it.",
+      "tasks": [
+        "T002",
+        "T007",
+        "T112"
+      ]
     },
     "FR-028": {
-      "title": "The four Items with no value source are not offered until that work lands"
+      "title": "The four Items whose value source does not exist yet MUST NOT be offered until that work lands.",
+      "tasks": [
+        "T007",
+        "T029",
+        "T033"
+      ]
     },
     "FR-029": {
-      "title": "The wrong-material Items read as one Deliver request carrying the correct part on the second line"
+      "title": "The wrong-material Items MUST each read as a single Deliver request whose second line carries the correct material identifier.",
+      "tasks": [
+        "T018",
+        "T056",
+        "T061",
+        "T071"
+      ]
     },
     "FR-030": {
-      "title": "The Scrap Item's value is the job's scrap type and the user is never asked for it"
+      "title": "The Scrap Item value MUST be the scrap type already set on the job; the user MUST NOT be asked to enter it.",
+      "tasks": [
+        "T029",
+        "T045",
+        "T061"
+      ]
     },
     "FR-031": {
-      "title": "Scrap is offered only on a real scrap decision: set, not No Scrap, and not the Scrap Type Required placeholder"
+      "title": "The Scrap Item MUST be offered only when the job has a real scrap decision, not No Scrap and not the Scrap Type Required placeholder.",
+      "tasks": [
+        "T023",
+        "T024",
+        "T029",
+        "T033",
+        "T045"
+      ]
     },
     "FR-032": {
-      "title": "Choosing an Item does not change the request's lifecycle"
+      "title": "Choosing an Item MUST NOT change the request lifecycle: statuses, transitions and who may perform them stay exactly as they are.",
+      "tasks": [
+        "T010",
+        "T114"
+      ]
     }
   },
   "size": "oversized",
@@ -232,6 +484,9 @@
     "plan": {
       "summary": "Full oversized plan: plan.md with the Constitution Check (six principles, no violations), research.md with 21 Phase 0 decisions, data-model.md reshaping the request and adding the Item configuration entity, and four contract documents covering configuration, picker flow, card, and verification gates.",
       "key_finding": "The Category/Item vocabulary is already half-built in code, so this is a re-key onto the store rather than a green field - and the one move that follows from the spec rather than from taste is that the per-Item allotted minutes leave per-Windows-user local settings and become seeded data, because FR-018 must compare the configured value with a history-derived observed average that FR-024 requires to come through a stored procedure."
+    },
+    "tasks": {
+      "summary": "117 tasks across 8 phases (Setup 3, Foundational 29, US1 23, US2 16, US3 11, US4 5, US5 13, Polish 17), laid out as 51 dependency-ordered waves with explicit join points"
     }
   },
   "concerns": [

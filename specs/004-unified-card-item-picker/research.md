@@ -238,14 +238,27 @@ withdraws it, which is the exact defect FR-002 names. *Deleting the four Items f
 ## D12. Scrap availability reads the job's scrap decision through the existing predicate
 
 **Decision.** Offer `pickup-scrap` only when the requesting job carries a *real* scrap decision — a value that is
-set, is not `No Scrap`, and is not the `Scrap Type Required` placeholder — evaluated through the codebase's
-canonical `HasScrapDecision` predicate and the constants in `SetupWorkflowService`.
+set, is not `No Scrap`, and is not the `Scrap Type Required` placeholder — decided by a **single extracted
+predicate** that both the picker and Setup call.
+
+**Correction (2026-09-13, found while generating tasks).** This decision originally said to reuse
+`HasScrapDecision` directly. That was wrong twice over, and both halves matter:
+
+1. **`HasScrapDecision` is not this rule.** It lives on `SetupDunnageTypeViewModel` and answers "has the operator
+   made a decision at all" — it returns **true** for `No Scrap`. Reusing it unchanged would offer a Scrap request
+   for exactly the job FR-031 forbids. The required test is `HasScrapDecision` **and** the value is not `No Scrap`;
+   the existing predicate is necessary but not sufficient.
+2. **It cannot be called from the picker anyway.** `RequestItemPickerRules` lives in `MTM_Waitlist.Settings`, which
+   has no reference to `MTM_Waitlist.Setup`, where the predicate and the constants live.
+
+The resolution, carried as tasks T023/T024/T029: lift the three-way test and the `No Scrap` / `Scrap Type Required`
+constants into `MTM_Waitlist.Core` — the one project both sides already reference — as a static
+`ScrapDecisionRules`; have `HasScrapDecision` delegate to it so Setup keeps a single implementation; and add the
+scrap member to the availability snapshot the picker consumes.
 
 **Rationale.** FR-031 and the Edge Cases both turn on the placeholder being persistable: the workflow falls back to
 `Scrap Type Required` whenever nothing has been saved, so a naive "is it non-empty" test would offer a Scrap request
-for a job where no decision was made. `No Scrap` is a real answer with nothing to collect. The spec names
-`HasScrapDecision` as the canonical predicate, so the plan reuses it instead of re-deriving the three-way test —
-which also means a change to the placeholder constant cannot silently diverge between Setup and New Request.
+for a job where no decision was made. `No Scrap` is a real answer with nothing to collect.
 
 **Alternatives considered.** *A second predicate in the picker rules* — rejected: two implementations of one
 three-way rule will drift. *Reading the scrap value from the request-configuration table* — rejected: the scrap
