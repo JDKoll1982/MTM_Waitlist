@@ -14,7 +14,10 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
-            <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="New Request - Choose Category" />
+            <TextBlock
+                x:Uid="NewRequest_Category.Title"
+                Style="{StaticResource SetupPageTitleStyle}"
+                Text="New Request - Choose Category" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkCenterText, Mode=OneWay}" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.PromptText, Mode=OneWay}" />
             <TextBlock
@@ -94,6 +97,7 @@
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
             <Button
+                x:Uid="NewRequest_Category.BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}" />
         </StackPanel>

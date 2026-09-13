@@ -88,9 +88,6 @@
     <Content Update="Assets\scrap.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="Assets\Config\waitlist-request-types.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Update="Assets\RequestTypes\*.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

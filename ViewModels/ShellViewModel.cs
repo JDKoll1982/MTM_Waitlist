@@ -63,8 +63,8 @@ public partial class ShellViewModel : ObservableRecipient
     private static readonly string[] s_newRequestStepLabelFallbacks =
     {
         "Work Center",
-        "Job Type",
-        "Subtype",
+        "Category",
+        "Item",
         "Details",
         "Preview",
         "Confirm",

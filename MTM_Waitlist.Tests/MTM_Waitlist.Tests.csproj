@@ -22,10 +22,6 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\Assets\Config\waitlist-request-types.json" Link="Assets\Config\waitlist-request-types.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
   <!-- Mirror the app's queue-script content so integration tests can load real scripts from
        AppContext.BaseDirectory\Database\InforVisual\Queues\... (same layout the app produces).
        The Module_Mock population reads are the service's own set-based snapshots and are part of the

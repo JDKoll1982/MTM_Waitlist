@@ -93,6 +93,9 @@ public sealed class RequestItemConfigurationSet
     /// <summary>The resource key of the unavailable report (FR-022).</summary>
     public const string UnavailableMessageKey = "RequestItem_Unavailable.Message";
 
+    /// <summary>The resource key of the report shown when a reachable Item step has nothing to offer (FR-022).</summary>
+    public const string NoItemsMessageKey = "RequestItem_NoneOffered.Message";
+
     /// <summary>
     /// The plain-language unavailable report, resolved through the resource mechanism, with a readable
     /// fallback so the person is never shown a bare resource key.
@@ -104,6 +107,22 @@ public sealed class RequestItemConfigurationSet
         var localized = UnavailableMessageKey.GetLocalized();
         return string.IsNullOrWhiteSpace(localized)
             || string.Equals(localized, UnavailableMessageKey, StringComparison.Ordinal)
+                ? fallback
+                : localized;
+    }
+
+    /// <summary>
+    /// The plain-language report for an Item step that has nothing to offer. The picker's availability pass makes
+    /// this unreachable in practice (FR-002); it exists so an empty step is still reported rather than rendered
+    /// blank, and never as a bare resource key.
+    /// </summary>
+    public static string ResolveNoItemsMessage()
+    {
+        const string fallback =
+            "No item is available for this request right now. A supervisor needs to check the item configuration.";
+        var localized = NoItemsMessageKey.GetLocalized();
+        return string.IsNullOrWhiteSpace(localized)
+            || string.Equals(localized, NoItemsMessageKey, StringComparison.Ordinal)
                 ? fallback
                 : localized;
     }

@@ -56,7 +56,7 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
     public partial string PromptText
     {
         get; set;
-    } = "Choose an item to continue.";
+    } = ResolveItemPrompt();
 
     [ObservableProperty]
     public partial bool IsLoading
@@ -144,6 +144,14 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
                         ? ResolveSummary(configuration)
                         : configuration.UnavailableMessage,
                 });
+            }
+
+            // The availability pass guarantees at least one Item (FR-002). If that guarantee were ever broken
+            // the step says so in plain language rather than rendering an empty grid with no explanation.
+            if (Items.Count == 0)
+            {
+                IsUnavailableVisible = true;
+                UnavailableMessage = RequestItemConfigurationSet.ResolveNoItemsMessage();
             }
 
             StartupDebugLog.Info("NewRequestItem", $"Item step for category '{category}' on work center '{state.WorkCenter}' bound {Items.Count} item(s).");
@@ -267,6 +275,20 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
         var localized = key.GetLocalized();
         return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, key, StringComparison.Ordinal)
             ? item.NormalizedName
+            : localized;
+    }
+
+    /// <summary>The Category step's prompt, resolved through the resource mechanism (FR-022).</summary>
+    public static string ResolveCategoryPrompt() => ResolveMessage("NewRequest_Category.Prompt.Text", "Choose a request category to continue.");
+
+    /// <summary>The Item step's prompt, resolved through the resource mechanism (FR-022).</summary>
+    public static string ResolveItemPrompt() => ResolveMessage("NewRequest_Item.Prompt.Text", "Choose an item to continue.");
+
+    private static string ResolveMessage(string resourceKey, string fallback)
+    {
+        var localized = resourceKey.GetLocalized();
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, resourceKey, StringComparison.Ordinal)
+            ? fallback
             : localized;
     }
 }

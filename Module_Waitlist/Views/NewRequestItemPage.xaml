@@ -14,7 +14,10 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
-            <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="New Request - Choose Item" />
+            <TextBlock
+                x:Uid="NewRequest_Item.Title"
+                Style="{StaticResource SetupPageTitleStyle}"
+                Text="New Request - Choose Item" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkCenterText, Mode=OneWay}" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.CategoryText, Mode=OneWay}" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.PromptText, Mode=OneWay}" />
@@ -85,9 +88,11 @@
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}" Orientation="Horizontal">
             <Button
+                x:Uid="NewRequest_Item.BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}" />
             <Button
+                x:Uid="NewRequest_Item.ContinueButton"
                 Content="Continue"
                 Command="{x:Bind ViewModel.ContinueCommand}" />
         </StackPanel>

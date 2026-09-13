@@ -65,7 +65,7 @@ public partial class NewRequestJobTypeViewModel : ObservableRecipient, INavigati
     public partial string PromptText
     {
         get; set;
-    } = "Choose a request category to continue.";
+    } = NewRequestItemViewModel.ResolveCategoryPrompt();
 
     /// <summary>The Categories this job actually supports, in canonical order.</summary>
     public ObservableCollection<NewRequestPickerTile> Options { get; } = new();

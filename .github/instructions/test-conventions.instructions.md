@@ -23,8 +23,9 @@ external reads are cached).
 - The app project declares `InternalsVisibleTo("MTM_Waitlist.Tests")`, so tests reach `internal` seams directly
 - The project is **deliberately nested inside the repository** so it stays under version control and on the CI
   path: `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`, `UseWinUI=false` with `EnableWindowsTargeting=true`
-- It copies real application content into its own output — `Assets/Config/waitlist-request-types.json` and every
-  `Database/**/Queues/**/*.sql` script — so integration tests load the same artifacts the app ships
+- It copies real application content into its own output — every `Database/**/Queues/**/*.sql` script — so
+  integration tests load the same artifacts the app ships. (The retired `Assets/Config/waitlist-request-types.json`
+  catalog is no longer part of that set: FR-023 retired it with the type/subtype vocabulary.)
 - There is no Node, npm, TypeScript or browser-automation layer in this repository
 
 ## Test code style

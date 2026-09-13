@@ -559,10 +559,10 @@
     <value>Work Center</value>
   </data>
   <data name="NewRequest_Header.Step2" xml:space="preserve">
-    <value>Job Type</value>
+    <value>Category</value>
   </data>
   <data name="NewRequest_Header.Step3" xml:space="preserve">
-    <value>Subtype</value>
+    <value>Item</value>
   </data>
   <data name="NewRequest_Header.Step4" xml:space="preserve">
     <value>Details</value>
@@ -770,5 +770,119 @@
   </data>
   <data name="Store_Unavailable.Retry" xml:space="preserve">
     <value>Try again</value>
+  </data>
+  <!--
+       The Category/Item picker (specs/004-unified-card-item-picker, FR-022). One key per Category, one per
+       catalogued Item's display name, the two step titles and their prompts, the action labels, and the two
+       plain-language reports the Item step can raise. The Item keys follow the catalog's single convention
+       (RequestItemCatalog.DisplayNameResourceKeyFor): RequestItem.<item>.DisplayName.
+  -->
+  <data name="RequestCategory.Pickup.Name" xml:space="preserve">
+    <value>Pickup</value>
+  </data>
+  <data name="RequestCategory.Deliver.Name" xml:space="preserve">
+    <value>Deliver</value>
+  </data>
+  <data name="RequestCategory.Assist.Name" xml:space="preserve">
+    <value>Assist</value>
+  </data>
+  <data name="RequestCategory.Other.Name" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="RequestItem.pickup-coil.DisplayName" xml:space="preserve">
+    <value>Coil or Flatstock</value>
+  </data>
+  <data name="RequestItem.pickup-die.DisplayName" xml:space="preserve">
+    <value>Die</value>
+  </data>
+  <data name="RequestItem.pickup-component.DisplayName" xml:space="preserve">
+    <value>Component</value>
+  </data>
+  <data name="RequestItem.pickup-fg.DisplayName" xml:space="preserve">
+    <value>Finished Goods (FG)</value>
+  </data>
+  <data name="RequestItem.pickup-ncm.DisplayName" xml:space="preserve">
+    <value>Non-Conforming (NCM)</value>
+  </data>
+  <data name="RequestItem.pickup-wip.DisplayName" xml:space="preserve">
+    <value>Work In Process (WIP)</value>
+  </data>
+  <data name="RequestItem.pickup-outside-service.DisplayName" xml:space="preserve">
+    <value>Outside Service</value>
+  </data>
+  <data name="RequestItem.pickup-riser-table.DisplayName" xml:space="preserve">
+    <value>Riser Table</value>
+  </data>
+  <data name="RequestItem.pickup-dunnage.DisplayName" xml:space="preserve">
+    <value>Dunnage</value>
+  </data>
+  <data name="RequestItem.pickup-scrap.DisplayName" xml:space="preserve">
+    <value>Scrap / Offal removal</value>
+  </data>
+  <data name="RequestItem.pickup-hopper.DisplayName" xml:space="preserve">
+    <value>Pickup Hopper (do not return)</value>
+  </data>
+  <data name="RequestItem.deliver-coil.DisplayName" xml:space="preserve">
+    <value>Coil</value>
+  </data>
+  <data name="RequestItem.deliver-riser-table.DisplayName" xml:space="preserve">
+    <value>Riser Table</value>
+  </data>
+  <data name="RequestItem.deliver-hopper.DisplayName" xml:space="preserve">
+    <value>Hopper (scrap)</value>
+  </data>
+  <data name="RequestItem.deliver-flatstock.DisplayName" xml:space="preserve">
+    <value>Flatstock</value>
+  </data>
+  <data name="RequestItem.deliver-die.DisplayName" xml:space="preserve">
+    <value>Die</value>
+  </data>
+  <data name="RequestItem.deliver-dunnage.DisplayName" xml:space="preserve">
+    <value>Dunnage</value>
+  </data>
+  <data name="RequestItem.deliver-wrong-coil.DisplayName" xml:space="preserve">
+    <value>Wrong Coil</value>
+  </data>
+  <data name="RequestItem.deliver-wrong-flatstock.DisplayName" xml:space="preserve">
+    <value>Wrong Flatstock</value>
+  </data>
+  <data name="RequestItem.assist-coil-turn.DisplayName" xml:space="preserve">
+    <value>Coil</value>
+  </data>
+  <data name="RequestItem.assist-table-place.DisplayName" xml:space="preserve">
+    <value>Place Parts on Table</value>
+  </data>
+  <data name="RequestItem.assist-table-remove.DisplayName" xml:space="preserve">
+    <value>Remove Parts from Table</value>
+  </data>
+  <data name="RequestItem.other.DisplayName" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="NewRequest_Category.Title.Text" xml:space="preserve">
+    <value>New Request - Choose Category</value>
+  </data>
+  <data name="NewRequest_Category.Prompt.Text" xml:space="preserve">
+    <value>Choose a request category to continue.</value>
+  </data>
+  <data name="NewRequest_Category.BackButton.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="NewRequest_Item.Title.Text" xml:space="preserve">
+    <value>New Request - Choose Item</value>
+  </data>
+  <data name="NewRequest_Item.Prompt.Text" xml:space="preserve">
+    <value>Choose an item to continue.</value>
+  </data>
+  <data name="NewRequest_Item.BackButton.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="NewRequest_Item.ContinueButton.Content" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="RequestItem_Unavailable.Message" xml:space="preserve">
+    <value>This item isn't available right now. Its configuration is missing, so a supervisor needs to check it.</value>
+  </data>
+  <data name="RequestItem_NoneOffered.Message" xml:space="preserve">
+    <value>No item is available for this request right now. A supervisor needs to check the item configuration.</value>
   </data>
 </root>
