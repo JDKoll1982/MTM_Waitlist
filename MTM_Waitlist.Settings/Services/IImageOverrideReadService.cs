@@ -13,12 +13,12 @@ public interface IImageOverrideReadService
     /// Gets an active override for a specific scope and scope item.
     /// Returns null if not found or inactive; propagates database errors.
     /// </summary>
-    /// <param name="scope">The scope type: request_type, request_subtype, or work_center</param>
+    /// <param name="scope">The scope type: request_item, request_category, or work_center</param>
     /// <param name="scopeItemId">The stable identifier within scope (GUID or numeric string)</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>ImageOverride if found and active; null if not found or inactive; throws on database error</returns>
     /// <exception cref="ArgumentNullException">If scope or scopeItemId is null or empty</exception>
-    /// <exception cref="ArgumentException">If scope is invalid (not request_type, request_subtype, or work_center)</exception>
+    /// <exception cref="ArgumentException">If scope is invalid (not request_item, request_category, or work_center)</exception>
     /// <exception cref="InvalidOperationException">If database query fails</exception>
     Task<ImageOverride?> GetOverrideAsync(string scope, string scopeItemId, CancellationToken cancellationToken = default);
 
@@ -26,7 +26,7 @@ public interface IImageOverrideReadService
     /// Gets all active overrides for a specific scope.
     /// Useful for batch operations and inventory validation.
     /// </summary>
-    /// <param name="scope">The scope type: request_type, request_subtype, or work_center</param>
+    /// <param name="scope">The scope type: request_item, request_category, or work_center</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>Collection of active overrides for this scope; empty list if none found</returns>
     /// <exception cref="ArgumentNullException">If scope is null or empty</exception>

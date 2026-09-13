@@ -10,12 +10,8 @@ public sealed class ImageLocationServiceCascadeTests
 {
     private string _workingDirectory = string.Empty;
     private FakeImageOverrideReadService _overrides = null!;
-    private FakeRequestSubtypeDisplayLabelService _subtypeLabels = null!;
     private FakeMySqlHelperServer _mysql = null!;
     private ImageLocationService _service = null!;
-
-    private static readonly Guid RequestTypeId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-    private static readonly Guid SubtypeId = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
     [TestInitialize]
     public async Task TestInitialize()
@@ -24,13 +20,10 @@ public sealed class ImageLocationServiceCascadeTests
         Directory.CreateDirectory(_workingDirectory);
 
         _overrides = new FakeImageOverrideReadService();
-        _subtypeLabels = new FakeRequestSubtypeDisplayLabelService { ParentRequestTypeId = RequestTypeId };
         _mysql = new FakeMySqlHelperServer();
 
         _service = new ImageLocationService(
             NullLogger<ImageLocationService>.Instance,
-            new FakeRequestTypeDisplayLabelService(),
-            _subtypeLabels,
             _overrides,
             new FakeImageStorageConfigurationResolver { SharedFolderPath = _workingDirectory },
             new FakeWorkCenterCatalogService(),
@@ -55,137 +48,6 @@ public sealed class ImageLocationServiceCascadeTests
         var path = Path.Combine(_workingDirectory, name);
         File.WriteAllText(path, "image");
         return path;
-    }
-
-    [TestMethod]
-    public async Task ResolveRequestTypeImagePathAsync_WithNoOverride_ReturnsTheDefaultAsset()
-    {
-        var resolved = await _service.ResolveRequestTypeImagePathAsync(RequestTypeId.ToString());
-
-        Assert.AreEqual(ImageLocationDefaults.RequestTypeDefaultPath, resolved);
-    }
-
-    [TestMethod]
-    public async Task ResolveRequestTypeImagePathAsync_WithOverride_ReturnsTheOverridePath()
-    {
-        var overridePath = CreateImageFile("request-type-override.png");
-        _overrides.AddOverride("request_type", RequestTypeId.ToString(), overridePath);
-
-        var resolved = await _service.ResolveRequestTypeImagePathAsync(RequestTypeId.ToString());
-
-        Assert.AreEqual(overridePath, resolved);
-    }
-
-    [TestMethod]
-    public async Task ResolveRequestTypeImagePathAsync_WhenOverrideFileIsMissing_FallsBackToTheDefaultAsset()
-    {
-        _overrides.AddOverride("request_type", RequestTypeId.ToString(), Path.Combine(_workingDirectory, "deleted.png"));
-
-        var resolved = await _service.ResolveRequestTypeImagePathAsync(RequestTypeId.ToString());
-
-        Assert.AreEqual(ImageLocationDefaults.RequestTypeDefaultPath, resolved);
-    }
-
-    [TestMethod]
-    public async Task ResolveRequestSubtypeImagePathAsync_WithSubtypeOverride_PrefersTheSubtypeImage()
-    {
-        var subtypePath = CreateImageFile("subtype-override.png");
-        var parentPath = CreateImageFile("parent-override.png");
-        _overrides.AddOverride("request_subtype", SubtypeId.ToString(), subtypePath);
-        _overrides.AddOverride("request_type", RequestTypeId.ToString(), parentPath);
-
-        var resolved = await _service.ResolveRequestSubtypeImagePathAsync(SubtypeId.ToString());
-
-        Assert.AreEqual(subtypePath, resolved);
-    }
-
-    [TestMethod]
-    public async Task ResolveRequestSubtypeImagePathAsync_WithNoSubtypeOverride_InheritsTheParentImage()
-    {
-        var parentPath = CreateImageFile("parent-override.png");
-        _overrides.AddOverride("request_type", RequestTypeId.ToString(), parentPath);
-
-        var resolved = await _service.ResolveRequestSubtypeImagePathAsync(SubtypeId.ToString());
-
-        Assert.AreEqual(parentPath, resolved);
-    }
-
-    [TestMethod]
-    public async Task ResolveRequestSubtypeImagePathAsync_WithNoOverrideAnywhere_ReturnsTheDefaultAsset()
-    {
-        var resolved = await _service.ResolveRequestSubtypeImagePathAsync(SubtypeId.ToString());
-
-        Assert.AreEqual(ImageLocationDefaults.RequestSubtypeDefaultPath, resolved);
-    }
-
-    [TestMethod]
-    public async Task ResolveWorkCenterImagePathAsync_WithOverride_ReturnsTheOverridePath()
-    {
-        var path = CreateImageFile("work-center-override.png");
-        _overrides.AddOverride("work_center", "42", path);
-
-        var resolved = await _service.ResolveWorkCenterImagePathAsync("42");
-
-        Assert.AreEqual(path, resolved);
-    }
-
-    [TestMethod]
-    public async Task ResolveWorkCenterImagePathAsync_WithNoOverride_ReturnsTheWorkCenterDefaultAsset()
-    {
-        var resolved = await _service.ResolveWorkCenterImagePathAsync("42");
-
-        Assert.AreEqual(ImageLocationDefaults.WorkCenterDefaultPath, resolved);
-    }
-
-    [TestMethod]
-    public async Task ResolveWorkCenterImagePathAsync_WhenOverrideFileIsMissing_FallsBackToTheDefaultAsset()
-    {
-        _overrides.AddOverride("work_center", "42", Path.Combine(_workingDirectory, "gone.png"));
-
-        var resolved = await _service.ResolveWorkCenterImagePathAsync("42");
-
-        Assert.AreEqual(ImageLocationDefaults.WorkCenterDefaultPath, resolved);
-    }
-
-    [TestMethod]
-    public async Task ResolveRequestTypeImagePathAsync_WithoutAnOverride_ReadsTheCatalogDefaultImagePath()
-    {
-        var catalogPath = CreateImageFile("catalog-request-type.png");
-        _mysql.EnqueueQueryResult(CatalogRow("public_id", RequestTypeId.ToString(), "default_image_path", catalogPath));
-
-        var resolved = await _service.ResolveRequestTypeImagePathAsync(RequestTypeId.ToString());
-
-        Assert.AreEqual(catalogPath, resolved);
-        Assert.AreEqual(
-            "sp_waitlist_request_types_get",
-            _mysql.ExecutedQueries.Single().Sql,
-            "The catalog procedure — not Assets/Config/waitlist-request-types.json — is the request-type source (T100).");
-    }
-
-    [TestMethod]
-    public async Task ResolveRequestSubtypeImagePathAsync_WithoutAnOverride_ReadsTheSubtypeCatalogDefaultImagePath()
-    {
-        var catalogPath = CreateImageFile("catalog-subtype.png");
-        _mysql.EnqueueQueryResult(CatalogRow("public_id", SubtypeId.ToString(), "default_image_path", catalogPath));
-
-        var resolved = await _service.ResolveRequestSubtypeImagePathAsync(SubtypeId.ToString());
-
-        Assert.AreEqual(catalogPath, resolved);
-        Assert.AreEqual("sp_waitlist_request_subtypes_get", _mysql.ExecutedQueries.Single().Sql);
-    }
-
-    [TestMethod]
-    public async Task ResolveRequestTypeImagePathAsync_WhenTheCatalogPathIsMissing_FallsBackToTheDefaultAsset()
-    {
-        _mysql.EnqueueQueryResult(CatalogRow(
-            "public_id",
-            RequestTypeId.ToString(),
-            "default_image_path",
-            Path.Combine(_workingDirectory, "gone.png")));
-
-        var resolved = await _service.ResolveRequestTypeImagePathAsync(RequestTypeId.ToString());
-
-        Assert.AreEqual(ImageLocationDefaults.RequestTypeDefaultPath, resolved);
     }
 
     // ── The Item scope and its Category family (FR-009, contracts/card-and-identifier.md §4, §D10). The
@@ -322,13 +184,6 @@ public sealed class ImageLocationServiceCascadeTests
         };
 
     [TestMethod]
-    public async Task ResolveRequestTypeImagePathAsync_WithNonGuidId_Throws()
-    {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
-            () => _service.ResolveRequestTypeImagePathAsync("not-a-guid"));
-    }
-
-    [TestMethod]
     public async Task ResolveWorkCenterImagePathAsync_WithNonNumericId_Throws()
     {
         await Assert.ThrowsExceptionAsync<ArgumentException>(
@@ -336,19 +191,17 @@ public sealed class ImageLocationServiceCascadeTests
     }
 
     [TestMethod]
-    public async Task ResolveRequestTypeImagePathAsync_BeforeInitialization_Throws()
+    public async Task ResolveRequestItemImagePathAsync_BeforeInitialization_Throws()
     {
         using var uninitialised = new ImageLocationService(
             NullLogger<ImageLocationService>.Instance,
-            new FakeRequestTypeDisplayLabelService(),
-            new FakeRequestSubtypeDisplayLabelService(),
             new FakeImageOverrideReadService(),
             new FakeImageStorageConfigurationResolver(),
             new FakeWorkCenterCatalogService(),
             TestDoubles.CreateUnusedMySqlHelperServer());
 
         await Assert.ThrowsExceptionAsync<InvalidOperationException>(
-            () => uninitialised.ResolveRequestTypeImagePathAsync(RequestTypeId.ToString()));
+            () => uninitialised.ResolveRequestItemImagePathAsync("pickup-coil"));
     }
 
     [TestMethod]
@@ -357,11 +210,11 @@ public sealed class ImageLocationServiceCascadeTests
         ImageLocationChangedEventArgs? received = null;
         using var subscription = _service.SubscribeToImageLocationChanges(args => received = args);
 
-        _service.RaiseImageLocationUpdated("request_type", RequestTypeId.ToString());
+        _service.RaiseImageLocationUpdated("request_item", "pickup-coil");
 
         Assert.IsNotNull(received);
-        Assert.AreEqual("request_type", received!.Scope);
-        Assert.AreEqual(RequestTypeId.ToString(), received.ScopeId);
+        Assert.AreEqual("request_item", received!.Scope);
+        Assert.AreEqual("pickup-coil", received.ScopeId);
         await Task.CompletedTask;
     }
 
@@ -371,9 +224,9 @@ public sealed class ImageLocationServiceCascadeTests
         var notifications = 0;
         var subscription = _service.SubscribeToImageLocationChanges(_ => notifications++);
 
-        _service.RaiseImageLocationUpdated("request_type", RequestTypeId.ToString());
+        _service.RaiseImageLocationUpdated("request_item", "pickup-coil");
         subscription.Dispose();
-        _service.RaiseImageLocationUpdated("request_type", RequestTypeId.ToString());
+        _service.RaiseImageLocationUpdated("request_item", "pickup-coil");
 
         Assert.AreEqual(1, notifications);
     }

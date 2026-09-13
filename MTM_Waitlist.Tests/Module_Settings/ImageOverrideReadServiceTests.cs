@@ -24,14 +24,14 @@ public sealed class ImageOverrideReadServiceTests
     public async Task GetOverrideAsync_WhenRowExists_MapsEveryColumn()
     {
         _helper.EnqueueQueryResult(FakeMySqlHelperServer.OverrideRow(
-            "request_type", "abc-123", @"\\server\images\rt.png", id: 7, publicId: "11111111-1111-1111-1111-111111111111"));
+            "request_item", "abc-123", @"\\server\images\rt.png", id: 7, publicId: "11111111-1111-1111-1111-111111111111"));
 
-        var result = await _service.GetOverrideAsync("request_type", "abc-123");
+        var result = await _service.GetOverrideAsync("request_item", "abc-123");
 
         Assert.IsNotNull(result);
         Assert.AreEqual(7, result!.RecordId);
         Assert.AreEqual("11111111-1111-1111-1111-111111111111", result.PublicId);
-        Assert.AreEqual("request_type", result.Scope);
+        Assert.AreEqual("request_item", result.Scope);
         Assert.AreEqual("abc-123", result.ScopeItemId);
         Assert.AreEqual(@"\\server\images\rt.png", result.ImagePath);
         Assert.IsTrue(result.IsActive);
@@ -60,12 +60,12 @@ public sealed class ImageOverrideReadServiceTests
     {
         _helper.EnqueueEmptyQueryResult();
 
-        Assert.IsNull(await _service.GetOverrideAsync("request_type", "abc-123"));
+        Assert.IsNull(await _service.GetOverrideAsync("request_item", "abc-123"));
     }
 
     [DataTestMethod]
-    [DataRow("request_type")]
-    [DataRow("request_subtype")]
+    [DataRow("request_item")]
+    [DataRow("request_category")]
     [DataRow("work_center")]
     public async Task GetOverrideAsync_AcceptsEveryValidScope(string scope)
     {
@@ -87,7 +87,7 @@ public sealed class ImageOverrideReadServiceTests
     public async Task GetOverrideAsync_WithEmptyScopeItemId_Throws()
     {
         await Assert.ThrowsExceptionAsync<ArgumentNullException>(
-            () => _service.GetOverrideAsync("request_type", " "));
+            () => _service.GetOverrideAsync("request_item", " "));
     }
 
     [TestMethod]
@@ -106,11 +106,11 @@ public sealed class ImageOverrideReadServiceTests
     [TestMethod]
     public async Task HasOverrideAsync_ReflectsWhetherARowWasReturned()
     {
-        _helper.EnqueueQueryResult(FakeMySqlHelperServer.OverrideRow("request_type", "abc", "a.png"));
-        Assert.IsTrue(await _service.HasOverrideAsync("request_type", "abc"));
+        _helper.EnqueueQueryResult(FakeMySqlHelperServer.OverrideRow("request_item", "abc", "a.png"));
+        Assert.IsTrue(await _service.HasOverrideAsync("request_item", "abc"));
 
         _helper.EnqueueEmptyQueryResult();
-        Assert.IsFalse(await _service.HasOverrideAsync("request_type", "abc"));
+        Assert.IsFalse(await _service.HasOverrideAsync("request_item", "abc"));
     }
 
     /// <summary>

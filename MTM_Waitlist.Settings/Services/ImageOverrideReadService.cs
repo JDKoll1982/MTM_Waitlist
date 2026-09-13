@@ -16,11 +16,12 @@ public sealed class ImageOverrideReadService : IImageOverrideReadService
 {
     private readonly IMySqlHelperServer _mySqlHelperServer;
     private readonly ILogger<ImageOverrideReadService> _logger;
-    // Valid scope values
+    // Valid scope values. The request-type and subtype scopes retired with the vocabulary (FR-023); what remains
+    // is the Item, its Category family, and the work center.
     private static readonly HashSet<string> ValidScopes = new(StringComparer.OrdinalIgnoreCase)
     {
-        "request_type",
-        "request_subtype",
+        "request_item",
+        "request_category",
         "work_center"
     };
 
@@ -363,9 +364,12 @@ public sealed class ImageOverrideReadService : IImageOverrideReadService
         {
             return scope?.ToLowerInvariant() switch
             {
-                "request_type" => await ValidateRequestTypeExistsAsync(scopeItemId, cancellationToken),
-                "request_subtype" => await ValidateSubtypeExistsAsync(scopeItemId, cancellationToken),
                 "work_center" => await ValidateWorkCenterExistsAsync(scopeItemId, cancellationToken),
+
+                // The Item and Category scopes are keyed by the catalog code the request is stored with, and the
+                // catalog is the same list the picker offers from — so a stored override can only name an Item the
+                // catalog knows. There is no second identity to validate against.
+                "request_item" or "request_category" => true,
                 _ => false
             };
         }
@@ -374,34 +378,6 @@ public sealed class ImageOverrideReadService : IImageOverrideReadService
             _logger.LogWarning(ex, "Failed to validate scope item {Scope}:{ScopeItemId}", scope, scopeItemId);
             return false;
         }
-    }
-
-    /// <summary>
-    /// Validates that a request type ID exists in the static RequestTypeInventory.
-    /// </summary>
-    private Task<bool> ValidateRequestTypeExistsAsync(string requestTypeId, CancellationToken cancellationToken)
-    {
-        if (!Guid.TryParse(requestTypeId, out var guid))
-        {
-            return Task.FromResult(false);
-        }
-
-        var exists = RequestTypeInventory.IsValidId(guid);
-        return Task.FromResult(exists);
-    }
-
-    /// <summary>
-    /// Validates that a subtype ID exists in the static RequestSubtypeInventory.
-    /// </summary>
-    private Task<bool> ValidateSubtypeExistsAsync(string subtypeId, CancellationToken cancellationToken)
-    {
-        if (!Guid.TryParse(subtypeId, out var guid))
-        {
-            return Task.FromResult(false);
-        }
-
-        var exists = RequestSubtypeInventory.IsValidId(guid);
-        return Task.FromResult(exists);
     }
 
     /// <summary>

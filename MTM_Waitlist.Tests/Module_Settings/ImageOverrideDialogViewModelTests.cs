@@ -35,8 +35,6 @@ public sealed class ImageOverrideDialogViewModelTests
 
         _imageLocationService = new ImageLocationService(
             NullLogger<ImageLocationService>.Instance,
-            new FakeRequestTypeDisplayLabelService(),
-            new FakeRequestSubtypeDisplayLabelService(),
             _readService,
             _resolver,
             _catalog,
@@ -62,9 +60,14 @@ public sealed class ImageOverrideDialogViewModelTests
         }
     }
 
-    private RequestTypeImagesDialogViewModel CreateRequestTypeViewModel() =>
+    /// <summary>
+    /// The shared dialog base — hydrate, filter, reset, cancel, and a single batched commit — is exercised
+    /// through the live Item-keyed dialog. The request-type dialog that used to host these checks retired with
+    /// the type/subtype vocabulary (FR-023); the behaviour it exercised did not.
+    /// </summary>
+    private RequestItemImagesDialogViewModel CreateItemViewModel() =>
         new(_imageLocationService, _readService, _writeService, _storageService,
-            NullLogger<RequestTypeImagesDialogViewModel>.Instance);
+            NullLogger<RequestItemImagesDialogViewModel>.Instance);
 
     private WorkCenterImagesDialogViewModel CreateWorkCenterViewModel() =>
         new(_imageLocationService, _readService, _writeService, _storageService,
@@ -74,42 +77,15 @@ public sealed class ImageOverrideDialogViewModelTests
         viewModel.Groups.SelectMany(g => g.Rows);
 
     [TestMethod]
-    public async Task RequestTypeDialog_LoadsTheEightInventoryRows()
-    {
-        var viewModel = CreateRequestTypeViewModel();
-
-        await viewModel.LoadAsync();
-
-        var rows = AllRows(viewModel).ToList();
-        Assert.AreEqual(RequestTypeInventory.Items.Count, rows.Count);
-        CollectionAssert.AreEquivalent(
-            RequestTypeInventory.Items.Select(i => i.DisplayName).ToArray(),
-            rows.Select(r => r.DisplayName).ToArray());
-    }
-
-    [TestMethod]
-    public async Task RequestTypeDialog_BindsTheStableGuidAsTheRowKey()
-    {
-        var viewModel = CreateRequestTypeViewModel();
-
-        await viewModel.LoadAsync();
-
-        foreach (var row in AllRows(viewModel))
-        {
-            Assert.IsTrue(Guid.TryParse(row.ItemId, out _), $"'{row.ItemId}' is not a GUID.");
-        }
-    }
-
-    [TestMethod]
     public async Task Dialog_HydratesExistingOverridesIntoTheEditableColumn()
     {
-        var first = RequestTypeInventory.Items[0];
-        _readService.AddOverride("request_type", first.StableId.ToString(), @"\\share\custom.png");
+        var first = RequestItemCatalog.Items[0];
+        _readService.AddOverride("request_item", first.Id, @"\\share\custom.png");
 
-        var viewModel = CreateRequestTypeViewModel();
+        var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
 
-        var row = AllRows(viewModel).Single(r => r.ItemId == first.StableId.ToString());
+        var row = AllRows(viewModel).Single(r => r.ItemId == first.Id);
         Assert.AreEqual(@"\\share\custom.png", row.CustomPath);
         Assert.IsTrue(row.HasCustomImage);
         Assert.IsFalse(row.IsDirty);
@@ -118,10 +94,10 @@ public sealed class ImageOverrideDialogViewModelTests
     [TestMethod]
     public async Task SearchFiltersRowsByDisplayName()
     {
-        var viewModel = CreateRequestTypeViewModel();
+        var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
 
-        viewModel.SearchText = RequestTypeInventory.Items[0].DisplayName;
+        viewModel.SearchText = RequestItemCatalog.ResolveDisplayName(RequestItemCatalog.Items[0]);
 
         Assert.AreEqual(1, AllRows(viewModel).Count());
     }
@@ -129,28 +105,28 @@ public sealed class ImageOverrideDialogViewModelTests
     [TestMethod]
     public async Task CustomOnlyToggleHidesRowsWithoutAnOverride()
     {
-        var first = RequestTypeInventory.Items[0];
-        _readService.AddOverride("request_type", first.StableId.ToString(), "custom.png");
+        var first = RequestItemCatalog.Items[0];
+        _readService.AddOverride("request_item", first.Id, "custom.png");
 
-        var viewModel = CreateRequestTypeViewModel();
+        var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
 
         viewModel.ShowOnlyCustomImages = true;
 
         Assert.AreEqual(1, AllRows(viewModel).Count());
-        Assert.AreEqual(first.DisplayName, AllRows(viewModel).Single().DisplayName);
+        Assert.AreEqual(RequestItemCatalog.ResolveDisplayName(first), AllRows(viewModel).Single().DisplayName);
     }
 
     [TestMethod]
     public async Task ResetRowClearsTheOverrideButLeavesItUncommitted()
     {
-        var first = RequestTypeInventory.Items[0];
-        _readService.AddOverride("request_type", first.StableId.ToString(), "custom.png");
+        var first = RequestItemCatalog.Items[0];
+        _readService.AddOverride("request_item", first.Id, "custom.png");
 
-        var viewModel = CreateRequestTypeViewModel();
+        var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
 
-        var row = AllRows(viewModel).Single(r => r.ItemId == first.StableId.ToString());
+        var row = AllRows(viewModel).Single(r => r.ItemId == first.Id);
         await viewModel.ResetRowCommand.ExecuteAsync(row);
 
         Assert.AreEqual(string.Empty, row.CustomPath);
@@ -161,12 +137,12 @@ public sealed class ImageOverrideDialogViewModelTests
     [TestMethod]
     public async Task ResetAllClearsEveryRow()
     {
-        foreach (var item in RequestTypeInventory.Items)
+        foreach (var item in RequestItemCatalog.Items)
         {
-            _readService.AddOverride("request_type", item.StableId.ToString(), "custom.png");
+            _readService.AddOverride("request_item", item.Id, "custom.png");
         }
 
-        var viewModel = CreateRequestTypeViewModel();
+        var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
 
         await viewModel.ResetAllAsync();
@@ -178,13 +154,13 @@ public sealed class ImageOverrideDialogViewModelTests
     [TestMethod]
     public async Task CancelDiscardsEveryPendingEdit()
     {
-        var first = RequestTypeInventory.Items[0];
-        _readService.AddOverride("request_type", first.StableId.ToString(), "original.png");
+        var first = RequestItemCatalog.Items[0];
+        _readService.AddOverride("request_item", first.Id, "original.png");
 
-        var viewModel = CreateRequestTypeViewModel();
+        var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
 
-        var row = AllRows(viewModel).Single(r => r.ItemId == first.StableId.ToString());
+        var row = AllRows(viewModel).Single(r => r.ItemId == first.Id);
         row.CustomPath = "edited.png";
 
         viewModel.CancelEdits();
@@ -197,7 +173,7 @@ public sealed class ImageOverrideDialogViewModelTests
     [TestMethod]
     public async Task SaveWithNoChangesWritesNothing()
     {
-        var viewModel = CreateRequestTypeViewModel();
+        var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
 
         Assert.IsTrue(await viewModel.SaveAsync());
@@ -212,7 +188,7 @@ public sealed class ImageOverrideDialogViewModelTests
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
 
-        var viewModel = CreateRequestTypeViewModel();
+        var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
 
         AllRows(viewModel).First().CustomPath = source;
@@ -229,7 +205,7 @@ public sealed class ImageOverrideDialogViewModelTests
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
 
-        var viewModel = CreateRequestTypeViewModel();
+        var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
 
         var row = AllRows(viewModel).First();
@@ -240,7 +216,7 @@ public sealed class ImageOverrideDialogViewModelTests
 
         Assert.IsTrue(await viewModel.SaveAsync(), viewModel.ErrorMessage);
 
-        var stored = Path.Combine(_resolver.SharedFolderPath, $"request_type_{row.ItemId}.png");
+        var stored = Path.Combine(_resolver.SharedFolderPath, $"request_item_{row.ItemId}.png");
         Assert.IsTrue(File.Exists(stored), "The chosen file must be copied into the share.");
         Assert.AreEqual(stored, row.OriginalPath);
     }
@@ -251,7 +227,7 @@ public sealed class ImageOverrideDialogViewModelTests
         var source = Path.Combine(_workingDirectory, "wide.png");
         TestPngWriter.Write(source, 128, 64);
 
-        var viewModel = CreateRequestTypeViewModel();
+        var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
         AllRows(viewModel).First().CustomPath = source;
 

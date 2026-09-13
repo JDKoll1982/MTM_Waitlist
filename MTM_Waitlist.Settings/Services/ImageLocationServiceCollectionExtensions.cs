@@ -17,8 +17,6 @@ public static class ImageLocationServiceCollectionExtensions
     /// 
     /// Registered Services:
     /// - IImageLocationService (singleton) → ImageLocationService
-    /// - IRequestTypeDisplayLabelService (singleton) → RequestTypeDisplayLabelService
-    /// - IRequestSubtypeDisplayLabelService (singleton) → RequestSubtypeDisplayLabelService
     /// - IImageStorageConfigurationResolver (singleton) → ImageStorageConfigurationResolver
     /// - IWorkCenterCatalogService (from Module_Shared, assumed pre-registered)
     /// - ImageStorageOptions (from IOptions<ImageStorageOptions>)
@@ -66,10 +64,6 @@ public static class ImageLocationServiceCollectionExtensions
         // Register configuration options
         services.Configure<ImageStorageOptions>(
             configuration.GetSection(ImageStorageOptions.SectionName));
-
-        // Register display label services (singletons - initialized once, never change for session)
-        services.AddSingleton<IRequestTypeDisplayLabelService, RequestTypeDisplayLabelService>();
-        services.AddSingleton<IRequestSubtypeDisplayLabelService, RequestSubtypeDisplayLabelService>();
 
         // Register configuration resolver (singleton - coordinates with IOptions<T>)
         services.AddSingleton<IImageStorageConfigurationResolver, ImageStorageConfigurationResolver>();

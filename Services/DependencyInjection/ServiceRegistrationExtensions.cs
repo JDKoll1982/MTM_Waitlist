@@ -126,7 +126,6 @@ public static class ServiceRegistrationExtensions
         // entered, never at registration time (contract §3).
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider, RequestJobAvailabilityProvider>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IDefectTypeCatalogService, MTM_Waitlist.Module_Settings.Services.DefectTypeCatalogService>();
-        services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IRequestSubtypeNameReadService, MTM_Waitlist.Module_Core.Services.RequestSubtypeNameReadService>();
         services.AddSingleton<IExternalConnectionInfoProvider, ExternalConnectionInfoProvider>();
         services.AddSingleton<IConnectionHealthService, MTM_Waitlist.Module_Core.Services.ConnectionHealthService>();
         services.AddSingleton<INewRequestAlertService, MTM_Waitlist.Module_Core.Services.NewRequestAlertService>();

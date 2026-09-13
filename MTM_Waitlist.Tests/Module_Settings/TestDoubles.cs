@@ -126,40 +126,6 @@ internal sealed class FakeImageOverrideReadService : IImageOverrideReadService
     private static string Key(string scope, string scopeItemId) => $"{scope}|{scopeItemId}";
 }
 
-internal sealed class FakeRequestTypeDisplayLabelService : IRequestTypeDisplayLabelService
-{
-    public string GetCurrentDisplayName(Guid requestTypeId) => requestTypeId.ToString();
-
-    public Guid? GetIdByCurrentDisplayName(string displayName) => null;
-
-    public bool HasDisplayNameChanged(Guid requestTypeId) => false;
-
-    public string? GetPreviousDisplayName(Guid requestTypeId) => null;
-
-    public Task InitializeFromJsonAsync() => Task.CompletedTask;
-
-    public Task<int> DetectDisplayNameChangesAsync() => Task.FromResult(0);
-}
-
-internal sealed class FakeRequestSubtypeDisplayLabelService : IRequestSubtypeDisplayLabelService
-{
-    public Guid ParentRequestTypeId { get; set; } = Guid.NewGuid();
-
-    public string GetCurrentDisplayName(Guid subtypeId) => subtypeId.ToString();
-
-    public Guid GetParentRequestTypeId(Guid subtypeId) => ParentRequestTypeId;
-
-    public Guid? GetIdByDisplayName(Guid parentRequestTypeId, string subtypeDisplayName) => null;
-
-    public bool HasDisplayNameChanged(Guid subtypeId) => false;
-
-    public string? GetPreviousDisplayName(Guid subtypeId) => null;
-
-    public Task InitializeFromJsonAsync() => Task.CompletedTask;
-
-    public Task<int> DetectDisplayNameChangesAsync() => Task.FromResult(0);
-}
-
 internal sealed class FakeWorkCenterCatalogService : IWorkCenterCatalogService
 {
     public WorkCenterCatalogResult Catalog { get; set; } = new();

@@ -28,9 +28,9 @@ public sealed partial class SettingsPage : Page
         _ = ViewModel.ComputerManagement.LoadAsync();
     }
 
-    private async void RequestTypeImages_Click(object sender, RoutedEventArgs e)
+    private async void RequestItemImages_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new RequestTypeImagesDialog(App.GetService<RequestTypeImagesDialogViewModel>())
+        var dialog = new RequestItemImagesDialog(App.GetService<RequestItemImagesDialogViewModel>())
         {
             XamlRoot = XamlRoot
         };
@@ -41,16 +41,6 @@ public sealed partial class SettingsPage : Page
     private async void WorkCenterImages_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new WorkCenterImagesDialog(App.GetService<WorkCenterImagesDialogViewModel>())
-        {
-            XamlRoot = XamlRoot
-        };
-
-        await dialog.ShowAsync();
-    }
-
-    private async void RequestItemImages_Click(object sender, RoutedEventArgs e)
-    {
-        var dialog = new RequestItemImagesDialog(App.GetService<RequestItemImagesDialogViewModel>())
         {
             XamlRoot = XamlRoot
         };

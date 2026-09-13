@@ -46,8 +46,6 @@ public sealed class RequestItemImagesDialogViewModelTests
 
         _imageLocationService = new ImageLocationService(
             NullLogger<ImageLocationService>.Instance,
-            new FakeRequestTypeDisplayLabelService(),
-            new FakeRequestSubtypeDisplayLabelService(),
             _readService,
             _resolver,
             new FakeWorkCenterCatalogService(),
@@ -103,7 +101,10 @@ public sealed class RequestItemImagesDialogViewModelTests
         var viewModel = CreateViewModel();
 
         Assert.AreEqual(ImageLocationScope.RequestItem.ToDatabaseString(), viewModel.Scope);
-        Assert.AreNotEqual(ImageLocationScope.RequestSubtype.ToDatabaseString(), viewModel.Scope);
+        Assert.AreNotEqual(
+            ImageLocationScope.RequestCategory.ToDatabaseString(),
+            viewModel.Scope,
+            "The picture screen is keyed by Item, not by the Category family the Item inherits from.");
     }
 
     [TestMethod]

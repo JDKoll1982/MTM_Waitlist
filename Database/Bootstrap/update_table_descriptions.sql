@@ -321,13 +321,13 @@ MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the 
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was last updated.';
 
-ALTER TABLE config_images_locations COMMENT = 'Image path overrides for request types, work centers, and request subtypes. Enables role-based customization of visual assets via cascade resolution pattern.';
+ALTER TABLE config_images_locations COMMENT = 'Image path overrides for request items, their Category families, and work centers. Enables role-based customization of visual assets via cascade resolution pattern.';
 
 ALTER TABLE config_images_locations
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for image location override row.',
-MODIFY COLUMN scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_type, work_center, or request_subtype.',
-MODIFY COLUMN scope_item_id VARCHAR(190) NOT NULL COMMENT 'Stable identifier within scope. GUID for request types and subtypes, BIGINT for work centers.',
+MODIFY COLUMN scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_item, request_category, or work_center.',
+MODIFY COLUMN scope_item_id VARCHAR(190) NOT NULL COMMENT 'Identifier within scope: the Item or Category code, or the numeric work center id.',
 MODIFY COLUMN image_path VARCHAR(500) NOT NULL COMMENT 'File system path to the image file copied to the shared network folder.',
 MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Soft-delete flag; inactive rows are ignored during path resolution cascades.',
 MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the image override.',
@@ -342,9 +342,9 @@ MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.'
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the waitlist request.',
 MODIFY COLUMN building VARCHAR(64) NOT NULL COMMENT 'Building the request belongs to.',
 MODIFY COLUMN work_center VARCHAR(64) NOT NULL COMMENT 'Work center that raised the request.',
-MODIFY COLUMN request_type VARCHAR(64) NOT NULL COMMENT 'Top-level request type display label.',
-MODIFY COLUMN subtype VARCHAR(64) NULL COMMENT 'Request subtype display label; null when the type has no subtypes.',
-MODIFY COLUMN input_value VARCHAR(255) NULL COMMENT 'Free-text value captured for request types that require input.',
+MODIFY COLUMN category VARCHAR(16) NOT NULL COMMENT 'The Category the requester chose: Pickup, Deliver, Assist or Other.',
+MODIFY COLUMN item VARCHAR(64) NOT NULL COMMENT 'The Item the requester chose: one of the catalogued Item codes.',
+MODIFY COLUMN input_value VARCHAR(255) NULL COMMENT 'The answer captured for an Item whose flow collects one.',
 MODIFY COLUMN active_setup_job_id VARCHAR(64) NOT NULL COMMENT 'Active setup job associated with the request at submission time.',
 MODIFY COLUMN work_center_name VARCHAR(64) NOT NULL COMMENT 'Work center that submitted the request.',
 MODIFY COLUMN requester_employee_number VARCHAR(32) NOT NULL COMMENT 'Employee number of the requester.',

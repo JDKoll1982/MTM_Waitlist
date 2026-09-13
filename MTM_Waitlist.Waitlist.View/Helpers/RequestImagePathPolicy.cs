@@ -39,7 +39,7 @@ public static class RequestImagePathPolicy
     /// <param name="path">The path to test.</param>
     /// <returns>
     /// <see langword="true"/> when the path is one of the placeholders the service substitutes for "nothing
-    /// configured": the request-type, request-subtype, request-item or request-category default.
+    /// configured": the request-item or request-category default.
     /// </returns>
     public static bool IsServicePlaceholder(string? path)
     {
@@ -49,13 +49,10 @@ public static class RequestImagePathPolicy
             return false;
         }
 
-        // Every scope's placeholder is checked, even though they all resolve to the same file today, so a
-        // future split of one of them cannot quietly reintroduce the bug. The two Item scopes (FR-009) matter
-        // most: the Item is the card's own picture, so its placeholder is exactly the answer that must never
-        // replace an image the request already resolves.
-        return string.Equals(normalized, Normalize(ImageLocationDefaults.RequestTypeDefaultPath), StringComparison.OrdinalIgnoreCase)
-            || string.Equals(normalized, Normalize(ImageLocationDefaults.RequestSubtypeDefaultPath), StringComparison.OrdinalIgnoreCase)
-            || string.Equals(normalized, Normalize(ImageLocationDefaults.RequestItemDefaultPath), StringComparison.OrdinalIgnoreCase)
+        // Both live Item scopes are checked, even though they resolve to the same file today, so a future split of
+        // one of them cannot quietly reintroduce the bug. The Item is the card's own picture (FR-009), so its
+        // placeholder is exactly the answer that must never replace an image the request already resolves.
+        return string.Equals(normalized, Normalize(ImageLocationDefaults.RequestItemDefaultPath), StringComparison.OrdinalIgnoreCase)
             || string.Equals(normalized, Normalize(ImageLocationDefaults.RequestCategoryDefaultPath), StringComparison.OrdinalIgnoreCase);
     }
 

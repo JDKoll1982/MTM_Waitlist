@@ -14,7 +14,6 @@ public static class ModuleDependencyInjectionExtensions
         services.AddImageLocationServices(configuration);
 
         // Transient so each dialog opens with a clean set of pending edits.
-        services.AddTransient<MTM_Waitlist.Module_Settings.ViewModels.RequestTypeImagesDialogViewModel>();
         services.AddTransient<MTM_Waitlist.Module_Settings.ViewModels.WorkCenterImagesDialogViewModel>();
         services.AddTransient<MTM_Waitlist.Module_Settings.ViewModels.RequestItemImagesDialogViewModel>();
         services.AddTransient<MTM_Waitlist.Module_Settings.ViewModels.ComputerEditDialogViewModel>();

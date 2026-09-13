@@ -27,7 +27,7 @@ public interface IImageOverrideWriteService
     /// Creates a new image override in the database.
     /// Fails if an override already exists for this scope/item (unique constraint).
     /// </summary>
-    /// <param name="scope">The scope type: request_type, request_subtype, or work_center</param>
+    /// <param name="scope">The scope type: request_item, request_category, or work_center</param>
     /// <param name="scopeItemId">The stable identifier within scope</param>
     /// <param name="imagePath">The file system path to the copied image</param>
     /// <param name="userId">Optional user ID for audit trail (created_by_user_id)</param>

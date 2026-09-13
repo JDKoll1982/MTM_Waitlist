@@ -222,36 +222,15 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <TextBlock
                             Grid.Row="0"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="Manage the default visuals used for request type, item, and work-center image overrides for authorized staff."
+                            Text="Manage the default visuals used for item and work-center image overrides for authorized staff."
                             TextWrapping="Wrap" />
 
                         <wct:SettingsCard Grid.Row="1">
-                            <wct:SettingsCard.Header>
-                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Request Type Images" />
-                            </wct:SettingsCard.Header>
-                            <wct:SettingsCard.Description>
-                                <TextBlock
-                                    Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
-                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="Manage the default visuals used for request type cards and summaries while preserving the inherited fallback chain."
-                                    TextWrapping="Wrap" />
-                            </wct:SettingsCard.Description>
-                            <wct:SettingsCard.Content>
-                                <Button
-                                    MinWidth="120"
-                                    Content="Manage types"
-                                    Click="RequestTypeImages_Click"
-                                    AutomationProperties.Name="Manage request type images" />
-                            </wct:SettingsCard.Content>
-                        </wct:SettingsCard>
-
-                        <wct:SettingsCard Grid.Row="2">
                             <wct:SettingsCard.Header>
                                 <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Item Images" />
                             </wct:SettingsCard.Header>
@@ -271,7 +250,7 @@
                             </wct:SettingsCard.Content>
                         </wct:SettingsCard>
 
-                        <wct:SettingsCard Grid.Row="3">
+                        <wct:SettingsCard Grid.Row="2">
                             <wct:SettingsCard.Header>
                                 <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="Work Center Images" />
                             </wct:SettingsCard.Header>

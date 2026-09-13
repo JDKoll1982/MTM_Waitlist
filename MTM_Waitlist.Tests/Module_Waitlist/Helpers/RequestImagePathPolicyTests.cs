@@ -29,11 +29,11 @@ public sealed class RequestImagePathPolicyTests
     {
         // The service answers with these when nothing is configured, which is not the same as an image.
         Assert.IsFalse(
-            RequestImagePathPolicy.IsUsableResolvedPath(ImageLocationDefaults.RequestTypeDefaultPath),
-            "The request-type placeholder must not be taken as a resolved image.");
+            RequestImagePathPolicy.IsUsableResolvedPath(ImageLocationDefaults.RequestItemDefaultPath),
+            "The request-item placeholder must not be taken as a resolved image.");
         Assert.IsFalse(
-            RequestImagePathPolicy.IsUsableResolvedPath(ImageLocationDefaults.RequestSubtypeDefaultPath),
-            "The request-subtype placeholder must not be taken as a resolved image.");
+            RequestImagePathPolicy.IsUsableResolvedPath(ImageLocationDefaults.RequestCategoryDefaultPath),
+            "The request-category placeholder must not be taken as a resolved image.");
     }
 
     [TestMethod]

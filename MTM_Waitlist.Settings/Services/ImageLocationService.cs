@@ -27,14 +27,7 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
     /// as the request-type source (T100) and returns each row's stable <c>public_id</c> GUID beside its
     /// configured <c>default_image_path</c>.
     /// </summary>
-    private const string RequestTypesProcedure = "sp_waitlist_request_types_get";
-
-    /// <summary>The authoritative request-subtype catalog read; see <see cref="RequestTypesProcedure"/>.</summary>
-    private const string RequestSubtypesProcedure = "sp_waitlist_request_subtypes_get";
-
     private readonly ILogger<ImageLocationService> _logger;
-    private readonly IRequestTypeDisplayLabelService _requestTypeDisplayLabelService;
-    private readonly IRequestSubtypeDisplayLabelService _requestSubtypeDisplayLabelService;
     private readonly IImageOverrideReadService _imageOverrideReadService;
     private readonly IImageStorageConfigurationResolver _configurationResolver;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
@@ -52,25 +45,18 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
     /// All dependencies must be provided; null dependencies throw ArgumentNullException.
     /// </summary>
     /// <param name="logger">Logger for diagnostics and error logging</param>
-    /// <param name="requestTypeDisplayLabelService">Service for request type display labels</param>
-    /// <param name="requestSubtypeDisplayLabelService">Service for subtype display labels</param>
+    /// <param name="imageOverrideReadService">Service for reading stored image overrides</param>
     /// <param name="configurationResolver">Service for resolving image storage configuration</param>
     /// <param name="workCenterCatalogService">Service for accessing work center catalog data</param>
     /// <exception cref="ArgumentNullException">If any dependency is null</exception>
     public ImageLocationService(
         ILogger<ImageLocationService> logger,
-        IRequestTypeDisplayLabelService requestTypeDisplayLabelService,
-        IRequestSubtypeDisplayLabelService requestSubtypeDisplayLabelService,
         IImageOverrideReadService imageOverrideReadService,
         IImageStorageConfigurationResolver configurationResolver,
         IWorkCenterCatalogService workCenterCatalogService,
         IMySqlHelperServer mySqlHelperServer)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _requestTypeDisplayLabelService = requestTypeDisplayLabelService ?? 
-            throw new ArgumentNullException(nameof(requestTypeDisplayLabelService));
-        _requestSubtypeDisplayLabelService = requestSubtypeDisplayLabelService ?? 
-            throw new ArgumentNullException(nameof(requestSubtypeDisplayLabelService));
         _imageOverrideReadService = imageOverrideReadService ??
             throw new ArgumentNullException(nameof(imageOverrideReadService));
         _configurationResolver = configurationResolver ?? 
@@ -108,26 +94,6 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
 
             try
             {
-                // Initialize all sub-services
-                _logger.LogDebug("Loading request type display labels...");
-                await _requestTypeDisplayLabelService.InitializeFromJsonAsync().ConfigureAwait(false);
-
-                _logger.LogDebug("Loading subtype display labels...");
-                await _requestSubtypeDisplayLabelService.InitializeFromJsonAsync().ConfigureAwait(false);
-
-                // Validate that inventories are loaded
-                if (!RequestTypeInventory.Items.Any())
-                {
-                    throw new InvalidOperationException(
-                        "Request type inventory is empty after initialization. The request-type catalog may not be loaded.");
-                }
-
-                if (!RequestSubtypeInventory.Groups.Any())
-                {
-                    throw new InvalidOperationException(
-                        "Request subtype inventory is empty after initialization. The request-subtype catalog may not be loaded.");
-                }
-
                 // Validate configuration
                 _logger.LogDebug("Validating image storage configuration...");
                 var config = await _configurationResolver.GetEffectiveConfigurationAsync().ConfigureAwait(false);
@@ -163,134 +129,6 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
     }
 
     /// <inheritdoc />
-    public string GetRequestTypeDisplayName(Guid requestTypeId)
-    {
-        if (!_isInitialized)
-        {
-            var message = "Image location service not initialized. Call InitializeAsync() first.";
-            _logger.LogError(message);
-            throw new InvalidOperationException(message);
-        }
-
-        if (requestTypeId == Guid.Empty)
-        {
-            throw new ArgumentException("Request type ID cannot be empty.", nameof(requestTypeId));
-        }
-
-        try
-        {
-            return _requestTypeDisplayLabelService.GetCurrentDisplayName(requestTypeId);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(ex, "Request type ID '{Id}' not found in inventory", requestTypeId);
-            throw;
-        }
-    }
-
-    /// <inheritdoc />
-    public string GetSubtypeDisplayName(Guid subtypeId)
-    {
-        if (!_isInitialized)
-        {
-            var message = "Image location service not initialized. Call InitializeAsync() first.";
-            _logger.LogError(message);
-            throw new InvalidOperationException(message);
-        }
-
-        if (subtypeId == Guid.Empty)
-        {
-            throw new ArgumentException("Subtype ID cannot be empty.", nameof(subtypeId));
-        }
-
-        try
-        {
-            return _requestSubtypeDisplayLabelService.GetCurrentDisplayName(subtypeId);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(ex, "Subtype ID '{Id}' not found in inventory", subtypeId);
-            throw;
-        }
-    }
-
-    /// <inheritdoc />
-    public Guid GetSubtypeParentId(Guid subtypeId)
-    {
-        if (!_isInitialized)
-        {
-            var message = "Image location service not initialized. Call InitializeAsync() first.";
-            _logger.LogError(message);
-            throw new InvalidOperationException(message);
-        }
-
-        if (subtypeId == Guid.Empty)
-        {
-            throw new ArgumentException("Subtype ID cannot be empty.", nameof(subtypeId));
-        }
-
-        try
-        {
-            return _requestSubtypeDisplayLabelService.GetParentRequestTypeId(subtypeId);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(ex, "Subtype ID '{Id}' not found in inventory", subtypeId);
-            throw;
-        }
-    }
-
-    /// <inheritdoc />
-    public bool IsValidRequestTypeId(Guid requestTypeId)
-    {
-        if (!_isInitialized)
-        {
-            _logger.LogWarning("IsValidRequestTypeId called before initialization");
-            return false;
-        }
-
-        if (requestTypeId == Guid.Empty)
-        {
-            return false;
-        }
-
-        try
-        {
-            _ = _requestTypeDisplayLabelService.GetCurrentDisplayName(requestTypeId);
-            return true;
-        }
-        catch (ArgumentException)
-        {
-            return false;
-        }
-    }
-
-    /// <inheritdoc />
-    public bool IsValidSubtypeId(Guid subtypeId)
-    {
-        if (!_isInitialized)
-        {
-            _logger.LogWarning("IsValidSubtypeId called before initialization");
-            return false;
-        }
-
-        if (subtypeId == Guid.Empty)
-        {
-            return false;
-        }
-
-        try
-        {
-            _ = _requestSubtypeDisplayLabelService.GetCurrentDisplayName(subtypeId);
-            return true;
-        }
-        catch (ArgumentException)
-        {
-            return false;
-        }
-    }
-
-    /// <inheritdoc />
     public bool IsValidWorkCenterId(long workCenterId)
     {
         if (!_isInitialized)
@@ -308,117 +146,6 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
         // For now, accept all positive IDs; validation will be done in next phase
         _logger.LogDebug("Validating work center ID: {WorkCenterId}", workCenterId);
         return true;
-    }
-
-    /// <inheritdoc />
-    public async Task<string> ResolveRequestTypeImagePathAsync(string requestTypeId, CancellationToken cancellationToken = default)
-    {
-        if (!_isInitialized)
-        {
-            var message = "Image location service not initialized. Call InitializeAsync() first.";
-            _logger.LogError(message);
-            throw new InvalidOperationException(message);
-        }
-
-        if (string.IsNullOrWhiteSpace(requestTypeId))
-        {
-            throw new ArgumentException("Request type ID cannot be null or empty.", nameof(requestTypeId));
-        }
-
-        if (!Guid.TryParse(requestTypeId, out var typeId))
-        {
-            throw new ArgumentException("Request type ID must be a valid GUID.", nameof(requestTypeId));
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        try
-        {
-            var defaultPath = ImageLocationDefaults.RequestTypeDefaultPath;
-
-            // Cascade order: database override -> catalog default_image_path -> default asset.
-            var overridePath = await _imageOverrideReadService.GetOverrideAsync("request_type", typeId.ToString(), cancellationToken).ConfigureAwait(false);
-            if (overridePath is not null && !string.IsNullOrWhiteSpace(overridePath.ImagePath))
-            {
-                return await ResolveExistingPathAsync(overridePath.ImagePath, defaultPath, "request_type", requestTypeId).ConfigureAwait(false);
-            }
-
-            var catalogPath = await TryResolveCatalogRequestTypeImagePathAsync(typeId, cancellationToken).ConfigureAwait(false);
-            if (!string.IsNullOrWhiteSpace(catalogPath))
-            {
-                return await ResolveExistingPathAsync(catalogPath, defaultPath, "request_type", requestTypeId).ConfigureAwait(false);
-            }
-
-            // Nothing is configured for this type, so the caller gets the placeholder. Said out loud at Debug
-            // because this substitution is otherwise invisible: the card cannot tell a placeholder from a real
-            // answer, and a caller that prefers any resolved path will show "no image available" over a good one.
-            _logger.LogDebug(
-                "No override and no catalog image for request_type:{RequestTypeId}; returning the default placeholder {DefaultPath}",
-                requestTypeId,
-                defaultPath);
-            return defaultPath;
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to resolve request type image path for {RequestTypeId}", requestTypeId);
-            return ImageLocationDefaults.RequestTypeDefaultPath;
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<string> ResolveRequestSubtypeImagePathAsync(string subtypeId, CancellationToken cancellationToken = default)
-    {
-        if (!_isInitialized)
-        {
-            var message = "Image location service not initialized. Call InitializeAsync() first.";
-            _logger.LogError(message);
-            throw new InvalidOperationException(message);
-        }
-
-        if (string.IsNullOrWhiteSpace(subtypeId))
-        {
-            throw new ArgumentException("Subtype ID cannot be null or empty.", nameof(subtypeId));
-        }
-
-        if (!Guid.TryParse(subtypeId, out var typeId))
-        {
-            throw new ArgumentException("Subtype ID must be a valid GUID.", nameof(subtypeId));
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        try
-        {
-            var defaultPath = ImageLocationDefaults.RequestSubtypeDefaultPath;
-            var overridePath = await _imageOverrideReadService.GetOverrideAsync("request_subtype", typeId.ToString(), cancellationToken).ConfigureAwait(false);
-            if (overridePath is not null && !string.IsNullOrWhiteSpace(overridePath.ImagePath))
-            {
-                return await ResolveExistingPathAsync(overridePath.ImagePath, defaultPath, "request_subtype", subtypeId).ConfigureAwait(false);
-            }
-
-            var catalogPath = await TryResolveCatalogSubtypeImagePathAsync(typeId, cancellationToken).ConfigureAwait(false);
-            if (!string.IsNullOrWhiteSpace(catalogPath))
-            {
-                return await ResolveExistingPathAsync(catalogPath, defaultPath, "request_subtype", subtypeId).ConfigureAwait(false);
-            }
-
-            var parentRequestTypeId = _requestSubtypeDisplayLabelService.GetParentRequestTypeId(typeId);
-            var parentImagePath = await ResolveRequestTypeImagePathAsync(parentRequestTypeId.ToString(), cancellationToken).ConfigureAwait(false);
-            return await ResolveExistingPathAsync(parentImagePath, defaultPath, "request_subtype", subtypeId).ConfigureAwait(false);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to resolve subtype image path for {SubtypeId}", subtypeId);
-            return ImageLocationDefaults.RequestSubtypeDefaultPath;
-        }
     }
 
     /// <inheritdoc />
@@ -554,40 +281,23 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
     }
 
     /// <inheritdoc />
-    public async Task<int> DetectConfigurationChangesAsync()
+    /// <remarks>
+    /// There is nothing left to detect: display-name drift was a hazard of the request-type and subtype catalogs,
+    /// whose overrides were keyed by a stable GUID precisely so a renamed label could not orphan them. Those
+    /// scopes are retired with the vocabulary (FR-023) and the live Item and work-center overrides are keyed by
+    /// the same Item code and work-center name the request is stored with, so a rename cannot orphan them in the
+    /// first place. The method stays on the contract and answers zero rather than throwing.
+    /// </remarks>
+    public Task<int> DetectConfigurationChangesAsync()
     {
         if (!_isInitialized)
         {
             _logger.LogWarning("DetectConfigurationChangesAsync called before initialization");
-            return 0;
         }
 
-        try
-        {
-            _logger.LogInformation("Detecting configuration changes...");
+        _logger.LogDebug("No display-name drift to detect: the live image scopes are keyed by the stored identity.");
 
-            var requestTypeChanges = await _requestTypeDisplayLabelService.DetectDisplayNameChangesAsync();
-            var subtypeChanges = await _requestSubtypeDisplayLabelService.DetectDisplayNameChangesAsync();
-
-            var totalChanges = requestTypeChanges + subtypeChanges;
-
-            if (totalChanges > 0)
-            {
-                _logger.LogWarning("Detected {Count} configuration changes: {RequestTypeChanges} request types, {SubtypeChanges} subtypes",
-                                 totalChanges, requestTypeChanges, subtypeChanges);
-            }
-            else
-            {
-                _logger.LogInformation("No configuration changes detected");
-            }
-
-            return totalChanges;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to detect configuration changes");
-            throw;
-        }
+        return Task.FromResult(0);
     }
 
     /// <inheritdoc />
@@ -835,73 +545,6 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
 
         var appRelative = Path.Combine(AppContext.BaseDirectory, target);
         return File.Exists(appRelative);
-    }
-
-    /// <summary>
-    /// Reads a request type's configured <c>default_image_path</c> from the authoritative catalog by its
-    /// stable <c>public_id</c> GUID. This replaced <c>Assets/Config/waitlist-request-types.json</c>, which was
-    /// the last production reader of that file (T100, FR-019).
-    /// </summary>
-    private async Task<string?> TryResolveCatalogRequestTypeImagePathAsync(Guid requestTypeId, CancellationToken cancellationToken)
-    {
-        var rows = await _mySqlHelperServer
-            .ExecuteStoredProcedureQueryAsync(
-                RequestTypesProcedure,
-                new Dictionary<string, object?>(),
-                MySqlDatabaseTarget.MtmWaitlist,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        return FindCatalogImagePath(rows, "public_id", requestTypeId);
-    }
-
-    /// <summary>
-    /// Reads a request subtype's configured <c>default_image_path</c> from the authoritative catalog by its
-    /// stable <c>public_id</c> GUID.
-    /// </summary>
-    private async Task<string?> TryResolveCatalogSubtypeImagePathAsync(Guid subtypeId, CancellationToken cancellationToken)
-    {
-        var rows = await _mySqlHelperServer
-            .ExecuteStoredProcedureQueryAsync(
-                RequestSubtypesProcedure,
-                new Dictionary<string, object?>(),
-                MySqlDatabaseTarget.MtmWaitlist,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        return FindCatalogImagePath(rows, "public_id", subtypeId);
-    }
-
-    private static string? FindCatalogImagePath(
-        IReadOnlyList<Dictionary<string, object?>> rows,
-        string publicIdColumn,
-        Guid id)
-    {
-        var publicId = id.ToString();
-
-        foreach (var row in rows)
-        {
-            if (!row.TryGetValue(publicIdColumn, out var rawId)
-                || !string.Equals(Convert.ToString(rawId)?.Trim(), publicId, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            if (row.TryGetValue("default_image_path", out var rawPath)
-                && rawPath is not null
-                && rawPath != DBNull.Value)
-            {
-                var path = Convert.ToString(rawPath)?.Trim();
-                if (!string.IsNullOrWhiteSpace(path))
-                {
-                    return path;
-                }
-            }
-
-            return null;
-        }
-
-        return null;
     }
 
     /// <summary>

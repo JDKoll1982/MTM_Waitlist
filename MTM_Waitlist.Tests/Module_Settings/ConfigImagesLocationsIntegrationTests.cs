@@ -44,8 +44,6 @@ public sealed class ConfigImagesLocationsIntegrationTests
 
         _imageLocationService = new ImageLocationService(
             NullLogger<ImageLocationService>.Instance,
-            new FakeRequestTypeDisplayLabelService(),
-            new FakeRequestSubtypeDisplayLabelService(),
             _readService,
             new FakeImageStorageConfigurationResolver(),
             new FakeWorkCenterCatalogService(),
@@ -97,13 +95,13 @@ public sealed class ConfigImagesLocationsIntegrationTests
     [TestMethod]
     public async Task CreateThenRead_RoundTripsTheOverride()
     {
-        var created = await _writeService.CreateOverrideAsync("request_type", _scopeItemId, @"\\share\images\rt.png");
+        var created = await _writeService.CreateOverrideAsync("request_item", _scopeItemId, @"\\share\images\rt.png");
         Assert.IsTrue(created.Success, created.ErrorMessage);
 
-        var loaded = await _readService.GetOverrideAsync("request_type", _scopeItemId);
+        var loaded = await _readService.GetOverrideAsync("request_item", _scopeItemId);
 
         Assert.IsNotNull(loaded);
-        Assert.AreEqual("request_type", loaded!.Scope);
+        Assert.AreEqual("request_item", loaded!.Scope);
         Assert.AreEqual(_scopeItemId, loaded.ScopeItemId);
         Assert.AreEqual(@"\\share\images\rt.png", loaded.ImagePath);
         Assert.IsTrue(loaded.IsActive);
@@ -113,10 +111,10 @@ public sealed class ConfigImagesLocationsIntegrationTests
     [TestMethod]
     public async Task CreateTwice_IsRejectedByTheUniqueScopeItemKey()
     {
-        var first = await _writeService.CreateOverrideAsync("request_type", _scopeItemId, "first.png");
+        var first = await _writeService.CreateOverrideAsync("request_item", _scopeItemId, "first.png");
         Assert.IsTrue(first.Success, first.ErrorMessage);
 
-        var second = await _writeService.CreateOverrideAsync("request_type", _scopeItemId, "second.png");
+        var second = await _writeService.CreateOverrideAsync("request_item", _scopeItemId, "second.png");
 
         Assert.IsFalse(second.Success);
         Assert.AreEqual("DUPLICATE_KEY", second.ErrorCode);
@@ -132,14 +130,14 @@ public sealed class ConfigImagesLocationsIntegrationTests
     [TestMethod]
     public async Task TheSameScopeItemIdIsAllowedUnderADifferentScope()
     {
-        var asRequestType = await _writeService.CreateOverrideAsync("request_type", _scopeItemId, "rt.png");
-        var asSubtype = await _writeService.CreateOverrideAsync("request_subtype", _scopeItemId, "st.png");
+        var asRequestType = await _writeService.CreateOverrideAsync("request_item", _scopeItemId, "rt.png");
+        var asSubtype = await _writeService.CreateOverrideAsync("request_category", _scopeItemId, "st.png");
 
         Assert.IsTrue(asRequestType.Success, asRequestType.ErrorMessage);
         Assert.IsTrue(asSubtype.Success, asSubtype.ErrorMessage);
 
-        Assert.AreEqual("rt.png", (await _readService.GetOverrideAsync("request_type", _scopeItemId))!.ImagePath);
-        Assert.AreEqual("st.png", (await _readService.GetOverrideAsync("request_subtype", _scopeItemId))!.ImagePath);
+        Assert.AreEqual("rt.png", (await _readService.GetOverrideAsync("request_item", _scopeItemId))!.ImagePath);
+        Assert.AreEqual("st.png", (await _readService.GetOverrideAsync("request_category", _scopeItemId))!.ImagePath);
     }
 
     [TestMethod]
@@ -207,9 +205,9 @@ public sealed class ConfigImagesLocationsIntegrationTests
     [TestMethod]
     public async Task GetOverridesByScopeAsync_IncludesTheCreatedRow()
     {
-        await _writeService.CreateOverrideAsync("request_subtype", _scopeItemId, "st.png");
+        await _writeService.CreateOverrideAsync("request_category", _scopeItemId, "st.png");
 
-        var all = await _readService.GetOverridesByScopeAsync("request_subtype");
+        var all = await _readService.GetOverridesByScopeAsync("request_category");
 
         Assert.IsTrue(all.Any(o => o.ScopeItemId == _scopeItemId));
     }

@@ -845,11 +845,11 @@ Cross-cutting retirement, documentation, and validation against the Success Crit
 
 ### Wave 3 — the retired code symbols, independent (different files)
 
-- [ ] **T105** [P] Retire `RequestSubtypeInventory.cs` and `RequestTypeInventory.cs` (FR-023). ·
+- [x] **T105** [P] Retire `RequestSubtypeInventory.cs` and `RequestTypeInventory.cs` (FR-023). ·
   delete both files under `MTM_Waitlist.Settings/Models/`
-- [ ] **T106** [P] Retire the subtype display-label service: `IRequestSubtypeDisplayLabelService.cs` and
+- [x] **T106** [P] Retire the subtype display-label service: `IRequestSubtypeDisplayLabelService.cs` and
   `RequestSubtypeDisplayLabelService.cs` (FR-023). · delete both files under `MTM_Waitlist.Settings/Services/`
-- [ ] **T107** [P] **Inspect, then retire** the request-type display-label service —
+- [x] **T107** [P] **Inspect, then retire** the request-type display-label service —
   `IRequestTypeDisplayLabelService.cs`, `RequestTypeDisplayLabelService.cs` — and
   `RequestItemLegacyMapper.cs` with its test `MTM_Waitlist.Tests/Module_Settings/RequestItemLegacyMapperTests.cs`.
   §D15 requires the inspection: the mapper may have backed the seed rewrite and a display-label service may still
@@ -858,12 +858,12 @@ Cross-cutting retirement, documentation, and validation against the Success Crit
   `MTM_Waitlist.Settings/Services/RequestTypeDisplayLabelService.cs`,
   `MTM_Waitlist.Settings/Services/RequestItemLegacyMapper.cs`,
   `MTM_Waitlist.Tests/Module_Settings/RequestItemLegacyMapperTests.cs`
-- [ ] **T108** [P] Retire the two obsolete image scopes: remove `request_subtype` and `request_type` from
+- [x] **T108** [P] Retire the two obsolete image scopes: remove `request_subtype` and `request_type` from
   `ImageLocationScope` and from the `config_images_locations` rows that carry them, once the
   `RequestSubtypeImagesDialog` has already become the Item dialog (T096–T097) and the `work_center` scope — which is
   **kept** — is the only other live scope. ·
   `MTM_Waitlist.Settings/Models/ImageLocationScope.cs`, `Database/Seeds/seed_waitlist_request_item_images/create.sql`
-- [ ] **T109** [P] **Inspect, then retire** `RequestTypeImagesDialog.xaml(.cs)` and
+- [x] **T109** [P] **Inspect, then retire** `RequestTypeImagesDialog.xaml(.cs)` and
   `RequestTypeImagesDialogViewModel.cs` (with a `RequestItemImagesDialog` in their place) — the `request_type` scope
   they served is gone as of T108. *§D10 says the `request_type` / `request_subtype` scopes and their dialogs retire
   with the vocabulary, while `plan.md`'s Project Structure lists only the subtype dialog as retired; the inspection

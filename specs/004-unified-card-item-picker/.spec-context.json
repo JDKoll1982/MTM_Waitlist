@@ -906,6 +906,46 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-13T22:08:30.148Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T105",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:21:11.490Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T106",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:21:11.730Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T107",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:21:11.970Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T108",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:21:17.561Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T109",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:21:17.798Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
@@ -1407,6 +1447,11 @@
       "decision": "Retired schema artifacts keep their rollback.sql and lose only create.sql, matching the feature-001 mock-family precedent already on disk",
       "why": "the mandatory description file records that retired objects are dropped via Database/<kind>/<name>/rollback.sql, so removing the drop statement would leave a DBA nothing to promote",
       "rejected": "deleting both create.sql and rollback.sql, which would leave seven sibling retired directories inconsistent with the two new ones"
+    },
+    {
+      "decision": "The request-type dialog tests were re-pointed at the live Item-keyed dialog and the retired-symbol tests deleted",
+      "why": "the shared ImageOverrideDialogViewModel base owns hydrate, filter, reset, cancel and the single batched commit, so deleting the class would have lost that coverage; only tests whose actual subject was the retired vocabulary were removed",
+      "rejected": "deleting the whole class, or keeping it alive against a scope value the services no longer accept"
     }
   ],
   "step_summaries": {
@@ -1487,7 +1532,7 @@
       "step": "implement"
     }
   ],
-  "currentTask": "T104",
+  "currentTask": "T109",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2310,6 +2355,63 @@
         "Database/StoredProcedures/AllSPs.sql",
         "Database/Seeds/AllSeeds.sql",
         "Database/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T105": {
+      "status": "DONE",
+      "did": "Retired RequestTypeInventory and RequestSubtypeInventory, and with them the inventory-backed ImageLocationServiceInventoryExtensions whose eight lookup helpers had no caller outside itself",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestTypeInventory.cs",
+        "MTM_Waitlist.Settings/Models/RequestSubtypeInventory.cs",
+        "MTM_Waitlist.Settings/Services/ImageLocationServiceInventoryExtensions.cs",
+        "MTM_Waitlist.Settings/Models/ImageLocation.cs"
+      ]
+    },
+    "T106": {
+      "status": "DONE",
+      "did": "Retired the subtype display-label service and, with it, IRequestSubtypeNameReadService and its reader, which called the retired sp_waitlist_request_subtypes_get and had no consumer left after US5 re-keyed the minutes editor",
+      "files": [
+        "MTM_Waitlist.Settings/Services/IRequestSubtypeDisplayLabelService.cs",
+        "MTM_Waitlist.Settings/Services/RequestSubtypeDisplayLabelService.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IRequestSubtypeNameReadService.cs",
+        "MTM_Waitlist.Core/Services/RequestSubtypeNameReadService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T107": {
+      "status": "DONE",
+      "did": "Inspected then retired the request-type display-label service (its only reader was ImageLocationService's retired resolve path) and RequestItemLegacyMapper with its test, which no production caller referenced",
+      "files": [
+        "MTM_Waitlist.Settings/Services/IRequestTypeDisplayLabelService.cs",
+        "MTM_Waitlist.Settings/Services/RequestTypeDisplayLabelService.cs",
+        "MTM_Waitlist.Settings/Services/RequestItemLegacyMapper.cs",
+        "MTM_Waitlist.Tests/Module_Settings/RequestItemLegacyMapperTests.cs"
+      ]
+    },
+    "T108": {
+      "status": "DONE",
+      "did": "Removed request_type and request_subtype from ImageLocationScope and every mapping, default, allowlist and comment that carried them; the live scopes are request_item, request_category and work_center, and the image seed already carried no retired row",
+      "files": [
+        "MTM_Waitlist.Settings/Models/ImageLocationScope.cs",
+        "MTM_Waitlist.Settings/Models/ImageLocationDefaults.cs",
+        "MTM_Waitlist.Settings/Services/ImageOverrideReadService.cs",
+        "MTM_Waitlist.Settings/Services/ImageOverrideWriteService.cs",
+        "Database/Tables/17_config_images_locations/create.sql",
+        "Database/Tables/AllTables.sql"
+      ]
+    },
+    "T109": {
+      "status": "DONE",
+      "did": "Inspected then retired RequestTypeImagesDialog and its view model and view, since the request_type scope they served is gone as of T108; the Settings page's card and its click handler went with them, and the shared dialog-base tests were re-pointed at the Item-keyed dialog rather than dropped",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/RequestTypeImagesDialogViewModel.cs",
+        "Module_Settings/Views/RequestTypeImagesDialog.xaml",
+        "Module_Settings/Views/RequestTypeImagesDialog.xaml.cs",
+        "Module_Settings/Views/SettingsPage.xaml",
+        "Module_Settings/Views/SettingsPage.xaml.cs",
+        "MTM_Waitlist.Settings/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs",
+        "MTM_Waitlist.Tests/Module_Settings/ImageOverrideDialogViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/ImageLocationServiceCascadeTests.cs"
       ]
     }
   },

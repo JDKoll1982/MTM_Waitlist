@@ -37,7 +37,7 @@ public interface IImageStorageService
     /// If archive behavior is enabled, replaces existing file and archives the old one.
     /// </summary>
     /// <param name="sourceFilePath">The full path to the source image file</param>
-    /// <param name="scope">The scope type (request_type, request_subtype, work_center) - used in file name</param>
+    /// <param name="scope">The scope type (request_item, request_category, work_center) - used in file name</param>
     /// <param name="itemId">The item identifier - used in file name</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>StorageResult with final file path or error details</returns>

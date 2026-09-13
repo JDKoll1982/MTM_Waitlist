@@ -3,19 +3,22 @@ namespace MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Settings.Models;
 
 /// <summary>
-/// Service for managing and resolving image locations across all scopes.
+/// Service for managing and resolving image locations across the live scopes.
 /// Acts as the primary orchestration point for the image location feature.
-/// Coordinates inventory loading, display label tracking, configuration resolution, and path resolution.
+/// Coordinates configuration resolution and path resolution.
 /// 
 /// This service manages the complete lifecycle:
-/// 1. **Initialization:** Load inventories and display labels at startup
+/// 1. **Initialization:** Validate configuration at startup
 /// 2. **Querying:** Resolve effective image paths with cascade fallback
 /// 3. **Mutation:** Update image overrides in database
 /// 4. **Notification:** Notify subscribers when overrides change
 /// 
+/// The request-type and subtype scopes are retired with the type/subtype vocabulary (FR-023); the live scopes
+/// are <c>request_item</c>, <c>request_category</c> and <c>work_center</c>.
+/// 
 /// Error Handling Strategy:
 /// - ArgumentNullException: If dependencies or inputs are null
-/// - InvalidOperationException: If service not initialized or inventory missing
+/// - InvalidOperationException: If service not initialized or configuration missing
 /// - OperationCanceledException: If long-running operation is cancelled
 /// </summary>
 public interface IImageLocationService
@@ -23,11 +26,11 @@ public interface IImageLocationService
     /// <summary>
     /// Initializes the image location service.
     /// Must be called once at application startup before using query methods.
-    /// Loads inventories, display labels, and validates configuration.
+    /// Validates the image storage configuration.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>A task representing the asynchronous operation</returns>
-    /// <exception cref="InvalidOperationException">If initialization fails or inventory is corrupted</exception>
+    /// <exception cref="InvalidOperationException">If initialization fails</exception>
     Task InitializeAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -36,70 +39,11 @@ public interface IImageLocationService
     bool IsInitialized { get; }
 
     /// <summary>
-    /// Gets the display name for a request type by its stable ID.
-    /// </summary>
-    /// <param name="requestTypeId">The stable GUID identifier</param>
-    /// <returns>The current display name</returns>
-    /// <exception cref="ArgumentException">If request type ID not found</exception>
-    /// <exception cref="InvalidOperationException">If service not initialized</exception>
-    string GetRequestTypeDisplayName(Guid requestTypeId);
-
-    /// <summary>
-    /// Gets the display name for a subtype by its stable ID.
-    /// </summary>
-    /// <param name="subtypeId">The stable GUID identifier</param>
-    /// <returns>The current display name</returns>
-    /// <exception cref="ArgumentException">If subtype ID not found</exception>
-    /// <exception cref="InvalidOperationException">If service not initialized</exception>
-    string GetSubtypeDisplayName(Guid subtypeId);
-
-    /// <summary>
-    /// Gets the parent request type ID for a subtype.
-    /// </summary>
-    /// <param name="subtypeId">The stable GUID identifier of the subtype</param>
-    /// <returns>The stable GUID of the parent request type</returns>
-    /// <exception cref="ArgumentException">If subtype ID not found</exception>
-    /// <exception cref="InvalidOperationException">If service not initialized</exception>
-    Guid GetSubtypeParentId(Guid subtypeId);
-
-    /// <summary>
-    /// Checks if a request type ID is valid and exists in the inventory.
-    /// </summary>
-    /// <param name="requestTypeId">The stable GUID identifier</param>
-    /// <returns>True if the ID is valid; false otherwise</returns>
-    bool IsValidRequestTypeId(Guid requestTypeId);
-
-    /// <summary>
-    /// Checks if a subtype ID is valid and exists in the inventory.
-    /// </summary>
-    /// <param name="subtypeId">The stable GUID identifier</param>
-    /// <returns>True if the ID is valid; false otherwise</returns>
-    bool IsValidSubtypeId(Guid subtypeId);
-
-    /// <summary>
     /// Checks if a work center ID is valid and exists in the catalog.
     /// </summary>
     /// <param name="workCenterId">The numeric ID from setup_workstations_catalog</param>
     /// <returns>True if the ID is valid; false otherwise</returns>
     bool IsValidWorkCenterId(long workCenterId);
-
-    /// <summary>
-    /// Resolves the effective image path for a request type.
-    /// Resolution order: database override → JSON imagePath → default asset.
-    /// </summary>
-    /// <param name="requestTypeId">The stable request type GUID</param>
-    /// <param name="cancellationToken">Cancellation token for the operation</param>
-    /// <returns>The resolved image path, falling back to the request type default asset when needed</returns>
-    Task<string> ResolveRequestTypeImagePathAsync(string requestTypeId, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Resolves the effective image path for a request subtype.
-    /// Resolution order: database override → subtype JSON imagePath → parent request type → default asset.
-    /// </summary>
-    /// <param name="subtypeId">The stable subtype GUID</param>
-    /// <param name="cancellationToken">Cancellation token for the operation</param>
-    /// <returns>The resolved image path, falling back to the scope default asset when needed</returns>
-    Task<string> ResolveRequestSubtypeImagePathAsync(string subtypeId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Resolves the effective image path for a work center.
@@ -139,7 +83,7 @@ public interface IImageLocationService
     /// Raises a notification that image locations have been updated.
     /// All subscribed views should refresh their image paths.
     /// </summary>
-    /// <param name="scope">The scope that was updated (e.g., "request_type", "subtype", "work_center")</param>
+    /// <param name="scope">The scope that was updated (e.g., "request_item", "request_category", "work_center")</param>
     /// <param name="scopeId">The ID within the scope that was updated</param>
     void RaiseImageLocationUpdated(string scope, string scopeId);
 
@@ -168,7 +112,7 @@ public interface IImageLocationService
 public sealed class ImageLocationChangedEventArgs : EventArgs
 {
     /// <summary>
-    /// The scope that was updated (e.g., "request_type", "subtype", "work_center").
+    /// The scope that was updated (e.g., "request_item", "request_category", "work_center").
     /// </summary>
     public string Scope { get; init; } = string.Empty;
 

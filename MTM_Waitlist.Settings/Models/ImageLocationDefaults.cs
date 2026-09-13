@@ -8,21 +8,6 @@ namespace MTM_Waitlist.Module_Settings.Models;
 public static class ImageLocationDefaults
 {
     /// <summary>
-    /// Default image for request types. Used when no override or JSON imagePath is set.
-    /// Image dimensions: Square (100x100px minimum recommended)
-    /// Format: PNG, JPG, JPEG
-    /// </summary>
-    public const string RequestTypeDefaultPath = "Assets\\Placeholders\\default-request-type.png";
-
-    /// <summary>
-    /// Default image for request subtypes. Used when no override, subtype JSON imagePath, or parent request type image is set.
-    /// Falls back through cascade: Subtype Override → Subtype JSON → Parent Request Type → Request Type Default
-    /// Image dimensions: Square (100x100px minimum recommended)
-    /// Format: PNG, JPG, JPEG
-    /// </summary>
-    public const string RequestSubtypeDefaultPath = "Assets\\Placeholders\\default-request-type.png";
-
-    /// <summary>
     /// Default image for work centers. Used when no override exists.
     /// Note: Work centers have no JSON config; only database override or default.
     /// Image dimensions: Square (100x100px minimum recommended)
@@ -44,13 +29,11 @@ public static class ImageLocationDefaults
     /// <summary>
     /// Gets the default image path for a given image location scope.
     /// </summary>
-    /// <param name="scope">The scope type: request_type, request_subtype, work_center, request_item, or request_category</param>
+    /// <param name="scope">The scope type: work_center, request_item, or request_category</param>
     /// <returns>The relative path to the default image file</returns>
     /// <exception cref="ArgumentException">Thrown if scope is not recognized</exception>
     public static string GetDefaultPathByScope(ImageLocationScope scope) => scope switch
     {
-        ImageLocationScope.RequestType => RequestTypeDefaultPath,
-        ImageLocationScope.RequestSubtype => RequestSubtypeDefaultPath,
         ImageLocationScope.WorkCenter => WorkCenterDefaultPath,
         ImageLocationScope.RequestItem => RequestItemDefaultPath,
         ImageLocationScope.RequestCategory => RequestCategoryDefaultPath,
@@ -60,7 +43,7 @@ public static class ImageLocationDefaults
     /// <summary>
     /// Gets the default image path for a given scope string.
     /// </summary>
-    /// <param name="scopeString">The scope as a string: request_type, request_subtype, work_center, request_item, or request_category</param>
+    /// <param name="scopeString">The scope as a string: work_center, request_item, or request_category</param>
     /// <returns>The relative path to the default image file</returns>
     /// <exception cref="ArgumentException">Thrown if scopeString is not recognized</exception>
     public static string GetDefaultPathByScope(string scopeString)
@@ -72,8 +55,6 @@ public static class ImageLocationDefaults
 
         return scopeString.ToLowerInvariant() switch
         {
-            "request_type" => RequestTypeDefaultPath,
-            "request_subtype" => RequestSubtypeDefaultPath,
             "work_center" => WorkCenterDefaultPath,
             "request_item" => RequestItemDefaultPath,
             "request_category" => RequestCategoryDefaultPath,

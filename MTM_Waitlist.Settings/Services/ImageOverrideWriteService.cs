@@ -22,11 +22,11 @@ public sealed class ImageOverrideWriteService : IImageOverrideWriteService
     private readonly IImageOverrideReadService _readService;
     private readonly IImageLocationService _imageLocationService;
 
-    // Valid scope values
+    // Valid scope values. The request-type and subtype scopes retired with the vocabulary (FR-023).
     private static readonly HashSet<string> ValidScopes = new(StringComparer.OrdinalIgnoreCase)
     {
-        "request_type",
-        "request_subtype",
+        "request_item",
+        "request_category",
         "work_center"
     };
 

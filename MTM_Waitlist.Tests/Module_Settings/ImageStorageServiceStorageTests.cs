@@ -38,13 +38,13 @@ public sealed class ImageStorageServiceStorageTests
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
 
-        var first = await _service.CopyImageToStorageAsync(source, "request_type", "abc-123");
-        var second = await _service.CopyImageToStorageAsync(source, "request_type", "abc-123");
+        var first = await _service.CopyImageToStorageAsync(source, "request_item", "abc-123");
+        var second = await _service.CopyImageToStorageAsync(source, "request_item", "abc-123");
 
         Assert.IsTrue(first.Success, first.ErrorMessage);
         Assert.IsTrue(second.Success, second.ErrorMessage);
         Assert.AreEqual(first.StoredFilePath, second.StoredFilePath);
-        Assert.AreEqual("request_type_abc-123.png", Path.GetFileName(first.StoredFilePath));
+        Assert.AreEqual("request_item_abc-123.png", Path.GetFileName(first.StoredFilePath));
         Assert.AreEqual(1, Directory.GetFiles(_sharePath).Length, "The active image must be replaced in place.");
     }
 
@@ -89,8 +89,8 @@ public sealed class ImageStorageServiceStorageTests
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
 
-        await _service.CopyImageToStorageAsync(source, "request_type", "abc");
-        await _service.CopyImageToStorageAsync(source, "request_type", "abc");
+        await _service.CopyImageToStorageAsync(source, "request_item", "abc");
+        await _service.CopyImageToStorageAsync(source, "request_item", "abc");
 
         Assert.IsFalse(Directory.Exists(Path.Combine(_sharePath, "Archive")));
     }
@@ -102,7 +102,7 @@ public sealed class ImageStorageServiceStorageTests
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
 
-        var result = await _service.CopyImageToStorageAsync(source, "request_type", "abc");
+        var result = await _service.CopyImageToStorageAsync(source, "request_item", "abc");
 
         Assert.IsFalse(result.Success);
         Assert.AreEqual("SHARE_UNREACHABLE", result.ErrorCode);
@@ -115,7 +115,7 @@ public sealed class ImageStorageServiceStorageTests
         var source = Path.Combine(_workingDirectory, "wide.png");
         TestPngWriter.Write(source, 128, 64);
 
-        var result = await _service.CopyImageToStorageAsync(source, "request_type", "abc");
+        var result = await _service.CopyImageToStorageAsync(source, "request_item", "abc");
 
         Assert.IsFalse(result.Success);
         Assert.AreEqual("NOT_SQUARE", result.ErrorCode);
@@ -128,10 +128,10 @@ public sealed class ImageStorageServiceStorageTests
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
 
-        var result = await _service.CopyImageToStorageAsync(source, "request_type", "a/b:c");
+        var result = await _service.CopyImageToStorageAsync(source, "request_item", "a/b:c");
 
         Assert.IsTrue(result.Success, result.ErrorMessage);
-        Assert.AreEqual("request_type_a_b_c.png", Path.GetFileName(result.StoredFilePath));
+        Assert.AreEqual("request_item_a_b_c.png", Path.GetFileName(result.StoredFilePath));
     }
 
     [TestMethod]

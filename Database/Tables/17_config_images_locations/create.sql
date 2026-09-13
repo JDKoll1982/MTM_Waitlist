@@ -13,8 +13,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 CREATE TABLE IF NOT EXISTS config_images_locations (
     id BIGINT NOT NULL AUTO_INCREMENT,
     public_id CHAR(36) NOT NULL,
-    scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_type, work_center, request_subtype',
-    scope_item_id VARCHAR(190) NOT NULL COMMENT 'Stable ID within scope: GUID for types/subtypes, BIGINT for work centers',
+    scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_item, request_category, work_center',
+    scope_item_id VARCHAR(190) NOT NULL COMMENT 'Identifier within scope: Item code, Category code, or numeric work center id',
     image_path VARCHAR(500) NOT NULL COMMENT 'File system path to the copied image',
     is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Soft-delete flag; inactive rows are ignored during resolution',
     created_by_user_id BIGINT NULL COMMENT 'User who created this override',

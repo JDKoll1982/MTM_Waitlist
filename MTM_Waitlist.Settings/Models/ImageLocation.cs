@@ -7,7 +7,7 @@ namespace MTM_Waitlist.Module_Settings.Models;
 public sealed class ImageLocation
 {
     /// <summary>
-    /// The scope type: request_type, request_subtype, or work_center.
+    /// The scope type: request_item, request_category, or work_center.
     /// </summary>
     public ImageLocationScope Scope { get; init; }
 
@@ -68,7 +68,7 @@ public enum ImagePathResolutionLevel
     DatabaseOverride,
 
     /// <summary>
-    /// Resolved from JSON configuration (request_type.imagePath or subtype.imagePath)
+    /// Resolved from JSON configuration (a scope's imagePath)
     /// </summary>
     JsonConfiguration,
 
@@ -81,97 +81,6 @@ public enum ImagePathResolutionLevel
     /// Resolved to scope default asset (final fallback; always available)
     /// </summary>
     ScopeDefault
-}
-
-/// <summary>
-/// Represents a request type image location mapping.
-/// Captures the stable ID, display name, and default image for a request type.
-/// </summary>
-public sealed class RequestTypeImageMapping
-{
-    /// <summary>
-    /// Stable GUID identifier from waitlist-request-types.json
-    /// Never changes, even if display name is renamed.
-    /// </summary>
-    public string RequestTypeId { get; init; } = string.Empty;
-
-    /// <summary>
-    /// Display name of the request type (e.g., "Pickup", "Coil", "Scrap")
-    /// This can change without affecting stored overrides (because we use stable ID).
-    /// </summary>
-    public string RequestTypeName { get; init; } = string.Empty;
-
-    /// <summary>
-    /// Default image path when no override or JSON config exists.
-    /// </summary>
-    public string DefaultImagePath { get; init; } = ImageLocationDefaults.RequestTypeDefaultPath;
-
-    /// <summary>
-    /// Optional image path from JSON configuration (waitlist-request-types.json)
-    /// Null if not configured in JSON.
-    /// </summary>
-    public string? JsonConfiguredImagePath { get; init; }
-
-    /// <summary>
-    /// Currently active database override, if any.
-    /// Null if no override is stored.
-    /// </summary>
-    public string? DatabaseOverridePath { get; init; }
-}
-
-/// <summary>
-/// Represents a request subtype image location mapping.
-/// Captures the stable ID, parent reference, display name, and default image for a subtype.
-/// </summary>
-public sealed class RequestSubtypeImageMapping
-{
-    /// <summary>
-    /// Stable globally-unique GUID identifier from waitlist-request-types.json
-    /// Never changes, even if display name is renamed.
-    /// </summary>
-    public string SubtypeId { get; init; } = string.Empty;
-
-    /// <summary>
-    /// Stable GUID of the parent request type.
-    /// Used to resolve inherited images when subtype has no override.
-    /// </summary>
-    public string ParentRequestTypeId { get; init; } = string.Empty;
-
-    /// <summary>
-    /// Display name of the parent request type (for UI organization).
-    /// </summary>
-    public string ParentRequestTypeName { get; init; } = string.Empty;
-
-    /// <summary>
-    /// Display name of the subtype (e.g., "Pickup Other", "Pickup NCM", "Bring", etc.)
-    /// Not globally unique; multiple subtypes may share the same name across parents.
-    /// </summary>
-    public string SubtypeName { get; init; } = string.Empty;
-
-    /// <summary>
-    /// Default image path when no override, subtype JSON config, or parent image exists.
-    /// Same as request type default.
-    /// </summary>
-    public string DefaultImagePath { get; init; } = ImageLocationDefaults.RequestSubtypeDefaultPath;
-
-    /// <summary>
-    /// Optional image path from JSON configuration (subtype.imagePath in waitlist-request-types.json)
-    /// Null if not configured in JSON.
-    /// </summary>
-    public string? JsonConfiguredImagePath { get; init; }
-
-    /// <summary>
-    /// Currently active database override, if any.
-    /// Null if no override is stored.
-    /// </summary>
-    public string? DatabaseOverridePath { get; init; }
-
-    /// <summary>
-    /// Indicates if this subtype inherits its image from the parent request type.
-    /// True if no subtype-specific override or JSON config exists.
-    /// </summary>
-    public bool InheritsFromParent =>
-        string.IsNullOrEmpty(DatabaseOverridePath) && string.IsNullOrEmpty(JsonConfiguredImagePath);
 }
 
 /// <summary>

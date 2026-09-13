@@ -30,8 +30,6 @@ public sealed class ImageOverrideWriteServiceTests
 
         _imageLocationService = new ImageLocationService(
             NullLogger<ImageLocationService>.Instance,
-            new FakeRequestTypeDisplayLabelService(),
-            new FakeRequestSubtypeDisplayLabelService(),
             _readService,
             new FakeImageStorageConfigurationResolver(),
             new FakeWorkCenterCatalogService(),
@@ -52,23 +50,23 @@ public sealed class ImageOverrideWriteServiceTests
         _helper.EnqueueEmptyQueryResult(); // existence probe
         _helper.EnqueueNonQueryResult(1);  // insert
 
-        var result = await _service.CreateOverrideAsync("request_type", "abc-123", @"\\server\images\rt.png");
+        var result = await _service.CreateOverrideAsync("request_item", "abc-123", @"\\server\images\rt.png");
 
         Assert.IsTrue(result.Success, result.ErrorMessage);
         Assert.AreEqual("CREATE", result.OperationType);
 
         var insert = _helper.ExecutedNonQueries.Single();
         Assert.AreEqual("sp_config_images_locations_insert", insert.Sql);
-        Assert.AreEqual("request_type", insert.Parameters["p_scope"]);
+        Assert.AreEqual("request_item", insert.Parameters["p_scope"]);
         Assert.AreEqual("abc-123", insert.Parameters["p_scope_item_id"]);
     }
 
     [TestMethod]
     public async Task CreateOverrideAsync_WhenActiveRowExists_ReturnsDuplicateKeyAndDoesNotInsert()
     {
-        _helper.EnqueueQueryResult(FakeMySqlHelperServer.OverrideRow("request_type", "abc-123", "existing.png"));
+        _helper.EnqueueQueryResult(FakeMySqlHelperServer.OverrideRow("request_item", "abc-123", "existing.png"));
 
-        var result = await _service.CreateOverrideAsync("request_type", "abc-123", "new.png");
+        var result = await _service.CreateOverrideAsync("request_item", "abc-123", "new.png");
 
         Assert.IsFalse(result.Success);
         Assert.AreEqual("DUPLICATE_KEY", result.ErrorCode);
@@ -97,7 +95,7 @@ public sealed class ImageOverrideWriteServiceTests
         _helper.EnqueueEmptyQueryResult();
         _helper.EnqueueNonQueryResult(0);
 
-        var result = await _service.CreateOverrideAsync("request_type", "abc-123", "rt.png");
+        var result = await _service.CreateOverrideAsync("request_item", "abc-123", "rt.png");
 
         Assert.IsFalse(result.Success);
         Assert.AreEqual("DATABASE_ERROR", result.ErrorCode);
@@ -112,7 +110,7 @@ public sealed class ImageOverrideWriteServiceTests
         var notifications = 0;
         using var subscription = _imageLocationService.SubscribeToImageLocationChanges(_ => notifications++);
 
-        await _service.CreateOverrideAsync("request_type", "abc-123", "rt.png");
+        await _service.CreateOverrideAsync("request_item", "abc-123", "rt.png");
 
         Assert.AreEqual(1, notifications);
     }
@@ -123,7 +121,7 @@ public sealed class ImageOverrideWriteServiceTests
         var tooLong = new string('x', 501);
 
         await Assert.ThrowsExceptionAsync<ArgumentException>(
-            () => _service.CreateOverrideAsync("request_type", "abc-123", tooLong));
+            () => _service.CreateOverrideAsync("request_item", "abc-123", tooLong));
     }
 
     [TestMethod]
@@ -136,7 +134,7 @@ public sealed class ImageOverrideWriteServiceTests
     [TestMethod]
     public async Task UpdateOverrideAsync_WhenNoRowExists_ReturnsNotFound()
     {
-        var result = await _service.UpdateOverrideAsync("request_type", "missing", "rt.png");
+        var result = await _service.UpdateOverrideAsync("request_item", "missing", "rt.png");
 
         Assert.IsFalse(result.Success);
         Assert.AreEqual("NOT_FOUND", result.ErrorCode);
@@ -146,10 +144,10 @@ public sealed class ImageOverrideWriteServiceTests
     [TestMethod]
     public async Task UpdateOverrideAsync_WhenRowExists_IssuesAnUpdate()
     {
-        _readService.AddOverride("request_type", "abc-123", "old.png");
+        _readService.AddOverride("request_item", "abc-123", "old.png");
         _helper.EnqueueNonQueryResult(1);
 
-        var result = await _service.UpdateOverrideAsync("request_type", "abc-123", "new.png");
+        var result = await _service.UpdateOverrideAsync("request_item", "abc-123", "new.png");
 
         Assert.IsTrue(result.Success, result.ErrorMessage);
         var statement = _helper.ExecutedNonQueries.Single();
@@ -235,12 +233,12 @@ public sealed class ImageOverrideWriteServiceTests
     {
         _helper.EnqueueNonQueryResult(2);
 
-        var deactivated = await _service.DeactivateAllForScopeAsync("request_subtype");
+        var deactivated = await _service.DeactivateAllForScopeAsync("request_category");
 
         Assert.AreEqual(2, deactivated);
         var statement = _helper.ExecutedNonQueries.Single();
         Assert.AreEqual("sp_config_images_locations_deactivate_for_scope", statement.Sql);
-        Assert.AreEqual("request_subtype", statement.Parameters["p_scope"]);
+        Assert.AreEqual("request_category", statement.Parameters["p_scope"]);
     }
 
     /// <summary>
@@ -252,14 +250,14 @@ public sealed class ImageOverrideWriteServiceTests
     {
         _helper.EnqueueEmptyQueryResult(); // existence probe
         _helper.EnqueueNonQueryResult(1);  // insert
-        await _service.CreateOverrideAsync("request_type", "abc-123", "new.png");
+        await _service.CreateOverrideAsync("request_item", "abc-123", "new.png");
 
-        _readService.AddOverride("request_type", "abc-123", "old.png");
+        _readService.AddOverride("request_item", "abc-123", "old.png");
         _helper.EnqueueNonQueryResult(1);
-        await _service.UpdateOverrideAsync("request_type", "abc-123", "newer.png");
+        await _service.UpdateOverrideAsync("request_item", "abc-123", "newer.png");
 
         _helper.EnqueueNonQueryResult(1);
-        await _service.DeleteOverrideAsync("request_type", "abc-123");
+        await _service.DeleteOverrideAsync("request_item", "abc-123");
 
         _helper.EnqueueNonQueryResult(1);
         await _service.DeleteByPublicIdAsync("11111111-1111-1111-1111-111111111111");

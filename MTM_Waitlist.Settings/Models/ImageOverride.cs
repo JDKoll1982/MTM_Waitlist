@@ -21,7 +21,7 @@ public sealed class ImageOverride
     public string PublicId { get; init; } = string.Empty;
 
     /// <summary>
-    /// Scope type: request_type, request_subtype, or work_center.
+    /// Scope type: request_item, request_category, or work_center.
     /// </summary>
     public string Scope { get; init; } = string.Empty;
 
@@ -34,7 +34,7 @@ public sealed class ImageOverride
 
     /// <summary>
     /// File system path to the copied image.
-    /// Examples: \\server\share\images\request_type_pickup_2026-08-18.png
+    /// Examples: \\server\share\images\request_item_pickup-coil_2026-08-18.png
     /// </summary>
     public string ImagePath { get; init; } = string.Empty;
 

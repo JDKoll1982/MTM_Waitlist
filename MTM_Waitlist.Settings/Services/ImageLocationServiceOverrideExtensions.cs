@@ -14,7 +14,7 @@ public static class ImageLocationServiceOverrideExtensions
     /// </summary>
     /// <param name="service">The image location service (unused, only for extension method syntax)</param>
     /// <param name="readService">The override read service (injected separately)</param>
-    /// <param name="scope">The scope type: request_type, request_subtype, or work_center</param>
+    /// <param name="scope">The scope type: request_item, request_category, or work_center</param>
     /// <param name="scopeItemId">The stable identifier within scope</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>ImageOverride if found and active; null if not found or inactive</returns>
@@ -45,7 +45,7 @@ public static class ImageLocationServiceOverrideExtensions
     /// </summary>
     /// <param name="service">The image location service (unused, only for extension method syntax)</param>
     /// <param name="readService">The override read service (injected separately)</param>
-    /// <param name="scope">The scope type: request_type, request_subtype, or work_center</param>
+    /// <param name="scope">The scope type: request_item, request_category, or work_center</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>Collection of active overrides for this scope; empty list if none found</returns>
     /// <exception cref="ArgumentNullException">If service or readService is null</exception>

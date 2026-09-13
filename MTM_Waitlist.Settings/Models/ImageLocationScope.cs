@@ -7,24 +7,6 @@ namespace MTM_Waitlist.Module_Settings.Models;
 public enum ImageLocationScope
 {
     /// <summary>
-    /// Top-level request type image (e.g., Pickup, Coil, Scrap, etc.)
-    /// Database value: "request_type"
-    /// Default image: Assets\Placeholders\default-request-type.png
-    /// Inventory: 8 request types (static, defined in waitlist-request-types.json)
-    /// </summary>
-    RequestType,
-
-    /// <summary>
-    /// Request subtype image (e.g., Pickup Other, Pickup NCM, Pickup WIP, etc.)
-    /// Database value: "request_subtype"
-    /// Default image: Assets\Placeholders\default-request-type.png (same as parent request type)
-    /// Cascade: Subtype Override → Subtype JSON → Parent Request Type → Default
-    /// Inventory: 24 subtypes across 8 parents (static, defined in waitlist-request-types.json)
-    /// Uniqueness: Subtype names are NOT globally unique; GUIDs in JSON are.
-    /// </summary>
-    RequestSubtype,
-
-    /// <summary>
     /// Work center image representing each facility work center in selection and detail surfaces.
     /// Database value: "work_center"
     /// Default image: Assets\Placeholders\default-workstation-image.png
@@ -64,8 +46,6 @@ public static class ImageLocationScopeExtensions
     /// <returns>The string representation used in config_images_locations.scope column</returns>
     public static string ToDatabaseString(this ImageLocationScope scope) => scope switch
     {
-        ImageLocationScope.RequestType => "request_type",
-        ImageLocationScope.RequestSubtype => "request_subtype",
         ImageLocationScope.WorkCenter => "work_center",
         ImageLocationScope.RequestItem => "request_item",
         ImageLocationScope.RequestCategory => "request_category",
@@ -87,8 +67,6 @@ public static class ImageLocationScopeExtensions
 
         return scopeString.ToLowerInvariant() switch
         {
-            "request_type" => ImageLocationScope.RequestType,
-            "request_subtype" => ImageLocationScope.RequestSubtype,
             "work_center" => ImageLocationScope.WorkCenter,
             "request_item" => ImageLocationScope.RequestItem,
             "request_category" => ImageLocationScope.RequestCategory,
@@ -97,14 +75,14 @@ public static class ImageLocationScopeExtensions
     }
 
     /// <summary>
-    /// Determines if this scope has JSON configuration support.
+    /// Determines if this scope has JSON configuration support. No live scope does: the request-type and subtype
+    /// scopes that read <c>waitlist-request-types.json</c> retired with the vocabulary (FR-023), and the Item,
+    /// Category and work-center scopes are configured as database rows.
     /// </summary>
     /// <param name="scope">The scope enumeration value</param>
-    /// <returns>True if this scope can be configured via JSON (request_type, request_subtype); false otherwise (work_center, request_item, request_category)</returns>
+    /// <returns>Always false for a live scope</returns>
     public static bool HasJsonConfig(this ImageLocationScope scope) => scope switch
     {
-        ImageLocationScope.RequestType => true,
-        ImageLocationScope.RequestSubtype => true,
         ImageLocationScope.WorkCenter => false, // Work centers are dynamic; no JSON config
         ImageLocationScope.RequestItem => false, // Items are configured as database rows, not JSON
         ImageLocationScope.RequestCategory => false, // Categories are configured as database rows, not JSON
