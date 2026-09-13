@@ -885,12 +885,12 @@ Cross-cutting retirement, documentation, and validation against the Success Crit
 
 ### Wave 5 — documentation in the same change, independent (different files)
 
-- [ ] **T111** [P] Record the supersession in `specs/003-waitlist-handler-fulfilment` (§D17): rewrite the
+- [x] **T111** [P] Record the supersession in `specs/003-waitlist-handler-fulfilment` (§D17): rewrite the
   **"VERIFIED CARD ANATOMY … DO NOT REGRESS"** constraint (line 321 and its quote block) to the new anatomy, rewrite
   its **matching test** rather than deleting it — the freeze is lifted **in writing** so an unintended change still
   fails — and amend its FR-015 from "MUST be ordered most-urgent-first" to "**defaults to** most-urgent-first". ·
   `specs/003-waitlist-handler-fulfilment/spec.md`
-- [ ] **T112** [P] Sweep the project documentation for the retired vocabulary (SC-012): remove stale references to
+- [x] **T112** [P] Sweep the project documentation for the retired vocabulary (SC-012): remove stale references to
   request types and subtypes and to the per-type cards from `README.md`, `CHANGELOG.md`, `FEATURES.md`,
   `OPEN-TASKS.md` and the `WeekendProject/` documents. **Do not touch the two documents of record**
   (`WeekendProject/Documents/Request-Config-Template.csv`,
@@ -902,13 +902,13 @@ Cross-cutting retirement, documentation, and validation against the Success Crit
 
 ### Wave 6 — the gates
 
-- [ ] **T113** **Build gate.** With no `MTM_Waitlist.exe` running, run
+- [x] **T113** **Build gate.** With no `MTM_Waitlist.exe` running, run
   `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` and record the result: it must read
   **`0 Warning(s) 0 Error(s)`**. Treat `WMC9999` as a masked **real XAML error** and surface it with the documented
   technique (a deliberate C# error to force the file/type report, or bisecting the changed XAML) — never as an
   environment problem. Treat `PRI175` / `PRI224` as a running app or stale `*.pri`, and clear the stale processes
   before re-running. · `MTM_Waitlist.sln`
-- [ ] **T114** **Test gate.** Run
+- [x] **T114** **Test gate.** Run
   `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` and record the result: it must
   read **`Failed: 0`** *with* this feature's new tests in place, not instead of them. Environment-gated tests stay
   `Assert.Inconclusive` and are recorded as skipped, never as passing, and no gate is weakened to go green (no

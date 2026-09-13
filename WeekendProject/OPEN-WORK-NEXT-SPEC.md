@@ -1,5 +1,11 @@
 # WeekendProject — Open Work (seed for the next spec)
 
+> **⚠️ Superseded vocabulary in §§4–§10 below (2026-09-13).** This seed is kept as written. Where it describes a
+> request **type** or **subtype** — including the catalog-administration workstream and the per-type cards — that
+> vocabulary is **retired**: `specs/004-unified-card-item-picker` (FR-023) replaced it with a Category/Item model,
+> and its own §10 note that "no request-type/subtype editor will be built" is now settled in code, with
+> `RetiredSymbolAuditTests` failing the build if any retired symbol returns.
+>
 > **State as of 2026-09-13 — §4 is delivered, so the next spec is §5.**
 > `specs/003-waitlist-handler-fulfilment` was the §4 workstream (its own spec cites `PromptFiles/07`, `08` and
 > `prompt.md` tasks 16–18 as its input) and it is **complete**: 49/49 tasks, build `0 Warning(s) 0 Error(s)`,

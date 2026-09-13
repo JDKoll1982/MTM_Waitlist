@@ -954,6 +954,38 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-13T22:25:19.442Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T111",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:28:52.127Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T112",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:28:52.387Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T113",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:28:52.665Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T114",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T22:28:59.670Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
@@ -1142,6 +1174,10 @@
       "tasks": [
         "T090",
         "T094"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Core/Services/UrgencyDeadlineServiceTests.cs::Compute_DueIsCreatedPlusTheItemsStoredAllotment",
+        "MTM_Waitlist.Tests/Core/Services/UrgencySettingsServiceTests.cs::GetMaxAllotted_ReadsTheItemsStoredConfiguration"
       ]
     },
     "FR-017": {
@@ -1151,6 +1187,10 @@
         "T027",
         "T090",
         "T095"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Core/Services/UrgencySettingsServiceTests.cs::GetMaxAllotted_ForAnItemWithNoConfiguredMinutes_UsesTheFifteenMinuteDefault",
+        "MTM_Waitlist.Tests/Module_Settings/UrgencyAllotmentEditorViewModelTests.cs::Load_ForAnItemWithNoConfiguredMinutes_UsesThe15MinuteDefaultAndLabelsItAsADefault"
       ]
     },
     "FR-018": {
@@ -1158,6 +1198,9 @@
       "tasks": [
         "T088",
         "T095"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Settings/UrgencyAllotmentEditorViewModelTests.cs::Load_ShowsTheConfiguredMinutesAndTheObservedAverageAsTwoSeparateValues"
       ]
     },
     "FR-019": {
@@ -1166,6 +1209,10 @@
         "T014",
         "T027",
         "T091"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemObservedTimeServiceTests.cs::GetObservedTimesAsync_IsARead_ItNeverWritesTheObservedValueBack",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemObservedTimeServiceTests.cs::GetObservedTimesAsync_ForAnItemWithNoCompletedRequest_YieldsNoValueRatherThanAZero"
       ]
     },
     "FR-020": {
@@ -1176,6 +1223,10 @@
         "T095",
         "T098",
         "T100"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Settings/UrgencyAllotmentEditorViewModelTests.cs::CanManage_IsTrueForPlantManagerAndAbove",
+        "MTM_Waitlist.Tests/Module_Settings/RequestItemImagesDialogViewModelTests.cs::ThePictureScreensGate_IsADifferentGateFromTheMinutesEditors"
       ]
     },
     "FR-021": {
@@ -1185,6 +1236,9 @@
         "T063",
         "T089",
         "T096"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Settings/RequestItemImagesDialogViewModelTests.cs::ResolveEffectivePath_WhenNothingIsConfiguredForTheItem_KeepsTheInheritedCategoryImage"
       ]
     },
     "FR-022": {
@@ -1209,6 +1263,10 @@
         "T106",
         "T107",
         "T110"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs::NoRetiredSymbolRemainsInCodeOrDatabaseArtifacts",
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs::EveryRetiredPattern_BitesOnAReintroductionOfItsSymbol"
       ]
     },
     "FR-024": {
@@ -1545,7 +1603,7 @@
       "step": "implement"
     }
   ],
-  "currentTask": "T110",
+  "currentTask": "T114",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2436,6 +2494,39 @@
         "Strings/en-us/TooltipResources.developer.resw",
         "MTM_Waitlist.Tests/Module_Mock/InternalStoreAvailabilityTests.cs"
       ]
+    },
+    "T111": {
+      "status": "DONE",
+      "did": "Recorded the card-anatomy supersession in specs/003: the DO NOT REGRESS block rewritten to the one-card Category/Item anatomy with the per-type clause retired, its guarding test named, and FR-015 amended from MUST be ordered most-urgent-first to defaults to",
+      "files": [
+        "specs/003-waitlist-handler-fulfilment/spec.md"
+      ]
+    },
+    "T112": {
+      "status": "DONE",
+      "did": "Brought the current documentation onto the Category/Item vocabulary - FEATURES.md wizard, card, detail sections, picture screen and minutes panel, and OPEN-TASKS.md's image-card entry and owner decision - and marked the three historical WeekendProject records and the PromptFiles archive index as superseded rather than rewriting their history",
+      "files": [
+        "FEATURES.md",
+        "OPEN-TASKS.md",
+        "WeekendProject/PromptFiles/README.md",
+        "WeekendProject/ChangeLog.md",
+        "WeekendProject/ChangeLog.Simple.md",
+        "WeekendProject/OPEN-WORK-NEXT-SPEC.md"
+      ]
+    },
+    "T113": {
+      "status": "DONE",
+      "did": "Build gate: dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false with no MTM_Waitlist.exe running reported Build succeeded, 0 Warning(s), 0 Error(s) in 38.9s; no WMC9999 and no PRI175/PRI224",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    },
+    "T114": {
+      "status": "DONE",
+      "did": "Test gate: dotnet test MTM_Waitlist.Tests -c Debug -p:Platform=x64 reported Failed: 0, Passed: 967, Skipped: 26, Total: 993; the environment-gated live-database tests remain Assert.Inconclusive and are recorded as skipped, and a filtered run of the eleven test classes this feature touched or added reported 107 passed / 0 failed, so the green is with the new tests in place",
+      "files": [
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
     }
   },
   "verified": [
@@ -2548,6 +2639,14 @@
       "result": "with the probe: Assert.AreEqual failed. Expected:<0>. Actual:<24>, one violation line per retired pattern; without it: 7/7 passed",
       "warnings": [
         "the .codegraphy graph cache held indexed copies of the retired symbol names, so it is now excluded as generated output alongside bin/ and obj/"
+      ]
+    },
+    {
+      "what": "Test gate T114",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "Failed: 0, Passed: 967, Skipped: 26, Total: 993 (baseline was 956 passed / 0 failed / 26 skipped; the 26 skipped are the environment-gated live-database tests)",
+      "warnings": [
+        "11 of the 26 skips are the live-MySQL integration classes, which cannot run without the owner reinstalling the local database"
       ]
     }
   ]

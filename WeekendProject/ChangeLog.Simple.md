@@ -1,5 +1,9 @@
 # MTM Waitlist — What's New
 
+> **⚠️ Superseded entry vocabulary (2026-09-13).** This changelog is a **historical record** and is kept as
+> written. Any entry below naming a request **type** or **subtype** describes a vocabulary that
+> `specs/004-unified-card-item-picker` (FR-023) has since retired, replaced by a Category/Item model.
+>
 > **🕐 Times for Shawn to enter**
 >
 > | Date | Day | Clock in | Clock out | ~Hours |

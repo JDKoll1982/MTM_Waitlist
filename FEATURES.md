@@ -46,7 +46,7 @@
   role.
 - **Step progress strip.** The wizard screens show numbered steps across the top and tick each one as
   it is completed — for Setup: Work Center → Work Order → Part → Operation → Dunnage & Scrap → Review →
-  Result; for a new request: Work Center → Job Type → Subtype → Details → Preview → Confirm → Complete.
+  Result; for a new request: Work Center → Category → Item → Details → Preview → Confirm → Complete.
 - **Search box.** In the title bar. As you type, it suggests matching requests (up to eight) and
   opening a suggestion takes you straight to that request. It is a way to jump to a request, not a
   filter for the list.
@@ -56,10 +56,10 @@
 
 - **A live list of the real requests** for the facility you have selected. It reloads when you open the
   screen, when you change facility, and when requests change.
-- **A card per request, shaped for its type** — Coil, Pickup (WIP, FG, NCM, Outside Service) and Scrap.
-  Each card has a coloured edge, a square picture with a type badge (COIL, FG, NCM, O/S, WIP, SCRAP),
-  the request title, four facts (Requested by, Press, Remaining time, Waiting), and the details that
-  matter for that type of request.
+- **A card per request, and it reads the same way for every item.** Each card has a coloured edge, a
+  square picture of the item, the item's umbrella phrase as its first line, the item's identifier as its
+  second line, four facts (Requested by, Press, Remaining time, Waiting), and the status. There is one card
+  shape for every item — no card is laid out differently because of what was requested.
 - **Remaining time, with overdue made obvious.** The time left before the request is due; anything
   overdue turns bold red instead of green.
 - **How long it has been waiting**, and what it is waiting for.
@@ -82,11 +82,9 @@
   remaining time — plus the request picture on the left and the work center's picture on the right.
 - **Pictures you can enlarge.** Clicking either picture opens a full-size view; close it with the X or
   by clicking the dark background.
-- **Request Details sections**, written for the type of request. Each section explains itself in a
-  sentence and lists labelled values, for example "Coil material" and "Work order and request" for a
-  coil; "Customer order" and "Shipment" for a finished-goods pickup; "NCM pickup" and "Quality review";
-  "Pickup and delivery" and "Outside service"; "WIP pickup and inventory" and "Work order and
-  operation"; "Scrap pickup and lugger" and "Material classification".
+- **Request Details sections**, generated from what the item's configuration declares. Each item's page
+  shows the labelled values its own configuration names, in the order it declares them, so the page follows
+  the configuration rather than the app.
 - **Inventory by Location** — a sortable list of Part #, Location and Quantity (lb). Click a heading to
   sort by it, click it again to reverse the order. The hidden-locations list is respected here.
 - **A plain note about the remaining time** — the page says "Does not update automatically", because
@@ -100,13 +98,14 @@
 
 ## 5. Waitlist — creating a request
 
-- **Seven steps:** Work Center → Job Type → Subtype → Details → Preview → Confirm → Complete.
+- **Seven steps:** Work Center → Category → Item → Details → Preview → Confirm → Complete.
 - **Choose a work center.** Search by work center, work order, sequence or part number; choose the
   building; pick from the presses saved to this computer ("Local Work Centers") or from the rest
   ("Other Workcenters"). Each tile shows the work center's current job, part number and when it was
   last updated.
-- **Choose the job type, then the subtype**, from the real catalog — the lists come from the database,
-  not from a file shipped with the app.
+- **Choose the category, then the item**, from the real catalog — the lists come from the database, not
+  from a file shipped with the app. The item list offers only what the requesting job actually supports, and
+  it is filtered before it is shown, so an unsupported item is never offered and then refused.
 - **Add the details** — a short multi-line description of what you need.
 - **Preview, then Confirm.** Preview reads everything back before you continue. Confirm shows the
   request summary and refuses a duplicate or a request whose current job has changed. The **Coil
@@ -185,9 +184,10 @@
 
 **Operations**
 
-- **Image Location Settings** — manage the pictures used for request types, request subtypes and work
-  centers, including the fallback chain (inherited or custom), with Browse, Reset and "Reset all", a
-  "Custom only" filter and a search over the rows. For authorized staff.
+- **Image Location Settings** — manage the picture each item uses and the picture each work center uses,
+  including the fallback chain (an item with no picture of its own shows its category's, inherited or
+  custom), with Browse, Reset and "Reset all", a "Custom only" filter and a search over the rows. For
+  authorized staff.
 - **Local Work Centers** — pin the work centers this computer should show first, or unpin them again.
   For Admin and lead roles.
 - **Dunnage Type Visibility** — choose which MTM Receiving dunnage types appear in this app, moving them
@@ -199,8 +199,10 @@
 - **New Request Alerts** — a personal switch (off by default) for the new-request alert. ⚠️ It is disabled
   in this installation, and says why, because the app as installed cannot deliver a notification — see
   `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
-- **Max Allotted Time** — how long each request sub-type should reasonably take, which drives the due
-  time and the overdue countdown. Plant Manager and above can change it; everyone else can see it.
+- **Max Allotted Time** — how long each item should reasonably take, which drives the due time and the
+  overdue countdown, shown beside the average its completed requests have actually taken. An item with no
+  configured figure is measured by a 15-minute default, labelled as a default. Plant Manager and above can
+  change the configured figure; everyone else can see both numbers.
 - **Cached Infor Visual data** — ask the cache service on the server to rebuild the cached Infor Visual
   data right away instead of waiting for its next scheduled run, and see the result in plain language
   (including "this workstation is not pointed at a service"). For Plant Manager, Admin and Developer.
@@ -218,7 +220,7 @@
 ## 9. Notifications
 
 - **A new-request alert.** When a request is submitted, a notification titled "New Waitlist Request"
-  naming the work center and request type is raised for users who have switched alerts on (off by
+  naming the work center and the item raised for users who have switched alerts on (off by
   default). Tapping it is meant to open that request.
 - ⚠️ **It cannot ring in this installation, and the surface says so instead of promising otherwise.** The
   alert needs the app installed in the way Windows notifications require, and this app is installed

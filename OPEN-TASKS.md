@@ -205,7 +205,7 @@ Full detail: `tasks.md` **Phase 30** (T162, T163) and **Phase 32** (T164).
 | ID | Severity | What it was |
 | --- | --- | --- |
 | ~~T162~~ | ~~MEDIUM~~ | **RESOLVED 2026-09-12.** Phase 24 narrowed the work-order *input* rule along with the key, which broke the Setup textbox's long-standing auto-formatter. The key sent is still the canonical `WO-######`; the raw input is lenient again and is formatted to that key **before** the lookup, so the collision class stays closed. See `tasks.md` Phase 30. |
-| ~~T163~~ | ~~LOW~~ | **RESOLVED 2026-09-12.** The image cards inside **Image Location Settings** were `Request Type`, `Work Center`, `Request Subtype`. Types and subtypes are now **one** card with two actions, followed by the work-center card. See `tasks.md` Phase 30. |
+| ~~T163~~ | ~~LOW~~ | **RESOLVED 2026-09-12.** The image cards inside **Image Location Settings** were one card per catalog. They were collapsed into one card with two actions and the work-center card. **Superseded 2026-09-13:** the request-type and subtype catalog is retired outright by `specs/004-unified-card-item-picker` (FR-023), so the screen is now **Item Images** and **Work Center Images**, and the request-type card is gone with the vocabulary it configured. |
 | ~~T164~~ | ~~MEDIUM~~ | **RESOLVED 2026-09-12.** An account still holding the temporary default password had to be signed into with `0000` before the change panel appeared. Startup now resolves the requirement from the store while the splash is up (new `sp_auth_password_reset_required_get`, called only on the login branch) and the window opens directly on the change panel — the sign-in form is never shown. The auto-login path is deliberately unchanged. See `tasks.md` Phase 32. |
 
 ### 1.8 Host reachability and the installer shortcut (T165, T166)
@@ -276,7 +276,10 @@ SC-007/SC-008 clocks are already running. §10 is documentation hygiene and can 
 
 **Owner decision already taken (2026-09-11): no request-type/subtype editor will be built.** The
 catalog-administration workstream is **cancelled, not deferred** — do not resurrect the Developer Settings
-editor page, the type edit view, or the guided wizard modal.
+editor page, the type edit view, or the guided wizard modal. **This is now settled in code as well as in
+intent:** `specs/004-unified-card-item-picker` (FR-023) removed the type and subtype vocabulary entirely —
+its two catalog tables, its seed, its two read procedures, its display-label services and its picture
+dialog — and `RetiredSymbolAuditTests` fails the build if any of them returns.
 
 ---
 

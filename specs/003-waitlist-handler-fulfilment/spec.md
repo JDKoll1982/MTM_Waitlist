@@ -187,8 +187,11 @@ both, named with its sender.
   type-specific detail values — without adding sections to the card's fixed layout. Where the request
   carries no resolved material identifier, the card MUST show nothing in its place rather than a
   substitute.
-- **FR-015**: The available-request list MUST be ordered most-urgent-first using the due, remaining and
-  overdue values the application already computes, so the most overdue and oldest work appears first.
+- **FR-015**: The available-request list **defaults to** most-urgent-first, using the due, remaining and
+  overdue values the application already computes, so the most overdue and oldest work appears first. The
+  order is a per-viewer choice the viewer can change, and the default is the one this feature fixed
+  (amended by `specs/004-unified-card-item-picker` FR-011/US3, which adds the four other order keys and
+  remembers the viewer's choice).
 - **FR-016**: Every lifecycle action MUST be performed through the stored procedures the application
   already uses for the request lifecycle; no action may write inline statement text.
 - **FR-017**: Every lifecycle action and every note change MUST record who performed it and when in the
@@ -318,12 +321,14 @@ was asked for after using it, both stay legible.
 
 ## Verbatim Constraints
 
-The card anatomy below was verified and approved on 2026-09-06 and is explicitly marked "DO NOT REGRESS".
-It stays authoritative; the action affordances this feature adds occupy the existing action area without
-changing any of these dimensions. Reproduced verbatim from
-`WeekendProject/PromptFiles/03-100%-Phase1-listdetail.md`:
+The card anatomy below **was** verified and approved on 2026-09-06 and marked "DO NOT REGRESS". It is
+**superseded in writing** by `specs/004-unified-card-item-picker` (US2, FR-005–FR-008) and is reproduced here
+so the supersession is a recorded decision rather than a quiet divergence. What the freeze protected still
+holds; what it forbade is now deliberate.
 
-> **VERIFIED CARD ANATOMY (2026-09-06, user-approved; DO NOT REGRESS):** The shared `WaitlistLineCardView.xaml` shell is laid out as a spreadsheet-style grid: (a) type/subtype **image is a FIXED 96×96 centered square** (do NOT stretch it full card height); (b) **title sits on its own top row**; (c) below it a content row splits into a **4-row label/value metadata grid** (Requested by / Press / Remaining time / Waiting, labels left, values right, aligned) on the left and the **per-type detail-field grid** on the right; (d) the **action buttons (Edit/Cancel/Accept) are vertically centered** on the right; (e) the **status pill is COMPACT** (fixed ~36px height), below the buttons, spanning the combined button width — do NOT make it fill remaining card height. Each per-type `*WaitlistLineView.xaml` `DetailsContent` renders its fields as a **2×3 four-column label/value grid** (`Auto/*/Auto/*` row pairs: Field0|Field1, Field2|Field3, Field4 spanning col1-3) — Coil uses the SAME grid pattern as the other types (do NOT swap it back to a single `ItemsControl` column). Overdue "Remaining time" is bold red.
+> **VERIFIED CARD ANATOMY (2026-09-06, user-approved; DO NOT REGRESS — SUPERSEDED 2026-09-13 by feature 004):** The shared `WaitlistLineCardView.xaml` shell is laid out as a spreadsheet-style grid: (a) the request **image is a FIXED 96×96 centered square** (do NOT stretch it full card height) — the picture is now the **Item's** and no longer the type's or subtype's; (b) **title sits on its own top row** — it now carries the Item's umbrella phrase as Line 1; (c) below it a content row carries the **4-row label/value metadata grid** (Requested by / Press / Remaining time / Waiting, labels left, values right, aligned) on the left, the **two-line identifier** (Line 2, resolved from the Item's `{token}` template) beneath it, and the **action buttons (Cancel and the primary action) vertically centered** on the right; the **per-type detail-field grid** it described has moved **off the card and onto the request detail page** (feature 004 FR-013), where the Item's declared fields lay out two per row; (d) the **action buttons are vertically centered** on the right; (e) the **status pill is COMPACT** (fixed ~36px height), below the buttons, spanning the combined button width — do NOT make it fill remaining card height. **There is one card shape for every Item.** The per-type `*WaitlistLineView.xaml` controls and the layout selector that chose between them are **deleted** (feature 004 FR-006: no layout variant may be selected by Item, type or subtype), so the "each per-type `DetailsContent` renders a 2×3 four-column grid" clause no longer has a subject and is retired rather than honoured. Overdue "Remaining time" is bold red.
+
+The supersession is guarded rather than merely documented: `MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs` asserts the **new** anatomy — the fixed 96×96 request image, the title on its own top row, the four metadata rows, the compact 36-high status pill below the buttons, and one shape for every Item — so an unintended card change still fails rather than passing quietly.
 
 The statuses named by the request lifecycle MUST be treated as the exact strings
 `Pending`, `Accepted`, `In Progress`, `Completed`, `Done`, `Cancelled` and `Released` wherever a stored

@@ -1,5 +1,11 @@
 # MTM Waitlist — Weekend Project Changelog
 
+> **⚠️ Superseded entry vocabulary (2026-09-13).** This changelog is a **historical record** and is kept as
+> written. Entries below that describe a request **type** or **subtype**, a per-type card, or a
+> `request_type` / `request_subtype` image scope describe a vocabulary that `specs/004-unified-card-item-picker`
+> (FR-023) has since **retired outright** — replaced by a Category/Item model with one card shape for every item.
+> Read those entries as the record of what changed at the time, not as a description of the current code.
+>
 > **Audience:** End users / plant-floor operators, supervisors, and admins.
 > This changelog is scoped to the **weekend Waitlist project work** (WeekendProject prompt files
 > `01`–`12`) — what you can see and do differently in the Waitlist area, written in plain language.
