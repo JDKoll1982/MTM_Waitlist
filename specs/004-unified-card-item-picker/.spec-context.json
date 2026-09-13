@@ -2,8 +2,8 @@
   "workflow": "companion",
   "specName": "unified card item picker",
   "branch": "004-unified-card-item-picker",
-  "currentStep": "specify",
-  "status": "specified",
+  "currentStep": "plan",
+  "status": "planned",
   "history": [
     {
       "step": "specify",
@@ -18,6 +18,34 @@
       "kind": "complete",
       "by": "extension",
       "at": "2026-09-13T17:05:06.581Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T17:40:51.374Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T17:45:15.980Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T17:47:08.932Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T17:48:42.994Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
@@ -144,7 +172,8 @@
     "area: specs/004-unified-card-item-picker (specification refreshed in place)",
     "area: WeekendProject/Documents/Request-Config-Template.csv and unified-item-picker-workflows.md (documents of record)",
     "area: MTM_Waitlist.Setup SetupWorkflowService.cs and SetupDunnageTypeViewModel.cs (scrap constants, HasScrapDecision)",
-    "constraint: constitution III stored-procedure-first; FR-027 the spreadsheet is never read or shipped"
+    "constraint: constitution III stored-procedure-first; FR-027 the spreadsheet is never read or shipped",
+    "Reached the oversized-review-plan gate (workflow node oversized-review-plan, options approve/reject). Run is unattended=true, so the gate is recorded rather than awaited and the plan step completes; no tasks work was started."
   ],
   "intent": "Let a person raise a request by naming the Category and Item they actually mean, and let every request read as the same two-line card whatever it is.",
   "expectations": [
@@ -155,5 +184,81 @@
     "Releasing a request keeps no screen control; it remains service-only.",
     "Verifying with the in-app inspector is superseded by the scripted UI tests."
   ],
-  "unattended": true
+  "unattended": true,
+  "approach": "Re-key the half-built Category/Item layer onto the store rather than rebuild it: add one configuration table row per Item holding behaviour and allotted minutes, re-key the request row and its three procedures to category + item, collapse the seven per-type cards into the one WaitlistLineCardView with no Item-based layout variant, and re-key both Settings screens and the image scope from subtype to Item. The per-Item allotted minutes move out of per-Windows-user local settings into seeded data so the configured value and the observed average can sit side by side; the 15-minute fallback stays app-side and is labelled as a default. The database is reinstalled from seed, so the retiring catalog is consumed at design time and no migration is written.",
+  "decisions": [
+    {
+      "decision": "One new table waitlist_request_item_configs, one row per Item, holding both the flow behaviour and allotted_minutes",
+      "why": "FR-014 is one configuration row per Item in the singular; keeping behaviour and minutes on the same row removes the half-configured state the requirement forbids, and consolidates metadata that the retiring design split across waitlist_request_types and waitlist_request_subtypes",
+      "rejected": "A second waitlist_request_item_settings table (creates a half-configured state for one integer column); re-keying waitlist_request_subtypes in place (FR-023 requires its removal); leaving the flow in code (FR-013/FR-015 require it to change as data)"
+    },
+    {
+      "decision": "The card Line 1 and Line 2 stay properties of the code catalog (RequestItemDefinition gains CardLine2Template); the configuration table holds only behaviour",
+      "why": "Seed section 16.3 keeps existence, order, Category, umbrella verb and Line 2 in the code catalog, and FR-013 list of what must come from stored configuration excludes the card lines; the retiring type/subtype rows never carried a line-2 template, so moving one there would be new behaviour rather than a re-key",
+      "rejected": "A line2_template column on the configuration table (contradicts 16.3 and leaves two owners); deriving Line 2 from ProducedValue (that is the stored value, not the displayed identifier)"
+    },
+    {
+      "decision": "The per-Item allotted minutes move out of ILocalSettingsService into the seeded store, and the 15-minute fallback stays an app-side constant labelled as a default",
+      "why": "FR-018 puts the configured value beside the observed average, which is a history read through a stored procedure, and FR-024 forbids inline SQL; a configured value keyed to a Windows user profile is invisible to everyone else and cannot be compared meaningfully with a shared observed value",
+      "rejected": "Keeping local settings and adding a DB read only for the average (compares a per-user value with a shared one); per-user minutes in the database (no requirement asks for it and FR-020 already means one configuration for everyone)"
+    },
+    {
+      "decision": "The job-independent Item set is five (both Riser Tables, both Hoppers, other) and a Category that would offer no Item is itself not offered",
+      "why": "The spec Edge Case states five after the scrap correction while seed section 16.4 still says six, and the spec is the authority; filtering the Category list is the only way FR-002 must-never-be-empty and SC-005 at-least-one-in-every-case both hold, because none of the five belongs to Assist, whose three Items each require a part on the job",
+      "rejected": "Showing an empty Assist Item step with a message (contradicts FR-002 and SC-005); adding a job-independent Assist Item (changes the 23-row catalog the spec pins verbatim); counting Scrap as job-independent (the exact mistake the spec was refreshed to fix)"
+    },
+    {
+      "decision": "The sort preference is per viewer through the existing ILocalSettingsService behind a new IWaitlistSortPreferenceService; five options with most urgent as the default; ordering extends UrgencyCalculator",
+      "why": "FR-011 requires the choice be remembered and SC-009 requires it to survive a restart, which rules out mirroring the in-memory BuildingSelectionService; UrgencyCalculator already owns most-urgent-first and is already unit-tested, and every sort key is a value the card already displays so sorting adds no query",
+      "rejected": "Mirroring BuildingSelectionService (in-memory, fails SC-009); a per-user database column (puts a display preference in the operational store); a separate sort service (two homes for one ordering rule)"
+    },
+    {
+      "decision": "The Other card gets no Item-selected span: the card is one layout, and the design document full-width Other span is read as a property of the detail-field grid that moves to the request page, where a lone field takes its row full width by field count",
+      "why": "FR-006 forbids any layout variant selected by Item, and the checklist already recorded the span as a plan-level layout value rather than a business requirement; deriving it from the declared field count generalises to any odd field count, which the mutable field set requires",
+      "rejected": "Special-casing other with RowSpan 2 (a variant selected by Item, and it breaks as soon as other gains a field); width bounds to stretch the lone field (constitution V forbids hardcoded layout boundaries)"
+    },
+    {
+      "decision": "Pictures are keyed by Item under a new request_item scope inheriting a new request_category family scope, reusing config_images_locations and the existing override dialog renamed",
+      "why": "FR-009 needs a two-hop Item then Category-family fallback, which is exactly the inheritance shape ImageOverrideDialogViewModel already implements, so storage, read/write services and the batched commit path stay untouched; request_type cannot serve as the Category key because the four Categories are not in RequestTypeInventory",
+      "rejected": "Reusing the request_type scope for the Category family (its eight entries are legacy request types, so the key would be a lie); a new Item image table (duplicates ten procedures and the storage root)"
+    },
+    {
+      "decision": "Correct the merged pickup Item rule to require a coil OR flatstock, and drop the dead pickup-flatstock arm",
+      "why": "pickup-coil is the CSV merged Pickup row whose source is MMC=>Coil, MMF=>Flatstock and whose visibility requires either, so the current Coil-only rule withholds a supported Item from a flatstock-only job, which SC-004 measures; pickup-flatstock is not one of the 23 pinned Item codes",
+      "rejected": "Leaving the rule and seeding no flatstock-only job (SC-004 requires that configuration proven); splitting Pickup back into two Items (the spec pins 23 codes and the merged display name)"
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Full oversized plan: plan.md with the Constitution Check (six principles, no violations), research.md with 21 Phase 0 decisions, data-model.md reshaping the request and adding the Item configuration entity, and four contract documents covering configuration, picker flow, card, and verification gates.",
+      "key_finding": "The Category/Item vocabulary is already half-built in code, so this is a re-key onto the store rather than a green field - and the one move that follows from the spec rather than from taste is that the per-Item allotted minutes leave per-Windows-user local settings and become seeded data, because FR-018 must compare the configured value with a history-derived observed average that FR-024 requires to come through a stored procedure."
+    }
+  },
+  "concerns": [
+    {
+      "note": "Seed section 16.4 says the job-independent Item set is six; the spec Edge Case says five after the scrap correction (both Riser Tables, both Hoppers, Other). Resolved in favour of the spec (research D20) - 16.4 is stale, and Scrap is gated on a real scrap decision per FR-031.",
+      "step": "plan",
+      "kind": "seed-vs-spec"
+    },
+    {
+      "note": "Under-specified: Assist has no job-independent Item, so an unfiltered Assist Category on a job with no parts opens an empty Item step, which FR-002 (MUST never be empty) and SC-005 (at least one in every case) forbid. The plan resolves it by filtering the Category list with the same availability pass (research D20). Owner confirmation needed if every Category is instead meant to stay selectable - that would need a job-independent Assist Item, which changes the 23-row catalog the spec pins verbatim.",
+      "step": "plan",
+      "kind": "underspecified-requirement"
+    },
+    {
+      "note": "Seed 16.3 assigns card Line 2 to the code catalog while 16.5 calls it the CSV identifier template, and FR-013s list of what must come from stored configuration excludes the card lines. The plan keeps Line 1 and Line 2 in the code catalog (research D3) and puts only behaviour in the configuration table.",
+      "step": "plan",
+      "kind": "seed-internal-contradiction"
+    },
+    {
+      "note": "RequestItemPickerRules.RequiredJobPart maps pickup-coil to Coil only, although the CSV row is the merged Pickup item whose source is MMC=>Coil, MMF=>Flatstock and whose visibility requires either - so a flatstock-only job withholds a supported Item (SC-004). The same switch carries a dead pickup-flatstock arm that is not one of the 23 pinned Item codes. Both corrected per research D21.",
+      "step": "plan",
+      "kind": "existing-defect"
+    },
+    {
+      "note": "FR-020 says both configuration screens reuse the role gate that already governs them (singular), but today they are governed by two different gates: CanManageUrgencySettings on the minutes editor and CanManageImageLocationSettings on the picture screen. The plan keeps each screens own gate and collapses neither.",
+      "step": "plan",
+      "kind": "ambiguity-resolved"
+    }
+  ]
 }
