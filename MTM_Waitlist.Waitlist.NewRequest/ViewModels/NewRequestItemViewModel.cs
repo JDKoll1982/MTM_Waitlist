@@ -171,11 +171,13 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
     }
 
     /// <summary>
-    /// Records the choice. An Item with no usable configuration row stops the flow here with the report the
-    /// configuration reader produced (FR-014), so the request can never be raised half-configured.
+    /// Records the choice and moves the flow on: on this step the card click <b>is</b> the advance, so the tile
+    /// and the button that used to follow it are one gesture. An Item with no usable configuration row still
+    /// stops the flow here with the report the configuration reader produced (FR-014), which is why the choice is
+    /// judged before anything is advanced.
     /// </summary>
     [RelayCommand]
-    private void SelectItem(NewRequestItemOption? option)
+    private async Task SelectItemAsync(NewRequestItemOption? option)
     {
         if (_state is null || option?.Item is null)
         {
@@ -200,14 +202,16 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
         _state.ItemConfiguration = _configurations.Get(option.Item.Id);
         IsUnavailableVisible = false;
         UnavailableMessage = string.Empty;
+
+        await AdvanceAsync().ConfigureAwait(true);
     }
 
     /// <summary>
-    /// Advances to the step the Item's configuration asks for. Without a choice — or without a usable
-    /// configuration row for it — the flow stays exactly where it is.
+    /// Advances to the step the Item's configuration asks for. The row is read again here, so the step that
+    /// follows is chosen from the configuration as it stands now rather than from the copy the list was bound
+    /// with; a row that has become unusable stops the flow where it is and undoes the choice.
     /// </summary>
-    [RelayCommand]
-    private async Task ContinueAsync()
+    private async Task AdvanceAsync()
     {
         if (_state?.Item is null || _state.Category is null)
         {

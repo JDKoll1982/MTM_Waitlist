@@ -27,10 +27,12 @@
         <Border Grid.Row="1" Style="{StaticResource SetupSectionCardStyle}">
             <StackPanel Spacing="10">
                 <TextBox
+                    x:Name="DetailInput"
                     AutomationProperties.AutomationId="NewRequestDetailsPage_DetailInput"
                     Header="{x:Bind ViewModel.PromptText, Mode=OneWay}"
                     Text="{x:Bind ViewModel.InputValue, Mode=TwoWay}"
-                    AcceptsReturn="True"
+                    AcceptsReturn="False"
+                    KeyDown="OnDetailInputKeyDown"
                     TextWrapping="Wrap"
                     PlaceholderText="Enter a short description"
                     MinWidth="360"
@@ -38,10 +40,12 @@
                     HorizontalAlignment="Left"
                     Visibility="{x:Bind ViewModel.IsTextInput, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                 <ComboBox
+                    x:Name="OptionCombo"
                     AutomationProperties.AutomationId="NewRequestDetailsPage_OptionCombo"
                     Header="{x:Bind ViewModel.PromptText, Mode=OneWay}"
                     ItemsSource="{x:Bind ViewModel.Options, Mode=OneWay}"
                     SelectedItem="{x:Bind ViewModel.SelectedOption, Mode=TwoWay}"
+                    SelectionChanged="OnOptionComboSelectionChanged"
                     MinWidth="360"
                     HorizontalAlignment="Left"
                     Visibility="{x:Bind ViewModel.IsOptionPick, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
@@ -60,11 +64,6 @@
                 AutomationProperties.AutomationId="NewRequestDetailsPage_BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}" />
-            <Button
-                AutomationProperties.AutomationId="NewRequestDetailsPage_ContinueButton"
-                Content="Continue"
-                Command="{x:Bind ViewModel.ContinueCommand}"
-                Style="{StaticResource AccentButtonStyle}" />
         </StackPanel>
     </Grid>
 </Page>

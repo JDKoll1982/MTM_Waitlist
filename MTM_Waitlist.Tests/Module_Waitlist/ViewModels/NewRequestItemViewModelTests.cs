@@ -13,8 +13,8 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 
 /// <summary>
 /// The Item step (US1, T035): it binds the filtered Item list in the catalog's Order, stops the flow with a
-/// plain-language unavailable report when a chosen Item has no configuration row (FR-014), and never advances
-/// past the step without a choice.
+/// plain-language unavailable report when a chosen Item has no configuration row (FR-014), and advances on the
+/// card click alone — the step has no Continue button, so the click <b>is</b> the way out.
 /// </summary>
 [TestClass]
 public sealed class NewRequestItemViewModelTests
@@ -97,21 +97,7 @@ public sealed class NewRequestItemViewModelTests
     }
 
     [TestMethod]
-    public void Continue_WithoutAChoice_DoesNotAdvanceTheFlow()
-    {
-        var navigation = new RecordingNavigationService();
-        var viewModel = CreateViewModel(navigation: navigation, availability: RequestJobPartAvailability.All);
-        var state = CreateState(RequestCategory.Other, RequestJobPartAvailability.All);
-        viewModel.OnNavigatedTo(state);
-
-        viewModel.ContinueCommand.Execute(null);
-
-        Assert.AreEqual(0, navigation.Navigations.Count, "The flow must not advance past the Item step without a choice.");
-        Assert.IsNull(state.Item);
-    }
-
-    [TestMethod]
-    public void Continue_AfterAChoice_AdvancesTheFlow()
+    public void SelectItem_WithAUsableConfiguration_AdvancesTheFlowImmediately()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation, availability: RequestJobPartAvailability.All);
@@ -119,10 +105,19 @@ public sealed class NewRequestItemViewModelTests
         viewModel.OnNavigatedTo(state);
 
         viewModel.SelectItemCommand.Execute(viewModel.Items.Single(option => option.Item!.Id == "other"));
-        viewModel.ContinueCommand.Execute(null);
 
-        Assert.AreEqual(1, navigation.Navigations.Count);
+        Assert.AreEqual(1, navigation.Navigations.Count, "The card click is this step's advance; no second action may be needed.");
         Assert.AreEqual(NewRequestFlowRules.GetNextStepType(state).FullName, navigation.Navigations[0].PageKey);
+    }
+
+    [TestMethod]
+    public void ItemStep_DeclaresNoContinueCommand()
+    {
+        // The step has exactly one way out. A Continue path reappearing on the view model would put the redundant
+        // action back in front of the person the moment something binds it again.
+        Assert.IsNull(
+            typeof(NewRequestItemViewModel).GetProperty("ContinueCommand"),
+            "The Item step must declare no Continue command; its card click is the advance.");
     }
 
     private static NewRequestFlowState CreateState(RequestCategory category, RequestJobPartAvailability availability) => new()

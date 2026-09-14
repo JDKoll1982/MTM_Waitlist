@@ -13,10 +13,15 @@ using MTM_Waitlist.Module_Waitlist.Services;
 namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 
 /// <summary>
-/// Text-input step of the New Request wizard. Replaces the inline "Additional details"
-/// <c>ContentDialog</c> that <c>WaitlistNewRequestDialogService</c> built in code:
-/// the user types the request details subject to the configured min/max length.
+/// Additional-details step of the New Request wizard. Replaces the inline "Additional details"
+/// <c>ContentDialog</c> that <c>WaitlistNewRequestDialogService</c> built in code: the person answers subject to
+/// the configured min/max length, or picks one of the configured options.
 /// </summary>
+/// <remarks>
+/// The step has no Continue button. The answer is the way out: the view executes <see cref="ContinueCommand"/> when
+/// a listed answer is picked or Enter is pressed in the text box, so an answer that does not satisfy the row is
+/// reported on the step the person is still looking at rather than ending the request elsewhere (FR-014).
+/// </remarks>
 public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigationAware
 {
     private readonly INavigationService _navigationService;
@@ -74,6 +79,18 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
         get; set;
     }
 
+    /// <summary>
+    /// The listed answer this step was entered with, or null when it asked nothing before. Coming Back to the step
+    /// restores the previous answer, and that restore raises <c>SelectionChanged</c> on the list; the view compares
+    /// against this so a restore is not mistaken for a fresh choice — otherwise the step would leave again the
+    /// instant it appeared and the answer could never be corrected.
+    /// </summary>
+    public string? RestoredAnswer
+    {
+        get;
+        private set;
+    }
+
     /// <summary>The options the configuration declares, in declared order.</summary>
     public ObservableCollection<string> Options { get; } = new();
 
@@ -129,6 +146,12 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
 
         InputValue = state.InputValue ?? string.Empty;
         SelectedOption = IsOptionPick ? state.InputValue : null;
+
+        // Read before the list is bound: the binding applies this value to the list control, which reports it back
+        // as a selection change. Recording it here means the view can tell that report from a person's pick without
+        // depending on which of loading and loading-complete happens first.
+        RestoredAnswer = SelectedOption;
+
         ValidationMessage = string.Empty;
         IsValidationVisible = false;
     }
@@ -137,6 +160,11 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
     {
     }
 
+    /// <summary>
+    /// Judges the answer against the chosen Item's configuration row and moves on to the confirmation step once it
+    /// passes. An answer that does not — a typed one outside the configured length, a picked one that is blank or
+    /// not on the list — is reported here and the flow stays on this step.
+    /// </summary>
     [RelayCommand]
     private void Continue()
     {

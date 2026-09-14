@@ -6,8 +6,9 @@ using MTM_Waitlist.Module_Waitlist.ViewModels;
 namespace MTM_Waitlist.Module_Waitlist.Views;
 
 /// <summary>
-/// Item step of the New Request wizard. A card click selects the Item; the flow advances on Continue, so an Item
-/// whose configuration is missing can be reported in place rather than failing on the way out (FR-014).
+/// Item step of the New Request wizard. The card click <b>is</b> the advance — the step has no Continue button —
+/// and an Item whose configuration is missing is still reported in place rather than failing on the way out
+/// (FR-014), because the view model judges the choice before it moves the flow.
 /// </summary>
 public sealed partial class NewRequestItemPage : Page
 {

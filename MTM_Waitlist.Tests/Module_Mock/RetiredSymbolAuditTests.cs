@@ -23,6 +23,13 @@ namespace MTM_Waitlist.Tests.Module_Mock;
 /// carries the recorded "Retired objects" section. Both must name the retired objects, so neither is a
 /// stale reference — they are the record <i>of</i> the removal.
 /// </para>
+/// <para>
+/// <b>One generated-output exemption.</b> <c>tools/tooltip-inventory/</c> holds the artifacts
+/// <c>tools/Generate-TooltipInventory.ps1</c> writes; it is gitignored, it is rebuilt from the XAML rather
+/// than written by hand, and the generator already skips that folder when it scans. A snapshot taken before
+/// a retirement therefore names symbols that no longer exist in source — a fact about the snapshot's age,
+/// not about the code — so it is excluded here for the same reason <c>.codegraphy/</c> is.
+/// </para>
 /// </remarks>
 [TestClass]
 public sealed class RetiredSymbolAuditTests
@@ -73,6 +80,10 @@ public sealed class RetiredSymbolAuditTests
         $"{Path.DirectorySeparatorChar}specs{Path.DirectorySeparatorChar}",
         $"{Path.DirectorySeparatorChar}WeekendProject{Path.DirectorySeparatorChar}",
         $"{Path.DirectorySeparatorChar}.github{Path.DirectorySeparatorChar}",
+
+        // Generated tooltip-inventory output: gitignored, rebuilt from the XAML, and already skipped by its
+        // own generator. See the remarks above.
+        $"{Path.DirectorySeparatorChar}tools{Path.DirectorySeparatorChar}tooltip-inventory{Path.DirectorySeparatorChar}",
     ];
 
     /// <summary>

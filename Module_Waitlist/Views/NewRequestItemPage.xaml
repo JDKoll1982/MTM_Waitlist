@@ -88,17 +88,12 @@
             </ScrollViewer>
         </Grid>
 
-        <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}" Orientation="Horizontal">
+        <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
             <Button
                 AutomationProperties.AutomationId="NewRequestItemPage_BackButton"
                 x:Uid="NewRequest_Item.BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}" />
-            <Button
-                AutomationProperties.AutomationId="NewRequestItemPage_ContinueButton"
-                x:Uid="NewRequest_Item.ContinueButton"
-                Content="Continue"
-                Command="{x:Bind ViewModel.ContinueCommand}" />
         </StackPanel>
     </Grid>
 </Page>

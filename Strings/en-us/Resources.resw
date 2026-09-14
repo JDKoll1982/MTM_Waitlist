@@ -879,9 +879,6 @@
   <data name="NewRequest_Item.BackButton.Content" xml:space="preserve">
     <value>Back</value>
   </data>
-  <data name="NewRequest_Item.ContinueButton.Content" xml:space="preserve">
-    <value>Continue</value>
-  </data>
   <data name="NewRequest_Dunnage.Title.Text" xml:space="preserve">
     <value>New Request - Choose Dunnage</value>
   </data>

@@ -969,6 +969,13 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
   names resolve to **no** active job — the fixtures must be gone from the data, not merely from the seed file.
   **Write it to fail first**, against today's seed. ·
   `MTM_Waitlist.Tests/Module_Setup/Services/ActiveJobSeedRoundTripTests.cs`
+- [x] **T120a** [US1] (2026-09-14) `ActiveJobSeedRoundTripTests` now **writes its own seven fixture rows** under a
+  per-run `IT-ROUNDTRIP-*` work centre and deletes them in teardown, so the matrix no longer reads the deployed
+  seed. The re-point T120 landed was not survivable in practice: work centre `100-3` had already been overwritten
+  by a live Setup save for `WO-060954`, which made `Seeded100_3_CoilOnly_NormalisesToCoil` red for a reason that
+  was not a defect. The shapes asserted are unchanged (the same seven situations through the same deserializer),
+  and `Retired900Fixtures_ResolveToNoActiveJob` still reads live rows because its subject is an absence. ·
+  `MTM_Waitlist.Tests/Module_Setup/Services/ActiveJobSeedRoundTripTests.cs`
 - [x] **T121** [P] [US1] Add the raisability check (FR-035): every in-scope Item with `requires_answer = 1` and
   `answer_value_type = 'enum'` yields at least one choice, resolved from the configuration row and the job snapshot
   — **never** from an Item's identity (FR-013). **Write it to fail first**; it must name `pickup-component` in the

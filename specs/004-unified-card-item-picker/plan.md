@@ -307,6 +307,15 @@ the seven situations are no longer immune to a Setup walk: the fulfilment pass r
 walk on the same work centre, and the round-trip test is re-pointed rather than deleted so the matrix is still
 asserted.
 
+**Amendment (2026-09-14) — the re-point was not survivable, so the test now owns its data.** The predicted
+overwrite happened: work centre `100-3` carried a live Setup save for `WO-060954` / `22-77723-125-Raw`, and
+`Seeded100_3_CoilOnly_NormalisesToCoil` failed with zero coils — a red gate caused by the shop floor doing its job.
+`ActiveJobSeedRoundTripTests` therefore writes its own seven rows under a per-run `IT-ROUNDTRIP-*` work centre and
+deletes them in teardown. The matrix, the shapes and the deserializer it is driven through are unchanged, so it
+remains a proof about the real read path; what it no longer does is depend on a row the live database is free to
+replace. The deployed seed keeps its real work centres for the fulfilment pass. The one live-row claim that remains
+is the retirement assertion, whose subject is the absence of rows at the seven `900-*` names.
+
 **Files.** `seed_setup_work_centers_fixture_stations/{create,rollback}.sql` retire; `AllSeeds.sql`'s entry for them is
 removed and `Bootstrap/update_table_descriptions.sql` follows if it names them (FR-025, constitution III);
 `ActiveJobSeedRoundTripTests.cs` moves to the new work centres.
