@@ -189,7 +189,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
                 await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
                 var result = await operation(connection, cancellationToken).ConfigureAwait(false);
-                _storeAvailability?.RecordAvailable(databaseTarget, attemptedUtc, attempt);
+                RecordAvailability(() => _storeAvailability?.RecordAvailable(databaseTarget, attemptedUtc, attempt));
                 return result;
             }
             catch (OperationCanceledException)
@@ -205,17 +205,42 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
 
                 if (attempt >= _retryPolicy.MaxAttempts)
                 {
-                    _storeAvailability?.RecordUnavailable(
+                    RecordAvailability(() => _storeAvailability?.RecordUnavailable(
                         databaseTarget,
                         attemptedUtc,
                         attempt,
                         DateTime.UtcNow + _retryPolicy.NextRetryDelay,
-                        $"The {databaseName} store did not answer after {attempt} attempts.");
+                        $"The {databaseName} store did not answer after {attempt} attempts."));
                     return unavailableResult;
                 }
 
                 await _retryPolicy.DelayBeforeRetryAsync(attempt, cancellationToken).ConfigureAwait(false);
             }
+        }
+    }
+
+    /// <summary>
+    /// Records a store observation without letting the observation decide the read's outcome.
+    /// </summary>
+    /// <remarks>
+    /// Availability is this seam's side channel to the screen, not part of the read. A screen that throws
+    /// while being told the state — a thread-affine XAML write, a disposed screen — must not turn a read that
+    /// already succeeded into a failed operation or an extra attempt, and must not be reported as the store
+    /// itself having refused. The fault is logged where it actually belongs instead of being mislabelled as a
+    /// database error and retried.
+    /// </remarks>
+    private static void RecordAvailability(Action record)
+    {
+        try
+        {
+            record();
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "MySqlHelperServer",
+                ex,
+                "The store availability observation could not be recorded, so the screen was not told. The read's own outcome is unaffected.");
         }
     }
 

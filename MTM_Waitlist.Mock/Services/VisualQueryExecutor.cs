@@ -90,6 +90,11 @@ public sealed class VisualQueryExecutor : IVisualQueryExecutor
             return VisualQueryOutcome.Failed("No Infor Visual connection is configured.");
         }
 
+        // Bounded before it is opened. Without this the read inherited the configured connect timeout, so the
+        // first Visual read of a session spent ~12 s discovering a host the reachability probe had already
+        // declared unreachable in two.
+        connectionString = BoundConnectAttempt(connectionString);
+
         try
         {
             await using var connection = new SqlConnection(connectionString);
@@ -151,6 +156,48 @@ public sealed class VisualQueryExecutor : IVisualQueryExecutor
         {
             StartupDebugLog.Error("VisualQuery", exception, $"Read script '{sourceScriptRelativePath}' failed.");
             return VisualQueryOutcome.Failed(exception.Message);
+        }
+    }
+
+    /// <summary>
+    /// Caps how long a read may spend failing to reach Infor Visual, so the wait before the mirror answers is
+    /// the same short bound the reachability probe already uses.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The read used to inherit the configured connect timeout (<c>ConnectionTimeoutSeconds</c>, ten seconds by
+    /// default) — and on an absent host the first Visual read of a session measured <b>12.5 s</b> before the
+    /// fallback could serve the same question from <c>mtm_mock</c> in microseconds. The probe asks the identical
+    /// question of the identical host and answers it in two seconds.
+    /// </para>
+    /// <para>
+    /// <b>The bound is shared with the probe rather than stated again</b>, so the two cannot drift into
+    /// disagreeing about how long "unreachable" takes to establish: a change to either moves both. It costs
+    /// nothing when the host is up — a reachable server completes the handshake in milliseconds — and it is the
+    /// entire wait when the host is absent.
+    /// </para>
+    /// <para>
+    /// An unparseable value is returned unchanged rather than throwing, matching
+    /// <see cref="IVisualConnectionStringProvider.Resolve"/>'s documented behaviour: the fault then surfaces
+    /// from the connection attempt, where it is classified as unreachable or failed.
+    /// </para>
+    /// </remarks>
+    internal static string BoundConnectAttempt(string connectionString)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+
+        try
+        {
+            var builder = new SqlConnectionStringBuilder(connectionString);
+            builder.ConnectTimeout = Math.Min(builder.ConnectTimeout, VisualConnectivityProbe.ProbeConnectTimeoutSeconds);
+            return builder.ConnectionString;
+        }
+        catch (ArgumentException ex)
+        {
+            StartupDebugLog.Info(
+                "VisualQuery",
+                $"The Infor Visual connection string could not be bounded ({ex.GetType().Name}), so the read keeps its configured timeout.");
+            return connectionString;
         }
     }
 

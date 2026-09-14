@@ -21,6 +21,7 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
     private readonly IStartupShellStateService _startupShellStateService;
     private readonly IAppLifecycleService _lifecycle;
     private readonly StartupState _startupState;
+    private readonly IVisualVerdictPrimer? _verdictPrimer;
     private bool _startupStarted;
     private string _statusText = "Starting application...";
     private bool _isBusy = true;
@@ -61,6 +62,10 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
 
     public Func<Task<string?>>? LoggingDestinationPromptRequestedAsync { get; set; }
 
+    /// <param name="verdictPrimer">
+    /// Settles the Infor Visual reachability verdict while the splash is showing. Optional: a host with no
+    /// Visual read fallback simply has nothing to prime, and the application behaves as it did before.
+    /// </param>
     public SplashViewModel(
         IStartupCoordinator startupCoordinator,
         IStartupRecoveryService startupRecoveryService,
@@ -68,7 +73,8 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
         INavigationService navigationService,
         IStartupShellStateService startupShellStateService,
         IAppLifecycleService lifecycle,
-        StartupState startupState)
+        StartupState startupState,
+        IVisualVerdictPrimer? verdictPrimer = null)
     {
         ArgumentNullException.ThrowIfNull(startupCoordinator);
         ArgumentNullException.ThrowIfNull(startupRecoveryService);
@@ -84,6 +90,7 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
         _startupShellStateService = startupShellStateService;
         _lifecycle = lifecycle;
         _startupState = startupState;
+        _verdictPrimer = verdictPrimer;
 
         StatusText = _startupState.StatusText;
         IsBusy = _startupState.IsBusy;
@@ -157,6 +164,36 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
         _lifecycle.Exit();
     }
 
+    /// <summary>
+    /// Settles the Infor Visual reachability verdict, when a primer is installed.
+    /// </summary>
+    /// <remarks>
+    /// Started alongside the rest of startup rather than after it, so establishing the verdict has almost no
+    /// effect on how long the splash is up. It is awaited before the shell activates either way, which is the
+    /// point: the main window must never open while the application is still deciding whether Infor Visual can
+    /// be reached, because every read taken in that window would pay for the answer. Never throws — a
+    /// reachability question may not be able to block startup.
+    /// </remarks>
+    private async Task PrimeReachabilityVerdictAsync()
+    {
+        if (_verdictPrimer is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _verdictPrimer.PrimeAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "SplashViewModel",
+                ex,
+                "Priming the Infor Visual reachability verdict failed; startup continues and the probe loop settles it as before.");
+        }
+    }
+
     private async Task RunStartupAsync(bool retryDatabasePhaseOnly = false)
     {
         StartupDebugLog.Info("SplashViewModel", "RunStartupAsync entered.");
@@ -178,7 +215,13 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
                 UpdateState();
             });
 
+            // Settle the verdict while the rest of startup runs, and await both before the shell activates, so
+            // the first read of the session is never the thing that discovers Infor Visual is unreachable.
+            var verdictPriming = PrimeReachabilityVerdictAsync();
+
             result = await _startupCoordinator.RunAsync(progress, default, retryDatabasePhaseOnly);
+
+            await verdictPriming;
         }
         catch (Exception ex)
         {

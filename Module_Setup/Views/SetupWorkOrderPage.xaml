@@ -90,10 +90,21 @@
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="Wrap" />
         </StackPanel>
 
+        <!-- A live Infor Visual lookup can spend seconds failing over to the mtm_mock mirror. The ring is the
+             operator's only signal that the search is running rather than the screen having frozen. -->
+        <ProgressRing
+            Grid.Row="1"
+            AutomationProperties.AutomationId="SetupWorkOrderPage_BusyIndicator"
+            Width="48"
+            Height="48"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
             <Button AutomationProperties.AutomationId="SetupWorkOrderPage_BackButton" x:Uid="Setup_Action.BackToWorkstations" Content="Back" Command="{x:Bind ViewModel.BackToWorkCentersCommand}" />
             <Button AutomationProperties.AutomationId="SetupWorkOrderPage_CancelButton" x:Uid="Setup_Action.Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelCommand}" />
-            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_SearchButton" x:Uid="Setup_Action.Search" Content="Search" Command="{x:Bind ViewModel.SearchCommand}" />
+            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_SearchButton" x:Uid="Setup_Action.Search" Content="Search" Command="{x:Bind ViewModel.SearchCommand}" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </Page>

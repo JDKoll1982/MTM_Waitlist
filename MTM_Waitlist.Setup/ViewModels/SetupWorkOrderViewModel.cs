@@ -14,6 +14,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
 {
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
+    private readonly IWorkOrderValidationService _workOrderValidationService;
     private readonly SemaphoreSlim _searchGate = new(1, 1);
     private CancellationTokenSource _lifecycleCts = new();
     private bool _isClosing;
@@ -72,14 +73,30 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
             ? Visibility.Visible
             : Visibility.Collapsed;
 
+    /// <summary>
+    /// Whether the screen is idle, and therefore whether its actions may be used.
+    /// </summary>
+    /// <remarks>
+    /// A lookup against an unreachable Infor Visual spends seconds failing over to the <c>mtm_mock</c> mirror, so
+    /// the Search action is held for that whole time instead of letting a second search be issued behind the
+    /// first — which the search gate would silently drop, leaving the operator believing nothing happened.
+    /// </remarks>
+    public bool IsIdle => !IsBusy;
+
+    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(IsIdle));
+
     public string SelectedPartDisplay => string.IsNullOrWhiteSpace(State.SelectedPartNumber)
         ? LocalizeOrDefault("Setup_Common.None", "None")
         : State.SelectedPartNumber;
 
-    public SetupWorkOrderViewModel(INavigationService navigationService, ISetupWorkflowService workflowService)
+    public SetupWorkOrderViewModel(
+        INavigationService navigationService,
+        ISetupWorkflowService workflowService,
+        IWorkOrderValidationService workOrderValidationService)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
+        _workOrderValidationService = workOrderValidationService;
     }
 
     public void OnNavigatedTo(object parameter)
@@ -138,6 +155,18 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
         IsBusy = true;
         try
         {
+            // Canonicalise the box before the lookup is awaited, not after it returns. This is the operator's
+            // first confirmation that their number was understood, so it has to be immediate: on a machine that
+            // cannot reach Infor Visual the lookup spends seconds failing over to the mtm_mock mirror, and
+            // canonicalising afterwards leaves them staring at raw digits — '55691' — for the whole search.
+            // The rule itself stays in WorkOrderValidationService, the same singleton the workflow uses, so what
+            // the box shows and what the lookup is handed cannot drift apart. Input the rule rejects is left
+            // exactly as typed so the operator can correct it.
+            if (_workOrderValidationService.TryNormalize(WorkOrderInput, out var normalizedWorkOrder, out _))
+            {
+                WorkOrderInput = normalizedWorkOrder;
+            }
+
             var result = await _workflowService.SearchWorkOrderAsync(WorkOrderInput, _lifecycleCts.Token).ConfigureAwait(true);
             StatusMessage = result.Message;
 

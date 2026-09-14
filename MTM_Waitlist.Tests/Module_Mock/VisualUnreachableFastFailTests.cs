@@ -4,6 +4,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Mock.Contracts;
+using MTM_Waitlist.Mock.Models;
 using MTM_Waitlist.Mock.Services;
 
 namespace MTM_Waitlist.Tests.Module_Mock;
@@ -180,6 +182,64 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
+    public void BoundConnectAttempt_ShortensALongerConfiguredTimeoutToTheProbeBound()
+    {
+        var prepared = new SqlConnectionStringBuilder(
+            VisualQueryExecutor.BoundConnectAttempt(
+                "Server=VISUAL;Database=MTMFG;User ID=SHOP2;Password=SHOP;Connect Timeout=10"));
+
+        Assert.AreEqual(
+            VisualConnectivityProbe.ProbeConnectTimeoutSeconds,
+            prepared.ConnectTimeout,
+            "A read that is going to fall back may not spend the data-read timeout discovering the source is down.");
+    }
+
+    [TestMethod]
+    public void BoundConnectAttempt_KeepsAShorterCallerConnectTimeout()
+    {
+        var prepared = new SqlConnectionStringBuilder(
+            VisualQueryExecutor.BoundConnectAttempt(
+                "Server=VISUAL;Database=MTMFG;User ID=SHOP2;Password=SHOP;Connect Timeout=1"));
+
+        Assert.AreEqual(1, prepared.ConnectTimeout, "A caller asking for less than the read bound keeps their shorter timeout.");
+    }
+
+    [TestMethod]
+    public void BoundConnectAttempt_WithAnUnparseableValue_IsReturnedUnchangedRatherThanThrowing()
+    {
+        const string Unparseable = "Server=VISUAL;NotAKeywordThisProviderKnows=1";
+
+        Assert.AreEqual(
+            Unparseable,
+            VisualQueryExecutor.BoundConnectAttempt(Unparseable),
+            "Bounding is best-effort: the fault must surface from the connection attempt, not from here.");
+    }
+
+    [TestMethod]
+    public async Task ExecuteAsync_WithAnUnreachableHost_GivesUpWithinTheReadBound()
+    {
+        Environment.SetEnvironmentVariable(
+            ConnectionStringEnvironmentVariable,
+            $"Server={NonRoutableServer};Database=MTMFG;User ID=SHOP2;Password=SHOP;TrustServerCertificate=true;Encrypt=false;Connect Timeout=30");
+
+        var executor = new VisualQueryExecutor(new StubScriptStore(), new VisualConnectionStringProvider());
+        var stopwatch = Stopwatch.StartNew();
+
+        var outcome = await executor.ExecuteAsync(
+            "Database/InforVisual/Queues/Module_Setup/Queries/LookupWorkOrder.sql",
+            new Dictionary<string, object?>());
+
+        stopwatch.Stop();
+        Assert.AreEqual(
+            VisualQueryStatus.Unreachable,
+            outcome.Status,
+            "An absent host is unreachability, which is what routes the read to the mtm_mock mirror.");
+        Assert.IsTrue(
+            stopwatch.Elapsed < TimeSpan.FromSeconds(6),
+            $"A read that is going to be served from the mirror must not spend the configured data-read timeout first; it took {stopwatch.Elapsed.TotalSeconds:F1} s.");
+    }
+
+    [TestMethod]
     public async Task ProbeAsync_WithNoConnectionConfigured_ReturnsFalse()
     {
         var probe = new VisualConnectivityProbe(new VisualConnectionStringProvider());
@@ -204,5 +264,12 @@ public sealed class VisualUnreachableFastFailTests
         Assert.IsTrue(
             stopwatch.Elapsed < TimeSpan.FromSeconds(6),
             $"A probe must not hold the read-status loop for a connect timeout plus a blind retry; it took {stopwatch.Elapsed.TotalSeconds:F1} s.");
+    }
+
+    /// <summary>Supplies a script without touching the content root, so a bound can be measured in isolation.</summary>
+    private sealed class StubScriptStore : IInforVisualScriptStore
+    {
+        public Task<string> LoadAsync(string relativePath, CancellationToken cancellationToken = default) =>
+            Task.FromResult("SELECT 1 AS Probe");
     }
 }

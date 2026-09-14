@@ -125,7 +125,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         StoreUnavailable = new InternalStoreUnavailableState(
             MySqlDatabaseTarget.MtmWaitlist,
             _ => LoadOrdersAsync(_buildingSelectionService.SelectedBuilding),
-            storeAvailabilityTracker);
+            storeAvailabilityTracker,
+            dispatcherQueue);
         StoreUnavailable.PropertyChanged += OnStoreUnavailablePropertyChanged;
 
         Source.CollectionChanged += OnSourceCollectionChanged;

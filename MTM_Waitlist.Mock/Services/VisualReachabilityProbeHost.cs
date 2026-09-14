@@ -1,3 +1,6 @@
+using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
+
 using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Mock.Models;
 
@@ -29,7 +32,7 @@ namespace MTM_Waitlist.Mock.Services;
 /// continues, because losing reachability visibility must never take the application down.
 /// </para>
 /// </remarks>
-public sealed class VisualReachabilityProbeHost : IVisualReachabilityProbeHost
+public sealed class VisualReachabilityProbeHost : IVisualReachabilityProbeHost, IVisualVerdictPrimer
 {
     /// <summary>Probe interval while Infor Visual is reachable.</summary>
     public static readonly TimeSpan LiveProbeInterval = TimeSpan.FromSeconds(30);
@@ -41,6 +44,11 @@ public sealed class VisualReachabilityProbeHost : IVisualReachabilityProbeHost
     private readonly ReadStatusProvider? _statusProvider;
     private readonly TimeSpan _liveInterval;
     private readonly TimeSpan _cachedInterval;
+
+    /// <summary>
+    /// Serialises probes so the loop and startup priming can never have two connections on the wire at once.
+    /// </summary>
+    private readonly SemaphoreSlim _probeGate = new(1, 1);
 
     private Task? _loop;
     private CancellationTokenSource? _loopSource;
@@ -124,12 +132,7 @@ public sealed class VisualReachabilityProbeHost : IVisualReachabilityProbeHost
         {
             try
             {
-                await _detector.ProbeAsync(cancellationToken).ConfigureAwait(false);
-
-                if (_statusProvider is not null)
-                {
-                    await _statusProvider.RefreshAsync(cancellationToken).ConfigureAwait(false);
-                }
+                await ProbeOnceAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -152,6 +155,69 @@ public sealed class VisualReachabilityProbeHost : IVisualReachabilityProbeHost
             {
                 return;
             }
+        }
+    }
+
+    /// <summary>
+    /// Probes until the verdict is settled, so the shell never opens while the application is still deciding
+    /// whether to attempt Infor Visual. See <see cref="IVisualVerdictPrimer"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The threshold is read from the detector rather than restated, so this can never probe fewer times than
+    /// the hysteresis requires. Probing is serialised with the loop, and a failure observed here counts toward
+    /// the same threshold the loop's probes do — which is the point: the two together settle the verdict the
+    /// way one probe interval eventually would, only before the user can see anything.
+    /// </para>
+    /// <para>
+    /// Never throws. Nothing about a reachability question may stop the application from starting, so an
+    /// inconclusive prime simply leaves the verdict <c>Unknown</c> and the loop carries on as it always did.
+    /// </para>
+    /// </remarks>
+    public async Task PrimeAsync(CancellationToken cancellationToken = default)
+    {
+        for (var attempt = 0; attempt < VisualReachabilityDetector.FailuresBeforeCached; attempt++)
+        {
+            if (_detector.Current != VisualReadStatus.Unknown)
+            {
+                break;
+            }
+
+            try
+            {
+                await ProbeOnceAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception)
+            {
+                // A throwing probe is the detector's failure signal; startup must survive it.
+            }
+        }
+
+        StartupDebugLog.Info(
+            nameof(VisualReachabilityProbeHost),
+            $"Startup priming settled the Infor Visual verdict as {_detector.Current}.");
+    }
+
+    private async Task ProbeOnceAsync(CancellationToken cancellationToken)
+    {
+        await _probeGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            await _detector.ProbeAsync(cancellationToken).ConfigureAwait(false);
+
+            if (_statusProvider is not null)
+            {
+                await _statusProvider.RefreshAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            _probeGate.Release();
         }
     }
 }

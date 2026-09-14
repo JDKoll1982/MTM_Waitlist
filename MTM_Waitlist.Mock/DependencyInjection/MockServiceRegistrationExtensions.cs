@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Mock.Models;
 using MTM_Waitlist.Mock.Services;
@@ -53,6 +54,11 @@ public static class MockServiceRegistrationExtensions
         services.AddSingleton<IVisualReachabilityProbeHost>(provider => new VisualReachabilityProbeHost(
             provider.GetRequiredService<IVisualReachabilityDetector>(),
             provider.GetRequiredService<ReadStatusProvider>()));
+
+        // The same object again, as the startup primer: the probe owner is the only thing allowed to ask Infor
+        // Visual for reachability, so priming must not become a second probe path.
+        services.AddSingleton<IVisualVerdictPrimer>(provider =>
+            (VisualReachabilityProbeHost)provider.GetRequiredService<IVisualReachabilityProbeHost>());
 
         // One fallback per read shape. A sixth shape adds one line here and changes nothing else.
         services.AddSingleton<IVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow>, VisualWorkOrderLookupFallback>();

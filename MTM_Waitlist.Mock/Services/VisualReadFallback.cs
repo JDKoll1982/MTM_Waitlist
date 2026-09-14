@@ -22,11 +22,19 @@ namespace MTM_Waitlist.Mock.Services;
 /// reads the mirror, and every other failure surfaces. That is what stops the cache from masking a real
 /// fault or from replacing a legitimately empty answer.
 /// </para>
+/// <para>
+/// <b>A settled verdict is reused.</b> When the reachability probe has established that Infor Visual is
+/// unreachable, the live attempt is skipped and the mirror answers directly — because the attempt could only
+/// rediscover the verdict, at the cost of a connect timeout, on every read. The read path never decides
+/// unreachability from its own failure; it only ever honours a verdict the probe reached, and the probe loop
+/// is what keeps asking and therefore what detects recovery.
+/// </para>
 /// </remarks>
 public abstract class VisualReadFallback<TRequest, TRow> : IVisualReadFallback<TRequest, TRow>
 {
     private readonly IVisualQueryExecutor _executor;
     private readonly IMySqlHelperServer? _mySqlHelperServer;
+    private readonly IVisualReachabilityDetector? _reachability;
 
     /// <summary>Creates the fallback.</summary>
     /// <param name="executor">Runs the live read against Infor Visual.</param>
@@ -34,13 +42,28 @@ public abstract class VisualReadFallback<TRequest, TRow> : IVisualReadFallback<T
     /// Reads the <c>mtm_mock</c> mirror. Optional so the shape can still be exercised without a cache
     /// configured; an unreachable source then surfaces instead of silently returning nothing.
     /// </param>
-    protected VisualReadFallback(IVisualQueryExecutor executor, IMySqlHelperServer? mySqlHelperServer)
+    /// <param name="reachability">
+    /// Supplies the settled reachability verdict. Optional, and when it is absent every read attempts the live
+    /// source exactly as it always did — the short-circuit optimises a fact the probe has already established,
+    /// it is never a second source of truth.
+    /// </param>
+    protected VisualReadFallback(
+        IVisualQueryExecutor executor,
+        IMySqlHelperServer? mySqlHelperServer,
+        IVisualReachabilityDetector? reachability = null)
     {
         ArgumentNullException.ThrowIfNull(executor);
 
         _executor = executor;
         _mySqlHelperServer = mySqlHelperServer;
+        _reachability = reachability;
     }
+
+    /// <summary>
+    /// Whether the probe has already settled on "Infor Visual is unreachable", making a live attempt a way of
+    /// rediscovering it at the cost of a connect timeout.
+    /// </summary>
+    private bool IsVerdictCached => _reachability?.Current == VisualReadStatus.Cached;
 
     /// <summary>The catalog definition this fallback serves.</summary>
     protected abstract VisualReadShape Shape { get; }
@@ -74,6 +97,16 @@ public abstract class VisualReadFallback<TRequest, TRow> : IVisualReadFallback<T
         TRequest request,
         CancellationToken cancellationToken = default)
     {
+        // A settled "unreachable" verdict is reused rather than re-established on every read. The probe already
+        // knows the answer — it establishes it in two seconds, while a read was spending its own full connect
+        // timeout rediscovering the same fact — and the probe loop, not the read path, is what keeps asking and
+        // therefore what detects recovery. That keeps the promise that matters: cached rows are served only
+        // while Infor Visual is unreachable, and never merely because a read once found it so.
+        if (IsVerdictCached)
+        {
+            return await ReadFromMirrorAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+
         var outcome = await _executor
             .ExecuteAsync(Shape.SourceScriptRelativePath, BuildLiveParameters(request), cancellationToken)
             .ConfigureAwait(false);

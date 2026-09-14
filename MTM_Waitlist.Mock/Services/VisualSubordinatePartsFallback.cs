@@ -22,8 +22,12 @@ public sealed class VisualSubordinatePartsFallback
     /// <summary>Creates the fallback.</summary>
     /// <param name="executor">Runs the live read against Infor Visual.</param>
     /// <param name="mySqlHelperServer">Reads the <c>mtm_mock</c> mirror.</param>
-    public VisualSubordinatePartsFallback(IVisualQueryExecutor executor, IMySqlHelperServer? mySqlHelperServer = null)
-        : base(executor, mySqlHelperServer)
+    /// <param name="reachability">Supplies the settled reachability verdict the shared read algorithm honours.</param>
+    public VisualSubordinatePartsFallback(
+        IVisualQueryExecutor executor,
+        IMySqlHelperServer? mySqlHelperServer = null,
+        IVisualReachabilityDetector? reachability = null)
+        : base(executor, mySqlHelperServer, reachability)
     {
     }
 

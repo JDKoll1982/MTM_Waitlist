@@ -406,6 +406,181 @@ public sealed class VisualReadFallbackParityTests
         return AppContext.BaseDirectory;
     }
 
+    // ---- Settled verdict: the live attempt is skipped while the probe says unreachable -------------
+
+    [TestMethod]
+    public async Task WhenTheVerdictIsCached_TheMirrorAnswersWithoutTouchingInforVisual()
+    {
+        var cache = new RecordingMirrorCache([Row(("PartNumber", "P-CACHED"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]);
+        var executor = new FakeVisualQueryExecutor(
+            VisualQueryOutcome.Ok([Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
+        var fallback = new VisualWorkOrderLookupFallback(
+            executor,
+            cache,
+            new StubReachabilityDetector(VisualReadStatus.Cached));
+
+        var result = await fallback.ReadWithProvenanceAsync(new VisualWorkOrderLookupRequest("WO-1"));
+
+        Assert.AreEqual(
+            0,
+            executor.ExecuteCount,
+            "The live attempt could only rediscover the verdict the probe already established.");
+        Assert.AreEqual(VisualReadSource.ServedFromCache, result.Source);
+        Assert.AreEqual("P-CACHED", result.Value[0].PartNumber);
+        Assert.AreEqual("sp_visual_work_order_lookup_get", cache.LastProcedureName);
+    }
+
+    [TestMethod]
+    public async Task WhenTheVerdictIsUnknown_TheLiveReadIsStillAttempted()
+    {
+        var cache = new RecordingMirrorCache([Row(("PartNumber", "P-CACHED"))]);
+        var executor = new FakeVisualQueryExecutor(
+            VisualQueryOutcome.Ok([Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
+        var fallback = new VisualWorkOrderLookupFallback(
+            executor,
+            cache,
+            new StubReachabilityDetector(VisualReadStatus.Unknown));
+
+        var result = await fallback.ReadWithProvenanceAsync(new VisualWorkOrderLookupRequest("WO-1"));
+
+        Assert.AreEqual(1, executor.ExecuteCount, "An undecided verdict must not be read as unreachability.");
+        Assert.AreEqual(VisualReadSource.ServedFromLive, result.Source);
+        Assert.AreEqual("P-LIVE", result.Value[0].PartNumber);
+    }
+
+    [TestMethod]
+    public async Task WhenTheVerdictReturnsToLive_TheVeryNextReadGoesLiveAgain()
+    {
+        var cache = new RecordingMirrorCache([Row(("PartNumber", "P-CACHED"))]);
+        var executor = new FakeVisualQueryExecutor(
+            VisualQueryOutcome.Ok([Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
+        var detector = new StubReachabilityDetector(VisualReadStatus.Cached);
+        var fallback = new VisualWorkOrderLookupFallback(executor, cache, detector);
+
+        var whileCached = await fallback.ReadWithProvenanceAsync(new VisualWorkOrderLookupRequest("WO-1"));
+
+        detector.Status = VisualReadStatus.Live;
+        var afterRecovery = await fallback.ReadWithProvenanceAsync(new VisualWorkOrderLookupRequest("WO-1"));
+
+        Assert.AreEqual(VisualReadSource.ServedFromCache, whileCached.Source);
+        Assert.AreEqual(
+            VisualReadSource.ServedFromLive,
+            afterRecovery.Source,
+            "Recovery is the probe's to notice, and the read must follow it immediately, not after a timeout.");
+        Assert.AreEqual(1, executor.ExecuteCount, "Exactly one of the two reads was the one that could go live.");
+    }
+
+    [TestMethod]
+    public async Task WhenTheVerdictIsCachedAndNoMirrorIsConfigured_TheConditionSurfacesRatherThanReadingEmpty()
+    {
+        var fallback = new VisualWorkOrderLookupFallback(
+            new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])),
+            mySqlHelperServer: null,
+            reachability: new StubReachabilityDetector(VisualReadStatus.Cached));
+
+        await Assert.ThrowsExceptionAsync<VisualReadFailedException>(
+            () => fallback.ReadAsync(new VisualWorkOrderLookupRequest("WO-1")));
+    }
+
+    [TestMethod]
+    public async Task WithoutAVerdictSource_TheLiveReadIsStillAttempted()
+    {
+        var cache = new RecordingMirrorCache([Row(("PartNumber", "P-CACHED"))]);
+        var executor = new FakeVisualQueryExecutor(
+            VisualQueryOutcome.Ok([Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
+        var fallback = new VisualWorkOrderLookupFallback(executor, cache);
+
+        var result = await fallback.ReadWithProvenanceAsync(new VisualWorkOrderLookupRequest("WO-1"));
+
+        Assert.AreEqual(1, executor.ExecuteCount, "With no verdict to consult, a read behaves exactly as it always did.");
+        Assert.AreEqual(VisualReadSource.ServedFromLive, result.Source);
+    }
+
+    // ---- Startup priming ---------------------------------------------------------------------------
+
+    [TestMethod]
+    public async Task PrimeAsync_WithAnUnreachableSource_SettlesTheVerdictWithoutWaitingForAnInterval()
+    {
+        var detector = new VisualReachabilityDetector(new StubConnectivityProbe(reachable: false));
+        var host = CreateHost(detector);
+
+        await host.PrimeAsync();
+
+        Assert.AreEqual(
+            VisualReadStatus.Cached,
+            detector.Current,
+            "The hysteresis needs two failures; priming supplies them back to back instead of after a live interval.");
+    }
+
+    [TestMethod]
+    public async Task PrimeAsync_WithAReachableSource_SettlesAsLive()
+    {
+        var detector = new VisualReachabilityDetector(new StubConnectivityProbe(reachable: true));
+        var host = CreateHost(detector);
+
+        await host.PrimeAsync();
+
+        Assert.AreEqual(VisualReadStatus.Live, detector.Current);
+    }
+
+    [TestMethod]
+    public async Task PrimeAsync_WhenProbingThrows_DoesNotEscapeFromStartup()
+    {
+        var detector = new VisualReachabilityDetector(new StubConnectivityProbe(throws: true));
+        var host = CreateHost(detector);
+
+        await host.PrimeAsync();
+
+        Assert.AreEqual(
+            VisualReadStatus.Unknown,
+            detector.Current,
+            "An inconclusive prime is a normal outcome: the probe loop settles it exactly as it did before priming existed.");
+    }
+
+    private static VisualReachabilityProbeHost CreateHost(IVisualReachabilityDetector detector) =>
+        // Intervals long enough that only priming can settle the verdict; the loop is never started here.
+        new(
+            detector,
+            statusProvider: null,
+            liveInterval: TimeSpan.FromMinutes(30),
+            cachedInterval: TimeSpan.FromMinutes(30));
+
+    /// <summary>A detector whose verdict the test sets, so the short-circuit is exercised without probing.</summary>
+    private sealed class StubReachabilityDetector : IVisualReachabilityDetector
+    {
+        public StubReachabilityDetector(VisualReadStatus status) => Status = status;
+
+        public VisualReadStatus Status { get; set; }
+
+        public VisualReadStatus Current => Status;
+
+        public event EventHandler<VisualReadStatus>? StateChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public Task ProbeAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+    }
+
+    /// <summary>A connectivity probe with a fixed answer, so priming needs no network.</summary>
+    private sealed class StubConnectivityProbe : IVisualConnectivityProbe
+    {
+        private readonly bool _reachable;
+        private readonly bool _throws;
+
+        public StubConnectivityProbe(bool reachable = false, bool throws = false)
+        {
+            _reachable = reachable;
+            _throws = throws;
+        }
+
+        public Task<bool> ProbeAsync(CancellationToken cancellationToken = default) =>
+            _throws
+                ? Task.FromException<bool>(new InvalidOperationException("The probe failed."))
+                : Task.FromResult(_reachable);
+    }
+
     private static Dictionary<string, object?> Row(params (string Key, object? Value)[] values)
     {
         var row = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);

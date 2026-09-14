@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using Microsoft.UI.Dispatching;
+
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
@@ -33,26 +35,58 @@ public sealed partial class InternalStoreUnavailableState : ObservableObject, ID
     private readonly MySqlDatabaseTarget _store;
     private readonly Func<CancellationToken, Task> _retry;
     private readonly IStoreAvailabilityTracker? _tracker;
+    private readonly DispatcherQueue? _dispatcherQueue;
     private bool _disposed;
 
     /// <summary>Creates the state.</summary>
     /// <param name="store">The internal store this screen reads.</param>
     /// <param name="retry">Re-runs this screen's load; the manual retry action.</param>
     /// <param name="tracker">The availability tracker the seam records into, when one is installed.</param>
+    /// <param name="dispatcherQueue">
+    /// The screen's UI queue, so a report raised on the read's background thread can be applied on the UI
+    /// thread. Defaults to the queue of the thread this object is built on. It is <c>null</c> where there is
+    /// no queue — unit tests and headless hosts — which leaves every report applying inline, and it must be
+    /// supplied by the screen because it cannot be resolved later from the thread that raises the report.
+    /// </param>
     public InternalStoreUnavailableState(
         MySqlDatabaseTarget store,
         Func<CancellationToken, Task> retry,
-        IStoreAvailabilityTracker? tracker = null)
+        IStoreAvailabilityTracker? tracker = null,
+        DispatcherQueue? dispatcherQueue = null)
     {
         ArgumentNullException.ThrowIfNull(retry);
         _store = store;
         _retry = retry;
         _tracker = tracker;
+        _dispatcherQueue = dispatcherQueue ?? TryGetCurrentDispatcher();
 
         if (_tracker is not null)
         {
             _tracker.Changed += OnAvailabilityChanged;
             Report(_tracker.Get(_store));
+        }
+    }
+
+    /// <summary>
+    /// The queue of the thread this object is built on, or <c>null</c> where that thread has none.
+    /// </summary>
+    /// <remarks>
+    /// A null queue is an ordinary outcome rather than a fault: unit tests and headless hosts have no
+    /// dispatcher, and the lookup itself throws on some threads that have none. Both cases fall back to
+    /// applying reports inline, which is what those hosts need, so neither is treated as a failure.
+    /// </remarks>
+    private static DispatcherQueue? TryGetCurrentDispatcher()
+    {
+        try
+        {
+            return DispatcherQueue.GetForCurrentThread();
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Info(
+                nameof(InternalStoreUnavailableState),
+                $"No UI queue is reachable from this thread ({ex.GetType().Name}), so store state is applied inline.");
+            return null;
         }
     }
 
@@ -124,6 +158,28 @@ public sealed partial class InternalStoreUnavailableState : ObservableObject, ID
     }
 
     private void Report(InternalStoreAvailability availability)
+    {
+        // Raised from whichever thread ran the read. The members below are reached by the screen through the
+        // generated x:Bind setters, so applying them here would throw RPC_E_WRONG_THREAD instead of showing
+        // the state — and, because the seam reports a healthy read exactly once, the screen would stay wrong
+        // until the store's state changed again. Hand the whole update to the UI thread: the queue is
+        // documented as safe to use from another thread, and it is the one supported way to get there.
+        if (_dispatcherQueue is DispatcherQueue dispatcher && !dispatcher.HasThreadAccess)
+        {
+            if (!dispatcher.TryEnqueue(() => Apply(availability)))
+            {
+                StartupDebugLog.Info(
+                    nameof(InternalStoreUnavailableState),
+                    $"The '{availability.StoreName}' store state was not shown because the UI queue is not accepting work.");
+            }
+
+            return;
+        }
+
+        Apply(availability);
+    }
+
+    private void Apply(InternalStoreAvailability availability)
     {
         IsUnavailable = availability.Status == InternalStoreStatus.Unavailable;
         StoreName = availability.StoreName;

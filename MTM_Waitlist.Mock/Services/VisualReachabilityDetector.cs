@@ -21,7 +21,14 @@ namespace MTM_Waitlist.Mock.Services;
 /// </remarks>
 public sealed class VisualReachabilityDetector : IVisualReachabilityDetector
 {
-    private const int FailuresBeforeCached = 2;
+    /// <summary>
+    /// Probe failures in a row required before cached data is served (contract §1 hysteresis).
+    /// </summary>
+    /// <remarks>
+    /// <see langword="internal"/> so the startup primer can satisfy the threshold with back-to-back probes
+    /// rather than restating "two" and drifting from the rule it exists to satisfy.
+    /// </remarks>
+    internal const int FailuresBeforeCached = 2;
 
     private readonly IVisualConnectivityProbe _probe;
     private readonly object _gate = new();
