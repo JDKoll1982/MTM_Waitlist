@@ -184,7 +184,8 @@ public static class ServiceRegistrationExtensions
             startupState: provider.GetRequiredService<MTM_Waitlist.Module_Core.Models.StartupState>(),
             dispatcherQueue: DispatcherQueue.GetForCurrentThread(),
             messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>(),
-            itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>()));
+            itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>(),
+            jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>()));
         services.AddTransient<WaitlistViewDetailPage>();
         services.AddTransient<NewRequestWorkCenterViewModel>();
         services.AddTransient<NewRequestWorkCenterPage>();
