@@ -6,17 +6,21 @@ using MySqlConnector;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Startup.Services;
 
 namespace MTM_Waitlist.Module_Startup.ViewModels;
 
 public partial class LoginViewModel : ObservableRecipient
 {
-    private const string LocalSessionTokenKey = "Startup.Session.Token";
     private const string WaitlistRoute = "MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewViewModel";
-    private const string LocalSessionExpiryKey = "Startup.Session.ExpiresUtc";
-    private const string RememberPasswordKey = "Login.RememberPassword";
-    private const string RememberedUsernameKey = "Login.RememberedUsername";
-    private const string RememberedPasswordKey = "Login.RememberedPassword";
+
+    // The keys signing in reads and writes. They live in one place so signing out clears exactly the set
+    // signing in uses, and a key added here without being added there cannot slip through (FR-034).
+    private const string LocalSessionTokenKey = SignInSessionKeys.SessionToken;
+    private const string LocalSessionExpiryKey = SignInSessionKeys.SessionExpiresUtc;
+    private const string RememberPasswordKey = SignInSessionKeys.RememberPassword;
+    private const string RememberedUsernameKey = SignInSessionKeys.RememberedUsername;
+    private const string RememberedPasswordKey = SignInSessionKeys.RememberedPassword;
 
     private readonly IStartupSessionRepository _startupSessionRepository;
     private readonly IStartupRegistrationService _startupRegistrationService;

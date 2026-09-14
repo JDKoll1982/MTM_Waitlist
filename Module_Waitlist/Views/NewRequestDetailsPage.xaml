@@ -27,6 +27,7 @@
         <Border Grid.Row="1" Style="{StaticResource SetupSectionCardStyle}">
             <StackPanel Spacing="10">
                 <TextBox
+                    AutomationProperties.AutomationId="NewRequestDetailsPage_DetailInput"
                     Header="{x:Bind ViewModel.PromptText, Mode=OneWay}"
                     Text="{x:Bind ViewModel.InputValue, Mode=TwoWay}"
                     AcceptsReturn="True"
@@ -37,6 +38,7 @@
                     HorizontalAlignment="Left"
                     Visibility="{x:Bind ViewModel.IsTextInput, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                 <ComboBox
+                    AutomationProperties.AutomationId="NewRequestDetailsPage_OptionCombo"
                     Header="{x:Bind ViewModel.PromptText, Mode=OneWay}"
                     ItemsSource="{x:Bind ViewModel.Options, Mode=OneWay}"
                     SelectedItem="{x:Bind ViewModel.SelectedOption, Mode=TwoWay}"
@@ -55,9 +57,11 @@
 
         <StackPanel Grid.Row="3" Style="{StaticResource SetupActionBarStyle}">
             <Button
+                AutomationProperties.AutomationId="NewRequestDetailsPage_BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}" />
             <Button
+                AutomationProperties.AutomationId="NewRequestDetailsPage_ContinueButton"
                 Content="Continue"
                 Command="{x:Bind ViewModel.ContinueCommand}"
                 Style="{StaticResource AccentButtonStyle}" />

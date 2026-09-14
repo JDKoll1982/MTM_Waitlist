@@ -51,6 +51,7 @@
 
             <!-- Refresh and start-up -->
             <Expander
+                AutomationProperties.AutomationId="ServiceSettingsPage_RefreshGroupExpander"
                 AutomationProperties.Name="{x:Bind ViewModel.RefreshGroup.HeaderText}"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
@@ -94,7 +95,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="160" Text="{x:Bind ViewModel.RefreshIntervalMinutes, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_RefreshIntervalInput" MinWidth="160" Text="{x:Bind ViewModel.RefreshIntervalMinutes, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
 
@@ -110,7 +111,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <ToggleSwitch IsOn="{x:Bind ViewModel.AutoStartAtLogon, Mode=TwoWay}" />
+                            <ToggleSwitch AutomationProperties.AutomationId="ServiceSettingsPage_AutoStartToggle" IsOn="{x:Bind ViewModel.AutoStartAtLogon, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
                 </StackPanel>
@@ -118,6 +119,7 @@
 
             <!-- Service API -->
             <Expander
+                AutomationProperties.AutomationId="ServiceSettingsPage_ApiGroupExpander"
                 AutomationProperties.Name="{x:Bind ViewModel.ApiGroup.HeaderText}"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
@@ -161,7 +163,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.ApiBindAddress, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_ApiBindAddressInput" MinWidth="240" Text="{x:Bind ViewModel.ApiBindAddress, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
 
@@ -177,7 +179,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="160" Text="{x:Bind ViewModel.ApiPort, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_ApiPortInput" MinWidth="160" Text="{x:Bind ViewModel.ApiPort, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
                 </StackPanel>
@@ -185,6 +187,7 @@
 
             <!-- Operator access -->
             <Expander
+                AutomationProperties.AutomationId="ServiceSettingsPage_OperatorAccessGroupExpander"
                 AutomationProperties.Name="{x:Bind ViewModel.OperatorAccessGroup.HeaderText}"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
@@ -239,6 +242,7 @@
 
             <!-- Infor Visual source -->
             <Expander
+                AutomationProperties.AutomationId="ServiceSettingsPage_VisualGroupExpander"
                 AutomationProperties.Name="{x:Bind ViewModel.VisualGroup.HeaderText}"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
@@ -282,7 +286,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.VisualServer, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_VisualServerInput" MinWidth="240" Text="{x:Bind ViewModel.VisualServer, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
 
@@ -298,7 +302,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.VisualDatabase, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_VisualDatabaseInput" MinWidth="240" Text="{x:Bind ViewModel.VisualDatabase, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
 
@@ -314,7 +318,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.VisualUserId, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_VisualUserIdInput" MinWidth="240" Text="{x:Bind ViewModel.VisualUserId, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
 
@@ -330,7 +334,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="160" Text="{x:Bind ViewModel.VisualConnectionTimeoutSeconds, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_VisualTimeoutInput" MinWidth="160" Text="{x:Bind ViewModel.VisualConnectionTimeoutSeconds, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
                 </StackPanel>
@@ -338,6 +342,7 @@
 
             <!-- MySQL host and backup tool -->
             <Expander
+                AutomationProperties.AutomationId="ServiceSettingsPage_MySqlGroupExpander"
                 AutomationProperties.Name="{x:Bind ViewModel.MySqlGroup.HeaderText}"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
@@ -381,7 +386,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.MySqlServer, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_MySqlServerInput" MinWidth="240" Text="{x:Bind ViewModel.MySqlServer, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
 
@@ -397,7 +402,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="160" Text="{x:Bind ViewModel.MySqlPort, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_MySqlPortInput" MinWidth="160" Text="{x:Bind ViewModel.MySqlPort, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
 
@@ -413,7 +418,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="240" Text="{x:Bind ViewModel.MySqlUserId, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_MySqlUserIdInput" MinWidth="240" Text="{x:Bind ViewModel.MySqlUserId, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
 
@@ -429,7 +434,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="280" Text="{x:Bind ViewModel.MySqlPasswordFilePath, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_MySqlPasswordFileInput" MinWidth="280" Text="{x:Bind ViewModel.MySqlPasswordFilePath, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
 
@@ -445,7 +450,7 @@
                                 TextWrapping="Wrap" />
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
-                            <TextBox MinWidth="280" Text="{x:Bind ViewModel.MySqlDumpPath, Mode=TwoWay}" />
+                            <TextBox AutomationProperties.AutomationId="ServiceSettingsPage_MySqlDumpPathInput" MinWidth="280" Text="{x:Bind ViewModel.MySqlDumpPath, Mode=TwoWay}" />
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
 
@@ -461,6 +466,7 @@
 
             <!-- Backups, one collapsible card per store -->
             <Expander
+                AutomationProperties.AutomationId="ServiceSettingsPage_BackupGroupExpander"
                 AutomationProperties.Name="{x:Bind ViewModel.BackupGroup.HeaderText}"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
@@ -492,7 +498,7 @@
                         Text="{x:Bind ViewModel.BackupGroup.DescriptionText}"
                         TextWrapping="Wrap" />
 
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.BackupPolicies}">
+                    <ItemsControl AutomationProperties.AutomationId="ServiceSettingsPage_BackupPoliciesList" ItemsSource="{x:Bind ViewModel.BackupPolicies}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="viewModels:BackupStoreSettingsViewModel">
                                 <Expander
@@ -529,7 +535,7 @@
                                                     TextWrapping="Wrap" />
                                             </wct:SettingsCard.Description>
                                             <wct:SettingsCard.Content>
-                                                <ToggleSwitch IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
+                                                <ToggleSwitch AutomationProperties.Name="{x:Bind EnableLabelText}" IsOn="{x:Bind IsEnabled, Mode=TwoWay}" />
                                             </wct:SettingsCard.Content>
                                         </wct:SettingsCard>
 
@@ -545,7 +551,7 @@
                                                     TextWrapping="Wrap" />
                                             </wct:SettingsCard.Description>
                                             <wct:SettingsCard.Content>
-                                                <TextBox MinWidth="120" Text="{x:Bind ScheduleLocalTime, Mode=TwoWay}" />
+                                                <TextBox AutomationProperties.Name="{x:Bind ScheduleLabelText}" MinWidth="120" Text="{x:Bind ScheduleLocalTime, Mode=TwoWay}" />
                                             </wct:SettingsCard.Content>
                                         </wct:SettingsCard>
 
@@ -561,7 +567,7 @@
                                                     TextWrapping="Wrap" />
                                             </wct:SettingsCard.Description>
                                             <wct:SettingsCard.Content>
-                                                <TextBox MinWidth="120" Text="{x:Bind RetentionCount, Mode=TwoWay}" />
+                                                <TextBox AutomationProperties.Name="{x:Bind RetentionLabelText}" MinWidth="120" Text="{x:Bind RetentionCount, Mode=TwoWay}" />
                                             </wct:SettingsCard.Content>
                                         </wct:SettingsCard>
 
@@ -577,7 +583,7 @@
                                                     TextWrapping="Wrap" />
                                             </wct:SettingsCard.Description>
                                             <wct:SettingsCard.Content>
-                                                <TextBox MinWidth="280" Text="{x:Bind DestinationDirectory, Mode=TwoWay}" />
+                                                <TextBox AutomationProperties.Name="{x:Bind DestinationLabelText}" MinWidth="280" Text="{x:Bind DestinationDirectory, Mode=TwoWay}" />
                                             </wct:SettingsCard.Content>
                                         </wct:SettingsCard>
                                     </StackPanel>
@@ -599,8 +605,8 @@
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <ComboBox MinWidth="200" ItemsSource="{x:Bind ViewModel.BackupStoreNames}" SelectedItem="{x:Bind ViewModel.SelectedBackupStoreName, Mode=TwoWay}" />
-                                <Button Command="{x:Bind ViewModel.BackupNowCommand}" Content="{x:Bind ViewModel.BackupNowText}" />
+                                <ComboBox AutomationProperties.AutomationId="ServiceSettingsPage_BackupStoreCombo" MinWidth="200" ItemsSource="{x:Bind ViewModel.BackupStoreNames}" SelectedItem="{x:Bind ViewModel.SelectedBackupStoreName, Mode=TwoWay}" />
+                                <Button AutomationProperties.AutomationId="ServiceSettingsPage_BackupNowButton" Command="{x:Bind ViewModel.BackupNowCommand}" Content="{x:Bind ViewModel.BackupNowText}" />
                             </StackPanel>
                         </wct:SettingsCard.Content>
                     </wct:SettingsCard>
@@ -609,6 +615,7 @@
 
             <!-- Emergency restore -->
             <Expander
+                AutomationProperties.AutomationId="ServiceSettingsPage_RestoreGroupExpander"
                 AutomationProperties.Name="{x:Bind ViewModel.RestoreGroup.HeaderText}"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
@@ -653,6 +660,7 @@
                         </wct:SettingsCard.Description>
                         <wct:SettingsCard.Content>
                             <ComboBox
+                                AutomationProperties.AutomationId="ServiceSettingsPage_RestoreStoreCombo"
                                 AutomationProperties.Name="{x:Bind ViewModel.RestoreStoreLabelText}"
                                 MinWidth="200"
                                 ItemsSource="{x:Bind ViewModel.BackupStoreNames}"
@@ -674,6 +682,7 @@
                         <wct:SettingsCard.Content>
                             <ComboBox
                                 x:Name="RestoreArtifactPicker"
+                                AutomationProperties.AutomationId="ServiceSettingsPage_RestoreArtifactCombo"
                                 AutomationProperties.Name="{x:Bind ViewModel.RestorePickerLabelText}"
                                 MinWidth="420"
                                 ItemsSource="{x:Bind ViewModel.RestoreArtifacts}"
@@ -701,6 +710,7 @@
                         <wct:SettingsCard.Content>
                             <StackPanel Spacing="8">
                                 <Button
+                                    AutomationProperties.AutomationId="ServiceSettingsPage_RestoreButton"
                                     Click="OnRestoreClick"
                                     Content="{x:Bind ViewModel.RestoreText}"
                                     Style="{ThemeResource AccentButtonStyle}" />
@@ -731,6 +741,7 @@
                 </wct:SettingsCard.Description>
                 <wct:SettingsCard.Content>
                     <Button
+                        AutomationProperties.AutomationId="ServiceSettingsPage_SaveButton"
                         MinWidth="180"
                         Command="{x:Bind ViewModel.SaveSettingsCommand}"
                         Content="{x:Bind ViewModel.SaveText}"

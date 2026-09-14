@@ -942,6 +942,312 @@ Cross-cutting retirement, documentation, and validation against the Success Crit
 
 ---
 
+## Phase 9: Follow-Up Batch — Sign Out, the Request Population and the Fulfilment Pass
+
+This phase follows the **shipped** build: the feature reached `status: completed`, and Phases 1–8 above are all
+ticked. Everything here is new work against the appended requirements **FR-033 … FR-045** and criteria
+**SC-013 … SC-020**; nothing above is reopened, and `.spec-context.json` is not this phase's to edit. The same four
+gates apply, and the three build traps carry over.
+
+The `[US#]` tags map the batch onto the stories it serves: **US6** is the new sign-out story, **US1** owns raising a
+request, and **US2** owns the card's action surface. The handling outcomes are **verification**, not a new story —
+`plan.md` §F5 is their plan of record.
+
+### Tests — write these first; they must fail before the implementation lands
+
+- [x] **T118** [P] [US6] Add `ShellViewModelTests` (new): the signed-in badge offers **Sign out**, and choosing it
+  invokes the sign-out path through a recording stub rather than merely blanking `CurrentUserDisplayName` — the
+  negative case is the point, because a view model that never calls the service must not look signed out
+  (FR-033, FR-034). · new `MTM_Waitlist.Tests/Module_Core/ViewModels/ShellViewModelTests.cs`
+- [x] **T119** [P] [US6] Add `SignOutServiceTests` (new): the five keys the sign-in path reads
+  (`Login.RememberPassword`, `Login.RememberedUsername`, `Login.RememberedPassword`, `Startup.Session.Token`,
+  `Startup.Session.ExpiresUtc`) are reset **before** the relaunch is asked for, so the restarted instance cannot
+  restore the session, and a refused relaunch is reported in plain language rather than swallowed
+  (FR-034, FR-026). · new `MTM_Waitlist.Tests/Module_Startup/Services/SignOutServiceTests.cs`
+- [x] **T120** [P] [US1] Re-point `ActiveJobSeedRoundTripTests` at the real work centres that now carry the seven
+  prepared situations, driving the same `ActiveJobItemResolverService` deserializer, and assert the seven `900-*`
+  names resolve to **no** active job — the fixtures must be gone from the data, not merely from the seed file.
+  **Write it to fail first**, against today's seed. ·
+  `MTM_Waitlist.Tests/Module_Setup/Services/ActiveJobSeedRoundTripTests.cs`
+- [x] **T121** [P] [US1] Add the raisability check (FR-035): every in-scope Item with `requires_answer = 1` and
+  `answer_value_type = 'enum'` yields at least one choice, resolved from the configuration row and the job snapshot
+  — **never** from an Item's identity (FR-013). **Write it to fail first**; it must name `pickup-component` in the
+  failure. · `MTM_Waitlist.Tests/Module_Settings/Services/RequestItemConfigurationServiceTests.cs`
+- [x] **T122** [P] [US2] Add the transition-guard test (FR-043): an accept applied to a request that is no longer
+  `Pending` reports zero affected rows and does **not** reassign the handler — the assertion the race outcome rests
+  on, made at the service/procedure seam rather than in the UI. **Write it to fail first**; today
+  `sp_waitlist_request_status_update` matches on `public_id` alone. ·
+  `MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs`
+
+### Implementation
+
+**Wave 1 — the sign-out service (single task; adds the service and its contract):**
+
+- [x] **T123** [US6] Add `ISignOutService` and `SignOutService`: reset the remembered-credential and session keys the
+  sign-in path reads, then relaunch the process through the path `StartupRecoveryService.CorruptAndRestartAsync`
+  already uses (`Environment.ProcessPath`, the `dotnet`-hosted case included) and exit — or `AppInstance.Restart`,
+  which Microsoft Learn documents for a packaged **or unpackaged** desktop app. A relaunch that cannot be performed
+  is reported in plain language so the person is never left apparently signed in (FR-026, FR-034). · new
+  `MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs`, new
+  `MTM_Waitlist.Startup/Services/SignOutService.cs`
+
+**⟶ Wait for Wave 1 to finish, then:**
+
+**Wave 2 — the badge control (single task; four files, one owner):**
+
+- [x] **T124** [US6] Put **Sign out** on the badge: give `ShellPage_CurrentUserButton` (`CurrentUserButton`) a
+  `MenuFlyout` in `Module_Core/Views/ShellPage.xaml`, add the command and the `ISignOutService` injection to
+  `ViewModels/ShellViewModel.cs`, register the service in
+  `Services/DependencyInjection/ServiceRegistrationExtensions.cs`, and add the localized label and tooltip through
+  the resource mechanism (FR-022). Remember the `[RelayCommand]` `Async`-stripping rule when the command is named,
+  and keep the tooltip's `AssociatedFiles` list true to the files the control actually touches. ·
+  `Module_Core/Views/ShellPage.xaml`, `ViewModels/ShellViewModel.cs`,
+  `Services/DependencyInjection/ServiceRegistrationExtensions.cs`, `Strings/en-us/Resources.resw`
+
+**⟶ Wait for Wave 2 to finish, then:**
+
+**Wave 3 — the prepared situations move to real work centres (single task; the seed's own owner):**
+
+- [x] **T125** [US1] Re-point `seed_setup_active_jobs_eight_configurations`: five of the seven situations onto Expo
+  Drive work centres and two onto Vits Drive work centres (`100-3`, `100-6` … `100-28`, `100-1806`, `100-1807`; and
+  `V100-33`, `V100-34`, `V100-35`), keeping each situation's job shape and the exact `subordinate_parts_json` shape
+  `sp_setup_save_setup` writes. Record which five and which two in the seed's header comment, as that seed already
+  records its own matrix. The eighth case stays an absent job. Paired rollback in the same change. ·
+  `Database/Seeds/seed_setup_active_jobs_eight_configurations/create.sql`,
+  `Database/Seeds/seed_setup_active_jobs_eight_configurations/rollback.sql`
+
+**⟶ Wait for Wave 3 to finish, then:**
+
+**Wave 4 — the fixture work centres retire (single task; one owner for the master list):**
+
+- [x] **T126** [US1] Retire `Database/Seeds/seed_setup_work_centers_fixture_stations/{create,rollback}.sql` — with
+  T125 landed, no job points at `900-1` … `900-7` any more — and remove its entry from `Database/Seeds/AllSeeds.sql`
+  and its description from `Database/Bootstrap/update_table_descriptions.sql` if it names them, so the lists agree
+  with the files on disk (FR-025, constitution III). · delete
+  `Database/Seeds/seed_setup_work_centers_fixture_stations/create.sql`, delete
+  `Database/Seeds/seed_setup_work_centers_fixture_stations/rollback.sql`, `Database/Seeds/AllSeeds.sql`,
+  `Database/Bootstrap/update_table_descriptions.sql`
+
+**⟶ Wait for Wave 4 to finish, then:**
+
+**Wave 5 — the `pickup-component` repair (single task; the details step's own owner):**
+
+- [x] **T127** [US1] Make `pickup-component` raisable (FR-035) by the direction `plan.md` §F4 records: give the
+  enumerated answer the choices it needs through the job-derived path the seed's own comment names
+  (`subordinate_parts_json → category='Component'`), keyed on the configuration row's `answer_value_type` and the
+  field's declared `source` — **never** on the Item's identity (FR-013). If the configuration row itself must change,
+  ship its paired rollback and keep `AllSeeds.sql` in sync. ·
+  `MTM_Waitlist.Settings/Services/RequestItemConfigurationService.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestDetailsViewModel.cs`,
+  `Database/Seeds/seed_waitlist_request_item_configs/create.sql`, `Database/Seeds/AllSeeds.sql`
+
+**⟶ Wait for Wave 5 to finish, then:**
+
+**Wave 6 — the transition guard (single task; the procedure's own owner):**
+
+- [x] **T128** [US2] Make the transition conditional on the state the handler saw (FR-043):
+  `sp_waitlist_request_status_update` (or a dedicated accept procedure) updates only while the row is still in the
+  state that was read, so a second handler's accept reports zero affected rows instead of overwriting the first
+  assignment, and the count reaches the caller through the non-query seam so the losing handler is told
+  (FR-026, constitution III). Paired rollback in the same change, and the caller updated in the same pass. ·
+  `Database/StoredProcedures/sp_waitlist_request_status_update/create.sql`,
+  `Database/StoredProcedures/sp_waitlist_request_status_update/rollback.sql`,
+  `MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs`
+
+**⟶ Wait for Wave 6 to finish, then:**
+
+**Wave 7 — the population is raised (single task; one person, nineteen requests):**
+
+- [ ] **T129** [US1] Raise the nineteen requests through the application, one per in-scope Item, signed in as the ten
+  accounts that already exist — **no new account** — with the owner's weighting (ordinary floor people plus a couple
+  of leads) and every one of the eight roles raising at least one, so each kind of login opens onto a populated list
+  (FR-036, FR-037). Spread them across more work centres than the seven that carry the prepared situations, and raise
+  every material-dependent Item from a work centre whose job actually carries that material (FR-038). Leave all
+  nineteen unhelped (FR-040). Evidence: the nineteen rows read back with their `category`, `item`, `status` and
+  requester. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
+
+**⟶ Wait for Wave 7 to finish, then:**
+
+**Wave 8 — the seven handling outcomes, independent where the artifact differs:**
+
+- [ ] **T130** [P] [US2] Outcome 1 — accept, then finish; and outcome 2 — accept, hand back, accept again, finish.
+  Record both, including that a hand-back leaves **one** request, back to `Pending`, with `released_utc` set and the
+  handler cleared, and that the second accept completes it (FR-042). · the running app
+- [ ] **T131** [P] [US2] Outcome 3 — the raiser cancels before anyone accepts, signed in as that request's own
+  raiser, and confirm a non-raiser cannot. · the running app
+- [x] **T132** [P] [US2] Outcome 4 — give one Item the **smallest allowance the minutes screen accepts** through the
+  minutes screen's own write (`sp_waitlist_request_item_allotted_minutes_update`), raise that Item's request and let
+  its deadline genuinely expire. **No back-dated `requested_utc` and no hand-edited `target_time_utc`** (FR-044) —
+  record the allowance, the deadline and the moment the row read overdue. · the running app
+- [ ] **T133** [P] [US2] Outcomes 5 and 6 — one handler hands back and a **different** handler takes it over; and a
+  handler accepts a request **they raised themselves**, which must be **permitted** (FR-041). Prove the first
+  handler's assignment is gone and the second handler's stands, then prove the self-accept completes. · the running app
+- [x] **T134** [US2] Outcome 7 — the two-handler race: run **two copies of the application side by side**, both acting
+  on the same request at the same moment (FR-043, SC-019), and record exactly one assignment, one `accepted_utc`, and
+  the losing handler's plain-language report. Two ordinary instances of the same Debug build — no special harness. ·
+  `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe` (two instances)
+
+**⟶ Wait for Wave 8 to finish, then:**
+
+**Wave 9 — the gates:**
+
+- [x] **T135** **Build gate.** With no `MTM_Waitlist.exe` running, run
+  `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` and record it as
+  **`0 Warning(s) 0 Error(s)`**. Carry the three traps: `WMC9999` is a masked real XAML error, `PRI175` / `PRI224`
+  mean a running app or stale `*.pri`, and `[RelayCommand]` strips a trailing `Async`. · `MTM_Waitlist.sln`
+- [x] **T136** **Test gate.** Run `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64`
+  and record **`Failed: 0`** *with* T118–T122 in place, not instead of them. Environment-gated tests stay
+  `Assert.Inconclusive` and are recorded as skipped; no gate is weakened to go green. ·
+  `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
+- [ ] **T137** **Live database validation.** Apply and reverse every paired `create.sql` / `rollback.sql` the batch
+  touches against a local `mtm_waitlist`, confirm `AllSeeds.sql` and `Bootstrap/update_table_descriptions.sql` agree
+  with the files on disk, and confirm the seven prepared situations now resolve from real work centres. **The
+  reinstall is the owner's action, never the agent's.** · `Database/**`
+- [x] **T138** **Sign-out gate.** On a computer where "remember me" is set and the session had been restored, choose
+  Sign out from the badge and prove the application **restarts to the sign-in screen** rather than restoring the
+  session. The displayed name alone is not evidence (FR-034, SC-013). · the running app
+- [ ] **T139** **Validate against Success Criteria.** Walk SC-013 … SC-020 against the recorded evidence — SC-013 on
+  T138, the population on T129, the outcomes on T130–T134, and the build/test criteria on T135–T136, so **do not run
+  the suites a second time**. Confirm SC-020 last: the nineteen requests and the ten accounts are still present and
+  browsable (FR-045). Any criterion without recorded evidence stays unticked and is reported, never asserted. ·
+  `specs/004-unified-card-item-picker/spec.md`
+
+**Checkpoint — the follow-up batch is complete.** Sign out ends the session by restart rather than by hiding it; the
+nineteen requests exist, raised by the ten existing people with every role represented, and are left waiting; the
+seven fixture work centres are gone and their situations live on real work centres; and all seven handling outcomes
+have been exercised, including the two-copy race, with the overdue case a real expiry. SC-013 … SC-020 are provable
+from this phase alone.
+
+---
+
+## Phase 10: Second Follow-Up Batch — Attribution and Give Back
+
+This phase follows the Phase 9 walk, which left six of its tasks unticked. The walk surfaced **two defects** that
+stand between it and its own checkpoint, and both are fixed here rather than worked around: a request is not
+attributed to the person who raised it, and a claimed request can never be given back. Everything here is new work
+against the appended requirements **FR-046** and **FR-047** and criterion **SC-021**; nothing above is reopened, and
+`.spec-context.json` is not this phase's to edit. The same four gates apply, and the three build traps carry over.
+
+The `[US#]` tags map the batch onto the stories it serves: **US1** owns raising a request, **US2** owns the card's
+action surface.
+
+### Tests — write these first; they must fail before the implementation lands
+
+- [x] **T140** [P] [US1] Re-point the identity rule's tests at the **directory row** rather than at a literal
+  (FR-046): the rule accepts the signed-in employee from the record the lookup returned — proved with an account
+  that is **not** `6229`, so a name that is not `John Koll` has to come out — refuses an employee number the
+  directory holds no row for, refuses a row that is known but inactive, and refuses a blank number. **Write it to
+  fail first.** · `MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs`
+- [x] **T141** [P] [US1] Add the attribution test at the wizard's first step (FR-046, SC-021): with the directory
+  holding the signed-in `9004` / `Sam Reyes`, selecting an active work centre attributes the request to **that**
+  person — the negative is the point, because a step that names anyone else is the defect — and a signed-in person
+  the directory does not account for is blocked in plain language without navigating (FR-026). **Write it to fail
+  first**; today the step writes `6229 John Koll` whoever is signed in. ·
+  `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs`
+- [x] **T142** [P] [US2] Add the give-back surface tests (FR-047): the assignee is offered **Give back** carrying the
+  view model's actual generated release command — the command **name** is read from the view model, never assumed —
+  and hidden from every viewer the gate excludes, `OfferedActionCount` equals the buttons the row actually offers,
+  and executing it reaches `ReleaseAsync` exactly once as the signed-in handler; plus the markup check that the card
+  draws a Release button whose gate, command, accessible name and tooltip all come from the row (contract C7).
+  **Write it to fail first.** · `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs`,
+  `MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs`
+
+### Implementation
+
+**Wave 1 — the employee lookup (single task; adds the artifact and its procedure):**
+
+- [x] **T143** [US1] Add the real employee lookup the attribution stands on (FR-046, constitution III): a paired
+  `Database/StoredProcedures/sp_core_employee_by_identifier_get/{create,rollback}.sql` matching `core_users_profiles`
+  on **`employee_identifier`** — not on a name — returning the stored identifier, display name and active state, with
+  its block appended to `Database/StoredProcedures/AllSPs.sql`; and the service that reads it
+  (`IEmployeeDirectoryService` + its implementation) over the non-query seam's read half. An unreachable store is
+  reported rather than treated as "no such employee" (FR-026). ·
+  new `Database/StoredProcedures/sp_core_employee_by_identifier_get/create.sql`, new
+  `.../rollback.sql`, `Database/StoredProcedures/AllSPs.sql`, new
+  `MTM_Waitlist.Core/Contracts/Services/IEmployeeDirectoryService.cs`, new
+  `MTM_Waitlist.Core/Models/EmployeeIdentity.cs`, new
+  `MTM_Waitlist.Waitlist.View/Services/EmployeeDirectoryService.cs`
+
+**⟶ Wait for Wave 1 to finish, then:**
+
+**Wave 2 — the rule and its only caller (single task; one owner for the rule and the call site):**
+
+- [x] **T144** [US1] Replace the literal with the signed-in person (FR-046): `NewRequestFlowRules.VerifyEmployeeIdentity`
+  takes the signed-in number and the directory's row for it, and keeps the refusal — a number with no active record is
+  still refused rather than accepted — while `NewRequestWorkCenterViewModel.SelectWorkCenter` resolves the signed-in
+  identity from `StartupState`, looks it up, and attributes the request from the answer; the directory is registered in
+  the DI host. · `MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowRules.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestWorkCenterViewModel.cs`,
+  `Services/DependencyInjection/ServiceRegistrationExtensions.cs`
+
+**⟶ Wait for Wave 2 to finish, then:**
+
+**Wave 3 — the give-back surface on the row (single task; row, list view model and label):**
+
+- [x] **T145** [US2] Give the row its Give back action (FR-047): `SampleOrder` carries the command and the localized
+  label, and `OfferedActionCount` counts the buttons the row offers rather than the flags it holds, so the count and
+  the drawn controls cannot disagree; `WaitlistViewViewModel.ApplyHandlerActionStateAsync` sets both from the gate
+  that already governs Complete/Release; the label and its tooltip go through the resource mechanism (FR-022). ·
+  `MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs`,
+  `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs`, `Strings/en-us/Resources.resw`
+
+**⟶ Wait for Wave 3 to finish, then:**
+
+**Wave 4 — the card control (single task; the card's own owner):**
+
+- [x] **T146** [US2] Draw Give back on the card (FR-047, contract C7): a third 44×44 icon button in the action area,
+  named and described by the row's own action text, distinguishable from Complete and Cancel by both colour and glyph
+  (the glyph is checked against the Segoe Fluent Icons list, and the deprecated `E0`–`E5` range is not used). ·
+  `Module_Waitlist/Controls/WaitlistLineCardView.xaml`
+
+**⟶ Wait for Wave 4 to finish, then:**
+
+**Wave 5 — the supersession, written down (single task; the documents that currently contradict it):**
+
+- [x] **T147** [US2] Record the supersession rather than leaving the contradiction (FR-047): amend
+  `specs/003-waitlist-handler-fulfilment/contracts/action-contracts.md` C1 ("Release has no surface") and C7 ("Release
+  — not drawn", and the two-button ceiling) in place, and amend the `ReleaseRequestAsync` remark in
+  `WaitlistViewViewModel.cs` that says the same. The earlier decision is **superseded, not deleted**: the reason it
+  was taken is kept and the new behaviour stated beside it. ·
+  `specs/003-waitlist-handler-fulfilment/contracts/action-contracts.md`,
+  `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs`
+
+**⟶ Wait for Wave 5 to finish, then:**
+
+**Wave 6 — the specification stays current (single task; the two documents this batch was planned in):**
+
+- [x] **T148** [US1] Record what this batch changed in the specification and the plan (FR-046, FR-047, SC-021): append
+  the two requirements and the criterion to `spec.md` without renumbering anything, and add the design decisions to
+  `plan.md` — the employee-lookup source (`core_users_profiles.employee_identifier`, compared as the stored
+  identifier), why the literal had to go, and the supersession the give-back records — including that the eight test
+  accounts take `1111` as their first-use password change. ·
+  `specs/004-unified-card-item-picker/spec.md`, `specs/004-unified-card-item-picker/plan.md`
+
+**⟶ Wait for Wave 6 to finish, then:**
+
+**Wave 7 — the gates:**
+
+- [x] **T149** **Build gate.** With no `MTM_Waitlist.exe` running, run
+  `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` and record it as
+  **`0 Warning(s) 0 Error(s)`**. · `MTM_Waitlist.sln`
+- [x] **T150** **Test gate.** Clear the ambient `MTM_*` environment variables, then run
+  `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` and record
+  **`Failed: 0`** *with* T140–T142 in place, not instead of them. Environment-gated tests stay
+  `Assert.Inconclusive` and are recorded as skipped; no gate is weakened to go green. ·
+  `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
+- [x] **T151** **Live database validation.** Apply and reverse the new procedure pair against a local
+  `mtm_waitlist`, confirm the lookup resolves the ten existing identifiers and returns nothing for a number no
+  account holds, and confirm `AllSPs.sql` agrees with the files on disk. **The reinstall is the owner's action,
+  never the agent's.** · `Database/StoredProcedures/**`
+
+**Checkpoint — the two defects are gone.** A request carries the name of the person who raised it, resolved from that
+person's own stored employee record, and a number no active record accounts for is still refused; a handler can give a
+claimed request back to the queue from its card, which supersedes the earlier decision that releasing keeps no screen
+control. FR-046, FR-047 and SC-021 are provable from this phase alone, and Phase 9's six unticked tasks can be walked
+again.
+
+---
+
 ## Dependencies & Execution Order
 
 **Phase dependencies.**
@@ -949,13 +1255,20 @@ Cross-cutting retirement, documentation, and validation against the Success Crit
 ```text
 Phase 1 Setup ──▶ Phase 2 Foundational ──▶ ┌ Phase 3 US1 (P1) ──┐
                                            ├ Phase 4 US2 (P1) ──┤
-                                           ├ Phase 5 US3 (P2) ──┼──▶ Phase 8 Polish
+                                           ├ Phase 5 US3 (P2) ──┼──▶ Phase 8 Polish ──▶ Phase 9 Follow-Up Batch
                                            ├ Phase 6 US4 (P2) ──┤
-                                           └ Phase 7 US5 (P3) ──┘
+                                           └ Phase 7 US5 (P3) ──┘                          │
+                                                                                           ▼
+                                                                    Phase 10 Attribution & Give Back
 ```
 
 Every user story waits for Foundational and nothing else. **Do not begin any story before Phase 2's Checkpoint** —
 the request's two columns, the configuration table and the availability snapshot are what each story stands on.
+
+**Phase 9 follows the shipped build and waits on nothing above it.** Phases 1–8 are complete; Phase 9's work is new
+and may start at once. Its own order is fixed only where a file demands it: sign out (T118–T124) → the prepared
+situations re-pointed (T125) → the fixtures retired (T126) → `pickup-component` (T127) → the transition guard (T128)
+→ the population (T129) → the seven outcomes (T130–T134) → the gates (T135–T139).
 
 **Cross-story boundaries that are real, not organisational.**
 
@@ -969,9 +1282,9 @@ the request's two columns, the configuration table and the availability snapshot
 - **US4 re-opens US1's Details step and US2's detail page.** T085 extends the file T025 created, and T086 binds the
   page T070 laid out. Both are deliberate sequential same-file edits across phases; neither may be merged into its
   earlier counterpart without making the earlier phase untestable on its own.
-- **`Strings/en-us/Resources.resw` is one file touched by five phases** (T053, T071, T082, T099, plus the removals in
-  T053). It can never appear twice in one wave. If the stories are run in parallel, the resource edits are the
-  single serialised resource — sequence them.
+- **`Strings/en-us/Resources.resw` is one file touched by six phases** (T053, T071, T082, T099, T124, plus the
+  removals in T053). It can never appear twice in one wave. If the stories are run in parallel, the resource edits
+  are the single serialised resource — sequence them.
 
 **Wave summary, phase by phase.**
 
@@ -1002,6 +1315,17 @@ the request's two columns, the configuration table and the availability snapshot
   symbols (T105–T109) → W4 the audit guard (T110) → W5 documentation (T111–T112) → W6 the gates (T113–T117).
   W3 must precede W4 only in the sense that the guard should be extended once the deletions exist; W4 before W6 so
   the build gate proves the retirements, not the intent.
+- **Phase 9 Follow-Up Batch** — tests first (T118–T122), then nine waves: the sign-out service (T123) → the badge
+  control (T124) → the situations re-pointed (T125) → the fixtures retired (T126) → `pickup-component` (T127) → the
+  transition guard (T128) → the population (T129) → the seven outcomes (T130–T134) → the gates (T135–T139).
+  W3 must precede W4: the fixture stations cannot be deleted while jobs still point at them. W7 must precede W8:
+  there is nothing to handle until the nineteen exist.
+- **Phase 10 Attribution & Give Back** — tests first (T140–T142), then seven waves: the employee lookup (T143) → the
+  rule and its call site (T144) → the give-back surface on the row (T145) → the card control (T146) → the
+  supersession written down (T147) → the specification brought current (T148) → the gates (T149–T151). W1 must
+  precede W2: the rule is given the directory's row, so the lookup has to exist first. W3 must precede W4: the card
+  binds the row's command, so the row has to carry it first. Phase 10 waits on Phase 9 only in that its two defects
+  are what Phase 9's own walk found.
 
 **Parallel opportunities.** Every wave of `[P]` tasks may be built concurrently — different files, no unfinished
 dependency between them. The largest are Phase 2 W1 (six new stored artifacts), Phase 2 W5 (seven model files) and

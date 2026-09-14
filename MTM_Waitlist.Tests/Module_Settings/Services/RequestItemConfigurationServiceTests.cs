@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Settings.Services;
 
@@ -23,6 +24,9 @@ namespace MTM_Waitlist.Tests.Module_Settings.Services;
 public sealed class RequestItemConfigurationServiceTests
 {
     private const string CataloguedItem = "pickup-coil";
+
+    /// <summary>The Item FR-035 names: it declares an enumerated answer and ships with no list of its own.</summary>
+    private const string PickupComponent = "pickup-component";
 
     private static readonly IRequestItemCatalogService Catalog = new RequestItemCatalogService();
 
@@ -213,6 +217,119 @@ public sealed class RequestItemConfigurationServiceTests
             "A stray row must not appear in the read at all.");
         Assert.AreEqual(Catalog.GetAllItems().Count, set.All.Count, "A stray row must not inflate the configured set.");
         Assert.IsTrue(set.Get(CataloguedItem).IsAvailable, "One stray row must not disturb the rows that are valid.");
+    }
+
+    // ── Raisability: an enumerated answer must have choices to draw on (FR-035) ─────────────────────────
+
+    [TestMethod]
+    public async Task GetConfigurationsAsync_EnumeratedAnswerWithNoConfiguredList_TakesItsChoicesFromTheJob()
+    {
+        // `pickup-component` is the shipped case: it declares an answer chosen from a list and is configured
+        // with no list of its own, because its list arrives with the job snapshot. Its details step therefore
+        // had nothing to draw on and the Item could not be raised at all (FR-035).
+        var set = await ReadAsync(Row(
+            PickupComponent,
+            optionsJson: null,
+            answerValueType: "enum",
+            requiresAnswer: "1",
+            detailFieldsJson: DetailFields(
+                ("Component", "enum", "answer", 1, true),
+                ("Part description", "string", "job", 2, false))));
+
+        var configuration = set.Get(PickupComponent);
+        Assert.IsTrue(configuration.IsAvailable, "The shipped row is a usable configuration, not a broken one.");
+
+        var job = RequestJobPartAvailability.None with
+        {
+            HasActiveJob = true,
+            HasComponent = true,
+        };
+        job = job.WithComponentPartNumbers(new[] { "CMP0004455", "CMP0004456" });
+
+        var choices = RequestItemAnswerOptionsResolver.Resolve(configuration, job);
+
+        Assert.IsTrue(
+            choices.Count > 0,
+            "Every in-scope Item whose configuration asks for an answer of a choice kind must yield at least one choice, so its details step can be completed — pickup-component is configured with no list of its own and is the Item this check names (FR-035).");
+        CollectionAssert.AreEqual(
+            new[] { "CMP0004455", "CMP0004456" },
+            choices.ToArray(),
+            "The choices come from the requesting job's component list and keep the job's order.");
+    }
+
+    [TestMethod]
+    public async Task GetConfigurationsAsync_AConfiguredList_WinsOverTheJob()
+    {
+        // The same rule read the other way: a row that carries its own list uses it, so a fixed list is never
+        // silently replaced by whatever the job happens to hold.
+        var set = await ReadAsync(Row(
+            "pickup-die",
+            optionsJson: JsonSerializer.Serialize(new[] { "Die Shop", "Home Location", "Other" }),
+            answerValueType: "enum",
+            requiresAnswer: "1",
+            detailFieldsJson: DetailFields(("Destination", "enum", "answer", 1, true))));
+
+        var job = RequestJobPartAvailability.None with { HasActiveJob = true, HasComponent = true };
+        job = job.WithComponentPartNumbers(new[] { "CMP0004455" });
+
+        CollectionAssert.AreEqual(
+            new[] { "Die Shop", "Home Location", "Other" },
+            RequestItemAnswerOptionsResolver.Resolve(set.Get("pickup-die"), job).ToArray(),
+            "A configured list is the list, whatever the job holds.");
+    }
+
+    [TestMethod]
+    public async Task GetConfigurationsAsync_AnAnswerTheRowDoesNotDeclare_AsksForNothing_SoNoChoicesAreInvented()
+    {
+        var set = await ReadAsync(Row(CataloguedItem, answerValueType: "enum", requiresAnswer: "1"));
+
+        var job = RequestJobPartAvailability.None with { HasActiveJob = true, HasComponent = true };
+        job = job.WithComponentPartNumbers(new[] { "CMP0004455" });
+
+        Assert.AreEqual(
+            0,
+            RequestItemAnswerOptionsResolver.Resolve(set.Get(CataloguedItem), job).Count,
+            "A row that declares no enumerated answer field takes no list, from configuration or from the job (FR-013).");
+    }
+
+    [TestMethod]
+    public void ShippedConfigurationSeed_PickupComponent_StillDeclaresAnEnumeratedAnswerWithNoListOfItsOwn()
+    {
+        // The fixture above is only a proof about the shipped data while the shipped row still looks like it.
+        // This is the source-side half: the row is enumerated, asks for an answer, and carries no options_json.
+        var seed = File.ReadAllText(Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Database",
+            "Seeds",
+            "seed_waitlist_request_item_configs",
+            "create.sql"));
+
+        var row = PickupComponentRow(seed);
+
+        Assert.IsTrue(
+            row.Contains(", 1, 'enum',", StringComparison.Ordinal),
+            "pickup-component must still declare that it asks for an answer of a choice kind (FR-035).");
+        Assert.IsFalse(
+            row.Contains("JSON_ARRAY('", StringComparison.Ordinal),
+            "pickup-component ships with no list of its own, which is why its choices must come from the job (FR-035).");
+        Assert.IsTrue(
+            row.Contains("'value_type','enum','source','answer'", StringComparison.Ordinal),
+            "pickup-component must declare the enumerated answer field that consumes the choice.");
+    }
+
+    /// <summary>The shipped <c>pickup-component</c> INSERT row, from its Item code to the next row.</summary>
+    private static string PickupComponentRow(string seedText)
+    {
+        var start = seedText.IndexOf("'" + PickupComponent + "'", StringComparison.Ordinal);
+        Assert.IsTrue(start >= 0, $"The shipped configuration seed no longer carries a row for {PickupComponent}.");
+
+        var end = seedText.IndexOf("),\n\n--", start, StringComparison.Ordinal);
+        if (end < 0)
+        {
+            end = Math.Min(seedText.Length, start + 2000);
+        }
+
+        return seedText[start..end];
     }
 
     // ── Every operation goes through a stored procedure (FR-024) ────────────────────────────────────────

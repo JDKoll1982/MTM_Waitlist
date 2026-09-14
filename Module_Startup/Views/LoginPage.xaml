@@ -38,18 +38,21 @@
                         Text="Use your assigned credentials to continue." />
 
                     <TextBox
+                        AutomationProperties.AutomationId="LoginPage_UserNameInput"
                         x:Name="UsernameTextBox"
                         Header="Username"
                         PlaceholderText="Username"
                         Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" shared:TooltipBehavior.ResourceKey="Startup_UsernameTextBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Username."/>
 
                     <PasswordBox
+                        AutomationProperties.AutomationId="LoginPage_PasswordInput"
                         x:Name="PasswordBox"
                         Header="Password"
                         PlaceholderText="Password"
                         PasswordChanged="PasswordBox_OnPasswordChanged" shared:TooltipBehavior.ResourceKey="Startup_PasswordBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Password."/>
 
                     <CheckBox
+                        AutomationProperties.AutomationId="LoginPage_RememberMeCheckBox"
                         Content="Remember me on this device"
                         IsChecked="{x:Bind ViewModel.RememberPassword, Mode=TwoWay}" />
                 </StackPanel>
@@ -67,16 +70,19 @@
                         Text="This account still uses its temporary default password. Choose a new one to continue."
                         TextWrapping="Wrap" />
                     <PasswordBox
+                        AutomationProperties.AutomationId="LoginPage_NewPasswordInput"
                         x:Name="NewPasswordBox"
                         Header="New password"
                         PlaceholderText="New password"
                         PasswordChanged="NewPasswordBox_OnPasswordChanged" shared:TooltipBehavior.ResourceKey="Startup_NewPasswordBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="New password."/>
                     <PasswordBox
+                        AutomationProperties.AutomationId="LoginPage_ConfirmPasswordInput"
                         x:Name="ConfirmPasswordBox"
                         Header="Confirm new password"
                         PlaceholderText="Confirm new password"
                         PasswordChanged="ConfirmPasswordBox_OnPasswordChanged" shared:TooltipBehavior.ResourceKey="Startup_ConfirmPasswordBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Startup/Views/LoginPage.xaml|Module_Startup/Views/LoginPage.xaml.cs|Module_Startup/ViewModels/LoginViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Confirm new password."/>
                     <Button
+                        AutomationProperties.AutomationId="LoginPage_UpdatePasswordButton"
                         Content="Update Password"
                         Command="{x:Bind ViewModel.ChangePasswordCommand, Mode=OneWay}"
                         Style="{ThemeResource AccentButtonStyle}"
@@ -90,12 +96,14 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <Button
+                        AutomationProperties.AutomationId="LoginPage_SignInButton"
                         x:Name="SignInButton"
                         Content="Sign In"
                         Command="{x:Bind ViewModel.SignInCommand, Mode=OneWay}"
                         Style="{ThemeResource AccentButtonStyle}"
                         x:Load="{x:Bind ViewModel.ShowSignInForm, Mode=OneWay}" />
                     <Button
+                        AutomationProperties.AutomationId="LoginPage_BackButton"
                         Content="Back"
                         Command="{x:Bind ViewModel.CancelCommand, Mode=OneWay}" />
                 </StackPanel>
@@ -106,6 +114,7 @@
                     Spacing="12"
                     x:Load="{x:Bind ViewModel.ShowNewUserAction, Mode=OneWay}">
                     <Button
+                        AutomationProperties.AutomationId="LoginPage_CreateAccountButton"
                         Content="Create Account"
                         Command="{x:Bind ViewModel.NewUserCommand, Mode=OneWay}" />
                 </StackPanel>

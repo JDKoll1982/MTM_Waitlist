@@ -69,4 +69,28 @@ public sealed record RequestJobPartAvailability(
     public static RequestJobPartAvailability All { get; } = new(true, true, true, true, true, true, true);
 
     public bool HasAnySubordinate => HasCoil || HasFlatstock || HasDie || HasComponent || HasDunnage;
+
+    /// <summary>
+    /// The requesting job's component part numbers, in the job's own order (FR-035).
+    /// <para>
+    /// This is the list an Item whose configuration declares an enumerated answer <b>with no list of its own</b>
+    /// draws its choices from — the job-derived path, keyed on the row's declarations and never on the Item's
+    /// identity (FR-013). Empty when the job carries no component.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<string> ComponentPartNumbers { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// A copy of this snapshot carrying the job's component part numbers, trimmed and with blanks dropped so a
+    /// caller can never offer an empty choice.
+    /// </summary>
+    public RequestJobPartAvailability WithComponentPartNumbers(IEnumerable<string>? partNumbers) => this with
+    {
+        ComponentPartNumbers = partNumbers is null
+            ? Array.Empty<string>()
+            : partNumbers
+                .Where(part => !string.IsNullOrWhiteSpace(part))
+                .Select(part => part.Trim())
+                .ToArray(),
+    };
 }

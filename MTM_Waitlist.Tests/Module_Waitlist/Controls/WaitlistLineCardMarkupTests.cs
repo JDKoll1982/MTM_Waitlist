@@ -145,6 +145,55 @@ public sealed class WaitlistLineCardMarkupTests
     }
 
     [TestMethod]
+    public void Card_DrawsGiveBackFromTheRowsOwnCommand()
+    {
+        // FR-047, contract C7 (superseded): a claimed request can be given back from its own card. Give back
+        // is a card control like the others — command, gate, accessible name and tooltip all from the row —
+        // and it is distinguishable from Complete, because the two sit side by side on the same row.
+        var card = LoadCard();
+        var release = card
+            .Descendants(s_presentation + "Button")
+            .SingleOrDefault(button => button.Attribute("Command")?.Value.Contains("ReleaseCommand", StringComparison.Ordinal) == true);
+
+        Assert.IsNotNull(
+            release,
+            "The card draws no Give back button, so a claimed request cannot be handed back from its card (FR-047).");
+
+        Assert.IsTrue(
+            release!.Attribute("Visibility")!.Value.Contains("CanCompleteOrRelease", StringComparison.Ordinal),
+            "Give back must be hidden unless the row's own gate says the viewer may hand this request back.");
+        Assert.IsTrue(
+            release.Attribute("AutomationProperties.Name")!.Value.Contains("ReleaseActionText", StringComparison.Ordinal),
+            "Give back must be named from the row's localized action text, not from a literal.");
+        Assert.AreEqual("44", (string?)release.Attribute("MinWidth"), "Give back must match the other icon buttons.");
+        Assert.AreEqual("44", (string?)release.Attribute("MinHeight"), "Give back must match the other icon buttons.");
+
+        var complete = card
+            .Descendants(s_presentation + "Button")
+            .Single(button => button.Attribute("AutomationProperties.Name")!.Value.Contains("CompleteActionText", StringComparison.Ordinal));
+
+        Assert.AreNotEqual(
+            complete.Attribute("Background")!.Value,
+            release.Attribute("Background")!.Value,
+            "Complete and Give back must not share a background colour.");
+
+        var glyphOf = (System.Xml.Linq.XElement button) => button
+            .Descendants(s_presentation + "FontIcon")
+            .Single()
+            .Attribute("Glyph")!
+            .Value;
+
+        Assert.AreNotEqual(
+            glyphOf(complete),
+            glyphOf(release),
+            "Complete and Give back must not share an icon.");
+        Assert.AreEqual(
+            "\uE7A7",
+            glyphOf(release),
+            "Give back uses the Undo glyph (E7A7) from the Segoe Fluent Icons list.");
+    }
+
+    [TestMethod]
     public void Card_ShowsTheRequestsRealLifecycleStatusInTheActionArea()
     {
         var card = LoadCard();

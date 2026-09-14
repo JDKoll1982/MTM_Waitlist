@@ -156,6 +156,43 @@ public sealed partial class ShellPage : Page
         }
     }
 
+    /// <summary>
+    /// Signs out from the badge (FR-033, FR-034). The view model hands the work to the sign-out service, which
+    /// clears the remembered credential and the local session, launches a replacement instance and exits this
+    /// one — so a successful sign-out never comes back here. A relaunch that could not be performed is
+    /// reported in plain language rather than leaving the person apparently signed in (FR-026).
+    /// </summary>
+    private async void SignOutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        SignOutResult result;
+        try
+        {
+            result = await ViewModel.SignOutAsync();
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("ShellPage", ex, "Signing out failed before the application could be relaunched.");
+            result = SignOutResult.Refused(MTM_Waitlist.Module_Startup.Services.SignOutService.ResolveRestartFailedMessage());
+        }
+
+        if (result.Succeeded)
+        {
+            // The replacement instance is already running and this process is exiting.
+            return;
+        }
+
+        // ShowAsync returns IAsyncOperation and must not be awaited through ConfigureAwait on this thread.
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Shell_SignOut.Failed.Title".GetLocalized(),
+            Content = result.Message,
+            CloseButtonText = "Shell_SignOut.Close".GetLocalized(),
+        };
+
+        await dialog.ShowAsync();
+    }
+
     private void TitleBarSearchBox_TextChanged(
         AutoSuggestBox sender,
         AutoSuggestBoxTextChangedEventArgs args)

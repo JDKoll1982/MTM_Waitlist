@@ -67,6 +67,7 @@
                             </Grid.ColumnDefinitions>
 
                             <ComboBox
+                                AutomationProperties.AutomationId="SetupDunnageTypePage_ScrapTypeCombo"
                                 Grid.Column="0"
                                 x:Uid="Setup_DunnagePair.ScrapType.ComboBox"
                                 PlaceholderText="Select scrap type"
@@ -83,6 +84,8 @@
                                 Visibility="{x:Bind ViewModel.ScrapSelectionNotificationVisibility, Mode=OneWay}" />
 
                             <Button
+                                AutomationProperties.AutomationId="SetupDunnageTypePage_AddScrapTypeButton"
+                                AutomationProperties.Name="Add scrap type"
                                 Grid.Column="1"
                                 Width="32"
                                 Height="32"
@@ -117,15 +120,16 @@
                             Style="{ThemeResource BodyStrongTextBlockStyle}"
                             Text="Current Dunnage" />
                         <Button
+                            AutomationProperties.AutomationId="SetupDunnageTypePage_AddDunnageButton"
                             Grid.Column="1"
                             x:Uid="Setup_Action.AddDunnage"
                             Content="Add Dunnage"
                             Command="{x:Bind ViewModel.AddDunnageCommand}" />
                     </Grid>
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.PairAssignments, Mode=OneWay}">
+                    <ItemsControl AutomationProperties.AutomationId="SetupDunnageTypePage_AssignmentList" ItemsSource="{x:Bind ViewModel.PairAssignments, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="models:SetupDunnagePart">
-                                <Grid Margin="0,0,0,8" ColumnSpacing="10">
+                                <Grid AutomationProperties.Name="{x:Bind DisplayName}" Margin="0,0,0,8" ColumnSpacing="10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
@@ -151,9 +155,9 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="1" x:Uid="Setup_Action.ClearAllForPair" Content="Clear All" Click="OnClearAllForPairClick" />
-            <Button Grid.Column="2" x:Uid="Setup_Action.Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
-            <Button Grid.Column="3" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueToReviewCommand}" IsEnabled="{x:Bind ViewModel.CanContinue, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupDunnageTypePage_ClearAllButton" Grid.Column="1" x:Uid="Setup_Action.ClearAllForPair" Content="Clear All" Click="OnClearAllForPairClick" />
+            <Button AutomationProperties.AutomationId="SetupDunnageTypePage_BackButton" Grid.Column="2" x:Uid="Setup_Action.Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
+            <Button AutomationProperties.AutomationId="SetupDunnageTypePage_ContinueButton" Grid.Column="3" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueToReviewCommand}" IsEnabled="{x:Bind ViewModel.CanContinue, Mode=OneWay}" />
         </Grid>
     </Grid>
 </Page>

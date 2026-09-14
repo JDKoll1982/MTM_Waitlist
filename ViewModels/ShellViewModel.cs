@@ -23,6 +23,7 @@ public partial class ShellViewModel : ObservableRecipient
 {
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly IWaitlistSortPreferenceService _sortPreferenceService;
+    private readonly ISignOutService _signOutService;
     private readonly SetupWorkflowState _setupWorkflowState;
     private readonly StartupState _startupState;
     private Type? _currentPageType;
@@ -224,6 +225,23 @@ public partial class ShellViewModel : ObservableRecipient
         get; set;
     } = CreateUserBadgeBrush("#FF5C5C5C");
 
+    /// <summary>
+    /// The label of the badge flyout's Sign out entry (FR-022, FR-033). The fallback is readable text rather
+    /// than the resource key, so a missing entry never shows the person a key.
+    /// </summary>
+    public string SignOutLabel => ResolveShellString("Shell_SignOut.Label", "Sign out");
+
+    /// <summary>The Sign out entry's tooltip (FR-022).</summary>
+    public string SignOutTooltip => ResolveShellString("Shell_SignOut.Tooltip", "Sign out and return to the sign-in screen.");
+
+    private static string ResolveShellString(string resourceKey, string fallback)
+    {
+        var localized = resourceKey.GetLocalized();
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, resourceKey, StringComparison.Ordinal)
+            ? fallback
+            : localized;
+    }
+
     public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
 
     public INavigationService NavigationService
@@ -242,7 +260,8 @@ public partial class ShellViewModel : ObservableRecipient
         IBuildingSelectionService buildingSelectionService,
         SetupWorkflowState setupWorkflowState,
         StartupState startupState,
-        IWaitlistSortPreferenceService sortPreferenceService)
+        IWaitlistSortPreferenceService sortPreferenceService,
+        ISignOutService signOutService)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(navigationViewService);
@@ -250,18 +269,37 @@ public partial class ShellViewModel : ObservableRecipient
         ArgumentNullException.ThrowIfNull(setupWorkflowState);
         ArgumentNullException.ThrowIfNull(startupState);
         ArgumentNullException.ThrowIfNull(sortPreferenceService);
+        ArgumentNullException.ThrowIfNull(signOutService);
 
         NavigationService = navigationService;
         NavigationService.Navigated += OnNavigated;
         NavigationViewService = navigationViewService;
         _buildingSelectionService = buildingSelectionService;
         _sortPreferenceService = sortPreferenceService;
+        _signOutService = signOutService;
         _setupWorkflowState = setupWorkflowState;
         _setupWorkflowState.PropertyChanged += OnSetupWorkflowStateChanged;
         _startupState = startupState;
         SelectedBuilding = _buildingSelectionService.SelectedBuilding;
         HeaderText = "MTM Waitlist";
         RefreshUserInfo();
+    }
+
+    /// <summary>
+    /// Signs out from the badge (FR-033, FR-034): the service clears the remembered credential and the local
+    /// session, relaunches the application and exits this process, so the person lands back at the sign-in
+    /// screen. The badge's displayed name is deliberately <b>not</b> touched here — blanking it while the
+    /// session persists is exactly what FR-034 rules out, and it is the service, not this method, that ends
+    /// the session.
+    /// </summary>
+    /// <returns>
+    /// The outcome, so the view can tell the person when the relaunch could not be performed rather than
+    /// leaving them apparently signed in (FR-026).
+    /// </returns>
+    public Task<SignOutResult> SignOutAsync(CancellationToken cancellationToken = default)
+    {
+        // The replacement instance is started by the service; when it succeeds this process is on its way out.
+        return _signOutService.SignOutAsync(cancellationToken);
     }
 
     public void RefreshUserInfo()

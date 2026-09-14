@@ -171,10 +171,12 @@
 
         <StackPanel Grid.Row="3" Style="{StaticResource SetupActionBarStyle}">
             <Button
+                AutomationProperties.AutomationId="NewRequestSummaryPage_BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}"
                 IsEnabled="{x:Bind ViewModel.CanSubmit, Mode=OneWay}" />
             <Button
+                AutomationProperties.AutomationId="NewRequestSummaryPage_SubmitButton"
                 Command="{x:Bind ViewModel.SubmitCommand}"
                 Style="{StaticResource AccentButtonStyle}"
                 IsEnabled="{x:Bind ViewModel.CanSubmit, Mode=OneWay}">

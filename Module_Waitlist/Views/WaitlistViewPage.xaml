@@ -19,6 +19,7 @@
         <!--  One card template for every Item (FR-006): there is nothing left to choose between.  -->
         <DataTemplate x:Key="WaitlistLineCardTemplate" x:DataType="models:SampleOrder">
             <cardControls:WaitlistLineCardView
+                AutomationProperties.Name="{x:Bind Title}"
                 AccentBrush="{ThemeResource AccentFillColorDefaultBrush}"
                 AccentSurfaceBrush="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                 Order="{Binding}" />
@@ -57,6 +58,7 @@
         </VisualStateManager.VisualStateGroups>
 
         <ListView
+            AutomationProperties.AutomationId="WaitlistViewPage_CardList"
             x:Name="WaitlistListView"
             Padding="6,12,6,92"
             IsItemClickEnabled="True"
@@ -108,6 +110,7 @@
             Title="{x:Bind ViewModel.StoreUnavailableTitle, Mode=OneWay}">
             <InfoBar.ActionButton>
                 <Button
+                    AutomationProperties.AutomationId="WaitlistViewPage_StoreRetryButton"
                     Command="{x:Bind ViewModel.StoreUnavailable.RetryCommand, Mode=OneWay}"
                     Content="{x:Bind ViewModel.StoreUnavailableRetryText, Mode=OneWay}" />
             </InfoBar.ActionButton>
@@ -171,6 +174,7 @@
 
         <!--  Floating Green Circular Action Button  -->
         <Button
+            AutomationProperties.AutomationId="WaitlistViewPage_AddRequestButton"
             x:Name="WaitlistFab"
             Width="56"
             Height="56"

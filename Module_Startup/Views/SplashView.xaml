@@ -53,13 +53,13 @@
             HorizontalAlignment="Center"
             Orientation="Horizontal"
             Spacing="12">
-            <Button Command="{x:Bind ViewModel.RetryCommand, Mode=OneWay}" Content="Retry" />
+            <Button AutomationProperties.AutomationId="SplashView_RetryButton" Command="{x:Bind ViewModel.RetryCommand, Mode=OneWay}" Content="Retry" />
             <StackPanel
                 x:Name="ResetActionArea"
                 x:Load="{x:Bind ViewModel.ShowResetToDefaultsAction, Mode=OneWay}">
-                <Button Command="{x:Bind ViewModel.ResetToDefaultsCommand, Mode=OneWay}" Content="Restore Defaults" />
+                <Button AutomationProperties.AutomationId="SplashView_RestoreDefaultsButton" Command="{x:Bind ViewModel.ResetToDefaultsCommand, Mode=OneWay}" Content="Restore Defaults" />
             </StackPanel>
-            <Button Command="{x:Bind ViewModel.ExitCommand, Mode=OneWay}" Content="Close" />
+            <Button AutomationProperties.AutomationId="SplashView_CloseButton" Command="{x:Bind ViewModel.ExitCommand, Mode=OneWay}" Content="Close" />
         </StackPanel>
     </Grid>
 </UserControl>

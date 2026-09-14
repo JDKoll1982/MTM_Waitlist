@@ -1922,3 +1922,29 @@ SET is_active = 0,
     updated_utc = UTC_TIMESTAMP()
 WHERE scope = p_scope
   AND is_active = 1;
+
+-- Create procedure: sp_core_employee_by_identifier_get
+-- Engine: MySQL 5.7
+-- Feature: 004-unified-card-item-picker (task T143)
+-- Purpose: resolve one account by the employee identifier the signed-in session carries, so a request is
+--          attributed to the person who raised it (FR-046). The comparison is on the stored identifier, never
+--          on a name; an identifier no account carries returns no row, which is what lets the caller refuse it.
+--          The read is ordered active-first because two accounts may deliberately share one identifier
+--          (`johnk` and `jkoll` are both 6229, both being John Koll). An inactive account is still returned, so
+--          the caller can say "not active" rather than the weaker "no such employee".
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_employee_by_identifier_get;
+
+CREATE PROCEDURE sp_core_employee_by_identifier_get(
+    IN p_employee_identifier VARCHAR(128)
+)
+SELECT u.employee_identifier,
+       COALESCE(u.display_name, '') AS display_name,
+       u.is_active
+FROM core_users_profiles u
+WHERE u.employee_identifier IS NOT NULL
+  AND u.employee_identifier = p_employee_identifier
+ORDER BY u.is_active DESC, u.id ASC
+LIMIT 1;

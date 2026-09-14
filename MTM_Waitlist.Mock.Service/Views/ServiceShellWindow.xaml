@@ -27,6 +27,7 @@
             IsPaneToggleButtonVisible="False">
             <TitleBar.Content>
                 <AutoSuggestBox
+                    AutomationProperties.AutomationId="ServiceShellWindow_SearchBox"
                     x:Name="TitleBarSearchBox"
                     MaxWidth="400"
                     Margin="12,0,0,0"
@@ -49,6 +50,7 @@
             only. An item without one renders as blank space in that state.
         -->
         <NavigationView
+            AutomationProperties.AutomationId="ServiceShellWindow_Navigation"
             x:Name="ShellNavigationView"
             Grid.Row="1"
             IsBackButtonVisible="Collapsed"
@@ -58,7 +60,7 @@
             SelectionChanged="OnNavigationSelectionChanged">
 
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Name="StatusNavigationItem" Tag="status">
+                <NavigationViewItem AutomationProperties.AutomationId="ServiceShellWindow_StatusNavItem" x:Name="StatusNavigationItem" Tag="status">
                     <NavigationViewItem.Icon>
                         <!-- Diagnostic: this surface reports the service's health and last run. -->
                         <BitmapIcon UriSource="ms-appx:///Assets/Icons/service-status.png" ShowAsMonochrome="False" />

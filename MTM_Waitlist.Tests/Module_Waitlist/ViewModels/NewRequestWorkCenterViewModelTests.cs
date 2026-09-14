@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Settings.Models;
@@ -14,6 +15,14 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 [TestClass]
 public sealed class NewRequestWorkCenterViewModelTests
 {
+    /// <summary>
+    /// The signed-in person every test in this file runs as. 9004 is deliberately not 6229 — the identifier the
+    /// step used to name for everyone (FR-046) — so a step that still writes the literal fails here.
+    /// </summary>
+    private const string SignedInEmployeeNumber = "9004";
+
+    private const string SignedInEmployeeName = "Sam Reyes";
+
     [TestMethod]
     public void OnNavigatedTo_LoadsCatalogPopulatesHotAndOtherWithDetail()
     {
@@ -175,7 +184,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public void SelectWorkCenter_MarksSelectedClearsOthersAndNavigates()
+    public async Task SelectWorkCenter_MarksSelectedClearsOthersAndNavigates()
     {
         var catalogService = new FakeWorkCenterCatalogService
         {
@@ -197,16 +206,91 @@ public sealed class NewRequestWorkCenterViewModelTests
         var first = viewModel.HotWorkCenters[0];
         var second = viewModel.HotWorkCenters[1];
 
-        viewModel.SelectWorkCenterCommand.Execute(second);
+        await viewModel.SelectWorkCenterCommand.ExecuteAsync(second);
 
         Assert.IsFalse(first.IsSelected);
         Assert.IsTrue(second.IsSelected);
         Assert.AreEqual("Press 2", state.WorkCenter);
-        Assert.AreEqual("6229", state.RequesterEmployeeNumber);
-        Assert.IsFalse(string.IsNullOrWhiteSpace(state.RequesterEmployeeName));
+        Assert.AreEqual(SignedInEmployeeNumber, state.RequesterEmployeeNumber);
+        Assert.AreEqual(SignedInEmployeeName, state.RequesterEmployeeName);
         Assert.AreEqual(1, navigationService.Navigations.Count);
         Assert.AreEqual(typeof(NewRequestJobTypeViewModel).FullName, navigationService.Navigations[0].PageKey);
         Assert.AreSame(state, navigationService.Navigations[0].Parameter);
+    }
+
+    [TestMethod]
+    public async Task SelectWorkCenter_AttributesTheRequestToTheSignedInPersonFromTheDirectory()
+    {
+        // FR-046, SC-021. The signed-in person is 9004, deliberately not the 6229 the step used to name:
+        // both the number and the name on the request have to come from that person's stored record, and the
+        // lookup has to have been asked for that person's identifier.
+        var catalogService = new FakeWorkCenterCatalogService
+        {
+            Catalog = BuildCatalog(
+                hot: new[] { "Press 1" },
+                other: Array.Empty<string>(),
+                active: new[] { "Press 1" },
+                details: new Dictionary<string, WorkCenterDetail>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["Press 1"] = new() { Building = "Expo Drive", HasActiveJob = true },
+                }),
+        };
+        var navigationService = new RecordingNavigationService();
+        var directory = new StubEmployeeDirectoryService(new EmployeeIdentity
+        {
+            EmployeeNumber = SignedInEmployeeNumber,
+            DisplayName = SignedInEmployeeName,
+            IsActive = true,
+        });
+        var state = new NewRequestFlowState();
+        var viewModel = CreateViewModel(
+            catalogService,
+            new StubBuildingSelectionService(),
+            navigationService,
+            directory);
+
+        viewModel.OnNavigatedTo(state);
+        await viewModel.SelectWorkCenterCommand.ExecuteAsync(viewModel.HotWorkCenters[0]);
+
+        Assert.AreEqual(SignedInEmployeeNumber, directory.LastRequestedIdentifier, "The step must look up the signed-in person's own identifier.");
+        Assert.AreEqual(SignedInEmployeeNumber, state.RequesterEmployeeNumber, "The request must carry the signed-in person's number.");
+        Assert.AreEqual(SignedInEmployeeName, state.RequesterEmployeeName, "The request must carry the signed-in person's name.");
+        Assert.IsFalse(viewModel.IsVerificationWarningVisible);
+        Assert.AreEqual(1, navigationService.Navigations.Count);
+    }
+
+    [TestMethod]
+    public async Task SelectWorkCenter_BlocksTheStepWhenTheDirectoryDoesNotHoldTheSignedInNumber()
+    {
+        // The refusal survives the fix: a person no active record accounts for cannot raise a request, and
+        // the step says so in plain language and stays put rather than navigating on (FR-026, FR-046).
+        var catalogService = new FakeWorkCenterCatalogService
+        {
+            Catalog = BuildCatalog(
+                hot: new[] { "Press 1" },
+                other: Array.Empty<string>(),
+                active: new[] { "Press 1" },
+                details: new Dictionary<string, WorkCenterDetail>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["Press 1"] = new() { Building = "Expo Drive", HasActiveJob = true },
+                }),
+        };
+        var navigationService = new RecordingNavigationService();
+        var state = new NewRequestFlowState();
+        var viewModel = CreateViewModel(
+            catalogService,
+            new StubBuildingSelectionService(),
+            navigationService,
+            new StubEmployeeDirectoryService(storedIdentity: null));
+
+        viewModel.OnNavigatedTo(state);
+        await viewModel.SelectWorkCenterCommand.ExecuteAsync(viewModel.HotWorkCenters[0]);
+
+        Assert.IsTrue(viewModel.IsVerificationWarningVisible, "The step must report the refusal rather than appearing to do nothing.");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(viewModel.VerificationMessage), "The refusal must be a plain sentence.");
+        Assert.AreEqual(string.Empty, state.RequesterEmployeeNumber);
+        Assert.AreEqual(string.Empty, state.RequesterEmployeeName);
+        Assert.AreEqual(0, navigationService.Navigations.Count, "A refused step must not navigate on.");
     }
 
     [TestMethod]
@@ -280,13 +364,52 @@ public sealed class NewRequestWorkCenterViewModelTests
     private static NewRequestWorkCenterViewModel CreateViewModel(
         FakeWorkCenterCatalogService catalogService,
         StubBuildingSelectionService buildingService,
-        RecordingNavigationService navigationService)
+        RecordingNavigationService navigationService,
+        IEmployeeDirectoryService? employeeDirectory = null)
     {
+        var startupState = new StartupState
+        {
+            Username = "test.setup.lead",
+            EmployeeNumber = SignedInEmployeeNumber,
+            EmployeeName = SignedInEmployeeName,
+        };
+
         return new NewRequestWorkCenterViewModel(
             navigationService,
             catalogService,
             new FakeNewRequestFlowService(),
-            buildingService);
+            buildingService,
+            startupState,
+            employeeDirectory ?? new StubEmployeeDirectoryService(new EmployeeIdentity
+            {
+                EmployeeNumber = SignedInEmployeeNumber,
+                DisplayName = SignedInEmployeeName,
+                IsActive = true,
+            }));
+    }
+
+    private sealed class StubEmployeeDirectoryService : IEmployeeDirectoryService
+    {
+        private readonly EmployeeIdentity? _storedIdentity;
+
+        public StubEmployeeDirectoryService(EmployeeIdentity? storedIdentity)
+        {
+            _storedIdentity = storedIdentity;
+        }
+
+        /// <summary>The identifier the view model asked for, so a test can prove the lookup keyed on the signed-in person.</summary>
+        public string LastRequestedIdentifier { get; private set; } = string.Empty;
+
+        public Task<EmployeeIdentity?> FindByEmployeeIdentifierAsync(string employeeIdentifier, CancellationToken cancellationToken = default)
+        {
+            LastRequestedIdentifier = employeeIdentifier?.Trim() ?? string.Empty;
+
+            return Task.FromResult(
+                _storedIdentity is not null
+                && string.Equals(_storedIdentity.EmployeeNumber, LastRequestedIdentifier, StringComparison.OrdinalIgnoreCase)
+                    ? _storedIdentity
+                    : null);
+        }
     }
 
     private static WorkCenterCatalogResult BuildCatalog(

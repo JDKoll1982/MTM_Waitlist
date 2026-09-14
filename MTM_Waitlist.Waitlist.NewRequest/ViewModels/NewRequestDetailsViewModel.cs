@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 
@@ -117,7 +118,7 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
         MaxLength = configuration.MaxLength;
 
         Options.Clear();
-        foreach (var option in configuration.Options)
+        foreach (var option in RequestItemAnswerOptionsResolver.Resolve(configuration, state.Availability))
         {
             Options.Add(option);
         }

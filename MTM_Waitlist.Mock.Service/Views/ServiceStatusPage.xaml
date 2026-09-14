@@ -33,6 +33,7 @@
                 </StackPanel>
 
                 <Button
+                    AutomationProperties.AutomationId="ServiceStatusPage_RefreshButton"
                     Grid.Column="1"
                     VerticalAlignment="Top"
                     Command="{x:Bind ViewModel.LoadStatusCommand}"
@@ -64,10 +65,11 @@
             <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.IsSummarySectionVisible, Mode=OneWay}">
                 <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.SummaryHeaderText}" />
 
-                <ItemsControl ItemsSource="{x:Bind ViewModel.SummaryRows, Mode=OneWay}">
+                <ItemsControl AutomationProperties.AutomationId="ServiceStatusPage_SummaryList" ItemsSource="{x:Bind ViewModel.SummaryRows, Mode=OneWay}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:ServiceSummaryRow">
                             <wct:SettingsCard
+                                AutomationProperties.Name="{x:Bind LabelText}"
                                 Margin="0,0,0,8"
                                 HorizontalAlignment="Stretch">
                                 <wct:SettingsCard.Header>
@@ -104,10 +106,11 @@
                     TextWrapping="Wrap" />
             </StackPanel>
 
-            <ItemsControl ItemsSource="{x:Bind ViewModel.Shapes, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsShapesSectionVisible, Mode=OneWay}">
+            <ItemsControl AutomationProperties.AutomationId="ServiceStatusPage_ShapesList" ItemsSource="{x:Bind ViewModel.Shapes, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsShapesSectionVisible, Mode=OneWay}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="models:ShapeStatusRow">
                         <Border
+                            AutomationProperties.Name="{x:Bind DisplayName}"
                             Margin="0,0,0,10"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -204,10 +207,11 @@
                     TextWrapping="Wrap" />
             </StackPanel>
 
-            <ItemsControl ItemsSource="{x:Bind ViewModel.Backups, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsBackupsSectionVisible, Mode=OneWay}">
+            <ItemsControl AutomationProperties.AutomationId="ServiceStatusPage_BackupsList" ItemsSource="{x:Bind ViewModel.Backups, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsBackupsSectionVisible, Mode=OneWay}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="models:BackupStatusRow">
                         <Border
+                            AutomationProperties.Name="{x:Bind DisplayName}"
                             Margin="0,0,0,10"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"

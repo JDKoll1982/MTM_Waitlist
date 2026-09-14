@@ -11,6 +11,14 @@ the per-Item configuration, the sole source of the field definitions in FR-027 �
 `WeekendProject/Documents/unified-item-picker-workflows.md`, which records each Item's flow and the availability
 rule that gates it.
 
+**Follow-up batch (2026-09-13).** This feature is **delivered** — it shipped at `status: completed` — and this
+document now also records a **second batch of decisions** taken on top of that build: a new **Sign out** capability,
+the request population that will be raised and left waiting, the removal of the seven fixture work centres that were
+added to carry the prepared job situations, and the handling outcomes the fulfilment pass must exercise. The new
+requirements begin at **FR-033** and are **appended**: no existing requirement is renumbered, reordered or rewritten,
+the five user stories stand as they are, and a sixth is added. Reopening the specification's status is the owner's
+action, not this batch's, so the header is left as written.
+
 ## User Scenarios & Testing
 
 Today a request is described by two words — a **request type** and a **subtype** — and the list draws a different
@@ -141,6 +149,32 @@ minutes and the average it has actually taken.
    neither is offered.
 5. **Given** an Item nobody has configured, **Then** it does not silently behave like a different Item.
 
+### User Story 6 - Sign out, and come back to the sign-in screen (Priority: P2)
+
+The header shows who is signed in. From that badge the person can sign out — and signing out actually signs them out:
+the application restarts and comes back at the sign-in screen, even on a computer where they had asked to be
+remembered and the application had been restoring their session.
+
+**Why this priority**: there is no sign-out anywhere in the application today, and the application runs on shared
+shop-floor workstations where handing the screen to the next person is routine. It is P2 rather than P1 because the
+request pipeline works without it, and it touches the shell rather than the work itself.
+
+**Independent Test**: on a computer where "remember me" is set and the application has just restored the previous
+session, open the badge, choose Sign out, and confirm the application restarts at the sign-in screen rather than
+restoring that session.
+
+**Acceptance Scenarios**:
+
+1. **Given** the signed-in user's badge, **When** it is opened, **Then** it offers **Sign out**.
+2. **Given** a signed-in person, **When** they choose Sign out, **Then** the application restarts and returns to the
+   sign-in screen.
+3. **Given** a computer where the person had asked to be remembered, **When** they choose Sign out, **Then** the
+   restarted application does **not** restore their session but asks them to sign in.
+4. **Given** Sign out has been chosen, **When** the sign-in screen appears, **Then** the previous session is gone —
+   the application did not merely clear the displayed name while the session persisted.
+5. **Given** a person chooses Sign out, **When** the restart cannot be performed, **Then** they are told in plain
+   language and the application does not leave them apparently signed in.
+
 ### Edge Cases
 
 - **A job with no parts on it, or no active job at all.** The Item step must still offer the job-independent
@@ -166,6 +200,10 @@ minutes and the average it has actually taken.
 - **The store is unreachable.** Reported as the existing per-screen unavailable state with a manual retry —
   never as an empty list and never as a fabricated row.
 - **An Item whose page shows fields that the request does not carry.** The field is omitted, never substituted.
+- **Sign out on a computer where nothing was remembered.** The application still restarts and still returns to the
+  sign-in screen; the behaviour does not depend on a remembered credential existing.
+- **Sign out while the store is unreachable.** The person still reaches the sign-in screen, and the unreachability
+  is reported rather than the previous session being silently restored.
 
 ## Requirements
 
@@ -234,6 +272,49 @@ minutes and the average it has actually taken.
   to collect.
 - **FR-032**: Choosing an Item MUST NOT change the request's lifecycle: the stored statuses, the legal transitions
   and who may perform them stay exactly as they are, whichever Item was chosen.
+- **FR-033**: The signed-in user's badge in the main window MUST offer **Sign out**.
+- **FR-034**: Choosing Sign out MUST restart the application and return it to the sign-in screen, bypassing the
+  signed-in user's "Remember Me" so the previous session is **not** restored. Clearing the displayed name while the
+  session persists MUST NOT be presented as signing out.
+- **FR-035**: Every one of the nineteen in-scope Items MUST be raisable. An Item that declares it needs an answer of
+  a kind chosen from a list MUST offer the list of choices that answer needs, so its details step can be completed —
+  `pickup-component` declares exactly that answer and is configured with no list today, and is therefore not
+  raisable.
+- **FR-036**: Nineteen requests MUST be raised, one for each in-scope Item, and each MUST be attributed to a person
+  who already exists in the application. **No new account may be created.** The requester's name MUST appear on the
+  request's card as "Requested by".
+- **FR-037**: The nineteen MUST be raised by the ten people who already exist and spread across them, weighted
+  towards ordinary floor people with a couple of leads, and **every one of the application's eight roles MUST have
+  raised at least one**, so each kind of login opens onto a populated list.
+- **FR-038**: The nineteen MUST come from **more** work centres than the seven that carry the prepared job
+  situations, and where an Item needs material on the job, its request MUST come from a work centre whose job
+  actually carries that material — the availability rule continues to govern which Items are offered where.
+- **FR-039**: The seven fixture work centres added only to carry the prepared job situations (`900-1` … `900-7`)
+  MUST be removed, and those seven situations MUST be carried by **real** work centres — five on Expo Drive and two
+  on Vits Drive. The eighth case, a work centre with no active job, MUST remain realised by the absence of a job
+  rather than by a row.
+- **FR-040**: The requests raised for this batch MUST be left unhelped, so the queue is populated before any
+  handling is exercised.
+- **FR-041**: A handler MUST be able to accept a request that they raised themselves.
+- **FR-042**: Handing a request back to the queue MUST return it to an acceptable state, so it can be accepted again
+  by the same handler or a different one, and MUST leave **one** request rather than two.
+- **FR-043**: Two handlers acting on the same request at the same moment MUST produce exactly one outcome. A request
+  MUST NOT end up accepted, assigned or completed twice, and the handler whose action did not take effect MUST be
+  told so.
+- **FR-044**: An overdue request MUST be produced only by a deadline the application itself derived — a deliberately
+  short time allowance that genuinely runs out. A raised time, or any other value the application did not produce,
+  MUST NOT be used to make a request appear overdue.
+- **FR-045**: The nineteen requests and the ten accounts MUST remain in place after the batch, so the owner can
+  browse them.
+- **FR-046**: A request MUST be attributed to the person who raised it. The signed-in person's own employee
+  identifier MUST be resolved against the application's own account records, and the request MUST carry that
+  person's number and name, so the card's "Requested by" names the person who asked rather than a stand-in. The
+  match MUST be made on the **stored employee identifier** and never on a name, and a number no active account
+  accounts for MUST be refused — the lookup is what makes the rule permissive, not the rule being loosened.
+- **FR-047**: A handler who has claimed a request MUST be able to give it back to the queue from that request's
+  own card, without cancelling it, so it can be accepted again by the same handler or a different one. This
+  **supersedes** the earlier decision that releasing keeps no screen control; the earlier reason is kept beside the
+  new behaviour rather than deleted.
 
 ### Key Entities
 
@@ -279,6 +360,25 @@ minutes and the average it has actually taken.
 - **SC-011**: The full test suite reports no failures, and the solution builds with no warnings and no errors.
 - **SC-012**: Zero references to the retired type and subtype vocabulary remain in application code, database
   artifacts, or project documentation.
+- **SC-013**: Sign out from the user badge returns the application to the sign-in screen on a computer where
+  "Remember Me" is set and the previous session had been restored — proven by the restart, not by the displayed name
+  alone.
+- **SC-014**: All nineteen in-scope Items have been raised once, with zero Items left unraisable.
+- **SC-015**: Zero new accounts were created; the nineteen requests are attributed to the ten people who already
+  exist, and every one of the eight roles has raised at least one.
+- **SC-016**: Zero fixture work centres remain; the seven prepared job situations are carried by five Expo Drive and
+  two Vits Drive work centres, and the no-active-job case is still an absent job.
+- **SC-017**: All seven handling outcomes are exercised and recorded — accept and finish; accept, hand back, accept
+  again and finish; cancel before acceptance; overdue; hand-over to a different handler; a handler accepting their
+  own request; and two handlers acting at once.
+- **SC-018**: Zero overdue requests were produced by a time the application did not itself derive; the overdue case
+  is a real expiry.
+- **SC-019**: Two copies of the application acting on one request produce exactly one outcome.
+- **SC-020**: The nineteen requests and the ten accounts are still present and browsable after the batch.
+- **SC-021**: Zero requests name an identity other than the person who raised them — each request's requester is
+  resolved from that person's own stored employee record, never from a stand-in — and a claimed request can be
+  returned to the queue from its own card.
+
 ## Assumptions
 
 - **The database is reinstalled from seed; no migration is written.** The sample data is recreated in the new
@@ -312,6 +412,17 @@ minutes and the average it has actually taken.
   replacement is stronger evidence, since it drives the same artifact a user runs.
 - **The two configuration screens keep working for whoever uses them today.** Only their subject changes, from
   subtype to Item.
+- **This batch is a follow-up to a delivered build, and it is a preparation and verification pass rather than a
+  second vocabulary.** The feature shipped at `status: completed`; the work recorded here — sign out, the request
+  population, the fixture work centres' removal and the handling outcomes — is new work against the same
+  specification. Reopening the specification's status is the owner's action.
+- **The nineteen requests are raised by people, through the application, and are not seeded rows.** The application
+  must produce the lifecycle times, and the overdue case must be a real expiry, so a hand-written row cannot stand
+  in for a raised request.
+- **The requests raised for this batch are not a fixture to be retired.** They and the ten accounts stay in place
+  afterwards so the owner can browse them.
+- **Two copies of the application may run at the same time.** Nothing in the application prevents it, which is what
+  the two-handler case needs.
 
 ## Verbatim Constraints
 
@@ -351,3 +462,22 @@ Neither may be offered as a Scrap request.
 
 **The five sort options**, most urgent first: most urgent (the default), longest waiting, press, requested by,
 status.
+
+**The follow-up batch's fixed values**:
+
+- **The ten people**, exactly as the application spells them: `johnk` and `jkoll` (Developer), and `test.admin`,
+  `test.developer`, `test.material.handler`, `test.plant.manager`, `test.production`, `test.production.lead`,
+  `test.setup` and `test.setup.lead` — one per role. They share the test password `0000`.
+- **The eight roles**: Admin, Developer, Material Handler, Plant Manager, Production, Production Lead, Setup,
+  Setup Lead.
+- **The handler** for the fulfilment pass: `johnk`.
+- **The seven prepared job situations**, one per work centre: coil only; flatstock only; die only; component only;
+  dunnage only; everything at once; no subordinate parts.
+- **The seven retired fixture work centres**: `900-1`, `900-2`, `900-3`, `900-4`, `900-5`, `900-6`, `900-7`.
+- **The real work centres that take the situations**: five on Expo Drive and two on Vits Drive. Expo Drive —
+  `100-3`, `100-6` … `100-28`, `100-1806`, `100-1807`; Vits Drive — `V100-33`, `V100-34`, `V100-35`.
+- **The overdue allowance** is the smallest one the minutes screen accepts, so the request genuinely runs out of
+  time rather than being written as though it had.
+- **`pickup-component` is the one Item that cannot be raised today** — it declares an answer chosen from a list and
+  is configured with no list. The other answer-bearing Items are unaffected: `pickup-die` offers `Die Shop`,
+  `Home Location`, `Other`, and `deliver-wrong-coil`, `deliver-wrong-flatstock` and `other` ask for text.

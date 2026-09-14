@@ -42,9 +42,9 @@
             HorizontalAlignment="Center"
             Orientation="Horizontal"
             Spacing="12">
-            <Button Command="{x:Bind ViewModel.RetryCommand, Mode=OneWay}" Content="Retry" />
-            <Button Command="{x:Bind ViewModel.ResetToDefaultsCommand, Mode=OneWay}" Content="Restore Defaults" />
-            <Button Command="{x:Bind ViewModel.ExitCommand, Mode=OneWay}" Content="Close" />
+            <Button AutomationProperties.AutomationId="SplashPage_RetryButton" Command="{x:Bind ViewModel.RetryCommand, Mode=OneWay}" Content="Retry" />
+            <Button AutomationProperties.AutomationId="SplashPage_RestoreDefaultsButton" Command="{x:Bind ViewModel.ResetToDefaultsCommand, Mode=OneWay}" Content="Restore Defaults" />
+            <Button AutomationProperties.AutomationId="SplashPage_CloseButton" Command="{x:Bind ViewModel.ExitCommand, Mode=OneWay}" Content="Close" />
         </StackPanel>
     </Grid>
 </Page>

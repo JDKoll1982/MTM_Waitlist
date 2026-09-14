@@ -3,7 +3,7 @@
   "specName": "unified card item picker",
   "branch": "004-unified-card-item-picker",
   "currentStep": "implement",
-  "status": "completed",
+  "status": "implementing",
   "history": [
     {
       "step": "specify",
@@ -1017,10 +1017,241 @@
       "kind": "complete",
       "by": "extension",
       "at": "2026-09-13T23:07:41.477Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-14T01:42:01.991Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T118",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T01:59:12.860Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T119",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T01:59:16.119Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T121",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T01:59:19.729Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T123",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T01:59:23.332Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T124",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T01:59:26.594Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T120",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:01:00.785Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T125",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:01:05.071Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T126",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:01:09.124Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T122",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:03:54.356Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T127",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:03:58.160Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T128",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:04:02.085Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T134",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:36:57.095Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T132",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:44:27.657Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T135",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:46:01.541Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T136",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:46:01.630Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T138",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:47:51.487Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T140",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:55:54.722Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T141",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:55:58.070Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T142",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:56:01.299Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T143",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:56:48.987Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T144",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:58:11.215Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T145",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T02:58:36.681Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T146",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T03:00:17.017Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T147",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T03:00:51.162Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T148",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T03:01:18.711Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T149",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T03:01:54.160Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T150",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T03:02:45.421Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T151",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-14T03:03:48.080Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",
-  "last_action": "all 117 tasks checked - build 0/0, suite 969 passed / 0 failed / 26 skipped; SC-001 and SC-002 closed live, SC-003 and SC-004 covered as far as the data and suite reach",
+  "last_action": "Phase 10 complete, 12/12 tasks ticked; T129, T130, T131, T133, T137 and T139 remain unticked from Phase 9 and must be re-run against the fixes",
   "coverage": {
     "FR-001": {
       "title": "A person raising a request MUST choose a Category, and then an Item, in that order.",
@@ -1281,6 +1512,10 @@
         "T071",
         "T082",
         "T099"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs::Card_DrawsGiveBackFromTheRowsOwnCommand",
+        "Card_ActionButtonsAreNamedFromTheRowNotFromALiteral"
       ]
     },
     "FR-023": {
@@ -1352,8 +1587,7 @@
         "T091"
       ],
       "tests": [
-        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::GetConfigurationsAsync_MalformedDetailFieldsJson_IsReportedAndNeverThrown",
-        "Module_Waitlist/ViewModels/WaitlistViewDetailFieldTests.cs::DeclaredFields_AnUnreadableConfiguration_IsReportedInPlainLanguageRatherThanDrawnEmpty"
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs::SelectWorkCenter_BlocksTheStepWhenTheDirectoryDoesNotHoldTheSignedInNumber"
       ]
     },
     "FR-027": {
@@ -1408,6 +1642,68 @@
       "tasks": [
         "T010",
         "T114"
+      ]
+    },
+    "FR-033": {
+      "tests": [
+        "TheSignedInBadge_OffersSignOut",
+        "TheSignedInBadge_CarriesAnAutomationId_SoTheEntryCanBeAddressed",
+        "EveryStringThisCapabilityShows_ComesFromTheResourceMechanism"
+      ]
+    },
+    "FR-034": {
+      "tests": [
+        "SignOut_ReachesTheSignOutService_AndDoesNotMerelyClearTheDisplayedName",
+        "SignOutAsync_ClearsEveryKeyTheSignInPathReads_BeforeTheRelaunchIsAskedFor",
+        "SignOutAsync_WhenTheRelaunchIsRefused_ReportsItInPlainLanguage_AndDoesNotExit",
+        "SignOutAsync_OnAComputerWhereNothingWasRemembered_StillRelaunches"
+      ]
+    },
+    "FR-035": {
+      "tests": [
+        "GetConfigurationsAsync_EnumeratedAnswerWithNoConfiguredList_TakesItsChoicesFromTheJob",
+        "GetConfigurationsAsync_AConfiguredList_WinsOverTheJob",
+        "GetConfigurationsAsync_AnAnswerTheRowDoesNotDeclare_AsksForNothing_SoNoChoicesAreInvented",
+        "ShippedConfigurationSeed_PickupComponent_StillDeclaresAnEnumeratedAnswerWithNoListOfItsOwn"
+      ]
+    },
+    "FR-039": {
+      "tests": [
+        "Seeded100_3_CoilOnly_NormalisesToCoil",
+        "Seeded100_6_FlatstockTaggedComponent_IsNormalisedByThePartNumberPrefix",
+        "Seeded100_7_DieOnly_NormalisesToDie",
+        "Seeded100_18_ComponentOnly_KeepsTheStoredCategory",
+        "Seeded100_1806_DunnageOnly_HasNoSubordinatePart",
+        "SeededV100_33_EverythingAtOnce_NormalisesEveryCategory",
+        "SeededV100_34_EmptySubordinateArray_ResolvesWithNothingPresent",
+        "Seeded100_8_WorkCentreWithNoRow_ReadsAsNoActiveJob",
+        "Retired900Fixtures_ResolveToNoActiveJob"
+      ]
+    },
+    "FR-043": {
+      "tests": [
+        "AcceptAsync_WhenTheRowIsNoLongerInTheStateTheHandlerSaw_ReportsZeroAffectedRows_AndDoesNotReassignTheHandler"
+      ]
+    },
+    "FR-046": {
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs::NewRequestFlowRules_VerifyEmployeeIdentity_AcceptsTheSignedInEmployeeFromTheDirectory",
+        "NewRequestFlowRules_VerifyEmployeeIdentity_RefusesANumberTheDirectoryDoesNotHold",
+        "NewRequestFlowRules_VerifyEmployeeIdentity_RefusesAKnownButInactiveEmployee",
+        "NewRequestFlowRules_VerifyEmployeeIdentity_ComparesTheStoredIdentifierNotTheName;MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs::SelectWorkCenter_AttributesTheRequestToTheSignedInPersonFromTheDirectory",
+        "SelectWorkCenter_BlocksTheStepWhenTheDirectoryDoesNotHoldTheSignedInNumber"
+      ]
+    },
+    "FR-047": {
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::GiveBack_IsOfferedToTheAssigneeAndCarriesTheListsOwnReleaseCommand",
+        "GiveBack_ReachesTheReleasePathOnceAsTheSignedInHandler",
+        "GiveBack_IsNotOfferedToAViewerTheGateExcludes;MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs::Card_DrawsGiveBackFromTheRowsOwnCommand"
+      ]
+    },
+    "SC-021": {
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs::NewRequestFlowRules_VerifyEmployeeIdentity_AcceptsTheSignedInEmployeeFromTheDirectory;MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs::SelectWorkCenter_AttributesTheRequestToTheSignedInPersonFromTheDirectory;MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs::Card_DrawsGiveBackFromTheRowsOwnCommand"
       ]
     }
   },
@@ -1575,6 +1871,51 @@
     },
     {
       "decision": "Relabel the Preview step Item field as Item, sourced through x:Uid NewRequest_Preview.ItemLabel and a matching resw entry: the feature rebound that field from ViewModel.RequestType to ViewModel.ItemText but kept the retired label, so the screen named a request type while showing the Item, and a user-visible string changed by this work must come from the resource mechanism FR-022"
+    },
+    {
+      "decision": "The transition guard is a p_expected_status parameter on sp_waitlist_request_status_update, with the store written before the in-memory row and the audit entry, and accept/complete/release returning null when it reports zero rows",
+      "why": "The race is between processes, so the guard has to be where the two writers meet (FR-043, constitution III). Writing the store first means a refused transition records no Accepted audit entry and cannot leave the losing handler holding an assignment the store never recorded",
+      "rejected": "Guarding in the caller only, or matching on public_id alone plus a read-then-write check, which is the same lost-update race with more round trips"
+    },
+    {
+      "decision": "An enumerated answer with no options_json is resolved from the requesting job component list (subordinate_parts_json where category is Component); a row that carries its own list keeps it",
+      "why": "The branch is a property of the configuration row and the declared field source, never the Item identity, so a second such Item behaves the same (FR-013). It also leaves the seeded row untouched, so no configuration rollback was needed",
+      "rejected": "Seeding an options_json list for pickup-component, which would freeze a job-derived list into configuration"
+    },
+    {
+      "decision": "The seven prepared situations sit on 100-3 (coil), 100-6 (flatstock), 100-7 (die), 100-18 (component) and 100-1806 (dunnage) on Expo Drive, and V100-33 (everything) and V100-34 (nothing on the job) on Vits Drive; the no-active-job case is 100-8",
+      "why": "Five and two as the decisions fixed, on work centres whose existing jobs did not have to be displaced (100-12 already carried a real job, so it was left alone)",
+      "rejected": "Reusing 100-12 or other work centres that already hold a live job row"
+    },
+    {
+      "decision": "The restart is a seam: IAppProcessRestarter implemented by AppProcessRestarter, which mirrors StartupRecoveryService CorruptAndRestartAsync",
+      "why": "A process cannot restart itself from inside a test, so the relaunch has to be replaceable for the order of the five keys to be provable (FR-034). The production implementation is the same two steps the recovery path already uses",
+      "rejected": "Calling Environment.ProcessPath and Process.Start directly inside SignOutService, which would make the service untestable and the key order unverifiable"
+    },
+    {
+      "decision": "The eleven existing John Koll rows in waitlist_requests_queue are left in place beside the nineteen this batch raises",
+      "why": "plan.md F5 records the question as open and the owner instructed that the eleven be left alone unless a task says otherwise",
+      "rejected": "Clearing them first, which would make the queue evidence read differently and was not authorised"
+    },
+    {
+      "decision": "The restart is a seam: IAppProcessRestarter, implemented by AppProcessRestarter, mirroring StartupRecoveryService CorruptAndRestartAsync",
+      "why": "A process cannot restart itself from inside a test, so the relaunch has to be replaceable for the order of the five keys to be provable (FR-034). The production implementation is the same two steps the recovery path already uses",
+      "rejected": "Calling Environment.ProcessPath and Process.Start directly inside SignOutService, which would make the key order unverifiable"
+    },
+    {
+      "decision": "ShellViewModelTests asserts the shell source rather than a constructed view model",
+      "why": "ShellViewModel builds a Microsoft.UI.Xaml.Media.SolidColorBrush as the badge initial value and cannot be constructed outside a WinUI UI thread: a probe in this test host fails with COMException telling the reader to use UITestMethod. The repository already asserts app-project surfaces this way (SettingsPageMarkupTests, NewRequestSummaryHonestyTests)",
+      "rejected": "Adding a ProjectReference from the test project to the WinUI application project - it builds, but the type still cannot be constructed at run time, and every test run would then build the whole XAML app"
+    },
+    {
+      "decision": "The employee lookup lives behind IEmployeeDirectoryService over a new sp_core_employee_by_identifier_get matched on employee_identifier, and the rule is handed the record rather than deciding who exists",
+      "why": "the lookup is the authority and the identifier is the key, so the literal disappears without the rule being loosened - an unknown number still refuses",
+      "rejected": "comparing a name against the stored display name, which would work until two people share a name, and letting the flow continue when the lookup returns nothing"
+    },
+    {
+      "decision": "Give back rides the existing CanCompleteOrRelease gate and binds the existing ReleaseRequestCommand",
+      "why": "C1 said a future change must bind that command rather than add a second one, and the gate already means exactly assignee-of-a-claimed-request",
+      "rejected": "a new CanRelease flag, which would have widened what the card offers without widening what the service allows"
     }
   ],
   "step_summaries": {
@@ -1586,7 +1927,7 @@
       "summary": "117 tasks across 8 phases (Setup 3, Foundational 29, US1 23, US2 16, US3 11, US4 5, US5 13, Polish 17), laid out as 51 dependency-ordered waves with explicit join points"
     },
     "implement": {
-      "summary": "Fixed the New Request wizard page-activation crash, added the page-activation regression audit that would have caught it, fixed the Preview step retired Request Type label, and closed T116 and T117 with live evidence - build 0/0, suite 969 passed / 0 failed / 26 skipped"
+      "summary": "FR-046 and FR-047 landed: a request is attributed from the signed-in person own stored employee identifier through a new procedure-backed lookup that still refuses an unknown number, and a claimed request can be given back from its card through the existing release command, with the earlier no-surface decision superseded in writing; build 0 warnings 0 errors, suite 995 passed / 0 failed / 27 skipped"
     },
     "specify": {
       "summary": "spec.md: the Category/Item feature as WHAT and WHY - five user stories (raise a request by Category then Item, one card for every request, sort the list, an Item that is configured not coded, minutes and pictures), FR-001 to FR-032 and SC-001 to SC-012, with the retired type/subtype vocabulary removed and the configuration spreadsheet named as a design document only (FR-027)."
@@ -1674,9 +2015,41 @@
     },
     {
       "note": "The New Request Preview and Summary pages carry hardcoded English literals from commit 0bd33f6, before this feature; only the label this run changed is localized, so a page-level localization sweep is outstanding"
+    },
+    {
+      "note": "The seven fixture rows in setup_work_centers_catalog are now removed only by hand on the live database: the retired seed files are gone, so nothing in Database/ removes those catalogue rows any more. A database rebuilt from the committed AllSeeds.sql never had them, but a machine that ran the uncommitted fixture seed today keeps them until someone deletes them.",
+      "step": "implement"
+    },
+    {
+      "note": "Several prepared situations now sit on work centres a real Setup walk can overwrite, because setup_active_jobs is keyed by work centre. plan.md F3 records the owner accepting that trade; the fulfilment pass must run before any Setup walk on 100-3, 100-6, 100-7, 100-18, 100-1806, V100-33 or V100-34.",
+      "step": "implement"
+    },
+    {
+      "note": "FR-037 cannot be produced by the application: NewRequestWorkCenterViewModel.SelectWorkCenter calls NewRequestFlowRules.VerifyEmployeeIdentity(\"6229\") with a literal, so every request is attributed to employee 6229 John Koll whoever is signed in, and VerifyEmployeeIdentity refuses every number except 6229. The nineteen exist but carry one requester, so the ten-person spread, the owner weighting and every-role-raising-one are unmet. Fixing it needs the signed-in identity plumbed in plus a real active-employee lookup - outside this batch tasks list.",
+      "step": "implement"
+    },
+    {
+      "note": "FR-042 hand-back has no surface: ReleaseRequestCommand is bound by no card and no page (contract C7 says so in as many words), so outcomes 2 and 5 of the fulfilment pass cannot be produced through the running application.",
+      "step": "implement"
+    },
+    {
+      "note": "Outcome 3 second half is unprovable in this store: every queue row is raised by employee 6229 and the only sign-in available without mutating an account is 6229, so there is no non-raiser whose cancel could be refused. The refusal branch stays covered by the existing unit tests.",
+      "step": "implement"
+    },
+    {
+      "note": "AllSPs.sql declares only 55 procedures while 109 folders exist under Database/StoredProcedures (the mock/* and setup/* families, plus the retired type/subtype editors). The new procedure is registered and no declared name is missing from disk, so this is pre-existing drift, not this batch - but the master list is not a full mirror and T137-style sync checks should not assume it is.",
+      "step": "implement"
+    },
+    {
+      "note": "Give back is proved by the row and markup tests and by the release path reaching the service, but no card click has been exercised in the running app: T130 outcome 2 and T133 outcome 5 are the tests that do that, and both remain unticked.",
+      "step": "implement"
+    },
+    {
+      "note": "SelectWorkCenter became an awaited command (the lookup is I/O), so the step now runs asynchronously and the app-level double-click behaviour depends on AsyncRelayCommand refusing concurrent execution. Not exercised in the running app - worth watching when T129 raises the population.",
+      "step": "implement"
     }
   ],
-  "currentTask": "T117",
+  "currentTask": "T151",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2642,6 +3015,242 @@
         "specs/004-unified-card-item-picker/spec.md",
         "specs/004-unified-card-item-picker/contracts/verification-gates.md"
       ]
+    },
+    "T118": {
+      "status": "DONE",
+      "did": "Added ShellViewModelTests: the badge offers Sign out on both header templates and the sign-out path reaches ISignOutService without blanking CurrentUserDisplayName",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/ViewModels/ShellViewModelTests.cs"
+      ]
+    },
+    "T119": {
+      "status": "DONE",
+      "did": "Added SignOutServiceTests: the five sign-in keys are cleared before the relaunch is asked for, and a refused or throwing relaunch is reported in plain language without exiting",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/SignOutServiceTests.cs"
+      ]
+    },
+    "T121": {
+      "status": "DONE",
+      "did": "Added the raisability check and the job-derived choices mechanism: an enumerated answer with no configured list draws on the job's component list, keyed on the row and the field source, never the Item identity",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemConfigurationServiceTests.cs",
+        "MTM_Waitlist.Settings/Services/RequestItemConfigurationService.cs",
+        "MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs"
+      ]
+    },
+    "T123": {
+      "status": "DONE",
+      "did": "Added ISignOutService, SignOutResult and IAppProcessRestarter, plus SignOutService and AppProcessRestarter and the shared SignInSessionKeys the login view model now reads",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs",
+        "MTM_Waitlist.Core/Contracts/Services/SignOutResult.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IAppProcessRestarter.cs",
+        "MTM_Waitlist.Startup/Services/SignInSessionKeys.cs",
+        "MTM_Waitlist.Startup/Services/AppProcessRestarter.cs",
+        "MTM_Waitlist.Startup/Services/SignOutService.cs",
+        "MTM_Waitlist.Startup/ViewModels/LoginViewModel.cs"
+      ]
+    },
+    "T124": {
+      "status": "DONE",
+      "did": "Put Sign out on both shell badges: MenuFlyout with a stable automation id, the SignOutAsync command over ISignOutService, the DI registration and four localized Shell_SignOut keys",
+      "files": [
+        "Module_Core/Views/ShellPage.xaml",
+        "Module_Core/Views/ShellPage.xaml.cs",
+        "ViewModels/ShellViewModel.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T120": {
+      "status": "DONE",
+      "did": "Re-pointed ActiveJobSeedRoundTripTests at the five Expo Drive and two Vits Drive work centres and added the retirement assertion; red against the old seed, green after the re-point",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Setup/Services/ActiveJobSeedRoundTripTests.cs"
+      ]
+    },
+    "T125": {
+      "status": "DONE",
+      "did": "Re-pointed the seven prepared situations: five onto 100-3/100-6/100-7/100-18/100-1806 (Expo Drive) and two onto V100-33/V100-34 (Vits Drive), split recorded in the header, AllSeeds mirrored, applied to the live database",
+      "files": [
+        "Database/Seeds/seed_setup_active_jobs_eight_configurations/create.sql",
+        "Database/Seeds/seed_setup_active_jobs_eight_configurations/rollback.sql",
+        "Database/Seeds/AllSeeds.sql"
+      ]
+    },
+    "T126": {
+      "status": "DONE",
+      "did": "Retired the seven fixture stations: both files deleted, the AllSeeds block replaced with a retirement marker, the re-pointed seed's DELETE names the seven so an existing database is cleaned, and the live catalogue rows were removed",
+      "files": [
+        "Database/Seeds/seed_setup_work_centers_fixture_stations/create.sql",
+        "Database/Seeds/seed_setup_work_centers_fixture_stations/rollback.sql",
+        "Database/Seeds/AllSeeds.sql"
+      ]
+    },
+    "T122": {
+      "status": "DONE",
+      "did": "Added the transition-guard test: an accept the store did not apply returns null, leaves the assignment untouched and records no Accepted audit entry, asserted at the service/procedure seam",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs"
+      ]
+    },
+    "T127": {
+      "status": "DONE",
+      "did": "Made pickup-component raisable: the availability snapshot now carries the job's component list and the details step draws its enumerated choices through RequestItemAnswerOptionsResolver, keyed on the row and the field source, never the Item identity; no configuration row changed so no seed rollback was needed",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestItemConfigurationService.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestDetailsViewModel.cs",
+        "Services/RequestJobAvailabilityProvider.cs"
+      ]
+    },
+    "T128": {
+      "status": "DONE",
+      "did": "Guarded the transition on the state the caller read: p_expected_status on sp_waitlist_request_status_update, the store written before the transition is believed, and accept/complete/release returning failure when it reports zero affected rows; applied to the live database",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_status_update/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_status_update/rollback.sql",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs"
+      ]
+    },
+    "T134": {
+      "status": "DONE",
+      "did": "Two ordinary Debug copies accepted pickup-riser-table at 100-12 172 ms apart (02:36:39.454 / 02:36:39.626): the winner's card went In Progress, the store holds one assignment (6229), one accepted_utc 02:36:39 and updated_utc equal to it, and the loser was told in plain language 'Another handler already took this request. Please choose a different one.' (both actors are the same signed-in account, a consequence of the hard-coded requester identity)",
+      "files": [
+        "bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe (two instances)"
+      ]
+    },
+    "T132": {
+      "status": "DONE",
+      "did": "Set pickup-scrap to the smallest allowance the minutes screen accepts (its own NumberBox Minimum is 1) through that screen's write - allotted_minutes 30 -> 1, updated_utc 02:41:36 - then raised pickup-scrap at V100-33 through the wizard: requested_utc 02:42:13, target_time_utc 02:43:13 (the app's own +1 minute) and the card read 'Remaining time Overdue' at 02:43:45; no back-dated requested_utc and no hand-edited target_time_utc",
+      "files": [
+        "Module_Settings/Views/SettingsPage.xaml",
+        "bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe"
+      ]
+    },
+    "T135": {
+      "status": "DONE",
+      "did": "Build gate with no app running: dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false reported 0 Warning(s) 0 Error(s)",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    },
+    "T136": {
+      "status": "DONE",
+      "did": "Test gate: dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 with MTM_* cleared reported Failed 0, Passed 987, Skipped 27, Total 1014 - the protected baseline, with T118-T122 in place",
+      "files": [
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    },
+    "T138": {
+      "status": "DONE",
+      "did": "Sign-out gate: with Remember Me set (Login.RememberPassword true, remembered username present) and a live Startup.Session.Token, the app reached the shell with no credential prompt; the badge MenuItem 'Sign out' restarted the process (new pid) and it landed on the Sign In window (LoginPage_SignInButton, 'Use your assigned credentials to continue.'); the five sign-in keys are gone from LocalSettings.json while unrelated keys remain",
+      "files": [
+        "Module_Core/Views/ShellPage.xaml",
+        "ViewModels/ShellViewModel.cs",
+        "MTM_Waitlist.Startup/Services/SignOutService.cs"
+      ]
+    },
+    "T140": {
+      "status": "DONE",
+      "did": "Re-pointed the identity rule's tests at the directory row: accepts the signed-in employee (9004 / Sam Reyes, not 6229 / John Koll), refuses an unknown number, refuses a known-but-inactive row, refuses a blank number, and refuses a row whose stored identifier disagrees with the name it carries",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs"
+      ]
+    },
+    "T141": {
+      "status": "DONE",
+      "did": "Added the attribution tests at the wizard's first step: with the directory holding the signed-in 9004 / Sam Reyes the request carries that number and name and the lookup was asked for that identifier, and a signed-in number the directory does not account for blocks the step in plain language without navigating",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs"
+      ]
+    },
+    "T142": {
+      "status": "DONE",
+      "did": "Added the give-back tests: the assignee's row carries the view model's own generated ReleaseRequestCommand, executing it reaches ReleaseAsync once as the signed-in handler, a foreign or non-handler viewer gets no Give back at all, OfferedActionCount matches the commands carried, and the card markup test fails until a Release button is drawn from the row",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs"
+      ]
+    },
+    "T143": {
+      "status": "DONE",
+      "did": "Added the real employee lookup: sp_core_employee_by_identifier_get with its paired rollback and its AllSPs.txt block matching core_users_profiles on the stored employee_identifier (active-first, inactive still returned, unknown returns no row), plus IEmployeeDirectoryService, the EmployeeIdentity model and the EmployeeDirectoryService that reads it over the helper seam and throws rather than answering an outage as no-such-employee",
+      "files": [
+        "Database/StoredProcedures/sp_core_employee_by_identifier_get/create.sql",
+        "Database/StoredProcedures/sp_core_employee_by_identifier_get/rollback.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "MTM_Waitlist.Core/Contracts/Services/IEmployeeDirectoryService.cs",
+        "MTM_Waitlist.Core/Models/EmployeeIdentity.cs",
+        "MTM_Waitlist.Waitlist.View/Services/EmployeeDirectoryService.cs"
+      ]
+    },
+    "T144": {
+      "status": "DONE",
+      "did": "Replaced the hard-coded identity with the signed-in person: VerifyEmployeeIdentity now takes the directory row and decides from the stored identifier (refusing an unknown number, an inactive account and a mismatched row), SelectWorkCenter became an awaited command that looks the signed-in EmployeeNumber up and attributes the request from the answer, an unreadable store is reported as the outage it is, and the directory is registered in the DI host",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowRules.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestWorkCenterViewModel.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs"
+      ]
+    },
+    "T145": {
+      "status": "DONE",
+      "did": "Gave the row its Give back action: SampleOrder carries ReleaseCommand and ReleaseActionText, OfferedActionCount now counts the buttons the row offers (the claimed state contributes two, so Complete and Give back cannot disagree with the count), WaitlistViewViewModel sets both from the gate that already governs Complete, the label and tooltip come from the resource file (Waitlist_Action.ReleaseRequest), and the row-surface test was extended to match",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/SampleOrderTests.cs"
+      ]
+    },
+    "T146": {
+      "status": "DONE",
+      "did": "Drew Give back on the card: a third 44x44 icon button bound to the row's ReleaseCommand and ReleaseActionText, gated on the row's CanCompleteOrRelease, on SystemFillColorSolidNeutralBrush with the Undo glyph E7A7 (verified against the Segoe Fluent Icons list and read back from the SDK generic.xaml), with the spacing tightened so three buttons fit the 150-wide action column; solution build 0 warnings 0 errors and the five touched test classes 140 passed / 0 failed",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T147": {
+      "status": "DONE",
+      "did": "Recorded the supersession instead of leaving the contradiction: action-contracts.md C1 now says Release has a surface again (with the earlier reason kept), C7's ceiling is three buttons with a Give back row, colour, Undo glyph and a note on why the solid neutral token rather than the translucent one, C3 lists Give back in the assignee row and gains a third invariant, and the WaitlistViewViewModel remark now documents the supersession; the 003 data-model row table was corrected too",
+      "files": [
+        "specs/003-waitlist-handler-fulfilment/contracts/action-contracts.md",
+        "specs/003-waitlist-handler-fulfilment/data-model.md",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T148": {
+      "status": "DONE",
+      "did": "Recorded the batch in the specification and the plan: spec.md gained FR-046 (attribution from the stored employee identifier, a number no active account accounts for refused) and FR-047 (Give back on the card, superseding the no-surface decision) plus SC-021, without renumbering anything; plan.md gained the Second Follow-Up Batch section G1-G3 with the lookup source, the rejected alternatives, the supersession, the glyph/brush grounding and the 1111 first-use password",
+      "files": [
+        "specs/004-unified-card-item-picker/spec.md",
+        "specs/004-unified-card-item-picker/plan.md"
+      ]
+    },
+    "T149": {
+      "status": "DONE",
+      "did": "Build gate: no MTM_Waitlist.exe running, dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false reported Build succeeded with 0 Warning(s) 0 Error(s)",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    },
+    "T150": {
+      "status": "DONE",
+      "did": "Test gate: ambient MTM_* variables cleared, dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 reported Failed 0, Passed 995, Skipped 27, Total 1022 - eight more passing than the 987 baseline, which is the new attribution and give-back tests, with T140-T142 in place rather than instead of anything",
+      "files": [
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    },
+    "T151": {
+      "status": "DONE",
+      "did": "Live database validation: applied sp_core_employee_by_identifier_get to local mtm_waitlist (created 22:02), read all nine distinct identifiers back and each resolved to the right active account (6229 John Koll, 9001-9008 the eight test accounts; jkoll shares 6229), 999999 and 0000 both returned zero rows so the app-layer refusal is reachable, the paired rollback dropped it (0 rows) and the re-apply restored it (1 row), and the AllSPs.sql block is character-identical statement text to the artifact file (403 chars each)",
+      "files": [
+        "Database/StoredProcedures/sp_core_employee_by_identifier_get/create.sql",
+        "Database/StoredProcedures/sp_core_employee_by_identifier_get/rollback.sql",
+        "Database/StoredProcedures/AllSPs.sql"
+      ]
     }
   },
   "verified": [
@@ -2875,6 +3484,134 @@
       "what": "The fix is in the artifact that was driven",
       "command": "Get-Item on bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe",
       "result": "LastWriteTime 6:05:43 PM on 2026-09-13, after the final build, and the wizard reached the Preview step on that build"
+    },
+    {
+      "what": "solution build after T123/T124/T127/T128",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "result": "Build succeeded. 0 Warning(s) 0 Error(s)",
+      "warnings": [
+        "PRI/WMC9999 did not appear; no stale app or *.pri was in the way"
+      ]
+    },
+    {
+      "what": "full suite with no ambient MTM_* variables set",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "Passed! Failed: 0, Passed: 987, Skipped: 27, Total: 1014 (baseline was 969/0/26; the extra pass count is T118/T119/T121/T122, the extra skip is the new DB-gated round-trip case)",
+      "warnings": []
+    },
+    {
+      "what": "the re-pointed seed and the guarded procedure applied to the live local mtm_waitlist",
+      "command": "mysql < Database/Seeds/seed_setup_active_jobs_eight_configurations/create.sql and < Database/StoredProcedures/sp_waitlist_request_status_update/create.sql",
+      "result": "seven jobs on 100-3/100-6/100-7/100-18/100-1806/V100-33/V100-34, zero fixture stations left, sp_waitlist_request_status_update carries 7 parameters including p_expected_status",
+      "warnings": [
+        "the seven fixture catalogue rows had to be deleted by hand: no artifact removes setup_work_centers_catalog rows any more"
+      ]
+    },
+    {
+      "what": "the seed round-trip proof against the live database",
+      "command": "MTM_WAITLIST_TEST_DB_CONNECTION_STRING=... dotnet test --filter FullyQualifiedName~ActiveJobSeedRoundTripTests",
+      "result": "Passed! Failed: 0, Passed: 10, Skipped: 0 - red against the old seed (9 failures naming the new work centres and 900-1), green after the re-point",
+      "warnings": []
+    },
+    {
+      "what": "sign-out and shell tests",
+      "command": "dotnet test --filter FullyQualifiedName~SignOutServiceTests|FullyQualifiedName~ShellViewModelTests",
+      "result": "Passed! Failed: 0, Passed: 13",
+      "warnings": [
+        "two assertions initially searched the source for a marker that did not match the implemented signature; the test was corrected, not the implementation"
+      ]
+    },
+    {
+      "what": "the seed round-trip proof, first red against the old seed and then green against the live database",
+      "command": "$env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING=...; dotnet test --filter FullyQualifiedName~ActiveJobSeedRoundTripTests",
+      "result": "before the re-point: Failed: 9, Passed: 1 - the nine named the five Expo and two Vits work centres that carried no row and 900-1 still carrying a job. After the re-point and the live apply: Passed! Failed: 0, Passed: 10, Skipped: 0",
+      "warnings": []
+    },
+    {
+      "what": "sign-out service and shell badge tests",
+      "command": "dotnet test --filter FullyQualifiedName~SignOutServiceTests|FullyQualifiedName~ShellViewModelTests",
+      "result": "Passed! Failed: 0, Passed: 13",
+      "warnings": [
+        "two assertions first searched the source for a marker that did not match the implemented signature; the test was corrected rather than the implementation"
+      ]
+    },
+    {
+      "what": "The nineteen requests exist, one per in-scope Item, read back from mtm_waitlist.waitlist_requests_queue",
+      "command": "SELECT ... FROM waitlist_requests_queue WHERE id > 18",
+      "result": "19 rows, 19 distinct items, 8 distinct work centres (100-3, 100-6, 100-7, 100-12, 100-18, 100-1806, V100-33, V100-34), all status Pending, all four Categories, every one raised through the running application",
+      "warnings": [
+        "Infor Visual unreachable banner shown throughout (cached data 31 hours old) - expected on this workstation"
+      ]
+    },
+    {
+      "what": "Outcome 1 - accept then finish (request 25, pickup-riser-table at 100-12)",
+      "command": "the running app: Accept via the card, then Complete",
+      "result": "status Completed; accepted_utc 02:36:39, completed_utc 02:37:46, each set once; the card left the open list",
+      "warnings": [
+        "the accept was the race winner of T134"
+      ]
+    },
+    {
+      "what": "Outcome 3 - the raiser cancels before anyone accepts (request 29, assist-table-place at 100-18)",
+      "command": "the running app: the card own Cancel, reason typed, confirmed",
+      "result": "status Canceled, cancellation_reason recorded verbatim, canceled_by_employee_number 6229, canceled_utc 02:38:34, accepted_utc null",
+      "warnings": [
+        "every row in the store is raised by 6229, so no non-raiser row exists to prove the refusal branch"
+      ]
+    },
+    {
+      "what": "Outcome 6 - a handler accepts a request they raised themselves (request 27, pickup-component at 100-18, requester 6229)",
+      "command": "the running app as the signed-in 6229: Accept then Complete",
+      "result": "permitted: status Completed, assigned_material_handler 6229, accepted_utc 02:37:54, completed_utc 02:38:02",
+      "warnings": []
+    },
+    {
+      "what": "Success-criteria snapshot read back from mtm_waitlist after the pass",
+      "command": "SELECT counts over core_users_profiles, waitlist_requests_queue, setup_work_centers_catalog, setup_active_jobs",
+      "result": "10 active accounts; 20 batch rows (19 raised + the 1-minute overdue raise) of which 17 still Pending; 31 rows in total; 0 fixture work centres and 0 fixture jobs; the seven prepared situations sit on 8 real centres (100-3,100-6,100-7,100-12,100-18,100-1806,V100-33,V100-34)",
+      "warnings": [
+        "every batch row carries requester 6229 John Koll, so SC-015 spread is unmet and SC-017 is short outcomes 2 and 5"
+      ]
+    },
+    {
+      "what": "The new tests were written first and failed against the missing contract",
+      "command": "dotnet build MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "result": "5 errors, all CS0246: IEmployeeDirectoryService and EmployeeIdentity not found; the markup half of T142 would have been an assertion failure had compilation succeeded",
+      "warnings": [
+        "a compile-red rather than an assertion-red for the two new C# contracts, because a signature and a dependency change cannot compile until they exist"
+      ]
+    },
+    {
+      "what": "The touched test classes after the implementation",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --filter FullyQualifiedName~WaitlistLineCardMarkupTests|...~WaitlistViewViewModelActionTests|...~NewRequestWorkCenterViewModelTests|...~WaitlistRequestServiceTests|...~SampleOrderTests",
+      "result": "Failed: 0, Passed: 140, Skipped: 0, Total: 140",
+      "warnings": []
+    },
+    {
+      "what": "Build gate",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false (no MTM_Waitlist.exe running)",
+      "result": "Build succeeded - 0 Warning(s) 0 Error(s)",
+      "warnings": []
+    },
+    {
+      "what": "Test gate",
+      "command": "ambient MTM_* variables cleared, then dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "result": "Failed: 0, Passed: 995, Skipped: 27, Total: 1022 - eight more passing than the 987 baseline, which is T140-T142",
+      "warnings": []
+    },
+    {
+      "what": "The employee lookup refuses an unknown number against the live local database",
+      "command": "CALL sp_core_employee_by_identifier_get on local mtm_waitlist for 6229, 9001-9008, 999999, 0000",
+      "result": "all nine distinct identifiers resolved to the right active account with is_active=1 (jkoll shares 6229 with johnk); 999999 and 0000 each returned zero rows, so the rule refuses them",
+      "warnings": []
+    },
+    {
+      "what": "The new procedure pair applies, reverses and re-applies, and AllSPs.sql agrees with the artifact",
+      "command": "mysql source of create.sql / rollback.sql; comparison of the AllSPs block against the file with comments and blanks stripped",
+      "result": "created 22:02; rollback left 0 rows in information_schema.ROUTINES; re-apply restored 1; the AllSPs block is character-identical statement text to create.sql (403 chars each)",
+      "warnings": [
+        "AllSPs.sql declares 55 procedures while 109 folders exist - pre-existing drift in the mock/* and setup/* families, unchanged by this batch"
+      ]
     }
   ]
 }

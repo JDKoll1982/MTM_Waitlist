@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
@@ -296,16 +297,24 @@ public sealed class WaitlistRequestServiceTests
     private sealed class StubMySqlHelperServer : IMySqlHelperServer
     {
         private readonly IReadOnlyList<Dictionary<string, object?>> _rows;
-        private readonly int _affectedRows;
 
         public int QueryCallCount { get; private set; }
 
         public List<string> NonQueryProcedures { get; } = new();
 
+        /// <summary>Every non-query call made, with the parameters it carried.</summary>
+        public List<(string Procedure, IReadOnlyDictionary<string, object?> Parameters)> NonQueryCalls { get; } = new();
+
+        /// <summary>
+        /// The affected-row count every non-query call reports. A test sets this to 0 to model the store
+        /// refusing a transition — the second handler's accept loses the race.
+        /// </summary>
+        public int AffectedRows { get; set; }
+
         public StubMySqlHelperServer(IReadOnlyList<Dictionary<string, object?>> rows, int affectedRows = 1)
         {
             _rows = rows;
-            _affectedRows = affectedRows;
+            AffectedRows = affectedRows;
         }
 
         public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
@@ -325,7 +334,8 @@ public sealed class WaitlistRequestServiceTests
             CancellationToken cancellationToken = default)
         {
             NonQueryProcedures.Add(storedProcedureName);
-            return Task.FromResult(_affectedRows);
+            NonQueryCalls.Add((storedProcedureName, parameters));
+            return Task.FromResult(AffectedRows);
         }
 
         public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
@@ -402,25 +412,72 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void NewRequestFlowRules_VerifyEmployeeIdentity_ReturnsActiveEmployeeResult()
+    public void NewRequestFlowRules_VerifyEmployeeIdentity_AcceptsTheSignedInEmployeeFromTheDirectory()
     {
-        var result = NewRequestFlowRules.VerifyEmployeeIdentity("6229");
+        // The rule is given the record the lookup returned for the signed-in number (FR-046). 9004 is
+        // deliberately not 6229: a name that is not "John Koll" has to come back, or the step is still
+        // naming the literal and every request is attributed to one person (SC-021).
+        var stored = new EmployeeIdentity
+        {
+            EmployeeNumber = "9004",
+            DisplayName = "Sam Reyes",
+            IsActive = true,
+        };
+
+        var result = NewRequestFlowRules.VerifyEmployeeIdentity("9004", stored);
 
         Assert.IsTrue(result.IsValid);
         Assert.IsTrue(result.IsActive);
-        Assert.AreEqual("6229", result.EmployeeNumber);
-        Assert.AreEqual("John Koll", result.EmployeeName);
+        Assert.AreEqual("9004", result.EmployeeNumber);
+        Assert.AreEqual("Sam Reyes", result.EmployeeName);
     }
 
     [TestMethod]
-    public void NewRequestFlowRules_VerifyEmployeeIdentity_RejectsInactiveOrUnknownEmployee()
+    public void NewRequestFlowRules_VerifyEmployeeIdentity_RefusesANumberTheDirectoryDoesNotHold()
     {
-        var unknownResult = NewRequestFlowRules.VerifyEmployeeIdentity("999999");
-        var inactiveResult = NewRequestFlowRules.VerifyEmployeeIdentity("0000");
+        // The refusal is the requirement: an unknown number is still refused rather than accepted, because
+        // the lookup — not the caller — is what decides (FR-046).
+        var unknown = NewRequestFlowRules.VerifyEmployeeIdentity("999999", null);
+        var blank = NewRequestFlowRules.VerifyEmployeeIdentity("   ", null);
 
-        Assert.IsFalse(unknownResult.IsValid);
-        Assert.IsFalse(inactiveResult.IsValid);
-        Assert.IsFalse(inactiveResult.IsActive);
+        Assert.IsFalse(unknown.IsValid);
+        Assert.IsFalse(unknown.IsActive);
+        Assert.IsFalse(blank.IsValid);
+        Assert.IsFalse(blank.IsActive);
+    }
+
+    [TestMethod]
+    public void NewRequestFlowRules_VerifyEmployeeIdentity_RefusesAKnownButInactiveEmployee()
+    {
+        var stored = new EmployeeIdentity
+        {
+            EmployeeNumber = "0000",
+            DisplayName = "Inactive Employee",
+            IsActive = false,
+        };
+
+        var result = NewRequestFlowRules.VerifyEmployeeIdentity("0000", stored);
+
+        Assert.IsFalse(result.IsValid);
+        Assert.IsFalse(result.IsActive);
+    }
+
+    [TestMethod]
+    public void NewRequestFlowRules_VerifyEmployeeIdentity_ComparesTheStoredIdentifierNotTheName()
+    {
+        // A row that came back for a different number is not an answer for this number, and a name that
+        // happens to match is never the evidence: the two identifiers have to agree (FR-046).
+        var stored = new EmployeeIdentity
+        {
+            EmployeeNumber = "9001",
+            DisplayName = "John Koll",
+            IsActive = true,
+        };
+
+        var result = NewRequestFlowRules.VerifyEmployeeIdentity("6229", stored);
+
+        Assert.IsFalse(result.IsValid);
+        Assert.IsFalse(result.IsActive);
     }
 
     [TestMethod]
@@ -879,6 +936,49 @@ public sealed class WaitlistRequestServiceTests
         // An accepted job stays on the shared (active) list.
         Assert.IsTrue(service.GetActiveRequests("Expo Drive").Any(item => item.Id == request.Id));
         Assert.IsTrue(service.GetAuditTrail(request.Id).Any(entry => entry.EventType == "Accepted"));
+    }
+
+    [TestMethod]
+    public async Task AcceptAsync_WhenTheRowIsNoLongerInTheStateTheHandlerSaw_ReportsZeroAffectedRows_AndDoesNotReassignTheHandler()
+    {
+        // Outcome 7's assertion, made at the service/procedure seam rather than in the UI (FR-043, SC-019).
+        // Two handlers read the same Pending row; the store applies exactly one of the two accepts and reports
+        // zero affected rows for the other. Handing back a request the store did not accept would make the
+        // losing handler believe they hold work they do not.
+        var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
+        var service = new WaitlistRequestService(helper);
+        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submitResult.Request!;
+
+        // The first handler's accept landed; the row is no longer Pending, so the second accept affects nothing.
+        var handlerBeforeTheLosingAccept = service.GetRequest(request.Id)!.AssignedMaterialHandler;
+        helper.AffectedRows = 0;
+        var secondAccept = await service.AcceptAsync(request.Id, "9002", "Second Handler");
+
+        Assert.IsNull(secondAccept, "An accept the store did not apply must never be reported as a success (FR-026).");
+        Assert.AreNotEqual(
+            "9002",
+            service.GetRequest(request.Id)!.AssignedMaterialHandler,
+            "The losing handler must not be left holding an assignment the store never recorded (FR-043).");
+        Assert.AreEqual(
+            handlerBeforeTheLosingAccept,
+            service.GetRequest(request.Id)!.AssignedMaterialHandler,
+            "The row must carry the assignment it already had, untouched by the accept that did not take (FR-043).");
+        Assert.AreEqual(
+            "Pending",
+            service.GetRequest(request.Id)!.Status,
+            "The row's stored state is whatever the store holds, not whatever the losing handler asked for.");
+        Assert.IsFalse(
+            service.GetAuditTrail(request.Id).Any(entry => entry.EventType == "Accepted"),
+            "An accept that did not take effect must not be recorded as though it had (FR-026).");
+
+        // The guard has to be the state the handler saw, carried to the store: matching on public_id alone is
+        // what lets a second accept overwrite the first handler's assignment.
+        var statusUpdate = helper.NonQueryCalls.Last(call => call.Procedure == "sp_waitlist_request_status_update");
+        Assert.AreEqual(
+            "Pending",
+            Convert.ToString(statusUpdate.Parameters["p_expected_status"]),
+            "The transition must be conditional on the state the handler read (FR-043).");
     }
 
     [TestMethod]

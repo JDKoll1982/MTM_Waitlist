@@ -43,16 +43,19 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox
+                    AutomationProperties.AutomationId="SetupDunnageImageSearchDialog_FilterInput"
                     Grid.Column="0"
                     HorizontalAlignment="Stretch"
                     PlaceholderText="Filter by part, type, or location"
                     Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Button
+                    AutomationProperties.AutomationId="SetupDunnageImageSearchDialog_RefreshButton"
                     Grid.Column="1"
                     Margin="8,0,0,0"
                     Command="{x:Bind ViewModel.LoadPartsCommand}"
                     Content="Refresh" />
                 <ToggleSwitch
+                    AutomationProperties.AutomationId="SetupDunnageImageSearchDialog_ShowAllToggle"
                     Grid.Column="2"
                     Margin="12,0,0,0"
                     HorizontalAlignment="Right"
@@ -67,6 +70,7 @@
 
         <Grid Grid.Row="1" Margin="0,16,0,0">
             <GridView
+                AutomationProperties.AutomationId="SetupDunnageImageSearchDialog_PartTiles"
                 x:Name="PartGridView"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Center"
@@ -93,6 +97,7 @@
                 <GridView.ItemTemplate>
                     <DataTemplate x:DataType="models:SetupDunnagePart">
                         <Border
+                            AutomationProperties.Name="{x:Bind PartNumber}"
                             Margin="4"
                             Padding="12"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

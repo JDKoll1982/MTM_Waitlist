@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
@@ -26,6 +27,18 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly INewRequestFlowService _flowService;
     private readonly IBuildingSelectionService _buildingSelectionService;
+
+    /// <summary>
+    /// The signed-in person's own identity, carried from startup. The step attributes the request to them and to
+    /// nobody else: a literal here is what attributed every request in the store to one man (FR-046).
+    /// </summary>
+    private readonly StartupState _startupState;
+
+    /// <summary>
+    /// The account records, read by the identifier the session carries. The directory is the authority on whether
+    /// that person exists, so the rule never has to trust a name the caller happens to hold (FR-046).
+    /// </summary>
+    private readonly IEmployeeDirectoryService _employeeDirectoryService;
 
     private NewRequestFlowState? _state;
     private HashSet<string> _activeJobWorkCenters = new(StringComparer.OrdinalIgnoreCase);
@@ -105,12 +118,16 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         INavigationService navigationService,
         IWorkCenterCatalogService workCenterCatalogService,
         INewRequestFlowService flowService,
-        IBuildingSelectionService buildingSelectionService)
+        IBuildingSelectionService buildingSelectionService,
+        StartupState startupState,
+        IEmployeeDirectoryService employeeDirectoryService)
     {
         _navigationService = navigationService;
         _workCenterCatalogService = workCenterCatalogService;
         _flowService = flowService;
         _buildingSelectionService = buildingSelectionService;
+        _startupState = startupState;
+        _employeeDirectoryService = employeeDirectoryService;
     }
 
     public async void OnNavigatedTo(object parameter)
@@ -257,8 +274,18 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         ApplyFilter();
     }
 
+    /// <summary>
+    /// Takes the chosen work centre and moves the wizard on, attributing the request to the person who is
+    /// actually signed in (FR-046).
+    /// </summary>
+    /// <remarks>
+    /// The identity is resolved from the account records by the identifier the session carries — never from a
+    /// name and never from a literal. A person the directory does not account for is refused here, at the step
+    /// where the request would otherwise be created under their name, and a store that cannot be read is
+    /// reported as the outage it is rather than as a refusal they did not earn (FR-026).
+    /// </remarks>
     [RelayCommand]
-    private void SelectWorkCenter(WorkCenterSelectionItem? workCenterItem)
+    private async Task SelectWorkCenterAsync(WorkCenterSelectionItem? workCenterItem)
     {
         if (_state is null || workCenterItem is null || string.IsNullOrWhiteSpace(workCenterItem.WorkCenterName))
         {
@@ -286,7 +313,25 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
             return;
         }
 
-        var verification = NewRequestFlowRules.VerifyEmployeeIdentity("6229");
+        EmployeeVerificationResult verification;
+        try
+        {
+            // No ConfigureAwait(false): the continuation sets bindable state, which is UI-thread-only.
+            var storedEmployee = await _employeeDirectoryService
+                .FindByEmployeeIdentifierAsync(_startupState.EmployeeNumber)
+                .ConfigureAwait(true);
+
+            verification = NewRequestFlowRules.VerifyEmployeeIdentity(_startupState.EmployeeNumber, storedEmployee);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("NewRequestWorkCenter", ex, "The employee lookup failed; the request was not started.");
+            IsNoActiveJobWarningVisible = false;
+            IsVerificationWarningVisible = true;
+            VerificationMessage = "The employee records could not be read, so this request could not be attributed. Try again.";
+            return;
+        }
+
         if (!verification.IsValid)
         {
             IsNoActiveJobWarningVisible = false;
@@ -300,7 +345,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         _state.RequesterEmployeeNumber = verification.EmployeeNumber;
         _state.RequesterEmployeeName = verification.EmployeeName;
 
-        StartupDebugLog.Info("NewRequestWorkCenter", $"Selected workstation '{normalizedWorkCenter}'.");
+        StartupDebugLog.Info("NewRequestWorkCenter", $"Selected workstation '{normalizedWorkCenter}' for employee '{verification.EmployeeNumber}'.");
         _navigationService.NavigateTo(typeof(NewRequestJobTypeViewModel).FullName!, _state);
     }
 

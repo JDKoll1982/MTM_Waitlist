@@ -39,6 +39,7 @@
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <GridView
+                    AutomationProperties.AutomationId="NewRequestItemPage_ItemTiles"
                     x:Name="ItemGridView"
                     ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
                     IsItemClickEnabled="True"
@@ -54,6 +55,7 @@
                     <GridView.ItemTemplate>
                         <DataTemplate>
                             <Border
+                                AutomationProperties.Name="{Binding DisplayName}"
                                 Width="150"
                                 Height="150"
                                 Margin="8"
@@ -88,10 +90,12 @@
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}" Orientation="Horizontal">
             <Button
+                AutomationProperties.AutomationId="NewRequestItemPage_BackButton"
                 x:Uid="NewRequest_Item.BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}" />
             <Button
+                AutomationProperties.AutomationId="NewRequestItemPage_ContinueButton"
                 x:Uid="NewRequest_Item.ContinueButton"
                 Content="Continue"
                 Command="{x:Bind ViewModel.ContinueCommand}" />

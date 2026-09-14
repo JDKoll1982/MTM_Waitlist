@@ -274,10 +274,13 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// not a cancellation: the request comes back as available with no assignee (FR-007).
     /// </summary>
     /// <remarks>
-    /// The card shows two buttons — the primary (Accept, becoming Complete) and Cancel — so this has no button
-    /// of its own since the card was re-laid out. It is kept on the view model rather than deleted because the
-    /// release transition is real, tested and one line from being surfaced again; nothing else can put a
-    /// claimed request back on the open list.
+    /// The card draws this as <b>Give back</b>, beside Complete and gated by the same flag (FR-047). That is a
+    /// recorded <b>supersession</b>: the earlier decision — that the card's two-button action area left this
+    /// command with no surface, and that it was kept on the view model only because nothing else can put a
+    /// claimed request back on the open list — did not survive contact with the floor, because a handler who
+    /// cannot work a request had no control that returned it to the queue. The reason is kept here rather than
+    /// deleted, and `specs/003-waitlist-handler-fulfilment/contracts/action-contracts.md` C1 and C7 carry the
+    /// same amendment.
     /// </remarks>
     [RelayCommand]
     private async Task ReleaseRequestAsync(SampleOrder? order)
@@ -404,9 +407,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// true where the service would refuse, and a button is drawn only while its flag is true.
     /// </summary>
     /// <remarks>
-    /// The card draws two buttons: the primary — Accept while the request is available, Complete once the
-    /// viewer has claimed it — and Cancel. Cancel is offered to the requester while their request is still
-    /// waiting, and to the assignee of a claimed request, which is what makes it appear alongside Complete.
+    /// The card draws a primary button — Accept while the request is available, Complete once the viewer has
+    /// claimed it — Give back beside it, and Cancel. Cancel is offered to the requester while their request is
+    /// still waiting, and to the assignee of a claimed request, which is what makes it appear alongside Complete.
     /// </remarks>
     private async Task ApplyHandlerActionStateAsync(IReadOnlyList<SampleOrder> orders, DateTimeOffset now)
     {
@@ -428,6 +431,11 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
             order.CompleteCommand = order.CanCompleteOrRelease ? CompleteRequestCommand : null;
             order.CompleteActionText = order.CanCompleteOrRelease ? "Waitlist_Action.CompleteRequest".GetLocalized() : string.Empty;
+
+            // Give back rides the same gate as Complete: it is the assignee's other option on their own claim,
+            // and it is what puts a request the handler cannot work back on the open list (FR-047).
+            order.ReleaseCommand = order.CanCompleteOrRelease ? ReleaseRequestCommand : null;
+            order.ReleaseActionText = order.CanCompleteOrRelease ? "Waitlist_Action.ReleaseRequest".GetLocalized() : string.Empty;
 
             order.CancelCommand = order.CanCancelRequest ? CancelRequestCommand : null;
             order.CancelActionText = order.CanCancelRequest ? "Waitlist_Action.CancelRequest".GetLocalized() : string.Empty;

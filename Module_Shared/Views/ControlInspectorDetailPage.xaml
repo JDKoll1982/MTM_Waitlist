@@ -25,6 +25,7 @@
             </Grid.ColumnDefinitions>
 
             <Button
+                AutomationProperties.AutomationId="ControlInspectorDetailPage_BackButton"
                 Grid.Column="0"
                 Command="{x:Bind ViewModel.BackCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
@@ -62,6 +63,7 @@
             </StackPanel>
 
             <Button
+                AutomationProperties.AutomationId="ControlInspectorDetailPage_PrintButton"
                 x:Name="PrintButton"
                 Grid.Column="2"
                 VerticalAlignment="Top"
@@ -92,7 +94,7 @@
                             HorizontalScrollBarVisibility="Auto"
                             HorizontalScrollMode="Enabled"
                             VerticalScrollMode="Disabled">
-                            <ItemsControl ItemsSource="{x:Bind ViewModel.WorkflowSteps, Mode=OneWay}">
+                            <ItemsControl AutomationProperties.AutomationId="ControlInspectorDetailPage_WorkflowStepsList" ItemsSource="{x:Bind ViewModel.WorkflowSteps, Mode=OneWay}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel
@@ -130,7 +132,7 @@
                 </Border>
 
                 <!-- Sections rendered as label/value tables -->
-                <ItemsControl ItemsSource="{x:Bind ViewModel.Sections, Mode=OneWay}">
+                <ItemsControl AutomationProperties.AutomationId="ControlInspectorDetailPage_SectionsList" ItemsSource="{x:Bind ViewModel.Sections, Mode=OneWay}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:ControlInspectorSection">
                             <Border
@@ -188,6 +190,7 @@
                                     Text="{x:Bind ViewModel.AssociatedFilesSummary, Mode=OneWay}" />
                             </StackPanel>
                             <ToggleSwitch
+                                AutomationProperties.AutomationId="ControlInspectorDetailPage_HideTooltipFilesToggle"
                                 Grid.Column="1"
                                 Header="Hide tooltip files"
                                 IsOn="{x:Bind ViewModel.HideTooltipRelatedFiles, Mode=TwoWay}"
@@ -195,7 +198,7 @@
                                 OnContent="Hidden"
                                 MinWidth="0" />
                         </Grid>
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.VisibleAssociatedFiles, Mode=OneWay}">
+                        <ItemsControl AutomationProperties.AutomationId="ControlInspectorDetailPage_AssociatedFilesList" ItemsSource="{x:Bind ViewModel.VisibleAssociatedFiles, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Padding="0,6" ColumnSpacing="8">

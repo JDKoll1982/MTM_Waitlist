@@ -91,6 +91,7 @@ public sealed class SampleOrderTests
     {
         var accept = new NoOpCommand();
         var complete = new NoOpCommand();
+        var release = new NoOpCommand();
         var cancel = new NoOpCommand();
         var order = new SampleOrder
         {
@@ -100,9 +101,11 @@ public sealed class SampleOrderTests
             CanCancelRequest = true,
             AcceptActionText = "Accept",
             CompleteActionText = "Complete",
+            ReleaseActionText = "Give back",
             CancelActionText = "Cancel",
             AcceptCommand = accept,
             CompleteCommand = complete,
+            ReleaseCommand = release,
             CancelCommand = cancel,
         };
 
@@ -112,10 +115,12 @@ public sealed class SampleOrderTests
 
         Assert.AreEqual("Accept", order.AcceptActionText);
         Assert.AreEqual("Complete", order.CompleteActionText);
+        Assert.AreEqual("Give back", order.ReleaseActionText);
         Assert.AreEqual("Cancel", order.CancelActionText);
 
         Assert.IsNotNull(order.AcceptCommand);
         Assert.IsNotNull(order.CompleteCommand);
+        Assert.IsNotNull(order.ReleaseCommand);
         Assert.IsNotNull(order.CancelCommand);
     }
 

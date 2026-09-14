@@ -473,3 +473,49 @@ public sealed class RequestItemConfigurationService : IRequestItemConfigurationS
         return int.TryParse(Convert.ToString(value), out var number) ? number : null;
     }
 }
+
+/// <summary>
+/// The choices an Item's enumerated answer draws on (FR-035).
+/// <para>
+/// The rule is a property of the <b>configuration row</b> and the requesting job — never of the Item's identity
+/// (FR-013), so a second Item configured the same way behaves the same way:
+/// </para>
+/// <list type="number">
+/// <item>a row that carries its own list uses that list, in the order it declares;</item>
+/// <item>a row that declares an enumerated answer field sourced from the answer (<c>source = 'answer'</c>) and
+/// carries no list of its own draws on the <b>requesting job's component list</b>, which is the path
+/// <c>pickup-component</c> is configured for and the reason it was not raisable without it;</item>
+/// <item>anything else yields no choices, and the details step reports that rather than inventing a list.</item>
+/// </list>
+/// </summary>
+public static class RequestItemAnswerOptionsResolver
+{
+    /// <summary>
+    /// The choices this Item's enumerated answer offers, or an empty list when the row declares none — an
+    /// empty list is reported by the screen, never filled in with something plausible (FR-026, FR-035).
+    /// </summary>
+    public static IReadOnlyList<string> Resolve(
+        RequestItemConfiguration configuration,
+        RequestJobPartAvailability availability)
+    {
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        if (availability is null || configuration.AnswerValueType != RequestItemValueType.Enum)
+        {
+            return Array.Empty<string>();
+        }
+
+        if (configuration.Options.Count > 0)
+        {
+            return configuration.Options;
+        }
+
+        var declaresEnumeratedAnswer = configuration.DetailFields.Any(field =>
+            field.ValueType == RequestItemValueType.Enum
+            && string.Equals(field.Source, RequestItemFieldDefinition.Sources.Answer, StringComparison.OrdinalIgnoreCase));
+
+        return declaresEnumeratedAnswer
+            ? availability.ComponentPartNumbers
+            : Array.Empty<string>();
+    }
+}

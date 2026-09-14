@@ -60,6 +60,7 @@
                             <Image
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_RequestTypeImage"
                                 AutomationProperties.Name="View larger request type image"
                                 Source="{x:Bind ViewModel.Item.EffectiveImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                                 Stretch="Uniform"
@@ -83,6 +84,7 @@
                             <Image
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_WorkCenterImage"
                                 AutomationProperties.Name="View larger work center image"
                                 Source="{x:Bind ViewModel.Item.EffectiveWorkCenterImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                                 Stretch="Uniform"
@@ -170,6 +172,7 @@
                             Text="{x:Bind ViewModel.SectionFailureMessage, Mode=OneWay}"
                             TextWrapping="WrapWholeWords" />
                         <Button
+                            AutomationProperties.AutomationId="WaitlistViewDetailPage_SectionRetryButton"
                             HorizontalAlignment="Left"
                             Command="{x:Bind ViewModel.RetryLoadCommand}"
                             Content="{x:Bind ViewModel.SectionFailureRetryText}" />
@@ -265,6 +268,7 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Button
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_SortPartNumberButton"
                                 Grid.Column="0"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Left"
@@ -274,6 +278,7 @@
                                 FontWeight="SemiBold"
                                 Content="Part #" />
                             <Button
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_SortLocationButton"
                                 Grid.Column="1"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Left"
@@ -283,6 +288,7 @@
                                 FontWeight="SemiBold"
                                 Content="Location" />
                             <Button
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_SortQuantityButton"
                                 Grid.Column="2"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Left"
@@ -343,6 +349,7 @@
                             Text="{x:Bind ViewModel.NoteLabel, Mode=OneWay}" />
                         <TextBox
                             AcceptsReturn="True"
+                            AutomationProperties.AutomationId="WaitlistViewDetailPage_NoteInput"
                             AutomationProperties.Name="{x:Bind ViewModel.NoteLabel, Mode=OneWay}"
                             PlaceholderText="{x:Bind ViewModel.NotePlaceholder, Mode=OneWay}"
                             Text="{x:Bind ViewModel.NoteDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -358,6 +365,7 @@
                                 TextWrapping="WrapWholeWords" />
                         </StackPanel>
                         <Button
+                            AutomationProperties.AutomationId="WaitlistViewDetailPage_SaveNoteButton"
                             HorizontalAlignment="Left"
                             Command="{x:Bind ViewModel.SaveNoteCommand}"
                             Content="{x:Bind ViewModel.NoteSaveText, Mode=OneWay}" />
@@ -546,6 +554,7 @@
                 Padding="10"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
+                AutomationProperties.AutomationId="WaitlistViewDetailPage_CloseImageViewerButton"
                 AutomationProperties.Name="Close image viewer"
                 Click="ImageViewerClose_Click"
                 FontFamily="{ThemeResource SymbolThemeFontFamily}"

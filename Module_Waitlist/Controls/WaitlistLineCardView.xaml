@@ -146,22 +146,26 @@
                      own gate says the action is available, carries the command the view model put on the
                      row, and names itself with the row's localized label. The action area offers only what
                      the application can actually do (FR-007/FR-008/FR-020, contracts C1/C7), and it keeps
-                     the approved anatomy: at most two 44x44 icon buttons, vertically centred above the
-                     compact status pill.
+                     the approved anatomy: at most three 44x44 icon buttons, vertically centred above the
+                     compact status pill. The third is Give back, added when the owner superseded C7's
+                     "Release — not drawn": without a control, a claimed request could never be handed
+                     back, and releasing is the only way it returns to the open list (FR-047).
 
                      Accept and Complete are the same slot in two states, so they must never be mistaken for
                      each other: Accept is green with the Accept glyph, Complete is the accent colour with the
-                     Completed glyph. Glyph names come from the Segoe Fluent Icons list; E10B is in the
-                     deprecated E0-E5 range and is not used. -->
+                     Completed glyph, and Give back is solid neutral with the Undo glyph — three different
+                     colours and three different icons. Glyph names come from the Segoe Fluent Icons list;
+                     E10B is in the deprecated E0-E5 range and is not used. -->
                 <StackPanel
                     Grid.Row="0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
-                    Spacing="8">
+                    Spacing="4">
                     <Button
                         MinWidth="44"
                         MinHeight="44"
+                        AutomationProperties.AutomationId="WaitlistLineCardView_AcceptButton"
                         AutomationProperties.Name="{Binding Order.AcceptActionText, ElementName=Root}"
                         Background="{ThemeResource SystemFillColorSuccessBrush}"
                         Command="{Binding Order.AcceptCommand, ElementName=Root}"
@@ -174,6 +178,7 @@
                     <Button
                         MinWidth="44"
                         MinHeight="44"
+                        AutomationProperties.AutomationId="WaitlistLineCardView_CompleteButton"
                         AutomationProperties.Name="{Binding Order.CompleteActionText, ElementName=Root}"
                         Background="{ThemeResource AccentFillColorDefaultBrush}"
                         Command="{Binding Order.CompleteCommand, ElementName=Root}"
@@ -183,9 +188,27 @@
                         Visibility="{Binding Order.CanCompleteOrRelease, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
                         <FontIcon FontSize="18" Foreground="White" Glyph="&#xE930;" />
                     </Button>
+                    <!-- Give back sits beside Complete and rides the same gate: it is the assignee's other
+                         option on their own claim, and it is what puts the request back on the open list for
+                         somebody else (FR-047). Solid neutral keeps it visibly quieter than Complete without
+                         borrowing the red that means Cancel. -->
                     <Button
                         MinWidth="44"
                         MinHeight="44"
+                        AutomationProperties.AutomationId="WaitlistLineCardView_ReleaseButton"
+                        AutomationProperties.Name="{Binding Order.ReleaseActionText, ElementName=Root}"
+                        Background="{ThemeResource SystemFillColorSolidNeutralBrush}"
+                        Command="{Binding Order.ReleaseCommand, ElementName=Root}"
+                        CommandParameter="{Binding Order, ElementName=Root}"
+                        CornerRadius="9"
+                        ToolTipService.ToolTip="{Binding Order.ReleaseActionText, ElementName=Root}"
+                        Visibility="{Binding Order.CanCompleteOrRelease, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <FontIcon FontSize="18" Foreground="White" Glyph="&#xE7A7;" />
+                    </Button>
+                    <Button
+                        MinWidth="44"
+                        MinHeight="44"
+                        AutomationProperties.AutomationId="WaitlistLineCardView_CancelButton"
                         AutomationProperties.Name="{Binding Order.CancelActionText, ElementName=Root}"
                         Background="{ThemeResource SystemFillColorCriticalBrush}"
                         Command="{Binding Order.CancelCommand, ElementName=Root}"

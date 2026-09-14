@@ -371,7 +371,9 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         // Persist the transition to the MySQL DB whenever a helper is present. The in-memory request id
         // equals the DB public_id (client-supplied on insert / DB row id on load), so the status update
-        // targets the correct row.
+        // targets the correct row. The transition is guarded on the state read a moment ago (FR-043), so a
+        // store that no longer holds that state reports zero rows rather than overwriting whoever got there
+        // first.
         if (_mySqlHelperServer is not null)
         {
             var rowsAffected = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
@@ -384,6 +386,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                     ["p_cancellation_reason"] = string.Equals(nextStatus, "Canceled", StringComparison.OrdinalIgnoreCase) ? cancellationReason : null,
                     ["p_canceled_by_employee_number"] = string.Equals(nextStatus, "Canceled", StringComparison.OrdinalIgnoreCase) ? canceledByEmployeeNumber : null,
                     ["p_note"] = updated.Note,
+                    ["p_expected_status"] = existing.Status,
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
@@ -517,6 +520,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                         ["p_cancellation_reason"] = updated.CancellationReason,
                         ["p_canceled_by_employee_number"] = updated.CanceledByEmployeeNumber,
                         ["p_note"] = updated.Note,
+                        ["p_expected_status"] = existing.Status,
                     },
                     MySqlDatabaseTarget.MtmWaitlist,
                     cancellationToken).ConfigureAwait(false);
@@ -583,7 +587,14 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             LastMessageUtc = existing.LastMessageUtc,
         };
 
-        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Accepted", handler, handlerEmployeeName, "Waitlist_History.Event.Accepted".GetLocalized(), cancellationToken).ConfigureAwait(false);
+        var applied = await PersistHandlerActionAsync(requestId, existing.Status, updated, "Accepted", handler, handlerEmployeeName, "Waitlist_History.Event.Accepted".GetLocalized(), cancellationToken).ConfigureAwait(false);
+        if (!applied)
+        {
+            // Another handler got there first: the store refused the transition, so this handler did not take
+            // the request and must not be told they did (FR-043, FR-026).
+            return null;
+        }
+
         StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' accepted by handler '{handler}'. Status 'Pending' -> 'Accepted'.");
         return updated;
     }
@@ -635,7 +646,12 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             LastMessageUtc = existing.LastMessageUtc,
         };
 
-        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Completed", handler, handlerEmployeeName, "Waitlist_History.Event.Completed".GetLocalized(), cancellationToken).ConfigureAwait(false);
+        var applied = await PersistHandlerActionAsync(requestId, existing.Status, updated, "Completed", handler, handlerEmployeeName, "Waitlist_History.Event.Completed".GetLocalized(), cancellationToken).ConfigureAwait(false);
+        if (!applied)
+        {
+            return null;
+        }
+
         StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' completed by handler '{handler}'. Status 'Accepted' -> 'Completed'.");
         return updated;
     }
@@ -689,7 +705,12 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             LastMessageUtc = existing.LastMessageUtc,
         };
 
-        await PersistHandlerActionAsync(requestId, existing.Status, updated, "Released", handler, handlerEmployeeName, "Waitlist_History.Event.Released".GetLocalized(), cancellationToken).ConfigureAwait(false);
+        var applied = await PersistHandlerActionAsync(requestId, existing.Status, updated, "Released", handler, handlerEmployeeName, "Waitlist_History.Event.Released".GetLocalized(), cancellationToken).ConfigureAwait(false);
+        if (!applied)
+        {
+            return null;
+        }
+
         StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' released by handler '{handler}'. Status 'Accepted' -> 'Pending' (not a cancellation).");
         return updated;
     }
@@ -697,8 +718,15 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
     /// <summary>
     /// Stores a handler-action transition, records its audit entry, persists it through the status-update
     /// path, and raises <see cref="RequestsChanged"/>.
+    /// <para>
+    /// The store is written <b>first</b> and the transition is conditional on the state the handler saw
+    /// (FR-043). When it reports zero affected rows the action did not take: the in-memory row is left alone,
+    /// no audit entry is recorded, and <c>false</c> is handed back so the losing handler is told rather than
+    /// shown a success they did not get (FR-026).
+    /// </para>
     /// </summary>
-    private async Task PersistHandlerActionAsync(
+    /// <returns>Whether the transition was applied.</returns>
+    private async Task<bool> PersistHandlerActionAsync(
         Guid requestId,
         string fromStatus,
         WaitlistRequest updated,
@@ -708,12 +736,9 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         string? details,
         CancellationToken cancellationToken)
     {
-        _requests[requestId] = updated;
-        await RecordAuditAsync(requestId, fromStatus, updated.Status, eventType, actorNumber, actorName, details, cancellationToken).ConfigureAwait(false);
-
         if (_mySqlHelperServer is not null)
         {
-            await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+            var rowsAffected = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
                 "sp_waitlist_request_status_update",
                 new Dictionary<string, object?>
                 {
@@ -723,12 +748,24 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                     ["p_cancellation_reason"] = updated.CancellationReason,
                     ["p_canceled_by_employee_number"] = updated.CanceledByEmployeeNumber,
                     ["p_note"] = updated.Note,
+                    ["p_expected_status"] = fromStatus,
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
+
+            if (rowsAffected <= 0)
+            {
+                StartupDebugLog.Info(
+                    "WaitlistRequest",
+                    $"Handler action '{eventType}' for request '{requestId}' did not take: the row is no longer '{fromStatus}'. RowsAffected={rowsAffected}.");
+                return false;
+            }
         }
 
+        _requests[requestId] = updated;
+        await RecordAuditAsync(requestId, fromStatus, updated.Status, eventType, actorNumber, actorName, details, cancellationToken).ConfigureAwait(false);
         RequestsChanged?.Invoke(this, EventArgs.Empty);
+        return true;
     }
 
     private static bool IsValidStatusTransition(string currentStatus, string nextStatus)

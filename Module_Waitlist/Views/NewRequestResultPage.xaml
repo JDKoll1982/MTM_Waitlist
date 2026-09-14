@@ -57,9 +57,11 @@
                     Spacing="12"
                     Visibility="{x:Bind ViewModel.IsSuccess, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Button
+                        AutomationProperties.AutomationId="NewRequestResultPage_AddAnotherRequestButton"
                         Content="Add Another Request"
                         Command="{x:Bind ViewModel.AddAnotherRequestCommand}" />
                     <Button
+                        AutomationProperties.AutomationId="NewRequestResultPage_ReturnToWaitlistButton"
                         Content="Return to Waitlist"
                         Command="{x:Bind ViewModel.ReturnToWaitlistCommand}"
                         Style="{StaticResource AccentButtonStyle}" />
@@ -71,9 +73,11 @@
                     Spacing="12"
                     Visibility="{x:Bind ViewModel.IsDuplicate, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Button
+                        AutomationProperties.AutomationId="NewRequestResultPage_CancelButton"
                         Content="Cancel"
                         Command="{x:Bind ViewModel.CancelToWaitlistCommand}" />
                     <Button
+                        AutomationProperties.AutomationId="NewRequestResultPage_ContinueButton"
                         Content="Continue"
                         Command="{x:Bind ViewModel.ContinueDuplicateCommand}"
                         Style="{StaticResource AccentButtonStyle}" />
@@ -85,9 +89,11 @@
                     Spacing="12"
                     Visibility="{x:Bind ViewModel.IsFailure, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Button
+                        AutomationProperties.AutomationId="NewRequestResultPage_CloseButton"
                         Content="Close"
                         Command="{x:Bind ViewModel.CancelToWaitlistCommand}" />
                     <Button
+                        AutomationProperties.AutomationId="NewRequestResultPage_RetryButton"
                         Content="Retry"
                         Command="{x:Bind ViewModel.RetryCommand}"
                         Style="{StaticResource AccentButtonStyle}" />

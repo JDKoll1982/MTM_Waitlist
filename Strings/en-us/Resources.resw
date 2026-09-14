@@ -625,6 +625,9 @@
   <data name="Waitlist_Action.CompleteRequest" xml:space="preserve">
     <value>Complete request</value>
   </data>
+  <data name="Waitlist_Action.ReleaseRequest" xml:space="preserve">
+    <value>Give back</value>
+  </data>
   <data name="Waitlist_Action.CancelRequest" xml:space="preserve">
     <value>Cancel request</value>
   </data>
@@ -914,6 +917,21 @@
   </data>
   <data name="Shell_SortOrder.Label" xml:space="preserve">
     <value>Sort by</value>
+  </data>
+  <data name="Shell_SignOut.Label" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Shell_SignOut.Tooltip" xml:space="preserve">
+    <value>Sign out and return to the sign-in screen.</value>
+  </data>
+  <data name="Shell_SignOut.RestartFailed" xml:space="preserve">
+    <value>You have been signed out, but the application could not restart. Close it and open it again to sign in.</value>
+  </data>
+  <data name="Shell_SignOut.Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Shell_SignOut.Failed.Title" xml:space="preserve">
+    <value>Sign out</value>
   </data>
   <data name="Shell_SortOrder.MostUrgent" xml:space="preserve">
     <value>Most urgent</value>

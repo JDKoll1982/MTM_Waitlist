@@ -141,7 +141,7 @@
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
             <TextBlock x:Uid="Setup_Workstation.Title" Style="{StaticResource SetupPageTitleStyle}" Text="Select Work Center" />
             <TextBlock x:Uid="Setup_Workstation.Subtitle" Style="{StaticResource SetupPageSubtitleStyle}" Text="Choose where this setup is being performed." />
-            <TextBox x:Uid="Setup_Workstation.SearchInput" Header="Search" PlaceholderText="Search by work center, work order, sequence, or part number" Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox AutomationProperties.AutomationId="SetupWorkCenterPage_SearchInput" x:Uid="Setup_Workstation.SearchInput" Header="Search" PlaceholderText="Search by work center, work order, sequence, or part number" Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
 
@@ -153,6 +153,7 @@
                     <StackPanel Spacing="12">
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Local Work Centers" />
                         <GridView
+                            AutomationProperties.AutomationId="SetupWorkCenterPage_WorkCenterTiles"
                             x:Name="HotWorkCentersGridView"
                             HorizontalContentAlignment="Stretch"
                             ItemsSource="{x:Bind ViewModel.DisplayedHotWorkCenters, Mode=OneWay}"
@@ -174,6 +175,7 @@
                 </Border>
 
                 <Expander
+                    AutomationProperties.AutomationId="SetupWorkCenterPage_OtherWorkCentersExpander"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
                     IsExpanded="{x:Bind ViewModel.IsOtherWorkCentersExpanded, Mode=TwoWay}">
@@ -184,6 +186,7 @@
                     </Expander.Header>
                     <StackPanel Spacing="12" Margin="0,12,0,0">
                         <GridView
+                            AutomationProperties.AutomationId="SetupWorkCenterPage_OtherWorkCenterTiles"
                             x:Name="OtherWorkCentersGridView"
                             HorizontalContentAlignment="Stretch"
                             ItemsSource="{x:Bind ViewModel.DisplayedOtherWorkCenters, Mode=OneWay}"
@@ -214,9 +217,9 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Content="New Work Center" MinWidth="150" Click="OnNewWorkCenterClick" IsEnabled="{x:Bind ViewModel.CanManageWorkCenters, Mode=OneWay}" />
-            <Button Grid.Column="2" x:Uid="Setup_Action.Refresh" Content="Refresh" Command="{x:Bind ViewModel.RefreshCommand}" />
-            <Button Grid.Column="3" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
+            <Button AutomationProperties.AutomationId="SetupWorkCenterPage_NewWorkCenterButton" Grid.Column="0" Content="New Work Center" MinWidth="150" Click="OnNewWorkCenterClick" IsEnabled="{x:Bind ViewModel.CanManageWorkCenters, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupWorkCenterPage_RefreshButton" Grid.Column="2" x:Uid="Setup_Action.Refresh" Content="Refresh" Command="{x:Bind ViewModel.RefreshCommand}" />
+            <Button AutomationProperties.AutomationId="SetupWorkCenterPage_ContinueButton" Grid.Column="3" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
         </Grid>
     </Grid>
 </Page>

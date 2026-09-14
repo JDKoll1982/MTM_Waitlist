@@ -36,6 +36,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBox
+                    AutomationProperties.AutomationId="ImageOverrideEditorControl_SearchBox"
                     x:Name="SearchTextBox"
                     Grid.Column="0"
                     PlaceholderText="Search"
@@ -43,6 +44,7 @@
                     AutomationProperties.Name="Search image rows" shared:TooltipBehavior.ResourceKey="Settings_SearchTextBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Settings/Views/ImageOverrideEditorControl.xaml|Module_Settings/Views/ImageOverrideEditorControl.xaml.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Search."/>
 
                 <ToggleSwitch
+                    AutomationProperties.AutomationId="ImageOverrideEditorControl_CustomOnlyToggle"
                     x:Name="CustomOnlyToggle"
                     Grid.Column="1"
                     MinWidth="0"
@@ -52,6 +54,7 @@
                     AutomationProperties.Name="Show only rows with a custom image" shared:TooltipBehavior.ResourceKey="Settings_CustomOnlyToggle_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Settings/Views/ImageOverrideEditorControl.xaml|Module_Settings/Views/ImageOverrideEditorControl.xaml.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="All."/>
 
                 <Button
+                    AutomationProperties.AutomationId="ImageOverrideEditorControl_ResetAllButton"
                     x:Name="ResetAllButton"
                     Grid.Column="2"
                     Content="Reset all"
@@ -109,7 +112,7 @@
                     VerticalScrollBarVisibility="Auto"
                     VerticalScrollMode="Auto"
                     HorizontalScrollMode="Disabled">
-                    <ItemsControl x:Name="GroupsItemsControl">
+                    <ItemsControl AutomationProperties.AutomationId="ImageOverrideEditorControl_GroupsList" x:Name="GroupsItemsControl">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="models:ImageOverrideRowGroup">
                                 <StackPanel Margin="0,0,0,12" Spacing="6">
@@ -194,6 +197,7 @@
 
                                                             <!-- File-picker button to choose a custom image -->
                                                             <Button
+                                                                AutomationProperties.Name="{x:Bind DisplayName}"
                                                                 Grid.Column="4"
                                                                 MinWidth="84"
                                                                 VerticalAlignment="Center"
@@ -204,6 +208,7 @@
 
                                                             <!-- Reset this row back to the inherited/default image -->
                                                             <Button
+                                                                AutomationProperties.Name="{x:Bind DisplayName}"
                                                                 Grid.Column="5"
                                                                 MinWidth="72"
                                                                 VerticalAlignment="Center"

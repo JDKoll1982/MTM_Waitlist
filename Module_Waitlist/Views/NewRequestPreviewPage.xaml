@@ -82,9 +82,11 @@
 
         <StackPanel Grid.Row="3" Style="{StaticResource SetupActionBarStyle}">
             <Button
+                AutomationProperties.AutomationId="NewRequestPreviewPage_BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}" />
             <Button
+                AutomationProperties.AutomationId="NewRequestPreviewPage_ContinueButton"
                 Content="Continue"
                 Command="{x:Bind ViewModel.ContinueCommand}"
                 Style="{StaticResource AccentButtonStyle}" />

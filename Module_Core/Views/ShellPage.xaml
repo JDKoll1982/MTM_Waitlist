@@ -215,6 +215,7 @@
                 Style="{StaticResource CaptionTextBlockStyle}"
                 TextWrapping="NoWrap" />
             <AutoSuggestBox
+                AutomationProperties.AutomationId="ShellPage_SearchBox"
                 x:Name="TitleBarSearchBox"
                 Grid.Column="2"
                 MaxWidth="400"
@@ -242,6 +243,7 @@
             </AutoSuggestBox>
         </Grid>
         <NavigationView
+            AutomationProperties.AutomationId="ShellPage_Navigation"
             x:Name="NavigationViewControl"
             Canvas.ZIndex="0"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
@@ -262,12 +264,12 @@
                 The Assets/Icons artwork is greyscale, so ShowAsMonochrome must stay false — the
                 default (true) flattens each glyph to a single Foreground-coloured silhouette.
                 -->
-                <NavigationViewItem x:Uid="Shell_WaitlistView" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewViewModel">
+                <NavigationViewItem AutomationProperties.AutomationId="ShellPage_WaitlistNavItem" x:Uid="Shell_WaitlistView" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewViewModel">
                     <NavigationViewItem.Icon>
                         <BitmapIcon UriSource="ms-appx:///Assets/Icons/waitlist.png" ShowAsMonochrome="False" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Uid="Shell_ModuleSetup" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Setup.ViewModels.SetupWorkCenterViewModel">
+                <NavigationViewItem AutomationProperties.AutomationId="ShellPage_WorkCenterSetupNavItem" x:Uid="Shell_ModuleSetup" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Setup.ViewModels.SetupWorkCenterViewModel">
                     <NavigationViewItem.Icon>
                         <BitmapIcon UriSource="ms-appx:///Assets/Icons/setup.png" ShowAsMonochrome="False" />
                     </NavigationViewItem.Icon>
@@ -305,6 +307,7 @@
                                     Style="{ThemeResource BodyTextBlockStyle}"
                                     Text="{Binding MyRequestsFilterLabel}" />
                                 <ToggleSwitch
+                                    AutomationProperties.AutomationId="ShellPage_MyRequestsToggle"
                                     MinWidth="0"
                                     MinHeight="0"
                                     VerticalAlignment="Center"
@@ -318,6 +321,7 @@
                                  offers them as a radio set; which one is ticked is set from the view model when
                                  the menu opens, because these items live in the shell's own header template. -->
                             <Button
+                                AutomationProperties.AutomationId="ShellPage_SortButton"
                                 Grid.Column="2"
                                 Margin="16,0,0,0"
                                 VerticalAlignment="Center"
@@ -329,26 +333,31 @@
                                 <Button.Flyout>
                                     <MenuFlyout Opening="SortOrderFlyout_Opening">
                                         <RadioMenuFlyoutItem
+                                            AutomationProperties.AutomationId="ShellPage_SortMostUrgentItem"
                                             GroupName="WaitlistSortOrder"
                                             Tag="most-urgent"
                                             Text="{Binding SortOrderMostUrgentLabel}"
                                             Click="SortOrderItem_Click" />
                                         <RadioMenuFlyoutItem
+                                            AutomationProperties.AutomationId="ShellPage_SortLongestWaitingItem"
                                             GroupName="WaitlistSortOrder"
                                             Tag="longest-waiting"
                                             Text="{Binding SortOrderLongestWaitingLabel}"
                                             Click="SortOrderItem_Click" />
                                         <RadioMenuFlyoutItem
+                                            AutomationProperties.AutomationId="ShellPage_SortPressItem"
                                             GroupName="WaitlistSortOrder"
                                             Tag="press"
                                             Text="{Binding SortOrderPressLabel}"
                                             Click="SortOrderItem_Click" />
                                         <RadioMenuFlyoutItem
+                                            AutomationProperties.AutomationId="ShellPage_SortRequestedByItem"
                                             GroupName="WaitlistSortOrder"
                                             Tag="requested-by"
                                             Text="{Binding SortOrderRequestedByLabel}"
                                             Click="SortOrderItem_Click" />
                                         <RadioMenuFlyoutItem
+                                            AutomationProperties.AutomationId="ShellPage_SortStatusItem"
                                             GroupName="WaitlistSortOrder"
                                             Tag="status"
                                             Text="{Binding SortOrderStatusLabel}"
@@ -357,6 +366,7 @@
                                 </Button.Flyout>
                             </Button>
                             <ComboBox
+                                AutomationProperties.AutomationId="ShellPage_FacilitySelector"
                                 x:Name="FacilitySelectorComboBox"
                                 Grid.Column="3"
                                 MinWidth="160"
@@ -369,6 +379,7 @@
                                 shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Core/Contracts/Services/IBuildingSelectionService.cs|Module_Core/Services/BuildingSelectionService.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
                                 shared:TooltipBehavior.FallbackText="Select the active facility." />
                             <Button
+                                AutomationProperties.AutomationId="ShellPage_CurrentUserButton"
                                 x:Name="CurrentUserButton"
                                 Grid.Column="4"
                                 Margin="16,0,0,0"
@@ -377,8 +388,17 @@
                                 Background="Transparent"
                                 BorderThickness="0"
                                 shared:TooltipBehavior.ResourceKey="Shell_CurrentUser_Tooltip"
-                                shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
-                                shared:TooltipBehavior.FallbackText="View the current signed-in user.">
+                                shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs|MTM_Waitlist.Startup/Services/SignOutService.cs|MTM_Waitlist.Startup/Services/SignInSessionKeys.cs|MTM_Waitlist.Startup/Services/AppProcessRestarter.cs|Strings/en-us/Resources.resw|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
+                                shared:TooltipBehavior.FallbackText="View the current signed-in user, or sign out.">
+                                <Button.Flyout>
+                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                        <MenuFlyoutItem
+                                            AutomationProperties.AutomationId="ShellPage_SignOutItem"
+                                            Click="SignOutItem_Click"
+                                            Text="{Binding SignOutLabel}"
+                                            ToolTipService.ToolTip="{Binding SignOutTooltip}" />
+                                    </MenuFlyout>
+                                </Button.Flyout>
                                 <StackPanel Orientation="Horizontal" Spacing="12">
                                     <Border
                                         Width="32"
@@ -457,6 +477,7 @@
                                             Style="{ThemeResource BodyTextBlockStyle}"
                                             Text="{Binding MyRequestsFilterLabel}" />
                                         <ToggleSwitch
+                                            AutomationProperties.AutomationId="ShellPage_MyRequestsToggleDefault"
                                             MinWidth="0"
                                             MinHeight="0"
                                             VerticalAlignment="Center"
@@ -469,6 +490,7 @@
                                     <!-- The same sort control as the navigation-view header carries, for the shell
                                          state where no page supplies its own header. -->
                                     <Button
+                                        AutomationProperties.AutomationId="ShellPage_SortButtonDefault"
                                         Grid.Column="2"
                                         Margin="16,0,0,0"
                                         VerticalAlignment="Center"
@@ -480,26 +502,31 @@
                                         <Button.Flyout>
                                             <MenuFlyout Opening="SortOrderFlyout_Opening">
                                                 <RadioMenuFlyoutItem
+                                                    AutomationProperties.AutomationId="ShellPage_SortMostUrgentItemDefault"
                                                     GroupName="WaitlistSortOrder"
                                                     Tag="most-urgent"
                                                     Text="{Binding SortOrderMostUrgentLabel}"
                                                     Click="SortOrderItem_Click" />
                                                 <RadioMenuFlyoutItem
+                                                    AutomationProperties.AutomationId="ShellPage_SortLongestWaitingItemDefault"
                                                     GroupName="WaitlistSortOrder"
                                                     Tag="longest-waiting"
                                                     Text="{Binding SortOrderLongestWaitingLabel}"
                                                     Click="SortOrderItem_Click" />
                                                 <RadioMenuFlyoutItem
+                                                    AutomationProperties.AutomationId="ShellPage_SortPressItemDefault"
                                                     GroupName="WaitlistSortOrder"
                                                     Tag="press"
                                                     Text="{Binding SortOrderPressLabel}"
                                                     Click="SortOrderItem_Click" />
                                                 <RadioMenuFlyoutItem
+                                                    AutomationProperties.AutomationId="ShellPage_SortRequestedByItemDefault"
                                                     GroupName="WaitlistSortOrder"
                                                     Tag="requested-by"
                                                     Text="{Binding SortOrderRequestedByLabel}"
                                                     Click="SortOrderItem_Click" />
                                                 <RadioMenuFlyoutItem
+                                                    AutomationProperties.AutomationId="ShellPage_SortStatusItemDefault"
                                                     GroupName="WaitlistSortOrder"
                                                     Tag="status"
                                                     Text="{Binding SortOrderStatusLabel}"
@@ -508,6 +535,7 @@
                                         </Button.Flyout>
                                     </Button>
                                     <ComboBox
+                                        AutomationProperties.AutomationId="ShellPage_FacilitySelectorDefault"
                                         x:Name="FacilitySelectorComboBoxDefault"
                                         Grid.Column="3"
                                         MinWidth="160"
@@ -520,6 +548,7 @@
                                         shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Core/Contracts/Services/IBuildingSelectionService.cs|Module_Core/Services/BuildingSelectionService.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
                                         shared:TooltipBehavior.FallbackText="Select the active facility." />
                                     <Button
+                                        AutomationProperties.AutomationId="ShellPage_CurrentUserButtonDefault"
                                         x:Name="CurrentUserButtonDefault"
                                         Grid.Column="4"
                                         Margin="16,0,0,0"
@@ -528,8 +557,17 @@
                                         Background="Transparent"
                                         BorderThickness="0"
                                         shared:TooltipBehavior.ResourceKey="Shell_CurrentUser_Tooltip"
-                                        shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|Module_Core/ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
-                                        shared:TooltipBehavior.FallbackText="View the current signed-in user.">
+                                        shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs|MTM_Waitlist.Startup/Services/SignOutService.cs|MTM_Waitlist.Startup/Services/SignInSessionKeys.cs|MTM_Waitlist.Startup/Services/AppProcessRestarter.cs|Strings/en-us/Resources.resw|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
+                                        shared:TooltipBehavior.FallbackText="View the current signed-in user, or sign out.">
+                                        <Button.Flyout>
+                                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                <MenuFlyoutItem
+                                                    AutomationProperties.AutomationId="ShellPage_SignOutItemDefault"
+                                                    Click="SignOutItem_Click"
+                                                    Text="{Binding SignOutLabel}"
+                                                    ToolTipService.ToolTip="{Binding SignOutTooltip}" />
+                                            </MenuFlyout>
+                                        </Button.Flyout>
                                         <StackPanel Orientation="Horizontal" Spacing="12">
                                             <Border
                                                 Width="32"

@@ -28,6 +28,7 @@
             </Grid.RowDefinitions>
 
             <TextBox
+                AutomationProperties.AutomationId="SettingsPage_SearchBox"
                 Grid.Row="0"
                 PlaceholderText="Search settings"
                 Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
@@ -53,6 +54,7 @@
                     Text="Appearance" />
 
                 <muxc:Expander
+                    AutomationProperties.AutomationId="SettingsPage_AppearanceExpander"
                     Grid.Row="1"
                     x:Name="AppearanceExpander"
                     x:Load="{x:Bind ViewModel.IsAppearancePanelVisible, Mode=OneWay}"
@@ -113,6 +115,7 @@
                                     <ColumnDefinition Width="50*" />
                                 </Grid.ColumnDefinitions>
                                 <RadioButton
+                                    AutomationProperties.AutomationId="SettingsPage_ThemeLightOption"
                                     x:Uid="Settings_Theme_Light"
                                     Grid.Column="1"
                                     VerticalAlignment="Center"
@@ -124,6 +127,7 @@
                                     </RadioButton.CommandParameter>
                                 </RadioButton>
                                 <RadioButton
+                                    AutomationProperties.AutomationId="SettingsPage_ThemeDarkOption"
                                     x:Uid="Settings_Theme_Dark"
                                     Grid.Column="2"
                                     VerticalAlignment="Center"
@@ -135,6 +139,7 @@
                                     </RadioButton.CommandParameter>
                                 </RadioButton>
                                 <RadioButton
+                                    AutomationProperties.AutomationId="SettingsPage_ThemeDefaultOption"
                                     x:Uid="Settings_Theme_Default"
                                     Grid.Column="3"
                                     VerticalAlignment="Center"
@@ -183,6 +188,7 @@
                     Text="Operations" />
 
                 <muxc:Expander
+                    AutomationProperties.AutomationId="SettingsPage_ImageLocationExpander"
                     Grid.Row="1"
                     x:Name="ImageLocationSettingsExpander"
                     x:Load="{x:Bind ViewModel.IsImageLocationSettingsPanelVisible, Mode=OneWay}"
@@ -243,6 +249,7 @@
                             </wct:SettingsCard.Description>
                             <wct:SettingsCard.Content>
                                 <Button
+                                    AutomationProperties.AutomationId="SettingsPage_Images_ManageItemsButton"
                                     MinWidth="120"
                                     Content="Manage items"
                                     Click="RequestItemImages_Click"
@@ -262,6 +269,7 @@
                             </wct:SettingsCard.Description>
                             <wct:SettingsCard.Content>
                                 <Button
+                                    AutomationProperties.AutomationId="SettingsPage_Images_ManageWorkCentersButton"
                                     MinWidth="120"
                                     Content="Manage"
                                     Click="WorkCenterImages_Click"
@@ -272,6 +280,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
+                    AutomationProperties.AutomationId="SettingsPage_LocalWorkCentersExpander"
                     Grid.Row="2"
                     x:Name="HotWorkCentersExpander"
                     x:Load="{x:Bind ViewModel.IsHotWorkCentersPanelVisible, Mode=OneWay}"
@@ -321,6 +330,7 @@
                             VerticalAlignment="Center"
                             Text="Computer" />
                         <ComboBox
+                            AutomationProperties.AutomationId="SettingsPage_HotWorkCenters_ComputerCombo"
                             Grid.Row="0"
                             Grid.Column="1"
                             Grid.ColumnSpan="3"
@@ -374,7 +384,7 @@
                                         Grid.Row="0"
                                         FontWeight="SemiBold"
                                         Text="Local Work Centers" />
-                                    <ItemsControl Grid.Row="1" ItemsSource="{x:Bind ViewModel.HotWorkCenters, Mode=OneWay}">
+                                    <ItemsControl AutomationProperties.AutomationId="SettingsPage_HotWorkCentersList" Grid.Row="1" ItemsSource="{x:Bind ViewModel.HotWorkCenters, Mode=OneWay}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Grid Margin="0,0,0,8">
@@ -390,6 +400,7 @@
                                                         <TextBlock Foreground="White" Text="{Binding}" />
                                                     </Border>
                                                     <Button
+                                                        AutomationProperties.Name="{Binding}"
                                                         Grid.Column="1"
                                                         Margin="8,0,0,0"
                                                         VerticalAlignment="Center"
@@ -421,7 +432,7 @@
                                         Grid.Row="0"
                                         FontWeight="SemiBold"
                                         Text="Other Workcenters" />
-                                    <ItemsControl Grid.Row="1" ItemsSource="{x:Bind ViewModel.OtherWorkCenters, Mode=OneWay}">
+                                    <ItemsControl AutomationProperties.AutomationId="SettingsPage_OtherWorkCentersList" Grid.Row="1" ItemsSource="{x:Bind ViewModel.OtherWorkCenters, Mode=OneWay}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Grid Margin="0,0,0,8">
@@ -437,6 +448,7 @@
                                                         <TextBlock Text="{Binding}" />
                                                     </Border>
                                                     <Button
+                                                        AutomationProperties.Name="{Binding}"
                                                         Grid.Column="1"
                                                         Margin="8,0,0,0"
                                                         VerticalAlignment="Center"
@@ -470,6 +482,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
+                    AutomationProperties.AutomationId="SettingsPage_DunnageVisibilityExpander"
                     Grid.Row="3"
                     x:Name="DunnageTypeVisibilityExpander"
                     x:Load="{x:Bind ViewModel.IsDunnageTypeVisibilityPanelVisible, Mode=OneWay}"
@@ -551,7 +564,7 @@
                                         Grid.Row="0"
                                         FontWeight="SemiBold"
                                         Text="Shown Dunnage Types" />
-                                    <ItemsControl Grid.Row="1" ItemsSource="{x:Bind ViewModel.VisibleDunnageTypes, Mode=OneWay}">
+                                    <ItemsControl AutomationProperties.AutomationId="SettingsPage_VisibleDunnageTypesList" Grid.Row="1" ItemsSource="{x:Bind ViewModel.VisibleDunnageTypes, Mode=OneWay}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Grid Margin="0,0,0,8">
@@ -567,6 +580,7 @@
                                                         <TextBlock Foreground="White" Text="{Binding Name}" />
                                                     </Border>
                                                     <Button
+                                                        AutomationProperties.Name="{Binding Name}"
                                                         Grid.Column="1"
                                                         Margin="8,0,0,0"
                                                         VerticalAlignment="Center"
@@ -598,7 +612,7 @@
                                         Grid.Row="0"
                                         FontWeight="SemiBold"
                                         Text="Hidden Dunnage Types" />
-                                    <ItemsControl Grid.Row="1" ItemsSource="{x:Bind ViewModel.HiddenDunnageTypes, Mode=OneWay}">
+                                    <ItemsControl AutomationProperties.AutomationId="SettingsPage_HiddenDunnageTypesList" Grid.Row="1" ItemsSource="{x:Bind ViewModel.HiddenDunnageTypes, Mode=OneWay}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Grid Margin="0,0,0,8">
@@ -614,6 +628,7 @@
                                                         <TextBlock Text="{Binding Name}" />
                                                     </Border>
                                                     <Button
+                                                        AutomationProperties.Name="{Binding Name}"
                                                         Grid.Column="1"
                                                         Margin="8,0,0,0"
                                                         VerticalAlignment="Center"
@@ -645,6 +660,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
+                    AutomationProperties.AutomationId="SettingsPage_ComputersExpander"
                     Grid.Row="4"
                     x:Name="ComputersExpander"
                     x:Load="{x:Bind ViewModel.IsComputersPanelVisible, Mode=OneWay}"
@@ -706,11 +722,13 @@
                             </Grid.ColumnDefinitions>
 
                             <Button
+                                AutomationProperties.AutomationId="SettingsPage_Computers_AddButton"
                                 Grid.Column="1"
                                 Content="Add"
                                 Click="AddComputer_Click"
                                 IsEnabled="{x:Bind ViewModel.ComputerManagement.CanManageComputers, Mode=OneWay}" />
                             <Button
+                                AutomationProperties.AutomationId="SettingsPage_Computers_EditButton"
                                 Grid.Column="2"
                                 Content="Edit"
                                 Click="EditComputer_Click"
@@ -751,6 +769,7 @@
                                 </Grid>
 
                                 <ListView
+                                    AutomationProperties.AutomationId="SettingsPage_ComputersList"
                                     Grid.Row="1"
                                     MaxHeight="320"
                                     ItemsSource="{x:Bind ViewModel.ComputerManagement.Computers, Mode=OneWay}"
@@ -772,6 +791,7 @@
                                                         Text="{Binding MacAddressNormalized}" />
                                                 </StackPanel>
                                                 <Button
+                                                    AutomationProperties.Name="{Binding DisplayName}"
                                                     Grid.Column="1"
                                                     VerticalAlignment="Center"
                                                     Command="{Binding ViewModel.ComputerManagement.DeleteCommand, ElementName=RootPage}"
@@ -794,6 +814,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
+                    AutomationProperties.AutomationId="SettingsPage_IgnoredLocationsExpander"
                     Grid.Row="5"
                     x:Name="IgnoredLocationsExpander"
                     x:Load="{x:Bind ViewModel.IsIgnoredLocationsPanelVisible, Mode=OneWay}"
@@ -854,12 +875,14 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBox
+                                    AutomationProperties.AutomationId="SettingsPage_IgnoredLocations_AddInput"
                                     Grid.Column="0"
                                     x:Uid="Settings_IgnoredLocations_AddPlaceholder"
                                     IsEnabled="{x:Bind ViewModel.CanManageIgnoredLocations, Mode=OneWay}"
                                     PlaceholderText="Add location code (for example WC)"
                                     Text="{x:Bind ViewModel.IgnoredLocationInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 <Button
+                                    AutomationProperties.AutomationId="SettingsPage_IgnoredLocations_AddButton"
                                     Grid.Column="1"
                                     x:Uid="Settings_IgnoredLocations_Add"
                                     VerticalAlignment="Stretch"
@@ -877,6 +900,7 @@
                                 Text="Ignored locations" />
 
                             <ItemsControl
+                                AutomationProperties.AutomationId="SettingsPage_IgnoredLocationsList"
                                 Grid.Row="3"
                                 ItemsSource="{x:Bind ViewModel.IgnoredLocations, Mode=OneWay}">
                                 <ItemsControl.ItemTemplate>
@@ -900,6 +924,7 @@
                                                 VerticalAlignment="Center"
                                                 Text="{Binding}" />
                                             <Button
+                                                AutomationProperties.Name="{Binding}"
                                                 Grid.Column="2"
                                                 x:Uid="Settings_IgnoredLocations_Remove"
                                                 VerticalAlignment="Center"
@@ -923,6 +948,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
+                    AutomationProperties.AutomationId="SettingsPage_NewRequestAlertsExpander"
                     Grid.Row="6"
                     x:Name="NewRequestAlertsExpander"
                     x:Load="{x:Bind ViewModel.IsNewRequestAlertsPanelVisible, Mode=OneWay}"
@@ -975,6 +1001,7 @@
                             </wct:SettingsCard.Description>
                             <wct:SettingsCard.Content>
                                 <ToggleSwitch
+                                    AutomationProperties.AutomationId="SettingsPage_NewRequestAlerts_Toggle"
                                     IsEnabled="{x:Bind ViewModel.IsNewRequestAlertsAvailable, Mode=OneWay}"
                                     IsOn="{x:Bind ViewModel.NewRequestAlertsEnabled, Mode=TwoWay}"
                                     OffContent="Off"
@@ -985,6 +1012,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
+                    AutomationProperties.AutomationId="SettingsPage_MaxAllottedTimeExpander"
                     Grid.Row="7"
                     x:Name="UrgencyAllotmentsExpander"
                     x:Load="{x:Bind ViewModel.IsUrgencyAllotmentsPanelVisible, Mode=OneWay}"
@@ -1069,6 +1097,7 @@
                         </Grid>
 
                         <ItemsControl
+                            AutomationProperties.AutomationId="SettingsPage_MinutesList"
                             Grid.Row="2"
                             ItemsSource="{x:Bind ViewModel.UrgencyAllotments.Items, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
@@ -1088,6 +1117,7 @@
                                             Text="{Binding DisplayName}"
                                             TextWrapping="Wrap" />
                                         <muxc:NumberBox
+                                            AutomationProperties.Name="{Binding DisplayName}"
                                             Grid.Column="1"
                                             Minimum="1"
                                             Maximum="1440"
@@ -1120,6 +1150,7 @@
                 </muxc:Expander>
 
                 <muxc:Expander
+                    AutomationProperties.AutomationId="SettingsPage_CacheRefreshExpander"
                     Grid.Row="8"
                     x:Name="CacheRefreshExpander"
                     x:Load="{x:Bind ViewModel.IsCacheRefreshPanelVisible, Mode=OneWay}"
@@ -1175,6 +1206,7 @@
                                 Orientation="Horizontal"
                                 Spacing="12">
                                 <Button
+                                    AutomationProperties.AutomationId="SettingsPage_CacheRefresh_RefreshButton"
                                     x:Uid="Settings_CacheRefresh_Refresh"
                                     Command="{x:Bind ViewModel.RequestCacheRefreshCommand}"
                                     Content="Refresh cached data" />
@@ -1212,6 +1244,7 @@
                     Style="{ThemeResource SubtitleTextBlockStyle}" />
 
                 <muxc:Expander
+                    AutomationProperties.AutomationId="SettingsPage_AboutExpander"
                     Grid.Row="1"
                     x:Name="AboutExpander"
                     x:Load="{x:Bind ViewModel.IsAboutPanelVisible, Mode=OneWay}"

@@ -111,7 +111,7 @@ public sealed class WaitlistViewViewModelActionTests
         await viewModel.RefreshAsync().ConfigureAwait(false);
 
         var row = SingleRow(viewModel);
-        var offeredCommands = new[] { row.AcceptCommand, row.CompleteCommand, row.CancelCommand }
+        var offeredCommands = new[] { row.AcceptCommand, row.CompleteCommand, row.ReleaseCommand, row.CancelCommand }
             .Count(command => command is not null);
 
         Assert.AreEqual(
@@ -121,6 +121,7 @@ public sealed class WaitlistViewViewModelActionTests
 
         Assert.AreEqual(row.CanAccept, row.AcceptCommand is not null, "Accept flag and command disagree.");
         Assert.AreEqual(row.CanCompleteOrRelease, row.CompleteCommand is not null, "Complete flag and command disagree.");
+        Assert.AreEqual(row.CanCompleteOrRelease, row.ReleaseCommand is not null, "Give back flag and command disagree.");
         Assert.AreEqual(row.CanCancelRequest, row.CancelCommand is not null, "Cancel flag and command disagree.");
 
         // The card draws [primary][Cancel], where the primary is Accept while available and Complete once
@@ -147,6 +148,77 @@ public sealed class WaitlistViewViewModelActionTests
         Assert.IsNotNull(row.CancelCommand, "The Cancel button must carry a command when it is shown.");
     }
 
+    // ── The give-back surface (FR-047, superseding `action-contracts.md` C7's "Release — not drawn") ──
+
+    [TestMethod]
+    public async Task GiveBack_IsOfferedToTheAssigneeAndCarriesTheListsOwnReleaseCommand()
+    {
+        // The command is read off the view model rather than assumed by name: [RelayCommand] strips the
+        // trailing "Async" from ReleaseRequestAsync, so the generated member is ReleaseRequestCommand and a
+        // binding written against the other name would be a silent XAML failure (WMC9999).
+        var request = BuildRequest(TakenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
+        var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, new RecordingRequestService(request));
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+        var row = SingleRow(viewModel);
+
+        Assert.IsTrue(row.CanCompleteOrRelease, "The assignee must be offered Give back.");
+        Assert.IsNotNull(row.ReleaseCommand, "The Give back button must carry a command, or it cannot act.");
+        Assert.AreSame(
+            viewModel.ReleaseRequestCommand,
+            row.ReleaseCommand,
+            "The card must carry the list's own release command, by the name the generator actually produced.");
+        Assert.AreNotSame(
+            row.CompleteCommand,
+            row.ReleaseCommand,
+            "Give back and Complete are two different actions and must not share one command.");
+        Assert.IsFalse(
+            string.IsNullOrWhiteSpace(row.ReleaseActionText),
+            "Give back must be named from the row's localized action text, not from a literal.");
+    }
+
+    [TestMethod]
+    public async Task GiveBack_ReachesTheReleasePathOnceAsTheSignedInHandler()
+    {
+        var request = BuildRequest(TakenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
+        var service = new RecordingRequestService(request);
+        var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service);
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+        var row = SingleRow(viewModel);
+
+        await viewModel.ReleaseRequestCommand.ExecuteAsync(row).ConfigureAwait(false);
+
+        Assert.AreEqual(1, service.ReleaseCalls.Count, "Give back must reach the release path exactly once.");
+        Assert.AreEqual(TakenByViewerRequestId, service.ReleaseCalls[0].RequestId, "Give back targeted the wrong request.");
+        Assert.AreEqual(HandlerEmployeeNumber, service.ReleaseCalls[0].EmployeeNumber, "Give back must act as the signed-in handler.");
+        Assert.AreEqual(0, service.CompleteCalls.Count, "Give back must not complete the request.");
+    }
+
+    [TestMethod]
+    public async Task GiveBack_IsNotOfferedToAViewerTheGateExcludes()
+    {
+        // The card offers only what the service would allow: a handler looking at somebody else's claim, and a
+        // viewer who is not a handler at all, are both offered no Give back.
+        var takenByOther = BuildRequest(TakenByOtherRequestId, "Accepted", assignee: OtherHandlerEmployeeNumber, RequesterEmployeeNumber);
+        var otherViewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, new RecordingRequestService(takenByOther));
+
+        await otherViewModel.RefreshAsync().ConfigureAwait(false);
+        var otherRow = SingleRow(otherViewModel);
+
+        Assert.IsFalse(otherRow.CanCompleteOrRelease, "A request assigned to someone else offers no handler action.");
+        Assert.IsNull(otherRow.ReleaseCommand, "Give back was carried on a request the viewer does not own.");
+        Assert.AreEqual(string.Empty, otherRow.ReleaseActionText, "A control that is not shown must not be named either.");
+
+        var takenByViewer = BuildRequest(TakenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
+        var nonHandlerViewModel = BuildViewModel(NonHandlerRole, HandlerEmployeeNumber, new RecordingRequestService(takenByViewer));
+
+        await nonHandlerViewModel.RefreshAsync().ConfigureAwait(false);
+        var nonHandlerRow = SingleRow(nonHandlerViewModel);
+
+        Assert.IsNull(nonHandlerRow.ReleaseCommand, "A viewer who is not a handler must not be offered Give back.");
+    }
+
     // ── G5: the commands reach the service with the signed-in identity ───────────────────────────────
 
     [TestMethod]
@@ -165,7 +237,7 @@ public sealed class WaitlistViewViewModelActionTests
         Assert.AreEqual(TakenByViewerRequestId, service.CompleteCalls[0].RequestId, "Complete targeted the wrong request.");
         Assert.AreEqual(HandlerEmployeeNumber, service.CompleteCalls[0].EmployeeNumber, "Complete must act as the signed-in handler.");
 
-        Assert.AreEqual(0, service.ReleaseCalls.Count, "The card offers no Release button, so nothing may reach the release path.");
+        Assert.AreEqual(0, service.ReleaseCalls.Count, "Complete must not reach the release path; Give back is its own control (FR-047).");
     }
 
     [TestMethod]

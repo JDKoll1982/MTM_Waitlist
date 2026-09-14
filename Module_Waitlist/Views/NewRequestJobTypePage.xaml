@@ -37,6 +37,7 @@
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <GridView
+                    AutomationProperties.AutomationId="NewRequestJobTypePage_CategoryTiles"
                     x:Name="JobTypeGridView"
                     ItemsSource="{x:Bind ViewModel.Options, Mode=OneWay}"
                     IsItemClickEnabled="True"
@@ -52,6 +53,7 @@
                     <GridView.ItemTemplate>
                         <DataTemplate>
                             <Border
+                                AutomationProperties.Name="{Binding Name}"
                                 Width="150"
                                 Height="150"
                                 Margin="8"
@@ -97,6 +99,7 @@
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
             <Button
+                AutomationProperties.AutomationId="NewRequestJobTypePage_BackButton"
                 x:Uid="NewRequest_Category.BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}" />

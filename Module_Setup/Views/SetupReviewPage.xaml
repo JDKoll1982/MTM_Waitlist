@@ -20,8 +20,8 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TabView Grid.Row="0" IsAddTabButtonVisible="False">
-            <TabViewItem x:Uid="Setup_Review.Tab.JobContext" Header="Job Context">
+        <TabView AutomationProperties.AutomationId="SetupReviewPage_Tabs" Grid.Row="0" IsAddTabButtonVisible="False">
+            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_JobContextTab" x:Uid="Setup_Review.Tab.JobContext" Header="Job Context">
                 <Border Margin="0,8,0,0" Style="{StaticResource SetupSectionCardStyle}">
                     <Grid ColumnSpacing="16" RowSpacing="10">
                         <Grid.ColumnDefinitions>
@@ -43,12 +43,12 @@
                 </Border>
             </TabViewItem>
 
-            <TabViewItem x:Uid="Setup_Review.Tab.SubordinateParts" Header="Subordinate Parts">
+            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_SubordinatePartsTab" x:Uid="Setup_Review.Tab.SubordinateParts" Header="Subordinate Parts">
                 <ScrollViewer Margin="0,8,0,0">
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.SubordinatePartGroups, Mode=OneWay}">
+                    <ItemsControl AutomationProperties.AutomationId="SetupReviewPage_SubordinatePartsList" ItemsSource="{x:Bind ViewModel.SubordinatePartGroups, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="models:SetupSubordinatePartGroup">
-                                <Border Margin="0,0,0,12" Style="{StaticResource SetupSectionCardStyle}">
+                                <Border AutomationProperties.Name="{x:Bind CategoryDisplayName}" Margin="0,0,0,12" Style="{StaticResource SetupSectionCardStyle}">
                                     <StackPanel Spacing="10">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -61,7 +61,7 @@
                                         <ItemsControl ItemsSource="{x:Bind Parts}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="models:SetupSubordinatePart">
-                                                    <Grid Margin="0,0,0,8" ColumnSpacing="12">
+                                                    <Grid AutomationProperties.Name="{x:Bind PartNumber}" Margin="0,0,0,8" ColumnSpacing="12">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="2*" />
                                                             <ColumnDefinition Width="2*" />
@@ -92,14 +92,14 @@
                 </ScrollViewer>
             </TabViewItem>
 
-            <TabViewItem x:Uid="Setup_Review.Tab.DunnageAssignments" Header="Dunnage &amp; Scrap Assignments">
+            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_DunnageAssignmentsTab" x:Uid="Setup_Review.Tab.DunnageAssignments" Header="Dunnage &amp; Scrap Assignments">
                 <Border Margin="0,8,0,0" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="8">
                         <TextBlock x:Uid="Setup_Review.SelectedDunnageTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Selected Dunnage Summary" />
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.DunnageAssignmentDisplays, Mode=OneWay}">
+                        <ItemsControl AutomationProperties.AutomationId="SetupReviewPage_DunnageAssignmentsList" ItemsSource="{x:Bind ViewModel.DunnageAssignmentDisplays, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:SetupDunnageAssignmentDisplay">
-                                    <Grid Margin="0,0,0,10" ColumnSpacing="10">
+                                    <Grid AutomationProperties.Name="{x:Bind DisplayName}" Margin="0,0,0,10" ColumnSpacing="10">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
@@ -116,10 +116,10 @@
         </TabView>
 
         <StackPanel Grid.Row="1" Style="{StaticResource SetupActionBarStyle}">
-            <Button x:Uid="Setup_Action.Edit" Content="Edit" Command="{x:Bind ViewModel.EditCommand}" />
-            <Button x:Uid="Setup_Action.Confirm" Content="Confirm" Command="{x:Bind ViewModel.ConfirmCommand}" Visibility="{x:Bind ViewModel.ConfirmButtonVisibility, Mode=OneWay}" />
-            <Button x:Uid="Setup_Action.Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelReplacementCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
-            <Button x:Uid="Setup_Action.Replace" Content="Replace" Command="{x:Bind ViewModel.ReplaceCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_EditButton" x:Uid="Setup_Action.Edit" Content="Edit" Command="{x:Bind ViewModel.EditCommand}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_ConfirmButton" x:Uid="Setup_Action.Confirm" Content="Confirm" Command="{x:Bind ViewModel.ConfirmCommand}" Visibility="{x:Bind ViewModel.ConfirmButtonVisibility, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_CancelButton" x:Uid="Setup_Action.Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelReplacementCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_ReplaceButton" x:Uid="Setup_Action.Replace" Content="Replace" Command="{x:Bind ViewModel.ReplaceCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </Page>

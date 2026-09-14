@@ -49,7 +49,11 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
             HasDie: snapshot.Dies.Count > 0,
             HasComponent: snapshot.Components.Count > 0,
             HasDunnage: snapshot.DunnageParts.Count > 0,
-            HasScrapDecision: HasRealScrapDecision(snapshot));
+            HasScrapDecision: HasRealScrapDecision(snapshot))
+            // The job's own component list travels with the snapshot: an Item whose configuration declares an
+            // enumerated answer with no list of its own takes its choices from here (FR-035), which is how
+            // `pickup-component`'s details step can be completed at all.
+            .WithComponentPartNumbers(snapshot.Components.Select(component => component.PartNumber));
     }
 
     /// <summary>

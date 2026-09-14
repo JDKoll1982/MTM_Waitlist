@@ -199,6 +199,13 @@ public sealed class SampleOrder : INotifyPropertyChanged
     /// <summary>The list's Complete command, carried to the card through this row. Null when the gate is false.</summary>
     public ICommand? CompleteCommand { get; set; }
 
+    /// <summary>
+    /// The list's Give back command, carried to the card through this row. Null when the gate is false. It is the
+    /// same gate as Complete: handing a claimed request back is the assignee's other option, so the two are
+    /// offered together and never to anybody else (FR-047).
+    /// </summary>
+    public ICommand? ReleaseCommand { get; set; }
+
     /// <summary>The list's Cancel command, carried to the card through this row. Null when the gate is false.</summary>
     public ICommand? CancelCommand { get; set; }
 
@@ -216,16 +223,24 @@ public sealed class SampleOrder : INotifyPropertyChanged
     /// <summary>Localized accessible name for the Complete icon button; empty when the action is not offered.</summary>
     public string CompleteActionText { get; set; } = string.Empty;
 
+    /// <summary>Localized accessible name for the Give back icon button; empty when the action is not offered.</summary>
+    public string ReleaseActionText { get; set; } = string.Empty;
+
     /// <summary>Localized accessible name for the Cancel icon button; empty when the action is not offered.</summary>
     public string CancelActionText { get; set; } = string.Empty;
 
     /// <summary>
-    /// The number of buttons this row offers. The card draws [primary][Cancel], where the primary is Accept
-    /// while the request is available and becomes Complete once the viewer has claimed it — so Accept and
-    /// Complete are never both live.
+    /// The number of buttons this row offers — the one number the card's action area can be checked against, so
+    /// a gate flag with no control and a control with no gate are both visible at once.
     /// </summary>
+    /// <remarks>
+    /// The card draws [primary][Give back][Cancel]: the primary is Accept while the request is available and
+    /// becomes Complete once the viewer has claimed it — so Accept and Complete are never both live — and Complete
+    /// and Give back are both live exactly when the viewer is the assignee, which is why the claimed state
+    /// contributes two. Cancel accompanies a claim.
+    /// </remarks>
     public int OfferedActionCount =>
-        (CanAccept ? 1 : 0) + (CanCompleteOrRelease ? 1 : 0) + (CanCancelRequest ? 1 : 0);
+        (CanAccept ? 1 : 0) + (CanCompleteOrRelease ? 2 : 0) + (CanCancelRequest ? 1 : 0);
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;

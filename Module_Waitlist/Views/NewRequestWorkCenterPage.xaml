@@ -134,10 +134,12 @@
             <TextBlock Style="{StaticResource SetupPageTitleStyle}" Text="Select Work Center" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkstationName, Mode=OneWay}" />
             <TextBox
+                AutomationProperties.AutomationId="NewRequestWorkCenterPage_SearchBox"
                 Header="Search"
                 PlaceholderText="Search by work center, work order, sequence, or part number"
                 Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <ComboBox
+                AutomationProperties.AutomationId="NewRequestWorkCenterPage_BuildingCombo"
                 Header="Building"
                 ItemsSource="{x:Bind ViewModel.Buildings, Mode=OneWay}"
                 SelectedItem="{x:Bind ViewModel.SelectedBuilding, Mode=TwoWay}" />
@@ -168,6 +170,7 @@
                     <StackPanel Spacing="12">
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="Local Work Centers" />
                         <GridView
+                            AutomationProperties.AutomationId="NewRequestWorkCenterPage_WorkCenterTiles"
                             x:Name="HotWorkCentersGridView"
                             HorizontalContentAlignment="Stretch"
                             ItemsSource="{x:Bind ViewModel.HotWorkCenters, Mode=OneWay}"
@@ -189,6 +192,7 @@
                 </Border>
 
                 <Expander
+                    AutomationProperties.AutomationId="NewRequestWorkCenterPage_OtherWorkCentersExpander"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
                     IsExpanded="{x:Bind ViewModel.IsOtherWorkCentersExpanded, Mode=TwoWay}">
@@ -199,6 +203,7 @@
                     </Expander.Header>
                     <StackPanel Spacing="12" Margin="0,12,0,0">
                         <GridView
+                            AutomationProperties.AutomationId="NewRequestWorkCenterPage_OtherWorkCenterTiles"
                             x:Name="OtherWorkCentersGridView"
                             HorizontalContentAlignment="Stretch"
                             ItemsSource="{x:Bind ViewModel.OtherWorkCenters, Mode=OneWay}"
@@ -223,6 +228,7 @@
 
         <StackPanel Grid.Row="3" Style="{StaticResource SetupActionBarStyle}">
             <Button
+                AutomationProperties.AutomationId="NewRequestWorkCenterPage_CancelButton"
                 Content="Cancel"
                 Command="{x:Bind ViewModel.CancelCommand}"
                 Style="{StaticResource AccentButtonStyle}" />

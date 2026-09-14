@@ -52,6 +52,8 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<ILocalSettingsService, MTM_Waitlist.Module_Settings.Services.LocalSettingsService>();
         services.AddSingleton<IIgnoredLocationsService, MTM_Waitlist.Module_Core.Services.IgnoredLocationsService>();
         services.AddSingleton<IStartupRecoveryService, MTM_Waitlist.Module_Startup.Services.StartupRecoveryService>();
+        services.AddSingleton<IAppProcessRestarter, MTM_Waitlist.Module_Startup.Services.AppProcessRestarter>();
+        services.AddSingleton<ISignOutService, MTM_Waitlist.Module_Startup.Services.SignOutService>();
         services.AddSingleton<IStartupRegistrationService, MTM_Waitlist.Module_Startup.Services.StartupRegistrationService>();
         services.AddSingleton<IStartupSessionRepository, MTM_Waitlist.Module_Startup.Services.StartupSessionRepository>();
         services.AddSingleton<IComputerRegistryService, MTM_Waitlist.Module_Startup.Services.ComputerRegistryService>();
@@ -107,6 +109,12 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<MySqlHelperServer>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMySqlHelperServer>(
             sp => sp.GetRequiredService<MySqlHelperServer>());
+
+        // The account records, read by the employee identifier the signed-in session carries. The request flow
+        // attributes a request from this lookup rather than from a name or a literal (FR-046).
+        services.AddSingleton<
+            MTM_Waitlist.Module_Core.Contracts.Services.IEmployeeDirectoryService,
+            MTM_Waitlist.Module_Waitlist.Services.EmployeeDirectoryService>();
 
         // Infor Visual read fallback: the reachability detector and the five shape fallbacks, so every
         // Visual read is attempted live and transparently falls back to the mtm_mock mirror only when
