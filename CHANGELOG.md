@@ -10,6 +10,23 @@
 
 ---
 
+## 2026-09-13 — no more waiting when Infor Visual is down
+
+**What changed:** when the plant's Infor Visual system cannot be reached, the app now works that out *before*
+the main screen appears — the startup screen settles it — instead of rediscovering it on your first lookup.
+Work-order searches and the other lookups that use Infor Visual answer from the locally held copy immediately.
+
+**Why it matters:** after opening the app, the first lookup used to pause for around twelve seconds while the
+app waited to see whether Infor Visual would answer, with nothing on screen to explain the wait. It is now
+effectively instant, and the app no longer records a failed connection every time it looks something up during
+an outage.
+
+**What to expect:** while Infor Visual is down you are given the locally held copy of the data, exactly as
+before, and the "Cached data in use" notice still tells you so. Once Infor Visual is reachable again the app
+notices within a few minutes and returns to live data — the next lookup after that is live.
+
+---
+
 ## What's new for you
 
 ### 1. Computer registration on first launch (First-Load Gate)

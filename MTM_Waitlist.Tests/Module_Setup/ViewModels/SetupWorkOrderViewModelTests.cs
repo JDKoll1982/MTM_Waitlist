@@ -68,6 +68,40 @@ public sealed class SetupWorkOrderViewModelTests
         Assert.IsTrue(viewModel.IsIdle, "The screen is released once the lookup returns.");
     }
 
+    [TestMethod]
+    public async Task ACommandThatOutlivesItsView_DoesNotNotifyBoundMembers()
+    {
+        var workflow = new RecordingSetupWorkflowService();
+        var release = new TaskCompletionSource();
+        workflow.BeforeSearchReturns = () => release.Task;
+        var viewModel = new SetupWorkOrderViewModel(
+            new NoOpNavigationService(),
+            workflow,
+            new WorkOrderValidationService());
+        var notified = new List<string?>();
+        viewModel.PropertyChanged += (_, e) => notified.Add(e.PropertyName);
+        viewModel.WorkOrderInput = "55691";
+
+        var running = viewModel.SearchCommand.ExecuteAsync(null);
+
+        // The window closes while the read is still in flight; the continuation then runs against a XAML tree
+        // that has been torn down, where writing a bound member throws E_UNEXPECTED out of the notification.
+        // Only what is raised from here on is the subject: going busy was announced while the view was alive.
+        viewModel.NotifyViewClosing();
+        notified.Clear();
+        release.SetResult();
+        await running;
+
+        CollectionAssert.DoesNotContain(
+            notified,
+            nameof(SetupWorkOrderViewModel.IsBusy),
+            "IsBusy drives a bound Control, so notifying a closed view writes into a torn-down tree.");
+        CollectionAssert.DoesNotContain(
+            notified,
+            "IsIdle",
+            "IsIdle is what the Search action binds, so it must not reach a closed view either.");
+    }
+
     private static (SetupWorkOrderViewModel ViewModel, RecordingSetupWorkflowService Workflow) CreateViewModel()
     {
         var workflow = new RecordingSetupWorkflowService();
@@ -88,15 +122,24 @@ public sealed class SetupWorkOrderViewModelTests
         /// <summary>Runs while the lookup is in flight, so a test can read the screen's state at that moment.</summary>
         public Action? DuringSearch { get; set; }
 
+        /// <summary>Lets a test hold the lookup open, so a command can be observed outliving its view.</summary>
+        public Func<Task>? BeforeSearchReturns { get; set; }
+
         public bool HasUnsavedChanges => State.HasUnsavedChanges;
 
         public Task ResetAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-        public Task<SetupLookupResult> SearchWorkOrderAsync(string workOrderInput, CancellationToken cancellationToken = default)
+        public async Task<SetupLookupResult> SearchWorkOrderAsync(string workOrderInput, CancellationToken cancellationToken = default)
         {
             InputReceived = workOrderInput;
             DuringSearch?.Invoke();
-            return Task.FromResult(new SetupLookupResult { Success = true });
+
+            if (BeforeSearchReturns is not null)
+            {
+                await BeforeSearchReturns().ConfigureAwait(false);
+            }
+
+            return new SetupLookupResult { Success = true };
         }
 
         public Task<SetupSelectionResult> SelectPartAsync(string partNumber, CancellationToken cancellationToken = default) =>

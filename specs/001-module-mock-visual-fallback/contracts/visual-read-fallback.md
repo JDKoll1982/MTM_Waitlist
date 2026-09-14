@@ -28,6 +28,7 @@ public interface IVisualReachabilityDetector
 | Non-manual | No public API sets the state; it is derived only from probe results (FR-003) |
 | Cost | Probing is a lightweight connectivity check (a connection/health round-trip only — it never executes a read shape and returns no rows) |
 | Scheduling | Probing is app-owned. The application **never** performs a scheduled *refresh* (FR-025) |
+| Priming | The application settles the verdict once at startup (`IVisualVerdictPrimer.PrimeAsync`) so it is known before the shell activates. This is probing, not refreshing: it reads no shape and fills no mirror (FR-025) |
 
 ## 2. Fallback read contract (one seam per read shape)
 
@@ -41,7 +42,10 @@ public interface IVisualReadFallback<TRequest, TRow>
 
 **Algorithm — identical for all five shapes (FR-024):**
 
-1. Attempt the **live** Visual read through the shape's existing executor and script.
+0. If the reachability probe's verdict is **`Cached`**, skip step 1 and read the mirror directly (§2a). The
+   verdict is a fact the probe has already established; re-establishing it on every read costs a connect timeout
+   per read and can only reach the same answer.
+1. Otherwise attempt the **live** Visual read through the shape's existing executor and script.
 2. On **unreachability** (connectivity failure, timeout, login failure) → read the mirror via
    `sp_visual_<shape>_get` and return those rows.
 3. On a **successful** live read → return exactly those rows, **including when the result set is empty**. An empty
@@ -49,6 +53,17 @@ public interface IVisualReadFallback<TRequest, TRow>
 4. On any other live error (for example a genuine query error against a reachable server) → **surface the error**;
    do not silently substitute cache. Only *unreachability* triggers fallback (FR-002).
 5. Never write to Visual (spec non-goal NG2).
+
+### 2a. The settled verdict (added 2026-09-13)
+
+| Rule | Requirement |
+|---|---|
+| Short-circuit | While `IVisualReachabilityDetector.Current == VisualReadStatus.Cached`, a read MUST go to the mirror **without attempting** the live source |
+| Source of truth | The verdict MUST come from the probe. A read MUST NOT treat **its own** failure as proof of unreachability |
+| Recovery | The probe owns recovery: a single successful probe returns the verdict to `Live`, and the **very next read** MUST attempt the live source again |
+| Staleness bound | Recovery is therefore noticed at the next probe rather than the next read; worst-case staleness is one probe interval (`CachedProbeInterval`, 5 minutes) |
+| Priming | `IVisualVerdictPrimer.PrimeAsync` settles the verdict during startup, **before the shell activates**, so the first read of a session is not the one that discovers an outage. It MUST NOT throw |
+| No verdict | With no detector installed a read behaves exactly as it did before this section existed |
 
 **Structural identity (FR-004, SC-004):** the caller receives the same row type, the same column set, and the same
 ordering rules whichever source answered. `ReadWithProvenanceAsync` is available *only* to the status surface; it

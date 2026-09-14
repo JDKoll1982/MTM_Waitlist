@@ -80,9 +80,12 @@ For this repository, prioritize MCP-backed validation for:
   reported as a per-screen unavailable state (`Store`/`LastAttemptUtc`/`RetryCount`/`NextRetryUtc` + a manual
   retry), never substituted with sample rows and never turned into a persistent banner (FR-001, FR-021).
 - **External reads fall back automatically, never on request.** Only Infor Visual reads use the cache: the five
-  read shapes are resolved through `MTM_Waitlist.Mock` (`IVisualReadFallback<TRequest,TRow>`), which attempts the
-  live Visual query and, on *unreachability only*, serves `sp_visual_<shape>_get` from the `mtm_mock` mirror with
-  an identical result shape (FR-002/FR-004). A reachable-but-empty live result is a real answer and is never
+  read shapes are resolved through `MTM_Waitlist.Mock` (`IVisualReadFallback<TRequest,TRow>`), which serves
+  `sp_visual_<shape>_get` from the `mtm_mock` mirror with an identical result shape (FR-002/FR-004) when the
+  reachability probe's **settled verdict** is `Cached` (it skips the live attempt entirely, and the verdict is
+  established during startup so the shell never opens mid-decision) or when a live attempt finds the source
+  **unreachable**. The verdict is the probe's, never the read's own failure; one successful probe returns it to
+  `Live` and the next read goes live again. A **reachable-but-empty** live result is a real answer and is never
   replaced by cached data. The cache is never consulted for an internal-store read (FR-027).
 - **The application never refreshes the cache.** Keeping the mirror warm is the on-host
   `MTM_Waitlist.Mock.Service`'s job (3-hour default cadence on the local-midnight grid). The app only *probes*

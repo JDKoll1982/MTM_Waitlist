@@ -3386,3 +3386,58 @@ supersession pointer so a reader lands on this phase instead of a stale verdict.
 **Still true, and not a task:** T173's fix is verified in one direction only — the indicator was observed *opening* on
 the cached transition. Its **recovery** path (closing again on return to `Live`) still needs Infor Visual to become
 reachable from the machine running the app, so it remains unverified and is recorded as such in Phase 38.
+
+---
+
+## Phase 39 — the settled verdict is reused, and settled during startup (2026-09-13, operator-directed)
+
+> Appended at the operator's direction: *"Yes do this app wide, if verdict is Cached then skip the live attempt,
+> make sure that no queues still try visual first if Cached is the verdict"* and *"update the startup process to set
+> the verdict on the splash screen so once main window is active the ui is not lagging"*. No earlier task ID or
+> phase text was modified.
+
+### T174 — every read re-established a fact the probe already knew
+
+- [x] T174 (**DONE 2026-09-13** — see below) The read path attempted Infor Visual on **every** read and only fell back
+  when that attempt failed, so an outage cost a connect timeout per read even though
+  `VisualReachabilityDetector` had already settled the verdict. Verified app-wide: all five read shapes route through
+  `VisualReadFallback<TRequest,TRow>.ReadWithProvenanceAsync` (consumers `SetupLookupService`,
+  `WaitlistInventoryService`, `RequestDispositionResolver`), so the rule lives in one place by construction. The
+  legacy `InforVisualSqlQueryService` executors are still registered but have no production caller.
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| A lookup took ~12 s during an outage | `VisualQueryExecutor` opened the connection without bounding the connect attempt, inheriting the configured 10 s timeout while the probe bounded the same question to 2 s | `VisualQueryExecutor.BoundConnectAttempt` applies `Math.Min(configured, VisualConnectivityProbe.ProbeConnectTimeoutSeconds)` — the bound is shared with the probe so the two cannot drift |
+| The verdict was re-derived on every read | `VisualReadFallback` never consulted `IVisualReachabilityDetector` | The shared algorithm skips the live attempt while the verdict is `Cached` and reads the mirror directly (contract §2a) |
+| The shell opened while the verdict was still `Unknown` | Hysteresis needs 2 consecutive failures and the live probe interval is 30 s, so the second failure landed long after the shell was accepting input | `IVisualVerdictPrimer.PrimeAsync` (implemented by the probe host) runs back-to-back probes until the verdict settles; `SplashViewModel` starts it alongside the startup coordinator and awaits both before the shell activates |
+
+**Hysteresis and recovery are untouched.** The threshold is read from
+`VisualReachabilityDetector.FailuresBeforeCached` rather than restated; a read never treats **its own** failure as
+proof of unreachability; and one successful probe returns the verdict to `Live`, after which the very next read goes
+live again. The cost is bounded and stated rather than hidden: recovery is noticed at the next probe, so worst-case
+staleness is one `CachedProbeInterval` (5 minutes). **FR-024 and contract §2 were amended in the same change** to say
+so; the constitution needed no amendment, because Principle II permits the cached copy "only through the automatic
+cached fallback when it is unreachable" and this remains automatic and unreachability-driven — it is memoised, not
+manual.
+
+**Deliberately excluded from the short-circuit:** `MTM_Waitlist.Mock.Service`'s `VisualShapePayloadSource` is the
+on-host **refresher** and must always attempt Visual, because it is what fills the mirror; `VisualConnectivityProbe`
+is the **rechecker** and stays the only thing that establishes or clears the verdict.
+
+### Verified
+
+| Gate | Result |
+|---|---|
+| `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` | **0 Warning(s) 0 Error(s)** |
+| `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` | **Failed: 0, Passed: 1010, Skipped: 27, Total: 1037** |
+| The lookup that originally took 12.5 s | **12.51 s → 2.70 s** (connect bound) **→ 6 ms** (verdict short-circuit) |
+| The verdict is settled before the shell | One run: probe fails `23:03:23.572`, second probe `23:03:24.607`, `Startup priming settled the Infor Visual verdict as Cached.` `23:03:24.622`, `Splash window closed` `23:03:24.797` |
+| No read path still attempts Visual when `Cached` | The lookup logged **no** `[VisualQuery]` line at all and went straight to `sp_visual_work_order_lookup_get` |
+| Error count | Startup **41 entries, 41 INFO, 0 ERROR**; the read session **66 entries, 66 INFO, 0 ERROR** |
+| Pre-fix failure recorded | With the bound removed the new end-to-end bound test took the full 30 s configured timeout (error 258) and failed |
+
+**Not covered by the suite, read from the log instead:** whether priming extends the splash. It did not — the splash
+was up 3.02 s, priming ran concurrently with the startup coordinator, and the second probe failed in 0 ms.
+
+**Also brought into line in the same change:** `contracts/visual-read-fallback.md` (§1 priming row, §2 algorithm step
+0, new §2a), `spec.md` FR-024, `.github/copilot-instructions.md`, and `README.md`.

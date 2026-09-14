@@ -85,6 +85,25 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
 
     partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(IsIdle));
 
+    /// <summary>
+    /// Clears the busy flag, but only while this view still exists.
+    /// </summary>
+    /// <remarks>
+    /// A command can outlive its page: the window may close while a read is still in flight, and the
+    /// continuation then runs against a XAML tree that has already been torn down. Raising a change
+    /// notification at that moment writes a bound member through <c>x:Bind</c> and throws
+    /// <c>E_UNEXPECTED</c> (0x8000FFFF) — which is how an ordinary shutdown produced a logged first-chance
+    /// COMException, from <c>SelectSequenceAsync</c>'s <c>finally</c>. A closed view has no busy state to
+    /// show, and the next navigation resolves a fresh view model, so the flag is simply left as it was.
+    /// </remarks>
+    private void ClearBusyIfViewIsLive()
+    {
+        if (!_isClosing && !_lifecycleCts.IsCancellationRequested)
+        {
+            IsBusy = false;
+        }
+    }
+
     public string SelectedPartDisplay => string.IsNullOrWhiteSpace(State.SelectedPartNumber)
         ? LocalizeOrDefault("Setup_Common.None", "None")
         : State.SelectedPartNumber;
@@ -194,7 +213,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
         }
         finally
         {
-            IsBusy = false;
+            ClearBusyIfViewIsLive();
             _searchGate.Release();
         }
     }
@@ -241,7 +260,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
         }
         finally
         {
-            IsBusy = false;
+            ClearBusyIfViewIsLive();
         }
     }
 
@@ -271,7 +290,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
         }
         finally
         {
-            IsBusy = false;
+            ClearBusyIfViewIsLive();
         }
     }
 
