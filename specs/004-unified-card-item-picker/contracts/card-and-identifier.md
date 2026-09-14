@@ -26,7 +26,9 @@ appear on the card (FR-007).
 
 ## 2. Line 1 — the umbrella phrase
 
-The Category's own word, or an Item-specific phrase where the Item defines one (FR-005).
+The Category's own word, or an Item-specific phrase where the Item defines one (FR-005). An Item may declare a
+**Line 1 template** instead of a bare phrase, so its first line can name the job value the request is about; the
+phrase is then the template's `{umbrella}` token and its fallback.
 
 | Category | Default Line 1 |
 |---|---|
@@ -44,6 +46,14 @@ The Category's own word, or an Item-specific phrase where the Item defines one (
 
 These are the Item's own first line, not the plain Category word.
 
+**Two Items add a job value to that phrase (FR-053).** `pickup-die` and `deliver-die` declare the Line 1 template
+`{umbrella} {job_part_number}`, so their cards read `Pickup Die: PART-9003` / `Deliver Die: PART-9003` — the part
+the die is assigned to. The phrase itself stays `Pickup Die:` / `Deliver Die:` and is what the line degrades to when
+the job value cannot be resolved, so a first line always says what kind of request it is.
+
+**The Line 1 token set** is the identifier's token set plus `{umbrella}` — the Item's own phrase. Nothing else is
+added, and an Item that declares no Line 1 template resolves to its phrase exactly as before.
+
 ## 3. Line 2 — the identifier
 
 A fixed value, a value read from the job, or a value that depends on an answer captured during the flow (FR-005).
@@ -57,11 +67,25 @@ A fixed value, a value read from the job, or a value that depends on an answer c
 **The die's rule, verbatim.** `Home Location` is the value that switches the second line from the die's number to
 the die's location. The three destination options are `Die Shop`, `Home Location`, `Other`.
 
+> **Superseded 2026-09-14 (FR-053).** The die Items' identifiers are now `{die_number}-{die_location}` — the die's
+own `FGT` number and where the die is, both always, e.g. `FGT0002000-DIE SHOP`. The destination question is still
+asked and still stored, but it no longer shapes the card, so **no shipped row uses the conditional syntax any
+more**. The resolver still supports it, and `Home Location` remains a valid destination answer.
+
 **Token set.** Line 2 is written as a `{token}` template on the Item's catalog row. Job-derived tokens:
 `{part_number}`, `{part_description}`, `{die_number}`, `{die_location}`, `{dunnage_part}`, `{sequence_number}`,
-`{scrap_type}`. Captured tokens: `{answer}`, `{destination}`, `{component}`, `{defect}`. An unresolvable token
-renders the Item's own display name and reports the configuration problem — never a blank, never a fabricated
-value.
+`{scrap_type}`, `{job_part_number}`. Captured tokens: `{answer}`, `{destination}`, `{component}`, `{defect}`. An
+unresolvable token renders the Item's own display name and reports the configuration problem — never a blank, never
+a fabricated value.
+
+**`{job_part_number}` is the job's own part number**, not a subordinate's. It exists because `{part_number}` means
+the *subordinate's* number for the coil and flatstock Items, so a die's "which part is this die for" value must not
+borrow it (FR-053).
+
+**`{dunnage_part}` is the captured answer.** The dunnage Items ask which dunnage the operator needs (FR-048), so
+their identifier is the part that answer carries: one the job had assigned, or the substitute the operator picked.
+The request stores that part as its one answer like any other, and the card reads it back through the template —
+the stored request cannot tell an assigned part from a substitute, and does not need to (FR-049, FR-051).
 
 **The real material identifiers stay deferred.** The coil or part number, quantity and stock location remain the
 property of the later item-resolution work, so the card shows only what a request truthfully carries.

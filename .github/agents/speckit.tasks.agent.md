@@ -11,6 +11,40 @@ handoffs:
     send: true
 ---
 
+<!-- speckit-companion:part communication -->
+## How to talk to the person — plain English, end-user facing
+
+Constitution Principle VII governs this reply. It applies to the **chat channel only** — files and
+artifacts are unaffected. The working detail is `.github/instructions/response-format.instructions.md`.
+
+- **Plain English, end-user facing.** Say what changed and what it means, in ordinary words. No jargon
+  walls, no acronyms that were never defined, no narration of your own reasoning, and never recap the
+  request back to the person.
+- **Never paste raw material.** No tool output, terminal transcripts, JSON, stack traces, file dumps,
+  diffs, or whole artifact bodies. If one line matters, quote that one line.
+- **One short line per step.** Report progress as single sentences. Never paste the task list, never
+  announce a command before running it, never repeat a step already reported.
+- **Fences must render.** A fence starts at **column 0**: a fence indented by four or more spaces, or
+  placed inside a list item, becomes a literal code block and garbles everything after it (GFM,
+  "Indented Code Block (4 Spaces)"). If the content contains a fence, wrap it in a **longer** backtick run
+  than the inner one. Never print a sample block that was only a template for a file you are writing.
+- **No machine directives in chat** unless the host needs them to run a step.
+- **The last section is what the person must do**, headed exactly `## What you need to do`, as a short
+  numbered list in the order they should do it. Nothing to do → end with the single line
+  `Nothing needed from you.` Never bury an action in the middle of the reply.
+<!-- /speckit-companion:part communication -->
+
+<!-- speckit-companion:part scripts -->
+## Run this repo's scripts with the right interpreter
+
+- **PowerShell spec-kit scripts:** every `.specify/scripts/powershell/*.ps1` invocation needs
+  `-ExecutionPolicy Bypass`, because this machine reports `Undefined` at every execution-policy scope and
+  otherwise fails with "running scripts is disabled on this system" before any logic runs.
+- **Python scripts:** use `python` or `py`, **never `python3`** — on Windows `python3` is a Microsoft
+  Store app-execution alias, not an interpreter, and it answers "Python was not found". Retry a failing
+  interpreter at most once and never paste its failure text into the chat.
+<!-- /speckit-companion:part scripts -->
+
 ## User Input
 
 ```text

@@ -45,7 +45,9 @@ public sealed class RequestItemCatalogTests
     [TestMethod]
     public void Catalog_UmbrellaVerb_MapsToCategory()
     {
-        Assert.AreEqual("Pickup", RequestItemCatalog.FindById("pickup-die")!.UmbrellaVerb);
+        // The die Items are the exception the catalog declares for themselves: their first line names the thing
+        // being moved rather than the bare Category word (FR-053).
+        Assert.AreEqual("Pickup", RequestItemCatalog.FindById("pickup-coil")!.UmbrellaVerb);
         Assert.AreEqual("Deliver", RequestItemCatalog.FindById("deliver-coil")!.UmbrellaVerb);
         Assert.AreEqual("Assist", RequestItemCatalog.FindById("assist-coil-turn")!.UmbrellaVerb);
         Assert.AreEqual("Other", RequestItemCatalog.FindById("other")!.UmbrellaVerb);
@@ -63,9 +65,11 @@ public sealed class RequestItemCatalogTests
     public void Catalog_UmbrellaVerb_OverridesTheWrongMaterialItems()
     {
         // The two wrong-material Items carry their own first line, pinned verbatim, rather than the
-        // plain Category word (contract §2, FR-029).
+        // plain Category word (contract §2, FR-029); the die Items do the same (FR-053).
         Assert.AreEqual("Wrong Coil Bring:", RequestItemCatalog.FindById("deliver-wrong-coil")!.UmbrellaVerb);
         Assert.AreEqual("Wrong Flatstock Bring:", RequestItemCatalog.FindById("deliver-wrong-flatstock")!.UmbrellaVerb);
+        Assert.AreEqual("Pickup Die:", RequestItemCatalog.FindById("pickup-die")!.UmbrellaVerb);
+        Assert.AreEqual("Deliver Die:", RequestItemCatalog.FindById("deliver-die")!.UmbrellaVerb);
         Assert.AreEqual("Deliver", RequestItemCatalog.FindById("deliver-coil")!.UmbrellaVerb);
     }
 
@@ -85,11 +89,18 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
-    public void Catalog_CardLine2Template_EncodesTheDiesHomeLocationConditional()
+    public void Catalog_DieItems_DeclareTheirOwnTwoLines()
     {
-        // The only conditional in the language: the die's location when the captured destination is
-        // Home Location, otherwise the die's number (contract §3).
-        var die = RequestItemCatalog.FindById("pickup-die")!;
-        Assert.AreEqual("{die_number:die_location=Home Location}", die.CardLine2Template);
+        // Superseded 2026-09-14 (FR-053). The identifier used to be the language's one conditional — the die's
+        // location at Home Location, otherwise its number. Both lines now carry what the handler needs in one
+        // read: which job part the die is for, then the die's own number and where the die is. Nothing in the
+        // shipped catalog uses the conditional syntax any more; the resolver still supports it.
+        foreach (var itemId in new[] { "pickup-die", "deliver-die" })
+        {
+            var die = RequestItemCatalog.FindById(itemId)!;
+
+            Assert.AreEqual("{die}", die.CardLine2Template, $"{itemId}'s identifier is the die and its location, composed as one value.");
+            Assert.AreEqual("{umbrella} {job_part_number}", die.CardLine1Template, $"{itemId}'s first line names the part the die is assigned to.");
+        }
     }
 }

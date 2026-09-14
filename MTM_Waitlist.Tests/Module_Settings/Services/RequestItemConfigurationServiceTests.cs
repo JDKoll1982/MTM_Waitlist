@@ -361,7 +361,117 @@ public sealed class RequestItemConfigurationServiceTests
         Assert.IsFalse(configuration.IsAvailable, "The Item has no row, so it is unavailable.");
     }
 
+    // ── Which job list an enumerated answer names (FR-035, FR-050) ─────────────────────────────────────
+
+    [TestMethod]
+    public async Task GetConfigurationsAsync_AnAnswerNamingTheDunnageList_TakesTheJobsAssignedDunnageParts()
+    {
+        var set = await ReadAsync(Row(
+            "pickup-dunnage",
+            answerValueType: "enum",
+            requiresAnswer: "1",
+            detailFieldsJson: DetailFieldsWithList(("Dunnage part", "enum", "answer", "dunnage", 1, true))));
+
+        var job = RequestJobPartAvailability.None with { HasActiveJob = true, HasDunnage = true };
+        job = job.WithDunnageParts(new[]
+        {
+            new RequestDunnagePart { PartNumber = "DN-STL-4", DisplayName = "Steel Rack" },
+            new RequestDunnagePart { PartNumber = "DN-BOX-2", DisplayName = "Boxes" },
+        });
+
+        CollectionAssert.AreEqual(
+            new[] { "DN-STL-4", "DN-BOX-2" },
+            RequestItemAnswerOptionsResolver.Resolve(set.Get("pickup-dunnage"), job).ToArray(),
+            "A field naming the dunnage list takes the parts assigned to the job, in the job's order (FR-050).");
+        Assert.AreEqual(
+            RequestItemFieldDefinition.Lists.Dunnage,
+            RequestItemAnswerOptionsResolver.DeclaredJobListName(set.Get("pickup-dunnage")),
+            "The flow reads which step asks for the answer from the row, never from the Item's code (FR-013).");
+    }
+
+    [TestMethod]
+    public async Task GetConfigurationsAsync_AnAnswerNamingTheComponentList_TakesTheJobsComponents()
+    {
+        // The same mechanism read the other way: naming the list is what decides, so the two Items cannot be told
+        // apart by anything but their rows (FR-013).
+        var set = await ReadAsync(Row(
+            CataloguedItem,
+            answerValueType: "enum",
+            requiresAnswer: "1",
+            detailFieldsJson: DetailFieldsWithList(("Component", "enum", "answer", "component", 1, true))));
+
+        var job = RequestJobPartAvailability.None with { HasActiveJob = true, HasComponent = true, HasDunnage = true };
+        job = job
+            .WithComponentPartNumbers(new[] { "CMP0004455" })
+            .WithDunnageParts(new[] { new RequestDunnagePart { PartNumber = "DN-STL-4" } });
+
+        CollectionAssert.AreEqual(
+            new[] { "CMP0004455" },
+            RequestItemAnswerOptionsResolver.Resolve(set.Get(CataloguedItem), job).ToArray(),
+            "A field naming the component list takes the job's components, not the job's dunnage.");
+    }
+
+    [TestMethod]
+    public async Task GetConfigurationsAsync_AListNameNothingSupplies_YieldsNoChoicesRatherThanAPlausibleList()
+    {
+        var set = await ReadAsync(Row(
+            CataloguedItem,
+            answerValueType: "enum",
+            requiresAnswer: "1",
+            detailFieldsJson: DetailFieldsWithList(("Something", "enum", "answer", "no-such-list", 1, true))));
+
+        var job = RequestJobPartAvailability.None with { HasActiveJob = true, HasComponent = true, HasDunnage = true };
+        job = job
+            .WithComponentPartNumbers(new[] { "CMP0004455" })
+            .WithDunnageParts(new[] { new RequestDunnagePart { PartNumber = "DN-STL-4" } });
+
+        Assert.AreEqual(
+            0,
+            RequestItemAnswerOptionsResolver.Resolve(set.Get(CataloguedItem), job).Count,
+            "A list name nothing supplies yields no choices, and the screen reports that rather than filling one in (FR-026, FR-035).");
+    }
+
+    [TestMethod]
+    public void ShippedConfigurationSeed_BothDunnageRows_AskForTheJobsDunnageList()
+    {
+        // The mechanism above is only worth having while the shipped rows use it: both dunnage Items ask for an
+        // answer, name the job's dunnage list, and carry no options_json of their own (FR-048, FR-050).
+        var seed = File.ReadAllText(Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Database",
+            "Seeds",
+            "seed_waitlist_request_item_configs",
+            "create.sql"));
+
+        foreach (var itemCode in new[] { "pickup-dunnage", "deliver-dunnage" })
+        {
+            var row = SeedRow(seed, itemCode);
+
+            Assert.IsTrue(
+                row.Contains(", 1, 'enum',", StringComparison.Ordinal),
+                $"{itemCode} must declare that it asks for an answer of a choice kind (FR-048).");
+            Assert.IsTrue(
+                row.Contains("'value_type','enum','source','answer','list','dunnage'", StringComparison.Ordinal),
+                $"{itemCode} must name the job's dunnage list on its answer field (FR-050).");
+        }
+    }
+
     // ── Fixtures ───────────────────────────────────────────────────────────────────────────────────────
+
+    /// <summary>The shipped INSERT row for one Item, from its Item code to the next row.</summary>
+    private static string SeedRow(string seedText, string itemCode)
+    {
+        var start = seedText.IndexOf("'" + itemCode + "'", StringComparison.Ordinal);
+        Assert.IsTrue(start >= 0, $"The shipped configuration seed no longer carries a row for {itemCode}.");
+
+        var end = seedText.IndexOf("),\n\n--", start, StringComparison.Ordinal);
+        if (end < 0)
+        {
+            end = Math.Min(seedText.Length, start + 2000);
+        }
+
+        return seedText[start..end];
+    }
 
     /// <summary>Builds a <c>detail_fields_json</c> payload out of the declared fields this test declares.</summary>
     private static string DetailFields(params (string Label, string ValueType, string Source, int Order, bool IsRequired)[] fields)
@@ -370,6 +480,21 @@ public sealed class RequestItemConfigurationServiceTests
             ["label"] = field.Label,
             ["value_type"] = field.ValueType,
             ["source"] = field.Source,
+            ["order"] = field.Order,
+            ["is_required"] = field.IsRequired,
+        }));
+
+    /// <summary>
+    /// The same payload with the optional <c>list</c> key, which names the job-derived list a field's choices
+    /// come from (FR-050).
+    /// </summary>
+    private static string DetailFieldsWithList(params (string Label, string ValueType, string Source, string? List, int Order, bool IsRequired)[] fields)
+        => JsonSerializer.Serialize(fields.Select(field => new Dictionary<string, object?>
+        {
+            ["label"] = field.Label,
+            ["value_type"] = field.ValueType,
+            ["source"] = field.Source,
+            ["list"] = field.List,
             ["order"] = field.Order,
             ["is_required"] = field.IsRequired,
         }));

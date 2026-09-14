@@ -795,7 +795,7 @@ public sealed class WaitlistRequestServiceTests
         Assert.AreEqual(
             0,
             new[] { forklift, flatstock, other, pickupOther }
-                .Select(WaitlistViewViewModel.CreateSessionOrder)
+                .Select(request => WaitlistViewViewModel.CreateSessionOrder(request))
                 .SelectMany(order => order.Fields)
                 .Count(field => string.IsNullOrWhiteSpace(field.Label) && string.IsNullOrWhiteSpace(field.Value)),
             "A session row still carries empty padding slots, which only a per-type template's fixed slot count needed.");

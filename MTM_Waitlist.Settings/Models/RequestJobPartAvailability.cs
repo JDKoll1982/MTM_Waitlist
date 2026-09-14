@@ -81,6 +81,53 @@ public sealed record RequestJobPartAvailability(
     public IReadOnlyList<string> ComponentPartNumbers { get; init; } = Array.Empty<string>();
 
     /// <summary>
+    /// The dunnage parts assigned to the requesting job, in the job's own order (FR-035).
+    /// <para>
+    /// This is the list the dunnage step shows as picture cards, and the list an Item whose configuration names
+    /// the <c>dunnage</c> list draws its choices from. Empty when the job carries no dunnage — which is also the
+    /// condition that keeps the dunnage Items out of the picker entirely.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<RequestDunnagePart> DunnageParts { get; init; } = Array.Empty<RequestDunnagePart>();
+
+    /// <summary>
+    /// The requesting job's own part number — the part its parts are subordinate to, and the part a die is
+    /// assigned to (FR-053). It is what the die Items' first line names, so a die request reads which part it is
+    /// for rather than only which die it is.
+    /// </summary>
+    public string JobPartNumber { get; init; } = string.Empty;
+
+    /// <summary>The number of the job's primary die (its <c>FGT</c> part number), or empty when it has no die.</summary>
+    public string DieNumber { get; init; } = string.Empty;
+
+    /// <summary>The primary die's location, or empty. Read from the die subordinate row's <c>Location</c> (FR-053).</summary>
+    public string DieLocation { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Every die assigned to the requesting job, in the job's own order (FR-054).
+    /// <para>
+    /// This is the list the die step shows as selectable cards, and the list an Item whose configuration names
+    /// the <c>die</c> list draws its choices from. A job whose only die row is the <c>No Die</c> placeholder has
+    /// an <b>empty</b> list — the placeholder is how Setup records "this job has no die", so it is not a die
+    /// (FR-055).
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<RequestDiePart> Dies { get; init; } = Array.Empty<RequestDiePart>();
+
+    /// <summary>
+    /// A copy of this snapshot carrying the job's dies, with rows that carry no die number dropped so a caller can
+    /// never offer an empty choice.
+    /// </summary>
+    public RequestJobPartAvailability WithDies(IEnumerable<RequestDiePart>? dies) => this with
+    {
+        Dies = dies is null
+            ? Array.Empty<RequestDiePart>()
+            : dies
+                .Where(die => die is not null && !string.IsNullOrWhiteSpace(die.PartNumber))
+                .ToArray(),
+    };
+
+    /// <summary>
     /// A copy of this snapshot carrying the job's component part numbers, trimmed and with blanks dropped so a
     /// caller can never offer an empty choice.
     /// </summary>
@@ -91,6 +138,19 @@ public sealed record RequestJobPartAvailability(
             : partNumbers
                 .Where(part => !string.IsNullOrWhiteSpace(part))
                 .Select(part => part.Trim())
+                .ToArray(),
+    };
+
+    /// <summary>
+    /// A copy of this snapshot carrying the job's assigned dunnage parts, with parts that carry no part number
+    /// dropped so a caller can never offer an empty choice.
+    /// </summary>
+    public RequestJobPartAvailability WithDunnageParts(IEnumerable<RequestDunnagePart>? parts) => this with
+    {
+        DunnageParts = parts is null
+            ? Array.Empty<RequestDunnagePart>()
+            : parts
+                .Where(part => part is not null && !string.IsNullOrWhiteSpace(part.PartNumber))
                 .ToArray(),
     };
 }

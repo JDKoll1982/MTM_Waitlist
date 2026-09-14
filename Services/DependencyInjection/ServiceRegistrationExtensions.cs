@@ -47,6 +47,9 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<IShellContentProvider, ShellContentProvider>();
         services.AddSingleton<IAppLifecycleService, AppLifecycleService>();
         services.AddSingleton<ISetupDialogService, SetupDialogService>();
+        // The New Request dunnage step's substitute picker reuses the Setup dunnage image-search dialog, so the
+        // bridge lives here where both sides are visible (FR-049).
+        services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IDunnageSubstitutePicker, DunnageSubstitutePicker>();
         services.AddSingleton<IWaitlistRequestActionPrompt, WaitlistRequestActionPrompt>();
         services.AddSingleton<IWorkCenterImageService, MTM_Waitlist.Module_Settings.Services.ImageLocationService>();
         services.AddSingleton<ILocalSettingsService, MTM_Waitlist.Module_Settings.Services.LocalSettingsService>();
@@ -79,6 +82,7 @@ public static class ServiceRegistrationExtensions
             pageService.Configure<NewRequestWorkCenterViewModel, NewRequestWorkCenterPage>();
             pageService.Configure<NewRequestJobTypeViewModel, NewRequestJobTypePage>();
             pageService.Configure<NewRequestItemViewModel, NewRequestItemPage>();
+            pageService.Configure<NewRequestDunnageViewModel, NewRequestDunnagePage>();
             pageService.Configure<NewRequestDetailsViewModel, NewRequestDetailsPage>();
             pageService.Configure<NewRequestPreviewViewModel, NewRequestPreviewPage>();
             pageService.Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
@@ -188,6 +192,8 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<NewRequestJobTypePage>();
         services.AddTransient<NewRequestItemViewModel>();
         services.AddTransient<NewRequestItemPage>();
+        services.AddTransient<NewRequestDunnageViewModel>();
+        services.AddTransient<NewRequestDunnagePage>();
         services.AddTransient<NewRequestDetailsViewModel>();
         services.AddTransient<NewRequestDetailsPage>();
         services.AddTransient<NewRequestPreviewViewModel>();
@@ -212,7 +218,8 @@ public static class ServiceRegistrationExtensions
             actionPrompt: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt>(),
             urgencyDeadlineService: provider.GetRequiredService<IUrgencyDeadlineService>(),
             messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>(),
-            sortPreferenceService: provider.GetRequiredService<IWaitlistSortPreferenceService>()));
+            sortPreferenceService: provider.GetRequiredService<IWaitlistSortPreferenceService>(),
+            jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();

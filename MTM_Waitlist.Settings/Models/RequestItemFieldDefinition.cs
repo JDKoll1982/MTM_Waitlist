@@ -30,6 +30,23 @@ public sealed class RequestItemFieldDefinition
         public const string Fixed = "fixed";
     }
 
+    /// <summary>
+    /// The job-derived lists a field may name as where its choices come from — the value of the optional
+    /// <c>list</c> key. The list is a name, never the Item's identity, so the mechanism stays configuration-driven
+    /// (FR-013, FR-035).
+    /// </summary>
+    public static class Lists
+    {
+        /// <summary>The requesting job's component part numbers.</summary>
+        public const string Component = "component";
+
+        /// <summary>The dunnage parts assigned to the requesting job.</summary>
+        public const string Dunnage = "dunnage";
+
+        /// <summary>The dies assigned to the requesting job (FR-054).</summary>
+        public const string Die = "die";
+    }
+
     /// <summary>The resource key or literal shown beside the value.</summary>
     public string Label { get; init; } = string.Empty;
 
@@ -38,6 +55,13 @@ public sealed class RequestItemFieldDefinition
 
     /// <summary>One of <see cref="Sources"/>. An unrecognised source is a configuration problem.</summary>
     public string Source { get; init; } = Sources.Job;
+
+    /// <summary>
+    /// The job-derived list this field's choices come from, named (<see cref="Lists"/>), or empty when the field
+    /// declares none. A named list the requesting job cannot supply yields <b>no</b> choices, which the screen
+    /// reports rather than filling in with something plausible (FR-035, FR-026).
+    /// </summary>
+    public string List { get; init; } = string.Empty;
 
     /// <summary>Position in the declared order; the page renders fields in this order.</summary>
     public int Order { get; init; }

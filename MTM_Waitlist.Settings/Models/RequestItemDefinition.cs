@@ -36,6 +36,19 @@ public sealed class RequestItemDefinition
     public string UmbrellaVerb { get; init; } = string.Empty;
 
     /// <summary>
+    /// The card's Line 1 as a <c>{token}</c> template, or empty when the Item's first line is the umbrella phrase
+    /// alone. It is the same deliberately-small language the identifier uses, plus one token of its own:
+    /// <c>{umbrella}</c>, which is the Item's own <see cref="UmbrellaVerb"/>.
+    /// <para>
+    /// It exists because a first line sometimes has to say <b>which</b> job part the request is about. The die
+    /// Items read <c>{umbrella} {job_part_number}</c>, so their cards say <c>Pickup Die: PART-9003</c> instead of
+    /// leaving the handler to work out which part the die is for. A template whose tokens cannot all be resolved
+    /// degrades to the umbrella phrase, so the first line always says what kind of request it is (FR-005).
+    /// </para>
+    /// </summary>
+    public string CardLine1Template { get; init; } = string.Empty;
+
+    /// <summary>
     /// The card's Line 2 (the Item's identifier) as a <c>{token}</c> template (CSV col 11), resolved by
     /// <c>RequestItemLine2Resolver</c> against the active-job snapshot and the captured answer.
     /// <para>

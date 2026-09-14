@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using MTM_Waitlist.Module_Core.Services;
+
 namespace MTM_Waitlist.Module_Setup.Models;
 
 public enum SetupWorkflowStep
@@ -471,7 +473,20 @@ public sealed class SetupActiveJobSnapshot
 
     public IReadOnlyList<SetupSubordinatePart> Components => Filter("Component");
 
-    public SetupSubordinatePart? PrimaryDie => Dies.FirstOrDefault();
+    /// <summary>
+    /// The job's <b>real</b> dies — the ones an operator can actually ask for (FR-055).
+    /// <para>
+    /// <see cref="Dies"/> keeps every row the query returned, including the <c>No Die</c> placeholder a job with
+    /// no die comes back with, because the Setup screens show what the job returned. The request workflow must
+    /// not: it reads this member, so a job whose only die row is the placeholder is treated as having no die and
+    /// is never offered the Die Items.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<SetupSubordinatePart> RealDies => Dies
+        .Where(die => DieDecisionRules.HasRealDie(die.PartNumber, die.Description))
+        .ToArray();
+
+    public SetupSubordinatePart? PrimaryDie => RealDies.FirstOrDefault();
 
     /// <summary>Die location (Home Location path) read from the die subordinate row's <c>Location</c>.</summary>
     public string DieLocation => PrimaryDie?.Location ?? string.Empty;

@@ -19,7 +19,7 @@ public static class RequestItemCatalog
     {
         // --- Pickup (11) ---
         Item(RequestCategory.Pickup, 1, "pickup-coil", "coil-or-flatstock", "{part_number}", "pickup-coil"),
-        Item(RequestCategory.Pickup, 2, "pickup-die", "die", "{die_number:die_location=Home Location}", "pickup-die"),
+        Item(RequestCategory.Pickup, 2, "pickup-die", "die", "{die}", "pickup-die", cardLine1Template: "{umbrella} {job_part_number}"),
         Item(RequestCategory.Pickup, 3, "pickup-component", "component", "{component}", "pickup-component"),
         Item(RequestCategory.Pickup, 4, "pickup-fg", "finished-goods-fg", "{part_number}", "pickup-fg"),
         Item(RequestCategory.Pickup, 5, "pickup-ncm", "non-conforming-ncm", "{part_number}", "pickup-ncm"),
@@ -35,7 +35,7 @@ public static class RequestItemCatalog
         Item(RequestCategory.Deliver, 2, "deliver-riser-table", "riser-table", "Riser Table", "deliver-riser-table"),
         Item(RequestCategory.Deliver, 3, "deliver-hopper", "hopper", "Hopper", "deliver-hopper"),
         Item(RequestCategory.Deliver, 4, "deliver-flatstock", "flatstock", "{part_number}", "deliver-flatstock"),
-        Item(RequestCategory.Deliver, 5, "deliver-die", "die", "{die_number} / {die_location}", "deliver-die"),
+        Item(RequestCategory.Deliver, 5, "deliver-die", "die", "{die}", "deliver-die", cardLine1Template: "{umbrella} {job_part_number}"),
         Item(RequestCategory.Deliver, 6, "deliver-dunnage", "dunnage", "{dunnage_part}", "deliver-dunnage"),
         Item(RequestCategory.Deliver, 7, "deliver-wrong-coil", "wrong-coil", "{part_number}", "deliver-wrong-coil"),
         Item(RequestCategory.Deliver, 8, "deliver-wrong-flatstock", "wrong-flatstock", "{part_number}", "deliver-wrong-flatstock"),
@@ -76,6 +76,10 @@ public static class RequestItemCatalog
     {
         "deliver-wrong-coil" => PinnedLine1ForKey(id, "Wrong Coil Bring:"),
         "deliver-wrong-flatstock" => PinnedLine1ForKey(id, "Wrong Flatstock Bring:"),
+        // The die Items name the thing being moved rather than the bare Category word, and their Line 1 template
+        // appends the requesting job's part number so the handler knows which part the die is for (FR-005).
+        "pickup-die" => PinnedLine1ForKey(id, "Pickup Die:"),
+        "deliver-die" => PinnedLine1ForKey(id, "Deliver Die:"),
         _ => category switch
         {
             RequestCategory.Pickup => "Pickup",
@@ -137,7 +141,7 @@ public static class RequestItemCatalog
 
     private static RequestItemDefinition Item(
         RequestCategory category, int order, string id, string normalizedName,
-        string cardLine2Template, string producedValue) =>
+        string cardLine2Template, string producedValue, string cardLine1Template = "") =>
         new()
         {
             Category = category,
@@ -146,6 +150,7 @@ public static class RequestItemCatalog
             DisplayNameResourceKey = DisplayNameResourceKeyFor(id),
             NormalizedName = normalizedName,
             UmbrellaVerb = UmbrellaVerbFor(category, id),
+            CardLine1Template = cardLine1Template,
             CardLine2Template = cardLine2Template,
             ProducedValue = producedValue
         };

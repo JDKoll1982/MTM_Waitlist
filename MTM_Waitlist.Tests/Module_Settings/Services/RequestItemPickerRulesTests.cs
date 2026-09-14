@@ -44,6 +44,20 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
+    public void DieItems_AreNotOfferedWhenTheJobHasNoDie()
+    {
+        // The picker reads HasDie (FR-055). A job whose only die row is the query's 'No Die' placeholder has no
+        // die: the composition root derives HasDie from SetupActiveJobSnapshot.RealDies, whose rule is pinned by
+        // DieDecisionRulesTests and SetupActiveJobSnapshotDieTests. This is the picker half of that chain — no die
+        // means neither Die Item is offered, in either Category, and the Category itself disappears when nothing
+        // else under it is visible either.
+        var noDie = RequestJobPartAvailability.All with { HasDie = false };
+
+        Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-die")!, noDie));
+        Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("deliver-die")!, noDie));
+    }
+
+    [TestMethod]
     public void FlatstockAndDieAndDunnage_EvaluateIndependently()
     {
         var onlyFlatstock = RequestJobPartAvailability.All with

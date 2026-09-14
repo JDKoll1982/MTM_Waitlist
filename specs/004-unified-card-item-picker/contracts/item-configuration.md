@@ -90,6 +90,21 @@ template (card Line 2).
 is `enum` or `text`. `category` is one of `Pickup`, `Deliver`, `Assist`, `Other`. `item` is one of the twenty-three
 Item codes.
 
+**The `list` key — where an enumerated answer's choices come from (FR-035, FR-050).** A field inside
+`detail_fields_json` may carry one further key, `list`, naming the job-derived list its choices come from. It is a
+**name**, never the Item's identity, so two Items configured the same way behave the same way:
+
+| `list` value | the choices are |
+|---|---|
+| `component` | the requesting job's component part numbers |
+| `dunnage` | the dunnage parts assigned to the requesting job |
+| absent | the job's component list — the path the existing rows already rely on |
+| any other name | **nothing**: the screen reports that rather than inventing a list |
+
+`list` is **data**: adding or changing it is a one-row edit and needs no rebuild (FR-015). It is what keeps the
+dunnage step from being selected by an Item code in code — the step is chosen because the row names the `dunnage`
+list.
+
 ## 6. The default allotment
 
 `15` minutes, when `allotted_minutes` is null. The value is a constant in the application, and the surface that

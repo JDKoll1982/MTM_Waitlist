@@ -1,5 +1,6 @@
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
@@ -177,9 +178,21 @@ public static class NewRequestFlowRules
             || string.Equals(configuration?.ControlFlow, RequestItemConfiguration.CollectInputThenConfirm, StringComparison.OrdinalIgnoreCase);
 
         var answerCaptured = !string.IsNullOrWhiteSpace(state.InputValue);
-        return requiresAnswer && !answerCaptured
-            ? typeof(NewRequestDetailsViewModel)
-            : typeof(NewRequestPreviewViewModel);
+        if (!requiresAnswer || answerCaptured)
+        {
+            return typeof(NewRequestPreviewViewModel);
+        }
+
+        // An answer the job supplies is asked for by the step that can show it: the dunnage list is asked for on
+        // the dunnage step, as picture cards of the parts the job carries, with the substitute picker beside them
+        // (FR-048, FR-049). Which list it is comes from the row's declaration, never from the Item's identity
+        // (FR-013).
+        return string.Equals(
+            RequestItemAnswerOptionsResolver.DeclaredJobListName(configuration),
+            RequestItemFieldDefinition.Lists.Dunnage,
+            StringComparison.OrdinalIgnoreCase)
+                ? typeof(NewRequestDunnageViewModel)
+                : typeof(NewRequestDetailsViewModel);
     }
 
     private static bool IsNoActiveJobPlaceholder(string? value) =>

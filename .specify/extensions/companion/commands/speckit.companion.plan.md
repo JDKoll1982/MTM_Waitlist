@@ -2,6 +2,47 @@
 description: "Companion plan — implementation plan with research & design artifacts"
 ---
 
+<!-- speckit-companion:part communication -->
+## How to talk to the person — plain English, end-user facing
+
+Constitution Principle VII governs this reply. It applies to the **chat channel only** — files and
+artifacts are unaffected.
+
+- **Plain English, end-user facing.** Say what changed and what it means, in ordinary words. No jargon
+  walls, no acronyms that were never defined, no narration of your own reasoning, and never recap the
+  request back to the person.
+- **Never paste raw material.** No tool output, terminal transcripts, JSON, stack traces, file dumps,
+  diffs, or whole artifact bodies. If one line matters, quote that one line.
+- **One short line per step.** Report progress as single sentences. Never paste the task list, never
+  announce a command before running it, never repeat a step already reported.
+- **Fences must render.** A fence starts at **column 0**: a fence indented by four or more spaces, or
+  placed inside a list item, becomes a literal code block and garbles everything after it (GFM,
+  "Indented Code Block (4 Spaces)"). If the content contains a fence, wrap it in a **longer** backtick run
+  than the inner one. Never print a sample block that was only a template for a file you are writing.
+- **No machine directives in chat** (`EXECUTE_COMMAND:` and the like) unless the host needs them to run.
+- **The last section is what the person must do**, headed exactly `## What you need to do`, as a short
+  numbered list in the order they should do it. Nothing to do → end with the single line
+  `Nothing needed from you.` Never bury an action in the middle of the reply.
+<!-- /speckit-companion:part communication -->
+
+<!-- speckit-companion:part interpreter -->
+## Resolve the script interpreter once, then reuse it
+
+Every command below is written `python3 …`, which is right on Linux and macOS and **wrong on Windows**:
+`python3` there is a Microsoft Store app-execution alias, not an interpreter. It answers "Python was not
+found; run without arguments to install from the Microsoft Store", so the call never runs and the
+bookkeeping is silently lost. Resolve the interpreter **once, at the start of this step**:
+
+1. `python3 --version` — prints a version? Use `python3`.
+2. Otherwise `python --version` — prints a version? Use `python`.
+3. Otherwise `py --version` — prints a version? Use `py`.
+4. If none answers: say so in one plain line, stop trying, continue the step without the bookkeeping, and
+   **never hand-edit `.spec-context.json` and never tick a `tasks.md` box yourself** — report the loss so
+   it stays visible instead.
+
+Retry a failing interpreter **at most once**, and never paste its failure text into the chat.
+<!-- /speckit-companion:part interpreter -->
+
 ## User Input
 
 ```text
@@ -20,7 +61,10 @@ Let `<step>` be this command's phase: `specify`, `plan`, `tasks`, or `implement`
 - If it exists, read it and look for entries under `hooks.before_<step>`. If the YAML cannot be parsed, skip hook checking silently and continue normally.
 - Filter out hooks where `enabled` is explicitly `false`. A hook with no `enabled` field is enabled by default.
 - Do **not** interpret or evaluate a hook's `condition` expression yourself: a hook with no `condition` (or a null/empty one) is executable; a hook with a non-empty `condition` is left to the HookExecutor — skip it here.
-- For each executable hook, emit one block based on its `optional` flag:
+- For each executable hook, emit one block based on its `optional` flag. **Write the block's fence at
+  column 0** — the samples below are indented only to sit under their bullet, and an indented fence renders
+  as literal backticks that garble the rest of the reply (see the `communication` part above). Emit the
+  content, not the indentation, and never nest a fence inside a list item.
   - **Optional** (`optional: true`):
     ```
     ## Extension Hooks

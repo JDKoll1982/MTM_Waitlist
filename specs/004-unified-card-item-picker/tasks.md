@@ -1248,6 +1248,315 @@ again.
 
 ---
 
+## Phase 11: Third Follow-Up Batch — The Operator Picks the Dunnage
+
+This phase follows Phase 10. The dunnage Items were seeded as *read the part out of the job and ask nothing*, which is
+what the CSV row spec said at the time — while `OPEN-WORK-NEXT-SPEC.md` §5.3 said the opposite, that the operator
+always selects the part. The owner settled it: **the operator picks**, from the dunnage the job carries, with a control
+that opens the receiving catalogue so a part the job does **not** carry can be used as a **substitute**. Everything
+here is new work against the appended requirements **FR-048 … FR-051** and criteria **SC-022** and **SC-023**; nothing
+above is reopened, and `.spec-context.json` is not this phase's to edit. The same four gates apply, and the three
+build traps carry over.
+
+The `[US#]` tags map the batch onto the stories it serves: **US1** owns raising a request, **US2** owns the card's
+identifier.
+
+### Tests — write these first; they must fail before the implementation lands
+
+- [x] **T152** [P] [US1] Add the dunnage step's tests (FR-048, FR-049): the step offers every part the job carries,
+nothing is pre-chosen, clicking a card captures that part as the request's answer and continues, a substitute
+captures a part the job does not carry and continues exactly the same way, a **dismissed** picker captures nothing
+and does not advance, a picker that **cannot open** is reported in plain language while the job's own cards stay
+usable, a job with no dunnage reports why the step is empty, and returning to the step re-shows a substitute as the
+chosen card without duplicating an assigned one. · new
+`MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestDunnageViewModelTests.cs`
+- [x] **T153** [P] [US1] Add the routing tests (FR-050, SC-023): a row whose answer field names the `dunnage` list
+reaches the dunnage step, a row naming the `component` list still reaches Details, and a captured answer still goes
+straight to Preview — with the fixture row deliberately **not** one of the two dunnage Items, so the step cannot be
+chosen by an Item code. · `MTM_Waitlist.Tests/Module_Waitlist/Models/NewRequestFlowStateTests.cs`
+- [x] **T154** [P] [US1] Add the named-job-list tests (FR-035, FR-050): a field naming `dunnage` takes the job's
+assigned dunnage part numbers in the job's order, one naming `component` takes the components and not the dunnage,
+one naming nothing keeps the component list the existing rows rely on, and a name nothing supplies yields **no**
+choices rather than a plausible list. Include the source-side check that both shipped dunnage rows ask for an answer
+and name the `dunnage` list. ·
+`MTM_Waitlist.Tests/Module_Settings/Services/RequestItemConfigurationServiceTests.cs`
+- [x] **T155** [P] [US2] Add the card tests (FR-051): a dunnage request carrying its part resolves that part as
+Line 2 through the template's `{dunnage_part}` token; a request that stored nothing shows the Item's display name
+with the configuration problem reported; and a captured answer is **not** handed to the dunnage token of an Item
+whose template does not ask for it. · `MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs`
+
+### Implementation
+
+**Wave 1 — the job's dunnage parts reach the wizard (single task; the Settings snapshot gains a member):**
+
+- [x] **T156** [US1] Carry the job's assigned dunnage parts onto the availability snapshot (FR-048): a
+`RequestDunnagePart` value in `MTM_Waitlist.Settings`, a `DunnageParts` member and `WithDunnageParts` on
+`RequestJobPartAvailability` beside `ComponentPartNumbers`, and the mapping at the composition root —
+`RequestJobAvailabilityProvider` — which is the only place that may see the Setup-side part and resolve each part's
+picture to an absolute path. · `MTM_Waitlist.Settings/Models/RequestDunnagePart.cs`,
+`MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs`, `Services/RequestJobAvailabilityProvider.cs`
+
+**⟶ Wait for Wave 1 to finish, then:**
+
+**Wave 2 — the named job list (single task; one file owns the resolver):**
+
+- [x] **T157** [US1] Make the enumerated answer's choices name their job list (FR-035, FR-050): add the optional
+`list` key to `RequestItemFieldDefinition` with its two names, read it in the configuration parser, resolve it in
+`RequestItemAnswerOptionsResolver` — named list first, no name keeps today's component default, an unknown name
+yields nothing — and expose `DeclaredJobListName` for the flow to read. ·
+`MTM_Waitlist.Settings/Models/RequestItemFieldDefinition.cs`,
+`MTM_Waitlist.Settings/Services/RequestItemConfigurationService.cs`
+
+**⟶ Wait for Wave 2 to finish, then:**
+
+**Wave 3 — the step itself, independent (different files):**
+
+- [x] **T158** [P] [US1] Build the dunnage step: `NewRequestDunnageViewModel` binds the job's parts as picture
+cards, captures the chosen part as the request's answer and continues, refuses to continue without one, offers the
+substitute through `IDunnageSubstitutePicker` — a dismissed picker changes nothing, a part with no number is refused,
+a failure is reported in plain language — and remembers a substitute so returning to the step still shows it.
+`NewRequestFlowState` carries that remembered substitute. ·
+`MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestDunnageViewModel.cs`,
+`MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestDunnageOption.cs`,
+`MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestFlowState.cs`
+- [x] **T159** [P] [US1] Draw the step: `NewRequestDunnagePage` reuses the wizard's existing page shells and its
+image-card tile shape — `SetupPageGridStyle`, `SetupPageHeaderStyle`, `SetupActionBarStyle`, the 150-wide tile inside
+`ItemsWrapGrid`, `ResolvedImagePathToSourceConverter`, the accent selection outline — and adds the `Use substitute…`
+control. Every new user-visible string comes from `Strings/en-us/Resources.resw` (FR-022). · new
+`Module_Waitlist/Views/NewRequestDunnagePage.xaml`, `…/NewRequestDunnagePage.xaml.cs`, `Strings/en-us/Resources.resw`
+- [x] **T160** [US1] Route it and register it: `NewRequestFlowRules.GetNextStepType` sends an answer that names the
+`dunnage` list to the new step, and the composition root gains the substitute bridge — `IDunnageSubstitutePicker`
+with `DunnageSubstitutePicker`, which shows the **existing** `SetupDunnageImageSearchDialog` through
+`ISetupDialogService` and maps the part it returns, so no second dunnage picker exists (FR-049). ·
+`MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowRules.cs`,
+`MTM_Waitlist.Settings/Services/IDunnageSubstitutePicker.cs`, `Services/DunnageSubstitutePicker.cs`,
+`Services/DependencyInjection/ServiceRegistrationExtensions.cs`
+
+**⟶ Wait for Wave 3 to finish, then:**
+
+**Wave 4 — the card reads it back (single task; the title resolver owns the rule):**
+
+- [x] **T161** [US2] Resolve the dunnage identifier from what the request stored (FR-051): the captured answer
+fills the `{dunnage_part}` token for the Items whose template asks for it, and nothing else changes — the rule moves
+beside the resolver as `WaitlistRequestTitles.ResolveContext`, and the view model delegates to it. ·
+`MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs`,
+`MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs`
+
+**⟶ Wait for Wave 4 to finish, then:**
+
+**Wave 5 — the data and the requirement of record (single task; the seed and its master move together):**
+
+- [x] **T162** [US1] Seed both dunnage Items as an operator choice (FR-048, FR-050):
+`collect-input-then-confirm`, `requires_answer = 1`, `answer_value_type = 'enum'`, the prompt, and an
+`enum`/`answer` field naming the `dunnage` list — with `options_json` left NULL because the values arrive with the
+job snapshot, exactly as `pickup-component`'s do. The spreadsheet's own two rows and the contracts move in the same
+change, so the row spec, the seed and the code cannot disagree. ·
+`Database/Seeds/seed_waitlist_request_item_configs/create.sql`, `Database/Seeds/AllSeeds.sql`,
+`WeekendProject/Documents/Request-Config-Template.csv`, `specs/004-unified-card-item-picker/spec.md`,
+`specs/004-unified-card-item-picker/contracts/request-picker-flow.md`,
+`specs/004-unified-card-item-picker/contracts/item-configuration.md`,
+`specs/004-unified-card-item-picker/contracts/card-and-identifier.md`,
+`specs/004-unified-card-item-picker/data-model.md`,
+`WeekendProject/OPEN-WORK-NEXT-SPEC.md`
+
+**⟶ Wait for Wave 5 to finish, then:**
+
+**Wave 6 — the gates:**
+
+- [x] **T163** **Build and tests.** `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1
+/nodeReuse:false` → `0 Error(s)`; `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug
+-p:Platform=x64` → `Failed: 0`. Evidence recorded: build succeeded, `total: 1060, failed: 0, succeeded: 1033,
+skipped: 27`. · `MTM_Waitlist.sln`, `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
+- [ ] **T164** **UI gate.** In the running app, raise a request for a job that carries dunnage and prove, from a
+text/geometry dump rather than from the code: the dunnage step appears between Item and Preview; the job's parts
+are drawn as cards; Continue is reachable only after a part is chosen; `Use substitute…` opens the receiving
+catalogue and a part chosen there becomes the request's value; and the raised request's card shows the chosen part
+on its second line. Needs a signed-in session and a job carrying dunnage. ·
+`bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
+- [ ] **T165** **Live database validation.** Re-run the configuration seed against a local `mtm_waitlist` and read
+both dunnage rows back with their `list` key intact, confirming `AllSeeds.sql` agrees with the file on disk.
+**The reinstall is the owner's action, never the agent's.** · `Database/Seeds/**`
+
+**Checkpoint — the operator picks the dunnage, and the card says which.** A dunnage request cannot be raised without a
+part being chosen; the parts offered are the ones the job carries; a substitute from the receiving catalogue is a
+first-class answer; and the card shows whichever part the operator ended on. FR-048 … FR-051 and SC-022/SC-023 are
+provable from this phase's tests alone, with the UI walk and the seed reinstall the two gates still open.
+
+---
+
+## Phase 12: Fourth Follow-Up Batch — The Die Card Says Which Part, Which Die, and Where
+
+This phase follows Phase 11, and it started from the same discovery: **a die card was broken in exactly the way a
+dunnage card was.** `pickup-die`'s identifier template resolved `{die_number}` / `{die_location}`, but nothing ever
+filled either value — the card context carried only the captured answer — so a die card rendered the word `Die` and
+the configuration-problem report, never a number and never a location. The owner settled what the two lines should
+say: **Line 1** the Item's own phrase plus the requesting **job's part number**, **Line 2** the die's own number and
+where the die is. Everything here is new work against **FR-052**, **FR-053**, the amended **FR-005** and criterion
+**SC-024**; nothing above is reopened.
+
+Three decisions were taken by the agent because the owner was unavailable, and each is the conservative one:
+
+- **Line 1's part number is the *job's*, and it is a token of its own** (`{job_part_number}`). Reusing
+  `{part_number}` would have been wrong: that token means the *subordinate's* number for the coil and flatstock
+  Items, so a die's "which part is this die for" value must not borrow it. This is the FR-053 record of that call.
+- **The die values are re-read from the job** rather than stored on the request. `pickup-die` already uses its one
+  stored answer for the destination, and `OPEN-WORK-NEXT-SPEC.md` §5.4 asks for exactly this re-resolution.
+- **The destination question stays.** It is in the row spec and it tells the handler where to take the die; it
+  simply no longer shapes the card.
+
+### Tests
+
+- [x] **T166** [P] [US2] Re-point the die card tests at the new lines (FR-052, FR-053): both die Items resolve
+`FGT0002000-DIE SHOP` from the job snapshot; the destination no longer changes the identifier, which is the
+supersession written as an assertion; Line 1 reads `Pickup Die: PART-9003` / `Deliver Die: PART-9003`; a die request
+with no job degrades to the phrase rather than a blank or a bare template; and the job values are handed over **only**
+to the Items whose templates name their tokens. · `MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs`
+- [x] **T167** [P] [US2] Update the catalog's own assertions (FR-052, FR-053): the die Items carry
+`Pickup Die:` / `Deliver Die:` as their phrase, `{umbrella} {job_part_number}` as their first line and
+`{die_number}-{die_location}` as their identifier — replacing the assertion that pinned the retired conditional, and
+moving the plain-Category-word check off `pickup-die` onto `pickup-coil`. ·
+`MTM_Waitlist.Tests/Module_Settings/RequestItemCatalogTests.cs`
+
+### Implementation
+
+**Wave 1 — the first line becomes a template (single task; one file owns the resolver):**
+
+- [x] **T168** [US2] Give an Item a first line that can name a job value (FR-005, FR-052): `CardLine1Template` on the
+Item definition with `{umbrella}` as the phrase token, the resolver's walk extracted so both lines share one
+implementation, `ResolveLine1` degrading to the phrase instead of reporting, and the `{job_part_number}` token added
+to the closed set. · `MTM_Waitlist.Settings/Models/RequestItemDefinition.cs`,
+`MTM_Waitlist.Settings/Services/RequestItemLine2Resolver.cs`
+
+**⟶ Wait for Wave 1 to finish, then:**
+
+**Wave 2 — the job's identity reaches the snapshot, independent (different files):**
+
+- [x] **T169** [P] [US2] Carry the job's own part number and its primary die's number and location on the wizard's
+availability snapshot (FR-053), and map them at the composition root, where the Setup-side part is visible. ·
+`MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs`, `Services/RequestJobAvailabilityProvider.cs`
+- [x] **T170** [P] [US2] Give both die Items their two lines (FR-052, FR-053): the phrase, the Line 1 template and
+the identifier, with the phrases resolved through the resource mechanism like the two wrong-material Items already
+are. · `MTM_Waitlist.Settings/Models/RequestItemCatalog.cs`, `Strings/en-us/Resources.resw`
+
+**⟶ Wait for Wave 2 to finish, then:**
+
+**Wave 3 — the card reads the job (single task; the list view model gains a dependency):**
+
+- [x] **T171** [US2] Fill the job tokens a template names, from the requesting job (FR-053): the card's context is
+built from the request **and** the job snapshot, the job is read **once per work centre per load** and cached for it,
+a job that cannot be read is logged rather than failing the list, and the row builder takes the snapshot as an
+optional argument so the existing one-argument call sites keep their behaviour. ·
+`MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs`,
+`MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs`,
+`Services/DependencyInjection/ServiceRegistrationExtensions.cs`
+
+**⟶ Wait for Wave 3 to finish, then:**
+
+**Wave 4 — the gates:**
+
+- [x] **T172** **The requirement of record, in the same change** (FR-027's discipline, applied to the docs): the two
+die rows in the spreadsheet, the card-and-identifier contract's Line 1 and Line 2 sections and its token set, the
+picker-flow contract's two die rows plus §10 for where a card's job values come from, the failure table, the data
+model's Item table and the spec's FR-005/FR-052/FR-053/SC-024 all move together, so the row spec, the contracts and
+the code cannot disagree. · `WeekendProject/Documents/Request-Config-Template.csv`,
+`specs/004-unified-card-item-picker/{spec.md,data-model.md}`,
+`specs/004-unified-card-item-picker/contracts/{card-and-identifier.md,request-picker-flow.md}`
+- [x] **T173** **Build and tests.** `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1
+/nodeReuse:false` → `0 Error(s)`; `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug
+-p:Platform=x64` → `Failed: 0`. Evidence recorded: build succeeded, `total: 1064, failed: 0, succeeded: 1037,
+skipped: 27`. · `MTM_Waitlist.sln`, `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
+- [ ] **T174** **UI gate.** In the running app, raise a pickup-die and a deliver-die request from a work centre whose
+job carries a die (the seed's `100-7`), and prove from a text dump rather than from the code: Line 1 reads
+`Pickup Die: <the job's part number>` / `Deliver Die: <the job's part number>`, and Line 2 reads
+`<FGT number>-<die location>`. Then move the die's location in the store and reload, to prove the card follows the job
+rather than a stale copy. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
+- [ ] **T175** **Live database validation.** No schema change here, so this is the read path: confirm
+`sp_setup_active_jobs_latest_by_work_center_get` returns the job's `part_number` and the die row's `PartNumber` /
+`Location` for a real active job, so the two lines have something to resolve against outside the seed. · local
+`mtm_waitlist`
+
+**Checkpoint — a die card says which part, which die, and where it is.** Both die Items render a first line naming the
+requesting job's part number and an identifier carrying the die's own number and location, read from the job; the
+destination answer no longer changes either line; and an Item that names none of these tokens is provably untouched.
+FR-052, FR-053, the amended FR-005 and SC-024 are provable from this phase's tests alone, with the UI walk and the
+live read the two gates still open.
+
+---
+
+## Phase 13: Fifth Follow-Up Batch — What Counts as a Die, and One Request per Die
+
+The batch that a live job forced. `100-3` carries a die row described `No Die` with an empty location — the query's
+way of saying "this job has no die" — yet it was counted as a die, offered to the operator, and rendered as a
+dangling separator. So this phase settles what a die **is** (FR-055), how a die is **written** (FR-056), and what a
+request for a die shows on the **request page** as well as the card (FR-052, FR-053); then it builds the step that
+lets an operator choose among several dies and raises one request for each (FR-054).
+
+### Wave 1 — What a die is, and how it is written
+
+- [x] **T176** [P] [US2] **Settle what a die is** (FR-055, SC-025): one definition, `DieDecisionRules` in
+  `MTM_Waitlist.Core` beside `ScrapDecisionRules`, whose `HasRealDie(partNumber, description)` refuses a row carrying
+  the `No Die` placeholder and refuses a row with no part number to identify it by. The snapshot exposes the job's
+  `RealDies`, the availability's `HasDie` is derived from that list rather than from the row count, and the picker's
+  existing `RequestJobPartKind.Die` gate then withholds the die Items from a job that has no die. The Setup workflow
+  reads the same rule, so the picker and the setup screens cannot disagree. · `MTM_Waitlist.Core/Services/DieDecisionRules.cs`,
+  `MTM_Waitlist.Setup/Models/SetupModels.cs`, `Services/RequestJobAvailabilityProvider.cs`,
+  `MTM_Waitlist.Tests/Module_Core/Services/DieDecisionRulesTests.cs`,
+  `MTM_Waitlist.Tests/Module_Settings/Services/RequestItemPickerRulesTests.cs`
+- [x] **T177** [P] [US2] **Settle how a die is written** (FR-056, SC-026): the die's identifier is composed as its
+  number and its location by one rule — `RequestDiePart.ComposeLabel`, which omits the separator when no location is
+  known — and exposed to templates as the single `{die}` token, with `{die_number}` and `{die_location}` kept for a
+  row that wants one half. Both die Items' Line 2 becomes `{die}`, and the card's context hands the die over when a
+  template names the die **at all**, not only when it names the old two-token spelling. · `MTM_Waitlist.Settings/Models/RequestDiePart.cs`,
+  `MTM_Waitlist.Settings/Models/RequestItemCatalog.cs`, `MTM_Waitlist.Settings/Services/RequestItemLine2Resolver.cs`,
+  `MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs`, `MTM_Waitlist.Tests/Module_Settings/RequestItemCatalogTests.cs`,
+  `MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs`
+
+### Wave 2 — The request page carries the job too
+
+- [x] **T178** [US2] **Give the request page the requesting job** (FR-052, FR-053): the detail page built its row
+  from the request alone, so the die and its location — which are **job** values the request never stored — could not
+  appear anywhere on it. The page now reads the job once per work centre, hands it to `CreateSessionOrder` for both
+  card lines, and resolves a declared field whose `source` is `job` through `RequestJobFieldValues`, which maps the
+  declared label onto the job value and yields nothing for a label the job cannot supply — so no row is drawn empty
+  and none is invented. · `MTM_Waitlist.Settings/Services/RequestJobFieldValues.cs`,
+  `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs`,
+  `Services/DependencyInjection/ServiceRegistrationExtensions.cs`
+- [x] **T179** **Build and tests.** `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` →
+  `0 Error(s)`; `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` → `Failed: 0`.
+  Evidence recorded: build succeeded, `total: 1089, failed: 0, succeeded: 1062, skipped: 27`. · `MTM_Waitlist.sln`,
+  `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
+
+### Wave 3 — One request per die (FR-054) — **BLOCKED, not built**
+
+- [ ] **T180** [US1] **Decide where a chosen die is stored per request.** A die request stores exactly one free
+  value: `waitlist_requests.input_value`, and for `pickup-die` that column already holds the operator's
+  **destination** answer, which the request page renders as a declared `answer`-sourced field. A multi-die run must
+  record, per entry, both **which die** and that destination, and one column cannot hold both. Verified against the
+  live schema: the table has no die column and no second answer column. **Blocks T181–T183.** · local `mtm_waitlist`
+- [ ] **T181** [US1] **Carry a per-entry die identifier** (FR-054): whichever store T180 chooses — the existing
+  `input_value`, or a new column with the procedure pair and its `create.sql` / `rollback.sql` that a schema change
+  requires — a raised die request must resolve *its own* die rather than the job's first one, which is what the card
+  does today and what makes several entries from one job indistinguishable.
+- [ ] **T182** [US1] **Build the die step** (FR-054): `NewRequestDieViewModel` + `NewRequestDiePage`, reached because
+  the chosen Item's configuration names the `die` job list, offering the job's dies as selectable cards that may be
+  selected **more than once**, refusing to continue with nothing selected.
+- [ ] **T183** [US1] **Raise one request per selected die** (FR-054): the confirmation step submits one request for
+  each die the operator selected — never one request carrying several dies — and reports how many were raised.
+- [ ] **T184** **UI gate.** In the running app, raise a die request from the seed's `100-7` and prove from a text
+  dump that the card and the request page both carry the die's number **and** its location, then do the same for a
+  job carrying two dies and confirm one entry appears per die selected. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
+- [ ] **T185** **Live database validation.** Confirm the live `100-3` job offers **no** die Item — its only die row is
+  the `No Die` placeholder — while `100-7` and `V100-33` do, and that the die values resolve from the live read
+  rather than the seed. · local `mtm_waitlist`
+
+**Checkpoint — half closed, and the open half named.** FR-055, FR-056, the amended FR-052/FR-053 and SC-025/SC-026
+are provable from this phase's tests alone: a job whose only die row is the placeholder is offered no die Item, a die
+with no known location renders as its number alone, and the request page carries the die and its location as the card
+does. FR-054 is **not** built: it waits on T180's decision, because a die request has one value column and it is
+already spent on the destination. Reporting this phase as complete would be false.
+
+---
+
 ## Dependencies & Execution Order
 
 **Phase dependencies.**
@@ -1326,6 +1635,25 @@ situations re-pointed (T125) → the fixtures retired (T126) → `pickup-compone
   precede W2: the rule is given the directory's row, so the lookup has to exist first. W3 must precede W4: the card
   binds the row's command, so the row has to carry it first. Phase 10 waits on Phase 9 only in that its two defects
   are what Phase 9's own walk found.
+- **Phase 11 Dunning Picker** — tests first (T152–T155), then five waves: the job's dunnage parts on the snapshot
+  (T156) → the named job list (T157) → the step and its page (T158–T159) → routing and the substitute bridge (T160) →
+  the card reading the answer back (T161) → the data and the row spec (T162) → the gates (T163–T165). W2 must precede
+  W3: the flow cannot route on a list name the parser does not read — and that gap was real, found only by asserting
+  on the shipped seed rather than on a fixture.
+- **Phase 12 Die Lines** — tests first (T166–T167), then three waves: the first line as a template (T168) → the job's
+  identity and the two die rows (T169–T170) → the card reading the job (T171) → the requirement of record and the
+  gates (T172–T175). W1 must precede W3: the card cannot resolve a token the resolver does not know, and W2 must
+  precede W3 for the same reason one level down. Phases 11 and 12 were prompted by the same class of defect — a
+  job-derived token with no source — so **a card line that still renders a display name plus a problem report is the
+  next thing to audit**, and the audit should name which tokens each Item's templates use against what the card is
+  handed.
+- **Phase 13 Die Identity** — the settled rules first (T176–T177, independent of each other), then the request page
+  (T178) → the gates (T179) → the decision (T180) → the per-entry identifier (T181) → the step (T182) → one request
+  per die (T183) → the gates (T184–T185). W1 precedes W2 because T178's row would otherwise resolve a die rule that
+  is still counting placeholders. **W3 is blocked on W1's sibling decision, not on W2**: T180 asks which column holds
+  a chosen die, and T181–T183 cannot be written until it is answered. Phase 13's first two waves came from the same
+  audit Phase 12's closing note asked for, and they found what it predicted — a job offering a die it does not have,
+  and a request page that never received the job its rows resolve against.
 
 **Parallel opportunities.** Every wave of `[P]` tasks may be built concurrently — different files, no unfinished
 dependency between them. The largest are Phase 2 W1 (six new stored artifacts), Phase 2 W5 (seven model files) and

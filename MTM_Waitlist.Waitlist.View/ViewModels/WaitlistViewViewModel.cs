@@ -48,6 +48,16 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// </summary>
     private readonly Dictionary<string, TimeSpan> _maxAllottedCache = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// The requesting job per work centre for the load in flight. Building a card's two lines can need the job's
+    /// own part number and the die assigned to it, and every row of a work centre needs the same job, so a list of
+    /// N rows costs one read per distinct work centre rather than N. Cleared at the start of each load, so a job
+    /// that has moved on since the last load is picked up.
+    /// </summary>
+    private readonly Dictionary<string, RequestJobPartAvailability> _jobAvailabilityCache = new(StringComparer.OrdinalIgnoreCase);
+
+    private readonly IRequestJobPartAvailabilityProvider? _jobAvailabilityProvider;
+
     /// <summary>The documented default allotted time, used when no deadline service is supplied or the Item has no configured allotment.</summary>
     private static readonly TimeSpan DefaultMaxAllotted = TimeSpan.FromMinutes(UrgencySettingsService.DefaultMinutes);
 
@@ -100,7 +110,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt? actionPrompt = null,
         IUrgencyDeadlineService? urgencyDeadlineService = null,
         MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? messageSeenStore = null,
-        IWaitlistSortPreferenceService? sortPreferenceService = null)
+        IWaitlistSortPreferenceService? sortPreferenceService = null,
+        IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -118,6 +129,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _urgencyDeadlineService = urgencyDeadlineService;
         _messageSeenStore = messageSeenStore;
         _sortPreferenceService = sortPreferenceService;
+        _jobAvailabilityProvider = jobAvailabilityProvider;
 
         // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
         // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
@@ -656,9 +668,11 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         var workCenterImageLookup = await BuildWorkCenterImageLookupAsync(cancellationToken: default).ConfigureAwait(false);
         var now = DateTimeOffset.UtcNow;
         _maxAllottedCache.Clear();
+        _jobAvailabilityCache.Clear();
         foreach (var request in activeRequests)
         {
-            var sessionOrder = CreateSessionOrder(request);
+            var jobAvailability = await ResolveJobAvailabilityAsync(request.WorkCenter).ConfigureAwait(false);
+            var sessionOrder = CreateSessionOrder(request, jobAvailability);
             sessionOrder.Urgency = await ResolveUrgencyAsync(request, now).ConfigureAwait(false);
             await ApplyResolvedImagesAsync(sessionOrder, request, workCenterImageLookup).ConfigureAwait(false);
             newItems.Add(sessionOrder);
@@ -822,14 +836,15 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
     }
 
-    public static SampleOrder CreateSessionOrder(WaitlistRequest request)
+    public static SampleOrder CreateSessionOrder(WaitlistRequest request, RequestJobPartAvailability? jobAvailability = null)
     {
         // The request's identity is its Item code. Everything the card shows about *what* was asked for —
         // both lines, the picture, the detail slots — resolves from that one code through the Item catalog,
         // so no reader is handed a second, derived pair it could disagree with (FR-004, FR-005).
         var definition = request.ItemDefinition;
-        var line1 = WaitlistRequestTitles.ResolveLine1(definition);
-        var line2 = WaitlistRequestTitles.ResolveLine2(definition, BuildLine2Context(request));
+        var context = WaitlistRequestTitles.ResolveContext(request, jobAvailability);
+        var line1 = WaitlistRequestTitles.ResolveLine1(definition, context);
+        var line2 = WaitlistRequestTitles.ResolveLine2(definition, context);
 
         var item = new SampleOrder
         {
@@ -864,18 +879,40 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     }
 
     /// <summary>
-    /// The values the Item's second-line template resolves against.
+    /// The requesting job for one work centre, read once per load and held for that work centre. Where a card's
+    /// two lines need a value the request never stored — the job's own part number, the die it is assigned, the
+    /// die's location — this is where it comes from (FR-053).
     /// </summary>
     /// <remarks>
-    /// The request carries the answer its flow captured, and that is the only identifier source it holds. The
-    /// job-derived tokens (<c>{part_number}</c>, <c>{die_number}</c>, <c>{dunnage_part}</c>, …) belong to the
-    /// later item-resolution work, so a template that needs one is reported as unresolved and the Item's own
-    /// display name is shown — never a substituted value, never a blank
-    /// (<c>contracts/card-and-identifier.md</c> §3).
+    /// A job that cannot be read is not worth failing the whole list for: the row falls back to what the request
+    /// itself carries, the failure is logged, and the card stays readable rather than the list going empty.
     /// </remarks>
-    private static RequestItemLine2Context BuildLine2Context(WaitlistRequest request) => new(
-        Answer: request.InputValue,
-        Destination: request.InputValue);
+    private async Task<RequestJobPartAvailability> ResolveJobAvailabilityAsync(string? workCenter)
+    {
+        var key = workCenter?.Trim() ?? string.Empty;
+        if (key.Length == 0 || _jobAvailabilityProvider is null)
+        {
+            return RequestJobPartAvailability.None;
+        }
+
+        if (_jobAvailabilityCache.TryGetValue(key, out var cached))
+        {
+            return cached;
+        }
+
+        var availability = RequestJobPartAvailability.None;
+        try
+        {
+            availability = await _jobAvailabilityProvider.GetAvailabilityAsync(key).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("Waitlist", ex, $"Reading the job for work center '{key}' failed while building the cards' lines.");
+        }
+
+        _jobAvailabilityCache[key] = availability;
+        return availability;
+    }
 
     /// <summary>
     /// The card's built-in picture for an Item, before any configured override is applied. An Item the catalog

@@ -369,6 +369,10 @@ public sealed class RequestItemConfigurationService : IRequestItemConfigurationS
                     Label = label!.Trim(),
                     ValueType = valueType,
                     Source = source!.Trim(),
+                    // The optional job-list name (FR-050). Absent is the normal case and means the field names no
+                    // list; an unrecognised name is not a malformed payload — the choices resolver reports that
+                    // the job cannot supply the list it named, rather than the whole row being thrown away.
+                    List = ReadJsonString(element, "list")?.Trim() ?? string.Empty,
                     Order = order,
                     IsRequired = ReadJsonBool(element, "is_required"),
                 });
@@ -483,9 +487,13 @@ public sealed class RequestItemConfigurationService : IRequestItemConfigurationS
 /// <list type="number">
 /// <item>a row that carries its own list uses that list, in the order it declares;</item>
 /// <item>a row that declares an enumerated answer field sourced from the answer (<c>source = 'answer'</c>) and
-/// carries no list of its own draws on the <b>requesting job's component list</b>, which is the path
-/// <c>pickup-component</c> is configured for and the reason it was not raisable without it;</item>
-/// <item>anything else yields no choices, and the details step reports that rather than inventing a list.</item>
+/// carries no list of its own draws on the <b>job list that field names</b> — <c>list = 'component'</c> for the
+/// job's components, which is the path <c>pickup-component</c> is configured for, or <c>list = 'dunnage'</c> for
+/// the dunnage parts assigned to the job;</item>
+/// <item>a field that names no list keeps the job's <b>component</b> list, which is the path every existing row
+/// already relies on;</item>
+/// <item>anything else — including a named list the job cannot supply — yields no choices, and the details step
+/// reports that rather than inventing a list.</item>
 /// </list>
 /// </summary>
 public static class RequestItemAnswerOptionsResolver
@@ -510,12 +518,51 @@ public static class RequestItemAnswerOptionsResolver
             return configuration.Options;
         }
 
-        var declaresEnumeratedAnswer = configuration.DetailFields.Any(field =>
+        if (!DeclaresEnumeratedAnswer(configuration))
+        {
+            return Array.Empty<string>();
+        }
+
+        var namedList = DeclaredJobListName(configuration);
+        return namedList.Length > 0
+            ? ResolveNamedJobList(namedList, availability)
+            : availability.ComponentPartNumbers;
+    }
+
+    /// <summary>
+    /// The job-derived list this Item's enumerated answer names, or empty when it names none. The flow reads it to
+    /// know which step the answer needs — a named list is configuration, never the Item's identity (FR-013).
+    /// </summary>
+    public static string DeclaredJobListName(RequestItemConfiguration? configuration)
+    {
+        if (configuration is null)
+        {
+            return string.Empty;
+        }
+
+        return configuration.DetailFields
+            .Where(field => field.ValueType == RequestItemValueType.Enum
+                && string.Equals(field.Source, RequestItemFieldDefinition.Sources.Answer, StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(field.List))
+            .Select(field => field.List.Trim())
+            .FirstOrDefault() ?? string.Empty;
+    }
+
+    /// <summary>The job's own values for the named list, or none when the name is one nothing supplies.</summary>
+    private static IReadOnlyList<string> ResolveNamedJobList(string name, RequestJobPartAvailability availability) =>
+        name switch
+        {
+            var candidate when string.Equals(candidate, RequestItemFieldDefinition.Lists.Component, StringComparison.OrdinalIgnoreCase) =>
+                availability.ComponentPartNumbers,
+            var candidate when string.Equals(candidate, RequestItemFieldDefinition.Lists.Dunnage, StringComparison.OrdinalIgnoreCase) =>
+                availability.DunnageParts.Select(part => part.PartNumber).ToArray(),
+            var candidate when string.Equals(candidate, RequestItemFieldDefinition.Lists.Die, StringComparison.OrdinalIgnoreCase) =>
+                availability.Dies.Select(die => die.Label).ToArray(),
+            _ => Array.Empty<string>(),
+        };
+
+    private static bool DeclaresEnumeratedAnswer(RequestItemConfiguration configuration) =>
+        configuration.DetailFields.Any(field =>
             field.ValueType == RequestItemValueType.Enum
             && string.Equals(field.Source, RequestItemFieldDefinition.Sources.Answer, StringComparison.OrdinalIgnoreCase));
-
-        return declaresEnumeratedAnswer
-            ? availability.ComponentPartNumbers
-            : Array.Empty<string>();
-    }
 }

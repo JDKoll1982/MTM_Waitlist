@@ -141,4 +141,54 @@ public sealed class NewRequestFlowStateTests
 
         Assert.AreEqual(typeof(NewRequestDetailsViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
+
+    [TestMethod]
+    public void GetNextStepType_ReturnsTheDunnageStep_WhenTheAnswerNamesTheDunnageList()
+    {
+        // FR-050: which step asks for the answer is decided by what the ROW declares, never by the Item's code —
+        // this row is deliberately not one of the two dunnage Items.
+        var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Dunnage));
+
+        Assert.AreEqual(typeof(NewRequestDunnageViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    [TestMethod]
+    public void GetNextStepType_ReturnsDetails_WhenTheAnswerNamesTheComponentList()
+    {
+        // The same mechanism read the other way: naming the component list keeps the ordinary details step, so two
+        // Items cannot be told apart by anything but their rows (FR-013).
+        var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Component));
+
+        Assert.AreEqual(typeof(NewRequestDetailsViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    [TestMethod]
+    public void GetNextStepType_ReturnsPreview_OnceTheDunnageAnswerIsCaptured()
+    {
+        var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Dunnage), inputValue: "DN-STL-4");
+
+        Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    /// <summary>A usable row that asks for one enumerated answer drawn from the named job list.</summary>
+    private static RequestItemConfiguration ConfigurationNaming(string listName) => new()
+    {
+        Item = "other",
+        Category = "Other",
+        ControlFlow = RequestItemConfiguration.CollectInputThenConfirm,
+        RequiresAnswer = true,
+        AnswerValueType = RequestItemValueType.Enum,
+        DetailFields = new[]
+        {
+            new RequestItemFieldDefinition
+            {
+                Label = "Dunnage part",
+                ValueType = RequestItemValueType.Enum,
+                Source = RequestItemFieldDefinition.Sources.Answer,
+                List = listName,
+                Order = 1,
+                IsRequired = true,
+            },
+        },
+    };
 }

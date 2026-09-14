@@ -1,10 +1,21 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.1.1 → 1.1.2 (PATCH — expression, cross-reference, and determinism only; no principle
-added, removed, redefined, or weakened). Last amended: 2026-09-12.
-Templates: .specify/templates/* aligned. specs/001-module-mock-visual-fallback/plan.md still cites v1.0.0
-(tracked as T137). Full amendment history and rationale: `.specify/memory/constitution-history.md`.
+Version change: 1.1.2 → 1.2.0 (MINOR — one principle ADDED; no principle removed, redefined, or weakened).
+Last amended: 2026-09-14.
+Added: Principle VII (Readable, End-User-Facing Delivery).
+Propagated to: `.github/instructions/response-format.instructions.md` (new — the working detail),
+`.github/copilot-instructions.md` (whose "Output code blocks directly / raw information density"
+invariant directly contradicted the new principle and was reconciled), and
+`.github/instructions/spec-kit.instructions.md`. The Companion pipeline's command sources under
+`.specify/extensions/companion/commands/*.md` and the generated agents under
+`.github/agents/speckit.companion.*.agent.md` carry the same wording as a `communication` part.
+Templates: `.specify/templates/*` need no change — verified 2026-09-14 that no template enumerates the
+principles (only `constitution-template.md` placeholders and `plan-template.md`'s "[Gates determined
+based on constitution file]" line), so append-only numbering leaves Principles I–VI and every
+cross-reference to them intact (e.g. `mcp-doc-research.instructions.md` cites Principle IV).
+specs/001-module-mock-visual-fallback/plan.md still cites v1.0.0 (tracked as T137).
+Full amendment history and rationale: `.specify/memory/constitution-history.md`.
 -->
 
 # MTM_Waitlist Constitution
@@ -108,6 +119,31 @@ documented in `.github/copilot-instructions.md` (Known Build Quirks).
 Rationale: the repo's XAML toolchain masks real errors and its solution build can race; explicit,
 reproducible gates are the only reliable signal that a change is sound.
 
+### VII. Readable, End-User-Facing Delivery
+
+Every chat reply MUST be written in **plain English** for the person who asked for the work, never as a
+compiler log: what changed, what it means for the product, and what is still open. A reply MUST NOT paste
+raw material into the chat — tool output, terminal transcripts, JSON payloads, stack traces, file dumps,
+diffs, or whole artifact bodies. Progress MUST be reported in short sentences, never by restating the
+task list and never by narrating each command as it is run.
+
+Code fences MUST be safe to render: a fence starts at **column 0**, a fence indented by four or more
+spaces (or placed inside a list item) is an *indented code block* whose backticks render literally and
+which garbles everything after it, and content that itself contains a fence MUST be wrapped in a
+**longer** run of backticks than the inner one (GitHub Flavored Markdown spec, "Indented Code Block
+(4 Spaces)").
+
+Anything the person must do **after** the session — approving a step, running a command, reinstalling
+the database, restarting the application, supplying a credential — MUST be the **last** section of the
+reply, under the heading `## What you need to do`, as a short numbered list in the order they should do
+them. When there is nothing, the reply MUST end with the single line `Nothing needed from you.` An
+action MUST NOT be buried in the middle of a reply.
+
+Rationale: the chat transcript is how this repo's work is reviewed, audited and resumed. A garbled or
+fence-broken reply hides the decisions and the open work, and an action buried mid-reply is an action
+that does not happen. The working detail lives in
+`.github/instructions/response-format.instructions.md`.
+
 ## Additional Constraints
 
 ### Security & Secrets
@@ -161,4 +197,4 @@ ticked; unjustified violations block completion.
 Runtime development guidance remains in the repo instruction files, which MUST stay consistent with
 this constitution.
 
-**Version**: 1.1.2 | **Ratified**: 2026-09-09 | **Last Amended**: 2026-09-12
+**Version**: 1.2.0 | **Ratified**: 2026-09-09 | **Last Amended**: 2026-09-14

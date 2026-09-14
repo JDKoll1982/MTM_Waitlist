@@ -219,9 +219,11 @@ restoring that session.
 - **FR-004**: A stored request MUST carry the chosen Category and Item, and MUST NOT carry a request type or a
   subtype.
 - **FR-005**: Every request on the list MUST render as one card whose first line is the **Item's umbrella
-  phrase** — the Category's own word, or an Item-specific phrase where the Item defines one — and whose second
+  phrase** — the Category's own word, or an Item-specific phrase where the Item defines one, and where the Item
+declares it, the requesting job's part number beside that phrase — and whose second
   line is the **Item's identifier**, which may be a fixed value, a value read from the job, or a value that
-  depends on an answer captured during the flow.
+  depends on an answer captured during the flow. A first line whose job value cannot be resolved MUST fall back to
+the umbrella phrase rather than reporting a fault; the identifier is where a fault is reported.
 - **FR-006**: The card MUST use one layout for every Item; no layout variant may be selected by Item.
 - **FR-007**: An Item's own fields MUST appear on the request's page and MUST NOT appear on the card.
 - **FR-008**: The card MUST keep the four metadata rows — who asked, the work centre, the time remaining, and how
@@ -315,6 +317,36 @@ restoring that session.
   own card, without cancelling it, so it can be accepted again by the same handler or a different one. This
   **supersedes** the earlier decision that releasing keeps no screen control; the earlier reason is kept beside the
   new behaviour rather than deleted.
+- **FR-048**: A dunnage Item MUST ask **which** dunnage the operator needs, offering the dunnage parts assigned to
+  the requesting job as selectable cards. Nothing may be chosen on the operator's behalf, and the flow MUST NOT
+  continue until a part has been chosen.
+- **FR-049**: The dunnage step MUST offer a **substitute**: a control that opens the receiving dunnage catalogue,
+  including parts **not** assigned to the requesting job, so an operator who has to use something else can say so.
+  The part chosen there MUST become the request's value exactly as an assigned part does, and dismissing the picker
+  MUST change nothing.
+- **FR-050**: Which job list an Item's enumerated answer draws on MUST be **declared on the Item's configuration
+  row** — a job-list name on the answer field — and MUST NOT be inferred from the Item's identity. The dunnage
+  Items name the list of dunnage parts assigned to the requesting job.
+- **FR-051**: The card's second line for a dunnage request MUST show the part the operator ended on — one the job
+  carried or their substitute — read back from the value the request stored, which is the only place it can come
+  from once the request has been raised.
+- **FR-052**: The die Items' first line MUST name the requesting job's part number — `Pickup Die: PART-9003` — so a
+  handler can tell which part the die is for, and MUST fall back to the phrase alone when the job cannot supply it.
+- **FR-053**: The die Items' second line MUST show the die's own number and where the die is, together, read from
+  the job — e.g. `FGT0002000-DIE SHOP`. The value the operator picked as the destination MUST NOT change the
+  identifier: the two die lines say which part, which die, and where it is, whatever the destination.
+- **FR-054**: Every die assigned to the requesting job MUST travel with that job in the job's own order. Where a job
+  has **more than one** die, the flow MUST ask the operator which die they need, MUST allow more than one to be
+  selected, and MUST raise **one request per die selected** — never one request carrying several dies, and never a
+  request whose die was chosen on the operator's behalf.
+- **FR-055**: A die row carrying the query's `No Die` placeholder MUST NOT be counted as a die. A job whose only die
+  row is that placeholder has **no die**: it MUST NOT be offered a die Item, and no die value or die location may
+  be shown for it. The rule MUST be one definition shared by the Setup screens and the New Request picker, so the
+  two cannot disagree about what a die is.
+- **FR-056**: A die's identifier MUST be composed as its number followed by its location, and MUST omit the
+  separator when no location is known — `FGT0002000-DIE SHOP`, or `FGT0002000` alone. The composition MUST be the
+  same value wherever a die is shown, so a card, a detail row and the step that offers the choice cannot format
+  the same die three different ways. An unknown location MUST NOT render as a trailing separator.
 
 ### Key Entities
 
@@ -325,8 +357,8 @@ restoring that session.
   value read from the job, or one that depends on an answer the flow captured — and whether it needs anything
   from the person raising it.
 - **Item configuration** — an Item's behaviour: how far the flow goes before confirmation, whether an answer is
-  required, the prompt shown, the limits on the answer, the options offered, and the fields the Item's page
-  shows. One row per Item.
+  required, the prompt shown, the limits on the answer, the options offered, which job list an enumerated answer
+  draws on, and the fields the Item's page shows. One row per Item.
 - **Item setting** — an Item's allotted minutes and its picture. Configurable, and separate from the request
   data.
 - **Item observed time** — derived, not stored: the average time an Item's completed requests actually took,
@@ -378,6 +410,19 @@ restoring that session.
 - **SC-021**: Zero requests name an identity other than the person who raised them — each request's requester is
   resolved from that person's own stored employee record, never from a stand-in — and a claimed request can be
   returned to the queue from its own card.
+- **SC-022**: A dunnage request cannot be raised without the operator having chosen a dunnage part, and its card
+  then shows the part they chose — including when the part was a substitute rather than one the job carried.
+- **SC-023**: The dunnage step is reached because the Item's configuration names the job's dunnage list, not
+  because of the Item's code: changing that one row moves which step asks for the answer, with no code change and
+  no rebuild.
+- **SC-024**: A die request's card names the part the die is assigned to on its first line and the die's own number
+  and location on its second, both read from the requesting job — including when the operator's chosen destination
+  is something else.
+- **SC-025**: A job whose only die row is the `No Die` placeholder is offered no die Item at all, and shows no die
+  value or die location anywhere in the flow — and flipping that one row to a real die makes the Item appear again,
+  with no code change and no rebuild.
+- **SC-026**: A die whose location is unknown renders as its number alone — zero instances of a trailing separator
+  or an empty location slot on any card, detail row or choice offered to the operator.
 
 ## Assumptions
 

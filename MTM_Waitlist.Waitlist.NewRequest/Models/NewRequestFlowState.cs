@@ -39,6 +39,13 @@ public sealed class NewRequestFlowState
 
     public string? InputValue { get; set; }
 
+    /// <summary>
+    /// The dunnage part the operator ended on at the dunnage step, when it is <b>not</b> one the job carries —
+    /// their substitute (FR-049). It is kept so returning to the step still shows the card they chose; the value
+    /// the request stores is <see cref="InputValue"/>, assigned or substituted alike.
+    /// </summary>
+    public RequestDunnagePart? SelectedDunnagePart { get; set; }
+
     public string RequesterEmployeeNumber { get; set; } = string.Empty;
 
     public string RequesterEmployeeName { get; set; } = string.Empty;

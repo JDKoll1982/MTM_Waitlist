@@ -23,11 +23,13 @@ public static class WaitlistRequestTitles
     private static readonly RequestItemLine2Resolver Resolver = new();
 
     /// <summary>
-    /// Card Line 1 — the umbrella phrase: the Category's own word, or the Item's own phrase where the Item
-    /// defines one (<c>contracts/card-and-identifier.md</c> §2). Empty when the stored Item code is not
-    /// catalogued; a missing code is reported through Line 2 rather than papered over here.
+    /// Card Line 1 — the umbrella phrase: the Category's own word, or the Item's own phrase where the Item defines
+    /// one, resolved against the values the request and the requesting job carry
+    /// (<c>contracts/card-and-identifier.md</c> §2). Empty when the stored Item code is not catalogued; a missing
+    /// code is reported through Line 2 rather than papered over here.
     /// </summary>
-    public static string ResolveLine1(RequestItemDefinition? item) => item?.UmbrellaVerb ?? string.Empty;
+    public static string ResolveLine1(RequestItemDefinition? item, RequestItemLine2Context? context = null)
+        => item is null ? string.Empty : Resolver.ResolveLine1(item, context);
 
     /// <summary>
     /// Card Line 2 — the identifier, resolved from the Item's <see cref="RequestItemDefinition.CardLine2Template"/>
@@ -43,4 +45,60 @@ public static class WaitlistRequestTitles
                 RequestItemLine2Resolver.ProblemKey,
                 RequestItemLine2Resolver.ResolveProblemMessage(null!, null))
             : Resolver.Resolve(item, context ?? new RequestItemLine2Context());
+
+    /// <summary>
+    /// The values the Item's templates resolve against, taken from what the request carries and from the
+    /// requesting job.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The request holds one captured answer, and where the Item's identifier <b>is</b> that answer the template
+    /// says so: a template naming <c>{dunnage_part}</c> is filled from the captured answer, which is the dunnage
+    /// part the operator ended on — one the job carried, or their substitute. The stored request cannot tell those
+    /// two apart and does not need to: the request stores the part the operator said they needed (FR-048,
+    /// FR-051).
+    /// </para>
+    /// <para>
+    /// The die's number and its location, and the job's own part number, are <b>job</b> values, not answers — the
+    /// request never stored them — so they come from the job snapshot the composition root hands in. Each one is
+    /// filled only when the Item's templates actually name it, so an Item that asks for none of them is handed
+    /// none of them and its card is unchanged (FR-053). Every token left unfilled stays unresolved, with the
+    /// Item's own display name shown — never a substituted value, never a blank
+    /// (<c>contracts/card-and-identifier.md</c> §3).
+    /// </para>
+    /// </remarks>
+    public static RequestItemLine2Context ResolveContext(
+        WaitlistRequest? request,
+        RequestJobPartAvailability? jobAvailability = null)
+    {
+        var answer = request?.InputValue;
+        var item = request?.ItemDefinition;
+        var job = jobAvailability;
+
+        // The die is handed over when a template names the die at all — as its own composed value, or as either
+        // half of it — so an Item that writes `{die}` is not left unresolved while one that writes
+        // `{die_number}` still resolves (FR-053, FR-056).
+        var namesDie = NamesToken(item, "die")
+            || NamesToken(item, "die_number")
+            || NamesToken(item, "die_location");
+
+        return new RequestItemLine2Context(
+            Answer: answer,
+            Destination: answer,
+            DunnagePart: NamesToken(item, "dunnage_part") ? answer : null,
+            JobPartNumber: NamesToken(item, "job_part_number") ? job?.JobPartNumber : null,
+            DieNumber: namesDie ? job?.DieNumber : null,
+            DieLocation: namesDie ? job?.DieLocation : null);
+    }
+
+    /// <summary>
+    /// Whether an Item's templates ask for the named token. Both lines are consulted: an Item's first line may
+    /// name a job value its identifier does not (the die Items name the job's part number on Line 1 and the die
+    /// itself on Line 2), and a value is only handed over where something actually asks for it.
+    /// </summary>
+    private static bool NamesToken(RequestItemDefinition? item, string token) =>
+        NamesTokenIn(item?.CardLine1Template, token) || NamesTokenIn(item?.CardLine2Template, token);
+
+    private static bool NamesTokenIn(string? template, string token) =>
+        template?.Contains($"{{{token}}}", StringComparison.OrdinalIgnoreCase) == true;
 }

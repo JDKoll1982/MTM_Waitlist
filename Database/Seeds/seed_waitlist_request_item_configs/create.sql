@@ -19,6 +19,9 @@
 --   * pickup-component's options are the requesting job's component list, so its options_json is NULL: the
 --     enumerated values arrive with the job snapshot rather than from configuration. pickup-die's options are
 --     fixed and are seeded here.
+--   * pickup-dunnage and deliver-dunnage ask *which* dunnage the operator needs, so they too carry no
+--     options_json: the choices are the dunnage parts assigned to the requesting job, and the `list` key on the
+--     answer field names that job list so the choice never depends on the Item's identity (FR-013, FR-048).
 --   * detail_fields_json's key order stays inside the JSON payload: a bare `order` column is banned by
 --     Database/Database-Ruleset.md and is never introduced.
 
@@ -113,10 +116,10 @@ VALUES
    JSON_OBJECT('label','Requesting work center','value_type','string','source','fixed','order',1,'is_required',FALSE)),
  20, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
-('c1000000-0000-4000-8000-000000000009', 'pickup-dunnage', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
- 0, 200, NULL,
+('c1000000-0000-4000-8000-000000000009', 'pickup-dunnage', 'Pickup', 'collect-input-then-confirm', 1, 'enum',
+ 'Which dunnage do you need from the material handlers?', 0, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Dunnage part','value_type','string','source','job','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Dunnage part','value_type','enum','source','answer','list','dunnage','order',1,'is_required',TRUE),
    JSON_OBJECT('label','Description','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Home location','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Quantity on hand','value_type','string','source','job','order',4,'is_required',FALSE)),
@@ -178,10 +181,10 @@ VALUES
    JSON_OBJECT('label','Destination','value_type','string','source','fixed','order',4,'is_required',FALSE)),
  45, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
-('c1000000-0000-4000-8000-000000000017', 'deliver-dunnage', 'Deliver', 'direct-to-confirmation', 0, NULL, NULL,
- 0, 200, NULL,
+('c1000000-0000-4000-8000-000000000017', 'deliver-dunnage', 'Deliver', 'collect-input-then-confirm', 1, 'enum',
+ 'Which dunnage do you need from the material handlers?', 0, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Dunnage part','value_type','string','source','job','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Dunnage part','value_type','enum','source','answer','list','dunnage','order',1,'is_required',TRUE),
    JSON_OBJECT('label','Description','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Home location','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Quantity on hand','value_type','string','source','job','order',4,'is_required',FALSE)),

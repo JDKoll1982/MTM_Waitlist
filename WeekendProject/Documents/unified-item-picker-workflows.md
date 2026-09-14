@@ -106,11 +106,21 @@ flowchart TD
     E -- "No" --> X["Item not offered"]
     E -- "Yes" --> D["Item: Dunnage"]
     D --> F["Read selected_dunnage_parts_json"]
-    F --> G["Resolve dunnage part"]
-    G --> H["Preview"]
-    H --> I["Confirm"]
-    I --> J["Create Pickup request"]
+    F --> G["Show the job's parts as picture cards"]
+    G --> H{"Operator picks which part they need"}
+    H -- "Uses a job part" --> I["Preview"]
+    H -- "'Use substitute' → receiving catalogue" --> J["Part not on the job"]
+
+    I --> K["Confirm"]
+    J --> K
+    K --> L["Create Pickup request"]
+
 ```
+
+> **Superseded 2026-09-14.** This diagram used to resolve the dunnage part for the operator (*read the JSON, resolve
+> the part, preview*). The operator now **picks** the part they need from the ones the job carries, and a **substitute**
+> control opens the receiving catalogue for a part the job does not carry. See
+> `specs/004-unified-card-item-picker` FR-048 … FR-051 and the two reseeded `waitlist_request_item_configs` rows.
 
 ---
 
@@ -273,12 +283,14 @@ flowchart TD
     C --> E{"Job has dunnage?"}
     E -- "No" --> X["Item not offered"]
     E -- "Yes" --> D["Item: Dunnage"]
-    D --> F["Read selected dunnage assignment"]
-    F --> G["Resolve dunnage part"]
-    G --> H["Destination = requesting Work Center"]
-    H --> I["Preview"]
-    I --> J["Confirm"]
-    J --> K["Create Deliver request"]
+    D --> F["Show the job's parts as picture cards"]
+    F --> G{"Operator picks which part they need"}
+    G -- "Uses a job part" --> H["Destination = requesting Work Center"]
+    G -- "'Use substitute' → receiving catalogue" --> I["Part not on the job"]
+    H --> J["Preview"]
+    I --> J
+    J --> K["Confirm"]
+    K --> L["Create Deliver request"]
 ```
 
 ---

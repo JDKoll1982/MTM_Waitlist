@@ -39,7 +39,8 @@ rows. This feature keeps the identity and display columns and **moves the behavi
 | `Order` | `int` | CSV col 2 | position within the Category |
 | `DisplayNameResourceKey` | `string` | **new** | resource key for the display name; replaces the literal |
 | `NormalizedName` | `string` | CSV col 5 | kept |
-| `UmbrellaVerb` | `string` | CSV col 6 | card Line 1; `Wrong Coil Bring:` / `Wrong Flatstock Bring:` for the two wrong-material Items |
+| `UmbrellaVerb` | `string` | CSV col 6 | card Line 1; `Wrong Coil Bring:` / `Wrong Flatstock Bring:` for the two wrong-material Items, `Pickup Die:` / `Deliver Die:` for the die Items |
+| `CardLine1Template` | `string` | CSV col 6 | **new, optional** — the first line as a template, whose `{umbrella}` token is `UmbrellaVerb`; the die Items read `{umbrella} {job_part_number}`. Empty means the phrase alone |
 | `CardLine2Template` | `string` | CSV col 11 | **new** — the identifier template (§7) |
 | `ProducedValue` | `string` | CSV col 18 | kept — the value the request stores, distinct from what the card displays |
 | ~~`ValueType`~~ | — | CSV col 10 | **moved** to `RequestItemConfiguration.AnswerValueType` |
@@ -117,6 +118,7 @@ spreadsheet.
 | `label` | the resource key or literal shown beside the value |
 | `value_type` | the approved `value_type` name — `string`, `text`, `enum` |
 | `source` | where the value comes from: a job field, the captured answer, or a fixed value |
+| `list` | **new, optional** — the job-derived list this field's choices come from, by name (`component`, `dunnage`). Absent means the job's component list, which is what the existing rows rely on; a name nothing supplies yields no choices, which the screen reports rather than inventing a list (FR-035, FR-050) |
 | `order` | position in the declared order; the page renders fields in this order |
 | `is_required` | whether the page blocks confirmation without it |
 

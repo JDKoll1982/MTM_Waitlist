@@ -18,7 +18,8 @@ public sealed record RequestItemLine2Context(
     string? Answer = null,
     string? Destination = null,
     string? Component = null,
-    string? Defect = null);
+    string? Defect = null,
+    string? JobPartNumber = null);
 
 /// <summary>The resolved identifier, and whether it resolved at all.</summary>
 public sealed record RequestItemLine2Result(string Text, bool IsResolved, string ProblemKey, string Problem)
@@ -51,33 +52,91 @@ public sealed class RequestItemLine2Resolver
     {
         ArgumentNullException.ThrowIfNull(item);
         var effectiveContext = context ?? new RequestItemLine2Context();
-        var tokens = BuildTokens(effectiveContext);
 
-        var unresolvedToken = (string?)null;
-        var text = new System.Text.StringBuilder();
-        var template = item.CardLine2Template ?? string.Empty;
+        return TryResolveTemplate(
+            item.CardLine2Template,
+            BuildTokens(effectiveContext),
+            effectiveContext.Destination,
+            out var text,
+            out var unresolvedToken)
+                ? RequestItemLine2Result.Resolved(text)
+                : new RequestItemLine2Result(
+                    ResolveDisplayName(item),
+                    false,
+                    ProblemKey,
+                    ResolveProblemMessage(item, unresolvedToken));
+    }
+
+    /// <summary>
+    /// Resolves an Item's <b>first</b> line — the umbrella phrase, plus whatever the Item declares beside it
+    /// (<see cref="RequestItemDefinition.CardLine1Template"/>). It is the same deliberately-small template
+    /// language the identifier uses, with one further token of its own: <c>{umbrella}</c>, the Item's own phrase.
+    /// </summary>
+    /// <remarks>
+    /// There is <b>no</b> problem report here, and that is the point. The first line's job is to say what kind of
+    /// request this is, and the phrase alone says it even when the job value beside it is missing — so an
+    /// unresolvable token degrades to the phrase rather than turning the card's heading into a configuration
+    /// fault. Where a fault <b>is</b> reported is the identifier, which is the line that would otherwise be blank
+    /// (FR-005, FR-026).
+    /// </remarks>
+    public string ResolveLine1(RequestItemDefinition item, RequestItemLine2Context? context = null)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        var template = item.CardLine1Template ?? string.Empty;
+        if (template.IndexOf('{') < 0)
+        {
+            return item.UmbrellaVerb;
+        }
+
+        var tokens = BuildTokens(context ?? new RequestItemLine2Context());
+        tokens["umbrella"] = item.UmbrellaVerb;
+
+        return TryResolveTemplate(template, tokens, context?.Destination, out var text, out _)
+            ? text
+            : item.UmbrellaVerb;
+    }
+
+    /// <summary>
+    /// Walks a template once: literal text is copied through, a <c>{token}</c> is replaced by its value, and the
+    /// language's one conditional — <c>{primary:secondary=conditionValue}</c> — picks between two tokens by the
+    /// captured destination. Returns <c>false</c> when any token is unknown or blank, handing back the offending
+    /// token so each caller can decide what to do about it.
+    /// </summary>
+    private static bool TryResolveTemplate(
+        string? template,
+        Dictionary<string, string?> tokens,
+        string? destination,
+        out string text,
+        out string? unresolvedToken)
+    {
+        unresolvedToken = null;
+        text = string.Empty;
+
+        var builder = new System.Text.StringBuilder();
+        var source = template ?? string.Empty;
         var index = 0;
 
-        while (index < template.Length)
+        while (index < source.Length)
         {
-            var open = template.IndexOf('{', index);
+            var open = source.IndexOf('{', index);
             if (open < 0)
             {
-                text.Append(template, index, template.Length - index);
+                builder.Append(source, index, source.Length - index);
                 break;
             }
 
-            text.Append(template, index, open - index);
+            builder.Append(source, index, open - index);
 
-            var close = template.IndexOf('}', open + 1);
+            var close = source.IndexOf('}', open + 1);
             if (close < 0)
             {
                 // An unterminated brace is a malformed template, not literal text.
-                unresolvedToken = template[open..];
-                break;
+                unresolvedToken = source[open..];
+                return false;
             }
 
-            var body = template[(open + 1)..close];
+            var body = source[(open + 1)..close];
             var token = body;
             var colon = body.IndexOf(':');
             if (colon >= 0)
@@ -89,7 +148,7 @@ public sealed class RequestItemLine2Resolver
                 var primary = body[..colon];
                 var secondary = equals >= 0 ? alternatives[..equals] : alternatives;
                 var conditionValue = equals >= 0 ? alternatives[(equals + 1)..] : string.Empty;
-                token = string.Equals(effectiveContext.Destination?.Trim(), conditionValue.Trim(), StringComparison.OrdinalIgnoreCase)
+                token = string.Equals(destination?.Trim(), conditionValue.Trim(), StringComparison.OrdinalIgnoreCase)
                     ? secondary
                     : primary;
             }
@@ -97,29 +156,22 @@ public sealed class RequestItemLine2Resolver
             if (!tokens.TryGetValue(token.Trim(), out var value) || string.IsNullOrWhiteSpace(value))
             {
                 unresolvedToken = token;
-                break;
+                return false;
             }
 
-            text.Append(value);
+            builder.Append(value);
             index = close + 1;
         }
 
-        if (unresolvedToken is null)
+        var resolved = builder.ToString().Trim();
+        if (resolved.Length == 0)
         {
-            var resolved = text.ToString().Trim();
-            if (resolved.Length > 0)
-            {
-                return RequestItemLine2Result.Resolved(resolved);
-            }
-
-            unresolvedToken = template;
+            unresolvedToken = source;
+            return false;
         }
 
-        return new RequestItemLine2Result(
-            ResolveDisplayName(item),
-            false,
-            ProblemKey,
-            ResolveProblemMessage(item, unresolvedToken));
+        text = resolved;
+        return true;
     }
 
     /// <summary>
@@ -159,12 +211,20 @@ public sealed class RequestItemLine2Resolver
             ["part_description"] = context.PartDescription,
             ["die_number"] = context.DieNumber,
             ["die_location"] = context.DieLocation,
+            // The die's two-part identifier as one value — the number and where the die is — so a row can show both
+            // without a separator dangling when the location is unknown (FR-056). It is composed here rather than
+            // accepted ready-made, so every caller that can supply a die gets the same formatting.
+            ["die"] = RequestDiePart.ComposeLabel(context.DieNumber, context.DieLocation),
             ["dunnage_part"] = context.DunnagePart,
             ["sequence_number"] = context.SequenceNumber,
             ["scrap_type"] = context.ScrapType,
             ["answer"] = context.Answer,
             ["destination"] = context.Destination,
             ["component"] = context.Component,
-            ["defect"] = context.Defect
+            ["defect"] = context.Defect,
+            // The requesting job's own part number — the part a die is assigned to, which the die Items' first
+            // line names. It is deliberately a token of its own: `part_number` means the *subordinate's* number
+            // for the coil and flatstock Items, so the two must not be conflated (FR-005).
+            ["job_part_number"] = context.JobPartNumber
         };
 }

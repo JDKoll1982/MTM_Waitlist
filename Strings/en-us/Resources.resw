@@ -882,6 +882,24 @@
   <data name="NewRequest_Item.ContinueButton.Content" xml:space="preserve">
     <value>Continue</value>
   </data>
+  <data name="NewRequest_Dunnage.Title.Text" xml:space="preserve">
+    <value>New Request - Choose Dunnage</value>
+  </data>
+  <data name="NewRequest_Dunnage.BackButton.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="NewRequest_Dunnage.SubstituteButton.Content" xml:space="preserve">
+    <value>Use substitute…</value>
+  </data>
+  <data name="NewRequest_Dunnage.Prompt" xml:space="preserve">
+    <value>Which dunnage do you need from the material handlers?</value>
+  </data>
+  <data name="NewRequest_Dunnage.NoAssignedParts.Message" xml:space="preserve">
+    <value>This job has no dunnage saved on it. Use a substitute if you need one, or go back and choose a different item.</value>
+  </data>
+  <data name="NewRequest_Dunnage.SubstituteFailed.Message" xml:space="preserve">
+    <value>The dunnage list could not be opened. Try again, or choose one of the parts listed here.</value>
+  </data>
   <data name="NewRequest_Preview.ItemLabel.Text" xml:space="preserve">
     <value>Item</value>
   </data>
@@ -914,6 +932,12 @@
   </data>
   <data name="RequestItem.deliver-wrong-flatstock.Line1" xml:space="preserve">
     <value>Wrong Flatstock Bring:</value>
+  </data>
+  <data name="RequestItem.pickup-die.Line1" xml:space="preserve">
+    <value>Pickup Die:</value>
+  </data>
+  <data name="RequestItem.deliver-die.Line1" xml:space="preserve">
+    <value>Deliver Die:</value>
   </data>
   <data name="Shell_SortOrder.Label" xml:space="preserve">
     <value>Sort by</value>

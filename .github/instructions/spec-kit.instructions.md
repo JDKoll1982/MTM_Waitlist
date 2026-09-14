@@ -32,6 +32,16 @@ Run the core sequence in order; `specify` must precede `plan`, which must preced
   resolve-template,setup-tasks,update-agent-context}.ps1`; Copilot integration: `.specify/integrations/copilot/scripts/update-context.ps1`.
 
 ## Rules
+- **Replies follow Principle VII.** Every `/speckit.*` step's chat reply is plain English and
+  end-user facing: what changed and what is still open. Never paste raw tool output, JSON, diffs, file
+  dumps or whole artifacts, and never print a code block to show a change you made with a tool — see
+  `.github/instructions/response-format.instructions.md`. Anything the person must do after the session is
+  the **last** section of the reply, under `## What you need to do`; if nothing, end with
+  `Nothing needed from you.`
+- **Run the spec-kit scripts with a real interpreter.** Every `.specify/scripts/powershell/*.ps1`
+  invocation needs `-ExecutionPolicy Bypass`, and the Companion extension's `write-context.py` / `doctor.py`
+  / `drift.py` calls must use `python` or `py` — **never `python3`**, which on this machine is a 0-byte
+  Microsoft Store alias that answers "Python was not found" and silently drops the run journal.
 - **Specs are technology-agnostic** (WHAT/WHY, user value, acceptance scenarios, success criteria). No
   implementation details in `spec.md`; put the technical design in `plan.md` and the work items in `tasks.md`.
 - **One feature per `/speckit.specify`** invocation.

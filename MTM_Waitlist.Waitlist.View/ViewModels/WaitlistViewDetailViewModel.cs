@@ -24,6 +24,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     private readonly IWaitlistInventoryService? _inventoryService;
     private readonly IImageLocationService? _imageLocationService;
     private readonly IRequestItemConfigurationService? _itemConfigurationService;
+    private readonly IRequestJobPartAvailabilityProvider? _jobAvailabilityProvider;
+    private readonly Dictionary<string, RequestJobPartAvailability> _jobAvailabilityCache = new(StringComparer.OrdinalIgnoreCase);
     private readonly string _currentEmployeeNumber;
     private readonly string _currentEmployeeName;
     private readonly string _currentRole;
@@ -174,7 +176,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         StartupState? startupState = null,
         DispatcherQueue? dispatcherQueue = null,
         IWaitlistMessageSeenStore? messageSeenStore = null,
-        IRequestItemConfigurationService? itemConfigurationService = null)
+        IRequestItemConfigurationService? itemConfigurationService = null,
+        IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -185,6 +188,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _requestService = requestService;
         _inventoryService = inventoryService;
         _itemConfigurationService = itemConfigurationService;
+        _jobAvailabilityProvider = jobAvailabilityProvider;
         _currentEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
         _currentEmployeeName = startupState?.EmployeeName?.Trim() ?? string.Empty;
         _currentRole = startupState?.CurrentRole?.Trim() ?? string.Empty;
@@ -518,10 +522,18 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             _imageLocationSubscription = _imageLocationService.SubscribeToImageLocationChanges(OnImageLocationChanged);
         }
 
+        // A fresh visit re-reads the requesting job: the die it carries can have moved since this page last showed
+        // it, and the card must not outlive the value it was built from.
+        _jobAvailabilityCache.Clear();
+
         LoadItemAndSections();
 
         // The declared-field grid is a configuration read, so it is loaded alongside the request's own rows.
         _ = LoadDeclaredFieldRowsAsync();
+
+        // The requesting job is a store read of its own — the die and its location come from it — so it is
+        // requested here and the page rebuilds when it lands.
+        _ = EnsureJobAvailabilityAsync();
 
         // The history is a store read, so it is awaited separately from the synchronous row/section build.
         _ = LoadHistoryAsync();
@@ -603,7 +615,10 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             }
 
             _resolvedRequestId = match.Id;
-            Item = WaitlistViewViewModel.CreateSessionOrder(match);
+
+            // The requesting job travels with the card: the die's number and where the die is are job values the
+            // request never stored, so without the job the die rows on this page cannot be drawn (FR-053).
+            Item = WaitlistViewViewModel.CreateSessionOrder(match, ResolveJobAvailability(match.WorkCenter));
         }
 
         ApplyItemState(Item);
@@ -697,6 +712,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             }
 
             var request = ResolveRequest(item);
+            var jobAvailability = ResolveJobAvailability(request?.WorkCenter);
 
             var declared = configuration.DetailFields
                 .OrderBy(field => field.Order)
@@ -704,7 +720,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
                 {
                     Label = field.Label,
                     ValueType = field.ValueType,
-                    Value = ResolveDeclaredFieldValue(field, item, request) ?? string.Empty,
+                    Value = ResolveDeclaredFieldValue(field, item, request, jobAvailability) ?? string.Empty,
                 })
                 .Where(field => !string.IsNullOrWhiteSpace(field.Label) && !string.IsNullOrWhiteSpace(field.Value))
                 .ToList();
@@ -732,20 +748,88 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
     /// <summary>
     /// The value a declared field renders, from a source the page actually holds. <c>answer</c> is the one
-    /// answer the flow captured; every other source is looked up by the field's own label among the values the
-    /// request carries. A label that nothing carries yields nothing, so the row is not drawn — never a
-    /// substituted value, never a blank standing in for one.
+    /// answer the flow captured; <c>job</c> is a value the <b>requesting job</b> carries and the request never
+    /// stored — the die whose number and location a die request is about; every other source is looked up by the
+    /// field's own label among the values the request carries. A label that nothing carries yields nothing, so the
+    /// row is not drawn — never a substituted value, never a blank standing in for one.
     /// </summary>
-    private static string? ResolveDeclaredFieldValue(RequestItemFieldDefinition field, SampleOrder item, WaitlistRequest? request)
+    private static string? ResolveDeclaredFieldValue(
+        RequestItemFieldDefinition field,
+        SampleOrder item,
+        WaitlistRequest? request,
+        RequestJobPartAvailability? jobAvailability)
     {
         if (string.Equals(field.Source, RequestItemFieldDefinition.Sources.Answer, StringComparison.OrdinalIgnoreCase))
         {
             return request?.InputValue;
         }
 
+        if (string.Equals(field.Source, RequestItemFieldDefinition.Sources.Job, StringComparison.OrdinalIgnoreCase))
+        {
+            return RequestJobFieldValues.Resolve(field.Label, jobAvailability);
+        }
+
         return FieldValue(item, field.Label);
     }
 
+    /// <summary>
+    /// The requesting job as this page last read it. Until the read lands the page draws only the rows the request
+    /// itself carries, and it is rebuilt once the job arrives (FR-053).
+    /// </summary>
+    private RequestJobPartAvailability ResolveJobAvailability(string? workCenter)
+    {
+        var key = workCenter?.Trim() ?? string.Empty;
+        return key.Length > 0 && _jobAvailabilityCache.TryGetValue(key, out var cached)
+            ? cached
+            : RequestJobPartAvailability.None;
+    }
+
+    /// <summary>
+    /// Reads the requesting job once per work centre and rebuilds the page when it arrives.
+    /// </summary>
+    /// <remarks>
+    /// The read is deliberately not fatal. The die's number and its location are job values, so a job that cannot
+    /// be read leaves the rows the request itself carries rather than replacing the whole page with a failure: the
+    /// request on screen is still worth reading, and the failure is logged.
+    /// </remarks>
+    private async Task EnsureJobAvailabilityAsync()
+    {
+        if (_jobAvailabilityProvider is null)
+        {
+            return;
+        }
+
+        var workCenter = _resolvedRequestId is Guid known
+            ? _requestService?.GetRequest(known)?.WorkCenter
+            : null;
+
+        var key = workCenter?.Trim() ?? string.Empty;
+        if (key.Length == 0 || _jobAvailabilityCache.ContainsKey(key))
+        {
+            return;
+        }
+
+        RequestJobPartAvailability availability;
+        try
+        {
+            availability = await _jobAvailabilityProvider.GetAvailabilityAsync(key).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "WaitlistDetail",
+                ex,
+                $"Reading the job for work center '{key}' failed; the page keeps the rows the request itself carries.");
+            return;
+        }
+
+        _jobAvailabilityCache[key] = availability;
+
+        // The job's values shape both lines and the declared job rows, so the page is rebuilt now that they are
+        // known rather than left showing a die request with no die on it.
+        LoadItemAndSections();
+        await LoadDeclaredFieldRowsAsync().ConfigureAwait(true);
+    }
     private void AddRequestContextSection(SampleOrder item, string title, string summary)
         => AddSection(
             title,

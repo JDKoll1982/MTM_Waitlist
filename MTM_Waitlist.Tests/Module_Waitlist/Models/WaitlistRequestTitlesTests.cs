@@ -17,7 +17,7 @@ public sealed class WaitlistRequestTitlesTests
     [TestMethod]
     public void ResolveLine1_IsTheItemsUmbrellaPhrase()
     {
-        Assert.AreEqual("Pickup", WaitlistRequestTitles.ResolveLine1(Find("pickup-die")));
+        Assert.AreEqual("Pickup", WaitlistRequestTitles.ResolveLine1(Find("pickup-coil")));
         Assert.AreEqual("Deliver", WaitlistRequestTitles.ResolveLine1(Find("deliver-coil")));
         Assert.AreEqual("Assist", WaitlistRequestTitles.ResolveLine1(Find("assist-coil-turn")));
         Assert.AreEqual("Other", WaitlistRequestTitles.ResolveLine1(Find("other")));
@@ -62,21 +62,95 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_PickupDie_ShowsTheLocationAtHomeLocationAndTheNumberOtherwise()
+    public void ResolveLine2_PickupDie_ShowsTheDieNumberAndLocationWhateverTheChosenDestination()
     {
-        // Home Location is the value that switches the die's second line (contract §3).
+        // Superseded 2026-09-14 (FR-053). The identifier used to switch between the die's location and its number
+        // depending on the captured destination. It now always carries both, so the handler sees which die it is
+        // and where it is in one read, and the destination answer no longer shapes the card.
         var atHome = WaitlistRequestTitles.ResolveLine2(
             Find("pickup-die"),
             new RequestItemLine2Context(DieNumber: "D-4471", DieLocation: "Rack 12", Destination: "Home Location"));
-        Assert.IsTrue(atHome.IsResolved);
-        Assert.AreEqual("Rack 12", atHome.Text);
-
         var toDieShop = WaitlistRequestTitles.ResolveLine2(
             Find("pickup-die"),
             new RequestItemLine2Context(DieNumber: "D-4471", DieLocation: "Rack 12", Destination: "Die Shop"));
-        Assert.IsTrue(toDieShop.IsResolved);
-        Assert.AreEqual("D-4471", toDieShop.Text);
+
+        Assert.IsTrue(atHome.IsResolved);
+        Assert.AreEqual("D-4471-Rack 12", atHome.Text);
+        Assert.AreEqual("D-4471-Rack 12", toDieShop.Text, "The chosen destination no longer changes the identifier.");
     }
+
+    [TestMethod]
+    public void ResolveLine2_DieItems_ShowTheDieNumberAndItsLocation()
+    {
+        foreach (var itemId in new[] { "pickup-die", "deliver-die" })
+        {
+            var request = new WaitlistRequest { Category = "Pickup", Item = itemId };
+
+            var result = WaitlistRequestTitles.ResolveLine2(
+                Find(itemId),
+                WaitlistRequestTitles.ResolveContext(request, DieJob()));
+
+            Assert.IsTrue(result.IsResolved, $"{itemId} resolves its identifier from the job (FR-053).");
+            Assert.AreEqual(
+                "FGT0002000-DIE SHOP",
+                result.Text,
+                $"{itemId}'s identifier is the die's own number and where the die is.");
+        }
+    }
+
+    [TestMethod]
+    public void ResolveLine1_DieItems_NameTheRequestingJobsPartNumber()
+    {
+        foreach (var (itemId, expected) in new[] { ("pickup-die", "Pickup Die: PART-9003"), ("deliver-die", "Deliver Die: PART-9003") })
+        {
+            var request = new WaitlistRequest { Category = "Pickup", Item = itemId };
+
+            var line1 = WaitlistRequestTitles.ResolveLine1(
+                Find(itemId),
+                WaitlistRequestTitles.ResolveContext(request, DieJob()));
+
+            Assert.AreEqual(expected, line1, $"{itemId}'s first line names the part the die is assigned to.");
+        }
+    }
+
+    [TestMethod]
+    public void ResolveLine1_DieItemWithNoJob_StillSaysWhatKindOfRequestItIs()
+    {
+        var request = new WaitlistRequest { Category = "Deliver", Item = "deliver-die" };
+
+        var line1 = WaitlistRequestTitles.ResolveLine1(
+            request.ItemDefinition,
+            WaitlistRequestTitles.ResolveContext(request));
+
+        Assert.AreEqual(
+            "Deliver Die:",
+            line1,
+            "An unresolvable job value degrades to the phrase — never a blank, never a bare template (FR-005).");
+    }
+
+    [TestMethod]
+    public void ResolveContext_HandsJobValuesOnlyToTheItemsWhoseTemplatesNameThem()
+    {
+        // The die and job values are job data, and they are handed over only where a template asks for them — so
+        // an Item that names none of them keeps the card it had (FR-053).
+        var coil = WaitlistRequestTitles.ResolveContext(
+            new WaitlistRequest { Category = "Pickup", Item = "pickup-coil" },
+            DieJob());
+
+        Assert.IsNull(coil.DieNumber, "pickup-coil's identifier is the coil's number, not the job's die.");
+        Assert.IsNull(coil.DieLocation);
+        Assert.IsNull(coil.JobPartNumber, "pickup-coil does not name the job's part number, so it is handed none.");
+    }
+
+    /// <summary>A job carrying a die, as the composition root maps it onto the wizard's snapshot.</summary>
+    private static RequestJobPartAvailability DieJob() => RequestJobPartAvailability.None with
+    {
+        HasActiveJob = true,
+        HasDie = true,
+        JobPartNumber = "PART-9003",
+        DieNumber = "FGT0002000",
+        DieLocation = "DIE SHOP",
+    };
 
     [TestMethod]
     public void ResolveLine2_ReadsWhatTheJobCarries()
@@ -87,6 +161,56 @@ public sealed class WaitlistRequestTitlesTests
 
         Assert.IsTrue(result.IsResolved);
         Assert.AreEqual("MMC0001000", result.Text);
+    }
+
+    [TestMethod]
+    public void ResolveLine2_DunnageRequest_ShowsThePartTheOperatorChose()
+    {
+        // FR-048, FR-051: the request stores the part the operator ended on — one the job carried, or their
+        // substitute — and the card reads it back through the template's `{dunnage_part}` token.
+        var request = new WaitlistRequest
+        {
+            Category = "Pickup",
+            Item = "pickup-dunnage",
+            InputValue = "DN-STL-4",
+        };
+
+        var result = WaitlistRequestTitles.ResolveLine2(
+            request.ItemDefinition,
+            WaitlistRequestTitles.ResolveContext(request));
+
+        Assert.IsTrue(result.IsResolved, "A dunnage request that carries its part resolves its identifier.");
+        Assert.AreEqual("DN-STL-4", result.Text);
+    }
+
+    [TestMethod]
+    public void ResolveLine2_DunnageRequestWithNoStoredPart_ShowsTheDisplayNameAndReportsTheProblem()
+    {
+        var request = new WaitlistRequest { Category = "Pickup", Item = "pickup-dunnage" };
+
+        var result = WaitlistRequestTitles.ResolveLine2(
+            request.ItemDefinition,
+            WaitlistRequestTitles.ResolveContext(request));
+
+        Assert.IsFalse(result.IsResolved, "Nothing was stored, so nothing may be shown as the identifier.");
+        Assert.AreEqual(
+            RequestItemLine2Resolver.ResolveDisplayName(Find("pickup-dunnage")!),
+            result.Text,
+            "The Item's own display name stands in, never a blank and never an invented part.");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(result.Problem), "The configuration problem is stated, not hidden (FR-026).");
+    }
+
+    [TestMethod]
+    public void ResolveContext_HandsTheDunnageTokenOnlyToAnItemThatAsksForIt()
+    {
+        // The mapping is keyed on the Item's own template, so a captured answer is never handed to a token that
+        // Item does not use: pickup-coil's identifier is the job's part number, which this request does not hold.
+        var coil = new WaitlistRequest { Category = "Pickup", Item = "pickup-coil", InputValue = "MMC0001000" };
+
+        var context = WaitlistRequestTitles.ResolveContext(coil);
+
+        Assert.IsNull(context.DunnagePart, "An Item that does not name the dunnage token must not be handed one.");
+        Assert.AreEqual("MMC0001000", context.Answer, "The captured answer is still available to the tokens it belongs to.");
     }
 
     [TestMethod]

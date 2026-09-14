@@ -168,6 +168,7 @@ public partial class NewRequestJobTypeViewModel : ObservableRecipient, INavigati
         _state.Item = null;
         _state.ItemConfiguration = null;
         _state.InputValue = null;
+        _state.SelectedDunnagePart = null;
 
         StartupDebugLog.Info("NewRequestJobType", $"Selected category '{category}' for work center '{_state.WorkCenter}'.");
         _navigationService.NavigateTo(typeof(NewRequestItemViewModel).FullName!, _state);

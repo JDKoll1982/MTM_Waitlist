@@ -947,7 +947,8 @@ distinct shapes fall out, but they collapse to seven:
 | Shape | Rows | What the Details step does |
 | --- | --- | --- |
 | **Pure flag** — no value at all | `pickup-riser-table`, `pickup-hopper`, `deliver-riser-table`, `deliver-hopper` | Nothing to collect |
-| **Job-derived, no entry** | `pickup-coil`, `deliver-coil`, `deliver-flatstock`, `deliver-die`, `assist-coil-turn`, `assist-table-place`, `assist-table-remove`, `pickup-dunnage`, `deliver-dunnage` | Nothing — the value is read from the job |
+| **Job-derived, no entry** | `pickup-coil`, `deliver-coil`, `deliver-flatstock`, `deliver-die`, `assist-coil-turn`, `assist-table-place`, `assist-table-remove` | Nothing — the value is read from the job |
+| **Job-derived, the operator picks** | `pickup-dunnage`, `deliver-dunnage` | One picture-card pick from the dunnage the job carries, plus a substitute control — **superseded 2026-09-14**: §5.3 said the operator always selects the part and the CSV row said nothing was asked; the owner settled it in favour of the pick, and FR-048 … FR-051 plus the two reseeded rows are the record |
 | **Job-derived + a choice** | `pickup-die` (destination: Die Shop / Home Location / Other), `pickup-component` (which component) | One enum pick |
 | **Job-derived + free text** | `deliver-wrong-coil`, `deliver-wrong-flatstock` | One text explanation |
 | **Custom-data value** | `pickup-scrap` | User entry, source `setup_part_sequence_custom_data` |

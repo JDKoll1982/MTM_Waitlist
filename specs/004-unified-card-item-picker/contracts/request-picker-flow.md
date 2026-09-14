@@ -6,14 +6,19 @@ gates it and the answer it captures. A consumer or a test codes against the iden
 ## 1. The steps
 
 ```text
-Work Centre ──▶ Category ──▶ [availability resolved] ──▶ Item ──▶ Details ──▶ Preview ──▶ Summary ──▶ Result
+Work Centre ──▶ Category ──▶ [availability resolved] ──▶ Item ──▶ [Dunnage] ──▶ Details ──▶ Preview ──▶ Summary ──▶ Result
 ```
+
+The **Dunnage** step is entered only when the chosen Item's configuration names the job's dunnage list as the source
+of its answer (§4); every other Item goes from Item straight to Details or Preview. Nothing else about the step order
+changes.
 
 | Step | View model | Offers |
 |---|---|---|
 | Work Centre | `NewRequestWorkCenterViewModel` | unchanged |
 | Category | `NewRequestJobTypeViewModel` (re-laid) | the four Categories, each filtered by the availability pass (§3) |
 | Item | `NewRequestItemViewModel` (new) | the Items of the chosen Category that the requesting job supports, in the Item's `Order` |
+| Dunnage | `NewRequestDunnageViewModel` (new) | the dunnage parts the requesting job carries, as picture cards, plus the substitute picker (§9) |
 | Details | `NewRequestDetailsViewModel` (re-laid) | the Item's configured prompt, limits and fields — nothing when the Item requires no answer |
 | Preview / Summary / Result | unchanged | unchanged |
 
@@ -58,22 +63,22 @@ are catalogued but never offered (FR-028).
 | Item | Availability | Captures | Line 2 |
 |---|---|---|---|
 | `pickup-coil` | `HasCoil` **or** `HasFlatstock` (D21) | — | the coil number |
-| `pickup-die` | `HasDie` | pick the die, then the destination from `Die Shop` / `Home Location` / `Other` | the die's **location** when the destination is `Home Location`, otherwise the die's **number** |
+| `pickup-die` | `HasDie` | pick the die, then the destination from `Die Shop` / `Home Location` / `Other` | the die's own number and where the die is — `FGT0002000-DIE SHOP` (§10) |
 | `pickup-component` | `HasComponent` | pick which component, from the job's list | the component's part number |
 | `pickup-fg` | **out of scope** | — | — |
 | `pickup-ncm` | **out of scope** | — | — |
 | `pickup-wip` | **out of scope** | — | — |
 | `pickup-outside-service` | **out of scope** | — | — |
 | `pickup-riser-table` | always offered | — | `Riser Table` (fixed) |
-| `pickup-dunnage` | `HasDunnage` | — | the assigned dunnage part |
+| `pickup-dunnage` | `HasDunnage` | pick which dunnage they need, from the parts the job carries — on its own step, with the substitute picker beside it | the part they picked |
 | `pickup-scrap` | a **real scrap decision** on the job (§5) | — | the job's scrap type |
 | `pickup-hopper` | always offered | — | `Hopper` (fixed) |
 | `deliver-coil` | `HasCoil` | — | the coil number |
 | `deliver-riser-table` | always offered | — | `Riser Table` (fixed) |
 | `deliver-hopper` | always offered | — | `Hopper` (fixed) |
 | `deliver-flatstock` | `HasFlatstock` | — | the flatstock part number |
-| `deliver-die` | `HasDie` | — | the die's number and its location |
-| `deliver-dunnage` | `HasDunnage` | — | the assigned dunnage part |
+| `deliver-die` | `HasDie` | — | the die's own number and where the die is — `FGT0002000-DIE SHOP` (§10) |
+| `deliver-dunnage` | `HasDunnage` | pick which dunnage they need, from the parts the job carries — on its own step, with the substitute picker beside it | the part they picked |
 | `deliver-wrong-coil` | `HasCoil` | one short explanation of why the coil is wrong | the **correct** coil being brought |
 | `deliver-wrong-flatstock` | `HasFlatstock` | one short explanation of why the flatstock is wrong | the **correct** flatstock being brought |
 | `assist-coil-turn` | `HasCoil` | — | the coil number |
@@ -114,13 +119,45 @@ decision is.
 It renders from the Item's configuration and nothing else:
 
 - **nothing**, when the Item is a pure flag (the fixed-label Items), or when the Item's value is derived from the job
-  (the coil, die, dunnage, component and part Items);
+  (the coil, die, component and part Items);
 - **one option pick**, where the configuration declares an enumerated answer;
 - **one text input**, where the configuration declares a text answer, honouring the configured prompt and the
   configured minimum and maximum length, with a plain-language message when the value is out of range;
 - **a message**, where the Item carries its own text and nothing is asked for.
 
 No branch of this step keys on the Item's identity; every branch keys on the configuration row (FR-013).
+
+The dunnage Items are **not** asked here. Their enumerated answer names the job's dunnage list, so it is asked on the
+Dunnage step (§1, §9) — the step whose cards can show the parts. By the time the flow reaches this step a dunnage
+answer is already captured, so it goes straight on to Preview.
+
+## 9. The Dunnage step
+
+The step exists for one shape of answer: a configuration row that declares an enumerated answer drawn from a named
+job list, where that list is the **dunnage** parts assigned to the requesting job.
+
+| What | Rule |
+|---|---|
+| Which Items use it | those whose answer field names the `dunnage` list (FR-050) — never a list of Item codes in code |
+| What it shows | one card per dunnage part the job carries: the part's picture, its name, its part number |
+| What it asks | which part the operator needs; the flow does not continue until one is chosen (FR-048) |
+| The substitute | a control on the step that opens the receiving dunnage catalogue — parts the job does **not** carry — so a substitute can be used; the part chosen there becomes the request's value exactly as an assigned one does (FR-049) |
+| Dismissing the substitute | nothing changes: the step stays as it was, with whatever was chosen before |
+| A part with no number | refused, and reported — a part that cannot be the card's identifier is never captured as an empty answer (FR-026) |
+| What it stores | the chosen part as the request's one answer; the request does not distinguish an assigned part from a substitute once it is stored |
+
+## 10. The job values a card's lines read (FR-053)
+
+Two of an Item's tokens name values the request never stored — they are the **job's**, not an answer — so they come
+from the requesting job's snapshot. `{job_part_number}` is the job's own `part_number`; `{die_number}` and
+`{die_location}` are the job's primary die.
+
+| Rule | Why |
+|---|---|
+| The job is read **once per work centre per load**, not per row | every row of a work centre needs the same job; a list of N rows costs one read per distinct work centre |
+| A value is handed over **only where a template names its token** | an Item that names none of them keeps the card it had, so this cannot change another Item's line |
+| A job with more than one die shows the **first** die | the same row the snapshot already calls its primary die |
+| A job that cannot be read is **logged, not fatal** | the list keeps rendering from what the requests themselves carry |
 
 ## 7. Failure behaviour
 
@@ -131,6 +168,9 @@ No branch of this step keys on the Item's identity; every branch keys on the con
 | A configuration row names an Item that does not exist | nothing breaks; the row is never offered |
 | A configuration payload cannot be parsed | a reportable configuration problem in plain language |
 | A Line 2 token cannot be resolved | the Item's own display name, with the configuration problem reported |
+| A Line 1 token cannot be resolved | the Item's umbrella phrase — no problem is reported, because the phrase alone still says what kind of request this is (FR-005) |
+| The requesting job cannot be read while a card is built | the card falls back to what the request itself carries, logged rather than failing the list (FR-026) |
+| The substitute dunnage picker cannot open | the step reports it in plain language and the assigned cards stay usable |
 
 Nothing fails silently and nothing appears to succeed when it did not (FR-026).
 

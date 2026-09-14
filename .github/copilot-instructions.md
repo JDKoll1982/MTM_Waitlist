@@ -6,7 +6,17 @@ for tool names and server roles. Do not restate it here.
 # Output Control Invariants
 - Be highly terse and concise. Never explain code unless explicitly requested.
 - Strip all conversational filler, introductory pleasantries, and summarizing conclusions.
-- Output code blocks directly. Prioritize raw information density over prose.
+- Prioritize raw information density over prose — but never at the cost of being readable.
+- **Do NOT print code blocks to show a change.** Make the edit with a tool. A code block in chat is
+  justified only when the person asked to see that code, or when quoting one line that genuinely matters.
+- **Fences must be renderable.** A fence starts at column 0. A fence indented by four or more spaces, or
+  placed inside a list item, renders as literal backticks and garbles the rest of the reply (GitHub
+  Flavored Markdown spec, "Indented Code Block (4 Spaces)"). Content that contains a fence goes inside a
+  longer backtick run. Never print a sample block that was only a template for a file you are writing.
+- **Anything the person must do comes last**, under the heading `## What you need to do`; if nothing, end
+  with the single line `Nothing needed from you.`
+- Inside any `/speckit.*` step, `.github/instructions/response-format.instructions.md` (constitution
+  Principle VII) governs the reply: plain English, end-user facing, no raw machine output.
 ## Repo-Specific Focus
 For this repository, prioritize MCP-backed validation for:
 - WinUI 3 and Windows App SDK APIs
