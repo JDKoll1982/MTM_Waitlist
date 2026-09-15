@@ -11,6 +11,7 @@ using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 
@@ -956,18 +957,35 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             return;
         }
 
+        // Both pictures follow the card's rule rather than taking whatever the service answered with: a resolved
+        // path is only worth taking when it is something other than the resolver's "nothing configured" placeholder
+        // and when the file it names actually carries a picture. This page used to take the resolver's answer
+        // unconditionally, so a request whose Item had no configured picture lost the picture it already had the
+        // moment an image location changed.
         if (!string.IsNullOrWhiteSpace(item.ItemCode))
         {
-            item.ResolvedImagePath = await _imageLocationService
+            var resolvedItemPath = await _imageLocationService
                 .ResolveRequestItemImagePathAsync(item.ItemCode)
                 .ConfigureAwait(false);
+
+            if (RequestImagePathPolicy.IsUsableResolvedPicture(resolvedItemPath))
+            {
+                item.ResolvedImagePath = resolvedItemPath!;
+            }
         }
 
         if (item.WorkCenterCatalogId.HasValue)
         {
-            item.WorkCenterImagePath = await _imageLocationService
+            var resolvedWorkCenterPath = await _imageLocationService
                 .ResolveWorkCenterImagePathAsync(item.WorkCenterCatalogId.Value.ToString())
                 .ConfigureAwait(false);
+
+            // Left unset when the file carries nothing, so the page draws its own work-centre placeholder rather
+            // than a hole: an empty picture and a placeholder are not the same answer.
+            if (ImageFileProbe.CarriesPicture(resolvedWorkCenterPath))
+            {
+                item.WorkCenterImagePath = resolvedWorkCenterPath;
+            }
         }
 
         OnPropertyChanged(nameof(Item));

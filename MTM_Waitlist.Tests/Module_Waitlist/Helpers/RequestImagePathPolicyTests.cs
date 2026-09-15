@@ -13,6 +13,25 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Helpers;
 [TestClass]
 public sealed class RequestImagePathPolicyTests
 {
+    private string _directory = string.Empty;
+    private string _picturePath = string.Empty;
+    private string _standInPath = string.Empty;
+
+    [TestInitialize]
+    public void TestInitialize()
+    {
+        _directory = ImageHeaderFixtures.CreateTemporaryDirectory();
+        _picturePath = Path.Combine(_directory, "picture.png");
+        _standInPath = Path.Combine(_directory, "stand-in.png");
+    }
+
+    [TestCleanup]
+    public void TestCleanup() => ImageHeaderFixtures.DeleteTemporaryDirectory(_directory);
+
+    /// <summary>
+    /// The string half of the rule: a path that is not the resolver's placeholder is worth taking.
+    /// <see cref="APathThatCarriesNoPictureIsNotTaken"/> covers the other half, which is the file behind it.
+    /// </summary>
     [TestMethod]
     public void ARealResolvedPathIsUsed()
     {
@@ -86,13 +105,60 @@ public sealed class RequestImagePathPolicyTests
 
     /// <summary>
     /// A genuine answer from either hop of the cascade — the Item's own picture, or the Category family's —
-    /// is taken.
+    /// is taken, as far as the path itself can say.
     /// </summary>
     [TestMethod]
     public void EitherHopOfTheItemCascadeIsTakenWhenItResolvesARealImage()
     {
         Assert.IsTrue(RequestImagePathPolicy.IsUsableResolvedPath(@"X:\Shared\RequestItems\pickup-coil.png"));
         Assert.IsTrue(RequestImagePathPolicy.IsUsableResolvedPath(@"X:\Shared\RequestCategories\Pickup.png"));
+    }
+
+    /// <summary>
+    /// The whole question the card asks, and the defect it exists for: the six <c>Assets/RequestTypes/*.png</c>
+    /// ship as 68-byte single-white-pixel stand-ins, so a seeded override naming one of them is a real path to a
+    /// file with no picture in it. Taking it blanked the card's tile the moment the image service was initialized.
+    /// </summary>
+    [TestMethod]
+    public void APathThatCarriesNoPictureIsNotTaken()
+    {
+        ImageHeaderFixtures.WriteShippedSinglePixelPng(_standInPath);
+        Assert.IsFalse(
+            RequestImagePathPolicy.IsUsableResolvedPicture(_standInPath),
+            "A file holding nothing but a single white pixel must not be taken as a picture.");
+
+        ImageHeaderFixtures.WritePng(_picturePath, 96, 96);
+        Assert.IsTrue(
+            RequestImagePathPolicy.IsUsableResolvedPicture(_picturePath),
+            "A real picture must be taken.");
+
+        Assert.IsFalse(
+            RequestImagePathPolicy.IsUsableResolvedPicture(Path.Combine(_directory, "absent.png")),
+            "A path with no file behind it must not be taken as a picture.");
+
+        Assert.IsFalse(
+            RequestImagePathPolicy.IsUsableResolvedPicture(ImageLocationDefaults.RequestItemDefaultPath),
+            "The resolver's own placeholder must be refused before the file is even considered.");
+    }
+
+    /// <summary>
+    /// The same rule stated as the caller's own decision, for the picture-less file: a row that already draws a
+    /// picture keeps it.
+    /// </summary>
+    [TestMethod]
+    public void APicturelessFileNeverReplacesAnImageTheRequestAlreadyResolves()
+    {
+        var alreadyResolved = "Assets/pickup_wip.png";
+        ImageHeaderFixtures.WriteShippedSinglePixelPng(_standInPath);
+
+        var chosen = RequestImagePathPolicy.IsUsableResolvedPicture(_standInPath)
+            ? _standInPath
+            : alreadyResolved;
+
+        Assert.AreEqual(
+            alreadyResolved,
+            chosen,
+            "A seeded stand-in replaced the picture the row already draws, which is what this rule exists to stop.");
     }
 
     /// <summary>

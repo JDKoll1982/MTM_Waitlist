@@ -19,6 +19,15 @@ namespace MTM_Waitlist.Module_Waitlist.Helpers;
 /// service as a side effect, and the next list load then resolves every row to the placeholder. The card is
 /// meant to prefer a configured image, not to prefer a card that says there is none.
 /// </para>
+/// <para>
+/// Answering "is this the resolver's way of saying nothing?" is not the whole question, because a configured
+/// path can be just as empty as no path at all: the six <c>Assets/RequestTypes/*.png</c> files ship as 68-byte
+/// single-pixel stand-ins for artwork that was never delivered, and a seeded override that points at one of them
+/// is a real path to a file with no picture in it. <see cref="IsUsableResolvedPicture"/> is the question the
+/// card actually asks — a real picture, and not the resolver's placeholder — while
+/// <see cref="IsUsableResolvedPath"/> stays the string-only half of it, so the rule can be stated and tested
+/// without a file system.
+/// </para>
 /// </remarks>
 public static class RequestImagePathPolicy
 {
@@ -32,6 +41,22 @@ public static class RequestImagePathPolicy
     /// </returns>
     public static bool IsUsableResolvedPath(string? resolvedPath) =>
         !string.IsNullOrWhiteSpace(resolvedPath) && !IsServicePlaceholder(resolvedPath);
+
+    /// <summary>
+    /// Whether a resolved path is worth taking <em>and</em> the file it names actually carries a picture.
+    /// </summary>
+    /// <param name="resolvedPath">What the image-location service returned, or null.</param>
+    /// <returns>
+    /// <see langword="true"/> only for a genuine path to a file that holds a picture of at least the size the
+    /// application accepts. A placeholder, a missing file, an unreadable file and a single-pixel stand-in all
+    /// answer <see langword="false"/>, which leaves the row's existing image in place.
+    /// </returns>
+    /// <remarks>
+    /// This is the rule the card and the request page both apply: a picture that shows nothing must never replace
+    /// a picture that shows something, whichever way the empty answer is spelled.
+    /// </remarks>
+    public static bool IsUsableResolvedPicture(string? resolvedPath) =>
+        IsUsableResolvedPath(resolvedPath) && ImageFileProbe.CarriesPicture(resolvedPath);
 
     /// <summary>
     /// Whether a path is one of the service's own fallbacks.

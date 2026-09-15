@@ -1001,6 +1001,18 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 var resolvedPath = await _imageLocationService.ResolveWorkCenterImagePathAsync(
                     workCenter.WorkCenterId.ToString(),
                     cancellationToken).ConfigureAwait(false);
+
+                // Checked once per work centre rather than once per row, because every row of a work centre draws
+                // the same picture. A resolved path that carries no picture is not an answer: it is stored as empty
+                // so the request page draws the work centre's own "no picture" placeholder rather than a hole.
+                if (!ImageFileProbe.CarriesPicture(resolvedPath))
+                {
+                    StartupDebugLog.Info(
+                        "WaitlistRequest",
+                        $"Work center '{workCenter.DisplayName}' has no picture to resolve to '{resolvedPath}'; the request page will draw the work centre placeholder instead.");
+                    resolvedPath = string.Empty;
+                }
+
                 lookup[workCenter.DisplayName] = (workCenter.WorkCenterId, resolvedPath);
             }
         }
@@ -1023,18 +1035,19 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             try
             {
                 var resolvedImagePath = await ResolveRequestImagePathAsync(request, cancellationToken).ConfigureAwait(false);
-                if (RequestImagePathPolicy.IsUsableResolvedPath(resolvedImagePath))
+                if (RequestImagePathPolicy.IsUsableResolvedPicture(resolvedImagePath))
                 {
                     order.ResolvedImagePath = resolvedImagePath!;
                 }
                 else if (!string.IsNullOrWhiteSpace(resolvedImagePath))
                 {
-                    // The service had nothing configured and answered with its own placeholder. Taking it would
-                    // replace this row's working image with a "no image available" card, so the row keeps the
+                    // Either the service had nothing configured and answered with its own placeholder, or the path
+                    // it answered with is a file carrying no picture (a stand-in, or artwork that never shipped).
+                    // Taking it would replace this row's working image with an empty tile, so the row keeps the
                     // image it already has. Logged because the substitution is otherwise invisible.
                     StartupDebugLog.Info(
                         "WaitlistRequest",
-                        $"Request '{request.Id}' has no configured image; keeping the row's own image '{order.ImagePath}' instead of the resolver's placeholder.");
+                        $"Request '{request.Id}' has no picture to resolve to '{resolvedImagePath}'; keeping the row's own image '{order.ImagePath}' instead.");
                 }
             }
             catch
@@ -1046,6 +1059,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         if (workCenterImageLookup.TryGetValue(request.WorkCenter, out var workCenterImage))
         {
             order.WorkCenterCatalogId = workCenterImage.WorkCenterId;
+
+            // Empty when the work centre's file carries no picture, which draws the work centre's own placeholder
+            // rather than a hole where a picture should be. See the check that emptied it.
             order.WorkCenterImagePath = workCenterImage.ResolvedPath;
         }
     }

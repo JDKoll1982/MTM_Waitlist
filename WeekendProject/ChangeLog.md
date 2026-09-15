@@ -13,7 +13,7 @@
 >
 > For the broader, longer-running repo changelog, see the root `CHANGELOG.md`.
 >
-> **Most recent update:** 2026-09-13
+> **Most recent update:** 2026-09-15
 
 ---
 
@@ -21,6 +21,26 @@
 
 > Work landed this weekend but not yet cut into a numbered release. Items are grouped by the type of
 > change, newest first.
+
+### 2026-09-15 — Waitlist card pictures stop going blank after a request is raised
+
+> Defect record: `defects/High-Waitlist-CardPicturesBecomeBlankAfterNewRequest.md`.
+
+**Fixed**
+
+- **Every picture on the Waitlist no longer goes blank once a request has been raised.** Every card's tile used to
+  turn into an empty white square the first time you went through the New Request workflow, and it stayed that way
+  until the app was restarted — which made it look as though the pictures had been lost. They had not been lost.
+  The picture the app was told to use for each item is a single white pixel, standing in for artwork that was never
+  supplied, and the card accepted it over the picture it already had. The card now checks that there is a picture in
+  the file before it uses it, so an empty file can no longer replace a good picture, and the log says so when one
+  is passed over.
+- **Two pictures on the request page are held to the same rule**, so opening a request cannot drop a picture it is
+  already showing either.
+
+The six item pictures in `Assets/RequestTypes` are still stand-ins and still need real artwork. Until they have
+it, the cards draw the picture the card itself carries — which is what you see on the first screen after
+start-up — rather than an empty tile.
 
 ### 2026-09-13 — Request images stop disappearing after a visit to New Request
 
