@@ -215,9 +215,9 @@
       "installed_at": "2026-09-13T00:10:54.409133+00:00"
     },
     "companion": {
-      "version": "0.21.0",
+      "version": "0.22.0",
       "source": "local",
-      "manifest_hash": "sha256:05502a3fd1eb40921640244e962507a6923373ffa8e5c3c446a7c251fbde8e9b",
+      "manifest_hash": "sha256:d11f6d93175c5ad9bc7eb5816af99e63cedbc2fdb4ea5da4c63a0435e3bb7100",
       "enabled": true,
       "priority": 10,
       "registered_commands": {
@@ -239,12 +239,14 @@
           "speckit.companion.living-adopt",
           "speckit.companion.living-move",
           "speckit.companion.living-drift",
+          "speckit.companion.living-show",
+          "speckit.companion.living-validate",
           "speckit.companion.living-coverage",
           "speckit.companion.living-sync"
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-09-13T02:41:37.691430+00:00"
+      "installed_at": "2026-09-20T11:47:36.977290+00:00"
     }
   }
 }
