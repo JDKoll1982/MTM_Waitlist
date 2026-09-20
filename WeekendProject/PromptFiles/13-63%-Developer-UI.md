@@ -1,5 +1,17 @@
 # 13 — Developer UI: Mock Auto-Fallback, DB Connection Gates & Startup Gate
 
+> **COUNT THIS FILE WITH `+ [ ]`, NOT `- [ ]`.** It uses the `+` marker throughout. A `- [ ]`-only sweep
+> reports it as **0 open**; it actually holds **4** `+ [ ]` boxes (recounted 2026-09-20), of which **2 are live
+> carry-forward** (the startup-gate pair in Subphase 3.1) and **2 are obsolete** (below). Any other figure you
+> see for this file is stale.
+>
+> **The 2 obsolete boxes** — do not implement either:
+>
+> | Box | Why it is not work |
+> | --- | --- |
+> | Task 0 — *Tech Lead: read `PromptFiles/*.md` + `DeveloperUI-VisualPrompts.md` + `ChangeLog.md` and reconcile the mock/real routing rules…* | The read was a one-shot gate for an architecture that no longer exists. Its mock/real routing question was answered by `specs/001-module-mock-visual-fallback` (reachability probe + `MTM_Waitlist.Mock` fallback, FR-002/FR-004), and **`WeekendProject/DeveloperUI-VisualPrompts.md` is not in the tree** — it was a design-time reference, not an instruction. Nothing left to reconcile. |
+> | Subphase 2.2 — *Security Engineer: race-condition guard … so simultaneous clients can't corrupt state during an outage.* | The whole central mock-configuration mechanism this guards was **removed** by `specs/001` FR-014. There is no mock toggle to race on. |
+
 > **Purpose:** Add a **Developer-oriented** UI & behavior layer on top of the Waitlist app so the app
 > keeps running when its external databases (Infor Visual, the receiving app) are down.
 >
@@ -32,7 +44,7 @@
 
 + [x] **DevOps: confirm `MTM_Waitlist.sln` builds clean (0 errors/warnings)** (`dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false`). | **Persona: DevOps Engineer** — verified 2026-09-06: clean across every increment (0 warnings / 0 errors).
 + [x] **QA: full suite green** (`dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64`). | **Persona: QA Engineer** — verified 2026-09-06: 421 passed / 0 failed / 12 skipped.
-+ [ ] **Tech Lead: read `WeekendProject/PromptFiles/*.md` + `WeekendProject/DeveloperUI-VisualPrompts.md` + `WeekendProject/ChangeLog.md`** and reconcile the mock/real routing rules and the request-type/subtype schema. | **Persona: Tech Lead**
++ [ ] **Tech Lead: read `WeekendProject/PromptFiles/*.md` + `WeekendProject/DeveloperUI-VisualPrompts.md` + `WeekendProject/ChangeLog.md`** and reconcile the mock/real routing rules and the request-type/subtype schema. | **Persona: Tech Lead** — **OBSOLETE (2026-09-20); do not do this.** One-shot read gate for a retired architecture: the routing question is settled by `specs/001` and `DeveloperUI-VisualPrompts.md` is not in the tree. See the count banner at the top of this file.
 **GATE: baseline green and full read complete before any edits.**
 
 ---
@@ -79,7 +91,7 @@
 ### Subphase 2.2 — Client refresh + race handling
 
 + [x] **Backend Engineer: client polling** — running clients poll the central mock config on a timer and apply changes + fire a toast. | **Persona: Backend Engineer** — verified 2026-09-06 (poll/apply core done): `MockRoutingRefreshService` (one refresh pass → `MockModeChange`s) + `MockRoutingMonitorService`/`IMockRoutingMonitorService` (raises a `MockModeChanged` event per change; exposes `LastChanges`; `ResetBaseline()`). A UI host (WinUI `DispatcherTimer`) calls `RunOnceAsync()` and subscribes to `MockModeChanged` to fire the toast — that timer host + toast rendering is the remaining Phase 1.3/app wiring. `MockRoutingMonitorServiceTests` (3) pass; build clean; full suite green (437 passed).
-+ [ ] **Security Engineer: race-condition guard** — single source of truth with optimistic/last-writer-wins on the row so simultaneous clients can't corrupt state during an outage. | **Persona: Security Engineer**
++ [ ] **Security Engineer: race-condition guard** — single source of truth with optimistic/last-writer-wins on the row so simultaneous clients can't corrupt state during an outage. | **Persona: Security Engineer** — **OBSOLETE (2026-09-20); do not do this.** The central mock-configuration mechanism this guards was removed by `specs/001` FR-014. See the count banner at the top of this file.
 + [x] **QA Engineer: tests** for central read/write, role gating, client refresh applying a changed value, and concurrent upserts. | **Persona: QA Engineer** — verified 2026-09-06: `MockModeQaTests` covers central read/write per-source key mapping + all_users/bool scope (`MockConfigurationService`), role gating (`DeveloperAccessGuard` denies operator roles for config/catalog edits), a changed central value applied on the next client refresh with a single `TurnedOn` event (`MockRoutingMonitorService`), and last-writer-wins concurrent upserts on the same key. `MockModeQaTests` (4) pass; build clean; full suite green (445 passed).
 
 ---

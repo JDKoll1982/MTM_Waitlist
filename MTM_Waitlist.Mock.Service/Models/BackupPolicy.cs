@@ -16,8 +16,17 @@ public sealed record BackupPolicy
     /// <summary>Local host time of day the backup runs.</summary>
     public TimeOnly ScheduleLocalTime { get; init; } = new(1, 0);
 
-    /// <summary>How many artifacts to keep for this store; older ones are pruned.</summary>
-    public int RetentionCount { get; init; } = 14;
+    /// <summary>
+    /// How many artifacts to keep for this store; older ones are pruned.
+    /// </summary>
+    /// <remarks>
+    /// The default is sized against the criterion, not chosen for convenience. SC-008 asks whether every
+    /// scheduled window in the last thirty days produced a restorable artifact, so a store that keeps fewer
+    /// than thirty daily backups has already pruned the artifact the question is about — the criterion would be
+    /// unanswerable for reasons that have nothing to do with whether backups work (T230). See
+    /// <see cref="ReliabilityCriteria.BackupRetentionCount"/>.
+    /// </remarks>
+    public int RetentionCount { get; init; } = ReliabilityCriteria.BackupRetentionCount;
 
     /// <summary>
     /// Destination directory for this store's artifacts. Must be writable; validated at save time.

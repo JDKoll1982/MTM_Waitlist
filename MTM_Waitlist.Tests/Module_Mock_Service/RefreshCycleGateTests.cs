@@ -80,6 +80,7 @@ public sealed class RefreshCycleGateTests
         using var recorder = new RefreshRunRecordRecorder(
             fixture.Engine,
             fixture.RunRecordStore,
+            fixture.HistoryStore,
             NullLogger<RefreshRunRecordRecorder>.Instance);
 
         fixture.PayloadSource.Release();
@@ -108,6 +109,7 @@ public sealed class RefreshCycleGateTests
         var recorder = new RefreshRunRecordRecorder(
             fixture.Engine,
             fixture.RunRecordStore,
+            fixture.HistoryStore,
             NullLogger<RefreshRunRecordRecorder>.Instance);
 
         recorder.Dispose();
@@ -164,6 +166,8 @@ public sealed class RefreshCycleGateTests
 
             RunRecordStore = new RefreshRunRecordStore(_root);
             RunRecordStore.LoadAsync().GetAwaiter().GetResult();
+
+            HistoryStore = new RunHistoryStore(_root, NullLogger<RunHistoryStore>.Instance);
         }
 
         public RefreshShapeCatalogProvider CatalogProvider { get; }
@@ -175,6 +179,8 @@ public sealed class RefreshCycleGateTests
         public RefreshEngine Engine { get; }
 
         public RefreshRunRecordStore RunRecordStore { get; }
+
+        public RunHistoryStore HistoryStore { get; }
 
         public void Dispose()
         {

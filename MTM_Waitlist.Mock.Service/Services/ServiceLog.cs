@@ -35,8 +35,16 @@ internal static class ServiceLog
     /// <summary>Prefix of each daily log file; the date is appended as <c>yyyy_MM_dd</c>.</summary>
     internal const string FileNamePrefix = "service_daily_";
 
-    /// <summary>Number of days of log files kept before the oldest are deleted.</summary>
-    internal const int RetentionDays = 30;
+    /// <summary>
+    /// Number of days of log files kept before the oldest are deleted.
+    /// </summary>
+    /// <remarks>
+    /// Tied to <see cref="Models.ReliabilityCriteria.HistoryRetentionDays"/> rather than to a literal. A
+    /// diagnostic log that expires before the period the reliability criteria are measured over cannot be used
+    /// to explain a failure inside that period — the evidence would be deleted before anyone could ask for it,
+    /// which is how a criterion becomes unmeasurable by construction (T230).
+    /// </remarks>
+    internal const int RetentionDays = Models.ReliabilityCriteria.HistoryRetentionDays;
 
     private static readonly object s_gate = new();
 

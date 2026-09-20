@@ -232,6 +232,7 @@ public sealed class ServiceCapabilityEnforcementTests
 
             var backupEngine = new BackupEngine(
                 Artifacts,
+                new RunHistoryStore(Root, NullLogger<RunHistoryStore>.Instance),
                 new MySqlConnectionStringResolver(configuration.MySqlConnection),
                 () => ConfigurationStore.Current,
                 NullLogger<BackupEngine>.Instance);
@@ -265,6 +266,7 @@ public sealed class ServiceCapabilityEnforcementTests
 
             var engine = new BackupEngine(
                 Artifacts,
+                new RunHistoryStore(Root, NullLogger<RunHistoryStore>.Instance),
                 new MySqlConnectionStringResolver(Configuration.MySqlConnection),
                 () => Configuration,
                 NullLogger<BackupEngine>.Instance);
@@ -294,6 +296,7 @@ public sealed class ServiceCapabilityEnforcementTests
 
             var engine = new BackupEngine(
                 Artifacts,
+                new RunHistoryStore(Root, NullLogger<RunHistoryStore>.Instance),
                 new MySqlConnectionStringResolver(Configuration.MySqlConnection),
                 () => Configuration,
                 NullLogger<BackupEngine>.Instance);

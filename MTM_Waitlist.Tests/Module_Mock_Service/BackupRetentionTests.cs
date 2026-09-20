@@ -139,6 +139,7 @@ public sealed class BackupRetentionTests
         var configuration = ServiceConfiguration.CreateDefault(fixture.Root);
         var engine = new BackupEngine(
             fixture.Store,
+            new RunHistoryStore(fixture.Root, NullLogger<RunHistoryStore>.Instance),
             new MySqlConnectionStringResolver(configuration.MySqlConnection),
             () => configuration,
             NullLogger<BackupEngine>.Instance);

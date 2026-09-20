@@ -155,6 +155,7 @@ public sealed class RefreshEngine
         var records = await TryRunShapesAsync(
             _catalogProvider.RefreshableShapes,
             _timeProvider.GetUtcNow().UtcDateTime,
+            RefreshRunTrigger.Scheduled,
             cancellationToken).ConfigureAwait(false);
 
         return records ?? [];
@@ -171,7 +172,11 @@ public sealed class RefreshEngine
     /// loaded snapshot as the current one.
     /// </remarks>
     public Task<IReadOnlyList<RefreshRunRecord>?> TryRunCycleAsync(CancellationToken cancellationToken = default) =>
-        TryRunShapesAsync(_catalogProvider.RefreshableShapes, _timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
+        TryRunShapesAsync(
+            _catalogProvider.RefreshableShapes,
+            _timeProvider.GetUtcNow().UtcDateTime,
+            RefreshRunTrigger.Scheduled,
+            cancellationToken);
 
     /// <summary>
     /// Runs the given shapes as one gated cycle, unless a cycle is already running.
@@ -199,7 +204,13 @@ public sealed class RefreshEngine
     {
         ArgumentNullException.ThrowIfNull(shapes);
 
-        return TryRunShapesAsync(shapes, _timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
+        // Attributed as on-demand: this is the seam the on-demand API endpoint uses, and a caller asking for a
+        // refresh must not be able to move SC-007's number (see RefreshRunTrigger).
+        return TryRunShapesAsync(
+            shapes,
+            _timeProvider.GetUtcNow().UtcDateTime,
+            RefreshRunTrigger.OnDemand,
+            cancellationToken);
     }
 
     /// <summary>
@@ -214,7 +225,7 @@ public sealed class RefreshEngine
         var due = _catalogProvider.RefreshableShapes.Where(shape => IsDue(shape, utcNow)).ToList();
         return due.Count == 0
             ? Task.FromResult<IReadOnlyList<RefreshRunRecord>?>([])
-            : TryRunShapesAsync(due, utcNow, cancellationToken);
+            : TryRunShapesAsync(due, utcNow, RefreshRunTrigger.Scheduled, cancellationToken);
     }
 
     /// <summary>
@@ -343,11 +354,13 @@ public sealed class RefreshEngine
     /// </summary>
     /// <param name="shapes">The shapes to run.</param>
     /// <param name="utcNow">The time this cycle is considered to have run at; the next due time is derived from it.</param>
+    /// <param name="trigger">What caused this cycle; carried onto every record it produces.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The records, or <see langword="null"/> when a cycle was already running.</returns>
     private async Task<IReadOnlyList<RefreshRunRecord>?> TryRunShapesAsync(
         IReadOnlyList<VisualReadShape> shapes,
         DateTime utcNow,
+        RefreshRunTrigger trigger,
         CancellationToken cancellationToken)
     {
         if (Interlocked.CompareExchange(ref _cycleGate, 1, 0) != 0)
@@ -366,7 +379,10 @@ public sealed class RefreshEngine
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var record = await RefreshShapeAsync(shape, cancellationToken).ConfigureAwait(false);
+                // One cycle id for the whole cycle, so a reader can tell a cycle that refreshed every shape from
+                // one that refreshed some of them. Derived from the cycle's own instant rather than from the clock
+                // at each shape, which would give every shape its own id and make the distinction unreadable.
+                var record = await RefreshShapeAsync(shape, utcNow, trigger, cancellationToken).ConfigureAwait(false);
                 records.Add(record);
 
                 // Schedule the next attempt on the grid, so a skip or a slow cycle still keeps cadence.
@@ -424,13 +440,34 @@ public sealed class RefreshEngine
     }
 
     /// <summary>
-    /// Refreshes one shape, always returning a record rather than throwing.
+    /// Refreshes one shape on its own, always returning a record rather than throwing.
     /// </summary>
     /// <param name="shape">The shape to refresh.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The outcome of the attempt.</returns>
+    /// <remarks>
+    /// A single-shape call is by definition not a scheduled cycle — nothing on the schedule reaches the engine
+    /// this way — so it is attributed as on-demand. Callers that are running a cycle use
+    /// <see cref="TryRunShapesAsync(IReadOnlyList{MTM_Waitlist.Mock.Models.VisualReadShape}, CancellationToken)"/>
+    /// instead, which is the only path that can also guarantee one cycle at a time.
+    /// </remarks>
+    public Task<RefreshRunRecord> RefreshShapeAsync(
+        VisualReadShape shape,
+        CancellationToken cancellationToken = default) =>
+        RefreshShapeAsync(shape, _timeProvider.GetUtcNow().UtcDateTime, RefreshRunTrigger.OnDemand, cancellationToken);
+
+    /// <summary>
+    /// Refreshes one shape as part of a cycle, always returning a record rather than throwing.
+    /// </summary>
+    /// <param name="shape">The shape to refresh.</param>
+    /// <param name="cycleUtc">The cycle's instant, stamped onto the record so a reader can group by cycle.</param>
+    /// <param name="trigger">What caused the cycle.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The outcome of the attempt.</returns>
     public async Task<RefreshRunRecord> RefreshShapeAsync(
         VisualReadShape shape,
+        DateTime cycleUtc,
+        RefreshRunTrigger trigger,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(shape);
@@ -455,6 +492,8 @@ public sealed class RefreshEngine
             record = new RefreshRunRecord
             {
                 ShapeKey = shape.Key,
+                CycleUtc = cycleUtc,
+                Trigger = trigger,
                 StartedUtc = startedUtc,
                 FinishedUtc = DateTime.UtcNow,
                 Outcome = RefreshRunOutcome.Succeeded,
@@ -476,6 +515,8 @@ public sealed class RefreshEngine
             record = new RefreshRunRecord
             {
                 ShapeKey = shape.Key,
+                CycleUtc = cycleUtc,
+                Trigger = trigger,
                 StartedUtc = startedUtc,
                 FinishedUtc = DateTime.UtcNow,
                 Outcome = RefreshRunOutcome.SkippedSourceUnreachable,
@@ -497,6 +538,8 @@ public sealed class RefreshEngine
             record = new RefreshRunRecord
             {
                 ShapeKey = shape.Key,
+                CycleUtc = cycleUtc,
+                Trigger = trigger,
                 StartedUtc = startedUtc,
                 FinishedUtc = DateTime.UtcNow,
                 Outcome = RefreshRunOutcome.FailedSchemaMismatch,
@@ -520,6 +563,8 @@ public sealed class RefreshEngine
             record = new RefreshRunRecord
             {
                 ShapeKey = shape.Key,
+                CycleUtc = cycleUtc,
+                Trigger = trigger,
                 StartedUtc = startedUtc,
                 FinishedUtc = DateTime.UtcNow,
                 Outcome = RefreshRunOutcome.FailedUnknown,

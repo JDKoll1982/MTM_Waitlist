@@ -68,7 +68,7 @@ Next task: **Subphase 0.1 stock snapshot** | **Persona: Backend Engineer**
 
 ## Mockups (UI references)
 
-See `../Mockups/` for the target UI for this task:
+See `../Mockups/` for the target UI for this task. **`WeekendProject/Mockups/` is not in the tree** (noted 2026-09-20): these are design-time references — provenance, not instructions — describing a target that has since been built. Do not re-create the folder to satisfy this list.
 
 - `../Mockups/analytics-waitlist-overview.svg` — Plant Manager waitlist analytics screen
 

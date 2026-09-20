@@ -14,6 +14,22 @@ public sealed record RefreshRunRecord
     /// <summary>Unique identifier of this run.</summary>
     public Guid RunId { get; init; } = Guid.NewGuid();
 
+    /// <summary>
+    /// The cycle this run belonged to: every shape refreshed in one cycle carries the same value.
+    /// </summary>
+    /// <remarks>
+    /// This is what makes the run history countable as <i>cycles</i> rather than as shapes. SC-007 is stated over
+    /// scheduled cycles, and a cycle that refreshed four of five shapes has to be countable as the partial
+    /// failure it is — a per-shape tally of the same period would call it an 80% success.
+    /// </remarks>
+    public DateTime CycleUtc { get; init; }
+
+    /// <summary>
+    /// What caused this run. Defaults to <see cref="RefreshRunTrigger.Scheduled"/>, which is the scheduled loop's
+    /// reading; every non-scheduled entry point sets it explicitly.
+    /// </summary>
+    public RefreshRunTrigger Trigger { get; init; } = RefreshRunTrigger.Scheduled;
+
     /// <summary>The <see cref="MTM_Waitlist.Mock.Models.VisualReadShape.Key"/> this run belongs to.</summary>
     public required string ShapeKey { get; init; }
 

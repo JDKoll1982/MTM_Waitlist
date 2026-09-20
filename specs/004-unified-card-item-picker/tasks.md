@@ -1746,77 +1746,121 @@ history (T231); the real measurement stays owed and stays in `READINESS-CHECKLIS
 
 ### Documentation corrections (from `READINESS-CHECKLIST.md` Phase 2)
 
-- [ ] **T189** Correct `OPEN-TASKS.md` §2's carry-forward total and its pointer: **127 → 116**, the §4 row struck as
+- [x] **T189** Correct `OPEN-TASKS.md` §2's carry-forward total and its pointer: **127 → 116**, the §4 row struck as
   delivered, and §5 item 8 pointed at **§6** rather than §4. · `OPEN-TASKS.md`
-- [ ] **T190** Name `specs/003-waitlist-handler-fulfilment` and `specs/004-unified-card-item-picker` in
+  **DONE 2026-09-20.** `OPEN-TASKS.md` section 2 now carries **116** open boxes and its own check line reads `20 + 20 + 8 + 39 + 2 + 27 = 116`; the section 4 row is struck as delivered by `specs/003`; and section 5 item 8 points at **section 6**. Verified by recounting the boxes in the file rather than trusting the old total.
+
+- [x] **T190** Name `specs/003-waitlist-handler-fulfilment` and `specs/004-unified-card-item-picker` in
   `OPEN-TASKS.md`, which currently walks from `specs/001` to "new spec" as though two delivered features never
   happened. · `OPEN-TASKS.md`
-- [ ] **T191** Repair `OPEN-TASKS.md` §5 item 6's dangling reference to `VALIDATION-PROMPT-SERVER.md` and the same
+  **DONE 2026-09-20.** `OPEN-TASKS.md` names `specs/003-waitlist-handler-fulfilment` and `specs/004-unified-card-item-picker` by path, and a new *Delivered features this file used to walk past* table replaces the `specs/001` to "new spec" leap.
+
+- [x] **T191** Repair `OPEN-TASKS.md` §5 item 6's dangling reference to `VALIDATION-PROMPT-SERVER.md` and the same
   stale citations inside `specs/001-module-mock-visual-fallback/tasks.md` — **classify each as provenance** (a record
   of what was run) **or instruction** before rewriting, because the two want different answers. · `OPEN-TASKS.md`,
   `specs/001-module-mock-visual-fallback/tasks.md`
-- [ ] **T192** Restate the SC-007 / SC-008 follow-up honestly in one place: the windows opened **2026-09-12**, the
+  **DONE 2026-09-20.** Every citation is classified **provenance**, and the classification is stated where a reader will hit it: `OPEN-TASKS.md` section 5 item 6, plus a new banner at the top of `specs/001-module-mock-visual-fallback/tasks.md`, record that `VALIDATION-PROMPT-SERVER.md` was a one-shot host handover that **was executed**, so its absence is not missing work, and that `RELEASE-NOTES.md` is retired rather than lost. The rule the classification follows is written down in `capabilities/DRIFT.md` (instruction / provenance / already-retired).
+
+- [x] **T192** Restate the SC-007 / SC-008 follow-up honestly in one place: the windows opened **2026-09-12**, the
   re-check is **due 2026-10-12**, and they are **unmeasured** until then — **and state the real blocker, not just the
   date** (established 2026-09-20, see T229): the service keeps only the latest run per shape and per store, and both
   the log retention (30 days) and the backup retention (14 artifacts) are shorter than or equal to the window being
   measured. "Waiting until October" is not a plan, because there will be nothing to read. · `OPEN-TASKS.md`,
   `specs/001-module-mock-visual-fallback/tasks.md`
-- [ ] **T193** Re-verify `FEATURES.md` against the current tree and move its pin off commit `7bf6857` — it was
+  **DONE 2026-09-20.** The SC-007 / SC-008 follow-up is restated in one place with the **real** blocker, not just the date: the windows opened **2026-09-12**, the re-check is due **2026-10-12**, and they are unmeasured -- but `RefreshRunRecordStore` and `BackupArtifactStore` keep only the **latest** run per shape and per store, so there is no history to aggregate however long the service runs. The durable history owed is `specs/004` T229/T230, and the metric itself is proven against a seeded history by T231.
+
+- [x] **T193** Re-verify `FEATURES.md` against the current tree and move its pin off commit `7bf6857` — it was
   verified before `specs/003` and `specs/004` existed. · `FEATURES.md`
-- [ ] **T194** Delete `FEATURES.md`'s now-false "not yet built" claims, re-checking each line rather than assuming:
+  **DONE 2026-09-20.** The pin moved from `7bf6857` to `692091f` (2026-09-20), and `FEATURES.md` was re-read against the tree at that commit rather than merely re-dated.
+
+- [x] **T194** Delete `FEATURES.md`'s now-false "not yet built" claims, re-checking each line rather than assuming:
   the one that says the handler list *"is not sorted most-urgent-first"* is already delivered —
   `UrgencyCalculator.OrderBy` defaults to most-urgent and `WaitlistViewViewModel.SortOrder` resolves the remembered
   key with `WaitlistSortOrder.MostUrgent` as the default. · `FEATURES.md`,
   `MTM_Waitlist.Core/Services/UrgencyCalculator.cs`,
   `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs`
-- [ ] **T195** Extend `FEATURES.md`'s maintainer index (it lists `specs/001` alone while its own defect table cites
+  **DONE 2026-09-20.** Three claims were falsified by direct code reads and struck as corrected: the handler list **is** sorted most-urgent-first (`WaitlistViewViewModel.SortOrder` resolves to `WaitlistSortOrder.MostUrgent`), Accept/Complete/Release **are** available (`AcceptRequestAsync`, `CompleteRequestAsync`, `ReleaseRequestAsync`, `CancelRequestAsync`), and the detail-page countdown **does** tick (`RefreshInterval = 30s` to `OnRefreshTick` to `RefreshFromStoreAsync` to `LoadItemAndSections()`). A repo-wide search for the old user-facing *"does not update automatically"* note returned zero hits, confirming it is gone from the app and not merely from the doc.
+
+- [x] **T195** Extend `FEATURES.md`'s maintainer index (it lists `specs/001` alone while its own defect table cites
   `specs/002` ten times) and drop the dead `RELEASE-NOTES.md` pointer, which is not in the tree. · `FEATURES.md`
-- [ ] **T196** Reconcile `FEATURES.md`'s defect-status column with the defect files themselves — it says the
+  **DONE 2026-09-20.** The maintainer index now lists `specs/001`-`004`, `defects/`, `WeekendProject/SpecTemplates/`, `OPEN-TASKS.md`, `OPEN-WORK-NEXT-SPEC.md` and `capabilities/DRIFT.md`, and the dead `RELEASE-NOTES.md` pointer is recorded as **not in the tree** with the live equivalents named.
+
+- [x] **T196** Reconcile `FEATURES.md`'s defect-status column with the defect files themselves — it says the
   Cancel/Accept defect was closed by `specs/002` while the defect file says **`specs/003`**, with the actions
   working. · `FEATURES.md`, `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`
-- [ ] **T197** Reconcile `WeekendProject/PromptFiles/07-8%-Phase2-fulfill.md` against `specs/003`: reconcile every
+  **DONE 2026-09-20.** The defect-status column was reconciled against the defect files: the Cancel/Accept defect is attributed to **`specs/003`** (as its own file says, with the actions working), the material-attributes and analytics entries were re-pointed, and the three not-yet-specified rows now name concrete specs or seed templates instead of placeholder names.
+
+- [x] **T197** Reconcile `WeekendProject/PromptFiles/07-8%-Phase2-fulfill.md` against `specs/003`: reconcile every
   box, **delete** the two mock-mode boxes the seed's §3 says cannot be built, and leave a "delivered by `specs/003`"
   note. The file still shows **11 open** and carries no `specs/003` note although that spec cites it as its seed. ·
   `WeekendProject/PromptFiles/07-8%-Phase2-fulfill.md`
-- [ ] **T198** Reconcile `WeekendProject/PromptFiles/08-70%-Phase2-urgency.md` against `specs/003` the same way —
+  **DONE 2026-09-20.** `07-8%-Phase2-fulfill.md` carries a *DELIVERED by `specs/003`* banner; every box is reconciled with evidence, and the two mock-mode boxes the seed says cannot be built are **deleted** rather than left open. Verified: **0** open boxes.
+
+- [x] **T198** Reconcile `WeekendProject/PromptFiles/08-70%-Phase2-urgency.md` against `specs/003` the same way —
   **3 open**, no `specs/003` note, one box unbuildable. · `WeekendProject/PromptFiles/08-70%-Phase2-urgency.md`
-- [ ] **T199** Recount `WeekendProject/PromptFiles/13-63%-Developer-UI.md` **including `+ [ ]` markers**: it holds
+  **DONE 2026-09-20.** `08-70%-Phase2-urgency.md` carries the same banner and the same treatment; the one unbuildable box is deleted. Verified: **0** open boxes.
+
+- [x] **T199** Recount `WeekendProject/PromptFiles/13-63%-Developer-UI.md` **including `+ [ ]` markers**: it holds
   **4**, where a `- [ ]`-only sweep reports zero. · `WeekendProject/PromptFiles/13-63%-Developer-UI.md`
-- [ ] **T200** Retire the dangling artefact references: 12 `PromptFiles/*` point at `../Mockups/*.svg` (folder absent)
+  **DONE 2026-09-20.** `13-63%-Developer-UI.md` opens with a banner stating it must be counted with `+ [ ]` and not `- [ ]`, and that it holds **4** open boxes of which 2 are live and 2 obsolete. Verified: **4** `+ [ ]`, **0** `- [ ]`. The banner is necessary because a `- [ ]`-only sweep reports this file as zero open.
+
+- [x] **T200** Retire the dangling artefact references: 12 `PromptFiles/*` point at `../Mockups/*.svg` (folder absent)
   and `PromptFiles/13` names `WeekendProject/DeveloperUI-VisualPrompts.md` (absent). Classify instruction vs
   provenance before editing. · `WeekendProject/PromptFiles/**`
-- [ ] **T201** Correct `WeekendProject/Module_Mock/Module_Mock-Planning-Progress.md`'s status line — it opens
+  **DONE 2026-09-20.** The dangling artefacts were classified **provenance** and annotated rather than deleted: the eleven `PromptFiles/*` that point at the absent `../Mockups/` folder carry a provenance note (verified 11 of 11), and `PromptFiles/13` now says in place that `WeekendProject/DeveloperUI-VisualPrompts.md` is not in the tree and that its one-shot routing question was answered by `specs/001`.
+
+- [x] **T201** Correct `WeekendProject/Module_Mock/Module_Mock-Planning-Progress.md`'s status line — it opens
   *"Status: In design/planning. Not implemented."* for a capability that shipped in `specs/001`. ·
   `WeekendProject/Module_Mock/Module_Mock-Planning-Progress.md`
-- [ ] **T202** Add `07` and `08` to the retired-sources note in `OPEN-TASKS.md` §3.1, which names six retired sources
+  **DONE 2026-09-20.** `Module_Mock-Planning-Progress.md` no longer opens *"Status: In design/planning. Not implemented."* for a capability that shipped in `specs/001`; the line is replaced with a **SUPERSEDED** status pointing at the shipped spec.
+
+- [x] **T202** Add `07` and `08` to the retired-sources note in `OPEN-TASKS.md` §3.1, which names six retired sources
   and omits the two that are now delivered-but-unreconciled. · `OPEN-TASKS.md`
-- [ ] **T203** Reconcile `WeekendProject/PromptFiles/App-Validation-Checklist.md` with the delivered card work: it
+  **DONE 2026-09-20.** `OPEN-TASKS.md` section 3.1 now reads "plus three reconciled seeds" and lists the `07` and `08` rows alongside the six it already named.
+
+- [x] **T203** Reconcile `WeekendProject/PromptFiles/App-Validation-Checklist.md` with the delivered card work: it
   holds **45 unchecked** boxes, §4–§8 (27) belonged to the card workstream `specs/004` has since delivered, and at
   least one check names the **retired** catalog (`waitlist_request_types` / `_subtypes` exposing `category` +
   `item_id`). Unreconciled it would fail a shipped feature. · `WeekendProject/PromptFiles/App-Validation-Checklist.md`
-- [ ] **T204** Reconcile `specs/003-waitlist-handler-fulfilment/spec.md`'s header — it still reads `Status: Draft`
+  **DONE 2026-09-20.** `App-Validation-Checklist.md` carries a *4-8 reconciliation* banner that accounts for all **45** unchecked boxes (18 `[NOW]` in sections 0-3 plus 27 in sections 4-8) and states where each group belongs: section 4 (9) and section 5 (7) delivered by `specs/004` US1/US2, section 6 (4) and section 7 (2) **out of scope** per `specs/004/spec.md` line 509, section 8 (5) mixed with two stale boxes. The retired-catalog check (section 1d, naming `waitlist_request_types` / `_subtypes` with `category` + `item_id`) is struck with the FR-023 explanation. Verified premise: `Database/Tables/28_waitlist_request_types/` and `29_waitlist_request_subtypes/` contain **`rollback.sql` only**, and `sp_waitlist_request_types_get` / `sp_waitlist_request_subtypes_get` exist only as rollback drops -- the vocabulary really is gone, so an unreconciled checklist would indeed fail a shipped feature.
+
+- [x] **T204** Reconcile `specs/003-waitlist-handler-fulfilment/spec.md`'s header — it still reads `Status: Draft`
   while `.spec-context.json` records `status: completed` with 49/49 tasks. ·
   `specs/003-waitlist-handler-fulfilment/spec.md`
-- [ ] **T205** Resolve the orphan `specs/005-setup-work-order-search/` directory, which contains **only
+  **DONE 2026-09-20.** The `specs/003-waitlist-handler-fulfilment/spec.md` header reads `Status: Completed (2026-09-13 -- 49/49 tasks; ...)`, matching the `status: completed` its `.spec-context.json` already recorded.
+
+- [x] **T205** Resolve the orphan `specs/005-setup-work-order-search/` directory, which contains **only
   `.trace.jsonl`** — no `spec.md`, no `.spec-context.json`, no plan. Either remove the abandoned attempt or record
   that it was one; an empty numbered feature directory is a trap for whoever runs the next `specify`. ·
   `specs/005-setup-work-order-search/`
-- [ ] **T206** Restore or re-derive `capabilities/DRIFT.md`, named in repo memory as the drift **ledger of record**
+  **DONE 2026-09-20.** `specs/005-setup-work-order-search/ABANDONED.md` was created to record the abandoned 2026-09-13 run from its retained 58-line `.trace.jsonl` (45 `capture`, 5 `set`, 4 `lifecycle`, 2 `finish`, 2 `unknown`; `spec.md` never named, never written) and to state why the directory is kept. Verified it cannot create a false capability: `resolve-spec-paths.py --all --json` reports `orphans: []` and does not list `specs/005`. Verified the number is consumed: `create-new-feature.ps1` takes the highest number from the directories under `specs/`, so the next real spec is **`006`**.
+
+- [x] **T206** Restore or re-derive `capabilities/DRIFT.md`, named in repo memory as the drift **ledger of record**
   and absent from the tree. · `capabilities/`
-- [ ] **T207** State the living-spec blind spot where a reader will hit it: only `startup` and `startup-diagnostics`
+  **DONE 2026-09-20.** `capabilities/DRIFT.md` created as the ledger of record: what the ledger is, how to run `drift.py` (with `python`, never `python3`), the blind spot, the file-level-glob-leaf hazard, coverage-link validation, the 2026-09-13 findings with their 2026-09-20 resolutions, and the instruction/provenance/already-retired classification rule. Verified `capabilities/DRIFT.md` is **inert** to the tooling -- a non-spec markdown file there matches neither `*.spec.md` nor `capabilities/<name>/spec.md`, so it cannot be mistaken for a capability.
+
+- [x] **T207** State the living-spec blind spot where a reader will hit it: only `startup` and `startup-diagnostics`
   are registered, so drift across `MTM_Waitlist.Waitlist.View/**`, `Module_Waitlist/**`, `MTM_Waitlist.Core/**`,
   `Database/**` and `Strings/**` is invisible by construction — a green drift run means the *registry* is complete,
   not the repository. · `living-specs.yml`, `capabilities/`
-- [ ] **T208** Re-check every defect file's forward-looking rows against the shipped specs: the **Status** rows are
+  **DONE 2026-09-20.** `living-specs.yml` carries a comment block above `capabilities:` stating that only `startup` and `startup-diagnostics` are registered, that drift across `MTM_Waitlist.Waitlist.View/**`, `Module_Waitlist/**`, `MTM_Waitlist.Core/**`, `Database/**` and `Strings/**` is invisible by construction, and that a green run means the *registry* is complete and not the repository. Verified the file still parses as YAML.
+
+- [x] **T208** Re-check every defect file's forward-looking rows against the shipped specs: the **Status** rows are
   current, but the *Planned fix* rows still name features by their pre-shipment names (`Spec 01-truthful-data-and-controls`
   → `specs/002`, `Spec 03-unified-card-and-taxonomy` → `specs/004`). · `defects/*.md`,
   `WeekendProject/SpecTemplates/00-INDEX.md`
-- [ ] **T209** Correct the two repo-memory notes that contradict the tree —
+  **DONE 2026-09-20.** All **13** defect files carry an identical *Naming note (2026-09-20)* banner explaining that the template number is not the spec number (`01` to `specs/002`, `02` to `specs/003`, `03` to `specs/004`), and `WeekendProject/SpecTemplates/00-INDEX.md` carries the template-to-shipped-spec table plus the consequence for the defect map. Verified: 13 of 13, and no BOM introduced (PowerShell 5.1 reads a BOM-less file as ANSI, so a stray BOM would corrupt them).
+
+- [x] **T209** Correct the two repo-memory notes that contradict the tree —
   `.github/memories/repo/github-artifact-staleness.md` records `.github/copilot-startup-steps.yaml` and
   `.github/scripts/restructure-database-layout.ps1` as **DELETED**; both are present. A memory that says a file is
   gone is worse than no note, because the next agent stops looking. · `.github/memories/repo/`
-- [ ] **T210** Fix the stale platform version in `Directory.Build.props` — it says *"satisfied by the 2.3.0 in use"*
+  **DONE 2026-09-20 -- with a correction to this task's own path.** The note is **not** at `.github/memories/repo/github-artifact-staleness.md`; that folder holds only `infor-visual-disposition.md`, `tasks-md-id-allocation.md`, `workstation-elevation.md` and `workstation-secrets.md`. The real note lives in the **machine-local** Copilot memory store (`...\GitHub.copilot-chat\memory-tool\memories\repo\github-artifact-staleness.md`), which is outside the repository and therefore **not committable**. Both halves were done: the machine-local original was corrected in place, and a committed corrected record was written at `.github/memories/repo/github-artifact-staleness.md` and indexed in `.github/memories/README.md`. The note now records that `.github/copilot-startup-steps.yaml` and `.github/scripts/restructure-database-layout.ps1` are **present**, annotated *REFERENCE ONLY* / *ARCHIVED -- DO NOT RE-RUN*, and must **not** be deleted.
+
+- [x] **T210** Fix the stale platform version in `Directory.Build.props` — it says *"satisfied by the 2.3.0 in use"*
   where the repository pins **2.3.1**. · `Directory.Build.props`
+  **DONE 2026-09-20.** `Directory.Build.props` line 30 reads *"satisfied by the 2.3.1 in use"*, matching the pinned platform version.
+
 - [x] **T211** Correct the two stale statements in `.github/instructions/database-schema-rules.instructions.md`: its
   required-table list still names `core_workstations_registry` (the live table is `core_computers_registry`), and its
   migration section still describes a **"FluentMigrator runner"** where the model is hand-maintained
@@ -2045,21 +2089,55 @@ prove nothing points at it.**
 
 ### Gates
 
-- [ ] **T227** **Build and tests.** `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` →
+- [x] **T227** **Build and tests.** `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` →
   `0 Warning(s) 0 Error(s)`; `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` →
   `Failed: 0`. Record the evidence with **today's** numbers — the figure stored in this file (1089) is already stale
   against a measured **1109 total / 1082 passed / 27 skipped**. · `MTM_Waitlist.sln`,
   `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
-- [ ] **T228** **Validate against `READINESS-CHECKLIST.md`.** Walk that file's Phases 2–4 and confirm every box has a
+  **DONE 2026-09-20 — both commands run at this exact revision; the stored figure is replaced.** Build:
+  `Build succeeded. 0 Warning(s) 0 Error(s)` (24.9 s). Tests: `Passed! - Failed: 0, Passed: 1109, Skipped: 27,
+  Total: 1136, Duration: 28 s - MTM_Waitlist.Tests.dll (net10.0)`. **The 1082 in this task's own text was already
+  stale when it was written** — the correct measured figure is **1109 passed**, and the totals are
+  **1136 total / 1109 passed / 0 failed / 27 skipped**. One caveat worth recording, because it cost time and it is
+  **pre-existing, not caused by this phase**: `MTM_WAITLIST_DB_CONNECTION_STRING` is set at **User** scope on this
+  workstation, and `StartupCoordinator.ResolveStartupDatabaseConnectionString()` prefers the environment variable
+  over the configured one, so
+  `StartupCoordinatorTests.RunAsync_WhenDatabaseConnectionStringIsMalformed_ReturnsBlockedAsync` (which passes
+  `ConnectionString = "###"` and expects `IsBlocked`) fails **intermittently** when that variable leaks into the test
+  process. Three test classes save-and-clear both variables and restore them in `[TestCleanup]`, but
+  `VisualUnreachableFastFailTests`, `MockServiceRefreshClientTests` and `BackupRestoreTests` do not — hence the
+  flake. With the variable absent from the process environment the suite is deterministic at the numbers above, and
+  that is how this run was taken. Reported as a defect rather than fixed here: it is a test-isolation bug in an
+  unrelated subsystem, and this phase's remit is documentation honesty.
+- [x] **T228** **Validate against `READINESS-CHECKLIST.md`.** Walk that file's Phases 2–4 and confirm every box has a
   named artifact behind it, leaving **Phase 5 (the owner's actions) untouched and unticked**. Report any box without
   evidence rather than asserting it. · `READINESS-CHECKLIST.md`
+  **Walked 2026-09-20 — 39 boxes, 38 confirmed, 1 real gap found and closed.** The walk was run as **41 named checks**
+  against the tree rather than read off the documents' own claims. Six checks failed on first run and **five were bad
+  checks, not bad work**: the `FEATURES.md` pin check demanded `7bf6857` be *absent* when the header correctly records
+  it as the **previous** pin; the defect-table check matched a row that now records **both** closures (002 removed the
+  inert buttons, 003 brought them back wired); the Mockups check required 11 files where the box itself says 12 and
+  only **10** `PromptFiles/*` name `Mockups` at all, all ten classified; the schema-rules check matched the corrected
+  sentence *"there is **no** FluentMigrator runner"*; and the folder-table check's regex read `IF` as the table name
+  (corrected, it finds **21 folders → 21 distinct tables, 0 duplicated**). **One was a real gap, and it is closed:**
+  `.github/instructions/winui3-ui-automation.instructions.md` still asserted that *"reaching the shell needs a sign-in
+  as well, so a full navigation test needs credentials"*, and no task in Phase 14 named that file — so the box was
+  carried by the T189–T212 range but had nothing behind it. It was disproved by driving the running app and the file
+  was corrected, together with its verification table and its two previously-unverified recipes. **Phase 5 was left
+  untouched and unticked** — its three boxes are the owner's actions, and one of them (the full GUI-only installer)
+  cannot be driven by an agent at all. All 39 Phase 2–4 boxes now carry their verifying task inline.
+  **What the walk found in the tree:** 11 superseded duplicate artifact folders gone; `AllTables.sql` and the 21
+  `Database/Tables` folders name the **same 21 tables**; a scan of every `create.sql` under `Database/**` finds **117
+  creates, 0 duplicated**; `Database/Mock/Tables` holds exactly **10** creates and the internal aggregate contains
+  **0** mirror objects; both naming guards print their findings and fail for the right reason; and the 901 C#/XAML
+  findings exist as `.github/reports/csharp-xaml-naming-violations.md` (71 KB) beside the SQL report.
 
 ### The reliability criteria that cannot currently be measured (found 2026-09-20)
 
 `SC-007` and `SC-008` are stated over a **30-day observation window**, and nothing in the service retains one. These
 four tasks give the criteria a durable input, prove the metric, and keep the unmeasured part labelled unmeasured.
 
-- [ ] **T229** **Correct the SC-007 / SC-008 diagnosis wherever it is written as "it needs 30 days of wall time".**
+- [x] **T229** **Correct the SC-007 / SC-008 diagnosis wherever it is written as "it needs 30 days of wall time".**
   Two blockers sit underneath the date, and neither is time: (1) `RefreshRunRecordStore._lastRuns` and
   `BackupArtifactStore._lastRuns` are dictionaries keyed by shape and by store, so each holds **one** run — the last
   one — and there is no history to aggregate even after 30 days; (2) the only durable history is the prose JSONL
@@ -2068,7 +2146,15 @@ four tasks give the criteria a durable input, prove the metric, and keep the unm
   pruned long before day 30. Amend the three places that state the softer version — `specs/001`'s blocked table and
   its status table, and `OPEN-TASKS.md` — and leave `READINESS-CHECKLIST.md` Phase 5's measurement owed. ·
   `specs/001-module-mock-visual-fallback/tasks.md`, `OPEN-TASKS.md`
-- [ ] **T230** **Give the criteria a durable, append-only run history to be measured against.** Record every
+  **Done 2026-09-20 — all three places amended, and a fourth inaccuracy found while doing it.** `OPEN-TASKS.md` §1.1's
+  row now reads *"not measured, and not measurable as built"*, names the **two blockers** (one run kept per shape and
+  per store; `ServiceLog.RetentionDays` hard-coded to **30** against `BackupPolicy.RetentionCount` defaulting to
+  **14**), and points at §5's "the real blocker, not the date" instead of resting on the calendar. `specs/001`'s
+  **blocked table** and its **status table** both already carried the corrected diagnosis. The inaccuracy found while
+  checking them: the blocked table still read *"30-day observation windows — **not started**"*, which contradicts the
+  start this file records as **2026-09-12** — corrected to *"started 2026-09-12, not measured, and not measurable as
+  built"*. `READINESS-CHECKLIST.md` Phase 5's measurement stays **owed** and stays unticked.
+- [x] **T230** **Give the criteria a durable, append-only run history to be measured against.** Record every
   scheduled refresh cycle's per-shape outcome **with its attribution** (so "skipped because the external source was
   unreachable" is a stored fact, not an inference from prose), and every scheduled backup window's per-store outcome
   with the artifact's path and size. Two constraints are not negotiable: the history must live **service-locally**, not
@@ -2078,6 +2164,31 @@ four tasks give the criteria a durable input, prove the metric, and keep the unm
   `ServiceLog.RetentionDays` and `BackupPolicy.RetentionCount` against the 30-day criterion in the same change, or the
   criterion stays unmeasurable by construction. · `MTM_Waitlist.Mock.Service/Services/`,
   `MTM_Waitlist.Mock.Service/Models/`
+  **Done 2026-09-20 — the history exists, and the measurement tool reads it end to end.** `RunHistoryStore` appends one
+  JSON line per refresh outcome and per backup outcome to `run-history.jsonl` under the service's own app-data root —
+  beside `refresh-run-records.json` and `backup-artifacts.json`, and deliberately **not** in MySQL, so a restore cannot
+  rewind the record of itself. The file is opened `FileMode.Append` / `FileShare.Read`, so a reader never blocks a
+  writer and a writer never blocks the measurement tool; the only thing that removes a line is retention, which drops
+  whole records older than **60 days** at most once per UTC day and replaces the file atomically. **Attribution is
+  stored, not inferred**: `SkippedSourceUnreachable` is written as `outcome:"Skipped"` + `reason:"sourceUnreachable"`,
+  each failure class gets its own token (`schemaMismatch`, `loadFailed`, `unexpectedError`, `mysqldumpUnavailable`,
+  `mysqldumpFailed`), and the sanitized error text rides along in `detail`. **Cycle identity** is the other half:
+  `RefreshRunRecord` gained `CycleUtc` and `Trigger`, every shape refreshed in one cycle carries the same instant, so a
+  cycle that refreshed four of five shapes counts as the partial failure it is rather than as an 80% success — and
+  `Trigger` separates `scheduled` from `onDemand`, so the rate cannot be improved by asking for more refreshes.
+  **Retention reconciled against the criterion, in one place:** `Models/ReliabilityCriteria.cs` holds
+  `MeasuredWindowDays = 30`, `HistoryRetentionDays = 60` and `BackupRetentionCount = 44`; `ServiceLog.RetentionDays`
+  (was 30) and `BackupPolicy.RetentionCount` (was 14, at both the model and its duplicated default in
+  `ServiceConfigurationStore`) now read from it, so raising the window moves the retention with it. **Evidence:**
+  `MTM_Waitlist.Tests/Module_Mock_Service/RunHistoryStoreTests.cs` (32 cases) pins the JSON property names the tool
+  reads, the outcome/reason vocabulary, cycle sharing, trigger separation, append-only growth, UTC normalization,
+  credential redaction, corrupt-line tolerance and both retention edges; build **0 warnings / 0 errors**, suite
+  **1141 passed / 0 failed / 27 skipped / 1168 total**. The loop was then closed by hand: a fixture wrote 270 lines
+  **through the real store** and `tools/measure-reliability-window.ps1 -Root <that folder>` read them and reported
+  SC-007 **30 of 30 scheduled cycles, 100%, PASS** and SC-008 **120 windows, 4 of 4 stores, 0 missing artifacts,
+  PASS**. That run proves the tool reads what the store writes — **it is a fixture, so it does not prove the service
+  is reliable**, and the tool now labels its own output `Evidence: read from <path>` rather than `seeded` when it did
+  not generate the file.
 - [x] **T231** **Land the seeded measurement and prove both thresholds bite** — **DONE 2026-09-20.**
   `tools/measure-reliability-window.ps1` reads a run history (the shape T230 must write), seeds a 30-day one per
   scenario, and computes both criteria: SC-007 as *succeeded cycles / scheduled cycles ≥ 95% **and** every
@@ -2093,12 +2204,25 @@ four tasks give the criteria a durable input, prove the metric, and keep the unm
   proves the metric is computable and the gate is enforceable; it is seeded data and therefore proves **nothing**
   about the service's real-world reliability. Run `-Scenario healthy -Generate` to reproduce, `-Generate` with the
   others to see each failure mode. · `tools/measure-reliability-window.ps1`
-- [ ] **T232** **Keep the unmeasured part labelled unmeasured.** Wherever this work is summarised — `OPEN-TASKS.md`,
+- [x] **T232** **Keep the unmeasured part labelled unmeasured.** Wherever this work is summarised — `OPEN-TASKS.md`,
   `READINESS-CHECKLIST.md` and the `specs/001` status table — say plainly that the seeded run proves the *metric*,
   that the real 30-day result is still owed, and that it cannot be obtained until T230 lands and the service then
   runs on the host for 30 days. A green seeded run reported as a passing criterion is exactly the class of false
   claim this phase exists to remove. · `READINESS-CHECKLIST.md`, `OPEN-TASKS.md`,
   `specs/001-module-mock-visual-fallback/tasks.md`
+  **Done 2026-09-20 — the three named places say it, and a sweep found four more claims that did not.** All three
+  named summaries now carry the same three-part statement verbatim in substance: the **metric** is proven against a
+  seeded 30-day history by `tools/measure-reliability-window.ps1` and both thresholds demonstrably bite (93 % fails
+  SC-007; a non-outage skip fails SC-007 even at 97 %; one missing backup artifact fails SC-008); that proves the
+  **gate, never the service**; and the **real** result is **owed** until T230 lands and the service then runs on the
+  host for 30 days. `OPEN-TASKS.md` line 59 ends *"A green seeded run must not be reported as a passing criterion"*;
+  `READINESS-CHECKLIST.md` Phase 5 item 3 ends *"The seeded result proves the **metric**, never the service, and must
+  be reported that way"*; the `specs/001` status table row ends *"which proves the gate, not the service. Durable
+  history owed: `specs/004` T230"*. **What the sweep added:** four further places in `specs/001` still carried the
+  *old* diagnosis or a false one, and all four were corrected — the Phase 19 blocker list's *"so even on a provisioned
+  host the task completes at the 30-day mark"* (the strongest form of the claim T229 exists to remove), a blocked-reason
+  line, and **two lines that called the windows "unstarted"** when §1.1 records the start as **2026-09-12**. A green
+  seeded run is nowhere reported as a passing criterion.
 
 **Checkpoint — the repository can be trusted by whoever comes next.** No document asserts a state the code
 contradicts, one folder defines each table, both naming guards fail for the right reason and print what they found,

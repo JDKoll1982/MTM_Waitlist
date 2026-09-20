@@ -213,6 +213,13 @@ public sealed class ServiceHostBuilder
 
         _services.AddSingleton(_ => new RefreshRunRecordStore(AppDataRoot));
 
+        // The append-only history the reliability criteria are measured against. It sits beside the run-record
+        // store for the same reason that store sits on disk: a restore replaces a whole MySQL store, so history
+        // kept inside one would be rewound by the operation it has to describe (T230).
+        _services.AddSingleton(provider => new RunHistoryStore(
+            AppDataRoot,
+            provider.GetRequiredService<ILogger<RunHistoryStore>>()));
+
         _services.AddSingleton(provider => new RefreshEngine(
             provider.GetRequiredService<RefreshShapeCatalogProvider>(),
             provider.GetRequiredService<IVisualShapePayloadSource>(),
@@ -226,6 +233,7 @@ public sealed class ServiceHostBuilder
         _services.AddSingleton(provider => new RefreshRunRecordRecorder(
             provider.GetRequiredService<RefreshEngine>(),
             provider.GetRequiredService<RefreshRunRecordStore>(),
+            provider.GetRequiredService<RunHistoryStore>(),
             provider.GetRequiredService<ILogger<RefreshRunRecordRecorder>>()));
     }
 
@@ -272,6 +280,7 @@ public sealed class ServiceHostBuilder
 
         _services.AddSingleton(provider => new BackupEngine(
             provider.GetRequiredService<BackupArtifactStore>(),
+            provider.GetRequiredService<RunHistoryStore>(),
             provider.GetRequiredService<MySqlConnectionStringResolver>(),
             configurationAccessor,
             provider.GetRequiredService<ILogger<BackupEngine>>()));

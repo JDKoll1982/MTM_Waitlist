@@ -19,6 +19,25 @@ independently. **Verification is mandatory** — the ratified constitution (`.sp
 Principle VI *Evidence-Based Verification Gates*) makes verification a gate, so verification tasks are included even
 though the generic template marks tests optional. Verification tasks are marked `(verification)`.
 
+> ### Artefacts cited below that are no longer in the tree (classified 2026-09-20)
+>
+> Two documents are cited throughout this file and **neither is present in the repository**. Before you go looking,
+> read what each citation is, because the two want different answers:
+>
+> - **`VALIDATION-PROMPT-SERVER.md`** — **every citation is provenance, not instruction.** It was a one-shot
+>   handover prompt for the host run on `V-MTMFG-5` / `172.16.1.104`, and the run **was executed**; the lines here
+>   record what that run did and what it found (see Phase 25, and the "expected check count 24 → 25" and
+>   "27 checks" rows further down). The claims are not re-runnable from the file because the file was consumed by
+>   the run. **Do not look for it, and do not treat its absence as missing work.** The same classification applies
+>   to the citation in `OPEN-TASKS.md` §5 item 6.
+> - **`RELEASE-NOTES.md`** — **retired.** It documented the Infor Visual outage fallback and was removed after the
+>   architecture it described changed (T139 corrected its refresh cadence; T125 had extended it). Citations at
+>   T125, T139 and T161 are history; the live equivalent is `README.md` + `CHANGELOG.md` + `WeekendProject/ChangeLog.Simple.md`.
+>
+> **The rule.** A dangling reference is **instruction**, **provenance**, or **already-retired**, and the three want
+> different answers: an instruction must be repaired or deleted, provenance needs a note saying the artefact is gone
+> and why, and a retired artefact needs only the reference removed. See `capabilities/DRIFT.md`.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies on incomplete tasks)
@@ -1382,7 +1401,8 @@ reachable MySQL/Infor Visual, so the live subset of T105 was not re-run).
   operation-level half of both, including the "no code path from the API to a restore" guard.
 - **T106** — the end-to-end acceptance walkthrough needs a running service, a deployed `mtm_mock`, and reachable
   MySQL/Infor Visual; none is available in this environment, and its SC-007/SC-008 halves are 30-day observation
-  windows rather than one-shot tests.
+  windows rather than one-shot tests (**corrected 2026-09-20**: those windows started 2026-09-12 and the blocker
+  is not the calendar — see the status table below).
 - **T107 / T108** — the internal-store bounded-retry policy and the per-screen `Unavailable` surface (FR-021). The
   design is settled (`data-model.md` §10); the work is a Core retry seam plus the affected screens' state surface,
   and it was deliberately not started rather than left half-built.
@@ -1512,8 +1532,10 @@ on-host service refreshes on its own schedule) and never touches an internal sto
 Not executed. The walkthrough needs a running service, Infor Visual made unreachable, a signed-in client build,
 and a backup/restore drill; the environment re-probe in Phase 19 shows the first and third of those are absent
 and the second is a deliberate disruption of a live shared system. Its SC-007/SC-008 halves are 30-day
-observation windows rather than one-shot tests, so even on a provisioned host the task completes at the 30-day
-mark.
+observation windows rather than one-shot tests — and, **corrected 2026-09-20**, a provisioned host would not
+close them either: the windows were **started 2026-09-12**, and the service keeps only the latest run per shape
+and per store, so 30 days of wall time would still leave nothing to aggregate. See the status table below and
+`specs/004` T229–T232.
 
 ---
 
@@ -1574,7 +1596,7 @@ final-validation gates. Phase 18 asserted the environment has "a deployed `mtm_m
 class documents this — the cache is disposable and the on-host service rewrites it on schedule). The
 `seed_visual_mirror_baseline` seed was re-applied afterwards, and the mirrors were re-verified at 1/2/2/2/1 rows
 with `is_seed_content = 1` and no `_prev` table present, i.e. **byte-equivalent to the pre-test baseline**.
-
+sk-e766f3651bb445f4baf2a10fa8998bee
 ### Still blocked, and the specific blocker
 
 | Step | Blocker |
@@ -1584,7 +1606,7 @@ with `is_seed_content = 1` and no `_prev` table present, i.e. **byte-equivalent 
 | §4 defect proof (SC-001/SC-002, FR-021) | Needs a signed-in application session; the app stops at the **Sign in** gate and no credential was used |
 | §5 backup/restore drill (SC-008/SC-009) | Needs a running service and a throwaway store. `mysqldump` is installed but off `PATH`, so only the `toolUnavailable` branch is reachable from here (which at least means the absence is *reported*, per FR-013, rather than worked around) |
 | §7 sixth-shape playbook (SC-012) | A maintainer-day exercise, not a mechanical gate |
-| SC-007 / SC-008 | **30-day observation windows — not started.** They cannot start until the service runs on the host |
+| SC-007 / SC-008 | **30-day observation windows — started 2026-09-12, not measured, and not measurable as built (corrected 2026-09-20).** `RefreshRunRecordStore` and `BackupArtifactStore` keep only the **latest** run per shape and per store, so there is no history to aggregate however long the service runs; the durable history is the JSONL `ServiceLog`, whose `RetentionDays` is a hard-coded **30** — the exact window the criterion measures — and `BackupPolicy.RetentionCount` defaults to **14** artifacts per store. Give the criteria a durable history first (see `specs/004` T230, T229). The metric itself is proven against a seeded 30-day history (`tools/measure-reliability-window.ps1`, `specs/004` T231) |
 
 **Net position: 110 of 111 tasks remain complete. T106 stays unticked**, now with an accurate description of what
 is blocked on a host-side deployment versus what can never be checked from a workstation.
@@ -2295,7 +2317,8 @@ of **180**. The live configuration holds `RefreshIntervalMinutes: 180`, `Service
 in place and the blocker that stopped Phases 18/19/21 ("a host-side deployment to another machine") is retired. What
 remains of §2 is the tray Settings surface; §3's fallback proof and §4's defect proof need a **signed-in** application
 session; §5 needs a configured service and a throwaway store; §7 is a maintainer-day exercise; SC-007/SC-008 are
-unstarted 30-day observation windows. (The write-once credential and the “one real refresh cycle” items this list
+observation windows that **started 2026-09-12 and are unmeasured** (**corrected 2026-09-20** — this line read
+"unstarted", and the tick that started them is recorded in §1.1). (The write-once credential and the “one real refresh cycle” items this list
 used to carry are both retired — T147 deleted the credential, and Phase 25 ran the cycle on the host.) Two of those
 blockers were re-confirmed unchanged this run (`172.16.1.104:5760` closed, no `HKCU\…\Run` entry, no
 `bin/publish/win-x64`). The new finding above adds a fourth reason the walkthrough cannot be signed off: even on a
@@ -2483,7 +2506,9 @@ exists** (T147 retired it) and the **real refresh cycle has now run**.
 - **Step 6's remote-client check was not run from a plant PC.** On the host the listener binds `0.0.0.0:5760`, a call
   to `http://172.16.1.104:5760/api/status` with an approved operator answers `200`, and an inbound allow rule exists —
   necessary but not the remote proof itself.
-- A settings save from the UI was not exercised, and SC-007/SC-008 remain unstarted observation windows.
+- A settings save from the UI was not exercised, and SC-007/SC-008 are observation windows that **started
+  2026-09-12 and remain unmeasured** (**corrected 2026-09-20** — this line read "unstarted", but the start is
+  recorded in §1.1 and the windows are simply not measurable as the service is built).
 - The live-store test pass wrote 14 rows into the operational store during this session (four
   `waitlist_requests_queue` rows with their four `waitlist_requests_audit` rows, `setup_active_jobs` id 4 with its
   custom-data row and four `setup_job_history` rows). All 14 were **deleted** transactionally afterwards; rollback
@@ -3359,7 +3384,7 @@ it that left a trace in the run output named below. It does not re-assert each o
 |---|---|---|
 | T106 §3 (fallback proof) | Operator verification | `GetInventoryLocations.sql` could not reach Infor Visual, and the read was served from the `mtm_mock` mirror by `sp_visual_inventory_locations_get` — the fallback firing on unreachability, which is exactly §3 |
 | T106 §3/§4 (signed-in surface) | Operator verification | A **signed-in** session (auto-login from the stored session token) rendered the Waitlist shell and the request detail surface; the same run is what makes T151's third part reachable |
-| T106 SC-007 / SC-008 | **Started, not measured** | The windows need 30 days of wall time. Recorded start: **2026-09-12**; re-check due **2026-10-12** (≥ 95 % of scheduled refresh cycles succeeding; 100 % of scheduled backup windows producing a restorable artifact per enabled store) |
+| T106 SC-007 / SC-008 | **Started, not measured — and not measurable as built** | The windows need 30 days of wall time, but wall time is **not** the real blocker (corrected 2026-09-20): the service keeps only the latest run per shape and per store, the log retention is a hard-coded 30 days and the backup retention defaults to 14 artifacts per store, so even after 30 days there is nothing to aggregate. Recorded start: **2026-09-12**; re-check due **2026-10-12** (≥ 95 % of scheduled refresh cycles succeeding; 100 % of scheduled backup windows producing a restorable artifact per enabled store). The **metric** is proven against a seeded history — `healthy` 29/30 = 97 % passes, `marginal` 93 % fails, a non-outage skip fails at 97 %, and a missing backup artifact fails — which proves the gate, not the service. Durable history owed: `specs/004` T230 |
 | T151 parts 1–2 | Host run, Phase 26 | `visual_inventory_locations_result` at **2,012** rows, minimum `1.0000`, against 79,457 pre-change |
 | T151 part 3 | Operator verification | `GetInventoryLocationRowsAsync` answered the detail surface for the sampled part `RM-50218 / Customer RM-77` on the signed-in session; `Raw=0, Displayed=0` is a **real empty answer** for a part the mirror holds no locations for, which FR-004 requires be served as-is rather than treated as a miss |
 

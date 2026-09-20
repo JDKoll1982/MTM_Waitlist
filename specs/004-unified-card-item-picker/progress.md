@@ -47,6 +47,24 @@ Started: 2026-09-20 07:25:58
 - **`$Error` is a read-only PowerShell automatic variable.** `foreach ($error in $errors)` aborts the loop with
   *"Cannot overwrite variable Error"* before printing anything, which turns a working guard into a guard that fails
   loudly with the wrong message and no findings. Never use `$error`/`$Error` as a loop variable.
+- **`R` is an alias for `Invoke-History`.** Naming a helper function `R` (or `Lines`) silently calls the built-in
+  instead, and the failure looks like a logic bug in the caller. Pick a name no alias claims.
+- **A trailing `)` imbalance reports a `ParserError` at the wrong column.** Do not trust the reported position -
+  dump the script with numbered lines and read the tail of the block before re-running.
+- **`Get-ChildItem -Filter` accepts one string, not an array.** `-Filter @('a.cs','b.cs')` fails with *"Cannot convert
+  System.Object[]"*; use `-Include` with `-Recurse`, or one `-Filter` per call.
+- **`[regex]::Matches(...) | Select-Object -First 1` returns the collection, not the first match.** Use
+  `[regex]::Match(...)`. A sweep built on the former reports matches it did not find.
+- **`Get-Content` on a BOM-less UTF-8 file decodes as ANSI and destroys non-ASCII on write-back.** Any in-place edit
+  must read with `[System.IO.File]::ReadAllLines($p, [System.Text.Encoding]::UTF8)` and write with
+  `UTF8Encoding($false)`.
+- **A measurement tool must not let "no evidence" read as "perfect".** Walking only the entries a file already
+  mentions passes whatever is absent, so a store that never ran looks like a store with nothing wrong. Enumerate the
+  expected set independently and report the gap.
+- **Retention equal to the period being measured is the same as having no history.** Tie the retention constant to
+  the window constant in one place, so the window cannot be raised past the evidence.
+- **A reader must never block the writer, and vice versa.** Open an append-only history with `FileMode.Append` and
+  `FileShare.Read`, and replace it atomically (`.tmp` + `File.Move(overwrite: true)`) when retention prunes it.
 - **The C#/XAML naming guard is diff-scoped by design.** `.github/workflows/csharp-xaml-naming-compliance.yml`
   builds its file list from `git diff --name-only $base $head` and calls the script with `-Files`, so a pull request
   that touches no C#/XAML/RESW file passes **and is not evidence that the tree is clean**. A repo-wide backlog of
@@ -219,4 +237,54 @@ Started: 2026-09-20 07:25:58
 - **Pre-existing uncommitted work was left alone.** The working tree carried substantive uncommitted changes from earlier iterations (`MTM_Waitlist.Settings`, `MTM_Waitlist.Waitlist.NewRequest`, `MTM_Waitlist.Waitlist.View`, `Services/DependencyInjection`, several test files, `Database/Seeds/*`, and `.specify/extensions/ralph/scripts/powershell/ralph-loop.ps1`) - 366 insertions across 16 files. They are outside this unit's scope and were not verified by this iteration, so they were deliberately **not** swept into this commit even though the loop recipe suggests `git add -A`. They remain uncommitted and are flagged for the owner below.
 - **Verification evidence.** Duplicate scan after deletion: 0 duplicate creates across 21 table and 84 routine/view `create.sql` files. Validator on a clean tree with no connection-string variables, under `pwsh`: *"Duplicate-object check passed: 94 artifact(s) create 94 distinct object(s)."* then *"Skipping validation because no configured connection-string env vars are set."*, exit 0. Validator with a deliberately recreated duplicate: names the table and both paths, exit 1. Live store: for the workstation/work-centre family only the renamed objects exist. No C#, XAML, RESW or `.csproj` file was touched this iteration, so the last full-suite result (`total: 1136, failed: 0, succeeded: 1109, skipped: 27`) still stands and no build or test run was needed.
 - **Next iteration's scope.** The remaining 37 tasks are dominated by running-app UI gates (T129-T133, T139, T164, T174, T184, T188), the owner's database reinstall (T165), and the documentation batch (T189-T210). The documentation batch is the only self-contained, verifiable unit left that does not need a signed-in app; the UI gates need a valid account credential and a running Debug build.
+---
+
+---
+## Iteration 5 - 2026-09-20
+**User Story**: Phase 14 (US7, "The codebase is honest about itself") — complete. This iteration landed T230, the last open task in the story.
+**Tasks Completed**:
+- [x] T189-T210: the documentation batch — every claim that no longer matched the shipped application corrected
+- [x] T227: the honesty sweep over the retired-systems boundary
+- [x] T228: the 39-box `READINESS-CHECKLIST.md` walk
+- [x] T229: the SC-007 / SC-008 diagnosis corrected wherever it was written as "it needs 30 days of wall time"
+- [x] T230: a durable, append-only run history for the criteria to be measured against
+- [x] T232: four further SC-007 / SC-008 claims corrected in `specs/001-module-mock-visual-fallback/tasks.md`
+**Tasks Remaining in Story**: None - US7 is complete. 10 tasks remain elsewhere in `tasks.md`.
+**Commit**: the US7 commit for this iteration (amended to carry this entry)
+**Files Changed**:
+- MTM_Waitlist.Mock.Service/Models/ReliabilityCriteria.cs (new - the numbers the criteria are measured over, in one place)
+- MTM_Waitlist.Mock.Service/Models/RunHistoryEntry.cs (new - the JSONL line shape, and the measurement tool's contract)
+- MTM_Waitlist.Mock.Service/Models/RefreshRunTrigger.cs (new - scheduled vs onDemand)
+- MTM_Waitlist.Mock.Service/Services/RunHistoryStore.cs (new - the append-only history, with retention)
+- MTM_Waitlist.Mock.Service/Models/RefreshRunRecord.cs (CycleUtc + Trigger)
+- MTM_Waitlist.Mock.Service/Services/RefreshEngine.cs (cycle identity threaded through every record)
+- MTM_Waitlist.Mock.Service/Services/RefreshRunRecordRecorder.cs (writes the history beside the run record)
+- MTM_Waitlist.Mock.Service/Services/BackupEngine.cs (same, for every backup outcome)
+- MTM_Waitlist.Mock.Service/Services/ServiceLog.cs (RetentionDays 30 -> ReliabilityCriteria.HistoryRetentionDays)
+- MTM_Waitlist.Mock.Service/Models/BackupPolicy.cs (RetentionCount 14 -> ReliabilityCriteria.BackupRetentionCount)
+- MTM_Waitlist.Mock.Service/Services/ServiceConfigurationStore.cs (the duplicated RetentionCount default, same source)
+- MTM_Waitlist.Mock.Service/Services/ServiceHostBuilder.cs (RunHistoryStore registered; both factories updated)
+- MTM_Waitlist.Tests/Module_Mock_Service/RunHistoryStoreTests.cs (new - 32 cases)
+- MTM_Waitlist.Tests/Module_Mock_Service/{RefreshCycleGateTests,BackupRestoreTests,BackupRetentionTests,ServiceApiSecurityTests,ServiceCapabilityEnforcementTests}.cs (constructors)
+- tools/measure-reliability-window.ps1 (SC-007 now reads scheduled cycles only; SC-008 now checks each store's own windows and names a store that never ran)
+- tools/README.md (the tool documented)
+- specs/004-unified-card-item-picker/tasks.md (the story's tasks ticked with recorded evidence)
+- specs/001-module-mock-visual-fallback/tasks.md, OPEN-TASKS.md, READINESS-CHECKLIST.md, FEATURES.md
+- WeekendProject/Module_Mock/Module_Mock-Planning-Progress.md, WeekendProject/PromptFiles/* (the documentation batch)
+- specs/004-unified-card-item-picker/progress.md (this entry)
+**Learnings**:
+- **The criterion was unmeasurable for two reasons, and only one of them was retention.** `ServiceLog.RetentionDays` (30) equalled the window and `BackupPolicy.RetentionCount` (14) was half of it, so the record of the window was swept as the window closed. But the deeper blocker was that **nothing aggregated a history at all**: `RefreshRunRecordStore` and `BackupArtifactStore` are dictionaries keyed by shape and by store, so each holds one run — the last one — and no amount of wall time turns that into 30 days of evidence. A history had to be created, not merely retained longer.
+- **Cycle identity is what makes SC-007 countable, and it has to be recorded rather than reconstructed.** SC-007 is stated over *cycles*, not shapes. Grouping by timestamp alone would be a guess: two shapes refreshed minutes apart by different code paths look identical to a reader. Carrying an explicit `CycleUtc` on every record makes "these five shapes were one cycle" a stored fact, so a cycle that refreshed four of five shapes counts as the partial failure it is instead of as an 80% success.
+- **An on-demand refresh would have let the rate be improved by asking for more refreshes.** The API's refresh endpoint calls the same `TryRunShapesAsync` the schedule does, so without a `Trigger` field a caller could raise the success rate by triggering successful runs. The measurement now keeps `scheduled` only, and the tool's filter treats a record with no `trigger` as scheduled so a history written before the field existed still reads.
+- **"No evidence" must not read as "perfect".** The first cut of SC-008 walked the four known stores and asked each whether the window had a record. That silently passes a store whose schedule never fired at all, because the check only looked at stores the history already mentioned. It now reports a store with no record at all as a failure — that store is exactly what the criterion exists to catch.
+- **Retention equal to the window is the failure mode, so the constants are tied together rather than restated.** `ReliabilityCriteria` holds `MeasuredWindowDays = 30`, `HistoryRetentionDays = 60`, `BackupRetentionCount = 44`; `ServiceLog.RetentionDays` and both copies of the backup default now read from it. Raising the window moves the retention with it, so the criterion cannot be made unmeasurable by editing one number.
+- **A reader must never block a writer.** The history is opened `FileMode.Append` / `FileShare.Read`, so the measurement tool — or an operator with the file open — cannot stall the service, and the service cannot stall the measurement. Retention replaces the file atomically through a `.tmp` + `File.Move(overwrite: true)`, so a reader never sees a half-written one.
+- **PowerShell aliases bite in this repo's scripts.** `R` is an alias for `Invoke-History` in Windows PowerShell, so a helper named `R` silently calls the wrong command. The same class of problem produced a misleading `ParserError` pointing at the wrong column for a trailing `)` imbalance — dump numbered lines before re-running rather than trusting the reported position.
+- **`Get-ChildItem -Filter` takes one string, not an array.** Passing `@('a.cs','b.cs')` fails with *"Cannot convert System.Object[]"*; use `-Include` with `-Recurse`, or one `-Filter` per call.
+- **`[regex]::Matches(...) | Select-Object -First 1` returns the collection, not the first match.** Use `[regex]::Match(...)`. A sweep built on the former reports a match it did not find.
+- **`Get-Content` on a BOM-less UTF-8 file decodes as ANSI and destroys non-ASCII on write-back.** Every script that edits a file in place here must use `[System.IO.File]::ReadAllLines($p, [System.Text.Encoding]::UTF8)` and write with `UTF8Encoding($false)`.
+- **Verification evidence.** Build `0 Warning(s) / 0 Error(s)`. Suite **1141 passed / 0 failed / 27 skipped / 1168 total** with both connection-string variables absent — the 1109 baseline plus the 32 new `RunHistoryStoreTests` cases. The loop was then closed by hand: a fixture wrote **270 lines through the real `RunHistoryStore`** and `tools/measure-reliability-window.ps1 -Root <that folder>` read them and reported SC-007 **30 of 30 scheduled cycles, 100%, PASS** and SC-008 **120 windows, 4 of 4 stores, 0 missing artifacts, PASS**. All four seeded scenarios still discriminate (93% -> rate FAIL, 97% with one unattributed skip -> attribution FAIL, one missing artifact -> SC-008 FAIL). The tool now labels its own output `Evidence: read from <path>` rather than `seeded` when it did not generate the file.
+- **One flake, seen once, and it is the documented one.** A full-suite run in this iteration reported 1140 passed / 1 failed before two clean runs at 1141 / 0. The failure is the known cross-test leak: three test classes save-and-clear the connection-string variables and restore them in `[TestCleanup]`, but `VisualUnreachableFastFailTests`, `MockServiceRefreshClientTests` and `BackupRestoreTests` do not, so `StartupCoordinatorTests.RunAsync_WhenDatabaseConnectionStringIsMalformed_ReturnsBlockedAsync` can see a stale value. Pre-existing, not caused by this unit, and not fixed here.
+- **A fixture proves the metric, not the service.** The 30/30 and 120/120 above are a fixture's numbers. Reporting them as the measured outcome of SC-007/SC-008 would be exactly the dishonesty this story exists to remove, which is why `READINESS-CHECKLIST.md` Phase 5 stays owed and unticked and the tool says so on its own output.
+- **Next iteration's scope.** 10 tasks remain: the Phase 9 running-app UI gates and criteria walk (T129, T130, T131, T133, T139), the Phase 11 gates (T164, T165), Phase 12's T174, and Phase 13's T184 and T188. All but T165 need a signed-in session against a running Debug build.
 ---

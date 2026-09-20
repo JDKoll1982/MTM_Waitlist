@@ -351,6 +351,7 @@ public sealed class BackupRestoreTests
 
             return new BackupEngine(
                 Store,
+                new RunHistoryStore(Root, NullLogger<RunHistoryStore>.Instance),
                 new MySqlConnectionStringResolver(configuration.MySqlConnection),
                 () => configuration,
                 NullLogger<BackupEngine>.Instance);

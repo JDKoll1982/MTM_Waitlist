@@ -56,7 +56,7 @@ named below. Every blocker this section used to list is retired:
 | §3 fallback proof, §4 defect proof | **Done** — a **signed-in** application session; the run output shows `GetInventoryLocations.sql` unable to reach Infor Visual and the read served from `mtm_mock`, which is §3's proof |
 | §5 backup/restore drill | Covered by the same verified execution |
 | §7 sixth-shape playbook | Covered by the same verified execution |
-| **SC-007 / SC-008** | **Started 2026-09-12 — not measured.** The windows need 30 days of wall time; re-check due **2026-10-12** (≥ 95 % of scheduled refresh cycles succeeding; 100 % of scheduled backup windows producing a restorable artifact per enabled store). T106 asked that the **start be recorded**, which it now is; the tick is not a claim that the windows passed |
+| **SC-007 / SC-008** | **Started 2026-09-12 — not measured, and not measurable as built.** Re-check due **2026-10-12** (≥ 95 % of scheduled refresh cycles succeeding; 100 % of scheduled backup windows producing a restorable artifact per enabled store). T106 asked that the **start be recorded**, which it now is; the tick is not a claim that the windows passed. **Corrected 2026-09-20 — the blocker is not the calendar.** 30 days of wall time would not produce the number, because the service keeps only the **latest** run per shape and per store (`RefreshRunRecordStore._lastRuns`, `BackupArtifactStore._lastRuns`) while `ServiceLog.RetentionDays` is hard-coded to **30** — the exact period being measured — and `BackupPolicy.RetentionCount` defaults to **14** artifacts. See §5's "the real blocker, not the date". **What is proven and what is owed:** the *metric* is proven against a seeded 30-day history by `tools/measure-reliability-window.ps1` (both thresholds demonstrably bite), and that proves the gate and **never** the service; the **real** result is still owed and cannot be obtained until a durable run history lands (`specs/004` T230) and the service then runs on the host for 30 days. A green seeded run must not be reported as a passing criterion |
 
 A fifth reason was added on 2026-09-11 and **retired 2026-09-12**: §3 step 3's *"every journey returns a complete,
 correctly shaped result"* would pass on **shape** while still serving a **different work order** than the live read
@@ -253,7 +253,7 @@ Full detail: `tasks.md` **Phase 37**.
 
 ---
 
-## 2. Carry-forward backlog for the next spec — 127 boxes
+## 2. Carry-forward backlog for the next spec — 116 boxes
 
 Itemised in **`WeekendProject/OPEN-WORK-NEXT-SPEC.md`** §4–§10. Run `/speckit.specify` against **one
 workstream at a time**, not the whole set.
@@ -261,18 +261,30 @@ workstream at a time**, not the whole set.
 | § | Workstream | Carry-forward | Source files |
 | --- | --- | ---: | --- |
 | 10 | Close out `specs/001` + documentation hygiene | — | `specs/001/tasks.md`, this file |
-| 4 | Waitlist handler fulfilment & urgency ordering | 9 + 2 | `PromptFiles/07`, `PromptFiles/08` |
-| 5 | Unified 2-line card + Category/Item taxonomy refactor | 20 | `PromptFiles/14-57%` |
+| ~~4~~ | ~~Waitlist handler fulfilment & urgency ordering~~ — **delivered by `specs/003-waitlist-handler-fulfilment`** (2026-09-13, 49/49) | ~~9 + 2~~ **0** | `PromptFiles/07`, `PromptFiles/08` (unreconciled; §3.1) |
+| 5 | Unified 2-line card + Category/Item taxonomy refactor — **in flight as `specs/004-unified-card-item-picker`** | 20 | `PromptFiles/14-57%` |
 | 6 | Waitlist analytics | 20 | `PromptFiles/10` |
 | 7 | Administration: cancellations monitor & request retention | 8 | `PromptFiles/11` |
 | 8 | User management (Settings → Administration) | 39 | `PromptFiles/15` |
 | 9 | Startup gate polish | 2 | `PromptFiles/13` (the two `+ [ ]` boxes; see §4) |
 | — | Validation checklist §4–§8 | 27 | `App-Validation-Checklist.md` |
 
-**Checked: 11 + 20 + 20 + 8 + 39 + 2 + 27 = 127.**
+**Checked: 20 + 20 + 8 + 39 + 2 + 27 = 116.** §4's 11 boxes are struck because
+`specs/003-waitlist-handler-fulfilment` shipped that workstream on 2026-09-13; §5's 20 stay counted because
+`specs/004-unified-card-item-picker` is still in flight, not complete.
 
-Sequencing is in that file's §11; the short version is: **§4 first** now that §10's T106 item is closed and the
-SC-007/SC-008 clocks are already running. §10 is documentation hygiene and can run alongside anything.
+**Delivered features this file used to walk past.** It previously went from `specs/001-module-mock-visual-fallback`
+straight to *"the new spec"*, as though two shipped features had never happened:
+
+| Spec | Scope | State |
+| --- | --- | --- |
+| `specs/002-truthful-data-and-controls` | Truthful data and controls (the §10.2 hygiene pass and FR-027's retired-source rule) | delivered |
+| `specs/003-waitlist-handler-fulfilment` | `OPEN-WORK-NEXT-SPEC.md` §4 — handler fulfilment and urgency ordering | delivered 2026-09-13 (49/49) |
+| `specs/004-unified-card-item-picker` | `OPEN-WORK-NEXT-SPEC.md` §5 — the unified 2-line card and the Category/Item picker | **in flight** |
+
+Sequencing is in that file's §11; the short version is: **§6 first** — §10's T106 item is closed, the
+SC-007/SC-008 clocks are already running, §4 is delivered by `specs/003`, and §5 is already being built as
+`specs/004`. §10 is documentation hygiene and can run alongside anything.
 
 **Owner decision already taken (2026-09-11): no request-type/subtype editor will be built.** The
 catalog-administration workstream is **cancelled, not deferred** — do not resurrect the Developer Settings
@@ -290,13 +302,21 @@ shipped code or rebuilding something deliberately deleted. The **151** counts on
 and the obsolete requirements (13); the **six** rows still open in the reconciled `Module_Mock/Tasks.md` are
 neither of those, and are listed in §3.1 for completeness.
 
-### 3.1 Retired sources (counting traps) — 138 boxes, 0 work, plus one reconciled seed
+### 3.1 Retired sources (counting traps) — 138 boxes, 0 work, plus three reconciled seeds
 
 | Source | Open boxes | Why it is not a backlog |
 | --- | ---: | --- |
 | `WeekendProject/Module_Mock/Tasks.md` | 6 | The **seed** for `specs/001`. **Reconciled 2026-09-12** (`specs/002-truthful-data-and-controls` T042): 67 of its 73 boxes are ticked against the shipped code, and each of the six left open carries its own `— still open 2026-09-12:` reason. It is no longer a counting trap, and the six are not shipped work. |
+| `WeekendProject/PromptFiles/07-8%-Phase2-fulfill.md` | 0 (was 11) | The **seed** for `specs/003-waitlist-handler-fulfilment` §4 (handler fulfilment). **Reconciled 2026-09-20:** the 9 real boxes are ticked with the delivering user story named, and the 2 mock-mode boxes are **deleted** — they cannot be built (see §3.2). |
+| `WeekendProject/PromptFiles/08-70%-Phase2-urgency.md` | 0 (was 3) | The other half of that same seed (urgency ordering). **Reconciled 2026-09-20:** 2 boxes ticked against `specs/003` US3 and 1 mock-mode box **deleted**. |
 | `PromptFiles/prompt.md` | 23 | The **master Task 1–23 index**; Tasks 1–15 and 19 are 100 % checked in their own files, and the genuinely open ones (16–18, 20–23) already appear in §4/§6/§7. |
 | `PromptFiles/14-30%`, `14-45%`, `14-47%`, `14-53%`, `14-55%` | 115 | Earlier **snapshots** of the same list `14-57%` holds live. Retire; never merge their counts. |
+
+**The 07 / 08 pair — read this before counting either file.** Between 2026-09-13 and 2026-09-20 they were the
+repo's most misleading counts: `specs/003` cited them as its seed and shipped their work, but neither file was
+reconciled, so `OPEN-WORK-NEXT-SPEC.md` §12 had to carry a standing "unreconciled, not work" footnote for 14 boxes
+that looked open. That is now closed — both files read **0 open**. If you see 11 and 3 again, you are reading a
+stale copy, not a backlog.
 
 **Retired sources — the six files that must not be reopened** (`specs/002-truthful-data-and-controls` FR-027).
 Each is a counting trap for a different reason:
@@ -355,16 +375,34 @@ out to have shipped in `c2d5e04` already. The host-side proof has since run too 
    (`76951`, `076951`, `WO-076951`) and is auto-formatted to that key **before** the lookup, so the autoformatter
    still works while the collision class stays closed (§1.2).
 5. ~~**T150**~~ — **done.** The shape-4 cache no longer stores zero-stock locations (§1.5).
-6. ~~**Host validation**~~ — **done 2026-09-12.** `VALIDATION-PROMPT-SERVER.md` was executed on `V-MTMFG-5`
-   (`tasks.md` Phase 25), the service and the app were both redeployed (Phase 26), and T151's zero-stock condition is
-   confirmed (§1.5). Its signed-in remainder — the last thing T151 had left — was confirmed the same day, so nothing
-   is outstanding from it.
+6. ~~**Host validation**~~ — **done 2026-09-12.** The server-side validation prompt (kept for the record as
+   `VALIDATION-PROMPT-SERVER.md` in the run's provenance) was **executed on `V-MTMFG-5`** (`tasks.md` Phase 25), the
+   service and the app were both redeployed (Phase 26), and T151's zero-stock condition is confirmed (§1.5). Its
+   signed-in remainder — the last thing T151 had left — was confirmed the same day, so nothing is outstanding from it.
+   **That document is no longer in the tree:** it was a one-shot instruction consumed by the run, so its role is
+   **provenance**, not instruction. Do not look for it, and do not treat its absence as missing work — the outcome it
+   asked for is recorded in `specs/001-module-mock-visual-fallback/tasks.md` Phase 25 and §1.5 below.
 7. ~~**T106**~~ — **done 2026-09-12.** The walkthrough was executed and the SC-007/SC-008 clocks were **started**;
    the 30-day re-check is due **2026-10-12** (§1.1). That re-check is a dated follow-up, not an open task — with it
    recorded, **nothing in `specs/001` is open**, so the next step is the new spec.
-8. **Next spec** — `/speckit.specify` against `OPEN-WORK-NEXT-SPEC.md` **§4** first (smallest, unblocked, immediate
-   user value), with §10 reduced to documentation hygiene now that its T106 item closed. The only dated item left in
-   this file is the **2026-10-12** SC-007/SC-008 re-check.
+
+   **SC-007 / SC-008 — the real blocker, not the date (established 2026-09-20).** Both success criteria are
+   *unmeasured*, and "wait until October" is not a plan, because by then there will be nothing to read:
+
+   | Criterion | Window | What the service actually keeps | Verdict |
+   | --- | --- | --- | --- |
+   | **SC-007** ≥ 95 % of scheduled refresh cycles succeeding | 30 days | only the **latest run per shape**, and `ServiceLog.RetentionDays` is hard-coded to **30** | unmeasurable — the per-cycle history is gone before the window closes |
+   | **SC-008** 100 % of scheduled backup windows producing a restorable artifact per enabled store | 30 days | only the **latest run per store**, and `BackupPolicy.RetentionCount` defaults to **14** artifacts | unmeasurable — the artifact record is overwritten before the window closes |
+
+   Both retentions are **shorter than or equal to the window being measured**, so the evidence expires at the same
+   rate it accumulates. Recording a successful cycle is not the same as being able to count the cycles. Treat the
+   **2026-10-12** re-check as a *decision point about what to instrument*, not as a measurement that will be waiting
+   there. (See `specs/004-unified-card-item-picker` T229.)
+8. **Next spec** — `/speckit.specify` against `OPEN-WORK-NEXT-SPEC.md` **§6** (Waitlist analytics) now that §4 has
+   shipped as `specs/003-waitlist-handler-fulfilment` and §5 is already in flight as
+   `specs/004-unified-card-item-picker`; §10 is reduced to documentation hygiene now that its T106 item closed. The
+   only dated item left in this file is the **2026-10-12** SC-007/SC-008 re-check — and item 7 above is what it will
+   have to contend with.
 
 ---
 

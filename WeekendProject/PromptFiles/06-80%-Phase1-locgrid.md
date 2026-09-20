@@ -49,6 +49,6 @@ Next task: **Completed — file `06` grid + backend source delivered. Move to `0
 
 ## Mockups (UI references)
 
-See `../Mockups/` for the target UI for this task:
+See `../Mockups/` for the target UI for this task. **`WeekendProject/Mockups/` is not in the tree** (noted 2026-09-20): these are design-time references — provenance, not instructions — describing a target that has since been built. Do not re-create the folder to satisfy this list.
 
 - `../Mockups/waitlist-detail-locationgrid.svg` — sortable Part # / Location / Quantity grid

@@ -15,7 +15,9 @@ namespace MTM_Waitlist.Mock.Service.Services;
 /// </para>
 /// <para>
 /// It subscribes on construction so the wiring cannot be forgotten at a call site, and it records for every
-/// path that runs a shape — scheduled, on-demand, or manual — because all three raise the same event.
+/// path that runs a shape — scheduled, on-demand, or manual — because all three raise the same event. Each run
+/// goes to two places: the run-record store, which answers "what is this shape's state now", and the
+/// append-only <see cref="RunHistoryStore"/>, which is what SC-007 is measured against.
 /// </para>
 /// <para>
 /// Recording is best-effort: a durable-store failure is logged and swallowed, because losing an operational
@@ -26,23 +28,28 @@ public sealed class RefreshRunRecordRecorder : IDisposable
 {
     private readonly RefreshEngine _engine;
     private readonly RefreshRunRecordStore _store;
+    private readonly RunHistoryStore _historyStore;
     private readonly ILogger<RefreshRunRecordRecorder> _logger;
 
     /// <summary>Creates the recorder and subscribes to the engine.</summary>
     /// <param name="engine">The engine whose completed runs are recorded.</param>
     /// <param name="store">The durable store the records are written to.</param>
+    /// <param name="historyStore">The append-only history every run is also added to.</param>
     /// <param name="logger">Logger; error text is sanitized by the store, which never sees a credential.</param>
     public RefreshRunRecordRecorder(
         RefreshEngine engine,
         RefreshRunRecordStore store,
+        RunHistoryStore historyStore,
         ILogger<RefreshRunRecordRecorder> logger)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(store);
+        ArgumentNullException.ThrowIfNull(historyStore);
         ArgumentNullException.ThrowIfNull(logger);
 
         _engine = engine;
         _store = store;
+        _historyStore = historyStore;
         _logger = logger;
 
         _engine.RunCompleted += OnRunCompleted;
@@ -78,6 +85,18 @@ public sealed class RefreshRunRecordRecorder : IDisposable
             _logger.LogError(
                 exception,
                 "The run record for shape {ShapeKey} could not be persisted; the refresh outcome itself is unaffected.",
+                record.ShapeKey);
+        }
+
+        try
+        {
+            await _historyStore.AppendRefreshAsync(record).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "The run history entry for shape {ShapeKey} could not be appended; the refresh outcome itself is unaffected.",
                 record.ShapeKey);
         }
     }

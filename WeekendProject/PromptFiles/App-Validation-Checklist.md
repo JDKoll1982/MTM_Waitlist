@@ -13,6 +13,29 @@
 > The prior `App-Validation-Checklist.md` content (checks for the 55% scope) is superseded by this file;
 > its DB/backend checks are preserved below where still applicable.
 
+> ### 🔎 §4–§8 reconciliation (2026-09-20) — read before counting or running this file
+>
+> The file holds **45** unchecked boxes: **18** are the §0–§3 `[NOW]` pre-flight gates, and **27** are the
+> §4–§8 "when the phase lands" checks. Those 27 are **not one batch**, and only part of them is delivered:
+>
+> | § | Boxes | State (verified 2026-09-20) |
+> | --- | ---: | --- |
+> | **4** New Request Category → Item picker | 9 | **Delivered** by `specs/004-unified-card-item-picker` **US1** ("Raise a request by saying what it is"). Re-run as regression once that spec's UI gates close. |
+> | **5** Uniform 2-line card | 7 | **Delivered** by `specs/004` **US2** ("Every request reads the same way"). Same treatment. |
+> | **6** NCM defect panel | 4 | **Not delivered, and not planned.** `spec.md` line 509 puts `pickup-ncm` **out of scope** for `specs/004`, and `IDefectTypeCatalogService` / `DefectTypeCatalogService` **do not exist in the code** — the DB half survives (`Database/Tables/30_waitlist_defect_types` + its four `sp_waitlist_defect_types_*` procedures) with no consumer. This needs its own spec, or the artifacts retired. |
+> | **7** Real FG/WIP/Outside item | 2 | **Half true, half out of scope.** The hard-coded placeholders it bans (`FG-10042`, `WO-073112`, `RM-48190`) are **gone from the tree**, so the first box passes; but `pickup-fg`, `pickup-wip` and `pickup-outside-service` are also **out of scope** for `specs/004` (same line 509), so the second box is unbuilt. |
+> | **8** Final acceptance (Phase 7) | 5 | **Mixed.** The build/test and role-gating boxes are re-runnable now; the "23 CSV rows" and "advance `14-57%`" boxes are stale (see below). |
+>
+> **Two boxes in §8 are stale as written:** *"Tests cover all 23 CSV rows"* counts a template
+> (`Documents/Request-Config-Template.csv`) whose row set changed with the Item catalog, and *"Checklist
+> advanced (current `14-57%-Phase2-UnifiedWaitlistCard.md`)"* is superseded — that file is the **seed** for
+> `specs/004`, and live task state now lives in `specs/004-unified-card-item-picker/tasks.md`.
+>
+> **The 27 still count as carry-forward in `OPEN-TASKS.md` §2**, deliberately: §4 and §5 describe behaviour
+> that `specs/004` has built but whose running-app gates have not yet been exercised, so ticking them here
+> would claim verification the spec itself has not claimed. When those gates close, 16 of the 27 come out
+> of the count and the remaining 11 (§6–§8) become a workstream of their own.
+
 ---
 
 ## 0. Pre-flight gates [NOW — re-run on every code change]
@@ -53,14 +76,21 @@
 - [ ] `sp_receiving_history_average_coil_weight('MMC0001000')` → `AverageWeight = 5000`
       (`mysql -e "USE mtm_receiving_application; CALL sp_receiving_history_average_coil_weight('MMC0001000');"`).
 
-### 1d. Schema/seed consistency (DB-first Category/Item mapping) — LIVE-VALIDATED 2026-09-09
-- [ ] `waitlist_request_types` / `waitlist_request_subtypes` expose `category` + `item_id` on leaf rows
-      (24/24 subtype leaves; Forklift Assist type-leaf → Other/other).
-- [ ] `sp_waitlist_request_types_get` / `sp_waitlist_request_subtypes_get` return the columns.
-- [ ] `AllTables.sql`, `AllSPs.sql`, `AllSeeds.sql`, `update_table_descriptions.sql` in sync with per-artifact
-      create.sql files. **`AllSPs.sql` no longer contains the removed editor SPs**
-      (`sp_waitlist_request_{types,subtypes}_{insert,update,delete,get_all}`) and still contains the runtime
-      `*_get` + `sp_mock_master_table_columns_get` + `sp_waitlist_defect_types_*`.
+### 1d. ~~Schema/seed consistency (DB-first Category/Item mapping)~~ — RETIRED 2026-09-20
+
+> **All three boxes below are struck, not re-run.** They assert against
+> `waitlist_request_types` / `waitlist_request_subtypes` exposing `category` + `item_id`, and those two tables
+> **no longer exist**: `specs/004-unified-card-item-picker` FR-023 removed the type/subtype vocabulary
+> outright — both catalog tables, their seed, both read procedures, the display-label services and the
+> picture dialog. `Database/Tables/28_waitlist_request_types/` and `29_.../` now hold **`rollback.sql` only**
+> (retained drops), `sp_waitlist_request_types_get` / `sp_waitlist_request_subtypes_get` are rollback-only
+> too, and `RetiredSymbolAuditTests` fails the build if any of it returns. The Category/Item mapping they
+> were checking is now the **Item** catalog, checked by `specs/004` US4/US5. Running these would fail a
+> shipped feature.
+
+- ~~[ ] `waitlist_request_types` / `waitlist_request_subtypes` expose `category` + `item_id` on leaf rows (24/24 subtype leaves; Forklift Assist type-leaf → Other/other).~~ — **retired** (tables removed by FR-023).
+- ~~[ ] `sp_waitlist_request_types_get` / `sp_waitlist_request_subtypes_get` return the columns.~~ — **retired** (both procedures are rollback-only).
+- ~~[ ] `AllTables.sql`, `AllSPs.sql`, `AllSeeds.sql`, `update_table_descriptions.sql` in sync with per-artifact create.sql files.~~ — **retired as written.** The sync rule still holds and is enforced by `validate-database-schema.ps1`, but the parenthetical about `sp_mock_master_table_columns_get` and the editor SPs no longer describes the tree. Re-check the aggregates against the live `create.sql` set instead of this list.
 
 ### 1e. Defect foundation — landed 2026-09-09
 - [ ] `waitlist_defect_types` table exists (`mysql -e "USE mtm_waitlist; SHOW TABLES LIKE 'waitlist_defect_types';"`).

@@ -546,7 +546,7 @@ public sealed class ServiceConfigurationStore
 
         public string ScheduleLocalTime { get; init; } = "01:00";
 
-        public int RetentionCount { get; init; } = 14;
+        public int RetentionCount { get; init; } = Models.ReliabilityCriteria.BackupRetentionCount;
 
         public string DestinationDirectory { get; init; } = string.Empty;
 

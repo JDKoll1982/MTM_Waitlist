@@ -1,9 +1,14 @@
 # Module_Mock — Planning Progress (working notes)
 
-> **Status:** In design/planning. Not implemented. This is a scratch doc capturing converged
-> decisions + open questions as we plan **from the ground up**. The formal artifacts (`Spec.md`,
-> `Plan.md`, `Tasks.md`) will be authored once the shape is locked.
-> **Last updated:** 2026-09-09 (collaborative planning session).
+> **Status:** ⚠️ **SUPERSEDED — this scratch doc is a 2026-09-09 planning snapshot; the capability it plans
+> shipped as `specs/001-module-mock-visual-fallback`.** It is kept for provenance only. **Do not read its
+> "not implemented" framing as current state**, and do not plan from it: the formal artifacts it promised
+> exist as `specs/001` (`spec.md` / `plan.md` / `tasks.md`), and several decisions recorded below were
+> superseded during that build — most visibly, the manual mock toggles it discusses were **removed
+> outright** (FR-014), replaced by automatic cache fallback driven by a reachability probe. It is a
+> scratch doc capturing converged decisions + open questions from that planning session; treat every
+> "will be" below as "was, then".
+> **Last updated:** 2026-09-09 (collaborative planning session); **status corrected 2026-09-20.**
 
 ---
 

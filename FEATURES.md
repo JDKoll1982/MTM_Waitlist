@@ -2,7 +2,11 @@
 
 **Audience:** plant-floor operators, material handlers, setup techs, leads, and administrators.
 **Written in plain language — no code, no jargon.**
-**Last verified against:** the working tree at commit `7bf6857` (2026-09-12).
+**Last verified against:** the working tree at commit `692091f` (2026-09-20). The previous pin was
+`7bf6857` (2026-09-12); since then `specs/002-truthful-data-and-controls` and
+`specs/003-waitlist-handler-fulfilment` shipped and `specs/004-unified-card-item-picker` went into
+flight, so §14 and the defect table below were re-read against those specs on 2026-09-20 and the
+claims they falsified were corrected. Where a row says **corrected 2026-09-20**, that re-read is why.
 
 > **How this list was built (no assumptions).** Every entry was read out of the shipped application
 > itself — each screen, the wording it shows, and the behaviour behind it. Nothing here is copied from
@@ -72,8 +76,9 @@
   **Try again** button, and it clears itself as soon as the database answers again.
 - **The green + button** in the bottom-right corner starts a new request.
 - ⚠️ **The Cancel (✕) and Accept (✓) buttons are gone from the cards, because they did nothing.** A
-  control that cannot act is no longer offered, and the card shows the request's real status instead. The
-  working Accept/Complete/Release actions are owned by the handler-fulfilment specification — see
+  control that cannot act is no longer offered, and the card shows the request's real status instead.
+  **Corrected 2026-09-20 — the working actions are now shipped:** `specs/003-waitlist-handler-fulfilment`
+  put Accept / Complete / Release / Cancel back on the card, wired and gated on who may use them. See
   `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`.
 
 ## 4. Waitlist — request detail
@@ -87,14 +92,16 @@
   the configuration rather than the app.
 - **Inventory by Location** — a sortable list of Part #, Location and Quantity (lb). Click a heading to
   sort by it, click it again to reverse the order. The hidden-locations list is respected here.
-- **A plain note about the remaining time** — the page says "Does not update automatically", because
-  the number is worked out when the page opens and does not tick while you sit on it.
+- **The remaining time updates while you are on the page.** **Corrected 2026-09-20:** this page used to
+  say "Does not update automatically". That note and its string are **gone from the app**, and the page now
+  refreshes itself every 30 seconds (`WaitlistViewDetailViewModel.RefreshInterval`), rebuilding the field
+  rows — including "Remaining time" — on each pass.
 - **"Nothing to show"** with a short reason when there is no request to display.
 - ⚠️ **This page no longer shows material values it cannot source.** The coil number, part numbers,
   quantities, customer, packlist, vendor, destination and die values that used to be fixed text built
   into the app are gone; a value with no read behind it is simply not shown, and a read that fails shows
-  the failure in place with a retry. The real values are owned by the item-resolution workstream — see
-  `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md`.
+  the failure in place with a retry. The real values are owned by **`specs/004-unified-card-item-picker`**
+  (in flight) — see `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md`.
 
 ## 5. Waitlist — creating a request
 
@@ -111,10 +118,11 @@
   request summary and refuses a duplicate or a request whose current job has changed. The **Coil
   details** section (requested coil, quantity in house, coil description, average coil weight) was
   removed — nothing on that screen could source those values, so they are not shown. Restoring them is
-  owned by the item-resolution workstream.
+  owned by **`specs/004-unified-card-item-picker`** (in flight).
 - ⚠️ **The "Queue & wait time" section on Confirm is gone, because it was not real.** It always read
   the same figure no matter how busy the work center was, so the card was removed rather than shown. Any
-  substantiated queue count or wait estimate is owned by the analytics specification — see
+  substantiated queue count or wait estimate is owned by the analytics workstream — seed
+  `WeekendProject/SpecTemplates/04-waitlist-analytics.md`, not yet specified — see
   `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md`.
 - **Finish.** The last screen confirms the outcome and offers **Add Another Request** or **Return to
   Waitlist**; if something went wrong it offers **Retry** and **Close**.
@@ -168,8 +176,8 @@
   picture; if that read is unavailable the app falls back to the Infor-only figures rather than guessing.
 - ⚠️ **Average coil weight is not shown, and the fixed figure is gone.** It used to be fetched for one
   fixed part and fell back to a fixed "5,000 lb", so it never described the coil on the request; the
-  lookup and the fallback were removed and no value is shown. Resolving it per coil is owned by the
-  item-resolution workstream — see
+  lookup and the fallback were removed and no value is shown. Resolving it per coil is owned by
+  **`specs/004-unified-card-item-picker`** (in flight) — see
   `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md`.
 
 ## 8. Settings
@@ -224,12 +232,14 @@
   default). Tapping it is meant to open that request.
 - ⚠️ **It cannot ring in this installation, and the surface says so instead of promising otherwise.** The
   alert needs the app installed in the way Windows notifications require, and this app is installed
-  differently; making it arrive is owned by the notification-delivery specification — see
+  differently; making it arrive is owned by the notification-delivery workstream — seed
+  `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified — see
   `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
 - ⚠️ **Tapping a notification no longer shows an internal "TODO" message.** The placeholder dialogs were
   deleted: a recognised tap opens the request, and an unrecognised one does nothing visible and is recorded
-  for diagnosis. Proving it on a delivered notification is owned by the notification-delivery specification
-  — see `defects/Low-Notifications-ToastActivationShowsTodoDialog.md`.
+  for diagnosis. Proving it on a delivered notification is owned by the notification-delivery workstream —
+  seed `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified — see
+  `defects/Low-Notifications-ToastActivationShowsTodoDialog.md`.
 
 ## 10. The cache service (a separate small app that runs on the database server)
 
@@ -293,51 +303,94 @@
 ## 14. What is not finished yet
 
 These gaps are already recorded by the project team. They are listed here so this file is not read as a
-claim that everything works.
+claim that everything works. **Re-read 2026-09-20** against the shipped specifications: three entries
+that were true on 2026-09-12 are no longer true, and they are struck below rather than deleted so the
+change is visible.
 
-- **Accept, Complete and Release — the handler's side of the job — are not available.** The app knows
-  the status of every request and records what happens, but the buttons a handler would use to pick up
-  and finish a request are not wired, so the card no longer offers them. Editing a request's note is also
-  not available.
+- ~~**Accept, Complete and Release — the handler's side of the job — are not available.**~~ **CORRECTED
+  2026-09-20 — this is done.** `specs/003-waitlist-handler-fulfilment` shipped the handler's side: **Accept**
+  (a handler or above, on an unclaimed request), **Complete** and **Release** (the recorded assignee only),
+  and **Cancel** (a requester withdrawing their own waiting request). Each control is shown only when the
+  viewer may use it. The request's **note** is editable and its **history** is readable on the detail page.
+  See §4 for what the screen shows and `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` for
+  the proof.
 - **The material attributes on a request are not yet sourced.** Coil, part, quantity, customer, vendor and
   destination values have no read behind them yet, so the card and detail page show only what the request
-  itself carries; the item-resolution workstream restores the rest.
+  itself carries. The item-resolution workstream — now `specs/004-unified-card-item-picker`, in flight —
+  restores the rest.
 - **The hidden-locations list is not applied everywhere.** It is respected in the Setup location lookup
   and in the detail page's inventory list, but not yet across the Waitlist/Coil lists, the "Quantity in
   house" totals, and the Setup location lists.
-- **The handler list is not sorted most-urgent-first.** The due and overdue sums are correct; the
-  ordering is not applied.
+- ~~**The handler list is not sorted most-urgent-first.**~~ **CORRECTED 2026-09-20 — this is done.**
+  `specs/003` US3 shipped it: the list sorts most-urgent-first by default
+  (`WaitlistViewViewModel.SortOrder` falls back to `WaitlistSortOrder.MostUrgent` and the ordering runs
+  through `UrgencyCalculator.OrderBy`), with the due and overdue sums as before.
 - **Analytics, the cancelled-request view for administrators, retention/archiving of old requests, and
-  user management** are planned work that has not started.
-- **The remaining time on the detail page does not tick** — the page says so itself.
+  user management** are planned work that has not started. (The *requester's own* cancel shipped with
+  `specs/003` — see the first entry above. A view for **administrators** over all cancelled requests is
+  still not built.) Seeds: `WeekendProject/SpecTemplates/04-…`, `…/05-…`, `…/06-…`.
+- ~~**The remaining time on the detail page does not tick**~~ — **CORRECTED 2026-09-20.** The detail page
+  now refreshes itself every 30 seconds (`WaitlistViewDetailViewModel.RefreshInterval`) and each refresh
+  rebuilds the field rows including "Remaining time", so the countdown does update while the page is open.
+  The **list** has its own once-a-minute ticker aligned to the wall-clock minute.
 - **The 30-day measurements** for refresh success and backup success were started on 2026-09-12 and are
   due on 2026-10-12; until then they are unproven.
 
 ### Defects found while building this inventory
 
-Each of these has its own file in `defects/` with the evidence needed to fix it. This feature closes all
-ten; a ⚠️ marks the ones where a follow-on specification owns the remainder, and each row names the checks
-that prove the closure.
+Each of these has its own file in `defects/` with the evidence needed to fix it. `specs/002` closed all
+ten; a ⚠️ marks the ones where a **follow-on** specification owns the remainder, and each row names the
+checks that prove the closure. **Re-read 2026-09-20:** the follow-on specifications are now named
+concretely — `specs/003-waitlist-handler-fulfilment` (shipped) and `specs/004-unified-card-item-picker`
+(in flight) — instead of "the handler-fulfilment specification" and "the item-resolution workstream".
+The two rows whose follow-on has no spec yet name their **seed template** in
+`WeekendProject/SpecTemplates/`.
 
 | Criticality | Defect | Affected feature | Status |
 | --- | --- | --- | --- |
-| Critical | `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` — card and detail fields show hard-coded coil/part/quantity/customer/vendor values | Waitlist cards, request detail | **Closed by `specs/002-truthful-data-and-controls`** — T005/T009/T010/T012 with the T015 verification: the literals are gone and no substitute renders. ⚠️ The real values are owned by the item-resolution workstream. |
-| High | `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` — the Cancel and Accept buttons on every card do nothing | Waitlist cards | **Closed by `specs/002`** — T007/T011: the buttons are gone and the real status is shown. ⚠️ Working actions are owned by the handler-fulfilment specification. |
-| High | `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — confirm screen always reads "0 active request(s)" / "~15 minutes" | New Request confirm step | **Closed by `specs/002`** — T016/T019: the fabricated card is deleted. ⚠️ Any substantiated figure is owned by the analytics specification. |
-| High | `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` — the average is always looked up for the sample coil part `MMC0001000` | Coil cards and detail | **Closed by `specs/002`** — T017/T020: the fixed-part lookup and its `5,000 lb` fallback are removed and nothing is shown. ⚠️ Per-coil resolution is owned by the item-resolution workstream. |
-| Medium | `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` — the alerts toggle cannot fire in the shipped unpackaged app | Settings, notifications | **Closed by `specs/002`** — T018/T021/T022: the switch is disabled with the reason and no preference is stored. ⚠️ Delivery is owned by the notification-delivery specification. |
+| Critical | `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` — card and detail fields show hard-coded coil/part/quantity/customer/vendor values | Waitlist cards, request detail | **Closed by `specs/002-truthful-data-and-controls`** — T005/T009/T010/T012 with the T015 verification: the literals are gone and no substitute renders. ⚠️ The real values are owned by **`specs/004-unified-card-item-picker`** (in flight). |
+| High | `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` — the Cancel and Accept buttons on every card do nothing | Waitlist cards | **Closed by `specs/002`** — T007/T011: the buttons are gone and the real status is shown. ✅ **Completed by `specs/003-waitlist-handler-fulfilment`** (2026-09-13): Accept / Complete / Release / Cancel came back wired and gated, with the most-urgent-first ordering. |
+| High | `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — confirm screen always reads "0 active request(s)" / "~15 minutes" | New Request confirm step | **Closed by `specs/002`** — T016/T019: the fabricated card is deleted. ⚠️ Any substantiated figure is owned by the analytics workstream — seed `WeekendProject/SpecTemplates/04-waitlist-analytics.md`, not yet specified. |
+| High | `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` — the average is always looked up for the sample coil part `MMC0001000` | Coil cards and detail | **Closed by `specs/002`** — T017/T020: the fixed-part lookup and its `5,000 lb` fallback are removed and nothing is shown. ⚠️ Per-coil resolution is owned by **`specs/004-unified-card-item-picker`** (in flight). |
+| Medium | `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` — the alerts toggle cannot fire in the shipped unpackaged app | Settings, notifications | **Closed by `specs/002`** — T018/T021/T022: the switch is disabled with the reason and no preference is stored. ⚠️ Delivery is owned by the notification-delivery workstream — seed `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified. |
 | Medium | `defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` — three labels share one resource key, so all three read "About this application" | Settings → About | **Closed by `specs/002`** — T024/T027: each element has its own key and its own resource entry. |
 | Low | `defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` — the Privacy Policy link points at `YourPrivacyUrlGoesHere` | Settings → About | **Closed by `specs/002`** — T028: the link and its resource entries are removed; T026's placeholder scan is the standing check. |
 | Low | `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md` — three panels do not re-evaluate when the settings search changes | Settings search | **Closed by `specs/002`** — T025/T029/T030: the three panels are registered and the coverage check fails on the next unregistered one. |
 | Low | `defects/Low-Localization-RetiredMockWordingStillShips.md` — "Setup saved using sample data" string and stale sample/mock comments | Setup result, code docs | **Closed by `specs/002`** — T037/T038 with T036's wording scan as the standing check: the orphan entry and the stale comments are gone. |
-| Low | `defects/Low-Notifications-ToastActivationShowsTodoDialog.md` — tapping a toast while the app runs shows a "TODO" dialog | Notifications | **Closed by `specs/002`** — T032/T033/T034: the placeholder dialogs are deleted and one shared deep-link helper handles activation. ⚠️ Proving it on a delivered notification is owned by the notification-delivery specification. |
+| Low | `defects/Low-Notifications-ToastActivationShowsTodoDialog.md` — tapping a toast while the app runs shows a "TODO" dialog | Notifications | **Closed by `specs/002`** — T032/T033/T034: the placeholder dialogs are deleted and one shared deep-link helper handles activation. ⚠️ Proving it on a delivered notification is owned by the notification-delivery workstream — seed `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified. |
 
 ---
 
 ## For the maintainer
 
+**The specifications behind this file** (read them in this order — each one is a superset of the last
+state described here):
+
+- `specs/001-module-mock-visual-fallback/` — the specification behind the Infor Visual outage fallback
+  and the cache. **Shipped.**
+- `specs/002-truthful-data-and-controls/` — the compliance-closure spec that removed every value the app
+  could not substantiate and every control it could not honour. **Shipped** — this is the spec that closed
+  all ten defects in the table above.
+- `specs/003-waitlist-handler-fulfilment/` — the handler's side of the request: Accept / Complete /
+  Release / Cancel, the most-urgent-first ordering, the note and the request history. **Shipped**
+  (49/49, 2026-09-13).
+- `specs/004-unified-card-item-picker/` — one card shape for every item, the Item catalog and the
+  Category → Item picker. **In flight.**
+
+**Other places to look:**
+
 - `defects/` — one file per defect found while building this inventory. Each one records what a user
-  sees, the exact evidence in the code, why it happens, how to fix it, and how to prove the fix.
+  sees, the exact evidence in the code, why it happens, how to fix it, and how to prove the fix. Each
+  file's **Planned fix** row names specs by *template* number; the map to real spec numbers is in
+  `WeekendProject/SpecTemplates/00-INDEX.md`.
+- `WeekendProject/SpecTemplates/` — the seed briefs for the workstreams that have not been specified yet
+  (analytics, request administration, user management, startup-gate polish, notification delivery).
 - `WeekendProject/ChangeLog.Simple.md` — the plain-language change log for the Waitlist work.
-- `RELEASE-NOTES.md` — the release notes for the Infor Visual outage fallback.
-- `specs/001-module-mock-visual-fallback/` — the specification behind the fallback and the cache.
+- `WeekendProject/OPEN-TASKS.md` — the carry-forward task counts. `WeekendProject/OPEN-WORK-NEXT-SPEC.md`
+  — the itemised detail behind them.
+- `capabilities/DRIFT.md` — what the drift detector watches, what it found, and what it cannot see.
+
+> **Corrected 2026-09-20.** This section previously pointed at **`RELEASE-NOTES.md`**, which **is not in
+> the tree** — it was the release notes for the Infor Visual outage fallback, and it has been removed.
+> Its five remaining references were provenance, not instructions. The specification it documented,
+> `specs/001-module-mock-visual-fallback/`, is listed above and is the thing to read instead.

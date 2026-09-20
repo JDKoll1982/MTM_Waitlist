@@ -134,6 +134,7 @@ public sealed class ServiceApiSecurityTests
 
             var backupEngine = new BackupEngine(
                 ArtifactStore,
+                new RunHistoryStore(_appDataRoot, NullLogger<RunHistoryStore>.Instance),
                 new MySqlConnectionStringResolver(configuration.MySqlConnection),
                 () => ConfigurationStore.Current,
                 NullLogger<BackupEngine>.Instance);

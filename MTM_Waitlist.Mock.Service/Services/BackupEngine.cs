@@ -35,6 +35,7 @@ public sealed class BackupEngine
     private static readonly TimeSpan s_dumpTimeout = TimeSpan.FromHours(2);
 
     private readonly BackupArtifactStore _artifactStore;
+    private readonly RunHistoryStore _historyStore;
     private readonly MySqlConnectionStringResolver _connectionResolver;
     private readonly ILogger<BackupEngine> _logger;
     private readonly TimeProvider _timeProvider;
@@ -48,23 +49,27 @@ public sealed class BackupEngine
 
     /// <summary>Creates the engine.</summary>
     /// <param name="artifactStore">Records artifacts and last-run outcomes.</param>
+    /// <param name="historyStore">The append-only history every run is also added to.</param>
     /// <param name="connectionResolver">Supplies host/port/login without any secret being persisted.</param>
     /// <param name="configurationAccessor">Reads the live configuration, so a settings save applies without a restart.</param>
     /// <param name="logger">Logger; credential material is never passed to it.</param>
     /// <param name="timeProvider">Time source for artifact naming and timestamps.</param>
     public BackupEngine(
         BackupArtifactStore artifactStore,
+        RunHistoryStore historyStore,
         MySqlConnectionStringResolver connectionResolver,
         Func<Models.ServiceConfiguration> configurationAccessor,
         ILogger<BackupEngine> logger,
         TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(artifactStore);
+        ArgumentNullException.ThrowIfNull(historyStore);
         ArgumentNullException.ThrowIfNull(connectionResolver);
         ArgumentNullException.ThrowIfNull(configurationAccessor);
         ArgumentNullException.ThrowIfNull(logger);
 
         _artifactStore = artifactStore;
+        _historyStore = historyStore;
         _connectionResolver = connectionResolver;
         _configurationAccessor = configurationAccessor;
         _logger = logger;
@@ -73,6 +78,37 @@ public sealed class BackupEngine
         foreach (var store in BackupStoreExtensions.All)
         {
             _storeGates[store] = new SemaphoreSlim(1, 1);
+        }
+    }
+
+    /// <summary>
+    /// Records one run in both stores: the artifact store, which answers "what is the state of this store now",
+    /// and the run history, which is what SC-008 is measured against.
+    /// </summary>
+    /// <param name="record">The run record.</param>
+    /// <param name="artifact">The artifact produced, when one was.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    /// The history write is best-effort and its failure is swallowed after logging: losing a history line must
+    /// never turn a backup that produced a good artifact into a reported failure.
+    /// </remarks>
+    private async Task RecordRunAsync(
+        BackupRunRecord record,
+        BackupArtifact? artifact,
+        CancellationToken cancellationToken)
+    {
+        await _artifactStore.RecordAsync(record, artifact, cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            await _historyStore.AppendBackupAsync(record, artifact, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "The run history entry for the {Store} backup could not be appended; the backup outcome itself is unaffected.",
+                record.Store.ToDatabaseName());
         }
     }
 
@@ -225,7 +261,7 @@ public sealed class BackupEngine
 
             // Deliberately no artifact parameter: an unavailable tool must never leave a record that
             // looks like a produced backup (FR-013).
-            await _artifactStore.RecordAsync(unavailable, artifact: null, cancellationToken).ConfigureAwait(false);
+            await RecordRunAsync(unavailable, artifact: null, cancellationToken).ConfigureAwait(false);
             return unavailable;
         }
 
@@ -242,7 +278,7 @@ public sealed class BackupEngine
                 ErrorMessage = "mysqldump could not be located when the backup started."
             };
 
-            await _artifactStore.RecordAsync(disappeared, artifact: null, cancellationToken).ConfigureAwait(false);
+            await RecordRunAsync(disappeared, artifact: null, cancellationToken).ConfigureAwait(false);
             return disappeared;
         }
 
@@ -269,7 +305,7 @@ public sealed class BackupEngine
                 "Backup for {Store} was not started: no MySQL connection is configured for it.",
                 database);
 
-            await _artifactStore.RecordAsync(notConfigured, artifact: null, cancellationToken).ConfigureAwait(false);
+            await RecordRunAsync(notConfigured, artifact: null, cancellationToken).ConfigureAwait(false);
             return notConfigured;
         }
 
@@ -316,7 +352,7 @@ public sealed class BackupEngine
                     exitCode,
                     sizeBytes);
 
-                await _artifactStore.RecordAsync(failed, artifact: null, cancellationToken).ConfigureAwait(false);
+                await RecordRunAsync(failed, artifact: null, cancellationToken).ConfigureAwait(false);
                 return failed;
             }
 
@@ -340,7 +376,7 @@ public sealed class BackupEngine
                 IsSafetySnapshot = isSafetySnapshot
             };
 
-            await _artifactStore.RecordAsync(succeeded, artifact, cancellationToken).ConfigureAwait(false);
+            await RecordRunAsync(succeeded, artifact, cancellationToken).ConfigureAwait(false);
 
             _logger.LogInformation(
                 "Backup for {Store} produced {Bytes} bytes at {ArtifactPath}.",
@@ -375,7 +411,7 @@ public sealed class BackupEngine
             };
 
             _logger.LogError(exception, "Backup for {Store} failed while running mysqldump.", database);
-            await _artifactStore.RecordAsync(crashed, artifact: null, cancellationToken).ConfigureAwait(false);
+            await RecordRunAsync(crashed, artifact: null, cancellationToken).ConfigureAwait(false);
             return crashed;
         }
     }
