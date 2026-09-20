@@ -62,21 +62,27 @@ screens follow the application's existing settings pattern, render role badges a
 without fixed widths, virtualise the list, guard the save action against a double click, never block
 the interface thread, and localise every string.
 
-The same feature also gives the application one named permission per gated action, in place of the ten
-hand-written role lists it carries today. Each gated action is named by a settings key, and a role either
-holds that key or does not: if the current user's key is false, they cannot perform the gated action. A new
-Administration page in Settings, openable only by Plant Manager and above, shows the whole matrix of roles
-against permissions as a grid of switches, and saving a change writes it to the settings store together with
-an audit record naming the acting user, the permission, the role, the previous value, the new value and the
-time. Every gate the application has today becomes an entry in that matrix — accepting requests, ignored
+The same feature also gives the application one named permission per gated action, in place of the twelve
+hand-written role lists it carries today. Each gated action is named by a settings key, and a person either
+holds that key or does not: if the signed-in user's key is false, they cannot perform the gated action. A new
+Administration page in Settings, openable only by IT Department, Plant Manager and Developer, shows **one
+person at a time** — a column of people, and the chosen person's permissions as a list of switches — and saving
+a change writes it to the settings store together with an audit record naming the acting user, the permission,
+whose set was changed, the previous value, the new value and the time. **Permissions belong to the person, and
+a role is the baseline its people start from**: a new account begins with its role's baseline, and the page
+adjusts the person rather than the role, so changing what someone may do never means changing the privilege
+level. Every gate the application has today becomes an entry in that set — accepting requests, ignored
 locations, hot work centres, part pictures, cache refresh, allotted minutes, Quick Add dunnage, work-centre
-setup, and the badge beside the signed-in name — and the shipped default for each one reproduces exactly
-what it allows today, so nobody's access changes on the day it ships. A permission row that is missing, or a
-settings store that cannot be reached, yields the shipped default rather than a refusal, following the order
-the image-storage configuration already uses: take the stored override when there is one, otherwise the
-default. The set of permissions is declared in one place so the page can be drawn from it and so a newly
-added gate cannot be introduced without a default, and a role with no row for a permission falls back to
-that permission's default. The permission that opens and edits this page is itself not editable from the
+setup, defect type management, and computer management. The badge beside the signed-in name is deliberately
+**not** one of them: it decides how a person looks, not what they may do. The shipped baseline for each role
+reproduces exactly what that role allows today, so nobody's access changes on the day it ships. A permission a
+person has no row for falls back to their role's baseline and then to the shipped default, and a settings store
+that cannot be reached yields that same fallback rather than a refusal, following the order the image-storage
+configuration already uses: take the stored override when there is one, otherwise the default. The set of
+permissions, and each role's baseline for them, is declared in one place so the page can be drawn from it and so
+a newly added gate cannot be introduced without a baseline. Because one person's set can differ from their
+role's, a second view answers *"who holds this?"* by naming the roles whose baseline gives it and only the
+people who differ from theirs. The permission that opens and edits this page is itself not editable from the
 page, so an administrator cannot remove their own way back in.
 ```
 
@@ -159,46 +165,61 @@ UI-thread collection safety; deactivate without session revocation; double-click
 one row; an audit row with acting user and timestamp. *(The source's twelfth case, "mock-toggle
 parity", is obsolete — see `OPEN-WORK-NEXT-SPEC.md` §3.)*
 
-**Permission matrix (3.8) — added by owner decision 2026-09-20; not one of the source's 39 boxes.**
+**Permissions (3.8)** — added by owner decision 2026-09-20; not one of the source's 39 boxes. *This template
+calls the permission set "the matrix" in most of its prose; the name is shorthand for the set of named
+permissions and their role baselines, **not** for a grid of roles against permissions. Since decision 29 the set
+belongs to a person, and a role supplies only the baseline.*
 
-*Database.* Reuse `config_settings_values` (table 08) rather than adding a table: a permission is a
-`setting_key`, the role is the `scope_key` with a new `scope_type` for a role scope, and the value is a
-boolean. Declare that `scope_type` where the existing values are declared so
-`vw_config_settings_scope_catalog` and `Database/Validation/settings_schema/validate.sql` pick it up. Add the
-two procedures the page needs that the existing set does not cover — read every cell in one call, and write
-one cell — as `sp_config_permissions_matrix_get` and `sp_config_permissions_cell_set`, each shipping
-`create.sql` + `rollback.sql` + `update_table_descriptions.sql` in the same change (constitution III). Seed
-every permission at every role in the matrix seed so the shipped defaults are **data**, not literals in code,
-and regenerate `AllSeeds.sql` / `AllSPs.sql` / `AllTables.sql`. History: one `config_settings_history` row per
-cell change (the table already exists) naming actor, permission, role, previous value, new value and time —
-do not invent a second audit shape if that one is sufficient.
+*Database.* Reuse `config_settings_values` (table 08) rather than adding a table, and **grant to the person, not
+the role** (decision 29): a permission is a `setting_key`, **a person's own grant is a `user`-scoped row**, and
+**a role's baseline is a `role`-scoped row**. Because thestore already reads a `user` scope and already carries
+the `user_id` column, nothing new is needed to hold a person's set. Declare the `role` `scope_type` where the
+existing values are declared so `vw_config_settings_scope_catalog` and
+`Database/Validation/settings_schema/validate.sql` pick it up, and **re-rank `user` above the role scopes in
+`fn_config_settings_scope_rank` before any per-person row is written** — decision 29 records why the current
+order would silently override a person's own value. Add the two procedures the page needs that the existing set
+does not cover — read one person's set in a single call, and write one permission — as
+`sp_config_permissions_user_get` and `sp_config_permissions_user_set`, each shipping `create.sql` +
+`rollback.sql` + `update_table_descriptions.sql` in the same change (constitution III). Seed every permission's
+**role baseline** so the shipped defaults are **data**, not literals in code, and regenerate `AllSeeds.sql` /
+`AllSPs.sql` / `AllTables.sql`. **No per-person rows are seeded** — a person with no row inherits their role's
+baseline, which is what keeps ship day identical (decision 29). History: one `config_settings_history` row per
+permission change (the table already exists) naming actor, permission, the scope it was written for, previous value,
+new value and time — do not invent a second audit shape if that one is sufficient.
 
-*The permission registry.* One place declares every permission: its key, a human label for the page, its
-shipped default per role, and the screen it gates. The page is drawn from the registry, so a permission
-cannot exist in code without appearing on the page, and cannot appear without a default. A test asserts the
-registry is non-empty, that every key is unique, and that **no gate reads a key the registry does not
-declare** — that test is what replaces the silent-outsider failure the ten arrays produce today.
+*The permission registry.* One place declares every permission: its key, a human label for the page, **the
+baseline each role gives its people**, and the screen it gates. The page is drawn from the registry, so a
+permission cannot exist in code without appearing on the page, and cannot appear without a baseline. A test
+asserts the registry is non-empty, that every key is unique, and that **no gate reads a key the registry does
+not declare** — that test is what replaces the silent-outsider failure the twelve arrays produce today.
 
-*Resolution.* A permission resolves to the stored value for the caller's role; when the row is absent, or
-the store cannot be reached, the **shipped default** applies. That is the order
-`ImageStorageConfigurationResolver` already documents ("1. Database override … 2. default") and it means an
-unreachable store does not lock the application out of its own buttons — the opposite of the service API's
-fail-closed rule, which governs a network call, not a control. Cache the resolved values for the session with
-explicit invalidation on save, and never read settings inside a layout pass on the UI thread.
+*Resolution.* A permission resolves **for the person**: their own stored value if there is one, otherwise their
+**role's baseline**, otherwise the shipped fallback. An unreachable store yields the fallback rather than a
+refusal, which is the order `ImageStorageConfigurationResolver` documents — and it means an unreachable store
+does not lock the application out of its own buttons, the opposite of the service API's fail-closed rule, which
+governs a network call rather than a control. Cache the resolved values for the session with explicit
+invalidation on save, and never read settings inside a layout pass on the UI thread.
 
 *The page.* The permission screen is a **page of its own** (`PermissionsPage` in `Module_Settings/Views`),
 reached from an Administration entry on `SettingsPage.xaml` (decision 21), openable by **Developer, IT
-Department and Plant Manager** (decision 5). **Its shape is a role picker plus that role's permissions as a
-list, not a grid** (decision 16): nine roles across a 1080px column leaves about 90px each, while a name like
-"Material Handler Lead" needs about 140px before its switch, and the window can be dragged to 760px. Each row
-carries the permission's plain-language label and what it gates. The roles that outrank the reader are **shown,
-with their switches not changeable** and the reason stated in words (decision 6). Localise every string; no
-fixed widths; guard Save against double-click; register its Settings entry with the search-refresh path so it
-obeys the search defects recorded in §5. The permission that opens this page is **not** editable from it, so
-nobody can remove their own way back in — the same shape as this feature's self-lockout guard for users.
+Department and Plant Manager** (decision 5). **Its shape is one person at a time** — a column of people, with the
+chosen person's features as a list, each row carrying the plain-language label and what it gates (decisions 16
+and 24 on the subject's identity superseded by decision 29). The arithmetic that ruled out a grid still holds:
+nine roles across a 1080px column leaves about 90px each against about 140px needed, and the window can be
+dragged to 760px. Each row shows **what the person has, and whether it came from their role's baseline or from a
+choice made for them** — the difference decision 16 required is now the difference between inherited and granted.
+**Accounts that outrank the reader are shown and not changeable**, with the reason in words (decision 2).
+Localise every string; no fixed widths; guard Save against double-click; register its Settings entry with the
+search-refresh path so it obeys the search defects recorded in §5. The permission that opens this page is **not**
+editable from it, so nobody can remove their own way back in — the same shape as this feature's self-lockout
+guard for users. A **second way of looking at the same data** answers *"who holds this?"* (decision 30): choose
+a feature and see the roles whose baseline gives it plus the people who differ, read-only, each differing person
+opening their own page.
 
 *Migration.* **Twelve lists in nine files are deleted** and each is replaced at its call site by its
-permission, with the default set to today's membership so nothing changes on the day it ships:
+permission, **with the role baseline set to today's membership** so nothing changes on the day it ships — a
+person with no row of their own inherits that baseline, which is why the migration needs no per-person backfill
+(decision 29):
 `RequestActionPolicy.HandlerRoles`; `ServiceOperatorRoles.Approved` in `MTM_Waitlist.Mock.Service` (a
 separate project — it must resolve the same key from the same store rather than keep a copy);
 `SettingsViewModel`'s four arrays; `UrgencyAllotmentEditorViewModel.AllowedUrgencyManageRoles`;
@@ -218,11 +239,14 @@ it must not be carried into work-centre setup's default — decide whether a pla
 meant to have it and record the answer.
 
 *Required tests.* Registry completeness and key uniqueness; a gate reading an undeclared key fails the
-suite; an absent row yields the default; an unreachable store yields the default (a double that throws); a
-stored override beats the default for the right role **and only that role**; a cell write produces exactly one
-history row naming actor and both values; the panel is openable by Developer, IT Department and Plant Manager and invisible to every other role; the
-open-the-page permission cannot be cleared from the page; and the badge map resolves a Material Handler Lead
-without falling through to the unknown-role branch.
+suite; **a person with no row of their own gets their role's baseline**, not nothing; an unreachable store
+yields the fallback (a double that throws); **a person's own row beats their role's baseline, and changes nobody
+else's**; **a person's own row beats a role-scoped row** — the precedence trap decision 29 records; a permission
+write produces exactly one history row naming actor and both values; the panel is openable by Developer, IT
+Department and Plant Manager and invisible to every other role; the
+open-the-page permission cannot be cleared from the page; the *who holds this* view lists the roles from the
+registry and **only the people who differ** (decision 30); and the badge map gives **every role the catalogue
+holds** its own badge (decision 15) rather than falling through to the grey default.
 
 ## 4. Explicitly out of scope — do not resurrect
 
@@ -265,9 +289,12 @@ None. But two things must be checked while this spec edits `SettingsPage.xaml` a
 6. Beware the documented build traps: `WMC9999` masks a real XAML error, `x:Name` is required on any
    element using `x:Load`, and a shell that has launched the app must have its `MTM_*` variables
    cleared before running the suite.
-7. **The matrix's defaults reproduce today's behaviour exactly** — provable, not asserted: for every one of
-   the **twelve** gates, the seeded default membership must equal the list it replaces, and a test must compare
-   the two rather than trusting the seed. Then the replacement of each list is a no-op by construction.
+7. **The baselines reproduce today's behaviour exactly** — provable, not asserted: for every one of
+   the **twelve** gates, the seeded **role baseline** must equal the list it replaces, and a test must compare
+   the two rather than trusting the seed. Because a person with no row of their own inherits their role's
+   baseline, the comparison is also provable **per person**: every person's *effective* set on ship day must
+   equal what their role's list gave them before (decision 29). Then the replacement of each list is a no-op by
+   construction.
 8. **The registry test is the safety net, not the page.** A new gate added in a later feature must fail the
    suite until it is declared with a default, or the silent-outsider failure simply moves.
 
@@ -285,6 +312,9 @@ None. But two things must be checked while this spec edits `SettingsPage.xaml` a
 | The registry's contents and defaults | decision 12 — namespace, keys and shipped defaults fixed |
 | What happens to stored permission rows when the role is renamed | decision 7 — verified there are none to carry |
 | Which answer wins where a panel already gates itself | decision 13 — the permission, and only the permission |
+| Whether a permission belongs to a role or to a person | decision 29 — the **person**, with the role as the baseline they start from; ship day is unchanged and no per-person backfill is needed |
+| Whether that needs new storage | decision 29 — verified there is none to add: the settings table already carries a user column and the effective-settings read already resolves a user scope. The one thing that **must** change is the precedence order, because today a rank-4 and rank-5 scope would beat a person's own value |
+| How anyone finds out who holds a feature | decision 30 — a view that names the roles whose baseline gives it plus only the people who differ |
 | Whether a permission change is confirmed or undone | decision 10 — both, with the history table as the durable path |
 
 **The next step is `/speckit.specify`, with §2 as the input.** §3's carried-forward requirements, §3.8's
@@ -306,7 +336,7 @@ into a separate design document, per `.specify/extensions/superspec/references/s
 ### 2026-09-20 — decision 1: IT Department takes `Admin`'s authority; Developer outranks it
 
 **Decided (owner, 2026-09-20): IT Department sits at the top of the operational hierarchy — it can manage user
-accounts and change what every role may do — and the Developer role sits above IT Department.**
+accounts and change what any person may do — and the Developer role sits above IT Department.**
 
 **Why this is consistent with the rest of the template.** §6 gate 7 requires the permission matrix's defaults
 to reproduce today's behaviour *provably*, and `Admin` is currently in nearly every permissive list. Renaming
@@ -450,7 +480,7 @@ explicit default.
 - **The Plant Manager can grant themselves anything the matrix controls.** That is inherent in giving them the
   page and it is accepted. It is also exactly why the page's own opening permission is not editable: the one
   thing a Plant Manager cannot do is remove their own way back in.
-- **The roles above you are read-only here too — settled as decision 6.** A Plant Manager cannot touch a
+- **The accounts above you are read-only here too — settled as decision 6.** A Plant Manager cannot touch a
   Developer's account (decision 2), and the same rule now governs the grid, so they cannot switch off every
   permission the Developer and IT Department roles hold. That is sabotage rather than escalation, and it is
   silent, so it is stated explicitly rather than left to the general rule.
@@ -462,11 +492,13 @@ explicit default.
 | The page is drawn from the registry | §3.8 requires one declaration per permission | A permission cannot exist in code without appearing on the page, and cannot appear without a default. The page is generated, never hand-listed |
 | A role with no row for a permission | Defaults are seeded, but a role added later may have none | Falls back to that permission's shipped default (§3.8), never to a refusal |
 
-### 2026-09-20 — decision 6: a role that outranks you is read-only in the grid as well
+### 2026-09-20 — decision 6 (MERGED INTO DECISION 2 BY DECISION 29): a role that outranks you is read-only too
 
 **Decided (owner, 2026-09-20): you may change the permissions of every role at or below your own rung, and the
 roles above you are visible but not changeable.** Decision 2 says the same thing about accounts, so the feature
-has **one rule in two places** rather than two rules to remember.
+has **one rule in two places** rather than two rules to remember. **Superseded by decision 29:** the screen's
+columns are people, so this is now **exactly** decision 2's account rule and no longer a second rule about roles.
+It survives unchanged in effect — nobody may edit an account that outranks their own.
 
 | Who | May change |
 | --- | --- |
@@ -475,12 +507,12 @@ has **one rule in two places** rather than two rules to remember.
 | Plant Manager | Plant Manager and everything below it — the three Lead rungs and the three worker roles |
 
 **Enforced inside the database transaction, not only on the screen** — the same standing requirement decision 2
-carries, for the same reason: the screen cannot be trusted, so a client posting a cell change directly must
+carries, for the same reason: the screen cannot be trusted, so a client posting a permission change directly must
 still be refused.
 
 | Edge case | Why it happens | The answer the spec must state |
 | --- | --- | --- |
-| A dead switch with no explanation | The read-only cells look different from the editable ones | The screen says **why**, in the reader's words — *"you cannot change the Developer role"* — rather than rendering a control that silently does nothing. A greyed control with no reason is the failure this feature exists to remove |
+| A dead switch with no explanation | The read-only rows look different from the editable ones | The screen says **why**, in the reader's words — *"you cannot change the Developer's account"* — rather than rendering a control that silently does nothing. A greyed control with no reason is the failure this feature exists to remove |
 | The Developer row | Only a Developer may change it, and no Developer may be available | Stated. The row stays readable, and when nobody holds the role, nobody can change it — the same shape as decision 2's "the last Developer account" |
 | A refused change | Someone tries a row above them | The refusal is reported plainly to the person, and **no history row is written**, because nothing changed — the history records changes, not attempts |
 | Two protections on one screen | The page's own opening permission is not editable (§3.8), *and* the rows above you are not editable | Keep them distinct and test both. They look identical on screen but have different causes, so a reader who conflates them will misreport a bug |
@@ -714,7 +746,7 @@ transcription was already found to be short by two gates.
 | `permission.setup.work_centers` | work-centre setup | IT Department, Developer, Plant Manager, Setup Lead, Production Lead |
 | `permission.admin.users` | create / edit / deactivate a user | Production Lead, Setup Lead, Material Handler Lead, Plant Manager, IT Department, Developer |
 | `permission.admin.reset_password` | reset a password | the same set as `permission.admin.users` today |
-| `permission.admin.permissions` | edit the permission matrix — **not editable from the page** (decision 5) | IT Department, Developer, Plant Manager |
+| `permission.admin.permissions` | edit any person's permissions — **not editable from the page** (decision 5) | IT Department, Developer, Plant Manager |
 
 **Three findings from reading the twelve sites that change the design.**
 
@@ -844,10 +876,11 @@ the "silent outsider" shape this feature exists to remove.
 | The `administrator`, `supervisor`, `manager`, `quality` branches | They name nothing | **Removed**, not left in place, so dead vocabulary cannot be mistaken for a supported one |
 | A manager wanting to switch a badge off | It cannot be done, because it is not a permission | Stated, so nobody hunts for the switch and concludes it is missing |
 
-### 2026-09-20 — decision 16: the permission screen is one role at a time
+### 2026-09-20 — decision 16 (SUPERSEDED BY DECISION 29): the permission screen is one subject at a time
 
 **Decided (owner, 2026-09-20): a role picker, then that role's permissions as a list — not a grid of roles
-against permissions.**
+against permissions.** **Superseded by decision 29: the subject is now a person, not a role.** The arithmetic
+that forced a single-subject screen still holds exactly — only the subject changed.
 
 **The arithmetic is what settled it, and the owner asked for the grid before the numbers were known.** The
 Settings page is one centred column capped at 1080px, and its own comment states that sections are stacked and
@@ -856,9 +889,11 @@ left, leaves roughly **90px per role** — while a name like "Material Handler L
 switch, and the window's measured restore size is **760px wide**. 126 switches also cannot be read as a whole
 at any width.
 
-**What the screen is now.** A role picker, and the chosen role's permissions grouped by area, each row carrying
-the permission's plain-language label, what it gates, and a switch. It answers the question people arrive with —
-*"what may this role do?"* — and it fits the page's existing shape at any window width.
+**What the screen became, and then became again.** The subject was a role; decision 29 moved it to a person, so
+the screen is a **column of people** and the chosen person's permissions grouped by area, each row carrying the
+permission's plain-language label, what it gates, a switch, and **whether the value came from their role or was
+chosen for them**. It answers the question people arrive with — *"what may this person do?"* — and it fits the
+page's existing shape at any window width. Decision 30 adds the reverse question, *"who holds this?"*.
 
 | Edge case | Why it happens | The answer the spec must state |
 | --- | --- | --- |
@@ -1047,10 +1082,11 @@ below, and a page the reader cannot act on announces that at the top and shows i
 | A field the source's contract forbids | Sign-in name was on that list until decision 20 | Anything still not editable is shown with its value and no control — not a control that refuses |
 | Long values on a narrow window | Names and employee numbers vary | `TextTrimming` with a tooltip, never a fixed width — the rule §3 already sets for badges and indicators |
 
-### 2026-09-20 — decision 24: the roles run down one side, in ladder order
+### 2026-09-20 — decision 24 (SUPERSEDED BY DECISION 29): down one side, in order
 
 **Decided (owner, 2026-09-20): the permission page lists the roles down one side in ladder order, with the
-chosen role's permissions on the other side.**
+chosen role's permissions on the other side.** **Superseded by decision 29: the column lists people.** Their
+order follows the user list's own order, so the two screens agree rather than each inventing an order.
 
 **Why this over a menu of roles.** The ladder is a ladder on this screen for the first time anywhere in the
 application — one definition of the hierarchy, visible, in order. A dropdown would hide it behind a control and
@@ -1167,6 +1203,81 @@ Folding costs a little vertical space and hides nothing.
 | The status marker | It is the fact people scan for | Visible in both shapes, not pushed off the second line |
 | A long role name | Some are long | Wraps within its own line rather than forcing the row wider |
 
+### 2026-09-20 — decision 29: permissions belong to the person, and the role becomes the baseline
+
+**Decided (owner, 2026-09-20): the permission screen changes a *person's* set of features, not a role's
+privilege level.** Confirmed in the same pass: a new account starts with **its role's baseline**, and the screen
+then adjusts the person.
+
+| Before | After |
+| --- | --- |
+| A permission is granted to a role | A permission is granted to a **person** |
+| The role decides what you can do | The role supplies the **baseline** a person starts from |
+| A role-wide change is one cell | A role-wide change is a baseline change, or N person changes |
+| The ladder decides who may edit whom **and** what you may do | The ladder decides **who may edit whom**. What you may do comes from your own set |
+| The screen is roles × permissions | The screen is **one person at a time** |
+
+**The resolution order, which is the load-bearing part.** *the person's own row → their role's baseline row →
+the shipped fallback*, and an unreachable store yields the fallback rather than a refusal, so a settings failure
+never turns every button in the application into a refusal.
+
+**Verified against the store rather than assumed — better news than expected, and one trap in it.**
+
+- **A per-person scope already exists.** `sp_config_settings_get_effective` takes a user id and already queries
+  `scope_type = 'user' AND user_id = p_user_id` alongside `computer`, `all_users` and an `admin`/`developer`
+  pair, and `config_settings_values` already carries a `user_id` foreign key. **No new table is needed.**
+- **But the precedence is upside down for this purpose.** `fn_config_settings_scope_rank` ranks `computer` 1,
+  `all_users` 2, **`user` 3**, `admin` 4, `developer` 5, and the reader takes the **highest** rank. A per-person
+  row therefore loses to an `admin` or `developer` row today — so a person's explicit grant would be silently
+  overridden by an inherited one, which is precisely the failure this feature exists to remove. **The ranking
+  must change so a person's own value wins.**
+- **That change is safe now, and only now.** `config_settings_values` holds three rows and all three are
+  `all_users`, so no `user`-scoped row exists to be re-ranked. The re-rank must ship **before** any per-person
+  permission row is written, or rows will have resolved under the old order.
+- **The rank function is shared.** `sp_config_settings_get_effective` is the generic resolver for every scoped
+  setting, not only permissions, so the change is wider than this feature even though nothing collides today.
+- **The existing `admin` and `developer` scopes are role scopes in disguise** — they are matched by
+  `scope_type` rather than by a scope key. Adding a general `role` scope is the opportunity to express those two
+  the same way, but converting them is **not** required by this decision and is not done here.
+
+**No backfill, which removes the risk this change appeared to carry.** Because a person with no row of their own
+falls through to their role's baseline, and the baselines are exactly the lists those roles hold today, **ship
+day is identical with zero per-person rows written.** Only deviations are stored. §6 gate 7's provable
+comparison therefore becomes **per person**: every person's *effective* set must equal what their role's list
+gave them today.
+
+**The cost, stated once.** Per-person permissions cannot be reviewed at a glance: *"who can change hot work
+centres?"* is no longer one page, because each person's set can differ. Decision 30 answers it.
+
+| Edge case | Why it happens | The answer the spec must state |
+| --- | --- | --- |
+| A person changes role | Their overrides were granted for a job they no longer do | Their own rows survive, because they are the person's. State whether that is intended, and make it visible on the screen rather than discovered |
+| A person with rows for a feature that no longer exists | A gate is removed in a later release | The stale row is ignored and the registry test reports it — a permission with no gate is already decision 13's rule |
+| The role baseline itself | Roles still need one | The baselines are seeded data, per §3.8's "defaults are data, not literals in code". **The screen does not edit them** — decision 29's point is that the screen changes the person |
+| Deactivating a person | A deactivated account may still hold rows | Harmless: they cannot sign in. Stated so it is not mistaken for a leak |
+| Two people, one change | A role-wide change is now many acts | Stated plainly as the price of the model, with the review question above as the mitigation |
+| Any per-person row written before the re-rank ships | Ordering | The re-rank ships first, in the same change, before the first per-person permission row exists |
+
+### 2026-09-20 — decision 30: you can ask who holds a feature, and the answer is short
+
+**Decided (owner, 2026-09-20): the permission screen gains a second way of looking at the same data — choose a
+feature and see who holds it**, as the roles whose baseline gives it **plus the people who differ from their
+role**, in either direction. Only deviations are named as individuals, so the list stays short; the baseline
+carries the ordinary case, which is what keeps per-person permissions reviewable at all (decision 29's cost).
+
+| Aspect | The answer |
+| --- | --- |
+| Is it a second place to change things? | **No.** It is a view. Changing anything there opens that person's page, so a permission still has exactly one place it is written (decision 22's "a row has one job", one level up) |
+| What it lists first | The roles whose baseline includes the feature — computed from the registry, so it **cannot drift** from the baselines and needs no query |
+| What it lists second | The people who differ, each marked *granted* or *denied*, and each opening their page |
+| When the list is long | It is long exactly when many people differ, which is the thing worth seeing — so it is a finding, not a rendering problem |
+| A feature nobody has | Say *"nobody"* in words. Never an empty table, which reads as a failure |
+| An inactive person holding it | Shown and marked inactive (decision 25's rule), because a grant that outlives the account is a thing to see |
+| What it is for | The two questions a person actually arrives with: *"can this account do this?"* and *"who can?"* — the first is the person's page, the second is this one |
+
+**It also becomes the audit answer.** "Who was given this, and by whom" reads off the same view plus
+`config_settings_history`, rather than requiring a report nobody would build.
+
 ### 2026-09-20 — session 2 summary: the UI design pass
 
 **Focus.** The owner asked for the UI to be designed rather than left to whoever implements it. Classified
@@ -1192,8 +1303,3 @@ layout (23); the role column (24); the sign-in name becoming editable (20); and 
    exists and the live-session read already honours it, so what is missing is a write path, not a design.
 
 **State after this pass: every item is settled. The next step is `/speckit.specify`.**
-
-
-
-
-
