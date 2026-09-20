@@ -200,8 +200,11 @@ function Get-IncompleteTasks {
     }
     
     $content = Get-Content $Path -Raw
-    $taskMatches = [regex]::Matches($content, '- \[ \] (T\d+.*?)(?=\r?\n|$)')
-    
+    # The task id may be wrapped in markdown bold ("- [ ] **T001** ..."). This repository's tasks.md bolds every
+    # id, and the original pattern required "T<digits>" immediately after "- [ ] ", so it matched nothing and the
+    # loop announced "All tasks are already complete!" while 59 tasks were unchecked. Tolerate the bold markers.
+    $taskMatches = [regex]::Matches($content, '- \[ \] \*{0,2}(T\d+.*?)(?=\r?\n|$)')
+
     return $taskMatches | ForEach-Object { $_.Groups[1].Value }
 }
 

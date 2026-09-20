@@ -31,7 +31,7 @@ below raise it. `RetiredSymbolAuditTests` and `InlineSqlAuditTests` stay green.
 | `MockSaved` | none |
 | `TODO: Handle notification` | none |
 | `RecvMockData` | `specs/`, `defects/` |
-| the fabricated-literal set from `defects/Critical-…FabricatedMaterialData.md` §3 | `specs/`, `defects/` |
+| the fabricated-literal set from `defects/Closed-Partial-Critical-…FabricatedMaterialData.md` §3 | `specs/`, `defects/` |
 | placeholder-resource patterns (`example.com`, `Contoso`, `lorem`) in `.resw` values | `specs/`, `defects/` |
 
 `defects/` is excluded by design: those files quote the removed values as evidence.

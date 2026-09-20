@@ -17,8 +17,15 @@ so those are machine-local and will NOT be committed when you push.
   The exception is scoped to that one host; do not carry the pattern anywhere else.
 
 ## Index
+- `repo/github-artifact-staleness.md` — the `.github/` staleness audit's committed record, including the
+  **2026-09-20 correction** to Decisions #2 (the two "inert" files were **retained and annotated**, not
+  deleted — do not delete them).
 - `repo/infor-visual-disposition.md` — Infor Visual status codes + FG/WIP/Outside derivation +
   MTM WIP Application facts + tooling quirks (file 14 Phase 6). Canonical long-form note:
   `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md`.
+- `repo/tasks-md-id-allocation.md` — how task IDs are allocated in `tasks.md` so they stay unique and
+  stable across phases.
 - `repo/workstation-elevation.md` — which account to use when administrator rights are needed on this
   workstation, when elevation is *not* needed, and the owner-approved exception that lets it name a password.
+- `repo/workstation-secrets.md` — the `MTM_Waitlist.Mock.Service` host's per-user environment variables,
+  their source of truth, verification steps and guardrails.

@@ -69,7 +69,7 @@ corrected or retired in the same change so no reader is sent to re-implement del
 1. **Remove every fabricated value** from the waitlist card and the request detail page, and remove the
    fallback literals behind them, so a field with no real source shows nothing (or a localized "not
    available") instead of a plausible number, customer or part. The values to remove are listed
-   exhaustively in `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §3 (about
+   exhaustively in `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §3 (about
    thirty literals across coil, finished goods, NCM, WIP, outside service, flatstock, table handling,
    die handling and scrap), plus the invented content the detail page adds on its own ("Tipping
    strategy", "Allowed categories", the "Pending…" statuses).
@@ -121,16 +121,16 @@ the SP-first rule (any `Database/**` change ships `create.sql` + `rollback.sql` 
 
 | Defect file | What "closed" means here |
 | --- | --- |
-| `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` | no fabricated material value is rendered anywhere; template 03 later restores real ones |
-| `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` | the buttons are gone (or the card shows real status only); template 02 later wires them |
-| `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md` | the fixed queue/wait text is gone; template 04 may later deliver a real figure |
-| `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` | the fixed-part lookup and the `5,000 lb` fallback are gone; template 03 later implements it per coil |
-| `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` | the control no longer promises what this installation cannot do; template 08 decides packaging |
-| `defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` | each label has its own key and its own text |
-| `defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` | no shipped resource value is a placeholder address |
-| `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md` | every search-aware panel is refreshed, and a coverage test prevents recurrence |
-| `defects/Low-Localization-RetiredMockWordingStillShips.md` | no retired-behaviour wording ships in `.resw`, comments or docs |
-| `defects/Low-Notifications-ToastActivationShowsTodoDialog.md` | no placeholder dialog exists on the notification path |
+| `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` | no fabricated material value is rendered anywhere; template 03 later restores real ones |
+| `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` | the buttons are gone (or the card shows real status only); template 02 later wires them |
+| `defects/Closed-Partial-High-NewRequest-QueueAndWaitTimeIsHardcoded.md` | the fixed queue/wait text is gone; template 04 may later deliver a real figure |
+| `defects/Closed-Partial-High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` | the fixed-part lookup and the `5,000 lb` fallback are gone; template 03 later implements it per coil |
+| `defects/Closed-Partial-Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` | the control no longer promises what this installation cannot do; template 08 decides packaging |
+| `defects/Closed-Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` | each label has its own key and its own text |
+| `defects/Closed-Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` | no shipped resource value is a placeholder address |
+| `defects/Closed-Low-Settings-SearchIgnoresThreeSettingsPanels.md` | every search-aware panel is refreshed, and a coverage test prevents recurrence |
+| `defects/Closed-Low-Localization-RetiredMockWordingStillShips.md` | no retired-behaviour wording ships in `.resw`, comments or docs |
+| `defects/Closed-Partial-Low-Notifications-ToastActivationShowsTodoDialog.md` | no placeholder dialog exists on the notification path |
 
 ## 6. Verification / gates
 

@@ -43,7 +43,7 @@ instead of them.
 | No frozen field list | **no test asserts today's field contents** — a change to an Item's fields must not fail a build | FR-015 |
 | Missing configuration row | an Item with no row is reported unavailable, never half-configured, never a crash | FR-014 |
 | Stray configuration row | a row naming an Item that does not exist is ignored and never offered | Edge Cases |
-| The die's Line 2 | the die's location when the captured destination is `Home Location`; the die's number otherwise | FR-005, US2 |
+| The die's Line 2 | the die's own number and its **home location**, both read from the job — never switched on an answer, and no destination is ever asked for | FR-053, FR-056, D22 |
 | The two wrong-material Items | each reads as one Deliver request whose Line 2 names the **correct** material | FR-029 |
 | Item and Category display text | resolves through the resource mechanism | FR-022 |
 | Observed average | completed requests only; acceptance to completion; a released-then-completed request contributes once; no value when nothing has completed | FR-019 |

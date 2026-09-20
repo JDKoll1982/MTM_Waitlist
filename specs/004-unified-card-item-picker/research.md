@@ -63,8 +63,9 @@ rejected by FR-013/FR-015 and §16.15, which require the field set to change as 
 
 **Decision.** The umbrella phrase (Line 1) and the identifier template (Line 2) remain properties of the Item's
 code-catalog row — `RequestItemDefinition` keeps `UmbrellaVerb` and gains `CardLine2Template`, which carries the
-CSV's `Card Line 2 (identifier)` as a `{token}` template plus the one conditional alternative the die needs
-(`{die_number}`, or `{die_location}` when the captured destination is `Home Location`). The configuration table
+CSV's `Card Line 2 (identifier)` as a `{token}` template. (The die's one conditional alternative — `{die_location}`
+when the captured destination was `Home Location` — was superseded by FR-053/FR-056 on 2026-09-14 and the question
+itself retired on 2026-09-20, so no conditional remains; see D22.) The configuration table
 holds the *behaviour*; the catalog holds identity, order, Category, umbrella verb and Line 2.
 
 **Rationale.** §16.3 is explicit: the metadata table holds "what lives on the type/subtype rows today" — control
@@ -86,7 +87,8 @@ and reviewability liability for one conditional rule.
 
 Closed by design so an unknown token is a reportable configuration error rather than a silent blank. Job-derived
 from the active-job snapshot: `part_number`, `part_description`, `die_number`, `die_location`, `dunnage_part`,
-`sequence_number`, `scrap_type`. Captured during the flow: `answer`, `destination`, `component`, `defect`.
+`sequence_number`, `scrap_type`. Captured during the flow: `answer`, `component`, `defect`. (`destination` left this
+set on 2026-09-20 — no Item captures a destination any more; see D22.)
 
 ## D4. The per-Item allotted minutes move out of local settings and into the store
 
@@ -437,3 +439,52 @@ rejected: SC-004 requires the flatstock-only configuration to be proven, and the
 includes a flatstock job. *Splitting Pickup back into two Items, coil and flatstock* — rejected: the spec pins
 twenty-three codes and `pickup-coil`'s merged display name, and the configuration spreadsheet is the sole source of
 per-Item field definitions.
+
+## D22. The destination question retires, the die goes home, and the chosen die travels on the request
+
+**Decision.** A die always goes to its **home location** — the location the requesting job records on that die's own
+subordinate row — and the person raising the request is **never asked where it goes**. The `Take To` question
+`pickup-die` carried (`Die Shop` / `Home Location` / `Other`) is retired from the Item's configuration row, and the
+one value column a request already has (`input_value`) carries **which die the request is for**. **No schema change
+is made**: no `die_identifier` column, no procedure pair, no aggregate edit, no description change, and no reinstall
+is needed for this decision.
+
+**Rationale.** T180 framed the storage choice (reuse `input_value`, or add a column) and the owner answered it with
+a product decision rather than a storage preference: the destination was never information the shop needed, because
+a die belongs in its home location and that is where it goes. Removing the question is what frees the column, so the
+two halves are one decision rather than two — the retirement is what makes the storage choice possible, and the
+storage choice is what FR-054 needs. It also closes a defect class instead of extending it: with the destination and
+the die sharing one column, every die entry from one job would have resolved the job's *first* die and been
+indistinguishable from its siblings.
+
+**Consequences carried into the code.** `pickup-die`'s configuration row loses its required answer, its prompt, its
+value type and its options; both die Items declare the `die` job list so both reach the die step (which moves
+`deliver-die` off `direct-to-confirmation`); `destination` leaves the Line 2 token set; the CSV's two die rows lose
+their sub-action and options columns; and **no die line changes**, because FR-053 and FR-056 already read the number
+and the location from the job rather than from an answer.
+
+**And two things the answer added (2026-09-20, same day).** The owner confirmed the die step belongs to **both** die
+Items and asked for two further behaviours, so the decision is not only a retirement:
+
+- **Select all.** The step offers an action that takes **every** die the job carries in one go, raising one request
+  per die exactly as selecting them singly does (`spec.md` FR-054, `tasks.md` T182). Without it, a job carrying five
+  dies costs five selections to clear.
+- **Every die location on the request page.** The page must list **every** die location the requesting job carries,
+  not only the location of the die that request names (`spec.md` **FR-057**, `tasks.md` T187, gate T188). The page
+  resolves the job's **first** die today, which is why a job carrying several dies shows one location and hides the
+  rest — the same "resolves the job's first die" weakness this note opened with, now fixed on the reading side as
+  well as the raising side.
+
+**Alternatives considered for the two added behaviours.** *Requiring each die to be selected one at a time* —
+rejected by the owner in favour of the select-all action, because the common case is a job whose dies are all needed.
+*Showing only the requesting die's own location on the request page* — rejected: the page's job is to tell a handler
+where the job's dies live, and a job with several dies would then need several pages open to answer one question.
+*Listing every die on **every** die request regardless of the job* — rejected: nothing about another job's dies may
+appear, so the list is scoped to the requesting job's own dies.
+
+**Alternatives considered.** *Adding `die_identifier` and keeping the destination question* — rejected by the
+owner's decision: it preserves a question the shop does not need and pays for it with a schema change, a procedure
+pair, both aggregates, the mandatory description file, a seed change and a database reinstall. *Keeping the question
+but not storing its answer* — rejected: asking for something nothing reads is the "offers a control it cannot
+honour" failure the truthful-controls spec exists to prevent. *Narrowing the question to `Home Location` alone* —
+rejected: a one-option question is a question nobody should be asked.

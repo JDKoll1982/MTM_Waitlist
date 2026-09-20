@@ -27,7 +27,7 @@
 
       ROOT-CAUSE ALTERNATIVE (verified, not taken here): Win2D 1.4.0 ships portable win-* assets and
       would remove the need for this flag entirely (its only constraint is
-      Microsoft.WindowsAppSDK.WinUI >= 1.8.260204000, satisfied by the 2.3.0 in use). It is not taken
+      Microsoft.WindowsAppSDK.WinUI >= 1.8.260204000, satisfied by the 2.3.1 in use). It is not taken
       as part of this change because Win2D is transitive via CommunityToolkit.WinUI.UI.* 7.1.2, which
       was compiled against Win2D 1.0.0.30 — changing that assembly version is a runtime binding risk
       that neither the build nor the test suite can validate. Schedule it as a separate change with

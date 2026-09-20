@@ -1178,7 +1178,7 @@
       "status": "DONE",
       "did": "Closed the inert-buttons defect with the tests that prove the actions now work",
       "files": [
-        "defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md"
+        "defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md"
       ]
     },
     "T027": {
@@ -1464,7 +1464,7 @@
       "step": "implement"
     },
     {
-      "note": "The request history is only as complete as the current session: audit rows are written to the store but never read back, so the history block shows nothing for a request the user has not acted on. Recorded as defects/Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md and left as open task T036 rather than patched, because the read path is a stored procedure that needs live-database validation",
+      "note": "The request history is only as complete as the current session: audit rows are written to the store but never read back, so the history block shows nothing for a request the user has not acted on. Recorded as defects/Closed-Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md and left as open task T036 rather than patched, because the read path is a stored procedure that needs live-database validation",
       "step": "implement"
     },
     {

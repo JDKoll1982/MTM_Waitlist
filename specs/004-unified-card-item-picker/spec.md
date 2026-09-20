@@ -70,8 +70,8 @@ shape, with the umbrella word first, the identifier second, and the right pictur
 
 1. **Given** requests for different Items, **When** the list is shown, **Then** each is a card whose first line
    is the Item's umbrella phrase and whose second line is the Item's identifier.
-2. **Given** a request raised for a die, **When** its card is shown, **Then** the second line is the die's
-   location if the destination captured was Home Location, and the die's number otherwise.
+2. **Given** a request raised for a die, **When** its card is shown, **Then** the second line is the die's own
+   number and where that die lives, read from the job — no destination is ever asked for or shown.
 3. **Given** a request, **When** its card is shown, **Then** the picture is the Item's picture, and the
    Category's picture only when the Item has none of its own.
 4. **Given** a request, **When** its card is shown, **Then** it still shows who asked, the work centre, the time
@@ -333,12 +333,16 @@ the umbrella phrase rather than reporting a fault; the identifier is where a fau
 - **FR-052**: The die Items' first line MUST name the requesting job's part number — `Pickup Die: PART-9003` — so a
   handler can tell which part the die is for, and MUST fall back to the phrase alone when the job cannot supply it.
 - **FR-053**: The die Items' second line MUST show the die's own number and where the die is, together, read from
-  the job — e.g. `FGT0002000-DIE SHOP`. The value the operator picked as the destination MUST NOT change the
-  identifier: the two die lines say which part, which die, and where it is, whatever the destination.
+  the job — e.g. `FGT0002000-DIE SHOP`. Where the die is **is its home location, as the job records it on that
+  die's own row**: the person raising the request MUST NOT be asked where a die should go, and nothing they choose
+  may change the identifier.
 - **FR-054**: Every die assigned to the requesting job MUST travel with that job in the job's own order. Where a job
   has **more than one** die, the flow MUST ask the operator which die they need, MUST allow more than one to be
   selected, and MUST raise **one request per die selected** — never one request carrying several dies, and never a
-  request whose die was chosen on the operator's behalf.
+  request whose die was chosen on the operator's behalf. A die goes to its **home location** and nowhere else: the
+  person MUST NOT be asked where it goes, and the request MUST record **which die** it is for. The step MUST also
+  offer an **all** action, so every die the job carries can be taken in one action rather than one at a time;
+  selecting all raises one request per die, exactly as selecting them singly does.
 - **FR-055**: A die row carrying the query's `No Die` placeholder MUST NOT be counted as a die. A job whose only die
   row is that placeholder has **no die**: it MUST NOT be offered a die Item, and no die value or die location may
   be shown for it. The rule MUST be one definition shared by the Setup screens and the New Request picker, so the
@@ -347,6 +351,22 @@ the umbrella phrase rather than reporting a fault; the identifier is where a fau
   separator when no location is known — `FGT0002000-DIE SHOP`, or `FGT0002000` alone. The composition MUST be the
   same value wherever a die is shown, so a card, a detail row and the step that offers the choice cannot format
   the same die three different ways. An unknown location MUST NOT render as a trailing separator.
+- **FR-057**: A die request's **request page** MUST show **every** die location the requesting job carries, not
+  only the location of the die that request names, so a handler reading one request can see where the job's dies
+  live. A location the job cannot supply MUST NOT be invented, and the job's dies MUST be read once per work centre
+  rather than once per die.
+
+**Decision of record (2026-09-20, T180 and its follow-up).** Two decisions were taken together and they answer the
+same question — what a die request asks for, and what it shows:
+
+1. **Where a chosen die is stored.** A die always goes to its own home location and the person is never asked where
+   it goes, so the `Take To` question `pickup-die` carried — `Die Shop` / `Home Location` / `Other` — **retires**,
+   and the one value column a request already has carries **which die the request is for**. Several entries from one
+   job therefore stay distinguishable **without a schema change**.
+2. **Which Items ask, and what the page shows.** **Both** die Items ask which die (so `deliver-die` gains the step),
+   the step offers **select all**, and the **request page lists every die location the job carries** (FR-057).
+
+The rationale, the alternatives and the propagation list are in `research.md` D22.
 
 ### Key Entities
 
@@ -416,8 +436,7 @@ the umbrella phrase rather than reporting a fault; the identifier is where a fau
   because of the Item's code: changing that one row moves which step asks for the answer, with no code change and
   no rebuild.
 - **SC-024**: A die request's card names the part the die is assigned to on its first line and the die's own number
-  and location on its second, both read from the requesting job — including when the operator's chosen destination
-  is something else.
+  and location on its second, both read from the requesting job, with no destination asked for or shown.
 - **SC-025**: A job whose only die row is the `No Die` placeholder is offered no die Item at all, and shows no die
   value or die location anywhere in the flow — and flipping that one row to a real die makes the Item appear again,
   with no code change and no rebuild.
@@ -498,8 +517,9 @@ text only.
 **The wrong-material first lines**: `Wrong Coil Bring:` and `Wrong Flatstock Bring:` — the Item's own first line,
 not the plain Category word.
 
-**The Die destination options**: `Die Shop`, `Home Location`, `Other` — and `Home Location` is the value that
-switches the card's second line from the die's number to the die's location.
+**The retired Die destination question**: `Die Shop`, `Home Location`, `Other` — the `Take To` question `pickup-die`
+used to ask. It **retired 2026-09-20** (D22): a die always goes to its own home location, so no Item asks where a die
+should go and nothing an operator chooses changes a die's identifier.
 
 **The scrap values that suppress the Scrap Item**: `No Scrap` — a real selectable scrap type meaning the job has no
 scrap — and `Scrap Type Required` — the placeholder the workflow falls back to when no decision has been saved.
@@ -524,5 +544,6 @@ status.
 - **The overdue allowance** is the smallest one the minutes screen accepts, so the request genuinely runs out of
   time rather than being written as though it had.
 - **`pickup-component` is the one Item that cannot be raised today** — it declares an answer chosen from a list and
-  is configured with no list. The other answer-bearing Items are unaffected: `pickup-die` offers `Die Shop`,
-  `Home Location`, `Other`, and `deliver-wrong-coil`, `deliver-wrong-flatstock` and `other` ask for text.
+  is configured with no list. The other answer-bearing Items are unaffected: `pickup-die` and `deliver-die` now ask
+  **which die** from the job's own dies rather than for a destination (D22), and `deliver-wrong-coil`,
+  `deliver-wrong-flatstock` and `other` ask for text.

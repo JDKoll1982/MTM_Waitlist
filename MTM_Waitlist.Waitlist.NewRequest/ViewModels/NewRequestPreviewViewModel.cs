@@ -38,11 +38,15 @@ public partial class NewRequestPreviewViewModel : ObservableRecipient, INavigati
         get; set;
     } = string.Empty;
 
+    /// <summary>
+    /// One row per entry this run will raise — every die the operator chose, in the order they will be raised —
+    /// rather than the request's single value, which showed one die while several were about to be raised (FR-054).
+    /// </summary>
     [ObservableProperty]
-    public partial string Detail
+    public partial IReadOnlyList<string> DetailLines
     {
         get; set;
-    } = string.Empty;
+    } = Array.Empty<string>();
 
     [ObservableProperty]
     public partial bool HasDetail
@@ -67,8 +71,8 @@ public partial class NewRequestPreviewViewModel : ObservableRecipient, INavigati
         WorkCenter = state.WorkCenter;
         CategoryText = NewRequestItemViewModel.ResolveCategoryName(state.Category ?? state.Item.Category);
         ItemText = NewRequestItemViewModel.ResolveItemName(state.Item);
-        Detail = state.InputValue ?? string.Empty;
-        HasDetail = !string.IsNullOrWhiteSpace(Detail);
+        DetailLines = state.DetailLines();
+        HasDetail = DetailLines.Count > 0;
     }
 
     public void OnNavigatedFrom()

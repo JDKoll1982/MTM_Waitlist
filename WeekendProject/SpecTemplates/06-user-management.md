@@ -131,8 +131,8 @@ None. But two things must be checked while this spec edits `SettingsPage.xaml` a
 
 - If template 01 has **not** yet run, do not re-introduce its defects: no new label may share an
   existing resource key, and any new search-aware panel must be registered with the search-refresh
-  path (`defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md`,
-  `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md`).
+  path (`defects/Closed-Medium-Settings-AboutLabelsCollideOnOneResourceKey.md`,
+  `defects/Closed-Low-Settings-SearchIgnoresThreeSettingsPanels.md`).
 - The new Administration panels must obey template 01's rule: no control may be shown for a role that
   cannot use it.
 

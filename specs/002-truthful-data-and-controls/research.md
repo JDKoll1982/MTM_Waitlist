@@ -11,7 +11,7 @@ Every Technical Context unknown is resolved below. Sources: the feature's defect
 **Decision**: Omit the row. Where the empty result *is* the answer, hide the block. Where the read
 failed, show the error in place with a retry. Absence and failure are never the same state.
 
-**Evidence**: `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §6.5 — "omit the row rather than print a placeholder value — a missing row is truthful, a fake value is not." · Same defect §3 lists the hard-coded `"Not available"` defaults among the fabricated literals, so they go with the rest. · Absence/failure split: recorded clarification, 2026-09-12.
+**Evidence**: `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §6.5 — "omit the row rather than print a placeholder value — a missing row is truthful, a fake value is not." · Same defect §3 lists the hard-coded `"Not available"` defaults among the fabricated literals, so they go with the rest. · Absence/failure split: recorded clarification, 2026-09-12.
 
 ---
 
@@ -63,7 +63,7 @@ existing value-only test is corrected to assert that `PropertyChanged` was raise
 placeholder-value scans extend the existing `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`,
 which already scans `.cs/.xaml/.resw/.sql/.csproj/.json`.
 
-**Evidence**: `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md` §5.2 — "Prefer the array + coverage test: it fails when the next panel is added without registering"; §5.3 — the existing test "reads the property directly, so it passes regardless of whether the notification was raised". · `defects/Low-Localization-RetiredMockWordingStillShips.md` §4.4 and `defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` §6.2 both name the audit file as the extension point.
+**Evidence**: `defects/Closed-Low-Settings-SearchIgnoresThreeSettingsPanels.md` §5.2 — "Prefer the array + coverage test: it fails when the next panel is added without registering"; §5.3 — the existing test "reads the property directly, so it passes regardless of whether the notification was raised". · `defects/Closed-Low-Localization-RetiredMockWordingStillShips.md` §4.4 and `defects/Closed-Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` §6.2 both name the audit file as the extension point.
 
 ---
 
@@ -104,6 +104,6 @@ the six sources), `WeekendProject/OPEN-WORK-NEXT-SPEC.md` §10.2 (pointer at tha
 
 **Decision**: Gates are the solution build (`/m:1 /nodeReuse:false`, 0 warnings / 0 errors), the full suite (`Failed: 0`), the scan gates (empty outside `specs/` and `defects/`), the per-defect automated checks (≥ 10 new, each failing against the pre-change behaviour), and a manual pass over the four affected surfaces. UI automation follows `.github/instructions/winui3-ui-automation.instructions.md`; steps that need a signed-in session are recorded as environment-gated when no credential is available, exactly as `specs/001` recorded its live-environment checks.
 
-**Evidence**: Constitution VI. · `.github/instructions/winui3-ui-automation.instructions.md` — "Reaching the **shell** needs a sign-in as well". · `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §5 — `RetiredSymbolAuditTests` matched only *symbol names*, so `"Northstar Manufacturing"` shipped through a green build.
+**Evidence**: Constitution VI. · `.github/instructions/winui3-ui-automation.instructions.md` — "Reaching the **shell** needs a sign-in as well". · `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §5 — `RetiredSymbolAuditTests` matched only *symbol names*, so `"Northstar Manufacturing"` shipped through a green build.
 
 <!-- token-budget: compacted (level=aggressive) on 2026-09-12T23:54:00Z; original at research.full.md -->

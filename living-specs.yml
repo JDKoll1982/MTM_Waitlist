@@ -1,5 +1,15 @@
 enabled: true
 exempt: ["*.config.*", "*.test.*", "**/migrations/**"]
+# --------------------------------------------------------------------------------------------
+# THE REGISTRY IS NOT THE REPOSITORY. Two capabilities are declared below; everything else in
+# the tree has NO living spec, so drift across it is invisible by construction -- and a green
+# `drift.py` run means "the registry is complete with respect to itself", not "the repo is in
+# sync". Unwatched today: MTM_Waitlist.Waitlist.View/**, Module_Waitlist/**, MTM_Waitlist.Core/**,
+# MTM_Waitlist.Setup/**, Module_Setup/**, Database/**, Strings/**, Views/**, ViewModels/**.
+# Adopting an area is opt-in via /speckit.companion.living-adopt.
+# The standing record -- what is watched, what was found, and this blind spot -- is
+# `capabilities/DRIFT.md`. Read it before trusting a green run.
+# --------------------------------------------------------------------------------------------
 capabilities:
   - name: startup
     match: ["MTM_Waitlist.Startup/**", "Module_Startup/**"]

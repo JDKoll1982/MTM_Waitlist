@@ -62,21 +62,37 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_PickupDie_ShowsTheDieNumberAndLocationWhateverTheChosenDestination()
+    public void ResolveLine2_PickupDie_ShowsTheDieTheRequestIsFor()
     {
-        // Superseded 2026-09-14 (FR-053). The identifier used to switch between the die's location and its number
-        // depending on the captured destination. It now always carries both, so the handler sees which die it is
-        // and where it is in one read, and the destination answer no longer shapes the card.
-        var atHome = WaitlistRequestTitles.ResolveLine2(
-            Find("pickup-die"),
-            new RequestItemLine2Context(DieNumber: "D-4471", DieLocation: "Rack 12", Destination: "Home Location"));
-        var toDieShop = WaitlistRequestTitles.ResolveLine2(
-            Find("pickup-die"),
-            new RequestItemLine2Context(DieNumber: "D-4471", DieLocation: "Rack 12", Destination: "Die Shop"));
+        // Superseded 2026-09-20 (FR-054, D22). The identifier used to switch between the die's location and its
+        // number depending on the captured destination, and the destination question is retired. What shapes the
+        // card now is which die the request is for, so a job carrying two dies is two different cards.
+        var request = new WaitlistRequest { Category = "Pickup", Item = "pickup-die", InputValue = "D-9001-PRESS BAY" };
 
-        Assert.IsTrue(atHome.IsResolved);
-        Assert.AreEqual("D-4471-Rack 12", atHome.Text);
-        Assert.AreEqual("D-4471-Rack 12", toDieShop.Text, "The chosen destination no longer changes the identifier.");
+        var result = WaitlistRequestTitles.ResolveLine2(
+            Find("pickup-die"),
+            WaitlistRequestTitles.ResolveContext(request, TwoDieJob()));
+
+        Assert.IsTrue(result.IsResolved);
+        Assert.AreEqual(
+            "D-9001-PRESS BAY",
+            result.Text,
+            "The card names the die the request is for, not the first die the job happens to carry (FR-057).");
+    }
+
+    [TestMethod]
+    public void ResolveLine2_DieRequestWithNoStoredDie_FallsBackToTheJobsOwnDie()
+    {
+        // A request raised before the picker learned to record its die still has to render, so the job's primary
+        // die stands in rather than leaving the card blank or inventing an identifier (FR-005, FR-026).
+        var request = new WaitlistRequest { Category = "Pickup", Item = "pickup-die" };
+
+        var result = WaitlistRequestTitles.ResolveLine2(
+            Find("pickup-die"),
+            WaitlistRequestTitles.ResolveContext(request, DieJob()));
+
+        Assert.IsTrue(result.IsResolved);
+        Assert.AreEqual("FGT0002000-DIE SHOP", result.Text);
     }
 
     [TestMethod]
@@ -151,6 +167,17 @@ public sealed class WaitlistRequestTitlesTests
         DieNumber = "FGT0002000",
         DieLocation = "DIE SHOP",
     };
+
+    /// <summary>
+    /// A job carrying <b>two</b> dies, so the first die the job carries is not the answer to "which die"
+    /// (FR-057). The job's own primary die stays <c>FGT0002000</c> on purpose: that is the value a request that
+    /// never recorded a die falls back to.
+    /// </summary>
+    private static RequestJobPartAvailability TwoDieJob() => DieJob().WithDies(
+    [
+        new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP" },
+        new RequestDiePart { PartNumber = "D-9001", Location = "PRESS BAY" },
+    ]);
 
     [TestMethod]
     public void ResolveLine2_ReadsWhatTheJobCarries()

@@ -36,6 +36,30 @@ carry-forward counts below are the box counts those workstreams were sized again
 | 08 | `08-notification-delivery-and-packaging.md` | Defect-driven (no backlog workstream) | — | Completes `Medium-Settings-NewRequestAlertsCannotFireUnpackaged` and verifies `Low-Notifications-ToastActivationShowsTodoDialog` |
 | — | Docs hygiene (§10.2) | `OPEN-WORK-NEXT-SPEC.md` §10 | — | Folded into template 01 — see its §5 |
 
+## Template number → shipped spec number (added 2026-09-20)
+
+A template's number is **not** its spec number. `01-truthful-data-and-controls` shipped as
+`specs/002-truthful-data-and-controls`, not `specs/001-…` (`specs/001` is the Module_Mock workstream,
+which pre-dates the templates). Every `defects/*.md` **Planned fix** row names specs by *template*
+number and now carries a banner pointing back here.
+
+| Template | Shipped as | Status |
+| --- | --- | --- |
+| `01-truthful-data-and-controls.md` | **`specs/002-truthful-data-and-controls`** | **shipped** |
+| `02-handler-fulfilment-and-urgency.md` | **`specs/003-waitlist-handler-fulfilment`** | **shipped** (49/49) |
+| `03-unified-card-and-taxonomy.md` | **`specs/004-unified-card-item-picker`** | **in flight** |
+| `04-waitlist-analytics.md` | — | not specified |
+| `05-request-administration-and-retention.md` | — | not specified |
+| `06-user-management.md` | — | not specified |
+| `07-startup-gate-polish.md` | — | not specified (its 2 boxes are live carry-forward in `PromptFiles/13`) |
+| `08-notification-delivery-and-packaging.md` | — | not specified |
+
+**Consequence for the defect map above:** `01` rows are closed, `02` rows are closed, and `03` rows are
+partly closed — `specs/004` **removes** the fabricated values (already done by `specs/002`) and builds the
+unified card and item picker, but the NCM defect panel and the FG/WIP/Outside items are **explicitly out of
+its scope** (`specs/004-unified-card-item-picker/spec.md` line 509). Those need template `05`-or-later
+ownership, or the surviving `sp_waitlist_defect_types_*` artifacts need retiring.
+
 ### Why template 01 exists (and why it runs first)
 
 **Eight of the ten defects have no owning workstream at all** in `OPEN-WORK-NEXT-SPEC.md` — they were
@@ -63,16 +87,16 @@ and files those requirements were never checked against.
 
 | Defect file | Fixed in | Feature completion |
 | --- | --- | --- |
-| `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` | **01** — remove every fabricated value so nothing false is shown | 03 — restore the real values through the resolvers |
-| `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` | **01** — stop offering the buttons until they work | 02 — wire Accept/Complete/Release and cancel-own |
-| `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md` | **01** — remove the fabricated queue/wait card | 04 (optional) — a real queue count and wait estimate |
-| `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` | **01** — remove the wrong-part lookup and its fixed fallback | 03 — per-coil lookup for the request's own part |
-| `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` | **01** — gate the toggle on the capability so the surface stops promising it | 08 — decide packaging and make alerts actually deliver |
-| `defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` | **01** | — |
-| `defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` | **01** | — |
-| `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md` | **01** | — |
-| `defects/Low-Localization-RetiredMockWordingStillShips.md` | **01** — with §10.2 documentation hygiene | — |
-| `defects/Low-Notifications-ToastActivationShowsTodoDialog.md` | **01** — delete the placeholder dialogs | 08 — proves the real activation path |
+| `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` | **01** — remove every fabricated value so nothing false is shown | 03 — restore the real values through the resolvers |
+| `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` | **01** — stop offering the buttons until they work | 02 — wire Accept/Complete/Release and cancel-own |
+| `defects/Closed-Partial-High-NewRequest-QueueAndWaitTimeIsHardcoded.md` | **01** — remove the fabricated queue/wait card | 04 (optional) — a real queue count and wait estimate |
+| `defects/Closed-Partial-High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` | **01** — remove the wrong-part lookup and its fixed fallback | 03 — per-coil lookup for the request's own part |
+| `defects/Closed-Partial-Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` | **01** — gate the toggle on the capability so the surface stops promising it | 08 — decide packaging and make alerts actually deliver |
+| `defects/Closed-Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` | **01** | — |
+| `defects/Closed-Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` | **01** | — |
+| `defects/Closed-Low-Settings-SearchIgnoresThreeSettingsPanels.md` | **01** | — |
+| `defects/Closed-Low-Localization-RetiredMockWordingStillShips.md` | **01** — with §10.2 documentation hygiene | — |
+| `defects/Closed-Partial-Low-Notifications-ToastActivationShowsTodoDialog.md` | **01** — delete the placeholder dialogs | 08 — proves the real activation path |
 
 **Every `specs/001` box is closed** (`173/173`), so no template below re-opens that feature. Its one
 dated follow-up is the **SC-007 / SC-008 30-day re-check due 2026-10-12** — a measurement, not a task.

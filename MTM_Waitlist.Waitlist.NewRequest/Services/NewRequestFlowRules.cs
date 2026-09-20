@@ -185,14 +185,16 @@ public static class NewRequestFlowRules
 
         // An answer the job supplies is asked for by the step that can show it: the dunnage list is asked for on
         // the dunnage step, as picture cards of the parts the job carries, with the substitute picker beside them
-        // (FR-048, FR-049). Which list it is comes from the row's declaration, never from the Item's identity
-        // (FR-013).
-        return string.Equals(
-            RequestItemAnswerOptionsResolver.DeclaredJobListName(configuration),
-            RequestItemFieldDefinition.Lists.Dunnage,
-            StringComparison.OrdinalIgnoreCase)
-                ? typeof(NewRequestDunnageViewModel)
-                : typeof(NewRequestDetailsViewModel);
+        // (FR-048, FR-049), and the die list on the die step, as cards of the dies the job carries (FR-054).
+        // Which list it is comes from the row's declaration, never from the Item's identity (FR-013).
+        return RequestItemAnswerOptionsResolver.DeclaredJobListName(configuration) switch
+        {
+            var list when string.Equals(list, RequestItemFieldDefinition.Lists.Dunnage, StringComparison.OrdinalIgnoreCase)
+                => typeof(NewRequestDunnageViewModel),
+            var list when string.Equals(list, RequestItemFieldDefinition.Lists.Die, StringComparison.OrdinalIgnoreCase)
+                => typeof(NewRequestDieViewModel),
+            _ => typeof(NewRequestDetailsViewModel),
+        };
     }
 
     private static bool IsNoActiveJobPlaceholder(string? value) =>

@@ -62,19 +62,20 @@ A fixed value, a value read from the job, or a value that depends on an answer c
 |---|---|
 | **fixed value** | `pickup-riser-table`, `deliver-riser-table` → `Riser Table`; `pickup-hopper`, `deliver-hopper` → `Hopper` |
 | **read from the job** | `pickup-coil`, `pickup-component`, `pickup-dunnage`, `pickup-scrap`, `deliver-coil`, `deliver-flatstock`, `deliver-die`, `deliver-dunnage`, `assist-coil-turn`, `assist-table-place`, `assist-table-remove`, and the two wrong-material Items (which name the **correct** material) |
-| **depends on a captured answer** | `pickup-die` — the die's location when the captured destination is `Home Location`, otherwise the die's number. `other` — the message the person typed. |
+| **depends on a captured answer** | `other` — the message the person typed. (`pickup-die` was the second row here: its identifier switched on the captured destination. FR-053 replaced that switch with one composition, and the question itself retired 2026-09-20 — D22 — so the die's line is read from the job like every other die value.) |
 
-**The die's rule, verbatim.** `Home Location` is the value that switches the second line from the die's number to
-the die's location. The three destination options are `Die Shop`, `Home Location`, `Other`.
+**The die's rule.** The second line is the die's own `FGT` number and where the die is, both read from the job and
+composed once — `FGT0002000-DIE SHOP`, or the number alone where the job knows no location (FR-056).
 
-> **Superseded 2026-09-14 (FR-053).** The die Items' identifiers are now `{die_number}-{die_location}` — the die's
-own `FGT` number and where the die is, both always, e.g. `FGT0002000-DIE SHOP`. The destination question is still
-asked and still stored, but it no longer shapes the card, so **no shipped row uses the conditional syntax any
-more**. The resolver still supports it, and `Home Location` remains a valid destination answer.
+> **Superseded 2026-09-14 (FR-053), then retired 2026-09-20 (D22).** The line used to switch on the captured
+destination (`{die_location}` when it was `Home Location`, the number otherwise). FR-053 replaced that with a single
+composition, so no shipped row used the conditional any more; and the destination question has now retired in full —
+a die always goes to its home location and the person is never asked where it goes. The conditional syntax is gone
+from the resolver's contract as well as from the rows, and **no row may name `destination`**.
 
 **Token set.** Line 2 is written as a `{token}` template on the Item's catalog row. Job-derived tokens:
 `{part_number}`, `{part_description}`, `{die_number}`, `{die_location}`, `{dunnage_part}`, `{sequence_number}`,
-`{scrap_type}`, `{job_part_number}`. Captured tokens: `{answer}`, `{destination}`, `{component}`, `{defect}`. An
+`{scrap_type}`, `{job_part_number}`. Captured tokens: `{answer}`, `{component}`, `{defect}`. An
 unresolvable token renders the Item's own display name and reports the configuration problem — never a blank, never
 a fabricated value.
 

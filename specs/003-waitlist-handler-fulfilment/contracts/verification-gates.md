@@ -143,7 +143,7 @@ at the same available request:
 `mtm_waitlist`; `CALL sp_waitlist_request_audit_list('f0000000-0010-4000-8000-000000000010')` returned that
 request's entries oldest-first and an unknown id returned an empty set rather than an error; opening the
 request in the built app logged `Audit trail loaded for request 'f0000000-0001-…'. Entries=1.` and rendered
-the entry with its detail text. Recorded in `defects/Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md` §6.
+the entry with its detail text. Recorded in `defects/Closed-Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md` §6.
 
 ## G9 — Running application pass (manual, documented)
 
@@ -184,7 +184,7 @@ running the test suite.
 
 ## G10 — Documentation reflects reality
 
-- `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` moves to `FIXED` with the commit and the
+- `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` moves to `FIXED` with the commit and the
   tests that prove it.
 - `CHANGELOG.md` carries the two entries the defect file already claims exist, corrected to describe
   the surface as delivered.
@@ -247,7 +247,7 @@ last, which only the running application can prove.
 
 ## G12 — Documentation reflects reality after the fixes
 
-- `defects/High-NewRequestVisitReplacesCardImagesWithThePlaceholder.md` records the image defect with its
+- `defects/Closed-High-NewRequestVisitReplacesCardImagesWithThePlaceholder.md` records the image defect with its
   before/after evidence.
 - `WeekendProject/ChangeLog.md` carries an entry per post-completion pass.
 - `spec.md` FR-012, FR-013 and FR-028 … FR-031, `plan.md`'s revision section, `data-model.md` §1/§2/§5 and

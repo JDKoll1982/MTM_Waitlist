@@ -76,9 +76,19 @@ Start-Process $exe
   With only the first set, the app still showed *"Could not validate startup session from the
   database"*; with both set it reached the **Sign in** window. That is the difference between testing
   navigation and testing nothing but the failure dialog.
-- Reaching the **shell** needs a sign-in as well, so a full navigation test needs credentials for a
-  valid account. Without them, steps 3 (header text) and 5 (navigation) cannot be exercised — only the
-  pre-shell windows can.
+- **Reaching the shell needs no sign-in (corrected 2026-09-20).** This bullet previously said the
+  opposite — that a full navigation test needs credentials for a valid account. It does not: with
+  **both** connection overrides set against a reachable store, the built app **auto-signs-in as the
+  configured developer account** and lands directly on the shell, so steps 3 and 5 are exercisable
+  with no credentials at all. Verified 2026-09-20 by driving the running app: the signed-in badge read
+  `johnk`, the shell header read `Waitlist for "Expo Drive"`, the live store supplied 21 real requests
+  across work centers `100-3`, `100-5`, `100-6`, `100-7`, `100-8`, `100-11`, `100-12`, `100-14`,
+  `100-15`, `100-16`, the cached-data bar correctly reported Infor Visual unreachable, and the
+  `Accept request` / `Cancel request` / `Complete request` / `Give back` buttons rendered.
+- **What still needs a signed-in *session* rather than the shell.** A test that depends on a
+  *specific* account's first-use state — a forced password change on the masked `'0000'` credentials,
+  for instance — still cannot be driven headlessly. The distinction matters: "the shell is reachable"
+  is not "any account's flow is reachable".
 
 ## 2. Connect to the window
 
@@ -269,11 +279,12 @@ measuring, and launch fresh before concluding that a sizing change did or did no
 - Window regressions such as a window that shows before it is activated, or a page that resizes the
   main window and silently un-maximizes it.
 
-## Verification status (2026-09-11, current Debug build)
+## Verification status (2026-09-11 and 2026-09-20, current Debug build)
 
 The recipes above were exercised against the built app
-(`bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe`, 2026-09-11 07:58) on
-`MTMFG-161`:
+(`bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe`) on `MTMFG-161` — the table
+below on **2026-09-11**, and the pre-shell windows only; the second table, further down, on
+**2026-09-20**, when the app was driven all the way into the shell:
 
 | Claim | Result |
 |---|---|
@@ -290,11 +301,21 @@ The recipes above were exercised against the built app
 | Close recipe leaves no orphan | **correct** — 0 instances afterwards |
 | `Add-Type` fails on a duplicate type | **did not reproduce** — see the note in step 4; the real hazard here is the opposite (types do not survive between commands) |
 
-**Not verified.** Step 5 (navigation with `SelectionItemPattern`) and the shell header text of step 3.
-Both need the app past the **Sign in** gate, and no valid account credential was used for this test
-run, so the shell was never reached. The `NavigationViewItem` → `ControlType.ListItem` +
-`SelectionItemPattern` claim therefore remains untested against this build; treat it as the next thing
-to check when a sign-in is available.
+**Not verified — as of 2026-09-11.** Step 5 (navigation with `SelectionItemPattern`) and the shell header text of step 3.
+Both need the app past the **Sign in** gate, and no valid account credential was used for that test
+run, so the shell was never reached.
+
+**Both are now verified (2026-09-20), and the blocker was not a credential at all.** With both
+connection overrides set against the local `mtm_waitlist`, the app auto-signed-in and reached the
+shell, so the two open items were walked on the current Debug build:
+
+| Claim | Result (2026-09-20) |
+|---|---|
+| Step 3 — the text dump identifies the shell page | **correct** — `Waitlist for "Expo Drive"`, the `johnk` badge, the nav labels and 21 request cards, with no `Sign in` window anywhere in the run |
+| Step 5 — `NavigationViewItem` → `ControlType.ListItem` + `SelectionItemPattern` | **correct** — the nav item reported `ControlType.ListItem`, `Select()` succeeded, and the header changed to `Work Center Setup — Select Work Station` with the wizard's steps 1–7 rendered |
+| `showCmd` on a maximized window | **consistent** — `3`, with `GetWindowRect` `3456x1408` and a `760x500` restore rectangle |
+| Reaching the shell needs credentials | **incorrect as written** — it needs no sign-in; corrected in step 1 |
+| The recipe needs no app change to work | **correct** — the run used the shipped artifact unchanged |
 
 ## Relationship to XamlMcp
 

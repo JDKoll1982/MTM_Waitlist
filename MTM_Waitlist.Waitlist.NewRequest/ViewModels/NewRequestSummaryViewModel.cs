@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -46,11 +48,15 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         get; set;
     }
 
+    /// <summary>
+    /// One row per entry this confirmation will raise — every die the operator chose, in the order they will be
+    /// raised — rather than the request's single value, which showed one die while several were raised (FR-054).
+    /// </summary>
     [ObservableProperty]
-    public partial string Detail
+    public partial IReadOnlyList<string> DetailLines
     {
         get; set;
-    } = string.Empty;
+    } = Array.Empty<string>();
 
     [ObservableProperty]
     public partial bool HasDetail
@@ -120,6 +126,26 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         get; set;
     } = string.Empty;
 
+    /// <summary>
+    /// Whether this confirmation raises <b>more than one</b> request. A job carrying several dies is one request
+    /// per die the operator chose, so the step says so rather than submitting several entries silently (FR-054).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool HasMultipleRequests
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// How many requests this confirmation raises, or raised — resolved through the resource mechanism, so it is
+    /// plain language and never a bare resource key (FR-022). Empty for the ordinary single request.
+    /// </summary>
+    [ObservableProperty]
+    public partial string RequestCountText
+    {
+        get; set;
+    } = string.Empty;
+
     public bool CanSubmit => !IsSubmitting;
 
     partial void OnIsSubmittingChanged(bool value) => OnPropertyChanged(nameof(CanSubmit));
@@ -144,12 +170,14 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         CategoryText = NewRequestItemViewModel.ResolveCategoryName(state.Category ?? state.Item.Category);
         ItemText = NewRequestItemViewModel.ResolveItemName(state.Item);
         HasItem = !string.IsNullOrWhiteSpace(ItemText);
-        Detail = state.InputValue ?? string.Empty;
-        HasDetail = !string.IsNullOrWhiteSpace(Detail);
+        DetailLines = state.DetailLines();
+        HasDetail = DetailLines.Count > 0;
         IsSubmitting = false;
         IsStatusVisible = false;
         IsStatusError = false;
         StatusMessage = string.Empty;
+
+        AnnounceHowManyRequests(state);
 
         ResetCoilDetail();
         if (IsCoilRequest(state))
@@ -228,7 +256,39 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         IsStatusVisible = false;
         try
         {
-            var result = await _requestService.SubmitAsync(_state.ToDraft(), allowDuplicate: false).ConfigureAwait(true);
+            var drafts = _state.ToDrafts();
+            WaitlistRequestSubmitResult? result = null;
+            var raised = 0;
+
+            foreach (var draft in drafts)
+            {
+                result = await _requestService.SubmitAsync(draft, allowDuplicate: false).ConfigureAwait(true);
+                if (result.Status != WaitlistRequestSubmitStatus.Success)
+                {
+                    // A die that could not be raised stops the run rather than being skipped silently: the
+                    // operator is told which failure it was, and the entries already raised stand.
+                    break;
+                }
+
+                raised++;
+            }
+
+            if (result is null)
+            {
+                StatusMessage = "The request could not be submitted. Please try again.";
+                IsStatusError = true;
+                IsStatusVisible = true;
+                return;
+            }
+
+            if (raised > 1)
+            {
+                RequestCountText = FormatRequestCount(
+                    "NewRequest_Summary.RequestsRaised",
+                    "{0} requests were raised — one for each die you chose.",
+                    raised);
+            }
+
             switch (result.Status)
             {
                 case WaitlistRequestSubmitStatus.Success:
@@ -265,6 +325,34 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         _navigationService.NavigateTo(
             typeof(NewRequestResultViewModel).FullName!,
             new NewRequestResultNavigationData { State = _state, Phase = phase, Message = message });
+    }
+
+    /// <summary>
+    /// Says how many requests this confirmation will raise, before the operator commits — one per die they chose,
+    /// and nothing at all for the ordinary single request (FR-054).
+    /// </summary>
+    private void AnnounceHowManyRequests(NewRequestFlowState state)
+    {
+        var count = state.ToDrafts().Count;
+
+        HasMultipleRequests = count > 1;
+        RequestCountText = HasMultipleRequests
+            ? FormatRequestCount(
+                "NewRequest_Summary.MultipleRequests",
+                "This will raise {0} requests — one for each die you chose.",
+                count)
+            : string.Empty;
+    }
+
+    private static string FormatRequestCount(string key, string fallback, int count) =>
+        string.Format(CultureInfo.CurrentCulture, LocalizeOrDefault(key, fallback), count);
+
+    private static string LocalizeOrDefault(string key, string fallback)
+    {
+        var localized = key.GetLocalized();
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, key, StringComparison.Ordinal)
+            ? fallback
+            : localized;
     }
 
     [RelayCommand]

@@ -137,7 +137,7 @@ This lands with US1 because it is the same command.
 
 **Wave 1 — independent (different files):**
 
-- [x] **T026** [P] Move the inert-buttons defect to `FIXED` with the closing commit and the tests that prove it · `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` · FR-021
+- [x] **T026** [P] Move the inert-buttons defect to `FIXED` with the closing commit and the tests that prove it · `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` · FR-021
 - [x] **T027** [P] Correct the changelog claims so the documented surface matches what shipped · `CHANGELOG.md` · FR-021
 - [x] **T028** [P] Add the frozen-anatomy guard: the card's image is a fixed 96×96 square, the title keeps its own row, the four metadata rows remain, the status pill stays a fixed ~36px below the buttons, and the per-type detail grid stays the 2×3 four-column pattern · `MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs` · FR-021
 
@@ -172,7 +172,7 @@ below by **T037**, which is where its validation lives.
   every entry and there is no matching read procedure, so `GetAuditTrail` serves an in-memory dictionary and
   the history block shows only this session's events — and hides itself entirely for a request the user has
   not touched, which is absence rendered as nothing. Closed by T037; the defect it was owned by is
-  `defects/Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md` · G8 · FR-013, FR-017
+  `defects/Closed-Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md` · G8 · FR-013, FR-017
 
 ---
 
@@ -264,7 +264,7 @@ not claimed shows `[Accept request]` alone.
   load skipped resolution and looked right; opening New Request initialized the singleton, and every later load
   then resolved to the placeholder. `RequestImagePathPolicy.IsUsableResolvedPath` now states the rule in one
   testable place, the card keeps its own image when the resolver has nothing real, and the refusal is logged.
-  **Owned by** `defects/High-NewRequestVisitReplacesCardImagesWithThePlaceholder.md` ·
+  **Owned by** `defects/Closed-High-NewRequestVisitReplacesCardImagesWithThePlaceholder.md` ·
   `MTM_Waitlist.Waitlist.View/Helpers/RequestImagePathPolicy.cs`, `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs`,
   `MTM_Waitlist.Settings/Services/ImageLocationService.cs` · FR-014, FR-031
 

@@ -6,7 +6,7 @@
 | **Source** | `WeekendProject/OPEN-WORK-NEXT-SPEC.md` §5 — from `PromptFiles/14-57%-Phase2-UnifiedWaitlistCard.md` (**20 carry-forward**, the live revision) + `Documents/Request-Config-Template.csv` + the three `Plan-Design-*` reference docs |
 | **Carry-forward boxes** | **20** (plus the **27** `App-Validation-Checklist.md` §4–§8 checks, which are this workstream's acceptance suite) |
 | **Depends on** | template 01 (which removes the fabricated values this spec replaces with real ones). Independent of template 02, but the two touch the same card — coordinate the button slot. |
-| **Defect files it completes** | `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` (real values), `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` (per-coil lookup) |
+| **Defect files it completes** | `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` (real values), `defects/Closed-Partial-High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` (per-coil lookup) |
 | **Validation** | `App-Validation-Checklist.md` **§4–§8 (27 checks)** — §0–§3 are `[NOW]` gates already executed by `specs/001` T104/T105 and must not be re-listed |
 
 ---
@@ -121,8 +121,8 @@ checks) as the acceptance suite.
 
 | Defect file | What this spec delivers |
 | --- | --- |
-| `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` | the real part/quantity/customer/vendor values, resolved from the request and its job, replacing the values template 01 removed |
-| `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` | the coil's own part resolved from the job, so the average-weight lookup is requested for the right part |
+| `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` | the real part/quantity/customer/vendor values, resolved from the request and its job, replacing the values template 01 removed |
+| `defects/Closed-Partial-High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` | the coil's own part resolved from the job, so the average-weight lookup is requested for the right part |
 
 Both files already record template 01 as the interim fix and **this spec as the completion**; update
 each one's status line when this spec lands.

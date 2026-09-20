@@ -67,13 +67,25 @@
                         Style="{StaticResource RequestDialogFieldLabelStyle}"
                         Text="Detail"
                         Visibility="{x:Bind ViewModel.HasDetail, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <TextBlock
+                    <!--
+                        One row per entry the wizard will raise, not one row for the request: a run over two dies
+                        raises two requests, so the review has to show two.
+                    -->
+                    <ItemsControl
+                        AutomationProperties.AutomationId="NewRequestPreviewPage_DetailLines"
                         Grid.Row="2"
                         Grid.Column="1"
-                        Style="{StaticResource RequestDialogFieldValueStyle}"
-                        Text="{x:Bind ViewModel.Detail, Mode=OneWay}"
-                        TextWrapping="WrapWholeWords"
-                        Visibility="{x:Bind ViewModel.HasDetail, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        ItemsSource="{x:Bind ViewModel.DetailLines, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.HasDetail, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Style="{StaticResource RequestDialogFieldValueStyle}"
+                                    Text="{Binding}"
+                                    TextWrapping="WrapWholeWords" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </Grid>
             </StackPanel>
         </Border>

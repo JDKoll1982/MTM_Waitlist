@@ -33,15 +33,15 @@
 
 - **0 open markers.** All 5 open decisions in the feature seed (`WeekendProject/SpecTemplates/01-truthful-data-and-controls.md` §7) were resolved from the source documentation rather than by asking:
   - **Missing values (was FR-002 clarification)** → *omit the row, display no value*; grounded in
-    `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §6 step 5 ("omit the row rather than
+    `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §6 step 5 ("omit the row rather than
     print a placeholder value — a missing row is truthful, a fake value is not"). The existing hard-coded
     `"Not available"` defaults are listed as fabricated content in §3 of that defect, so they are removed too.
   - **Privacy Policy** → *remove the entry*; grounded in
-    `defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` §5 branch 3 ("if no statement exists and
+    `defects/Closed-Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` §5 branch 3 ("if no statement exists and
     none is planned, delete the HyperlinkButton and both resource entries rather than shipping a broken link").
     No published statement address or in-app policy asset exists anywhere in the repository.
   - **Hide or disable the card buttons** → *hide*; grounded in
-    `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` §5 step 3 ("Hide the buttons rather than
+    `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` §5 step 3 ("Hide the buttons rather than
     showing disabled ones").
   - **`SampleOrder` rename** → *not required*; the source defect marks it "optional" and the retired-symbol
     audit deliberately does not match the bare word "sample".

@@ -1,5 +1,15 @@
 # High — Coil — "Average coil weight" is looked up for one hard-coded part
 
+> **Naming note (2026-09-20).** The **Planned fix** row below names specs by their **template** number, from
+> `WeekendProject/SpecTemplates/` -- the seeds written before the specs existed -- so `Spec 01-...` is *not*
+> `specs/001-...`. Those templates have since shipped under different numbers: `01-truthful-data-and-controls`
+> is now **`specs/002-truthful-data-and-controls`** (shipped), `02-handler-fulfilment-and-urgency` is
+> **`specs/003-waitlist-handler-fulfilment`** (shipped), and `03-unified-card-and-taxonomy` is
+> **`specs/004-unified-card-item-picker`** (in flight). Templates **04-08** have no spec yet. The single copy
+> of this map is `WeekendProject/SpecTemplates/00-INDEX.md`. The **Status** row above already uses the real
+> `specs/00N` names -- read that one for what actually happened.
+
+
 | Field | Value |
 | --- | --- |
 | **Criticality** | High |
@@ -9,7 +19,7 @@
 | **Status** | **FIXED — closed by `specs/002-truthful-data-and-controls`**. **Closure:** the fixed-part lookup (`MMC0001000`) and the `5,000 lb` fallback were removed, and the field is left unset when nothing resolves — never wrong, never defaulted. **Remainder owned by Spec `03-unified-card-and-taxonomy`**, which resolves the coil per request and queries the average for that part. **Proof:** `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestSummaryHonestyTests` (the call is made with the resolved part, and nothing resolvable yields no value) plus the fabricated-literal scan. |
 | **Planned fix** | **Spec `01-truthful-data-and-controls`** — removes the fixed-part lookup (`MMC0001000`) and the `5,000 lb` fallback so the field is never wrong. **Spec `03-unified-card-and-taxonomy`** re-implements it per request: the coil is resolved from the job (§5.6 of the seed uses the active-job/work-order reads), and the average is then queried for that part. Seeds: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md`, `…/03-unified-card-and-taxonomy.md` |
 | **Files** | `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs` (line 126), `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs` (lines 196–226), `MTM_Waitlist.Waitlist.View/Services/AverageCoilWeightService.cs` |
-| **Related** | `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` (the coil number shown beside this value is itself fabricated) |
+| **Related** | `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` (the coil number shown beside this value is itself fabricated) |
 
 ---
 

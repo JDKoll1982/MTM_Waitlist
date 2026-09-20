@@ -6,7 +6,7 @@
 | **Source** | `WeekendProject/OPEN-WORK-NEXT-SPEC.md` §4 — from `PromptFiles/07-8%-Phase2-fulfill.md` (9 carry-forward) and `PromptFiles/08-70%-Phase2-urgency.md` (2 carry-forward), plus `prompt.md` Tasks 16–18 |
 | **Carry-forward boxes** | **11** (9 + 2) |
 | **Depends on** | template 01 (which removes the two inert buttons this spec then wires); **not** on template 03 |
-| **Defect files it closes** | completes `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` |
+| **Defect files it closes** | completes `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` |
 | **Validation** | the source's own QA boxes, plus build clean and full suite `Failed: 0` |
 
 ---
@@ -95,7 +95,7 @@ layout from scratch.
 
 ## 5. Defect this spec closes
 
-`defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` — template 01 removes or hides the
+`defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` — template 01 removes or hides the
 inert buttons; **this spec is where they come back working**. When this spec is implemented, update
 that defect file's status line to `FIXED` with the commit and the tests that prove it.
 

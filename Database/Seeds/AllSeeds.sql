@@ -767,13 +767,12 @@ VALUES
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000002', 'pickup-die', 'Pickup', 'collect-input-then-confirm', 1, 'enum',
- 'Choose where the die is going.', 0, 200,
- JSON_ARRAY('Die Shop', 'Home Location', 'Other'),
+ 'Which die is this request for?', 0, 200,
+ NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Die','value_type','string','source','job','order',1,'is_required',FALSE),
-   JSON_OBJECT('label','Quantity','value_type','string','source','job','order',2,'is_required',FALSE),
-   JSON_OBJECT('label','Pickup location','value_type','string','source','job','order',3,'is_required',FALSE),
-   JSON_OBJECT('label','Destination','value_type','enum','source','answer','order',4,'is_required',TRUE)),
+   JSON_OBJECT('label','Die','value_type','enum','source','answer','list','die','order',1,'is_required',TRUE),
+   JSON_OBJECT('label','Pickup location','value_type','string','source','job','order',2,'is_required',FALSE),
+   JSON_OBJECT('label','Quantity','value_type','string','source','job','order',3,'is_required',FALSE)),
  45, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000003', 'pickup-component', 'Pickup', 'collect-input-then-confirm', 1, 'enum',
@@ -887,13 +886,13 @@ VALUES
    JSON_OBJECT('label','Destination','value_type','string','source','fixed','order',4,'is_required',FALSE)),
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
-('c1000000-0000-4000-8000-000000000016', 'deliver-die', 'Deliver', 'direct-to-confirmation', 0, NULL, NULL,
- 0, 200, NULL,
+('c1000000-0000-4000-8000-000000000016', 'deliver-die', 'Deliver', 'collect-input-then-confirm', 1, 'enum',
+ 'Which die is this request for?', 0, 200,
+ NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Die','value_type','string','source','job','order',1,'is_required',FALSE),
-   JSON_OBJECT('label','Quantity','value_type','string','source','job','order',2,'is_required',FALSE),
-   JSON_OBJECT('label','Pickup location','value_type','string','source','job','order',3,'is_required',FALSE),
-   JSON_OBJECT('label','Destination','value_type','string','source','fixed','order',4,'is_required',FALSE)),
+   JSON_OBJECT('label','Die','value_type','enum','source','answer','list','die','order',1,'is_required',TRUE),
+   JSON_OBJECT('label','Pickup location','value_type','string','source','job','order',2,'is_required',FALSE),
+   JSON_OBJECT('label','Quantity','value_type','string','source','job','order',3,'is_required',FALSE)),
  45, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000017', 'deliver-dunnage', 'Deliver', 'collect-input-then-confirm', 1, 'enum',

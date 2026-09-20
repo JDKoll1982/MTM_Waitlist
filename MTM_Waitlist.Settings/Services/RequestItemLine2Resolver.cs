@@ -7,6 +7,11 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// The values a card's Line 2 template resolves against: the active job's fields and the one answer the flow
 /// captured. A pure value so the resolver stays deterministic and DB-free.
 /// </summary>
+/// <remarks>
+/// There is no destination here, and its absence is deliberate: a die always goes to the home location the job
+/// records, so nothing is asked about where it goes and nothing about the card may be shaped by an answer to that
+/// retired question (FR-054, D22).
+/// </remarks>
 public sealed record RequestItemLine2Context(
     string? PartNumber = null,
     string? PartDescription = null,
@@ -16,7 +21,6 @@ public sealed record RequestItemLine2Context(
     string? SequenceNumber = null,
     string? ScrapType = null,
     string? Answer = null,
-    string? Destination = null,
     string? Component = null,
     string? Defect = null,
     string? JobPartNumber = null);
@@ -41,12 +45,6 @@ public sealed class RequestItemLine2Resolver
     /// <summary>The resource key of the configuration-problem report (FR-022).</summary>
     public const string ProblemKey = "RequestItem_Line2.Problem";
 
-    /// <summary>
-    /// The captured destination value that switches <c>pickup-die</c>'s identifier from the die's number to the
-    /// die's location. Pinned verbatim (spec Verbatim Constraints).
-    /// </summary>
-    public const string HomeLocation = "Home Location";
-
     /// <summary>Resolves the Item's Line 2. Never returns null and never returns a bare template.</summary>
     public RequestItemLine2Result Resolve(RequestItemDefinition item, RequestItemLine2Context context)
     {
@@ -56,7 +54,6 @@ public sealed class RequestItemLine2Resolver
         return TryResolveTemplate(
             item.CardLine2Template,
             BuildTokens(effectiveContext),
-            effectiveContext.Destination,
             out var text,
             out var unresolvedToken)
                 ? RequestItemLine2Result.Resolved(text)
@@ -92,21 +89,24 @@ public sealed class RequestItemLine2Resolver
         var tokens = BuildTokens(context ?? new RequestItemLine2Context());
         tokens["umbrella"] = item.UmbrellaVerb;
 
-        return TryResolveTemplate(template, tokens, context?.Destination, out var text, out _)
+        return TryResolveTemplate(template, tokens, out var text, out _)
             ? text
             : item.UmbrellaVerb;
     }
 
     /// <summary>
-    /// Walks a template once: literal text is copied through, a <c>{token}</c> is replaced by its value, and the
-    /// language's one conditional — <c>{primary:secondary=conditionValue}</c> — picks between two tokens by the
-    /// captured destination. Returns <c>false</c> when any token is unknown or blank, handing back the offending
-    /// token so each caller can decide what to do about it.
+    /// Walks a template once: literal text is copied through and a <c>{token}</c> is replaced by its value.
+    /// Returns <c>false</c> when any token is unknown or blank, handing back the offending token so each caller
+    /// can decide what to do about it.
     /// </summary>
+    /// <remarks>
+    /// The language's one conditional — <c>{primary:secondary=conditionValue}</c> — retired with the question it
+    /// existed for. It switched <c>pickup-die</c>'s identifier on the captured destination, and a die now always
+    /// goes to its home location, so there is no captured value left to condition on (FR-054, D22).
+    /// </remarks>
     private static bool TryResolveTemplate(
         string? template,
         Dictionary<string, string?> tokens,
-        string? destination,
         out string text,
         out string? unresolvedToken)
     {
@@ -136,22 +136,7 @@ public sealed class RequestItemLine2Resolver
                 return false;
             }
 
-            var body = source[(open + 1)..close];
-            var token = body;
-            var colon = body.IndexOf(':');
-            if (colon >= 0)
-            {
-                // {primary:secondary=conditionValue} — the language's one conditional, evaluated against the
-                // captured destination (pickup-die: the die's location at Home Location, else its number).
-                var alternatives = body[(colon + 1)..];
-                var equals = alternatives.IndexOf('=');
-                var primary = body[..colon];
-                var secondary = equals >= 0 ? alternatives[..equals] : alternatives;
-                var conditionValue = equals >= 0 ? alternatives[(equals + 1)..] : string.Empty;
-                token = string.Equals(destination?.Trim(), conditionValue.Trim(), StringComparison.OrdinalIgnoreCase)
-                    ? secondary
-                    : primary;
-            }
+            var token = source[(open + 1)..close];
 
             if (!tokens.TryGetValue(token.Trim(), out var value) || string.IsNullOrWhiteSpace(value))
             {
@@ -219,7 +204,6 @@ public sealed class RequestItemLine2Resolver
             ["sequence_number"] = context.SequenceNumber,
             ["scrap_type"] = context.ScrapType,
             ["answer"] = context.Answer,
-            ["destination"] = context.Destination,
             ["component"] = context.Component,
             ["defect"] = context.Defect,
             // The requesting job's own part number — the part a die is assigned to, which the die Items' first

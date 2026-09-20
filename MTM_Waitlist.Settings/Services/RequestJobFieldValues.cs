@@ -15,6 +15,10 @@ using MTM_Waitlist.Module_Settings.Models;
 /// standing in for a value, never an invented one (FR-002, FR-026). That is what keeps a job with no die from
 /// producing an empty "Die" row on a card.
 /// </para>
+/// <para>
+/// The two die labels are <b>lists</b>: a job may carry several dies, so the row names every one of them rather
+/// than the first, and the requester sees all the dies — and all the locations — the job actually has (FR-057).
+/// </para>
 /// </summary>
 public static class RequestJobFieldValues
 {
@@ -31,12 +35,19 @@ public static class RequestJobFieldValues
 
         return label.Trim().ToLowerInvariant() switch
         {
-            // The die's identifier as one value, so the row reads which die it is and where the die is. Composed
-            // through the die's own rule, so a die with no known location cannot leave a dangling separator.
-            "die" => Trimmed(RequestDiePart.ComposeLabel(job.DieNumber, job.DieLocation)),
+            // The dies the job carries, as one row: each written as its number and where it lives, so the
+            // requester reads which dies the job has rather than only the first one (FR-057, FR-056). A job whose
+            // die list is empty falls back to the single die the snapshot names.
+            "die" => job.Dies.Count > 0
+                ? Join(job.Dies.Select(die => RequestDiePart.ComposeLabel(die.PartNumber, die.Location)))
+                : Trimmed(RequestDiePart.ComposeLabel(job.DieNumber, job.DieLocation)),
 
-            // Where the die currently is, which for a die request is the place the handler collects it from.
-            "pickup location" => Trimmed(job.DieLocation),
+            // Where the dies are, which for a die request is the place the handler collects them from. Every
+            // location the job records is listed, and a job recording none yields nothing — a location the job
+            // does not have is never back-filled from another die's row (FR-057).
+            "pickup location" => job.Dies.Count > 0
+                ? Join(job.Dies.Select(die => die.Location))
+                : Trimmed(job.DieLocation),
 
             // The part the die is assigned to — the requesting job's own part number.
             "part number" or "job part number" or "part" => Trimmed(job.JobPartNumber),
@@ -45,6 +56,16 @@ public static class RequestJobFieldValues
             // its row is omitted rather than drawn empty.
             _ => null,
         };
+    }
+
+    /// <summary>
+    /// The values as one readable list, blanks dropped so a value the job does not record is omitted rather than
+    /// drawn as a gap. <see langword="null" /> when nothing was left to join.
+    /// </summary>
+    private static string? Join(IEnumerable<string?> values)
+    {
+        var present = values.Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value!.Trim()).ToArray();
+        return present.Length == 0 ? null : string.Join(", ", present);
     }
 
     private static string? Trimmed(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

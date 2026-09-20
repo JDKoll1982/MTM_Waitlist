@@ -79,7 +79,7 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
   control that cannot act is no longer offered, and the card shows the request's real status instead.
   **Corrected 2026-09-20 — the working actions are now shipped:** `specs/003-waitlist-handler-fulfilment`
   put Accept / Complete / Release / Cancel back on the card, wired and gated on who may use them. See
-  `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`.
+  `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`.
 
 ## 4. Waitlist — request detail
 
@@ -101,7 +101,7 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
   quantities, customer, packlist, vendor, destination and die values that used to be fixed text built
   into the app are gone; a value with no read behind it is simply not shown, and a read that fails shows
   the failure in place with a retry. The real values are owned by **`specs/004-unified-card-item-picker`**
-  (in flight) — see `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md`.
+  (in flight) — see `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md`.
 
 ## 5. Waitlist — creating a request
 
@@ -123,12 +123,12 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
   the same figure no matter how busy the work center was, so the card was removed rather than shown. Any
   substantiated queue count or wait estimate is owned by the analytics workstream — seed
   `WeekendProject/SpecTemplates/04-waitlist-analytics.md`, not yet specified — see
-  `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md`.
+  `defects/Closed-Partial-High-NewRequest-QueueAndWaitTimeIsHardcoded.md`.
 - **Finish.** The last screen confirms the outcome and offers **Add Another Request** or **Return to
   Waitlist**; if something went wrong it offers **Retry** and **Close**.
 - ⚠️ **New-request alerts cannot ring in this installation, and the switch now says so.** The setting is
   disabled and explains why, instead of accepting a preference the app cannot honour — see
-  `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
+  `defects/Closed-Partial-Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
 
 ## 6. Work Center Setup
 
@@ -178,7 +178,7 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
   fixed part and fell back to a fixed "5,000 lb", so it never described the coil on the request; the
   lookup and the fallback were removed and no value is shown. Resolving it per coil is owned by
   **`specs/004-unified-card-item-picker`** (in flight) — see
-  `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md`.
+  `defects/Closed-Partial-High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md`.
 
 ## 8. Settings
 
@@ -188,7 +188,7 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
 - **Search box** — filters which settings panels are shown, each panel matching on its own keywords
   (for example "appearance", "theme", "version", "privacy"). Every search-aware panel re-evaluates when
   the search changes, including Image Location Settings, New Request Alerts and Max Allotted Time — see
-  `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md`.
+  `defects/Closed-Low-Settings-SearchIgnoresThreeSettingsPanels.md`.
 
 **Operations**
 
@@ -206,7 +206,7 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
   (for example WC, NCM, V-WC, NCM-VITS, SHIP). For roles above Material Handler.
 - **New Request Alerts** — a personal switch (off by default) for the new-request alert. ⚠️ It is disabled
   in this installation, and says why, because the app as installed cannot deliver a notification — see
-  `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
+  `defects/Closed-Partial-Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
 - **Max Allotted Time** — how long each item should reasonably take, which drives the due time and the
   overdue countdown, shown beside the average its completed requests have actually taken. An item with no
   configured figure is measured by a 15-minute default, labelled as a default. Plant Manager and above can
@@ -220,10 +220,10 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
 - **App version** — the version you are running.
 - **About MTM Waitlist** — a short description. The **Privacy Policy** link was removed: it pointed at
   an unfinished placeholder address, and an app that cannot open a real policy does not offer one — see
-  `defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md`.
+  `defects/Closed-Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md`.
 - **Each heading in this area now shows its own text** — the section header, the version card and the
   about card each have their own label, instead of all three reading "About this application" — see
-  `defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md`.
+  `defects/Closed-Medium-Settings-AboutLabelsCollideOnOneResourceKey.md`.
 
 ## 9. Notifications
 
@@ -234,12 +234,12 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
   alert needs the app installed in the way Windows notifications require, and this app is installed
   differently; making it arrive is owned by the notification-delivery workstream — seed
   `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified — see
-  `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
+  `defects/Closed-Partial-Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`.
 - ⚠️ **Tapping a notification no longer shows an internal "TODO" message.** The placeholder dialogs were
   deleted: a recognised tap opens the request, and an unrecognised one does nothing visible and is recorded
   for diagnosis. Proving it on a delivered notification is owned by the notification-delivery workstream —
   seed `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified — see
-  `defects/Low-Notifications-ToastActivationShowsTodoDialog.md`.
+  `defects/Closed-Partial-Low-Notifications-ToastActivationShowsTodoDialog.md`.
 
 ## 10. The cache service (a separate small app that runs on the database server)
 
@@ -312,7 +312,7 @@ change is visible.
   (a handler or above, on an unclaimed request), **Complete** and **Release** (the recorded assignee only),
   and **Cancel** (a requester withdrawing their own waiting request). Each control is shown only when the
   viewer may use it. The request's **note** is editable and its **history** is readable on the detail page.
-  See §4 for what the screen shows and `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` for
+  See §4 for what the screen shows and `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` for
   the proof.
 - **The material attributes on a request are not yet sourced.** Coil, part, quantity, customer, vendor and
   destination values have no read behind them yet, so the card and detail page show only what the request
@@ -348,16 +348,16 @@ The two rows whose follow-on has no spec yet name their **seed template** in
 
 | Criticality | Defect | Affected feature | Status |
 | --- | --- | --- | --- |
-| Critical | `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` — card and detail fields show hard-coded coil/part/quantity/customer/vendor values | Waitlist cards, request detail | **Closed by `specs/002-truthful-data-and-controls`** — T005/T009/T010/T012 with the T015 verification: the literals are gone and no substitute renders. ⚠️ The real values are owned by **`specs/004-unified-card-item-picker`** (in flight). |
-| High | `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` — the Cancel and Accept buttons on every card do nothing | Waitlist cards | **Closed by `specs/002`** — T007/T011: the buttons are gone and the real status is shown. ✅ **Completed by `specs/003-waitlist-handler-fulfilment`** (2026-09-13): Accept / Complete / Release / Cancel came back wired and gated, with the most-urgent-first ordering. |
-| High | `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — confirm screen always reads "0 active request(s)" / "~15 minutes" | New Request confirm step | **Closed by `specs/002`** — T016/T019: the fabricated card is deleted. ⚠️ Any substantiated figure is owned by the analytics workstream — seed `WeekendProject/SpecTemplates/04-waitlist-analytics.md`, not yet specified. |
-| High | `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` — the average is always looked up for the sample coil part `MMC0001000` | Coil cards and detail | **Closed by `specs/002`** — T017/T020: the fixed-part lookup and its `5,000 lb` fallback are removed and nothing is shown. ⚠️ Per-coil resolution is owned by **`specs/004-unified-card-item-picker`** (in flight). |
-| Medium | `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` — the alerts toggle cannot fire in the shipped unpackaged app | Settings, notifications | **Closed by `specs/002`** — T018/T021/T022: the switch is disabled with the reason and no preference is stored. ⚠️ Delivery is owned by the notification-delivery workstream — seed `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified. |
-| Medium | `defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` — three labels share one resource key, so all three read "About this application" | Settings → About | **Closed by `specs/002`** — T024/T027: each element has its own key and its own resource entry. |
-| Low | `defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` — the Privacy Policy link points at `YourPrivacyUrlGoesHere` | Settings → About | **Closed by `specs/002`** — T028: the link and its resource entries are removed; T026's placeholder scan is the standing check. |
-| Low | `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md` — three panels do not re-evaluate when the settings search changes | Settings search | **Closed by `specs/002`** — T025/T029/T030: the three panels are registered and the coverage check fails on the next unregistered one. |
-| Low | `defects/Low-Localization-RetiredMockWordingStillShips.md` — "Setup saved using sample data" string and stale sample/mock comments | Setup result, code docs | **Closed by `specs/002`** — T037/T038 with T036's wording scan as the standing check: the orphan entry and the stale comments are gone. |
-| Low | `defects/Low-Notifications-ToastActivationShowsTodoDialog.md` — tapping a toast while the app runs shows a "TODO" dialog | Notifications | **Closed by `specs/002`** — T032/T033/T034: the placeholder dialogs are deleted and one shared deep-link helper handles activation. ⚠️ Proving it on a delivered notification is owned by the notification-delivery workstream — seed `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified. |
+| Critical | `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` — card and detail fields show hard-coded coil/part/quantity/customer/vendor values | Waitlist cards, request detail | **Closed by `specs/002-truthful-data-and-controls`** — T005/T009/T010/T012 with the T015 verification: the literals are gone and no substitute renders. ⚠️ The real values are owned by **`specs/004-unified-card-item-picker`** (in flight). |
+| High | `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` — the Cancel and Accept buttons on every card do nothing | Waitlist cards | **Closed by `specs/002`** — T007/T011: the buttons are gone and the real status is shown. ✅ **Completed by `specs/003-waitlist-handler-fulfilment`** (2026-09-13): Accept / Complete / Release / Cancel came back wired and gated, with the most-urgent-first ordering. |
+| High | `defects/Closed-Partial-High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — confirm screen always reads "0 active request(s)" / "~15 minutes" | New Request confirm step | **Closed by `specs/002`** — T016/T019: the fabricated card is deleted. ⚠️ Any substantiated figure is owned by the analytics workstream — seed `WeekendProject/SpecTemplates/04-waitlist-analytics.md`, not yet specified. |
+| High | `defects/Closed-Partial-High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` — the average is always looked up for the sample coil part `MMC0001000` | Coil cards and detail | **Closed by `specs/002`** — T017/T020: the fixed-part lookup and its `5,000 lb` fallback are removed and nothing is shown. ⚠️ Per-coil resolution is owned by **`specs/004-unified-card-item-picker`** (in flight). |
+| Medium | `defects/Closed-Partial-Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` — the alerts toggle cannot fire in the shipped unpackaged app | Settings, notifications | **Closed by `specs/002`** — T018/T021/T022: the switch is disabled with the reason and no preference is stored. ⚠️ Delivery is owned by the notification-delivery workstream — seed `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified. |
+| Medium | `defects/Closed-Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` — three labels share one resource key, so all three read "About this application" | Settings → About | **Closed by `specs/002`** — T024/T027: each element has its own key and its own resource entry. |
+| Low | `defects/Closed-Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` — the Privacy Policy link points at `YourPrivacyUrlGoesHere` | Settings → About | **Closed by `specs/002`** — T028: the link and its resource entries are removed; T026's placeholder scan is the standing check. |
+| Low | `defects/Closed-Low-Settings-SearchIgnoresThreeSettingsPanels.md` — three panels do not re-evaluate when the settings search changes | Settings search | **Closed by `specs/002`** — T025/T029/T030: the three panels are registered and the coverage check fails on the next unregistered one. |
+| Low | `defects/Closed-Low-Localization-RetiredMockWordingStillShips.md` — "Setup saved using sample data" string and stale sample/mock comments | Setup result, code docs | **Closed by `specs/002`** — T037/T038 with T036's wording scan as the standing check: the orphan entry and the stale comments are gone. |
+| Low | `defects/Closed-Partial-Low-Notifications-ToastActivationShowsTodoDialog.md` — tapping a toast while the app runs shows a "TODO" dialog | Notifications | **Closed by `specs/002`** — T032/T033/T034: the placeholder dialogs are deleted and one shared deep-link helper handles activation. ⚠️ Proving it on a delivered notification is owned by the notification-delivery workstream — seed `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified. |
 
 ---
 

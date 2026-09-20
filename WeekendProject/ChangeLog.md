@@ -24,7 +24,7 @@
 
 ### 2026-09-15 — Waitlist card pictures stop going blank after a request is raised
 
-> Defect record: `defects/High-Waitlist-CardPicturesBecomeBlankAfterNewRequest.md`.
+> Defect record: `defects/Closed-High-Waitlist-CardPicturesBecomeBlankAfterNewRequest.md`.
 
 **Fixed**
 
@@ -45,7 +45,7 @@ start-up — rather than an empty tile.
 ### 2026-09-13 — Request images stop disappearing after a visit to New Request
 
 > Specification: `specs/003-waitlist-handler-fulfilment/` (task T049). Defect record:
-> `defects/High-NewRequestVisitReplacesCardImagesWithThePlaceholder.md`.
+> `defects/Closed-High-NewRequestVisitReplacesCardImagesWithThePlaceholder.md`.
 
 **Fixed**
 
@@ -126,7 +126,7 @@ are built to carry dark text on top (one of them is bright yellow, on which whit
 ### 2026-09-13 — The actions moved onto the card, and the history is real
 
 > Specification: `specs/003-waitlist-handler-fulfilment/` (tasks T037–T041). Defect closed:
-> `defects/Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md`.
+> `defects/Closed-Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md`.
 
 **Changed**
 
@@ -172,7 +172,7 @@ are built to carry dark text on top (one of them is bright yellow, on which whit
 
 ### 2026-09-12 — The waitlist is workable: accept, complete, release, withdraw
 
-> Specification: `specs/003-waitlist-handler-fulfilment/`. Defect closed: `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`.
+> Specification: `specs/003-waitlist-handler-fulfilment/`. Defect closed: `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`.
 > The card's action area carried the actions themselves for the first time — the earlier entry below about
 > cancelling from the detail view, and the "Waitlist request lifecycle" entry, described a surface that did
 > not exist until now. They are accurate as of this change.
@@ -203,7 +203,7 @@ are built to carry dark text on top (one of them is bright yellow, on which whit
   history currently lists only the events raised while the app has been running, because the entries are
   written to the store but nothing reads them back yet. A request that has not been acted on in the current
   session therefore shows no history. Tracked as
-  `defects/Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md` — **closed on 2026-09-13** by the entry
+  `defects/Closed-Medium-Waitlist-RequestHistoryShowsOnlyTheCurrentSession.md` — **closed on 2026-09-13** by the entry
   above, which added the read path.
 - **The card's looks are unchanged.** The approved request-card layout (the square image and badge, the title
   row, the four metadata rows, the action area above the compact status pill, and the per-type detail grid)
@@ -218,7 +218,7 @@ are built to carry dark text on top (one of them is bright yellow, on which whit
   Windows can only deliver a toast from a **packaged** install, and the app ships unpackaged, so the switch is
   **disabled** and carries the reason rather than accepting a setting that can never fire. Making the alert
   actually arrive belongs to the notification-delivery workstream
-  (`defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`).
+  (`defects/Closed-Partial-Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md`).
 - **The coil and confirm-screen figures described further down this file are gone, and that is the current
   state.** The card no longer shows a coil number, an in-house quantity, a coil description or an average coil
   weight, because nothing available to the card sourced them, and the New Request confirm step no longer shows

@@ -6,7 +6,7 @@
 | **Source** | `WeekendProject/OPEN-WORK-NEXT-SPEC.md` §6 — from `PromptFiles/10-0%-Phase3-analytics.md` (**20 carry-forward**) + `prompt.md` Tasks 20–21 |
 | **Carry-forward boxes** | **20** |
 | **Depends on** | template 03 (§5) for card-level metrics, and template 01 for truthful data |
-| **Defect files it may complete** | `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — the *optional* follow-on: a real queue count and wait estimate |
+| **Defect files it may complete** | `defects/Closed-Partial-High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — the *optional* follow-on: a real queue count and wait estimate |
 | **Validation** | role-access tests, filter-composition tests, preference round-trip, print output; build clean; suite `Failed: 0` |
 
 ---
@@ -95,7 +95,7 @@ limitations.
 
 ## 5. Defect this spec may complete
 
-`defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — template 01 removes the fabricated
+`defects/Closed-Partial-High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — template 01 removes the fabricated
 queue/wait card. If a real queue count and wait estimate are wanted, **this is the spec that can
 substantiate them** (active requests per work center, and an estimate derived from the per-sub-type
 max-allotted minutes). Either make it an explicit requirement of this spec, or record in the defect

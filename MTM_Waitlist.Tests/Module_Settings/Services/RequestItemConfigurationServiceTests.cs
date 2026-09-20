@@ -87,13 +87,13 @@ public sealed class RequestItemConfigurationServiceTests
     public async Task GetConfigurationsAsync_OptionsJson_IsReadInDeclaredOrder()
     {
         var set = await ReadAsync(Row(
-            "pickup-die",
-            optionsJson: JsonSerializer.Serialize(new[] { "Die Shop", "Home Location", "Other" }),
+            CataloguedItem,
+            optionsJson: JsonSerializer.Serialize(new[] { "Alpha", "Beta", "Gamma" }),
             answerValueType: "enum"));
 
         CollectionAssert.AreEqual(
-            new[] { "Die Shop", "Home Location", "Other" },
-            set.Get("pickup-die").Options.ToArray(),
+            new[] { "Alpha", "Beta", "Gamma" },
+            set.Get(CataloguedItem).Options.ToArray(),
             "The options offered are the ones the configuration declares, in the order it declares them.");
     }
 
@@ -144,14 +144,14 @@ public sealed class RequestItemConfigurationServiceTests
 
     [DataTestMethod]
     [DataRow("[unterminated", DisplayName = "options_json is not JSON at all")]
-    [DataRow("{\"Die Shop\":true}", DisplayName = "options_json is not an array")]
-    [DataRow("[\"Die Shop\",\"\"]", DisplayName = "an option has no text")]
-    [DataRow("[\"Die Shop\",7]", DisplayName = "an option is not text")]
+    [DataRow("{\"Alpha\":true}", DisplayName = "options_json is not an array")]
+    [DataRow("[\"Alpha\",\"\"]", DisplayName = "an option has no text")]
+    [DataRow("[\"Alpha\",7]", DisplayName = "an option is not text")]
     public async Task GetConfigurationsAsync_MalformedOptionsJson_IsReportedAndNeverThrown(string payload)
     {
-        var set = await ReadAsync(Row("pickup-die", optionsJson: payload, answerValueType: "enum"));
+        var set = await ReadAsync(Row(CataloguedItem, optionsJson: payload, answerValueType: "enum"));
 
-        var configuration = set.Get("pickup-die");
+        var configuration = set.Get(CataloguedItem);
 
         Assert.IsFalse(configuration.IsAvailable, "A payload that cannot be read must not be presented as a usable configuration.");
         Assert.AreEqual(RequestItemConfiguration.MalformedMessageKey, configuration.UnavailableMessageKey, "The report must come through the resource mechanism.");
@@ -263,18 +263,18 @@ public sealed class RequestItemConfigurationServiceTests
         // The same rule read the other way: a row that carries its own list uses it, so a fixed list is never
         // silently replaced by whatever the job happens to hold.
         var set = await ReadAsync(Row(
-            "pickup-die",
-            optionsJson: JsonSerializer.Serialize(new[] { "Die Shop", "Home Location", "Other" }),
+            CataloguedItem,
+            optionsJson: JsonSerializer.Serialize(new[] { "Alpha", "Beta", "Gamma" }),
             answerValueType: "enum",
             requiresAnswer: "1",
-            detailFieldsJson: DetailFields(("Destination", "enum", "answer", 1, true))));
+            detailFieldsJson: DetailFields(("Choice", "enum", "answer", 1, true))));
 
         var job = RequestJobPartAvailability.None with { HasActiveJob = true, HasComponent = true };
         job = job.WithComponentPartNumbers(new[] { "CMP0004455" });
 
         CollectionAssert.AreEqual(
-            new[] { "Die Shop", "Home Location", "Other" },
-            RequestItemAnswerOptionsResolver.Resolve(set.Get("pickup-die"), job).ToArray(),
+            new[] { "Alpha", "Beta", "Gamma" },
+            RequestItemAnswerOptionsResolver.Resolve(set.Get(CataloguedItem), job).ToArray(),
             "A configured list is the list, whatever the job holds.");
     }
 

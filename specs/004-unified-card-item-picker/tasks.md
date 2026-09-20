@@ -1569,25 +1569,37 @@ from the code.
   `Matching request already active | An active matching request already exists.`, because row 52 already held
   that `(building, work centre, item, answer)`. That is FR-054 working, not a defect in the step; the second
   walk therefore used `V100-33`, and the refusal is recorded here as evidence about the guard.
-- [ ] **T165** **Live database validation.** Re-run the configuration seed against a local `mtm_waitlist` and read
+- [x] **T165** **Live database validation.** Re-run the configuration seed against a local `mtm_waitlist` and read
 both dunnage rows back with their `list` key intact, confirming `AllSeeds.sql` agrees with the file on disk.
 **The reinstall is the owner's action, never the agent's.** · `Database/Seeds/**`
 
-  **Read back, not reinstalled (2026-09-20).** The two halves this task asks for that are not the reinstall are
-  done, so only the owner's action is outstanding. Both dunnage rows are live in the local `mtm_waitlist`
-  (`pickup-dunnage` and `deliver-dunnage`, installed 12:43:36) and both carry `collect-input-then-confirm`,
-  `requires_answer = 1`, `answer_value_type = 'enum'`, the prompt `Which dunnage do you need from the material
-  handlers?`, `options_json = NULL`, and `'list','dunnage'` on the `source: answer` field of
-  `detail_fields_json` - the key intact, exactly as T162 specified. `AllSeeds.sql` (lines 833-841 and 898-906) is
-  **identical** to `Database/Seeds/seed_waitlist_request_item_configs/create.sql` (lines 121-129 and 186-194) for
-  both rows, so the master and the file agree. **The task stays unticked**: the reinstall it names is the owner's
-  action, and re-running the seed against a store is that action, whatever the host.
+  **CLOSED 2026-09-20 - the owner re-ran the seed, and both clauses were re-read from the live store afterwards.**
+
+  - **Both dunnage rows are live with their `list` key intact.** `pickup-dunnage` and `deliver-dunnage` in the local
+    `mtm_waitlist` each carry `requires_answer = 1`, `answer_value_type = 'enum'`, the prompt `Which dunnage do you
+    need from the material handlers?`, `options_json = NULL`, and `"list": "dunnage"` on the `source: answer` field of
+    `detail_fields_json` - the key intact, exactly as T162 specified.
+  - **`AllSeeds.sql` agrees with the file on disk.** All four rows (both dunnage and both die) are character-identical
+    between `Database/Seeds/AllSeeds.sql` and `Database/Seeds/seed_waitlist_request_item_configs/create.sql`.
+  - **The reinstall is evidenced, not merely reported.** The two die rows were rewritten by it (`updated_utc`
+    `2026-09-20 15:20:55`) and now carry the seed's shape - `value_type: enum`, `source: answer`, `list: die` - where
+    the previously-live rows carried `source: job`. That stale shape is exactly what left
+    `NewRequestFlowRules.GetNextStepType` unable to route to the die step, so **the temporary fixture iteration 10
+    needed is no longer required: T184 and T188 are now walkable against the live configuration with no edit to the
+    store.**
+
+  *Superseded note (kept as history, 2026-09-20).* Before the reinstall the two non-reinstall halves had been read
+  back and the task was deliberately left unticked because the reinstall named here is the owner's action: both
+  dunnage rows were live (`installed 12:43:36`) with `collect-input-then-confirm`, `requires_answer = 1`,
+  `answer_value_type = 'enum'`, the prompt above, `options_json = NULL` and `'list','dunnage'` on the `source:
+  answer` field, and `AllSeeds.sql` (lines 833-841, 898-906) was identical to the seed file (lines 121-129,
+  186-194). That read-back is what this closure re-confirmed after the owner's run.
 
 **Checkpoint — the operator picks the dunnage, and the card says which.** A dunnage request cannot be raised without a
 part being chosen; the parts offered are the ones the job carries; a substitute from the receiving catalogue is a
 first-class answer; and the card shows whichever part the operator ended on. FR-048 … FR-051 and SC-022/SC-023 are
-provable from this phase's tests alone, with the UI walk recorded above (T164) and the seed reinstall the one gate
-still open.
+provable from this phase's tests alone, with the UI walk recorded above (T164) and the seed reinstall closed
+(T165, 2026-09-20).
 
 ---
 
@@ -1870,9 +1882,14 @@ change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (
   contract's §10 row still states. `WaitlistRequestTitles` prefers the die the request itself stored, so two
   entries from one job stay distinguishable. Evidence: `RequestJobFieldValuesTests`,
   `WaitlistRequestTitlesTests` and `WaitlistViewDetailFieldTests` green in the full run below.
-- [ ] **T188** **UI gate for the new page behaviour.** Walk T187 in the running app: open a die request raised from
+- [x] **T188** **UI gate for the new page behaviour.** Walk T187 in the running app: open a die request raised from
   a job carrying **two** dies and prove from a text dump that the request page names **both** locations, not only
   the request's own die. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
+  — **VERIFIED 2026-09-20 in the running app.** The request opened for T184 was raised from a job carrying two
+  dies, and its page's **Pickup location** read **`DIE SHOP, PRESS BAY`** — every location the job carries, not
+  only the request's own — while `Item details → Die` showed the request's own `FGT0002000-DIE SHOP`. A job
+  carrying a single die is unaffected: `100-7`'s own pre-fixture data resolves to `DIE SHOP` alone (T185).
+  Evidence: `%TEMP%\die-walk\15-detail-die1.txt`.
 - [x] **T183** [US1] **Raise one request per selected die** (FR-054): the confirmation step submits one request for
   each die the operator selected — never one request carrying several dies — and reports how many were raised. ·
   `MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestFlowState.cs`,
@@ -1883,9 +1900,48 @@ change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (
   reports the count in plain language when more than one went through. Each draft carries its own die in
   `InputValue`, so several entries from one job stay distinguishable with no schema change. Evidence: the 6
   `NewRequestOneRequestPerDieTests` cases, green.
-- [ ] **T184** **UI gate.** In the running app, raise a die request from the seed's `100-7` and prove from a text
+- [x] **T184** **UI gate.** In the running app, raise a die request from the seed's `100-7` and prove from a text
   dump that the card and the request page both carry the die's number **and** its location, then do the same for a
   job carrying two dies and confirm one entry appears per die selected. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
+  — **VERIFIED 2026-09-20 in the running app** (local store, both connection-string overrides; Infor Visual is
+  unreachable from this workstation, so the shell showed its cached-data bar, but the job values under test are
+  internal-store reads and were live). Walk: Work Centre `100-7` → Category `Pickup` → Item `Die` → the die step
+  asked *"Which die is this request for? Choose one or more."* and offered **both** cards — `FGT0002000-DIE SHOP`
+  (Die 9003-A) and `FGT0002001-PRESS BAY` (Die 9006-B) — so the **card carries the die's number and its location**.
+  Selecting both and submitting raised **two** waitlist cards, `Pickup Die: PART-9003` carrying
+  `FGT0002000-DIE SHOP` and `FGT0002001-PRESS BAY` respectively, each `100-7` and `Waiting < 1m`: **one entry per
+  die selected**, and each entry distinguishable by its own die. Opening the first showed the request page carrying
+  the same value as `Identifier`, `Request details` and `Item details → Die`, again number **and** location.
+  **Stated rather than smoothed over:** the **Preview** step listed only one `Detail` row although two dies were
+  selected, so the preview under-reports what will be raised even though the submission itself was correct.
+  **Raised as T233 and fixed the same day** — both review steps now list one row per die. **Fixture, and its reversal:** the seed's `100-7` job carries **one** die, so the
+  two-die half of this gate was walked against a temporary local edit of
+  `setup_active_jobs.subordinate_parts_json` adding the seed's `V100-33` die (`FGT0002001` / `PRESS BAY`) to
+  `100-7` — real seed data, not invented. The original single-die value was snapshotted before the edit and written
+  back afterwards. Evidence: `%TEMP%\die-walk\03-workcenter.txt`, `04-category.txt`, `05-item.txt`,
+  `06-die-options.txt`, `07-select-die1.txt`, `08-select-die2.txt`, `09-after-continue.txt`, `10-confirm.txt`,
+  `11-state.txt`, `12-invokables.txt`, `13-submitted.txt`, `14-waitlist-card.txt`, `15-detail-die1.txt`.
+- [x] **T233** **Show every die on both review steps** (FR-054; found by the T184 walk above). With two dies selected
+  the **Preview** listed one `Detail` row, and the **Confirmation** listed one `Details` value **and never rendered
+  the count it had already resolved** — `AnnounceHowManyRequests` computed *"This will raise 2 requests — one for
+  each die you chose."* and the page bound it to nothing — so both steps understated a run that was about to raise
+  two requests. Both now list one row per entry, read from `NewRequestFlowState.DetailLines()`, which is the same
+  list `ToDrafts()` feeds the submission, so neither step can drift from what is raised again. ·
+  `MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestFlowState.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestPreviewViewModel.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSummaryViewModel.cs`,
+  `Module_Waitlist/Views/NewRequestPreviewPage.xaml`, `Module_Waitlist/Views/NewRequestSummaryPage.xaml`
+  — **VERIFIED 2026-09-20 in the running app.** Walked again with two dies on `100-7` (the same temporary fixture
+  T184 used, applied and reversed again): the preview now reads `Detail / FGT0002000-DIE SHOP / FGT0002001-PRESS BAY`
+  and the confirmation reads `Details / FGT0002000-DIE SHOP / FGT0002001-PRESS BAY` beside
+  *"This will raise 2 requests — one for each die you chose."* **Why the old tests missed it, which is the part worth
+  keeping:** `NewRequestOneRequestPerDieTests` asserted the count **text** and stayed green while the page rendered
+  nothing at all, so the new checks read the XAML — `PreviewPage_RendersTheDetailAsARepeatingList`,
+  `ConfirmPage_RendersTheDetailAsARepeatingList` and `ConfirmPage_ShowsTheRequestCountItComputed` — and the single
+  `ViewModel.Detail` binding they forbid cannot come back. The 3 markup cases were **red against the unfixed view and
+  green after**; the full suite is **1149 passed / 0 failed / 27 skipped (1176)** and the solution builds with 0
+  warnings and 0 errors. Evidence: `%TEMP%\die-walk\27-preview-fixed.txt`, `28-confirm-fixed.txt`; the 8
+  `NewRequestReviewShowsEveryDieTests` cases.
 - [x] **T185** **Live database validation.** Confirm the live `100-3` job offers **no** die Item — its only die row is
   the `No Die` placeholder — while `100-7` and `V100-33` do, and that the die values resolve from the live read
   rather than the seed. · local `mtm_waitlist` — **VERIFIED 2026-09-20** against the local store: the Die rows carried
@@ -1900,10 +1956,11 @@ carries the die and its location as the card does. **T180 is answered** (2026-09
 destination question retires, and the freed `input_value` column carries the chosen die with no schema change.
 **FR-054 and FR-057 are now built** (2026-09-20, iteration 2): T186, T181, T182, T183 and T187 are closed — the die
 step exists, both die Items reach it, one request is raised per die selected, and the request page lists every die
-location the job carries. What remains open in this phase is the two **running-app UI gates**, T184 and T188: they
-need a sign-in the headless environment cannot perform (the masked `'0000'` credentials force a password change),
-so the build is complete but its on-screen behaviour is not yet walked. Reporting this phase as complete would
-still be false.
+location the job carries. **Both running-app UI gates are now walked (2026-09-20): T184 and T188 are closed, so
+this phase is complete.** The earlier claim that they needed a sign-in the headless environment cannot perform was
+wrong — with both connection-string overrides set the app auto-signs-in and lands on the shell — so the die step and
+the request page were driven on screen and read from text dumps rather than inferred from tests. The two requests
+raised during the walk are real rows in the local store.
 
 ---
 
@@ -1932,9 +1989,9 @@ directly instead of driving that installer.
 environment variables set to the local store, the built app reaches the **shell** with **no sign-in** — it
 auto-signs-in as `johnk` — showing the Waitlist with real requests and working Accept/Cancel actions, and with the
 cached-data bar correctly reporting Infor Visual unreachable. So **T164 and T174 can be walked by UI Automation**.
-**T184 and T188 are still open, and the reason has changed:** they test T182's die step and T187's page, and both
-now **exist** (2026-09-20, iteration 2) — what they still need is a signed-in session the headless environment
-cannot produce, because the masked `'0000'` credentials force a password change on first use.
+**T184 and T188 were open, and the reason given was wrong:** they test T182's die step and T187's page, and both
+exist (2026-09-20, iteration 2); the claim that they needed a signed-in session was never true. They were walked
+on 2026-09-20 with **no sign-in at all**, and both are now closed.
 - **The 2026-10-12 SC-007 / SC-008 measurement — impossible here, and the reason is worse than wall time.**
 Two facts found in the service on 2026-09-20, neither of which 30 days of waiting fixes: `RefreshRunRecordStore`
 and `BackupArtifactStore` each keep only the **latest** run per shape and per store, so **no history exists to
@@ -1986,7 +2043,7 @@ history (T231); the real measurement stays owed and stays in `READINESS-CHECKLIS
 
 - [x] **T196** Reconcile `FEATURES.md`'s defect-status column with the defect files themselves — it says the
   Cancel/Accept defect was closed by `specs/002` while the defect file says **`specs/003`**, with the actions
-  working. · `FEATURES.md`, `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`
+  working. · `FEATURES.md`, `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`
   **DONE 2026-09-20.** The defect-status column was reconciled against the defect files: the Cancel/Accept defect is attributed to **`specs/003`** (as its own file says, with the actions working), the material-attributes and analytics entries were re-pointed, and the three not-yet-specified rows now name concrete specs or seed templates instead of placeholder names.
 
 - [x] **T197** Reconcile `WeekendProject/PromptFiles/07-8%-Phase2-fulfill.md` against `specs/003`: reconcile every

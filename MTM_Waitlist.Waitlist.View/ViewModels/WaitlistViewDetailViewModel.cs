@@ -639,8 +639,11 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _imageLocationSubscription = null;
     }
 
-    /// <summary>The coil part keyed in the receiving_history seed for the sample coil (MMC0001000).</summary>
-    private const string CoilReceivingPartId = "MMC0001000";
+    // The average coil weight is not resolved on this page at all. It used to be looked up for the fixed sample
+    // part MMC0001000; that lookup and its "5,000 lb" fallback were removed by specs/002-truthful-data-and-controls,
+    // and the per-request resolution now lives where a coil is actually known — the New Request confirm step,
+    // through CoilAvailabilityService, which asks for the requesting job's own coil part. Nothing here may
+    // reintroduce a constant part: this page simply has no row for it.
 
     [RelayCommand]
     private void Back()
@@ -750,9 +753,10 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     /// <summary>
     /// The value a declared field renders, from a source the page actually holds. <c>answer</c> is the one
     /// answer the flow captured; <c>job</c> is a value the <b>requesting job</b> carries and the request never
-    /// stored — the die whose number and location a die request is about; every other source is looked up by the
-    /// field's own label among the values the request carries. A label that nothing carries yields nothing, so the
-    /// row is not drawn — never a substituted value, never a blank standing in for one.
+    /// stored — a die request's rows name <b>every</b> die the job carries and where each one lives (FR-057);
+    /// every other source is looked up by the field's own label among the values the request carries. A label that
+    /// nothing carries yields nothing, so the row is not drawn — never a substituted value, never a blank standing
+    /// in for one.
     /// </summary>
     private static string? ResolveDeclaredFieldValue(
         RequestItemFieldDefinition field,

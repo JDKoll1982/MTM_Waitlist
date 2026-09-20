@@ -26,6 +26,60 @@ public sealed class RequestJobFieldValuesTests
         Assert.AreEqual("FGT0002000-DIE SHOP", RequestJobFieldValues.Resolve("Die", DieJob()));
     }
 
+    /// <summary>A job carrying two dies, with the second one the request is actually for (FR-057).</summary>
+    private static RequestJobPartAvailability TwoDieJob() => DieJob().WithDies(
+    [
+        new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP" },
+        new RequestDiePart { PartNumber = "D-9001", Location = "PRESS BAY" },
+    ]);
+
+    [TestMethod]
+    public void Resolve_Die_ListsEveryDieTheJobCarries_NotJustTheFirst()
+    {
+        // FR-057: a job carrying more than one die is one row per die, never the first die standing in for all
+        // of them. The requester reads the row to see which dies the job has.
+        Assert.AreEqual(
+            "FGT0002000-DIE SHOP, D-9001-PRESS BAY",
+            RequestJobFieldValues.Resolve("Die", TwoDieJob()));
+    }
+
+    [TestMethod]
+    public void Resolve_PickupLocation_ListsEveryDieLocationTheJobCarries()
+    {
+        // FR-057, stated directly: the request page lists every die location. The locations are drawn in the
+        // job's own order, so the row reads in the same order as the job does.
+        Assert.AreEqual(
+            "DIE SHOP, PRESS BAY",
+            RequestJobFieldValues.Resolve("Pickup location", TwoDieJob()));
+    }
+
+    [TestMethod]
+    public void Resolve_Die_WithADieThatHasNoLocation_LeavesNoDanglingSeparatorInTheList()
+    {
+        // The second die has no recorded location, so its entry is its number alone and no separator is left
+        // hanging off it.
+        var twoDies = DieJob().WithDies(
+        [
+            new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP" },
+            new RequestDiePart { PartNumber = "D-9001", Location = string.Empty },
+        ]);
+
+        Assert.AreEqual("FGT0002000-DIE SHOP, D-9001", RequestJobFieldValues.Resolve("Die", twoDies));
+    }
+
+    [TestMethod]
+    public void Resolve_PickupLocation_WithOnlyOneDieThatHasNoLocation_YieldsNothing()
+    {
+        // A location the job does not record is omitted rather than drawn as a blank standing in for a value.
+        var noLocations = DieJob().WithDies(
+        [
+            new RequestDiePart { PartNumber = "FGT0002000", Location = string.Empty },
+            new RequestDiePart { PartNumber = "D-9001", Location = string.Empty },
+        ]);
+
+        Assert.IsNull(RequestJobFieldValues.Resolve("Pickup location", noLocations));
+    }
+
     [TestMethod]
     public void Resolve_PickupLocation_IsWhereTheDieIs()
     {

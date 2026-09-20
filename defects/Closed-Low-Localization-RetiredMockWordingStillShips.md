@@ -1,5 +1,15 @@
 # Low — Localization and comments — Retired sample/mock wording still ships
 
+> **Naming note (2026-09-20).** The **Planned fix** row below names specs by their **template** number, from
+> `WeekendProject/SpecTemplates/` -- the seeds written before the specs existed -- so `Spec 01-...` is *not*
+> `specs/001-...`. Those templates have since shipped under different numbers: `01-truthful-data-and-controls`
+> is now **`specs/002-truthful-data-and-controls`** (shipped), `02-handler-fulfilment-and-urgency` is
+> **`specs/003-waitlist-handler-fulfilment`** (shipped), and `03-unified-card-and-taxonomy` is
+> **`specs/004-unified-card-item-picker`** (in flight). Templates **04-08** have no spec yet. The single copy
+> of this map is `WeekendProject/SpecTemplates/00-INDEX.md`. The **Status** row above already uses the real
+> `specs/00N` names -- read that one for what actually happened.
+
+
 | Field | Value |
 | --- | --- |
 | **Criticality** | Low |
@@ -78,7 +88,7 @@ described as a state a row can be in — but `CreateSessionOrder` only ever buil
    not against sample data.
 2. **Rewrite the stale comments** listed in §1 so they describe the live behaviour, and delete the
    "sample/mock value until the live Infor Visual coil lookup is wired" note once the fabricated
-   values it excuses are gone (`defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md`).
+   values it excuses are gone (`defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md`).
    Where a comment exists to explain a *gap*, keep it as an explicit gap statement ("not yet sourced —
    see defects/…"), not as a justification for sample content.
 3. **Rename `SampleOrder` → `WaitlistOrder` (or similar)** if the team wants the naming to stop
@@ -103,6 +113,6 @@ described as a state a row can be in — but `CreateSessionOrder` only ever buil
 
 - `specs/001-module-mock-visual-fallback/spec.md` FR-014, SC-013; `.specify/memory/constitution.md` II.
 - `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs` — scope, exemptions, and pattern set.
-- `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` — the values these comments
+- `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` — the values these comments
   excuse.
 - `FEATURES.md` §14.

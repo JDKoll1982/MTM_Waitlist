@@ -2,7 +2,7 @@
 
 **Feature Branch**: `003-waitlist-handler-fulfilment`
 **Created**: 2026-09-12
-**Status**: Draft
+**Status**: Completed (2026-09-13 — 49/49 tasks; `tasks.md` all `[x]`, `.spec-context.json` `status: completed`)
 **Input**: Spec seed `WeekendProject/SpecTemplates/02-handler-fulfilment-and-urgency.md` — from
 `PromptFiles/07-8%-Phase2-fulfill.md`, `PromptFiles/08-70%-Phase2-urgency.md`, and `prompt.md` tasks 16–18.
 

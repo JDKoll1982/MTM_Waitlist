@@ -98,6 +98,7 @@ Item codes.
 |---|---|
 | `component` | the requesting job's component part numbers |
 | `dunnage` | the dunnage parts assigned to the requesting job |
+| `die` | the dies assigned to the requesting job, each offered as its number and where it lives (`RequestDiePart.ComposeLabel`); more than one may be chosen and one request is raised per die (FR-054, FR-057) |
 | absent | the job's component list — the path the existing rows already rely on |
 | any other name | **nothing**: the screen reports that rather than inventing a list |
 

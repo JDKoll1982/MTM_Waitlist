@@ -83,6 +83,7 @@ public static class ServiceRegistrationExtensions
             pageService.Configure<NewRequestJobTypeViewModel, NewRequestJobTypePage>();
             pageService.Configure<NewRequestItemViewModel, NewRequestItemPage>();
             pageService.Configure<NewRequestDunnageViewModel, NewRequestDunnagePage>();
+            pageService.Configure<NewRequestDieViewModel, NewRequestDiePage>();
             pageService.Configure<NewRequestDetailsViewModel, NewRequestDetailsPage>();
             pageService.Configure<NewRequestPreviewViewModel, NewRequestPreviewPage>();
             pageService.Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
@@ -195,6 +196,8 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<NewRequestItemPage>();
         services.AddTransient<NewRequestDunnageViewModel>();
         services.AddTransient<NewRequestDunnagePage>();
+        services.AddTransient<NewRequestDieViewModel>();
+        services.AddTransient<NewRequestDiePage>();
         services.AddTransient<NewRequestDetailsViewModel>();
         services.AddTransient<NewRequestDetailsPage>();
         services.AddTransient<NewRequestPreviewViewModel>();

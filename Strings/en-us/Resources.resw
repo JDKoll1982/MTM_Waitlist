@@ -897,6 +897,33 @@
   <data name="NewRequest_Dunnage.SubstituteFailed.Message" xml:space="preserve">
     <value>The dunnage list could not be opened. Try again, or choose one of the parts listed here.</value>
   </data>
+  <data name="NewRequest_Die.Title.Text" xml:space="preserve">
+    <value>New Request - Choose Die</value>
+  </data>
+  <data name="NewRequest_Die.Prompt" xml:space="preserve">
+    <value>Which die is this request for? Choose one or more.</value>
+  </data>
+  <data name="NewRequest_Die.NoDies.Message" xml:space="preserve">
+    <value>This job has no die saved on it, so there is no die to ask about. Go back and choose a different item.</value>
+  </data>
+  <data name="NewRequest_Die.NothingChosen.Message" xml:space="preserve">
+    <value>Choose at least one die before continuing.</value>
+  </data>
+  <data name="NewRequest_Die.BackButton.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="NewRequest_Die.SelectAllButton.Content" xml:space="preserve">
+    <value>Select all</value>
+  </data>
+  <data name="NewRequest_Die.ContinueButton.Content" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="NewRequest_Summary.MultipleRequests" xml:space="preserve">
+    <value>This will raise {0} requests — one for each die you chose.</value>
+  </data>
+  <data name="NewRequest_Summary.RequestsRaised" xml:space="preserve">
+    <value>{0} requests were raised — one for each die you chose.</value>
+  </data>
   <data name="NewRequest_Preview.ItemLabel.Text" xml:space="preserve">
     <value>Item</value>
   </data>

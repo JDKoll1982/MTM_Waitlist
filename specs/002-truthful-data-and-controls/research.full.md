@@ -12,7 +12,7 @@ Every unknown in the Technical Context is resolved below. Sources are the featur
 **Decision**: Omit the row. Where the empty result *is* the answer, hide the block. Where the read
 failed, show the error in place with a retry. Absence and failure are never the same state.
 
-**Rationale**: `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §6.5 — "If any of
+**Rationale**: `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §6.5 — "If any of
 these fields genuinely cannot be sourced yet, **omit the row** rather than print a placeholder value — a
 missing row is truthful, a fake value is not." The same defect lists the hard-coded `"Not available"`
 defaults among the fabricated literals (§3), so they are removed with the rest rather than used as the
@@ -110,11 +110,11 @@ existing value-only test is corrected to assert that `PropertyChanged` was raise
 placeholder-value scans extend the existing `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`,
 which already scans `.cs/.xaml/.resw/.sql/.csproj/.json`.
 
-**Rationale**: `defects/Low-Settings-SearchIgnoresThreeSettingsPanels.md` §5.2 — "Prefer the array +
+**Rationale**: `defects/Closed-Low-Settings-SearchIgnoresThreeSettingsPanels.md` §5.2 — "Prefer the array +
 coverage test: it fails when the next panel is added without registering"; §5.3 — "assert that a
 `PropertyChanged` was raised … the existing test reads the property directly, so it passes regardless of
-whether the notification was raised". `defects/Low-Localization-RetiredMockWordingStillShips.md` §4.4 and
-`defects/Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` §6.2 both name the audit file as the
+whether the notification was raised". `defects/Closed-Low-Localization-RetiredMockWordingStillShips.md` §4.4 and
+`defects/Closed-Low-Settings-PrivacyPolicyLinkPointsAtPlaceholderUrl.md` §6.2 both name the audit file as the
 extension point rather than a new mechanism.
 
 **Alternatives considered**: `OnPropertyChanged(string.Empty)` (rejected in the defect as a broader
@@ -194,6 +194,6 @@ needs a sign-in as well", so the sign-in-dependent half of the manual pass canno
 launch. The existing gates missed these defects because they are runtime-rendered values — the audit
 patterns, not the compiler, are what make them visible.
 
-**Alternatives considered**: treating the green build as sufficient — rejected: `defects/Critical-…` §5
+**Alternatives considered**: treating the green build as sufficient — rejected: `defects/Closed-Partial-Critical-…` §5
 records that `RetiredSymbolAuditTests` matched only *symbol names*, so `"Northstar Manufacturing"` shipped
 through a green build.

@@ -1,5 +1,15 @@
 # Low — Settings — "Privacy Policy" link points at an unfinished placeholder address
 
+> **Naming note (2026-09-20).** The **Planned fix** row below names specs by their **template** number, from
+> `WeekendProject/SpecTemplates/` -- the seeds written before the specs existed -- so `Spec 01-...` is *not*
+> `specs/001-...`. Those templates have since shipped under different numbers: `01-truthful-data-and-controls`
+> is now **`specs/002-truthful-data-and-controls`** (shipped), `02-handler-fulfilment-and-urgency` is
+> **`specs/003-waitlist-handler-fulfilment`** (shipped), and `03-unified-card-and-taxonomy` is
+> **`specs/004-unified-card-item-picker`** (in flight). Templates **04-08** have no spec yet. The single copy
+> of this map is `WeekendProject/SpecTemplates/00-INDEX.md`. The **Status** row above already uses the real
+> `specs/00N` names -- read that one for what actually happened.
+
+
 | Field | Value |
 | --- | --- |
 | **Criticality** | Low |
@@ -81,7 +91,7 @@ no consumer).
 
 ## 7. Related
 
-- `defects/Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` — the same card block (labels).
+- `defects/Closed-Medium-Settings-AboutLabelsCollideOnOneResourceKey.md` — the same card block (labels).
 - `.github/instructions/packaging.instructions.md`, `Package.appinstaller` — the packaging/template
   scaffolding this placeholder belongs to.
 - `FEATURES.md` §8.

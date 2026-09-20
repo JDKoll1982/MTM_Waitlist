@@ -1,5 +1,15 @@
 # High — Waitlist — Every card's picture goes blank after a visit to New Request, because the seeded Item pictures are single-pixel stand-ins
 
+> **Naming note (2026-09-20).** The **Planned fix** row below names specs by their **template** number, from
+> `WeekendProject/SpecTemplates/` -- the seeds written before the specs existed -- so `Spec 01-...` is *not*
+> `specs/001-...`. Those templates have since shipped under different numbers: `01-truthful-data-and-controls`
+> is now **`specs/002-truthful-data-and-controls`** (shipped), `02-handler-fulfilment-and-urgency` is
+> **`specs/003-waitlist-handler-fulfilment`** (shipped), and `03-unified-card-and-taxonomy` is
+> **`specs/004-unified-card-item-picker`** (in flight). Templates **04-08** have no spec yet. The single copy
+> of this map is `WeekendProject/SpecTemplates/00-INDEX.md`. The **Status** row above already uses the real
+> `specs/00N` names -- read that one for what actually happened.
+
+
 | Field | Value |
 | --- | --- |
 | **Criticality** | High — every card on the list is affected at once, and an empty tile reads as lost data rather than a missing configuration |
@@ -99,7 +109,7 @@ Guards: `MTM_Waitlist.Tests/Module_Waitlist/Helpers/ImageFileProbeTests.cs` (sev
 
 ## 6. Related
 
-- `defects/High-NewRequestVisitReplacesCardImagesWithThePlaceholder.md` — the same seam, reached the first time
+- `defects/Closed-High-NewRequestVisitReplacesCardImagesWithThePlaceholder.md` — the same seam, reached the first time
   from the *placeholder* string instead of from a picture-less file.
 - `specs/004-unified-card-item-picker/contracts/card-and-identifier.md` §4 — the picture cascade
   (Item → Category family → placeholder) and the rule that a "nothing configured" answer never replaces a picture

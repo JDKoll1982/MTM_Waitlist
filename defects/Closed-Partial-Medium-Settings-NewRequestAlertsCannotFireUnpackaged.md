@@ -1,5 +1,15 @@
 # Medium — Settings — "New Request Alerts" can never fire in the shipped application
 
+> **Naming note (2026-09-20).** The **Planned fix** row below names specs by their **template** number, from
+> `WeekendProject/SpecTemplates/` -- the seeds written before the specs existed -- so `Spec 01-...` is *not*
+> `specs/001-...`. Those templates have since shipped under different numbers: `01-truthful-data-and-controls`
+> is now **`specs/002-truthful-data-and-controls`** (shipped), `02-handler-fulfilment-and-urgency` is
+> **`specs/003-waitlist-handler-fulfilment`** (shipped), and `03-unified-card-and-taxonomy` is
+> **`specs/004-unified-card-item-picker`** (in flight). Templates **04-08** have no spec yet. The single copy
+> of this map is `WeekendProject/SpecTemplates/00-INDEX.md`. The **Status** row above already uses the real
+> `specs/00N` names -- read that one for what actually happened.
+
+
 | Field | Value |
 | --- | --- |
 | **Criticality** | Medium |
@@ -97,13 +107,13 @@ toast + deep link") and `WeekendProject/ChangeLog.md` should record the packaged
    toggle is disabled/annotated as unavailable, and that no toast is claimed.
 3. If option 1 is chosen instead: install the MSIX, enable the toggle, submit a request from a second
    account, confirm the toast appears and the tap routes to the request via
-   `AppNotificationActivationHandler` — and fix `defects/Low-Notifications-ToastActivationShowsTodoDialog.md`
+   `AppNotificationActivationHandler` — and fix `defects/Closed-Partial-Low-Notifications-ToastActivationShowsTodoDialog.md`
    first, because tapping a toast while the app is running currently shows a "TODO" dialog.
 4. Suite `Failed: 0`; build `0 Warning(s) 0 Error(s)`.
 
 ## 7. Related
 
-- `defects/Low-Notifications-ToastActivationShowsTodoDialog.md` — the placeholder dialog on the
+- `defects/Closed-Partial-Low-Notifications-ToastActivationShowsTodoDialog.md` — the placeholder dialog on the
   toast-activation path.
 - `.github/instructions/packaging.instructions.md` — packaging rules for this repo;
   `Package.appxmanifest` / `Package.appinstaller`.

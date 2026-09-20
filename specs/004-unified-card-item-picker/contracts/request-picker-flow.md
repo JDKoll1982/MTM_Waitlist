@@ -63,7 +63,7 @@ are catalogued but never offered (FR-028).
 | Item | Availability | Captures | Line 2 |
 |---|---|---|---|
 | `pickup-coil` | `HasCoil` **or** `HasFlatstock` (D21) | — | the coil number |
-| `pickup-die` | `HasDie` | pick the die, then the destination from `Die Shop` / `Home Location` / `Other` | the die's own number and where the die is — `FGT0002000-DIE SHOP` (§10) |
+| `pickup-die` | `HasDie` | pick **which die** — the job's dies are offered as cards, more than one may be chosen, and a **select all** action takes every die in one action; one request per die (D22) | the die's own number and where the die is — `FGT0002000-DIE SHOP` (§10) |
 | `pickup-component` | `HasComponent` | pick which component, from the job's list | the component's part number |
 | `pickup-fg` | **out of scope** | — | — |
 | `pickup-ncm` | **out of scope** | — | — |
@@ -77,7 +77,7 @@ are catalogued but never offered (FR-028).
 | `deliver-riser-table` | always offered | — | `Riser Table` (fixed) |
 | `deliver-hopper` | always offered | — | `Hopper` (fixed) |
 | `deliver-flatstock` | `HasFlatstock` | — | the flatstock part number |
-| `deliver-die` | `HasDie` | — | the die's own number and where the die is — `FGT0002000-DIE SHOP` (§10) |
+| `deliver-die` | `HasDie` | pick **which die**, exactly as `pickup-die` does — FR-054 applies to a die whichever Item raises it, so this Item asks the same question and offers the same select-all action | the die's own number and where the die is — `FGT0002000-DIE SHOP` (§10) |
 | `deliver-dunnage` | `HasDunnage` | pick which dunnage they need, from the parts the job carries — on its own step, with the substitute picker beside it | the part they picked |
 | `deliver-wrong-coil` | `HasCoil` | one short explanation of why the coil is wrong | the **correct** coil being brought |
 | `deliver-wrong-flatstock` | `HasFlatstock` | one short explanation of why the flatstock is wrong | the **correct** flatstock being brought |
@@ -89,8 +89,16 @@ are catalogued but never offered (FR-028).
 **The job-independent Items are exactly five:** `pickup-riser-table`, `deliver-riser-table`, `pickup-hopper`,
 `deliver-hopper`, `other`. `pickup-scrap` is **not** one of them — it is gated on a real scrap decision.
 
-**Deliver destination.** Every Deliver Item is delivered to the requesting work centre; the person is never asked
-where. No Deliver Item captures a destination, which is why only `pickup-die` has a destination-dependent Line 2.
+**Where a thing goes.** Deliver Items are delivered to the requesting work centre, and a die — pickup or deliver —
+goes to its own **home location** as the job records it. The person is never asked where anything goes, and **no Item
+captures a destination**: the question `pickup-die` used to ask retired 2026-09-20 (D22), which is what freed the
+request's one value column to carry the chosen die.
+
+**What the request page shows for a die (FR-057, added 2026-09-20).** A die request's page lists **every** die
+location the requesting job carries, not only the location of the die that request names — a handler reading one
+request should be able to see where the job's dies live. The job's dies are read **once per work centre**, and a
+location the job cannot supply is not invented. A job with several dies therefore produces several requests that all
+show the same complete location list.
 
 **The wrong-material Items are single Deliver requests**, not compound ones: one request, Line 1 is the Item's own
 bring phrase, Line 2 names the material being brought — the **correct** one, never the wrong one being collected.
@@ -150,13 +158,15 @@ job list, where that list is the **dunnage** parts assigned to the requesting jo
 
 Two of an Item's tokens name values the request never stored — they are the **job's**, not an answer — so they come
 from the requesting job's snapshot. `{job_part_number}` is the job's own `part_number`; `{die_number}` and
-`{die_location}` are the job's primary die.
+`{die_location}` name the job's dies — every die the job carries, in the job's own order, each written as its number
+and its location (FR-054, FR-057). A job carrying no die row of its own falls back to the snapshot's primary die.
 
 | Rule | Why |
 |---|---|
 | The job is read **once per work centre per load**, not per row | every row of a work centre needs the same job; a list of N rows costs one read per distinct work centre |
 | A value is handed over **only where a template names its token** | an Item that names none of them keeps the card it had, so this cannot change another Item's line |
-| A job with more than one die shows the **first** die | the same row the snapshot already calls its primary die |
+| A job's dies are **listed in full**, in the job's own order | a job carrying several dies shows **every** one of them and where each lives, never only the first — the request page must not hide the rest of the job's dies (FR-054, FR-057) |
+| A job with no die row of its own falls back to the snapshot's primary die | the snapshot's primary die is the only die the job can supply, so nothing is invented for it (FR-057) |
 | A job that cannot be read is **logged, not fatal** | the list keeps rendering from what the requests themselves carry |
 
 ## 7. Failure behaviour

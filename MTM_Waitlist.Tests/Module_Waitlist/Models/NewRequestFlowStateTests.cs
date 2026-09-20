@@ -143,6 +143,24 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
+    public void GetNextStepType_ReturnsTheDieStep_WhenTheAnswerNamesTheDieList()
+    {
+        // FR-054: both die Items ask which die, so the step that asks is chosen by the row exactly as the
+        // dunnage step is. A die Item used to go straight to confirmation, which is why this is asserted.
+        var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Die));
+
+        Assert.AreEqual(typeof(NewRequestDieViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    [TestMethod]
+    public void GetNextStepType_ReturnsPreview_OnceTheDieAnswerIsCaptured()
+    {
+        var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Die), inputValue: "FGT0002000-DIE SHOP");
+
+        Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    [TestMethod]
     public void GetNextStepType_ReturnsTheDunnageStep_WhenTheAnswerNamesTheDunnageList()
     {
         // FR-050: which step asks for the answer is decided by what the ROW declares, never by the Item's code —

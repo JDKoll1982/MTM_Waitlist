@@ -18,5 +18,6 @@ The full design, including the exact trigger ordering that trips up deliver-die,
 Spec state — my new code cited FR-054/055/056, which didn't exist. Those are now defined, with SC-025/026, and the batch is recorded as Phase 13 with only verified work ticked. I also ran the audit your spec's own Phase 12 note asked for: all 44 requirement IDs cited in source now resolve.
 
 What you need to do
-Decide where a chosen die is stored, so I can finish it — add a die_identifier column (keeps the destination question; needs a table, three procedures, the mandatory update_table_descriptions.sql, the AllTables/AllSPs aggregates, and a database reinstall), or reuse input_value (no schema work, but the destination question is retired).
-Still open from earlier: the UI and live-database gates — T164, T165, T174 — and the new T184, T185. None of the die screens have been exercised in the running app yet, so what's verified is the code and its tests, not the app on screen.
+Nothing is blocking. The storage decision below was taken on 2026-09-20 — reuse `input_value` — so no database change is owed for it.
+The UI and live-database gates are closed: T164, T165, T174, T184, T185 and T188 have all now been exercised, the die screens in the running app and the rest against the live store.
+The preview gap is fixed and verified on screen: with two dies selected, the Preview and the Confirmation each now list a row per die, and the Confirmation shows the "This will raise 2 requests" line it had been computing but never displaying. Recorded as T233 in `specs/004-unified-card-item-picker/tasks.md`.

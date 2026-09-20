@@ -6,7 +6,7 @@
 | **Source** | Defect-driven; no backlog workstream. It is the packaging/delivery decision the New Request Alerts feature has been waiting on since it was built |
 | **Carry-forward boxes** | none |
 | **Depends on** | template 01 (which makes the alerts control honest about what this installation can do) |
-| **Defect files it completes** | `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` (the real fix), `defects/Low-Notifications-ToastActivationShowsTodoDialog.md` (verifies the cleaned-up path) |
+| **Defect files it completes** | `defects/Closed-Partial-Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` (the real fix), `defects/Closed-Partial-Low-Notifications-ToastActivationShowsTodoDialog.md` (verifies the cleaned-up path) |
 | **Validation** | a real notification delivered and tapped on a real installation, both with the app running and with it closed; build clean; suite `Failed: 0` |
 
 ---
@@ -86,8 +86,8 @@ no runtime activation path is broken.
 
 | Defect file | What this spec delivers |
 | --- | --- |
-| `defects/Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` | the chosen option: either a packaged install where the alert fires, or a permanently withdrawn switch with an honest explanation |
-| `defects/Low-Notifications-ToastActivationShowsTodoDialog.md` | the placeholder dialogs are gone (template 01) and the real activation path is proven for both cold start and while-running |
+| `defects/Closed-Partial-Medium-Settings-NewRequestAlertsCannotFireUnpackaged.md` | the chosen option: either a packaged install where the alert fires, or a permanently withdrawn switch with an honest explanation |
+| `defects/Closed-Partial-Low-Notifications-ToastActivationShowsTodoDialog.md` | the placeholder dialogs are gone (template 01) and the real activation path is proven for both cold start and while-running |
 
 Update both files' status lines when this spec lands, naming the commit and the manual proof.
 

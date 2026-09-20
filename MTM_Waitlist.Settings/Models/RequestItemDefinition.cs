@@ -52,18 +52,16 @@ public sealed class RequestItemDefinition
     /// The card's Line 2 (the Item's identifier) as a <c>{token}</c> template (CSV col 11), resolved by
     /// <c>RequestItemLine2Resolver</c> against the active-job snapshot and the captured answer.
     /// <para>
-    /// <b>Syntax.</b> A bare <c>{token}</c> is replaced by that token's value. A token may carry
-    /// <b>one</b> conditional alternative, written <c>{primary:secondary=conditionValue}</c>, which renders
-    /// <c>secondary</c> when the captured value <c>destination</c> equals <c>conditionValue</c> and
-    /// <c>primary</c> otherwise. That is the whole language — deliberately not a general expression
-    /// evaluator, because exactly one rule needs it (<c>pickup-die</c>: the die's location when the
-    /// captured destination is <c>Home Location</c>, otherwise the die's number). Literal text outside
-    /// braces is copied through unchanged.
+    /// <b>Syntax.</b> A bare <c>{token}</c> is replaced by that token's value. That is the whole language —
+    /// deliberately not a general expression evaluator. Literal text outside braces is copied through unchanged.
+    /// A conditional alternative (<c>{primary:secondary=conditionValue}</c>) was the language's one further rule,
+    /// evaluated against the captured <c>destination</c>; it retired with the question it existed for on
+    /// 2026-09-20 (FR-054, D22), so no row may name <c>destination</c> and no template may carry a conditional.
     /// </para>
     /// <para>
     /// <b>Token set (closed).</b> Job-derived: <c>part_number</c>, <c>part_description</c>,
-    /// <c>die_number</c>, <c>die_location</c>, <c>dunnage_part</c>, <c>sequence_number</c>,
-    /// <c>scrap_type</c>. Captured during the flow: <c>answer</c>, <c>destination</c>, <c>component</c>,
+    /// <c>die_number</c>, <c>die_location</c>, <c>die</c>, <c>dunnage_part</c>, <c>sequence_number</c>,
+    /// <c>scrap_type</c>, <c>job_part_number</c>. Captured during the flow: <c>answer</c>, <c>component</c>,
     /// <c>defect</c>. An unknown token is a reportable configuration problem, never a silent blank
     /// (FR-026).
     /// </para>

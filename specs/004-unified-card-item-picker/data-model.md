@@ -158,7 +158,7 @@ applied — the average covers all of an Item's completed requests.
 | `subtype` | **removed** | FR-004, FR-023 |
 | `category` | **added** `VARCHAR(16) NOT NULL` | one of `Pickup`, `Deliver`, `Assist`, `Other` |
 | `item` | **added** `VARCHAR(64) NOT NULL` | one of the twenty-three Item codes |
-| `input_value` | kept | the one answer the flow captured, where an Item captures one |
+| `input_value` | kept | the one value the flow captured, where an Item captures one. For a die Item it carries **which die the request is for** — the destination question retired 2026-09-20, which freed this column (D22). No column is added |
 | `status` | kept | `Pending`, `Accepted`, `Completed`, `Canceled` — **unchanged, not extended** |
 | `requested_utc` | kept | the "Waiting" row's anchor |
 | `target_time_utc` | kept | the due value; when null, derived as `requested_utc + the Item's allotted minutes` |
@@ -192,10 +192,11 @@ property of the row selects a layout; FR-006 admits no Item-based variant.
 | Status pill, new-message marker, action area | unchanged from `specs/003` | the lifecycle does not change with the Item (FR-032) |
 
 **Line 2 resolution.** The template's tokens come from a closed set — job-derived (`part_number`, `part_description`,
-`die_number`, `die_location`, `dunnage_part`, `sequence_number`, `scrap_type`) and captured (`answer`, `destination`,
-`component`, `defect`). The one conditional is `pickup-die`: the die's **location** when the captured destination is
-`Home Location`, the die's **number** otherwise. An unresolvable token renders the Item's own display name and
-reports the configuration problem rather than rendering a blank (FR-026).
+`die_number`, `die_location`, `dunnage_part`, `sequence_number`, `scrap_type`) and captured (`answer`, `component`,
+`defect`). A die Item's line is composed once from the die's own number and its **home location** by
+`RequestDiePart.ComposeLabel`, with no conditional on any answer: the destination question its old switch turned on
+retired 2026-09-20 (D22), and `destination` left the token set with it. An unresolvable token renders the Item's own
+display name and reports the configuration problem rather than rendering a blank (FR-026).
 
 **The detail-field grid is not on the card.** It moves to the request page, where the declared fields (FR-007) are
 laid out in declared order, two per row; a field alone on its row takes that row's full width. The span is derived

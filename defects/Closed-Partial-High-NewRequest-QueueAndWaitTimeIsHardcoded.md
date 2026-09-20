@@ -1,5 +1,15 @@
 # High — New Request — "Queue & wait time" on the confirm screen is hard-coded
 
+> **Naming note (2026-09-20).** The **Planned fix** row below names specs by their **template** number, from
+> `WeekendProject/SpecTemplates/` -- the seeds written before the specs existed -- so `Spec 01-...` is *not*
+> `specs/001-...`. Those templates have since shipped under different numbers: `01-truthful-data-and-controls`
+> is now **`specs/002-truthful-data-and-controls`** (shipped), `02-handler-fulfilment-and-urgency` is
+> **`specs/003-waitlist-handler-fulfilment`** (shipped), and `03-unified-card-and-taxonomy` is
+> **`specs/004-unified-card-item-picker`** (in flight). Templates **04-08** have no spec yet. The single copy
+> of this map is `WeekendProject/SpecTemplates/00-INDEX.md`. The **Status** row above already uses the real
+> `specs/00N` names -- read that one for what actually happened.
+
+
 | Field | Value |
 | --- | --- |
 | **Criticality** | High |
@@ -9,7 +19,7 @@
 | **Status** | **FIXED (removed, not replaced) — closed by `specs/002-truthful-data-and-controls`**. **Closure:** the "0 active request(s)" / "approximately 15 minutes" card was deleted from the confirm step, and the view model exposes no queue-count or wait-estimate member. **Remainder owned by Spec `04-waitlist-analytics`**: if a real count or estimate is wanted, that spec must adopt it as a requirement. **Proof:** `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestSummaryHonestyTests`. |
 | **Planned fix** | **Spec `01-truthful-data-and-controls`** — removes the fabricated "0 active request(s)" / "approximately 15 minutes" card (or binds it to a substantiated figure). If a real queue count and wait estimate are wanted, **Spec `04-waitlist-analytics`** is the spec that can substantiate them; that spec must either adopt it as a requirement or this file must be closed as "removed, not replaced". Seeds: `WeekendProject/SpecTemplates/01-truthful-data-and-controls.md`, `…/04-waitlist-analytics.md` |
 | **Files** | `Module_Waitlist/Views/NewRequestSummaryPage.xaml` (lines 161–167), `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSummaryViewModel.cs` |
-| **Related** | `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` (same pattern, different screen) |
+| **Related** | `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` (same pattern, different screen) |
 
 ---
 
@@ -63,6 +73,11 @@ There is **no** queue count and **no** wait estimate anywhere in the view model:
   `IsStatusVisible`, `IsStatusError`, `StatusMessage`, `CanSubmit`; commands are `SubmitCommand` and
   `BackCommand`. No queue/wait member exists in the file or in any of its injected services
   (`IWaitlistRequestService`, `ICoilAvailabilityService`, `INavigationService`).
+  *(Snapshot as found. The surface has since moved twice with no queue/wait member added: the
+  Category/Item rework retired `RequestType`/`SubtypeName`/`HasSubtype`, and T233 of
+  `specs/004-unified-card-item-picker` replaced the single `Detail` with `DetailLines` so the review steps
+  list one row per entry raised. The finding itself — no queue or wait figure has a producer — still holds,
+  which is what this evidence is for.)*
 - A repository-wide search for `Queue` / `WaitTime` / `Estimated` in the Setup, Waitlist and New
   Request projects finds no queue-count or wait-estimate producer — only `DispatcherQueue` and the
   SQL "Queues" folder naming.

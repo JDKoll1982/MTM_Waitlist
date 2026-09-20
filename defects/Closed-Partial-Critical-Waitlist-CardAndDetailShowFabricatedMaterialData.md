@@ -1,5 +1,15 @@
 # Critical — Waitlist — Cards and detail pages show fabricated material data
 
+> **Naming note (2026-09-20).** The **Planned fix** row below names specs by their **template** number, from
+> `WeekendProject/SpecTemplates/` -- the seeds written before the specs existed -- so `Spec 01-...` is *not*
+> `specs/001-...`. Those templates have since shipped under different numbers: `01-truthful-data-and-controls`
+> is now **`specs/002-truthful-data-and-controls`** (shipped), `02-handler-fulfilment-and-urgency` is
+> **`specs/003-waitlist-handler-fulfilment`** (shipped), and `03-unified-card-and-taxonomy` is
+> **`specs/004-unified-card-item-picker`** (in flight). Templates **04-08** have no spec yet. The single copy
+> of this map is `WeekendProject/SpecTemplates/00-INDEX.md`. The **Status** row above already uses the real
+> `specs/00N` names -- read that one for what actually happened.
+
+
 | Field | Value |
 | --- | --- |
 | **Criticality** | Critical |
@@ -48,7 +58,7 @@ real data on screen.
 - The defect is on the primary screen of the product, in the fields the work is actually performed
   against, and on the detail page under headings whose own text promises the opposite:
   "Material and inventory information needed to select and stage the requested coil."
-- It also silently defeats `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md`: the
+- It also silently defeats `defects/Closed-Partial-High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md`: the
   "Requested coil" the average is shown beside is itself fabricated.
 
 ## 3. Evidence — the exact literals
@@ -170,11 +180,11 @@ plus any new/updated stored procedures and queue query files, and the localizati
 
 ## 8. Related
 
-- `defects/High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` — same method, same root cause,
+- `defects/Closed-Partial-High-Coil-AverageWeightIsResolvedForOneHardCodedPart.md` — same method, same root cause,
   for the one field that *is* wired to a real service.
-- `defects/High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — the same fabricated-data pattern on the
+- `defects/Closed-Partial-High-NewRequest-QueueAndWaitTimeIsHardcoded.md` — the same fabricated-data pattern on the
   confirm screen.
-- `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` — the other half of the card's
+- `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` — the other half of the card's
   unusable state.
 - `specs/001-module-mock-visual-fallback/spec.md` FR-001, FR-003, FR-014, SC-013;
   `.specify/memory/constitution.md` II; `FEATURES.md` §3, §4.

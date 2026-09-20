@@ -30,7 +30,7 @@ A **block** is a card, a section, or a labelled attribute group on one of the af
 
 ## 2. Fabricated attribute inventory (what comes out)
 
-Source of truth: `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §3 (roughly thirty
+Source of truth: `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` §3 (roughly thirty
 literals) plus the two companion defects. Disposition is identical for every row.
 
 | Group | Attributes | Typical literal today | Disposition here | Restored by |

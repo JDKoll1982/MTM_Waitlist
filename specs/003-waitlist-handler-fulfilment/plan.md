@@ -48,7 +48,7 @@ its `create.sql` / `rollback.sql` pair and its `AllSPs.sql` block, per constitut
 | VI. Evidence-Based Verification Gates | Clean solution build and green suite; `WMC9999` treated as a real error | **PASS** — `contracts/verification-gates.md` G1–G8, including the gate combinations that must fail before the wiring exists |
 | Security & Secrets | No hardcoded credentials; nothing credential-shaped logged or displayed | **PASS** — the feature reads no credential; it uses the signed-in employee number and role already resolved at startup |
 | External Integration & Cache Boundaries | Infor Visual never written; cached data is fallback only | **PASS** — no Infor Visual path is touched; the inventory-location read on the detail page is unchanged |
-| Documentation & Extensibility | Affected documentation updated in the same change, stale references removed | **PASS** — `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` moves to `FIXED` with its proof, and `CHANGELOG.md` gains the two entries the defect file already claims exist |
+| Documentation & Extensibility | Affected documentation updated in the same change, stale references removed | **PASS** — `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md` moves to `FIXED` with its proof, and `CHANGELOG.md` gains the two entries the defect file already claims exist |
 
 The post-Phase-1 re-check reaches the same result: the design adds no principle-affecting mechanism,
 no database artifact, and no new cross-cutting abstraction.
@@ -144,7 +144,7 @@ touches made after the terminal status have nowhere to land unless a human reope
 
 **Final gates (2026-09-13):** `0 Warning(s) 0 Error(s)` and `Failed: 0, Passed: 888, Skipped: 19, Total: 907`.
 
-defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md   # status + proof
+defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md   # status + proof
 CHANGELOG.md                                                  # the entries the defect file already claims
 ```
 

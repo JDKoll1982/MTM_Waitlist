@@ -66,6 +66,14 @@ public static class WaitlistRequestTitles
     /// Item's own display name shown — never a substituted value, never a blank
     /// (<c>contracts/card-and-identifier.md</c> §3).
     /// </para>
+    /// <para>
+    /// A die request is the one place where the captured answer <b>is</b> a die: <c>input_value</c> carries which
+    /// die the request is for, which is what keeps two entries raised from one job apart (FR-054, D22). So where
+    /// the request stored a die, that die is the one the card names — matched against the job's own list so its
+    /// number and its location are read apart from the stored label rather than guessed at — and the job's primary
+    /// die stands in only when nothing was stored, so a request raised before the picker learned to record its die
+    /// still renders (FR-057).
+    /// </para>
     /// </remarks>
     public static RequestItemLine2Context ResolveContext(
         WaitlistRequest? request,
@@ -82,14 +90,27 @@ public static class WaitlistRequestTitles
             || NamesToken(item, "die_number")
             || NamesToken(item, "die_location");
 
+        var storedDie = namesDie ? answer : null;
+        var choseADie = !string.IsNullOrWhiteSpace(storedDie);
+        var chosen = choseADie ? FindDie(job, storedDie) : null;
+
         return new RequestItemLine2Context(
             Answer: answer,
-            Destination: answer,
             DunnagePart: NamesToken(item, "dunnage_part") ? answer : null,
             JobPartNumber: NamesToken(item, "job_part_number") ? job?.JobPartNumber : null,
-            DieNumber: namesDie ? job?.DieNumber : null,
-            DieLocation: namesDie ? job?.DieLocation : null);
+            DieNumber: namesDie ? (choseADie ? chosen?.PartNumber ?? storedDie : job?.DieNumber) : null,
+            DieLocation: namesDie ? (choseADie ? chosen?.Location : job?.DieLocation) : null);
     }
+
+    /// <summary>
+    /// The die the request stored, found among the dies the job carries so its number and its location can be read
+    /// apart. A stored value the job no longer carries — or a job snapshot that was not handed in — resolves to
+    /// <see langword="null" />, and the stored value is then treated as the die's number alone rather than being
+    /// split at a separator that also occurs inside a die's own number.
+    /// </summary>
+    private static RequestDiePart? FindDie(RequestJobPartAvailability? job, string? storedDie) =>
+        job?.Dies.FirstOrDefault(die =>
+            string.Equals(die.Label, storedDie!.Trim(), StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     /// Whether an Item's templates ask for the named token. Both lines are consulted: an Item's first line may

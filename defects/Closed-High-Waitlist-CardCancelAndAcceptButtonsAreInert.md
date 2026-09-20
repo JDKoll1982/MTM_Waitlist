@@ -1,5 +1,15 @@
 # High — Waitlist — Card Cancel and Accept buttons are inert
 
+> **Naming note (2026-09-20).** The **Planned fix** row below names specs by their **template** number, from
+> `WeekendProject/SpecTemplates/` -- the seeds written before the specs existed -- so `Spec 01-...` is *not*
+> `specs/001-...`. Those templates have since shipped under different numbers: `01-truthful-data-and-controls`
+> is now **`specs/002-truthful-data-and-controls`** (shipped), `02-handler-fulfilment-and-urgency` is
+> **`specs/003-waitlist-handler-fulfilment`** (shipped), and `03-unified-card-and-taxonomy` is
+> **`specs/004-unified-card-item-picker`** (in flight). Templates **04-08** have no spec yet. The single copy
+> of this map is `WeekendProject/SpecTemplates/00-INDEX.md`. The **Status** row above already uses the real
+> `specs/00N` names -- read that one for what actually happened.
+
+
 | Field | Value |
 | --- | --- |
 | **Criticality** | High |
@@ -165,5 +175,5 @@ The `OPEN-WORK-NEXT-SPEC.md` §4.3 workstream is the outstanding item that owns 
   expectations.
 - `WeekendProject/ChangeLog.Simple.md` features 1 and 2 — the ✅/🚧 claims that need correcting
   alongside the fix.
-- `defects/Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` — the same card surface.
+- `defects/Closed-Partial-Critical-Waitlist-CardAndDetailShowFabricatedMaterialData.md` — the same card surface.
 - `FEATURES.md` §3, §14.
