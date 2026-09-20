@@ -1093,18 +1093,63 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
 
 **Wave 8 — the seven handling outcomes, independent where the artifact differs:**
 
-- [ ] **T130** [P] [US2] Outcome 1 — accept, then finish; and outcome 2 — accept, hand back, accept again, finish.
+- [x] **T130** [P] [US2] Outcome 1 — accept, then finish; and outcome 2 — accept, hand back, accept again, finish.
   Record both, including that a hand-back leaves **one** request, back to `Pending`, with `released_utc` set and the
   handler cleared, and that the second accept completes it (FR-042). · the running app
-- [ ] **T131** [P] [US2] Outcome 3 — the raiser cancels before anyone accepts, signed in as that request's own
+
+  Evidence recorded (2026-09-20, Debug build, driven through the running app's own card buttons — no harness action
+  the app itself cannot perform): **outcome 1** on row `38` (`pickup-hopper`, `100-12`, raised by `9004`, so the
+  claim is somebody else's request). As `johnk` (`6229`) the card offered `accept` alone and the row read
+  `Pending`/`assigned=NULL`; after `accept` it read `Accepted`/`assigned=6229`/`accepted_utc=14:39:52` and the card
+  then offered `complete`,`give back`,`cancel`; after `complete` it read `Completed`/`completed_utc=14:39:56` and the
+  card left the list. **outcome 2** on row `39` (`deliver-wrong-coil`, `100-12`, raised by `9004`): `Pending` →
+  `accept` → `Accepted`/`assigned=6229`/`accepted_utc=14:40:38` → **give back** → still **exactly one** row
+  (`COUNT(*)` = `1` before and after), back to `Pending`, `assigned_material_handler` cleared to `NULL`,
+  `released_utc=14:40:42`, and the card's buttons returned to `accept` alone → second `accept` →
+  `Accepted`/`assigned=6229` → `complete` → `Completed`/`completed_utc=14:40:50`. FR-042 holds. Two details
+  recorded rather than smoothed over: the second accept did **not** re-stamp `accepted_utc` (it still reads the
+  first claim's `14:40:38`), and `released_utc` remains set after the re-claim — neither is asked for by FR-042,
+  and neither breaks it.
+- [x] **T131** [P] [US2] Outcome 3 — the raiser cancels before anyone accepts, signed in as that request's own
   raiser, and confirm a non-raiser cannot. · the running app
+
+  Evidence recorded (2026-09-20, Debug build, driven through the running app's own card buttons). **The raiser
+  cancels** — signed in as `johnk` (`6229`), the raiser, on `Vits Drive`, row `47` (`pickup-riser-table`,
+  `V100-34`, raised by `6229`, still `Pending`, `assigned=NULL`) showed `accept`,`cancel`. `cancel` raised the
+  confirmation dialog titled **"Cancel this request?"**, reading *"This withdraws your request and takes it off the
+  list. Give a reason so the floor knows why."*, with a `Reason (optional)` box and the buttons `Cancel request` and
+  `Keep request`. Confirming with the reason *"Operator no longer needs the riser table."* closed the dialog and left
+  the row `Canceled` with `canceled_utc=14:47:26`, `cancellation_reason` = that text,
+  `canceled_by_employee_number=6229`, `assigned_material_handler=NULL`, still exactly one row; the card left the
+  list (the `Vits Drive` list re-read with five rows and no riser card). **A non-raiser cannot** — signed in as
+  `test.setup` (`9006`), row `33` (`deliver-dunnage`, `100-1806`, raised by `9001`, `Pending`, `assigned=NULL`)
+  offered `accept` **alone**: there was no cancel affordance to press, and the row was unchanged after the look
+  (same `status`, `assigned` and timestamps). The reason it cannot is in the screen: `CancelRequestAsync` returns
+  before doing anything unless `CanCancelRequest` is true, and `CanCancelRequest` is
+  `(isRequester && CanRequesterCancel(order)) || isAssignee`, so a bystander is drawn no cancel button at all. The
+  store-level half — a cancel-own from a non-raiser answering `NotOwnedByRequester` — is already covered by the
+  repo's own view-model tests and was **not** re-run for this task. Recorded for honesty: an **assignee** does see
+  `cancel` on a request they did not raise (observed on row `38` after `johnk` claimed a request `9004` raised), and
+  the screen routes that through `TransitionStatusAsync` as the deliberate "assignee backing out" path — so "a
+  non-raiser cannot cancel" is precise for a bystander and deliberately not true for the handler who claimed it.
 - [x] **T132** [P] [US2] Outcome 4 — give one Item the **smallest allowance the minutes screen accepts** through the
   minutes screen's own write (`sp_waitlist_request_item_allotted_minutes_update`), raise that Item's request and let
   its deadline genuinely expire. **No back-dated `requested_utc` and no hand-edited `target_time_utc`** (FR-044) —
   record the allowance, the deadline and the moment the row read overdue. · the running app
-- [ ] **T133** [P] [US2] Outcomes 5 and 6 — one handler hands back and a **different** handler takes it over; and a
+- [x] **T133** [P] [US2] Outcomes 5 and 6 — one handler hands back and a **different** handler takes it over; and a
   handler accepts a request **they raised themselves**, which must be **permitted** (FR-041). Prove the first
   handler's assignment is gone and the second handler's stands, then prove the self-accept completes. · the running app
+
+  Evidence recorded (2026-09-20, Debug build, driven through the running app's own card buttons). **Outcome 5** on
+  row `31` (`deliver-die`, `100-7`, raised by `6229`) — `johnk` (`6229`) accepted it (`assigned=6229`,
+  `accepted_utc=14:41:45`), gave it back (one row, back to `Pending`, `assigned=NULL`, `released_utc=14:42:17`),
+  then signed out and `test.setup` (`9006`) signed in, saw `accept` alone on that card and accepted it. The row now
+  reads `Accepted`, `assigned=9006`, `accepted_utc` still `14:41:45`, and `6229` appears nowhere on it — the first
+  handler's assignment is gone and the second handler's stands. **Outcome 6** on row `32` (`pickup-coil`, `100-6`,
+  raised by `9001`) — signed in as `test.admin` (`9001`), the raiser's own waiting request offered `accept` and
+  `cancel`; the self-accept was **permitted** (`status=Accepted`, `assigned=9001`, `accepted_utc=14:44:07`,
+  `requester=9001`) and the self-complete finished it (`Completed`, `completed_utc=14:44:28`). FR-041 holds: a
+  handler may claim and finish a request they raised themselves.
 - [x] **T134** [US2] Outcome 7 — the two-handler race: run **two copies of the application side by side**, both acting
   on the same request at the same moment (FR-043, SC-019), and record exactly one assignment, one `accepted_utc`, and
   the losing handler's plain-language report. Two ordinary instances of the same Debug build — no special harness. ·

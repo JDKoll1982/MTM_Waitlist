@@ -110,6 +110,31 @@ Started: 2026-09-20 07:25:58
   `mock_*` family and the retired request type/subtype catalog. `RetiredSymbolAuditTests.IsExemptFromSqlAudit`
   exempts any file named `rollback.sql` precisely so these can name an object that no longer exists. A create-less
   artifact folder is not corruption and must not be tidied away.
+- **A `ContentDialog`'s buttons carry the framework's own AutomationIds — `PrimaryButton`, `SecondaryButton`,
+  `CloseButton` — not empty ones.** Matching a dialog button on an empty AutomationId selects the *card's* button
+  instead, because the card's "Cancel request" button also has a visible Name of "Cancel request". Match on the Name
+  **plus** membership in that three-id set. The reason box is `AutomationId=''` with `Name='Reason (optional)'` —
+  match the Name (the shell's search box owns the id `TextBox`).
+- **A `ContentDialog` is drawn as a `Window` whose `BoundingRectangle` is the whole app window**, so a naive
+  descendant text dump returns the shell behind it. Bound the band from `confirmButton.Y - 200` to `confirmButton.Y`.
+- **`WaitlistViewPage_CardList` is virtualized.** Only viewport cards are realized; off-screen groups report
+  `Infinity`/`NaN` rectangles, so a driver must skip infinite rectangles and scroll with
+  `ScrollPattern.LargeIncrement` until the percentage stops moving. Once the list shrinks below the viewport,
+  `SetScrollPercent` and `Scroll` throw *"Operation is not valid due to the current state of the object"* — treat
+  that throw as "the whole list is already visible".
+- **`MainWindowHandle` first points at the splash window** (title `WinUI Desktop`), which has no UIA children; the
+  shell window replaces it. Re-resolve `FromElement(FromHandle($p.MainWindowHandle))` in a poll loop and probe for a
+  shell AutomationId (`WaitlistViewPage_AddRequestButton`) rather than sleeping or locating by title.
+- **A helper used inside a function that also `return`s a value must write with `Write-Host`, not `Write-Output`.**
+  `Write-Output` feeds the function's return value and corrupts it — this bit the `Log` helper and made
+  `Find-MtmById` receive an array of strings. Related: run a driver `.ps1` with
+  `powershell -NoProfile -ExecutionPolicy Bypass -File <path>`, never dot-source it — dot-sourcing lets the
+  script's `switch` value flow into the caller's pipeline.
+- **The request table's ids are not contiguous, and were not before this work either.** `waitlist_requests_queue`
+  currently holds 37 rows with ids `1–18, 28, 29, 31, 32, 33, 35–43, 47–51`; ids `19–27, 30, 34, 44, 45, 46` are
+  absent. T129's nineteen raised rows are exactly the nineteen listed, so nothing is missing from that population —
+  but ids `30` and `44`, named by the ticked T132 and T134, **are** absent, and neither of those two tasks carries
+  an evidence block in `tasks.md`. Read the id gaps before treating a missing row as a lost one.
 
 ---
 
@@ -307,3 +332,26 @@ Started: 2026-09-20 07:25:58
 - **The eighteen demo rows were left in place, and the two populations do not collide.** No task rewrites `seed_waitlist_requests_default`; the plan avoided every (building, work centre, item, answer) the demo rows occupy, and a join across the two populations returns no active collision.
 - **`auth_roles_catalog`'s primary key is `id`, not `role_id`.** The assignment table's foreign key is `role_id`, which makes the obvious join look correct and fail with `ERROR 1054`.
 - **Next iteration's scope.** 9 tasks remain: the Phase 9 running-app UI gates and criteria walk (T130, T131, T133, T139), the Phase 11 gates (T164, T165), Phase 12's T174, and Phase 13's T184 and T188.
+---
+## Iteration 7 - 2026-09-21
+**User Story**: Phase 9 Wave 8 - T130 + T131 + T133 (five of the seven request-handling outcomes, driven through the running Debug build)
+**Tasks Completed**: 
+- [x] T130: Outcomes 1 and 2. Outcome 1 on row 38 (`pickup-hopper`, 100-12, raised by 9004) - `Pending` -> accept as `johnk` (6229) -> `Accepted`/`assigned=6229`/`accepted_utc=14:39:52` -> complete -> `Completed`/`completed_utc=14:39:56`, card left the list. Outcome 2 on row 39 (`deliver-wrong-coil`, 100-12, raised by 9004) - accept `14:40:38` -> give back -> exactly one row, back to `Pending`, `assigned_material_handler=NULL`, `released_utc=14:40:42` -> second accept -> complete -> `Completed` `14:40:50` (FR-042).
+- [x] T131: Outcome 3. As `johnk` (6229) the raiser on row 47 (`pickup-riser-table`, V100-34, Vits Drive) the card offered `accept`,`cancel`; the "Cancel this request?" dialog showed its message and reason box; confirming left `status=Canceled`, `canceled_utc=14:47:26`, `cancellation_reason='Operator no longer needs the riser table.'`, `canceled_by_employee_number=6229`, and the card left the list. As `test.setup` (9006) row 33 (`deliver-dunnage`, 100-1806, raised by 9001) offered `accept` alone - no cancel affordance - and stayed `Pending`.
+- [x] T133: Outcomes 5 and 6. Outcome 5 on row 31 (`deliver-die`, 100-7, raised by 6229) - `johnk` accepted (`14:41:45`, assigned 6229), gave back (`released_utc=14:42:17`, assigned NULL), then `test.setup` (9006) accepted: `assigned=9006`, 6229 gone. Outcome 6 on row 32 (`pickup-coil`, 100-6, raised by 9001) - `test.admin` (9001) self-accepted (`14:44:07`, assigned 9001) and self-completed (`14:44:28`), so FR-041 self-accept is permitted.
+**Tasks Remaining in Story**: None - the unit is complete. 6 tasks remain in the feature: T139, T164, T165, T174, T184, T188.
+**Commit**: `feat(004-unified-card-item-picker): US2 request-handling outcomes 1, 2, 3, 5 and 6` (this entry's own commit, carrying `tasks.md` and `progress.md`)
+**Files Changed**: 
+- specs/004-unified-card-item-picker/tasks.md (T130, T131 and T133 ticked with their evidence blocks)
+- specs/004-unified-card-item-picker/progress.md (this entry, plus eight new `## Codebase Patterns` bullets)
+**Learnings**:
+- **A `ContentDialog`'s buttons have real AutomationIds - `PrimaryButton`, `SecondaryButton`, `CloseButton`.** The first driver matched on "empty AutomationId", which selected the *card's* own "Cancel request" button (same visible Name), so the confirmation never fired and the row stayed `Pending` while the log said the click succeeded. Match Name **plus** set membership. The reason box is `AutomationId=''` / `Name='Reason (optional)'` - match the Name, because the shell's search box owns the id `TextBox`.
+- **The dialog is drawn as a `Window` covering the whole app**, so a descendant text dump returns the shell behind it. Bound the read to `confirmButton.Y - 200` .. `confirmButton.Y`.
+- **The card list is virtualized, and `ScrollPattern` throws once the list fits the viewport.** Skip `Infinity`/`NaN` rectangles, scroll with `LargeIncrement` until the percentage stops moving, and treat "Operation is not valid due to the current state of the object" as "everything is already visible".
+- **`MainWindowHandle` points at the splash window first** (title `WinUI Desktop`, no UIA children). Poll for a shell AutomationId instead of sleeping, and never locate the window by title - the title is not stable.
+- **A helper inside a function that returns a value must use `Write-Host`.** `Log` used `Write-Output`, so `return $root` returned an array and `Find-MtmById` got a string. Run the driver with `-File`, never dot-sourced, or the `switch` value flows into the caller's pipeline.
+- **The cancel affordance is drawn from `CanCancelRequest`, which is `(isRequester && CanRequesterCancel(order)) || isAssignee`.** A bystander sees `accept` alone - that is the whole of "a non-raiser cannot cancel" at the screen. But an **assignee** does see `cancel` on a request they did not raise (observed on row 38 after `johnk` claimed a request `9004` raised), and `CancelRequestAsync` routes that through `TransitionStatusAsync`, which performs no ownership check. `TransitionStatusAsync`'s only guard is `p_expected_status`; the ownership rule lives entirely in `CanCancelRequest` plus `CancelOwnRequestAsync`.
+- **The give-back does not re-stamp `accepted_utc`, and `released_utc` survives a re-claim.** Row 39's `accepted_utc` still read the first claim's `14:40:38` after the second accept, and `released_utc` stayed set. FR-042 asks for neither, so this is recorded rather than fixed.
+- **The request table's ids are not contiguous.** 37 rows: `1-18, 28, 29, 31, 32, 33, 35-43, 47-51`. Ids `19-27, 30, 34, 44, 45, 46` are absent. T129's nineteen rows are exactly the nineteen listed, so that population is intact - but ids `30` and `44`, named by the **already-ticked** T132 and T134, do not exist, and neither of those two tasks carries an evidence block in `tasks.md`. Flagged here rather than smoothed over; a later reader must not treat the gap as a lost row.
+- **MySQL session time is UTC+5 on this host** (`14:39` when the wall clock read `09:39 -05:00`), and `NOW()` reports `Central Daylight Time`. The stored `*_utc` values are therefore not comparable to local time. Recorded as a fact to avoid a future false "clock bug" report.
+- **Next iteration's scope.** 6 tasks remain: Phase 9's T139 (the criteria walk), Phase 11's T164 and T165, Phase 12's T174, Phase 13's T184 and T188.
