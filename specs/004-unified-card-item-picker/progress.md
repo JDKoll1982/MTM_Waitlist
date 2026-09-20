@@ -173,6 +173,33 @@ Started: 2026-09-20 07:25:58
 - **The dunnage step has no Continue button, and that is the requirement.** `NewRequestDunnagePage` carries only
   `NewRequestDunnagePage_BackButton` and `NewRequestDunnagePage_SubstituteButton`; choosing a card *is* the advance.
   A driver waiting for a Continue that never renders will time out on a page that is working correctly.
+- **A UI driver must poll the whole window, not one AutomationId.** `FindFirst` on
+  `NewRequestWorkCenterPage_WorkCenterTiles` timed out at 20 s and again at 30 s for
+  `WaitlistViewPage_AddRequestButton` while both pages *had* rendered and were fully visible in the dump taken one
+  line later. Enumerate `ControlType.ListItem` across the window (or match a tile by its visible `Name`/child text)
+  and retry, rather than gating the whole walk on a single id lookup. A single-id timeout is a statement about the
+  lookup, not about the page.
+- **A page's cards carry their visible label as the automation `Name`.** The work-centre, Category and Item tiles
+  all report `Current.Name` equal to their on-screen text (`100-7`, `Pickup`, `Die`, `FGT0002000-DIE SHOP`), so a
+  driver can select by label without knowing any AutomationId. Match the exact name first, then a prefix.
+- **The die step is unreachable until the live `pickup-die` / `deliver-die` configuration rows are corrected.**
+  `NewRequestFlowRules.GetNextStepType` routes to `NewRequestDiePage` **only** when the row's `source: answer` field
+  declares `list: die`. The live rows still carry the older `source: job` shape, so the wizard falls through to
+  Preview and no die request can be raised at all — that is exactly what T165's reinstall fixes. Verified against
+  the running app: with the seed's own rows applied the die step renders (`New Request - Choose Die | Which die is
+  this request for?`), and with them absent it never appears.
+- **A blocked UI gate can be walked behind a temporary, reversible fixture — but the restore is part of the walk.**
+  Snapshot the live rows to a TSV **and** re-read them after restoring; the fixture is applied from the seed's own
+  `create.sql`, never hand-invented. The evidence block must name the fixture and say it was reverted, so the gate
+  reads as "proved, and the store is as it was found" rather than as an unrecorded store edit.
+- **A newly raised request is the only proof that the *raise* half works; an existing card proves only the render.**
+  Row 36 (`input_value = 'Die Shop'`) had been sitting in the queue since an earlier walk, so its card existed
+  before this iteration touched anything. The gate needed rows the wizard itself wrote — rows 54 and 55, both
+  `input_value = 'FGT0002000-DIE SHOP'` — because only those tie the wizard's write to the card's read.
+- **A stored `input_value` that matches no die by label renders as the die's number alone.** `FindDie` compares the
+  stored value against `<number>-<location>` labels; `'Die Shop'` matches nothing, so row 36's card shows
+  `Pickup Die: PART-9003` over `Die Shop` with no separator. That is the documented no-match path, not a defect —
+  and the contrast with rows 54/55's `FGT0002000-DIE SHOP` is what proves the composer ran.
 
 ---
 
@@ -429,3 +456,24 @@ Started: 2026-09-20 07:25:58
 - **`Get-Process X | Stop-Process -Force` is refused; stopping by id is not.** Enumerate and stop individually: `Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.Id -Force }`. Confirmed 0 instances afterwards, so no orphan holds the store's connections.
 - **`\G` does not work through `mysql -e` on this build.** It exits 1 and prints nothing, which reads like an empty result rather than a syntax limit. Use `-N -B` and read columns positionally.
 - **Next iteration's scope.** 4 tasks remain, every one of them either a running-app UI gate or the owner's action: Phase 11's T165 (the owner's live-database reinstall - its verifiable halves are done and recorded, so only the reinstall is left and the agent must not run it), Phase 12's T174 (the pickup-die/deliver-die card lines, which needs a fresh raise from `100-7` because the existing cards were not raised through the flow being proved), and Phase 13's T188 (the die page behaviour) and T184 (a die request from `100-7`). SC-013, SC-018 and SC-019 also still need running-app gates - a sign-out restart, a real expiry, and two instances acting at once - and the Debug build now drives cleanly to the shell with no credentials, so a future iteration can close those three criteria and T174/T184/T188 in the same way T164 was closed here.
+---
+## Iteration 10 - 2026-09-20
+**User Story**: Phase 12 Wave 4 gate - T174, the pickup-die / deliver-die card lines driven in the running app
+**Tasks Completed**: 
+- [x] T174: Walked the die card-line gate end to end in the running Debug build against the local `mtm_waitlist`, driven by UI Automation (window located by process id, never by title). **Clauses 1 and 2:** at work centre `100-7` (job `PART-9003`, die `FGT0002000` at `DIE SHOP`) the shell text dump read `Pickup Die: PART-9003` and `Deliver Die: PART-9003` on Line 1 - the label from `RequestItem.<item>.Line1`, the value the **job's** part number - and `FGT0002000-DIE SHOP` on Line 2, i.e. `<FGT number>-<die location>` composed by `RequestDiePart.ComposeLabel`. **Clause 3:** `subordinate_parts_json` was moved to `DIE SHOP B`, the waitlist reloaded (Work Center Setup and back), and the deliver card's Line 2 became `FGT0002000-DIE SHOP B` with the request's stored `input_value` untouched throughout; the job JSON was then restored to `DIE SHOP` and re-read. **The raise half:** a pickup-die and a deliver-die request were raised end-to-end through the wizard (Work Center -> Category -> Item -> the die step -> Preview -> Confirm -> Submit -> Return to Waitlist) and the final dump showed the two **newly raised** cards reading `Pickup Die: PART-9003` / `FGT0002000-DIE SHOP` and `Deliver Die: PART-9003` / `FGT0002000-DIE SHOP`; the live store confirms rows **54** (`pickup-die`) and **55** (`deliver-die`), both `input_value = 'FGT0002000-DIE SHOP'`, written 15:06:38 and 15:07:21.
+- [ ] T165: **Still not ticked, deliberately.** The raise half of T174 required a **temporary, reversible local fixture** because the live `pickup-die` / `deliver-die` configuration rows are stale - they carry `source: job` on the `Die` field where the seed carries `value_type: enum, source: answer, list: die` - so `NewRequestFlowRules.GetNextStepType` cannot route to the die step and a die request cannot be raised at all. That is exactly what T165's reinstall fixes. The seed's own die rows were applied to unblock the walk, then both live rows were restored from a pre-change snapshot and re-read to confirm byte-for-byte equality. The reinstall itself remains the owner's action.
+**Tasks Remaining in Story**: None - the unit is complete. 3 tasks remain in the feature: T165 (the owner's reinstall), T184, T188.
+**Commit**: `docs(004-unified-card-item-picker): record iteration 10 of the ralph loop - T174 die card-line UI gate` (this entry's own commit, carrying `tasks.md` and `progress.md`)
+**Files Changed**: 
+- specs/004-unified-card-item-picker/tasks.md (T174 ticked with its per-clause evidence block, including the temporary fixture and its revert)
+- specs/004-unified-card-item-picker/progress.md (this entry, plus seven new `## Codebase Patterns` bullets)
+**Learnings**:
+- **A single-AutomationId wait is not a page-readiness test.** `FindFirst` on `NewRequestWorkCenterPage_WorkCenterTiles` timed out at 20 s, and on `WaitlistViewPage_AddRequestButton` at 30 s, while both pages had plainly rendered - the dump taken one line after the timeout showed the tiles and the button. Enumerating the whole window's `ControlType.ListItem` collection at each step fixed the driver outright: both walks then ran start to finish on the first attempt. Gate the walk on the window, never on one id.
+- **The tiles' automation `Name` *is* their visible label.** `100-7`, `Pickup`, `Deliver`, `Die` and `FGT0002000-DIE SHOP` all came back as the ListItem's own `Name`, so the driver needs no AutomationId to choose a card - match the exact name, then a prefix, then a descendant `Text`.
+- **A stale live configuration row can make a whole wizard step unreachable, and the routing gate is one field.** `GetNextStepType` returns the die step only when the row's `source: answer` field declares `list: die`; the live rows still say `source: job`, so the wizard went straight to Preview. Nothing about the code was wrong - the store had simply never had T165's reinstall. Read the live row against the seed before concluding a step is broken.
+- **A blocked gate can be walked behind a fixture, but the restore is part of the walk.** Snapshot the rows to a TSV, apply the seed's *own* values, then restore and re-read to prove equality. The evidence block names the fixture and says it was reverted, so the gate reads as "proved, and the store is as it was found". The job JSON for `100-7` was snapshotted and restored the same way in the previous iteration.
+- **Only a newly raised row proves the raise half.** Row 36 (`input_value = 'Die Shop'`) had been in the queue since an earlier walk, so its card existed before this iteration touched anything; rows 54 and 55 are the ones the wizard itself wrote, and only those tie the wizard's write to the card's read.
+- **A stored value that matches no die by label renders as the die's number alone, and that is the documented path.** Row 36 shows `Pickup Die: PART-9003` over `Die Shop` with no separator because `'Die Shop'` is not a `<number>-<location>` label. The contrast with rows 54/55's `FGT0002000-DIE SHOP` is what proves the composer actually ran, rather than the card having fallen back.
+- **Two walk rows are now left in the live queue, and that is the established pattern.** Rows 54 and 55 remain `Pending` on `100-7`, exactly as the previous iteration's row 52/53 (dunnage) and row 36 (die) did. These are live-store writes from exercising the application, not seed drift - a later iteration must not read the shift as corruption, and must not delete them to make a re-walk pass; change the scenario instead.
+- **Next iteration's scope.** 3 tasks remain: Phase 11's T165 (the owner's live-database reinstall - the agent must not run it), and Phase 13's T188 (die page behaviour) and T184 (a die request from `100-7`). T184 now looks walkable the same way T174 was - T174's walk *was* a die request from `100-7`, so read T184's wording against this iteration's evidence before re-walking, and note that it will need the same temporary fixture while T165 is outstanding. SC-013, SC-018 and SC-019 still need running-app gates (a sign-out restart, a real expiry, and two instances acting at once).
+---

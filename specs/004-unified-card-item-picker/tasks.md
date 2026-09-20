@@ -1672,11 +1672,37 @@ the code cannot disagree. · `WeekendProject/Documents/Request-Config-Template.c
 /nodeReuse:false` → `0 Error(s)`; `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug
 -p:Platform=x64` → `Failed: 0`. Evidence recorded: build succeeded, `total: 1064, failed: 0, succeeded: 1037,
 skipped: 27`. · `MTM_Waitlist.sln`, `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
-- [ ] **T174** **UI gate.** In the running app, raise a pickup-die and a deliver-die request from a work centre whose
+- [x] **T174** **UI gate.** In the running app, raise a pickup-die and a deliver-die request from a work centre whose
 job carries a die (the seed's `100-7`), and prove from a text dump rather than from the code: Line 1 reads
 `Pickup Die: <the job's part number>` / `Deliver Die: <the job's part number>`, and Line 2 reads
 `<FGT number>-<die location>`. Then move the die's location in the store and reload, to prove the card follows the job
 rather than a stale copy. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
+  — **VERIFIED 2026-09-20** against the running app (driven by UI Automation; the window is located by process id,
+  never by title). Work centre `100-7`, whose job is `PART-9003` with die `FGT0002000` at `DIE SHOP`.
+  **Clause 1 — Line 1.** The shell text dump read `Pickup Die: PART-9003` and `Deliver Die: PART-9003`: the label
+  comes from `RequestItem.<item>.Line1` and the value is the **job's** part number, not the die's.
+  **Clause 2 — Line 2.** Both cards' second line read `FGT0002000-DIE SHOP`, i.e. `<FGT number>-<die location>`,
+  composed by `RequestDiePart.ComposeLabel` from the job's die row.
+  **Clause 3 — the card follows the job, not a stale copy.** `subordinate_parts_json` for `100-7` was moved to
+  `DIE SHOP B`, the waitlist was reloaded (Work Center Setup and back), and the deliver card's Line 2 became
+  `FGT0002000-DIE SHOP B`; the stored `input_value` of the existing request was unchanged throughout. The job JSON
+  was then restored to `DIE SHOP` and re-read.
+  **The raise half.** A pickup-die and a deliver-die request were raised end-to-end through the wizard
+  (Work Center → Category → Item → the die step → Preview → Confirm → Submit → Return to Waitlist) and the final
+  dump showed the two **newly raised** cards reading `Pickup Die: PART-9003` / `FGT0002000-DIE SHOP` and
+  `Deliver Die: PART-9003` / `FGT0002000-DIE SHOP`. The live store confirms them: rows **54** (`pickup-die`) and
+  **55** (`deliver-die`), both `input_value = 'FGT0002000-DIE SHOP'`, written at 15:06:38 and 15:07:21.
+  **A temporary, reversible fixture was required for the raise half, and it has been reverted.** The live
+  `waitlist_request_item_configs` rows for `pickup-die` / `deliver-die` are **stale** — they still carry
+  `source: job` on the `Die` field instead of the seed's `value_type: enum, source: answer, list: die` — so
+  `NewRequestFlowRules.GetNextStepType` cannot route to the die step and a die request cannot be raised at all.
+  That is precisely what **T165**'s reinstall fixes. The seed's own die rows were applied locally to unblock the
+  walk, then the two live rows were restored byte-for-byte from a pre-change snapshot and re-read to confirm it.
+  Recorded as a residual: until T165 runs, the die step is unreachable on the live store, and the two walk rows
+  54/55 remain in the queue as Pending (the same way the earlier walk's row 36 did).
+  **Note on Line 2 for the pre-existing row 36:** it carries `input_value = 'Die Shop'`, which matches none of the
+  job's dies by label, so it renders as the die's number alone (`Die Shop`) rather than as a `<number>-<location>`
+  pair — the documented no-match behaviour of `WaitlistRequestTitles.FindDie`, not a defect.
 - [x] **T175** **Live database validation.** No schema change here, so this is the read path: confirm
 `sp_setup_active_jobs_latest_by_work_center_get` returns the job's `part_number` and the die row's `PartNumber` /
 `Location` for a real active job, so the two lines have something to resolve against outside the seed. · local
@@ -1688,8 +1714,16 @@ job — a correction to this task's original wording) and returned **8** rows; f
 **Checkpoint — a die card says which part, which die, and where it is.** Both die Items render a first line naming the
 requesting job's part number and an identifier carrying the die's own number and location, read from the job; the
 destination answer no longer changes either line; and an Item that names none of these tokens is provably untouched.
-FR-052, FR-053, the amended FR-005 and SC-024 are provable from this phase's tests alone, with the UI walk and the
-live read the two gates still open.
+FR-052, FR-053, the amended FR-005 and SC-024 are provable from this phase's tests alone, and **both gates are now
+closed**: T175 read the two lines' source back out of the live `sp_setup_active_jobs_latest_by_work_center_get`
+(`100-7` carries `part_number = PART-9003` and the die row `FGT0002000` / `DIE SHOP`), and T174 raised both die
+requests in the running app and read the rendered cards from a text dump — including the clause that the card follows
+the **job**, not a stale copy, proved by moving the die's location in the store and reloading. The one thing T174
+could **not** do on the live store as it stands is raise a die request without help: the live `pickup-die` /
+`deliver-die` configuration rows are stale (`source: job` where the seed says `value_type: enum, source: answer,
+list: die`), so `NewRequestFlowRules.GetNextStepType` never routes to the die step. T174 was walked behind a
+temporary, reversible local fixture applied from the seed's own `create.sql` and then reverted; **T165's reinstall is
+what removes that caveat**, and until it runs the die step is unreachable on the live store.
 
 ---
 
