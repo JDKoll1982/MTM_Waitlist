@@ -61,6 +61,12 @@ applyTo: "**/*.{cs,xaml,resw}"
 - Treat XAML compile errors as build-blocking; verify with `dotnet build` or the relevant test target before considering the patch complete.
 
 ## Enforcement
-- Naming violations must hard-fail PR checks.
+- Naming violations must hard-fail PR checks **on the files a pull request changed**. That is the check's
+  real scope: `.github/workflows/csharp-xaml-naming-compliance.yml` builds the changed-file list from the
+  PR diff and validates only those files, so a run with no changed C#/XAML/RESW files passes by design and
+  is not evidence that the tree is clean.
 - Exceptions require explicit written PR approval.
-- Legacy naming must be bulk normalized (no grandfathering mode).
+- Pre-existing violations are **grandfathered and tracked in a report** —
+  `.github/reports/csharp-xaml-naming-violations.md` — rather than normalized in a bulk pass (decision
+  **D-4**, 2026-09-20). New and changed code still hard-fails; the report is the backlog for a later
+  normalization pass, taken one rule at a time.

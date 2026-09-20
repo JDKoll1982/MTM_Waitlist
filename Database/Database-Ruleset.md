@@ -40,7 +40,7 @@ This document applies your completed naming conventions and database architectur
 
 ## Core Startup Tables
 - `core_users_profiles`
-- `core_workstations_registry`
+- `core_computers_registry`
 - `auth_roles_catalog`
 - `auth_roles_assignments`
 - `auth_sessions_tokens`
@@ -77,7 +77,8 @@ This document applies your completed naming conventions and database architectur
 - View artifacts live in `Database/Views/<view_name>/create.sql` and `rollback.sql`.
 - Seed artifacts live in `Database/Seeds/<seed_name>/create.sql` and `rollback.sql`.
 - Validation artifacts live in `Database/Validation/<validation_name>/validate.sql`.
-- FluentMigrator is the recommended runner layer for executing the reviewed SQL artifacts.
+- The reviewed SQL artifacts are the source of truth and are run as files; there is no FluentMigrator runner
+  and no migration-runner layer in this repository.
 - Production rollout: manual DBA-reviewed promotion with rollback prepared.
 - Naming drift in SQL must fail CI/PR checks.
 - Exceptions require explicit written approval in PR notes.

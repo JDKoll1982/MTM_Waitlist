@@ -1106,10 +1106,45 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
   and record **`Failed: 0`** *with* T118–T122 in place, not instead of them. Environment-gated tests stay
   `Assert.Inconclusive` and are recorded as skipped; no gate is weakened to go green. ·
   `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
-- [ ] **T137** **Live database validation.** Apply and reverse every paired `create.sql` / `rollback.sql` the batch
+- [x] **T137** **Live database validation.** Apply and reverse every paired `create.sql` / `rollback.sql` the batch
   touches against a local `mtm_waitlist`, confirm `AllSeeds.sql` and `Bootstrap/update_table_descriptions.sql` agree
   with the files on disk, and confirm the seven prepared situations now resolve from real work centres. **The
   reinstall is the owner's action, never the agent's.** · `Database/**`
+
+  **Recorded evidence (2026-09-20, local `mtm_waitlist`, MySQL 9.6.0 @ 127.0.0.1).** Run under the owner's
+  documented permission for the live round-trip; the plant host stayed unreachable and was never touched, and no
+  reinstall was performed.
+
+  - *Paired artifacts applied.* All three `create.sql` files the batch touches were applied by piping the artifact
+    into `mysql` (the client `source` command does not work under `-e`), each exiting `0`:
+    `StoredProcedures/sp_waitlist_request_status_update/create.sql`,
+    `Seeds/seed_waitlist_request_item_configs/create.sql`,
+    `Seeds/seed_setup_active_jobs_eight_configurations/create.sql`. Post-state verified: the procedure now exposes
+    **7 parameters with `p_expected_status` present**, `waitlist_request_item_configs` holds **23 rows**, and
+    `setup_active_jobs` holds all **seven prepared situations** (`100-3`, `100-6`, `100-7`, `100-18`, `100-1806`,
+    `V100-33`, `V100-34`).
+  - *Paired artifacts reversed.* All three `rollback.sql` files were applied the same way, each exiting `0`, and each
+    reversed its artifact: the procedure row count dropped to **0**, `waitlist_request_item_configs` to **0 rows**,
+    and `setup_active_jobs` to **0 rows at those work centres**, with **0 rows remaining at `900-*`** (the retired
+    fixture stations stay retired). The creates were then re-applied and the store returned to its pre-round-trip
+    state.
+  - *Seven situations resolve from real work centres.* Resolved through the real read path
+    (`sp_setup_active_jobs_latest_by_work_center_get`, which takes **no arguments** and returns every work centre's
+    latest job) rather than by reading the table: `100-3` Coil; `100-6` Component; `100-7` Die; `100-18` Component;
+    `100-1806` no subordinate parts plus dunnage; `V100-33` all four plus dunnage; `V100-34` none — the absent-job
+    case. **Zero rows at `100-8`** and **zero rows at `900-*`**. Three rows require an enum and carry NULL options.
+  - *FR-043 proved behaviourally, not by inspection.* Inside a transaction on a real queued request: a **stale**
+    `p_expected_status` updated **0 rows** and left `assigned_material_handler` NULL; a **matching**
+    `p_expected_status` updated **1 row** and set `assigned_material_handler`; an **absent/empty**
+    `p_expected_status` kept the old unguarded behaviour and updated **1 row**. `ROLLBACK` left the row untouched.
+  - *`AllSeeds.sql` and `Bootstrap/update_table_descriptions.sql` agree with the files on disk.*
+    `update_table_descriptions.sql` carries **no** fixture-station references, so there was nothing to remove there;
+    `AllSeeds.sql` line 1205 carries the deliberate **RETIRED** marker block recording the fixture seed's removal and
+    its replacement by the real-work-centre seed. No `source` directive drift: the master file mirrors the seed
+    files' content.
+  - *Nothing else moved.* `waitlist_requests_queue` still holds **24 rows**; the seven `setup_active_jobs` rows were
+    restored to their exact pre-round-trip contents, including `100-3`'s live `WO-055691` row that a real Setup save
+    had left there on 2026-09-14.
 - [x] **T138** **Sign-out gate.** On a computer where "remember me" is set and the session had been restored, choose
   Sign out from the badge and prove the application **restarts to the sign-in screen** rather than restoring the
   session. The displayed name alone is not evidence (FR-034, SC-013). · the running app
@@ -1477,10 +1512,13 @@ job carries a die (the seed's `100-7`), and prove from a text dump rather than f
 `Pickup Die: <the job's part number>` / `Deliver Die: <the job's part number>`, and Line 2 reads
 `<FGT number>-<die location>`. Then move the die's location in the store and reload, to prove the card follows the job
 rather than a stale copy. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
-- [ ] **T175** **Live database validation.** No schema change here, so this is the read path: confirm
+- [x] **T175** **Live database validation.** No schema change here, so this is the read path: confirm
 `sp_setup_active_jobs_latest_by_work_center_get` returns the job's `part_number` and the die row's `PartNumber` /
 `Location` for a real active job, so the two lines have something to resolve against outside the seed. · local
-`mtm_waitlist`
+`mtm_waitlist` — **VERIFIED 2026-09-20**: the procedure takes **no arguments** (it returns every work centre's latest
+job — a correction to this task's original wording) and returned **8** rows; for `100-7` it carries
+`part_number = PART-9003`, `sequence_number = 10` and a `subordinate_parts_json` holding the Die row `FGT0002000` /
+`DIE SHOP`, which is exactly what FR-052/FR-053's two lines resolve against
 
 **Checkpoint — a die card says which part, which die, and where it is.** Both die Items render a first line naming the
 requesting job's part number and an identifier carrying the die's own number and location, read from the job; the
@@ -1533,34 +1571,444 @@ lets an operator choose among several dies and raises one request for each (FR-0
   Evidence recorded: build succeeded, `total: 1089, failed: 0, succeeded: 1062, skipped: 27`. · `MTM_Waitlist.sln`,
   `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
 
-### Wave 3 — One request per die (FR-054) — **BLOCKED, not built**
+### Wave 3 — One request per die (FR-054) — **BUILT 2026-09-20; only the two UI gates remain**
 
-- [ ] **T180** [US1] **Decide where a chosen die is stored per request.** A die request stores exactly one free
-  value: `waitlist_requests.input_value`, and for `pickup-die` that column already holds the operator's
-  **destination** answer, which the request page renders as a declared `answer`-sourced field. A multi-die run must
-  record, per entry, both **which die** and that destination, and one column cannot hold both. Verified against the
-  live schema: the table has no die column and no second answer column. **Blocks T181–T183.** · local `mtm_waitlist`
-- [ ] **T181** [US1] **Carry a per-entry die identifier** (FR-054): whichever store T180 chooses — the existing
-  `input_value`, or a new column with the procedure pair and its `create.sql` / `rollback.sql` that a schema change
-  requires — a raised die request must resolve *its own* die rather than the job's first one, which is what the card
-  does today and what makes several entries from one job indistinguishable.
-- [ ] **T182** [US1] **Build the die step** (FR-054): `NewRequestDieViewModel` + `NewRequestDiePage`, reached because
+**The decision (T180, answered 2026-09-20).** A die always goes to its **home location** — the location the
+requesting job records on that die's own subordinate row — and **the person is never asked where it goes**. That
+retires `pickup-die`'s `Take To` question, and retiring it is what frees the request's one value column:
+**`input_value` carries which die the request is for**, so several entries from one job stay distinguishable.
+**No schema change is made** — no `die_identifier` column, no procedure pair, no aggregate edit, no description
+change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (2026-09-20, T180)" and
+`research.md` D22.
+
+- [x] **T180** [US1] **Decide where a chosen die is stored per request — ANSWERED 2026-09-20: reuse the existing
+  `input_value` column and retire the destination question.** The owner's decision is a product one: a die goes to
+  its home location, so nothing about where it goes is asked or stored, and the column that held the destination is
+  free to hold the die. The two alternatives T180 named are settled — no `die_identifier` column, and no second
+  answer column — and the propagation list is D22's "Consequences carried into the code". Verified against the tree:
+  `research.md` D22, `spec.md` FR-053/FR-054 and the decision note, `data-model.md` §6/§7, all three contracts, and
+  the CSV's two die rows carry the same answer. **Unblocks T186, T181–T183.** ·
+  `specs/004-unified-card-item-picker/{spec.md,research.md,data-model.md,contracts/}`
+- [x] **T186** **Tests — write these first; they must fail before the implementation lands.** (FR-054, D22) A
+  raised die request resolves *its own* die rather than the job's first one, so two entries raised from one
+  job are distinguishable; **select-all raises one request per die the job carries**, exactly as selecting them
+  singly does; **the request page lists every die location the job carries** (T187); the configuration row for each
+  die Item no longer requires a destination and names the
+  `die` job list; and **no source file, catalog row or configuration row names the `destination` token any more** —
+  the assertion that fails if the retired question comes back. **Two tests name the retired question today and must
+  move with it**, since both currently exercise the destination as live behaviour:
+  `MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs`
+  (`ResolveLine2_PickupDie_ShowsTheDieNumberAndLocationWhateverTheChosenDestination`) and
+  `MTM_Waitlist.Tests/Module_Settings/Services/RequestItemConfigurationServiceTests.cs` (its fixture mirrors the
+  `Die Shop` / `Home Location` / `Other` options). · new tests beside
+  `MTM_Waitlist.Tests/Module_Settings/RequestItemConfigurationServiceTests.cs`,
+  `MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs`,
+  `MTM_Waitlist.Tests/Module_Settings/RequestItemCatalogTests.cs` — **VERIFIED 2026-09-20 (iteration 2).** Written
+  before the implementation and run red against it. The suite is
+  `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestDieViewModelTests.cs` (8 cases: every die bound with its
+  home location, card toggle, select-all, refuse-with-nothing-chosen, two dies recorded and the step moves on,
+  return-visit marks the dies again, a job with no die drops no cards),
+  `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestOneRequestPerDieTests.cs` (6 cases: one draft per die,
+  one draft when nothing was chosen, the first draft, the confirm step raising one request per die, the count
+  reported for several, silence for one) and
+  `MTM_Waitlist.Tests/Module_Settings/Services/DestinationQuestionRetirementTests.cs` (6 cases: the Line 2 context
+  carries no destination, no production source registers or passes the token, no catalog row names it, no
+  configuration row asks where the die is going, both die rows ask which die from the job's own list, both die rows
+  list the location the job records). The two named tests moved with the question:
+  `ResolveLine2_PickupDie_ShowsTheDieNumberAndLocationWhateverTheChosenDestination` is now
+  `ResolveLine2_PickupDie_ShowsTheDieTheRequestIsFor` in `WaitlistRequestTitlesTests.cs`, and
+  `RequestItemConfigurationServiceTests.cs` carries no `Die Shop` / `Home Location` / destination fixture any more.
+- [x] **T181** [US1] **Carry the chosen die on the request and retire the destination question in the same change**
+  (FR-054, D22): `input_value` carries the chosen die, and the retirement moves every artifact at once — the
+  `waitlist_request_item_configs` seed rows for both die Items (`pickup-die` loses its required answer, prompt,
+  value type and options; **both** die rows declare the `die` job list, which moves `deliver-die` off
+  `direct-to-confirmation`), `AllSeeds.sql`, the CSV's two die rows, the three contracts, `spec.md` and
+  `data-model.md`, so the row spec, the contracts and the code cannot disagree. **No schema change**: no column, no
+  procedure pair, no aggregate and no description file. · `Database/Seeds/seed_waitlist_request_item_configs/create.sql`,
+  `Database/Seeds/AllSeeds.sql`, `WeekendProject/Documents/Request-Config-Template.csv`,
+  `specs/004-unified-card-item-picker/{spec.md,data-model.md,research.md}`,
+  `specs/004-unified-card-item-picker/contracts/{card-and-identifier.md,request-picker-flow.md,item-configuration.md}`
+  — **VERIFIED 2026-09-20 (iteration 2).** Both die rows in `create.sql` and `AllSeeds.sql` now read
+  `'collect-input-then-confirm', 1, 'enum'` with `NULL` options and the answer field
+  `'label','Die','value_type','enum','source','answer','list','die','order',1,'is_required',TRUE`, so
+  `deliver-die` left `direct-to-confirmation` and both Items reach the die step. `destination` is gone from the
+  Line 2 token set, from the catalog, and from every scanned source, catalog row and configuration row — the
+  retirement test's three patterns match nothing. **The CSV needed no edit**: rows 3 and 17 already carried the
+  2026-09-20 D22 note from the decision itself. The docs moved with it: `spec.md` (acceptance scenario 2, SC-024,
+  the retired-question bullet, and the `pickup-component` note), `contracts/request-picker-flow.md` §10 (the
+  "first die" rule replaced by "every die, in the job's own order"), and `contracts/item-configuration.md` §5 (the
+  `die` value added to the `list` table). `data-model.md` and `research.md` D22 already recorded the retirement.
+- [x] **T182** [US1] **Build the die step** (FR-054): `NewRequestDieViewModel` + `NewRequestDiePage`, reached because
   the chosen Item's configuration names the `die` job list, offering the job's dies as selectable cards that may be
-  selected **more than once**, refusing to continue with nothing selected.
-- [ ] **T183** [US1] **Raise one request per selected die** (FR-054): the confirmation step submits one request for
-  each die the operator selected — never one request carrying several dies — and reports how many were raised.
+  selected **more than once**, refusing to continue with nothing selected, and offering a **select all** action so
+  every die the job carries can be taken in one action. Put the check **before** the
+  `!requiresAnswer || answerCaptured → Preview` branch in `NewRequestFlowRules.GetNextStepType`, exactly as the
+  dunnage branch sits, or `deliver-die` never reaches the step. Each card shows the die's number and its **home
+  location** through `RequestDiePart.ComposeLabel`, so the operator chooses by seeing where the die lives. ·
+  `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestDieViewModel.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestDieOption.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowRules.cs`, `Module_Waitlist/Views/NewRequestDiePage.xaml`,
+  `Module_Waitlist/Views/NewRequestDiePage.xaml.cs`, `Services/DependencyInjection/ServiceRegistrationExtensions.cs`,
+  `Strings/en-us/Resources.resw` — **VERIFIED 2026-09-20 (iteration 2).** The step is built and wired: the `die`
+  branch sits in `GetNextStepType` **before** the `!requiresAnswer || answerCaptured → Preview` return, beside the
+  dunnage branch, so both die Items reach it; the page is a `GridView` of the job's dies with
+  `IsItemClickEnabled` + `SelectionMode="None"` so a card toggles instead of navigating, an accent selection
+  outline, and Back / Select all / Continue where Continue is refused with nothing chosen; the page is registered
+  through `PageService.Configure` and resolved by the view model's full name like every sibling. Its parameterless
+  constructor satisfies `PageActivationAuditTests` without an exemption, and it is deliberately **not** added to
+  `NewRequestWizardAdvanceMarkupTests`' choice-step list, which asserts the absence of `ContinueCommand`. Evidence:
+  clean build and the 8 `NewRequestDieViewModelTests` cases above, all green.
+- [x] **T187** [US1] **Show every die location on the request page** (FR-057, added 2026-09-20): the request page
+  currently resolves the job's **first** die, so a job carrying several dies shows one location and hides the rest.
+  It must list **every** die location the requesting job carries, read once per work centre rather than once per
+  die, and invent nothing for a job that cannot supply a location. · `MTM_Waitlist.Settings/Services/RequestJobFieldValues.cs`,
+  `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs`, `Strings/en-us/Resources.resw` —
+  **VERIFIED 2026-09-20 (iteration 2).** `RequestJobFieldValues.Resolve` now answers `die` with **every** die the
+  job carries, in the job's own order, each composed through `RequestDiePart.ComposeLabel`, and `pickup location`
+  with **every** location those dies record, blank entries dropped — a job recording no location yields nothing
+  rather than a substitute, and the snapshot's primary die is used **only** when the job carries no die row of its
+  own. The read was already once per work centre (`WaitlistViewDetailViewModel._jobAvailabilityCache`), which the
+  contract's §10 row still states. `WaitlistRequestTitles` prefers the die the request itself stored, so two
+  entries from one job stay distinguishable. Evidence: `RequestJobFieldValuesTests`,
+  `WaitlistRequestTitlesTests` and `WaitlistViewDetailFieldTests` green in the full run below.
+- [ ] **T188** **UI gate for the new page behaviour.** Walk T187 in the running app: open a die request raised from
+  a job carrying **two** dies and prove from a text dump that the request page names **both** locations, not only
+  the request's own die. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
+- [x] **T183** [US1] **Raise one request per selected die** (FR-054): the confirmation step submits one request for
+  each die the operator selected — never one request carrying several dies — and reports how many were raised. ·
+  `MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestFlowState.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSummaryViewModel.cs`,
+  `Strings/en-us/Resources.resw` — **VERIFIED 2026-09-20 (iteration 2).** `NewRequestFlowState.ToDrafts()` yields
+  one draft per selected die (and the single draft the wizard always raised when none was chosen), and
+  `NewRequestSummaryViewModel.SubmitAsync` submits each draft in turn, counting the ones that were raised, then
+  reports the count in plain language when more than one went through. Each draft carries its own die in
+  `InputValue`, so several entries from one job stay distinguishable with no schema change. Evidence: the 6
+  `NewRequestOneRequestPerDieTests` cases, green.
 - [ ] **T184** **UI gate.** In the running app, raise a die request from the seed's `100-7` and prove from a text
   dump that the card and the request page both carry the die's number **and** its location, then do the same for a
   job carrying two dies and confirm one entry appears per die selected. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
-- [ ] **T185** **Live database validation.** Confirm the live `100-3` job offers **no** die Item — its only die row is
+- [x] **T185** **Live database validation.** Confirm the live `100-3` job offers **no** die Item — its only die row is
   the `No Die` placeholder — while `100-7` and `V100-33` do, and that the die values resolve from the live read
-  rather than the seed. · local `mtm_waitlist`
+  rather than the seed. · local `mtm_waitlist` — **VERIFIED 2026-09-20** against the local store: the Die rows carried
+  are `100-3` → `FGT0001-01` described **`No Die`** with an **empty Location** (the placeholder FR-055 refuses),
+  `100-7` → `FGT0002000` / `DIE SHOP`, `V100-33` → `FGT0002001` / `PRESS BAY`. Read through
+  `JSON_TABLE(setup_active_jobs.subordinate_parts_json)`, so the split is the live data's, not the seed's
 
-**Checkpoint — half closed, and the open half named.** FR-055, FR-056, the amended FR-052/FR-053 and SC-025/SC-026
-are provable from this phase's tests alone: a job whose only die row is the placeholder is offered no die Item, a die
-with no known location renders as its number alone, and the request page carries the die and its location as the card
-does. FR-054 is **not** built: it waits on T180's decision, because a die request has one value column and it is
-already spent on the destination. Reporting this phase as complete would be false.
+**Checkpoint — half closed, the decision taken, and the build now landed.** FR-055, FR-056, the amended
+FR-052/FR-053 and SC-025/SC-026 are provable from this phase's tests alone: a job whose only die row is the
+placeholder is offered no die Item, a die with no known location renders as its number alone, and the request page
+carries the die and its location as the card does. **T180 is answered** (2026-09-20): a die goes home, the
+destination question retires, and the freed `input_value` column carries the chosen die with no schema change.
+**FR-054 and FR-057 are now built** (2026-09-20, iteration 2): T186, T181, T182, T183 and T187 are closed — the die
+step exists, both die Items reach it, one request is raised per die selected, and the request page lists every die
+location the job carries. What remains open in this phase is the two **running-app UI gates**, T184 and T188: they
+need a sign-in the headless environment cannot perform (the masked `'0000'` credentials force a password change),
+so the build is complete but its on-screen behaviour is not yet walked. Reporting this phase as complete would
+still be false.
+
+---
+
+## Phase 14: User Story 7 — The codebase is honest about itself (maintainer-facing)
+
+This phase exists so the **non-feature** readiness work has a carrier an automated implementer can read.
+Everything here is taken from `READINESS-CHECKLIST.md` **Phases 2–4**, which remains the itemised source of
+detail: this phase is the work list, that file is the argument for each item.
+
+**Scope for an automated iteration.** A work unit is **any unchecked task in this file, earliest first** — the
+`[US#]` follow-up batches above included. Several sections of this file are named *Follow-Up Batch* rather than
+*User Story*; they are user-story work all the same and they are **in scope**. Do not read the absence of a
+"User Story" heading as a signal that nothing remains, and **do not emit the completion token while any task in
+this file is unchecked.**
+
+**Owner permission granted 2026-09-20 for the first two of these. What that unlocks was established by running
+it, not assumed:**
+
+- **The live `mtm_waitlist` round-trip — permitted and doable.** The store exists on this machine (**23 tables**,
+the **seven prepared jobs** including `100-3`, `100-7` and `V100-33`), the plant host is unreachable and
+`MySqlHostFallback` correctly points the stores at localhost. Apply and reverse the paired artifacts here. One
+limit worth knowing: the shipped installer `Database/install_local_database.bat` is **GUI-only** — a `wscript` VBS
+that uses InputBox dialogs — so a *full* reinstall still needs a person at the keyboard. Use the SQL artifacts
+directly instead of driving that installer.
+- **The in-app UI gates — permitted and reachable.** **Verified 2026-09-20:** with both connection-string
+environment variables set to the local store, the built app reaches the **shell** with **no sign-in** — it
+auto-signs-in as `johnk` — showing the Waitlist with real requests and working Accept/Cancel actions, and with the
+cached-data bar correctly reporting Infor Visual unreachable. So **T164 and T174 can be walked by UI Automation**.
+**T184 and T188 are still open, and the reason has changed:** they test T182's die step and T187's page, and both
+now **exist** (2026-09-20, iteration 2) — what they still need is a signed-in session the headless environment
+cannot produce, because the masked `'0000'` credentials force a password change on first use.
+- **The 2026-10-12 SC-007 / SC-008 measurement — impossible here, and the reason is worse than wall time.**
+Two facts found in the service on 2026-09-20, neither of which 30 days of waiting fixes: `RefreshRunRecordStore`
+and `BackupArtifactStore` each keep only the **latest** run per shape and per store, so **no history exists to
+aggregate**; and `ServiceLog.RetentionDays` is a hard-coded **30** — the exact period the criterion measures —
+while `BackupPolicy.RetentionCount` defaults to **14** artifacts per store. So the criteria are not merely waiting
+for wall time; as built they have no durable input. The metric itself is now **proven** against a seeded 30-day
+history (T231); the real measurement stays owed and stays in `READINESS-CHECKLIST.md` Phase 5.
+
+### Documentation corrections (from `READINESS-CHECKLIST.md` Phase 2)
+
+- [ ] **T189** Correct `OPEN-TASKS.md` §2's carry-forward total and its pointer: **127 → 116**, the §4 row struck as
+  delivered, and §5 item 8 pointed at **§6** rather than §4. · `OPEN-TASKS.md`
+- [ ] **T190** Name `specs/003-waitlist-handler-fulfilment` and `specs/004-unified-card-item-picker` in
+  `OPEN-TASKS.md`, which currently walks from `specs/001` to "new spec" as though two delivered features never
+  happened. · `OPEN-TASKS.md`
+- [ ] **T191** Repair `OPEN-TASKS.md` §5 item 6's dangling reference to `VALIDATION-PROMPT-SERVER.md` and the same
+  stale citations inside `specs/001-module-mock-visual-fallback/tasks.md` — **classify each as provenance** (a record
+  of what was run) **or instruction** before rewriting, because the two want different answers. · `OPEN-TASKS.md`,
+  `specs/001-module-mock-visual-fallback/tasks.md`
+- [ ] **T192** Restate the SC-007 / SC-008 follow-up honestly in one place: the windows opened **2026-09-12**, the
+  re-check is **due 2026-10-12**, and they are **unmeasured** until then — **and state the real blocker, not just the
+  date** (established 2026-09-20, see T229): the service keeps only the latest run per shape and per store, and both
+  the log retention (30 days) and the backup retention (14 artifacts) are shorter than or equal to the window being
+  measured. "Waiting until October" is not a plan, because there will be nothing to read. · `OPEN-TASKS.md`,
+  `specs/001-module-mock-visual-fallback/tasks.md`
+- [ ] **T193** Re-verify `FEATURES.md` against the current tree and move its pin off commit `7bf6857` — it was
+  verified before `specs/003` and `specs/004` existed. · `FEATURES.md`
+- [ ] **T194** Delete `FEATURES.md`'s now-false "not yet built" claims, re-checking each line rather than assuming:
+  the one that says the handler list *"is not sorted most-urgent-first"* is already delivered —
+  `UrgencyCalculator.OrderBy` defaults to most-urgent and `WaitlistViewViewModel.SortOrder` resolves the remembered
+  key with `WaitlistSortOrder.MostUrgent` as the default. · `FEATURES.md`,
+  `MTM_Waitlist.Core/Services/UrgencyCalculator.cs`,
+  `MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs`
+- [ ] **T195** Extend `FEATURES.md`'s maintainer index (it lists `specs/001` alone while its own defect table cites
+  `specs/002` ten times) and drop the dead `RELEASE-NOTES.md` pointer, which is not in the tree. · `FEATURES.md`
+- [ ] **T196** Reconcile `FEATURES.md`'s defect-status column with the defect files themselves — it says the
+  Cancel/Accept defect was closed by `specs/002` while the defect file says **`specs/003`**, with the actions
+  working. · `FEATURES.md`, `defects/High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`
+- [ ] **T197** Reconcile `WeekendProject/PromptFiles/07-8%-Phase2-fulfill.md` against `specs/003`: reconcile every
+  box, **delete** the two mock-mode boxes the seed's §3 says cannot be built, and leave a "delivered by `specs/003`"
+  note. The file still shows **11 open** and carries no `specs/003` note although that spec cites it as its seed. ·
+  `WeekendProject/PromptFiles/07-8%-Phase2-fulfill.md`
+- [ ] **T198** Reconcile `WeekendProject/PromptFiles/08-70%-Phase2-urgency.md` against `specs/003` the same way —
+  **3 open**, no `specs/003` note, one box unbuildable. · `WeekendProject/PromptFiles/08-70%-Phase2-urgency.md`
+- [ ] **T199** Recount `WeekendProject/PromptFiles/13-63%-Developer-UI.md` **including `+ [ ]` markers**: it holds
+  **4**, where a `- [ ]`-only sweep reports zero. · `WeekendProject/PromptFiles/13-63%-Developer-UI.md`
+- [ ] **T200** Retire the dangling artefact references: 12 `PromptFiles/*` point at `../Mockups/*.svg` (folder absent)
+  and `PromptFiles/13` names `WeekendProject/DeveloperUI-VisualPrompts.md` (absent). Classify instruction vs
+  provenance before editing. · `WeekendProject/PromptFiles/**`
+- [ ] **T201** Correct `WeekendProject/Module_Mock/Module_Mock-Planning-Progress.md`'s status line — it opens
+  *"Status: In design/planning. Not implemented."* for a capability that shipped in `specs/001`. ·
+  `WeekendProject/Module_Mock/Module_Mock-Planning-Progress.md`
+- [ ] **T202** Add `07` and `08` to the retired-sources note in `OPEN-TASKS.md` §3.1, which names six retired sources
+  and omits the two that are now delivered-but-unreconciled. · `OPEN-TASKS.md`
+- [ ] **T203** Reconcile `WeekendProject/PromptFiles/App-Validation-Checklist.md` with the delivered card work: it
+  holds **45 unchecked** boxes, §4–§8 (27) belonged to the card workstream `specs/004` has since delivered, and at
+  least one check names the **retired** catalog (`waitlist_request_types` / `_subtypes` exposing `category` +
+  `item_id`). Unreconciled it would fail a shipped feature. · `WeekendProject/PromptFiles/App-Validation-Checklist.md`
+- [ ] **T204** Reconcile `specs/003-waitlist-handler-fulfilment/spec.md`'s header — it still reads `Status: Draft`
+  while `.spec-context.json` records `status: completed` with 49/49 tasks. ·
+  `specs/003-waitlist-handler-fulfilment/spec.md`
+- [ ] **T205** Resolve the orphan `specs/005-setup-work-order-search/` directory, which contains **only
+  `.trace.jsonl`** — no `spec.md`, no `.spec-context.json`, no plan. Either remove the abandoned attempt or record
+  that it was one; an empty numbered feature directory is a trap for whoever runs the next `specify`. ·
+  `specs/005-setup-work-order-search/`
+- [ ] **T206** Restore or re-derive `capabilities/DRIFT.md`, named in repo memory as the drift **ledger of record**
+  and absent from the tree. · `capabilities/`
+- [ ] **T207** State the living-spec blind spot where a reader will hit it: only `startup` and `startup-diagnostics`
+  are registered, so drift across `MTM_Waitlist.Waitlist.View/**`, `Module_Waitlist/**`, `MTM_Waitlist.Core/**`,
+  `Database/**` and `Strings/**` is invisible by construction — a green drift run means the *registry* is complete,
+  not the repository. · `living-specs.yml`, `capabilities/`
+- [ ] **T208** Re-check every defect file's forward-looking rows against the shipped specs: the **Status** rows are
+  current, but the *Planned fix* rows still name features by their pre-shipment names (`Spec 01-truthful-data-and-controls`
+  → `specs/002`, `Spec 03-unified-card-and-taxonomy` → `specs/004`). · `defects/*.md`,
+  `WeekendProject/SpecTemplates/00-INDEX.md`
+- [ ] **T209** Correct the two repo-memory notes that contradict the tree —
+  `.github/memories/repo/github-artifact-staleness.md` records `.github/copilot-startup-steps.yaml` and
+  `.github/scripts/restructure-database-layout.ps1` as **DELETED**; both are present. A memory that says a file is
+  gone is worse than no note, because the next agent stops looking. · `.github/memories/repo/`
+- [ ] **T210** Fix the stale platform version in `Directory.Build.props` — it says *"satisfied by the 2.3.0 in use"*
+  where the repository pins **2.3.1**. · `Directory.Build.props`
+- [x] **T211** Correct the two stale statements in `.github/instructions/database-schema-rules.instructions.md`: its
+  required-table list still names `core_workstations_registry` (the live table is `core_computers_registry`), and its
+  migration section still describes a **"FluentMigrator runner"** where the model is hand-maintained
+  file-per-artifact SQL with paired `create.sql` / `rollback.sql`. Always-on guidance, so both actively mislead. ·
+  `.github/instructions/database-schema-rules.instructions.md`
+  **DONE 2026-09-20.** The required-table list now names `core_computers_registry`, and the migration model reads
+  *hand-maintained, reviewed, file-per-artifact SQL with paired `create.sql` / `rollback.sql`; there is no
+  FluentMigrator runner*. Verified before editing: all three duplicate table folders that create
+  `core_computers_registry` name that table in their `CREATE TABLE` and `DROP TABLE` statements, and `FluentMigrator`
+  appears nowhere in the tree except as a description of the **retired** layout in
+  `.github/scripts/restructure-database-layout.ps1` and the validator's own comment.
+- [x] **T212** Correct the same legacy table name in `Database/Database-Ruleset.md`. · `Database/Database-Ruleset.md`
+  **DONE 2026-09-20.** *Core Startup Tables* now reads `core_computers_registry`. Verified before editing:
+  `core_workstations_registry` survives in only three places in the whole tree — this line, and two **deliberate**
+  historical notes (`Database/Mock.Service/Restore/README.md` and `verify_restore.sql`, both of which exist to record
+  the rename), so the ruleset was the last stale copy. The same file's *Artifact Layout and Release Governance*
+  section also still recommended *"FluentMigrator … as the runner layer"* — the identical stale claim T211 corrected
+  in the instructions file — so it was corrected too, to *"the reviewed SQL artifacts are the source of truth and are
+  run as files; there is no FluentMigrator runner"*. Leaving it would have recreated the exact contradiction between
+  the two always-on rules files that T211 exists to remove.
+
+### Database artifacts (from `READINESS-CHECKLIST.md` Phase 3)
+
+The workstation→computer rename left each of three tables with **two folders whose content creates the same live
+table**. Deleting the wrong half would delete live behaviour, so the order is fixed: **prove, then delete, then
+prove nothing points at it.**
+
+- [ ] **T213** Prove each of the three pairs is identical before removing anything — compare `create.sql` **and**
+  `rollback.sql` byte-for-byte for (`02_core_workstations_registry` / `02_core_computers_registry`),
+  (`13_setup_workstations_catalog` / `13_setup_work_centers_catalog`) and (`14_config_workstation_hot_workcenters` /
+  `14_config_computer_hot_work_centers`). **A pair that differs is not litter — stop and report instead of deleting.**
+  · `Database/Tables/`
+- [ ] **T214** Delete the superseded folder in each pair: the half whose **name** no longer matches the table it
+  creates, leaving the three correctly named folders. Only after T213's proof. · `Database/Tables/`
+- [ ] **T215** Sweep every stored procedure, view, function and seed for a reference to a removed folder or name, and
+  confirm the surviving folder is the only definition of each of the three tables. A dangling reference here is a
+  broken install, not a tidy-up. · `Database/StoredProcedures/**`, `Database/Views/**`, `Database/Functions/**`,
+  `Database/Tables/AllTables.sql`
+- [ ] **T216** Keep the aggregate honest after the deletion: `AllTables.sql` lists each of the three tables **once**,
+  so the aggregate, the folder set and `update_table_descriptions.sql` must agree and a fresh install must still
+  produce every table. · `Database/Tables/AllTables.sql`, `Database/Bootstrap/update_table_descriptions.sql`
+- [ ] **T217** Check whether the duplicate creates came with duplicate **procedures** and apply the same treatment:
+  list every procedure defined more than once across `Database/**`, compare each pair byte-for-byte, validate, then
+  delete the stale-named copy and leave one definition. · `Database/StoredProcedures/**`,
+  `Database/Mock/StoredProcedures/**`, `Database/StoredProcedures/AllSPs.sql`
+  **The answer is yes — established 2026-09-20, so this is not a hypothetical check.** The local store has **68**
+  procedures against **109** folders on disk, and **six** of the absent ones still have a `create.sql`:
+  `sp_setup_workstations_delete` / `_get_all` / `_touch` / `_upsert` and
+  `sp_config_hot_workcenters_delete_for_workstation` / `_get_for_workstation`. The pair
+  `sp_setup_workstations_get_all` / `sp_setup_work_centers_get_all` is **byte-identical**, as is
+  `sp_setup_workstations_upsert` / `sp_setup_work_centers_upsert` — so the stale folder creates the **renamed**
+  procedure, which is the same defect the three table folder pairs have. The other 35 absent folders are
+  **rollback-only retired objects** and are correct as they stand. Delete the stale half only after proving each pair
+  identical, exactly as T213–T214 require for the tables
+- [ ] **T218** Record that `Database/Tables/20`–`29` are **rollback-only by design** — the retained drops for retired
+  objects, which the retired-symbol audit explicitly exempts. Correct as-is, and indistinguishable from corruption to
+  a reader who does not know the rule. · `Database/Tables/20`–`29`,
+  `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`
+- [ ] **T219** Confirm and record that the mirror schema exists **only** under `Database/Mock/` — the five
+  `visual_*_result` tables plus their `_stage` twins — and that the `2x_mock_*` folders under `Database/Tables` hold
+  no creates. The folder names invite the opposite conclusion. · `Database/Mock/Tables/`,
+  `Database/Tables/AllTables.sql`
+- [ ] **T220** Teach `.github/scripts/validate-database-schema.ps1` to detect two artifacts creating the same object.
+  It collects every `Database/Tables/**/create.sql` and applies them in order, so a duplicate create passes silently
+  — which is how the duplicates above survived every CI run. · `.github/scripts/validate-database-schema.ps1`
+- [ ] **T221** Confirm `.github/workflows/database-schema-validation.yml` can fail for the right reason: its
+  table-install phase needs a database connection, so establish whether it fails honestly on a runner with no
+  database or passes vacuously. · `.github/workflows/database-schema-validation.yml`
+
+### The guards that cannot fail (from `READINESS-CHECKLIST.md` Phase 4)
+
+- [x] **T222** Fix the reserved-variable collision at `.github/scripts/validate-sql-naming.ps1:260` — the failure path
+  is `foreach ($error in $errors)`, and `$Error` is a PowerShell automatic **read-only** variable, so the moment there
+  is one violation the script dies with *"Cannot overwrite variable Error"* and exits 1 **without printing a single
+  violation**. The guard fails loudly with the wrong message and no findings. ·
+  `.github/scripts/validate-sql-naming.ps1`
+  **DONE 2026-09-20.** Reproduced first: the guard printed `SQL naming compliance failed:` followed by
+  *"Cannot overwrite variable Error because it is read-only or constant"* at line 260 and exited 1 with **zero**
+  findings. The loop variable is now `$violation`; the same run prints all **11** findings and exits 1.
+- [x] **T223** Record the **11** naming violations the crash was hiding, in one report file with rule, file and line,
+  and state in the rules file that pre-existing violations are **grandfathered** — the guard keeps failing on anything
+  **new**. Do **not** rename them (owner decision D-7). The eleven: seven filename-pattern failures
+  (`Database/InforVisual/Queues/Module_Mock/Populations/*.sql` — five files — plus
+  `Database/Mock.Service/Restore/replace_database.sql` and `verify_restore.sql`) and four boolean-column names
+  (`require_password_change` in `01_core_users_profiles` and `AllTables.sql`, `requires_answer` in
+  `31_waitlist_request_item_configs` and `AllTables.sql`). ·
+  `.github/instructions/database-schema-rules.instructions.md`
+  **DONE 2026-09-20.** Written up in `.github/reports/sql-naming-violations.md` with rule, file and line — the
+  **7** filename failures and the **4** boolean-column names (two of which are the aggregate's copies, so a
+  normalization pass has two columns and seven filenames to settle). Nothing was renamed (D-7). The rules file's
+  *PR Compliance* section now states that pre-existing violations are grandfathered and tracked in that report while
+  anything new still fails.
+- [x] **T224** Make `validate-sql-naming.ps1`'s working-directory assumption explicit: it derives its root from
+  `$PSScriptRoot` and then `Set-Location`s, so a copy run from anywhere else silently scans the wrong tree and reports
+  *"No SQL files found under Database/"* — a pass-shaped failure. Fail loudly instead. ·
+  `.github/scripts/validate-sql-naming.ps1`
+  **DONE 2026-09-20.** The script now checks that the derived root holds a `Database/` folder **before** scanning or
+  `Set-Location`, and on a miss prints the path it derived and exits **1**. Verified by copying the script to
+  `%TEMP%\sqlnaming-copytest\scripts\` and running it there: it named
+  `…\Temp\Database` as the missing folder and exited 1 instead of reporting *"No SQL files found"* with exit 0.
+  The scan itself now uses the absolute `$databaseRoot`.
+- [x] **T225** Amend `.github/instructions/csharp-xaml-naming-rules.instructions.md` to say what is now true (owner
+  decision D-4): pre-existing violations are **grandfathered and tracked in a report**, new and changed code still
+  hard-fails, an exception still needs written approval, and the check's real scope — **the files a pull request
+  changed** — is stated so the claim and the mechanism finally agree. The *"Legacy naming must be bulk normalized (no
+  grandfathering mode)"* clause retires. · `.github/instructions/csharp-xaml-naming-rules.instructions.md`,
+  `.github/workflows/csharp-xaml-naming-compliance.yml`
+  **DONE 2026-09-20.** The *Enforcement* section keeps *"violations must hard-fail PR checks"* and now says the check
+  validates **the files a pull request changed**, that a run with no changed C#/XAML/RESW files passes **by design**
+  and is not evidence the tree is clean, that pre-existing violations are grandfathered and tracked in
+  `.github/reports/csharp-xaml-naming-violations.md`, and that an exception still needs written approval. The
+  *"bulk normalized (no grandfathering mode)"* clause is gone. The workflow was read, not assumed: it builds the
+  changed-file list from the PR diff and calls the script with `-Files`, so the stated scope is the mechanism.
+- [x] **T226** Generate the violations report for future normalization: all **901** findings with rule, file and line,
+  grouped so a later pass can take one rule at a time. The distribution is already measured — `MTM_Waitlist.Tests`
+  **490**, `Strings` **353**, `MTM_Waitlist.Mock.Service` **18**, `MTM_Waitlist.Core` **15**,
+  `MTM_Waitlist.Settings` **10**, `MTM_Waitlist.Waitlist.View` **8**, `MTM_Waitlist.Setup` **5**,
+  `MTM_Waitlist.Mock` **1**, `MTM_Waitlist.Waitlist.NewRequest` **1**. The report is the deliverable, not the
+  renames. · `.github/scripts/validate-csharp-xaml-naming.ps1`
+  **DONE 2026-09-20.** `.github/reports/csharp-xaml-naming-violations.md` — every finding with rule, file and line,
+  grouped by rule then sorted by file, plus a per-rule summary and a per-project distribution. The guard reports
+  **910** today, not the remembered **901**: `MTM_Waitlist.Tests` **493**, `Strings` **359**,
+  `MTM_Waitlist.Mock.Service` **18**, `MTM_Waitlist.Core` **15**, `MTM_Waitlist.Settings` **10**,
+  `MTM_Waitlist.Waitlist.View` **8**, `MTM_Waitlist.Setup` **5**, `MTM_Waitlist.Waitlist.NewRequest` **1**,
+  `MTM_Waitlist.Mock` **1**. The rules are `Async Task method … must end with Async` **475**, `RESW key … must match
+  Feature_Element.Property` **377**, `Private static readonly field … must be s_camelCase` **33**, `Public type … must
+  match file name` **24**, `Private field … must be _camelCase` **1**; the two dominant rules are 852 of the total.
+  The report states the 901 → 910 drift rather than repeating the stale number. No renames were made.
+
+### Gates
+
+- [ ] **T227** **Build and tests.** `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` →
+  `0 Warning(s) 0 Error(s)`; `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` →
+  `Failed: 0`. Record the evidence with **today's** numbers — the figure stored in this file (1089) is already stale
+  against a measured **1109 total / 1082 passed / 27 skipped**. · `MTM_Waitlist.sln`,
+  `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
+- [ ] **T228** **Validate against `READINESS-CHECKLIST.md`.** Walk that file's Phases 2–4 and confirm every box has a
+  named artifact behind it, leaving **Phase 5 (the owner's actions) untouched and unticked**. Report any box without
+  evidence rather than asserting it. · `READINESS-CHECKLIST.md`
+
+### The reliability criteria that cannot currently be measured (found 2026-09-20)
+
+`SC-007` and `SC-008` are stated over a **30-day observation window**, and nothing in the service retains one. These
+four tasks give the criteria a durable input, prove the metric, and keep the unmeasured part labelled unmeasured.
+
+- [ ] **T229** **Correct the SC-007 / SC-008 diagnosis wherever it is written as "it needs 30 days of wall time".**
+  Two blockers sit underneath the date, and neither is time: (1) `RefreshRunRecordStore._lastRuns` and
+  `BackupArtifactStore._lastRuns` are dictionaries keyed by shape and by store, so each holds **one** run — the last
+  one — and there is no history to aggregate even after 30 days; (2) the only durable history is the prose JSONL
+  `ServiceLog`, whose `RetentionDays` is a hard-coded **30** while `BackupPolicy.RetentionCount` defaults to **14**,
+  so the record of the window is swept as the window closes and (for a daily cadence) the day-1 backup artifact is
+  pruned long before day 30. Amend the three places that state the softer version — `specs/001`'s blocked table and
+  its status table, and `OPEN-TASKS.md` — and leave `READINESS-CHECKLIST.md` Phase 5's measurement owed. ·
+  `specs/001-module-mock-visual-fallback/tasks.md`, `OPEN-TASKS.md`
+- [ ] **T230** **Give the criteria a durable, append-only run history to be measured against.** Record every
+  scheduled refresh cycle's per-shape outcome **with its attribution** (so "skipped because the external source was
+  unreachable" is a stored fact, not an inference from prose), and every scheduled backup window's per-store outcome
+  with the artifact's path and size. Two constraints are not negotiable: the history must live **service-locally**, not
+  in MySQL, for the reason `data-model.md` §4/§6 already gives — a restore replaces an entire store, so history kept
+  inside one would be rewound by the operation it has to describe — and its retention must be **longer than the window
+  it measures**, which the current 30-day log retention and 14-artifact backup retention are not. Reconcile
+  `ServiceLog.RetentionDays` and `BackupPolicy.RetentionCount` against the 30-day criterion in the same change, or the
+  criterion stays unmeasurable by construction. · `MTM_Waitlist.Mock.Service/Services/`,
+  `MTM_Waitlist.Mock.Service/Models/`
+- [x] **T231** **Land the seeded measurement and prove both thresholds bite** — **DONE 2026-09-20.**
+  `tools/measure-reliability-window.ps1` reads a run history (the shape T230 must write), seeds a 30-day one per
+  scenario, and computes both criteria: SC-007 as *succeeded cycles / scheduled cycles ≥ 95% **and** every
+  non-success attributable to a logged external-source outage*, SC-008 as *every scheduled window, for every store,
+  produced an artifact with a non-zero size*. Four scenarios were run and the verdicts are the evidence —
+  `healthy` 29/30 = 97% → **SC-007 PASS**, 0 of 30 windows missing → **SC-008 PASS**; `marginal` 28/30 = 93% →
+  **SC-007 FAIL** (the rate threshold bites); `unattributed` 29/30 = 97% but one skip carrying `schemaMismatch` →
+  **SC-007 FAIL** (the attribution rule bites *independently* of the rate, which is the half that would otherwise
+  pass silently); `broken` 30/30 = 100% with one store's artifact absent → **SC-008 FAIL** (the 100% rule bites);
+  and a history covering **30** intervals measured against a **45**-interval expectation → **SC-007 FAIL** with
+  `MissingIntervals 15` even though every recorded cycle succeeded, which closes the hole that a scheduled interval
+  where nothing ran leaves no record and would otherwise be invisible. **What this proves and does not prove:** it
+  proves the metric is computable and the gate is enforceable; it is seeded data and therefore proves **nothing**
+  about the service's real-world reliability. Run `-Scenario healthy -Generate` to reproduce, `-Generate` with the
+  others to see each failure mode. · `tools/measure-reliability-window.ps1`
+- [ ] **T232** **Keep the unmeasured part labelled unmeasured.** Wherever this work is summarised — `OPEN-TASKS.md`,
+  `READINESS-CHECKLIST.md` and the `specs/001` status table — say plainly that the seeded run proves the *metric*,
+  that the real 30-day result is still owed, and that it cannot be obtained until T230 lands and the service then
+  runs on the host for 30 days. A green seeded run reported as a passing criterion is exactly the class of false
+  claim this phase exists to remove. · `READINESS-CHECKLIST.md`, `OPEN-TASKS.md`,
+  `specs/001-module-mock-visual-fallback/tasks.md`
+
+**Checkpoint — the repository can be trusted by whoever comes next.** No document asserts a state the code
+contradicts, one folder defines each table, both naming guards fail for the right reason and print what they found,
+and the grandfathered debt exists as a report rather than as a claim. The two in-app guards above and the live-database
+round-trip stay open as the owner's actions, and this phase is not complete while they are. The reliability criteria
+now have a proven metric and a seeded measurement behind them, and the real 30-day result is still owed and still
+labelled as owed.
 
 ---
 

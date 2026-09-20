@@ -2,11 +2,22 @@ $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $repoRoot = Split-Path -Parent $repoRoot
+
+# The repository root is derived from this script's own location. A copy of the script that runs
+# from anywhere else would otherwise scan the wrong tree, find no SQL, and exit 0 - a pass-shaped
+# failure. Refuse to report anything unless the derived root actually holds the artifacts.
+$databaseRoot = Join-Path $repoRoot 'Database'
+if (-not (Test-Path -LiteralPath $databaseRoot -PathType Container)) {
+    Write-Host "SQL naming compliance failed: expected the repository's Database/ folder at '$databaseRoot'."
+    Write-Host "The root is derived from this script's own location ('$PSScriptRoot'). Run the script from a checkout of this repository."
+    exit 1
+}
+
 Set-Location $repoRoot
 
-$sqlFiles = Get-ChildItem -Path "Database" -Recurse -File -Include *.sql
+$sqlFiles = Get-ChildItem -Path $databaseRoot -Recurse -File -Include *.sql
 if (-not $sqlFiles) {
-    Write-Host "No SQL files found under Database/."
+    Write-Host "No SQL files found under $databaseRoot."
     exit 0
 }
 
@@ -257,8 +268,11 @@ foreach ($file in $sqlFiles) {
 
 if ($errors.Count -gt 0) {
     Write-Host 'SQL naming compliance failed:'
-    foreach ($error in $errors) {
-        Write-Host "- $error"
+    # `$error` is a PowerShell automatic read-only variable: assigning to it aborts the run before a
+    # single finding is printed, so the guard used to fail with "Cannot overwrite variable Error"
+    # and hide the violations it had found. Use a plain loop variable.
+    foreach ($violation in $errors) {
+        Write-Host "- $violation"
     }
     exit 1
 }

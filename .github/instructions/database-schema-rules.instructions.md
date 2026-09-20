@@ -45,7 +45,7 @@ applyTo: "Database/**/*.sql"
 
 ## Required Startup-Core Tables (v1)
 - `core_users_profiles`
-- `core_workstations_registry`
+- `core_computers_registry`
 - `auth_roles_catalog`
 - `auth_roles_assignments`
 - `auth_sessions_tokens`
@@ -64,7 +64,8 @@ applyTo: "Database/**/*.sql"
 - Retention windows must be settings-driven from `config_settings_values`.
 
 ## Migration and Deployment
-- Migration model: FluentMigrator runner backed by reviewed SQL artifacts.
+- Migration model: hand-maintained, reviewed, file-per-artifact SQL with paired `create.sql` /
+  `rollback.sql`. There is no FluentMigrator runner and no migration-runner layer in this repository.
 - Use a file-per-artifact layout under `Database/`:
 	- `Bootstrap/create_database.sql`
 	- `Bootstrap/update_table_descriptions.sql` (mandatory maintenance file)
@@ -81,3 +82,7 @@ applyTo: "Database/**/*.sql"
 ## PR Compliance
 - SQL naming convention drift must fail PR validation.
 - Any exception requires explicit written approval in migration PR notes.
+- Pre-existing violations are **grandfathered and tracked in a report** —
+  `.github/reports/sql-naming-violations.md` — instead of being renamed in a bulk normalization pass
+  (decision **D-7**, 2026-09-20). The guard keeps failing on anything **new**; a change that touches a
+  grandfathered file is expected to fix the violations it touches.
