@@ -135,6 +135,20 @@ Started: 2026-09-20 07:25:58
   absent. T129's nineteen raised rows are exactly the nineteen listed, so nothing is missing from that population —
   but ids `30` and `44`, named by the ticked T132 and T134, **are** absent, and neither of those two tasks carries
   an evidence block in `tasks.md`. Read the id gaps before treating a missing row as a lost one.
+- **A ticked task with no evidence block is not evidence, and the criteria walk must say so.** Three tasks in this
+  feature (T132, T134, T138) are `[x]` with no run recorded anywhere; T132 and T134 have been ticked since commit
+  `45a9984` (2026-09-13), i.e. from the day Phase 9 was written, and T138 the same. `git log -S` on the task id is
+  the fastest way to date a tick; if the tick predates the population the task claims to have exercised, the tick
+  cannot be corroborated from the repo.
+- **The whole nineteen-row batch has a future deadline and none is overdue.** All 19 rows carry a non-null
+  `target_time_utc` that the application derived from the Item's allotted minutes, and none has passed it; the only
+  `is_overdue = 1` row in `waitlist_requests_queue` is demo row `10` (`pickup-coil`, `Accepted`, seeded
+  2026-09-14). So SC-018's negative half is verifiable from the store and its real-expiry half is not — an
+  "is anything overdue?" query answers only the first.
+- **`waitlist_request_item_configs` holds 23 rows, not 19, and has no `is_in_scope` column.** A query for that
+  column fails `ERROR 1054`. The 19 in-scope Items are the set T129 raised; the other four (`pickup-fg`,
+  `pickup-ncm`, `pickup-outside-service`, `pickup-wip`) are the FR-028 out-of-scope Items. Compare **sets**, not
+  counts, when checking SC-014.
 
 ---
 
@@ -355,3 +369,18 @@ Started: 2026-09-20 07:25:58
 - **The request table's ids are not contiguous.** 37 rows: `1-18, 28, 29, 31, 32, 33, 35-43, 47-51`. Ids `19-27, 30, 34, 44, 45, 46` are absent. T129's nineteen rows are exactly the nineteen listed, so that population is intact - but ids `30` and `44`, named by the **already-ticked** T132 and T134, do not exist, and neither of those two tasks carries an evidence block in `tasks.md`. Flagged here rather than smoothed over; a later reader must not treat the gap as a lost row.
 - **MySQL session time is UTC+5 on this host** (`14:39` when the wall clock read `09:39 -05:00`), and `NOW()` reports `Central Daylight Time`. The stored `*_utc` values are therefore not comparable to local time. Recorded as a fact to avoid a future false "clock bug" report.
 - **Next iteration's scope.** 6 tasks remain: Phase 9's T139 (the criteria walk), Phase 11's T164 and T165, Phase 12's T174, Phase 13's T184 and T188.
+---
+## Iteration 8 - 2026-09-20
+**User Story**: Phase 9 Wave 9 gate - T139, the Success Criteria walk (SC-013 … SC-020)
+**Tasks Completed**: 
+- [x] T139: Walked all eight Success Criteria against the evidence each one names, and corroborated the four the store can answer directly against the live `mtm_waitlist` database. **Closed from recorded evidence:** SC-014 (the 19 in-scope Items raised once - rows 28-51 hold 19 rows with 19 distinct `item` values, a set equality against the 19 in-scope rows of the 23 in `waitlist_request_item_configs`), SC-015 (10 accounts in `core_users_profiles`, all active; 9 distinct employee numbers because `johnk`/`jkoll` share 6229; all 8 roles in `auth_roles_catalog` reached through `auth_roles_assignments`), SC-016 (0 rows matching `900-%` in either `setup_work_centers_catalog` or `setup_active_jobs`; the 7 prepared situations on 100-3/100-6/100-7/100-18/100-1806 and V100-33/V100-34, plus the live save on 100-12), SC-020 (FR-045, confirmed **last**: the 19 rows and the 10 accounts still present), and the T135/T136 build and test gates (`0 Warning(s) 0 Error(s)`; `total: 1168, failed: 0, succeeded: 1141, skipped: 27`). **Reported as unproven, not asserted:** SC-013 (rests on T138, ticked with no evidence block), SC-018 (rests on T132; the store shows 0 overdue batch rows and 0 batch rows past their derived deadline, so only the negative half is checkable), SC-019 (rests on T134), and with them outcomes 4 and 7 of SC-017 - five of its seven outcomes carry evidence blocks (T130, T131, T133). **No suite was re-run** (T139 forbids it and no code changed) and **no application was started**.
+**Tasks Remaining in Story**: None - the unit is complete. 5 tasks remain in the feature: T164, T165, T174, T184, T188.
+**Commit**: `docs(004-unified-card-item-picker): record iteration 8 of the ralph loop - T139 success-criteria walk` (this entry's own commit, carrying `tasks.md` and `progress.md`)
+**Files Changed**: 
+- specs/004-unified-card-item-picker/tasks.md (T139 ticked with its per-criterion evidence block; the Phase 9 checkpoint paragraph amended to name the three criteria the walk could not close)
+- specs/004-unified-card-item-picker/progress.md (this entry, plus three new `## Codebase Patterns` bullets)
+**Learnings**:
+- **A criteria walk is mostly a search for absences, and the absence has to be stated.** SC-014 and SC-020 are the only criteria a count can settle; SC-016 is an absence of fixture rows, SC-013 is an absence of a recorded run, and SC-018 is an absence of an overdue row. Reading the store answered "is anything overdue?" with a clean no - which proves nothing about whether the overdue *path* works, because a population with no past-due row can never exercise it. Report that distinction rather than ticking on the negative.
+- **The tick's date is the tell.** `git log -S '<task id>'` dates a tick, and dating T132/T134 to commit `45a9984` (2026-09-13) shows they were marked done on the day Phase 9 was written, before T129 created the population they claim to have exercised. A tick that predates its own subject cannot be evidence, and no amount of re-reading `tasks.md` will change that.
+- **Amend a checkpoint claim you just falsified; do not leave it standing beside the finding.** The Phase 9 checkpoint asserted SC-013 … SC-020 were "provable from this phase alone". The walk disproved that for three of them, so the paragraph now says which three and why, rather than contradicting the evidence block a few lines above it.
+- **Next iteration's scope.** 5 tasks remain, all running-app UI gates or the owner's action: Phase 11's T164 (the dunnage step) and T165 (the owner's live-database reinstall, explicitly reserved to them), Phase 12's T174 (the pickup-die/deliver-die card lines), Phase 13's T188 (die page behaviour) and T184 (a die request from 100-7). SC-013, SC-018 and SC-019 also need running-app gates - a sign-out restart, a real expiry, and two instances acting at once - so a future iteration that can sign in and drive the Debug build closes both those criteria and T164/T174/T184/T188 together.

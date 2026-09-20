@@ -1209,17 +1209,75 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
 - [x] **T138** **Sign-out gate.** On a computer where "remember me" is set and the session had been restored, choose
   Sign out from the badge and prove the application **restarts to the sign-in screen** rather than restoring the
   session. The displayed name alone is not evidence (FR-034, SC-013). · the running app
-- [ ] **T139** **Validate against Success Criteria.** Walk SC-013 … SC-020 against the recorded evidence — SC-013 on
+- [x] **T139** **Validate against Success Criteria.** Walk SC-013 … SC-020 against the recorded evidence — SC-013 on
   T138, the population on T129, the outcomes on T130–T134, and the build/test criteria on T135–T136, so **do not run
   the suites a second time**. Confirm SC-020 last: the nineteen requests and the ten accounts are still present and
   browsable (FR-045). Any criterion without recorded evidence stays unticked and is reported, never asserted. ·
   `specs/004-unified-card-item-picker/spec.md`
 
+  **Recorded walk (2026-09-20, local `mtm_waitlist` @ 127.0.0.1, MySQL 9.6.0).** Every criterion was read against
+  the evidence it names, and the four the store can answer directly were corroborated live rather than re-read from
+  the code. **No suite was run** — this task forbids a second run, and no code changed — and **no application was
+  started**; the criteria that need a signed-in session are reported as unproven rather than asserted.
+
+  - *SC-013 — sign out returns to the sign-in screen.* **UNPROVEN.** Rests on T138, which is ticked but carries no
+    evidence block in this file and no run in `progress.md`: no restart, no window dump, no session-state read.
+    Not asserted.
+  - *SC-014 — all nineteen in-scope Items raised once, zero left unraisable.* **PASS, corroborated live.**
+    `waitlist_request_item_configs` holds **23** rows: the **19** in-scope Items and the four FR-028 out-of-scope
+    Items with no value source (`pickup-fg`, `pickup-ncm`, `pickup-outside-service`, `pickup-wip`). Rows 28–51 hold
+    **19** rows and **19 distinct `item` values**, and that set is the 19 in-scope configs exactly — a set equality,
+    not a count. The "zero unraisable" half is T121's raisability check plus T127's `pickup-component` repair.
+  - *SC-015 — zero new accounts; the ten existing people; every role raising.* **PASS, corroborated live.**
+    `core_users_profiles` holds exactly **10** rows, all `is_active = 1`. The 19 rows name **9** distinct
+    `requester_employee_number` values (`6229`, `9001`–`9008`) because `johnk` and `jkoll` are two accounts on one
+    employee number — the limitation T129 recorded, not a missing person. Those 9 map through
+    `auth_roles_assignments` → `auth_roles_catalog` to **all eight** roles (Developer, Admin, Plant Manager, Setup
+    Lead, Production Lead, Setup, Production, Material Handler), so every role raised at least one.
+  - *SC-016 — zero fixture work centres; five Expo and two Vits carry the seven situations.* **PASS, corroborated
+    live.** `setup_work_centers_catalog` holds **0** rows matching `900-%` and `setup_active_jobs` holds **0** rows
+    at `900-%`. `setup_active_jobs` holds **8** rows: the seven prepared situations on `100-3`, `100-6`, `100-7`,
+    `100-18`, `100-1806` (Expo Drive) and `V100-33`, `V100-34` (Vits Drive), plus `100-12`, which is a live Setup
+    save rather than a prepared situation. The no-active-job case is an absence, not a row.
+  - *SC-017 — all seven handling outcomes exercised and recorded.* **PARTIAL: five of seven proven.** Outcomes 1, 2,
+    3, 5 and 6 carry evidence blocks (T130, T131, T133) with stored-state readings. **Outcome 4 (overdue) and
+    outcome 7 (the two-copy race) rest on T132 and T134, both ticked with no evidence block** in this file or in
+    `progress.md`. Not asserted.
+  - *SC-018 — zero overdue requests from a time the application did not derive.* **UNPROVEN**, resting on T132. The
+    store corroborates only the negative half: none of the 19 batch rows has `is_overdue = 1` and none has a
+    `target_time_utc` in the past (all 19 carry a deadline the application derived from the Item's allotted
+    minutes). The only `is_overdue = 1` row in the table is demo row `10`, seeded on 2026-09-14 before this batch.
+    There is therefore no overdue request from the batch to inspect, and no evidence either way for the
+    real-expiry half.
+  - *SC-019 — two copies acting on one request produce one outcome.* **UNPROVEN**, resting on T134. The guard it
+    would exercise (T128's `p_expected_status`, FR-043) is proven at the procedure seam by T137's behavioural
+    round-trip, but the two-instances-at-once run is not recorded.
+  - *SC-020 — the nineteen requests and the ten accounts still present and browsable.* **PASS** (FR-045, confirmed
+    last). `waitlist_requests_queue` still holds the nineteen rows — ids `28`, `29`, `31`–`43`, `47`–`51` — and
+    `core_users_profiles` still holds the ten accounts. "Browsable" rests on T129, where the same rows were read
+    back through the application; this walk confirmed presence, not a screen.
+  - *Build and test gates (T135, T136).* **PASS, from the record.** Build `0 Warning(s) 0 Error(s)`; suite
+    `total: 1168, failed: 0, succeeded: 1141, skipped: 27` — both recorded in `progress.md` (iterations 2 and 5),
+    with the 47 tests this feature added in place. Neither task carries its own evidence block in this file, so the
+    progress log is the record. No suite was re-run, per this task's own instruction, and no code changed since
+    that run.
+
+  **Three criteria are unproven, and the two they rest on were ticked without evidence.** T132 and T134 have been
+  `[x]` since Phase 9 was written (commit `45a9984`, 2026-09-13) and never carried a run; the row ids they were
+  performed on are absent from the store (ids `30` and `44` do not exist — the table's ids are `1`–`18`, `28`,
+  `29`, `31`–`33`, `35`–`43`, `47`–`51`). T138 is the same shape. So SC-013, SC-018 and SC-019 cannot be closed
+  from recorded evidence, and neither can outcomes 4 and 7 inside SC-017. Closing them needs three running-app
+  gates — a sign-out restart, a real expiry, and two instances acting at once — not another read of this file.
+
 **Checkpoint — the follow-up batch is complete.** Sign out ends the session by restart rather than by hiding it; the
 nineteen requests exist, raised by the ten existing people with every role represented, and are left waiting; the
 seven fixture work centres are gone and their situations live on real work centres; and all seven handling outcomes
 have been exercised, including the two-copy race, with the overdue case a real expiry. SC-013 … SC-020 are provable
-from this phase alone.
+from this phase alone — **except three, as the T139 walk (2026-09-20) found.** The walk closed SC-014, SC-015,
+SC-016, SC-020 and the build/test gates from recorded evidence, and five of SC-017's seven outcomes; it could not
+close **SC-013, SC-018 and SC-019** (and with them outcomes 4 and 7 of SC-017), because those rest on T138, T132 and
+T134 — all three ticked with no recorded run. Closing them needs three running-app gates, not another read of this
+file.
 
 ---
 
