@@ -1844,21 +1844,50 @@ The workstation→computer rename left each of three tables with **two folders w
 table**. Deleting the wrong half would delete live behaviour, so the order is fixed: **prove, then delete, then
 prove nothing points at it.**
 
-- [ ] **T213** Prove each of the three pairs is identical before removing anything — compare `create.sql` **and**
+- [x] **T213** Prove each of the three pairs is identical before removing anything — compare `create.sql` **and**
   `rollback.sql` byte-for-byte for (`02_core_workstations_registry` / `02_core_computers_registry`),
   (`13_setup_workstations_catalog` / `13_setup_work_centers_catalog`) and (`14_config_workstation_hot_workcenters` /
   `14_config_computer_hot_work_centers`). **A pair that differs is not litter — stop and report instead of deleting.**
   · `Database/Tables/`
-- [ ] **T214** Delete the superseded folder in each pair: the half whose **name** no longer matches the table it
+  **Proven 2026-09-20.** All three table pairs hash SHA256-identical in **both** files, and the check was extended to
+  every other artifact kind that can create an object — a duplicate-create proof that covers only tables is not a
+  duplicate-create proof, and the same defect turned out to exist for **six** procedure pairs
+  (`sp_setup_workstations_delete` / `sp_setup_work_centers_delete`, `_get_all`, `_touch`, `_upsert`,
+  `sp_config_hot_workcenters_delete_for_workstation` / `_delete_for_computer`, `_get_for_workstation` /
+  `_get_for_computer`), **one** view pair (`vw_setup_workstations_active` / `vw_setup_work_centers_active`) and
+  **one** function pair (`fn_setup_workstation_name_normalized` / `fn_setup_work_center_name_normalized`). All
+  **11** pairs are identical in `create.sql` and in `rollback.sql`, and in every pair the legacy-named folder
+  creates the **renamed** object — so the folder name is the only thing wrong with the stale half, which is exactly
+  what makes deleting it safe.
+- [x] **T214** Delete the superseded folder in each pair: the half whose **name** no longer matches the table it
   creates, leaving the three correctly named folders. Only after T213's proof. · `Database/Tables/`
-- [ ] **T215** Sweep every stored procedure, view, function and seed for a reference to a removed folder or name, and
+  **Done 2026-09-20.** `git rm -r` of the 11 superseded folders — the 3 table folders, the 6 procedure folders, the
+  view folder and the function folder — **22 files** removed. The superseded half in every pair is the
+  `*_workstations_*` / `*_workstation_*` / `*_workstation` name; the surviving half is the `*_computers_*` /
+  `*_work_centers_*` / `*_work_center_*` name that matches the object each file actually creates.
+- [x] **T215** Sweep every stored procedure, view, function and seed for a reference to a removed folder or name, and
   confirm the surviving folder is the only definition of each of the three tables. A dangling reference here is a
   broken install, not a tidy-up. · `Database/StoredProcedures/**`, `Database/Views/**`, `Database/Functions/**`,
   `Database/Tables/AllTables.sql`
-- [ ] **T216** Keep the aggregate honest after the deletion: `AllTables.sql` lists each of the three tables **once**,
+  **Swept 2026-09-20, no dangling references.** Grep for all 11 removed paths and all 11 removed names across
+  `Database/**` returned **no matches**. `AllTables.sql` contains each of the three tables exactly once
+  (`CREATE` = 1, `DROP` = 0), and `AllViews.sql` / `AllFunct.sql` each contain the surviving work-centre view and
+  function exactly once. A post-deletion duplicate scan over 21 table `create.sql` files and 84 routine/view
+  `create.sql` files found **0 duplicate creates**. The one file that still names a removed object,
+  `tools/scan_workstation_rename.ps1`, is a **rename scanner** whose search-pattern list deliberately includes the
+  legacy names — it is not a reference to a removed artifact and was left alone.
+- [x] **T216** Keep the aggregate honest after the deletion: `AllTables.sql` lists each of the three tables **once**,
   so the aggregate, the folder set and `update_table_descriptions.sql` must agree and a fresh install must still
   produce every table. · `Database/Tables/AllTables.sql`, `Database/Bootstrap/update_table_descriptions.sql`
-- [ ] **T217** Check whether the duplicate creates came with duplicate **procedures** and apply the same treatment:
+  **Verified 2026-09-20.** The aggregate's 21 `CREATE TABLE` names and the 21 folder `create.sql` table names are
+  the **same set** (nothing only-in-aggregate, nothing only-in-folders, no duplicate in the aggregate), so no
+  aggregate edit was needed — the duplicate folders were never in it. `update_table_descriptions.sql` references
+  only the surviving names. A fresh install was then **run for real** into a scratch database
+  (`mtm_waitlist_probe`, created for the test and dropped afterwards): applying `AllTables.sql` with its
+  `USE mtm_waitlist;` line stripped exited 0 and produced exactly **21** base tables, including
+  `core_computers_registry`, `setup_work_centers_catalog` and `config_computer_hot_work_centers`. The local store
+  was never touched.
+- [x] **T217** Check whether the duplicate creates came with duplicate **procedures** and apply the same treatment:
   list every procedure defined more than once across `Database/**`, compare each pair byte-for-byte, validate, then
   delete the stale-named copy and leave one definition. · `Database/StoredProcedures/**`,
   `Database/Mock/StoredProcedures/**`, `Database/StoredProcedures/AllSPs.sql`
@@ -1871,20 +1900,88 @@ prove nothing points at it.**
   procedure, which is the same defect the three table folder pairs have. The other 35 absent folders are
   **rollback-only retired objects** and are correct as they stand. Delete the stale half only after proving each pair
   identical, exactly as T213–T214 require for the tables
-- [ ] **T218** Record that `Database/Tables/20`–`29` are **rollback-only by design** — the retained drops for retired
+  **Done 2026-09-20.** All six procedure pairs hash SHA256-identical in `create.sql` and `rollback.sql`, and the
+  stale half was deleted in each (12 of the 22 files removed). A post-deletion scan over 84 routine/view
+  `create.sql` files across `Database/**` found **0 duplicate creates**, and `AllSPs.sql` holds each surviving
+  procedure exactly once. The live store confirms the same picture: for the workstation/work-centre family only the
+  renamed objects exist — `sp_setup_work_centers_catalog_get`, `_delete`, `_exists_get`, `_get_all`, `_touch`,
+  `_upsert`, `sp_config_hot_workcenters_delete_for_computer`, `_get_for_computer`, `_upsert` and
+  `sp_setup_active_jobs_latest_by_work_center_get`.
+- [x] **T218** Record that `Database/Tables/20`–`29` are **rollback-only by design** — the retained drops for retired
   objects, which the retired-symbol audit explicitly exempts. Correct as-is, and indistinguishable from corruption to
   a reader who does not know the rule. · `Database/Tables/20`–`29`,
   `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`
-- [ ] **T219** Confirm and record that the mirror schema exists **only** under `Database/Mock/` — the five
+  **Recorded 2026-09-20, and the claim was checked before it was written down.** `Database/Tables/20_mock_master_tables_registry`
+  through `27_mock_request_types` and `28_waitlist_request_types` / `29_waitlist_request_subtypes` each hold **only**
+  a `rollback.sql`, and each one is a bare `DROP TABLE IF EXISTS <retired object>` — the retired `mock_*` family and
+  the retired request type/subtype catalog respectively. The exemption is real and is on the *filename*:
+  `RetiredSymbolAuditTests.IsExemptFromSqlAudit` returns `true` for any `rollback.sql`, because *"the retained
+  rollback artifact IS the drop statement for a retired object"*. The rule a reader needs — that a create-less
+  artifact folder is a deliberate drop and must not be tidied away — now sits in the ruleset where the layout
+  convention is stated (`Database/Database-Ruleset.md`, *Artifact Layout and Release Governance*, "Review note —
+  rollback-only artifact folders"), together with the note that such a folder creates nothing and is therefore
+  outside the duplicate-object check.
+- [x] **T219** Confirm and record that the mirror schema exists **only** under `Database/Mock/` — the five
   `visual_*_result` tables plus their `_stage` twins — and that the `2x_mock_*` folders under `Database/Tables` hold
   no creates. The folder names invite the opposite conclusion. · `Database/Mock/Tables/`,
   `Database/Tables/AllTables.sql`
-- [ ] **T220** Teach `.github/scripts/validate-database-schema.ps1` to detect two artifacts creating the same object.
+  **Confirmed and recorded 2026-09-20.** `Database/Mock/Tables/` holds exactly **10** `create.sql` files — the five
+  `visual_*_result` mirror tables and their five `_stage` twins — and those 10 names are the **only** creates for
+  them anywhere under `Database/` (a group-by over every `create.sql` in the tree finds no name twice).
+  `Database/Tables/AllTables.sql` contains **0** occurrences of `mock`, so the internal-store aggregate does not
+  list a single mirror object; the mirror ships through the generated `Database/Mock/All*.sql` masters. The
+  `20_mock_*`–`27_mock_*` folders under `Database/Tables/` hold only `rollback.sql` (T218) and create nothing. The
+  opposite conclusion the folder names invite is now recorded as wrong in `Database/Database-Ruleset.md`
+  (*Artifact Layout and Release Governance*, "Review note — the `mtm_mock` mirror schema lives only under
+  `Database/Mock/`").
+- [x] **T220** Teach `.github/scripts/validate-database-schema.ps1` to detect two artifacts creating the same object.
   It collects every `Database/Tables/**/create.sql` and applies them in order, so a duplicate create passes silently
   — which is how the duplicates above survived every CI run. · `.github/scripts/validate-database-schema.ps1`
-- [ ] **T221** Confirm `.github/workflows/database-schema-validation.yml` can fail for the right reason: its
+  **Implemented and proven both ways 2026-09-20.** The script now collects the object each artifact creates — a
+  `table` / `procedure` / `function` / `view` `CREATE` pattern over the four `create.sql` path sets it already
+  builds — and fails on any object claimed by two artifacts, naming the object and both paths. It runs **before**
+  the connection-string gate, so it bites on a runner with no database at all, which is the only way this class of
+  defect is caught in CI. Verified on a clean tree with no connection-string environment variables and
+  `pwsh -NoProfile -ExecutionPolicy Bypass`: *"Duplicate-object check passed: 94 artifact(s) create 94 distinct
+  object(s)."*, then *"Skipping validation because no configured connection-string env vars are set."*, exit **0**.
+  Then `Database/Tables/02_core_workstations_registry/create.sql` was recreated as a deliberate duplicate: the
+  guard named the table and **both** paths and exited **1**. The temporary folder was removed afterwards and the
+  tree re-checked clean.
+- [x] **T221** Confirm `.github/workflows/database-schema-validation.yml` can fail for the right reason: its
   table-install phase needs a database connection, so establish whether it fails honestly on a runner with no
   database or passes vacuously. · `.github/workflows/database-schema-validation.yml`
+  **Established 2026-09-20 — and the answer is neither "honestly" nor "vacuously" as the task framed it: the job is
+  either vacuous or permanently red, and in neither state does it compare the tree against a database.** Both
+  `MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_HOME` and `_WORK` **are** configured as repository secrets (verified
+  with `gh secret list`), so the validation step does **not** skip on a push — it runs. Every recent run of the
+  workflow has **failed**: 10 of the 10 most recent, from 2026-09-12 to 2026-09-14. The reason is environmental, not
+  schematic — the configured hosts are private-LAN addresses that a GitHub-hosted runner cannot reach. From run
+  `34838617336` (2026-09-14): `_HOME` → *"Unable to connect to any of the specified MySQL hosts"*, `_WORK` →
+  *"Connect Timeout expired."*, then *"Database schema validation failed for all configured connection strings:"*
+  and exit 1. So it fails **honestly** — it names each source it tried and why — but for a reason that says nothing
+  about the schema, which makes it a permanently red gate rather than a check. The vacuous state is the other half:
+  with no connection string configured the script logs *"Skipping validation because no configured connection-string
+  env vars are set."* and exits 0. **That is how the duplicate creates survived every CI run — no schema check has
+  ever run in CI at all**, because the only check that needs a database can never reach one. The one check that can
+  be meaningful on a runner is the static duplicate-object check (T220), which is exactly why it was placed before
+  the gate; it is now the only part of this job that can fail for a reason the tree is responsible for.
+  Two further findings, recorded rather than silently absorbed. **The script's `pwsh` requirement is real**: under
+  Windows PowerShell 5.1 its `Add-Type` fails with *"The type or namespace name 'Loader' does not exist in the
+  namespace 'System.Runtime'"* (`System.Runtime.Loader` is absent in 5.1), so it would exit 1 for the wrong reason.
+  The workflow is correct as it stands; this is recorded so nobody "simplifies" it to `powershell`.
+  **The script could not run locally at all, for a reason that never affected CI**: it picked
+  `Microsoft.Extensions.Logging.Abstractions` **1.1.1** — the first version the local NuGet cache enumerates, nine
+  major versions behind the 10.0.10 the app resolves — so MySqlConnector's logging type initializer threw and the
+  script died before any check. The runner's cache held 10.0.10, which is why CI showed connection errors instead.
+  Fixed here by preferring the copy sitting beside `MySqlConnector.dll` and taking the **highest** cached version as
+  the fallback. With that fixed and a **reachable** store (the local `mtm_waitlist`), the script now gets as far as
+  its seed phase and fails there: `Database/Seeds/seed_config_image_storage_settings/create.sql` opens with
+  `TRUNCATE TABLE config_settings_values`, which MySQL refuses once `config_settings_history` exists with
+  `fk_settings_history_settings_values_config_setting_id` (`NO ACTION`) — unconditionally, regardless of row counts.
+  That is a fresh-install defect in the seed, not a runner concern, and it is reported here rather than fixed in this
+  change. The run against the local store wrote nothing: the refused `TRUNCATE` aborted the seed loop on its **first**
+  file, and the store was verified unchanged afterwards (`config_settings_values` still holds its original 3 rows,
+  none of them `image_storage.*`).
 
 ### The guards that cannot fail (from `READINESS-CHECKLIST.md` Phase 4)
 

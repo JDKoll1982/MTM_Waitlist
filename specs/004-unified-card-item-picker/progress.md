@@ -51,6 +51,47 @@ Started: 2026-09-20 07:25:58
   builds its file list from `git diff --name-only $base $head` and calls the script with `-Files`, so a pull request
   that touches no C#/XAML/RESW file passes **and is not evidence that the tree is clean**. A repo-wide backlog of
   **910** findings sat behind that gate unmeasured until now.
+- **Windows PowerShell 5.1 cannot run `.github/scripts/validate-database-schema.ps1`.** Its `Add-Type` of the
+  isolated load context fails with *"The type or namespace name 'Loader' does not exist in the namespace
+  'System.Runtime'"* — `System.Runtime.Loader` is not in the 5.1 framework — and the script exits **1 before it
+  reaches a single check**, which reads as a schema failure and is not one. Always run it as
+  `pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-database-schema.ps1`. The CI workflow
+  already uses `shell: pwsh`; do not "simplify" that to `powershell`.
+- **Never resolve a build dependency with `Get-ChildItem -Recurse | Select-Object -First 1` over the NuGet cache.**
+  `validate-database-schema.ps1` did that for `Microsoft.Extensions.Logging.Abstractions` and picked **1.1.1** — the
+  first of 22 cached versions, nine majors behind the 10.0.10 the app resolves — so the isolated load context
+  force-loaded the wrong assembly and MySqlConnector's logging type initializer threw. The script died before any
+  check, with an error that names neither the file nor the real cause. Resolve from **beside the assembly that needs
+  it** (the build output) first, and fall back to the **highest** cached version by parsing the version folder name
+  in a `try/catch` — never to the first one the file system happens to enumerate. This is version-dependent
+  behaviour: the CI runner's cache held only 10.0.10, so the same script worked there and failed only locally.
+- **A red CI job is not evidence that a check ran.** `database-schema-validation.yml` has failed on **every** recent
+  run (10 of 10, 2026-09-12 → 09-14) — and the reason is environmental: its connection-string secrets hold
+  private-LAN hosts that a GitHub-hosted runner cannot reach (*"Unable to connect to any of the specified MySQL
+  hosts"*, *"Connect Timeout expired."*), so the job fails honestly but for a reason that says nothing about the
+  schema. With no secrets configured the same script skips and exits **0**. The job is therefore either vacuous or
+  permanently red; read the log before treating either state as coverage.
+- **`TRUNCATE` is refused on any table an FK references, whatever the row counts.** `Database/Seeds/
+  seed_config_image_storage_settings/create.sql` opens with `TRUNCATE TABLE config_settings_values` and cannot
+  succeed once `config_settings_history` exists with `fk_settings_history_settings_values_config_setting_id`
+  (`NO ACTION`) — even though history held **0** rows against 3 values rows, so the block is vacuous and fatal. The
+  seed is applied **first** of eight, so this breaks a fresh install and, because `Apply-Seeds` also runs on the
+  success path, can turn an otherwise-green validation red at its final step. Use `DELETE FROM` where the FK must be
+  honoured, or drop and re-add the FK around the truncate.
+- **`git rm` needs `--` before the path list.** A repo path that begins with `-` is parsed as an option and the
+  command fails or does nothing, silently. Use `git rm -r --quiet -- <paths>`.
+- **A duplicate-create check must cover all four artifact kinds.** Scanning only `Database/Tables/**/create.sql`
+  finds the table duplicates and misses the procedure, view and function duplicates created by the same rename —
+  this repository had 11 pairs, not 3. Group every `create.sql` under `Database/**` by (kind, created object name)
+  and fail on any name claimed twice.
+- **A guard that runs after a connection-string gate never runs in CI.** `validate-database-schema.ps1` skipped
+  its whole validation phase when the connection-string secrets were empty, so the duplicate creates passed every
+  run; when the secrets *are* present the same phase cannot reach the private-LAN hosts and the job fails instead.
+  Put static checks **before** the gate; they are the only checks a DB-less runner can perform.
+- **`Database/Tables/20`–`29` hold `rollback.sql` only, by design.** They are the retained drops for the retired
+  `mock_*` family and the retired request type/subtype catalog. `RetiredSymbolAuditTests.IsExemptFromSqlAudit`
+  exempts any file named `rollback.sql` precisely so these can name an object that no longer exists. A create-less
+  artifact folder is not corruption and must not be tidied away.
 
 ---
 
@@ -132,4 +173,50 @@ Started: 2026-09-20 07:25:58
 - **T206's premise is stale.** It says `capabilities/` is absent from the tree, but the directory exists and holds `startup/spec.md` and `startup-diagnostics/spec.md`. The task needs re-scoping to *restore or re-derive* `capabilities/DRIFT.md` rather than to create the folder.
 - **Verification evidence.** SQL guard: eleven findings printed, exit 1. Wrong-tree guard: names the derived path, exit 1. C#/XAML guard: 910 findings, exit 1, matching the report line-for-line. No C#, XAML, RESW or `.csproj` file was touched this iteration, so there is no build or test signal to add to the last full-suite result (`total: 1136, failed: 0, succeeded: 1109, skipped: 27`).
 - **Next iteration's scope.** T213 (prove the pairs) is already satisfied, so T214 → T215 → T216 (delete the stale half, then reconcile `AllTables.sql` and the bootstrap) is the natural next unit and is self-contained. Every other open task is either a running-app gate or reserved to the owner.
+---
+---
+## Iteration 4 - 2026-09-20
+**User Story**: Phase 14 Wave 3 - the database-artifact duplicate pairs (T213-T221), complete
+**Tasks Completed**:
+- [x] T213: proved all 11 duplicate-create pairs identical (SHA256, `create.sql` and `rollback.sql`)
+- [x] T214: deleted the 11 superseded folders (22 files) with `git rm -r`
+- [x] T215: swept for dangling references - none; the surviving folder is the only definition of each object
+- [x] T216: reconciled the aggregate, the folder set and the bootstrap; proved a fresh install produces every table
+- [x] T217: found and removed six duplicate *procedure* pairs, not just the tables
+- [x] T218: recorded the rollback-only convention for `Database/Tables/20`-`29` in the ruleset
+- [x] T219: confirmed and recorded that the mirror schema lives only under `Database/Mock/`
+- [x] T220: taught `validate-database-schema.ps1` to fail on two artifacts creating one object
+- [x] T221: established that the CI workflow is either vacuous or permanently red, and never schema-checked
+**Tasks Remaining in Story**: None - the database-artifacts batch is complete. 37 tasks remain elsewhere in `tasks.md`.
+**Commit**: the batch commit for this iteration (amended to carry the validator's assembly-resolution fix)
+**Files Changed**:
+- Database/Tables/02_core_workstations_registry/ (deleted)
+- Database/Tables/13_setup_workstations_catalog/ (deleted)
+- Database/Tables/14_config_workstation_hot_workcenters/ (deleted)
+- Database/StoredProcedures/sp_setup_workstations_delete/ (deleted)
+- Database/StoredProcedures/sp_setup_workstations_get_all/ (deleted)
+- Database/StoredProcedures/sp_setup_workstations_touch/ (deleted)
+- Database/StoredProcedures/sp_setup_workstations_upsert/ (deleted)
+- Database/StoredProcedures/sp_config_hot_workcenters_delete_for_workstation/ (deleted)
+- Database/StoredProcedures/sp_config_hot_workcenters_get_for_workstation/ (deleted)
+- Database/Views/vw_setup_workstations_active/ (deleted)
+- Database/Functions/fn_setup_workstation_name_normalized/ (deleted)
+- .github/scripts/validate-database-schema.ps1 (T220 duplicate-object guard)
+- Database/Database-Ruleset.md (T218, T219 review notes)
+- specs/004-unified-card-item-picker/tasks.md (T213-T221 ticked with recorded evidence)
+- specs/004-unified-card-item-picker/progress.md (this entry)
+**Learnings**:
+- **The duplicate defect was four artifact kinds wide, not one.** T217 asked only about procedures; the same rename left duplicate *views* and *functions* too. Counting the pairs that actually exist gives **11**, not the 3 the wave was scoped around: 3 tables, 6 procedures, 1 view, 1 function. All 11 are byte-identical in both files, and in every pair the legacy-named folder creates the **renamed** object - so the folder name is the only thing wrong, and deleting the stale half cannot change behaviour.
+- **Deleting the stale half needed no aggregate edit.** `AllTables.sql` never listed the duplicate folders, so it already held each table exactly once. Verified as a **set equality**, not a spot check: 21 aggregate names and 21 folder names, nothing only-in-aggregate, nothing only-in-folders, no duplicate in the aggregate.
+- **The fresh-install proof can be run without touching the live store.** `AllTables.sql` opens with `USE mtm_waitlist;`, so the file cannot be piped into a scratch schema as-is - strip that line, create `mtm_waitlist_probe`, apply, count, drop. The apply exited 0 and produced exactly **21** base tables including all three renamed ones; `mtm_waitlist_probe` was dropped afterwards and the live store was never in the path.
+- **The live store now matches the aggregate exactly** - 21 base tables against 21 aggregate creates, same names. That is a stronger statement than the previous iteration's notes carried, and it means the T215 sweep's conclusion ("no dangling references") is corroborated by the running database rather than only by grep.
+- **The duplicate creates survived CI because no schema check has ever run there, and the reason is structural.** `validate-database-schema.ps1` applies the table creates in order, so a second create of the same table is not an error to MySQL - it is a no-op overwrite. The check that would have caught it (two artifacts, one object) did not exist, and the phases that *would* have caught it downstream cannot run on a runner at all: with the connection-string secrets configured - and they **are** configured - the hosts they name are private-LAN addresses, so the job dies on *"Unable to connect to any of the specified MySQL hosts"* / *"Connect Timeout expired."* before reaching the schema. With no secrets it skips and exits 0 instead. Either way the tree is never compared against a database. The new guard sits **before** the gate for exactly that reason: it is the only check in the job that a runner can actually perform.
+- **A red CI job is not coverage.** All 10 of the most recent runs of `database-schema-validation.yml` failed (2026-09-12 to 2026-09-14), and the failure is environmental - unreachable LAN hosts - so it says nothing about the schema. The job's two reachable states are "vacuous, exit 0" and "permanently red"; neither is a check. T221's real finding is narrower and less comfortable than the task assumed: the workflow never failed for a *schema* reason, and it also never passed for one.
+- **A seed can be unable to run at all, and the failure is vacuous.** With a reachable store the validator now gets past the schema check and dies in its seed phase: `Database/Seeds/seed_config_image_storage_settings/create.sql` opens with `TRUNCATE TABLE config_settings_values`, which MySQL refuses once `config_settings_history` exists with `fk_settings_history_settings_values_config_setting_id` (`NO ACTION`) - regardless of row counts. History held **0** rows against 3 values rows, so the constraint blocks nothing real and the statement fails anyway. It is applied **first** of eight, so this breaks a fresh install; and because `Apply-Seeds` also runs on the success path, it can turn an otherwise-green validation red at its final step. Reported, not fixed here - it is a seed defect rather than part of the artifact-deduplication unit.
+- **A destructive-sounding run wrote nothing, and that was verified rather than assumed.** The refused `TRUNCATE` aborted the seed loop on its **first** file, so no later seed ran and no partial state was left. Confirmed against the store afterwards: `config_settings_values` still holds its original 3 rows and **0** rows matching `image_storage.%` (the seed would have written 4).
+- **The validator could not run locally at all, for a reason that never affected CI.** It resolved `Microsoft.Extensions.Logging.Abstractions` with `Get-ChildItem -Recurse | Select-Object -First 1`, which returns **1.1.1** - the oldest of 22 cached versions, nine majors behind the 10.0.10 the app resolves - and the isolated load context force-loaded it, so MySqlConnector's logging type initializer threw and the script died before any check. The runner's cache held only 10.0.10, which is why CI reported connection errors instead. Fixed by preferring the copy beside `MySqlConnector.dll` and taking the **highest** cached version as the fallback.
+- **PowerShell 5.1 is a trap for this script.** The validator cannot run under 5.1 at all (`System.Runtime.Loader` absent), and it exits 1 with a message that looks like a schema failure. Anyone who runs it with `powershell` instead of `pwsh` will read a false red. Recorded in the patterns section above so the next iteration does not have to rediscover it.
+- **Pre-existing uncommitted work was left alone.** The working tree carried substantive uncommitted changes from earlier iterations (`MTM_Waitlist.Settings`, `MTM_Waitlist.Waitlist.NewRequest`, `MTM_Waitlist.Waitlist.View`, `Services/DependencyInjection`, several test files, `Database/Seeds/*`, and `.specify/extensions/ralph/scripts/powershell/ralph-loop.ps1`) - 366 insertions across 16 files. They are outside this unit's scope and were not verified by this iteration, so they were deliberately **not** swept into this commit even though the loop recipe suggests `git add -A`. They remain uncommitted and are flagged for the owner below.
+- **Verification evidence.** Duplicate scan after deletion: 0 duplicate creates across 21 table and 84 routine/view `create.sql` files. Validator on a clean tree with no connection-string variables, under `pwsh`: *"Duplicate-object check passed: 94 artifact(s) create 94 distinct object(s)."* then *"Skipping validation because no configured connection-string env vars are set."*, exit 0. Validator with a deliberately recreated duplicate: names the table and both paths, exit 1. Live store: for the workstation/work-centre family only the renamed objects exist. No C#, XAML, RESW or `.csproj` file was touched this iteration, so the last full-suite result (`total: 1136, failed: 0, succeeded: 1109, skipped: 27`) still stands and no build or test run was needed.
+- **Next iteration's scope.** The remaining 37 tasks are dominated by running-app UI gates (T129-T133, T139, T164, T174, T184, T188), the owner's database reinstall (T165), and the documentation batch (T189-T210). The documentation batch is the only self-contained, verifiable unit left that does not need a signed-in app; the UI gates need a valid account credential and a running Debug build.
 ---

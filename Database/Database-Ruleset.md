@@ -83,6 +83,34 @@ This document applies your completed naming conventions and database architectur
 - Naming drift in SQL must fail CI/PR checks.
 - Exceptions require explicit written approval in PR notes.
 
+### Review note — rollback-only artifact folders (approved 2026-09-20)
+
+Some folders under `Database/Tables/` hold **only** a `rollback.sql` and no `create.sql`. That is by design, not a
+truncated artifact, and it must not be "tidied" away:
+
+- `Database/Tables/20_mock_master_tables_registry` through `27_mock_request_types` are the retained drops for the
+  retired in-database `mock_*` tables; `Database/Tables/28_waitlist_request_types` and
+  `29_waitlist_request_subtypes` are the same pattern for the retired request-type catalog. The objects are gone
+  from the schema, and the only remaining obligation is that an environment promoted from an older build still has
+  a reviewed statement that removes them.
+- These folders are deliberately exempt from the retired-symbol audit — `rollback.sql` **is** the drop statement for
+  a retired object, so naming a removed object there is the record *of* the removal, not a stale reference
+  (`MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`, `IsExemptFromSqlAudit`). The matching instances are
+  listed under the "Retired objects" sections of `Database/Bootstrap/update_table_descriptions.sql`.
+- A rollback-only folder creates nothing, so it is **not** a duplicate of any create artifact and is outside the
+  duplicate-object check `validate-database-schema.ps1` performs over `create.sql` files.
+- The same convention applies to retired procedures under `Database/StoredProcedures/`.
+
+### Review note — the `mtm_mock` mirror schema lives only under `Database/Mock/`
+
+- The five `visual_*_result` mirror tables, their `_stage` twins and the `sp_visual_*` procedures are defined
+  **once**, under `Database/Mock/Tables`, `Database/Mock/StoredProcedures` and `Database/Mock/Seeds`.
+- `Database/Tables/AllTables.sql` does **not** list any `mtm_mock` object; the mirror ships through the generated
+  `Database/Mock/All*.sql` masters.
+- The `2x_mock_*` folders under `Database/Tables/` are the rollback-only retired-object drops above and create
+  nothing, so no mirror object is defined twice. The folder names invite the opposite conclusion; this note is the
+  record that the opposite conclusion is wrong.
+
 ### Review note — generated master lists for the `mtm_mock` cache (approved 2026-09-11)
 
 The rule above that a master list is "hand-maintained" does not fit the `mtm_mock` cache, so the deviation is

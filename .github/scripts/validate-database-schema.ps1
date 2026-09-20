@@ -39,11 +39,23 @@ if ([string]::IsNullOrWhiteSpace($nugetRoot)) {
     $nugetRoot = Join-Path $HOME '.nuget\packages'
 }
 
-$loggingAbstractionsAssembly = Get-ChildItem -Path (Join-Path $nugetRoot 'microsoft.extensions.logging.abstractions') -Recurse -Filter 'Microsoft.Extensions.Logging.Abstractions.dll' |
+$loggingAbstractionsAssembly = Get-ChildItem -Path $mysqlConnectorAssembly.Directory -Filter 'Microsoft.Extensions.Logging.Abstractions.dll' -ErrorAction SilentlyContinue |
 Select-Object -First 1
 
 if ($null -eq $loggingAbstractionsAssembly) {
-    throw 'Unable to locate Microsoft.Extensions.Logging.Abstractions in the NuGet package cache.'
+    Write-Log 'Logging abstractions assembly not found beside MySqlConnector.dll; falling back to the NuGet package cache.'
+
+    # Take the highest cached version, not the first one enumerated. The cache holds every version this
+    # machine has ever restored - on this workstation 1.1.1 through 10.0.10 - and loading a version far
+    # behind the one MySqlConnector was built against makes its logging type initializer throw, which
+    # fails the job for a reason that has nothing to do with the schema.
+    $loggingAbstractionsAssembly = Get-ChildItem -Path (Join-Path $nugetRoot 'microsoft.extensions.logging.abstractions') -Recurse -Filter 'Microsoft.Extensions.Logging.Abstractions.dll' |
+    Sort-Object -Property @{ Expression = { try { [version]$_.Directory.Parent.Name } catch { [version]'0.0.0' } } } -Descending |
+    Select-Object -First 1
+}
+
+if ($null -eq $loggingAbstractionsAssembly) {
+    throw 'Unable to locate Microsoft.Extensions.Logging.Abstractions in the build output or the NuGet package cache.'
 }
 
 Write-Log "Using logging abstractions assembly: $($loggingAbstractionsAssembly.FullName)"
@@ -105,6 +117,68 @@ Select-Object -ExpandProperty FullName
 $viewCreatePaths = Get-ChildItem -Path (Join-Path $repoRoot 'Database\Views') -Recurse -Filter 'create.sql' |
 Sort-Object FullName |
 Select-Object -ExpandProperty FullName
+
+# Two artifacts creating the same object is invisible to the install below: every file is applied in
+# turn, the last one silently wins, and the install reports success. The check is static and runs
+# before the connection-string gate on purpose, so it also holds on a runner with no database.
+$objectCreatePatterns = @(
+    @{ Kind = 'table'; Pattern = '(?im)^\s*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?' },
+    @{ Kind = 'procedure'; Pattern = '(?im)^\s*CREATE\s+(?:DEFINER\s*=\s*\S+\s+)?PROCEDURE\s+`?(\w+)`?' },
+    @{ Kind = 'function'; Pattern = '(?im)^\s*CREATE\s+(?:DEFINER\s*=\s*\S+\s+)?FUNCTION\s+`?(\w+)`?' },
+    @{ Kind = 'view'; Pattern = '(?im)^\s*CREATE\s+(?:OR\s+REPLACE\s+)?(?:ALGORITHM\s*=\s*\S+\s+)?VIEW\s+`?(\w+)`?' }
+)
+
+function Get-CreatedObject {
+    param([string]$Path)
+
+    $content = Get-Content -Path $Path -Raw
+    $created = New-Object System.Collections.Generic.List[object]
+
+    foreach ($objectCreatePattern in $objectCreatePatterns) {
+        foreach ($match in [regex]::Matches($content, $objectCreatePattern.Pattern)) {
+            $created.Add([pscustomobject]@{
+                    Kind = $objectCreatePattern.Kind
+                    Name = $match.Groups[1].Value
+                    Path = $Path
+                })
+        }
+    }
+
+    return $created
+}
+
+function Assert-NoDuplicateObjectCreates {
+    param([string[]]$Paths)
+
+    $created = New-Object System.Collections.Generic.List[object]
+    foreach ($path in $Paths) {
+        foreach ($entry in (Get-CreatedObject -Path $path)) {
+            $created.Add($entry)
+        }
+    }
+
+    $distinct = $created | Group-Object Kind, Name
+    $duplicates = $distinct | Where-Object { $_.Count -gt 1 }
+
+    if (-not $duplicates) {
+        Write-Log ("Duplicate-object check passed: {0} artifact(s) create {1} distinct object(s)." -f $created.Count, $distinct.Count)
+        return
+    }
+
+    Write-Host 'Duplicate-object check failed: more than one artifact creates the same object.'
+    foreach ($duplicate in $duplicates) {
+        $sample = $duplicate.Group[0]
+        Write-Host ("  {0} '{1}' is created by {2} artifacts:" -f $sample.Kind, $sample.Name, $duplicate.Count)
+        foreach ($entry in $duplicate.Group) {
+            Write-Host ("    {0}" -f $entry.Path.Substring($repoRoot.Length + 1))
+        }
+    }
+
+    Write-Host 'Only one artifact may create each object; delete the superseded one, or rename it if it is not a duplicate.'
+    exit 1
+}
+
+Assert-NoDuplicateObjectCreates -Paths ($tableCreatePaths + $procedureCreatePaths + $functionCreatePaths + $viewCreatePaths)
 
 $attemptErrors = New-Object System.Collections.Generic.List[string]
 $resolvedConnectionStrings = @()
