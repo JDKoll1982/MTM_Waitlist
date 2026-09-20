@@ -1065,13 +1065,29 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
 
 **Wave 7 — the population is raised (single task; one person, nineteen requests):**
 
-- [ ] **T129** [US1] Raise the nineteen requests through the application, one per in-scope Item, signed in as the ten
+- [x] **T129** [US1] Raise the nineteen requests through the application, one per in-scope Item, signed in as the ten
   accounts that already exist — **no new account** — with the owner's weighting (ordinary floor people plus a couple
   of leads) and every one of the eight roles raising at least one, so each kind of login opens onto a populated list
   (FR-036, FR-037). Spread them across more work centres than the seven that carry the prepared situations, and raise
   every material-dependent Item from a work centre whose job actually carries that material (FR-038). Leave all
   nineteen unhelped (FR-040). Evidence: the nineteen rows read back with their `category`, `item`, `status` and
   requester. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
+
+  Evidence recorded (2026-09-21, raised through the running Debug build, one fresh sign-in per account):
+  rows 28–51 (nineteen, all `Pending`) — `28`/`29`/`31`/`47` `6229 John Koll` (signed in as `johnk` twice and
+  `jkoll` twice), `32`/`33` `9001 Test Admin`, `35`/`48` `9002 Test Developer`, `36`/`37` `9003 Test Plant
+  Manager`, `38`/`39` `9004 Test Setup Lead`, `40`/`41` `9005 Test Production Lead`, `42`/`43` `9006 Test Setup`,
+  `49` `9007 Test Production`, `50`/`51` `9008 Test Material Handler`. Nineteen distinct `item` values (one per
+  in-scope Item), eight work centres (`100-3`, `100-6`, `100-7`, `100-12`, `100-18`, `100-1806`, `V100-33`,
+  `V100-34`) across both buildings, all eight roles represented. Material-dependent Items were raised only where
+  the work centre's active job carries the material (`100-1806` dunnage `DNG0007788`, `100-18` component
+  `CMP0004455`, `100-6` flatstock `MMF0001154`, `100-12` coil `MMC0000789`, `100-7` die `FGT0002000`, `V100-33`
+  coil `MMC0001001` / flatstock `MMF0001155`). All nineteen left `Pending` — none accepted, completed or canceled.
+  Two recorded limitations: `johnk` and `jkoll` are two accounts on one employee number (`6229`), so the store —
+  which has no user-id column — shows nine distinct requesters for ten sign-ins; and the eighteen
+  `seed_waitlist_requests_default` rows were left in place beside the nineteen (no task rewrites that seed), which
+  the plan avoided overlapping by (building, work centre, item, answer) — a join over the two populations returns
+  no active collision.
 
 **⟶ Wait for Wave 7 to finish, then:**
 
