@@ -149,6 +149,30 @@ Started: 2026-09-20 07:25:58
   column fails `ERROR 1054`. The 19 in-scope Items are the set T129 raised; the other four (`pickup-fg`,
   `pickup-ncm`, `pickup-outside-service`, `pickup-wip`) are the FR-028 out-of-scope Items. Compare **sets**, not
   counts, when checking SC-014.
+- **A `GridView` card exposes `InvokePattern`, so `ItemClick` can be driven headlessly.** The dunnage and work-centre
+  tiles are `ControlType.ListItem` under a `ControlType.List` and answer
+  `$e.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()` — the same route the user's
+  click takes. `SelectionItemPattern.Select()` also works on `NavigationViewItem` and on the facility selector's
+  `ComboBoxItem`s.
+- **A real mouse click does nothing while another window holds the foreground.** `SetCursorPos` + `mouse_event` was
+  silently a no-op with a File Explorer window focused, so a driver that "clicked" reported success and changed
+  nothing. Prefer `InvokePattern`; treat synthetic mouse input as the last resort it is.
+- **`BoundingRectangle` can be `Infinity`, and casting it to `[int]` throws.** Virtualized or off-screen items
+  report it, and the failure is `Cannot convert value "∞" to type "System.Int32"` — guard with
+  `[double]::IsInfinity()` before reading a centre point, exactly as the waitlist card list already required.
+- **`Get-Process X | Stop-Process -Force` is refused; `Stop-Process -Id $_.Id -Force` is not.** Enumerate the
+  instances and stop them by id:
+  `Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.Id -Force }`.
+- **`\G` does not work through `mysql -e` on this build.** It exits 1 with no rows. Use `-N -B` (tab-separated,
+  no header) and read the columns positionally instead.
+- **A duplicate-active refusal is the guard, not the step failing.** `WaitlistRequestService.SubmitAsync` matches on
+  `(building, work centre, item, answer)` against the queue snapshot, so once a dunnage walk has written its row a
+  second identical walk is refused with `Matching request already active`. To exercise the *other* answer path,
+  switch facility rather than deleting the row — the walk needs a job carrying dunnage, and only `100-1806`,
+  `V100-33` and `100-3` have one.
+- **The dunnage step has no Continue button, and that is the requirement.** `NewRequestDunnagePage` carries only
+  `NewRequestDunnagePage_BackButton` and `NewRequestDunnagePage_SubstituteButton`; choosing a card *is* the advance.
+  A driver waiting for a Continue that never renders will time out on a page that is working correctly.
 
 ---
 
@@ -384,3 +408,24 @@ Started: 2026-09-20 07:25:58
 - **The tick's date is the tell.** `git log -S '<task id>'` dates a tick, and dating T132/T134 to commit `45a9984` (2026-09-13) shows they were marked done on the day Phase 9 was written, before T129 created the population they claim to have exercised. A tick that predates its own subject cannot be evidence, and no amount of re-reading `tasks.md` will change that.
 - **Amend a checkpoint claim you just falsified; do not leave it standing beside the finding.** The Phase 9 checkpoint asserted SC-013 … SC-020 were "provable from this phase alone". The walk disproved that for three of them, so the paragraph now says which three and why, rather than contradicting the evidence block a few lines above it.
 - **Next iteration's scope.** 5 tasks remain, all running-app UI gates or the owner's action: Phase 11's T164 (the dunnage step) and T165 (the owner's live-database reinstall, explicitly reserved to them), Phase 12's T174 (the pickup-die/deliver-die card lines), Phase 13's T188 (die page behaviour) and T184 (a die request from 100-7). SC-013, SC-018 and SC-019 also need running-app gates - a sign-out restart, a real expiry, and two instances acting at once - so a future iteration that can sign in and drive the Debug build closes both those criteria and T164/T174/T184/T188 together.
+---
+## Iteration 9 - 2026-09-20
+**User Story**: Phase 11 Wave 6 gate - T164, the dunnage step driven in the running app
+**Tasks Completed**: 
+- [x] T164: Walked the dunnage step end to end twice in the running Debug build, once down each answer path, against the local `mtm_waitlist` @ 127.0.0.1. On `100-1806` the step rendered `New Request - Choose Dunnage | Work Center: 100-1806 | Which dunnage do you need from the material handlers?` between Item and Preview, with `NewRequestDunnagePage_DunnageTiles` holding one card for the job's single assigned part (`Rack, 24 x 36 wire` / `DNG0007788`); on `V100-33` the same step offered `Tote, collapsible` / `DNG0007789`. The page has **no** Continue button - only `NewRequestDunnagePage_BackButton` and `NewRequestDunnagePage_SubstituteButton` - so the card click is the advance, and it reached Preview reading `Detail | 12 x 8 x 4 (SW)`. `Use substitute…` opened the existing `SetupDunnageImageSearchDialog` (`Search Dunnage Parts by Image`, with its Refresh, Show-all and Close controls) and reported the step's own substitute button `enabled=False` while it was open; the `12 x 8 x 4 (SW)` tile chosen there carried through Confirm and Submit (`Request completed | Request submitted.`) into row **52** of `waitlist_requests_queue` (`100-1806` / `pickup-dunnage` / `input_value = 12 x 8 x 4 (SW)`). The assigned-card path was then walked on `V100-33` into row **53** (`input_value = DNG0007789`), and both were found back on the Waitlist by their second line - `Pickup > 12 x 8 x 4 (SW)` and `Pickup > DNG0007789` - which is FR-051 reading the captured answer back.
+- [ ] T165: **Not ticked, deliberately.** Its two non-reinstall halves were read back and are recorded under the task: both dunnage rows are live in the local store with `list`/`dunnage` intact on the `source: answer` field, and `AllSeeds.sql` (833-841, 898-906) is identical to `seed_waitlist_request_item_configs/create.sql` (121-129, 186-194) for both rows. The reinstall the task names is the owner's action, so the tick stays theirs.
+**Tasks Remaining in Story**: 1 - T165, reserved to the owner. 3 tasks remain in the feature after it: T174, T184, T188.
+**Commit**: `docs(004-unified-card-item-picker): record iteration 9 of the ralph loop - T164 dunnage UI gate` (this entry's own commit, carrying `tasks.md` and `progress.md`)
+**Files Changed**: 
+- specs/004-unified-card-item-picker/tasks.md (T164 ticked with its per-clause evidence block; T165 given a read-back note that leaves the tick to the owner; the Phase 11 checkpoint paragraph amended now that the UI walk is recorded)
+- specs/004-unified-card-item-picker/progress.md (this entry, plus eight new `## Codebase Patterns` bullets)
+**Learnings**:
+- **A `GridView` card answers `InvokePattern`, and that is the whole of driving `ItemClick` headlessly.** The tiles are `ControlType.ListItem` under a `ControlType.List`, and `GetCurrentPattern([InvokePattern]::Pattern).Invoke()` takes the same route the user's click does. The earlier belief that a templated card needs synthetic mouse input was wrong, and it mattered: the page has no Continue button, so without `Invoke` the step cannot be advanced at all.
+- **A synthetic mouse click is silently a no-op while another window holds the foreground.** `SetCursorPos` + `mouse_event` reported no error and changed nothing with a File Explorer window focused, which is the worst kind of failure - the driver's log says the click succeeded. `InvokePattern` has no such dependency.
+- **The requirement "Continue is reachable only after a part is chosen" is implemented as "there is no Continue".** `NewRequestDunnagePage` carries only Back and `Use substitute…`, so a driver that waits for a Continue button times out on a page that is behaving exactly as specified. Read the requirement's *intent* against the markup before treating an absent control as a defect.
+- **A duplicate-active refusal is evidence about the guard, not a failure of the walk.** The first assigned-card attempt on `100-1806` returned `Matching request already active | An active matching request already exists.` because row 52 already held that `(building, work centre, item, answer)` - FR-054 doing its job. The fix is to change the *scenario* (a different facility carrying dunnage), never to delete the row to make the walk pass.
+- **Two answers to the same question can each be the value the card reads back, and both must be walked.** The substitute path and the assigned-card path write the same `input_value` column by different routes - `12 x 8 x 4 (SW)` from the receiving catalogue, `DNG0007789` from the job's own assignment - and the Waitlist card's second line reads the column, not the route. Proving one proves nothing about the other.
+- **A store that grows while you test is not a store that drifted.** Driving the real app wrote rows 52 and 53 into the live local `mtm_waitlist`, taking `waitlist_requests_queue` from 37 to 39. These are live-store writes from exercising the application, not seed changes, and a later iteration must not read the shift as seed drift - the same trap the earlier "the live store already diverged from the seeds" note records.
+- **`Get-Process X | Stop-Process -Force` is refused; stopping by id is not.** Enumerate and stop individually: `Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.Id -Force }`. Confirmed 0 instances afterwards, so no orphan holds the store's connections.
+- **`\G` does not work through `mysql -e` on this build.** It exits 1 and prints nothing, which reads like an empty result rather than a syntax limit. Use `-N -B` and read columns positionally.
+- **Next iteration's scope.** 4 tasks remain, every one of them either a running-app UI gate or the owner's action: Phase 11's T165 (the owner's live-database reinstall - its verifiable halves are done and recorded, so only the reinstall is left and the agent must not run it), Phase 12's T174 (the pickup-die/deliver-die card lines, which needs a fresh raise from `100-7` because the existing cards were not raised through the flow being proved), and Phase 13's T188 (the die page behaviour) and T184 (a die request from `100-7`). SC-013, SC-018 and SC-019 also still need running-app gates - a sign-out restart, a real expiry, and two instances acting at once - and the Debug build now drives cleanly to the shell with no credentials, so a future iteration can close those three criteria and T174/T184/T188 in the same way T164 was closed here.

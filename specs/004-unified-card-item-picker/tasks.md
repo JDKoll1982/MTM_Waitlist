@@ -1528,20 +1528,66 @@ change, so the row spec, the seed and the code cannot disagree. ·
 /nodeReuse:false` → `0 Error(s)`; `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug
 -p:Platform=x64` → `Failed: 0`. Evidence recorded: build succeeded, `total: 1060, failed: 0, succeeded: 1033,
 skipped: 27`. · `MTM_Waitlist.sln`, `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
-- [ ] **T164** **UI gate.** In the running app, raise a request for a job that carries dunnage and prove, from a
+- [x] **T164** **UI gate.** In the running app, raise a request for a job that carries dunnage and prove, from a
 text/geometry dump rather than from the code: the dunnage step appears between Item and Preview; the job's parts
 are drawn as cards; Continue is reachable only after a part is chosen; `Use substitute…` opens the receiving
 catalogue and a part chosen there becomes the request's value; and the raised request's card shows the chosen part
 on its second line. Needs a signed-in session and a job carrying dunnage. ·
 `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
+
+**Recorded walk (2026-09-20, that Debug build, driven by UI Automation against the local `mtm_waitlist`
+@ 127.0.0.1, MySQL 9.6.0).** Two requests were raised end to end, one down each of the two answer paths the step
+offers. Every claim below is read from a text dump of the running window or from the row the walk wrote, never
+from the code.
+
+- *The dunnage step appears between Item and Preview.* On `100-1806` (Expo Drive) the wizard rendered
+  `New Request - Choose Dunnage | Work Center: 100-1806 | Which dunnage do you need from the material
+  handlers?` after the Item step and before Preview, and the walk reached it a second time on `V100-33`. The
+  step has no numbered slot of its own in the `1 Work Center` … `7 Complete` indicator, which is why the
+  title - not the indicator - is what identifies it.
+- *The job's parts are drawn as cards.* `NewRequestDunnagePage_DunnageTiles` (`ControlType.List`) held one
+  `ControlType.ListItem` per assigned part, each carrying the part's display name: `Rack, 24 x 36 wire` /
+  `DNG0007788` on `100-1806` and `Tote, collapsible` / `DNG0007789` on `V100-33`. One card each, matching each
+  job's single assigned part - the offered set is the job's own assignment, not a catalogue.
+- *Continue is reachable only after a part is chosen.* The page carries **no** Continue button at all - the
+  only controls are `NewRequestDunnagePage_BackButton` and `NewRequestDunnagePage_SubstituteButton` - so
+  choosing a card is the only way forward. Invoking the card advanced to Preview, where the choice read back as
+  `Detail | 12 x 8 x 4 (SW)`.
+- *`Use substitute…` opens the receiving catalogue, and a part chosen there becomes the request's value.*
+  `NewRequestDunnagePage_SubstituteButton` opened `Search Dunnage Parts by Image` - the existing
+  `SetupDunnageImageSearchDialog`, offering `SetupDunnageImageSearchDialog_RefreshButton`,
+  `SetupDunnageImageSearchDialog_ShowAllToggle` and `CloseButton` - and while it was open the step's own
+  substitute button reported `enabled=False`. The `12 x 8 x 4 (SW)` tile taken from it reached Preview, Confirm
+  and Submit: `Request completed | Request submitted.`, and row **52** of `waitlist_requests_queue` was written
+  as `100-1806` / `pickup-dunnage` / `input_value = 12 x 8 x 4 (SW)` / `Pending`. A second dunnage picker does
+  not exist: the receiving dialog is the one that opened.
+- *The raised request's card shows the chosen part on its second line.* Both walks were found back on the
+  Waitlist by their second line - `Pickup > 12 x 8 x 4 (SW)` at `100-1806` (the substitute) and
+  `Pickup > DNG0007789` at `V100-33` (the assigned card, row **53**, `input_value = DNG0007789`) - which is
+  FR-051 reading the captured answer back.
+- *The duplicate guard, met on the way.* The first attempt at the assigned-card path was refused with
+  `Matching request already active | An active matching request already exists.`, because row 52 already held
+  that `(building, work centre, item, answer)`. That is FR-054 working, not a defect in the step; the second
+  walk therefore used `V100-33`, and the refusal is recorded here as evidence about the guard.
 - [ ] **T165** **Live database validation.** Re-run the configuration seed against a local `mtm_waitlist` and read
 both dunnage rows back with their `list` key intact, confirming `AllSeeds.sql` agrees with the file on disk.
 **The reinstall is the owner's action, never the agent's.** · `Database/Seeds/**`
 
+  **Read back, not reinstalled (2026-09-20).** The two halves this task asks for that are not the reinstall are
+  done, so only the owner's action is outstanding. Both dunnage rows are live in the local `mtm_waitlist`
+  (`pickup-dunnage` and `deliver-dunnage`, installed 12:43:36) and both carry `collect-input-then-confirm`,
+  `requires_answer = 1`, `answer_value_type = 'enum'`, the prompt `Which dunnage do you need from the material
+  handlers?`, `options_json = NULL`, and `'list','dunnage'` on the `source: answer` field of
+  `detail_fields_json` - the key intact, exactly as T162 specified. `AllSeeds.sql` (lines 833-841 and 898-906) is
+  **identical** to `Database/Seeds/seed_waitlist_request_item_configs/create.sql` (lines 121-129 and 186-194) for
+  both rows, so the master and the file agree. **The task stays unticked**: the reinstall it names is the owner's
+  action, and re-running the seed against a store is that action, whatever the host.
+
 **Checkpoint — the operator picks the dunnage, and the card says which.** A dunnage request cannot be raised without a
 part being chosen; the parts offered are the ones the job carries; a substitute from the receiving catalogue is a
 first-class answer; and the card shows whichever part the operator ended on. FR-048 … FR-051 and SC-022/SC-023 are
-provable from this phase's tests alone, with the UI walk and the seed reinstall the two gates still open.
+provable from this phase's tests alone, with the UI walk recorded above (T164) and the seed reinstall the one gate
+still open.
 
 ---
 
