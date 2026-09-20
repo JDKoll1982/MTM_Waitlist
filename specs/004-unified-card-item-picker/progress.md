@@ -250,7 +250,7 @@ Started: 2026-09-20 07:25:58
 - [x] T230: a durable, append-only run history for the criteria to be measured against
 - [x] T232: four further SC-007 / SC-008 claims corrected in `specs/001-module-mock-visual-fallback/tasks.md`
 **Tasks Remaining in Story**: None - US7 is complete. 10 tasks remain elsewhere in `tasks.md`.
-**Commit**: the US7 commit for this iteration (amended to carry this entry)
+**Commit**: `7333147` — "feat(004): US7 make the codebase honest about itself" (39 files, +2249/-154). Committed as one coherent unit: the story's last open task plus the documentation batch it completes. This progress entry lands in the follow-up docs commit, as iteration 3's did.
 **Files Changed**:
 - MTM_Waitlist.Mock.Service/Models/ReliabilityCriteria.cs (new - the numbers the criteria are measured over, in one place)
 - MTM_Waitlist.Mock.Service/Models/RunHistoryEntry.cs (new - the JSONL line shape, and the measurement tool's contract)
