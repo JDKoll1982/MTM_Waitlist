@@ -6,6 +6,8 @@ using CommunityToolkit.Mvvm.Input;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 
@@ -187,10 +189,31 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
     }
 
     /// <summary>
-    /// Whether to show the job's coil readout. The <b>job</b> has a coil — the availability snapshot says so —
-    /// never a property of the Item the requester chose.
+    /// Whether this request involves the job's coil, and therefore whether its coil card belongs on this page.
     /// </summary>
-    private static bool IsCoilRequest(NewRequestFlowState state) => state.Availability.HasCoil;
+    /// <remarks>
+    /// <para>
+    /// The gate is the <b>Item the requester chose</b>, never the job on its own. A job carrying a coil is ordinary,
+    /// and gating on the job made every request raised against it grow a coil card — the card started hidden and the
+    /// asynchronous coil read then turned it on a couple of seconds after the page appeared, so a die, dunnage or
+    /// scrap request ended up showing detail for a coil that request had nothing to do with.
+    /// </para>
+    /// <para>
+    /// <see cref="RequestItemPickerRules.RequiredJobPart"/> is the same rule the picker uses to decide whether to
+    /// offer the Item at all, so the card and the picker cannot disagree about what a request is for — and nothing
+    /// here keys on the Item's identity (FR-013).
+    /// </para>
+    /// </remarks>
+    private static bool IsCoilRequest(NewRequestFlowState state)
+    {
+        if (!state.Availability.HasCoil || state.Item is null)
+        {
+            return false;
+        }
+
+        return RequestItemPickerRules.RequiredJobPart(state.Item) is
+            RequestJobPartKind.Coil or RequestJobPartKind.CoilOrFlatstock;
+    }
 
     private void ResetCoilDetail()
     {

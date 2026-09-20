@@ -28,7 +28,7 @@ public sealed class NewRequestOneRequestPerDieTests
 
         Assert.AreEqual(2, drafts.Count, "One request per die chosen (FR-054).");
         CollectionAssert.AreEqual(
-            new[] { "FGT0002000-DIE SHOP", "FGT0002001-PRESS BAY" },
+            new[] { "FGT0002000", "FGT0002001" },
             drafts.Select(draft => draft.InputValue).ToArray(),
             "Each request carries the die it is for, in the order the operator chose them.");
         Assert.AreEqual(
@@ -76,7 +76,7 @@ public sealed class NewRequestOneRequestPerDieTests
 
         Assert.AreEqual(2, requests.Submitted.Count, "Two dies chosen is two requests raised (FR-054).");
         CollectionAssert.AreEqual(
-            new[] { "FGT0002000-DIE SHOP", "FGT0002001-PRESS BAY" },
+            new[] { "FGT0002000", "FGT0002001" },
             requests.Submitted.Select(draft => draft.InputValue).ToArray(),
             "Each raised request carries the die it was raised for.");
     }

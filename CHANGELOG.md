@@ -10,6 +10,25 @@
 
 ---
 
+## 2026-09-20 — a die is named by its number, and the confirm screen shows only what the request is about
+
+**What changed:** a die is now named by its own number — `FGT0002000` — instead of the number with its home location
+joined onto it. And the confirm screen no longer shows the "Coil details" panel on a request that has nothing to do
+with the coil.
+
+**Why it matters:** the die's location was being printed twice — once inside the name and again by the request page's
+own location row — so one fact looked like two. And on a job that happens to carry a coil, *every* request raised
+against it grew a coil panel a moment after the screen appeared — including requests for a die, dunnage, scrap or
+equipment — so the screen flickered from correct to wrong and then showed you detail about something you had not
+asked for.
+
+**What to expect:** die cards, waitlist lines and the confirm screen all name the die by its number. Where a die lives
+is still listed on the request page, which is where it has always been. Requests raised before this change keep
+naming the die they were raised for, because the app reads the earlier spellings too, and the coil panel now appears
+only on requests that actually involve a coil.
+
+---
+
 ## 2026-09-13 — no more waiting when Infor Visual is down
 
 **What changed:** when the plant's Infor Visual system cannot be reached, the app now works that out *before*

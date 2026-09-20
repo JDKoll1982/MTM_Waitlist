@@ -30,7 +30,7 @@ public sealed class NewRequestDieViewModelTests
         viewModel.OnNavigatedTo(TwoDieState());
 
         CollectionAssert.AreEqual(
-            new[] { "FGT0002000-DIE SHOP", "FGT0002001-PRESS BAY" },
+            new[] { "FGT0002000", "FGT0002001" },
             viewModel.Options.Select(option => option.Title).ToArray(),
             "Every die the job carries is a card, written as its number and its home location (FR-056, FR-054).");
         Assert.IsFalse(viewModel.IsUnavailableVisible, "A job that carries dies has nothing to report.");
@@ -103,11 +103,11 @@ public sealed class NewRequestDieViewModelTests
         viewModel.ContinueCommand.Execute(null);
 
         CollectionAssert.AreEqual(
-            new[] { "FGT0002000-DIE SHOP", "FGT0002001-PRESS BAY" },
+            new[] { "FGT0002000", "FGT0002001" },
             state.SelectedDies.Select(die => die.Label).ToArray(),
             "The step remembers every die the operator chose, in the job's own order (FR-054).");
         Assert.AreEqual(
-            "FGT0002000-DIE SHOP",
+            "FGT0002000",
             state.InputValue,
             "The request's stored value is one die, so several dies can never be folded into one entry (FR-054).");
         Assert.AreEqual(
@@ -121,7 +121,7 @@ public sealed class NewRequestDieViewModelTests
     {
         var state = TwoDieState();
         state.SelectedDies = [Die(FirstDie, "DIE SHOP")];
-        state.InputValue = "FGT0002000-DIE SHOP";
+        state.InputValue = "FGT0002000";
         var viewModel = CreateViewModel();
 
         viewModel.OnNavigatedTo(state);

@@ -11,33 +11,33 @@ namespace MTM_Waitlist.Tests.Module_Settings.Models;
 public sealed class RequestDiePartTests
 {
     [TestMethod]
-    public void Label_IsTheNumberAndTheLocation()
+    public void Label_IsTheDieNumberAlone()
     {
         var die = new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP" };
 
-        Assert.AreEqual("FGT0002000-DIE SHOP", die.Label);
+        Assert.AreEqual("FGT0002000", die.Label);
     }
 
     [TestMethod]
-    public void Label_IsTheNumberAloneWhenTheLocationIsUnknown()
+    public void Label_NeverCarriesTheLocation_WhateverTheJobRecords()
     {
-        // The whole point of the rule: an unknown location must not leave a separator dangling behind the number.
-        foreach (var location in new[] { null, string.Empty, "   " })
+        // Where the die lives is a separate fact that the request page lists for itself (FR-057), so it must not be
+        // folded into the name in any form: not hyphen-joined, not bracketed, and not as a dangling separator. An
+        // unknown location takes the same path as a known one — out of the identifier.
+        foreach (var location in new[] { null, string.Empty, "   ", "DIE SHOP", "PRESS BAY" })
         {
             var die = new RequestDiePart { PartNumber = "FGT0002000", Location = location! };
 
-            Assert.AreEqual("FGT0002000", die.Label, $"a location of '{location}' is not a location.");
-            Assert.IsFalse(die.Label.EndsWith('-'), "the identifier never ends in the separator.");
-            Assert.IsFalse(die.HasLocation);
+            Assert.AreEqual("FGT0002000", die.Label, $"a location of '{location}' must not reach the die's name.");
         }
     }
 
     [TestMethod]
-    public void Label_TrimsBothHalves()
+    public void Label_TrimsTheNumber()
     {
         var die = new RequestDiePart { PartNumber = "  FGT0002000  ", Location = "  DIE SHOP  " };
 
-        Assert.AreEqual("FGT0002000-DIE SHOP", die.Label);
+        Assert.AreEqual("FGT0002000", die.Label);
     }
 
     [TestMethod]
@@ -48,7 +48,7 @@ public sealed class RequestDiePartTests
         {
             Assert.AreEqual(
                 string.Empty,
-                RequestDiePart.ComposeLabel(number, "DIE SHOP"),
+                RequestDiePart.ComposeLabel(number),
                 $"a die number of '{number}' cannot identify a die.");
         }
     }
@@ -58,7 +58,7 @@ public sealed class RequestDiePartTests
     {
         // One rule, so a card built from a stored request and one built from the live job agree.
         Assert.AreEqual(
-            RequestDiePart.ComposeLabel("FGT0002001", "PRESS BAY"),
+            RequestDiePart.ComposeLabel("FGT0002001"),
             new RequestDiePart { PartNumber = "FGT0002001", Location = "PRESS BAY" }.Label);
     }
 

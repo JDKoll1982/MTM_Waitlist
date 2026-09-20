@@ -23,25 +23,19 @@ public sealed class RequestDiePart
     public bool HasLocation => !string.IsNullOrWhiteSpace(Location);
 
     /// <summary>
-    /// The die's two-part identifier as one string: the die's number and where the die is, e.g.
-    /// <c>FGT0002000-DIE SHOP</c>. With no known location it is the number alone, so the separator never dangles
-    /// (FR-056). The composition lives here so a card built from a stored request and one built from the live job
-    /// cannot format the same die two different ways.
+    /// The die's identifier: <b>its own number alone</b>, e.g. <c>FGT0002000</c>. Where the die lives is
+    /// deliberately <b>not</b> part of the name — the request page lists every die location the job carries
+    /// (FR-057), so folding one location into the identifier duplicated it on the card and made two halves of one
+    /// fact look like one string. The composition lives here so a card built from a stored request and one built
+    /// from the live job cannot format the same die two different ways.
     /// </summary>
-    public string Label => ComposeLabel(PartNumber, Location);
+    public string Label => ComposeLabel(PartNumber);
 
-    /// <summary>Composes a die's two-part identifier, tolerating either half being absent.</summary>
-    public static string ComposeLabel(string? partNumber, string? location)
-    {
-        var number = partNumber?.Trim() ?? string.Empty;
-        if (number.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        var where = location?.Trim() ?? string.Empty;
-        return where.Length == 0 ? number : $"{number}-{where}";
-    }
+    /// <summary>
+    /// Composes a die's identifier from the die's number, which is the whole of it. A row with no number has no
+    /// identifier to show.
+    /// </summary>
+    public static string ComposeLabel(string? partNumber) => partNumber?.Trim() ?? string.Empty;
 
     /// <summary>The secondary line under the die's number on a card — the part the die is assigned to.</summary>
     public string Summary => string.IsNullOrWhiteSpace(Description)

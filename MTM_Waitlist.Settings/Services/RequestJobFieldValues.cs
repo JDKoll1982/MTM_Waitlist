@@ -39,8 +39,8 @@ public static class RequestJobFieldValues
             // requester reads which dies the job has rather than only the first one (FR-057, FR-056). A job whose
             // die list is empty falls back to the single die the snapshot names.
             "die" => job.Dies.Count > 0
-                ? Join(job.Dies.Select(die => RequestDiePart.ComposeLabel(die.PartNumber, die.Location)))
-                : Trimmed(RequestDiePart.ComposeLabel(job.DieNumber, job.DieLocation)),
+                ? Join(job.Dies.Select(die => RequestDiePart.ComposeLabel(die.PartNumber)))
+                : Trimmed(RequestDiePart.ComposeLabel(job.DieNumber)),
 
             // Where the dies are, which for a die request is the place the handler collects them from. Every
             // location the job records is listed, and a job recording none yields nothing — a location the job

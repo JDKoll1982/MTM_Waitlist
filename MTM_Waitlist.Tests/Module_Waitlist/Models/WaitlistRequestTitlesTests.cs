@@ -66,8 +66,9 @@ public sealed class WaitlistRequestTitlesTests
     {
         // Superseded 2026-09-20 (FR-054, D22). The identifier used to switch between the die's location and its
         // number depending on the captured destination, and the destination question is retired. What shapes the
-        // card now is which die the request is for, so a job carrying two dies is two different cards.
-        var request = new WaitlistRequest { Category = "Pickup", Item = "pickup-die", InputValue = "D-9001-PRESS BAY" };
+        // card now is which die the request is for, so a job carrying two dies is two different cards. The name is
+        // the die's number alone — where the die lives is a row the request page lists for itself (FR-057).
+        var request = new WaitlistRequest { Category = "Pickup", Item = "pickup-die", InputValue = "D-9001" };
 
         var result = WaitlistRequestTitles.ResolveLine2(
             Find("pickup-die"),
@@ -75,9 +76,36 @@ public sealed class WaitlistRequestTitlesTests
 
         Assert.IsTrue(result.IsResolved);
         Assert.AreEqual(
-            "D-9001-PRESS BAY",
+            "D-9001",
             result.Text,
             "The card names the die the request is for, not the first die the job happens to carry (FR-057).");
+    }
+
+    [TestMethod]
+    public void ResolveLine2_DieRequestStoredUnderAnyEarlierSpelling_StillNamesItsOwnDie()
+    {
+        // The identifier has been composed three ways: `D-9001-PRESS BAY` (original), `D-9001 - (PRESS BAY)`
+        // (2026-09-20, briefly) and `D-9001`, the number alone (2026-09-20, current). A request raised under any of
+        // them still carries that spelling in its one value column, and it must keep naming *its own* die: falling
+        // back to the job's primary die would put the wrong die on a card a handler acts on, which is the failure the
+        // stored value exists to prevent (FR-054, FR-057).
+        foreach (var stored in new[] { "D-9001", "D-9001 - (PRESS BAY)", "D-9001-PRESS BAY" })
+        {
+            var request = new WaitlistRequest { Category = "Pickup", Item = "pickup-die", InputValue = stored };
+
+            var context = WaitlistRequestTitles.ResolveContext(request, TwoDieJob());
+
+            Assert.AreEqual(
+                "D-9001",
+                context.DieNumber,
+                $"'{stored}' must resolve to its own die rather than the job's first, and the number is read apart from "
+                + "the stored label instead of being split at a hyphen the number itself may hold.");
+            Assert.AreEqual("PRESS BAY", context.DieLocation, $"'{stored}' still yields the die's location for the page.");
+            Assert.AreEqual(
+                "D-9001",
+                WaitlistRequestTitles.ResolveLine2(Find("pickup-die"), context).Text,
+                $"'{stored}' renders in the spelling the app composes today.");
+        }
     }
 
     [TestMethod]
@@ -92,11 +120,11 @@ public sealed class WaitlistRequestTitlesTests
             WaitlistRequestTitles.ResolveContext(request, DieJob()));
 
         Assert.IsTrue(result.IsResolved);
-        Assert.AreEqual("FGT0002000-DIE SHOP", result.Text);
+        Assert.AreEqual("FGT0002000", result.Text);
     }
 
     [TestMethod]
-    public void ResolveLine2_DieItems_ShowTheDieNumberAndItsLocation()
+    public void ResolveLine2_DieItems_ShowTheDieNumber()
     {
         foreach (var itemId in new[] { "pickup-die", "deliver-die" })
         {
@@ -108,9 +136,9 @@ public sealed class WaitlistRequestTitlesTests
 
             Assert.IsTrue(result.IsResolved, $"{itemId} resolves its identifier from the job (FR-053).");
             Assert.AreEqual(
-                "FGT0002000-DIE SHOP",
+                "FGT0002000",
                 result.Text,
-                $"{itemId}'s identifier is the die's own number and where the die is.");
+                $"{itemId}'s identifier is the die's own number, and only its number.");
         }
     }
 

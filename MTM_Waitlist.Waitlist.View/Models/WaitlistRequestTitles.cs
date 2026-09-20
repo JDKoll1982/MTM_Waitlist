@@ -109,8 +109,39 @@ public static class WaitlistRequestTitles
     /// split at a separator that also occurs inside a die's own number.
     /// </summary>
     private static RequestDiePart? FindDie(RequestJobPartAvailability? job, string? storedDie) =>
-        job?.Dies.FirstOrDefault(die =>
-            string.Equals(die.Label, storedDie!.Trim(), StringComparison.OrdinalIgnoreCase));
+        job?.Dies.FirstOrDefault(die => NamesThisDie(die, storedDie));
+
+    /// <summary>
+    /// Whether a stored answer names this die. <b>Every spelling the app has ever composed is accepted on purpose:</b>
+    /// the die's number alone (<c>FGT0002000</c>, what it composes today), the bracketed form
+    /// (<c>FGT0002000 - (DIE SHOP)</c>, shipped briefly on 2026-09-20) and the hyphen-joined form
+    /// (<c>FGT0002000-DIE SHOP</c>, the original). A request raised under an earlier rule still carries that
+    /// spelling in <c>input_value</c>, and it must keep naming its own die — losing that would silently fall the
+    /// card back to the job's primary die, which is the very failure the stored value exists to prevent
+    /// (FR-054, FR-057).
+    /// </summary>
+    private static bool NamesThisDie(RequestDiePart die, string? storedDie)
+    {
+        var stored = storedDie?.Trim();
+        if (string.IsNullOrEmpty(stored))
+        {
+            return false;
+        }
+
+        if (string.Equals(die.Label, stored, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (!die.HasLocation)
+        {
+            return false;
+        }
+
+        // The two retired spellings, both of which folded the location into the name.
+        return string.Equals($"{die.PartNumber} - ({die.Location})", stored, StringComparison.OrdinalIgnoreCase)
+            || string.Equals($"{die.PartNumber}-{die.Location}", stored, StringComparison.OrdinalIgnoreCase);
+    }
 
     /// <summary>
     /// Whether an Item's templates ask for the named token. Both lines are consulted: an Item's first line may

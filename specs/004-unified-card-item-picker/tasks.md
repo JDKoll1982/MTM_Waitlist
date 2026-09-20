@@ -1942,6 +1942,41 @@ change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (
   green after**; the full suite is **1149 passed / 0 failed / 27 skipped (1176)** and the solution builds with 0
   warnings and 0 errors. Evidence: `%TEMP%\die-walk\27-preview-fixed.txt`, `28-confirm-fixed.txt`; the 8
   `NewRequestReviewShowsEveryDieTests` cases.
+- [x] **T234** **Take the location out of the die's name** (FR-053, FR-056 amended; owner's call, 2026-09-20). The
+  identifier is now the die's own number and nothing else — `FGT0002000`. Where the die lives is a fact the **request
+  page** lists for itself (FR-057), so folding one location into the name duplicated it on the card and made two
+  halves of one fact look like one string. `RequestDiePart.ComposeLabel` **lost its location parameter** rather than
+  ignoring it, so no caller can pass a location and expect it to render; `{die_location}` remains its own template
+  token and the request page's `Pickup location` row is untouched. `WaitlistRequestTitles` now accepts **three**
+  spellings when it reads the stored `input_value` — the number alone, the bracketed form shipped for part of
+  2026-09-20, and the original hyphen-joined form — so a format change cannot silently drop an existing request back
+  to the job's primary die. · `MTM_Waitlist.Settings/Models/RequestDiePart.cs`,
+  `MTM_Waitlist.Settings/Services/RequestItemLine2Resolver.cs`,
+  `MTM_Waitlist.Settings/Services/RequestJobFieldValues.cs`,
+  `MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs`, `spec.md` (FR-053/FR-056),
+  `contracts/card-and-identifier.md`, `contracts/request-picker-flow.md`,
+  `WeekendProject/Documents/Request-Config-Template.csv` — **VERIFIED 2026-09-20 in the running app.** The die step's
+  card on `100-7` reads `FGT0002000` with the location gone, and the waitlist's existing die requests render
+  `FGT0002000`, `FGT1088-01` and `FGT0401-01`. **One of them does not, and that is correct:** `FGT0002001-PRESS BAY`
+  still shows its stored text verbatim, because the job no longer carries that die (the T184 fixture was reverted) and
+  the fallback deliberately refuses to split a stored value at a hyphen a die's own number may contain. Tests: the
+  `RequestDiePartTests` cases and `WaitlistRequestTitlesTests`' three-spelling case; full suite **1154 passed /
+  0 failed / 27 skipped (1181)** on a clean build. Evidence: `%TEMP%\die-walk\45-die-name.txt`, `63-waitlist.txt`.
+- [x] **T235** **Show the review page's coil card only for a request that involves the coil** (found by the owner
+  using the app, 2026-09-20). A deliver-die request grew a **Coil details** card a couple of seconds after the page
+  appeared: the card starts hidden and `LoadCoilAsync` then turned it on, and `IsCoilRequest` gated on the **job's**
+  `HasCoil` rather than on what the request was for — so every request raised on a job that happens to carry a coil
+  showed detail about that coil, and the page visibly flickered from right to wrong. The gate is now the **Item the
+  requester chose**, through `RequestItemPickerRules.RequiredJobPart`, which is the same rule the picker uses to
+  decide whether to offer the Item at all — so the card and the picker cannot disagree, nothing keys on the Item's
+  identity (FR-013), and a request that does not involve the coil does not even **read** it. ·
+  `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSummaryViewModel.cs` — **VERIFIED 2026-09-20 in the running
+  app**, on `100-3`, whose job carries `MMC0000268` (`3,140 lb`): a **Riser Table** request's confirm page shows the
+  request summary and **no coil card at all**, while a **Coil or Flatstock** request's confirm page shows
+  `Coil details / MMC0000268 / 1500 / Coil, 12Ga X 4.875 / 3,140 lb`. Tests: the 4 new cases in
+  `NewRequestSummaryHonestyTests` — the card hidden for a die request on a coil job, the coil **never read** for one
+  (which is what stops the card appearing later), and two guards keeping it drawn where it belongs. Evidence:
+  `%TEMP%\die-walk\51-confirm-riser.txt`, `60-confirm-coil.txt`.
 - [x] **T185** **Live database validation.** Confirm the live `100-3` job offers **no** die Item — its only die row is
   the `No Die` placeholder — while `100-7` and `V100-33` do, and that the die values resolve from the live read
   rather than the seed. · local `mtm_waitlist` — **VERIFIED 2026-09-20** against the local store: the Die rows carried

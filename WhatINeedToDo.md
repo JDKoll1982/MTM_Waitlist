@@ -7,7 +7,7 @@ Build: 0 Warning(s), 0 Error(s). Tests: total 1089, failed 0, passed 1062, skipp
 Done and pushed
 
 "No die ⇒ no die option" — the job's dies now pass through one shared rule, so a job whose only die row is the No Die placeholder has no die, is offered no die Item, and shows no die location anywhere. The picker already gated on that flag; the flag was simply wrong.
-The waitlist line — the die's number and location are composed by one rule (FGT0002000-DIE SHOP), so an unknown location renders as the number alone instead of a dangling -.
+The waitlist line — the die's name is its own number (FGT0002000). Where the die lives is no longer folded into it, because the request page lists the locations for itself.
 The details page — this was the actual cause of your complaint. It built its row from the request alone, so the die and its location, which are job values the request never stored, could not appear on it. It now reads the job and fills those rows.
 Not done — one item
 

@@ -332,10 +332,10 @@ the umbrella phrase rather than reporting a fault; the identifier is where a fau
   from once the request has been raised.
 - **FR-052**: The die Items' first line MUST name the requesting job's part number — `Pickup Die: PART-9003` — so a
   handler can tell which part the die is for, and MUST fall back to the phrase alone when the job cannot supply it.
-- **FR-053**: The die Items' second line MUST show the die's own number and where the die is, together, read from
-  the job — e.g. `FGT0002000-DIE SHOP`. Where the die is **is its home location, as the job records it on that
-  die's own row**: the person raising the request MUST NOT be asked where a die should go, and nothing they choose
-  may change the identifier.
+- **FR-053**: The die Items' second line MUST show the die's own number — e.g. `FGT0002000` — read from the job.
+  Where the die is **is its home location, as the job records it on that die's own row**, and it MUST NOT be folded
+  into that name: the request page lists the locations for itself (FR-057). The person raising the request MUST NOT
+  be asked where a die should go, and nothing they choose may change the identifier.
 - **FR-054**: Every die assigned to the requesting job MUST travel with that job in the job's own order. Where a job
   has **more than one** die, the flow MUST ask the operator which die they need, MUST allow more than one to be
   selected, and MUST raise **one request per die selected** — never one request carrying several dies, and never a
@@ -347,10 +347,11 @@ the umbrella phrase rather than reporting a fault; the identifier is where a fau
   row is that placeholder has **no die**: it MUST NOT be offered a die Item, and no die value or die location may
   be shown for it. The rule MUST be one definition shared by the Setup screens and the New Request picker, so the
   two cannot disagree about what a die is.
-- **FR-056**: A die's identifier MUST be composed as its number followed by its location, and MUST omit the
-  separator when no location is known — `FGT0002000-DIE SHOP`, or `FGT0002000` alone. The composition MUST be the
-  same value wherever a die is shown, so a card, a detail row and the step that offers the choice cannot format
-  the same die three different ways. An unknown location MUST NOT render as a trailing separator.
+- **FR-056**: A die's identifier MUST be the die's own number and nothing else — `FGT0002000`. Where the die lives
+  MUST NOT appear in the identifier in any form: not hyphen-joined, not bracketed, and not as a trailing separator.
+  The composition MUST be the same value wherever a die is shown, so a card, a detail row and the step that offers
+  the choice cannot format the same die three different ways, and the location stays a separate fact the request page
+  owns (FR-057).
 - **FR-057**: A die request's **request page** MUST show **every** die location the requesting job carries, not
   only the location of the die that request names, so a handler reading one request can see where the job's dies
   live. A location the job cannot supply MUST NOT be invented, and the job's dies MUST be read once per work centre

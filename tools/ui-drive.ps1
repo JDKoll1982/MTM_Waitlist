@@ -65,6 +65,30 @@ function Wait-AppRoot {
     throw "No main window appeared within $WaitSeconds s. The app may be showing a startup dialog - run -Action dump to see its text."
 }
 
+# The splash is a window too, and it answers MainWindowHandle seconds before the shell exists. A click aimed at the
+# splash finds nothing and the whole chain after it fails, so anything that CLICKS waits for the real shell: the
+# frameless splash has no caption buttons, the shell does. (-Action dump deliberately does not wait - seeing the
+# splash is occasionally the point.)
+function Test-ShellReady {
+    param($Root)
+
+    if (-not $Root) { return $false }
+
+    $c = New-Object System.Windows.Automation.PropertyCondition(
+        [System.Windows.Automation.AutomationElement]::ControlTypeProperty, $CT::Button)
+    return @($Root.FindAll($Scope::Descendants, $c) | Where-Object { $_.Current.Name -eq 'Minimize' }).Count -gt 0
+}
+
+function Wait-ShellRoot {
+    $deadline = (Get-Date).AddSeconds($WaitSeconds)
+    while ((Get-Date) -lt $deadline) {
+        $r = Get-AppRoot
+        if (Test-ShellReady -Root $r) { return $r }
+        Start-Sleep -Milliseconds 500
+    }
+    throw "The shell did not appear within $WaitSeconds s. The app may be stuck on a startup dialog - run -Action dump to see its text."
+}
+
 function Get-ByControlType {
     param($Root, $ControlType)
     $c = New-Object System.Windows.Automation.PropertyCondition(
@@ -161,7 +185,7 @@ switch ($Action) {
 
     'click-item' {
         if (-not $Name) { throw 'click-item needs -Name.' }
-        $root = Wait-AppRoot
+        $root = Wait-ShellRoot
         $el = Find-Element -Root $root -ControlType $CT::ListItem -Patterns $Name
         if (-not $el) {
             $available = @(Get-ByControlType -Root $root -ControlType $CT::ListItem)
@@ -175,7 +199,7 @@ switch ($Action) {
 
     'click-button' {
         if (-not $Name) { throw 'click-button needs -Name.' }
-        $root = Wait-AppRoot
+        $root = Wait-ShellRoot
         $el = Find-Element -Root $root -ControlType $CT::Button -Patterns $Name
         if (-not $el) {
             $available = @(Get-ByControlType -Root $root -ControlType $CT::Button)

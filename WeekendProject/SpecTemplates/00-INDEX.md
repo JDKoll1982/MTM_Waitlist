@@ -31,10 +31,20 @@ carry-forward counts below are the box counts those workstreams were sized again
 | 03 | `03-unified-card-and-taxonomy.md` | `OPEN-WORK-NEXT-SPEC.md` §5 (`PromptFiles/14-57%`) + `App-Validation-Checklist.md` §4–§8 | 20 + 27 checks | Completes the real-values half of `Critical-Waitlist-CardAndDetailShowFabricatedMaterialData` and `High-Coil-AverageWeightIsResolvedForOneHardCodedPart` |
 | 04 | `04-waitlist-analytics.md` | `OPEN-WORK-NEXT-SPEC.md` §6 (`PromptFiles/10`) | 20 | Optional follow-on for `High-NewRequest-QueueAndWaitTimeIsHardcoded` (a real queue/wait figure) |
 | 05 | `05-request-administration-and-retention.md` | `OPEN-WORK-NEXT-SPEC.md` §7 (`PromptFiles/11`) | 8 | — |
-| 06 | `06-user-management.md` | `OPEN-WORK-NEXT-SPEC.md` §8 (`PromptFiles/15`) | 39 | — |
+| 06 | `06-user-management.md` | `OPEN-WORK-NEXT-SPEC.md` §8 (`PromptFiles/15`) | 39 **+ the permission matrix, added by owner decision 2026-09-20** | — |
 | 07 | `07-startup-gate-polish.md` | `OPEN-WORK-NEXT-SPEC.md` §9 (`PromptFiles/13`, startup-gate items only) | 2 | — |
 | 08 | `08-notification-delivery-and-packaging.md` | Defect-driven (no backlog workstream) | — | Completes `Medium-Settings-NewRequestAlertsCannotFireUnpackaged` and verifies `Low-Notifications-ToastActivationShowsTodoDialog` |
 | — | Docs hygiene (§10.2) | `OPEN-WORK-NEXT-SPEC.md` §10 | — | Folded into template 01 — see its §5 |
+
+> **Re-ordered 2026-09-20 — template 06 now runs before template 04, and before 05, 07 and 08.** Owner
+> decision: 06 gains a **settings-backed permission matrix** (a new Administration page where Plant Manager
+> and above set what each role may do, each gate named by a settings key). Every template that gates on a
+> role — 04's analytics screen, 05's retention screens, 07's startup gates, 08's notifications — should be
+> written against that matrix instead of against hand-written role lists, so 06 goes first.
+>
+> **The `#` column is the template's own id and does not change. The run order is now
+> `01 → 02 → 03 → 06 → 04 → 05 → 07 → 08`.** Detail: `04-waitlist-analytics.md` §8 decisions 7 and 8, and
+> `06-user-management.md` §3.
 
 ## Template number → shipped spec number (added 2026-09-20)
 
@@ -48,9 +58,9 @@ number and now carries a banner pointing back here.
 | `01-truthful-data-and-controls.md` | **`specs/002-truthful-data-and-controls`** | **shipped** |
 | `02-handler-fulfilment-and-urgency.md` | **`specs/003-waitlist-handler-fulfilment`** | **shipped** (49/49) |
 | `03-unified-card-and-taxonomy.md` | **`specs/004-unified-card-item-picker`** | **in flight** |
-| `04-waitlist-analytics.md` | — | not specified |
+| `04-waitlist-analytics.md` | — | not specified — **runs after 06** (re-ordered 2026-09-20) |
 | `05-request-administration-and-retention.md` | — | not specified |
-| `06-user-management.md` | — | not specified |
+| `06-user-management.md` | — | **next** — takes the next feature number, and now carries the permission matrix (2026-09-20) |
 | `07-startup-gate-polish.md` | — | not specified (its 2 boxes are live carry-forward in `PromptFiles/13`) |
 | `08-notification-delivery-and-packaging.md` | — | not specified |
 

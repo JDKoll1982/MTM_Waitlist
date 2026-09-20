@@ -138,6 +138,82 @@ public sealed class NewRequestSummaryHonestyTests
         Assert.IsTrue(viewModel.HasCoilAverageWeight);
     }
 
+    /// <summary>
+    /// The card belongs to the request that asks for the coil, so a request asking for something else must not grow
+    /// one — not even on a job that happens to carry a coil.
+    /// </summary>
+    /// <remarks>
+    /// Found by walking the running app on 2026-09-20: a deliver-die request showed its summary and then a coil card
+    /// appeared a couple of seconds later, when the asynchronous coil read came back. The card starts hidden, so the
+    /// page flickered from right to wrong, and nothing about a die request concerns the job's coil.
+    /// </remarks>
+    [TestMethod]
+    public void ConfirmStep_DieRequestOnAJobCarryingACoil_ShowsNoCoilCard()
+    {
+        var viewModel = BuildViewModel(new FixedCoilAvailabilityService(ResolvedCoil()));
+
+        viewModel.OnNavigatedTo(DieState());
+
+        Assert.IsFalse(viewModel.IsCoilVisible, "a die request has nothing to do with the job's coil.");
+        Assert.IsFalse(viewModel.HasCoilAverageWeight);
+        Assert.AreEqual(string.Empty, viewModel.CoilNumber);
+    }
+
+    [TestMethod]
+    public void ConfirmStep_DieRequestOnAJobCarryingACoil_NeverReadsTheCoil()
+    {
+        // The card cannot appear later if the read never happens, which is what stops the page flickering from right
+        // to wrong once the asynchronous read lands.
+        var coil = new RecordingCoilAvailabilityService(ResolvedCoil());
+        var viewModel = BuildViewModel(coil);
+
+        viewModel.OnNavigatedTo(DieState());
+
+        Assert.AreEqual(0, coil.ReadCount, "the coil is not read for a request that does not involve it.");
+    }
+
+    [TestMethod]
+    public void ConfirmStep_CoilRequestOnAJobCarryingACoil_StillShowsTheCoilCard()
+    {
+        // The guard on the fix: the card is still drawn where it belongs.
+        var viewModel = BuildViewModel(new FixedCoilAvailabilityService(ResolvedCoil()));
+
+        viewModel.OnNavigatedTo(CoilState());
+
+        Assert.IsTrue(viewModel.IsCoilVisible);
+        Assert.AreEqual("MMC778812", viewModel.CoilNumber);
+    }
+
+    [TestMethod]
+    public void ConfirmStep_CoilRequestOnAJobWithNoCoil_ShowsNoCoilCard()
+    {
+        var viewModel = BuildViewModel(new NoCoilAvailabilityService());
+
+        viewModel.OnNavigatedTo(CoilState());
+
+        Assert.IsFalse(viewModel.IsCoilVisible, "a job with no coil has no coil to show.");
+    }
+
+    private static WaitlistCoilInfo ResolvedCoil() => new()
+    {
+        HasCoil = true,
+        CoilNumber = "MMC778812",
+        QuantityOnHand = "4310",
+        Description = "COIL 0.050 X 48.0 GALV",
+        AverageWeight = "4180 lb",
+    };
+
+    /// <summary>
+    /// A die request against a job that <b>does</b> carry a coil — the combination that used to grow a coil card.
+    /// </summary>
+    private static NewRequestFlowState DieState() => new()
+    {
+        WorkCenter = "Expo Line 7",
+        Category = RequestCategory.Deliver,
+        Item = RequestItemCatalog.FindById("deliver-die"),
+        Availability = RequestJobPartAvailability.All,
+    };
+
     private static NewRequestFlowState CoilState() => new()
     {
         WorkCenter = "Expo Line 7",
@@ -173,6 +249,18 @@ public sealed class NewRequestSummaryHonestyTests
     {
         public Task<WaitlistCoilInfo> GetCoilForJobAsync(string? workCenter, CancellationToken cancellationToken = default)
             => Task.FromResult(coil);
+    }
+
+    /// <summary>A coil source that counts how many times it was asked, so "the card never appears" can be proven.</summary>
+    private sealed class RecordingCoilAvailabilityService(WaitlistCoilInfo coil) : ICoilAvailabilityService
+    {
+        public int ReadCount { get; private set; }
+
+        public Task<WaitlistCoilInfo> GetCoilForJobAsync(string? workCenter, CancellationToken cancellationToken = default)
+        {
+            ReadCount++;
+            return Task.FromResult(coil);
+        }
     }
 
     private sealed class NoOpRequestService : IWaitlistRequestService

@@ -155,7 +155,7 @@ public sealed class NewRequestFlowStateTests
     [TestMethod]
     public void GetNextStepType_ReturnsPreview_OnceTheDieAnswerIsCaptured()
     {
-        var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Die), inputValue: "FGT0002000-DIE SHOP");
+        var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Die), inputValue: "FGT0002000");
 
         Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
     }

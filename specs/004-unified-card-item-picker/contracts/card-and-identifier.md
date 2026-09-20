@@ -64,8 +64,16 @@ A fixed value, a value read from the job, or a value that depends on an answer c
 | **read from the job** | `pickup-coil`, `pickup-component`, `pickup-dunnage`, `pickup-scrap`, `deliver-coil`, `deliver-flatstock`, `deliver-die`, `deliver-dunnage`, `assist-coil-turn`, `assist-table-place`, `assist-table-remove`, and the two wrong-material Items (which name the **correct** material) |
 | **depends on a captured answer** | `other` — the message the person typed. (`pickup-die` was the second row here: its identifier switched on the captured destination. FR-053 replaced that switch with one composition, and the question itself retired 2026-09-20 — D22 — so the die's line is read from the job like every other die value.) |
 
-**The die's rule.** The second line is the die's own `FGT` number and where the die is, both read from the job and
-composed once — `FGT0002000-DIE SHOP`, or the number alone where the job knows no location (FR-056).
+**The die's rule.** The second line is the die's own `FGT` number and nothing else — `FGT0002000` (FR-056). Where the
+die lives is a separate fact that the request page lists for itself (FR-057), so it is not part of the name.
+
+> **The spelling changed twice on 2026-09-20, and two records keep the earlier ones deliberately.** The identifier
+> was `FGT0002000-DIE SHOP`, then briefly `FGT0002000 - (DIE SHOP)`, and is now the number alone. The dated evidence
+> in `tasks.md` and the run journal in `progress.md` still show the earlier spellings, because they record what the
+> running app displayed on the day: they are history, not a rule, and rewriting them would falsify an observation.
+> A request raised under any earlier spelling still names its own die — `WaitlistRequestTitles` accepts all three
+> when it reads the stored `input_value`, so a format change cannot silently fall an existing request back to the
+> job's primary die.
 
 > **Superseded 2026-09-14 (FR-053), then retired 2026-09-20 (D22).** The line used to switch on the captured
 destination (`{die_location}` when it was `Home Location`, the number otherwise). FR-053 replaced that with a single

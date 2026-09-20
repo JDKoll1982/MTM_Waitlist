@@ -23,7 +23,7 @@ public sealed class RequestJobFieldValuesTests
     [TestMethod]
     public void Resolve_Die_IsTheNumberAndTheLocationTogether()
     {
-        Assert.AreEqual("FGT0002000-DIE SHOP", RequestJobFieldValues.Resolve("Die", DieJob()));
+        Assert.AreEqual("FGT0002000", RequestJobFieldValues.Resolve("Die", DieJob()));
     }
 
     /// <summary>A job carrying two dies, with the second one the request is actually for (FR-057).</summary>
@@ -39,7 +39,7 @@ public sealed class RequestJobFieldValuesTests
         // FR-057: a job carrying more than one die is one row per die, never the first die standing in for all
         // of them. The requester reads the row to see which dies the job has.
         Assert.AreEqual(
-            "FGT0002000-DIE SHOP, D-9001-PRESS BAY",
+            "FGT0002000, D-9001",
             RequestJobFieldValues.Resolve("Die", TwoDieJob()));
     }
 
@@ -64,7 +64,7 @@ public sealed class RequestJobFieldValuesTests
             new RequestDiePart { PartNumber = "D-9001", Location = string.Empty },
         ]);
 
-        Assert.AreEqual("FGT0002000-DIE SHOP, D-9001", RequestJobFieldValues.Resolve("Die", twoDies));
+        Assert.AreEqual("FGT0002000, D-9001", RequestJobFieldValues.Resolve("Die", twoDies));
     }
 
     [TestMethod]
@@ -98,7 +98,7 @@ public sealed class RequestJobFieldValuesTests
         // The label comes from the Item's stored configuration, so the row's own spacing must not decide it.
         foreach (var label in new[] { "die", "DIE", "  Die  " })
         {
-            Assert.AreEqual("FGT0002000-DIE SHOP", RequestJobFieldValues.Resolve(label, DieJob()));
+            Assert.AreEqual("FGT0002000", RequestJobFieldValues.Resolve(label, DieJob()));
         }
     }
 

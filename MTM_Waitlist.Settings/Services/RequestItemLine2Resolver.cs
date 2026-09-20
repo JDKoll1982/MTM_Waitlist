@@ -199,7 +199,7 @@ public sealed class RequestItemLine2Resolver
             // The die's two-part identifier as one value — the number and where the die is — so a row can show both
             // without a separator dangling when the location is unknown (FR-056). It is composed here rather than
             // accepted ready-made, so every caller that can supply a die gets the same formatting.
-            ["die"] = RequestDiePart.ComposeLabel(context.DieNumber, context.DieLocation),
+            ["die"] = RequestDiePart.ComposeLabel(context.DieNumber),
             ["dunnage_part"] = context.DunnagePart,
             ["sequence_number"] = context.SequenceNumber,
             ["scrap_type"] = context.ScrapType,

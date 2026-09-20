@@ -38,7 +38,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
         viewModel.OnNavigatedTo(DieState(("FGT0002000", "DIE SHOP"), ("FGT0002001", "PRESS BAY")));
 
         CollectionAssert.AreEqual(
-            new[] { "FGT0002000-DIE SHOP", "FGT0002001-PRESS BAY" },
+            new[] { "FGT0002000", "FGT0002001" },
             viewModel.DetailLines.ToArray(),
             "The preview lists every die the operator chose, in the order they will be raised.");
         Assert.IsTrue(viewModel.HasDetail, "Two dies is something to show, so the row is not hidden.");
@@ -52,7 +52,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
         viewModel.OnNavigatedTo(DieState(("FGT0002000", "DIE SHOP"), ("FGT0002001", "PRESS BAY")));
 
         CollectionAssert.AreEqual(
-            new[] { "FGT0002000-DIE SHOP", "FGT0002001-PRESS BAY" },
+            new[] { "FGT0002000", "FGT0002001" },
             viewModel.DetailLines.ToArray(),
             "The confirmation lists every die, so it cannot show one request where two will be raised.");
         Assert.IsTrue(viewModel.HasDetail);

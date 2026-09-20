@@ -63,7 +63,7 @@ are catalogued but never offered (FR-028).
 | Item | Availability | Captures | Line 2 |
 |---|---|---|---|
 | `pickup-coil` | `HasCoil` **or** `HasFlatstock` (D21) | — | the coil number |
-| `pickup-die` | `HasDie` | pick **which die** — the job's dies are offered as cards, more than one may be chosen, and a **select all** action takes every die in one action; one request per die (D22) | the die's own number and where the die is — `FGT0002000-DIE SHOP` (§10) |
+| `pickup-die` | `HasDie` | pick **which die** — the job's dies are offered as cards, more than one may be chosen, and a **select all** action takes every die in one action; one request per die (D22) | the die's own number — `FGT0002000` (§10) |
 | `pickup-component` | `HasComponent` | pick which component, from the job's list | the component's part number |
 | `pickup-fg` | **out of scope** | — | — |
 | `pickup-ncm` | **out of scope** | — | — |
@@ -77,7 +77,7 @@ are catalogued but never offered (FR-028).
 | `deliver-riser-table` | always offered | — | `Riser Table` (fixed) |
 | `deliver-hopper` | always offered | — | `Hopper` (fixed) |
 | `deliver-flatstock` | `HasFlatstock` | — | the flatstock part number |
-| `deliver-die` | `HasDie` | pick **which die**, exactly as `pickup-die` does — FR-054 applies to a die whichever Item raises it, so this Item asks the same question and offers the same select-all action | the die's own number and where the die is — `FGT0002000-DIE SHOP` (§10) |
+| `deliver-die` | `HasDie` | pick **which die**, exactly as `pickup-die` does — FR-054 applies to a die whichever Item raises it, so this Item asks the same question and offers the same select-all action | the die's own number — `FGT0002000` (§10) |
 | `deliver-dunnage` | `HasDunnage` | pick which dunnage they need, from the parts the job carries — on its own step, with the substitute picker beside it | the part they picked |
 | `deliver-wrong-coil` | `HasCoil` | one short explanation of why the coil is wrong | the **correct** coil being brought |
 | `deliver-wrong-flatstock` | `HasFlatstock` | one short explanation of why the flatstock is wrong | the **correct** flatstock being brought |
