@@ -1,0 +1,210 @@
+{
+  "workflow": "companion",
+  "specName": "setup work order search",
+  "branch": "005-setup-work-order-search",
+  "currentStep": "plan",
+  "status": "planned",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T23:19:48.070Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T23:26:16.333Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-13T23:28:41.092Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T23:30:51.152Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-13T23:31:52.273Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-13T23:38:28.689Z"
+    }
+  ],
+  "unattended": true,
+  "telemetryInstanceId": "1b0909ef-751c-48e7-92ff-e89141d5651a",
+  "last_action": "plan complete - review-plan gate recorded as pending owner review (unattended run); artifacts: plan.md, research.md, data-model.md, contracts/search-capability.md, contracts/work-order-source.md, contracts/verification-gates.md, .token-budget/scope-plan.md",
+  "coverage": {
+    "FR-001": {
+      "title": "A partial work order offers its matches in a modal"
+    },
+    "FR-002": {
+      "title": "The modal appears only when the entry is not a complete resolvable work order"
+    },
+    "FR-003": {
+      "title": "A complete work order is formatted and used directly with no modal"
+    },
+    "FR-004": {
+      "title": "The accepted input forms and the formatting rule are unchanged"
+    },
+    "FR-005": {
+      "title": "A partial becomes the prefix plus a trailing wildcard"
+    },
+    "FR-006": {
+      "title": "A partial is never padded to six digits"
+    },
+    "FR-007": {
+      "title": "Matches are shown recognisably with enough context to choose"
+    },
+    "FR-008": {
+      "title": "Choosing a match sets the entry and continues the flow"
+    },
+    "FR-009": {
+      "title": "Dismissing leaves the entry and flow unchanged and does not trap"
+    },
+    "FR-010": {
+      "title": "No matches is reported plainly with a way to retry"
+    },
+    "FR-011": {
+      "title": "An unshowable result stays usable and states how many matched"
+    },
+    "FR-012": {
+      "title": "One shared capability holds the matching; the entry step holds none"
+    },
+    "FR-013": {
+      "title": "The capability takes a caller-described source and knows nothing of work orders"
+    },
+    "FR-014": {
+      "title": "A new searchable source is additive and needs no change to the capability"
+    },
+    "FR-015": {
+      "title": "An unknown source is reported unavailable never silently empty"
+    },
+    "FR-016": {
+      "title": "Trigger pattern and match count are the caller to state"
+    },
+    "FR-017": {
+      "title": "Matching is case-insensitive and tolerates the separators typed"
+    },
+    "FR-018": {
+      "title": "Stored-procedure-first with no run-time-assembled statement text"
+    },
+    "FR-019": {
+      "title": "External search keeps the cached fallback and an empty result is a real answer"
+    },
+    "FR-020": {
+      "title": "Every schema artifact ships its rollback and the master lists stay in sync"
+    },
+    "FR-021": {
+      "title": "Every user-visible string comes through the resource mechanism"
+    },
+    "FR-022": {
+      "title": "The existing rejection for an impossible entry is preserved"
+    }
+  },
+  "intent": "Let a person find a work order by typing only part of it, through one shared picker that any screen can point at its own list.",
+  "context": [
+    "area: Module_Setup/Views/SetupWorkOrderPage.xaml + MTM_Waitlist.Setup/ViewModels/SetupWorkOrderViewModel.cs - the entry step and its existing LostFocus on-blur search",
+    "area: MTM_Waitlist.Setup/Services/WorkOrderValidationService.cs - the normalisation rule this builds on (^(?:WO-)?(\\d{5,6})$, padded to six)",
+    "area: MTM_Waitlist.Setup/Services/SetupWorkflowService.cs - existing Levenshtein best-match helper, candidate for reuse",
+    "area: MTM_Waitlist.Mock read-shape fallback + Database/Mock - the boundary for searching a list outside our own stores",
+    "constraint: constitution III stored-procedure-first; no inline or run-time-assembled statement text"
+  ],
+  "expectations": [
+    "out of scope: the picker ships one caller - a second caller is follow-on work",
+    "not changing: the existing work order formatting rule and accepted input forms",
+    "not in scope: a second source of truth for what a work order is",
+    "out of scope: contains-anywhere matching as the default - prefix is the chosen reading",
+    "owner action, not the agent: reinstalling the database from seed"
+  ],
+  "classification": {
+    "projectedFiles": 34,
+    "projectedTasks": 45,
+    "scopeSignal": "normal",
+    "verdict": "normal"
+  },
+  "size": "normal",
+  "approach": "One shared catalog-driven match picker lives in MTM_Waitlist.Core and knows nothing about work orders; a source is declared once as data (key, reader kind, read target, value column, display columns, default and maximum matches) and resolved through a closed registry, so adding a source is additive. The work-order source is the first registration and reads a new Infor Visual shape (work_order_search) through the existing live-then-mirror fallback, with the cap and the total match count computed inside the stored procedures. On the entry page the work-order text rules go into the existing WorkOrderValidationService, and the step keeps only the handoff that raises the modal on field exit.",
+  "decisions": [
+    {
+      "decision": "The capability lives as contracts + one implementation in MTM_Waitlist.Core, with the shipped reader kind in MTM_Waitlist.Mock and the caller in MTM_Waitlist.Setup",
+      "why": "The dependency direction is forced: Mock already depends on Core, so a Core contract can be implemented by Mock and used by Setup without an inverted reference, and the test project can reach the picker for the SC-003/SC-004 gates",
+      "rejected": "A new MTM_Waitlist.Search project (adds a build edge and a complexity-tracking entry for no isolation); putting it all in Mock (would force every caller to take the Mock dependency); putting it in the app (untestable by MTM_Waitlist.Tests)"
+    },
+    {
+      "decision": "Any caller-described source is a closed catalog of registered sources plus a registry of reader kinds; the request carries only SourceKey, Pattern and MaxMatches",
+      "why": "A caller names a key that is looked up in a closed registry, so the thing that reaches the data layer is a value already written into our own reviewed code (the shape key, from which the procedure name is derived), and the pattern and cap travel as command parameters -- no EXECUTE, no PREPARE, no CONCAT, no supplied table or procedure name",
+      "rejected": "A procedure that accepts a table name and builds the query (the reading FR-018 bans); putting the procedure name in the request (moves choice of executed statement into caller data); one reader per source (would re-implement the orchestration per source and break SC-003); a single hardcoded reader (makes FR-014 invasive)"
+    },
+    {
+      "decision": "Matching is the source query LIKE, applied in the store; the existing Levenshtein helper FindBestScrapTypeMatch is neither reused nor extracted",
+      "why": "It answers a different question -- one closest candidate ranked by edit distance, so WO-1451 would outrank the WO-0451xx orders the person is typing towards -- and reusing it would pull the whole list into memory, which the store-side cap exists to avoid",
+      "rejected": "Reuse or extract it as a shared fuzzy matcher (a rename that makes two different algorithms look like one, and a refactor of an unrelated working workflow)"
+    },
+    {
+      "decision": "Partial classification and pattern derivation live in WorkOrderValidationService, as new members beside an unchanged TryNormalize",
+      "why": "FR-012 forbids the entry step holding the logic, FR-013 forbids the capability knowing what a work order is, and this is the one service that must already agree about what a work order looks like -- and a separate method keeps the padding rule out of the search path, which is the FR-006 trap",
+      "rejected": "Deriving the pattern in the view model (FR-012, and a second home for the padding rule); deriving it in the picker (FR-013); a new WorkOrderSearchService (a second definition of the same grammar)"
+    },
+    {
+      "decision": "A new read shape work_order_search (shape 6) with its own live script, population script, mirror, stage twin and procedure pair, rather than a second read procedure on the existing work_order_lookup shape",
+      "why": "VisualReadShape derives the mirror, stage, get and refresh names from the key and the refresh engine and startup validation rely on those names existing; a second get on one shape breaks that derivation for one shape only and gives one key two contracts. The repo playbook states the rule: adding a sixth shape changes no existing artifact, so FR-020 and SC-005 are satisfied by addition alone",
+      "rejected": "A second procedure on the existing shape (an invariant break needing a complexity-tracking entry, for the saving of one table); reusing the lookup mirror with a new procedure (needs a name the catalog does not derive)"
+    },
+    {
+      "decision": "The read returns at most the caller is cap plus the true total match count, in one projection; live uses COUNT(*) OVER () with TOP, the mirror uses a scalar subquery with LIMIT p_max_matches",
+      "why": "FR-011 needs how many matched while staying usable and FR-016 makes the cap the caller is, so one round trip keeps the count honest -- a count taken from the capped rows would turn showing 25 of 400 into a false 25 matched, the same family of false answer FR-019 forbids",
+      "rejected": "A second count round trip (doubles the cost to answer a label and can disagree with the page it labels); SQL_CALC_FOUND_ROWS/FOUND_ROWS() (the manual marks both deprecated); a window function on the mirror (MySQL 5.7 has none); fetching cap+1 and saying more than N (a dodge of FR-011)"
+    },
+    {
+      "decision": "SearchRequest.Pattern is the ready-to-use pattern, wildcards included; the capability neither appends nor escapes",
+      "why": "FR-016 makes the pattern form the caller is, and it keeps the capability free of any query-language assumption so a later source can state a different pattern form without the picker changing; the owner is doubled %% is recorded as denoting the same pattern as a single %",
+      "rejected": "The capability appending the trailing wildcard (would need the query language, and contradicts FR-016); unconditional escaping (would break a caller who wants a wildcard and would still need the query language)"
+    },
+    {
+      "decision": "The modal is a ContentDialog in Module_Shared/Views raised through a new ISearchPickerDialogService implemented app-side, mirroring ISetupDialogService/SetupDialogService",
+      "why": "Microsoft Learn (Dialog controls) states XamlRoot must be set before ShowAsync in WinUI 3 or it throws at runtime, and that only one ContentDialog may be open per thread, so the show is guarded and the null-root path returns nothing picked -- which is what makes the gates run headless",
+      "rejected": "A Flyout or Popup anchored to the text box (light-dismiss is not FR-009 contract); an in-page overlay (would put picker presentation in the entry step FR-012 says holds no matching logic, and would not be reusable by the second caller US3 describes)"
+    },
+    {
+      "decision": "A partial is 1-4 digits after trimming, a leading WO/wo and an optional dash; the derived pattern is WO- plus those digits as typed plus one trailing wildcard; case-insensitivity comes from the stores collations with no UPPER() wrapper",
+      "why": "FR-017 asks matching to tolerate the separators a person actually types, and widening what starts a search does not touch FR-004 (the accepted complete forms and the formatting rule are unchanged); not wrapping the column in a function is both correct and necessary because a function around the column would defeat the mirror key index",
+      "rejected": "Reusing the existing ^(?:WO-)?(\\d{5,6})$ regex and treating anything it rejects as not-a-partial, which would reject the owner is own 0451 and 045 that the Edge Cases require to search"
+    },
+    {
+      "decision": "Match ordering is by the value column then the declared display columns, so two identical searches on an unchanged snapshot return the same order",
+      "why": "The spec defers ordering to the plan and requires only stability; deterministic ordering makes the unit and roundtrip assertions meaningful, and value-first puts the person is own number at the top of a prefix match",
+      "rejected": "Similarity-based ranking, which is the Levenshtein behaviour the design rejects"
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Plan and Phase 0/1 design complete for the shared match picker and its first work-order caller; deferred size budget is normal so the full artifact set was produced.",
+      "key_finding": "FR-018 is satisfiable without a table-name parameter: the repo already ships the exact precedent (VisualReadShapeCatalog), a registered source described once as data with its procedure names derived from a stable key -- so a closed catalog plus a reader-kind registry gives callers any source they need while the only name reaching the data layer is one written in reviewed code, and the owner is worked example 0451 stays unpadded (WO-0451%, never WO-000451%)."
+    }
+  },
+  "concerns": [
+    {
+      "note": "review-plan gate reached at the end of /speckit.companion.plan: message = Review the plan before generating tasks; options = approve, reject; on_reject = abort. Recorded rather than paused because the run is unattended: treated as awaiting the owner review of plan.md, research.md, data-model.md and contracts/, not as an approval.",
+      "step": "plan",
+      "kind": "gate"
+    }
+  ]
+}
