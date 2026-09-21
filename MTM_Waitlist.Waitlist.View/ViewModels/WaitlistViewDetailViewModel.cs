@@ -29,7 +29,6 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     private readonly Dictionary<string, RequestJobPartAvailability> _jobAvailabilityCache = new(StringComparer.OrdinalIgnoreCase);
     private readonly string _currentEmployeeNumber;
     private readonly string _currentEmployeeName;
-    private readonly string _currentRole;
     private DispatcherQueue? _dispatcherQueue;
     private readonly IWaitlistMessageSeenStore? _messageSeenStore;
     private IDisposable? _imageLocationSubscription;
@@ -192,7 +191,6 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _jobAvailabilityProvider = jobAvailabilityProvider;
         _currentEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
         _currentEmployeeName = startupState?.EmployeeName?.Trim() ?? string.Empty;
-        _currentRole = startupState?.CurrentRole?.Trim() ?? string.Empty;
         _dispatcherQueue = dispatcherQueue;
         _messageSeenStore = messageSeenStore;
         SortInventoryCommand = new RelayCommand<string>(SortInventoryBy);

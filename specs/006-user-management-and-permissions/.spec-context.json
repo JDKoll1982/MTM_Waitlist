@@ -386,6 +386,30 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-21T11:47:09.274Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:00:16.979Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:02:32.692Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:05:37.867Z"
     }
   ],
   "unattended": true,
@@ -751,7 +775,7 @@
         "T036",
         "T060"
       ],
-      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_GivesEveryKeyANamedGateSiteThatReadsIt"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_AndTheDeclaration_AgreeInBothDirections"
     },
     "FR-048": {
       "title": "The shipped baselines are data rather than values fixed in code, so what a role may do can change without a code change.",
@@ -779,7 +803,7 @@
         "T025",
         "T037"
       ],
-      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_WhenTheStoreThrows_AnswersFromTheShippedFallbackRatherThanRefusing"
+      "tests": "MTM_Waitlist.Tests/Core/Services/RequestActionPolicyTests.cs::CanViewerHandleRequestsAsync_NoPermissionService_AnswersFromTheShippedFallback"
     },
     "FR-051": {
       "title": "A new account starts from its role's baseline and holds nothing beyond it.",
@@ -788,7 +812,7 @@
         "T025",
         "T036"
       ],
-      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_WithNoStoredRowAtAll_FallsBackToTheShippedFallback"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_StoreNoRowForAnybodyInParticular"
     },
     "FR-052": {
       "title": "The shipped baselines reproduce exactly what each role is allowed today, so nobody's access changes on ship day.",
@@ -797,7 +821,8 @@
         "T034",
         "T036",
         "T072"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_ReproduceEveryRetiredListExactly_ForEveryRoleAndEveryPermission,MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_GiveTheThreeKeysWithNoPredecessorTheirStatedSets"
     },
     "FR-053": {
       "title": "A person's own stored value beats a wider scope, and the order is corrected and shipped before any value is stored for an individual.",
@@ -822,7 +847,7 @@
         "T039",
         "T040"
       ],
-      "tests": "Tests/Core/Models/CoreModelsTests.cs::StartupState_IsDeveloper_ReadsTheRoleCodeAndNotTheDisplayName"
+      "tests": "MTM_Waitlist.Tests/Core/Services/RequestActionPolicyTests.cs::CanViewerHandleRequestsAsync_AsksTheDeclaredKeyAndNothingElse"
     },
     "FR-055": {
       "title": "A gate is refused wherever the gated action is performed, not only where the control was drawn.",
@@ -838,14 +863,16 @@
         "T037",
         "T039",
         "T040"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs::AcceptAsync_ViewerWithoutThePermission_RefusesAtTheAction"
     },
     "FR-057": {
       "title": "Whatever the Settings cache-refresh control admits is also admitted by the service's cache-refresh permission.",
       "tasks": [
         "T034",
         "T038"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Mock_Service/ServiceOperatorPermissionTests.cs::TheShippedBaselines_AdmitToTheApiEveryRoleTheSettingsCacheRefreshGateAdmits"
     },
     "FR-058": {
       "title": "The badge beside the signed-in name does not become a permission.",
@@ -1342,7 +1369,8 @@
       "tasks": [
         "T036",
         "T072"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_GiveMaterialHandlerLeadItsStatedRowAndNothingMore"
     },
     "SC-005": {
       "title": "After the role rename the count of accounts with no role is zero, and the set on IT Department equals the set that held the retired role.",
@@ -1462,11 +1490,11 @@
       "summary": "Phase 2 finished (the bootstrap and its validators, the permission declaration, the role code through the session, permission resolution, the user-management data layer, registration, resource keys and the three wave-7 suites), and the first Phase 3 task landed: the shipped role seed now carries the eight rungs, Material Handler Lead and the name parts the schema requires."
     },
     "implement": {
-      "summary": "Implement in progress: 14 of 76 tasks complete, 62 open, across 12 phases and 36 waves. 57 tasks are marked parallel-safe; no two in the same wave share a file. Frontier: the highest complete task is T015; the first open task is T007. All 137 requirements and success criteria remain reachable from at least one task. No SQL has been applied to the live store."
+      "summary": "Phase 5 opened: the role-scoped permission baselines are seeded and proved live, the parity and subset tests read the shipped seed, and the request-action gate no longer holds a role list"
     }
   },
   "size": "oversized",
-  "currentTask": "T066",
+  "currentTask": "T037",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -1772,6 +1800,37 @@
         "MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs",
         "MTM_Waitlist.Startup/Services/StartupSessionRepository.cs"
       ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Seeded one role-scoped bool row per permission per role (14 keys x 9 roles = 126 rows), keyed role:<role_code> in the permission namespace; proved live against MAMP MySQL 5.7 (126 rows, 14 keys, 9 roles, subset rule settings.cache_refresh subset of cache.refresh_api holds, zero user-scoped rows); AllSeeds.sql regenerated from the folders and holds exactly one copy of the new body.",
+      "files": [
+        "Database/Seeds/seed_permission_role_baselines/create.sql",
+        "Database/Seeds/seed_permission_role_baselines/rollback.sql",
+        "Database/Seeds/AllSeeds.sql"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Wrote the baseline parity test (per role and per permission against the twelve retired lists, the three stated no-predecessor keys, the declaration-vs-baseline check in both directions, the stated material_handler_lead row and zero per-person rows) and the service-host subset test (settings.cache_refresh admits nobody the cache.refresh_api baseline refuses, declared gate site, fail-closed fallback, retired operator list preserved). 11/11 pass.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceOperatorPermissionTests.cs"
+      ]
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "Re-closed with the full change: the composition root now names the new permissionService parameter on WaitlistViewViewModel (WaitlistViewRegistrationTests.ListViewModelRegistration_NamesEveryConstructorParameter caught the omission, which is the guard working). Solution builds 0 errors; full suite 1282 total / 1244 passed / 38 skipped / 0 failed against the live MAMP store.",
+      "files": [
+        "MTM_Waitlist.Core/Services/RequestActionPolicy.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Core/Services/RequestActionPolicyTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs"
+      ]
     }
   },
   "verified": [
@@ -1830,6 +1889,22 @@
       "exitCode": 0,
       "durationSeconds": 46.4,
       "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1229, Skipped:    38, Total:  1267, Duration: 31 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31.0,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:30.81"
+    },
+    {
+      "what": "full test suite against live MAMP MySQL 5.7",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\johnk\\AppData\\Local\\Temp\\verify006_round4_suite.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 45.6,
+      "result": "Passed!  - Failed:     0, Passed:  1244, Skipped:    38, Total:  1282,  · Duration: 29 s - MTM_Waitlist.Tests.dll (net10.0)"
     }
   ],
   "decisions": [
@@ -1882,6 +1957,28 @@
       "decision": "The permission registry declares no per-role baseline and a test asserts the type has no member for one.",
       "why": "FR-046 and FR-048 split the two tiers on purpose: baselines are seeded data so what a role may do changes without a code change. The check is visible in the type rather than only in a comment about where the data lives.",
       "rejected": "Carrying a baseline table on the declaration, which the seed contradiction suggested and the research settled against."
+    },
+    {
+      "decision": "The permission baselines are seeded as role-scoped rows keyed role:<role_code>, one per permission per role, in the same config_settings_values shape sp_config_permissions_user_get matches on",
+      "why": "The declaration must not carry per-role baselines (FR-046/FR-048) and the read already matches on scope_key rather than on user_id",
+      "rejected": "A per-role dictionary inside PermissionRegistry, which would have put the answers back in code"
+    },
+    {
+      "decision": "material_handler_lead's whole row is stated rather than compared against a retired list: it holds requests.handle, cache.refresh_api, admin.users and admin.reset_password, and nothing else",
+      "why": "Phase 3 added the role after the twelve lists were captured, so no list can describe it; the specification's Assumptions state it and explicitly deny it ignored_locations",
+      "rejected": "Deriving it from the worker roles' union, which would have granted ignored_locations against the specification"
+    },
+    {
+      "decision": "RequestActionPolicy keeps its pure status and assignee rules and takes the handler answer as an input, but the answer itself is now the named permission",
+      "why": "Deleting the eight-name list is what FR-054 asks for, and the policy stays unit-testable because it never resolves the permission itself",
+      "rejected": "Making the whole policy asynchronous and store-backed",
+      "files": "MTM_Waitlist.Core/Services/RequestActionPolicy.cs"
+    },
+    {
+      "decision": "WaitlistViewDetailViewModel's dead role field was deleted rather than turned into a permission reader",
+      "why": "It was assigned from StartupState and read nowhere, and the detail page carries no action gates; a reader there would be a wrapper with no decision behind it",
+      "rejected": "Adding an unused permission read so the file would appear in the audit's gate-site list",
+      "files": "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
     }
   ],
   "concerns": [
@@ -1938,8 +2035,24 @@
     {
       "note": "Because the raw-SQL seam returns an empty result when the store refuses, a live test that expects rows cannot tell a missing procedure from an empty answer. That masking is worth knowing about when reading any live failure in this suite.",
       "step": "implement"
+    },
+    {
+      "note": "T037's task text says WaitlistViewDetailViewModel and WaitlistRequestService each compare a role name today. Neither does: the detail view model holds a dead role field and the request service compared only status and assignee. The service was given a real permission refusal, which is what the task wanted, and the dead field was deleted. The task list overstates the pre-change state.",
+      "step": "implement"
+    },
+    {
+      "note": "The four Settings gates and SetupWorkCenterViewModel.CanManageWorkCenters are synchronous XAML-bound properties computed from StartupState.CurrentRole. Replacing them with permissions needs an asynchronous load whose results the bindings read, and SettingsViewModel is not navigation-aware and has no asynchronous init hook, so T039 and T040 need a page-lifecycle decision the task list does not make. Left open rather than half-migrated.",
+      "step": "implement"
+    },
+    {
+      "note": "T038 cannot be contained in Api/ServiceOperatorRoles.cs as its Files line says: the gate needs the caller's user id, so IServiceOperatorRoleResolver, ServiceOperatorRoleResolver, ServiceOperatorAuthenticationHandler, ServiceHostBuilder and the Mock.Service test doubles all have to move with it. Left open.",
+      "step": "implement"
+    },
+    {
+      "note": "MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs carries four CS8602 warnings from round 3, so the solution builds with four warnings rather than none. Not fixed this round.",
+      "step": "implement"
     }
   ],
-  "last_action": "26 of 76 tasks are complete, 12 of them finished this round (T007, T016 to T023, T025, T026, T027); T024 is left open because its baseline half needs the seed T036 writes. The solution builds 0 warnings 0 errors, the suite reports 1205 total with 0 failed and 27 skipped, the live local store carries the new columns, table, rungs and all 75 procedures, and a fresh store built from the regenerated aggregates installs end to end.",
+  "last_action": "Round 4 closed T034, T036 and T037. tasks.md shows 42 checked and 34 open. Full suite 1282 total, 1244 passed, 38 skipped, 0 failed against MAMP MySQL 5.7; the solution builds with 4 pre-existing warnings and 0 errors.",
   "telemetryInstanceId": "7c4334c4-01cc-4e28-b1a9-4e5ade006824"
 }

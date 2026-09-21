@@ -16,6 +16,13 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
     private readonly IMySqlHelperServer? _mySqlHelperServer;
     private readonly INewRequestAlertNotifier? _newRequestAlertNotifier;
     private readonly IUrgencyDeadlineService? _urgencyDeadlineService;
+
+    /// <summary>
+    /// The one place this service asks what a person may do, so a handler action is refused at the action and
+    /// not only at the control that offered it (FR-056, FR-117). A caller that never drew the screen is refused
+    /// here too, which is the whole point of asking a second time.
+    /// </summary>
+    private readonly IPermissionService? _permissionService;
     private readonly ConcurrentDictionary<Guid, WaitlistRequest> _requests = new();
     private readonly ConcurrentDictionary<Guid, List<WaitlistRequestAuditEntry>> _auditTrail = new();
 
@@ -26,11 +33,13 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
     public WaitlistRequestService(
         IMySqlHelperServer? mySqlHelperServer = null,
         INewRequestAlertNotifier? newRequestAlertNotifier = null,
-        IUrgencyDeadlineService? urgencyDeadlineService = null)
+        IUrgencyDeadlineService? urgencyDeadlineService = null,
+        IPermissionService? permissionService = null)
     {
         _mySqlHelperServer = mySqlHelperServer;
         _newRequestAlertNotifier = newRequestAlertNotifier;
         _urgencyDeadlineService = urgencyDeadlineService;
+        _permissionService = permissionService;
     }
 
     public async Task<int> RefreshFromDatabaseAsync(string? building = null, CancellationToken cancellationToken = default)
@@ -560,6 +569,15 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             return null;
         }
 
+        // And only a person who holds the named permission may accept. The status rule above is about the
+        // request; this one is about the person, and it is asked here rather than only on the screen so a
+        // caller that never drew the screen is refused (FR-056). An unreachable store answers from the shipped
+        // fallback rather than refusing, so an outage does not stop the shop floor (FR-050).
+        if (!await RequestActionPolicy.CanViewerHandleRequestsAsync(_permissionService, cancellationToken).ConfigureAwait(false))
+        {
+            return null;
+        }
+
         var updated = new WaitlistRequest
         {
             Id = existing.Id,
@@ -614,7 +632,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         var handler = (handlerEmployeeNumber ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(handler)
-            || !RequestActionPolicy.CanViewerCompleteOrRelease(existing.Status, existing.AssignedMaterialHandler, handler))
+            || !RequestActionPolicy.CanViewerCompleteOrRelease(existing.Status, existing.AssignedMaterialHandler, handler)
+            || !await RequestActionPolicy.CanViewerHandleRequestsAsync(_permissionService, cancellationToken).ConfigureAwait(false))
         {
             return null;
         }
@@ -671,7 +690,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         var handler = (handlerEmployeeNumber ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(handler)
-            || !RequestActionPolicy.CanViewerCompleteOrRelease(existing.Status, existing.AssignedMaterialHandler, handler))
+            || !RequestActionPolicy.CanViewerCompleteOrRelease(existing.Status, existing.AssignedMaterialHandler, handler)
+            || !await RequestActionPolicy.CanViewerHandleRequestsAsync(_permissionService, cancellationToken).ConfigureAwait(false))
         {
             return null;
         }

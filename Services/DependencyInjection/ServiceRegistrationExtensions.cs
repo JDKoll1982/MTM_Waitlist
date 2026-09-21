@@ -223,7 +223,8 @@ public static partial class ServiceRegistrationExtensions
             urgencyDeadlineService: provider.GetRequiredService<IUrgencyDeadlineService>(),
             messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>(),
             sortPreferenceService: provider.GetRequiredService<IWaitlistSortPreferenceService>(),
-            jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>()));
+            jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>(),
+            permissionService: provider.GetRequiredService<IPermissionService>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();

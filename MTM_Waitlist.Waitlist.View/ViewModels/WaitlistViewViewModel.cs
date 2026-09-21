@@ -28,7 +28,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private DispatcherQueue? _dispatcherQueue;
     private readonly string _currentRequesterEmployeeNumber;
     private readonly string _currentEmployeeName;
-    private readonly string _currentRole;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt? _actionPrompt;
     private readonly IUrgencyDeadlineService? _urgencyDeadlineService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? _messageSeenStore;
@@ -57,6 +56,12 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly Dictionary<string, RequestJobPartAvailability> _jobAvailabilityCache = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly IRequestJobPartAvailabilityProvider? _jobAvailabilityProvider;
+
+    /// <summary>
+    /// The one place this screen asks what a person may do. Access is a named permission resolved from the one
+    /// declaration, never a role name held or compared here (FR-054).
+    /// </summary>
+    private readonly IPermissionService? _permissionService;
 
     /// <summary>The documented default allotted time, used when no deadline service is supplied or the Item has no configured allotment.</summary>
     private static readonly TimeSpan DefaultMaxAllotted = TimeSpan.FromMinutes(UrgencySettingsService.DefaultMinutes);
@@ -111,7 +116,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IUrgencyDeadlineService? urgencyDeadlineService = null,
         MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? messageSeenStore = null,
         IWaitlistSortPreferenceService? sortPreferenceService = null,
-        IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null)
+        IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null,
+        IPermissionService? permissionService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -124,7 +130,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _dispatcherQueue = dispatcherQueue;
         _currentRequesterEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
         _currentEmployeeName = startupState?.EmployeeName?.Trim() ?? string.Empty;
-        _currentRole = startupState?.CurrentRole?.Trim() ?? string.Empty;
+        _permissionService = permissionService;
         _actionPrompt = actionPrompt;
         _urgencyDeadlineService = urgencyDeadlineService;
         _messageSeenStore = messageSeenStore;
@@ -169,11 +175,14 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     }
 
     /// <summary>
-    /// True when the signed-in viewer's role may handle requests at all (Material Handler or above). The
-    /// screen uses it only to decide what to offer; the service re-checks it on every action, so a screen
-    /// built from stale data can never widen what the viewer is allowed to do (FR-018).
+    /// True when the signed-in viewer holds <c>permission.requests.handle</c>, which is the gate for being offered
+    /// any handler action at all. The screen uses it only to decide what to offer; the service re-checks it on
+    /// every action, so a screen built from stale data can never widen what the viewer is allowed to do (FR-018,
+    /// FR-056). No role name is compared here: the answer is the named permission, resolved from the one
+    /// declaration, and an unreachable store answers from the shipped fallback rather than refusing (FR-050).
     /// </summary>
-    public bool CanHandleRequests => RequestActionPolicy.CanViewerHandleRequests(_currentRole);
+    private Task<bool> CanHandleRequestsAsync(CancellationToken cancellationToken = default) =>
+        RequestActionPolicy.CanViewerHandleRequestsAsync(_permissionService, cancellationToken);
 
     /// <summary>
     /// Plain-language explanation of the last refused action, or empty when nothing was refused. A refusal
@@ -426,7 +435,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// </remarks>
     private async Task ApplyHandlerActionStateAsync(IReadOnlyList<SampleOrder> orders, DateTimeOffset now)
     {
-        var canHandle = CanHandleRequests;
+        var canHandle = await CanHandleRequestsAsync().ConfigureAwait(true);
 
         foreach (var order in orders)
         {
