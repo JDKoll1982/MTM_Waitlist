@@ -1,8 +1,12 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Permissions;
+using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Tests.Module_Mock;
 using MTM_Waitlist.Tests.Module_Settings.Fixtures;
 
@@ -131,6 +135,9 @@ public sealed class PermissionBaselineParityTests
 
     /// <summary>The role whose whole row is stated rather than compared against a retired list.</summary>
     private const string StatedRoleCode = "material_handler_lead";
+
+    /// <summary>The store variable the opt-in pass reads, the same one the other gated integration tests use.</summary>
+    private const string LiveStoreConnectionStringVariable = "MTM_WAITLIST_TEST_DB_CONNECTION_STRING";
 
     private static string SeedPath => Path.Combine(
         RepositoryPatternScan.FindRepositoryRoot(),
@@ -296,6 +303,100 @@ public sealed class PermissionBaselineParityTests
             RetiredRoleListFixture.EntriesMatchingNoCatalogRole.ToArray(),
             unmatched,
             "The mapping above must cover every entry the retired lists hold, and drop exactly the two that name no role.");
+    }
+
+    /// <summary>
+    /// The per-person half of the ship-day claim, which needs a live store and so belongs to the same pass as
+    /// the other opt-in integration checks: for every person the store holds, what they can do today is exactly
+    /// what their role's retired list gave them, and nothing was stored for anybody in particular to make that
+    /// true (T072, FR-014, FR-052, SC-001, SC-004, §6 gate 7).
+    /// </summary>
+    /// <remarks>
+    /// The comparison reads the store through the shipped read — <c>sp_config_permissions_user_get</c> resolves
+    /// the person's own rows and their role's rows — and composes the answer with the shipped rule, so a
+    /// procedure that resolved the wrong role would fail here rather than pass on the strength of the seed file
+    /// alone. Environment-gated on <c>MTM_WAITLIST_TEST_DB_CONNECTION_STRING</c>, and reported as skipped when it
+    /// is absent rather than as passing.
+    /// </remarks>
+    [TestMethod]
+    public async Task EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore()
+    {
+        var connectionString = Environment.GetEnvironmentVariable(LiveStoreConnectionStringVariable);
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            Assert.Inconclusive($"{LiveStoreConnectionStringVariable} is not set; skipping the live per-person parity proof.");
+        }
+
+        var helper = new MySqlHelperServer(
+            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+
+        // Nothing is stored for anybody in particular, which is what makes this a comparison of what each
+        // person's role gives them rather than of rows somebody wrote (SC-004).
+        var storedForPeople = await helper.ExecuteSqlQueryAsync(
+            "SELECT COUNT(*) AS rows_stored FROM config_settings_values "
+                + "WHERE setting_key LIKE 'permission.%' AND scope_type = 'user';",
+            new Dictionary<string, object?>(),
+            MySqlDatabaseTarget.MtmWaitlist).ConfigureAwait(false);
+
+        Assert.AreEqual(
+            "0",
+            Convert.ToString(storedForPeople.Single().Values.First(), CultureInfo.InvariantCulture),
+            "Ship day changes nobody's access while the store holds no per-person permission value at all (SC-004).");
+
+        var people = await helper.ExecuteSqlQueryAsync(
+            "SELECT u.id AS user_id, u.username_normalized AS sign_in_name, COALESCE(r.role_code, '') AS role_code "
+                + "FROM core_users_profiles u "
+                + "LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id "
+                + "LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id "
+                + "ORDER BY u.id ASC;",
+            new Dictionary<string, object?>(),
+            MySqlDatabaseTarget.MtmWaitlist).ConfigureAwait(false);
+
+        Assert.IsTrue(
+            people.Count > 0,
+            "The live store holds somebody, so the comparison is not vacuous (SC-001).");
+
+        foreach (var person in people)
+        {
+            var userId = Convert.ToInt64(person["user_id"], CultureInfo.InvariantCulture);
+            var signInName = Convert.ToString(person["sign_in_name"], CultureInfo.InvariantCulture) ?? string.Empty;
+            var roleCode = Convert.ToString(person["role_code"], CultureInfo.InvariantCulture) ?? string.Empty;
+
+            Assert.IsTrue(
+                CatalogueRoleCodes.Contains(roleCode, StringComparer.Ordinal),
+                $"{signInName} holds '{roleCode}', which is not one of the nine codes the catalogue holds, so no "
+                    + "retired list describes them (SC-005).");
+
+            var storedRows = await helper.ExecuteStoredProcedureQueryAsync(
+                StoredPermissionAnswers.StoredPermissionsProcedure,
+                new Dictionary<string, object?> { ["p_user_id"] = userId },
+                MySqlDatabaseTarget.MtmWaitlist).ConfigureAwait(false);
+
+            var effective = StoredPermissionAnswers.Compose(storedRows);
+
+            foreach (var (key, retiredList) in ReplacedLists)
+            {
+                var expected = roleCode == StatedRoleCode
+                    ? MaterialHandlerLeadGranted.Contains(key)
+                    : ExpectedHolders(key, retiredList).Contains(roleCode);
+
+                Assert.AreEqual(
+                    expected,
+                    StoredPermissionAnswers.AnswerFor(key, effective),
+                    $"{signInName} ({roleCode}) and {key}: the retired list it replaces "
+                        + $"{(expected ? "admitted" : "did not admit")} this role, so their effective set must be "
+                        + $"{(expected ? "true" : "false")} today (list: {string.Join(", ", retiredList)}).");
+            }
+
+            foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor)
+            {
+                Assert.AreEqual(
+                    statedRoles.Contains(roleCode, StringComparer.Ordinal),
+                    StoredPermissionAnswers.AnswerFor(key, effective),
+                    $"{signInName} ({roleCode}) and {key}: the key has no predecessor, so it is checked against the "
+                        + $"roles it is stated to ship to ({string.Join(", ", statedRoles)}).");
+            }
+        }
     }
 
     /// <summary>

@@ -642,6 +642,38 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-21T13:20:38.794Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T072",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T22:51:11.412Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T073",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T22:55:49.227Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T074",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T23:01:33.091Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T075",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T23:19:33.519Z"
     }
   ],
   "unattended": true,
@@ -659,7 +691,8 @@
         "T008",
         "T015",
         "T020"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::ASignInNameTypedInLowerCase_IsStoredUpperCase_AndSignsInEitherWay"
     },
     "FR-003": {
       "title": "Accounts whose sign-in name is not upper case are migrated to that rule.",
@@ -689,7 +722,8 @@
       "tasks": [
         "T011",
         "T072"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_AValidPerson_WritesTheProfileAndItsOneRoleAssignmentTogether,CreateAsync_FailingAfterTheProfileIsWritten_RollsTheProfileAndTheRoleBackTogether"
     },
     "FR-007": {
       "title": "A new account is created active, and the create screen offers no active control.",
@@ -707,7 +741,8 @@
         "T047",
         "T053",
         "T072"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_ASignInNameAlreadyTaken_ArrivesAsOneTypedAnswerAndWritesNothing"
     },
     "FR-009": {
       "title": "A person is created with exactly one role and nothing adds a second; the stored assignments still permit more, so readers take the highest-ranked live role.",
@@ -817,7 +852,8 @@
         "T012",
         "T048",
         "T053"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_DeactivatingTheActorsOwnAccount_IsRefusedByTheStore"
     },
     "FR-024": {
       "title": "A person cannot change the sign-in name of the account they are signed in as.",
@@ -825,7 +861,8 @@
         "T012",
         "T048",
         "T053"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_RenamingTheActorsOwnSignInName_IsRefusedByTheStore"
     },
     "FR-025": {
       "title": "The rank, self-lockout and sign-in-name rules are enforced where the change is written.",
@@ -837,7 +874,8 @@
         "T053",
         "T054",
         "T072"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_ARoleAboveTheActorsOwnRung_IsRefusedByTheStoreWithNoScreenInvolved,UpdateAsync_AnAccountThatOutranksTheActor_IsRefusedByTheStoreWithNoScreenInvolved"
     },
     "FR-026": {
       "title": "A refused change is reported plainly and writes no audit record, because nothing changed.",
@@ -879,7 +917,8 @@
         "T049",
         "T053",
         "T073"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/ViewModels/PinRevealDialogViewModelTests.cs,MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_AValidPerson_WritesTheProfileAndItsOneRoleAssignmentTogether"
     },
     "FR-031": {
       "title": "The value previously used for a reset stays recognised as a temporary value.",
@@ -915,7 +954,8 @@
         "T013",
         "T066",
         "T072"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_DeactivatingAPerson_LeavesTheirExistingSessionsAlone,MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs::ResetPassword_LeavesAnOpenSessionRunning"
     },
     "FR-036": {
       "title": "After five failed sign-in attempts an account holding a temporary value stops accepting it.",
@@ -1054,7 +1094,7 @@
         "T036",
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_ReproduceEveryRetiredListExactly_ForEveryRoleAndEveryPermission,MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_GiveTheThreeKeysWithNoPredecessorTheirStatedSets"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_ReproduceEveryRetiredListExactly_ForEveryRoleAndEveryPermission,EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore"
     },
     "FR-053": {
       "title": "A person's own stored value beats a wider scope, and the order is corrected and shipped before any value is stored for an individual.",
@@ -1335,7 +1375,8 @@
         "T042",
         "T044",
         "T046"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::SearchAsync_MatchesEachOfTheFourFacts_AndNarrowsByRole"
     },
     "FR-087": {
       "title": "The list is filterable by role.",
@@ -1513,14 +1554,16 @@
         "T005",
         "T011",
         "T012"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_OneSaveChangingSeveralFields_SharesOneChangeIdentifierAcrossItsAuditRows"
     },
     "FR-111": {
       "title": "A password reset is recorded as having happened with no value on either side.",
       "tasks": [
         "T013",
         "T072"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::ResetPasswordAsync_WritesOneAuditRowWithNoValueOnEitherSide"
     },
     "FR-112": {
       "title": "Every label, title, field label, action and error message is localised through the application's resource mechanism.",
@@ -1579,7 +1622,8 @@
         "T034",
         "T041",
         "T072"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore"
     },
     "SC-002": {
       "title": "Zero hand-written role lists remain in the application, and adding one back is reported as a failure.",
@@ -1602,7 +1646,7 @@
         "T036",
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_GiveMaterialHandlerLeadItsStatedRowAndNothingMore"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore"
     },
     "SC-005": {
       "title": "After the role rename the count of accounts with no role is zero, and the set on IT Department equals the set that held the retired role.",
@@ -1624,14 +1668,16 @@
         "T049",
         "T053",
         "T073"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/ViewModels/PinRevealDialogViewModelTests.cs"
     },
     "SC-008": {
       "title": "Five wrong tries with a temporary credential stop it working; a sixth correct attempt is refused; restarting and waiting do not restore it.",
       "tasks": [
         "T066",
         "T075"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs,MTM_Waitlist.Tests/ViewModels/LoginViewModelTests.cs"
     },
     "SC-009": {
       "title": "A save changing N permissions writes exactly N records naming the acting user and both values, and reversing it restores all N.",
@@ -1684,7 +1730,8 @@
       "title": "A change to an account that outranks the actor is refused when attempted without the screen, for the role, the active state and the password alike.",
       "tasks": [
         "T072"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_AnAccountThatOutranksTheActor_IsRefusedByTheStoreWithNoScreenInvolved"
     },
     "SC-017": {
       "title": "Opening either Administration page and returning to Settings takes one Back press, and the search reaches both entries.",
@@ -1697,7 +1744,8 @@
       "title": "The full test suite passes with zero failures and the build is clean with zero warnings.",
       "tasks": [
         "T074"
-      ]
+      ],
+      "tests": "the whole suite and the clean solution build"
     },
     "SC-019": {
       "title": "For every creation, change and password reset the audit names the actor as they were, carries one record per changed field, and shares one change identifier.",
@@ -1722,11 +1770,11 @@
       "summary": "Phase 2 finished (the bootstrap and its validators, the permission declaration, the role code through the session, permission resolution, the user-management data layer, registration, resource keys and the three wave-7 suites), and the first Phase 3 task landed: the shipped role seed now carries the eight rungs, Material Handler Lead and the name parts the schema requires."
     },
     "implement": {
-      "summary": "Phase 5 opened: the role-scoped permission baselines are seeded and proved live, the parity and subset tests read the shipped seed, and the request-action gate no longer holds a role list"
+      "summary": "Closed T072, T073, T074 and T075: the live integration pass now proves the create, the 1062 answer, a mid-way rollback, both rank and both self refusals, the reset's single empty audit row, deactivate leaving sessions alone, one change identifier per save and each person's ship-day parity; a reset's PIN was searched for across the store, the journal and the application and found nowhere; the suite and a clean build are green; and the running application was walked, which found and fixed an unreachable create form and a hidden count that never moved. T076 is open."
     }
   },
   "size": "oversized",
-  "currentTask": "T071",
+  "currentTask": "T075",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2347,6 +2395,39 @@
         "FEATURES.md",
         "CHANGELOG.md"
       ]
+    },
+    "T072": {
+      "status": "DONE",
+      "did": "Live gated pass green: 20/20 with the live store. New UserManagementLiveIntegrationTests proves one-act create, 1062 to a typed answer, a lock-induced mid-way rollback (1205) leaving neither write, both rank refusals, both self-lockout refusals, one reset audit row with no value on either side, deactivate leaving sessions untouched, and one change identifier per save; PermissionBaselineParityTests now proves each person's effective set equals their role's retired list for the eleven keys, the three stated sets, and zero per-person rows. Running it revealed sp_user_management_update failing on every call from a utf8mb4 connection (UNION collation mix), now fixed in the folder and the roll-up.",
+      "files": [
+        "Database/StoredProcedures/sp_user_management_update/create.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs"
+      ]
+    },
+    "T073": {
+      "status": "DONE",
+      "did": "Reset performed against the live store with a PIN chosen to collide with nothing (7391 absent from all 133 character columns), hashed exactly as PasswordSecretHasher does. Searched it as a whole value in all 133 character columns of mtm_waitlist (0 held it), in the account's own row (the hash is that PBKDF2 under the stored salt, 32-byte base64 hash with a 16-byte salt and not the PIN), in the application's own files (28 files, 0), in the journal (30 files, five matches, all four-digit runs inside the journal's own chained Hash fields written days before the reset, 0 lines after it), and in the source tree (three unrelated data matches). The reset's audit trail is one row with both value columns empty. Recorded in quickstart.md and cleaned up: 0 probe rows left.",
+      "files": [
+        "specs/006-user-management-and-permissions/quickstart.md"
+      ]
+    },
+    "T074": {
+      "status": "DONE",
+      "did": "Suite green with all five store connections exported: 1364 total, 1360 passed, 4 skipped, 0 failed. Solution build: Build succeeded, 0 Warning(s), 0 Error(s), no WMC9999. InlineSqlAuditTests + RetiredSymbolAuditTests filtered run: 10/10. The four skips are the Infor Visual reachability gates (server unreachable, the credential variables are set, so no MySQL connection can un-gate them). The eleven gate-2 cases are mapped to the case that carries each in quickstart.md; two of them (the four-fact search and the upper-case sign-in name) had no live case, so they were added to the live pass and run, and UI-thread collection safety is recorded as a stated gap. Recorded in quickstart.md.",
+      "files": [
+        "specs/006-user-management-and-permissions/quickstart.md",
+        "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs"
+      ]
+    },
+    "T075": {
+      "status": "DONE",
+      "did": "Walked the running app against the live store through UI Automation with both connection overrides set: Administration category with both entries navigating, Settings search reaching both, roster with its filter remembered, the person's page showing both self-lockout refusals on the reader's own account and a peer fully editable, a create ending in the PIN window that survived a click far outside it and Escape and Print, the permissions page with its fixed row locked and Save disabled, and the five-attempt limit refusing the sixth correct attempt and still refusing it after a restart. Two defects found only by running it: the roster had no Add control bound at all, so the create form was unreachable (fixed and re-walked successfully), and the hidden count was a one-time binding so it read 0 (fixed in markup, not re-observed at runtime because the sign-in form would not accept programmatic input after the walk's own sign-out). Recorded in quickstart.md; the store was left with its ten accounts.",
+      "files": [
+        "specs/006-user-management-and-permissions/quickstart.md",
+        "Module_Settings/Views/UserManagementPage.xaml"
+      ]
     }
   },
   "verified": [
@@ -2456,6 +2537,73 @@
       "warnings": [
         "exited 1"
       ]
+    },
+    {
+      "what": "the T072 live pass with all three storage variables exported",
+      "command": "powershell -NoProfile -Command $env:MSBUILDDISABLENODEREUSE='1'; $cs='Server=127.0.0.1;Port=3306;Database=mtm_waitlist;User Id=root;Password=root;'; $env:MTM_WAITLIST_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING=$cs; cd c:\\Users\\johnk\\source\\repos\\MTM_Waitlist; dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --filter 'FullyQualifiedName~PermissionBaselineParityTests|FullyQualifiedName~PermissionChangeSetServiceTests|FullyQualifiedName~RoleRenameMigrationTests|FullyQualifiedName~UserManagementLiveIntegrationTests'",
+      "source": "derived",
+      "exitCode": 255,
+      "durationSeconds": 0.0,
+      "result": "'FullyQualifiedName~PermissionChangeSetServiceTests' is not recognized as an internal or external command, · operable program or batch file.",
+      "warnings": [
+        "exited 255"
+      ]
+    },
+    {
+      "what": "the T073 reset PIN search",
+      "command": "powershell -NoProfile -File C:\\Users\\johnk\\AppData\\Local\\Temp\\t073_pin_search.ps1",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 0.3,
+      "result": "+              ~~~~~~~~ ·     + CategoryInfo          : ObjectNotFound: (New-Guid:String) [], ParentContainsErrorRecordException ·     + FullyQualifiedErrorId : CommandNotFoundException",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "the T072 live integration pass (the roster, permissions and baseline suites against the live store)",
+      "command": "pwsh -NoProfile -File C:\\Users\\johnk\\AppData\\Local\\Temp\\t072_live_pass.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 19.5,
+      "result": "Test run for C:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\MTM_Waitlist.Tests\\bin\\x64\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0) · A total of 1 test files matched the specified pattern. · Passed!  - Failed:     0, Passed:   126, Skipped:     0, Total:   126, Duration: 4 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "the T073 reset PIN search (store, journal and application files)",
+      "command": "pwsh -NoProfile -File C:\\Users\\johnk\\AppData\\Local\\Temp\\t073_pin_search.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 1.8,
+      "result": "    31 journal files searched against the reset time 2026-09-21 18:20:41Z; lines after the reset carrying the PIN: 0 ·     (the earlier matches are four-digit runs inside the journal's own `Hash` fields, written days before the reset.) · probe rows left in the store: 0"
+    },
+    {
+      "what": "the whole suite and the clean solution build, with all five store connections exported",
+      "command": "pwsh -NoProfile -File C:\\Users\\johnk\\AppData\\Local\\Temp\\t074_suite_and_build.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 85.0,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:30.83"
+    },
+    {
+      "what": "the walk through the running application (T075)",
+      "command": "UI Automation against bin\\x64\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\MTM_Waitlist.exe with both connection overrides pointed at 127.0.0.1",
+      "result": "observed: the Administration category with both entries navigating, the Settings search reaching both, the roster with all five facts per row and its filter remembered, both self-lockout refusals on the reader's own account with Deactivate disabled, a create ending in the PIN window that survived a click far outside it, Escape and Print, the permissions page with its fixed row locked and Save disabled, and the five-attempt limit moving 4-3-2-1-0 with the sixth correct attempt refused before and after a restart",
+      "warnings": [
+        "Print raised the Windows print preview, which had to be closed before the page beneath would take a click again",
+        "the sign-in form's password field accepts no programmatic input, so the walk could not be signed back in afterwards"
+      ]
+    },
+    {
+      "what": "the four skipped cases in the suite belong to another feature and cannot be un-gated here",
+      "command": "read the suite log and the guard",
+      "result": "all four are the Infor Visual live checks, whose guard probes the Infor Visual SQL Server; INFOR_VISUAL_SQL_USER and INFOR_VISUAL_SQL_PASSWORD are set on this machine, so the skip is the unreachable server and no MySQL connection changes it",
+      "warnings": []
+    },
+    {
+      "what": "the fixed-width reading of the three screens (not a walk)",
+      "command": "read the XAML of the three pages and the two others this feature adds",
+      "result": "no content control declares a fixed Width; the reading does find Width=24 progress rings, a MaxWidth=720 on the create and person form stacks and a MinWidth=200 on the permissions page's people column, which are judgement items for whoever does the scaling walk",
+      "warnings": []
     }
   ],
   "decisions": [
@@ -2530,6 +2678,41 @@
       "why": "It was assigned from StartupState and read nowhere, and the detail page carries no action gates; a reader there would be a wrapper with no decision behind it",
       "rejected": "Adding an unused permission read so the file would appear in the audit's gate-site list",
       "files": "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+    },
+    {
+      "decision": "induce the mid-way create failure by holding the role-assignment table's rows and gaps in another transaction while the create runs",
+      "why": "every refusal the create's inputs can provoke is raised before the profile insert, so no input reaches a failure after it, and proving the rollback needed a failure that really lands mid-way",
+      "rejected": "reporting a lock wait or a first-write failure as if it were the mid-way case"
+    },
+    {
+      "decision": "write the update procedure's two active flags as literals instead of CAST(... AS CHAR)",
+      "why": "a CAST takes the connection's collation while the routine's variables take the database's, and MySQL 5.7 refuses to union the two, so the save failed on every call from a utf8mb4 connection",
+      "rejected": "forcing a collation with COLLATE, which pins the store to one collation name"
+    },
+    {
+      "decision": "add the missing Add control to the roster page's header behind the same entitlement as the entry",
+      "why": "the view model's AddPersonCommand and AddLabelText and the shipped UserManagement_Add.Label key existed but nothing was bound to them, so the create form and the PIN window were unreachable in the running application",
+      "rejected": "reaching the create form from the person's page instead, which the contract does not ask for"
+    },
+    {
+      "decision": "bind the roster's hidden count one way",
+      "why": "it was a one-time binding, so it read 0 hidden while nine people were hidden",
+      "rejected": "leaving it, since the count is what FR-094 promises"
+    },
+    {
+      "decision": "add live cases for the four-fact search and the upper-case sign-in name while running T074",
+      "why": "gate 2 names eleven live cases and those two had no live case at all, only a view-model assertion that the term reaches the store",
+      "rejected": "recording them as covered by construction"
+    },
+    {
+      "decision": "clear the developer account's forced password change to reach the shell, then drive the application's own change-password form with the value this workstation already remembers",
+      "why": "the account held the legacy masked credential with a forced change, so the shell was unreachable, and the form is the application's own path rather than a hand-written hash",
+      "rejected": "writing a password hash into the store from the outside"
+    },
+    {
+      "decision": "leave the specification at implementing and not run --mark-complete",
+      "why": "T076 is still open: the scaling walk was not performed",
+      "rejected": "marking 75 of 76 tasks complete as if the last one were done"
     }
   ],
   "concerns": [
@@ -2602,8 +2785,24 @@
     {
       "note": "MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs carries four CS8602 warnings from round 3, so the solution builds with four warnings rather than none. Not fixed this round.",
       "step": "implement"
+    },
+    {
+      "note": "T076 is open and was not walked. The 150 and 200 percent scaling walks need the session's display scale changed, which needs a sign-out, and this pass ran unattended; the narrowest-window walk needs the shell and the application could not be signed back in through UI Automation afterwards. What the markup reading found is recorded in quickstart.md, explicitly as a reading rather than as evidence.",
+      "step": "implement"
+    },
+    {
+      "note": "The hidden-count fix is a markup change verified by the build and by the pre-fix observation of the defect, not re-observed in the running application, because the session could not be signed in again after the walk's own sign-out.",
+      "step": "implement"
+    },
+    {
+      "note": "The account JKOLL (user 2) was reset by accident while the T073 search harness was being written: an early bug in the harness read a scalar as its first character and performed the reset against user id 2 instead of the probe fixture. The account now holds a temporary credential with a fresh change required, and one audit row records that reset (deliberately left in place rather than deleted). The developer account JOHNK now holds a real salted password equal to the value this workstation already remembered for it, because the walk drove the application's own change-password form.",
+      "step": "implement"
+    },
+    {
+      "note": "T072's task line names three test files, but several of the live claims it lists (the transactional create, the 1062 answer through the repository, the rank refusals, the self-lockout refusals, the reset audit row, deactivate leaving sessions alone) had no live case at all; they were added in a new live suite rather than asserted from the fakes.",
+      "step": "implement"
     }
   ],
-  "last_action": "Round 4 closed T034, T036 and T037. tasks.md shows 42 checked and 34 open. Full suite 1282 total, 1244 passed, 38 skipped, 0 failed against MAMP MySQL 5.7; the solution builds with 4 pre-existing warnings and 0 errors.",
+  "last_action": "T072, T073, T074 and T075 closed with evidence recorded in quickstart.md; T076 left open and the spec left at implementing, because the scaling walk needs a session the pass could not make",
   "telemetryInstanceId": "7c4334c4-01cc-4e28-b1a9-4e5ade006824"
 }

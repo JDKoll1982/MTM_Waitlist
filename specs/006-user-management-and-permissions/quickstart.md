@@ -114,6 +114,143 @@ $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING = $cs
 11. **Check the scaling pass.** The two new pages and the person's page between 150 and 200 percent scaling and at
     the narrowest window the application permits, with all five facts of a list row still visible at both widths.
 
+## What the three live passes proved
+
+Each pass records its outcome here, and each says what it ran against and what it saw. The scaling pass is
+recorded beside the walk, because both read the running application.
+
+### T072: the live-database integration checks
+
+One opt-in, environment-gated pass against a live `mtm_waitlist` on MySQL 5.7.24, with
+`MTM_WAITLIST_DB_CONNECTION_STRING` and `MTM_WAITLIST_TEST_DB_CONNECTION_STRING` naming the same store. Twenty
+cases ran and none was skipped.
+
+| The claim | How it was proved |
+| --- | --- |
+| A create writes the profile and the role assignment as one act | the new account has one profile row, exactly one role assignment naming the role that was asked for, and one change identifier across every audit row it wrote |
+| A duplicate sign-in name arrives as `1062` and becomes one typed answer | creating the same name twice returns the typed "already taken" answer with the pinned sentence, and the store still holds one profile and one assignment |
+| A create that fails after the profile insert rolls both writes back | the role-assignment table is held in another transaction, so the profile insert succeeds and the role insert waits and fails with `1205`; afterwards neither row exists |
+| The rank rule refuses with no screen involved | a `setup` actor creating a `developer` gets the typed denial and writes nothing, and the same actor editing a `developer` account is refused and leaves that account untouched |
+| The two self refusals are refused in the store | switching off one's own account is refused and the account stays active; renaming one's own sign-in name is refused, the stored name is unchanged, and no audit row is written |
+| A reset records one row with no value on either side | the audit count moves by exactly one, and that row names the acting user, carries the time, and holds nothing on both sides |
+| Switching somebody off ends no session | a session written for the person is still active with the same expiry afterwards, which is what the confirmation promises |
+| One save shares one change identifier | a save changing both name parts, the derived display name and the employee number writes four rows under one change identifier, each naming the actor and the time |
+| Ship day changes nobody's access | every person in the store holds exactly what their role's retired list gave them, for each of the eleven replaced keys; the three keys with no predecessor match their stated sets; and the store holds zero per-person permission rows |
+
+**What running it found, and what it cost.** `sp_user_management_update` failed on every call from a utf8mb4
+connection with `Illegal mix of collations for operation 'UNION'`. The two active flags were written with
+`CAST(... AS CHAR)`, which takes the connection's collation, while the routine's own variables take the
+database's, and MySQL 5.7 refuses to union the two. The screen suites could not see it because they drive
+hand-written fakes, and the mysql client could not see it either because its own connection charset differs. The
+two branches now write literals, which are coercible and take the branches' own collation. The fix is in
+`Database/StoredProcedures/sp_user_management_update/create.sql` and in the `AllSPs.sql` roll-up.
+
+### T073: the reset PIN is readable nowhere
+
+A reset was performed against the live store with a PIN chosen so that it collides with nothing already stored:
+`7391` appears in none of the store's 133 character columns beforehand. It was hashed exactly as the shipped
+`PasswordSecretHasher` does, which is PBKDF2/SHA-256, 100,000 iterations, a 32-byte hash, a 16-byte salt and
+base64.
+
+| What was searched | What was found |
+| --- | --- |
+| The store, all 133 of its character columns, for the PIN as a whole value | zero columns hold it. The 102 numeric columns hold values rather than text, and a four-digit number among them is somebody's quantity rather than a credential |
+| The account's own row | the stored hash is that PBKDF2 of the PIN under the stored salt, is not the PIN, and is 32 bytes of base64 with a 16-byte salt |
+| The application's own files, its local state and its built configuration, 28 files | none carries the PIN |
+| The journal, 30 files, against the time of the reset | the five matches are four-digit runs inside the journal's own chained `Hash` fields, written days before the reset; zero lines written after it carry the PIN |
+| The application source tree, 7,581 files | three matches, all unrelated data: the same mock seed row id in two roll-ups of one seed, and a SQL Server default-constraint name |
+| The audit trail for the reset | one row, with both value columns empty |
+
+### T074: the whole suite and a clean solution build
+
+Run with every running application stopped and the build nodes cleared, and with all five store connections
+exported so no integration case is gated out.
+
+| The command | Result |
+| --- | --- |
+| `dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64` | 1364 total, 1360 passed, 4 skipped, 0 failed |
+| `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` | `Build succeeded`, `0 Warning(s)`, `0 Error(s)`, and no `WMC9999` |
+| the same run filtered to `InlineSqlAuditTests` and `RetiredSymbolAuditTests` | 10 passed, 0 failed, per §6 gate 4 |
+
+**The four skips belong to another feature and cannot be un-gated here.** They are the Infor Visual live checks
+(`LookupWorkOrderQuery_ReturnsRows_WhenServerIsAvailable` and its three siblings). Their guard probes the Infor
+Visual SQL Server and reports inconclusive when it cannot be reached. `INFOR_VISUAL_SQL_USER` and
+`INFOR_VISUAL_SQL_PASSWORD` are set on this machine, so the skip is the unreachable server rather than a missing
+variable, and no MySQL connection can change it.
+
+The eleven live cases §6 gate 2 names, and what carries each one:
+
+| The case | What carries it |
+| --- | --- |
+| Rank refusal | the two live cases in `UserManagementLiveIntegrationTests`, one for the role and one for a target who outranks the actor |
+| Self-lockout rejection | `UpdateAsync_DeactivatingTheActorsOwnAccount_IsRefusedByTheStore` and `UpdateAsync_RenamingTheActorsOwnSignInName_IsRefusedByTheStore` |
+| Transactional rollback | `CreateAsync_FailingAfterTheProfileIsWritten_RollsTheProfileAndTheRoleBackTogether` |
+| Duplicate-username typed result | `CreateAsync_ASignInNameAlreadyTaken_ArrivesAsOneTypedAnswerAndWritesNothing`, and `CreateUserViewModelTests` for the form's side of it |
+| Uppercase normalisation | `ASignInNameTypedInLowerCase_IsStoredUpperCase_AndSignsInEitherWay`, which creates with a lower-case name, reads the stored name back, and signs in with both spellings |
+| Employee-number non-uniqueness | `CreateUserViewModelTests.TwoPeopleSharingOneEmployeeNumber_AreBothCreatedAndBothListed` |
+| Search matching all four fields | `SearchAsync_MatchesEachOfTheFourFacts_AndNarrowsByRole`, one search per fact against the live roster, plus the role filter |
+| UI-thread collection safety | **stated as a gap.** The roster's load resumes on the context it was started from, because the continuation that fills the bound collection is not detached, and every roster case reads that collection straight after awaiting the load. No case installs a synchronization context and asserts where the mutation happens, so this one is covered by construction and by the tests that read the collection, not by an assertion about the thread |
+| Deactivate without ending a session | `UpdateAsync_DeactivatingAPerson_LeavesTheirExistingSessionsAlone`, and `TemporaryCredentialLimitTests.ResetPassword_LeavesAnOpenSessionRunning` for the reset half |
+| Double-click Save writing exactly one row | `CreateUserViewModelTests.OnePress_CreatesExactlyOnePerson` and `PermissionsViewModelTests.OneImpatientPress_WritesExactlyOneChange` |
+| An audit row naming the actor and the time | the live create, save and reset cases, each of which asserts the acting user and the recorded time on the rows it wrote |
+
+### T075: the walk through the running application
+
+Run against the built executable (`bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe`) with both
+connection overrides pointed at the local MySQL 5.7.24, and driven through UI Automation: the window, its navigation
+items and its cards were read as they rendered, and the actions were real clicks and keystrokes.
+
+| What was walked | What the running application showed |
+| --- | --- |
+| The Administration category | both entries are there as clickable rows carrying their own sentences, so neither is an expander; Settings' own search reaches both, "user" leaving the Users entry and "permission" leaving the Permissions entry |
+| Both entries navigate | clicking Users opened the roster and clicking Permissions opened the permissions page, and Back on either returned to Settings |
+| The roster | every account listed, each row one target that announces itself ("John Koll, JOHNK, 6229, Developer. Open this person"), with all five facts in the row |
+| The filter remembered | searching for a name narrowed the list, and returning to the page came back with the term still in the box, the list still narrowed, and the banner saying a filter is applied |
+| The person's page, on the reader's own account | "This is the account you are signed in as, so its sign-in name cannot be changed" and "…so it cannot be deactivated", with the sign-in name field read-only, Deactivate disabled, and the deactivation sentence on the page itself |
+| The person's page, on somebody else | every field editable, Deactivate and Reset password available, and neither self refusal shown |
+| A create | the create page opened from the roster's Add action, took the five fields and a role chosen from the roles at or below the reader's rung, and ended in the PIN window showing the sign-in name, the four-digit credential, when it was issued and who issued it |
+| The PIN window | a click far outside it left it open, Escape left it open, and Print left it open while raising the Windows print preview, which then had to be closed before the page beneath would take a click again |
+| Closing the PIN window | its own close button closed it, and the credential was nowhere on the screen afterwards |
+| The permissions page | one person at a time, each of the fourteen features stating what it gates and "From the role's baseline", the "Manage permissions" row disabled and locked with "This is the permission that opens this page, so it cannot be changed here.", Save changes disabled while nothing had changed, and the who-holds-this view naming the roles whose baselines give the feature |
+| The five-attempt limit | signing in as the account the walk created with the wrong credential five times moved "Attempts remaining on this temporary password" through 4, 3, 2, 1 and 0, the sixth attempt with the **correct** credential was refused with "This temporary password is no longer accepted. Someone who can reset passwords must issue a fresh one.", and after closing and reopening the application the correct credential was still refused |
+
+**Two defects the walk found, which no test could see.**
+
+1. **The create form had no way in.** The roster page carried no Add control at all. The view model had
+   `AddPersonCommand` and `AddLabelText` and the resource key `UserManagement_Add.Label` had shipped, but nothing on
+   the page was bound to either, so a person could not be created from the running application and the PIN window
+   could not be reached. An Add button bound to that command and that label now sits in the page header behind the
+   same entitlement as the entry, and the walk then used it: the create form opened, the create landed, and the PIN
+   window appeared.
+2. **The hidden count never moved.** The roster's "N hidden by the filter" was bound one time, so it read
+   "0 hidden by the filter" while nine people were hidden. The binding is now one way. That fix is a markup change
+   verified by the build and by the pre-fix observation of the defect; it was **not** re-observed in the running
+   application, because the walk's own sign-out could not be signed back in through UI Automation afterwards, the
+   password field refusing programmatic input.
+
+**What the walk changed on this machine.** The developer account `JOHNK` held the legacy masked credential with a
+forced change, so the shell could not be reached at all. The forced change was cleared to get in, and the
+application's own change-password form was then driven with the value this workstation already remembers for that
+account, so the account now holds a real salted password and no longer demands a change. The account the walk
+created (`ZZ.WALK.PERSON`) was removed afterwards with its audit rows and sessions, leaving the store's ten accounts
+as they were. Everything was run again after both fixes: the suite reports 1364 total, 1360 passed, 4 skipped,
+0 failed.
+
+### T076: not walked, and left open
+
+The scaling walk was not performed, so this task stays open rather than reported as done.
+
+- The display scale cannot be changed without signing the session out and back in, and this pass ran unattended, so
+  the 150 percent and 200 percent walks were not attempted.
+- The narrowest-window walk on the three screens needs the shell, and after the five-attempt walk the application
+  could not be signed back in through UI Automation, so it was not attempted either.
+- For information rather than as evidence: reading the markup of the three screens and the two others this feature
+  adds, no content control declares a fixed `Width`. What the reading does find is a `Width="24"` progress ring on
+  each page, a `MaxWidth="720"` on the create and person form stacks and a `MinWidth="200"` on the permissions
+  page's people column. Whether those three are consistent with "no control has a fixed width" is a judgement for
+  whoever does the scaling walk, because a spinner's size is fixed by its own nature and a maximum is not a fixed
+  width, and none of that is a substitute for the walk.
+
 ## What to do when something fails
 
 - A gate that refuses a person it should admit is almost always one of two things: the re-rank did not ship before

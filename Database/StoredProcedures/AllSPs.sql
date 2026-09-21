@@ -3446,7 +3446,12 @@ BEGIN
         UNION ALL
         SELECT 'role_code', v_current_role_code, TRIM(p_role_code)
         UNION ALL
-        SELECT 'is_active', CAST(v_current_is_active AS CHAR), CAST(p_is_active AS CHAR)
+        -- The two active flags are written as literals rather than CAST(... AS CHAR). A CAST takes the
+        -- CONNECTION's collation while the routine's own variables take the database's, and MySQL 5.7 refuses
+        -- to UNION the two: "Illegal mix of collations for operation 'UNION'". That is a real failure, not a
+        -- theoretical one: on a utf8mb4 connection this save failed every time. A literal is coercible, so it
+        -- adopts the branches' own collation and the save works whatever connection calls it.
+        SELECT 'is_active', IF(v_current_is_active <> 0, '1', '0'), IF(p_is_active <> 0, '1', '0')
     ) AS changed
     WHERE NOT (changed.previous_value <=> changed.changed_value);
 

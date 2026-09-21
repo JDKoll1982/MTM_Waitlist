@@ -26,6 +26,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <Button
@@ -44,6 +45,16 @@
                     Text="{x:Bind ViewModel.SubtitleText}"
                     TextWrapping="Wrap" />
             </StackPanel>
+
+            <!-- The way into the create form. `x:Load` requires an `x:Name` on the element it wraps. -->
+            <Button
+                Grid.Column="2"
+                x:Name="AddPersonButton"
+                AutomationProperties.AutomationId="UserManagementPage_Add"
+                Command="{x:Bind ViewModel.AddPersonCommand}"
+                Content="{x:Bind ViewModel.AddLabelText}"
+                VerticalAlignment="Top"
+                x:Load="{x:Bind ViewModel.IsEntitled, Mode=OneWay}" />
         </Grid>
 
         <!-- Search and the role filter -->
@@ -84,7 +95,7 @@
             <TextBlock
                 VerticalAlignment="Center"
                 Style="{ThemeResource BodyTextBlockStyle}"
-                Text="{x:Bind ViewModel.HiddenCountText}" />
+                Text="{x:Bind ViewModel.HiddenCountText, Mode=OneWay}" />
             <Button
                 AutomationProperties.AutomationId="UserManagementPage_ShowEveryone"
                 Command="{x:Bind ViewModel.ShowEveryoneCommand}"
