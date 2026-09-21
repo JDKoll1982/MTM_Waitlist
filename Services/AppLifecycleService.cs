@@ -4,7 +4,7 @@ namespace MTM_Waitlist.Services;
 
 public sealed class AppLifecycleService : IAppLifecycleService
 {
-    public void Exit() => App.Current.Exit();
+    public void Exit() => App.ExitApplication();
 
     public void ShowLoginWindowAndCloseSplash() => App.ShowLoginWindowAndCloseSplash();
 

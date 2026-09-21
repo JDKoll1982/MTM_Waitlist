@@ -471,7 +471,11 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
             ConnectionTimeout = (uint)Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds),
         };
 
-        var connection = new MySqlConnection(builder.ConnectionString);
+        // Resolved through the same host fallback every other reader uses: the configured host is the shared
+        // plant server, so a workstation off the plant network would otherwise time out here while the
+        // databases are present on the local server.
+        var connection = new MySqlConnection(
+            MySqlHostFallback.Apply(builder.ConnectionString) ?? builder.ConnectionString);
         await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         return connection;

@@ -17,6 +17,7 @@ namespace MTM_Waitlist;
 
 public partial class App : Application
 {
+    private static Microsoft.UI.Dispatching.DispatcherQueue? _uiDispatcher;
     private static WindowEx? _mainWindow;
     private static SplashWindow? _splashWindow;
     private static LoginWindow? _loginWindow;
@@ -43,9 +44,34 @@ public partial class App : Application
         get; set;
     }
 
+    /// <summary>
+    /// Ends the process from whatever thread the caller is on.
+    /// </summary>
+    /// <remarks>
+    /// <c>Application.Exit()</c> must run on the UI thread. Signing out reaches this after an await that
+    /// deliberately does not return to the UI thread, so calling <c>Exit()</c> directly left the signed-in
+    /// window open beside the replacement instance the sign-out had already launched.
+    /// </remarks>
+    public static void ExitApplication()
+    {
+        var dispatcher = _uiDispatcher;
+
+        if (dispatcher is null || dispatcher.HasThreadAccess)
+        {
+            Current.Exit();
+            return;
+        }
+
+        _ = dispatcher.TryEnqueue(() => Current.Exit());
+    }
+
     public App()
     {
         StartupDebugLog.Info("App", "App constructor started.");
+
+        // Captured here, on the UI thread, so a caller on any other thread can still end the session.
+        _uiDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+
         InitializeComponent();
 
         Host = Microsoft.Extensions.Hosting.Host.

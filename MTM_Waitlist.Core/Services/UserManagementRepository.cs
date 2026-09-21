@@ -425,7 +425,11 @@ public sealed class UserManagementRepository : IUserManagementRepository
             ConnectionTimeout = (uint)Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds),
         };
 
-        return builder.ConnectionString;
+        // The configured host is the shared plant server, which a workstation off the plant network cannot
+        // reach. Every other reader in the application resolves through this fallback, so without it this
+        // repository alone tried the unreachable host and reported a timeout while the same databases sat
+        // on the local server.
+        return MySqlHostFallback.Apply(builder.ConnectionString) ?? builder.ConnectionString;
     }
 
     private static string? NormalizeOrNull(string? value) =>
