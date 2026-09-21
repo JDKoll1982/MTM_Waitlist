@@ -89,6 +89,16 @@
                         HorizontalAlignment="Left" />
                 </StackPanel>
 
+                <StackPanel
+                    x:Name="RemainingAttemptsArea"
+                    x:Load="{x:Bind ViewModel.ShowRemainingAttempts, Mode=OneWay}">
+                    <TextBlock
+                        AutomationProperties.AutomationId="LoginPage_RemainingAttemptsText"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.RemainingAttemptsMessage, Mode=OneWay}"
+                        TextWrapping="WrapWholeWords" />
+                </StackPanel>
+
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="{x:Bind ViewModel.LoginHint, Mode=OneWay}"

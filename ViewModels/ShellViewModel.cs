@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Navigation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Views;
 using MTM_Waitlist.Module_Settings.Views;
 using MTM_Waitlist.Module_Setup.Models;
@@ -313,17 +314,14 @@ public partial class ShellViewModel : ObservableRecipient
         CurrentUserBadgeBrush = CreateUserBadgeBrush(userPresentation.ColorHex);
     }
 
-    private static (string Glyph, string ColorHex) GetUserPresentation(string? role)
+    private static (string Glyph, string ColorHex) GetUserPresentation(string? roleCode)
     {
-        return role?.Trim().ToLowerInvariant() switch
-        {
-            "developer" => ("\uE713", "#FF0078D4"),
-            "admin" or "administrator" => ("\uE7EF", "#FFC4314B"),
-            "supervisor" or "manager" => ("\uE716", "#FFD67D00"),
-            "quality" or "quality inspector" => ("\uE73E", "#FF107C10"),
-            "material handler" => ("\uE7B8", "#FF008272"),
-            _ => ("\uE77B", "#FF5C5C5C")
-        };
+        // Keyed on the role code through the one lookup, so every role the catalogue holds gets its own badge and
+        // no role reaches the grey default (FR-105). The badge stays presentation: it is fixed rather than gated,
+        // and it is not a permission (FR-058).
+        var badge = RoleBadgeCatalog.For(roleCode);
+
+        return (badge.Glyph, badge.ColorHex);
     }
 
     private static SolidColorBrush CreateUserBadgeBrush(string colorHex)

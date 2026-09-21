@@ -99,7 +99,7 @@ public sealed class CoreModelsTests
             Id = 5,
             ComputerName = "johnspc",
             DisplayName = "John's Computer",
-            Description = "Press 100-3",
+            Description = "Press 100-03",
             MacAddressNormalized = "AA:BB:CC",
             IsRegistered = true
         };
@@ -107,7 +107,7 @@ public sealed class CoreModelsTests
         Assert.AreEqual(5, record.Id);
         Assert.AreEqual("johnspc", record.ComputerName);
         Assert.AreEqual("John's Computer", record.DisplayName);
-        Assert.AreEqual("Press 100-3", record.Description);
+        Assert.AreEqual("Press 100-03", record.Description);
         Assert.AreEqual("AA:BB:CC", record.MacAddressNormalized);
         Assert.IsTrue(record.IsRegistered);
     }
@@ -148,7 +148,7 @@ public sealed class CoreModelsTests
         var report = new PrintableReport
         {
             Title = "Setup Report",
-            Subtitle = "Press 100-3",
+            Subtitle = "Press 100-03",
             Sections = new[]
             {
                 new PrintableReportSection
@@ -165,7 +165,7 @@ public sealed class CoreModelsTests
         };
 
         Assert.AreEqual("Setup Report", report.Title);
-        Assert.AreEqual("Press 100-3", report.Subtitle);
+        Assert.AreEqual("Press 100-03", report.Subtitle);
         Assert.AreEqual(1, report.Sections.Count);
         Assert.AreEqual("Pairing", report.Sections[0].Title);
         Assert.AreEqual("Part", report.Sections[0].Fields[0].Label);

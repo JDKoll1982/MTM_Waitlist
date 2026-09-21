@@ -8,12 +8,14 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
+using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.ViewModels;
 
 [TestClass]
 public sealed class LoginViewModelTests
 {
+    private const string LoginPageXamlPath = "Module_Startup/Views/LoginPage.xaml";
     [TestMethod]
     public async Task NewUserAsyncCommand_SubmitsRequestAndUpdatesStateAsync()
     {
@@ -339,6 +341,117 @@ public sealed class LoginViewModelTests
         await viewModel.ChangePasswordCommand.ExecuteAsync(null);
 
         Assert.AreEqual(42, repository.LastUpdatedUserId, "The update must target the account startup resolved.");
+    }
+
+    // ── The remaining-attempts line (FR-040, FR-041, FR-042, FR-044) ────────────────────────────────────
+
+    [TestMethod]
+    public async Task SignInAsync_AfterTheFirstWrongTryOnATemporaryCredential_ShowsHowManyAttemptsRemain()
+    {
+        var repository = new RecordingStartupSessionRepository
+        {
+            CheckCredentialsResult = StartupCredentialCheckResult.Failed() with
+            {
+                HoldsTemporaryCredential = true,
+                TemporaryCredentialFailedAttempts = 1,
+            },
+        };
+        var viewModel = CreateViewModel(SignedInState(), sessionRepository: repository);
+        viewModel.Username = "johnk";
+        viewModel.Password = "1234";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.IsTrue(viewModel.ShowRemainingAttempts, "The line appears once an attempt has failed (FR-041).");
+        StringAssert.Contains(viewModel.RemainingAttemptsMessage, "4", "Four of the five attempts remain after one failure (FR-041).");
+    }
+
+    [TestMethod]
+    public async Task SignInAsync_BeforeAnyAttemptHasFailed_ShowsNoAttemptLine()
+    {
+        var viewModel = CreateViewModel(
+            SignedInState(),
+            gateService: new FakeComputerGateService { CheckResult = new ComputerGateCheck(ComputerGateStatus.Registered) },
+            navigationService: new RecordingNavigationService(),
+            windowService: new RecordingStartupWindowService());
+        viewModel.Username = "johnk";
+        viewModel.Password = "pw-1234";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.IsFalse(viewModel.ShowRemainingAttempts, "Nothing is shown before an attempt has failed (FR-041).");
+        Assert.AreEqual(string.Empty, viewModel.RemainingAttemptsMessage);
+    }
+
+    [TestMethod]
+    public async Task SignInAsync_WhenTheTemporaryCredentialHasStoppedBeingAccepted_SaysAFreshResetIsNeeded()
+    {
+        var repository = new RecordingStartupSessionRepository
+        {
+            CheckCredentialsResult = StartupCredentialCheckResult.Failed() with
+            {
+                HoldsTemporaryCredential = true,
+                TemporaryCredentialFailedAttempts = 5,
+                TemporaryCredentialAttemptLimitReached = true,
+            },
+        };
+        var viewModel = CreateViewModel(SignedInState(), sessionRepository: repository);
+        viewModel.Username = "johnk";
+        viewModel.Password = "1234";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.IsTrue(viewModel.ShowRemainingAttempts);
+        StringAssert.Contains(
+            viewModel.RemainingAttemptsMessage,
+            "reset",
+            "The person must be told that someone entitled has to reset it (FR-044).");
+        StringAssert.Contains(viewModel.RemainingAttemptsMessage, "fresh", "A fresh credential is what they are waiting for (FR-044).");
+    }
+
+    [TestMethod]
+    public async Task SignInAsync_WhenAnAccountWithoutATemporaryCredentialFails_BehavesExactlyAsBefore()
+    {
+        // An ordinary account and a sign-in name that does not exist both arrive here as a plain failure, and an
+        // ordinary sign-in has no attempt limit at all (FR-040, FR-042).
+        var repository = new RecordingStartupSessionRepository { CheckCredentialsResult = StartupCredentialCheckResult.Failed() };
+        var viewModel = CreateViewModel(SignedInState(), sessionRepository: repository);
+        viewModel.Username = "nobody";
+        viewModel.Password = "pw-1234";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.IsFalse(viewModel.ShowRemainingAttempts, "The limit must not be visible for an account that holds no temporary credential.");
+        Assert.AreEqual(string.Empty, viewModel.RemainingAttemptsMessage);
+        Assert.AreEqual("Sign-in failed. Check your credentials and try again.", viewModel.LoginHint);
+    }
+
+    [TestMethod]
+    public void TheSignInPage_ShowsTheAttemptLine_AndOffersNoReset()
+    {
+        var xaml = ReadSource(LoginPageXamlPath);
+
+        StringAssert.Contains(
+            xaml,
+            "x:Load=\"{x:Bind ViewModel.ShowRemainingAttempts, Mode=OneWay}\"",
+            "The line is shown only when there is something to say (FR-041).");
+        StringAssert.Contains(xaml, "AutomationProperties.AutomationId=\"LoginPage_RemainingAttemptsText\"");
+        StringAssert.Contains(
+            xaml,
+            "{x:Bind ViewModel.RemainingAttemptsMessage, Mode=OneWay}",
+            "The line reads the view model's message.");
+
+        Assert.IsFalse(
+            xaml.Contains("reset", StringComparison.OrdinalIgnoreCase),
+            "No reset is offered anywhere on the sign-in screen, and a person cannot reset their own password (FR-028).");
+    }
+
+    private static string ReadSource(string relativePath)
+    {
+        var path = Path.Combine(RepositoryPatternScan.FindRepositoryRoot(), relativePath.Replace('/', Path.DirectorySeparatorChar));
+        Assert.IsTrue(File.Exists(path), $"The artifact is missing: {path}");
+
+        return File.ReadAllText(path);
     }
 
     private static StartupState SignedInState()

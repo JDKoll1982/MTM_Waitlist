@@ -282,6 +282,110 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-21T10:44:51.324Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:23:38.294Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:24:00.185Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:25:46.376Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:27:55.735Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:31:21.630Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:37:37.647Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:40:52.417Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T067",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:43:19.185Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T068",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:43:22.367Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T069",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:43:25.897Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T064",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:47:02.578Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T065",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:47:05.789Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T066",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:47:09.274Z"
     }
   ],
   "unattended": true,
@@ -1362,7 +1466,7 @@
     }
   },
   "size": "oversized",
-  "currentTask": "T027",
+  "currentTask": "T066",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -1564,6 +1668,110 @@
       "files": [
         "Database/Seeds/seed_dev_masked_baseline/create.sql;Database/Seeds/seed_dev_masked_baseline/rollback.sql;Database/Seeds/AllSeeds.sql"
       ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Ran PermissionRegistryTests against the live-store environment: 10/10 passed, so the declaration half T024 still owns holds; the baseline comparison stays in T034",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionRegistryTests.cs"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Added sp_auth_roles_list with create.sql and rollback.sql, applied to live MySQL 5.7 and read back: 8 rows ordered by rung desc then code, retired admin row excluded while still present in the catalogue",
+      "files": [
+        "Database/StoredProcedures/sp_auth_roles_list/create.sql",
+        "Database/StoredProcedures/sp_auth_roles_list/rollback.sql"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Added RoleAuthorization (IsAtLeast, IsAbove, AtOrAbove, AtOrBelow, Highest over catalogue entries) plus IRoleCatalogService and RoleCatalogService reading sp_auth_roles_list with a session cache; registered in the composition root; clean solution build 0 warnings 0 errors",
+      "files": [
+        "MTM_Waitlist.Core/Permissions/RoleAuthorization.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IRoleCatalogService.cs",
+        "MTM_Waitlist.Core/Services/RoleCatalogService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Regenerated AllSPs.sql with a UTF-8-safe generator: +37 lines for sp_auth_roles_list only, 76 of 76 procedure artifacts present verbatim and the rebuild is byte-identical. AllSeeds.sql left unchanged because feature 006's seed revision is already present verbatim; its two drifted blocks belong to other features and were reported instead of silently rewritten",
+      "files": [
+        "Database/StoredProcedures/AllSPs.sql"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Phase 3 ladder suite exists and passes against the live store: 23 passed, 0 failed, 0 skipped across RoleAuthorizationTests, RoleCatalogServiceTests and RoleLadderSeedTests, including the live nine-code catalogue check.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/RoleAuthorizationTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RoleCatalogServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RoleLadderSeedTests.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Rename seed written with a transactional procedure and an EXIT HANDLER that rolls back and resignals; AllSeeds.sql regenerated from the folders and proved by building a scratch store from the aggregates, which ends with it_department at rung 90, admin absent, one account on the renamed role and zero accounts holding no role.",
+      "files": [
+        "Database/Seeds/seed_role_admin_to_it_department/create.sql",
+        "Database/Seeds/seed_role_admin_to_it_department/rollback.sql",
+        "Database/Seeds/AllSeeds.sql"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Live proof ran the shipped create.sql, rolled it back with the shipped rollback.sql and re-applied it: the accounts on IT Department equal the set that held admin, no account holds no role at any of the three points, a switched-off fixture moved and stayed switched off, and the run ends with it_department at rung 90 and admin absent.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/RoleRenameMigrationTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RoleCatalogServiceTests.cs"
+      ]
+    },
+    "T067": {
+      "status": "DONE",
+      "did": "RoleBadgeCatalog added: one entry per role the catalogue holds, each with its own glyph and colour, the grey default reachable only by a genuinely unknown or blank role, and the retired vocabulary plus the display-name branches removed. Glyphs are drawn only from codepoints this application already renders.",
+      "files": [
+        "MTM_Waitlist.Core/Permissions/RoleBadgeCatalog.cs"
+      ]
+    },
+    "T068": {
+      "status": "DONE",
+      "did": "ShellViewModel's badge now reads RoleBadgeCatalog.For(role code) instead of its own switch over display names, so the badge is answered by the one lookup and stays presentation rather than becoming a permission.",
+      "files": [
+        "ViewModels/ShellViewModel.cs"
+      ]
+    },
+    "T069": {
+      "status": "DONE",
+      "did": "RoleBadgeCatalogTests proves the lookup covers every role the shipped seeds write, that the count reaching the grey default is zero, that each role's glyph and colour are distinct, that the retired vocabulary and display names reach the default, and that the badge is not a permission; ShellViewModelTests proves the shell reads the lookup and keeps no retired branch. 33 passed, 0 failed.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/RoleBadgeCatalogTests.cs",
+        "MTM_Waitlist.Tests/Module_Core/ViewModels/ShellViewModelTests.cs"
+      ]
+    },
+    "T064": {
+      "status": "DONE",
+      "did": "The sign-in view model shows the remaining attempts once an attempt has failed and never before, says a fresh reset is needed when the limit has been reached, clears the line on a successful sign-in, and keeps an ordinary account and an unknown sign-in name exactly as they were; the sign-in page carries the line through x:Load with a stable AutomationId and offers no reset. Two resource keys added under Startup_SignIn.",
+      "files": [
+        "MTM_Waitlist.Startup/ViewModels/LoginViewModel.cs",
+        "Module_Startup/Views/LoginPage.xaml",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T065": {
+      "status": "DONE",
+      "did": "Sign-in view-model cases added: the line appears after the first failure and not before, the reached-the-limit wording names a reset by somebody entitled, an account without a temporary credential keeps today's hint and shows no line, and the sign-in page carries the bound line with no reset offered. 22 tests in the file pass.",
+      "files": [
+        "MTM_Waitlist.Tests/ViewModels/LoginViewModelTests.cs"
+      ]
+    },
+    "T066": {
+      "status": "DONE",
+      "did": "Live end-to-end proof added: five wrong attempts stop the temporary credential, the sixth attempt with the correct value is refused, the count survives a new repository instance, nothing in the path computes a window so waiting cannot restore it, a successful sign-in clears it, the legacy 0000 marker is limited the same way, an unknown sign-in name moves no count, a failed attempt writes no audit row, a reset clears the count and issues a working value that supersedes the old PIN, and a reset leaves an open session running. 9 tests pass against the live store. Finding: the repository recorded every failed attempt against user id 0, so the count never moved and the limit never bit; the resolved account id now travels beside the verdict.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs",
+        "MTM_Waitlist.Startup/Services/StartupSessionRepository.cs"
+      ]
     }
   },
   "verified": [
@@ -1604,8 +1812,24 @@
       "command": "mysql -h 127.0.0.1 -u root -N -B mtm_waitlist -e \"SELECT COUNT(*) FROM auth_roles_catalog WHERE (role_code='developer' AND role_rank=100) OR (role_code='plant_manager' AND role_rank=80) OR (role_code='production_lead' AND role_rank=70) OR (role_code='setup_lead' AND role_rank=60) OR (role_code='material_handler_lead' AND role_rank=50) OR (role_code IN ('material_handler','production','setup') AND role_rank=10) OR (role_code='admin' AND role_rank=0)\"",
       "source": "derived",
       "exitCode": 0,
-      "durationSeconds": 0.0,
+      "durationSeconds": 0,
       "result": "9"
+    },
+    {
+      "what": "clean solution build (warnings and errors)",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31.5,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:31.35"
+    },
+    {
+      "what": "whole test suite with the live store exported",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 46.4,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1229, Skipped:    38, Total:  1267, Duration: 31 s - MTM_Waitlist.Tests.dll (net10.0)"
     }
   ],
   "decisions": [
@@ -1706,7 +1930,16 @@
     {
       "note": "MySQL Server 9.6.0 is what the live store runs on while every artifact header still says Engine: MySQL 5.7. Nothing in this feature needed a version-specific behaviour, and the compound procedure bodies and the guarded bootstrap blocks ran unchanged, but the headers are now inaccurate.",
       "step": "implement"
+    },
+    {
+      "note": "Root cause of the one suite failure, established by hand against the live store: mtm_receiving_application does not carry the Database/MTMReceivingApp artifacts. receiving_history has no part_type column and sp_receiving_history_average_coil_weight does not exist, so the coil test's insert and its procedure call both fail, and MySqlHelperServer turns both into an empty result after exhausting its retries rather than throwing, which is why the failure reads as Expected 1 Actual 0 instead of as a database error. Not caused by feature 006: nothing in this round touches that database, that tree or that test. It needs the receiving-app artifacts applied to the fresh install before that gate can be green.",
+      "step": "implement"
+    },
+    {
+      "note": "Because the raw-SQL seam returns an empty result when the store refuses, a live test that expects rows cannot tell a missing procedure from an empty answer. That masking is worth knowing about when reading any live failure in this suite.",
+      "step": "implement"
     }
   ],
-  "last_action": "26 of 76 tasks are complete, 12 of them finished this round (T007, T016 to T023, T025, T026, T027); T024 is left open because its baseline half needs the seed T036 writes. The solution builds 0 warnings 0 errors, the suite reports 1205 total with 0 failed and 27 skipped, the live local store carries the new columns, table, rungs and all 75 procedures, and a fresh store built from the regenerated aggregates installs end to end."
+  "last_action": "26 of 76 tasks are complete, 12 of them finished this round (T007, T016 to T023, T025, T026, T027); T024 is left open because its baseline half needs the seed T036 writes. The solution builds 0 warnings 0 errors, the suite reports 1205 total with 0 failed and 27 skipped, the live local store carries the new columns, table, rungs and all 75 procedures, and a fresh store built from the regenerated aggregates installs end to end.",
+  "telemetryInstanceId": "7c4334c4-01cc-4e28-b1a9-4e5ade006824"
 }

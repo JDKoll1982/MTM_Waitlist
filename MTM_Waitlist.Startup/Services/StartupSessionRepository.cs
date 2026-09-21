@@ -270,7 +270,8 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                         TemporaryCredentialFailedAttempts = failedAttempts,
                         TemporaryCredentialAttemptLimitReached = true,
                     },
-                    RecordAttempt: false);
+                    RecordAttempt: false,
+                    UserId: userId);
             }
 
             // The legacy marker account accepts only the literal marker, exactly as it did before this feature;
@@ -289,7 +290,8 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                         HoldsTemporaryCredential = holdsTemporaryCredential,
                         TemporaryCredentialFailedAttempts = holdsTemporaryCredential ? failedAttempts + 1 : 0,
                     },
-                    RecordAttempt: holdsTemporaryCredential);
+                    RecordAttempt: holdsTemporaryCredential,
+                    UserId: userId);
             }
 
             // A successful sign-in with a temporary credential clears the count (FR-039); a successful sign-in on
@@ -300,7 +302,8 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                     HoldsTemporaryCredential = holdsTemporaryCredential,
                     TemporaryCredentialFailedAttempts = 0,
                 },
-                RecordAttempt: holdsTemporaryCredential && failedAttempts > 0);
+                RecordAttempt: holdsTemporaryCredential && failedAttempts > 0,
+                UserId: userId);
         }, cancellationToken).ConfigureAwait(false);
 
         if (outcome is null)
@@ -311,7 +314,7 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         if (outcome.RecordAttempt)
         {
             await RecordTemporaryCredentialAttemptAsync(
-                    outcome.Result.UserId,
+                    outcome.UserId,
                     outcome.Result.IsAuthenticated,
                     timeoutConnectionString,
                     cancellationToken)
@@ -452,7 +455,13 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
     /// One credential check's answer plus whether the count has to move for it. The count is moved by the caller
     /// after the retried read has returned, so one attempt never becomes two.
     /// </summary>
-    private sealed record CredentialCheckOutcome(StartupCredentialCheckResult Result, bool RecordAttempt);
+    /// <remarks>
+    /// <paramref name="UserId"/> is carried separately from <see cref="StartupCredentialCheckResult.UserId"/>,
+    /// because the refused answers are built from <c>Failed()</c> and hold no identity: recording an attempt
+    /// against that answer would write to user 0 and leave the count unmoved, so the limit would never bite. The
+    /// account id is known here whatever the verdict, so it travels beside the verdict.
+    /// </remarks>
+    private sealed record CredentialCheckOutcome(StartupCredentialCheckResult Result, bool RecordAttempt, long UserId);
 
     private static async Task<DateTimeOffset?> ReadSessionExpiryUtcAsync(
         MySqlConnection connection,

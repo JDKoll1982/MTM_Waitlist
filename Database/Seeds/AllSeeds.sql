@@ -431,6 +431,150 @@ ON DUPLICATE KEY UPDATE
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- Seed: seed_role_admin_to_it_department
+-- Engine: MySQL 5.7
+-- Feature: 006-user-management-and-permissions (task T032)
+-- Purpose: the administrator role is removed and IT Department takes its place, with every account moved across
+--          (FR-011, FR-012, FR-013, FR-014).
+--
+-- Why this is a stored program and not a plain script
+--   The change is three statements that must all land or none: insert the incoming role, repoint every
+--   assignment, remove the outgoing row. MySQL 5.7 has no DECLARE ... HANDLER outside a stored program, so the
+--   work lives in a procedure this script creates, calls and drops. The handler rolls back and resignals, so the
+--   interrupted state FR-013 forbids, an account holding no role, cannot be left behind. The procedure is
+--   transient on purpose: it is not a schema artifact, so it is dropped before this script ends and it appears
+--   in no aggregate and no folder of its own.
+--
+-- The rung is written explicitly
+--   `it_department` is inserted with role_rank = 90 and not left to the column default. The column is
+--   NOT NULL DEFAULT 0 (T004), so an insert that omitted it would put the renamed top role BELOW the worker
+--   roles at 10, and the rank rule would then refuse it the accounts it exists to own.
+--
+-- The order of the three statements
+--   Insert, repoint, remove. `auth_roles_assignments.role_id` carries a RESTRICT foreign key back to the
+--   catalogue, so the retired row cannot be removed while an assignment still names it.
+--
+-- The reversal, and the window in which it is exact
+--   rollback.sql restores the row this migration removed and moves the accounts back. That reversal is exact
+--   only while no account has been given IT Department since this migration ran. Without a record of which
+--   accounts this script moved, the reversal moves every account standing on IT Department; inside that window
+--   no other writer can have put one there, so the two sets are the same set. The retired row's `public_id`
+--   cannot be restored either, because the row is gone: the reversal gives it a fresh one, which no reader
+--   keys on. Both headers state this, because the window is the whole reason the reversal is exact.
+--
+-- Running it twice
+--   A second run finds no retired row to remove and leaves the store alone. It reports that rather than failing,
+--   so re-running the file is safe.
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+DROP PROCEDURE IF EXISTS sp_seed_role_admin_to_it_department;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_seed_role_admin_to_it_department()
+BEGIN
+    DECLARE v_retired_role_id BIGINT DEFAULT NULL;
+    DECLARE v_incoming_role_id BIGINT DEFAULT NULL;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    SET v_retired_role_id = (
+        SELECT r.id
+        FROM auth_roles_catalog r
+        WHERE r.role_code = 'admin'
+        LIMIT 1
+    );
+
+    IF v_retired_role_id IS NOT NULL THEN
+        SET v_incoming_role_id = (
+            SELECT r.id
+            FROM auth_roles_catalog r
+            WHERE r.role_code = 'it_department'
+            LIMIT 1
+        );
+
+        IF v_incoming_role_id IS NULL THEN
+            INSERT INTO auth_roles_catalog (
+                public_id,
+                role_code,
+                role_name,
+                role_rank,
+                created_utc,
+                updated_utc
+            )
+            VALUES (
+                UUID(),
+                'it_department',
+                'IT Department',
+                90,
+                UTC_TIMESTAMP(),
+                UTC_TIMESTAMP()
+            );
+
+            SET v_incoming_role_id = LAST_INSERT_ID();
+        ELSE
+            UPDATE auth_roles_catalog
+            SET role_name = 'IT Department',
+                role_rank = 90,
+                updated_utc = UTC_TIMESTAMP()
+            WHERE id = v_incoming_role_id;
+        END IF;
+
+        UPDATE auth_roles_assignments
+        SET role_id = v_incoming_role_id
+        WHERE role_id = v_retired_role_id;
+
+        DELETE FROM auth_roles_catalog
+        WHERE id = v_retired_role_id;
+    END IF;
+
+    COMMIT;
+END$$
+
+DELIMITER ;
+
+CALL sp_seed_role_admin_to_it_department();
+
+DROP PROCEDURE IF EXISTS sp_seed_role_admin_to_it_department;
+
+-- Reported, so a run that changed nothing is visible rather than inferred.
+SELECT
+    'admin absent, it_department present' AS expected_after_apply,
+    (SELECT COUNT(*) FROM auth_roles_catalog WHERE role_code = 'admin') AS retired_rows,
+    (SELECT COUNT(*) FROM auth_roles_catalog WHERE role_code = 'it_department') AS renamed_rows,
+    (
+        SELECT r.role_rank
+        FROM auth_roles_catalog r
+        WHERE r.role_code = 'it_department'
+        LIMIT 1
+    ) AS renamed_rung,
+    (
+        SELECT COUNT(*)
+        FROM auth_roles_assignments ra
+        INNER JOIN auth_roles_catalog r ON r.id = ra.role_id
+        WHERE r.role_code = 'it_department'
+    ) AS accounts_on_the_renamed_role,
+    (
+        SELECT COUNT(*)
+        FROM core_users_profiles u
+        WHERE u.username_normalized IS NOT NULL
+          AND NOT EXISTS (
+                SELECT 1
+                FROM auth_roles_assignments ra
+                WHERE ra.user_id = u.id
+          )
+    ) AS accounts_with_no_role;
+
 -- Seed: seed_setup_active_jobs_eight_configurations
 -- Engine: MySQL 5.7
 -- Purpose: Seed the eight active-job configurations the Run 4 visibility matrix is driven through, so the
@@ -452,7 +596,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 --   V100-33   (Vits Drive)  everything at once   coil + flatstock + die + component, a REAL scrap type, and
 --                                                dunnage
 --   V100-34   (Vits Drive)  no subordinate part  an empty subordinate array, no dunnage
---   (100-8)   a work centre with NO active job: realised by the ABSENCE of a row, which is what the resolver
+--   (100-08)   a work centre with NO active job: realised by the ABSENCE of a row, which is what the resolver
 --             reads as "no active job" — the seed inserts nothing for it on purpose.
 --
 -- A live Setup save on any of these work centres overwrites its `setup_active_jobs` row, so the matrix is no
@@ -485,7 +629,7 @@ WHERE work_center IN (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- --------------------------------------------------------------- 100-3: coil only, a real scrap type
+-- --------------------------------------------------------------- 100-03: coil only, a real scrap type
 INSERT INTO setup_active_jobs
     (public_id, work_order, part_number, sequence_number, work_center,
      selected_dunnage_type_id, selected_dunnage_part_id,
@@ -504,7 +648,7 @@ VALUES
         'IsLowStock', FALSE)),
      NULL, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
--- --------------------------------------------------------------- 100-6: flatstock only, prefix wins over the stored tag
+-- --------------------------------------------------------------- 100-06: flatstock only, prefix wins over the stored tag
     ('c3000000-0000-4000-8000-000000000002', 'WO-900002', 'PART-9002', '10', '100-06',
      NULL, NULL,
      JSON_ARRAY(JSON_OBJECT(
@@ -518,7 +662,7 @@ VALUES
         'IsLowStock', FALSE)),
      NULL, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
--- --------------------------------------------------------------- 100-7: die only, the placeholder scrap value
+-- --------------------------------------------------------------- 100-07: die only, the placeholder scrap value
     ('c3000000-0000-4000-8000-000000000003', 'WO-900003', 'PART-9003', '10', '100-07',
      NULL, NULL,
      JSON_ARRAY(JSON_OBJECT(
@@ -1634,7 +1778,7 @@ VALUES
     -- Pending (open) -> returned by sp_waitlist_request_list; drives list/card + wait time + status badge
     ('f0000000-0001-4000-8000-000000000001','Expo Drive','100-03','Pickup','pickup-coil',NULL,'100-03','100-03','6229','John Koll','Pending',
         UTC_TIMESTAMP() - INTERVAL 35 MINUTE, (UTC_TIMESTAMP() - INTERVAL 35 MINUTE) + INTERVAL 30 MINUTE, 0, NULL, NULL, NULL, NULL,
-        'Coil pickup for press 100-3.', NULL, NULL, NULL, UTC_TIMESTAMP() - INTERVAL 35 MINUTE, UTC_TIMESTAMP() - INTERVAL 35 MINUTE),
+        'Coil pickup for press 100-03.', NULL, NULL, NULL, UTC_TIMESTAMP() - INTERVAL 35 MINUTE, UTC_TIMESTAMP() - INTERVAL 35 MINUTE),
     ('f0000000-0002-4000-8000-000000000002','Expo Drive','100-03','Deliver','deliver-wrong-coil','Wrong material at press - expected MMC0001000.','100-03','100-03','6229','John Koll','Pending',
         UTC_TIMESTAMP() - INTERVAL 12 MINUTE, (UTC_TIMESTAMP() - INTERVAL 12 MINUTE) + INTERVAL 30 MINUTE, 0, NULL, NULL, NULL, NULL,
         'Reports the staged coil is the wrong one.', NULL, NULL, NULL, UTC_TIMESTAMP() - INTERVAL 12 MINUTE, UTC_TIMESTAMP() - INTERVAL 12 MINUTE),
@@ -1671,7 +1815,7 @@ VALUES
         UTC_TIMESTAMP() - INTERVAL 40 MINUTE, (UTC_TIMESTAMP() - INTERVAL 40 MINUTE) + INTERVAL 30 MINUTE, 0, 'M. Lewis', NULL, NULL, NULL,
         NULL, UTC_TIMESTAMP() - INTERVAL 33 MINUTE, NULL, NULL, UTC_TIMESTAMP() - INTERVAL 40 MINUTE, UTC_TIMESTAMP() - INTERVAL 33 MINUTE),
     -- Completed (Done) -> resolved, retained; accepted_utc + completed_utc
-    ('f0000000-0013-4000-8000-000000000013','Expo Drive','100-09','Pickup','pickup-scrap','Scrapped punch slugs at press 100-9.','100-09','100-09','6229','John Koll','Completed',
+    ('f0000000-0013-4000-8000-000000000013','Expo Drive','100-09','Pickup','pickup-scrap','Scrapped punch slugs at press 100-09.','100-09','100-09','6229','John Koll','Completed',
         UTC_TIMESTAMP() - INTERVAL 3 HOUR, (UTC_TIMESTAMP() - INTERVAL 3 HOUR) + INTERVAL 30 MINUTE, 0, '6229', NULL, NULL, NULL,
         'Lugger filled and confirmed.', UTC_TIMESTAMP() - INTERVAL 170 MINUTE, UTC_TIMESTAMP() - INTERVAL 120 MINUTE, NULL, UTC_TIMESTAMP() - INTERVAL 3 HOUR, UTC_TIMESTAMP() - INTERVAL 120 MINUTE),
     ('f0000000-0014-4000-8000-000000000014','Vits Drive','V100-41','Pickup','pickup-fg',NULL,'V100-41','V100-41','5000','Other User','Completed',
@@ -1701,7 +1845,7 @@ INSERT INTO waitlist_requests_audit (
     actor_employee_number, actor_employee_name, details, occurred_utc
 )
 VALUES
-    ('a0000000-0001-4000-8000-000000000001','f0000000-0001-4000-8000-000000000001',NULL,NULL,'Created','6229','John Koll','Request submitted for press 100-3.',UTC_TIMESTAMP() - INTERVAL 35 MINUTE),
+    ('a0000000-0001-4000-8000-000000000001','f0000000-0001-4000-8000-000000000001',NULL,NULL,'Created','6229','John Koll','Request submitted for press 100-03.',UTC_TIMESTAMP() - INTERVAL 35 MINUTE),
     ('a0000000-0002-4000-8000-000000000002','f0000000-0002-4000-8000-000000000002',NULL,NULL,'Created','6229','John Koll','Wrong coil reported.',UTC_TIMESTAMP() - INTERVAL 12 MINUTE),
     ('a0000000-0003-4000-8000-000000000003','f0000000-0007-4000-8000-000000000007',NULL,NULL,'Created','5000','Other User','Other requester WIP request.',UTC_TIMESTAMP() - INTERVAL 30 MINUTE),
     ('a0000000-0010-4000-8000-000000000010','f0000000-0010-4000-8000-000000000010',NULL,'Pending','Created','6229','John Koll','Request created.',UTC_TIMESTAMP() - INTERVAL 80 MINUTE),

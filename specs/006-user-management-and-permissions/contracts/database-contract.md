@@ -5,6 +5,10 @@ change, and the hand-maintained aggregates (`AllTables.sql`, `AllSPs.sql`, `AllF
 `Database/Bootstrap/update_table_descriptions.sql` move with them, per constitution III and
 `database-schema-rules.instructions.md`.
 
+**The target server is MySQL 5.7.** Every artifact header names 5.7 deliberately: that is the version this goes on
+when it goes live. A local development server running a newer 9.x build is expected, and is **not** a reason to
+change a header to match it. (Confirmed by the owner, 2026-09-21: the headers are right and the dev server differs.)
+
 ## Tables
 
 | Artifact | Change |

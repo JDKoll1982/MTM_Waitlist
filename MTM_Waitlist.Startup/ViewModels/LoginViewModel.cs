@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -21,6 +23,11 @@ public partial class LoginViewModel : ObservableRecipient
     private const string RememberPasswordKey = SignInSessionKeys.RememberPassword;
     private const string RememberedUsernameKey = SignInSessionKeys.RememberedUsername;
     private const string RememberedPasswordKey = SignInSessionKeys.RememberedPassword;
+
+    /// <summary>The remaining-attempts line, and the one shown once the temporary credential has stopped being accepted (FR-041, FR-044).</summary>
+    private const string RemainingAttemptsResourceKey = "Startup_SignIn.RemainingAttempts.Text";
+
+    private const string AttemptLimitReachedResourceKey = "Startup_SignIn.AttemptLimitReached.Text";
 
     private readonly IStartupSessionRepository _startupSessionRepository;
     private readonly IStartupRegistrationService _startupRegistrationService;
@@ -101,6 +108,29 @@ public partial class LoginViewModel : ObservableRecipient
     /// </summary>
     [ObservableProperty]
     public partial bool ShowSignInForm
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Whether the remaining-attempts line has something to say. It is false until at least one attempt has
+    /// failed, and it stays false for an ordinary account and for a sign-in name that does not exist, so those
+    /// two paths behave exactly as they did before (FR-040, FR-041, FR-042).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowRemainingAttempts
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// How many attempts the temporary credential has left, or that it has stopped being accepted and somebody
+    /// entitled must issue a fresh one (FR-041, FR-044). It is never shown before an attempt has failed.
+    /// </summary>
+    [ObservableProperty]
+    public partial string RemainingAttemptsMessage
     {
         get;
         set;
@@ -203,6 +233,8 @@ public partial class LoginViewModel : ObservableRecipient
         ShowNewUserAction = _startupState.RequireNewUserAction;
         ShowPasswordChangePrompt = false;
         ShowSignInForm = true;
+        ShowRemainingAttempts = false;
+        RemainingAttemptsMessage = string.Empty;
         ComputerGateState = ComputerGateStatus.Registered;
         ComputerGateHint = string.Empty;
         DetectedComputerName = string.Empty;
@@ -265,10 +297,15 @@ public partial class LoginViewModel : ObservableRecipient
         var credentialResult = await _startupSessionRepository.CheckCredentialsAsync(Username, Password);
         if (!credentialResult.IsAuthenticated)
         {
+            // The line describes THIS attempt, so it is cleared before it is re-read: a failure that has
+            // nothing to say leaves nothing behind from an earlier one.
+            ApplyTemporaryCredentialAttemptState(credentialResult);
             LoginHint = "Sign-in failed. Check your credentials and try again.";
             _startupState.LoginHint = LoginHint;
             return;
         }
+
+        ClearTemporaryCredentialAttemptState();
 
         _pendingDisplayName = credentialResult.DisplayName;
         _pendingEmployeeIdentifier = credentialResult.EmployeeIdentifier;
@@ -354,6 +391,58 @@ public partial class LoginViewModel : ObservableRecipient
 
         ShowNewUserAction = false;
         LoginHint = _startupState.LoginHint;
+    }
+
+    /// <summary>
+    /// The remaining-attempts line for this attempt, or nothing at all.
+    /// </summary>
+    /// <remarks>
+    /// Only an account that holds a temporary credential reaches either message. An ordinary account, and a
+    /// sign-in name that does not exist, leave the line hidden, which is what keeps the limit from being usable
+    /// to discover which names exist (FR-042) and keeps ordinary sign-in exactly as it was (FR-040).
+    /// </remarks>
+    private void ApplyTemporaryCredentialAttemptState(StartupCredentialCheckResult credentialResult)
+    {
+        ClearTemporaryCredentialAttemptState();
+
+        if (!credentialResult.HoldsTemporaryCredential || credentialResult.TemporaryCredentialFailedAttempts <= 0)
+        {
+            return;
+        }
+
+        if (credentialResult.TemporaryCredentialAttemptLimitReached)
+        {
+            RemainingAttemptsMessage = ResolveStartupString(
+                AttemptLimitReachedResourceKey,
+                "This temporary password is no longer accepted. Someone who can reset passwords must issue a fresh one.");
+            ShowRemainingAttempts = true;
+            return;
+        }
+
+        var remaining = Math.Max(
+            0,
+            StartupSessionRepository.TemporaryCredentialAttemptLimit - credentialResult.TemporaryCredentialFailedAttempts);
+
+        RemainingAttemptsMessage = string.Format(
+            CultureInfo.CurrentCulture,
+            ResolveStartupString(RemainingAttemptsResourceKey, "Attempts remaining on this temporary password: {0}."),
+            remaining);
+        ShowRemainingAttempts = true;
+    }
+
+    private void ClearTemporaryCredentialAttemptState()
+    {
+        ShowRemainingAttempts = false;
+        RemainingAttemptsMessage = string.Empty;
+    }
+
+    private static string ResolveStartupString(string resourceKey, string fallback)
+    {
+        var localized = resourceKey.GetLocalized();
+
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, resourceKey, StringComparison.Ordinal)
+            ? fallback
+            : localized;
     }
 
     private async Task CompleteLoginAsync(long userId, string currentRole, string currentRoleCode, string passwordToRemember)

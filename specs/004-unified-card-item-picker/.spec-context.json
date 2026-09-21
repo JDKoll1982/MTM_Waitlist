@@ -1890,7 +1890,7 @@
       "rejected": "Seeding an options_json list for pickup-component, which would freeze a job-derived list into configuration"
     },
     {
-      "decision": "The seven prepared situations sit on 100-03 (coil), 100-06 (flatstock), 100-07 (die), 100-18 (component) and 100-1806 (dunnage) on Expo Drive, and V100-33 (everything) and V100-34 (nothing on the job) on Vits Drive; the no-active-job case is 100-8",
+      "decision": "The seven prepared situations sit on 100-03 (coil), 100-06 (flatstock), 100-07 (die), 100-18 (component) and 100-1806 (dunnage) on Expo Drive, and V100-33 (everything) and V100-34 (nothing on the job) on Vits Drive; the no-active-job case is 100-08",
       "why": "Five and two as the decisions fixed, on work centres whose existing jobs did not have to be displaced (100-12 already carried a real job, so it was left alone)",
       "rejected": "Reusing 100-12 or other work centres that already hold a live job row"
     },
@@ -2028,7 +2028,7 @@
       "step": "implement"
     },
     {
-      "note": "Several prepared situations now sit on work centres a real Setup walk can overwrite, because setup_active_jobs is keyed by work centre. plan.md F3 records the owner accepting that trade; the fulfilment pass must run before any Setup walk on 100-3, 100-6, 100-7, 100-18, 100-1806, V100-33 or V100-34.",
+      "note": "Several prepared situations now sit on work centres a real Setup walk can overwrite, because setup_active_jobs is keyed by work centre. plan.md F3 records the owner accepting that trade; the fulfilment pass must run before any Setup walk on 100-03, 100-06, 100-07, 100-18, 100-1806, V100-33 or V100-34.",
       "step": "implement"
     },
     {
@@ -3079,7 +3079,7 @@
     },
     "T125": {
       "status": "DONE",
-      "did": "Re-pointed the seven prepared situations: five onto 100-3/100-6/100-7/100-18/100-1806 (Expo Drive) and two onto V100-33/V100-34 (Vits Drive), split recorded in the header, AllSeeds mirrored, applied to the live database",
+      "did": "Re-pointed the seven prepared situations: five onto 100-03/100-06/100-07/100-18/100-1806 (Expo Drive) and two onto V100-33/V100-34 (Vits Drive), split recorded in the header, AllSeeds mirrored, applied to the live database",
       "files": [
         "Database/Seeds/seed_setup_active_jobs_eight_configurations/create.sql",
         "Database/Seeds/seed_setup_active_jobs_eight_configurations/rollback.sql",
@@ -3420,7 +3420,7 @@
     {
       "what": "T116 SC-009 sort changes the order and survives a restart",
       "command": "UIA Invoke on the Sort by button then a real click on the Press menu item; graceful close; relaunch same overrides; re-read the card order",
-      "result": "default most-urgent order began 100-7, 100-6, 100-16; after choosing Press it began 100-11, 100-12, 100-14, 100-15; after a graceful close (exit 0) and relaunch the order was still 100-11, 100-12, 100-14, 100-15, 100-16, 100-3",
+      "result": "default most-urgent order began 100-07, 100-06, 100-16; after choosing Press it began 100-11, 100-12, 100-14, 100-15; after a graceful close (exit 0) and relaunch the order was still 100-11, 100-12, 100-14, 100-15, 100-16, 100-03",
       "warnings": [
         "MenuItem exposes no Invoke pattern, so the option needs a real click"
       ]
@@ -3509,7 +3509,7 @@
     {
       "what": "the re-pointed seed and the guarded procedure applied to the live local mtm_waitlist",
       "command": "mysql < Database/Seeds/seed_setup_active_jobs_eight_configurations/create.sql and < Database/StoredProcedures/sp_waitlist_request_status_update/create.sql",
-      "result": "seven jobs on 100-3/100-6/100-7/100-18/100-1806/V100-33/V100-34, zero fixture stations left, sp_waitlist_request_status_update carries 7 parameters including p_expected_status",
+      "result": "seven jobs on 100-03/100-06/100-07/100-18/100-1806/V100-33/V100-34, zero fixture stations left, sp_waitlist_request_status_update carries 7 parameters including p_expected_status",
       "warnings": [
         "the seven fixture catalogue rows had to be deleted by hand: no artifact removes setup_work_centers_catalog rows any more"
       ]
@@ -3545,7 +3545,7 @@
     {
       "what": "The nineteen requests exist, one per in-scope Item, read back from mtm_waitlist.waitlist_requests_queue",
       "command": "SELECT ... FROM waitlist_requests_queue WHERE id > 18",
-      "result": "19 rows, 19 distinct items, 8 distinct work centres (100-3, 100-6, 100-7, 100-12, 100-18, 100-1806, V100-33, V100-34), all status Pending, all four Categories, every one raised through the running application",
+      "result": "19 rows, 19 distinct items, 8 distinct work centres (100-03, 100-06, 100-07, 100-12, 100-18, 100-1806, V100-33, V100-34), all status Pending, all four Categories, every one raised through the running application",
       "warnings": [
         "Infor Visual unreachable banner shown throughout (cached data 31 hours old) - expected on this workstation"
       ]
@@ -3575,7 +3575,7 @@
     {
       "what": "Success-criteria snapshot read back from mtm_waitlist after the pass",
       "command": "SELECT counts over core_users_profiles, waitlist_requests_queue, setup_work_centers_catalog, setup_active_jobs",
-      "result": "10 active accounts; 20 batch rows (19 raised + the 1-minute overdue raise) of which 17 still Pending; 31 rows in total; 0 fixture work centres and 0 fixture jobs; the seven prepared situations sit on 8 real centres (100-3,100-6,100-7,100-12,100-18,100-1806,V100-33,V100-34)",
+      "result": "10 active accounts; 20 batch rows (19 raised + the 1-minute overdue raise) of which 17 still Pending; 31 rows in total; 0 fixture work centres and 0 fixture jobs; the seven prepared situations sit on 8 real centres (100-03,100-06,100-07,100-12,100-18,100-1806,V100-33,V100-34)",
       "warnings": [
         "every batch row carries requester 6229 John Koll, so SC-015 spread is unmet and SC-017 is short outcomes 2 and 5"
       ]

@@ -34,7 +34,7 @@ VALUES
     -- Pending (open) -> returned by sp_waitlist_request_list; drives list/card + wait time + status badge
     ('f0000000-0001-4000-8000-000000000001','Expo Drive','100-03','Pickup','pickup-coil',NULL,'100-03','100-03','6229','John Koll','Pending',
         UTC_TIMESTAMP() - INTERVAL 35 MINUTE, (UTC_TIMESTAMP() - INTERVAL 35 MINUTE) + INTERVAL 30 MINUTE, 0, NULL, NULL, NULL, NULL,
-        'Coil pickup for press 100-3.', NULL, NULL, NULL, UTC_TIMESTAMP() - INTERVAL 35 MINUTE, UTC_TIMESTAMP() - INTERVAL 35 MINUTE),
+        'Coil pickup for press 100-03.', NULL, NULL, NULL, UTC_TIMESTAMP() - INTERVAL 35 MINUTE, UTC_TIMESTAMP() - INTERVAL 35 MINUTE),
     ('f0000000-0002-4000-8000-000000000002','Expo Drive','100-03','Deliver','deliver-wrong-coil','Wrong material at press - expected MMC0001000.','100-03','100-03','6229','John Koll','Pending',
         UTC_TIMESTAMP() - INTERVAL 12 MINUTE, (UTC_TIMESTAMP() - INTERVAL 12 MINUTE) + INTERVAL 30 MINUTE, 0, NULL, NULL, NULL, NULL,
         'Reports the staged coil is the wrong one.', NULL, NULL, NULL, UTC_TIMESTAMP() - INTERVAL 12 MINUTE, UTC_TIMESTAMP() - INTERVAL 12 MINUTE),
@@ -71,7 +71,7 @@ VALUES
         UTC_TIMESTAMP() - INTERVAL 40 MINUTE, (UTC_TIMESTAMP() - INTERVAL 40 MINUTE) + INTERVAL 30 MINUTE, 0, 'M. Lewis', NULL, NULL, NULL,
         NULL, UTC_TIMESTAMP() - INTERVAL 33 MINUTE, NULL, NULL, UTC_TIMESTAMP() - INTERVAL 40 MINUTE, UTC_TIMESTAMP() - INTERVAL 33 MINUTE),
     -- Completed (Done) -> resolved, retained; accepted_utc + completed_utc
-    ('f0000000-0013-4000-8000-000000000013','Expo Drive','100-09','Pickup','pickup-scrap','Scrapped punch slugs at press 100-9.','100-09','100-09','6229','John Koll','Completed',
+    ('f0000000-0013-4000-8000-000000000013','Expo Drive','100-09','Pickup','pickup-scrap','Scrapped punch slugs at press 100-09.','100-09','100-09','6229','John Koll','Completed',
         UTC_TIMESTAMP() - INTERVAL 3 HOUR, (UTC_TIMESTAMP() - INTERVAL 3 HOUR) + INTERVAL 30 MINUTE, 0, '6229', NULL, NULL, NULL,
         'Lugger filled and confirmed.', UTC_TIMESTAMP() - INTERVAL 170 MINUTE, UTC_TIMESTAMP() - INTERVAL 120 MINUTE, NULL, UTC_TIMESTAMP() - INTERVAL 3 HOUR, UTC_TIMESTAMP() - INTERVAL 120 MINUTE),
     ('f0000000-0014-4000-8000-000000000014','Vits Drive','V100-41','Pickup','pickup-fg',NULL,'V100-41','V100-41','5000','Other User','Completed',
@@ -101,7 +101,7 @@ INSERT INTO waitlist_requests_audit (
     actor_employee_number, actor_employee_name, details, occurred_utc
 )
 VALUES
-    ('a0000000-0001-4000-8000-000000000001','f0000000-0001-4000-8000-000000000001',NULL,NULL,'Created','6229','John Koll','Request submitted for press 100-3.',UTC_TIMESTAMP() - INTERVAL 35 MINUTE),
+    ('a0000000-0001-4000-8000-000000000001','f0000000-0001-4000-8000-000000000001',NULL,NULL,'Created','6229','John Koll','Request submitted for press 100-03.',UTC_TIMESTAMP() - INTERVAL 35 MINUTE),
     ('a0000000-0002-4000-8000-000000000002','f0000000-0002-4000-8000-000000000002',NULL,NULL,'Created','6229','John Koll','Wrong coil reported.',UTC_TIMESTAMP() - INTERVAL 12 MINUTE),
     ('a0000000-0003-4000-8000-000000000003','f0000000-0007-4000-8000-000000000007',NULL,NULL,'Created','5000','Other User','Other requester WIP request.',UTC_TIMESTAMP() - INTERVAL 30 MINUTE),
     ('a0000000-0010-4000-8000-000000000010','f0000000-0010-4000-8000-000000000010',NULL,'Pending','Created','6229','John Koll','Request created.',UTC_TIMESTAMP() - INTERVAL 80 MINUTE),

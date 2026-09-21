@@ -148,6 +148,36 @@ public sealed class ShellViewModelTests
             $"'{key}' must be declared in the resource file, because every user-visible string this capability adds comes through the resource mechanism (FR-022).");
     }
 
+    // ── The badge is keyed on the role code through the one lookup (FR-105, FR-107) ────────────────────
+
+    [TestMethod]
+    public void TheBadge_TakesItsGlyphAndColourFromTheRoleBadgeLookup()
+    {
+        StringAssert.Contains(
+            ReadSource(ShellViewModelPath),
+            "RoleBadgeCatalog.For(",
+            "The badge must be answered by the one lookup, so every role the catalogue holds gets its own badge and no role reaches the grey default (FR-105).");
+    }
+
+    [DataTestMethod]
+    [DataRow("\"admin\"")]
+    [DataRow("\"administrator\"")]
+    [DataRow("\"supervisor\"")]
+    [DataRow("\"quality inspector\"")]
+    [DataRow("Setup Tech")]
+    [DataRow("\"material handler\"")]
+    public void TheBadge_HoldsNoBranchForTheRetiredVocabularyOrForDisplayNames(string retired)
+    {
+        // The old lookup matched display names, which is why five of the eight roles fell to the grey default and
+        // why the retired vocabulary survived. Both are gone: the switch arms moved into RoleBadgeCatalog, which
+        // holds role codes only (FR-107). The claim that the badge is not a permission, and so does not appear on
+        // the permissions page, lives in RoleBadgeCatalogTests.TheBadge_IsNotAPermission, beside the declaration
+        // it is made against.
+        Assert.IsFalse(
+            ReadSource(ShellViewModelPath).Contains(retired, StringComparison.Ordinal),
+            $"The shell must not keep a badge branch for {retired}.");
+    }
+
     // ── helpers ────────────────────────────────────────────────────────────────────────────────────────
 
     /// <summary>The markup of one badge button, from its automation id to the end of its element.</summary>

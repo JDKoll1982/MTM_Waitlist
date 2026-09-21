@@ -129,7 +129,7 @@ whether they're talking about a physical PC or a press.
 ```mermaid
 graph LR
     OLD["Workstation<br/>(confusing, used for both)"] --> C["Computer<br/>(a physical machine)"]
-    OLD --> W["Work Center<br/>(a press / work station, e.g. 100-3)"]
+    OLD --> W["Work Center<br/>(a press / work station, e.g. 100-03)"]
 ```
 
 ---

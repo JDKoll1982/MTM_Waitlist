@@ -19,7 +19,7 @@
 --   V100-33   (Vits Drive)  everything at once   coil + flatstock + die + component, a REAL scrap type, and
 --                                                dunnage
 --   V100-34   (Vits Drive)  no subordinate part  an empty subordinate array, no dunnage
---   (100-8)   a work centre with NO active job: realised by the ABSENCE of a row, which is what the resolver
+--   (100-08)   a work centre with NO active job: realised by the ABSENCE of a row, which is what the resolver
 --             reads as "no active job" — the seed inserts nothing for it on purpose.
 --
 -- A live Setup save on any of these work centres overwrites its `setup_active_jobs` row, so the matrix is no
@@ -52,7 +52,7 @@ WHERE work_center IN (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- --------------------------------------------------------------- 100-3: coil only, a real scrap type
+-- --------------------------------------------------------------- 100-03: coil only, a real scrap type
 INSERT INTO setup_active_jobs
     (public_id, work_order, part_number, sequence_number, work_center,
      selected_dunnage_type_id, selected_dunnage_part_id,
@@ -71,7 +71,7 @@ VALUES
         'IsLowStock', FALSE)),
      NULL, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
--- --------------------------------------------------------------- 100-6: flatstock only, prefix wins over the stored tag
+-- --------------------------------------------------------------- 100-06: flatstock only, prefix wins over the stored tag
     ('c3000000-0000-4000-8000-000000000002', 'WO-900002', 'PART-9002', '10', '100-06',
      NULL, NULL,
      JSON_ARRAY(JSON_OBJECT(
@@ -85,7 +85,7 @@ VALUES
         'IsLowStock', FALSE)),
      NULL, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
--- --------------------------------------------------------------- 100-7: die only, the placeholder scrap value
+-- --------------------------------------------------------------- 100-07: die only, the placeholder scrap value
     ('c3000000-0000-4000-8000-000000000003', 'WO-900003', 'PART-9003', '10', '100-07',
      NULL, NULL,
      JSON_ARRAY(JSON_OBJECT(

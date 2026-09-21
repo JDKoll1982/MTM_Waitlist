@@ -567,34 +567,51 @@ public sealed class StartupCoordinatorTests
     [TestMethod]
     public async Task RunAsync_WhenDatabaseConnectionStringIsMalformed_ReturnsBlockedAsync()
     {
-        var fileService = new InMemoryFileService(new Dictionary<string, object>
+        // The environment beats the configured value by design, so this case has to control the variable the
+        // resolver consults rather than leave the default name in place. A developer's exported
+        // MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING is valid, which would decide the outcome and leave the
+        // malformed configured value below unreached. This is the same isolation the two sibling cases use.
+        const string environmentVariableName = "MTM_WAITLIST_TEST_STARTUP_DB_CONNECTION_STRING";
+        var previous = Environment.GetEnvironmentVariable(environmentVariableName);
+
+        try
         {
-            [RecoveryProbeKey] = "\"ok\""
-        });
+            Environment.SetEnvironmentVariable(environmentVariableName, null);
 
-        var localSettingsService = CreateLocalSettingsService(fileService);
-        var startupState = new StartupState();
-        var repository = new FakeStartupSessionRepository();
-
-        var coordinator = CreateCoordinator(
-            new LocalSettingsOptions
+            var fileService = new InMemoryFileService(new Dictionary<string, object>
             {
-                ApplicationDataFolder = "MTM_Waitlist/ApplicationData",
-                LocalSettingsFile = "LocalSettings.json"
-            },
-            localSettingsService,
-            new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
-            repository,
-            startupState,
-            startupDatabaseOptions: new StartupDatabaseOptions
-            {
-                ConnectionString = "###"
+                [RecoveryProbeKey] = "\"ok\""
             });
 
-        var result = await coordinator.RunAsync();
+            var localSettingsService = CreateLocalSettingsService(fileService);
+            var startupState = new StartupState();
+            var repository = new FakeStartupSessionRepository();
 
-        Assert.IsTrue(result.IsBlocked);
-        Assert.AreEqual("Startup database configuration is invalid. Contact a developer.", result.StatusMessage);
+            var coordinator = CreateCoordinator(
+                new LocalSettingsOptions
+                {
+                    ApplicationDataFolder = "MTM_Waitlist/ApplicationData",
+                    LocalSettingsFile = "LocalSettings.json"
+                },
+                localSettingsService,
+                new StartupRecoveryService(localSettingsService, new NoOpAppLifecycleService()),
+                repository,
+                startupState,
+                startupDatabaseOptions: new StartupDatabaseOptions
+                {
+                    ConnectionString = "###",
+                    ConnectionStringEnvironmentVariable = environmentVariableName
+                });
+
+            var result = await coordinator.RunAsync();
+
+            Assert.IsTrue(result.IsBlocked);
+            Assert.AreEqual("Startup database configuration is invalid. Contact a developer.", result.StatusMessage);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(environmentVariableName, previous);
+        }
     }
 
     [TestMethod]

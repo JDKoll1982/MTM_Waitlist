@@ -232,6 +232,7 @@ public static partial class ServiceRegistrationExtensions
         // rules, and the store seam beneath them, all in MTM_Waitlist.Core so the sign-in path, the settings
         // library, the setup library and the separate service host read one implementation rather than a copy.
         services.AddSingleton<IPermissionService, PermissionService>();
+        services.AddSingleton<IRoleCatalogService, RoleCatalogService>();
         services.AddSingleton<IUserManagementRepository, UserManagementRepository>();
         services.AddSingleton<IUserManagementService, UserManagementService>();
 
