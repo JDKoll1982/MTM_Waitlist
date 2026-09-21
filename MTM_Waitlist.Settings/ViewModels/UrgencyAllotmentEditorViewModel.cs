@@ -29,32 +29,38 @@ namespace MTM_Waitlist.Module_Settings.ViewModels;
 /// </remarks>
 public partial class UrgencyAllotmentEditorViewModel : ObservableObject
 {
-    private static readonly string[] AllowedUrgencyManageRoles =
-    {
-        "Admin",
-        "Developer",
-        "Plant Manager",
-    };
-
     private readonly IUrgencySettingsService _urgencySettingsService;
     private readonly IRequestItemObservedTimeService _observedTimeService;
-    private readonly StartupState _startupState;
 
     public UrgencyAllotmentEditorViewModel(
         IUrgencySettingsService urgencySettingsService,
-        IRequestItemObservedTimeService observedTimeService,
-        StartupState startupState)
+        IRequestItemObservedTimeService observedTimeService)
     {
         _urgencySettingsService = urgencySettingsService ?? throw new ArgumentNullException(nameof(urgencySettingsService));
         _observedTimeService = observedTimeService ?? throw new ArgumentNullException(nameof(observedTimeService));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
     }
 
     /// <summary>One row per catalogued Item, in catalog order.</summary>
     public ObservableCollection<UrgencyAllotmentItem> Items { get; } = new();
 
-    public bool CanManageUrgencySettings => AllowedUrgencyManageRoles.Any(role =>
-        string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+    /// <summary>
+    /// Whether the signed-in person may change the allotted minutes, answered from
+    /// <c>permission.settings.urgency_minutes</c> rather than from a list of role names kept here (FR-054).
+    /// </summary>
+    /// <remarks>
+    /// The Settings screen asks the permission service once for every gate it and its child view models need, so
+    /// this is an answer handed in rather than a second read: <see cref="ApplyPermission"/> is called with it.
+    /// It stays false until that answer arrives, so no editable control is drawn on a guess.
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool CanManageUrgencySettings
+    {
+        get; set;
+    }
+
+    /// <summary>Applies the answer the Settings screen read for this screen's one permission.</summary>
+    /// <param name="canManage">Whether the signed-in person holds it.</param>
+    public void ApplyPermission(bool canManage) => CanManageUrgencySettings = canManage;
 
     [ObservableProperty]
     public partial bool IsBusy

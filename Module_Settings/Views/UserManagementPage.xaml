@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.Module_Settings.Views.UserManagementPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d">
+
+    <!--
+        No control here carries a fixed width: the list, the search box and the row template all size to the window,
+        and a row's five facts wrap onto a second line rather than being cropped when the window is narrow.
+    -->
+    <Grid Padding="24" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header and the way back -->
+        <Grid Grid.Row="0" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button
+                Grid.Column="0"
+                AutomationProperties.AutomationId="UserManagementPage_Back"
+                Click="OnBackClick"
+                Content="{x:Bind ViewModel.BackLabelText}"
+                VerticalAlignment="Top" />
+
+            <StackPanel Grid.Column="1" Spacing="4">
+                <TextBlock
+                    Style="{ThemeResource TitleTextBlockStyle}"
+                    Text="{x:Bind ViewModel.TitleText}" />
+                <TextBlock
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Text="{x:Bind ViewModel.SubtitleText}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Search and the role filter -->
+        <Grid Grid.Row="1" x:Name="FilterBar" ColumnSpacing="12" x:Load="{x:Bind ViewModel.IsEntitled, Mode=OneWay}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox
+                Grid.Column="0"
+                AutomationProperties.AutomationId="UserManagementPage_Search"
+                Header="{x:Bind ViewModel.SearchLabelText}"
+                PlaceholderText="{x:Bind ViewModel.SearchPlaceholderText}"
+                Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" />
+
+            <muxc:ComboBox
+                Grid.Column="1"
+                AutomationProperties.AutomationId="UserManagementPage_RoleFilter"
+                Header="{x:Bind ViewModel.RoleFilterLabelText}"
+                ItemsSource="{x:Bind ViewModel.RoleOptions}"
+                SelectedItem="{x:Bind ViewModel.SelectedRole, Mode=TwoWay}"
+                VerticalAlignment="Bottom" />
+        </Grid>
+
+        <!-- The active filter, named, with the way to clear it -->
+        <StackPanel
+            Grid.Row="2"
+            x:Name="ActiveFilterBanner"
+            Orientation="Horizontal"
+            Spacing="12"
+            x:Load="{x:Bind ViewModel.IsFilterApplied, Mode=OneWay}">
+            <TextBlock
+                VerticalAlignment="Center"
+                Style="{ThemeResource BodyTextBlockStyle}"
+                Text="{x:Bind ViewModel.FilterActiveText}"
+                TextWrapping="Wrap" />
+            <TextBlock
+                VerticalAlignment="Center"
+                Style="{ThemeResource BodyTextBlockStyle}"
+                Text="{x:Bind ViewModel.HiddenCountText}" />
+            <Button
+                AutomationProperties.AutomationId="UserManagementPage_ShowEveryone"
+                Command="{x:Bind ViewModel.ShowEveryoneCommand}"
+                Content="{x:Bind ViewModel.ShowEveryoneText}" />
+        </StackPanel>
+
+        <!-- The list, and the states that stand in its place -->
+        <Grid Grid.Row="3" RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Spacing="8">
+                <ProgressRing
+                    Width="24"
+                    Height="24"
+                    HorizontalAlignment="Left"
+                    IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+                <TextBlock
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Text="{x:Bind ViewModel.StateMessage, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+                <TextBlock
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Text="{x:Bind ViewModel.EmptyText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.IsRosterEmpty, Mode=OneWay}" />
+                <TextBlock
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Text="{x:Bind ViewModel.NoMatchText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.IsNoMatch, Mode=OneWay}" />
+                <Button
+                    AutomationProperties.AutomationId="UserManagementPage_Retry"
+                    Command="{x:Bind ViewModel.LoadCommand}"
+                    Content="{x:Bind ViewModel.RetryText}"
+                    Visibility="{x:Bind ViewModel.IsStoreUnavailable, Mode=OneWay}" />
+            </StackPanel>
+
+            <!-- Virtualised, so the roster stays usable as it grows. Every row is one keyboard-reachable target. -->
+            <ListView
+                Grid.Row="1"
+                AutomationProperties.AutomationId="UserManagementPage_List"
+                IsItemClickEnabled="True"
+                ItemClick="OnPersonInvoked"
+                ItemsSource="{x:Bind ViewModel.People}"
+                SelectionMode="None">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:UserSummary">
+                        <Grid ColumnSpacing="16" Padding="8" RowSpacing="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- All five facts, on one line with room and folded onto a second line without it. -->
+                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" />
+                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind UsernameNormalized}" />
+                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind EmployeeIdentifier}" />
+                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind RoleText}" />
+                            </StackPanel>
+
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind StatusText}"
+                                TextWrapping="Wrap" />
+
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Grid.RowSpan="2"
+                                VerticalAlignment="Center"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind OpenAnnouncement}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+    </Grid>
+</Page>

@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
@@ -20,7 +21,9 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public void DefaultSeed_PopulatesTheDefaultIgnoredLocations()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Production Lead");
+        var viewModel = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsIgnoredLocations]);
 
         CollectionAssert.AreEquivalent(
             new[] { "WC", "NCM", "V-WC", "NCM-VITS", "SHIP" },
@@ -31,7 +34,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     public async Task AddAndRemove_PersistToLocalSettings()
     {
         var settings = new RecordingLocalSettingsService();
-        var viewModel = BuildViewModel(settings, "Production Lead");
+        var viewModel = BuildViewModel(settings, [PermissionKeys.SettingsIgnoredLocations]);
 
         // Add (auto-uppercased, dedupes) then remove.
         viewModel.IgnoredLocationInput = "wc";
@@ -55,17 +58,17 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         var settings = new RecordingLocalSettingsService();
         settings.SaveSettingAsync("Feature.IgnoredLocations", new List<string> { "WC", "SCRAP-1" }).GetAwaiter().GetResult();
 
-        var viewModel = BuildViewModel(settings, "Production Lead");
+        var viewModel = BuildViewModel(settings, [PermissionKeys.SettingsIgnoredLocations]);
 
         CollectionAssert.AreEquivalent(new[] { "WC", "SCRAP-1" }, viewModel.IgnoredLocations.ToArray());
     }
 
     [TestMethod]
-    public void AddRejectsInvalidCode_WhenNotAllowedToManage()
+    public void AddRejectsInvalidCode_WhenThePermissionIsNotHeld()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Material Handler");
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
 
-        // Role gate: Material Handler cannot edit.
+        // The gate is permission.settings.ignored_locations, and this person does not hold it.
         Assert.IsFalse(viewModel.CanManageIgnoredLocations);
 
         viewModel.IgnoredLocationInput = "SCRAP-2";
@@ -74,17 +77,42 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void RoleGating_AllowsRolesAboveMaterialHandler()
+    public void CanManageIgnoredLocations_FollowsThePermissionAndNothingElse()
     {
-        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Material Handler").CanManageIgnoredLocations);
-        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Operator").CanManageIgnoredLocations);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Production").CanManageIgnoredLocations);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Production Lead").CanManageIgnoredLocations);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Setup").CanManageIgnoredLocations);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Setup Lead").CanManageIgnoredLocations);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager").CanManageIgnoredLocations);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Admin").CanManageIgnoredLocations);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Developer").CanManageIgnoredLocations);
+        Assert.IsFalse(
+            BuildViewModel(new RecordingLocalSettingsService()).CanManageIgnoredLocations,
+            "A person who does not hold the permission may not manage ignored locations, whatever role they are on.");
+
+        Assert.IsTrue(
+            BuildViewModel(new RecordingLocalSettingsService(), [PermissionKeys.SettingsIgnoredLocations])
+                .CanManageIgnoredLocations,
+            "The shipped baseline for the permission is the whole answer.");
+
+        Assert.IsFalse(
+            BuildViewModel(new RecordingLocalSettingsService(), [PermissionKeys.SettingsPartPictures])
+                .CanManageIgnoredLocations,
+            "Holding a different permission opens nothing here: the gates are named and independent.");
+    }
+
+    [TestMethod]
+    public async Task OnNavigatedTo_ReadsTheScreensGates_AndTheyStayShutUntilTheAnswerArrives()
+    {
+        var viewModel = BuildViewModelWithoutLoading(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsIgnoredLocations]);
+
+        Assert.IsFalse(
+            viewModel.CanManageIgnoredLocations,
+            "No gate may answer before its read has returned, or the screen would offer a control it may have to take back.");
+        Assert.IsFalse(viewModel.IsAdministrationCategoryVisible, "The Administration category starts hidden.");
+
+        viewModel.OnNavigatedTo(null!);
+        await viewModel.PermissionLoad;
+
+        Assert.IsTrue(viewModel.CanManageIgnoredLocations, "The page's own load settles the gates.");
+        Assert.IsFalse(
+            viewModel.IsAdministrationCategoryVisible,
+            "A reader entitled to neither Administration entry does not see the category at all (FR-081).");
     }
 
     [TestMethod]
@@ -107,14 +135,14 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public void NewRequestAlerts_DefaultsOff()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Production");
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
         Assert.IsFalse(viewModel.NewRequestAlertsEnabled);
     }
 
     [TestMethod]
     public void NewRequestAlerts_PanelAndCategoryMatchSearch_AndTheChangeIsAnnounced()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Production");
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
         Assert.IsTrue(viewModel.IsNewRequestAlertsPanelVisible, "Panel visible with no search query.");
 
         var announced = new List<string>();
@@ -137,7 +165,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     public async Task NewRequestAlerts_TogglePersistsOnlyWhenTheInstallationCanDeliver()
     {
         var settings = new RecordingLocalSettingsService();
-        var viewModel = BuildViewModel(settings, "Production");
+        var viewModel = BuildViewModel(settings);
 
         viewModel.NewRequestAlertsEnabled = true;
         await Task.Delay(30);
@@ -157,40 +185,34 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void CanRequestCacheRefresh_IsRestrictedToPlantManagerAndAbove()
+    public void CanRequestCacheRefresh_AnswersFromTheSettingsPermissionOnly()
     {
-        // The gate is a strict subset of the service's approved operator roles, so it must exclude both the
-        // leads and the shop-floor roles, and include the three the Max Allotted Time panel already gates on.
-        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Material Handler").CanRequestCacheRefresh);
-        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Production").CanRequestCacheRefresh);
-        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Production Lead").CanRequestCacheRefresh);
-        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Setup").CanRequestCacheRefresh);
-        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Setup Lead").CanRequestCacheRefresh);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager").CanRequestCacheRefresh);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Admin").CanRequestCacheRefresh);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Developer").CanRequestCacheRefresh);
+        // The gate is permission.settings.cache_refresh, and its shipped baseline is the same trio the Max
+        // Allotted Time panel gates on. The subse rule that ties it to the service host's own permission is
+        // asserted against the shipped baselines, where both sides' data is visible (FR-057).
+        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService()).CanRequestCacheRefresh);
+        Assert.IsFalse(
+            BuildViewModel(new RecordingLocalSettingsService(), [PermissionKeys.SettingsHotWorkCenters])
+                .CanRequestCacheRefresh,
+            "A different permission opens nothing here.");
 
-        // The panel is "access only": a role outside the gate must not even see the surface.
-        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService(), "Setup Lead").IsCacheRefreshPanelVisible);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager").IsCacheRefreshPanelVisible);
+        var holding = BuildViewModel(new RecordingLocalSettingsService(), [PermissionKeys.SettingsCacheRefresh]);
+        Assert.IsTrue(holding.CanRequestCacheRefresh);
+
+        // The panel is "access only": without the permission the surface is not drawn at all.
+        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService()).IsCacheRefreshPanelVisible);
+        Assert.IsTrue(holding.IsCacheRefreshPanelVisible);
     }
 
     [TestMethod]
-    public void CanRequestCacheRefresh_MatchesTheRoleCaseInsensitively()
-    {
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "plant manager").CanRequestCacheRefresh);
-        Assert.IsTrue(BuildViewModel(new RecordingLocalSettingsService(), "ADMIN").CanRequestCacheRefresh);
-    }
-
-    [TestMethod]
-    public async Task RequestCacheRefresh_DoesNotReachTheService_WhenTheRoleIsNotAllowed()
+    public async Task RequestCacheRefresh_DoesNotReachTheService_WithoutThePermission()
     {
         var client = new FakeMockServiceRefreshClient();
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Setup Lead", client);
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), refreshClient: client);
 
         await viewModel.RequestCacheRefreshCommand.ExecuteAsync(null);
 
-        Assert.AreEqual(0, client.CallCount, "A role outside the gate must never reach the service.");
+        Assert.AreEqual(0, client.CallCount, "A person outside the gate must never reach the service.");
         Assert.AreEqual(string.Empty, viewModel.CacheRefreshStatusMessage);
     }
 
@@ -209,7 +231,10 @@ public sealed class SettingsViewModelIgnoredLocationsTests
                 },
             },
         };
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager", client);
+        var viewModel = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsCacheRefresh],
+            client);
 
         await viewModel.RequestCacheRefreshCommand.ExecuteAsync(null);
 
@@ -234,7 +259,10 @@ public sealed class SettingsViewModelIgnoredLocationsTests
                 },
             },
         };
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Developer", client);
+        var viewModel = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsCacheRefresh],
+            client);
 
         await viewModel.RequestCacheRefreshCommand.ExecuteAsync(null);
 
@@ -248,7 +276,10 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         {
             Result = RefreshRequestResult.Unavailable("No endpoint is installed."),
         };
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Admin", client);
+        var viewModel = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsCacheRefresh],
+            client);
 
         await viewModel.RequestCacheRefreshCommand.ExecuteAsync(null);
 
@@ -259,7 +290,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public void NewRequestAlerts_ReportsTheInstallationCapability()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Production");
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
 
         // The test host runs unpackaged, and the delivery path refuses to show a notification without
         // package identity (AppNotificationService.Initialize and Show both gate on RuntimeHelper.IsMSIX),
@@ -281,7 +312,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     public async Task NewRequestAlerts_DoesNotPersistWhileTheInstallationCannotDeliver()
     {
         var settings = new RecordingLocalSettingsService();
-        var viewModel = BuildViewModel(settings, "Production");
+        var viewModel = BuildViewModel(settings);
 
         Assert.IsFalse(viewModel.IsNewRequestAlertsAvailable, "This check assumes an installation that cannot deliver.");
 
@@ -298,7 +329,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     {
         // The About card's version value must say something on this build too, not only when the
         // packaged-only API is available (contract C4).
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Production");
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
 
         Assert.IsFalse(
             string.IsNullOrWhiteSpace(viewModel.VersionDescription),
@@ -308,7 +339,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public void SearchQuery_ChangeAnnouncesEveryPanelThatConsumesTheTerm()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager");
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
 
         var announced = new List<string>();
         viewModel.PropertyChanged += (_, args) => announced.Add(args.PropertyName ?? string.Empty);
@@ -367,31 +398,34 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public void TheMinutesPanel_AndThePicturePanel_EachKeepTheirOwnGate()
     {
-        var plantManager = BuildViewModel(new RecordingLocalSettingsService(), "Plant Manager");
-        var admin = BuildViewModel(new RecordingLocalSettingsService(), "Admin");
-        var handler = BuildViewModel(new RecordingLocalSettingsService(), "Material Handler");
+        var minutesOnly = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsUrgencyMinutes]);
+        var picturesOnly = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsPartPictures]);
+        var neither = BuildViewModel(new RecordingLocalSettingsService());
 
-        // The minutes editor is governed by CanManageUrgencySettings: Plant Manager and above may edit, and
-        // everyone else reads the panel without an editable control (FR-020).
-        Assert.IsTrue(plantManager.UrgencyAllotments.CanManageUrgencySettings);
-        Assert.IsTrue(plantManager.IsUrgencyAllotmentsPanelVisible);
-        Assert.IsFalse(handler.UrgencyAllotments.CanManageUrgencySettings);
-        Assert.IsTrue(handler.IsUrgencyAllotmentsPanelVisible, "The panel is a read surface for everyone below the gate.");
+        // The minutes editor is governed by permission.settings.urgency_minutes and nothing else...
+        Assert.IsTrue(minutesOnly.UrgencyAllotments.CanManageUrgencySettings);
+        Assert.IsTrue(minutesOnly.IsUrgencyAllotmentsPanelVisible);
+        Assert.IsFalse(neither.UrgencyAllotments.CanManageUrgencySettings);
+        Assert.IsTrue(neither.IsUrgencyAllotmentsPanelVisible, "The panel is a read surface for everyone below the gate.");
 
-        // The picture screen is governed by CanManageImageLocationSettings — a DIFFERENT gate. Collapsing the
-        // two would hand the picture screen to a role that never had it.
-        Assert.IsFalse(plantManager.CanManageImageLocationSettings);
+        // ...and the picture screen by permission.settings.part_pictures. Collapsing the two would hand the
+        // picture screen to somebody who only ever had the minutes (FR-020).
+        Assert.IsFalse(minutesOnly.CanManageImageLocationSettings);
         Assert.IsFalse(
-            plantManager.IsImageLocationSettingsPanelVisible,
-            "A role outside the picture screen's own gate is not shown its entry point.");
-        Assert.IsTrue(admin.CanManageImageLocationSettings);
-        Assert.IsTrue(admin.IsImageLocationSettingsPanelVisible);
+            minutesOnly.IsImageLocationSettingsPanelVisible,
+            "A person outside the picture screen's own permission is not shown its entry point.");
+        Assert.IsTrue(picturesOnly.CanManageImageLocationSettings);
+        Assert.IsTrue(picturesOnly.IsImageLocationSettingsPanelVisible);
     }
 
     [TestMethod]
     public void SearchQuery_ReachesBothReKeyedConfigurationPanels()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), "Admin");
+        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), [PermissionKeys.SettingsPartPictures]);
 
         viewModel.SearchQuery = "allotted minutes";
         Assert.IsTrue(viewModel.IsUrgencyAllotmentsPanelVisible, "The minutes panel is keyed by Item and finds the term.");
@@ -446,25 +480,116 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
     private static SettingsViewModel BuildViewModel(
         RecordingLocalSettingsService settings,
-        string role,
+        string[]? heldPermissionKeys = null,
         IMockServiceRefreshClient? refreshClient = null)
     {
-        var startupState = new StartupState { CurrentRole = role };
+        var viewModel = BuildViewModelWithoutLoading(settings, heldPermissionKeys, refreshClient);
+
+        // The stub answers from an already-completed task, so this settles synchronously and no test has to
+        // sleep waiting for a gate to make up its mind.
+        viewModel.LoadPermissionsAsync().GetAwaiter().GetResult();
+        return viewModel;
+    }
+
+    /// <summary>
+    /// Builds the screen and leaves its permission read unstarted, so a test can watch the gates before and after
+    /// the page's own load.
+    /// </summary>
+    private static SettingsViewModel BuildViewModelWithoutLoading(
+        RecordingLocalSettingsService settings,
+        string[]? heldPermissionKeys = null,
+        IMockServiceRefreshClient? refreshClient = null)
+    {
+        var startupState = new StartupState();
         var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), startupState);
         var urgencyAllotments = new UrgencyAllotmentEditorViewModel(
             new UrgencySettingsService(new FakeRequestItemAllottedMinutesStore()),
-            new FakeRequestItemObservedTimeService(),
-            startupState);
+            new FakeRequestItemObservedTimeService());
         return new SettingsViewModel(
             new FakeThemeSelectorService(),
             settings,
             new FakeWorkCenterCatalogService(),
             new FakeDunnageTypeVisibilityCatalogService(),
             new NewRequestAlertService(settings),
+            PermissionStub.Holding(heldPermissionKeys),
+            new RecordingNavigationService(),
             startupState,
             computerManagement,
             urgencyAllotments,
             refreshClient ?? new FakeMockServiceRefreshClient());
+    }
+
+    /// <summary>
+    /// A permission service that answers from a fixed set of held keys, which is what lets a test say exactly
+    /// which gate is open rather than naming a role and hoping it maps to one.
+    /// </summary>
+    private sealed class PermissionStub : IPermissionService
+    {
+        private readonly HashSet<string> _held;
+
+        private PermissionStub(IEnumerable<string> held) =>
+            _held = new HashSet<string>(held, StringComparer.Ordinal);
+
+        internal static PermissionStub Holding(IEnumerable<string>? heldPermissionKeys) =>
+            new(heldPermissionKeys ?? []);
+
+        internal List<string> RequestedKeys { get; } = [];
+
+        public Task<bool> HasPermissionAsync(string permissionKey, CancellationToken cancellationToken = default)
+        {
+            RequestedKeys.Add(permissionKey);
+            return Task.FromResult(_held.Contains(permissionKey));
+        }
+
+        public Task<IReadOnlyDictionary<string, bool>> HasPermissionsAsync(
+            IEnumerable<string> permissionKeys,
+            CancellationToken cancellationToken = default)
+        {
+            var keys = permissionKeys.ToArray();
+            RequestedKeys.AddRange(keys);
+
+            return Task.FromResult<IReadOnlyDictionary<string, bool>>(
+                keys.ToDictionary(key => key, _held.Contains, StringComparer.Ordinal));
+        }
+
+        public void Invalidate()
+        {
+        }
+    }
+
+    /// <summary>
+    /// Records where this screen asked to go, so a test can prove the Administration entries navigate rather than
+    /// expand.
+    /// </summary>
+    private sealed class RecordingNavigationService : INavigationService
+    {
+        public event Microsoft.UI.Xaml.Navigation.NavigatedEventHandler? Navigated
+        {
+            add { }
+            remove { }
+        }
+
+        public Microsoft.UI.Xaml.Controls.Frame? Frame
+        {
+            get => null;
+            set { }
+        }
+
+        public bool CanGoBack => false;
+
+        internal List<string> RequestedPageKeys { get; } = [];
+
+        public bool NavigateTo(string pageKey, object? parameter = null, bool clearNavigation = false)
+        {
+            RequestedPageKeys.Add(pageKey);
+            return true;
+        }
+
+        public bool GoBack() => false;
+
+        public void SetListDataItemForNextConnectedAnimation(object item)
+        {
+        }
     }
 
     /// <summary>

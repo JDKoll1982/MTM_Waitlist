@@ -133,7 +133,7 @@ public sealed class SetupWorkflowServiceTests
     [TestMethod]
     public async Task AddDunnageTypeAsync_WhenNameIsMissing_ReturnsValidationFailure()
     {
-        var result = await CreateDunnageWorkflowService().AddDunnageTypeAsync(string.Empty, "Developer");
+        var result = await CreateDunnageWorkflowService().AddDunnageTypeAsync(string.Empty);
 
         Assert.IsFalse(result.Success);
         Assert.IsTrue(result.Message.Contains("required", StringComparison.OrdinalIgnoreCase));
@@ -142,14 +142,14 @@ public sealed class SetupWorkflowServiceTests
     [TestMethod]
     public async Task AddDunnagePartAsync_WhenTypeIdIsInvalid_ReturnsValidationFailure()
     {
-        var result = await CreateDunnageWorkflowService().AddDunnagePartAsync("not-an-id", "Test Part", "Developer");
+        var result = await CreateDunnageWorkflowService().AddDunnagePartAsync("not-an-id", "Test Part");
 
         Assert.IsFalse(result.Success);
         Assert.IsTrue(result.Message.Contains("valid dunnage type", StringComparison.OrdinalIgnoreCase));
     }
 
     private static DunnageWorkflowService CreateDunnageWorkflowService() =>
-        new(new MySqlHelperServer());
+        new(new MySqlHelperServer(), permissionService: new AlwaysPermittingPermissionService());
 
     private static SetupWorkflowService CreateService(IReadOnlyList<string>? ignoredLocations = null)
     {
@@ -177,7 +177,7 @@ public sealed class SetupWorkflowServiceTests
             new FakeVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow>(
                 request => SetupLookupFixtureData.GetSubordinateParts(request.NormalizedWorkOrder, request.PartNumber, request.SequenceNumber)),
             new IgnoredLocationsService(settings));
-        var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer);
+        var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer, permissionService: new AlwaysPermittingPermissionService());
         var activeJobCoordinatorService = new SetupActiveJobCoordinatorService();
         var persistenceService = new SetupPersistenceService(activeJobCoordinatorService, mySqlHelperServer);
 
@@ -188,6 +188,26 @@ public sealed class SetupWorkflowServiceTests
             dunnageWorkflowService,
             persistenceService,
             state);
+    }
+
+    /// <summary>
+    /// A permission service that admits everything, so a test about something else reaches the code beneath the
+    /// gate. The gate itself is proved where it lives, in <c>SetupDunnageWorkflowServiceTests</c>.
+    /// </summary>
+    private sealed class AlwaysPermittingPermissionService : IPermissionService
+    {
+        public Task<bool> HasPermissionAsync(string permissionKey, CancellationToken cancellationToken = default) =>
+            Task.FromResult(true);
+
+        public Task<IReadOnlyDictionary<string, bool>> HasPermissionsAsync(
+            IEnumerable<string> permissionKeys,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyDictionary<string, bool>>(
+                permissionKeys.ToDictionary(key => key, _ => true, StringComparer.Ordinal));
+
+        public void Invalidate()
+        {
+        }
     }
 
     private sealed class InMemoryLocalSettingsService : ILocalSettingsService

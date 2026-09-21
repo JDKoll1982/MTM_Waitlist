@@ -12,9 +12,10 @@ namespace MTM_Waitlist.Mock.Service.Api;
 public static class ServiceApiContracts
 {
     /// <summary>`GET /api/status` response.</summary>
-    /// <param name="OperatorRoles">
-    /// The application roles permitted to call this API, as one readable list. Reported so an operator can
-    /// see who may use the service without reading its source (T147).
+    /// <param name="OperatorAccessPermission">
+    /// The permission that decides whether a caller may use this API, named so an operator can see what gates
+    /// the service without reading its source (T147, T038). The roles that permission admits are stored data in
+    /// the application store, so the service reports the permission rather than a copy of who holds it.
     /// </param>
     /// <param name="RefreshEnabled">
     /// Whether refresh runs on this host. <see langword="false"/> means Infor Visual is not reachable from
@@ -27,7 +28,7 @@ public static class ServiceApiContracts
         bool VisualSourceReachable,
         bool RefreshEnabled,
         string? RefreshDisabledReason,
-        string OperatorRoles,
+        string OperatorAccessPermission,
         int RefreshIntervalMinutes,
         IReadOnlyList<ShapeStatusPayload> Shapes,
         IReadOnlyList<BackupStatusPayload> Backups,

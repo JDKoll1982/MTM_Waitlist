@@ -1,6 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.ViewModels;
 
@@ -13,9 +13,10 @@ namespace MTM_Waitlist.Tests.Module_Settings;
 /// back as though it were configured.
 /// </summary>
 /// <remarks>
-/// The screen keeps its <b>own</b> role gate, <see cref="UrgencyAllotmentEditorViewModel.CanManageUrgencySettings"/>.
-/// FR-020's "the role gate" is two gates today — this one and the picture screen's
-/// <c>CanManageImageLocationSettings</c> — and this class proves the minutes editor still uses its own.
+/// The screen keeps its <b>own</b> gate, <see cref="UrgencyAllotmentEditorViewModel.CanManageUrgencySettings"/>,
+/// answered by <c>permission.settings.urgency_minutes</c>. FR-020's "the gate" is still two gates — this one and
+/// the picture screen's <c>CanManageImageLocationSettings</c> — and this class proves the minutes editor uses only
+/// its own, by handing it that one answer and no other.
 /// </remarks>
 [TestClass]
 public sealed class UrgencyAllotmentEditorViewModelTests
@@ -23,16 +24,21 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     private const string ConfiguredItem = "pickup-coil";
     private const string UnconfiguredItem = "deliver-coil";
 
+    /// <summary>
+    /// Builds the screen and hands it the Settings screen's permission answer, which is how the gate arrives:
+    /// the Settings view model asks once for every gate it and its child view models need.
+    /// </summary>
     private static UrgencyAllotmentEditorViewModel Build(
         FakeRequestItemAllottedMinutesStore store,
-        string role,
+        bool canManageUrgency = false,
         FakeRequestItemObservedTimeService? observedTimes = null)
     {
-        var startupState = new StartupState { CurrentRole = role };
-        return new UrgencyAllotmentEditorViewModel(
+        var viewModel = new UrgencyAllotmentEditorViewModel(
             new UrgencySettingsService(store),
-            observedTimes ?? DefaultObservedTimes(),
-            startupState);
+            observedTimes ?? DefaultObservedTimes());
+
+        viewModel.ApplyPermission(canManageUrgency);
+        return viewModel;
     }
 
     /// <summary>Two rows: one Item with a configured figure and a real average, one with neither.</summary>
@@ -44,18 +50,18 @@ public sealed class UrgencyAllotmentEditorViewModelTests
         return service;
     }
 
-    // ── The role gate that already governs this screen (§D4, FR-020) ─────────────────────────────────────
+    // ── The gate that already governs this screen (§D4, FR-020, FR-054) ─────────────────────────────────
 
     [TestMethod]
-    public void CanManage_IsTrueForPlantManagerAndAbove()
+    public void CanManage_FollowsTheHandedInAnswerRatherThanAnyRole()
     {
-        Assert.IsTrue(Build(new FakeRequestItemAllottedMinutesStore(), "Plant Manager").CanManageUrgencySettings);
-        Assert.IsTrue(Build(new FakeRequestItemAllottedMinutesStore(), "Developer").CanManageUrgencySettings);
-        Assert.IsTrue(Build(new FakeRequestItemAllottedMinutesStore(), "Admin").CanManageUrgencySettings);
+        Assert.IsTrue(
+            Build(new FakeRequestItemAllottedMinutesStore(), canManageUrgency: true).CanManageUrgencySettings,
+            "Holding permission.settings.urgency_minutes makes the screen editable.");
 
-        Assert.IsFalse(Build(new FakeRequestItemAllottedMinutesStore(), "Material Handler").CanManageUrgencySettings);
-        Assert.IsFalse(Build(new FakeRequestItemAllottedMinutesStore(), "Production").CanManageUrgencySettings);
-        Assert.IsFalse(Build(new FakeRequestItemAllottedMinutesStore(), "Setup Lead").CanManageUrgencySettings);
+        Assert.IsFalse(
+            Build(new FakeRequestItemAllottedMinutesStore()).CanManageUrgencySettings,
+            "Not holding it makes the screen read-only, whatever role the person is on.");
     }
 
     // ── Configured and observed are two values, shown side by side (FR-018, SC-008) ──────────────────────
@@ -63,7 +69,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     [TestMethod]
     public async Task Load_ShowsTheConfiguredMinutesAndTheObservedAverageAsTwoSeparateValues()
     {
-        var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), "Plant Manager");
+        var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), canManageUrgency: true);
 
         await viewModel.LoadAsync();
 
@@ -85,7 +91,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     [TestMethod]
     public async Task Load_ForAnItemWithNoConfiguredMinutes_UsesThe15MinuteDefaultAndLabelsItAsADefault()
     {
-        var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), "Plant Manager");
+        var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), canManageUrgency: true);
 
         await viewModel.LoadAsync();
 
@@ -105,7 +111,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     [TestMethod]
     public async Task Load_ForAnItemWithNoCompletedRequest_ShowsNoObservedValueRatherThanAZero()
     {
-        var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), "Plant Manager");
+        var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), canManageUrgency: true);
 
         await viewModel.LoadAsync();
 
@@ -124,7 +130,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     public async Task Load_NeverWritesTheObservedAverageBackAsAConfiguredValue()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
-        var viewModel = Build(store, "Plant Manager");
+        var viewModel = Build(store, canManageUrgency: true);
 
         await viewModel.LoadAsync();
 
@@ -140,7 +146,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     public async Task EditingMinutes_WritesTheItemsStoredAllotment()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
-        var viewModel = Build(store, "Plant Manager");
+        var viewModel = Build(store, canManageUrgency: true);
         await viewModel.LoadAsync();
 
         viewModel.Items.Single(row => row.ItemCode == ConfiguredItem).Minutes = 45;
@@ -155,7 +161,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     public async Task EditingMinutes_IsClampedToThePositiveMinimumAndTheTwentyFourHourMaximum()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
-        var viewModel = Build(store, "Plant Manager");
+        var viewModel = Build(store, canManageUrgency: true);
         await viewModel.LoadAsync();
 
         var row = viewModel.Items.Single(item => item.ItemCode == ConfiguredItem);
@@ -175,7 +181,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     public async Task EditingMinutes_IsRefusedForAViewerWithoutTheScreensOwnGate()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
-        var viewModel = Build(store, "Material Handler");
+        var viewModel = Build(store);
         await viewModel.LoadAsync();
 
         viewModel.Items.Single(row => row.ItemCode == ConfiguredItem).Minutes = 45;
@@ -193,7 +199,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     public async Task Load_WhenThePairsCannotBeRead_ReportsItInPlainLanguage()
     {
         var observedTimes = new FakeRequestItemObservedTimeService { Failure = new InvalidOperationException("store down") };
-        var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), "Plant Manager", observedTimes);
+        var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), canManageUrgency: true, observedTimes);
 
         await viewModel.LoadAsync();
 

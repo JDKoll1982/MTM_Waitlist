@@ -5,7 +5,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -16,44 +18,38 @@ using Windows.ApplicationModel;
 
 namespace MTM_Waitlist.Module_Settings.ViewModels;
 
-public partial class SettingsViewModel : ObservableRecipient
+public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 {
-    private static readonly string[] AllowedIgnoredLocationManageRoles =
-    {
-        "Admin",
-        "Developer",
-        "Plant Manager",
-        "Production",
-        "Production Lead",
-        "Setup",
-        "Setup Lead",
-    };
+    /// <summary>
+    /// The user list's view model, as the page service routes it. Named here because the two pages this feature
+    /// adds are routed by view-model name like every other page, and this screen reaches them by name rather than
+    /// by a reference to a type in another part of the feature.
+    /// </summary>
+    internal const string UserManagementViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.UserManagementViewModel";
 
-    private static readonly string[] AllowedHotWorkCenterManageRoles =
-    {
-        "Admin",
-        "Developer",
-        "Plant Manager",
-        "Setup Lead",
-        "Production Lead",
-    };
+    /// <summary>The permissions page's view model, routed the same way.</summary>
+    internal const string PermissionsViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.PermissionsViewModel";
 
-    private static readonly string[] AllowedImageLocationManageRoles =
-    {
-        "Admin",
-        "Developer",
-    };
-
-    // "Plant Manager and above" (T160) - the same trio the Max Allotted Time panel gates on. It is also a
-    // STRICT SUBSET of the service's ServiceOperatorRoles.Approved, so a caller this panel admits can never
-    // be refused by the service for its role (the service would answer 401 and the operator would have been
-    // shown a control that cannot work).
-    private static readonly string[] AllowedCacheRefreshRoles =
-    {
-        "Admin",
-        "Developer",
-        "Plant Manager",
-    };
+    /// <summary>
+    /// Every permission this screen asks about, in one read: the four Settings subjects it gates itself, the two
+    /// Administration entries it offers, and the two its child view models gate on (FR-056).
+    /// </summary>
+    /// <remarks>
+    /// This is a list of permission keys the declaration holds, not a list of role names: a gate that kept its own
+    /// role names is what this feature replaced (FR-054), and the parity of each key with the list it replaced is
+    /// asserted against the shipped baselines rather than here.
+    /// </remarks>
+    private static readonly string[] s_permissionKeys =
+    [
+        PermissionKeys.SettingsIgnoredLocations,
+        PermissionKeys.SettingsHotWorkCenters,
+        PermissionKeys.SettingsPartPictures,
+        PermissionKeys.SettingsCacheRefresh,
+        PermissionKeys.SettingsUrgencyMinutes,
+        PermissionKeys.SettingsComputers,
+        PermissionKeys.AdminUsers,
+        PermissionKeys.AdminPermissions,
+    ];
 
     /// <summary>
     /// Every property whose getter consumes <c>MatchesSearch</c>.
@@ -76,6 +72,8 @@ public partial class SettingsViewModel : ObservableRecipient
         nameof(IsNewRequestAlertsPanelVisible),
         nameof(IsUrgencyAllotmentsPanelVisible),
         nameof(IsImageLocationSettingsPanelVisible),
+        nameof(IsUserManagementEntryVisible),
+        nameof(IsPermissionsEntryVisible),
     ];
 
     private readonly IThemeSelectorService _themeSelectorService;
@@ -83,6 +81,8 @@ public partial class SettingsViewModel : ObservableRecipient
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IDunnageTypeVisibilityCatalogService _dunnageTypeVisibilityCatalogService;
     private readonly INewRequestAlertService _newRequestAlertService;
+    private readonly IPermissionService _permissionService;
+    private readonly INavigationService _navigationService;
     private readonly StartupState _startupState;
     private readonly IMockServiceRefreshClient _mockServiceRefreshClient;
 
@@ -184,27 +184,122 @@ public partial class SettingsViewModel : ObservableRecipient
 
     public ObservableCollection<string> IgnoredLocations { get; } = new();
 
-    public bool CanManageHotWorkCenters => AllowedHotWorkCenterManageRoles.Any(role =>
-        string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+    /// <summary>
+    /// Whether the signed-in person may change the hot work centres, answered from
+    /// <c>permission.settings.hot_work_centers</c> rather than from a list of role names kept here (FR-054).
+    /// </summary>
+    /// <remarks>
+    /// False until the screen's permission read returns, so the control is never shown on a guess. The read is
+    /// asynchronous and runs when the page is navigated to (FR-114).
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool CanManageHotWorkCenters
+    {
+        get; set;
+    }
 
-    public bool CanManageImageLocationSettings => AllowedImageLocationManageRoles.Any(role =>
-        string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+    /// <summary>Whether the signed-in person may change the part-picture locations.</summary>
+    [ObservableProperty]
+    public partial bool CanManageImageLocationSettings
+    {
+        get; set;
+    }
 
+    /// <summary>Whether the signed-in person may open the user list.</summary>
+    [ObservableProperty]
+    public partial bool CanOpenUserManagement
+    {
+        get; set;
+    }
+
+    /// <summary>Whether the signed-in person may open the permissions page.</summary>
+    [ObservableProperty]
+    public partial bool CanOpenPermissions
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// The dunnage-type visibility panel shares the hot work centres' permission, because it decides the same
+    /// thing about the same screen and was never a second gate.
+    /// </summary>
     public bool CanManageDunnageTypeVisibility => CanManageHotWorkCenters;
 
-    public bool CanManageIgnoredLocations => AllowedIgnoredLocationManageRoles.Any(role =>
-        string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+    /// <summary>Whether the signed-in person may change the ignored locations.</summary>
+    [ObservableProperty]
+    public partial bool CanManageIgnoredLocations
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Whether this operator may ask the on-host service to rebuild the cache now (T160).
     /// </summary>
     /// <remarks>
-    /// Authorization is layered, and this is the outer layer: the service independently resolves the
-    /// presented user name's application role and refuses anything outside its own approved set. This gate
-    /// exists so an operator who could never be authorized is not shown the control at all.
+    /// Authorization is layered, and this is the outer layer: the service independently reads
+    /// <c>permission.cache.refresh_api</c> for the presented user and refuses a caller who does not hold it. This
+    /// gate reads the Settings screen's own key, and the one subset rule ties the two together: whatever
+    /// <c>permission.settings.cache_refresh</c> admits is also admitted by <c>permission.cache.refresh_api</c>
+    /// (FR-057), so an operator is never shown a control the service would refuse.
     /// </remarks>
-    public bool CanRequestCacheRefresh => AllowedCacheRefreshRoles.Any(role =>
-        string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+    [ObservableProperty]
+    public partial bool CanRequestCacheRefresh
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// The Administration category: shown when the reader may open at least one of its two entries and may find
+    /// it, and not at all when they may open neither (FR-081).
+    /// </summary>
+    public bool IsAdministrationCategoryVisible => IsUserManagementEntryVisible || IsPermissionsEntryVisible;
+
+    /// <summary>
+    /// The Users entry. It navigates rather than expanding, so it is a card rather than an expander, and it is
+    /// reachable from the Settings search like every other entry on this screen.
+    /// </summary>
+    public bool IsUserManagementEntryVisible => CanOpenUserManagement && MatchesSearch(
+        "user",
+        "users",
+        "person",
+        "people",
+        "account",
+        "accounts",
+        "roster",
+        "employee",
+        "administration");
+
+    /// <summary>The Permissions entry. It navigates rather than expanding, and it is searchable.</summary>
+    public bool IsPermissionsEntryVisible => CanOpenPermissions && MatchesSearch(
+        "permission",
+        "permissions",
+        "access",
+        "allowed",
+        "who can",
+        "administration");
+
+    /// <summary>Opens the user list. The page service routes by view-model name, as every other page does.</summary>
+    [RelayCommand]
+    private void OpenUserManagement() => _navigationService.NavigateTo(UserManagementViewModelName);
+
+    /// <summary>Opens the permissions page.</summary>
+    [RelayCommand]
+    private void OpenPermissions() => _navigationService.NavigateTo(PermissionsViewModelName);
+
+    /// <summary>The Administration category's heading, resolved from the resource map.</summary>
+    public string AdministrationCategoryTitle => "Administration_Category.Title".GetLocalized();
+
+    /// <summary>The Users entry's title.</summary>
+    public string UserManagementEntryTitle => "Administration_Users.Title".GetLocalized();
+
+    /// <summary>What the Users entry opens, in a sentence.</summary>
+    public string UserManagementEntryDescription => "Administration_Users.Description".GetLocalized();
+
+    /// <summary>The Permissions entry's title.</summary>
+    public string PermissionsEntryTitle => "Administration_Permissions.Title".GetLocalized();
+
+    /// <summary>What the Permissions entry opens, in a sentence.</summary>
+    public string PermissionsEntryDescription => "Administration_Permissions.Description".GetLocalized();
 
     public bool IsCacheRefreshPanelVisible => CanRequestCacheRefresh && MatchesSearch(
         "cache",
@@ -327,6 +422,8 @@ public partial class SettingsViewModel : ObservableRecipient
         IWorkCenterCatalogService workCenterCatalogService,
         IDunnageTypeVisibilityCatalogService dunnageTypeVisibilityCatalogService,
         INewRequestAlertService newRequestAlertService,
+        IPermissionService permissionService,
+        INavigationService navigationService,
         StartupState startupState,
         ComputerManagementViewModel computerManagement,
         UrgencyAllotmentEditorViewModel urgencyAllotments,
@@ -338,6 +435,8 @@ public partial class SettingsViewModel : ObservableRecipient
         _workCenterCatalogService = workCenterCatalogService;
         _dunnageTypeVisibilityCatalogService = dunnageTypeVisibilityCatalogService;
         _newRequestAlertService = newRequestAlertService;
+        _permissionService = permissionService;
+        _navigationService = navigationService;
         _startupState = startupState;
         _mockServiceRefreshClient = mockServiceRefreshClient;
         ComputerManagement = computerManagement;
@@ -369,6 +468,81 @@ public partial class SettingsViewModel : ObservableRecipient
         RefreshSearchVisibility();
         StartupDebugLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}'.");
     }
+
+    /// <summary>
+    /// The permission read this screen started when it was navigated to.
+    /// </summary>
+    /// <remarks>
+    /// Exposed so a caller that needs the gates settled — the page's own load order, or a test — can await it
+    /// rather than wait a fixed time and hope. It is <see cref="Task.CompletedTask"/> until the first entry.
+    /// </remarks>
+    public Task PermissionLoad { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Loads this screen's permission answers when the page is reached, so the gates are read per visit rather
+    /// than decided from stored session state at construction (FR-114).
+    /// </summary>
+    /// <remarks>
+    /// The read is issued here rather than in a layout pass, so the screen is never drawn from an answer that has
+    /// not arrived and the interface thread is never blocked waiting for one.
+    /// </remarks>
+    public void OnNavigatedTo(object parameter) => PermissionLoad = LoadPermissionsAsync();
+
+    /// <summary>
+    /// Nothing is torn down on the way out: the screen subscribes to no service of its own, so it holds nothing to
+    /// release.
+    /// </summary>
+    /// <remarks>
+    /// The permission answers are re-read on every entry rather than kept from the first one. That is not a store
+    /// read per visit: the permission service caches a session's answers and is invalidated when one is saved, so
+    /// the second ask is free unless somebody's permissions actually changed while this screen was away.
+    /// </remarks>
+    public void OnNavigatedFrom()
+    {
+    }
+
+    /// <summary>
+    /// Asks the permission service once for every gate this screen and its two child view models need, then
+    /// applies the answers.
+    /// </summary>
+    /// <remarks>
+    /// One call answers the whole screen, which is what keeps a store read out of a layout pass and off the
+    /// interface thread (FR-056). Every gate stays false until its answer arrives, so a control is never offered
+    /// on a guess; and because an unreachable store is answered by each key's shipped fallback rather than by a
+    /// refusal (FR-050), the failure path hides the controls instead of breaking the screen. The failure is
+    /// recorded rather than swallowed.
+    /// </remarks>
+    public async Task LoadPermissionsAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var answers = await _permissionService
+                .HasPermissionsAsync(s_permissionKeys, cancellationToken)
+                .ConfigureAwait(true);
+
+            CanManageIgnoredLocations = answers[PermissionKeys.SettingsIgnoredLocations];
+            CanManageHotWorkCenters = answers[PermissionKeys.SettingsHotWorkCenters];
+            CanManageImageLocationSettings = answers[PermissionKeys.SettingsPartPictures];
+            CanRequestCacheRefresh = answers[PermissionKeys.SettingsCacheRefresh];
+            CanOpenUserManagement = answers[PermissionKeys.AdminUsers];
+            CanOpenPermissions = answers[PermissionKeys.AdminPermissions];
+
+            UrgencyAllotments.ApplyPermission(answers[PermissionKeys.SettingsUrgencyMinutes]);
+            ComputerManagement.ApplyPermission(answers[PermissionKeys.SettingsComputers]);
+
+            RefreshSearchVisibility();
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "SettingsPermissions",
+                ex,
+                "The Settings screen's permission answers could not be read; every gated control stays hidden rather than being offered on a guess.");
+        }
+    }
+
+    partial void OnCanManageHotWorkCentersChanged(bool value) =>
+        OnPropertyChanged(nameof(CanManageDunnageTypeVisibility));
 
     // FIX: This partial method is automatically invoked by the MVVM Toolkit source generator 
     // whenever the ElementTheme property is modified, updating our custom XAML text field.
@@ -939,6 +1113,7 @@ public partial class SettingsViewModel : ObservableRecipient
         OnPropertyChanged(nameof(IsAppearanceCategoryVisible));
         OnPropertyChanged(nameof(IsOperationsCategoryVisible));
         OnPropertyChanged(nameof(IsAboutCategoryVisible));
+        OnPropertyChanged(nameof(IsAdministrationCategoryVisible));
     }
 
     private static string GetVersionDescription()

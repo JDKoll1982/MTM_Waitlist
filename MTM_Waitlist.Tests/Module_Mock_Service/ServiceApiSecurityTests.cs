@@ -42,7 +42,7 @@ public sealed class ServiceApiSecurityTests
 
         Assert.IsFalse(json.Contains("password", StringComparison.OrdinalIgnoreCase), "No password-shaped field may appear in a payload.");
         Assert.IsTrue(
-            json.Contains("\"operatorRoles\"", StringComparison.Ordinal),
+            json.Contains("\"operatorAccessPermission\"", StringComparison.Ordinal),
             "The payload reports the application roles that may call the API (T147).");
         Assert.IsFalse(
             json.Contains("credential", StringComparison.OrdinalIgnoreCase),

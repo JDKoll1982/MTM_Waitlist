@@ -55,6 +55,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Search -->
@@ -875,6 +876,60 @@
                         </wct:SettingsCard>
                     </wct:SettingsExpander.Items>
                 </wct:SettingsExpander>
+            </StackPanel>
+
+            <!--
+                Administration: two entries, and both of them navigate rather than expanding — so they are
+                SettingsCards rather than expanders, each wrapped in x:Load (which requires an x:Name) and each
+                shown only to a reader who may open it. A reader entitled to neither does not see the category.
+            -->
+            <StackPanel
+                Grid.Row="4"
+                x:Name="AdministrationCategoryPanel"
+                x:Load="{x:Bind ViewModel.IsAdministrationCategoryVisible, Mode=OneWay}"
+                Spacing="8">
+
+                <TextBlock
+                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                    Text="{x:Bind ViewModel.AdministrationCategoryTitle}" />
+
+                <wct:SettingsCard
+                    x:Name="UserManagementEntryCard"
+                    x:Load="{x:Bind ViewModel.IsUserManagementEntryVisible, Mode=OneWay}"
+                    AutomationProperties.AutomationId="SettingsPage_UserManagementEntry"
+                    AutomationProperties.Name="{x:Bind ViewModel.UserManagementEntryTitle}"
+                    HorizontalAlignment="Stretch"
+                    IsClickEnabled="True"
+                    Command="{x:Bind ViewModel.OpenUserManagementCommand}">
+                    <wct:SettingsCard.Header>
+                        <TextBlock Text="{x:Bind ViewModel.UserManagementEntryTitle}" />
+                    </wct:SettingsCard.Header>
+                    <wct:SettingsCard.Description>
+                        <TextBlock Text="{x:Bind ViewModel.UserManagementEntryDescription}" />
+                    </wct:SettingsCard.Description>
+                    <wct:SettingsCard.HeaderIcon>
+                        <SymbolIcon Symbol="People" />
+                    </wct:SettingsCard.HeaderIcon>
+                </wct:SettingsCard>
+
+                <wct:SettingsCard
+                    x:Name="PermissionsEntryCard"
+                    x:Load="{x:Bind ViewModel.IsPermissionsEntryVisible, Mode=OneWay}"
+                    AutomationProperties.AutomationId="SettingsPage_PermissionsEntry"
+                    AutomationProperties.Name="{x:Bind ViewModel.PermissionsEntryTitle}"
+                    HorizontalAlignment="Stretch"
+                    IsClickEnabled="True"
+                    Command="{x:Bind ViewModel.OpenPermissionsCommand}">
+                    <wct:SettingsCard.Header>
+                        <TextBlock Text="{x:Bind ViewModel.PermissionsEntryTitle}" />
+                    </wct:SettingsCard.Header>
+                    <wct:SettingsCard.Description>
+                        <TextBlock Text="{x:Bind ViewModel.PermissionsEntryDescription}" />
+                    </wct:SettingsCard.Description>
+                    <wct:SettingsCard.HeaderIcon>
+                        <SymbolIcon Symbol="Permissions" />
+                    </wct:SettingsCard.HeaderIcon>
+                </wct:SettingsCard>
             </StackPanel>
         </Grid>
     </ScrollViewer>

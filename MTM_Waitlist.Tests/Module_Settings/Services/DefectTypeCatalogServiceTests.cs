@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Services;
 
@@ -10,23 +11,28 @@ namespace MTM_Waitlist.Tests.Module_Settings.Services;
 public sealed class DefectTypeCatalogServiceTests
 {
     [TestMethod]
-    public void CanManage_AllowsAdminDeveloperAdministrator()
+    public async Task CanManage_ReadsTheDeclaredPermission_AndAnswersItsValue()
     {
-        var service = new DefectTypeCatalogService(new StubMySqlHelperServer());
-        Assert.IsTrue(service.CanManage("Admin"));
-        Assert.IsTrue(service.CanManage("Developer"));
-        Assert.IsTrue(service.CanManage("administrator"));
-        Assert.IsTrue(service.CanManage("ADMIN"));
+        var holding = PermissionStub.Holding(PermissionKeys.SettingsDefectTypes);
+        Assert.IsTrue(await new DefectTypeCatalogService(new StubMySqlHelperServer(), holding).CanManageAsync());
+        CollectionAssert.Contains(
+            holding.RequestedKeys.ToArray(),
+            PermissionKeys.SettingsDefectTypes,
+            "The catalogue's gate reads the key the declaration names for it.");
+
+        var holdingNothing = PermissionStub.Holding();
+        Assert.IsFalse(await new DefectTypeCatalogService(new StubMySqlHelperServer(), holdingNothing).CanManageAsync());
     }
 
     [TestMethod]
-    public void CanManage_DeniesOperatorAndBlank()
+    public async Task CanManage_DoesNotAnswerFromAnyRoleName()
     {
-        var service = new DefectTypeCatalogService(new StubMySqlHelperServer());
-        Assert.IsFalse(service.CanManage("Operator"));
-        Assert.IsFalse(service.CanManage("Material Handler"));
-        Assert.IsFalse(service.CanManage("   "));
-        Assert.IsFalse(service.CanManage(null));
+        // The retired list admitted the display names Admin, administrator and Developer. None of them is read
+        // any more, so a service that still decided from a role would have to be handed one to do it — and this
+        // constructor takes none (FR-054).
+        var service = new DefectTypeCatalogService(new StubMySqlHelperServer(), PermissionStub.Holding());
+
+        Assert.IsFalse(await service.CanManageAsync());
     }
 
     [TestMethod]
@@ -44,7 +50,7 @@ public sealed class DefectTypeCatalogServiceTests
                 ["is_active"] = (byte)1,
             },
         });
-        var service = new DefectTypeCatalogService(helper);
+        var service = new DefectTypeCatalogService(helper, PermissionStub.Holding(PermissionKeys.SettingsDefectTypes));
 
         var result = await service.GetActiveAsync();
 
@@ -56,12 +62,12 @@ public sealed class DefectTypeCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task AddAsync_DeniedRole_ReturnsFail_NoSpCall()
+    public async Task AddAsync_Denied_ReturnsFail_NoSpCall()
     {
         var helper = new StubMySqlHelperServer();
-        var service = new DefectTypeCatalogService(helper);
+        var service = new DefectTypeCatalogService(helper, PermissionStub.Holding());
 
-        var result = await service.AddAsync("Scratch", null, 0, "Operator");
+        var result = await service.AddAsync("Scratch", null, 0);
 
         Assert.IsFalse(result.Success);
         Assert.AreEqual(0, helper.NonQueryCalls.Count);
@@ -71,21 +77,21 @@ public sealed class DefectTypeCatalogServiceTests
     public async Task AddAsync_EmptyName_ReturnsFail_NoSpCall()
     {
         var helper = new StubMySqlHelperServer();
-        var service = new DefectTypeCatalogService(helper);
+        var service = new DefectTypeCatalogService(helper, PermissionStub.Holding(PermissionKeys.SettingsDefectTypes));
 
-        var result = await service.AddAsync("   ", null, 0, "Admin");
+        var result = await service.AddAsync("   ", null, 0);
 
         Assert.IsFalse(result.Success);
         Assert.AreEqual(0, helper.NonQueryCalls.Count);
     }
 
     [TestMethod]
-    public async Task AddAsync_AllowedRole_CallsInsertSp()
+    public async Task AddAsync_Permitted_CallsInsertSp()
     {
         var helper = new StubMySqlHelperServer(affectedRows: 1);
-        var service = new DefectTypeCatalogService(helper);
+        var service = new DefectTypeCatalogService(helper, PermissionStub.Holding(PermissionKeys.SettingsDefectTypes));
 
-        var result = await service.AddAsync("Scratch", "desc", 3, "Developer");
+        var result = await service.AddAsync("Scratch", "desc", 3);
 
         Assert.IsTrue(result.Success);
         Assert.AreEqual(1, helper.NonQueryCalls.Count);
@@ -94,24 +100,24 @@ public sealed class DefectTypeCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task UpdateAsync_DeniedRole_ReturnsFail_NoSpCall()
+    public async Task UpdateAsync_Denied_ReturnsFail_NoSpCall()
     {
         var helper = new StubMySqlHelperServer();
-        var service = new DefectTypeCatalogService(helper);
+        var service = new DefectTypeCatalogService(helper, PermissionStub.Holding());
 
-        var result = await service.UpdateAsync(1, "New", null, 0, "Production Lead");
+        var result = await service.UpdateAsync(1, "New", null, 0);
 
         Assert.IsFalse(result.Success);
         Assert.AreEqual(0, helper.NonQueryCalls.Count);
     }
 
     [TestMethod]
-    public async Task DeleteAsync_AllowedRole_CallsDeleteSp()
+    public async Task DeleteAsync_Permitted_CallsDeleteSp()
     {
         var helper = new StubMySqlHelperServer(affectedRows: 1);
-        var service = new DefectTypeCatalogService(helper);
+        var service = new DefectTypeCatalogService(helper, PermissionStub.Holding(PermissionKeys.SettingsDefectTypes));
 
-        var result = await service.DeleteAsync(5, "Admin");
+        var result = await service.DeleteAsync(5);
 
         Assert.IsTrue(result.Success);
         Assert.AreEqual(1, helper.NonQueryCalls.Count);
@@ -123,12 +129,46 @@ public sealed class DefectTypeCatalogServiceTests
     public async Task DeleteAsync_NotFound_AffectedZero_ReturnsFail()
     {
         var helper = new StubMySqlHelperServer(affectedRows: 0);
-        var service = new DefectTypeCatalogService(helper);
+        var service = new DefectTypeCatalogService(helper, PermissionStub.Holding(PermissionKeys.SettingsDefectTypes));
 
-        var result = await service.DeleteAsync(999, "Admin");
+        var result = await service.DeleteAsync(999);
 
         Assert.IsFalse(result.Success);
         Assert.AreEqual(1, helper.NonQueryCalls.Count);
+    }
+
+    /// <summary>A permission service that answers whether one key is held, and records what it was asked.</summary>
+    private sealed class PermissionStub : IPermissionService
+    {
+        private readonly HashSet<string> _held;
+
+        private PermissionStub(IEnumerable<string> held) =>
+            _held = new HashSet<string>(held, StringComparer.Ordinal);
+
+        internal static PermissionStub Holding(params string[] heldPermissionKeys) => new(heldPermissionKeys);
+
+        internal List<string> RequestedKeys { get; } = [];
+
+        public Task<bool> HasPermissionAsync(string permissionKey, CancellationToken cancellationToken = default)
+        {
+            RequestedKeys.Add(permissionKey);
+            return Task.FromResult(_held.Contains(permissionKey));
+        }
+
+        public Task<IReadOnlyDictionary<string, bool>> HasPermissionsAsync(
+            IEnumerable<string> permissionKeys,
+            CancellationToken cancellationToken = default)
+        {
+            var keys = permissionKeys.ToArray();
+            RequestedKeys.AddRange(keys);
+
+            return Task.FromResult<IReadOnlyDictionary<string, bool>>(
+                keys.ToDictionary(key => key, _held.Contains, StringComparer.Ordinal));
+        }
+
+        public void Invalidate()
+        {
+        }
     }
 
     private sealed record Call(string Procedure, IReadOnlyDictionary<string, object?> Parameters);

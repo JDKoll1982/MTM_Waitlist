@@ -31,6 +31,13 @@ namespace MTM_Waitlist.Services.DependencyInjection;
 
 public static partial class ServiceRegistrationExtensions
 {
+    /// <summary>
+    /// The routes feature 006's story phases contribute. Each phase registers its own page in its own file and adds
+    /// its route here, and the page service applies them as it builds its route table, so no phase edits the
+    /// factory the others also edit.
+    /// </summary>
+    private static readonly List<Action<PageService>> s_pageRouteRegistrations = [];
+
     public static IServiceCollection AddAppServices(this IServiceCollection services, HostBuilderContext context)
     {
         // Default activation handler
@@ -97,6 +104,14 @@ public static partial class ServiceRegistrationExtensions
             pageService.Configure<SetupDunnageTypeViewModel, SetupDunnageTypePage>();
             pageService.Configure<SetupReviewViewModel, SetupReviewPage>();
             pageService.Configure<SetupCompletionViewModel, SetupCompletionPage>();
+
+            // Feature 006's story phases each own their own registration file, so the routes they add are
+            // contributed there and applied here rather than being written into this factory by three phases.
+            foreach (var configureRoutes in s_pageRouteRegistrations)
+            {
+                configureRoutes(pageService);
+            }
+
             return pageService;
         });
         services.AddSingleton<IPageTransitionService, PageTransitionService>();

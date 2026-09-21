@@ -314,7 +314,7 @@
     <value>Infor Visual</value>
   </data>
   <data name="Service_Status.CredentialLabel" xml:space="preserve">
-    <value>Operator roles</value>
+    <value>Access permission</value>
   </data>
   <data name="Service_Status.RefreshScheduleLabel" xml:space="preserve">
     <value>Refresh schedule</value>
@@ -505,7 +505,7 @@
     <value>What happened the last time a restore was run. Nothing above changes until the replacement is confirmed.</value>
   </data>
   <data name="Service_Settings.ApprovedRolesLabel" xml:space="preserve">
-    <value>Approved roles</value>
+    <value>Access permission</value>
   </data>
   <data name="Service_Settings.SaveHeader" xml:space="preserve">
     <value>Apply your changes</value>
@@ -525,7 +525,7 @@
     <value>Whether Infor Visual answers right now. When it does not, the cached data is served instead.</value>
   </data>
   <data name="Service_Status.CredentialLabelDescription" xml:space="preserve">
-    <value>The application roles whose users may call the service API.</value>
+    <value>The stored permission that decides who may call the service API.</value>
   </data>
   <data name="Service_Status.RefreshScheduleLabelDescription" xml:space="preserve">
     <value>How often each cached read is rebuilt from Infor Visual.</value>

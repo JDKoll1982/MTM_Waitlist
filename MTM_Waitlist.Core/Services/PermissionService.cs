@@ -24,12 +24,6 @@ namespace MTM_Waitlist.Module_Core.Services;
 /// </remarks>
 public sealed class PermissionService : IPermissionService
 {
-    /// <summary>The permission rows stored for one person and for their role.</summary>
-    private const string StoredPermissionsProcedure = "sp_config_permissions_user_get";
-
-    private const string UserScopeType = "user";
-    private const string RoleScopeType = "role";
-
     private readonly IMySqlHelperServer _mySqlHelperServer;
     private readonly StartupState _startupState;
     private readonly SemaphoreSlim _readGate = new(1, 1);
@@ -74,9 +68,7 @@ public sealed class PermissionService : IPermissionService
         var answers = new Dictionary<string, bool>(StringComparer.Ordinal);
         foreach (var key in requested)
         {
-            answers[key] = stored.TryGetValue(key, out var storedAnswer)
-                ? storedAnswer
-                : PermissionRegistry.Find(key)!.Fallback;
+            answers[key] = StoredPermissionAnswers.AnswerFor(key, stored);
         }
 
         return answers;
@@ -142,7 +134,7 @@ public sealed class PermissionService : IPermissionService
         {
             rows = await _mySqlHelperServer
                 .ExecuteStoredProcedureQueryAsync(
-                    StoredPermissionsProcedure,
+                    StoredPermissionAnswers.StoredPermissionsProcedure,
                     new Dictionary<string, object?> { ["p_user_id"] = userId },
                     MySqlDatabaseTarget.MtmWaitlist,
                     cancellationToken)
@@ -162,35 +154,7 @@ public sealed class PermissionService : IPermissionService
             return answers;
         }
 
-        // Role rows are applied first and the person's own rows second, so the person wins whatever order the
-        // procedure returned them in. Relying on the ORDER BY would put this rule in the store's SELECT list.
-        foreach (var row in rows.OrderBy(row => ReadScopeType(row) == UserScopeType ? 1 : 0))
-        {
-            var key = ReadString(row, "setting_key");
-            if (string.IsNullOrWhiteSpace(key) || !PermissionRegistry.IsDeclared(key))
-            {
-                // A stored row for a key the declaration does not hold is not an answer: the declaration is the
-                // only place a permission exists (FR-046), and the two-direction check reports the drift.
-                continue;
-            }
-
-            var scopeType = ReadScopeType(row);
-            if (!string.Equals(scopeType, UserScopeType, StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(scopeType, RoleScopeType, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            var value = ReadBool(row, "setting_value_bool");
-            if (value is null)
-            {
-                continue;
-            }
-
-            answers[key] = value.Value;
-        }
-
-        return answers;
+        return StoredPermissionAnswers.Compose(rows);
     }
 
     private static void RequireDeclared(string permissionKey)
@@ -201,38 +165,5 @@ public sealed class PermissionService : IPermissionService
                 $"'{permissionKey}' is not a permission the declaration holds. A gate that reads an undeclared key is a failure rather than a silent refusal (FR-061).",
                 nameof(permissionKey));
         }
-    }
-
-    private static string ReadScopeType(IReadOnlyDictionary<string, object?> row) => ReadString(row, "scope_type");
-
-    private static string ReadString(IReadOnlyDictionary<string, object?> row, string columnName)
-    {
-        if (!row.TryGetValue(columnName, out var value) || value is null || value is DBNull)
-        {
-            return string.Empty;
-        }
-
-        return Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture)?.Trim() ?? string.Empty;
-    }
-
-    private static bool? ReadBool(IReadOnlyDictionary<string, object?> row, string columnName)
-    {
-        if (!row.TryGetValue(columnName, out var value) || value is null || value is DBNull)
-        {
-            return null;
-        }
-
-        return value switch
-        {
-            bool boolean => boolean,
-            sbyte number => number != 0,
-            byte number => number != 0,
-            short number => number != 0,
-            int number => number != 0,
-            long number => number != 0,
-            _ => bool.TryParse(Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture), out var parsed)
-                ? parsed
-                : null,
-        };
     }
 }
