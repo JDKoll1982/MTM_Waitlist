@@ -115,8 +115,11 @@ public sealed class ActiveJobReadBackSpIntegrationTests
         var loadGuid1 = Guid.NewGuid().ToString();
         var loadGuid2 = Guid.NewGuid().ToString();
 
+        // Only the columns this test depends on. The procedure reads part_id and quantity; transaction_date
+        // is the remaining NOT NULL column with no default, and the rest carry defaults. Naming columns from
+        // a richer receiving_history revision made the fixture fail on a store that does not carry them.
         await _helper.ExecuteSqlNonQueryAsync(
-            "INSERT INTO receiving_history (load_guid, quantity, part_id, part_type, employee_number, received_date, transaction_date, is_non_po_item, is_quality_hold_required, is_quality_hold_acknowledged, is_reprint) VALUES (@p_load_guid, @p_qty, @p_part_id, 'COIL', 6229, UTC_TIMESTAMP(), CURDATE(), 0, 0, 0, 0);",
+            "INSERT INTO receiving_history (load_guid, quantity, part_id, transaction_date) VALUES (@p_load_guid, @p_qty, @p_part_id, CURDATE());",
             new Dictionary<string, object?>
             {
                 ["p_load_guid"] = loadGuid1,
@@ -125,7 +128,7 @@ public sealed class ActiveJobReadBackSpIntegrationTests
             },
             MySqlDatabaseTarget.MtmReceivingApplication);
         await _helper.ExecuteSqlNonQueryAsync(
-            "INSERT INTO receiving_history (load_guid, quantity, part_id, part_type, employee_number, received_date, transaction_date, is_non_po_item, is_quality_hold_required, is_quality_hold_acknowledged, is_reprint) VALUES (@p_load_guid, @p_qty, @p_part_id, 'COIL', 6229, UTC_TIMESTAMP(), CURDATE(), 0, 0, 0, 0);",
+            "INSERT INTO receiving_history (load_guid, quantity, part_id, transaction_date) VALUES (@p_load_guid, @p_qty, @p_part_id, CURDATE());",
             new Dictionary<string, object?>
             {
                 ["p_load_guid"] = loadGuid2,
