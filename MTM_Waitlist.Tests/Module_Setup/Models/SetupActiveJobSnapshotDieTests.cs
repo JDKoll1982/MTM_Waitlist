@@ -98,7 +98,7 @@ public sealed class SetupActiveJobSnapshotDieTests
 
     private static SetupActiveJobSnapshot Snapshot(params SetupSubordinatePart[] parts) => new()
     {
-        WorkCenter = "100-3",
+        WorkCenter = "100-03",
         WorkOrder = "WO-900001",
         PartNumber = "PART-9001",
         SubordinateParts = parts,

@@ -784,6 +784,7 @@ public sealed class StartupCoordinatorTests
                 IsUserMatched = false,
                 IsComputerRegistered = true,
                 CurrentRole = "Developer",
+                CurrentRoleCode = "developer",
                 HasDatabaseSession = false,
                 DatabaseSessionExpiresUtc = null
             }

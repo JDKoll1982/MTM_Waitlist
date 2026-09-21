@@ -86,6 +86,9 @@ public sealed class StartupCoordinator : IStartupCoordinator
         _startupState.CurrentRole = IsDefaultDeveloperUser(_startupState.Username)
             ? "Developer"
             : string.Empty;
+        _startupState.CurrentRoleCode = IsDefaultDeveloperUser(_startupState.Username)
+            ? "developer"
+            : string.Empty;
         _startupState.ConfigurationLoaded = false;
 
         StartupDebugLog.Info(
@@ -171,11 +174,14 @@ public sealed class StartupCoordinator : IStartupCoordinator
         progress?.Report(StartupProgress.Step3);
         var isUserMatched = sessionSnapshot.IsUserMatched;
         _startupState.IsUserMatched = isUserMatched;
+        _startupState.UserId = sessionSnapshot.UserId;
         _startupState.CurrentRole = sessionSnapshot.CurrentRole;
+        _startupState.CurrentRoleCode = sessionSnapshot.CurrentRoleCode;
 
         if (IsDefaultDeveloperUser(_startupState.Username))
         {
             _startupState.CurrentRole = "Developer";
+            _startupState.CurrentRoleCode = "developer";
         }
 
         // Expose the signed-in user's identity so services (Waitlist submit/accept/
@@ -276,6 +282,16 @@ public sealed class StartupCoordinator : IStartupCoordinator
             if (string.IsNullOrWhiteSpace(_startupState.CurrentRole))
             {
                 _startupState.CurrentRole = passwordResetRequirement.CurrentRole;
+            }
+
+            if (string.IsNullOrWhiteSpace(_startupState.CurrentRoleCode))
+            {
+                _startupState.CurrentRoleCode = passwordResetRequirement.CurrentRoleCode;
+            }
+
+            if (_startupState.UserId == 0)
+            {
+                _startupState.UserId = passwordResetRequirement.UserId;
             }
 
             if (!string.IsNullOrWhiteSpace(passwordResetRequirement.DisplayName))

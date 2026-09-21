@@ -308,7 +308,7 @@ walk on the same work centre, and the round-trip test is re-pointed rather than 
 asserted.
 
 **Amendment (2026-09-14) — the re-point was not survivable, so the test now owns its data.** The predicted
-overwrite happened: work centre `100-3` carried a live Setup save for `WO-060954` / `22-77723-125-Raw`, and
+overwrite happened: work centre `100-03` carried a live Setup save for `WO-060954` / `22-77723-125-Raw`, and
 `Seeded100_3_CoilOnly_NormalisesToCoil` failed with zero coils — a red gate caused by the shop floor doing its job.
 `ActiveJobSeedRoundTripTests` therefore writes its own seven rows under a per-run `IT-ROUNDTRIP-*` work centre and
 deletes them in teardown. The matrix, the shapes and the deserializer it is driven through are unchanged, so it

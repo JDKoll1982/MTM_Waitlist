@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Options;
 
 using MySqlConnector;
-using System.Security.Cryptography;
-using System.Text;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -37,11 +35,19 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
     /// </summary>
     private const string PasswordResetRequiredProcedure = "sp_auth_password_reset_required_get";
 
-    private const int PasswordSaltLengthBytes = 16;
-    private const int PasswordHashLengthBytes = 32;
-    private const int PasswordIterations = 100_000;
-    private const string TemporaryDefaultPasswordHashMarker = "0000";
+    /// <summary>
+    /// Moves the wrong-attempt count on a temporary credential: one up on a failure, to zero on a success.
+    /// Nothing else clears it and nothing expires it.
+    /// </summary>
+    private const string TemporaryCredentialAttemptProcedure = "sp_auth_temporary_credential_attempt_record";
 
+    /// <summary>
+    /// How many wrong attempts a temporary credential is accepted for. The limit is what gives a four-digit
+    /// credential any strength at all, so the count is held with the account and survives a restart.
+    /// </summary>
+    public const int TemporaryCredentialAttemptLimit = 5;
+
+    private const string TemporaryDefaultPasswordHashMarker = "0000";
     private readonly StartupDatabaseOptions _startupDatabaseOptions;
 
     public StartupSessionRepository(IOptions<StartupDatabaseOptions> startupDatabaseOptions)
@@ -130,7 +136,9 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                 IsUserMatched = true,
                 IsComputerRegistered = computerRegistered,
                 IsComputerRegistrationAuthoritative = true,
-                CurrentRole = userRow.CurrentRole,
+                UserId = userRow.UserId,
+                CurrentRoleCode = userRow.RoleCode,
+                CurrentRole = userRow.RoleName,
                 DisplayName = userRow.DisplayName,
                 EmployeeIdentifier = userRow.EmployeeIdentifier,
                 HasDatabaseSession = sessionExpiry.HasValue,
@@ -165,9 +173,9 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                 CommandType = System.Data.CommandType.StoredProcedure
             };
 
-            // Normalized exactly as the credential check does: the column is `username_normalized`, and the
-            // startup username arrives from the Windows environment, which is not case-normalized.
-            command.Parameters.AddWithValue("@p_username", username.Trim().ToLowerInvariant());
+            // Normalized exactly as the credential check does: the column is `username_normalized`, which the
+            // store holds in upper case, so the comparison is made in upper case whatever case was typed.
+            command.Parameters.AddWithValue("@p_username", NormalizeUsername(username));
 
             await using var reader = await command.ExecuteReaderAsync(token);
             if (!await reader.ReadAsync(token))
@@ -175,7 +183,7 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                 return StartupPasswordResetRequirement.None;
             }
 
-            var isRequired = !reader.IsDBNull(4) && Convert.ToInt32(reader[4]) == 1;
+            var isRequired = !reader.IsDBNull(5) && Convert.ToInt32(reader[5]) == 1;
             if (!isRequired)
             {
                 return StartupPasswordResetRequirement.None;
@@ -185,9 +193,10 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
             {
                 IsRequired = true,
                 UserId = reader.GetInt64(0),
-                CurrentRole = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
-                DisplayName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
-                EmployeeIdentifier = reader.IsDBNull(3) ? string.Empty : reader.GetString(3)
+                CurrentRoleCode = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                CurrentRole = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                DisplayName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                EmployeeIdentifier = reader.IsDBNull(4) ? string.Empty : reader.GetString(4)
             };
         }, cancellationToken);
     }
@@ -209,7 +218,10 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         }
 
         var timeoutConnectionString = BuildTimeoutConnectionString(connectionString);
-        return await ExecuteWithRetryAsync(async token =>
+
+        // The read runs under the retry policy, the count is moved outside it. A retry that re-ran the count
+        // would add a second failure for one try, and one press of Sign in must move the count exactly once.
+        var outcome = await ExecuteWithRetryAsync(async token =>
         {
             await using var connection = new MySqlConnection(timeoutConnectionString);
             await connection.OpenAsync(token);
@@ -219,39 +231,118 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
                 CommandType = System.Data.CommandType.StoredProcedure
             };
 
-            command.Parameters.AddWithValue("@p_username", username.Trim().ToLowerInvariant());
+            // Upper case, because the column is `username_normalized` and the store holds that form. The column's
+            // collation folds case, so a name typed either way matches the one stored form (FR-002).
+            command.Parameters.AddWithValue("@p_username", NormalizeUsername(username));
 
             await using var reader = await command.ExecuteReaderAsync(token);
             if (!await reader.ReadAsync(token))
             {
-                return StartupCredentialCheckResult.Failed();
+                return null;
             }
 
             var userId = reader.GetInt64(0);
-            var currentRole = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-            var passwordHash = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
-            var passwordSalt = reader.IsDBNull(3) ? null : (byte[])reader[3];
-            var requirePasswordChange = !reader.IsDBNull(4) && reader.GetBoolean(4);
-            var displayName = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
-            var employeeIdentifier = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+            var currentRoleCode = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+            var currentRole = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+            var passwordHash = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
+            var passwordSalt = reader.IsDBNull(4) ? null : (byte[])reader[4];
+            var requirePasswordChange = !reader.IsDBNull(5) && reader.GetBoolean(5);
+            var displayName = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+            var employeeIdentifier = reader.IsDBNull(7) ? string.Empty : reader.GetString(7);
+            var failedAttempts = reader.IsDBNull(8)
+                ? 0
+                : Convert.ToInt32(reader.GetValue(8), System.Globalization.CultureInfo.InvariantCulture);
 
-            if (IsTemporaryDefaultPassword(passwordHash))
+            // "Holds a temporary credential" is exactly what sp_auth_password_reset_required_get computes: the
+            // forced-change flag is set, or the stored hash is empty or the legacy marker. A reset stores a real
+            // salted hash of the PIN, so the flag is what marks it temporary, and the limit has to apply to it.
+            var holdsTemporaryCredential = requirePasswordChange || IsTemporaryDefaultPassword(passwordHash);
+            var requiresPasswordChange = requirePasswordChange || IsTemporaryDefaultPassword(passwordHash);
+
+            // The limit is checked BEFORE the value is compared, so the attempt after the fifth failing one is
+            // refused even when it holds the right credential (FR-031). Nothing here expires the count.
+            if (holdsTemporaryCredential && failedAttempts >= TemporaryCredentialAttemptLimit)
             {
-                if (!string.Equals(password, TemporaryDefaultPasswordHashMarker, StringComparison.Ordinal))
+                return new CredentialCheckOutcome(
+                    StartupCredentialCheckResult.Failed() with
+                    {
+                        HoldsTemporaryCredential = true,
+                        TemporaryCredentialFailedAttempts = failedAttempts,
+                        TemporaryCredentialAttemptLimitReached = true,
+                    },
+                    RecordAttempt: false);
+            }
+
+            // The legacy marker account accepts only the literal marker, exactly as it did before this feature;
+            // every other account is checked against its salted hash.
+            var credentialAccepted = IsTemporaryDefaultPassword(passwordHash)
+                ? string.Equals(password, TemporaryDefaultPasswordHashMarker, StringComparison.Ordinal)
+                : PasswordSecretHasher.Verify(password, passwordHash, passwordSalt);
+
+            // A wrong password on an ordinary account is refused and moves no count, so the limit cannot be used
+            // to find out which sign-in names exist (FR-044).
+            if (!credentialAccepted)
+            {
+                return new CredentialCheckOutcome(
+                    StartupCredentialCheckResult.Failed() with
+                    {
+                        HoldsTemporaryCredential = holdsTemporaryCredential,
+                        TemporaryCredentialFailedAttempts = holdsTemporaryCredential ? failedAttempts + 1 : 0,
+                    },
+                    RecordAttempt: holdsTemporaryCredential);
+            }
+
+            // A successful sign-in with a temporary credential clears the count (FR-039); a successful sign-in on
+            // an ordinary account had nothing to clear.
+            return new CredentialCheckOutcome(
+                StartupCredentialCheckResult.Success(userId, currentRole, requiresPasswordChange, displayName, employeeIdentifier, currentRoleCode) with
                 {
-                    return StartupCredentialCheckResult.Failed();
-                }
+                    HoldsTemporaryCredential = holdsTemporaryCredential,
+                    TemporaryCredentialFailedAttempts = 0,
+                },
+                RecordAttempt: holdsTemporaryCredential && failedAttempts > 0);
+        }, cancellationToken).ConfigureAwait(false);
 
-                return StartupCredentialCheckResult.Success(userId, currentRole, true, displayName, employeeIdentifier);
-            }
+        if (outcome is null)
+        {
+            return StartupCredentialCheckResult.Failed();
+        }
 
-            if (!VerifyPassword(password, passwordHash, passwordSalt))
-            {
-                return StartupCredentialCheckResult.Failed();
-            }
+        if (outcome.RecordAttempt)
+        {
+            await RecordTemporaryCredentialAttemptAsync(
+                    outcome.Result.UserId,
+                    outcome.Result.IsAuthenticated,
+                    timeoutConnectionString,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
 
-            return StartupCredentialCheckResult.Success(userId, currentRole, requirePasswordChange, displayName, employeeIdentifier);
-        }, cancellationToken);
+        return outcome.Result;
+    }
+
+    /// <summary>
+    /// Moves the wrong-attempt count for one account, in one statement, so no screen has to remember to record
+    /// a failure and a successful sign-in clears what earlier failures left (FR-036, FR-039).
+    /// </summary>
+    private static async Task RecordTemporaryCredentialAttemptAsync(
+        long userId,
+        bool wasSuccessful,
+        string timeoutConnectionString,
+        CancellationToken cancellationToken)
+    {
+        await using var connection = new MySqlConnection(timeoutConnectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new MySqlCommand(TemporaryCredentialAttemptProcedure, connection)
+        {
+            CommandType = System.Data.CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@p_user_id", userId);
+        command.Parameters.AddWithValue("@p_was_successful", wasSuccessful ? 1 : 0);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public async Task<bool> UpdatePasswordAsync(
@@ -273,9 +364,8 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         var timeoutConnectionString = BuildTimeoutConnectionString(connectionString);
         return await ExecuteWithRetryAsync(async token =>
         {
-            var salt = new byte[PasswordSaltLengthBytes];
-            RandomNumberGenerator.Fill(salt);
-            var hash = HashPassword(newPassword, salt);
+            var salt = PasswordSecretHasher.NewSalt();
+            var hash = PasswordSecretHasher.Hash(newPassword, salt);
 
             await using var connection = new MySqlConnection(timeoutConnectionString);
             await connection.OpenAsync(token);
@@ -313,7 +403,7 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
         return count > 0;
     }
 
-    private static async Task<(bool IsUserMatched, long UserId, string CurrentRole, string DisplayName, string EmployeeIdentifier)> ReadUserRowAsync(
+    private static async Task<UserRow> ReadUserRowAsync(
         MySqlConnection connection,
         string username,
         CancellationToken cancellationToken)
@@ -323,20 +413,46 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
             CommandType = System.Data.CommandType.StoredProcedure
         };
 
-        command.Parameters.AddWithValue("@p_username", username);
+        command.Parameters.AddWithValue("@p_username", NormalizeUsername(username));
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken))
         {
-            return (false, 0, string.Empty, string.Empty, string.Empty);
+            return UserRow.Missing;
         }
 
-        var userId = reader.GetInt64(0);
-        var role = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-        var displayName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
-        var employeeIdentifier = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
-        return (true, userId, role, displayName, employeeIdentifier);
+        return new UserRow(
+            true,
+            reader.GetInt64(0),
+            reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+            reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+            reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+            reader.IsDBNull(4) ? string.Empty : reader.GetString(4));
     }
+
+    /// <summary>
+    /// The stored form of a sign-in name. The column is <c>username_normalized</c> and the store holds upper
+    /// case, so both the write and the comparison use this one form (FR-002).
+    /// </summary>
+    private static string NormalizeUsername(string username) => username.Trim().ToUpperInvariant();
+
+    /// <summary>One matched account row, or <see cref="Missing"/> when no account matched.</summary>
+    private readonly record struct UserRow(
+        bool IsUserMatched,
+        long UserId,
+        string RoleCode,
+        string RoleName,
+        string DisplayName,
+        string EmployeeIdentifier)
+    {
+        public static UserRow Missing { get; } = new(false, 0, string.Empty, string.Empty, string.Empty, string.Empty);
+    }
+
+    /// <summary>
+    /// One credential check's answer plus whether the count has to move for it. The count is moved by the caller
+    /// after the retried read has returned, so one attempt never becomes two.
+    /// </summary>
+    private sealed record CredentialCheckOutcome(StartupCredentialCheckResult Result, bool RecordAttempt);
 
     private static async Task<DateTimeOffset?> ReadSessionExpiryUtcAsync(
         MySqlConnection connection,
@@ -427,44 +543,5 @@ public sealed class StartupSessionRepository : IStartupSessionRepository
     {
         return string.IsNullOrWhiteSpace(passwordHash)
             || string.Equals(passwordHash, TemporaryDefaultPasswordHashMarker, StringComparison.Ordinal);
-    }
-
-    private static bool VerifyPassword(string password, string storedHash, byte[]? storedSalt)
-    {
-        if (string.IsNullOrWhiteSpace(storedHash) || storedSalt is null || storedSalt.Length == 0)
-        {
-            return false;
-        }
-
-        byte[] expectedHash;
-        try
-        {
-            expectedHash = Convert.FromBase64String(storedHash);
-        }
-        catch (FormatException)
-        {
-            return false;
-        }
-
-        var computedHash = Rfc2898DeriveBytes.Pbkdf2(
-            Encoding.UTF8.GetBytes(password),
-            storedSalt,
-            PasswordIterations,
-            HashAlgorithmName.SHA256,
-            PasswordHashLengthBytes);
-
-        return CryptographicOperations.FixedTimeEquals(expectedHash, computedHash);
-    }
-
-    private static string HashPassword(string password, byte[] salt)
-    {
-        var hash = Rfc2898DeriveBytes.Pbkdf2(
-            Encoding.UTF8.GetBytes(password),
-            salt,
-            PasswordIterations,
-            HashAlgorithmName.SHA256,
-            PasswordHashLengthBytes);
-
-        return Convert.ToBase64String(hash);
     }
 }

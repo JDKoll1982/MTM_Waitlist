@@ -66,4 +66,7 @@ WHERE
         'plant_manager',
         'developer',
         'admin'
-    );
+    )
+    -- `material_handler_lead` is the one role this change added, so the rollback removes exactly it and nothing
+    -- else. It is removed before any of its assignments can survive, and those go with the users above.
+    OR role_code = 'material_handler_lead';

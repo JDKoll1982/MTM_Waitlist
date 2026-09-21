@@ -5,13 +5,89 @@ USE mtm_waitlist;
 
 ALTER TABLE core_users_profiles COMMENT = 'User profile and authentication identity records.';
 
+-- Feature 006: the person's own name parts and the wrong-attempt count on a temporary credential.
+-- A guarded block is required rather than optional here, because `CREATE TABLE IF NOT EXISTS` cannot add a
+-- column to a table that already exists. The three blocks below follow the shape of the
+-- `setup_work_centers_catalog.building` block further down this file.
+SET
+    @has_first_name_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'core_users_profiles'
+            AND column_name = 'first_name'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_first_name_column = 0,
+        'ALTER TABLE core_users_profiles ADD COLUMN first_name VARCHAR(128) NOT NULL AFTER username_normalized',
+        'SELECT ''core_users_profiles.first_name already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET
+    @has_last_name_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'core_users_profiles'
+            AND column_name = 'last_name'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_last_name_column = 0,
+        'ALTER TABLE core_users_profiles ADD COLUMN last_name VARCHAR(128) NOT NULL AFTER first_name',
+        'SELECT ''core_users_profiles.last_name already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET
+    @has_temporary_credential_failed_attempts_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'core_users_profiles'
+            AND column_name = 'temporary_credential_failed_attempts'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_temporary_credential_failed_attempts_column = 0,
+        'ALTER TABLE core_users_profiles ADD COLUMN temporary_credential_failed_attempts INT NOT NULL DEFAULT 0 AFTER require_password_change',
+        'SELECT ''core_users_profiles.temporary_credential_failed_attempts already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
 ALTER TABLE core_users_profiles
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for external references.',
 MODIFY COLUMN username_normalized VARCHAR(128) NOT NULL COMMENT 'Normalized unique username for sign-in lookup.',
+MODIFY COLUMN first_name VARCHAR(128) NOT NULL COMMENT 'The person given name, 1 to 128 characters.',
+MODIFY COLUMN last_name VARCHAR(128) NOT NULL COMMENT 'The person family name, 1 to 128 characters.',
 MODIFY COLUMN password_hash VARCHAR(128) NOT NULL DEFAULT '0000' COMMENT 'Password hash value for authentication.',
 MODIFY COLUMN password_salt VARBINARY(32) NULL COMMENT 'Per-user password salt.',
 MODIFY COLUMN require_password_change TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Flag requiring password reset on next login.',
+MODIFY COLUMN temporary_credential_failed_attempts INT NOT NULL DEFAULT 0 COMMENT 'Wrong attempts made with a temporary credential. Cleared by a successful attempt or a fresh reset; never expires with time.',
 MODIFY COLUMN display_name VARCHAR(256) NOT NULL COMMENT 'Display name shown in the UI.',
 MODIFY COLUMN employee_identifier VARCHAR(128) NULL COMMENT 'Optional employee number or identifier.',
 MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the user account is active.',
@@ -34,11 +110,59 @@ MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row 
 
 ALTER TABLE auth_roles_catalog COMMENT = 'Role definitions used for RBAC authorization.';
 
+-- Feature 006: the one rung per role, so the ladder is a readable row rather than a value copied into code.
+SET
+    @has_role_rank_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'auth_roles_catalog'
+            AND column_name = 'role_rank'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_role_rank_column = 0,
+        'ALTER TABLE auth_roles_catalog ADD COLUMN role_rank INT NOT NULL DEFAULT 0 AFTER role_name',
+        'SELECT ''auth_roles_catalog.role_rank already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET
+    @has_role_rank_index := (
+        SELECT COUNT(*)
+        FROM information_schema.statistics
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'auth_roles_catalog'
+            AND index_name = 'idx_auth_roles_catalog_role_rank'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_role_rank_index = 0,
+        'ALTER TABLE auth_roles_catalog ADD KEY idx_auth_roles_catalog_role_rank (role_rank)',
+        'SELECT ''idx_auth_roles_catalog_role_rank already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
 ALTER TABLE auth_roles_catalog
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for role record.',
 MODIFY COLUMN role_code VARCHAR(64) NOT NULL COMMENT 'Machine-friendly unique role code.',
 MODIFY COLUMN role_name VARCHAR(128) NOT NULL COMMENT 'Human-readable role name.',
+MODIFY COLUMN role_rank INT NOT NULL DEFAULT 0 COMMENT 'The role rung used by every rank comparison. Higher outranks lower. A retired role is deliberately left at the default 0.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
 
@@ -411,6 +535,35 @@ MODIFY COLUMN allotted_minutes INT NULL COMMENT 'The Item configured allotment i
 MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last changed this configuration row. Audit only; not part of the read contract.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the configuration row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the configuration row was last updated.';
+
+-- ============================================================
+-- auth_user_management_audit - feature 006
+-- ============================================================
+-- New table. The owning artifact is Database/Tables/32_auth_user_management_audit/create.sql; the guarded
+-- statement below carries the same shape so a store that ALREADY EXISTS gains the table when this maintenance
+-- file is run, which is the only path that reaches such a store. It carries no foreign keys, so it can be
+-- created in any order and needs no FOREIGN_KEY_CHECKS handling.
+SET
+    @has_auth_user_management_audit_table := (
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'auth_user_management_audit'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_auth_user_management_audit_table = 0,
+        'CREATE TABLE auth_user_management_audit (id BIGINT NOT NULL AUTO_INCREMENT COMMENT ''Surrogate primary key.'', public_id CHAR(36) NOT NULL COMMENT ''Public UUID for external references.'', change_group_id CHAR(36) NOT NULL COMMENT ''Shared by every row one save produced, so one act reads as one act.'', target_user_id BIGINT NOT NULL COMMENT ''The person whose account changed.'', field_name VARCHAR(64) NOT NULL COMMENT ''The one field this row is about.'', previous_value TEXT NULL COMMENT ''The value before the change, or NULL where there is none to record.'', changed_value TEXT NULL COMMENT ''The value after the change, or NULL where there is none to record.'', actor_user_id BIGINT NULL COMMENT ''The acting person, joined for durability.'', actor_display_name VARCHAR(256) NOT NULL COMMENT ''The actor display name as it was when they acted.'', actor_employee_identifier VARCHAR(128) NOT NULL COMMENT ''The actor employee number as it was when they acted.'', actor_role_code VARCHAR(64) NOT NULL COMMENT ''The actor role code as it was when they acted.'', occurred_utc DATETIME NOT NULL COMMENT ''UTC timestamp when the change was recorded.'', PRIMARY KEY (id), UNIQUE KEY uq_auth_user_management_audit_public_id (public_id), KEY idx_auth_user_management_audit_change_group_id (change_group_id), KEY idx_audit_target_user_id_occurred_utc (target_user_id, occurred_utc)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci',
+        'SELECT ''auth_user_management_audit already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
 
 -- ============================================================
 -- Retired objects - feature 001-module-mock-visual-fallback (FR-014)

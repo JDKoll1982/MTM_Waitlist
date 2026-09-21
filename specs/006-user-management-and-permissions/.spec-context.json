@@ -186,557 +186,1168 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-20T19:04:11.404Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:20:46.231Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:24:10.294Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:24:13.438Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:35:37.152Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:35:41.085Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:35:44.341Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:39:31.349Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:39:35.232Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:39:42.439Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:41:34.975Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:43:44.352Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:44:51.324Z"
     }
   ],
   "unattended": true,
   "coverage": {
     "FR-001": {
       "title": "An account carries a sign-in name, a first name, a last name, a display name, an employee number, a role and an active flag.",
-      "tasks": "T003,T010,T019"
+      "tasks": [
+        "T003",
+        "T019"
+      ]
     },
     "FR-002": {
       "title": "A sign-in name is stored and matched in upper case, so signing in succeeds whatever case is typed.",
-      "tasks": "T008,T015,T020"
+      "tasks": [
+        "T008",
+        "T015",
+        "T020"
+      ]
     },
     "FR-003": {
       "title": "Accounts whose sign-in name is not upper case are migrated to that rule.",
-      "tasks": "T015"
+      "tasks": [
+        "T015"
+      ],
+      "tests": "live check: sp_auth_credentials_check answered for a sign-in name typed upper, lower and mixed case after the upper-case comparison moved"
     },
     "FR-004": {
       "title": "An employee number is exactly four digits and is deliberately not unique.",
-      "tasks": "T019,T047,T053"
+      "tasks": [
+        "T019",
+        "T047",
+        "T053"
+      ]
     },
     "FR-005": {
       "title": "A sign-in name, a first name and a last name are each 1 to 128 characters; the display name does not exceed 256.",
-      "tasks": "T019,T047,T053"
+      "tasks": [
+        "T019",
+        "T047",
+        "T053"
+      ]
     },
     "FR-006": {
       "title": "Creating a person writes the profile and the role assignment together.",
-      "tasks": "T011,T019,T072"
+      "tasks": [
+        "T011",
+        "T072"
+      ]
     },
     "FR-007": {
       "title": "A new account is created active, and the create screen offers no active control.",
-      "tasks": "T011,T047,T050,T053"
+      "tasks": [
+        "T011",
+        "T047",
+        "T053"
+      ]
     },
     "FR-008": {
       "title": "A duplicate sign-in name produces a definite already-taken answer that names the name and is never retried.",
-      "tasks": "T011,T019,T047,T053,T072"
+      "tasks": [
+        "T011",
+        "T019",
+        "T047",
+        "T053",
+        "T072"
+      ]
     },
     "FR-009": {
       "title": "A person is created with exactly one role and nothing adds a second; the stored assignments still permit more, so readers take the highest-ranked live role.",
-      "tasks": "T011,T019"
+      "tasks": [
+        "T011"
+      ]
     },
     "FR-010": {
       "title": "The rank of every role is defined in one place and nowhere else.",
-      "tasks": "T004,T028,T029"
+      "tasks": [
+        "T004",
+        "T028",
+        "T029"
+      ]
     },
     "FR-011": {
       "title": "The retired administrator role is removed from the catalogue and replaced by IT Department.",
-      "tasks": "T027,T031"
+      "tasks": [
+        "T032"
+      ]
     },
     "FR-012": {
       "title": "Every account that held the retired role moves onto IT Department in one all-or-nothing act.",
-      "tasks": "T031,T032"
+      "tasks": [
+        "T032"
+      ]
     },
     "FR-013": {
       "title": "The change ships with a paired reversal that is run as part of verification.",
-      "tasks": "T032,T033,T070"
+      "tasks": [
+        "T032",
+        "T033",
+        "T070"
+      ]
     },
     "FR-014": {
       "title": "After the change no account has no role, and IT Department holds exactly the accounts that held the retired role.",
-      "tasks": "T032,T033,T072"
+      "tasks": [
+        "T001",
+        "T032",
+        "T033",
+        "T072"
+      ]
     },
     "FR-015": {
       "title": "Material Handler Lead is added as a role in its own right with its own rank, not mapped onto Plant Manager.",
-      "tasks": "T027,T031"
+      "tasks": [
+        "T027"
+      ],
+      "tests": "live check of the shipped role seed against the local store (nine catalogue rows at their pinned rungs, admin at 0)"
     },
     "FR-016": {
       "title": "The rank comparison and the roles-at-or-above list come from the one definition.",
-      "tasks": "T028,T029,T031"
+      "tasks": [
+        "T028",
+        "T029"
+      ]
     },
     "FR-017": {
       "title": "Where a person holds more than one live role, the highest rank decides.",
-      "tasks": "T029,T031"
+      "tasks": [
+        "T029"
+      ]
     },
     "FR-018": {
       "title": "The ladder leaves room between rungs and the rung of each role is checkable.",
-      "tasks": "T004,T027,T031"
+      "tasks": [
+        "T004",
+        "T027"
+      ]
     },
     "FR-019": {
       "title": "A person cannot change an account whose role ranks strictly above their own, for the role, the active state, the sign-in name or the password.",
-      "tasks": "T011,T012,T019,T048,T053"
+      "tasks": [
+        "T011",
+        "T012",
+        "T048",
+        "T053"
+      ]
     },
     "FR-020": {
       "title": "Peers remain editable, because a person's own rank is not above their own rank.",
-      "tasks": "T012,T048,T053"
+      "tasks": [
+        "T048",
+        "T053"
+      ]
     },
     "FR-021": {
       "title": "A person's own account does not rank above them, so their own password change still works.",
-      "tasks": "T012,T048"
+      "tasks": [
+        "T048",
+        "T053"
+      ]
     },
     "FR-022": {
       "title": "A person cannot assign a role above their own rank, and the picker offers only roles at or below it.",
-      "tasks": "T012,T047,T053"
+      "tasks": [
+        "T012",
+        "T047",
+        "T048",
+        "T053"
+      ]
     },
     "FR-023": {
       "title": "A person cannot deactivate their own account.",
-      "tasks": "T012,T048,T053"
+      "tasks": [
+        "T012",
+        "T048",
+        "T053"
+      ]
     },
     "FR-024": {
       "title": "A person cannot change the sign-in name of the account they are signed in as.",
-      "tasks": "T012,T048,T053"
+      "tasks": [
+        "T012",
+        "T048",
+        "T053"
+      ]
     },
     "FR-025": {
       "title": "The rank, self-lockout and sign-in-name rules are enforced where the change is written.",
-      "tasks": "T011,T012,T013,T019,T054,T072"
+      "tasks": [
+        "T011",
+        "T012",
+        "T019",
+        "T048",
+        "T053",
+        "T054",
+        "T072"
+      ]
     },
     "FR-026": {
       "title": "A refused change is reported plainly and writes no audit record, because nothing changed.",
-      "tasks": "T012,T019,T041,T047,T058"
+      "tasks": [
+        "T012",
+        "T047",
+        "T048",
+        "T053",
+        "T058"
+      ]
     },
     "FR-027": {
       "title": "An account the reader cannot change is still readable, shows its fields and actions as unavailable, and states the reason.",
-      "tasks": "T010,T012,T048,T053"
+      "tasks": [
+        "T010",
+        "T048",
+        "T053"
+      ]
     },
     "FR-028": {
       "title": "A password reset happens from a person's page, behind a confirmation, with no reset on the sign-in screen and none for oneself.",
-      "tasks": "T049,T051,T064"
+      "tasks": [
+        "T048",
+        "T049",
+        "T051",
+        "T064"
+      ]
     },
     "FR-029": {
       "title": "A reset sets a random four-digit PIN, requires a change at the next sign-in, and does not reactivate a switched-off account.",
-      "tasks": "T013"
+      "tasks": [
+        "T013"
+      ]
     },
     "FR-030": {
       "title": "The reset PIN is shown once and is never readable back: only a salted hash may be stored, and 'read back' means plaintext.",
-      "tasks": "T013,T049,T053,T073"
+      "tasks": [
+        "T013",
+        "T049",
+        "T053",
+        "T073"
+      ]
     },
     "FR-031": {
       "title": "The value previously used for a reset stays recognised as a temporary value.",
-      "tasks": "T008,T066"
+      "tasks": [
+        "T008",
+        "T066"
+      ]
     },
     "FR-032": {
       "title": "A second reset replaces the earlier PIN and the screen says so.",
-      "tasks": "T049,T053"
+      "tasks": [
+        "T049",
+        "T053"
+      ]
     },
     "FR-033": {
       "title": "Creating a person issues a PIN the same way a reset does.",
-      "tasks": "T011,T049"
+      "tasks": [
+        "T049"
+      ]
     },
     "FR-034": {
       "title": "The PIN window must be closed deliberately, is not dismissed by clicking outside or Escape, offers printing, and printing does not close it.",
-      "tasks": "T049,T052,T053"
+      "tasks": [
+        "T049",
+        "T052",
+        "T053"
+      ]
     },
     "FR-035": {
       "title": "A reset does not end an existing session for that person.",
-      "tasks": "T013"
+      "tasks": [
+        "T013",
+        "T066",
+        "T072"
+      ]
     },
     "FR-036": {
       "title": "After five failed sign-in attempts an account holding a temporary value stops accepting it.",
-      "tasks": "T009,T020,T066"
+      "tasks": [
+        "T009",
+        "T020",
+        "T066"
+      ]
     },
     "FR-037": {
       "title": "The count is held with the account, so closing and reopening the application does not clear it.",
-      "tasks": "T003,T009,T020,T066"
+      "tasks": [
+        "T003",
+        "T020",
+        "T066"
+      ]
     },
     "FR-038": {
       "title": "The count does not expire with time.",
-      "tasks": "T066"
+      "tasks": [
+        "T066"
+      ]
     },
     "FR-039": {
       "title": "Only a successful sign-in or a fresh reset clears the count.",
-      "tasks": "T009,T013,T066"
+      "tasks": [
+        "T009",
+        "T013",
+        "T066"
+      ]
     },
     "FR-040": {
       "title": "The limit applies only to accounts holding a temporary value; ordinary sign-in keeps today's behaviour.",
-      "tasks": "T064,T065"
+      "tasks": [
+        "T064",
+        "T065"
+      ]
     },
     "FR-041": {
       "title": "Once an attempt has failed the remaining attempts are shown; they are not shown before one has.",
-      "tasks": "T064,T065"
+      "tasks": [
+        "T064",
+        "T065"
+      ]
     },
     "FR-042": {
       "title": "A failed sign-in for a sign-in name that does not exist behaves exactly as it does today.",
-      "tasks": "T020,T064,T065"
+      "tasks": [
+        "T020",
+        "T064",
+        "T065"
+      ]
     },
     "FR-043": {
       "title": "The wrong-attempt count is not presented as a record of who tried.",
-      "tasks": "T066"
+      "tasks": [
+        "T066"
+      ]
     },
     "FR-044": {
       "title": "When the count has been reached the person is told that someone entitled must issue a fresh reset.",
-      "tasks": "T064,T065"
+      "tasks": [
+        "T064",
+        "T065"
+      ]
     },
     "FR-045": {
       "title": "Every gated action is named by exactly one permission key, and a person either holds it or does not.",
-      "tasks": "T016,T024"
+      "tasks": [
+        "T016"
+      ],
+      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_HoldsEveryPinnedKeyExactlyOnce"
     },
     "FR-046": {
       "title": "The application holds one declaration of every permission with its key, label, what it gates, the area, the shipped fallback and the gate sites, and it carries no per-role baseline.",
-      "tasks": "T016,T024"
+      "tasks": [
+        "T016",
+        "T024",
+        "T036",
+        "T060"
+      ],
+      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_DerivesEachKeysResourceNamesFromTheKeyItself,Declaration_ExposesNoPerRoleBaseline"
     },
     "FR-047": {
       "title": "A permission cannot exist without appearing on the page, nor appear without a baseline for every role; the declaration and the seeded baselines are checked in both directions.",
-      "tasks": "T016,T024,T036"
+      "tasks": [
+        "T016",
+        "T024",
+        "T036",
+        "T060"
+      ],
+      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_GivesEveryKeyANamedGateSiteThatReadsIt"
     },
     "FR-048": {
       "title": "The shipped baselines are data rather than values fixed in code, so what a role may do can change without a code change.",
-      "tasks": "T007,T036"
+      "tasks": [
+        "T007",
+        "T016",
+        "T024",
+        "T036",
+        "T060"
+      ]
     },
     "FR-049": {
       "title": "A permission resolves for the person: their own stored value, otherwise their role's baseline, otherwise the shipped fallback.",
-      "tasks": "T014,T018,T025"
+      "tasks": [
+        "T014",
+        "T018",
+        "T025"
+      ],
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_WithNoStoredRowOfTheirOwn_TakesTheRoleBaseline,HasPermissionAsync_APersonsOwnRowBeatsTheirRoleBaseline"
     },
     "FR-050": {
       "title": "An unreachable store yields the shipped fallback rather than a refusal.",
-      "tasks": "T018,T025,T037"
+      "tasks": [
+        "T018",
+        "T025",
+        "T037"
+      ],
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_WhenTheStoreThrows_AnswersFromTheShippedFallbackRatherThanRefusing"
     },
     "FR-051": {
       "title": "A new account starts from its role's baseline and holds nothing beyond it.",
-      "tasks": "T018,T025,T036"
+      "tasks": [
+        "T018",
+        "T025",
+        "T036"
+      ],
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_WithNoStoredRowAtAll_FallsBackToTheShippedFallback"
     },
     "FR-052": {
       "title": "The shipped baselines reproduce exactly what each role is allowed today, so nobody's access changes on ship day.",
-      "tasks": "T002,T034,T036,T041,T072"
+      "tasks": [
+        "T002",
+        "T034",
+        "T036",
+        "T072"
+      ]
     },
     "FR-053": {
       "title": "A person's own stored value beats a wider scope, and the order is corrected and shipped before any value is stored for an individual.",
-      "tasks": "T001,T006,T018,T025,T054,T070"
+      "tasks": [
+        "T001",
+        "T006",
+        "T014",
+        "T018",
+        "T025",
+        "T054",
+        "T070"
+      ],
+      "tests": "Module_Core/Services/SettingsScopeRankTests.cs::ShippedScopeRankFunction_PutsAPersonsOwnValueAboveEveryWiderScope"
     },
     "FR-054": {
       "title": "No gate decides access from a hand-written list of role names: all twelve lists the Context counts are removed, eleven replaced by their permission and the badge map re-keyed to role codes.",
-      "tasks": "T035,T037,T038,T039,T040"
+      "tasks": [
+        "T017",
+        "T026",
+        "T035",
+        "T037",
+        "T039",
+        "T040"
+      ],
+      "tests": "Tests/Core/Models/CoreModelsTests.cs::StartupState_IsDeveloper_ReadsTheRoleCodeAndNotTheDisplayName"
     },
     "FR-055": {
       "title": "A gate is refused wherever the gated action is performed, not only where the control was drawn.",
-      "tasks": "T018,T037"
+      "tasks": [
+        "T018",
+        "T037"
+      ]
     },
     "FR-056": {
       "title": "A control's visibility and the action it guards are answered from the same lookup.",
-      "tasks": "T018,T037,T039,T040"
+      "tasks": [
+        "T018",
+        "T037",
+        "T039",
+        "T040"
+      ]
     },
     "FR-057": {
       "title": "Whatever the Settings cache-refresh control admits is also admitted by the service's cache-refresh permission.",
-      "tasks": "T034,T038"
+      "tasks": [
+        "T034",
+        "T038"
+      ]
     },
     "FR-058": {
       "title": "The badge beside the signed-in name does not become a permission.",
-      "tasks": "T068,T069"
+      "tasks": [
+        "T035",
+        "T068",
+        "T069"
+      ]
     },
     "FR-059": {
       "title": "The permission that opens and edits the permissions page cannot be changed from that page.",
-      "tasks": "T054,T056,T058"
+      "tasks": [
+        "T054",
+        "T056",
+        "T058"
+      ]
     },
     "FR-060": {
       "title": "A role added later is answered by its baseline or by the shipped fallback for every permission.",
-      "tasks": "T018,T024,T025"
+      "tasks": [
+        "T018",
+        "T024",
+        "T025"
+      ],
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_ARoleWithNoBaselineRowAnswersFromTheShippedFallback"
     },
     "FR-061": {
       "title": "A gated action reading a permission the declaration does not hold is reported as a failure rather than shipping as a silent refusal.",
-      "tasks": "T016,T024,T035"
+      "tasks": [
+        "T016",
+        "T024",
+        "T035"
+      ],
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_WithAnUndeclaredKey_ReportsAFailureRatherThanRefusingSilently"
     },
     "FR-062": {
       "title": "A permission the declaration holds that no gate reads is reported.",
-      "tasks": "T016,T024"
+      "tasks": [
+        "T016",
+        "T024"
+      ],
+      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_GivesEveryKeyANamedGateSiteThatReadsIt"
     },
     "FR-063": {
       "title": "The permissions page shows one person at a time, is not a grid of roles against features, and changes no role's baseline.",
-      "tasks": "T055,T056,T057"
+      "tasks": [
+        "T055",
+        "T056",
+        "T057"
+      ]
     },
     "FR-064": {
       "title": "The permissions page is openable only by IT Department, Plant Manager and Developer.",
-      "tasks": "T036,T039,T054"
+      "tasks": [
+        "T056"
+      ]
     },
     "FR-065": {
       "title": "Each row states what the feature is, what it gates, the value in force, and whether it came from the role baseline or a choice for the person.",
-      "tasks": "T055,T056"
+      "tasks": [
+        "T055",
+        "T056"
+      ]
     },
     "FR-066": {
       "title": "A person whose role ranks above the reader's is selectable to view, with rows shown unavailable and the reason stated in words.",
-      "tasks": "T056,T059"
+      "tasks": [
+        "T056",
+        "T059"
+      ]
     },
     "FR-067": {
       "title": "Saving confirms what is changing and for whom, one sentence per changed row and a count when several change.",
-      "tasks": "T056,T059"
+      "tasks": [
+        "T056",
+        "T059"
+      ]
     },
     "FR-068": {
       "title": "Saving with nothing changed is unavailable and writes no history record.",
-      "tasks": "T056,T058,T059"
+      "tasks": [
+        "T056",
+        "T058",
+        "T059"
+      ]
     },
     "FR-069": {
       "title": "A completed save is reversible, and the reversal obeys the same rule as the change it reverses.",
-      "tasks": "T054,T055,T056,T058,T059"
+      "tasks": [
+        "T054",
+        "T055",
+        "T056",
+        "T059"
+      ]
     },
     "FR-070": {
       "title": "A reversal does not overwrite a value that has moved; it shows what the value is now and asks before restoring.",
-      "tasks": "T054,T055,T056,T058,T059"
+      "tasks": [
+        "T054",
+        "T055",
+        "T056",
+        "T058",
+        "T059"
+      ]
     },
     "FR-071": {
       "title": "A reversal of a save that changed several rows reverses the whole save.",
-      "tasks": "T054,T055,T056,T058,T059"
+      "tasks": [
+        "T054",
+        "T055",
+        "T056",
+        "T058"
+      ]
     },
     "FR-072": {
       "title": "Every permission change writes one history record per changed permission naming the actor, the permission, the scope, both values and the time.",
-      "tasks": "T054,T055,T058"
+      "tasks": [
+        "T054",
+        "T055",
+        "T056",
+        "T058"
+      ]
     },
     "FR-073": {
       "title": "The page warns before it is left with unsaved changes and states how many rows are pending.",
-      "tasks": "T056,T059"
+      "tasks": [
+        "T056",
+        "T059"
+      ]
     },
     "FR-074": {
       "title": "The page shows pending changes as pending until they are saved.",
-      "tasks": "T056,T059"
+      "tasks": [
+        "T056",
+        "T059"
+      ]
     },
     "FR-075": {
       "title": "A second view answers which roles' baselines give a feature, taken from the seeded baselines the declaration's check ties to it rather than repeated.",
-      "tasks": "T060,T061,T062,T063"
+      "tasks": [
+        "T060",
+        "T061",
+        "T062",
+        "T063"
+      ]
     },
     "FR-076": {
       "title": "The same view names only the people who differ from their role's baseline, in either direction, each marked granted or denied.",
-      "tasks": "T054,T060,T061,T063"
+      "tasks": [
+        "T054",
+        "T060",
+        "T063"
+      ]
     },
     "FR-077": {
       "title": "The view is read-only, and choosing a differing person opens that person's own page.",
-      "tasks": "T060,T061,T063"
+      "tasks": [
+        "T060",
+        "T061",
+        "T063"
+      ]
     },
     "FR-078": {
       "title": "A feature nobody holds is stated in words rather than shown as an empty region.",
-      "tasks": "T060,T061,T063"
+      "tasks": [
+        "T060",
+        "T061",
+        "T063"
+      ]
     },
     "FR-079": {
       "title": "A person who holds a feature but has been switched off is listed and marked as switched off.",
-      "tasks": "T054,T060,T061,T063"
+      "tasks": [
+        "T054",
+        "T060",
+        "T061",
+        "T063"
+      ]
     },
     "FR-080": {
       "title": "Settings gains an Administration category holding two entries, one opening the user list and one opening the permissions page.",
-      "tasks": "T021,T042,T043,T045,T046,T050,T052,T057"
+      "tasks": [
+        "T021",
+        "T043",
+        "T046",
+        "T052",
+        "T057"
+      ]
     },
     "FR-081": {
       "title": "Each entry is shown by its own permission, and a reader entitled to neither does not see the category.",
-      "tasks": "T039,T043,T046"
+      "tasks": [
+        "T039",
+        "T043"
+      ]
     },
     "FR-082": {
       "title": "Neither entry expands in place, and each carries a short description of what it opens.",
-      "tasks": "T043,T046"
+      "tasks": [
+        "T043",
+        "T046"
+      ]
     },
     "FR-083": {
       "title": "Leaving either page returns to Settings, and repeating a page does not walk back through repeats of it.",
-      "tasks": "T045,T046,T057"
+      "tasks": [
+        "T045",
+        "T057"
+      ]
     },
     "FR-084": {
       "title": "Both entries are reachable from the Settings search.",
-      "tasks": "T043,T046"
+      "tasks": [
+        "T043",
+        "T046"
+      ]
     },
     "FR-085": {
       "title": "A page re-checks the reader's entitlement rather than staying open on a stale answer.",
-      "tasks": "T044"
+      "tasks": [
+        "T044"
+      ]
     },
     "FR-086": {
       "title": "The list searches sign-in name, display name, employee number and role.",
-      "tasks": "T010,T042,T044,T046"
+      "tasks": [
+        "T010",
+        "T042",
+        "T044",
+        "T046"
+      ]
     },
     "FR-087": {
       "title": "The list is filterable by role.",
-      "tasks": "T010,T042,T044,T046"
+      "tasks": [
+        "T010",
+        "T042",
+        "T044",
+        "T046"
+      ]
     },
     "FR-088": {
       "title": "The list shows everyone by default, with switched-off people clearly marked.",
-      "tasks": "T010,T044,T046"
+      "tasks": [
+        "T010"
+      ]
     },
     "FR-089": {
       "title": "The search and role filter are remembered for the person, and the page names the active filter and says how many people it is hiding.",
-      "tasks": "T042,T044,T046"
+      "tasks": [
+        "T042",
+        "T044",
+        "T046"
+      ]
     },
     "FR-090": {
       "title": "A filter that matches nobody is stated distinctly from there being no people at all.",
-      "tasks": "T044,T046"
+      "tasks": [
+        "T044",
+        "T046"
+      ]
     },
     "FR-091": {
       "title": "A saved filter that cannot be read causes everyone to be shown with the failure stated, never an empty list.",
-      "tasks": "T044,T046"
+      "tasks": [
+        "T044",
+        "T046"
+      ]
     },
     "FR-092": {
       "title": "A filter naming a role that no longer exists falls back to showing everyone and says the filter no longer applies.",
-      "tasks": "T044,T046"
+      "tasks": [
+        "T044",
+        "T046"
+      ]
     },
     "FR-093": {
       "title": "A row does exactly one thing, which is to open that person; reset, deactivate and reactivate live on that person's page.",
-      "tasks": "T044,T045"
+      "tasks": [
+        "T044",
+        "T046"
+      ]
     },
     "FR-094": {
       "title": "A row remains a single target, keeps all five facts visible at every width, and folds onto a second line rather than cropping.",
-      "tasks": "T042,T044,T045"
+      "tasks": [
+        "T042",
+        "T044",
+        "T045",
+        "T046"
+      ]
     },
     "FR-095": {
       "title": "The list stays usable, and does not freeze while it loads, with a roster of 1,000 people.",
-      "tasks": "T044,T045,T046"
+      "tasks": [
+        "T044",
+        "T045",
+        "T046"
+      ]
     },
     "FR-096": {
       "title": "Where the store cannot be read the list shows an unavailable state with a retry, and never an empty list, a blank region or sample data.",
-      "tasks": "T044,T046"
+      "tasks": [
+        "T044",
+        "T046"
+      ]
     },
     "FR-097": {
       "title": "The page presents the fields in a form at the top and the actions in a clearly separated area below.",
-      "tasks": "T048,T051"
+      "tasks": [
+        "T048",
+        "T051"
+      ]
     },
     "FR-098": {
       "title": "A page the reader cannot act on says so at the top and shows its actions as unavailable rather than hiding them.",
-      "tasks": "T048,T053"
+      "tasks": [
+        "T048"
+      ]
     },
     "FR-099": {
       "title": "The create page is a form only, with no actions area.",
-      "tasks": "T050"
+      "tasks": [
+        "T050"
+      ]
     },
     "FR-100": {
       "title": "An action chosen while edits are unsaved does not act on a half-edited person; the reader must save or discard first.",
-      "tasks": "T048,T053"
+      "tasks": [
+        "T048",
+        "T053"
+      ]
     },
     "FR-101": {
       "title": "A failed action keeps what the reader had and states what failed, and does not blank the page.",
-      "tasks": "T010,T047,T048,T053"
+      "tasks": [
+        "T010",
+        "T047",
+        "T048",
+        "T053"
+      ]
     },
     "FR-102": {
       "title": "Deactivating states both halves in one sentence, and the same sentence appears on the person's page.",
-      "tasks": "T048,T053"
+      "tasks": [
+        "T048",
+        "T072"
+      ]
     },
     "FR-103": {
       "title": "Reactivating states that access returns from the next sign-in.",
-      "tasks": "T048,T053"
+      "tasks": [
+        "T048"
+      ]
     },
     "FR-104": {
       "title": "Saving is guarded against a repeated press, so one press creates exactly one person or writes exactly one change.",
-      "tasks": "T047,T048,T053"
+      "tasks": [
+        "T047",
+        "T048",
+        "T053"
+      ]
     },
     "FR-105": {
       "title": "The badge lookup is keyed on the role code and covers every role the catalogue holds.",
-      "tasks": "T008,T017,T067,T068,T069"
+      "tasks": [
+        "T008",
+        "T017",
+        "T067",
+        "T068",
+        "T069"
+      ]
     },
     "FR-106": {
       "title": "The fallback badge remains and is reachable only by a genuinely unknown or blank role.",
-      "tasks": "T067,T069"
+      "tasks": [
+        "T067",
+        "T069"
+      ]
     },
     "FR-107": {
       "title": "The vocabulary naming roles the catalogue has never held is removed rather than left in place.",
-      "tasks": "T039,T040,T067,T071"
+      "tasks": [
+        "T039",
+        "T040",
+        "T067",
+        "T071"
+      ]
     },
     "FR-108": {
       "title": "Every creation, change and password reset writes an audit record naming the actor, the field, both values and the time.",
-      "tasks": "T005,T011,T013,T072"
+      "tasks": [
+        "T005",
+        "T011"
+      ]
     },
     "FR-109": {
       "title": "The actor's name, employee number and role are recorded as they were at the time.",
-      "tasks": "T005,T011,T072"
+      "tasks": [
+        "T005"
+      ]
     },
     "FR-110": {
       "title": "One save changing several fields writes one record per changed field, sharing one identifier for the change.",
-      "tasks": "T005,T011,T012,T072"
+      "tasks": [
+        "T005",
+        "T011",
+        "T012"
+      ]
     },
     "FR-111": {
       "title": "A password reset is recorded as having happened with no value on either side.",
-      "tasks": "T005,T013,T072"
+      "tasks": [
+        "T013",
+        "T072"
+      ]
     },
     "FR-112": {
       "title": "Every label, title, field label, action and error message is localised through the application's resource mechanism.",
-      "tasks": "T022,T064"
+      "tasks": [
+        "T022",
+        "T064"
+      ]
     },
     "FR-113": {
       "title": "No control has a fixed width, and a long value wraps or trims with a tooltip rather than being cropped.",
-      "tasks": "T022,T045,T050,T057,T061,T076"
+      "tasks": [
+        "T022",
+        "T045",
+        "T050",
+        "T057",
+        "T061",
+        "T076"
+      ]
     },
     "FR-114": {
       "title": "No screen freezes or refuses interaction while it loads or saves.",
-      "tasks": "T044,T074"
+      "tasks": [
+        "T044",
+        "T059"
+      ]
     },
     "FR-115": {
       "title": "Every list remains usable with 1,000 rows.",
-      "tasks": "T045,T046"
+      "tasks": [
+        "T045"
+      ]
     },
     "FR-116": {
       "title": "The screens remain usable between 150 and 200 percent scaling, and at the narrowest window the application permits.",
-      "tasks": "T045,T050,T057,T076"
+      "tasks": [
+        "T045",
+        "T050",
+        "T057",
+        "T076"
+      ]
     },
     "FR-117": {
       "title": "No control is shown to a person who cannot use it.",
-      "tasks": "T018,T037,T039,T043"
+      "tasks": [
+        "T037",
+        "T039",
+        "T043",
+        "T048",
+        "T051"
+      ]
     },
     "SC-001": {
       "title": "For every key that replaces a retired list, and every person, the effective set on ship day equals exactly what that person's role was allowed before, with zero differences; the three keys with no predecessor are checked against their stated baseline sets.",
-      "tasks": "T002,T031,T034,T036,T041,T072"
+      "tasks": [
+        "T002",
+        "T034",
+        "T041",
+        "T072"
+      ]
     },
     "SC-002": {
       "title": "Zero hand-written role lists remain in the application, and adding one back is reported as a failure.",
-      "tasks": "T035,T041"
+      "tasks": [
+        "T035",
+        "T041"
+      ]
     },
     "SC-003": {
       "title": "Adding a new gated action without declaring its permission and every role's baseline is reported before it can ship as a silent refusal.",
-      "tasks": "T016,T024,T035,T041"
+      "tasks": [
+        "T024",
+        "T035",
+        "T041"
+      ]
     },
     "SC-004": {
       "title": "Zero stored values for individual people are required for SC-001 to hold.",
-      "tasks": "T036,T072"
+      "tasks": [
+        "T036",
+        "T072"
+      ]
     },
     "SC-005": {
       "title": "After the role rename the count of accounts with no role is zero, and the set on IT Department equals the set that held the retired role.",
-      "tasks": "T032,T033,T072"
+      "tasks": [
+        "T033",
+        "T072"
+      ]
     },
     "SC-006": {
       "title": "The paired reversal is executed as part of verifying this feature, and both comparisons hold again afterwards.",
-      "tasks": "T032,T033,T072"
+      "tasks": [
+        "T033",
+        "T072"
+      ]
     },
     "SC-007": {
       "title": "A password reset hands over a credential that cannot be read back as plaintext anywhere in the application, its logs or the store.",
-      "tasks": "T049,T053,T073"
+      "tasks": [
+        "T049",
+        "T053",
+        "T073"
+      ]
     },
     "SC-008": {
       "title": "Five wrong tries with a temporary credential stop it working; a sixth correct attempt is refused; restarting and waiting do not restore it.",
-      "tasks": "T066,T075"
+      "tasks": [
+        "T066",
+        "T075"
+      ]
     },
     "SC-009": {
       "title": "A save changing N permissions writes exactly N records naming the acting user and both values, and reversing it restores all N.",
-      "tasks": "T054,T058"
+      "tasks": [
+        "T058"
+      ]
     },
     "SC-010": {
       "title": "One impatient press of Save creates exactly one person, and one impatient press of a permission save writes exactly one change.",
-      "tasks": "T047,T048,T053,T056,T059"
+      "tasks": [
+        "T047",
+        "T053",
+        "T056",
+        "T059"
+      ]
     },
     "SC-011": {
       "title": "Every screen is usable between 150 and 200 percent scaling and at the narrowest window, with all five facts of a list row visible at both widths.",
-      "tasks": "T046,T076"
+      "tasks": [
+        "T046",
+        "T076"
+      ]
     },
     "SC-012": {
       "title": "No screen freezes or refuses interaction while it loads or saves, verified against a live store.",
-      "tasks": "T044,T046,T075"
+      "tasks": [
+        "T046",
+        "T075"
+      ]
     },
     "SC-013": {
       "title": "Changing a permission for one person takes effect for that person and changes no other person's effective set.",
-      "tasks": "T025,T044"
+      "tasks": [
+        "T025"
+      ]
     },
     "SC-014": {
       "title": "For any chosen feature the who-holds-this view names every role whose baseline gives it, no role whose baseline does not, and only the people who differ.",
-      "tasks": "T063"
+      "tasks": [
+        "T063"
+      ]
     },
     "SC-015": {
       "title": "Every role in the catalogue shows its own badge, and the count of roles falling to the grey default is zero.",
-      "tasks": "T069"
+      "tasks": [
+        "T069"
+      ]
     },
     "SC-016": {
       "title": "A change to an account that outranks the actor is refused when attempted without the screen, for the role, the active state and the password alike.",
-      "tasks": "T072"
+      "tasks": [
+        "T072"
+      ]
     },
     "SC-017": {
       "title": "Opening either Administration page and returning to Settings takes one Back press, and the search reaches both entries.",
-      "tasks": "T046,T075"
+      "tasks": [
+        "T046",
+        "T075"
+      ]
     },
     "SC-018": {
       "title": "The full test suite passes with zero failures and the build is clean with zero warnings.",
-      "tasks": "T074"
+      "tasks": [
+        "T074"
+      ]
     },
     "SC-019": {
       "title": "For every creation, change and password reset the audit names the actor as they were, carries one record per changed field, and shares one change identifier.",
-      "tasks": "T072"
+      "tasks": [
+        "T072"
+      ]
     },
     "SC-020": {
       "title": "Every string on this feature's screens renders from the shipped language resources, with no resource key ever shown to a person.",
-      "tasks": "T022,T046,T069"
+      "tasks": [
+        "T022",
+        "T046",
+        "T069"
+      ]
     }
   },
   "step_summaries": {
@@ -744,11 +1355,14 @@
       "summary": "76 tasks across 12 phases and 37 waves; 60 parallel-safe; 24 foundational tasks carry the schema, the precedence re-rank, the permission declaration and the user-management data layer before any story starts."
     },
     "specify": {
-      "summary": "Phase 1 complete and Phase 2 wave 1 and wave 2 delivered and exercised: two migration fixtures, four schema artifacts with their reversals, the settings precedence re-rank, three extended credential reads, ten procedures and the sign-in-name migration seed. 15 of 76 tasks complete; T007 is the open head of the wave."
+      "summary": "Phase 2 finished (the bootstrap and its validators, the permission declaration, the role code through the session, permission resolution, the user-management data layer, registration, resource keys and the three wave-7 suites), and the first Phase 3 task landed: the shipped role seed now carries the eight rungs, Material Handler Lead and the name parts the schema requires."
+    },
+    "implement": {
+      "summary": "Implement in progress: 14 of 76 tasks complete, 62 open, across 12 phases and 36 waves. 57 tasks are marked parallel-safe; no two in the same wave share a file. Frontier: the highest complete task is T015; the first open task is T007. All 137 requirements and success criteria remain reachable from at least one task. No SQL has been applied to the live store."
     }
   },
   "size": "oversized",
-  "currentTask": "T015",
+  "currentTask": "T027",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -866,6 +1480,90 @@
         "Database/Seeds/seed_username_upper_normalization/create.sql",
         "Database/Seeds/seed_username_upper_normalization/rollback.sql"
       ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Bootstrap update path carries guarded adds for the three person columns, role_rank and its index, plus the new audit table; new user_management_schema validator added and settings validator asserts the corrected rank order; applied to the live local mtm_waitlist (columns and table landed, re-run reports already exists, exit 0) and a scratch full-schema build validates at 0 issues on all three validators",
+      "files": [
+        "Database/Bootstrap/create_database.sql;Database/Bootstrap/update_table_descriptions.sql;Database/Validation/user_management_schema/validate.sql;Database/Validation/settings_schema/validate.sql;Database/install_local_database.vbs"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "One declaration: the fourteen pinned keys as constants plus per-key label/gates resource keys, area, shipped fallback and gate sites; no per-role baseline carried; solution builds 0 warnings 0 errors",
+      "files": [
+        "MTM_Waitlist.Core/Permissions/PermissionKeys.cs;MTM_Waitlist.Core/Permissions/PermissionRegistry.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "StartupState carries the signed-in person's role code and id, the code is threaded through StartupCredentialCheckResult, StartupSessionSnapshot and StartupPasswordResetRequirement, StartupState.IsDeveloper now reads the role code and not the display name, and the coordinator plus the sign-in view model are the producers that set both; solution builds 0 warnings 0 errors",
+      "files": [
+        "MTM_Waitlist.Core/Models/StartupState.cs;MTM_Waitlist.Core/Models/StartupCredentialCheckResult.cs;MTM_Waitlist.Core/Models/StartupSessionSnapshot.cs;MTM_Waitlist.Core/Models/StartupPasswordResetRequirement.cs;MTM_Waitlist.Startup/Services/StartupCoordinator.cs;MTM_Waitlist.Startup/ViewModels/LoginViewModel.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Permission resolution for one person: own stored row, then the role baseline, then the shipped fallback, composed from one read of sp_config_permissions_user_get, cached per person with explicit invalidation, undeclared keys throw rather than refusing silently, and an unreachable store answers from the fallback; solution builds 0 warnings 0 errors",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IPermissionService.cs;MTM_Waitlist.Core/Services/PermissionService.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "User-management service and repository behind the six procedures: identity rules and the 256-bounded derived display name applied in the service, the actor taken from the signed-in state, the 1062 duplicate and each mtm_* refusal turned into one typed reason in the repository, every write through the non-query seam, no statement text; live store proof of the create path (profile + one assignment + 7 field audit rows + 1 null-value credential row, actor snapshotted) and of the pinned 1062 answer, both cleaned up afterwards",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IUserManagementService.cs;MTM_Waitlist.Core/Contracts/Services/IUserManagementRepository.cs;MTM_Waitlist.Core/Services/UserManagementService.cs;MTM_Waitlist.Core/Services/UserManagementRepository.cs;MTM_Waitlist.Core/Services/PasswordSecretHasher.cs;MTM_Waitlist.Core/Models/UserManagement/UserRosterRow.cs;MTM_Waitlist.Core/Models/UserManagement/UserAccount.cs;MTM_Waitlist.Core/Models/UserManagement/UserAccountEdit.cs;MTM_Waitlist.Core/Models/UserManagement/UserManagementResult.cs;MTM_Waitlist.Core/Models/UserManagement/UserManagementMessages.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Sign-in repository stores and compares sign-in names in upper case, carries the role code and wrong-attempt count through all three credential reads with the caller ordinals moved, records a temporary-credential attempt through the new procedure outside the retry so one try moves the count once, and enforces the five-attempt limit before comparing the value; verified live - the three reads answer for a name typed upper, lower and mixed case, the count moves to 2 and clears to 0, and all 75 procedures applied to the live store with 0 failures",
+      "files": [
+        "MTM_Waitlist.Startup/Services/StartupSessionRepository.cs;MTM_Waitlist.Core/Models/StartupCredentialCheckResult.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "PermissionService, IUserManagementRepository/UserManagementRepository and IUserManagementService/UserManagementService registered in the composition root; the registration class is partial with RegisterUserManagementPages, RegisterUserAccountPages and RegisterPermissionsPages declared and called; solution builds 0 warnings 0 errors",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Resource keys for the whole feature: 28 permission label/gates keys generated from the declaration's own key names, the nine Role_<role_code> display texts, the Administration category pair, the roster, create, person, PIN, permissions and who-holds-this strings, and the thirteen UserManagement_Outcome keys the service resolves; file parses, 454 keys total, no duplicate key, every key the code resolves is present",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "All four roll-ups plus AllViews regenerated from the artifact folders; installed into a scratch schema in the installer's own order and every one applied cleanly, all three validators report 0 issues, and the installed counts match the folders (22 tables, 75 procedures, 3 functions, 2 views). Found and fixed a pre-existing fresh-store defect on the way: seed_config_image_storage_settings truncated a table another table holds a foreign key to, which stopped the whole seed phase; the truncate is now guarded",
+      "files": [
+        "Database/Tables/AllTables.sql;Database/Functions/AllFunct.sql;Database/Views/AllViews.sql;Database/StoredProcedures/AllSPs.sql;Database/Seeds/AllSeeds.sql;Database/Seeds/seed_config_image_storage_settings/create.sql"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Every suite that built a state for the developer check now sets the role code: CoreModelsTests (the display name is proved to decide nothing), StartupModelsTests, StartupOptionsModelsTests, ControlInspectorServiceTests, TooltipServiceTests and StartupCoordinatorTests. SplashViewModelTests needed no change - it constructs a bare StartupState and never sets a role, checked rather than assumed. Suite green: 1181 total, 0 failed, 1154 passed, 27 skipped",
+      "files": [
+        "MTM_Waitlist.Tests/Core/Models/CoreModelsTests.cs;MTM_Waitlist.Tests/Models/StartupModelsTests.cs;MTM_Waitlist.Tests/Core/Models/StartupOptionsModelsTests.cs;MTM_Waitlist.Tests/Module_Shared/Services/ControlInspectorServiceTests.cs;MTM_Waitlist.Tests/Module_Shared/Services/TooltipServiceTests.cs;MTM_Waitlist.Tests/Services/StartupCoordinatorTests.cs"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Permission resolution and the precedence trap asserted: a role baseline is inherited, a person's own row beats it in either row order, a role with no baseline answers from the fallback, a store that throws answers from the fallback, an undeclared key reports a failure, several keys are answered from one store read, the cache holds for the session and drops on invalidate and on a sign-in that resolves a different person; SettingsScopeRankTests asserts the six rungs and the corrected order by reading the shipped function artifact. 24 new cases, all pass",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionResolutionTests.cs;MTM_Waitlist.Tests/Module_Core/Services/SettingsScopeRankTests.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "The shipped role seed gives every live role its rung (developer 100, plant_manager 80, production_lead 70, setup_lead 60, material_handler_lead 50, the three worker roles 10), adds Material Handler Lead as a role in its own right, leaves the retired admin row unranked in its own statement so it holds the column default 0, and now supplies first_name and last_name on every seeded account; the rollback removes exactly the row it added. Applied to the live local store: the nine catalogue rows read back at those rungs with admin at 0, and no account is missing its name parts. The fresh-store aggregate install now runs its whole seed phase cleanly",
+      "files": [
+        "Database/Seeds/seed_dev_masked_baseline/create.sql;Database/Seeds/seed_dev_masked_baseline/rollback.sql;Database/Seeds/AllSeeds.sql"
+      ]
     }
   },
   "verified": [
@@ -884,6 +1582,30 @@
       "exitCode": 0,
       "durationSeconds": 47.2,
       "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1154, Skipped:    27, Total:  1181, Duration: 33 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 51.6,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1178, Skipped:    27, Total:  1205, Duration: 32 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "clean solution build",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 27.1,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:26.93"
+    },
+    {
+      "what": "live local mtm_waitlist: the nine catalogue rows carry their pinned rungs",
+      "command": "mysql -h 127.0.0.1 -u root -N -B mtm_waitlist -e \"SELECT COUNT(*) FROM auth_roles_catalog WHERE (role_code='developer' AND role_rank=100) OR (role_code='plant_manager' AND role_rank=80) OR (role_code='production_lead' AND role_rank=70) OR (role_code='setup_lead' AND role_rank=60) OR (role_code='material_handler_lead' AND role_rank=50) OR (role_code IN ('material_handler','production','setup') AND role_rank=10) OR (role_code='admin' AND role_rank=0)\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.0,
+      "result": "9"
     }
   ],
   "decisions": [
@@ -901,6 +1623,41 @@
     },
     {
       "decision": "Writing an account initial credential in sp_user_management_create also writes an audit row with both value columns null. Why: it keeps one rule for a credential being set across create and reset, and the PIN is never stored so there is no before or after value to record (FR-111). Rejected: omitting the row, which would leave create and reset recording the same act two different ways."
+    },
+    {
+      "decision": "T007 leaves Database/Bootstrap/create_database.sql without DDL and only documents the fresh-store path in its header.",
+      "why": "That file drops and recreates the database, so it can never be part of the update path, and a fresh store gets its table shape from Database/Tables/**/create.sql (rolled up in AllTables.sql) with the guarded additions in update_table_descriptions.sql running last. Putting the same DDL in it as well would have been two owners for one shape, and dead statements on the only path that reads it.",
+      "rejected": "Duplicating the column and table DDL in create_database.sql, which the task text named alongside update_table_descriptions.sql."
+    },
+    {
+      "decision": "UserManagementRepository opens its own MySqlConnection for reads and writes instead of going through IMySqlHelperServer.",
+      "why": "The helper server answers a failed call with its neutral result, which would fold a duplicate sign-in name into a generic failure and would hand an unreachable store on as an empty roster. Both requirements need the provider own answer: the pinned 1062 for a duplicate, and a loud failure so an empty list is never shown for an outage.",
+      "rejected": "Reading and writing through IMySqlHelperServer and inferring the cause from an empty result."
+    },
+    {
+      "decision": "One shipped fallback rule: permission.requests.handle answers true, the other thirteen answer false.",
+      "why": "An unreachable store must not turn every control into a refusal (FR-050), and it must not hand out anything new either. Exactly one key is operationally load-bearing while the store is down, so the shop floor keeps working and nobody gains administration.",
+      "rejected": "Answering true everywhere, which would grant administration during an outage, and answering false everywhere, which would stop the floor from accepting requests."
+    },
+    {
+      "decision": "PasswordSecretHasher holds the one implementation of the credential hashing, used by the sign-in path and the reset path.",
+      "why": "A reset writes a credential the sign-in path has to accept. Two copies of PBKDF2 with the same constants would let a change in one make every PIN issued from the other silently unusable, and nothing in the build or the suite could see it.",
+      "rejected": "Keeping the private hashing helpers in StartupSessionRepository and a second copy in the user-management service."
+    },
+    {
+      "decision": "The temporary-credential attempt count is moved outside the sign-in retry wrapper.",
+      "why": "The read runs under a bounded retry, and a retry that re-ran the count would add a second failure for one try. One press of Sign in must move the count exactly once.",
+      "rejected": "Recording the attempt inside the retried lambda."
+    },
+    {
+      "decision": "The role seed writes the retired admin row in its own INSERT that omits role_rank.",
+      "why": "A shared column list cannot omit the column for one row and supply it for the rest, and the task requires the row to be left unranked so it holds the column default. The role rename reads that rung back when it reverses, so writing an explicit 0 would quietly change what the reversal claims to restore.",
+      "rejected": "One INSERT carrying an explicit 0 for admin."
+    },
+    {
+      "decision": "The permission registry declares no per-role baseline and a test asserts the type has no member for one.",
+      "why": "FR-046 and FR-048 split the two tiers on purpose: baselines are seeded data so what a role may do changes without a code change. The check is visible in the type rather than only in a comment about where the data lives.",
+      "rejected": "Carrying a baseline table on the declaration, which the seed contradiction suggested and the research settled against."
     }
   ],
   "concerns": [
@@ -921,7 +1678,35 @@
     },
     {
       "note": "The scratch-database proofs of T003 to T015 ran through an ad-hoc PowerShell harness against a scratch schema, not through a repository command, so they are recorded as an account rather than as machine-verified evidence. No live store was written to."
+    },
+    {
+      "note": "T024 asserts the declaration in both directions against the seeded baselines, but those baselines do not exist until T036 writes them in Phase 5. The declaration half is implemented and green (permission registry, pinned spellings, gate sites, resource keys); the declaration-versus-baseline half cannot be written before the seed it compares against. T024 is left open, and the baseline direction belongs with T034 and T036.",
+      "step": "implement"
+    },
+    {
+      "note": "T022 asks for every resource key for the whole feature, and six screens do not exist until Phases 6 to 10. The keys the feature already names are present, including 28 permission strings, nine role displays, the Administration pair, the roster, the create form, the person page, the PIN window, the permissions page, the who-holds-this view and the thirteen outcome messages the service resolves. A later phase that finds its screen needs another string adds it to the same map, which is the single place the ownership rule wanted.",
+      "step": "implement"
+    },
+    {
+      "note": "Two paths read the signed-in role name and compare it to role names and are owned by no task Files line: MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs and WaitlistViewDetailViewModel.cs pass the role name into RequestActionPolicy, and MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs calls the same policy to enforce at the action. T037 replaces the policy with permission.requests.handle and names only the policy file, so those three call sites move with it or the handle gate is only half replaced.",
+      "step": "implement"
+    },
+    {
+      "note": "sp_user_management_create commits its own transaction internally, so an outer START TRANSACTION and ROLLBACK around it does not undo it. T072 live check must make the procedure fail mid-way to prove the rollback rather than wrapping the call in a transaction. Found by running the create path against the live store and finding the probe row still present after an outer rollback.",
+      "step": "implement"
+    },
+    {
+      "note": "Database/Seeds/seed_config_image_storage_settings/create.sql truncated a table that config_settings_history holds a foreign key to, which stopped the whole seed phase of a fresh install at that file. Fixed with the same FOREIGN_KEY_CHECKS guard the table artifacts use. The file belongs to no task in this feature and was found by installing the regenerated aggregates.",
+      "step": "implement"
+    },
+    {
+      "note": "A fresh store built from the aggregates holds 23 base tables against 22 table artifact folders. The extra one is seed_username_case_backup, created by the username-normalisation seed as a migration-lifetime table with no folder of its own, which its own header states. Not a defect; a count check has to know about it.",
+      "step": "implement"
+    },
+    {
+      "note": "MySQL Server 9.6.0 is what the live store runs on while every artifact header still says Engine: MySQL 5.7. Nothing in this feature needed a version-specific behaviour, and the compound procedure bodies and the guarded bootstrap blocks ran unchanged, but the headers are now inaccurate.",
+      "step": "implement"
     }
   ],
-  "last_action": "Solution build clean and the full suite green at 1181 total, 0 failed; 15 of 76 tasks closed; the spec is left at implementing because T007 onwards are open."
+  "last_action": "26 of 76 tasks are complete, 12 of them finished this round (T007, T016 to T023, T025, T026, T027); T024 is left open because its baseline half needs the seed T036 writes. The solution builds 0 warnings 0 errors, the suite reports 1205 total with 0 failed and 27 skipped, the live local store carries the new columns, table, rungs and all 75 procedures, and a fresh store built from the regenerated aggregates installs end to end."
 }

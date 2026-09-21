@@ -12,7 +12,7 @@
 # USAGE
 #   pwsh -File tools/ui-drive.ps1 -Action launch
 #   pwsh -File tools/ui-drive.ps1 -Action dump     -Label 01-workcenter
-#   pwsh -File tools/ui-drive.ps1 -Action click-item   -Name '100-7'        -Label 02-workcenter-picked
+#   pwsh -File tools/ui-drive.ps1 -Action click-item   -Name '100-07'        -Label 02-workcenter-picked
 #   pwsh -File tools/ui-drive.ps1 -Action click-button -Name 'Add'          -Label 03-add-request
 #   pwsh -File tools/ui-drive.ps1 -Action kill
 #

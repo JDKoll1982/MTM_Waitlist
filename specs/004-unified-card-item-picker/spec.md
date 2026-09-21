@@ -541,7 +541,7 @@ status.
   dunnage only; everything at once; no subordinate parts.
 - **The seven retired fixture work centres**: `900-1`, `900-2`, `900-3`, `900-4`, `900-5`, `900-6`, `900-7`.
 - **The real work centres that take the situations**: five on Expo Drive and two on Vits Drive. Expo Drive —
-  `100-3`, `100-6` … `100-28`, `100-1806`, `100-1807`; Vits Drive — `V100-33`, `V100-34`, `V100-35`.
+  `100-03`, `100-06` … `100-28`, `100-1806`, `100-1807`; Vits Drive — `V100-33`, `V100-34`, `V100-35`.
 - **The overdue allowance** is the smallest one the minutes screen accepts, so the request genuinely runs out of
   time rather than being written as though it had.
 - **`pickup-component` is the one Item that cannot be raised today** — it declares an answer chosen from a list and

@@ -118,7 +118,7 @@ looking at or selecting, reducing confusion on a shop floor with many computers.
 
 **What changed:** The app no longer uses the confusing, over-loaded word "Workstation".
 It is now consistently either **Computer** (a physical machine) or **Work Center** (a press /
-work station like `100-3`). User-facing labels, screens, and messages were updated.
+work station like `100-03`). User-facing labels, screens, and messages were updated.
 
 **Why it matters:** Two very different things used to share one name. Separating them into
 "Computer" and "Work Center" removes ambiguity so operators and admins are always clear

@@ -1029,4 +1029,451 @@
   <data name="Settings_RequestItemImages.Title" xml:space="preserve">
     <value>Request Item Images</value>
   </data>
+  <!-- ============================================================ -->
+  <!-- User management and permissions (feature 006)                -->
+  <!-- One entry per permission label and per what-it-gates sentence -->
+  <!-- ============================================================ -->
+  <data name="Permission_requests_handle.Label" xml:space="preserve">
+    <value>Handle requests</value>
+  </data>
+  <data name="Permission_requests_handle.Gates" xml:space="preserve">
+    <value>Accept, complete and give back a request.</value>
+  </data>
+  <data name="Permission_cache_refresh_api.Label" xml:space="preserve">
+    <value>Refresh the cache through the service</value>
+  </data>
+  <data name="Permission_cache_refresh_api.Gates" xml:space="preserve">
+    <value>Call the service host's cache-refresh API.</value>
+  </data>
+  <data name="Permission_settings_ignored_locations.Label" xml:space="preserve">
+    <value>Ignored locations</value>
+  </data>
+  <data name="Permission_settings_ignored_locations.Gates" xml:space="preserve">
+    <value>Manage the locations ignored in inventory lists.</value>
+  </data>
+  <data name="Permission_settings_hot_work_centers.Label" xml:space="preserve">
+    <value>Hot work centres</value>
+  </data>
+  <data name="Permission_settings_hot_work_centers.Gates" xml:space="preserve">
+    <value>Manage the Local work centres shown for this computer.</value>
+  </data>
+  <data name="Permission_settings_part_pictures.Label" xml:space="preserve">
+    <value>Part pictures</value>
+  </data>
+  <data name="Permission_settings_part_pictures.Gates" xml:space="preserve">
+    <value>Manage the pictures shown for a part.</value>
+  </data>
+  <data name="Permission_settings_cache_refresh.Label" xml:space="preserve">
+    <value>Pull a cache refresh</value>
+  </data>
+  <data name="Permission_settings_cache_refresh.Gates" xml:space="preserve">
+    <value>Ask for a cache refresh from the Settings screen.</value>
+  </data>
+  <data name="Permission_settings_urgency_minutes.Label" xml:space="preserve">
+    <value>Allowed minutes per item</value>
+  </data>
+  <data name="Permission_settings_urgency_minutes.Gates" xml:space="preserve">
+    <value>Change how many minutes each item is allowed.</value>
+  </data>
+  <data name="Permission_settings_defect_types.Label" xml:space="preserve">
+    <value>Defect types</value>
+  </data>
+  <data name="Permission_settings_defect_types.Gates" xml:space="preserve">
+    <value>Manage the defect-type catalogue.</value>
+  </data>
+  <data name="Permission_settings_computers.Label" xml:space="preserve">
+    <value>Computer registry</value>
+  </data>
+  <data name="Permission_settings_computers.Gates" xml:space="preserve">
+    <value>Manage the registered computers.</value>
+  </data>
+  <data name="Permission_setup_dunnage_quick_add.Label" xml:space="preserve">
+    <value>Quick Add dunnage</value>
+  </data>
+  <data name="Permission_setup_dunnage_quick_add.Gates" xml:space="preserve">
+    <value>Add dunnage types and parts without leaving the setup workflow.</value>
+  </data>
+  <data name="Permission_setup_work_centers.Label" xml:space="preserve">
+    <value>Work-centre setup</value>
+  </data>
+  <data name="Permission_setup_work_centers.Gates" xml:space="preserve">
+    <value>Set up a work centre.</value>
+  </data>
+  <data name="Permission_admin_users.Label" xml:space="preserve">
+    <value>Manage people</value>
+  </data>
+  <data name="Permission_admin_users.Gates" xml:space="preserve">
+    <value>Open the user list, and create, correct or switch off a person.</value>
+  </data>
+  <data name="Permission_admin_reset_password.Label" xml:space="preserve">
+    <value>Reset a password</value>
+  </data>
+  <data name="Permission_admin_reset_password.Gates" xml:space="preserve">
+    <value>Issue a new temporary password for a person.</value>
+  </data>
+  <data name="Permission_admin_permissions.Label" xml:space="preserve">
+    <value>Manage permissions</value>
+  </data>
+  <data name="Permission_admin_permissions.Gates" xml:space="preserve">
+    <value>Open the permissions page and change what one person may do.</value>
+  </data>
+  <!-- One display text per role the catalogue holds, keyed on the role code. -->
+  <data name="Role_developer" xml:space="preserve">
+    <value>Developer</value>
+  </data>
+  <data name="Role_it_department" xml:space="preserve">
+    <value>IT Department</value>
+  </data>
+  <data name="Role_plant_manager" xml:space="preserve">
+    <value>Plant Manager</value>
+  </data>
+  <data name="Role_production_lead" xml:space="preserve">
+    <value>Production Lead</value>
+  </data>
+  <data name="Role_setup_lead" xml:space="preserve">
+    <value>Setup Lead</value>
+  </data>
+  <data name="Role_material_handler_lead" xml:space="preserve">
+    <value>Material Handler Lead</value>
+  </data>
+  <data name="Role_material_handler" xml:space="preserve">
+    <value>Material Handler</value>
+  </data>
+  <data name="Role_production" xml:space="preserve">
+    <value>Production</value>
+  </data>
+  <data name="Role_setup" xml:space="preserve">
+    <value>Setup</value>
+  </data>
+  <!-- The Administration category in Settings: two entries, both of which navigate. -->
+  <data name="Administration_Category.Title" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Administration_Category.Description" xml:space="preserve">
+    <value>Manage people and what they may do.</value>
+  </data>
+  <data name="Administration_Users.Title" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="Administration_Users.Description" xml:space="preserve">
+    <value>Find a person and open their account.</value>
+  </data>
+  <data name="Administration_Permissions.Title" xml:space="preserve">
+    <value>Permissions</value>
+  </data>
+  <data name="Administration_Permissions.Description" xml:space="preserve">
+    <value>Change what one person may do, and see who holds a feature.</value>
+  </data>
+  <!-- The user list. -->
+  <data name="UserManagement_Title.Title" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="UserManagement_Subtitle.Text" xml:space="preserve">
+    <value>Everyone in the store, including the people who are switched off.</value>
+  </data>
+  <data name="UserManagement_Search.PlaceholderText" xml:space="preserve">
+    <value>Search sign-in name, name, employee number or role</value>
+  </data>
+  <data name="UserManagement_Search.Label" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="UserManagement_RoleFilter.Label" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="UserManagement_RoleFilter.All" xml:space="preserve">
+    <value>Every role</value>
+  </data>
+  <data name="UserManagement_Filter.Active" xml:space="preserve">
+    <value>A filter is applied, so some people are hidden.</value>
+  </data>
+  <data name="UserManagement_Filter.HiddenCount.Text" xml:space="preserve">
+    <value>{0} hidden by the filter.</value>
+  </data>
+  <data name="UserManagement_Filter.ShowEveryone" xml:space="preserve">
+    <value>Show everyone</value>
+  </data>
+  <data name="UserManagement_Row.SwitchedOff" xml:space="preserve">
+    <value>Switched off</value>
+  </data>
+  <data name="UserManagement_Row.Open" xml:space="preserve">
+    <value>Open this person</value>
+  </data>
+  <data name="UserManagement_Add.Label" xml:space="preserve">
+    <value>Add a person</value>
+  </data>
+  <data name="UserManagement_Back.Label" xml:space="preserve">
+    <value>Back to Settings</value>
+  </data>
+  <data name="UserManagement_State.Empty" xml:space="preserve">
+    <value>There are no people to show.</value>
+  </data>
+  <data name="UserManagement_State.NoMatch" xml:space="preserve">
+    <value>Nobody matches your filter.</value>
+  </data>
+  <data name="UserManagement_State.FilterUnreadable" xml:space="preserve">
+    <value>Your saved filter could not be read, so everyone is shown.</value>
+  </data>
+  <data name="UserManagement_State.RoleGone" xml:space="preserve">
+    <value>Your saved filter named a role that no longer exists, so everyone is shown.</value>
+  </data>
+  <data name="UserManagement_State.Unavailable" xml:space="preserve">
+    <value>The user store could not be read, so no list is shown. Nothing has been hidden.</value>
+  </data>
+  <data name="UserManagement_State.Retry" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <!-- Every answer a user-management write can give, keyed as MTM_Waitlist.Core names them. -->
+  <data name="UserManagement_Outcome.Succeeded" xml:space="preserve">
+    <value>Saved.</value>
+  </data>
+  <data name="UserManagement_Outcome.CredentialIssued" xml:space="preserve">
+    <value>Saved. Hand the sign-in details over now: this credential is shown once.</value>
+  </data>
+  <data name="UserManagement_Outcome.InvalidInput" xml:space="preserve">
+    <value>Check the details you entered and try again.</value>
+  </data>
+  <data name="UserManagement_Outcome.DuplicateUsername" xml:space="preserve">
+    <value>That sign-in name is already taken. Choose another one.</value>
+  </data>
+  <data name="UserManagement_Outcome.RoleDenied" xml:space="preserve">
+    <value>You cannot give somebody a role above your own.</value>
+  </data>
+  <data name="UserManagement_Outcome.SelfDeactivateDenied" xml:space="preserve">
+    <value>You cannot deactivate the account you are signed in as.</value>
+  </data>
+  <data name="UserManagement_Outcome.SelfRenameDenied" xml:space="preserve">
+    <value>You cannot change the sign-in name of the account you are signed in as.</value>
+  </data>
+  <data name="UserManagement_Outcome.TargetOutranksActor" xml:space="preserve">
+    <value>That person's role is above your own, so their account cannot be changed.</value>
+  </data>
+  <data name="UserManagement_Outcome.RoleUnknown" xml:space="preserve">
+    <value>That role is no longer in the role catalogue. Choose another one.</value>
+  </data>
+  <data name="UserManagement_Outcome.StoreUnavailable" xml:space="preserve">
+    <value>The user store could not be reached. Your work has been kept. Try again.</value>
+  </data>
+  <data name="UserManagement_Outcome.NameRequired" xml:space="preserve">
+    <value>Fill in every name field.</value>
+  </data>
+  <data name="UserManagement_Outcome.NameTooLong" xml:space="preserve">
+    <value>A sign-in name, a first name and a last name are each 128 characters at most.</value>
+  </data>
+  <data name="UserManagement_Outcome.EmployeeNumberInvalid" xml:space="preserve">
+    <value>An employee number is exactly four digits.</value>
+  </data>
+  <!-- The create form: a form only, with no actions area. -->
+  <data name="CreateUser_Title.Title" xml:space="preserve">
+    <value>Add a person</value>
+  </data>
+  <data name="CreateUser_Subtitle.Text" xml:space="preserve">
+    <value>A new account is created active and is given one role.</value>
+  </data>
+  <data name="CreateUser_SignInName.Label" xml:space="preserve">
+    <value>Sign-in name</value>
+  </data>
+  <data name="CreateUser_FirstName.Label" xml:space="preserve">
+    <value>First name</value>
+  </data>
+  <data name="CreateUser_LastName.Label" xml:space="preserve">
+    <value>Last name</value>
+  </data>
+  <data name="CreateUser_EmployeeNumber.Label" xml:space="preserve">
+    <value>Employee number</value>
+  </data>
+  <data name="CreateUser_Role.Label" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="CreateUser_Role.OnlyAtOrBelowYourRung" xml:space="preserve">
+    <value>Only roles at or below your own are offered.</value>
+  </data>
+  <data name="CreateUser_Save.Label" xml:space="preserve">
+    <value>Create the account</value>
+  </data>
+  <data name="CreateUser_Cancel.Label" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <!-- The person's page: fields above, actions below. -->
+  <data name="EditUser_Title.Title" xml:space="preserve">
+    <value>Person</value>
+  </data>
+  <data name="EditUser_Fields.Heading" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="EditUser_Actions.Heading" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="EditUser_SignInName.Label" xml:space="preserve">
+    <value>Sign-in name</value>
+  </data>
+  <data name="EditUser_FirstName.Label" xml:space="preserve">
+    <value>First name</value>
+  </data>
+  <data name="EditUser_LastName.Label" xml:space="preserve">
+    <value>Last name</value>
+  </data>
+  <data name="EditUser_EmployeeNumber.Label" xml:space="preserve">
+    <value>Employee number</value>
+  </data>
+  <data name="EditUser_Role.Label" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="EditUser_Active.Label" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="EditUser_Save.Label" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="EditUser_Discard.Label" xml:space="preserve">
+    <value>Discard changes</value>
+  </data>
+  <data name="EditUser_ResetPassword.Label" xml:space="preserve">
+    <value>Reset password</value>
+  </data>
+  <data name="EditUser_Deactivate.Label" xml:space="preserve">
+    <value>Deactivate</value>
+  </data>
+  <data name="EditUser_Reactivate.Label" xml:space="preserve">
+    <value>Reactivate</value>
+  </data>
+  <data name="EditUser_Deactivate.Explanation.Text" xml:space="preserve">
+    <value>A person you deactivate cannot sign in again, and any session they already have open stays open until they close the application.</value>
+  </data>
+  <data name="EditUser_Reactivate.Explanation.Text" xml:space="preserve">
+    <value>Access returns from the person's next sign-in.</value>
+  </data>
+  <data name="EditUser_Unsaved.ActionNeedsSave" xml:space="preserve">
+    <value>You have unsaved changes. Save them first, or discard them.</value>
+  </data>
+  <data name="EditUser_ReadOnly.Outranked" xml:space="preserve">
+    <value>This person's role is above your own, so you can read the account but not change it.</value>
+  </data>
+  <data name="EditUser_ReadOnly.NoPermission" xml:space="preserve">
+    <value>You do not hold the permission to manage people, so this account is shown as read-only.</value>
+  </data>
+  <data name="EditUser_SelfDeactivate.Unavailable" xml:space="preserve">
+    <value>This is the account you are signed in as, so it cannot be deactivated.</value>
+  </data>
+  <data name="EditUser_SelfRename.Unavailable" xml:space="preserve">
+    <value>This is the account you are signed in as, so its sign-in name cannot be changed.</value>
+  </data>
+  <data name="EditUser_ResetConfirmation.Text" xml:space="preserve">
+    <value>A new temporary password will be issued and shown once. The person must change it at their next sign-in.</value>
+  </data>
+  <data name="EditUser_Back.Label" xml:space="preserve">
+    <value>Back to the user list</value>
+  </data>
+  <!-- The one-time PIN window. -->
+  <data name="PinReveal_Title.Title" xml:space="preserve">
+    <value>One-time password</value>
+  </data>
+  <data name="PinReveal_Person.Label" xml:space="preserve">
+    <value>For</value>
+  </data>
+  <data name="PinReveal_SignInName.Label" xml:space="preserve">
+    <value>Sign-in name</value>
+  </data>
+  <data name="PinReveal_Credential.Label" xml:space="preserve">
+    <value>Temporary password</value>
+  </data>
+  <data name="PinReveal_IssuedAt.Label" xml:space="preserve">
+    <value>Issued</value>
+  </data>
+  <data name="PinReveal_IssuedBy.Label" xml:space="preserve">
+    <value>Issued by</value>
+  </data>
+  <data name="PinReveal_Instruction.Text" xml:space="preserve">
+    <value>Hand this over to the person now and do not keep a copy. They must set their own password at first sign-in.</value>
+  </data>
+  <data name="PinReveal_SecondReset.Text" xml:space="preserve">
+    <value>A second reset replaces this password, and this one stops working.</value>
+  </data>
+  <data name="PinReveal_Print.Label" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="PinReveal_PrintFailed.Text" xml:space="preserve">
+    <value>Printing did not start. The password is still shown, so you can write it down.</value>
+  </data>
+  <data name="PinReveal_Close.Label" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="PinReveal_MustCloseDeliberately.Text" xml:space="preserve">
+    <value>Close this window only when you have handed the password over.</value>
+  </data>
+  <!-- The permissions page and the who-holds-this view. -->
+  <data name="Permissions_Title.Title" xml:space="preserve">
+    <value>Permissions</value>
+  </data>
+  <data name="Permissions_Subtitle.Text" xml:space="preserve">
+    <value>One person at a time. A role's baseline is what every person holding that role starts from.</value>
+  </data>
+  <data name="Permissions_People.Heading" xml:space="preserve">
+    <value>People</value>
+  </data>
+  <data name="Permissions_Features.Heading" xml:space="preserve">
+    <value>Features</value>
+  </data>
+  <data name="Permissions_Row.Inherited" xml:space="preserve">
+    <value>From the role's baseline</value>
+  </data>
+  <data name="Permissions_Row.Chosen" xml:space="preserve">
+    <value>Chosen for this person</value>
+  </data>
+  <data name="Permissions_Row.Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Permissions_Row.UnavailableOutranked" xml:space="preserve">
+    <value>This person's role is above your own, so their features are shown but cannot be changed.</value>
+  </data>
+  <data name="Permissions_Row.Fixed" xml:space="preserve">
+    <value>This is the permission that opens this page, so it cannot be changed here.</value>
+  </data>
+  <data name="Permissions_Save.Label" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="Permissions_Save.NothingChanged" xml:space="preserve">
+    <value>Nothing has changed yet.</value>
+  </data>
+  <data name="Permissions_Save.Confirmation" xml:space="preserve">
+    <value>{0} change for {1}: {2}</value>
+  </data>
+  <data name="Permissions_Save.ConfirmationCount" xml:space="preserve">
+    <value>{0} changes for {1}.</value>
+  </data>
+  <data name="Permissions_Undo.Label" xml:space="preserve">
+    <value>Undo the last save</value>
+  </data>
+  <data name="Permissions_Undo.ValueMoved" xml:space="preserve">
+    <value>This value has changed since your save. It is now {0}. Restore your value anyway?</value>
+  </data>
+  <data name="Permissions_Unsaved.Leaving" xml:space="preserve">
+    <value>You are leaving with {0} rows still pending.</value>
+  </data>
+  <data name="Permissions_Holders.Heading" xml:space="preserve">
+    <value>Who holds this</value>
+  </data>
+  <data name="Permissions_Holders.Feature.Label" xml:space="preserve">
+    <value>Feature</value>
+  </data>
+  <data name="Permissions_Holders.Roles.Heading" xml:space="preserve">
+    <value>Given by these roles' baselines</value>
+  </data>
+  <data name="Permissions_Holders.People.Heading" xml:space="preserve">
+    <value>People who differ from their role</value>
+  </data>
+  <data name="Permissions_Holders.Nobody" xml:space="preserve">
+    <value>Nobody holds this feature.</value>
+  </data>
+  <data name="Permissions_Holders.SwitchedOff" xml:space="preserve">
+    <value>Switched off</value>
+  </data>
+  <data name="Permissions_Holders.Granted" xml:space="preserve">
+    <value>Granted</value>
+  </data>
+  <data name="Permissions_Holders.Denied" xml:space="preserve">
+    <value>Denied</value>
+  </data>
+  <data name="Permissions_Back.Label" xml:space="preserve">
+    <value>Back to Settings</value>
+  </data>
 </root>

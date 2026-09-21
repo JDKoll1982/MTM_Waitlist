@@ -173,6 +173,33 @@ FROM (
                         AND table_name = 'vw_config_settings_scope_catalog'
                 ), 'present', 'missing'
             )
+        UNION ALL
+        SELECT 'scope_rank_regression', 'fn_config_settings_scope_rank(computer)', '1', IF(
+                fn_config_settings_scope_rank('computer') = 1, 'present', 'missing'
+            )
+        UNION ALL
+        SELECT 'scope_rank_regression', 'fn_config_settings_scope_rank(all_users)', '2', IF(
+                fn_config_settings_scope_rank('all_users') = 2, 'present', 'missing'
+            )
+        UNION ALL
+        SELECT 'scope_rank_regression', 'fn_config_settings_scope_rank(role)', '3', IF(
+                fn_config_settings_scope_rank('role') = 3, 'present', 'missing'
+            )
+        UNION ALL
+        SELECT 'scope_rank_regression', 'fn_config_settings_scope_rank(admin)', '4', IF(
+                fn_config_settings_scope_rank('admin') = 4, 'present', 'missing'
+            )
+        UNION ALL
+        SELECT 'scope_rank_regression', 'fn_config_settings_scope_rank(developer)', '5', IF(
+                fn_config_settings_scope_rank('developer') = 5, 'present', 'missing'
+            )
+        UNION ALL
+        SELECT 'scope_rank_regression', 'fn_config_settings_scope_rank(user)', '6 above every wider scope', IF(
+                fn_config_settings_scope_rank('user') = 6
+                AND fn_config_settings_scope_rank('user') > fn_config_settings_scope_rank('role')
+                AND fn_config_settings_scope_rank('user') > fn_config_settings_scope_rank('admin')
+                AND fn_config_settings_scope_rank('user') > fn_config_settings_scope_rank('developer'), 'present', 'missing'
+            )
     ) validation_results
 WHERE
     actual_value = 'missing';

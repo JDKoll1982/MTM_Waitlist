@@ -33,6 +33,7 @@ public partial class LoginViewModel : ObservableRecipient
     private readonly StartupState _startupState;
     private long _pendingUserIdForPasswordChange;
     private string _pendingRole = string.Empty;
+    private string _pendingRoleCode = string.Empty;
     private string _pendingDisplayName = string.Empty;
     private string _pendingEmployeeIdentifier = string.Empty;
     private ComputerGateCheck? _pendingGateCheck;
@@ -219,6 +220,7 @@ public partial class LoginViewModel : ObservableRecipient
         {
             _pendingUserIdForPasswordChange = _startupState.PasswordChangeUserId;
             _pendingRole = _startupState.CurrentRole;
+            _pendingRoleCode = _startupState.CurrentRoleCode;
             _pendingDisplayName = _startupState.EmployeeName;
             _pendingEmployeeIdentifier = _startupState.EmployeeNumber;
             ShowPasswordChangePrompt = true;
@@ -277,6 +279,7 @@ public partial class LoginViewModel : ObservableRecipient
         {
             _pendingUserIdForPasswordChange = credentialResult.UserId;
             _pendingRole = credentialResult.CurrentRole;
+            _pendingRoleCode = credentialResult.CurrentRoleCode;
             ShowPasswordChangePrompt = true;
             ShowSignInForm = false;
             LoginHint = "You signed in with temporary password 0000. Set a new password now.";
@@ -285,7 +288,7 @@ public partial class LoginViewModel : ObservableRecipient
             return;
         }
 
-        await CompleteLoginAsync(credentialResult.UserId, credentialResult.CurrentRole, Password);
+        await CompleteLoginAsync(credentialResult.UserId, credentialResult.CurrentRole, credentialResult.CurrentRoleCode, Password);
     }
 
     [RelayCommand]
@@ -331,7 +334,7 @@ public partial class LoginViewModel : ObservableRecipient
         ShowSignInForm = true;
         LoginHint = "Password updated. Completing sign-in...";
         _startupState.LoginHint = LoginHint;
-        await CompleteLoginAsync(_pendingUserIdForPasswordChange, _pendingRole, NewPassword);
+        await CompleteLoginAsync(_pendingUserIdForPasswordChange, _pendingRole, _pendingRoleCode, NewPassword);
     }
 
     [RelayCommand]
@@ -353,10 +356,11 @@ public partial class LoginViewModel : ObservableRecipient
         LoginHint = _startupState.LoginHint;
     }
 
-    private async Task CompleteLoginAsync(long userId, string currentRole, string passwordToRemember)
+    private async Task CompleteLoginAsync(long userId, string currentRole, string currentRoleCode, string passwordToRemember)
     {
         _startupState.Username = Username.Trim().ToLowerInvariant();
         _startupState.CurrentRole = currentRole;
+        _startupState.CurrentRoleCode = currentRoleCode;
         _startupState.EmployeeName = string.IsNullOrWhiteSpace(_pendingDisplayName) ? _startupState.EmployeeName : _pendingDisplayName;
         _startupState.EmployeeNumber = string.IsNullOrWhiteSpace(_pendingEmployeeIdentifier) ? _startupState.EmployeeNumber : _pendingEmployeeIdentifier;
         _startupState.IsUserMatched = true;

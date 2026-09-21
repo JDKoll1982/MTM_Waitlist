@@ -1890,7 +1890,7 @@
       "rejected": "Seeding an options_json list for pickup-component, which would freeze a job-derived list into configuration"
     },
     {
-      "decision": "The seven prepared situations sit on 100-3 (coil), 100-6 (flatstock), 100-7 (die), 100-18 (component) and 100-1806 (dunnage) on Expo Drive, and V100-33 (everything) and V100-34 (nothing on the job) on Vits Drive; the no-active-job case is 100-8",
+      "decision": "The seven prepared situations sit on 100-03 (coil), 100-06 (flatstock), 100-07 (die), 100-18 (component) and 100-1806 (dunnage) on Expo Drive, and V100-33 (everything) and V100-34 (nothing on the job) on Vits Drive; the no-active-job case is 100-8",
       "why": "Five and two as the decisions fixed, on work centres whose existing jobs did not have to be displaced (100-12 already carried a real job, so it was left alone)",
       "rejected": "Reusing 100-12 or other work centres that already hold a live job row"
     },

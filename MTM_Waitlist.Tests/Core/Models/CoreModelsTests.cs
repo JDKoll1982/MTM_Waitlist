@@ -16,6 +16,8 @@ public sealed class CoreModelsTests
         Assert.AreEqual("Preparing startup checks...", state.StatusText);
         Assert.AreEqual(string.Empty, state.Username);
         Assert.AreEqual(string.Empty, state.CurrentRole);
+        Assert.AreEqual(string.Empty, state.CurrentRoleCode);
+        Assert.AreEqual(0, state.UserId);
         Assert.AreEqual(StartupState.SessionTokenSourceNone, state.SessionTokenSource);
         Assert.IsFalse(state.IsDeveloper);
         Assert.IsFalse(state.IsUserMatched);
@@ -23,11 +25,18 @@ public sealed class CoreModelsTests
     }
 
     [TestMethod]
-    public void StartupState_IsDeveloper_IsCaseInsensitive()
+    public void StartupState_IsDeveloper_ReadsTheRoleCodeAndNotTheDisplayName()
     {
-        Assert.IsTrue(new StartupState { CurrentRole = "Developer" }.IsDeveloper);
-        Assert.IsTrue(new StartupState { CurrentRole = "developer" }.IsDeveloper);
-        Assert.IsFalse(new StartupState { CurrentRole = "Operator" }.IsDeveloper);
+        // The code is the role's identity, so the check has to answer from it. The display name is presentation
+        // that a catalogue edit may change, and a hand-written role-name list is the defect this feature removes.
+        Assert.IsTrue(new StartupState { CurrentRoleCode = "developer" }.IsDeveloper);
+        Assert.IsTrue(new StartupState { CurrentRoleCode = "DEVELOPER" }.IsDeveloper);
+        Assert.IsFalse(new StartupState { CurrentRoleCode = "plant_manager" }.IsDeveloper);
+
+        // A display name that says Developer decides nothing.
+        Assert.IsFalse(new StartupState { CurrentRole = "Developer" }.IsDeveloper);
+        Assert.IsFalse(new StartupState { CurrentRole = "developer" }.IsDeveloper);
+        Assert.IsFalse(new StartupState { CurrentRole = "Developer", CurrentRoleCode = "setup" }.IsDeveloper);
     }
 
     [TestMethod]

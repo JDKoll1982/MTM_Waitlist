@@ -198,7 +198,7 @@ public sealed class NewRequestDunnageViewModelTests
 
     private static NewRequestFlowState StateWith(params string[] assignedPartNumbers) => new()
     {
-        WorkCenter = "100-3",
+        WorkCenter = "100-03",
         Category = RequestCategory.Pickup,
         Item = RequestItemCatalog.FindById("pickup-dunnage"),
         Availability = RequestJobPartAvailability.None.WithDunnageParts(assignedPartNumbers.Select(partNumber =>

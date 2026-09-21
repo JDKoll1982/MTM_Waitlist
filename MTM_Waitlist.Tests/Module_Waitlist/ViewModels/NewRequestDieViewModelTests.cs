@@ -160,7 +160,7 @@ public sealed class NewRequestDieViewModelTests
 
     private static NewRequestFlowState TwoDieState() => new()
     {
-        WorkCenter = "100-7",
+        WorkCenter = "100-07",
         Category = RequestCategory.Pickup,
         Item = RequestItemCatalog.FindById("pickup-die"),
         Availability = (RequestJobPartAvailability.None with { HasActiveJob = true, HasDie = true })

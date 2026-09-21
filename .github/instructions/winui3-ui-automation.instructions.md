@@ -82,7 +82,7 @@ Start-Process $exe
   configured developer account** and lands directly on the shell, so steps 3 and 5 are exercisable
   with no credentials at all. Verified 2026-09-20 by driving the running app: the signed-in badge read
   `johnk`, the shell header read `Waitlist for "Expo Drive"`, the live store supplied 21 real requests
-  across work centers `100-3`, `100-5`, `100-6`, `100-7`, `100-8`, `100-11`, `100-12`, `100-14`,
+  across work centers `100-03`, `100-05`, `100-06`, `100-07`, `100-08`, `100-11`, `100-12`, `100-14`,
   `100-15`, `100-16`, the cached-data bar correctly reported Infor Visual unreachable, and the
   `Accept request` / `Cancel request` / `Complete request` / `Give back` buttons rendered.
 - **What still needs a signed-in *session* rather than the shell.** A test that depends on a

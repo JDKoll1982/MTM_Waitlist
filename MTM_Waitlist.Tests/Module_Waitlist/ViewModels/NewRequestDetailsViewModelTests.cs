@@ -152,7 +152,7 @@ public sealed class NewRequestDetailsViewModelTests
 
     private static NewRequestFlowState CreateState(RequestItemConfiguration configuration, RequestCategory category) => new()
     {
-        WorkCenter = "100-3",
+        WorkCenter = "100-03",
         Category = category,
         Item = RequestItemCatalog.FindById(configuration.Item),
         ItemConfiguration = configuration,

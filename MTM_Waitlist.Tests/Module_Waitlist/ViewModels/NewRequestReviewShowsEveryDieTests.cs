@@ -85,7 +85,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
         // The ordinary single-request wizard is untouched by the list.
         var state = new NewRequestFlowState
         {
-            WorkCenter = "100-7",
+            WorkCenter = "100-07",
             Category = RequestCategory.Other,
             Item = RequestItemCatalog.FindById("other"),
             InputValue = "Skid 4471 is on the wrong dock",
@@ -103,7 +103,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
     {
         var state = new NewRequestFlowState
         {
-            WorkCenter = "100-7",
+            WorkCenter = "100-07",
             Category = RequestCategory.Pickup,
             Item = RequestItemCatalog.FindById("pickup-die"),
         };
@@ -171,7 +171,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
 
         return new NewRequestFlowState
         {
-            WorkCenter = "100-7",
+            WorkCenter = "100-07",
             Category = RequestCategory.Pickup,
             Item = RequestItemCatalog.FindById("pickup-die"),
             Availability = (RequestJobPartAvailability.None with { HasActiveJob = true, HasDie = true }).WithDies(parts),

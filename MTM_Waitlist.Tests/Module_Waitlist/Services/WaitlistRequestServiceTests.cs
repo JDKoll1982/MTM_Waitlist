@@ -194,12 +194,12 @@ public sealed class WaitlistRequestServiceTests
             {
                 ["public_id"] = "f0000000-00aa-4000-8000-0000000000aa",
                 ["building"] = "Expo Drive",
-                ["work_center"] = "100-3",
+                ["work_center"] = "100-03",
                 ["category"] = "Pickup",
                 ["item"] = "pickup-coil",
                 ["input_value"] = null,
-                ["active_setup_job_id"] = "100-3",
-                ["work_center_name"] = "100-3",
+                ["active_setup_job_id"] = "100-03",
+                ["work_center_name"] = "100-03",
                 ["requester_employee_number"] = "6229",
                 ["requester_employee_name"] = "John Koll",
                 ["status"] = "Pending",
@@ -225,7 +225,7 @@ public sealed class WaitlistRequestServiceTests
         var request = service.GetActiveRequests("Expo Drive").SingleOrDefault();
         Assert.IsNotNull(request);
         Assert.AreEqual("Pending", request!.Status);
-        Assert.AreEqual("100-3", request.WorkCenter);
+        Assert.AreEqual("100-03", request.WorkCenter);
         Assert.AreEqual("db note", request.Note);
     }
 
@@ -659,7 +659,7 @@ public sealed class WaitlistRequestServiceTests
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
-            WorkCenter = "100-3",
+            WorkCenter = "100-03",
             Category = "Deliver",
             Item = "deliver-coil",
             Status = "Pending",
@@ -676,7 +676,7 @@ public sealed class WaitlistRequestServiceTests
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
-            WorkCenter = "100-6",
+            WorkCenter = "100-06",
             Category = "Deliver",
             Item = "deliver-coil",
             Status = "Pending",
@@ -702,7 +702,7 @@ public sealed class WaitlistRequestServiceTests
             {
                 Id = Guid.NewGuid(),
                 Building = "Expo Drive",
-                WorkCenter = "100-3",
+                WorkCenter = "100-03",
                 Category = "Deliver",
                 Item = "deliver-coil",
                 Status = status,

@@ -29,7 +29,7 @@ using MTM_Waitlist.Notifications;
 
 namespace MTM_Waitlist.Services.DependencyInjection;
 
-public static class ServiceRegistrationExtensions
+public static partial class ServiceRegistrationExtensions
 {
     public static IServiceCollection AddAppServices(this IServiceCollection services, HostBuilderContext context)
     {
@@ -228,6 +228,20 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();
 
+        // User management and permissions (feature 006). One declaration of every permission, the user-management
+        // rules, and the store seam beneath them, all in MTM_Waitlist.Core so the sign-in path, the settings
+        // library, the setup library and the separate service host read one implementation rather than a copy.
+        services.AddSingleton<IPermissionService, PermissionService>();
+        services.AddSingleton<IUserManagementRepository, UserManagementRepository>();
+        services.AddSingleton<IUserManagementService, UserManagementService>();
+
+        // Feature 006's pages, one registration file per story phase so three phases never contend on this one.
+        // Each declaration below is implemented by its own file; a phase that has not landed yet contributes
+        // nothing, and the page is simply not reachable until it does.
+        RegisterUserManagementPages(services);
+        RegisterUserAccountPages(services);
+        RegisterPermissionsPages(services);
+
         // Configuration
         services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
         services.Configure<StartupDatabaseOptions>(context.Configuration.GetSection(nameof(StartupDatabaseOptions)));
@@ -244,4 +258,20 @@ public static class ServiceRegistrationExtensions
 
         return services;
     }
+
+    /// <summary>
+    /// Registers the user-list page and its view model, in the story phase that builds them.
+    /// </summary>
+    static partial void RegisterUserManagementPages(IServiceCollection services);
+
+    /// <summary>
+    /// Registers the create page, the person's page and the one-time PIN window, in the story phase that builds
+    /// them.
+    /// </summary>
+    static partial void RegisterUserAccountPages(IServiceCollection services);
+
+    /// <summary>
+    /// Registers the permissions page and the who-holds-this view, in the story phase that builds them.
+    /// </summary>
+    static partial void RegisterPermissionsPages(IServiceCollection services);
 }
