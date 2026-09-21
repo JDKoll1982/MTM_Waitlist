@@ -113,7 +113,7 @@ public sealed class TemporaryCredentialLimitTests
 
         // The sixth attempt carries the RIGHT value and is still refused, because the limit is checked before the
         // value is compared (FR-031).
-        var refused = await _repository.CheckCredentialsAsync(account.SignInName, CorrectPin);
+        var refused = await _repository!.CheckCredentialsAsync(account.SignInName, CorrectPin);
 
         Assert.IsFalse(refused.IsAuthenticated, "The sixth attempt must be refused even with the correct value.");
         Assert.IsTrue(refused.TemporaryCredentialAttemptLimitReached);
@@ -194,7 +194,7 @@ public sealed class TemporaryCredentialLimitTests
 
         Assert.AreEqual(3, await StoredFailedAttemptCountAsync(account.SignInName));
 
-        var succeeded = await _repository.CheckCredentialsAsync(account.SignInName, CorrectPin);
+        var succeeded = await _repository!.CheckCredentialsAsync(account.SignInName, CorrectPin);
 
         Assert.IsTrue(succeeded.IsAuthenticated, "The right value still works below the limit.");
         Assert.AreEqual(0, succeeded.TemporaryCredentialFailedAttempts);
@@ -214,7 +214,7 @@ public sealed class TemporaryCredentialLimitTests
             Assert.IsTrue(failed.HoldsTemporaryCredential, "The legacy marker is a temporary value (FR-031).");
         }
 
-        var refused = await _repository.CheckCredentialsAsync(account.SignInName, "0000");
+        var refused = await _repository!.CheckCredentialsAsync(account.SignInName, "0000");
 
         Assert.IsFalse(refused.IsAuthenticated, "The legacy value is limited exactly like a new one (FR-031).");
         Assert.IsTrue(refused.TemporaryCredentialAttemptLimitReached);
@@ -228,7 +228,7 @@ public sealed class TemporaryCredentialLimitTests
         await _repository!.CheckCredentialsAsync(account.SignInName, WrongPin);
 
         var before = await StoredFailedAttemptCountAsync(account.SignInName);
-        var unknown = await _repository.CheckCredentialsAsync($"{OwnedSignInPrefix}{_runId}.nobody", WrongPin);
+        var unknown = await _repository!.CheckCredentialsAsync($"{OwnedSignInPrefix}{_runId}.nobody", WrongPin);
 
         Assert.IsFalse(unknown.IsAuthenticated);
         Assert.IsFalse(unknown.HoldsTemporaryCredential, "A name that does not exist holds no temporary credential, so the limit stays invisible (FR-042).");
@@ -274,7 +274,7 @@ public sealed class TemporaryCredentialLimitTests
 
         Assert.AreEqual(0, await StoredFailedAttemptCountAsync(account.SignInName), "A fresh reset clears the count (FR-039).");
 
-        var withTheNewValue = await _repository.CheckCredentialsAsync(account.SignInName, freshPin);
+        var withTheNewValue = await _repository!.CheckCredentialsAsync(account.SignInName, freshPin);
 
         Assert.IsTrue(withTheNewValue.IsAuthenticated, "The freshly issued value works (SC-008).");
         Assert.IsTrue(withTheNewValue.RequiresPasswordChange, "The new value must still be changed at the next sign-in (FR-029).");

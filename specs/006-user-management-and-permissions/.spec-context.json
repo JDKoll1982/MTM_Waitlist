@@ -490,6 +490,158 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-21T12:42:42.549Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T047",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:02.784Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T048",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:06.105Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:09.982Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T050",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:13.864Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T051",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:17.039Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T052",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:20.567Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T053",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:23.762Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T054",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:04:56.600Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T055",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:07:43.483Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T056",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:09:41.355Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T057",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:11:15.408Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T058",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:15:23.416Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T059",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:15:27.326Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T060",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:19:27.043Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T061",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:19:31.197Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T062",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:19:35.027Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T063",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:19:38.860Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T070",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:20:02.727Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T071",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:20:38.794Z"
     }
   ],
   "unattended": true,
@@ -1574,7 +1726,7 @@
     }
   },
   "size": "oversized",
-  "currentTask": "T046",
+  "currentTask": "T071",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2018,6 +2170,183 @@
         "MTM_Waitlist.Tests/Module_Settings/ViewModels/UserManagementViewModelTests.cs",
         "MTM_Waitlist.Tests/Module_Settings/SettingsPageMarkupTests.cs"
       ]
+    },
+    "T047": {
+      "status": "DONE",
+      "did": "Person detail, edit request snapshot and typed-outcome resolver, plus the create form's view model: rung-bounded picker, guarded save, typed duplicate and over-length refusals that keep the typed values",
+      "files": [
+        "MTM_Waitlist.Settings/Models/UserDetail.cs",
+        "MTM_Waitlist.Settings/Models/UserEditRequest.cs",
+        "MTM_Waitlist.Settings/Models/UserManagementResults.cs",
+        "MTM_Waitlist.Settings/Models/IssuedCredential.cs",
+        "MTM_Waitlist.Settings/ViewModels/CreateUserViewModel.cs"
+      ]
+    },
+    "T048": {
+      "status": "DONE",
+      "did": "The person's page view model: one page with a read-only state, the two self-lockout refusals, unsaved-edit gating for every action, and the reset gated on permission.admin.reset_password at both the control and the action",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/EditUserViewModel.cs"
+      ]
+    },
+    "T049": {
+      "status": "DONE",
+      "did": "The one-time credential window's view model: the credential held only while open, a print that never closes the window and costs nothing when it fails, a refused dismissal, and a close that releases the credential",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/PinRevealDialogViewModel.cs"
+      ]
+    },
+    "T050": {
+      "status": "DONE",
+      "did": "The create page: a form only, with no actions area and no active control, every label localised through the view model, and the bound on the picker stated in words",
+      "files": [
+        "Module_Settings/Views/CreateUserPage.xaml",
+        "Module_Settings/Views/CreateUserPage.xaml.cs"
+      ]
+    },
+    "T051": {
+      "status": "DONE",
+      "did": "The person's page: fields in a form at the top and the actions in their own area below, the deactivation sentence repeated on the page, and the reset offered only behind a confirmation to a reader holding the key",
+      "files": [
+        "Module_Settings/Views/EditUserPage.xaml",
+        "Module_Settings/Views/EditUserPage.xaml.cs"
+      ]
+    },
+    "T052": {
+      "status": "DONE",
+      "did": "The credential window and the phase's own registration file: two buttons in its content and no framework close button, so Escape and every other dismissal hit the cancelling handler and pass through the existing print service",
+      "files": [
+        "Module_Settings/Views/PinRevealDialog.xaml",
+        "Module_Settings/Views/PinRevealDialog.xaml.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.UserAccount.cs"
+      ]
+    },
+    "T053": {
+      "status": "DONE",
+      "did": "The three flow suites: 27 tests over one press one person, the typed duplicate and over-length refusals, the rung-bounded picker, the derived display name bound, 6229 shared by two people, the read-only and self-lockout states, unsaved-edit gating, the four-digit credential and its release, and a print that cannot start",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/CreateUserViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/EditUserViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/PinRevealDialogViewModelTests.cs"
+      ]
+    },
+    "T054": {
+      "status": "DONE",
+      "did": "The change-set procedure and the holders read, both applied live to MySQL; AllSPs.sql regenerated with both bodies; the namespace refusal token added to the database contract because the pinned list had no token for that rule",
+      "files": [
+        "Database/StoredProcedures/sp_config_permissions_user_set/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_user_set/rollback.sql",
+        "Database/StoredProcedures/sp_config_permissions_feature_holders_get/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_feature_holders_get/rollback.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "specs/006-user-management-and-permissions/contracts/database-contract.md"
+      ]
+    },
+    "T055": {
+      "status": "DONE",
+      "did": "The page-facing permissions service behind two procedures and a new reversal read: one-person composition of chosen/inherited/fallback, the change set as one atomic call, the reversal built from the recorded history, and the resolution cache invalidated on a successful save. The change-set procedure was amended to stamp one clock per call and to accept to:null so a reversal restores an inherited value rather than leaving a false nobody chose",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IPermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Contracts/Services/PermissionAdministrationMessages.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "Database/StoredProcedures/sp_config_permissions_user_set/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_reversal_get/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_reversal_get/rollback.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T056": {
+      "status": "DONE",
+      "did": "The permissions page's row, its change set and its view model: per-row value/provenance/pending with the stored value kept so a moved value is refused, the change set composed from the rows that actually changed, the confirmed save, the whole-save undo that asks before restoring a moved value, the count of pending rows on leaving, and the outranking person shown with their rows unavailable. The reversal gained a restore-despite-moved flag for the second half of FR-070",
+      "files": [
+        "MTM_Waitlist.Settings/Models/PermissionRow.cs",
+        "MTM_Waitlist.Settings/Models/PermissionChangeSet.cs",
+        "MTM_Waitlist.Settings/ViewModels/PermissionsViewModel.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IPermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs"
+      ]
+    },
+    "T057": {
+      "status": "DONE",
+      "did": "The permissions page: the column of people, the chosen person's feature list with a checkbox per row, the fixed row and an outranking person rendered locked with their reasons, the restore question beside the bar (an InfoBar takes one action button and there are two answers), no fixed widths, and its own registration file with its route",
+      "files": [
+        "Module_Settings/Views/PermissionsPage.xaml",
+        "Module_Settings/Views/PermissionsPage.xaml.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.Permissions.cs"
+      ]
+    },
+    "T058": {
+      "status": "DONE",
+      "did": "The change-set suite against a live store: 1 test, 8 claims, 0 skipped with the gate variable set. It found two real defects: the helper server's bounded retry reported a refused change as a landed one, so the service now talks to the provider directly; and a value row cannot be deleted and still be recorded, so the reversal restores the value that was in force and the reversal read returns the role baseline",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PermissionChangeSetServiceTests.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "Database/StoredProcedures/sp_config_permissions_user_set/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_reversal_get/create.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "specs/006-user-management-and-permissions/contracts/database-contract.md"
+      ]
+    },
+    "T059": {
+      "status": "DONE",
+      "did": "The page's behaviour suite: 12 tests over pending marks and the leaving count, the confirmation's per-row sentences, both values per entry, one impatient press writing one change, the whole-save undo, the moved-value question and both answers to it, the outranking person, the fixed row, and the unavailable store",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/PermissionsViewModelTests.cs"
+      ]
+    },
+    "T060": {
+      "status": "DONE",
+      "did": "The holders models and view model: the roles read from the seeded baselines through a new baseline procedure rather than restated beside the view, only the people who differ in either direction, a feature nobody holds stated in words, a switched-off holder marked, and a picker over every declared permission",
+      "files": [
+        "MTM_Waitlist.Settings/Models/PermissionHoldersView.cs",
+        "MTM_Waitlist.Settings/Models/PermissionFeatureOption.cs",
+        "MTM_Waitlist.Settings/ViewModels/PermissionHoldersViewModel.cs",
+        "Database/StoredProcedures/sp_config_permissions_feature_baseline_get/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_feature_baseline_get/rollback.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "MTM_Waitlist.Core/Contracts/Services/IPermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs"
+      ]
+    },
+    "T061": {
+      "status": "DONE",
+      "did": "The who-holds-this control: feature picker, the roles as a list, only differing people each opening their own page, the nobody-holds statement in words, and no fixed width. WrapPanel was not available from the toolkit on this machine, so the roles are an ItemsControl rather than a wrap panel",
+      "files": [
+        "Module_Settings/Views/PermissionHoldersView.xaml",
+        "Module_Settings/Views/PermissionHoldersView.xaml.cs"
+      ]
+    },
+    "T062": {
+      "status": "DONE",
+      "did": "The who-holds-this view hosted on the permissions page in its own row, shown only to a reader entitled to the page, and its view model registered in the permissions phase's own registration file. PermissionsPage.xaml is the one path two phases share and Phase 9 ran after Phase 8 created it",
+      "files": [
+        "Module_Settings/Views/PermissionsPage.xaml",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.Permissions.cs"
+      ]
+    },
+    "T063": {
+      "status": "DONE",
+      "did": "The who-holds-this suite: 10 tests over the roles read from the store rather than a second copy, only the differing people, the denied direction named and marked, a switched-off holder listed and marked, nobody-holds stated in words and kept distinct from nobody-differing, the view writing nothing, one read for one answer, and an unread answer never claimed as an empty one",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/PermissionHoldersViewModelTests.cs"
+      ]
+    },
+    "T070": {
+      "status": "DONE",
+      "did": "The ruleset gains the new role scope, the corrected precedence order with the reason it moved, and the note that a value row cannot be deleted and still be recorded; the quickstart gains a section naming the two orderings that must not be reversed, with the re-rank-before-per-person-row gate first",
+      "files": [
+        "Database/Database-Ruleset.md",
+        "specs/006-user-management-and-permissions/quickstart.md"
+      ]
+    },
+    "T071": {
+      "status": "DONE",
+      "did": "The retired role vocabulary is out of FEATURES.md and the changelog header, user management is no longer listed as unstarted, the feature has its own catalogue section and its own plain-language changelog entry",
+      "files": [
+        "FEATURES.md",
+        "CHANGELOG.md"
+      ]
     }
   },
   "verified": [
@@ -2108,6 +2437,25 @@
       "exitCode": 0,
       "durationSeconds": 45.3,
       "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1263, Skipped:    38, Total:  1301, Duration: 31 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "clean solution build, 0 warnings 0 errors",
+      "command": "powershell -NoProfile -Command \"cd c:\\Users\\johnk\\source\\repos\\MTM_Waitlist; $env:MSBUILDDISABLENODEREUSE='1'; dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false --no-incremental\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 41.1,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:40.70"
+    },
+    {
+      "what": "whole test suite with all four store connections exported",
+      "command": "powershell -NoProfile -Command \"cd c:\\Users\\johnk\\source\\repos\\MTM_Waitlist; $env:MSBUILDDISABLENODEREUSE='1'; $cs='Server=127.0.0.1;Port=3306;Database=mtm_waitlist;User Id=root;Password=root;'; $env:MTM_WAITLIST_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING=$cs; $env:MTM_MOCK_DB_CONNECTION_STRING='Server=127.0.0.1;Port=3306;Database=mtm_mock;User Id=root;Password=root;'; $env:MTM_RECEIVING_APPLICATION_DB_CONNECTION_STRING='Server=127.0.0.1;Port=3306;Database=mtm_receiving_application;User Id=root;Password=root;'; dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64\"",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 55.0,
+      "result": "  Skipped GetSubordinatePartsQuery_ReturnsRows_WhenServerIsAvailable [< 1 ms] ·   Skipped EmployeeLookupQuery_ReturnsEmployeeStatus_WhenServerIsAvailable [< 1 ms] · Failed!  - Failed:     1, Passed:  1346, Skipped:     4, Total:  1351, Duration: 39 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "warnings": [
+        "exited 1"
+      ]
     }
   ],
   "decisions": [

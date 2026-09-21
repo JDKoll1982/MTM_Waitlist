@@ -5,6 +5,23 @@ precedence re-rank has to be in place before any per-person permission row exist
 to be run while the state it reverses is still the state on the floor, and the forward rename has to be back in
 place before the permission baselines are seeded, because every baseline is keyed to the role the rename creates.
 
+## The two orderings that must not be reversed
+
+They are written here as well as in `tasks.md` and `plan.md`, so they are found by reading rather than remembered.
+
+1. **The re-rank before any per-person row.** `Database/Functions/fn_config_settings_scope_rank` becomes
+   `computer` 1, `all_users` 2, `role` 3, `admin` 4, `developer` 5, `user` 6, and it must be in place **before the
+   first per-person permission row is ever written**. That row is written by
+   `sp_config_permissions_user_set`, reached only from the permissions page. A row written under the old order
+   resolves below an inherited `admin` or `developer` value and is silently overridden, and nothing reports it, so
+   a store that took the row first would look correct and behave wrongly.
+2. **The rename, its reversal, and the re-application of the rename, before the baselines.** The rename
+   (`Seeds/seed_role_admin_to_it_department`) runs, its paired reversal is **actually executed**, and the forward
+   rename is then **re-applied**, all before `Seeds/seed_permission_role_baselines` runs. The reversal leaves the
+   retired role in the catalogue, and every baseline is keyed `role:<role_code>`: a baseline keyed to a role that
+   does not exist is a baseline nobody holds, and one keyed to the retired role is a baseline nobody should. Step 4
+   below is the whole of that ordering in one run, and step 5 depends on the state step 4 leaves.
+
 ## Before anything is written
 
 1. **Check what the store holds now.** Read the three rows in `config_settings_values` and confirm all three are

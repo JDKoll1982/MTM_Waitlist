@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.Module_Settings.Views.CreateUserPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d">
+
+    <!--
+        A form and nothing else: no actions area, no active control, and no fixed width anywhere. Every label is
+        localised through the view model rather than through x:Uid, so the resource map keeps one owner.
+    -->
+    <ScrollViewer Padding="24">
+        <StackPanel Spacing="16" MaxWidth="720" HorizontalAlignment="Left">
+
+            <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
+            <TextBlock
+                Style="{ThemeResource BodyTextBlockStyle}"
+                Text="{x:Bind ViewModel.SubtitleText}"
+                TextWrapping="Wrap" />
+
+            <!-- The reader who may not create is told so, and the form is shown unavailable rather than hidden. -->
+            <InfoBar
+                x:Name="NotEntitledBar"
+                x:Load="{x:Bind ViewModel.NotEntitled, Mode=OneWay}"
+                IsClosable="False"
+                IsOpen="True"
+                Message="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+                Severity="Warning"
+                Title="{x:Bind ViewModel.TitleText}" />
+
+            <StackPanel x:Name="FormPanel" Spacing="12" x:Load="{x:Bind ViewModel.IsEntitled, Mode=OneWay}">
+                <TextBox
+                    AutomationProperties.AutomationId="CreateUserPage_SignInName"
+                    Header="{x:Bind ViewModel.SignInNameLabelText}"
+                    Text="{x:Bind ViewModel.Username, Mode=TwoWay}" />
+                <TextBox
+                    AutomationProperties.AutomationId="CreateUserPage_FirstName"
+                    Header="{x:Bind ViewModel.FirstNameLabelText}"
+                    Text="{x:Bind ViewModel.FirstName, Mode=TwoWay}" />
+                <TextBox
+                    AutomationProperties.AutomationId="CreateUserPage_LastName"
+                    Header="{x:Bind ViewModel.LastNameLabelText}"
+                    Text="{x:Bind ViewModel.LastName, Mode=TwoWay}" />
+                <TextBox
+                    AutomationProperties.AutomationId="CreateUserPage_EmployeeNumber"
+                    Header="{x:Bind ViewModel.EmployeeNumberLabelText}"
+                    Text="{x:Bind ViewModel.EmployeeNumber, Mode=TwoWay}" />
+
+                <StackPanel Spacing="4">
+                    <muxc:ComboBox
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.AutomationId="CreateUserPage_Role"
+                        Header="{x:Bind ViewModel.RoleLabelText}"
+                        ItemsSource="{x:Bind ViewModel.RoleOptions}"
+                        SelectedItem="{x:Bind ViewModel.SelectedRole, Mode=TwoWay}" />
+                    <!-- The bound on the picker, said in words rather than as a list of withheld roles. -->
+                    <TextBlock
+                        Style="{ThemeResource CaptionTextBlockStyle}"
+                        Text="{x:Bind ViewModel.RoleBoundText}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <muxc:ProgressRing
+                    Width="24"
+                    Height="24"
+                    HorizontalAlignment="Left"
+                    IsActive="{x:Bind ViewModel.IsSaving, Mode=OneWay}" />
+                <TextBlock
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Text="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button
+                        AutomationProperties.AutomationId="CreateUserPage_Create"
+                        Click="OnCreateClick"
+                        Content="{x:Bind ViewModel.SaveLabelText}"
+                        IsEnabled="{x:Bind ViewModel.CanSave, Mode=OneWay}"
+                        Style="{ThemeResource AccentButtonStyle}" />
+                    <Button
+                        AutomationProperties.AutomationId="CreateUserPage_Cancel"
+                        Click="OnCancelClick"
+                        Content="{x:Bind ViewModel.CancelLabelText}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

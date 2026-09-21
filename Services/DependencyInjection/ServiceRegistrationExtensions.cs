@@ -251,7 +251,7 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<IRoleCatalogService, RoleCatalogService>();
         services.AddSingleton<IUserManagementRepository, UserManagementRepository>();
         services.AddSingleton<IUserManagementService, UserManagementService>();
-
+        services.AddSingleton<IPermissionAdministrationService, PermissionAdministrationService>();
         // Feature 006's pages, one registration file per story phase so three phases never contend on this one.
         // Each declaration below is implemented by its own file; a phase that has not landed yet contributes
         // nothing, and the page is simply not reachable until it does.

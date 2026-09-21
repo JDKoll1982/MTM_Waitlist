@@ -60,12 +60,30 @@ This document applies your completed naming conventions and database architectur
 
 ## Settings Scope and Resolution
 - Settings are persisted in `config_settings_values`; changes are recorded in `config_settings_history`.
-- Supported scope types are `workstation`, `all_users`, `user`, `admin`, and `developer`.
-- Scope resolution is ordered from fallback to override: workstation -> all_users -> user -> admin -> developer.
-- `scope_key` is required and is `workstation:<id>`, `all_users`, `user:<id>`, `admin`, or `developer`.
+- Supported scope types are `workstation`, `all_users`, `role`, `user`, `admin`, and `developer`.
+- Scope resolution is ordered from fallback to override:
+  `workstation` -> `all_users` -> `role` -> `admin` -> `developer` -> `user`.
+- **The order is the corrected one, re-ranked by 006-user-management-and-permissions (T006).** The `role` scope is
+  new, and `user` moved from third to last so that **a person's own value wins**: before the re-rank an `admin` or
+  `developer` row outranked the value chosen for the person themselves, and the person's own choice was silently
+  overridden with nothing reporting it. `fn_config_settings_scope_rank` is the one place the numbers live, and the
+  effective read keeps taking the highest-ranked applicable row.
+- The re-rank ships **before** the first per-person permission row is ever written (T054), because a row written
+  under the old order would read as if it had no effect. That ordering is a gate rather than advice.
+- `scope_key` is required and is `workstation:<id>`, `all_users`, `role:<role_code>`, `user:<id>`, `admin`, or
+  `developer`.
+- A **role baseline** is one `role`-scoped row per permission per role, keyed `role:<role_code>` with
+  `value_type` `bool`. It is shipped as data by `Seeds/seed_permission_role_baselines`, so what a role may do is
+  changed without a code change. A **person permission value** is a `user`-scoped row in the same table, written
+  only when the person's answer differs from their role's baseline, and it is written through
+  `sp_config_permissions_user_set` rather than through `sp_config_settings_upsert`.
 - Workstation and user scopes use `workstation_id` and `user_id` foreign keys respectively.
 - Admin and developer scope writes require role authorization; raw secrets must remain outside the settings table.
-- Effective reads must use `sp_config_settings_get_effective`; writes must use `sp_config_settings_upsert`.
+- Effective reads must use `sp_config_settings_get_effective`; writes must use `sp_config_settings_upsert`, except
+  the permission writes named above, which have their own procedures and their own history record.
+- **A value row cannot be deleted and still be recorded.** `config_settings_history.config_setting_id` is a foreign
+  key to `config_settings_values.id`, so a removal cannot write a history row naming the row it removed. A reversal
+  therefore restores the *value* that was in force rather than the absence of a row.
 
 ## Artifact Layout and Release Governance
 - Use a file-per-artifact layout under `Database/`.

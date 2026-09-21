@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.Module_Settings.Views.PermissionsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:views="using:MTM_Waitlist.Module_Settings.Views"
+    mc:Ignorable="d">
+
+    <!--
+        One person at a time: a column of people on the left and the chosen person's features as a list on the
+        right, never a grid of roles against features. No control carries a fixed width: the two columns split the
+        window, and a row's text wraps rather than being cropped.
+    -->
+    <Grid Padding="24" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header and the way back -->
+        <Grid Grid.Row="0" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button
+                Grid.Column="0"
+                AutomationProperties.AutomationId="PermissionsPage_Back"
+                Click="OnBackClick"
+                Content="{x:Bind ViewModel.BackLabelText}"
+                VerticalAlignment="Top" />
+
+            <StackPanel Grid.Column="1" Spacing="4">
+                <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
+                <TextBlock
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Text="{x:Bind ViewModel.SubtitleText}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+
+        <!-- The reader who may not open this page is told so rather than shown a screen they cannot use. -->
+        <InfoBar
+            Grid.Row="1"
+            x:Name="NotEntitledBar"
+            x:Load="{x:Bind ViewModel.NotEntitled, Mode=OneWay}"
+            IsClosable="False"
+            IsOpen="True"
+            Message="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+            Severity="Warning"
+            Title="{x:Bind ViewModel.TitleText}" />
+
+        <!-- The chosen person outranks the reader: their rows are shown and cannot be changed (FR-066). -->
+        <InfoBar
+            Grid.Row="2"
+            x:Name="ReadOnlyBar"
+            AutomationProperties.AutomationId="PermissionsPage_ReadOnly"
+            x:Load="{x:Bind ViewModel.IsPersonReadOnly, Mode=OneWay}"
+            IsClosable="False"
+            IsOpen="True"
+            Message="{x:Bind ViewModel.ReadOnlyReasonText}"
+            Severity="Warning"
+            Title="{x:Bind ViewModel.TitleText}" />
+
+        <Grid Grid.Row="3" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" MinWidth="200" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- The column of people -->
+            <Grid Grid.Column="0" RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Spacing="4">
+                    <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.PeopleHeadingText}" />
+                    <muxc:ProgressRing
+                        Width="24"
+                        Height="24"
+                        HorizontalAlignment="Left"
+                        IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+                    <Button
+                        AutomationProperties.AutomationId="PermissionsPage_Retry"
+                        Command="{x:Bind ViewModel.LoadCommand}"
+                        Content="{x:Bind ViewModel.RetryText}"
+                        Visibility="{x:Bind ViewModel.IsStoreUnavailable, Mode=OneWay}" />
+                </StackPanel>
+
+                <ListView
+                    Grid.Row="1"
+                    AutomationProperties.AutomationId="PermissionsPage_People"
+                    ItemsSource="{x:Bind ViewModel.People}"
+                    SelectedItem="{x:Bind ViewModel.SelectedPerson, Mode=TwoWay}"
+                    SelectionMode="Single">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:UserSummary">
+                            <StackPanel Padding="8" Spacing="2">
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" />
+                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind RoleText}" />
+                                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind StatusText}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+
+            <!-- The chosen person's features -->
+            <Grid Grid.Column="1" RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.FeaturesHeadingText}" />
+
+                <ListView
+                    Grid.Row="1"
+                    AutomationProperties.AutomationId="PermissionsPage_Rows"
+                    ItemsSource="{x:Bind ViewModel.Rows}"
+                    SelectionMode="None">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:PermissionRow">
+                            <Grid Padding="8" ColumnSpacing="12" RowSpacing="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <CheckBox
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Grid.RowSpan="2"
+                                    AutomationProperties.Name="{x:Bind LabelText}"
+                                    IsChecked="{x:Bind Value, Mode=TwoWay}"
+                                    IsEnabled="{x:Bind CanBeCleared, Mode=OneWay}"
+                                    VerticalAlignment="Top" />
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                    Text="{x:Bind LabelText}"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Style="{ThemeResource BodyTextBlockStyle}"
+                                    Text="{x:Bind GatesText}"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind StateText, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+
+                                <!-- Why a locked row is locked, in words rather than by absence (FR-059, FR-066). -->
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind LockReasonText}"
+                                    TextWrapping="Wrap"
+                                    Visibility="{x:Bind IsLocked, Mode=OneWay}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <StackPanel Grid.Row="2" Spacing="8">
+                    <!-- What the value has moved to, and the question the reader is asked before restoring it. -->
+                    <InfoBar
+                        x:Name="RestoreBar"
+                        AutomationProperties.AutomationId="PermissionsPage_RestorePrompt"
+                        x:Load="{x:Bind ViewModel.IsRestorePromptVisible, Mode=OneWay}"
+                        IsClosable="False"
+                        IsOpen="True"
+                        Message="{x:Bind ViewModel.RestorePromptText, Mode=OneWay}"
+                        Severity="Informational"
+                        Title="{x:Bind ViewModel.UndoLabelText}" />
+
+                    <!--
+                        The two answers to that question. They sit beside the bar rather than inside it because an
+                        InfoBar's action area takes one button and there are two answers.
+                    -->
+                    <StackPanel
+                        x:Name="RestoreActions"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        x:Load="{x:Bind ViewModel.IsRestorePromptVisible, Mode=OneWay}">
+                        <Button
+                            AutomationProperties.AutomationId="PermissionsPage_RestoreConfirm"
+                            Command="{x:Bind ViewModel.ConfirmRestoreCommand}"
+                            Content="{x:Bind ViewModel.UndoLabelText}" />
+                        <Button
+                            AutomationProperties.AutomationId="PermissionsPage_RestoreDismiss"
+                            Command="{x:Bind ViewModel.DismissRestoreCommand}"
+                            Content="{x:Bind ViewModel.KeepValueLabelText}" />
+                    </StackPanel>
+
+                    <TextBlock
+                        Style="{ThemeResource BodyTextBlockStyle}"
+                        Text="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+
+                    <!-- Saving with nothing changed is unavailable, and says why (FR-068). -->
+                    <TextBlock
+                        Style="{ThemeResource CaptionTextBlockStyle}"
+                        Text="{x:Bind ViewModel.NothingChangedText}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.NothingChanged, Mode=OneWay}" />
+
+                    <!-- The count of rows still pending, which is also what leaving warns with (FR-073). -->
+                    <TextBlock
+                        Style="{ThemeResource CaptionTextBlockStyle}"
+                        Text="{x:Bind ViewModel.UnsavedWarningText, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.HasPendingChanges, Mode=OneWay}" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button
+                            AutomationProperties.AutomationId="PermissionsPage_Save"
+                            Click="OnSaveClick"
+                            Content="{x:Bind ViewModel.SaveLabelText}"
+                            IsEnabled="{x:Bind ViewModel.CanSave, Mode=OneWay}"
+                            Style="{ThemeResource AccentButtonStyle}" />
+                        <Button
+                            AutomationProperties.AutomationId="PermissionsPage_Undo"
+                            Command="{x:Bind ViewModel.UndoCommand}"
+                            Content="{x:Bind ViewModel.UndoLabelText}"
+                            IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!--
+            The second view of the same data on the same page, as the UI contract requires: asking who holds a
+            feature. It is read-only and changes nothing.
+        -->
+        <views:PermissionHoldersView
+            Grid.Row="4"
+            x:Name="HoldersView"
+            x:Load="{x:Bind ViewModel.IsEntitled, Mode=OneWay}" />
+    </Grid>
+</Page>

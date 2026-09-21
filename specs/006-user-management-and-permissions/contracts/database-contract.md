@@ -102,8 +102,19 @@ SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'mtm_self_rename_denied'
 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'mtm_target_outranks_actor'
 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'mtm_permission_gate_fixed'
 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'mtm_permission_value_moved'
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'mtm_permission_key_invalid'
 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'mtm_role_unknown'
 ```
+
+**Correction made while implementing T054 (2026-09-21).** `mtm_permission_key_invalid` is added to this list. The
+original list carried no token for the change-set namespace rule, and reusing one of the tokens it did carry would
+have reported a different refusal than the one that happened. The tokens that report a particular key carry it after
+the token and a colon, so `which key moved` is reported rather than only that something did, for example
+`mtm_permission_value_moved:permission.settings.hot_work_centers`.
+
+**MySQL 5.7 note, found by running it.** `SIGNAL` accepts a literal or a variable in its `SET` clause and nothing
+else, so a token that has to name a key is built into a local variable first. A function call in the `SET` clause is
+a syntax error at procedure-creation time.
 
 The store, not the screen, decides: it reads the actor's own rung from `auth_roles_assignments` joined to
 `auth_roles_catalog` and never takes a rank, a role code or an actor name from its caller. A refused write leaves
@@ -180,6 +191,21 @@ transaction:
 
 A save of several permissions and a reversal of that save are therefore the same call with the same atomicity, and
 one save writes exactly its own number of history rows.
+
+**What implementation proved about the reversal (T055, 2026-09-21), and why the procedure now reads the baseline.**
+A reversal cannot restore *the absence of a row* by deleting one: `config_settings_history.config_setting_id` is a
+foreign key to `config_settings_values.id`, so the history row a removal writes would name a value row that no
+longer exists, and the insert is refused. MySQL raised that when it was tried. So
+`sp_config_permissions_reversal_get` returns the person's role baseline for the key as well as the recorded values,
+and the reversal writes the value that was in force before the save. One byte of the reversal therefore reads
+exactly as `previous_setting_value_bool` does, and the value in force is restored; the one observable difference is
+that the restored value is carried by the person's own row rather than by their role's, so the page marks it as a
+choice made for the person rather than as inherited. That is recorded here rather than left to be discovered.
+
+`sp_config_permissions_user_set` reads its clock **once per call** and stamps every row it writes with that one
+value, so the rows of one save share an exact `changed_utc` and the reversal can find them as a group. A clock read
+per statement would not do that: a save of several keys straddling a second boundary would write two timestamps and
+the reversal would reverse half of it.
 
 ### `sp_config_permissions_feature_holders_get(p_setting_key)`
 

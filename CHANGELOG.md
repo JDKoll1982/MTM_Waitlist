@@ -1,12 +1,38 @@
 # MTM Waitlist — End-User Changelog
 
-> **Audience:** End users / plant-floor operators, supervisors, and admins.
+> **Audience:** End users / plant-floor operators, leads, and IT Department.
 > This changelog covers **user-facing** changes primarily — what you can see and do differently
 > in the app. Implementation details and internal plumbing are mostly excluded, but the module
 > restructuring below is included because it affects how the app is built and maintained going
 > forward.
 >
 > **Date:** 2026-08-29
+
+---
+
+## 2026-09-21 — you can now manage people, and what each person may do
+
+**What changed:** Settings has an **Administration** area with two entries. **Users** opens the roster of everyone in
+ the store — searchable by sign-in name, name, employee number or role, filterable by role, and with switched-off
+ people listed and marked. Opening a person shows their details and their actions on one page: save a correction,
+ switch the account off or back on, and reset a password. Creating a person or resetting a password shows a one-time
+ four-digit password in a window that has to be closed deliberately and can be printed. **Permissions** changes what
+ one person may do: one row per feature, each saying what the value is now and whether it came from the person's
+ role or from a choice made for them, with a save you are asked to confirm and can undo afterwards. The same page
+ answers **who holds a feature** — which roles' baselines give it, and the people who differ.
+
+**Why it matters:** access used to be decided by lists of role names written into the application, one per screen,
+ and there was no way to give one person something without changing everybody at their level. Now each gated action
+ is one named permission, a person starts from their role's baseline, and a change for one person takes effect for
+ that person and nobody else. A person's temporary password stops working after five wrong tries and the count
+ survives closing the application, so a password handed over on paper has a limit. Every change to an account is
+ recorded against the person who made it.
+
+**What to expect:** the Administration area appears only for people who may use it, and a reader entitled to one
+ entry sees that one. The person's page shows an account you cannot change as read-only, with the reason in words.
+ Your own account cannot be switched off from here, and its sign-in name cannot be changed here. The role list no
+ longer offers titles the store has never held: **IT Department** replaces **Admin**, and **Material Handler Lead**
+ is a role in its own right.
 
 ---
 
