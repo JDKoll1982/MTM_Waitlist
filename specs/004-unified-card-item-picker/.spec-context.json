@@ -3,7 +3,7 @@
   "specName": "unified card item picker",
   "branch": "004-unified-card-item-picker",
   "currentStep": "implement",
-  "status": "implementing",
+  "status": "completed",
   "history": [
     {
       "step": "specify",
@@ -1248,6 +1248,13 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-14T03:03:48.080Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "user",
+      "at": "2026-09-20T17:55:03.137Z"
     }
   ],
   "telemetryInstanceId": "d5390ed6-2e08-4fbc-a187-d9923949a5ca",

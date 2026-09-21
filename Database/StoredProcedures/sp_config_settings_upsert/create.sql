@@ -1,5 +1,20 @@
 -- Create procedure: sp_config_settings_upsert
 -- Engine: MySQL 5.7
+--
+-- This is NOT the permission write path, deliberately (006-user-management-and-permissions, task T009).
+-- A permission value is written only by `sp_config_permissions_user_set`, which enforces the rank rule, the
+-- moved-value check and the one fixed row in one transaction and writes the history row itself. Routing a
+-- permission through here would bypass all four.
+--
+-- The `ELSE 'developer'` branch below therefore stays as it is. It is a known trap, and it is left in place
+-- rather than fixed: its job is to give an unrecognised scope a deterministic `scope_key` instead of a NULL,
+-- and the `role` scope is never written through this procedure. Seeded role baselines are plain SQL inserts in
+-- Database/Seeds/seed_permission_role_baselines, and a person's own rows go through the change-set procedure
+-- named above. Adding a `WHEN 'role'` branch here would create a second way to write a role baseline, which is
+-- exactly what FR-048 keeps as data and FR-046 keeps in one place.
+--
+-- The equivalent trap on the read side is worth knowing too: `fn_config_settings_scope_rank` ranks `role` 3 and
+-- `user` 6, so a row written with the wrong scope_key is not merely mislabelled, it resolves at the wrong rung.
 
 USE mtm_waitlist;
 
