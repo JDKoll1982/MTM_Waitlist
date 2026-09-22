@@ -344,6 +344,31 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
+    public async Task ASaveThatCannotReachTheStore_IsStatedOnThePage_InsteadOfFaultingOutOfTheCommand()
+    {
+        var service = new FakePermissionAdministrationService
+        {
+            ApplyThrows = new InvalidOperationException("the store could not be reached"),
+        };
+
+        var viewModel = Build(service: service);
+
+        await viewModel.InitializeAsync();
+
+        var row = viewModel.Rows.Single();
+        Cell(row, PermissionKeys.SettingsHotWorkCenters).ToggleCommand.Execute(null);
+
+        await viewModel.SaveAsync(row);
+
+        Assert.AreEqual(
+            viewModel.UnavailableText,
+            viewModel.MessageText,
+            "A store that cannot be reached is a sentence on the page, not an exception out of the command.");
+        Assert.AreEqual(1, service.Applies, "The write was attempted once and no blind retry followed.");
+        Assert.IsTrue(row.PendingCount > 0, "Nothing is recorded as saved, so the change is still pending.");
+    }
+
+    [TestMethod]
     public async Task OneImpatientPress_WritesExactlyOneChange()
     {
         var service = new FakePermissionAdministrationService()
@@ -776,6 +801,12 @@ public sealed class PermissionsViewModelTests
 
         internal TaskCompletionSource<bool>? SaveGate { get; set; }
 
+        /// <summary>
+        /// Set to make the write path fail the way a store that cannot be reached fails. The exception is thrown
+        /// rather than returned because that is what the real service does when the store itself is gone.
+        /// </summary>
+        internal Exception? ApplyThrows { get; set; }
+
         internal PermissionChangeResult ReversalResult { get; set; } = PermissionChangeResult.Succeeded();
 
         internal int Applies { get; private set; }
@@ -823,6 +854,11 @@ public sealed class PermissionsViewModelTests
             Applies++;
             LastUserId = userId;
             LastChangeCount = changes.Count;
+
+            if (ApplyThrows is { } thrown)
+            {
+                throw thrown;
+            }
 
             if (SaveGate is { } gate && !gate.Task.IsCompleted)
             {

@@ -295,22 +295,44 @@ public static partial class ServiceRegistrationExtensions
                     return Array.Empty<MTM_Waitlist.Module_Shared.Services.ImageCacheSource>();
                 }
 
-                return
-                [
-                    new MTM_Waitlist.Module_Shared.Services.ImageCacheSource(
-                        "waitlist pictures",
-                        await provider
-                            .GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>()
-                            .GetSharedFolderPathAsync()
-                            .ConfigureAwait(false),
-                        Path.Combine(
-                            MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.LocalCacheRoot,
-                            MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.WaitlistFolderName)),
-                    new MTM_Waitlist.Module_Shared.Services.ImageCacheSource(
+                var sources = new List<MTM_Waitlist.Module_Shared.Services.ImageCacheSource>
+                {
+                    new(
                         "dunnage pictures",
                         DunnageImagePathResolver.RootFolder,
                         MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.ResolveDunnageCacheFolder()),
-                ];
+                };
+
+                // The image location service is initialized here rather than assumed. This delegate is the first
+                // thing to ask it for a path, and it runs inside startup, before any screen has initialized it:
+                // asking first threw, the synchroniser swallowed the throw as "nothing to do", and the cache was
+                // never built in the one run that is meant to build it — while the Settings screen went on saying
+                // that pictures are copied onto this computer when the application starts.
+                var imageLocationService = provider
+                    .GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>();
+
+                if (await imageLocationService.EnsureInitializedAsync().ConfigureAwait(false))
+                {
+                    sources.Insert(
+                        0,
+                        new MTM_Waitlist.Module_Shared.Services.ImageCacheSource(
+                            "waitlist pictures",
+                            await imageLocationService.GetSharedFolderPathAsync().ConfigureAwait(false),
+                            Path.Combine(
+                                MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.LocalCacheRoot,
+                                MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.WaitlistFolderName)));
+                }
+                else
+                {
+                    // One source skipped and one kept, rather than both lost: the Dunnage tree is still mirrored
+                    // from its own setting, and the waitlist pictures are read from the share for this run. The
+                    // service has already logged why it could not initialize.
+                    MTM_Waitlist.Module_Core.Helpers.StartupDebugLog.Info(
+                        "ImageCache",
+                        "The waitlist picture source is skipped for this run because the image locations could not be initialized; those pictures are read from the share.");
+                }
+
+                return sources;
             }));
 
         services.AddModuleServices(context.Configuration);

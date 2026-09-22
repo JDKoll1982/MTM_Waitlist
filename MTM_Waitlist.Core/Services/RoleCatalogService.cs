@@ -35,7 +35,22 @@ public sealed class RoleCatalogService : IRoleCatalogService
         await _readGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            return _cachedRoles ??= await ReadRolesAsync(cancellationToken).ConfigureAwait(false);
+            if (_cachedRoles is not null)
+            {
+                return _cachedRoles;
+            }
+
+            var roles = await ReadRolesAsync(cancellationToken).ConfigureAwait(false);
+            if (roles is null)
+            {
+                // A read that failed answers an empty catalogue for this caller and is deliberately not cached:
+                // caching it would turn a momentary outage into the whole session being told that the plant has no
+                // roles, which empties the role picker and makes the rank rule answer for nobody.
+                return Array.Empty<RoleCatalogEntry>();
+            }
+
+            _cachedRoles = roles;
+            return roles;
         }
         finally
         {
@@ -47,9 +62,10 @@ public sealed class RoleCatalogService : IRoleCatalogService
     public void Invalidate() => _cachedRoles = null;
 
     /// <summary>
-    /// Reads the catalogue, or answers an empty one when the store cannot be reached.
+    /// Reads the catalogue, or answers <c>null</c> when the store cannot be reached. A null is what stops the
+    /// failed answer being cached; the empty list is the caller's answer, not a fact about the plant.
     /// </summary>
-    private async Task<IReadOnlyList<RoleCatalogEntry>> ReadRolesAsync(CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<RoleCatalogEntry>?> ReadRolesAsync(CancellationToken cancellationToken)
     {
         IReadOnlyList<Dictionary<string, object?>> rows;
         try
@@ -73,7 +89,7 @@ public sealed class RoleCatalogService : IRoleCatalogService
                 ex,
                 "Could not read the role catalogue; the picker offers no role rather than a guessed one.");
 
-            return Array.Empty<RoleCatalogEntry>();
+            return null;
         }
 
         return rows

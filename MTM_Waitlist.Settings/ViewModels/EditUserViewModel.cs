@@ -173,6 +173,20 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
     /// <summary>Changing one's own sign-in name is unavailable, with its reason (FR-024).</summary>
     public bool IsSelfRenameUnavailable => IsSelfAccount;
 
+    /// <summary>
+    /// Whether resetting one's own credential is unavailable, with its reason (FR-028). A person issuing a one-time
+    /// credential for themselves is the one route that can lock them out of the account they are already signed in
+    /// as, so the control and the action both refuse it, exactly as deactivation and the sign-in-name change do.
+    /// </summary>
+    public bool IsSelfResetUnavailable => IsSelfAccount;
+
+    /// <summary>
+    /// Whether the reset action is offered: the reader holds the key and this is not their own account. The control
+    /// and the action read this one answer, so a reader who is not offered the action is refused it in the same
+    /// words.
+    /// </summary>
+    public bool IsResetPasswordOffered => CanResetPassword && !IsSelfResetUnavailable;
+
     /// <summary>Whether the reader has edits the store has not been told about (FR-100).</summary>
     public bool HasUnsavedChanges =>
         IsEditable && Person is not null && !string.Equals(CurrentRequest(), UserEditRequest.From(Person));
@@ -251,6 +265,9 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
 
     /// <summary>The reason the reader's own sign-in name cannot be changed (FR-024).</summary>
     public string SelfRenameUnavailableText => "EditUser_SelfRename.Unavailable".GetLocalized();
+
+    /// <summary>The reason the reader's own credential cannot be reset here (FR-028).</summary>
+    public string SelfResetUnavailableText => "EditUser_SelfReset.Unavailable".GetLocalized();
 
     /// <summary>What the reset confirmation says before the credential is issued (FR-028).</summary>
     public string ResetConfirmationText => "EditUser_ResetConfirmation.Text".GetLocalized();
@@ -331,8 +348,12 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
             entry => string.Equals(entry.RoleCode, Person.RoleCode, StringComparison.OrdinalIgnoreCase));
 
         // A role the catalogue no longer holds is nobody's rung, so the rank rule cannot clear it: the honest
-        // answer is that this account cannot be acted on here.
-        var outranked = readerRole is not null && personRole is not null && RoleAuthorization.IsAbove(personRole, readerRole);
+        // answer is that this account cannot be acted on here. The permissions page answers the same question the
+        // same way, rather than one screen failing open and the other failing closed.
+        var outranked =
+            readerRole is null ||
+            personRole is null ||
+            RoleAuthorization.IsAbove(personRole, readerRole);
 
         IsEditable = !outranked;
         ReadOnlyReasonText = outranked ? "EditUser_ReadOnly.Outranked".GetLocalized() : string.Empty;
@@ -418,10 +439,13 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        if (!CanResetPassword)
+        if (!IsResetPasswordOffered)
         {
-            // Refused at the action as well as absent from the control, and in the same words as the absence.
-            MessageText = "EditUser_ReadOnly.NoPermission".GetLocalized();
+            // Refused at the action as well as absent from the control, and in the same words as the absence: the
+            // reader's own account is refused with the self reason rather than the missing-key one.
+            MessageText = IsSelfResetUnavailable
+                ? SelfResetUnavailableText
+                : "EditUser_ReadOnly.NoPermission".GetLocalized();
             return;
         }
 
@@ -606,6 +630,9 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
         OnPropertyChanged(nameof(IsSelfAccount));
         OnPropertyChanged(nameof(IsSelfDeactivateUnavailable));
         OnPropertyChanged(nameof(IsSelfRenameUnavailable));
+        OnPropertyChanged(nameof(IsSelfResetUnavailable));
+        OnPropertyChanged(nameof(IsResetPasswordOffered));
+        OnPropertyChanged(nameof(SelfResetUnavailableText));
         OnPropertyChanged(nameof(IsSwitchedOff));
         OnPropertyChanged(nameof(CanDeactivate));
         OnPropertyChanged(nameof(HasUnsavedChanges));

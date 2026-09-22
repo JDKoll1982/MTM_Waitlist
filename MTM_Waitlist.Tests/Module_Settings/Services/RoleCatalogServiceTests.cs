@@ -101,6 +101,30 @@ public sealed class RoleCatalogServiceTests
     }
 
     [TestMethod]
+    public async Task GetRolesAsync_AfterAFailedRead_AsksAgainRatherThanAnsweringEmptyForTheSession()
+    {
+        var helper = new FlakyMySqlHelperServer();
+        helper.EnqueueQueryResult(Row(1, "developer", "Developer", 100));
+        var service = new RoleCatalogService(helper);
+
+        var unreached = await service.GetRolesAsync();
+
+        Assert.AreEqual(0, unreached.Count, "A catalogue that cannot be read is empty, never guessed at.");
+
+        helper.Recover();
+
+        var reached = await service.GetRolesAsync();
+
+        Assert.AreEqual(
+            2,
+            helper.Attempts,
+            "A failed read is deliberately not cached: caching it would tell every later screen for the rest of the " +
+            "session that the plant has no roles, which empties the picker and makes the rank rule answer for nobody.");
+        Assert.AreEqual(1, reached.Count, "And the retry answers from the store rather than from the failure.");
+        Assert.AreEqual("developer", reached[0].RoleCode);
+    }
+
+    [TestMethod]
     public async Task GetRolesAsync_IgnoresARowWithNoRoleCode()
     {
         var helper = new FakeMySqlHelperServer();
@@ -221,5 +245,53 @@ public sealed class RoleCatalogServiceTests
             IReadOnlyDictionary<string, object?> parameters,
             MySqlDatabaseTarget databaseTarget,
             CancellationToken cancellationToken = default) => throw new InvalidOperationException("The store is unreachable.");
+    }
+
+    /// <summary>A store that cannot be reached until it recovers, and counts how often it was asked.</summary>
+    private sealed class FlakyMySqlHelperServer : IMySqlHelperServer
+    {
+        private readonly List<Dictionary<string, object?>> _rows = [];
+
+        private bool _recovered;
+
+        internal int Attempts { get; private set; }
+
+        internal void EnqueueQueryResult(params Dictionary<string, object?>[] rows) => _rows.AddRange(rows);
+
+        internal void Recover() => _recovered = true;
+
+        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
+            string storedProcedureName,
+            IReadOnlyDictionary<string, object?> parameters,
+            MySqlDatabaseTarget databaseTarget,
+            CancellationToken cancellationToken = default)
+        {
+            Attempts++;
+
+            if (!_recovered)
+            {
+                throw new InvalidOperationException("The store is unreachable.");
+            }
+
+            return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(_rows);
+        }
+
+        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
+            string sql,
+            IReadOnlyDictionary<string, object?> parameters,
+            MySqlDatabaseTarget databaseTarget,
+            CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task<int> ExecuteSqlNonQueryAsync(
+            string sql,
+            IReadOnlyDictionary<string, object?> parameters,
+            MySqlDatabaseTarget databaseTarget,
+            CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task<int> ExecuteStoredProcedureNonQueryAsync(
+            string storedProcedureName,
+            IReadOnlyDictionary<string, object?> parameters,
+            MySqlDatabaseTarget databaseTarget,
+            CancellationToken cancellationToken = default) => throw new NotSupportedException();
     }
 }

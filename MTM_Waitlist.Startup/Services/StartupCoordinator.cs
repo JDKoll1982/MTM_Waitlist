@@ -419,9 +419,15 @@ public sealed class StartupCoordinator : IStartupCoordinator
 
             var result = await _imageCacheSyncService.SynchronizeAsync(cancellationToken).ConfigureAwait(false);
 
+            // The skipped list is named only when there is one: a label with nothing after it reads as broken
+            // telemetry, and "nothing was skipped" is the common case.
+            var skipped = result.SourcesSkipped.Count > 0
+                ? $", SourcesSkipped={string.Join(", ", result.SourcesSkipped)}"
+                : string.Empty;
+
             StartupDebugLog.Info(
                 "StartupCoordinator",
-                $"Picture cache synchronized. Copied={result.Copied}, Removed={result.Removed}, SourcesSkipped={string.Join(", ", result.SourcesSkipped)}");
+                $"Picture cache synchronized. Copied={result.Copied}, Removed={result.Removed}{skipped}");
         }
         catch (OperationCanceledException)
         {

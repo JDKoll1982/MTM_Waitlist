@@ -348,6 +348,13 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
                 "Permissions_Save.SavedFor".GetLocalized(),
                 person.DisplayName);
         }
+        catch (Exception ex)
+        {
+            // The store is a sentence on the screen here too. The service maps its own refusals, but the read that
+            // follows a save can still fail, and this command must not take the page down with it.
+            StartupDebugLog.Error("Permissions", ex, "The save did not reach the store; nothing is recorded as saved.");
+            MessageText = UnavailableText;
+        }
         finally
         {
             IsSaving = false;
@@ -379,6 +386,11 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
                 .ConfigureAwait(true);
 
             await HandleReversalOutcomeAsync(result, cancellationToken).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("Permissions", ex, "The undo did not reach the store; nothing was reversed.");
+            MessageText = UnavailableText;
         }
         finally
         {
@@ -412,6 +424,13 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
                 .ConfigureAwait(true);
 
             await HandleReversalOutcomeAsync(result, cancellationToken).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            // The reader answered the moved-value prompt; a store that cannot be reached at that moment is reported
+            // here rather than faulting out of the command.
+            StartupDebugLog.Error("Permissions", ex, "The restore did not reach the store; the value is unchanged.");
+            MessageText = UnavailableText;
         }
         finally
         {

@@ -79,9 +79,11 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task TheReadersOwnAccount_ShowsBothSelfLockoutRefusals_EachWithItsReason()
+    public async Task TheReadersOwnAccount_ShowsEverySelfLockoutRefusal_EachWithItsReason()
     {
+        var service = new FakeUserManagementService(Account(SignedInUserId, "jsmith", "Jane Smith", "setup_lead", 60));
         var viewModel = Build(
+            service: service,
             account: Account(SignedInUserId, "jsmith", "Jane Smith", "setup_lead", 60),
             readerRoleCode: "setup_lead");
 
@@ -97,6 +99,26 @@ public sealed class EditUserViewModelTests
             viewModel.SelfDeactivateUnavailableText,
             viewModel.SelfRenameUnavailableText,
             "The two refusals are different rules and are not stated with one sentence.");
+
+        // The third self refusal: a person cannot reset their own credential (FR-028). The permission answer is
+        // deliberately left alone — the reader does hold the key — and the action is what is withheld.
+        Assert.IsTrue(viewModel.CanResetPassword, "The reader holds the key, so the permission answer is unchanged.");
+        Assert.IsTrue(viewModel.IsSelfResetUnavailable, "But their own account is never offered the reset (FR-028).");
+        Assert.IsFalse(viewModel.IsResetPasswordOffered);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(viewModel.SelfResetUnavailableText));
+        Assert.AreNotEqual(
+            viewModel.SelfResetUnavailableText,
+            viewModel.SelfRenameUnavailableText,
+            "The reset refusal is its own rule and is not stated with the rename's sentence.");
+
+        await viewModel.ResetPasswordAsync();
+
+        Assert.AreEqual(
+            viewModel.SelfResetUnavailableText,
+            viewModel.MessageText,
+            "The action is refused in the same words the control's absence states (FR-028).");
+        Assert.AreEqual(0, service.Resets, "No credential is issued for the account the reader is signed in as.");
+        Assert.IsNull(viewModel.IssuedCredential, "And no window is raised for one.");
     }
 
     [TestMethod]

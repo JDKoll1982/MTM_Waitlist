@@ -128,8 +128,8 @@
                         AutomationProperties.AutomationId="EditUserPage_ResetPassword"
                         Click="OnResetClick"
                         Content="{x:Bind ViewModel.ResetPasswordLabelText}"
-                        IsEnabled="{x:Bind ViewModel.CanResetPassword, Mode=OneWay}"
-                        Visibility="{x:Bind ViewModel.CanResetPassword, Mode=OneWay}" />
+                        IsEnabled="{x:Bind ViewModel.IsResetPasswordOffered, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.IsResetPasswordOffered, Mode=OneWay}" />
                     <Button
                         AutomationProperties.AutomationId="EditUserPage_Deactivate"
                         Click="OnDeactivateClick"
@@ -160,6 +160,11 @@
                     Text="{x:Bind ViewModel.SelfDeactivateUnavailableText}"
                     TextWrapping="Wrap"
                     Visibility="{x:Bind ViewModel.IsSelfDeactivateUnavailable, Mode=OneWay}" />
+                <TextBlock
+                    Style="{ThemeResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.SelfResetUnavailableText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.IsSelfResetUnavailable, Mode=OneWay}" />
 
                 <TextBlock
                     Style="{ThemeResource BodyTextBlockStyle}"

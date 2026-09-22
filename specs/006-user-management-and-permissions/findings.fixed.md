@@ -159,3 +159,162 @@ command body's own fallback was used: the same cross-artifact check was performe
 - `.spec-context.json` was corrected only through `write-context.py`. Four writes were refused mid-run by the known
   `[WinError 5]` atomic-rename fault on this machine; each was retried and each retry was read back and confirmed.
   The file parses and no stray temporary file was left behind.
+
+---
+
+# Findings Fixed Log — 2026-09-22, against `checklist-review.md`
+
+> Second run of `/speckit.fix-findings.run` for this feature. The earlier run's log is preserved above; that one
+> repaired the specification artifacts against a cross-artifact analysis. This one is the opposite direction: it
+> takes the code review recorded in `checklist-review.md` and repairs **implementation code**. The invocation
+> constrained the scope to that review's **Critical and Important** findings, so its fifteen Suggestions were
+> deliberately not worked.
+
+## Summary
+
+- **Total iterations**: 1 — a second was not entered, because every remaining finding was deferred
+- **Findings identified**: 16 actionable (4 Critical, 12 Important)
+- **Findings resolved**: 5 — C1, C2, C3 (screen layer), I3 (screen layer), I4
+- **Findings deferred**: 11, each with its reason below
+- **Final status**: **DEFERRED_REMAINING**
+- **Verification**: `dotnet build MTM_Waitlist.sln` → `Build succeeded`, `0 Warning(s)`, `0 Error(s)`.
+  `dotnet test MTM_Waitlist.Tests.csproj` → `total: 1441, succeeded: 1393, failed: 0, skipped: 48`
+
+## Scope note on the prerequisite step
+
+The registered body's Step 1 calls `.specify/extensions/fix-findings/scripts/powershell/check-prerequisites.ps1`.
+That script is not installed — the extension ships `commands/`, `extension.yml` and documentation only — so the
+repository's own `.specify/scripts/powershell/check-prerequisites.ps1` was used as the equivalent. That script
+resolves the active feature from `.specify/feature.json`, which points at `specs/008-part-pictures`, so it would
+have validated the wrong feature. `FEATURE_DIR` was therefore resolved explicitly to
+`specs/006-user-management-and-permissions` (the feature the review names), and `spec.md`, `plan.md` and `tasks.md`
+were confirmed to exist there. The spec was renamed from `user-management-and-permissions.spec.md` to `spec.md` by
+the owner between the review and this run, which is what makes the path resolvable at all.
+
+## Iteration 1
+
+### Findings identified
+
+- [Critical] C1 — a store failure during sign-in throws out of the command instead of showing a message
+- [Critical] C2 — the undo "restore anyway" path can crash the permissions page
+- [Critical] C3 — a person can reset their own password, which FR-028 and Out of Scope forbid
+- [Critical] C4 — a save or reset against an account that does not exist reports success
+- [Important] I1 — the remembered password is written to disk in plaintext
+- [Important] I2 — the PIN's hash and salt leave the store, so the attempt limit is not the real control
+- [Important] I3 — the rank rule fails open on the person's page and closed on the permissions page
+- [Important] I4 — a failed role-catalogue read is cached as an empty catalogue for the session
+- [Important] I5 — nothing stops an administrator locking themselves out by role change or own permission row
+- [Important] I6 — the display-name bound is discarded before it reaches the store
+- [Important] I7 — the wrong-attempt counter is a read-then-write with no transaction or row lock
+- [Important] I8 — save and reset read store columns by ordinal
+- [Important] I9 — the undo path can merge two saves made in the same second
+- [Important] I10 — the live role-rename test can strand the store in the retired-role state
+- [Important] I11 — `tasks.md` claims a live case the suite does not cover
+- [Important] I12 — a helper-seam bypass is not recorded in `plan.md` → Complexity Tracking
+
+### Fixes applied
+
+- **C1** — `MTM_Waitlist.Startup/ViewModels/LoginViewModel.cs`. The command's body was extracted into
+  `CheckCredentialsAndProceedAsync` and the command now calls it inside `try`/`catch (Exception ex)`: a store that
+  cannot be reached is logged and reported through the new `Startup_SignIn.StoreUnavailable.Text` resource (with a
+  fallback in code), instead of faulting out of the `AsyncRelayCommand` and taking the window down. Both halves of
+  the path talk to the store — the credential read and the attempt counter, which uses its own connection — so
+  either can fail while the answer is in flight.
+- **C2** — `MTM_Waitlist.Settings/ViewModels/PermissionsViewModel.cs`. `SaveAsync`, `UndoAsync` and
+  `ConfirmRestoreAsync` gained `catch (Exception ex)` alongside their `finally`, each logging and setting
+  `MessageText = UnavailableText`. The service's own refusals are unaffected; what changed is that a read failing
+  behind them no longer escapes the command.
+- **C3** — `MTM_Waitlist.Settings/ViewModels/EditUserViewModel.cs`,
+  `Module_Settings/Views/EditUserPage.xaml`, `Strings/en-us/Resources.resw`. Added `IsSelfResetUnavailable`
+  (`FR-028`), `IsResetPasswordOffered` (`CanResetPassword && !IsSelfResetUnavailable`) and
+  `SelfResetUnavailableText` (new `EditUser_SelfReset.Unavailable` resource); the reset action now refuses on the
+  same condition it is offered on, stating the self reason rather than the missing-key one; the button and a new
+  reason line on the page read `IsResetPasswordOffered` / `IsSelfResetUnavailable`; and `AnnounceState()` raises all
+  three. `CanResetPassword` is deliberately left as the permission answer, so the two facts stay separable.
+- **I3 (screen layer)** — `EditUserViewModel.RefreshEntitlementAsync`. The rank comparison now fails **closed**:
+  a role the catalogue cannot resolve makes the account read-only, which is what the comment above it already
+  claimed, and the two screens now answer the same question the same way.
+- **I4** — `MTM_Waitlist.Core/Services/RoleCatalogService.cs`. `ReadRolesAsync` returns `null` on failure and
+  `GetRolesAsync` caches only a successful read, so a momentary outage no longer becomes "the plant has no roles"
+  for the rest of the session. `Invalidate()` is unchanged.
+
+### Tests added or strengthened with the fixes
+
+- `MTM_Waitlist.Tests/Module_Settings/ViewModels/EditUserViewModelTests.cs` —
+  `TheReadersOwnAccount_ShowsEverySelfLockoutRefusals_EachWithItsReason` (renamed from the two-refusal name) now
+  covers the third refusal: the reset is not offered, the action is refused in the same words, no credential is
+  issued and no window is raised.
+- `MTM_Waitlist.Tests/Module_Settings/ViewModels/PermissionsViewModelTests.cs` — the fake gained `ApplyThrows`,
+  and `ASaveThatCannotReachTheStore_IsStatedOnThePage_InsteadOfFaultingOutOfTheCommand` proves the save reports the
+  unavailable state, attempts the write once, and leaves the change pending.
+- `MTM_Waitlist.Tests/Module_Settings/Services/RoleCatalogServiceTests.cs` — a new `FlakyMySqlHelperServer` and
+  `GetRolesAsync_AfterAFailedRead_AsksAgainRatherThanAnsweringEmptyForTheSession` prove the failed read is not
+  cached and the retry answers from the store.
+
+### Findings deferred
+
+- **[Critical] C4** — Reason: requires a **new typed outcome**. Every existing `UserManagementOutcomeKind` names its
+  own store refusal token (`mtm_rank_denied`, `mtm_self_deactivate_denied`, …) and the specification pins that set,
+  so adding "no such account" extends the spec rather than implementing it. Human decision.
+- **[Important] I1** — Reason: a storage-format decision (DPAPI, or memory-only) on a path that predates this
+  feature. Deferred to an owner call rather than changed silently inside a review pass.
+- **[Important] I2** — Reason: moving the comparison into the store changes the credential read's contract
+  (`sp_auth_credentials_check` would take the presented secret and return a verdict rather than a hash).
+- **[Important] I5** — Reason: a stored-procedure change plus a policy decision about how far a self-demotion is
+  refused.
+- **[Important] I6** — Reason: a procedure change with aggregate regeneration, and truncate-versus-refuse is a
+  behaviour choice the spec does not settle.
+- **[Important] I7** — Reason: a transaction and row lock inside the credential path, which is a procedure change.
+- **[Important] I8** — Reason: mechanical, but it rewrites the credential and roster readers, and the suite does
+  not exercise those paths against a live store in this pass. Rewriting them here would be unverifiable; recorded
+  as a deliberate pass of its own rather than as a design decision.
+- **[Important] I9** — Reason: a schema change (`DATETIME(6)`), an aggregate regeneration, and a decision about the
+  existing rows.
+- **[Important] I10** — Reason: the suite in question is one of the 48 skipped live cases, so it could not be run
+  in this pass. Editing a live test that cannot be executed and calling it verified would be worse than leaving it
+  and saying so.
+- **[Important] I11** — Reason: the correction belongs in `tasks.md`, and the command forbids modifying spec
+  artifacts.
+- **[Important] I12** — Reason: the correction belongs in `plan.md` → Complexity Tracking, same prohibition.
+
+### Partial fixes, stated rather than rounded up
+
+- **C3 is fixed at the screen layer only.** The action and the control both refuse the reader's own account, which
+  is what the page can decide. The store still permits a reset where `p_actor_user_id = p_user_id`, because the
+  procedure refuses only a target that outranks the actor. A caller that bypasses the view model is therefore not
+  refused, and closing that needs a `mtm_self_reset_denied` token, which is a new refusal the specification does
+  not pin — the same class of decision that defers C4.
+- **I3 is fixed at the screen layer only.** `sp_user_management_update` still leaves `v_target_rank` at 0 when the
+  target's role is not in the catalogue, so the store remains a backstop rather than a guard for that case.
+- **C1 has no test.** The build proves it compiles; nothing yet drives a repository that throws and asserts the
+  sentence appears. Recorded as a residual gap rather than as covered.
+
+## Re-analysis
+
+The registered body's Step 5 says to delete `analysis.md` and re-run `speckit.analyze`, then parse the new findings.
+`speckit.analyze` cannot be dispatched from inside another command in this session — there is no tool that runs a
+sibling command — so the review's own finding set was re-checked directly against the code instead, which is the
+same convergence the loop is for. Nineteen further findings remain in `checklist-review.md` as **Suggestions**;
+they were out of scope by the invocation and were not re-checked.
+
+| Measure | Before | After |
+| --- | --- | --- |
+| Critical outstanding | 4 | **3** (C4 deferred; C1, C2, C3 resolved, C3 at the screen layer) |
+| Important outstanding | 12 | **11** (I3 and I4 resolved; I3 at the screen layer) |
+| Findings resolved | 0 | **5** |
+| Build | not re-run | `0 Warning(s)`, `0 Error(s)` |
+| Suite | 1387 total / 4 skipped (recorded) | **1441 total, 0 failed, 48 skipped** |
+
+## Residual risk, stated rather than hidden
+
+- **The 48 skips are the live-database cases**, gated out because the store connection variables are not exported
+  in this session. They include the role-rename live test that I10 describes as able to strand the live catalogue
+  if it fails midway. That is why the live connections were deliberately **not** exported for this pass: running
+  the full live gate would exercise exactly the risk this review raised, inside a fix run that has no authority to
+  accept it.
+- **One full-suite run failed transiently** on `BackupRetentionTests.PruneAsync_IsPerStore_OneStoresRetentionLeaves
+  AnotherStoreIntact` with `UnauthorizedAccessException` from a file move. It passes in isolation (6 passed) and
+  passed in the next full run. It is in the Mock service's backup store, which nothing in this pass touched, and it
+  is recorded here rather than dropped.
+- The fixes were verified by build and by the suite. Nothing in this pass was exercised against a live store, and
+  no live data was written.

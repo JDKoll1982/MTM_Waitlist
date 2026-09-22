@@ -29,6 +29,13 @@ public partial class LoginViewModel : ObservableRecipient
 
     private const string AttemptLimitReachedResourceKey = "Startup_SignIn.AttemptLimitReached.Text";
 
+    /// <summary>The key for the sentence a store that cannot be reached is given on the sign-in form.</summary>
+    private const string StoreUnavailableResourceKey = "Startup_SignIn.StoreUnavailable.Text";
+
+    /// <summary>The sentence used when the resource map does not carry that key.</summary>
+    private const string StoreUnavailableFallback =
+        "The store could not be reached, so the sign-in could not be checked. Try again.";
+
     private readonly IStartupSessionRepository _startupSessionRepository;
     private readonly IStartupRegistrationService _startupRegistrationService;
     private readonly ILocalSettingsService _localSettingsService;
@@ -291,6 +298,31 @@ public partial class LoginViewModel : ObservableRecipient
             return;
         }
 
+        try
+        {
+            await CheckCredentialsAndProceedAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            // A store that cannot be reached is a sentence on the screen, not an unhandled fault that takes the
+            // window down. Both halves of this path talk to the store — the credential check, and the wrong-attempt
+            // counter, which is written on its own connection — and either can fail while the answer is in flight.
+            StartupDebugLog.Error(
+                "Login",
+                ex,
+                "The sign-in could not be checked against the store; the reader is told to try again.");
+
+            LoginHint = ResolveStartupString(StoreUnavailableResourceKey, StoreUnavailableFallback);
+            _startupState.LoginHint = LoginHint;
+        }
+    }
+
+    /// <summary>
+    /// The credential check and everything that follows a successful one, kept in its own method so the command can
+    /// report a store it could not reach rather than faulting on the window.
+    /// </summary>
+    private async Task CheckCredentialsAndProceedAsync()
+    {
         var credentialResult = await _startupSessionRepository.CheckCredentialsAsync(Username, Password);
         if (!credentialResult.IsAuthenticated)
         {

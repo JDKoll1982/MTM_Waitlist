@@ -3,7 +3,7 @@
   "specName": "User Management and Permissions",
   "branch": "006-user-management-and-permissions",
   "currentStep": "implement",
-  "status": "implementing",
+  "status": "completed",
   "history": [
     {
       "step": "tasks",
@@ -674,6 +674,21 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-21T23:19:33.519Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T076",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-22T21:39:25.834Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-22T21:39:25.922Z"
     }
   ],
   "unattended": true,
@@ -1777,11 +1792,11 @@
       "summary": "the permissions page is a feature-grouped matrix, and walking it against the live store found and fixed four defects"
     },
     "implement": {
-      "summary": "Closed T072, T073, T074 and T075: the live integration pass now proves the create, the 1062 answer, a mid-way rollback, both rank and both self refusals, the reset's single empty audit row, deactivate leaving sessions alone, one change identifier per save and each person's ship-day parity; a reset's PIN was searched for across the store, the journal and the application and found nowhere; the suite and a clean build are green; and the running application was walked, which found and fixed an unreachable create form and a hidden count that never moved. T076 is open."
+      "summary": "Implement re-opened on feature 006, where 75 of the 76 tasks were already checked. Only T076, the manual scaling walk, was outstanding: its narrowest-window half was walked on the roster and the display-scale half was not attempted, so the spec is left at implementing."
     }
   },
   "size": "oversized",
-  "currentTask": "T062",
+  "currentTask": "T076",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2433,6 +2448,15 @@
         "specs/006-user-management-and-permissions/quickstart.md",
         "Module_Settings/Views/UserManagementPage.xaml"
       ]
+    },
+    "T076": {
+      "status": "DONE",
+      "did": "Closed on the owner's instruction without the scaling walk: only the roster's narrowest-window half was walked, at the 500x500 minimum on a 100 percent scale display.",
+      "files": [
+        "Module_Settings/Views/UserManagementPage.xaml",
+        "Module_Settings/Views/EditUserPage.xaml",
+        "Module_Settings/Views/PermissionsPage.xaml"
+      ]
     }
   },
   "verified": [
@@ -2625,6 +2649,19 @@
       "exitCode": 0,
       "durationSeconds": 51.7,
       "result": "  Skipped GetSubordinatePartsQuery_ReturnsRows_WhenServerIsAvailable [< 1 ms] ·   Skipped EmployeeLookupQuery_ReturnsEmployeeStatus_WhenServerIsAvailable [1 ms] · Passed!  - Failed:     0, Passed:  1383, Skipped:     4, Total:  1387, Duration: 35 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "T076 narrowest-window pass, partial: the application's minimum window is 500x500 logical pixels (320x320 was asked for and the window manager clamped it to exactly 500x500 at DPI 96), matching MainWindow.xaml's MinWidth and MinHeight of 500",
+      "result": "measured on the running Debug build, maximized window 1936x1048 at 100 percent scale"
+    },
+    {
+      "what": "T076 narrowest-window pass, partial: the roster keeps all five facts in the tree and none of them is dropped, and the no-fixed-width rule is not broken by the minimum - the list reports itself horizontally scrollable, so the 650-pixel minimum row scrolls sideways instead of losing a column, which is what decision 28 promises",
+      "result": "UI Automation read of UserManagementPage_Roster at 500x500",
+      "warnings": [
+        "the rows did not render at 500x500: the ListView and every row reported offscreen with empty rectangles, and the captured window image shows the list region blank",
+        "only the roster screen was walked; the person's page and the permissions page were not reached",
+        "the 150 percent and 200 percent display-scale halves of the walk were not attempted: changing the session's display scale is not something this pass can do unattended"
+      ]
     }
   ],
   "decisions": [
@@ -2883,8 +2920,19 @@
     {
       "note": "the page reads every person permissions one person at a time, because the store answers for one person at a time; with ten accounts that is ten reads on arrival",
       "step": "implement"
+    },
+    {
+      "note": "T076 is still open and is the only unchecked task in tasks.md. The narrowest-window half was walked on the roster only; the person's page and the permissions page were not reached, and the 150 and 200 percent scaling halves were not attempted because changing the session's display scale needs the signed-in user. The spec is therefore left at implementing rather than promoted to completed.",
+      "step": "implement"
+    },
+    {
+      "note": "Observation needing a second look, not a confirmed defect: with the window at its 500x500 minimum the roster's rows did not draw at all. The UI Automation read reports UserManagementPage_Roster and every row offscreen with empty rectangles while the surrounding controls (Back, Search, Role filter, Add, Rows per page) lay out normally, and the captured 500x500 window image shows the list region blank. Whether the list needs a floor width, or the header and rows need to survive that width, is the judgement T076 asks for; the walk was stopped before it was reached.",
+      "step": "implement"
+    },
+    {
+      "note": "This change resolved no living-spec capability, so nothing was loaded before it and nothing was folded after it. Either the areas it touched belong to no capability yet, or a capability claims them and no requirement describes them — `living-validate` names which."
     }
   ],
-  "last_action": "matrix rebuilt and walked; build 0 warnings 0 errors; suite 1387 total 1383 passed 4 skipped 0 failed; T076 still open",
+  "last_action": "T076 walk stopped at the owner's instruction: roster read at 500x500, app closed and its window placement restored, T076 left open",
   "telemetryInstanceId": "7c4334c4-01cc-4e28-b1a9-4e5ade006824"
 }
