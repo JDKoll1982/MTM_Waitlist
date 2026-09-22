@@ -32,9 +32,8 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
 - **Sign in.** Enter your user name and password and choose **Sign In**. Any problem is reported on the
   same screen.
 - **Remember me on this device.** A checkbox that keeps you signed in on this computer.
-- **Temporary password change.** If your account is still on its temporary default password, the app
-  switches to an **Update Password** panel — new password and confirmation — and tells you why before
-  you can sign in.
+- **Temporary password change.** If your account is still on a temporary password, you sign in with it as
+  usual and the app then switches to an **Update Password** panel — new password and confirmation.
 - **Create Account.** Offered to a new user with a **Create Account** button.
 - **Computer registration gate.** The app recognises the machine you are on from its name and hardware
   address. A machine that is not registered is held at the registration step; a machine whose hardware

@@ -130,9 +130,9 @@ The shell SHALL be entered directly only when identity, session and device regis
 - **AND** the hint says the computer is not registered
 
 #### Scenario: the account is on its temporary password
-- **WHEN** the account still holds the temporary default password
-- **THEN** the sign-in surface opens on setting a new password
-- **AND** the hint says why, so the operator is not asked to sign in with a password they must immediately replace
+- **WHEN** the account still holds a temporary credential
+- **THEN** the sign-in surface asks for that credential like any other sign-in, and the hint says it is temporary and must be replaced
+- **AND** the set-a-new-password panel opens only once the credential has been accepted, because knowing a change is due is not proof of identity, and an attempt limit cannot apply to a credential nobody was ever asked for
 
 ### The splash offers only the remedies that can work, and retry repeats the phase that failed
 

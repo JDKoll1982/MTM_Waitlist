@@ -316,7 +316,11 @@ public partial class LoginViewModel : ObservableRecipient
             _pendingRoleCode = credentialResult.CurrentRoleCode;
             ShowPasswordChangePrompt = true;
             ShowSignInForm = false;
-            LoginHint = "You signed in with temporary password 0000. Set a new password now.";
+
+            // The panel carries its own description, so the shared hint is cleared rather than left showing
+            // the guidance from the sign-in step. It no longer names a temporary value either: the credential
+            // is a per-person PIN now, not the shared 0000 constant it used to be (decision 9).
+            LoginHint = string.Empty;
             _startupState.LoginHint = LoginHint;
             Password = string.Empty;
             return;
