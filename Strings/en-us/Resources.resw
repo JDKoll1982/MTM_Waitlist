@@ -1570,13 +1570,13 @@
     <value>Permission</value>
   </data>
   <data name="Permissions_Holders.Roles.Heading" xml:space="preserve">
-    <value>Given by these roles' baselines</value>
+    <value>Roles that allow this by default</value>
   </data>
   <data name="Permissions_Holders.People.Heading" xml:space="preserve">
     <value>People who differ from their role</value>
   </data>
   <data name="Permissions_Holders.Nobody" xml:space="preserve">
-    <value>Nobody holds this feature.</value>
+    <value>Nobody holds this permission.</value>
   </data>
   <data name="Permissions_Holders.SwitchedOff" xml:space="preserve">
     <value>Switched off</value>
