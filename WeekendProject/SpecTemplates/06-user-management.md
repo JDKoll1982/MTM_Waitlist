@@ -166,9 +166,9 @@ one row; an audit row with acting user and timestamp. *(The source's twelfth cas
 parity", is obsolete — see `OPEN-WORK-NEXT-SPEC.md` §3.)*
 
 **Permissions (3.8)** — added by owner decision 2026-09-20; not one of the source's 39 boxes. *This template
-calls the permission set "the matrix" in most of its prose; the name is shorthand for the set of named
-permissions and their role baselines, **not** for a grid of roles against permissions. Since decision 29 the set
-belongs to a person, and a role supplies only the baseline.*
+calls the permission set "the matrix" in most of its prose. It is shorthand first for the set of named
+permissions and their role baselines, and since decision 31 it is also literally what the page draws: the areas
+as cards, their permissions as columns and the people as rows — **never** a grid of roles against permissions.*
 
 *Database.* Reuse `config_settings_values` (table 08) rather than adding a table, and **grant to the person, not
 the role** (decision 29): a permission is a `setting_key`, **a person's own grant is a `user`-scoped row**, and
@@ -202,12 +202,16 @@ invalidation on save, and never read settings inside a layout pass on the UI thr
 
 *The page.* The permission screen is a **page of its own** (`PermissionsPage` in `Module_Settings/Views`),
 reached from an Administration entry on `SettingsPage.xaml` (decision 21), openable by **Developer, IT
-Department and Plant Manager** (decision 5). **Its shape is one person at a time** — a column of people, with the
-chosen person's features as a list, each row carrying the plain-language label and what it gates (decisions 16
-and 24 on the subject's identity superseded by decision 29). The arithmetic that ruled out a grid still holds:
-nine roles across a 1080px column leaves about 90px each against about 140px needed, and the window can be
-dragged to 760px. Each row shows **what the person has, and whether it came from their role's baseline or from a
-choice made for them** — the difference decision 16 required is now the difference between inherited and granted.
+Department and Plant Manager** (decision 5). **Its shape is one card per area** — the five areas the declaration
+names, each card carrying that area's permissions across the top under their plain-language labels with what each
+one gates, and the people down the side as its rows (decision 31, which supersedes decisions 16 and 24). The
+arithmetic that ruled out a **roles-by-permissions** grid still holds: nine roles across a 1080px column leaves
+about 90px each against about 140px needed, and the window can be dragged to 760px. It does not rule out this
+one, because the roles are not the columns: five areas hold at most seven permissions each, so the widest card is
+seven columns and it scrolls sideways rather than dropping one. Each cell shows **what the person has, and whether
+it came from their role's baseline or from a choice made for them** — the difference decision 16 required, drawn as
+a filled square against an outlined circle so it is told apart without colour, and said in words in the cell's own
+accessible name.
 **Accounts that outrank the reader are shown and not changeable**, with the reason in words (decision 2).
 Localise every string; no fixed widths; guard Save against double-click; register its Settings entry with the
 search-refresh path so it obeys the search defects recorded in §5. The permission that opens this page is **not**
@@ -876,11 +880,13 @@ the "silent outsider" shape this feature exists to remove.
 | The `administrator`, `supervisor`, `manager`, `quality` branches | They name nothing | **Removed**, not left in place, so dead vocabulary cannot be mistaken for a supported one |
 | A manager wanting to switch a badge off | It cannot be done, because it is not a permission | Stated, so nobody hunts for the switch and concludes it is missing |
 
-### 2026-09-20 — decision 16 (SUPERSEDED BY DECISION 29): the permission screen is one subject at a time
+### 2026-09-20 — decision 16 (SUPERSEDED BY DECISION 29, AND AGAIN BY DECISION 31): the permission screen is one subject at a time
 
 **Decided (owner, 2026-09-20): a role picker, then that role's permissions as a list — not a grid of roles
-against permissions.** **Superseded by decision 29: the subject is now a person, not a role.** The arithmetic
-that forced a single-subject screen still holds exactly — only the subject changed.
+against permissions.** **Superseded by decision 29: the subject is now a person, not a role.** **Superseded again
+by decision 31: the page is one card per area with the people as its rows, so it is no longer one subject at a
+time at all.** The arithmetic that forced a single-subject screen still holds exactly — only what sat on the axes
+changed.
 
 **The arithmetic is what settled it, and the owner asked for the grid before the numbers were known.** The
 Settings page is one centred column capped at 1080px, and its own comment states that sections are stacked and
@@ -892,8 +898,10 @@ at any width.
 **What the screen became, and then became again.** The subject was a role; decision 29 moved it to a person, so
 the screen is a **column of people** and the chosen person's permissions grouped by area, each row carrying the
 permission's plain-language label, what it gates, a switch, and **whether the value came from their role or was
-chosen for them**. It answers the question people arrive with — *"what may this person do?"* — and it fits the
-page's existing shape at any window width. Decision 30 adds the reverse question, *"who holds this?"*.
+chosen for them**. **Decision 31 then removed the single-subject column entirely**, replacing it with one card per
+area whose rows are the people, which is what the page ships as. It answers the question people arrive with —
+*"what may this person do?"* — and it fits the page's existing shape at any window width. Decision 30 adds the
+reverse question, *"who holds this?"*.
 
 | Edge case | Why it happens | The answer the spec must state |
 | --- | --- | --- |
@@ -1082,11 +1090,13 @@ below, and a page the reader cannot act on announces that at the top and shows i
 | A field the source's contract forbids | Sign-in name was on that list until decision 20 | Anything still not editable is shown with its value and no control — not a control that refuses |
 | Long values on a narrow window | Names and employee numbers vary | `TextTrimming` with a tooltip, never a fixed width — the rule §3 already sets for badges and indicators |
 
-### 2026-09-20 — decision 24 (SUPERSEDED BY DECISION 29): down one side, in order
+### 2026-09-20 — decision 24 (SUPERSEDED BY DECISION 29, AND AGAIN BY DECISION 31): down one side, in order
 
 **Decided (owner, 2026-09-20): the permission page lists the roles down one side in ladder order, with the
-chosen role's permissions on the other side.** **Superseded by decision 29: the column lists people.** Their
-order follows the user list's own order, so the two screens agree rather than each inventing an order.
+chosen role's permissions on the other side.** **Superseded by decision 29: the column lists people.** **Superseded
+again by decision 31: there is no single side column at all — every card carries the people as its own rows, in
+rung order and then by name.** Their order follows the ladder rather than the user list's default name order,
+because a permission screen is read from the most senior person down.
 
 **Why this over a menu of roles.** The ladder is a ladder on this screen for the first time anywhere in the
 application — one definition of the hierarchy, visible, in order. A dropdown would hide it behind a control and
@@ -1303,3 +1313,62 @@ layout (23); the role column (24); the sign-in name becoming editable (20); and 
    exists and the live-session read already honours it, so what is missing is a write path, not a design.
 
 **State after this pass: every item is settled. The next step is `/speckit.specify`.**
+
+### 2026-09-21 — decision 31: the permission page is a feature-grouped matrix, and it supersedes decisions 16 and 24
+
+**Decided (owner, 2026-09-21): the permissions page is rebuilt as one bordered card per area of the permission
+declaration, each card carrying that area's permissions across the top and the people down the side, with a mark
+in every cell.** The owner showed a reference design and asked for its structure with this application's real
+content. This supersedes decision 16's single-subject screen and decision 24's single side column.
+
+**The columns are the declaration's own areas, so no new taxonomy was invented.** `PermissionRegistry.Area` names
+exactly five — Requests, Cache, Settings, Setup, Administration — and every declared permission already carries
+one. The five cards are therefore drawn from the declaration rather than listed on the page, which is what keeps
+FR-047's promise that a permission cannot exist in the code without appearing on the page.
+
+**The rows are people, and the roles are not the columns.** Decision 29 settled that a permission belongs to a
+person and a role supplies the baseline, so the subject of a row is a person. They are ordered by rung and then by
+name, so the screen is read from the most senior person down rather than in the user list's own name order.
+
+**Why this fits where the roles-by-permissions grid did not — the arithmetic decision 16 recorded is untouched.**
+That arithmetic was about nine roles competing for the width of one Settings column, about 90px each against about
+140px needed. It does not apply here, because roles are not columns. The areas are small: the widest card,
+Settings, carries seven permissions, and every other card carries one, one, two or two. A card wider than the
+window scrolls sideways rather than dropping a column, because a column that is not there is a fact the reader
+will never know is missing.
+
+**Three cell states, because two would hide the thing that matters.** A cell is on because it was chosen for this
+person, on because their role's baseline gives it, or off. Inherited and chosen are drawn as **different shapes** —
+an outlined circle against a filled square — rather than as different colours, and every cell carries an
+accessible name saying which it is, because a reader who cannot see a shape cannot read one. A cell the reader has
+just turned over is drawn as though it were already theirs, with a mark beside it and a count on the row saying it
+is not saved yet.
+
+**A save is written for one person, so the page asks one person at a time.** The change-set procedure takes one
+person and a whole set of changes, and its reversal reverses that person's last save. The page therefore lists the
+people with unsaved changes and saves each one on its own: one press is one atomic write, and two people's changes
+are two saves rather than one write that half lands.
+
+| Aspect | The answer |
+| --- | --- |
+| The five cards | The declaration's areas, in its order, drawn from it rather than listed on the page |
+| The columns | That area's permissions, each under its plain-language label with the sentence saying what it gates |
+| The rows | The people, ordered by rung and then by name |
+| The three states | Filled square (chosen for the person), outlined circle (their role's baseline), empty square (off) |
+| Telling them apart | Shape, never colour alone, plus an accessible name that says the state in words |
+| Saving | One person at a time, through the existing change-set procedure, after a confirmation that names the person and each change |
+| Undoing | The person whose last save it is, with the moved value named and asked about before anything is put back |
+| A person above the reader | Every cell of their row is shown, unavailable, with the reason in words — never hidden |
+| The page's own opening permission | Present in the Administration card, locked with its reason, clearable by nobody |
+| A card too wide for the window | It scrolls sideways. No permission column is ever dropped to make one fit |
+| The who-holds-this view | Kept as its own read-only block, wearing the same card chrome so the page is one screen |
+| What it costs | One permission read per person, because the store answers for one person at a time |
+| What it replaced | Decisions 16 and 24, which are superseded rather than deleted: a superseded decision is what stops somebody rebuilding the old shape |
+
+**A defect found while proving it, recorded here because it was found by running the page's own write path.** The
+change-set procedure learned the value row's id from `LAST_INSERT_ID()` after an upsert. When the upsert took its
+UPDATE branch no id was generated, and on a pooled connection the function returned whatever the last insert on
+that connection had generated — in the observed case a `config_settings_history` row's id — so the history write
+named a row in the wrong table and the foreign key refused the reversal. Every undo failed on a reused
+connection, and the same call succeeded on a fresh one, which is why it looked intermittent. The id is now read
+back unconditionally. See `Database/StoredProcedures/sp_config_permissions_user_set/create.sql`.

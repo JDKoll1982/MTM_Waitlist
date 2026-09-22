@@ -1194,7 +1194,8 @@
         "T055",
         "T056",
         "T057"
-      ]
+      ],
+      "tests": "PermissionsViewModelTests.cs::TheFiveCards_AreTheDeclarationAreas_AndEveryPermissionIsInExactlyOne,PermissionsViewModelTests.cs::TheRows_AreThePeople_OrderedByRungAndThenByName"
     },
     "FR-064": {
       "title": "The permissions page is openable only by IT Department, Plant Manager and Developer.",
@@ -1207,21 +1208,24 @@
       "tasks": [
         "T055",
         "T056"
-      ]
+      ],
+      "tests": "PermissionsViewModelTests.cs::AChosenCell_AnInheritedCell_AndAnOffCell_AreThreeDifferentShapes,PermissionsViewModelTests.cs::EveryCell_SaysItsStateAndWhoseItIsInWords_BecauseAShapeCannotBeReadAloud"
     },
     "FR-066": {
       "title": "A person whose role ranks above the reader's is selectable to view, with rows shown unavailable and the reason stated in words.",
       "tasks": [
         "T056",
         "T059"
-      ]
+      ],
+      "tests": "PermissionsViewModelTests.cs::APersonAboveTheReadersRung_HasEveryCellLocked_WithTheReasonInWords"
     },
     "FR-067": {
       "title": "Saving confirms what is changing and for whom, one sentence per changed row and a count when several change.",
       "tasks": [
         "T056",
         "T059"
-      ]
+      ],
+      "tests": "PermissionsViewModelTests.cs::TheConfirmation_NamesWhatChangesAndForWhom_AndCountsWhenSeveralChange"
     },
     "FR-068": {
       "title": "Saving with nothing changed is unavailable and writes no history record.",
@@ -1248,7 +1252,8 @@
         "T056",
         "T058",
         "T059"
-      ]
+      ],
+      "tests": "PermissionsViewModelTests.cs::AValueThatMovedWhileThePageWasOpen_IsNamedAndNothingIsWritten,PermissionsViewModelTests.cs::AValueThatMoved_IsShownAndAskedAbout_BeforeItIsRestored"
     },
     "FR-071": {
       "title": "A reversal of a save that changed several rows reverses the whole save.",
@@ -1257,7 +1262,8 @@
         "T055",
         "T056",
         "T058"
-      ]
+      ],
+      "tests": "PermissionsViewModelTests.cs::ASave_WritesOnePersonsWholeSet_AndAnotherPersonIsAnotherWrite,PermissionsViewModelTests.cs::TheUndo_ReversesTheWholeSave_ForThePersonItWasWrittenFor"
     },
     "FR-072": {
       "title": "Every permission change writes one history record per changed permission naming the actor, the permission, the scope, both values and the time.",
@@ -1280,7 +1286,8 @@
       "tasks": [
         "T056",
         "T059"
-      ]
+      ],
+      "tests": "PermissionsViewModelTests.cs::TurningACellOver_MarksTheRowPending_AndTheWarningStatesTheCount,PermissionsViewModelTests.cs::ASaveThatLanded_AnnouncesTheCellsNewState_NotOnlyItsNewValue"
     },
     "FR-075": {
       "title": "A second view answers which roles' baselines give a feature, taken from the seeded baselines the declaration's check ties to it rather than repeated.",
@@ -1646,7 +1653,7 @@
         "T036",
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore"
+      "tests": "PermissionBaselineParityTests.cs"
     },
     "SC-005": {
       "title": "After the role rename the count of accounts with no role is zero, and the set on IT Department equals the set that held the retired role.",
@@ -1767,14 +1774,14 @@
       "summary": "76 tasks across 12 phases and 37 waves; 60 parallel-safe; 24 foundational tasks carry the schema, the precedence re-rank, the permission declaration and the user-management data layer before any story starts."
     },
     "specify": {
-      "summary": "Phase 2 finished (the bootstrap and its validators, the permission declaration, the role code through the session, permission resolution, the user-management data layer, registration, resource keys and the three wave-7 suites), and the first Phase 3 task landed: the shipped role seed now carries the eight rungs, Material Handler Lead and the name parts the schema requires."
+      "summary": "the permissions page is a feature-grouped matrix, and walking it against the live store found and fixed four defects"
     },
     "implement": {
       "summary": "Closed T072, T073, T074 and T075: the live integration pass now proves the create, the 1062 answer, a mid-way rollback, both rank and both self refusals, the reset's single empty audit row, deactivate leaving sessions alone, one change identifier per save and each person's ship-day parity; a reset's PIN was searched for across the store, the journal and the application and found nowhere; the suite and a clean build are green; and the running application was walked, which found and fixed an unreachable create form and a hidden count that never moved. T076 is open."
     }
   },
   "size": "oversized",
-  "currentTask": "T075",
+  "currentTask": "T062",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2280,14 +2287,10 @@
     },
     "T054": {
       "status": "DONE",
-      "did": "The change-set procedure and the holders read, both applied live to MySQL; AllSPs.sql regenerated with both bodies; the namespace refusal token added to the database contract because the pinned list had no token for that rule",
+      "did": "the change-set procedure reads the value row id back rather than trusting LAST_INSERT_ID, so a reversal is no longer refused by the foreign key on a pooled connection",
       "files": [
         "Database/StoredProcedures/sp_config_permissions_user_set/create.sql",
-        "Database/StoredProcedures/sp_config_permissions_user_set/rollback.sql",
-        "Database/StoredProcedures/sp_config_permissions_feature_holders_get/create.sql",
-        "Database/StoredProcedures/sp_config_permissions_feature_holders_get/rollback.sql",
-        "Database/StoredProcedures/AllSPs.sql",
-        "specs/006-user-management-and-permissions/contracts/database-contract.md"
+        "Database/StoredProcedures/AllSPs.sql"
       ]
     },
     "T055": {
@@ -2306,22 +2309,24 @@
     },
     "T056": {
       "status": "DONE",
-      "did": "The permissions page's row, its change set and its view model: per-row value/provenance/pending with the stored value kept so a moved value is refused, the change set composed from the rows that actually changed, the confirmed save, the whole-save undo that asks before restoring a moved value, the count of pending rows on leaving, and the outranking person shown with their rows unavailable. The reversal gained a restore-despite-moved flag for the second half of FR-070",
+      "did": "the page models are the matrix: a cell with three states, a card per area, a card row, a column, and a person row carrying what a save writes",
       "files": [
-        "MTM_Waitlist.Settings/Models/PermissionRow.cs",
+        "MTM_Waitlist.Settings/Models/PermissionCell.cs",
+        "MTM_Waitlist.Settings/Models/PermissionAreaCard.cs",
+        "MTM_Waitlist.Settings/Models/PermissionCardRow.cs",
+        "MTM_Waitlist.Settings/Models/PermissionColumn.cs",
+        "MTM_Waitlist.Settings/Models/PermissionMatrixRow.cs",
         "MTM_Waitlist.Settings/Models/PermissionChangeSet.cs",
-        "MTM_Waitlist.Settings/ViewModels/PermissionsViewModel.cs",
-        "MTM_Waitlist.Core/Contracts/Services/IPermissionAdministrationService.cs",
-        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs"
+        "MTM_Waitlist.Settings/ViewModels/PermissionsViewModel.cs"
       ]
     },
     "T057": {
       "status": "DONE",
-      "did": "The permissions page: the column of people, the chosen person's feature list with a checkbox per row, the fixed row and an outranking person rendered locked with their reasons, the restore question beside the bar (an InfoBar takes one action button and there are two answers), no fixed widths, and its own registration file with its route",
+      "did": "the permissions page is five area cards with the permissions across the top and the people down the side, three shapes per cell each with an accessible name, and the who-holds-this block in the same card chrome",
       "files": [
         "Module_Settings/Views/PermissionsPage.xaml",
         "Module_Settings/Views/PermissionsPage.xaml.cs",
-        "Services/DependencyInjection/ServiceRegistrationExtensions.Permissions.cs"
+        "Strings/en-us/Resources.resw"
       ]
     },
     "T058": {
@@ -2338,7 +2343,7 @@
     },
     "T059": {
       "status": "DONE",
-      "did": "The page's behaviour suite: 12 tests over pending marks and the leaving count, the confirmation's per-row sentences, both values per entry, one impatient press writing one change, the whole-save undo, the moved-value question and both answers to it, the outranking person, the fixed row, and the unavailable store",
+      "did": "the page suite asserts the matrix: the five areas, the three cell states and their words, one save per person, the from that is null for a value the person does not own, the re-base announcement, outranked rows, the fixed cell and the moved value",
       "files": [
         "MTM_Waitlist.Tests/Module_Settings/ViewModels/PermissionsViewModelTests.cs"
       ]
@@ -2367,10 +2372,10 @@
     },
     "T062": {
       "status": "DONE",
-      "did": "The who-holds-this view hosted on the permissions page in its own row, shown only to a reader entitled to the page, and its view model registered in the permissions phase's own registration file. PermissionsPage.xaml is the one path two phases share and Phase 9 ran after Phase 8 created it",
+      "did": "the who-holds-this view is hosted in a bordered block wearing the same card chrome as the five area cards",
       "files": [
         "Module_Settings/Views/PermissionsPage.xaml",
-        "Services/DependencyInjection/ServiceRegistrationExtensions.Permissions.cs"
+        "MTM_Waitlist.Settings/ViewModels/PermissionHoldersViewModel.cs"
       ]
     },
     "T063": {
@@ -2604,6 +2609,22 @@
       "command": "read the XAML of the three pages and the two others this feature adds",
       "result": "no content control declares a fixed Width; the reading does find Width=24 progress rings, a MaxWidth=720 on the create and person form stacks and a MinWidth=200 on the permissions page's people column, which are judgement items for whoever does the scaling walk",
       "warnings": []
+    },
+    {
+      "what": "solution build after the permissions page was rebuilt as a matrix",
+      "command": "powershell -NoProfile -Command \"cd c:\\Users\\johnk\\source\\repos\\MTM_Waitlist; dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 35.9,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:35.53"
+    },
+    {
+      "what": "whole suite after the matrix rebuild, with all five store connections exported",
+      "command": "powershell -NoProfile -Command \"cd c:\\Users\\johnk\\source\\repos\\MTM_Waitlist; $env:MSBUILDDISABLENODEREUSE='1'; $cs='Server=127.0.0.1;Port=3306;Database=mtm_waitlist;User Id=root;Password=root;'; $env:MTM_WAITLIST_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING=$cs; $env:MTM_MOCK_DB_CONNECTION_STRING='Server=127.0.0.1;Port=3306;Database=mtm_mock;User Id=root;Password=root;'; $env:MTM_RECEIVING_APPLICATION_DB_CONNECTION_STRING='Server=127.0.0.1;Port=3306;Database=mtm_receiving_application;User Id=root;Password=root;'; dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 51.7,
+      "result": "  Skipped GetSubordinatePartsQuery_ReturnsRows_WhenServerIsAvailable [< 1 ms] ·   Skipped EmployeeLookupQuery_ReturnsEmployeeStatus_WhenServerIsAvailable [1 ms] · Passed!  - Failed:     0, Passed:  1383, Skipped:     4, Total:  1387, Duration: 35 s - MTM_Waitlist.Tests.dll (net10.0)"
     }
   ],
   "decisions": [
@@ -2713,6 +2734,51 @@
       "decision": "leave the specification at implementing and not run --mark-complete",
       "why": "T076 is still open: the scaling walk was not performed",
       "rejected": "marking 75 of 76 tasks complete as if the last one were done"
+    },
+    {
+      "decision": "the page is one card per PermissionRegistry.Area, drawn from the declaration",
+      "why": "the declaration already names exactly five areas, so the card split cannot drift from it and no permission can be lost or invented (FR-047)",
+      "rejected": "a hand-listed set of cards, or merging areas to make the page narrower"
+    },
+    {
+      "decision": "the three cell states are drawn as a filled square, an outlined circle and an empty square",
+      "why": "a two-state tick would hide whether a value is a choice made for the person or their role baseline, and shape rather than colour carries the difference for a reader who cannot see colour",
+      "rejected": "a CheckBox with an indeterminate state, which a reader can also set by clicking"
+    },
+    {
+      "decision": "a save is written for one person, and the page lists the people with pending changes",
+      "why": "the change-set procedure takes one person and a whole set, so one press is one atomic write and two people are two writes rather than one that half lands (FR-071)",
+      "rejected": "one page-level save grouping by person, which is several writes and can half land"
+    },
+    {
+      "decision": "the change set sends a null from when the value in force is not a stored value of that person",
+      "why": "the store reads a non-null from as there is a stored value and it must be this one, so sending the role baseline refused every first-time change",
+      "rejected": "sending the value in force unconditionally, which is what the old single-subject model did"
+    },
+    {
+      "decision": "a re-based cell announces every derived property",
+      "why": "a save leaves the value where the reader put it, so only the state changes, and a binding that is not re-announced keeps saying not saved yet over a cell that has just been written",
+      "rejected": "announcing only the two values that moved"
+    },
+    {
+      "decision": "the page refuses a second confirmation while one is showing",
+      "why": "a second ContentDialog while one is open throws, and the handler is async void so the exception ended the process",
+      "rejected": "leaving the double press to WinUI, which takes the application down"
+    },
+    {
+      "decision": "the what-it-gates sentence sits in the card heading under the permission label",
+      "why": "the cells are marks, and the sentence is what tells a reader what a column controls; repeating it in every cell would be fourteen copies of one sentence",
+      "rejected": "a tooltip on the column heading, which a sighted keyboard user cannot reach"
+    },
+    {
+      "decision": "the row shows the sign-in name under the person name",
+      "why": "two accounts in the live roster share the display name John Koll, and two rows that read identically are two rows a reader will confuse",
+      "rejected": "the display name alone, which the live store proved ambiguous"
+    },
+    {
+      "decision": "the change-set procedure reads the value row id back instead of taking LAST_INSERT_ID",
+      "why": "an upsert that took the UPDATE branch generates no id, and on a pooled connection the function answered with a config_settings_history row id, so the history write was refused by the foreign key",
+      "rejected": "keeping the zero guard, which cannot tell a stale non-zero id from a real one"
     }
   ],
   "concerns": [
@@ -2801,8 +2867,24 @@
     {
       "note": "T072's task line names three test files, but several of the live claims it lists (the transactional create, the 1062 answer through the repository, the rank refusals, the self-lockout refusals, the reset audit row, deactivate leaving sessions alone) had no live case at all; they were added in a new live suite rather than asserted from the fakes.",
       "step": "implement"
+    },
+    {
+      "note": "the save and its reversal were proved against the live store through the shipped service and through the running page, and the rows it wrote were removed afterwards; the store reports zero user-scoped permission rows and zero such history rows",
+      "step": "implement"
+    },
+    {
+      "note": "the two column widths on the permissions page are declared as page resources so a card heading lines up with its rows; a card scrolls sideways rather than dropping a column, which is the decision 28 trade-off and is a judgement for the scaling walk",
+      "step": "implement"
+    },
+    {
+      "note": "T076, the scaling walk, is still open, so the spec is left at implementing rather than marked complete",
+      "step": "implement"
+    },
+    {
+      "note": "the page reads every person permissions one person at a time, because the store answers for one person at a time; with ten accounts that is ten reads on arrival",
+      "step": "implement"
     }
   ],
-  "last_action": "T072, T073, T074 and T075 closed with evidence recorded in quickstart.md; T076 left open and the spec left at implementing, because the scaling walk needs a session the pass could not make",
+  "last_action": "matrix rebuilt and walked; build 0 warnings 0 errors; suite 1387 total 1383 passed 4 skipped 0 failed; T076 still open",
   "telemetryInstanceId": "7c4334c4-01cc-4e28-b1a9-4e5ade006824"
 }

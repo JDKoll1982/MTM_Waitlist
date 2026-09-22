@@ -86,12 +86,14 @@ MTM_Waitlist.Settings/
   ViewModels/UserManagementViewModel.cs     the list: search, role filter, remembered filter, states
   ViewModels/CreateUserViewModel.cs         the form only
   ViewModels/EditUserViewModel.cs           fields above, actions below, read-only announced at the top
-  ViewModels/PermissionsViewModel.cs        one person at a time
+  ViewModels/PermissionsViewModel.cs        the matrix: one card per area, the people as the rows
   ViewModels/PermissionHoldersViewModel.cs  the who-holds-this view
   Models/PermissionHoldersView.cs           the roles that hold it, and the people who differ
   ViewModels/PinRevealDialogViewModel.cs    the one-time PIN, its print and its deliberate close
-  Models/                                   UserSummary, UserDetail, UserEditRequest, PermissionRow,
-                                            PermissionChangeSet, UserListFilter, typed results
+  Models/                                   UserSummary, UserDetail, UserEditRequest, PermissionCell,
+                                            PermissionColumn, PermissionCardRow, PermissionAreaCard,
+                                            PermissionMatrixRow, PermissionChangeSet, UserListFilter,
+                                            typed results
 MTM_Waitlist.Startup/
   Services/StartupSessionRepository.cs      upper-case sign-in names, the attempt count, the role code
   ViewModels/LoginViewModel.cs              the remaining-attempts message

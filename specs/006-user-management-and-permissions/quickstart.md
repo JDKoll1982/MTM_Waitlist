@@ -106,8 +106,9 @@ $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING = $cs
      and rename unavailable with the reason.
    - A create ends with the PIN window, the window survives a click outside it and Escape, and printing leaves it
      open.
-   - The permissions page shows one person at a time with each row saying where its value came from, the fixed row
-     is locked, and saving nothing is unavailable.
+   - The permissions page shows one card per area with the people as its rows and a mark in every cell, each cell
+     saying whether its value came from the person's role or was chosen for them and saying so in words as well as
+     in shape; the fixed cell is locked, and saving nothing is unavailable.
    - The five-attempt limit is real: five wrong tries with a temporary credential stop it being accepted, and
      closing and reopening the application does not restore it.
 
@@ -211,8 +212,7 @@ items and its cards were read as they rendered, and the actions were real clicks
 | A create | the create page opened from the roster's Add action, took the five fields and a role chosen from the roles at or below the reader's rung, and ended in the PIN window showing the sign-in name, the four-digit credential, when it was issued and who issued it |
 | The PIN window | a click far outside it left it open, Escape left it open, and Print left it open while raising the Windows print preview, which then had to be closed before the page beneath would take a click again |
 | Closing the PIN window | its own close button closed it, and the credential was nowhere on the screen afterwards |
-| The permissions page | one person at a time, each of the fourteen features stating what it gates and "From the role's baseline", the "Manage permissions" row disabled and locked with "This is the permission that opens this page, so it cannot be changed here.", Save changes disabled while nothing had changed, and the who-holds-this view naming the roles whose baselines give the feature |
-| The five-attempt limit | signing in as the account the walk created with the wrong credential five times moved "Attempts remaining on this temporary password" through 4, 3, 2, 1 and 0, the sixth attempt with the **correct** credential was refused with "This temporary password is no longer accepted. Someone who can reset passwords must issue a fresh one.", and after closing and reopening the application the correct credential was still refused |
+| The permissions page | one person at a time, each of the fourteen features stating what it gates and "From the role's baseline", the "Manage permissions" row disabled and locked with "This is the permission that opens this page, so it cannot be changed here.", Save changes disabled while nothing had changed, and the who-holds-this view naming the roles whose baselines give the feature || The five-attempt limit | signing in as the account the walk created with the wrong credential five times moved "Attempts remaining on this temporary password" through 4, 3, 2, 1 and 0, the sixth attempt with the **correct** credential was refused with "This temporary password is no longer accepted. Someone who can reset passwords must issue a fresh one.", and after closing and reopening the application the correct credential was still refused |
 
 **Two defects the walk found, which no test could see.**
 
@@ -246,10 +246,55 @@ The scaling walk was not performed, so this task stays open rather than reported
   could not be signed back in through UI Automation, so it was not attempted either.
 - For information rather than as evidence: reading the markup of the three screens and the two others this feature
   adds, no content control declares a fixed `Width`. What the reading does find is a `Width="24"` progress ring on
-  each page, a `MaxWidth="720"` on the create and person form stacks and a `MinWidth="200"` on the permissions
-  page's people column. Whether those three are consistent with "no control has a fixed width" is a judgement for
-  whoever does the scaling walk, because a spinner's size is fixed by its own nature and a maximum is not a fixed
-  width, and none of that is a substitute for the walk.
+  each page and a `MaxWidth="720"` on the create and person form stacks. The permissions page now also declares two
+  column widths as page resources, `PermissionCellWidth` and `PermissionPersonColumnWidth`, which are what make a
+  card's heading row line up with the rows beneath it; each card scrolls sideways rather than dropping a column, so
+  a narrow window hides no fact but does require a scroll. Whether that is consistent with "no control has a fixed
+  width" is a judgement for whoever does the scaling walk, because a spinner's size is fixed by its own nature, a
+  maximum is not a fixed width, and a table column has to be definite to align — and none of that is a substitute
+  for the walk.
+
+### The permissions page rebuilt as a matrix, and what walking it found (2026-09-21)
+
+The page's shape changed by owner decision 31: one card per area of the declaration, that area's permissions across
+the top and the people down the side, with a mark in every cell. The walk below was run against the rebuilt page,
+with both connection overrides pointed at the local MySQL 5.7.24 and driven through UI Automation exactly as T075's
+was. Suite afterwards: **1387 total, 1383 passed, 4 skipped, 0 failed**.
+
+| What was walked | What the running application showed |
+| --- | --- |
+| The five cards | `Requests`, `Cache`, `Settings`, `Setup`, `Administration`, in that order, drawn from the declaration rather than listed on the page |
+| The columns | one per permission in that area, each under its plain-language label with the sentence saying what it gates; `Settings` carried seven, and no card carried a permission belonging to another area |
+| The rows | the ten accounts, ordered from the highest rung down: `John Koll (JKOLL)`, `John Koll (JOHNK)`, `Test Developer`, `Test Admin`, `Test Plant Manager`, `Test Production Lead`, `Test Setup Lead`, `Test Material Handler`, `Test Production`, `Test Setup` — two accounts that share a name are told apart by their sign-in name |
+| What a cell announces | `Hot work centres for Test Setup (TEST.SETUP): not allowed.` — the permission, the account, and the state, in words |
+| Changing a cell | it read `…: allowed, and set for this person. Not saved yet.`, the row said `1 change not saved yet`, the unsaved block appeared headed `Not saved yet`, and the page warned `You have not saved 1 change, and leaving now loses it.` |
+| The confirmation | `Check what changes` — `2 permissions change for Test Setup:` then a line for each: `Hot work centres: Allowed`, `Part pictures: Allowed`; buttons `Save changes` and `Do not save` |
+| The save | the page said `Saved. What Test Setup may do has changed.`, the unsaved block disappeared, the undo button appeared, and the store held two `user`-scoped rows with value `1` written by the acting user and two history rows with `previous` NULL |
+| The undo | the page said `Undone. What Test Setup may do is back to what it was.`, and the store held both values restored, with the reversal's own two history rows recorded beside the save's |
+
+**Three defects this walk found, none of which any test could see.**
+
+1. **Every first-time save was refused as a value that had moved.** The change set sent the value in force as its
+   `from`, and for a person with no stored row of their own that value belongs to their role. The procedure reads a
+   non-null `from` as "there is a stored value, and it must be this one", so it refused with
+   `mtm_permission_value_moved` and nothing was ever written. The `from` is now null when the value is not the
+   person's own. The suite could not catch it because its double accepted any change set; the double now applies
+   the procedure's own guard.
+2. **A cell that had just been saved kept saying "not saved yet".** A save leaves the value exactly where the
+   reader put it, so only the cell's *state* changes, and a re-based cell announced the two values that moved
+   rather than the state that follows from them. Every derived property is now announced on a re-base.
+3. **A second press of Save took the application down.** A `Click` while the confirmation was open built a second
+   `ContentDialog`, and WinUI refuses one while another is up: because the handler is `async void` the exception
+   ended the process. The handler now refuses a second confirmation while one is showing.
+
+A fourth defect was found by running the save and its reversal directly against the store, and is recorded in the
+brainstorm log beside decision 31: the change-set procedure learned the value row's id from `LAST_INSERT_ID()` after
+an upsert, which answers with another table's id on a pooled connection when the upsert took its UPDATE branch, so
+every reversal was refused by a foreign key. The id is now read back unconditionally.
+
+**What the walk left on this machine.** The one permission row it wrote, its save's history and its reversal's
+history were removed afterwards, and the store reports zero `user`-scoped permission rows and zero such history
+rows across the same ten accounts.
 
 ## What to do when something fails
 

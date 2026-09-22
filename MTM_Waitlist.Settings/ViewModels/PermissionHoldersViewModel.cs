@@ -125,7 +125,7 @@ public partial class PermissionHoldersViewModel : ObservableObject
 
         foreach (var entry in PermissionRegistry.All)
         {
-            Features.Add(new PermissionFeatureOption(entry.Key, PermissionRow.Resolve(entry.LabelResourceKey)));
+            Features.Add(new PermissionFeatureOption(entry.Key, PermissionRegistry.Label(entry.Key)));
         }
 
         if (SelectedFeature is not null)

@@ -49,34 +49,40 @@ public sealed class PermissionChangeSet
     public static PermissionChangeSet Empty(long userId) => new(userId, [], []);
 
     /// <summary>
-    /// The set of everything the reader has changed for one person, in the order the rows are shown.
+    /// The set of everything the reader has changed for one person, in the order the cells are shown.
     /// </summary>
-    public static PermissionChangeSet From(long userId, IEnumerable<PermissionRow> rows)
+    public static PermissionChangeSet From(long userId, IEnumerable<PermissionCell> cells)
     {
-        ArgumentNullException.ThrowIfNull(rows);
+        ArgumentNullException.ThrowIfNull(cells);
 
         var entries = new List<PermissionChange>();
         var labels = new List<string>();
 
-        foreach (var row in rows)
+        foreach (var cell in cells)
         {
-            if (!row.IsPending || !row.CanBeCleared)
+            if (!cell.IsPending || !cell.CanEdit)
             {
-                // The fixed row is refused by the store as well; it is excluded here so the reader is never asked
+                // The fixed cell is refused by the store as well; it is excluded here so the reader is never asked
                 // to confirm a change that cannot land (FR-059).
                 continue;
             }
 
-            entries.Add(new PermissionChange(row.Key, row.StoredValue, row.Value));
-            labels.Add(row.LabelText);
+            // The `from` is what the store is asked to compare against, and it is NULL when the person has no
+            // stored value of their own: the value their role supplies is not a stored value, and sending it as
+            // one makes the store report a value that has moved for every first-time change (FR-070).
+            var from = cell.IsThePersonsOwn ? cell.StoredIsOn : (bool?)null;
+
+            entries.Add(new PermissionChange(cell.Key, from, cell.IsOn));
+            labels.Add(cell.ChangeSentence);
         }
 
         return new PermissionChangeSet(userId, entries, labels);
     }
 
     /// <summary>
-    /// What the reader is asked to confirm before it is written: one sentence for a single row, and a count with a
-    /// sentence per changed row when several change (FR-067).
+    /// What the reader is asked to confirm before it is written: one sentence for a single change, and a count with
+    /// one sentence per change when several change (FR-067). Every sentence names the person, because a save is
+    /// written for one person and nothing else.
     /// </summary>
     /// <param name="personName">The person the changes are for, as the page shows them.</param>
     public IReadOnlyList<string> ConfirmationSentences(string personName)

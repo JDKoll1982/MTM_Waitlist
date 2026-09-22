@@ -1,5 +1,7 @@
 namespace MTM_Waitlist.Module_Core.Permissions;
 
+using MTM_Waitlist.Module_Core.Helpers;
+
 /// <summary>
 /// The one declaration of every permission: its key, the resource key of its label and of the sentence saying
 /// what it gates, the area the permissions page groups it under, the answer used when neither a person's own row
@@ -29,6 +31,9 @@ namespace MTM_Waitlist.Module_Core.Permissions;
 /// </remarks>
 public static class PermissionRegistry
 {
+    /// <summary>The namespace every permission key lives under, which is what makes a key recognisable as one.</summary>
+    private const string Namespace = "permission.";
+
     /// <summary>The group the permissions page shows an entry under.</summary>
     public enum Area
     {
@@ -182,6 +187,44 @@ public static class PermissionRegistry
         $"Permission_{Suffix(permissionKey)}.Label";
 
     /// <summary>
+    /// What <paramref name="permissionKey"/> is called, in the reader's words. Every screen that names a
+    /// permission reads it from here, so a permission is never called two things and its key is never shown to a
+    /// person.
+    /// </summary>
+    public static string Label(string permissionKey) => Resolve(LabelResourceKey(permissionKey));
+
+    /// <summary>
+    /// The sentence saying what <paramref name="permissionKey"/> gates, in the reader's words.
+    /// </summary>
+    public static string Gates(string permissionKey) => Resolve(GatesResourceKey(permissionKey));
+
+    /// <summary>
+    /// The text for a resource key, or a readable form of the key's own name when the map holds no entry. A key is
+    /// never shown to a person, so the fallback is the key's own name with its namespace, its suffix and its
+    /// underscores opened out rather than the key itself.
+    /// </summary>
+    private static string Resolve(string resourceKey)
+    {
+        var localized = resourceKey.GetLocalized();
+        if (!string.Equals(localized, resourceKey, StringComparison.Ordinal))
+        {
+            return localized;
+        }
+
+        var suffix = resourceKey.StartsWith(Namespace, StringComparison.Ordinal)
+            ? resourceKey[Namespace.Length..]
+            : resourceKey;
+
+        suffix = suffix.EndsWith(".Label", StringComparison.Ordinal)
+            ? suffix[..^".Label".Length]
+            : suffix.EndsWith(".Gates", StringComparison.Ordinal)
+                ? suffix[..^".Gates".Length]
+                : suffix;
+
+        return suffix.Replace('.', ' ').Replace('_', ' ');
+    }
+
+    /// <summary>
     /// The resource key of <paramref name="permissionKey"/>'s sentence saying what it gates.
     /// </summary>
     public static string GatesResourceKey(string permissionKey) =>
@@ -203,8 +246,6 @@ public static class PermissionRegistry
 
     private static string Suffix(string permissionKey)
     {
-        const string Namespace = "permission.";
-
         var suffix = permissionKey.StartsWith(Namespace, StringComparison.Ordinal)
             ? permissionKey[Namespace.Length..]
             : permissionKey;

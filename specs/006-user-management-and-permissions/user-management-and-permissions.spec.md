@@ -35,9 +35,10 @@ represented here by its replacement.
 > The same feature also gives the application one named permission per gated action, in place of the twelve
 > hand-written role lists it carries today. Each gated action is named by a settings key, and a person either
 > holds that key or does not: if the signed-in user's key is false, they cannot perform the gated action. A new
-> Administration page in Settings, openable only by IT Department, Plant Manager and Developer, shows **one
-> person at a time**, a column of people, and the chosen person's permissions as a list of switches, and saving
-> a change writes it to the settings store together with an audit record naming the acting user, the permission,
+> Administration page in Settings, openable only by IT Department, Plant Manager and Developer, shows **one card
+> per area of the permission set**, that area's permissions as the card's columns and the people as its rows, with
+> a mark in every cell; saving a change writes it to the settings store together with an audit record naming the
+> acting user, the permission,
 > whose set was changed, the previous value, the new value and the time. **Permissions belong to the person, and
 > a role is the baseline its people start from**: a new account begins with its role's baseline, and the page
 > adjusts the person rather than the role, so changing what someone may do never means changing the privilege
@@ -309,8 +310,8 @@ and confirm that a person with no entry of their own receives their role's basel
 ### User Story 5 - Change what one person may do (Priority: P2)
 
 A Plant Manager needs one Material Handler to be able to change hot work centres, without promoting them. They open
-the Permissions page, choose that person from the column of people, switch the feature on for them, and save. The page
-says what the change means before writing it, and offers to undo it afterwards.
+the Permissions page, find that person's row in the Settings card and set the hot work centres cell for them, then
+save. The page says what the change means before writing it, and offers to undo it afterwards.
 
 **Why this priority**: it is the reason permissions belong to a person rather than to a role. It is P2 because the
 gates themselves (User Story 4) must work before there is anything to adjust.
@@ -321,11 +322,13 @@ nobody else, then undo it.
 
 **Acceptance Scenarios**:
 
-1. **Given** the Permissions page, **When** it is shown, **Then** it presents a column of people and the chosen
-   person's features as a list, one person at a time, and not a grid of roles against features. It is reached from
-   its own Administration entry in Settings, which navigates rather than expanding in place.
-2. **Given** a person is chosen, **When** their list is shown, **Then** each row says what the feature is, what it
-   gates, whether the value comes from their role's baseline or from a choice made for them, and what the value is.
+1. **Given** the Permissions page, **When** it is shown, **Then** it presents one card per area of the permission
+   set, that area's permissions as the card's columns with the people as its rows, and not a grid of roles against
+   features. It is reached from its own Administration entry in Settings, which navigates rather than expanding in
+   place.
+2. **Given** a person's row, **When** their cells are shown, **Then** each cell says whether the value comes from
+   their role's baseline or from a choice made for them, in a shape that tells the two apart without relying on
+   colour, and with an accessible name that says it in words.
 3. **Given** a change is made and saved, **When** the confirmation is shown, **Then** it states in the reader's words
    what will change and for whom, one sentence per changed row, with a count when several change.
 4. **Given** nothing has been changed, **When** the page is shown, **Then** saving is unavailable and no history row
@@ -662,25 +665,28 @@ rather than with the retired role restored.
 
 #### The permissions page
 
-- **FR-063**: The permissions page MUST show one person at a time, presenting a column of people and the chosen
-  person's features as a list, MUST NOT be a grid of roles against features, and MUST NOT change any role's
-  baseline, because it adjusts a person rather than a privilege level.
+- **FR-063**: The permissions page MUST present one card per area of the permission declaration, that area's
+  permissions as the card's columns and the people as the card's rows, MUST NOT be a grid of roles against
+  features, and MUST NOT change any role's baseline, because it adjusts a person rather than a privilege level.
+  No permission column may be dropped to make a card fit: a card too wide for the window scrolls instead.
 - **FR-064**: The page MUST be openable only by IT Department, Plant Manager and Developer.
-- **FR-065**: Each row MUST state what the feature is, what it gates, the value in force, and whether that value
-  comes from the person's role's baseline or from a choice made for the person.
-- **FR-066**: A person whose role ranks above the reader's MUST be selectable to view, with their rows shown
-  unavailable and the reason stated in words.
-- **FR-067**: Saving MUST confirm what is changing and for whom, in the reader's words, one sentence per changed row
+- **FR-065**: Each card MUST name every permission in its area with the permission's plain-language label and the
+  sentence saying what it gates, and each cell MUST state whether the value in force comes from the person's role's
+  baseline or from a choice made for the person. That difference MUST be carried by shape or fill rather than by
+  colour alone, and every cell MUST carry an accessible name that says its state in words.
+- **FR-066**: A person whose role ranks above the reader's MUST have every cell of their row shown and unavailable,
+  with the reason stated in words rather than by the absence of a control.
+- **FR-067**: Saving MUST confirm what is changing and for whom, in the reader's words, one sentence per changed cell
   and a count when several change.
 - **FR-068**: Saving with nothing changed MUST be unavailable, and MUST NOT write a history record.
 - **FR-069**: A completed save MUST be reversible, and the reversal MUST obey the same rule as the change it
   reverses.
 - **FR-070**: A reversal MUST NOT overwrite a value that has moved since, and MUST show what the value is now and ask
   before restoring.
-- **FR-071**: A reversal of a save that changed several rows MUST reverse the whole save.
+- **FR-071**: A reversal of a save that changed several cells MUST reverse the whole save.
 - **FR-072**: Every permission change MUST write one history record per changed permission, naming the acting user,
   the permission, the scope it was written for, the previous value, the new value and the time.
-- **FR-073**: The page MUST warn before it is left with unsaved changes, and MUST state how many rows are pending.
+- **FR-073**: The page MUST warn before it is left with unsaved changes, and MUST state how many changes are pending.
 - **FR-074**: The page MUST show pending changes as pending until they are saved.
 
 #### Who holds this

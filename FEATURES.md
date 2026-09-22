@@ -376,10 +376,13 @@ Everything here lives in **Settings → Administration**, and the area appears o
 - **The one-time password** — a create or a reset issues a random four-digit password and shows it once, in a
   window that must be closed deliberately and can be printed. It stops working after five wrong tries, the count
   survives closing the application, and a fresh reset is the way back.
-- **Permissions** — one person at a time: every feature as a row, each saying what it is, what it gates, the value
-  in force, and whether that value came from the person's role or from a choice made for them. Saving is confirmed
-  before it is written and can be undone afterwards. The permission that opens the page is shown locked, and a
-  person whose role is above yours is shown with their rows unavailable and the reason in words.
+- **Permissions** — one card per area of the permission set, that area's permissions across the top under their
+  plain-language labels with what each one gates, and the people down the side. A cell says whether the person
+  holds that permission because it was chosen for them, because their role's baseline gives it, or not at all: the
+  two "yes" states are drawn as different shapes so they can be told apart without colour, and each cell says its
+  state in words for a screen reader. Saving is confirmed, names the person, and can be undone afterwards. The
+  permission that opens the page is shown locked, and a person whose role is above yours has every cell of their
+  row shown unavailable with the reason in words.
 - **Who holds this** — on the same page: which roles' baselines give a chosen feature, and then only the people
   who differ from their own role.
 - **One named permission per gated action.** A person starts from their role's baseline, and a change made for

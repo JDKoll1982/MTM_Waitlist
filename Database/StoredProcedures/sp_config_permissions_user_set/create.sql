@@ -60,6 +60,12 @@
 -- One history row per changed key carries the actor, the key, the scope, both values and the time (FR-072). A
 -- removal records the value it removed as `previous_setting_value_bool` and writes NULL as the changed value,
 -- which is what "this person no longer has a choice here" looks like in a value column.
+--
+-- THE VALUE ROW'S ID IS READ, NEVER TAKEN FROM LAST_INSERT_ID(). The upsert takes the UPDATE branch whenever the
+-- person already has a row of their own, and an upsert that updated generates no id: LAST_INSERT_ID() then answers
+-- with whatever the last insert on the connection generated, which on a pooled connection is another table's id
+-- entirely. That is not a precaution — it named a config_settings_history row as a value row and the foreign key
+-- refused the reversal, which is how it was found by running a save and its reversal against the live store.
 -- ============================================================
 
 USE mtm_waitlist;
@@ -219,16 +225,21 @@ BEGIN
                     updated_by_user_id = VALUES(updated_by_user_id),
                     updated_utc = VALUES(updated_utc);
 
-                SET v_setting_id = LAST_INSERT_ID();
+                -- The row's id is READ rather than taken from LAST_INSERT_ID(). An upsert that took the UPDATE
+                -- branch generates no id at all, and LAST_INSERT_ID() then answers with whatever the last insert
+                -- on this connection generated — on a pooled connection that is some other table's id entirely.
+                -- It named a config_settings_history row as a value row and the foreign key refused the history
+                -- write, which is how this was found by running it. The read is unconditional, because a
+                -- non-zero answer is exactly as possible as a zero one and the guard below could not tell them
+                -- apart.
+                SET v_setting_id = NULL;
 
-                IF IFNULL(v_setting_id, 0) = 0 THEN
-                    SELECT v.id
-                    INTO v_setting_id
-                    FROM config_settings_values v
-                    WHERE v.setting_key = v_key
-                      AND v.scope_key = v_scope_key
-                    LIMIT 1;
-                END IF;
+                SELECT v.id
+                INTO v_setting_id
+                FROM config_settings_values v
+                WHERE v.setting_key = v_key
+                  AND v.scope_key = v_scope_key
+                LIMIT 1;
             ELSE
                 -- The value is already what was asked for, so nothing changed and no history row is written.
                 SET v_skip = 1;

@@ -73,24 +73,34 @@ cancelled. After it closes, the PIN is not held anywhere, and a second reset rep
 
 ## The permissions page
 
-One person at a time: a column of people and the chosen person's features as a list, never a grid of roles against
-features. It is not a second place where a role's baseline can be edited, and nothing on it changes a baseline.
-Each row states what the feature is, what it gates, the value in force, and whether that value came from the
-person's role baseline or from a choice made for them.
+One card per area of the declaration, in the declaration's order, and exactly five because the declaration names
+five. Each card's heading row carries the area's name at the left and that area's permissions across the top, each
+with its plain-language label and the sentence saying what it gates; the people are the rows, ordered by rung and
+then by name, and a cell is one person against one permission. It is never a grid of roles against permissions, it
+is not a second place where a role's baseline can be edited, and nothing on it changes a baseline.
 
-| The row's state | What the row shows |
+The cells are three states rather than two, because a person with no row of their own inherits their role's
+baseline and the screen has to say so. The difference is carried by shape, never by colour alone, and every cell
+carries an accessible name that says its state in words.
+
+| The cell's state | What the cell shows |
 | --- | --- |
-| Inherited from the role baseline | The value, marked as the role's baseline. |
-| Chosen for the person | The value, marked as a choice made for the person. |
-| A person who outranks the reader | The row is present, unavailable, with the reason in words, and nothing about the person can be changed. |
+| On, chosen for this person | A filled square with a check. |
+| On, from the role's baseline | An outlined circle with a check. |
+| Off | An empty square. |
+| A person who outranks the reader | Every cell of the row is present and unavailable, the row carries the reason in words, and nothing about the person can be changed. |
 | `permission.admin.permissions` | Present, locked, with the reason, and clearable by nobody. |
-| Changed but not saved | Marked as pending until it is saved. |
+| Changed but not saved | A mark beside the cell, a count on the row, and the row listed in the unsaved block. |
 
-Saving with nothing changed is unavailable and writes no history row. A save confirms what is changing and for whom
-in the reader's words, one sentence per changed row and a count when several change. A completed save can be
-undone, and the undo reverses the whole save rather than half of it. Where the value has moved since, the page says
-so, shows what it is now, and asks before restoring. Leaving with unsaved changes warns and says how many rows are
-pending.
+A card too wide for the window scrolls sideways rather than dropping a column, and no control carries a fixed
+width: the column floor is declared once so the heading row and the rows beneath it line up.
+
+Saving with nothing changed is unavailable and writes no history row. A save is written for one person, because
+the change-set procedure takes one person and a whole set: the page lists the people with unsaved changes, and each
+one is saved on its own, confirmed in the reader's words with one sentence per changed cell and a count when
+several change. A completed save can be undone, and the undo reverses the whole save rather than half of it. Where
+the value has moved since, the page says which permission moved, shows what it is now, and asks before restoring.
+Leaving with unsaved changes warns and says how many changes are pending.
 
 The second view on the same page answers who holds a feature: the roles whose baselines give it, taken from the
 seeded baselines that the declaration's two-direction check ties to it rather than restated beside the view, and
