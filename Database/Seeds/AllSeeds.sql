@@ -1650,7 +1650,7 @@ SET u.username_normalized = UPPER(u.username_normalized),
 
 -- Seed: seed_waitlist_request_item_configs
 -- Engine: MySQL 5.7
--- Purpose: Populate waitlist_request_item_configs with one row for every one of the twenty-three catalogued
+-- Purpose: Populate waitlist_request_item_configs with one row for every one of the twenty-four catalogued
 --          Items, so a missing configuration row is the exception rather than the normal case and FR-014's
 --          "every Item has a configuration row" is true of the shipped data.
 -- Design-time sources (FR-027): the per-Item field definitions and the retiring type/subtype catalog, whose
@@ -1668,6 +1668,9 @@ SET u.username_normalized = UPPER(u.username_normalized),
 --     real data rather than a hypothetical one.
 --   * pickup-component's options are the requesting job's component list, so its options_json is NULL: the
 --     enumerated values arrive with the job snapshot rather than from configuration.
+--   * deliver-component is pickup-component's Deliver counterpart (added 2026-09-22, so a job with a component
+--     is offered a Deliver component wherever Pickup offers one). It names the `component` job list explicitly,
+--     which resolves to the same job list pickup-component reaches by fallback, so the two rows cannot drift.
 --   * pickup-die and deliver-die ask *which* die the request is for, so they too carry no options_json: the
 --     choices are the dies the requesting job records, and the `list` key on the answer field names that job
 --     list so the choice never depends on the Item's identity (FR-054, D22). The retired Take To question is
@@ -1792,7 +1795,7 @@ VALUES
    JSON_OBJECT('label','Pickup work center','value_type','string','source','fixed','order',1,'is_required',FALSE)),
  20, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
--- ------------------------------------------------------------------ Deliver (8)
+-- ------------------------------------------------------------------ Deliver (9)
 ('c1000000-0000-4000-8000-000000000012', 'deliver-coil', 'Deliver', 'direct-to-confirmation', 0, NULL, NULL,
  0, 200, NULL,
  JSON_ARRAY(
@@ -1822,6 +1825,16 @@ VALUES
    JSON_OBJECT('label','Quantity','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Work center','value_type','string','source','fixed','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Destination','value_type','string','source','fixed','order',4,'is_required',FALSE)),
+ 30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+
+('c1000000-0000-4000-8000-000000000024', 'deliver-component', 'Deliver', 'collect-input-then-confirm', 1, 'enum',
+ 'Choose the component to bring.', 0, 200,
+ NULL,
+ JSON_ARRAY(
+   JSON_OBJECT('label','Component','value_type','enum','source','answer','list','component','order',1,'is_required',TRUE),
+   JSON_OBJECT('label','Part description','value_type','string','source','job','order',2,'is_required',FALSE),
+   JSON_OBJECT('label','Quantity','value_type','string','source','job','order',3,'is_required',FALSE),
+   JSON_OBJECT('label','Requesting work center','value_type','string','source','fixed','order',4,'is_required',FALSE)),
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000016', 'deliver-die', 'Deliver', 'collect-input-then-confirm', 1, 'enum',

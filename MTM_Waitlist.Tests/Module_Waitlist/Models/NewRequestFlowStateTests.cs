@@ -171,13 +171,22 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsDetails_WhenTheAnswerNamesTheComponentList()
+    public void GetNextStepType_ReturnsTheComponentStep_WhenTheAnswerNamesTheComponentList()
     {
-        // The same mechanism read the other way: naming the component list keeps the ordinary details step, so two
-        // Items cannot be told apart by anything but their rows (FR-013).
+        // The component list has a step of its own: the operator clicks a box for each component the job carries
+        // instead of picking a part number out of a drop-down list on the details step. Which step asks is still
+        // the ROW's declaration, never the Item's code (FR-013).
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Component));
 
-        Assert.AreEqual(typeof(NewRequestDetailsViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(typeof(NewRequestComponentViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    [TestMethod]
+    public void GetNextStepType_ReturnsPreview_OnceTheComponentAnswerIsCaptured()
+    {
+        var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Component), inputValue: "V-EMB-2");
+
+        Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
 
     [TestMethod]

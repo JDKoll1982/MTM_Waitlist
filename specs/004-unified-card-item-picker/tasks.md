@@ -2524,6 +2524,121 @@ labelled as owed.
 
 ---
 
+## Phase 15: Sixth Follow-Up Batch — The Deliver Family Offers the Component Choice
+
+**Why.** A job that carries a component was offered the Pickup component choice and **no Deliver counterpart**, so
+an operator who needed a component brought to the press had no Item for it and fell back to Other. The owner's
+request (2026-09-22): *the Deliver options should mirror the Pickup options.* The addition moves the catalog to
+**twenty-four codes, twenty in scope** — recorded in `spec.md`'s post-delivery amendment and in the `data-model.md`
+codes and counts, with the two normative contract tables updated in the same change. Walking the new card then found
+its second line reading the Item's own name, which is the second task below and the larger of the two.
+
+- [x] **T236** **Add `deliver-component`, the Deliver counterpart of `pickup-component`.** One catalog row gated on
+  `HasComponent`; one configuration row that asks **which** component and draws its choices from the job's own
+  component list (the `component` job list, named explicitly — the list `pickup-component` reaches by fallback);
+  one display-name resource entry; and every count that pinned 23 rows / Deliver 8 moved to 24 / Deliver 9, the
+  in-scope population moving from nineteen to twenty with them. · `MTM_Waitlist.Settings/Models/RequestItemCatalog.cs`,
+  `MTM_Waitlist.Settings/Services/RequestItemPickerRules.cs`,
+  `Database/Seeds/seed_waitlist_request_item_configs/create.sql`, `Database/Seeds/AllSeeds.sql`,
+  `Database/Tables/31_waitlist_request_item_configs/create.sql`, `Database/Tables/AllTables.sql`,
+  `Strings/en-us/Resources.resw`, `MTM_Waitlist.Tests/Module_Settings/{RequestItemCatalogTests.cs,RequestItemCatalogServiceTests.cs,Services/RequestItemPickerRulesTests.cs}`,
+  `specs/004-unified-card-item-picker/{spec.md,data-model.md,contracts/request-picker-flow.md,contracts/card-and-identifier.md,contracts/item-configuration.md}`,
+  `WeekendProject/Documents/Request-Config-Template.csv`
+  **Done 2026-09-22 — the picker rule is the part that had to be remembered, not the catalog row.** A catalogued Item
+  with no `RequiredJobPart` arm falls through to `RequestJobPartKind.None`, which `IsVisible` reads as *always
+  offered*: the row **alone** would have put a Deliver Component on every job, including a job with no components at
+  all. `RequiredJobPart` now maps both component Items to `RequestJobPartKind.Component`, and
+  `DeliverComponent_IsGatedOnAJobComponent_LikeItsPickupTwin` asserts the two are gated alike, so the pairing cannot
+  rot. The visible-set matrix gains the Item in exactly the two configurations that carry a component (`100-18` and
+  `V100-33`) and in no other, and the Item's own row is pinned by
+  `Catalog_DeliverComponent_MirrorsThePickupComponentChoice`. **Evidence (run 2026-09-22 on this workstation):**
+  `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` → *Build succeeded*, no warnings and
+  no errors; the full suite → **1290 passed, 0 failed**. The design-time spreadsheet still parses to
+  **24 rows, Pickup 11 / Deliver 9 / Assist 3 / Other 1**. **Not verified, and stated as such:** no live
+  `mtm_waitlist` was reinstalled, so the new seed row has not been loaded by a real store, and the running app was not
+  driven — the new Item has not been seen on screen. Those are the owner's steps, and they are what T189–T228's
+  live-database and UI gates already cover.
+
+- [x] **T237** **Make a card's second line name the part involved rather than the kind of request it is** (FR-005;
+  found from the owner's screenshot of the new card, which read `Deliver` / `Component` where it should read
+  `Deliver` / `V-EMB-2`). The identifier templates name `{part_number}`, `{scrap_type}` and `{component}`, and **no
+  source supplied any of the three**, so the resolver's configured fallback — show the Item's own display name and
+  report the configuration problem — is what every affected card did: a coil request read `Coil`, a work-in-process
+  request read `Work In Process (WIP)`, the component request read `Component`. Three sources were added:
+  `{component}` from the request's captured answer (the component the operator chose, exactly as `{dunnage_part}`
+  already worked); `{part_number}` from the job — the material the job holds for an Item that is *about* one, and the
+  job's own part number otherwise, keyed on `RequestItemPickerRules.RequiredJobPart` so the picker and the card use
+  one rule for what an Item is about; and `{scrap_type}` from the job's real scrap decision. The job's coil number,
+  its flatstock number and its scrap type now travel on `RequestJobPartAvailability`
+  (`CoilPartNumber`, `FlatstockPartNumber`, `ScrapType`), mapped at the composition root. ·
+  `MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs`, `Services/RequestJobAvailabilityProvider.cs`,
+  `MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs`,
+  `MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs`,
+  `specs/004-unified-card-item-picker/contracts/card-and-identifier.md`
+  **Evidence (run 2026-09-22 on this workstation):** the solution builds with no warnings and no errors; the full
+  suite → **1382 passed, 0 failed, 48 skipped (1430 total)**; and the four new cases —
+  `ResolveLine2_ComponentRequests_ShowThePartTheOperatorChose`,
+  `ResolveLine2_MaterialRequests_NameThePartTheJobCarries`,
+  `ResolveLine2_MergedPickupCoil_NamesTheMaterialTheJobActuallyHolds` and
+  `ResolveLine2_ScrapRequest_ShowsTheTypeTheJobAlreadyDecided` — pass. **Not verified, and stated as such:** no card
+  has been seen on screen; the walk needs the reinstall below. **Left deliberately, and named here so it is not
+  mistaken for done:** the request page's own declared *job* rows (its `Coil number` and `Scrap type` labels) still
+  resolve to nothing, so those rows are omitted rather than drawn wrong — `RequestJobFieldValues` is unchanged, and
+  the page and the card agree about every value they both show.
+
+**Checkpoint — the two component choices behave as one, and a card's second line names a part.** The Deliver family
+offers everything the Pickup family offers wherever the job supports it, the counts in the code, the seeds, the
+resources, the tests and the spec of record all say twenty-four, every card whose identifier is a part reads that
+part instead of the kind of request it is, and the only things left are the reinstall and the walk below.
+
+---
+
+## Phase 16: Seventh Follow-Up Batch — The Component Choice Is Clicked, Not Listed
+
+**Why.** The component answer was the only one still drawn as a drop-down on the Details step: a list of part
+numbers with no part beside it. The owner's request (2026-09-22): *show clickable boxes for each component the job
+carries instead of the dropdown, and add a temporary image placeholder — images are coming for all Visual and WIP
+part numbers.* The answer is a part the operator recognises by sight, so it belongs on a step that shows parts, which
+is what the dunnage step already does for dunnage.
+
+- [x] **T238** **Give the component answer its own step: `NewRequestComponentViewModel` + `NewRequestComponentPage`,
+  one clickable box per component the job carries, each with a named picture placeholder.** Reached because the
+  chosen Item's row declares an enumerated answer naming the job's `component` list — read through
+  `RequestItemAnswerOptionsResolver.DeclaredJobListName` — and never because of the Item's identity, so both component
+  rows (`pickup-component`, `deliver-component`) are served by one step and a row added later needs no build
+  (FR-013). One component is one answer, so a click records it and moves on — the dunnage step's behaviour, not the
+  die step's. The question is the **row's own prompt**, because the two rows ask it differently (one collects, one
+  brings) and the dunnage/die steps' shared wording would flatten that (FR-013, FR-022). Each box carries the part
+  number, an `AutomationProperties.AutomationId` named after the part, and a picture box that draws
+  `ImagePicturePolicy.NoImagePath` — the application's shared no-image placeholder — with its own per-part automation
+  name, so the stand-in is findable and provable until Visual and WIP part numbers can be resolved to pictures. The
+  Details step keeps its own enumerated-answer control as the landing place for a row naming no job list of its own,
+  so no configuration is orphaned (FR-015). · `MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestComponentOption.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestComponentViewModel.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowRules.cs`, `Module_Waitlist/Views/NewRequestComponentPage.xaml`,
+  `Module_Waitlist/Views/NewRequestComponentPage.xaml.cs`, `Services/DependencyInjection/ServiceRegistrationExtensions.cs`,
+  `Strings/en-us/Resources.resw`, `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestComponentViewModelTests.cs`,
+  `MTM_Waitlist.Tests/Module_Waitlist/Models/NewRequestFlowStateTests.cs`,
+  `specs/004-unified-card-item-picker/contracts/{request-picker-flow.md,item-configuration.md}`
+  **Done 2026-09-22. Evidence:** the solution builds with **no errors and no warnings**;
+  `GetNextStepType_ReturnsTheDetailsStep_WhenTheAnswerNamesTheComponentList` was **replaced** by
+  `…ReturnsTheComponentStep…` plus a new captured-answer case, and the eight new
+  `NewRequestComponentViewModelTests` cases cover the boxes the job carries, the placeholder and its automation names,
+  the row's own prompt, the resource fallback, the click-and-move-on capture, the remembered choice, the empty job and
+  the missing state — **25 targeted tests pass and the full suite reports 0 failures**. **Open, and stated as such:**
+  the naming validator flags the three new `NewRequest_Component.*` resource keys, because its rule allows exactly one
+  dot in a key and this file's `x:Uid` convention needs `…Title.Text`; **200 keys in `Resources.resw` are flagged the
+  same way, including the sibling `NewRequest_Die.*` and `NewRequest_Dunnage.*` keys these three mirror**, so this is
+  the file's grandfathered debt (D-4) rather than a new divergence — renaming them would make this step's resources
+  the only ones spelled differently. Every C#, XAML and test file this task touched validates clean. **Also open:** no
+  on-screen walk — the app was stopped to release its build output, and the boxes have not been seen running.
+
+**Checkpoint — the component answer is a part a person can see.** Both component rows ask their own question on a step
+of boxes, every box is findable by name, the picture on every box is the shared placeholder waiting to be replaced by
+a real part picture, and the only steps left are the relaunch and the walk.
+
+---
+
 ## Dependencies & Execution Order
 
 **Phase dependencies.**
@@ -2621,6 +2736,21 @@ situations re-pointed (T125) → the fixtures retired (T126) → `pickup-compone
   a chosen die, and T181–T183 cannot be written until it is answered. Phase 13's first two waves came from the same
   audit Phase 12's closing note asked for, and they found what it predicted — a job offering a die it does not have,
   and a request page that never received the job its rows resolve against.
+
+- **Phase 15 Deliver Component** — two tasks. T236 has no wave order to respect: the catalog row, the picker rule
+  arm, the seed row, the resource entry and the counts all move in one pass. T237 then answers what the walk of the
+  new card found, and its own order is the point: the three identifier sources had to exist before the card could
+  name a part, and the `{part_number}` source is keyed on `RequiredJobPart` — the rule the picker already uses — so
+  the two surfaces cannot drift into disagreeing about what an Item is about. The trap worth naming is that the rule
+  arm of T236 is the only member whose omission is **silent** — a catalogued Item with no `RequiredJobPart` arm is
+  *always* offered rather than never, so the row alone would have gone out looking correct and put a Deliver
+  Component on every job on the floor.
+
+- **Phase 16 Component Step** — one task (T238), and its order is only inside itself: the step view model, its page
+  and its registration have to exist before the flow rule can name them, or `GetNextStepType` routes to a type that
+  is not a page. The trap worth naming is the reverse of Phase 15's: there, a missing rule arm made an Item *always*
+  offered; here, adding the rule arm **before** the step exists makes the wizard navigate to a page key with no
+  registration, which is a runtime blank rather than a build error.
 
 **Parallel opportunities.** Every wave of `[P]` tasks may be built concurrently — different files, no unfinished
 dependency between them. The largest are Phase 2 W1 (six new stored artifacts), Phase 2 W5 (seven model files) and

@@ -16,7 +16,7 @@
 --        table's one writer (sp_waitlist_request_item_allotted_minutes_update) records it. It is deliberately
 --        NOT part of the read contract: sp_waitlist_request_item_configs_get returns the configuration the
 --        application consumes, and who last changed a figure is not part of that.
--- Rows are seeded by Database/Seeds/seed_waitlist_request_item_configs (23 rows: one per catalogued Item).
+-- Rows are seeded by Database/Seeds/seed_waitlist_request_item_configs (24 rows: one per catalogued Item).
 
 USE mtm_waitlist;
 

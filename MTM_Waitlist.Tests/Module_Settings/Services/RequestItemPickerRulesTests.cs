@@ -13,7 +13,7 @@ public sealed class RequestItemPickerRulesTests
     public void EveryDeliverItem_IsDeliverDestinationWorkCenter()
     {
         var deliver = RequestItemCatalog.GetByCategory(RequestCategory.Deliver);
-        Assert.AreEqual(8, deliver.Count);
+        Assert.AreEqual(9, deliver.Count);
         foreach (var item in deliver)
         {
             Assert.IsTrue(RequestItemPickerRules.IsDeliverDestinationWorkCenter(item), item.Id);
@@ -112,7 +112,7 @@ public sealed class RequestItemPickerRulesTests
         string[] outOfScope = ["pickup-fg", "pickup-ncm", "pickup-wip", "pickup-outside-service"];
 
         // Present in the catalog: a hidden Item and a missing row are different states (FR-028).
-        Assert.AreEqual(23, RequestItemCatalog.TotalCount);
+        Assert.AreEqual(24, RequestItemCatalog.TotalCount);
         foreach (var id in outOfScope)
         {
             Assert.IsNotNull(RequestItemCatalog.FindById(id), id);
@@ -186,7 +186,7 @@ public sealed class RequestItemPickerRulesTests
             WithScrap(ScrapDecisionRules.NoScrap) with { HasCoil = false, HasFlatstock = false, HasDie = false, HasComponent = true, HasDunnage = false },
             [
                 .. jobIndependent,
-                "pickup-component",
+                "pickup-component", "deliver-component",
                 "assist-table-place", "assist-table-remove"
             ]);
 
@@ -205,7 +205,7 @@ public sealed class RequestItemPickerRulesTests
             [
                 .. jobIndependent,
                 "pickup-coil", "pickup-die", "pickup-component", "pickup-dunnage", "pickup-scrap",
-                "deliver-coil", "deliver-flatstock", "deliver-die", "deliver-dunnage",
+                "deliver-coil", "deliver-flatstock", "deliver-component", "deliver-die", "deliver-dunnage",
                 "deliver-wrong-coil", "deliver-wrong-flatstock",
                 "assist-coil-turn", "assist-table-place", "assist-table-remove"
             ]);
@@ -239,9 +239,28 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
+    public void DeliverComponent_IsGatedOnAJobComponent_LikeItsPickupTwin()
+    {
+        // Added 2026-09-22 with the Deliver counterpart: the choice is asked for on the same jobs as the Pickup
+        // choice, so a job with no component is never offered either of them.
+        var deliver = RequestItemCatalog.FindById("deliver-component")!;
+        var pickup = RequestItemCatalog.FindById("pickup-component")!;
+
+        Assert.AreEqual(
+            RequestItemPickerRules.RequiredJobPart(pickup),
+            RequestItemPickerRules.RequiredJobPart(deliver),
+            "The two component Items must be gated on the same job part.");
+        Assert.IsFalse(RequestItemPickerRules.IsOutOfScope(deliver));
+
+        var noComponent = RequestJobPartAvailability.All with { HasComponent = false };
+        Assert.IsFalse(RequestItemPickerRules.IsVisible(deliver, noComponent));
+        Assert.IsTrue(RequestItemPickerRules.IsVisible(deliver, RequestJobPartAvailability.All));
+    }
+
+    [TestMethod]
     public void DeadPickupFlatstockArm_IsGone()
     {
-        // 'pickup-flatstock' is not one of the twenty-three pinned codes and is not in the catalog, so the
+        // 'pickup-flatstock' is not one of the twenty-four pinned codes and is not in the catalog, so the
         // rule that advertised it must not come back.
         Assert.IsNull(RequestItemCatalog.FindById("pickup-flatstock"));
         Assert.AreNotEqual(
@@ -308,7 +327,7 @@ public sealed class RequestItemPickerRulesTests
     [TestMethod]
     public void EveryCatalogItem_HasARuleWithoutThrowing()
     {
-        // Regression guard: the RequiredJobPart/IsVisible rules must handle all 23 canonical rows.
+        // Regression guard: the RequiredJobPart/IsVisible rules must handle all 24 canonical rows.
         foreach (var item in RequestItemCatalog.Items)
         {
             _ = RequestItemPickerRules.RequiredJobPart(item);

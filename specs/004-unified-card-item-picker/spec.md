@@ -19,10 +19,19 @@ requirements begin at **FR-033** and are **appended**: no existing requirement i
 the five user stories stand as they are, and a sixth is added. Reopening the specification's status is the owner's
 action, not this batch's, so the header is left as written.
 
+**Post-delivery amendment (2026-09-22).** One Item was **added** to the catalog: `deliver-component`, in the
+Deliver family, mirroring `pickup-component` — the same gate (the job must carry a component), the same enumerated
+answer drawn from the job's own component list, the same identifier on card Line 2. The catalog is therefore
+**twenty-four codes, twenty in scope** (Pickup 11 / Deliver 9 / Assist 3 / Other 1), and the follow-up batch's
+request population is **twenty**, one per in-scope Item. Nothing existing was renamed, renumbered or withdrawn; the
+counts in the requirements and success criteria below were updated in place, and the Deliver spelling of the new
+code is pinned in Verbatim Constraints. The reasoning that the catalog was closed at twenty-three is in
+`research.md`; the owner has overridden it, and that record is left standing as the history it is.
+
 ## User Scenarios & Testing
 
 Today a request is described by two words — a **request type** and a **subtype** — and the list draws a different
-card for each of them. This feature replaces that with **a Category and an Item**: four Categories, twenty-three
+card for each of them. This feature replaces that with **a Category and an Item**: four Categories, twenty-four
 Items, and one card that looks the same whatever the request is. The people who raise requests pick the two
 things they actually mean; the people who work the list read one layout instead of fifteen.
 
@@ -108,7 +117,7 @@ How far the flow goes before confirmation, whether an answer is required, what t
 answer may be, which options are offered and which fields the page shows — all of that belongs to the **Item**,
 and can be changed afterwards without changing the program.
 
-**Why this priority**: it is what makes the twenty-three Items maintainable instead of twenty-three special
+**Why this priority**: it is what makes the twenty-four Items maintainable instead of twenty-four special
 cases. It is P2 rather than P1 because the first cut of the values ships with the feature.
 
 **Independent Test**: change an Item's configuration in the database — add a field, change a limit, add an
@@ -278,17 +287,17 @@ the umbrella phrase rather than reporting a fault; the identifier is where a fau
 - **FR-034**: Choosing Sign out MUST restart the application and return it to the sign-in screen, bypassing the
   signed-in user's "Remember Me" so the previous session is **not** restored. Clearing the displayed name while the
   session persists MUST NOT be presented as signing out.
-- **FR-035**: Every one of the nineteen in-scope Items MUST be raisable. An Item that declares it needs an answer of
+- **FR-035**: Every one of the twenty in-scope Items MUST be raisable. An Item that declares it needs an answer of
   a kind chosen from a list MUST offer the list of choices that answer needs, so its details step can be completed —
   `pickup-component` declares exactly that answer and is configured with no list today, and is therefore not
   raisable.
-- **FR-036**: Nineteen requests MUST be raised, one for each in-scope Item, and each MUST be attributed to a person
+- **FR-036**: Twenty requests MUST be raised, one for each in-scope Item, and each MUST be attributed to a person
   who already exists in the application. **No new account may be created.** The requester's name MUST appear on the
   request's card as "Requested by".
-- **FR-037**: The nineteen MUST be raised by the ten people who already exist and spread across them, weighted
+- **FR-037**: The twenty MUST be raised by the ten people who already exist and spread across them, weighted
   towards ordinary floor people with a couple of leads, and **every one of the application's eight roles MUST have
   raised at least one**, so each kind of login opens onto a populated list.
-- **FR-038**: The nineteen MUST come from **more** work centres than the seven that carry the prepared job
+- **FR-038**: The twenty MUST come from **more** work centres than the seven that carry the prepared job
   situations, and where an Item needs material on the job, its request MUST come from a work centre whose job
   actually carries that material — the availability rule continues to govern which Items are offered where.
 - **FR-039**: The seven fixture work centres added only to carry the prepared job situations (`900-1` … `900-7`)
@@ -306,7 +315,7 @@ the umbrella phrase rather than reporting a fault; the identifier is where a fau
 - **FR-044**: An overdue request MUST be produced only by a deadline the application itself derived — a deliberately
   short time allowance that genuinely runs out. A raised time, or any other value the application did not produce,
   MUST NOT be used to make a request appear overdue.
-- **FR-045**: The nineteen requests and the ten accounts MUST remain in place after the batch, so the owner can
+- **FR-045**: The twenty requests and the ten accounts MUST remain in place after the batch, so the owner can
   browse them.
 - **FR-046**: A request MUST be attributed to the person who raised it. The signed-in person's own employee
   identifier MUST be resolved against the application's own account records, and the request MUST carry that
@@ -373,7 +382,7 @@ The rationale, the alternatives and the propagation list are in `research.md` D2
 
 - **Category** — one of four kinds of request: Pickup, Deliver, Assist, Other. It carries the umbrella word the
   card's first line shows and the image family a card falls back to.
-- **Item** — one of twenty-three specific things a request can be, belonging to exactly one Category, with a
+- **Item** — one of twenty-four specific things a request can be, belonging to exactly one Category, with a
   position in that Category's order, a display name, an identifier for the card's second line — a fixed value, a
   value read from the job, or one that depends on an answer the flow captured — and whether it needs anything
   from the person raising it.
@@ -396,7 +405,7 @@ The rationale, the alternatives and the propagation list are in `research.md` D2
 - **SC-001**: A person can raise a request by choosing a Category and an Item, in one pass, without ever being
   asked for a type or a subtype.
 - **SC-002**: Zero screens, controls or stored fields refer to a request type or a subtype.
-- **SC-003**: Every request reachable in the list renders the same card shape — verified across all nineteen
+- **SC-003**: Every request reachable in the list renders the same card shape — verified across all twenty
   Items in scope, not a sample.
 - **SC-004**: Zero Items are offered that the job does not support, and zero supported Items are withheld —
   proven for each of the eight job configurations, not by inspection.
@@ -416,8 +425,8 @@ The rationale, the alternatives and the propagation list are in `research.md` D2
 - **SC-013**: Sign out from the user badge returns the application to the sign-in screen on a computer where
   "Remember Me" is set and the previous session had been restored — proven by the restart, not by the displayed name
   alone.
-- **SC-014**: All nineteen in-scope Items have been raised once, with zero Items left unraisable.
-- **SC-015**: Zero new accounts were created; the nineteen requests are attributed to the ten people who already
+- **SC-014**: All twenty in-scope Items have been raised once, with zero Items left unraisable.
+- **SC-015**: Zero new accounts were created; the twenty requests are attributed to the ten people who already
   exist, and every one of the eight roles has raised at least one.
 - **SC-016**: Zero fixture work centres remain; the seven prepared job situations are carried by five Expo Drive and
   two Vits Drive work centres, and the no-active-job case is still an absent job.
@@ -427,7 +436,7 @@ The rationale, the alternatives and the propagation list are in `research.md` D2
 - **SC-018**: Zero overdue requests were produced by a time the application did not itself derive; the overdue case
   is a real expiry.
 - **SC-019**: Two copies of the application acting on one request produce exactly one outcome.
-- **SC-020**: The nineteen requests and the ten accounts are still present and browsable after the batch.
+- **SC-020**: The twenty requests and the ten accounts are still present and browsable after the batch.
 - **SC-021**: Zero requests name an identity other than the person who raised them — each request's requester is
   resolved from that person's own stored employee record, never from a stand-in — and a claimed request can be
   returned to the queue from its own card.
@@ -450,7 +459,7 @@ The rationale, the alternatives and the propagation list are in `research.md` D2
   shape and the local database is reinstalled before the first screen test. There is therefore no historical
   data to carry, and no back-fill, derivation or migration procedure is specified. The reinstall is the owner's
   action, never the agent's.
-- **The list of Items lives in code; the behaviour of each Item lives in the store.** The twenty-three Items,
+- **The list of Items lives in code; the behaviour of each Item lives in the store.** The twenty-four Items,
   their Categories, order and display text are asserted by tests as they are today. Their configuration is data
   so that it can change without a build.
 - **The spreadsheet is a design document, not a shipped input.** Its field definitions are used once, when the
@@ -481,7 +490,7 @@ The rationale, the alternatives and the propagation list are in `research.md` D2
   second vocabulary.** The feature shipped at `status: completed`; the work recorded here — sign out, the request
   population, the fixture work centres' removal and the handling outcomes — is new work against the same
   specification. Reopening the specification's status is the owner's action.
-- **The nineteen requests are raised by people, through the application, and are not seeded rows.** The application
+- **The twenty requests are raised by people, through the application, and are not seeded rows.** The application
   must produce the lifecycle times, and the overdue case must be a real expiry, so a hand-written row cannot stand
   in for a raised request.
 - **The requests raised for this batch are not a fixture to be retired.** They and the ten accounts stay in place
@@ -498,12 +507,12 @@ or pluralized.
 
 **The four Categories**: `Pickup`, `Deliver`, `Assist`, `Other`.
 
-**The twenty-three Item codes**, exactly as the canonical catalog spells them:
+**The twenty-four Item codes**, exactly as the canonical catalog spells them:
 
 - Pickup — `pickup-coil`, `pickup-die`, `pickup-component`, `pickup-fg`, `pickup-ncm`, `pickup-wip`,
   `pickup-outside-service`, `pickup-riser-table`, `pickup-dunnage`, `pickup-scrap`, `pickup-hopper`
-- Deliver — `deliver-coil`, `deliver-riser-table`, `deliver-hopper`, `deliver-flatstock`, `deliver-die`,
-  `deliver-dunnage`, `deliver-wrong-coil`, `deliver-wrong-flatstock`
+- Deliver — `deliver-coil`, `deliver-riser-table`, `deliver-hopper`, `deliver-flatstock`, `deliver-component`,
+  `deliver-die`, `deliver-dunnage`, `deliver-wrong-coil`, `deliver-wrong-flatstock`
 - Assist — `assist-coil-turn`, `assist-table-place`, `assist-table-remove`
 - Other — `other`
 

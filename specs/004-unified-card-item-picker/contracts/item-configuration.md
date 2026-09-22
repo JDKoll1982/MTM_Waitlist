@@ -87,7 +87,7 @@ template (card Line 2).
 **From the visibility rules:** whether the Item is offered at all for the requesting job (FR-002).
 
 **Verbatim values.** `control_flow` is `direct-to-confirmation` or `collect-input-then-confirm`. `answer_value_type`
-is `enum` or `text`. `category` is one of `Pickup`, `Deliver`, `Assist`, `Other`. `item` is one of the twenty-three
+is `enum` or `text`. `category` is one of `Pickup`, `Deliver`, `Assist`, `Other`. `item` is one of the twenty-four
 Item codes.
 
 **The `list` key — where an enumerated answer's choices come from (FR-035, FR-050).** A field inside
@@ -96,7 +96,7 @@ Item codes.
 
 | `list` value | the choices are |
 |---|---|
-| `component` | the requesting job's component part numbers |
+| `component` | the requesting job's component part numbers, offered as one **clickable box** per component on the component step (2026-09-22) |
 | `dunnage` | the dunnage parts assigned to the requesting job |
 | `die` | the dies assigned to the requesting job, each offered as its number and where it lives (`RequestDiePart.ComposeLabel`); more than one may be chosen and one request is raised per die (FR-054, FR-057) |
 | absent | the job's component list — the path the existing rows already rely on |

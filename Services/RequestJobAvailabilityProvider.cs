@@ -76,6 +76,13 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
             JobPartNumber = snapshot.PartNumber ?? string.Empty,
             DieNumber = dies.FirstOrDefault()?.PartNumber ?? string.Empty,
             DieLocation = dies.FirstOrDefault()?.Location ?? string.Empty,
+            // The materials the job holds travel too. An Item whose identifier names the part it is about reads
+            // the coil or flatstock the job actually carries, so the card names a real part instead of repeating
+            // the Item's own name (FR-005).
+            CoilPartNumber = snapshot.Coils.FirstOrDefault()?.PartNumber ?? string.Empty,
+            FlatstockPartNumber = snapshot.Flatstock.FirstOrDefault()?.PartNumber ?? string.Empty,
+            // The scrap type the job already decided, which is what the Scrap Item's card shows (FR-030).
+            ScrapType = RealScrapType(snapshot),
         };
     }
 
@@ -111,6 +118,16 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
     /// a job that chose <c>No Scrap</c> — or still carries the <c>Scrap Type Required</c> placeholder — is not
     /// offered the Scrap Item (FR-031).
     /// </summary>
-    private static bool HasRealScrapDecision(SetupActiveJobSnapshot snapshot) =>
-        snapshot.SubordinateParts.Any(part => ScrapDecisionRules.HasRealScrapDecision(part.SelectedScrapType));
+    private static bool HasRealScrapDecision(SetupActiveJobSnapshot snapshot) => RealScrapType(snapshot).Length > 0;
+
+    /// <summary>
+    /// The scrap type the job's first <b>real</b> scrap decision names, trimmed, or empty when no subordinate part
+    /// records one. The placeholder and <c>No Scrap</c> are not decisions, so neither is ever carried — which is
+    /// what keeps both the Scrap Item's visibility and its card reading the same rule (FR-031).
+    /// </summary>
+    private static string RealScrapType(SetupActiveJobSnapshot snapshot) =>
+        snapshot.SubordinateParts
+            .Select(part => part.SelectedScrapType)
+            .FirstOrDefault(scrapType => ScrapDecisionRules.HasRealScrapDecision(scrapType))
+            ?.Trim() ?? string.Empty;
 }

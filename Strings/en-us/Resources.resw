@@ -837,6 +837,9 @@
   <data name="RequestItem.deliver-flatstock.DisplayName" xml:space="preserve">
     <value>Flatstock</value>
   </data>
+  <data name="RequestItem.deliver-component.DisplayName" xml:space="preserve">
+    <value>Component</value>
+  </data>
   <data name="RequestItem.deliver-die.DisplayName" xml:space="preserve">
     <value>Die</value>
   </data>
@@ -917,6 +920,18 @@
   </data>
   <data name="NewRequest_Die.ContinueButton.Content" xml:space="preserve">
     <value>Continue</value>
+  </data>
+  <data name="NewRequest_Component.Title.Text" xml:space="preserve">
+    <value>New Request - Choose Component</value>
+  </data>
+  <data name="NewRequest_Component.Prompt" xml:space="preserve">
+    <value>Which component do you need?</value>
+  </data>
+  <data name="NewRequest_Component.NoComponents.Message" xml:space="preserve">
+    <value>This job has no components saved on it, so there is no component to choose. Go back and choose a different item.</value>
+  </data>
+  <data name="NewRequest_Component.BackButton.Content" xml:space="preserve">
+    <value>Back</value>
   </data>
   <data name="NewRequest_Summary.MultipleRequests" xml:space="preserve">
     <value>This will raise {0} requests — one for each die you chose.</value>
