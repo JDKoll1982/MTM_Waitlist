@@ -244,19 +244,16 @@ public partial class LoginViewModel : ObservableRecipient
         ComputerDescription = string.Empty;
         ComputerGateError = string.Empty;
 
-        // Startup already established that this account still holds its temporary default password, so open
-        // on the set-a-new-password surface: the operator must not have to sign in with that password first
-        // (Phase 32). Everything the change needs — the account id for the update, and the identity and role
-        // for the sign-in that follows — was resolved before the window was shown.
-        if (_startupState.RequirePasswordChange && _startupState.PasswordChangeUserId > 0)
+        // A pending password change does NOT open the change panel by itself. Startup learns that a change is
+        // pending from a read that carries no credential material, and knowing a change is due is not the same
+        // as being the person: opening the panel here let anyone at this workstation set the account's password
+        // without ever entering the temporary credential, which also put the attempt limit out of reach.
+        // SignInAsync opens the panel, and only once the temporary credential itself has been accepted
+        // (decision 9, decision 14, FR-029). The hint tells the person what is expected of them.
+        if (_startupState.RequirePasswordChange)
         {
-            _pendingUserIdForPasswordChange = _startupState.PasswordChangeUserId;
-            _pendingRole = _startupState.CurrentRole;
-            _pendingRoleCode = _startupState.CurrentRoleCode;
-            _pendingDisplayName = _startupState.EmployeeName;
-            _pendingEmployeeIdentifier = _startupState.EmployeeNumber;
-            ShowPasswordChangePrompt = true;
-            ShowSignInForm = false;
+            LoginHint = "Sign in with your temporary password to set a new one.";
+            _startupState.LoginHint = LoginHint;
         }
     }
 

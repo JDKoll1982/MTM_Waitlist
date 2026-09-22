@@ -299,18 +299,23 @@ public sealed class LoginViewModelTests
     }
 
     [TestMethod]
-    public void Constructor_WhenStartupRequiresAPasswordChange_OpensOnTheChangePanelWithoutTheSignInForm()
+    public void Constructor_WhenStartupRequiresAPasswordChange_StillShowsTheSignInForm()
     {
-        // Startup already established this from the store, so the operator must never see (or have to use)
-        // the sign-in form: the window opens on the set-a-new-password surface (Phase 32).
+        // A pending change is not proof of identity. Startup learns it from a read that carries no credential
+        // material, so the person must still present the temporary credential before the change panel opens;
+        // otherwise anyone at this workstation could set the password, and the attempt limit could never bite
+        // (decision 9, decision 14, FR-029).
         var startupState = SignedInState();
         startupState.RequirePasswordChange = true;
         startupState.PasswordChangeUserId = 42;
 
         var viewModel = CreateViewModel(startupState);
 
-        Assert.IsTrue(viewModel.ShowPasswordChangePrompt);
-        Assert.IsFalse(viewModel.ShowSignInForm, "The sign-in form must not appear when the password must change.");
+        Assert.IsFalse(viewModel.ShowPasswordChangePrompt, "The change panel must wait for the temporary credential.");
+        Assert.IsTrue(viewModel.ShowSignInForm, "The sign-in form is where the temporary credential is entered.");
+        Assert.IsTrue(
+            viewModel.LoginHint.Contains("temporary password", StringComparison.Ordinal),
+            "The person is told to sign in with the temporary password.");
     }
 
     [TestMethod]
@@ -323,24 +328,33 @@ public sealed class LoginViewModelTests
     }
 
     [TestMethod]
-    public async Task ChangePasswordAsync_WhenOpenedFromStartup_UpdatesTheResolvedAccountAsync()
+    public async Task ChangePasswordAsync_WhenTheTemporaryCredentialWasAccepted_UpdatesThatAccountAsync()
     {
-        var startupState = SignedInState();
-        startupState.RequirePasswordChange = true;
-        startupState.PasswordChangeUserId = 42;
-        var repository = new RecordingStartupSessionRepository();
+        // The account the change targets comes from the credential that was just accepted, never from anything
+        // startup inferred, so an update can only land on the person who proved they hold the credential.
+        var repository = new RecordingStartupSessionRepository
+        {
+            CheckCredentialsResult = StartupCredentialCheckResult.Success(42, "Developer", requiresPasswordChange: true),
+        };
         var viewModel = CreateViewModel(
-            startupState,
+            SignedInState(),
             gateService: new FakeComputerGateService { CheckResult = new ComputerGateCheck(ComputerGateStatus.Registered) },
             navigationService: new RecordingNavigationService(),
             windowService: new RecordingStartupWindowService(),
             sessionRepository: repository);
+        viewModel.Username = "johnk";
+        viewModel.Password = "4821";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.IsTrue(viewModel.ShowPasswordChangePrompt, "An accepted temporary credential opens the change panel.");
+
         viewModel.NewPassword = "pw-4321";
         viewModel.ConfirmPassword = "pw-4321";
 
         await viewModel.ChangePasswordCommand.ExecuteAsync(null);
 
-        Assert.AreEqual(42, repository.LastUpdatedUserId, "The update must target the account startup resolved.");
+        Assert.AreEqual(42, repository.LastUpdatedUserId, "The update must target the account that signed in.");
     }
 
     // ── The remaining-attempts line (FR-040, FR-041, FR-042, FR-044) ────────────────────────────────────
