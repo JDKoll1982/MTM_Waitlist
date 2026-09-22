@@ -1093,6 +1093,12 @@
   <data name="Permission_settings_computers.Gates" xml:space="preserve">
     <value>Manage the registered computers.</value>
   </data>
+  <data name="Permission_settings_storage_paths.Label" xml:space="preserve">
+    <value>Storage paths</value>
+  </data>
+  <data name="Permission_settings_storage_paths.Gates" xml:space="preserve">
+    <value>Change where the application keeps its pictures and its key files.</value>
+  </data>
   <data name="Permission_setup_dunnage_quick_add.Label" xml:space="preserve">
     <value>Quick Add dunnage</value>
   </data>

@@ -9,7 +9,7 @@ public enum ImageLocationScope
     /// <summary>
     /// Work center image representing each facility work center in selection and detail surfaces.
     /// Database value: "work_center"
-    /// Default image: Assets\Placeholders\default-workstation-image.png
+    /// Default image: Assets\Placeholders\default-no-image.png (the application's one no-image placeholder)
     /// Cascade: Work Center Override → Default (no JSON config)
     /// Inventory: Dynamic (from setup_workstations_catalog, live database)
     /// </summary>

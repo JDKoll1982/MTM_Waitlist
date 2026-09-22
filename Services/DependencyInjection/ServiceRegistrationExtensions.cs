@@ -271,6 +271,45 @@ public static partial class ServiceRegistrationExtensions
         // root the MTM Receiving Application writes via "Dunnage.Application.DefaultImageLocation").
         DunnageImagePathResolver.ConfigureRootFolder(context.Configuration["DunnageImageOptions:RootFolder"]);
 
+        // The local picture cache, mirroring both trees the application reads. The waitlist root is a setting, so
+        // the factory resolves it when a run starts rather than when the container is built; the Dunnage cache
+        // folder is the receiving application's own when this machine already has one, and ours when it does not.
+        services.AddSingleton<MTM_Waitlist.Module_Shared.Services.IImageCacheSyncService>(provider =>
+            new MTM_Waitlist.Module_Shared.Services.ImageCacheSyncService(async cancellationToken =>
+            {
+                var storageConfiguration = provider
+                    .GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageStorageConfigurationResolver>();
+
+                // Adopted before anything reads a cached path, so the folder the copy is written into and the
+                // folder the screens look in are the same one.
+                MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.SetCacheRoot(
+                    await storageConfiguration.GetImageCacheFolderPathAsync().ConfigureAwait(false));
+
+                if (await storageConfiguration.GetImageCacheEnabledAsync().ConfigureAwait(false) is false)
+                {
+                    // No sources means nothing is copied and nothing is removed: a machine with caching switched
+                    // off keeps whatever it already had and reads every picture from the share.
+                    return Array.Empty<MTM_Waitlist.Module_Shared.Services.ImageCacheSource>();
+                }
+
+                return
+                [
+                    new MTM_Waitlist.Module_Shared.Services.ImageCacheSource(
+                        "waitlist pictures",
+                        await provider
+                            .GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>()
+                            .GetSharedFolderPathAsync()
+                            .ConfigureAwait(false),
+                        Path.Combine(
+                            MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.LocalCacheRoot,
+                            MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.WaitlistFolderName)),
+                    new MTM_Waitlist.Module_Shared.Services.ImageCacheSource(
+                        "dunnage pictures",
+                        DunnageImagePathResolver.RootFolder,
+                        MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.ResolveDunnageCacheFolder()),
+                ];
+            }));
+
         services.AddModuleServices(context.Configuration);
 
         return services;

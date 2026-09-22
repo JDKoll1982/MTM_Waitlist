@@ -39,6 +39,13 @@ public static class PermissionKeys
     /// <summary>The computer registry.</summary>
     public const string SettingsComputers = "permission.settings.computers";
 
+    /// <summary>
+    /// Where the application keeps its pictures and its key files. The site's layout, so it belongs to IT
+    /// Department and Developer rather than to the screens it feeds (a wrong picture root stops every configured
+    /// picture in the application being read).
+    /// </summary>
+    public const string SettingsStoragePaths = "permission.settings.storage_paths";
+
     /// <summary>Quick Add dunnage definitions.</summary>
     public const string SetupDunnageQuickAdd = "permission.setup.dunnage_quick_add";
 
@@ -68,6 +75,7 @@ public static class PermissionKeys
         SettingsUrgencyMinutes,
         SettingsDefectTypes,
         SettingsComputers,
+        SettingsStoragePaths,
         SetupDunnageQuickAdd,
         SetupWorkCenters,
         AdminUsers,

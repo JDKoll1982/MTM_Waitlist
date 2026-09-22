@@ -144,6 +144,13 @@ public static class PermissionRegistry
             Fallback: false,
             new[] { "ComputerManagementViewModel" }),
         new Entry(
+            PermissionKeys.SettingsStoragePaths,
+            LabelResourceKey(PermissionKeys.SettingsStoragePaths),
+            GatesResourceKey(PermissionKeys.SettingsStoragePaths),
+            Area.Settings,
+            Fallback: false,
+            new[] { "SettingsViewModel" }),
+        new Entry(
             PermissionKeys.SetupDunnageQuickAdd,
             LabelResourceKey(PermissionKeys.SetupDunnageQuickAdd),
             GatesResourceKey(PermissionKeys.SetupDunnageQuickAdd),

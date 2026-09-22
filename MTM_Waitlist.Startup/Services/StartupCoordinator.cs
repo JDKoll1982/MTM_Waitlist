@@ -4,6 +4,7 @@ using System.Net.NetworkInformation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Startup.ViewModels;
 using MySqlConnector;
 
@@ -23,6 +24,13 @@ public sealed class StartupCoordinator : IStartupCoordinator
         public const string Step3 = "Step 3 of 5: Verifying user identity...";
         public const string Step4 = "Step 4 of 5: Validating login session...";
         public const string Step5 = "Step 5 of 5: Loading data dashboards...";
+
+        /// <summary>
+        /// Reported between the session check and the last step, with no number of its own: the picture cache is
+        /// refreshed on the way past rather than being one of the five steps, and saying "step 4.5" to a person
+        /// watching the splash screen would be worse than saying nothing.
+        /// </summary>
+        public const string CachingPictures = "Caching pictures from the network...";
     }
 
     private readonly LocalSettingsOptions _settingsOptions;
@@ -32,6 +40,7 @@ public sealed class StartupCoordinator : IStartupCoordinator
     private readonly ILocalSettingsService _localSettingsService;
     private readonly IStartupSessionRepository _startupSessionRepository;
     private readonly IStartupRecoveryService _startupRecoveryService;
+    private readonly IImageCacheSyncService? _imageCacheSyncService;
     private readonly StartupState _startupState;
 
     public StartupCoordinator(
@@ -42,7 +51,8 @@ public sealed class StartupCoordinator : IStartupCoordinator
         ILocalSettingsService localSettingsService,
         IStartupSessionRepository startupSessionRepository,
         IStartupRecoveryService startupRecoveryService,
-        StartupState startupState)
+        StartupState startupState,
+        IImageCacheSyncService? imageCacheSyncService = null)
     {
         ArgumentNullException.ThrowIfNull(settingsOptions);
         ArgumentNullException.ThrowIfNull(startupDatabaseOptions);
@@ -61,6 +71,10 @@ public sealed class StartupCoordinator : IStartupCoordinator
         _startupSessionRepository = startupSessionRepository;
         _startupRecoveryService = startupRecoveryService;
         _startupState = startupState;
+
+        // Optional, and null means "no cache": the coordinator's own tests build it without one, and a host that
+        // has no picture cache registered must still be able to start.
+        _imageCacheSyncService = imageCacheSyncService;
     }
 
     public async Task<StartupResult> RunAsync(IProgress<string>? progress = null, CancellationToken cancellationToken = default, bool retryDatabasePhaseOnly = false)
@@ -242,6 +256,10 @@ public sealed class StartupCoordinator : IStartupCoordinator
             && !isUserMatched
             && !isComputerRegistered;
 
+        // The picture cache is refreshed on the way past, before the shell is shown, so the first screen a person
+        // reaches draws its pictures from local disk rather than reaching across the network for each one.
+        await SynchronizeImageCacheAsync(progress, cancellationToken).ConfigureAwait(false);
+
         progress?.Report(StartupProgress.Step5);
 
         if (isUserMatched && sessionIsValid && isComputerRegistered)
@@ -369,6 +387,53 @@ public sealed class StartupCoordinator : IStartupCoordinator
 
         return _startupDevelopmentOptions.DefaultDeveloperUsernames
             .Any(item => string.Equals(item?.Trim(), username.Trim(), StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Mirrors the picture roots onto this computer before the shell is shown.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Run here for the same reason the MTM Receiving Application runs its own cache step inside startup: the first
+    /// list a person sees should draw from local disk. The splash reports the line it is on, and then the numbered
+    /// steps carry on.
+    /// </para>
+    /// <para>
+    /// Best effort, and deliberately so: a cache that cannot be built is reported and the application opens
+    /// anyway. Losing the shell because a share was slow would be a far worse outcome than drawing from the share
+    /// for one session.
+    /// </para>
+    /// </remarks>
+    /// <param name="progress">The splash screen's progress reporter.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    private async Task SynchronizeImageCacheAsync(IProgress<string>? progress, CancellationToken cancellationToken)
+    {
+        if (_imageCacheSyncService is null)
+        {
+            return;
+        }
+
+        try
+        {
+            progress?.Report(StartupProgress.CachingPictures);
+
+            var result = await _imageCacheSyncService.SynchronizeAsync(cancellationToken).ConfigureAwait(false);
+
+            StartupDebugLog.Info(
+                "StartupCoordinator",
+                $"Picture cache synchronized. Copied={result.Copied}, Removed={result.Removed}, SourcesSkipped={string.Join(", ", result.SourcesSkipped)}");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "StartupCoordinator",
+                ex,
+                "Picture cache synchronization failed; the application will read its pictures from the share.");
+        }
     }
 
     private async Task<string?> ResolveCentralizedDestinationAsync()

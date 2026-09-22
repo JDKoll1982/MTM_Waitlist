@@ -10,6 +10,67 @@
 
 ---
 
+## 2026-09-22 — pictures are copied onto your computer when the app starts
+
+**What changed:** the application now keeps a copy of every picture on the computer it is running on, the same way
+the MTM Receiving Application keeps its dunnage pictures. Each time it starts, it copies the pictures from the network
+share into a folder on that computer, and every screen draws from the local copy. A picture that has changed on the
+share is copied again; a picture that has not changed is left alone; and a copy whose picture has been taken off the
+share is deleted. Anything with no picture still shows the same no-image picture as before.
+
+**Why it matters:** the waitlist, the detail pages, the work-centre tiles and the dunnage search were each fetching
+their pictures across the network every time they were drawn. With the pictures already on the computer, those screens
+open without waiting for the network, and they keep working if the share is briefly unavailable — the copies are
+already there.
+
+**What to expect:** the startup splash shows a **Caching pictures from the network...** line while this happens. It is
+best effort: if the share cannot be reached, or has nothing new, the application still opens and simply draws from
+the share. The taskbar copy is small — the pictures are only ever copies, and the share stays the only place a picture
+is ever changed.
+
+### Settings → Operations → **Picture Cache** (IT Department and Developer)
+
+A new section, directly under **Image Location Settings**, with three things in it:
+
+- **Cache pictures on this computer** — off means every picture is read from the network share instead. This is one
+  setting for the whole company: changing it on one computer changes it on all of them, on their next start.
+- **Cache folder** — where the copies are kept. The default is inside the signed-in person's local application
+  folder, so it needs no permission to write to; a different folder can be typed in and saved.
+- **Copy pictures now** — does the same copy the application does at startup, without waiting for a restart, and says
+  what it copied, what it removed, and any folder it could not reach.
+
+### Where the application keeps things (IT Department and Developer)
+
+The application's picture folder and its key-file folder now point at the network locations agreed with IT —
+pictures under `…\MTM Applications\MTM Waitlist Application\Images`, key files under
+`…\MTM Applications\Keys - DO NOT EDIT FILES\MTM Waitlist Application`. Both are ordinary settings rather than
+values compiled into the application, so IT can move them without a new release. Pictures are stored by name
+relative to the picture folder, so a picture saved on one computer is found by every other one.
+
+## 2026-09-22 — one picture means "no picture", everywhere in the app
+
+**What changed:** every picture in the application now falls back to the same single **no-image** picture. If nothing
+is configured for a picture, if the configured file cannot be found, or if the configured file is not a real picture
+(it cannot be read, it is smaller than 48 by 48, or it is not square), the app draws the no-image picture instead of
+an empty space.
+
+**Why it matters:** the app used to have nine different answers to "what do I draw here?" — four different fallback
+pictures, one of which had never actually shipped as a file at all — so a missing or empty picture showed as a blank
+tile rather than as "there is no picture". A blank tile is indistinguishable from a picture that failed to load, and
+the single no-image picture makes the answer the same on every screen and states it out loud.
+
+**What to expect:** the no-image picture appears on waitlist cards and detail pages, the New Request wizard's work
+centre and category tiles, the setup work-centre cards and dunnage image search, and the image previews in Settings.
+An Item's picture is now **entirely a setting**: the built-in artwork that used to stand in per Item (a box labelled
+WIP, NCM, Scrap and so on) is gone, so a request for an Item nobody has given a picture to shows the no-image picture
+rather than a picture of a different thing. Set a picture per Item or per work centre in Settings and that is what
+every machine draws. The per-scope placeholder artwork (a workstation photo and a request-item tile) is no longer used
+either — every scope points at the one no-image picture.
+
+**Also fixed:** a machine that had just been started drew the no-image picture for *everything* on its first visit,
+including Items whose picture had already been configured, and only picked the configured pictures up later. The image
+settings are read at the point each screen needs them now, so the first look is the right one on every machine.
+
 ## 2026-09-21 — you can now manage people, and what each person may do
 
 **What changed:** Settings has an **Administration** area with two entries. **Users** opens the roster of everyone in

@@ -80,6 +80,116 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
     }
 
     /// <inheritdoc />
+    public async Task<string> GetKeysFolderPathAsync()
+    {
+        try
+        {
+            var cacheKey = ConfigSettingKeys.KeysFolderPath;
+
+            if (_cache.TryGetValue(cacheKey, out var cached) && cached.IsValid())
+            {
+                _logger.LogDebug("Using cached key-files folder path: {Source}", cached.Source);
+                return (string)cached.Value;
+            }
+
+            var dbValue = await _configService.GetSettingValueAsync(
+                ConfigSettingKeys.KeysFolderPath, "all_users");
+
+            if (dbValue != null && !string.IsNullOrWhiteSpace(dbValue.SettingValue))
+            {
+                _logger.LogInformation("Using database override for key-files folder path: {Path}",
+                                     dbValue.SettingValue);
+                CacheValue(cacheKey, dbValue.SettingValue, "database");
+                return dbValue.SettingValue;
+            }
+
+            var appsettingsValue = _appsettingsOptions.Value.KeysFolderPath;
+            _logger.LogInformation("Using appsettings.json default for key-files folder path: {Path}",
+                                 appsettingsValue);
+            CacheValue(cacheKey, appsettingsValue, "appsettings");
+            return appsettingsValue;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to resolve the key-files folder configuration");
+            throw new InvalidOperationException(
+                "Failed to resolve the key-files folder configuration", ex);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<string> GetImageCacheFolderPathAsync()
+    {
+        try
+        {
+            var cacheKey = ConfigSettingKeys.ImageCacheFolderPath;
+
+            if (_cache.TryGetValue(cacheKey, out var cached) && cached.IsValid())
+            {
+                return (string)cached.Value;
+            }
+
+            var dbValue = await _configService.GetSettingValueAsync(
+                ConfigSettingKeys.ImageCacheFolderPath, "all_users");
+
+            if (dbValue != null && !string.IsNullOrWhiteSpace(dbValue.SettingValue))
+            {
+                _logger.LogInformation("Using database override for the picture cache folder: {Path}",
+                                     dbValue.SettingValue);
+                CacheValue(cacheKey, dbValue.SettingValue, "database");
+                return dbValue.SettingValue;
+            }
+
+            var appsettingsValue = _appsettingsOptions.Value.CacheFolderPath;
+            _logger.LogInformation("Using appsettings.json default for the picture cache folder: {Path}",
+                                 appsettingsValue);
+            CacheValue(cacheKey, appsettingsValue, "appsettings");
+            return appsettingsValue;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to resolve the picture cache folder configuration");
+            throw new InvalidOperationException(
+                "Failed to resolve the picture cache folder configuration", ex);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> GetImageCacheEnabledAsync()
+    {
+        try
+        {
+            var cacheKey = ConfigSettingKeys.ImageCacheEnabled;
+
+            if (_cache.TryGetValue(cacheKey, out var cached) && cached.IsValid())
+            {
+                return (bool)cached.Value;
+            }
+
+            var dbValue = await _configService.GetSettingValueAsync(
+                ConfigSettingKeys.ImageCacheEnabled, "all_users");
+
+            if (dbValue?.SettingValueBool.HasValue == true)
+            {
+                _logger.LogInformation("Using database override for the picture cache: {Enabled}",
+                                     dbValue.SettingValueBool);
+                CacheValue(cacheKey, dbValue.SettingValueBool!.Value, "database");
+                return dbValue.SettingValueBool.Value;
+            }
+
+            var appsettingsValue = _appsettingsOptions.Value.CacheEnabled;
+            CacheValue(cacheKey, appsettingsValue, "appsettings");
+            return appsettingsValue;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to resolve whether the picture cache is enabled");
+            throw new InvalidOperationException(
+                "Failed to resolve whether the picture cache is enabled", ex);
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<long> GetMaxFileSizeBytesAsync()
     {
         try
@@ -212,6 +322,9 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
             _appsettingsOptions.Value.Validate();
 
             var sharedFolderPath = await GetSharedFolderPathAsync();
+            var keysFolderPath = await GetKeysFolderPathAsync();
+            var cacheFolderPath = await GetImageCacheFolderPathAsync();
+            var cacheEnabled = await GetImageCacheEnabledAsync();
             var maxFileSize = await GetMaxFileSizeBytesAsync();
             var enableArchiveVersioning = await GetEnableArchiveVersioningAsync();
             var archiveKeepDays = await GetArchiveKeepDaysAsync();
@@ -219,6 +332,9 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
             var effectiveOptions = new ImageStorageOptions
             {
                 SharedFolderPath = sharedFolderPath,
+                KeysFolderPath = keysFolderPath,
+                CacheFolderPath = cacheFolderPath,
+                CacheEnabled = cacheEnabled,
                 MaxFileSizeBytes = maxFileSize,
                 AllowedExtensions = _appsettingsOptions.Value.AllowedExtensions,
                 RequireSquareAspectRatio = _appsettingsOptions.Value.RequireSquareAspectRatio,

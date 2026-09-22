@@ -16,7 +16,6 @@ public sealed class SampleModelsTests
         Assert.AreEqual(string.Empty, order.Title);
         Assert.AreEqual(string.Empty, order.Subtitle);
         Assert.AreEqual(string.Empty, order.Status);
-        Assert.AreEqual(string.Empty, order.ImagePath);
         Assert.AreEqual(0, order.Fields.Count);
     }
 
@@ -28,8 +27,7 @@ public sealed class SampleModelsTests
             Id = 42,
             Title = "Order 42",
             Subtitle = "Acme",
-            Status = "Waiting",
-            ImagePath = "coil.png"
+            Status = "Waiting"
         };
 
         order.Fields.Add(new WaitlistField { Label = "Request type", Value = "Coil" });
@@ -38,7 +36,6 @@ public sealed class SampleModelsTests
         Assert.AreEqual("Order 42", order.Title);
         Assert.AreEqual("Acme", order.Subtitle);
         Assert.AreEqual("Waiting", order.Status);
-        Assert.AreEqual("coil.png", order.ImagePath);
         Assert.AreEqual(1, order.Fields.Count);
         Assert.AreEqual("Request type", order.Fields[0].Label);
         Assert.AreEqual("Coil", order.Fields[0].Value);

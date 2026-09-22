@@ -20,7 +20,7 @@ namespace MTM_Waitlist.Tests.Module_Core.Permissions;
 public sealed class PermissionRegistryTests
 {
     /// <summary>
-    /// The fourteen keys, spelled exactly as the specification's Verbatim Constraints section pins them. Spelled
+    /// The fifteen keys, spelled exactly as the specification's Verbatim Constraints section pins them. Spelled
     /// out here on purpose: a test that read the list from the declaration could not catch a key the declaration
     /// misspells.
     /// </summary>
@@ -35,6 +35,7 @@ public sealed class PermissionRegistryTests
         "permission.settings.urgency_minutes",
         "permission.settings.defect_types",
         "permission.settings.computers",
+        "permission.settings.storage_paths",
         "permission.setup.dunnage_quick_add",
         "permission.setup.work_centers",
         "permission.admin.users",

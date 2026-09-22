@@ -505,7 +505,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         OnPropertyChanged(nameof(IsHistoryEmpty));
     }
 
-    public void OnNavigatedTo(object parameter)
+    public async void OnNavigatedTo(object parameter)
     {
         _lastOrderId = parameter switch
         {
@@ -513,6 +513,17 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             long longId when longId <= int.MaxValue && longId >= int.MinValue => (int)longId,
             _ => (int?)null
         };
+
+        // Made ready before the subscription is decided. This page resolves both the Item's picture and the work
+        // centre's, and a subscription that was never taken because the service was not ready yet meant a picture
+        // configured later — on this machine or another one — never reached the page.
+        if (_imageLocationService is not null
+            && !await _imageLocationService.EnsureInitializedAsync())
+        {
+            StartupDebugLog.Info(
+                "WaitlistRequest",
+                "The image location service could not be initialized; the request page will draw the no-image placeholder.");
+        }
 
         if (_imageLocationSubscription is null
             && _imageLocationService is not null
@@ -982,9 +993,10 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
                 .ResolveWorkCenterImagePathAsync(item.WorkCenterCatalogId.Value.ToString())
                 .ConfigureAwait(false);
 
-            // Left unset when the file carries nothing, so the page draws its own work-centre placeholder rather
-            // than a hole: an empty picture and a placeholder are not the same answer.
-            if (ImageFileProbe.CarriesPicture(resolvedWorkCenterPath))
+            // Left unset when the file is not a picture the application will draw, so the page falls back to the
+            // application's no-image placeholder rather than a hole: an empty picture and a placeholder are not
+            // the same answer.
+            if (ImageFileProbe.IsUsablePicture(resolvedWorkCenterPath))
             {
                 item.WorkCenterImagePath = resolvedWorkCenterPath;
             }

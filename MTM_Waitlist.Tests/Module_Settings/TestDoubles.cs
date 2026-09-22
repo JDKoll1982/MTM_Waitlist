@@ -50,9 +50,36 @@ internal sealed class FakeConfigSettingsValueService : IConfigSettingsValueServi
     }
 }
 
+/// <summary>
+/// A picture cache that records being asked, and can be told to fail or to report a particular result.
+/// </summary>
+internal sealed class FakeImageCacheSyncService : IImageCacheSyncService
+{
+    public int SynchronizeCallCount { get; private set; }
+
+    public ImageCacheSyncResult Result { get; set; } = ImageCacheSyncResult.NothingToDo;
+
+    public Exception? Failure { get; set; }
+
+    public Task<ImageCacheSyncResult> SynchronizeAsync(CancellationToken cancellationToken = default)
+    {
+        SynchronizeCallCount++;
+
+        return Failure is null
+            ? Task.FromResult(Result)
+            : Task.FromException<ImageCacheSyncResult>(Failure);
+    }
+}
+
 internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfigurationResolver
 {
     public string SharedFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests");
+
+    public string KeysFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "key-files");
+
+    public string CacheFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "cache");
+
+    public bool CacheEnabled { get; set; } = true;
 
     public long MaxFileSizeBytes { get; set; } = 10 * 1024 * 1024;
 
@@ -63,6 +90,12 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public bool RequireSquareAspectRatio { get; set; } = true;
 
     public Task<string> GetSharedFolderPathAsync() => Task.FromResult(SharedFolderPath);
+
+    public Task<string> GetKeysFolderPathAsync() => Task.FromResult(KeysFolderPath);
+
+    public Task<string> GetImageCacheFolderPathAsync() => Task.FromResult(CacheFolderPath);
+
+    public Task<bool> GetImageCacheEnabledAsync() => Task.FromResult(CacheEnabled);
 
     public Task<long> GetMaxFileSizeBytesAsync() => Task.FromResult(MaxFileSizeBytes);
 

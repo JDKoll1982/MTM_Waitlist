@@ -505,6 +505,18 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     public async void OnNavigatedTo(object parameter)
     {
+        // Made ready before anything subscribes or resolves. Nothing initializes this service at startup, and
+        // every guard below used to bail out while it was not ready yet — so on a machine that had just been
+        // started the first list load drew the no-image placeholder for every row, including Items whose picture
+        // somebody had configured on another machine. Awaiting it here makes the first render deterministic.
+        if (_imageLocationService is not null
+            && !await _imageLocationService.EnsureInitializedAsync())
+        {
+            StartupDebugLog.Info(
+                "Waitlist",
+                "The image location service could not be initialized; the list will draw the no-image placeholder.");
+        }
+
         if (!_isSubscribed)
         {
             _buildingSelectionService.BuildingChanged += OnBuildingChanged;
@@ -874,7 +886,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             RequestedUtc = request.RequestedUtc,
             TargetTimeUtc = request.TargetTimeUtc,
             LastMessageUtc = request.LastMessageUtc,
-            ImagePath = ResolveItemCardImagePath(definition),
             IsOverdue = request.IsOverdue,
             IsOverdueAtSource = request.IsOverdue,
         };
@@ -922,20 +933,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _jobAvailabilityCache[key] = availability;
         return availability;
     }
-
-    /// <summary>
-    /// The card's built-in picture for an Item, before any configured override is applied. An Item the catalog
-    /// does not describe keeps the existing placeholder rather than being given a borrowed image.
-    /// </summary>
-    private static string ResolveItemCardImagePath(RequestItemDefinition? item) => item?.Id switch
-    {
-        "pickup-ncm" => "pickup_ncm.png",
-        "pickup-wip" => "pickup_wip.png",
-        "pickup-fg" => "pickup_fg.png",
-        "pickup-outside-service" => "pickup_os.png",
-        "pickup-scrap" => "scrap.png",
-        _ => "pickup_wip.png",
-    };
 
     /// <summary>
     /// Derives a row's urgency from the same due value the card shows: the stored target time when the
@@ -1012,9 +1009,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                     cancellationToken).ConfigureAwait(false);
 
                 // Checked once per work centre rather than once per row, because every row of a work centre draws
-                // the same picture. A resolved path that carries no picture is not an answer: it is stored as empty
-                // so the request page draws the work centre's own "no picture" placeholder rather than a hole.
-                if (!ImageFileProbe.CarriesPicture(resolvedPath))
+                // the same picture. A resolved path that is not a picture the application will draw is not an
+                // answer: it is stored as empty so the card draws the application's no-image placeholder rather
+                // than a hole.
+                if (!ImageFileProbe.IsUsablePicture(resolvedPath))
                 {
                     StartupDebugLog.Info(
                         "WaitlistRequest",
@@ -1052,11 +1050,12 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 {
                     // Either the service had nothing configured and answered with its own placeholder, or the path
                     // it answered with is a file carrying no picture (a stand-in, or artwork that never shipped).
-                    // Taking it would replace this row's working image with an empty tile, so the row keeps the
-                    // image it already has. Logged because the substitution is otherwise invisible.
+                    // An Item's picture is a setting and there is no built-in artwork behind it any more, so the
+                    // card says "no picture" rather than showing a picture of something else. Logged because the
+                    // substitution is otherwise invisible.
                     StartupDebugLog.Info(
                         "WaitlistRequest",
-                        $"Request '{request.Id}' has no picture to resolve to '{resolvedImagePath}'; keeping the row's own image '{order.ImagePath}' instead.");
+                        $"Request '{request.Id}' has no picture to resolve to '{resolvedImagePath}'; the card will draw the no-image placeholder.");
                 }
             }
             catch

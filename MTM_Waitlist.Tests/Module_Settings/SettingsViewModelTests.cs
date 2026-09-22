@@ -9,6 +9,8 @@ using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
+using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Mock.Models;
@@ -478,12 +480,133 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         return false;
     }
 
+    /// <summary>
+    /// The picture cache is offered on the picture permission, which Developer and IT Department hold.
+    /// </summary>
+    /// <remarks>
+    /// One gate, not two: "only IT Department and Developer may change it" is answered by the picture screen's own
+    /// key, and a second permission for the same subject would be a second thing to keep in step with the seed.
+    /// </remarks>
+    [TestMethod]
+    public void ThePictureCacheIsOfferedOnlyOnThePicturePermission()
+    {
+        var settings = new RecordingLocalSettingsService();
+        var resolver = new FakeImageStorageConfigurationResolver();
+
+        Assert.IsFalse(
+            BuildViewModel(settings, imageStorageConfigurationResolver: resolver).IsPictureCachePanelVisible,
+            "With the permission not held the section must not be offered at all.");
+
+        Assert.IsTrue(
+            BuildViewModel(settings, [PermissionKeys.SettingsPartPictures], imageStorageConfigurationResolver: resolver)
+                .IsPictureCachePanelVisible);
+    }
+
+    /// <summary>
+    /// A host with no picture cache does not offer the section either.
+    /// </summary>
+    /// <remarks>
+    /// The controls would otherwise be there and do nothing, which reads as a broken screen rather than an
+    /// unregistered service.
+    /// </remarks>
+    [TestMethod]
+    public void WithoutACacheServiceTheSectionIsNotOffered()
+    {
+        var viewModel = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsPartPictures]);
+
+        Assert.IsFalse(viewModel.IsPictureCachePanelVisible);
+    }
+
+    /// <summary>
+    /// Turning the cache off stores it for every user, which is what makes it follow a person to another machine.
+    /// </summary>
+    [TestMethod]
+    public void TurningThePictureCacheOffStoresItForEveryUser()
+    {
+        var configuration = new FakeConfigSettingsValueService();
+        var viewModel = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsPartPictures],
+            configSettingsValueService: configuration,
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
+
+        viewModel.IsPictureCacheEnabled = false;
+
+        var saved = configuration.SavedValues.Single();
+        Assert.AreEqual(ConfigSettingKeys.ImageCacheEnabled, saved.SettingKey);
+        Assert.AreEqual("all_users", saved.ScopeType, "A person-scoped row would leave every other machine unchanged.");
+        Assert.AreEqual("all_users", saved.ScopeKey);
+        Assert.AreEqual(false, saved.SettingValueBool);
+    }
+
+    /// <summary>The folder box is stored under its own key, so it does not collide with the toggle.</summary>
+    [TestMethod]
+    public void SavingTheCacheFolderStoresThePathForEveryUser()
+    {
+        var configuration = new FakeConfigSettingsValueService();
+        var viewModel = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsPartPictures],
+            configSettingsValueService: configuration,
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
+
+        viewModel.PictureCacheFolderInput = @"D:\MTM Picture Cache";
+        viewModel.SavePictureCacheFolderCommand.Execute(null);
+
+        var saved = configuration.SavedValues.Single();
+        Assert.AreEqual(ConfigSettingKeys.ImageCacheFolderPath, saved.SettingKey);
+        Assert.AreEqual("all_users", saved.ScopeKey);
+        Assert.AreEqual(@"D:\MTM Picture Cache", saved.SettingValue);
+        Assert.AreEqual(@"D:\MTM Picture Cache", viewModel.PictureCacheFolderPath);
+    }
+
+    /// <summary>
+    /// Copying now says what it did, and names a root it could not reach.
+    /// </summary>
+    /// <remarks>
+    /// "Nothing to do" and "the share was not there" look identical on screen otherwise, and only one of them is a
+    /// problem worth acting on.
+    /// </remarks>
+    [TestMethod]
+    public async Task CopyingThePictureCacheNowReportsTheCountsAndAnyUnreachableRootAsync()
+    {
+        var cache = new FakeImageCacheSyncService
+        {
+            Result = new ImageCacheSyncResult(4, 2, ["waitlist pictures"])
+        };
+
+        var viewModel = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsPartPictures],
+            imageCacheSyncService: cache,
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
+
+        await viewModel.RefreshPictureCacheCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(1, cache.SynchronizeCallCount);
+        StringAssert.Contains(viewModel.PictureCacheStatusMessage, "4");
+        StringAssert.Contains(viewModel.PictureCacheStatusMessage, "2");
+        StringAssert.Contains(viewModel.PictureCacheStatusMessage, "waitlist pictures");
+        Assert.IsFalse(viewModel.IsPictureCacheBusy);
+    }
+
     private static SettingsViewModel BuildViewModel(
         RecordingLocalSettingsService settings,
         string[]? heldPermissionKeys = null,
-        IMockServiceRefreshClient? refreshClient = null)
+        IMockServiceRefreshClient? refreshClient = null,
+        IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
+        IConfigSettingsValueService? configSettingsValueService = null,
+        IImageCacheSyncService? imageCacheSyncService = null)
     {
-        var viewModel = BuildViewModelWithoutLoading(settings, heldPermissionKeys, refreshClient);
+        var viewModel = BuildViewModelWithoutLoading(
+            settings,
+            heldPermissionKeys,
+            refreshClient,
+            imageStorageConfigurationResolver,
+            configSettingsValueService,
+            imageCacheSyncService);
 
         // The stub answers from an already-completed task, so this settles synchronously and no test has to
         // sleep waiting for a gate to make up its mind.
@@ -498,7 +621,10 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     private static SettingsViewModel BuildViewModelWithoutLoading(
         RecordingLocalSettingsService settings,
         string[]? heldPermissionKeys = null,
-        IMockServiceRefreshClient? refreshClient = null)
+        IMockServiceRefreshClient? refreshClient = null,
+        IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
+        IConfigSettingsValueService? configSettingsValueService = null,
+        IImageCacheSyncService? imageCacheSyncService = null)
     {
         var startupState = new StartupState();
         var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), startupState);
@@ -516,7 +642,10 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             startupState,
             computerManagement,
             urgencyAllotments,
-            refreshClient ?? new FakeMockServiceRefreshClient());
+            refreshClient ?? new FakeMockServiceRefreshClient(),
+            imageStorageConfigurationResolver,
+            configSettingsValueService,
+            imageCacheSyncService);
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Helpers;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Helpers;
@@ -60,10 +61,24 @@ public sealed class RequestImagePathPolicyTests
     {
         // The service hands back backslashes for its own defaults; a resolved catalog path uses forward slashes.
         // A comparison that missed that would let exactly the bug back in.
-        Assert.IsTrue(RequestImagePathPolicy.IsServicePlaceholder("Assets\\Placeholders\\default-request-type.png"));
-        Assert.IsTrue(RequestImagePathPolicy.IsServicePlaceholder("assets/placeholders/DEFAULT-REQUEST-TYPE.PNG"));
-        Assert.IsTrue(RequestImagePathPolicy.IsServicePlaceholder("./Assets/Placeholders/default-request-type.png"));
-        Assert.IsTrue(RequestImagePathPolicy.IsServicePlaceholder("  Assets/Placeholders/default-request-type.png  "));
+        Assert.IsTrue(RequestImagePathPolicy.IsServicePlaceholder("Assets\\Placeholders\\default-no-image.png"));
+        Assert.IsTrue(RequestImagePathPolicy.IsServicePlaceholder("assets/placeholders/DEFAULT-NO-IMAGE.PNG"));
+        Assert.IsTrue(RequestImagePathPolicy.IsServicePlaceholder("./Assets/Placeholders/default-no-image.png"));
+        Assert.IsTrue(RequestImagePathPolicy.IsServicePlaceholder("  Assets/Placeholders/default-no-image.png  "));
+    }
+
+    /// <summary>
+    /// Every scope answers "nothing configured" with <b>one</b> file, so no surface has to know which scope it is
+    /// looking at to know whether it is being shown a placeholder. The per-scope artwork that used to answer here
+    /// has been retired: a person now learns one picture as "no image".
+    /// </summary>
+    [TestMethod]
+    public void EveryScopeAnswersWithTheSameNoImagePlaceholder()
+    {
+        Assert.AreEqual(ImagePicturePolicy.NoImagePath, ImageLocationDefaults.NoImagePath);
+        Assert.AreEqual(ImagePicturePolicy.NoImagePath, ImageLocationDefaults.WorkCenterDefaultPath);
+        Assert.AreEqual(ImagePicturePolicy.NoImagePath, ImageLocationDefaults.RequestItemDefaultPath);
+        Assert.AreEqual(ImagePicturePolicy.NoImagePath, ImageLocationDefaults.RequestCategoryDefaultPath);
     }
 
     [TestMethod]
@@ -168,7 +183,7 @@ public sealed class RequestImagePathPolicyTests
     [TestMethod]
     public void ANothingConfiguredAnswerNeverReplacesAnImageTheRequestAlreadyResolves()
     {
-        var alreadyResolved = "Assets/RequestItems/pickup-coil.png";
+        var alreadyResolved = @"\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist Application\Images\request_item\pickup-coil.png";
 
         foreach (var nothingConfigured in new[]
         {

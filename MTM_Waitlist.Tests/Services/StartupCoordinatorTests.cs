@@ -5,6 +5,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -548,7 +549,8 @@ public sealed class StartupCoordinatorTests
         StartupState? startupState = null,
         StartupDevelopmentOptions? startupDevelopmentOptions = null,
         StartupLoggingOptions? startupLoggingOptions = null,
-        StartupDatabaseOptions? startupDatabaseOptions = null)
+        StartupDatabaseOptions? startupDatabaseOptions = null,
+        IImageCacheSyncService? imageCacheSyncService = null)
     {
         return new StartupCoordinator(
             Options.Create(settingsOptions),
@@ -561,7 +563,124 @@ public sealed class StartupCoordinatorTests
             localSettingsService,
             startupSessionRepository,
             recoveryService,
-            startupState ?? new StartupState());
+            startupState ?? new StartupState(),
+            imageCacheSyncService);
+    }
+
+    /// <summary>
+    /// A start that reaches the shell copies the pictures on the way past.
+    /// </summary>
+    /// <remarks>
+    /// The point of the step is its place in the order: on the way past the session check and before the shell, so
+    /// the first list a person sees already has its pictures on local disk. A run that copies the cache after the
+    /// shell is shown would look identical from the outside and help nobody.
+    /// </remarks>
+    [TestMethod]
+    public async Task RunAsync_CopiesThePicturesBeforeTheShellIsShownAsync()
+    {
+        var repository = new FakeStartupSessionRepository
+        {
+            ServerTimeUtc = new DateTimeOffset(2026, 9, 22, 10, 0, 0, TimeSpan.Zero),
+            Snapshot = new StartupSessionSnapshot
+            {
+                IsUserMatched = true,
+                IsComputerRegistered = true,
+                CurrentRole = "Developer",
+                HasDatabaseSession = true,
+                DatabaseSessionExpiresUtc = new DateTimeOffset(2026, 9, 22, 18, 0, 0, TimeSpan.Zero)
+            }
+        };
+
+        var cache = new RecordingImageCacheSyncService();
+        var progress = new RecordingProgress();
+
+        var coordinator = CreateCoordinator(
+            new LocalSettingsOptions
+            {
+                ApplicationDataFolder = "MTM_Waitlist/ApplicationData",
+                LocalSettingsFile = "LocalSettings.json"
+            },
+            new RecordingLocalSettingsService(),
+            new StartupRecoveryService(new RecordingLocalSettingsService(), new NoOpAppLifecycleService()),
+            repository,
+            imageCacheSyncService: cache);
+
+        var result = await coordinator.RunAsync(progress);
+
+        Assert.IsTrue(result.IsSuccess, $"Expected the start to reach the shell; it reported route '{result.RouteTarget}' instead.");
+        Assert.AreEqual(1, cache.SynchronizeCallCount);
+    }
+
+    /// <summary>
+    /// A cache that cannot be built does not stop the application opening.
+    /// </summary>
+    /// <remarks>
+    /// This is the whole reason the step is best-effort. Losing the shell because a share was slow or a folder was
+    /// missing would trade a slow picture for no application at all, which is not a trade worth making — and it
+    /// would be made on a machine whose only problem is the network.
+    /// </remarks>
+    [TestMethod]
+    public async Task RunAsync_WhenThePictureCacheFails_StillReachesTheShellAsync()
+    {
+        var repository = new FakeStartupSessionRepository
+        {
+            ServerTimeUtc = new DateTimeOffset(2026, 9, 22, 10, 0, 0, TimeSpan.Zero),
+            Snapshot = new StartupSessionSnapshot
+            {
+                IsUserMatched = true,
+                IsComputerRegistered = true,
+                CurrentRole = "Developer",
+                HasDatabaseSession = true,
+                DatabaseSessionExpiresUtc = new DateTimeOffset(2026, 9, 22, 18, 0, 0, TimeSpan.Zero)
+            }
+        };
+
+        var cache = new RecordingImageCacheSyncService
+        {
+            Failure = new IOException("The share is not reachable.")
+        };
+
+        var coordinator = CreateCoordinator(
+            new LocalSettingsOptions
+            {
+                ApplicationDataFolder = "MTM_Waitlist/ApplicationData",
+                LocalSettingsFile = "LocalSettings.json"
+            },
+            new RecordingLocalSettingsService(),
+            new StartupRecoveryService(new RecordingLocalSettingsService(), new NoOpAppLifecycleService()),
+            repository,
+            imageCacheSyncService: cache);
+
+        var result = await coordinator.RunAsync();
+
+        Assert.IsTrue(result.IsSuccess, $"A failed picture cache must not block the start; it reported route '{result.RouteTarget}' instead.");
+        Assert.AreEqual(1, cache.SynchronizeCallCount);
+    }
+
+    /// <summary>A splash reporter that records synchronously, so an assertion sees every line.</summary>
+    private sealed class RecordingProgress : IProgress<string>
+    {
+        internal List<string> Lines { get; } = [];
+
+        public void Report(string value) => Lines.Add(value);
+    }
+
+    /// <summary>A picture cache that records being asked, and can be told to fail.</summary>
+    private sealed class RecordingImageCacheSyncService : IImageCacheSyncService
+    {
+        internal int SynchronizeCallCount { get; private set; }
+
+        /// <summary>The failure to raise when asked to synchronise, or <see langword="null"/> to succeed.</summary>
+        internal Exception? Failure { get; init; }
+
+        public Task<ImageCacheSyncResult> SynchronizeAsync(CancellationToken cancellationToken = default)
+        {
+            SynchronizeCallCount++;
+
+            return Failure is null
+                ? Task.FromResult(ImageCacheSyncResult.NothingToDo)
+                : Task.FromException<ImageCacheSyncResult>(Failure);
+        }
     }
 
     [TestMethod]

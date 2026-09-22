@@ -59,7 +59,7 @@ public sealed class PermissionsViewModelTests
             "Every declared permission appears in its area's card, and none appears twice (FR-047).");
 
         var settings = viewModel.Cards.Single(card => card.Columns.Any(column => column.Key == PermissionKeys.SettingsHotWorkCenters));
-        Assert.AreEqual(7, settings.Columns.Count, "The largest card carries seven permissions.");
+        Assert.AreEqual(8, settings.Columns.Count, "The largest card carries eight permissions.");
     }
 
     [TestMethod]

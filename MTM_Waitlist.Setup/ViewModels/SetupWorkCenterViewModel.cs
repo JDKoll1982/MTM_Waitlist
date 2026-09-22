@@ -10,6 +10,7 @@ using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Shared.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Core.Models;
 
@@ -17,7 +18,7 @@ namespace MTM_Waitlist.Module_Setup.ViewModels;
 
 public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigationAware
 {
-    private const string DefaultWorkCenterImagePath = "Assets/Placeholders/default-workstation-image.png";
+    private const string DefaultWorkCenterImagePath = ImagePicturePolicy.NoImagePath;
 
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
@@ -356,9 +357,15 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
 
     private async Task<string> ResolveWorkCenterImagePathAsync(SetupWorkCenter workstation, CancellationToken cancellationToken = default)
     {
-        if (_imageLocationService is null
-            || !_imageLocationService.IsInitialized
-            || string.IsNullOrWhiteSpace(workstation.Id))
+        if (_imageLocationService is null || string.IsNullOrWhiteSpace(workstation.Id))
+        {
+            return DefaultWorkCenterImagePath;
+        }
+
+        // Initialized on demand rather than assumed. Nothing initializes this service at startup, so a guard that
+        // bailed out while it was not ready yet left every card on the placeholder for the whole first visit, and
+        // the pictures configured for the work centers only appeared once some other screen had got there first.
+        if (!await _imageLocationService.EnsureInitializedAsync(cancellationToken).ConfigureAwait(true))
         {
             return DefaultWorkCenterImagePath;
         }

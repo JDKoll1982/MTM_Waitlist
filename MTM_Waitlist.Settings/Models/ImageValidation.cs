@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 
+using MTM_Waitlist.Module_Shared.Helpers;
+
 namespace MTM_Waitlist.Module_Settings.Models;
 
 /// <summary>
@@ -82,19 +84,19 @@ public sealed class ImageValidationRules
     /// Tolerance of 0.01 means aspect must be 0.99 to 1.01 for square.
     /// Default: 0.02 (allows ±2% deviation)
     /// </summary>
-    public double AspectRatioTolerance { get; init; } = 0.02;
+    public double AspectRatioTolerance { get; init; } = ImagePicturePolicy.AspectRatioTolerance;
 
     /// <summary>
     /// Target aspect ratio (usually 1.0 for square images).
     /// Default: 1.0 (square)
     /// </summary>
-    public double TargetAspectRatio { get; init; } = 1.0;
+    public double TargetAspectRatio { get; init; } = ImagePicturePolicy.TargetAspectRatio;
 
     /// <summary>
     /// Minimum image dimension (width and height must both exceed this).
     /// Default: 48 pixels (preview size)
     /// </summary>
-    public int MinDimensionPixels { get; init; } = 48;
+    public int MinDimensionPixels { get; init; } = ImagePicturePolicy.MinimumPixels;
 
     /// <summary>
     /// Maximum image dimension (width and height must not exceed this).

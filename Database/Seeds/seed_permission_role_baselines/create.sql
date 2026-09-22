@@ -205,3 +205,39 @@ ON DUPLICATE KEY UPDATE
     setting_value_bool = VALUES(setting_value_bool),
     value_type = VALUES(value_type),
     updated_utc = VALUES(updated_utc);
+
+-- ---------------------------------------------------------------------------
+-- permission.settings.storage_paths — the fifteenth key
+--
+--   Where the application keeps the pictures and the key files. IT Department and Developer own the site's
+--   layout, so they alone answer 1: a wrong picture root stops every configured picture being read on every
+--   machine, which is not a decision for the screen the pictures happen to feed. The other seven roles answer 0.
+--
+--   Written as its own statement rather than woven into the nine blocks above so the addition is reviewable on
+--   its own, and so the blocks that record what each role inherited from the retired lists stay unedited.
+-- ---------------------------------------------------------------------------
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.storage_paths', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.storage_paths', 'role', 'role:it_department', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.storage_paths', 'role', 'role:plant_manager', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.storage_paths', 'role', 'role:production_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.storage_paths', 'role', 'role:setup_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.storage_paths', 'role', 'role:material_handler_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.storage_paths', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.storage_paths', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.storage_paths', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);

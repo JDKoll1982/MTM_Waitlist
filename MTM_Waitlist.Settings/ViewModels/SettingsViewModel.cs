@@ -12,6 +12,8 @@ using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Mock.Models;
 using Windows.ApplicationModel;
@@ -72,6 +74,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         nameof(IsNewRequestAlertsPanelVisible),
         nameof(IsUrgencyAllotmentsPanelVisible),
         nameof(IsImageLocationSettingsPanelVisible),
+        nameof(IsPictureCachePanelVisible),
         nameof(IsUserManagementEntryVisible),
         nameof(IsPermissionsEntryVisible),
     ];
@@ -85,10 +88,17 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     private readonly INavigationService _navigationService;
     private readonly StartupState _startupState;
     private readonly IMockServiceRefreshClient _mockServiceRefreshClient;
+    private readonly IImageStorageConfigurationResolver? _imageStorageConfigurationResolver;
+    private readonly IConfigSettingsValueService? _configSettingsValueService;
+    private readonly IImageCacheSyncService? _imageCacheSyncService;
 
     // Suppresses the OnNewRequestAlertsEnabledChanged side effect while the initial value is loaded in the
     // constructor, so opening the page does not log a misleading "changed" or re-persist.
     private bool _newRequestAlertInitializing = true;
+
+    // The same guard for the picture cache's toggle: the stored value arrives after the constructor has run, and
+    // reading it must not be mistaken for somebody having changed it.
+    private bool _pictureCacheInitializing = true;
 
     public ComputerManagementViewModel ComputerManagement { get; }
 
@@ -171,6 +181,49 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         get; set;
     } = string.Empty;
+
+    /// <summary>
+    /// Whether pictures are copied onto this computer, for every computer that signs in rather than only this one.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsPictureCacheEnabled
+    {
+        get; set;
+    } = true;
+
+    /// <summary>The folder this computer keeps its cached pictures in, as configured.</summary>
+    [ObservableProperty]
+    public partial string PictureCacheFolderPath
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>
+    /// What the folder box holds.
+    /// </summary>
+    /// <remarks>
+    /// Kept apart from <see cref="PictureCacheFolderPath"/> so that typing in the box does not look like a saved
+    /// change, and an edit nobody saved is never treated as the configured folder.
+    /// </remarks>
+    [ObservableProperty]
+    public partial string PictureCacheFolderInput
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>What the picture cache section last did, in a sentence.</summary>
+    [ObservableProperty]
+    public partial string PictureCacheStatusMessage
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>Whether a picture copy is running, so the button is not started twice.</summary>
+    [ObservableProperty]
+    public partial bool IsPictureCacheBusy
+    {
+        get; set;
+    }
 
     public ObservableCollection<ComputerOption> AvailableWorkstations { get; } = new();
 
@@ -396,6 +449,27 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "item",
         "work center");
 
+    /// <summary>
+    /// The picture cache's settings.
+    /// </summary>
+    /// <remarks>
+    /// Gated on <see cref="CanManageImageLocationSettings"/>, which is the picture screen's own gate: deciding
+    /// where this application keeps its pictures is the same subject as deciding which picture an item uses, and
+    /// the requirement to restrict both to IT Department and Developer is met by that one permission
+    /// (<c>permission.settings.part_pictures</c>) rather than by a second gate that could drift from it.
+    /// </remarks>
+    public bool IsPictureCachePanelVisible => CanManageImageLocationSettings
+        && _imageStorageConfigurationResolver is not null
+        && MatchesSearch(
+            "picture cache",
+            "image cache",
+            "cache",
+            "cached pictures",
+            "offline pictures",
+            "local copy",
+            "images",
+            "pictures");
+
     public bool IsComputersPanelVisible => ComputerManagement.CanManageComputers && MatchesSearch(
         "computer",
         "computers",
@@ -404,7 +478,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "display name",
         string.Join(" ", ComputerManagement.Computers.Select(record => record.GetDisplayLabel())));
 
-    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
+    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsPictureCachePanelVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
@@ -427,7 +501,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         StartupState startupState,
         ComputerManagementViewModel computerManagement,
         UrgencyAllotmentEditorViewModel urgencyAllotments,
-        IMockServiceRefreshClient mockServiceRefreshClient)
+        IMockServiceRefreshClient mockServiceRefreshClient,
+        IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
+        IConfigSettingsValueService? configSettingsValueService = null,
+        IImageCacheSyncService? imageCacheSyncService = null)
     {
         StartupDebugLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
@@ -439,6 +516,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _navigationService = navigationService;
         _startupState = startupState;
         _mockServiceRefreshClient = mockServiceRefreshClient;
+
+        // Optional so that a host without a picture cache still opens this screen: with none registered the
+        // section stays hidden rather than offering controls that would do nothing.
+        _imageStorageConfigurationResolver = imageStorageConfigurationResolver;
+        _configSettingsValueService = configSettingsValueService;
+        _imageCacheSyncService = imageCacheSyncService;
         ComputerManagement = computerManagement;
         UrgencyAllotments = urgencyAllotments;
 
@@ -452,6 +535,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
         _ = UrgencyAllotments.LoadAsync();
         InitializeIgnoredLocations();
+        _ = InitializePictureCacheAsync();
 
         SwitchThemeCommand = new RelayCommand<ElementTheme>(
             async (param) =>
@@ -1050,6 +1134,192 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// serving cached content (FR-025, SC-011).
     /// </para>
     /// </remarks>
+    /// <summary>
+    /// Reads the picture cache's stored settings.
+    /// </summary>
+    /// <remarks>
+    /// Started from the constructor and awaited by nothing, like the other panels on this screen: the page must not
+    /// block on a store read, and the shipped defaults answer until the real values arrive. A read that fails
+    /// leaves those defaults in place and is recorded rather than shown.
+    /// </remarks>
+    private async Task InitializePictureCacheAsync()
+    {
+        if (_imageStorageConfigurationResolver is null)
+        {
+            _pictureCacheInitializing = false;
+            return;
+        }
+
+        try
+        {
+            PictureCacheFolderPath = await _imageStorageConfigurationResolver
+                .GetImageCacheFolderPathAsync()
+                .ConfigureAwait(true);
+            PictureCacheFolderInput = PictureCacheFolderPath;
+
+            IsPictureCacheEnabled = await _imageStorageConfigurationResolver
+                .GetImageCacheEnabledAsync()
+                .ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "SettingsPictureCache",
+                ex,
+                "The picture cache's settings could not be read; the shipped defaults are shown and the store will be asked again next visit.");
+        }
+        finally
+        {
+            _pictureCacheInitializing = false;
+            RefreshSearchVisibility();
+        }
+    }
+
+    partial void OnIsPictureCacheEnabledChanged(bool value)
+    {
+        if (_pictureCacheInitializing)
+        {
+            return;
+        }
+
+        _ = SavePictureCacheEnabledAsync(value);
+    }
+
+    /// <summary>
+    /// Stores the picture cache toggle for everybody, then says what will happen next.
+    /// </summary>
+    /// <remarks>
+    /// The copy itself is not started here: switching it off should not mean "stop half way", and switching it on
+    /// is what the next start does anyway. The message says "next time" for that reason.
+    /// </remarks>
+    private async Task SavePictureCacheEnabledAsync(bool value)
+    {
+        try
+        {
+            await SaveAppWideSettingAsync(
+                ConfigSettingKeys.ImageCacheEnabled,
+                "bool",
+                text: null,
+                boolean: value).ConfigureAwait(true);
+
+            PictureCacheStatusMessage = value
+                ? "Saved for every computer. Pictures will be copied onto each one the next time the application starts."
+                : "Saved for every computer. Pictures will be read from the network the next time the application starts.";
+        }
+        catch (Exception ex)
+        {
+            PictureCacheStatusMessage = "Unable to save that change.";
+            StartupDebugLog.Error("SettingsPictureCache", ex, "The picture cache toggle could not be stored.");
+        }
+    }
+
+    /// <summary>Stores the cache folder that was typed into the box, for everybody.</summary>
+    [RelayCommand]
+    private async Task SavePictureCacheFolderAsync()
+    {
+        if (_configSettingsValueService is null || _imageStorageConfigurationResolver is null)
+        {
+            return;
+        }
+
+        var folder = PictureCacheFolderInput?.Trim() ?? string.Empty;
+
+        if (folder.Length == 0)
+        {
+            PictureCacheStatusMessage = "A folder is needed before this can be saved.";
+            return;
+        }
+
+        try
+        {
+            await SaveAppWideSettingAsync(
+                ConfigSettingKeys.ImageCacheFolderPath,
+                "text",
+                folder,
+                boolean: null).ConfigureAwait(true);
+
+            PictureCacheFolderPath = folder;
+            PictureCacheStatusMessage = $"Saved for every computer. Pictures will be cached in {folder}.";
+        }
+        catch (Exception ex)
+        {
+            PictureCacheStatusMessage = "Unable to save that folder.";
+            StartupDebugLog.Error("SettingsPictureCache", ex, "The picture cache folder could not be stored.");
+        }
+    }
+
+    /// <summary>
+    /// Copies the pictures onto this computer now, without waiting for the next start.
+    /// </summary>
+    /// <remarks>
+    /// The same synchronisation the startup step runs, so the two can never disagree about what a cached picture
+    /// is. What it did is reported as counts, because a folder that turned out to be empty and a copy that did
+    /// nothing look identical otherwise.
+    /// </remarks>
+    [RelayCommand]
+    private async Task RefreshPictureCacheAsync()
+    {
+        if (_imageCacheSyncService is null || IsPictureCacheBusy)
+        {
+            return;
+        }
+
+        IsPictureCacheBusy = true;
+        PictureCacheStatusMessage = "Copying pictures...";
+
+        try
+        {
+            var result = await _imageCacheSyncService.SynchronizeAsync().ConfigureAwait(true);
+
+            PictureCacheStatusMessage = result.SourcesSkipped.Count > 0
+                ? $"Copied {result.Copied}, removed {result.Removed}. Nothing was done for {string.Join(", ", result.SourcesSkipped)}, which could not be reached."
+                : $"Copied {result.Copied}, removed {result.Removed}.";
+        }
+        catch (Exception ex)
+        {
+            PictureCacheStatusMessage = "Unable to copy the pictures.";
+            StartupDebugLog.Error("SettingsPictureCache", ex, "The picture copy requested from the Settings screen failed.");
+        }
+        finally
+        {
+            IsPictureCacheBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Writes one picture-cache setting for every user of the application.
+    /// </summary>
+    /// <remarks>
+    /// Scoped <c>all_users</c> deliberately: the requirement is that changing this on one computer changes it
+    /// everywhere, which a person-scoped row would not do. The resolver's cached answers are dropped afterwards,
+    /// because it holds them for minutes and would otherwise hand back the value that was just replaced.
+    /// </remarks>
+    /// <param name="settingKey">The setting key to write.</param>
+    /// <param name="valueType">The value's type, so the right column is written.</param>
+    /// <param name="text">The text value, for a text setting.</param>
+    /// <param name="boolean">The flag value, for a flag setting.</param>
+    private async Task SaveAppWideSettingAsync(string settingKey, string valueType, string? text, bool? boolean)
+    {
+        if (_configSettingsValueService is null)
+        {
+            throw new InvalidOperationException("No configuration store is available to write this setting to.");
+        }
+
+        await _configSettingsValueService.SetSettingValueAsync(
+            new ConfigSettingValue
+            {
+                SettingKey = settingKey,
+                ScopeType = "all_users",
+                ScopeKey = "all_users",
+                SettingValue = text,
+                SettingValueBool = boolean,
+                ValueType = valueType,
+            },
+            _startupState.UserId > 0 ? _startupState.UserId : null).ConfigureAwait(true);
+
+        _imageStorageConfigurationResolver?.InvalidateCache();
+    }
+
     [RelayCommand]
     private async Task RequestCacheRefreshAsync()
     {

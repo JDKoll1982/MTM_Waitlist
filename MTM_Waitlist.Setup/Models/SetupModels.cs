@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Setup.Models;
 
@@ -166,7 +167,7 @@ public sealed class SetupWorkflowState : ObservableObject
 
 public sealed class SetupWorkCenter : ObservableObject
 {
-    private const string DefaultWorkstationImagePath = "Assets/Placeholders/default-workstation-image.png";
+    private const string DefaultWorkstationImagePath = ImagePicturePolicy.NoImagePath;
 
     private bool _isSelected;
 
@@ -364,7 +365,7 @@ public sealed class SetupDunnageType
 
 public sealed class SetupDunnagePart
 {
-    private const string NoImagePath = "Assets/Packaging/window-icon.ico";
+    private const string NoImagePath = ImagePicturePolicy.NoImagePath;
 
     public string Id { get; set; } = string.Empty;
 

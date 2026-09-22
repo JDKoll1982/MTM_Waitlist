@@ -105,11 +105,23 @@ public static class ConfigSettingKeys
     /// Setting Key: "image_storage.shared_folder_path"
     /// Value Type: "text" (string path)
     /// Scope: "all_users" (global setting)
-    /// Description: Admin-configured UNC path to the shared network folder for image files.
+    /// Description: IT-configured path to the shared folder the application's pictures are copied into.
     ///             When set, overrides the value from appsettings.json.
-    /// Example: "X:\Software Development\Live Applications\MTM_Waitlist\Images"
+    /// Default: \\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist Application\Images
     /// </summary>
     public const string ImageStorageSharedFolderPath = "image_storage.shared_folder_path";
+
+    /// <summary>
+    /// The folder holding the key files, one per key, named "{keyname}.txt".
+    /// Setting Key: "keys.folder_path"
+    /// Value Type: "text" (string path)
+    /// Scope: "all_users" (global setting)
+    /// Description: IT-configured path to the folder holding the application's key files. Nothing reads these
+    ///             files yet; the setting exists so the first feature that needs a key has one agreed place to
+    ///             read it from. When set, overrides the value from appsettings.json.
+    /// Default: \\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\Keys - DO NOT EDIT FILES\MTM Waitlist Application
+    /// </summary>
+    public const string KeysFolderPath = "keys.folder_path";
 
     /// <summary>
     /// Image storage maximum file size override.
@@ -141,4 +153,24 @@ public static class ConfigSettingKeys
     /// Default: 30
     /// </summary>
     public const string ImageStorageArchiveKeepDays = "image_storage.archive_keep_days";
+
+    /// <summary>
+    /// The folder on this computer that pictures are mirrored into.
+    /// Setting Key: "image_cache.folder_path"
+    /// Value Type: "text" (string path)
+    /// Scope: "all_users" (global setting)
+    /// Description: IT-configured local folder for the picture cache. When set, overrides appsettings.json.
+    /// Default: %LOCALAPPDATA%\MTM_Waitlist\ImageCache
+    /// </summary>
+    public const string ImageCacheFolderPath = "image_cache.folder_path";
+
+    /// <summary>
+    /// Whether startup mirrors the picture roots onto this computer.
+    /// Setting Key: "image_cache.enabled"
+    /// Value Type: "bool" (true/false)
+    /// Scope: "all_users" (global setting)
+    /// Description: When false, no picture is copied locally and every screen reads from the share.
+    /// Default: true
+    /// </summary>
+    public const string ImageCacheEnabled = "image_cache.enabled";
 }

@@ -3,6 +3,7 @@ using System.Windows.Input;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
@@ -18,8 +19,7 @@ public sealed class SampleOrderTests
         {
             Title = "Material request",
             Subtitle = "Expo Drive",
-            Status = "Ready",
-            ImagePath = "coil.png"
+            Status = "Ready"
         };
 
         order.Fields.Add(new WaitlistField { Label = "Request type", Value = "Coil" });
@@ -27,7 +27,6 @@ public sealed class SampleOrderTests
         Assert.AreEqual("Material request", order.Title);
         Assert.AreEqual("Expo Drive", order.Subtitle);
         Assert.AreEqual("Ready", order.Status);
-        Assert.AreEqual("coil.png", order.ImagePath);
         Assert.AreEqual(1, order.Fields.Count);
         Assert.AreEqual("Request type", order.Fields[0].Label);
         Assert.AreEqual("Coil", order.Fields[0].Value);
@@ -44,7 +43,7 @@ public sealed class SampleOrderTests
         {
             Title = "Pickup",
             Subtitle = "MMC0001000",
-            ImagePath = "pickup_wip.png",
+            ResolvedImagePath = @"X:\Software Development\Live Applications\MTM_Waitlist\Images\request_item_pickup-coil.png",
             ItemCode = "pickup-coil",
             RequestedByName = "Ada Lovelace",
             RequestedPressName = "Press 4",
@@ -55,7 +54,10 @@ public sealed class SampleOrderTests
         Assert.AreEqual("Pickup", order.Title, "Line 1 is the Item's umbrella phrase.");
         Assert.AreEqual("MMC0001000", order.Subtitle, "Line 2 is the Item's identifier.");
         Assert.AreEqual("pickup-coil", order.ItemCode, "The row's identity is the Item code the request was raised with.");
-        Assert.AreEqual("Assets/pickup_wip.png", order.EffectiveImagePath, "The row's own picture is what the card draws when nothing overrides it.");
+        Assert.AreEqual(
+            @"X:\Software Development\Live Applications\MTM_Waitlist\Images\request_item_pickup-coil.png",
+            order.EffectiveImagePath,
+            "The picture configured for the Item is what the card draws.");
 
         Assert.AreEqual("Ada Lovelace", order.RequestedByName, "The Requested by row.");
         Assert.AreEqual("Press 4", order.RequestedPressName, "The Press row.");
@@ -145,6 +147,43 @@ public sealed class SampleOrderTests
             Array.Empty<string>(),
             offenders,
             $"The row exposes {string.Join(", ", offenders)}, which is a layout selected by the Item (FR-006).");
+    }
+
+    /// <summary>
+    /// An Item nobody has given a picture to says so.
+    /// </summary>
+    /// <remarks>
+    /// The row used to fall back to built-in artwork chosen from a table of Item codes, which drew a picture of a
+    /// box labelled "WIP" on a request for a coil — a picture of a different thing standing in for an absence.
+    /// A picture is a setting now, so no setting means the application's one no-image picture.
+    /// </remarks>
+    [TestMethod]
+    public void SampleOrder_WithNothingConfigured_DrawsTheNoImagePlaceholder()
+    {
+        var order = new SampleOrder { Title = "Pickup", ItemCode = "pickup-wip" };
+
+        Assert.AreEqual(
+            ImagePicturePolicy.NoImagePath,
+            order.EffectiveImagePath,
+            "A row with nothing configured must say there is no picture rather than borrow one.");
+    }
+
+    /// <summary>
+    /// The absence is the point, so it is stated as an absence: the row has no member holding an asset file name
+    /// for the card to draw, which is the door built-in per-Item artwork came back through last time. The
+    /// resolved pictures the row does carry — <c>ResolvedImagePath</c> and <c>WorkCenterImagePath</c> — are
+    /// paths a person configured, and they exist for the card to prefer.
+    /// </summary>
+    [TestMethod]
+    public void SampleOrder_CarriesNoBuiltInPictureMember()
+    {
+        const string removedMember = "ImagePath";
+
+        Assert.IsNull(
+            typeof(SampleOrder).GetProperty(
+                removedMember,
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance),
+            $"The row exposes '{removedMember}' again, which is where built-in per-Item artwork comes back in.");
     }
 
     [TestMethod]

@@ -187,6 +187,76 @@
                     </wct:SettingsExpander.Items>
                 </wct:SettingsExpander>
 
+                <!-- Picture cache -->
+                <wct:SettingsExpander
+                    AutomationProperties.AutomationId="SettingsPage_PictureCacheExpander"
+                    x:Name="PictureCacheExpander"
+                    x:Load="{x:Bind ViewModel.IsPictureCachePanelVisible, Mode=OneWay}"
+                    Description="Pictures are copied onto this computer when the application starts, so the waitlist draws them from local disk instead of reaching across the network for each one. A picture that has changed on the share is copied again, and a copy whose picture has gone is removed. Nothing else is touched."
+                    Header="Picture Cache"
+                    HorizontalAlignment="Stretch"
+                    IsExpanded="False">
+                    <wct:SettingsExpander.HeaderIcon>
+                        <SymbolIcon Symbol="Download" />
+                    </wct:SettingsExpander.HeaderIcon>
+
+                    <wct:SettingsExpander.Items>
+                        <wct:SettingsCard
+                            Description="Applies to every computer, not just this one. Turned off, pictures are read from the network share."
+                            Header="Cache pictures on this computer">
+                            <ToggleSwitch
+                                AutomationProperties.AutomationId="SettingsPage_PictureCache_Toggle"
+                                AutomationProperties.Name="Cache pictures on this computer"
+                                IsOn="{x:Bind ViewModel.IsPictureCacheEnabled, Mode=TwoWay}"
+                                OffContent="Off"
+                                OnContent="On" />
+                        </wct:SettingsCard>
+
+                        <wct:SettingsCard
+                            Description="Where the copies are kept. Each picture keeps the folder it has on the share, so the two trees read the same way."
+                            Header="Cache folder">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBox
+                                    AutomationProperties.AutomationId="SettingsPage_PictureCache_FolderBox"
+                                    AutomationProperties.Name="Picture cache folder"
+                                    MinWidth="320"
+                                    PlaceholderText="%LOCALAPPDATA%\MTM_Waitlist\ImageCache"
+                                    Text="{x:Bind ViewModel.PictureCacheFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button
+                                    AutomationProperties.AutomationId="SettingsPage_PictureCache_SaveFolderButton"
+                                    AutomationProperties.Name="Save picture cache folder"
+                                    MinWidth="90"
+                                    Click="SavePictureCacheFolder_Click"
+                                    Content="Save" />
+                            </StackPanel>
+                        </wct:SettingsCard>
+
+                        <wct:SettingsCard
+                            Description="Runs the same copy the application runs when it starts, without waiting for a restart."
+                            Header="Copy pictures now">
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="8">
+                                <Button
+                                    AutomationProperties.AutomationId="SettingsPage_PictureCache_RefreshButton"
+                                    AutomationProperties.Name="Copy pictures now"
+                                    MinWidth="110"
+                                    Click="RefreshPictureCache_Click"
+                                    Content="Copy now" />
+                                <ProgressRing
+                                    Width="20"
+                                    Height="20"
+                                    IsActive="{x:Bind ViewModel.IsPictureCacheBusy, Mode=OneWay}" />
+                                <TextBlock
+                                    MaxWidth="420"
+                                    VerticalAlignment="Center"
+                                    Text="{x:Bind ViewModel.PictureCacheStatusMessage, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </wct:SettingsCard>
+                    </wct:SettingsExpander.Items>
+                </wct:SettingsExpander>
+
                 <!-- Local work centers -->
                 <wct:SettingsExpander
                     AutomationProperties.AutomationId="SettingsPage_LocalWorkCentersExpander"
