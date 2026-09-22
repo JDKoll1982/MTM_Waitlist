@@ -1,5 +1,6 @@
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models.UserManagement;
+using MTM_Waitlist.Module_Core.Permissions;
 
 namespace MTM_Waitlist.Module_Settings.Models;
 
@@ -69,6 +70,18 @@ public sealed class UserSummary
         }
     }
 
+    /// <summary>
+    /// Fact 4's badge: the glyph the one badge lookup answers for this role, so no role arrives at the grey
+    /// default and no second mapping is built here (FR-105).
+    /// </summary>
+    public string RoleGlyph => RoleBadgeCatalog.For(RoleCode).Glyph;
+
+    /// <summary>
+    /// The colour that glyph is painted in, as the lookup holds it, so the row carries a colour without the
+    /// model holding a brush.
+    /// </summary>
+    public string RoleColorHex => RoleBadgeCatalog.For(RoleCode).ColorHex;
+
     /// <summary>Fact 5, as the store holds it: whether the account may sign in at all.</summary>
     public bool IsActive { get; }
 
@@ -80,6 +93,13 @@ public sealed class UserSummary
     /// active person needs no label to say so, and a second key for it would be a label nobody needs.
     /// </remarks>
     public string StatusText => IsSwitchedOff ? "UserManagement_Row.SwitchedOff".GetLocalized() : string.Empty;
+
+    /// <summary>
+    /// Fact 5 as the table's status pill reads it, which states the condition in both directions: a pill that
+    /// said nothing at all for an active account would leave the reader unable to tell it from a pill that failed
+    /// to render.
+    /// </summary>
+    public string ActiveStateText => IsSwitchedOff ? StatusText : "UserManagement_Row.Active".GetLocalized();
 
     /// <summary>
     /// Whether the person is switched off, which is what the row marks them with. A switched-off person is listed

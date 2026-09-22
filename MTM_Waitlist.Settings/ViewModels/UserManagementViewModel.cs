@@ -49,6 +49,11 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
     /// </summary>
     internal const string PersonPageViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.EditUserViewModel";
 
+    /// <summary>
+    /// The page size the table opens at: fifteen rows, which is the size the design that the table follows shows.
+    /// </summary>
+    private const int RowsPerPageOpening = 15;
+
     /// <summary>How many people the search and the role filter are hiding.</summary>
     private int _hiddenCount;
 
@@ -100,6 +105,16 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
     /// <summary>Everyone the current filter leaves, in the store's order.</summary>
     public ObservableCollection<UserSummary> People { get; } = new();
 
+    /// <summary>
+    /// The rows the table is showing: the current page of <see cref="People"/>, in the order the reader chose
+    /// (T045). The page is a slice of the filtered roster rather than a second read, so paging can never show a
+    /// person the filter excluded.
+    /// </summary>
+    public ObservableCollection<UserSummary> PageRows { get; } = new();
+
+    /// <summary>The page sizes the footer offers, smallest first.</summary>
+    public IReadOnlyList<int> RowsPerPageOptions { get; } = [10, 15, 25, 50];
+
     /// <summary>The roles the filter offers, from the one catalogue read.</summary>
     public ObservableCollection<UserListFilterOption> RoleOptions { get; } = new();
 
@@ -144,6 +159,77 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
     {
         get; set;
     } = string.Empty;
+
+    /// <summary>
+    /// How many rows the table shows at once. Changing it returns to the first page, because the page the reader
+    /// was on no longer contains the row they were reading.
+    /// </summary>
+    [ObservableProperty]
+    public partial int RowsPerPage
+    {
+        get; set;
+    } = RowsPerPageOpening;
+
+    /// <summary>Which page of the filtered roster the table is showing, counting from one.</summary>
+    [ObservableProperty]
+    public partial int CurrentPage
+    {
+        get; set;
+    } = 1;
+
+    /// <summary>
+    /// The column the roster is ordered by, and its direction. The table's headers set both; nothing else does.
+    /// </summary>
+    public RosterSortColumn SortColumn { get; private set; } = RosterSortColumn.Name;
+
+    /// <summary>Whether the sort column runs to its end rather than its beginning.</summary>
+    public bool SortDescending { get; private set; }
+
+    /// <summary>How many pages the filtered roster fills, which is never fewer than one.</summary>
+    public int PageCount => Math.Max(1, (int)Math.Ceiling(People.Count / (double)RowsPerPage));
+
+    /// <summary>Whether there is a page before this one.</summary>
+    public bool CanGoToPreviousPage => CurrentPage > 1;
+
+    /// <summary>Whether there is a page after this one.</summary>
+    public bool CanGoToNextPage => CurrentPage < PageCount;
+
+    /// <summary>
+    /// Which people this page is showing, out of how many are listed, said the way a table's footer says it.
+    /// </summary>
+    public string RangeText
+    {
+        get
+        {
+            if (People.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var first = ((CurrentPage - 1) * RowsPerPage) + 1;
+            var last = Math.Min(People.Count, CurrentPage * RowsPerPage);
+
+            return string.Format(
+                System.Globalization.CultureInfo.CurrentCulture,
+                "UserManagement_Pager.Range".GetLocalized(),
+                first,
+                last,
+                People.Count);
+        }
+    }
+
+    /// <summary>Which page this is, out of how many.</summary>
+    public string PageText => string.Format(
+        System.Globalization.CultureInfo.CurrentCulture,
+        "UserManagement_Pager.Page".GetLocalized(),
+        CurrentPage,
+        PageCount);
+
+    /// <summary>How many people are listed, said beside the title.</summary>
+    public string RosterCountText => string.Format(
+        System.Globalization.CultureInfo.CurrentCulture,
+        "UserManagement_Title.Count".GetLocalized(),
+        People.Count);
 
     /// <summary>
     /// Whether a filter is in force, which is what makes "nobody matches" different from "there is nobody"
@@ -207,6 +293,23 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
 
     public string BackLabelText => "UserManagement_Back.Label".GetLocalized();
 
+    /// <summary>The five column headings, in the order the table shows the five facts (FR-086).</summary>
+    public string ColumnNameHeaderText => "UserManagement_Column.Name".GetLocalized();
+
+    public string ColumnSignInNameHeaderText => "UserManagement_Column.SignInName".GetLocalized();
+
+    public string ColumnEmployeeNumberHeaderText => "UserManagement_Column.EmployeeNumber".GetLocalized();
+
+    public string ColumnRoleHeaderText => "UserManagement_Column.Role".GetLocalized();
+
+    public string ColumnStatusHeaderText => "UserManagement_Column.Status".GetLocalized();
+
+    public string RowsPerPageLabelText => "UserManagement_Pager.RowsPerPage".GetLocalized();
+
+    public string PreviousPageText => "UserManagement_Pager.Previous".GetLocalized();
+
+    public string NextPageText => "UserManagement_Pager.Next".GetLocalized();
+
     /// <inheritdoc />
     public void OnNavigatedTo(object parameter) => Initialization = InitializeAsync();
 
@@ -251,6 +354,10 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
         IsBusy = true;
         IsStoreUnavailable = false;
 
+        // A load is a new answer, so the reader starts at its beginning rather than on a page that a narrower
+        // filter may no longer have.
+        CurrentPage = 1;
+
         var filter = CurrentFilter();
         _filterAppliedAtLastLoad = filter.IsApplied;
 
@@ -292,8 +399,62 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
         finally
         {
             IsBusy = false;
+            ShowCurrentPage();
             AnnounceState();
         }
+    }
+
+    /// <summary>Moves to the page before this one. The control is only usable when there is one.</summary>
+    [RelayCommand]
+    public void PreviousPage()
+    {
+        if (!CanGoToPreviousPage)
+        {
+            return;
+        }
+
+        CurrentPage--;
+        ShowCurrentPage();
+    }
+
+    /// <summary>Moves to the page after this one. The control is only usable when there is one.</summary>
+    [RelayCommand]
+    public void NextPage()
+    {
+        if (!CanGoToNextPage)
+        {
+            return;
+        }
+
+        CurrentPage++;
+        ShowCurrentPage();
+    }
+
+    /// <summary>
+    /// Orders the roster by one of the five facts and shows its first page. Clicking the column already ordered
+    /// by reverses it, which is what a table's heading does. The argument is the column's name as the page spells
+    /// it, and a name that matches no column is ignored rather than guessed at.
+    /// </summary>
+    [RelayCommand]
+    public void SortBy(string column)
+    {
+        if (!Enum.TryParse<RosterSortColumn>(column, out var chosen))
+        {
+            return;
+        }
+
+        if (SortColumn == chosen)
+        {
+            SortDescending = !SortDescending;
+        }
+        else
+        {
+            SortColumn = chosen;
+            SortDescending = false;
+        }
+
+        CurrentPage = 1;
+        ShowCurrentPage();
     }
 
     /// <summary>Clears the filter and shows everyone, which is what the "show everyone" control does.</summary>
@@ -489,6 +650,54 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
         }
     }
 
+    /// <summary>
+    /// Rebuilds the table's rows: the whole filtered roster in the reader's order, cut down to the page they are
+    /// on. Paging is this slice and nothing else, which is what keeps it inside the filter (T045).
+    /// </summary>
+    private void ShowCurrentPage()
+    {
+        // A page size or a filter can leave the page the reader was on past the end of the roster.
+        CurrentPage = Math.Clamp(CurrentPage, 1, PageCount);
+
+        var ordered = OrderedPeople();
+
+        PageRows.Clear();
+        foreach (var person in ordered.Skip((CurrentPage - 1) * RowsPerPage).Take(RowsPerPage))
+        {
+            PageRows.Add(person);
+        }
+
+        AnnouncePageState();
+    }
+
+    private IEnumerable<UserSummary> OrderedPeople() => SortColumn switch
+    {
+        RosterSortColumn.SignInName => OrderByText(person => person.UsernameNormalized),
+        RosterSortColumn.EmployeeNumber => OrderByText(person => person.EmployeeIdentifier),
+        RosterSortColumn.Role => OrderByText(person => person.RoleText),
+        RosterSortColumn.Status => SortDescending
+            ? People.OrderByDescending(person => person.IsActive)
+            : People.OrderBy(person => person.IsActive),
+        _ => OrderByText(person => person.DisplayName),
+    };
+
+    /// <summary>
+    /// Orders text the way a person reads it: the machine's own collation with case set aside, so the sign-in
+    /// names, which the store holds in capitals, sort where a reader looks for them rather than before every
+    /// lower-case entry.
+    /// </summary>
+    private IOrderedEnumerable<UserSummary> OrderByText(Func<UserSummary, string> key) =>
+        SortDescending
+            ? People.OrderByDescending(key, StringComparer.CurrentCultureIgnoreCase)
+            : People.OrderBy(key, StringComparer.CurrentCultureIgnoreCase);
+
+    /// <summary>A different page size is a different set of pages, so the reader goes back to the first one.</summary>
+    partial void OnRowsPerPageChanged(int value)
+    {
+        CurrentPage = 1;
+        ShowCurrentPage();
+    }
+
     private void AnnounceState()
     {
         OnPropertyChanged(nameof(HasPeople));
@@ -496,5 +705,17 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
         OnPropertyChanged(nameof(IsNoMatch));
         OnPropertyChanged(nameof(IsFilterApplied));
         OnPropertyChanged(nameof(HiddenCountText));
+        AnnouncePageState();
+    }
+
+    private void AnnouncePageState()
+    {
+        OnPropertyChanged(nameof(PageCount));
+        OnPropertyChanged(nameof(CanGoToPreviousPage));
+        OnPropertyChanged(nameof(CanGoToNextPage));
+        OnPropertyChanged(nameof(RangeText));
+        OnPropertyChanged(nameof(PageText));
+        OnPropertyChanged(nameof(RosterCountText));
+        OnPropertyChanged(nameof(HasPeople));
     }
 }

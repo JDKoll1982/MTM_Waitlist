@@ -234,6 +234,134 @@ public sealed class UserManagementViewModelTests
         Assert.AreEqual("text", saved.ValueType);
     }
 
+    [TestMethod]
+    public async Task TheRoster_OpensOnItsFirstPage_WithTheRestBehindIt()
+    {
+        var viewModel = Build(rows: People(20));
+
+        await viewModel.InitializeAsync();
+
+        Assert.AreEqual(20, viewModel.People.Count, "The filtered roster is the whole list, not the page shown.");
+        Assert.AreEqual(15, viewModel.RowsPerPage, "The table opens at the size the design it follows shows.");
+        Assert.AreEqual(15, viewModel.PageRows.Count);
+        Assert.AreEqual(2, viewModel.PageCount);
+        Assert.IsFalse(viewModel.CanGoToPreviousPage, "The first page has no page before it.");
+        Assert.IsTrue(viewModel.CanGoToNextPage);
+
+        var firstPageRange = viewModel.RangeText;
+        Assert.IsFalse(string.IsNullOrWhiteSpace(firstPageRange), "The footer says which people this page is showing, out of how many are listed.");
+        Assert.AreEqual(1, viewModel.CurrentPage);
+        Assert.AreEqual("Person 001", viewModel.PageRows[0].DisplayName);
+
+        viewModel.NextPageCommand.Execute(null);
+
+        Assert.AreEqual(2, viewModel.CurrentPage);
+        Assert.AreEqual(5, viewModel.PageRows.Count);
+        Assert.AreEqual("Person 016", viewModel.PageRows[0].DisplayName, "The second page carries on where the first stopped.");
+        Assert.IsTrue(viewModel.CanGoToPreviousPage);
+        Assert.IsFalse(viewModel.CanGoToNextPage);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(viewModel.PageText));
+    }
+
+    [TestMethod]
+    public async Task APage_IsCutFromTheFilteredRoster_SoNoPageShowsAPersonTheFilterHid()
+    {
+        var service = new FakeUserManagementService(rows: People(20));
+        var viewModel = Build(service: service);
+
+        await viewModel.InitializeAsync();
+        Assert.AreEqual(2, viewModel.PageCount);
+
+        // What the store answers once a term narrows the roster to three people, which is fewer than one page.
+        service.AnswerWith = People(3);
+        viewModel.SearchText = "smith";
+        await viewModel.LoadAsync();
+
+        Assert.AreEqual(3, viewModel.People.Count);
+        Assert.AreEqual(1, viewModel.PageCount, "Paging counts the filtered roster, so a filter cannot be paged away.");
+        Assert.AreEqual(3, viewModel.PageRows.Count, "The page is a slice of the filtered roster rather than a second read.");
+        Assert.IsFalse(viewModel.CanGoToNextPage);
+    }
+
+    [TestMethod]
+    public async Task AColumnHeader_OrdersTheRoster_AndClickingItAgainReversesIt()
+    {
+        var viewModel = Build(rows: [
+            Row(1, "BETA", "A Person", "1", "developer", "Developer", true),
+            Row(2, "ALPHA", "B Person", "2", "setup", "Setup", true),
+            Row(3, "GAMMA", "C Person", "3", "plant_manager", "Plant Manager", true)]);
+
+        await viewModel.InitializeAsync();
+
+        Assert.AreEqual(RosterSortColumn.Name, viewModel.SortColumn, "The table opens ordered by the person's name.");
+        Assert.AreEqual("A Person", viewModel.PageRows[0].DisplayName);
+
+        viewModel.SortByCommand.Execute("SignInName");
+
+        CollectionAssert.AreEqual(
+            new[] { "ALPHA", "BETA", "GAMMA" },
+            viewModel.PageRows.Select(person => person.UsernameNormalized).ToArray(),
+            "A heading orders the roster by the fact that column shows.");
+        Assert.IsFalse(viewModel.SortDescending);
+
+        viewModel.SortByCommand.Execute("SignInName");
+
+        Assert.IsTrue(viewModel.SortDescending, "Clicking the column already ordered by reverses it.");
+        CollectionAssert.AreEqual(
+            new[] { "GAMMA", "BETA", "ALPHA" },
+            viewModel.PageRows.Select(person => person.UsernameNormalized).ToArray(),
+            "Reversed, the caller reaches the other end of the same fact.");
+
+        viewModel.SortByCommand.Execute("no_such_column");
+
+        Assert.AreEqual(RosterSortColumn.SignInName, viewModel.SortColumn, "A heading that names no fact leaves the order alone.");
+    }
+
+    [TestMethod]
+    public async Task OrderingAndADifferentPageSize_EachReturnToTheFirstPage()
+    {
+        var viewModel = Build(rows: People(20));
+
+        await viewModel.InitializeAsync();
+        viewModel.NextPageCommand.Execute(null);
+        Assert.AreEqual(2, viewModel.CurrentPage);
+
+        viewModel.SortByCommand.Execute("EmployeeNumber");
+        Assert.AreEqual(1, viewModel.CurrentPage, "A new order has no page two for the caller to still be on.");
+
+        viewModel.NextPageCommand.Execute(null);
+        viewModel.RowsPerPage = 50;
+        Assert.AreEqual(1, viewModel.CurrentPage, "A different page size is a different set of pages.");
+        Assert.AreEqual(20, viewModel.PageRows.Count);
+        Assert.AreEqual(1, viewModel.PageCount);
+    }
+
+    [TestMethod]
+    public async Task NobodyListed_LeavesTheFooterWithNothingToSay()
+    {
+        var viewModel = Build(rows: []);
+
+        await viewModel.InitializeAsync();
+
+        Assert.IsFalse(viewModel.HasPeople, "With nobody listed the footer is not shown.");
+        Assert.AreEqual(string.Empty, viewModel.RangeText, "A range is not offered for a roster that has none.");
+        Assert.AreEqual(1, viewModel.PageCount, "There is always a page one, even when it is empty.");
+        Assert.IsFalse(viewModel.CanGoToNextPage);
+    }
+
+    /// <summary>A roster of a known size, numbered so a test can state the order it expects.</summary>
+    private static List<UserRosterRow> People(int count) =>
+        Enumerable.Range(1, count)
+            .Select(index => Row(
+                index,
+                $"USER{index:D3}",
+                $"Person {index:D3}",
+                $"{index:D4}",
+                "developer",
+                "Developer",
+                true))
+            .ToList();
+
     private static UserRosterRow Row(
         long userId, string username, string displayName, string employeeIdentifier, string roleCode, string roleName, bool isActive) =>
         new(userId, $"public-{userId}", username, displayName, employeeIdentifier, roleCode, roleName, 10, isActive);
