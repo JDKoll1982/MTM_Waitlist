@@ -68,13 +68,42 @@ public static class ImageCachePaths
     /// </summary>
     /// <param name="configuredCacheRoot">The configured folder, or null or blank for the default.</param>
     /// <remarks>
+    /// <para>
     /// Configured in one place at startup, before anything reads the cache, which is the same arrangement the
     /// Dunnage image root uses (<c>DunnageImagePathResolver.ConfigureRootFolder</c>).
+    /// </para>
+    /// <para>
+    /// The configured value is expanded and then required to be absolute. A folder written as
+    /// <c>%LOCALAPPDATA%\MTM_Waitlist\ImageCache</c> is a <b>relative</b> path as far as the file system is
+    /// concerned, so taking it literally creates a folder <i>named</i> <c>%LOCALAPPDATA%</c> wherever the
+    /// application happened to be started from — the cache lands beside the executable instead of in the
+    /// account's own local application data, and the store's shared setting is what promises the latter. That is
+    /// not hypothetical: it is how 156 cached pictures came to be committed to this repository under
+    /// <c>%LOCALAPPDATA%/MTM_Waitlist/ImageCache</c>.
+    /// </para>
     /// </remarks>
     public static void SetCacheRoot(string? configuredCacheRoot) =>
         _configuredCacheRoot = string.IsNullOrWhiteSpace(configuredCacheRoot)
             ? null
-            : configuredCacheRoot.Trim();
+            : ExpandConfiguredCacheRoot(configuredCacheRoot);
+
+    /// <summary>
+    /// Expands the environment variables in a configured cache folder, and answers the shipped default when what
+    /// is left is not an absolute folder.
+    /// </summary>
+    /// <param name="configuredCacheRoot">The configured folder as it was written.</param>
+    /// <returns>An absolute folder, or <see cref="DefaultCacheRoot"/>.</returns>
+    private static string ExpandConfiguredCacheRoot(string configuredCacheRoot)
+    {
+        var expanded = Environment.ExpandEnvironmentVariables(configuredCacheRoot.Trim());
+
+        // A variable that could not be resolved leaves its percent signs behind, and anything not rooted gets
+        // resolved against the working directory — which is the defect this guards against. Both take the default:
+        // an unexpected folder in the right place beats a correct-looking folder beside the executable.
+        return expanded.Contains('%') || Path.IsPathFullyQualified(expanded) is false
+            ? DefaultCacheRoot
+            : expanded;
+    }
 
     /// <summary>
     /// The places the MTM Receiving Application's own Dunnage cache can be, in the order they are looked in.

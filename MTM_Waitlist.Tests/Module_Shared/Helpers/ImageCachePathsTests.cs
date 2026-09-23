@@ -108,4 +108,64 @@ public sealed class ImageCachePathsTests
 
         Assert.AreEqual(Path.Combine(@"C:\cache", "request_item", "sub", "picture.png"), path);
     }
+
+    [TestMethod]
+    public void AConfiguredFolderWrittenWithAnEnvironmentVariable_IsResolvedRatherThanTakenLiterally()
+    {
+        try
+        {
+            ImageCachePaths.SetCacheRoot(@"%LOCALAPPDATA%\MTM_Waitlist\ImageCache");
+
+            Assert.AreEqual(
+                ImageCachePaths.DefaultCacheRoot,
+                ImageCachePaths.LocalCacheRoot,
+                "A configured %LOCALAPPDATA% folder must resolve to this account's own local application data. " +
+                "Taken literally it is a relative path, so the cache is created in a folder named %LOCALAPPDATA% " +
+                "beside whatever folder the application happened to be started from — which is how cached pictures " +
+                "once ended up committed inside the repository.");
+        }
+        finally
+        {
+            ImageCachePaths.SetCacheRoot(null);
+        }
+    }
+
+    [TestMethod]
+    public void AConfiguredFolderThatIsNotAbsolute_FallsBackToTheShippedDefault()
+    {
+        try
+        {
+            ImageCachePaths.SetCacheRoot(@"MTM_Waitlist\ImageCache");
+
+            Assert.AreEqual(
+                ImageCachePaths.DefaultCacheRoot,
+                ImageCachePaths.LocalCacheRoot,
+                "A folder with no root is resolved against the working directory by the file system, which is what " +
+                "puts a cache somewhere nobody chose.");
+        }
+        finally
+        {
+            ImageCachePaths.SetCacheRoot(null);
+        }
+    }
+
+    [TestMethod]
+    public void AConfiguredAbsoluteFolder_IsAdoptedAsWritten()
+    {
+        var chosen = Path.Combine(_workingDirectory, "chosen");
+
+        try
+        {
+            ImageCachePaths.SetCacheRoot(chosen);
+
+            Assert.AreEqual(
+                chosen,
+                ImageCachePaths.LocalCacheRoot,
+                "A folder somebody chose on purpose is still the one used.");
+        }
+        finally
+        {
+            ImageCachePaths.SetCacheRoot(null);
+        }
+    }
 }

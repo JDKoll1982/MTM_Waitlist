@@ -19,6 +19,13 @@
 
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+        <!--
+        The navigation pane's own scale. The labels carry this size, and the control's Settings entry is given the
+        same size in code-behind because the control generates that item rather than this page declaring it.
+        -->
+        <x:Double x:Key="ShellNavItemFontSize">18</x:Double>
+
         <SolidColorBrush x:Key="HeaderStepCurrentBrush" Color="#FFF7630C" />
         <DataTemplate x:Key="HeaderStepPendingTemplate" x:DataType="headerModels:HeaderStep">
             <Grid Width="120">
@@ -255,23 +262,35 @@
             IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
             IsSettingsVisible="True"
             SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}">
+            <!--
+            The navigation pane drawn larger than the shipped default: a 16-pixel icon and the stock 36-pixel row
+            are hard to read on a shop-floor screen. Both are theme resources the item's own template reads, so
+            overriding them here resizes every item at once — the declared ones and the control's Settings entry —
+            without replacing the item style, which would take the item's template with it.
+            -->
+            <NavigationView.Resources>
+                <x:Double x:Key="NavigationViewItemOnLeftIconBoxHeight">28</x:Double>
+                <x:Double x:Key="NavigationViewItemOnLeftMinHeight">48</x:Double>
+            </NavigationView.Resources>
             <NavigationView.MenuItems>
                 <!--
                 TODO: Update item titles by updating <x:Uid>.Content entries in Strings/en-us/Resources.resw.
                 https://docs.microsoft.com/windows/uwp/app-resources/localize-strings-ui-manifest#refer-to-a-string-resource-identifier-from-xaml
 
-                TODO: Update item icons by updating the BitmapIcon.UriSource properties.
-                The Assets/Icons artwork is greyscale, so ShowAsMonochrome must stay false — the
-                default (true) flattens each glyph to a single Foreground-coloured silhouette.
+                The icons are font glyphs rather than the greyscale artwork in Assets/Icons. A bitmap is scaled up to
+                fill the pane's icon box and goes soft as the pane grows, which is what the pane was doing; a glyph is
+                drawn as an outline and stays sharp at any size. Both codes are taken from the Segoe Fluent Icons
+                list — e8fd is BulletedList and e90f is Repair — and both are also in the older Segoe MDL2 Assets
+                set, which is what a Windows 10 machine falls back to.
                 -->
-                <NavigationViewItem AutomationProperties.AutomationId="ShellPage_WaitlistNavItem" x:Uid="Shell_WaitlistView" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewViewModel">
+                <NavigationViewItem AutomationProperties.AutomationId="ShellPage_WaitlistNavItem" x:Uid="Shell_WaitlistView" FontSize="{StaticResource ShellNavItemFontSize}" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewViewModel">
                     <NavigationViewItem.Icon>
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/waitlist.png" ShowAsMonochrome="False" />
+                        <FontIcon Glyph="&#xE8FD;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem AutomationProperties.AutomationId="ShellPage_WorkCenterSetupNavItem" x:Uid="Shell_ModuleSetup" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Setup.ViewModels.SetupWorkCenterViewModel">
+                <NavigationViewItem AutomationProperties.AutomationId="ShellPage_WorkCenterSetupNavItem" x:Uid="Shell_ModuleSetup" FontSize="{StaticResource ShellNavItemFontSize}" helpers:NavigationHelper.NavigateTo="MTM_Waitlist.Module_Setup.ViewModels.SetupWorkCenterViewModel">
                     <NavigationViewItem.Icon>
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/setup.png" ShowAsMonochrome="False" />
+                        <FontIcon Glyph="&#xE90F;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
