@@ -14,7 +14,7 @@ namespace MTM_Waitlist.Module_Settings.Services;
 public static class RequestItemPickerRules
 {
     /// <summary>
-    /// Catalogued Items that are <b>never offered</b>: they exist in the catalog so the twenty-three-row
+    /// Catalogued Items that are <b>never offered</b>: they exist in the catalog so the twenty-four-row
     /// identity assertion stays true, and are hidden by this rule rather than by deletion — a hidden Item and a
     /// missing row are different states (FR-028).
     /// </summary>
@@ -48,7 +48,9 @@ public static class RequestItemPickerRules
             "deliver-coil" or "assist-coil-turn" or "deliver-wrong-coil" => RequestJobPartKind.Coil,
             "deliver-flatstock" or "deliver-wrong-flatstock" => RequestJobPartKind.Flatstock,
             "pickup-die" or "deliver-die" => RequestJobPartKind.Die,
-            "pickup-component" => RequestJobPartKind.Component,
+            // Both component Items are gated the same way, so the Deliver family mirrors the Pickup choice
+            // rather than offering a component on a job that has none.
+            "pickup-component" or "deliver-component" => RequestJobPartKind.Component,
             "pickup-dunnage" or "deliver-dunnage" => RequestJobPartKind.Dunnage,
             // The Scrap Item is offered only for a real scrap decision — not for 'No Scrap' and not for the
             // 'Scrap Type Required' placeholder, which means no decision was made (FR-031, contract §5).

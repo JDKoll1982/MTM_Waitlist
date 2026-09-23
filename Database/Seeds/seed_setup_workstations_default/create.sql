@@ -22,7 +22,7 @@ INSERT IGNORE INTO
     )
 VALUES (
         UUID(),
-        '100-3',
+        '100-03',
         'Expo Drive',
         1,
         10,
@@ -33,7 +33,7 @@ VALUES (
     ),
     (
         UUID(),
-        '100-6',
+        '100-06',
         'Expo Drive',
         1,
         20,
@@ -44,7 +44,7 @@ VALUES (
     ),
     (
         UUID(),
-        '100-7',
+        '100-07',
         'Expo Drive',
         1,
         30,
@@ -55,7 +55,7 @@ VALUES (
     ),
     (
         UUID(),
-        '100-8',
+        '100-08',
         'Expo Drive',
         1,
         40,
@@ -66,7 +66,7 @@ VALUES (
     ),
     (
         UUID(),
-        '100-9',
+        '100-09',
         'Expo Drive',
         1,
         50,

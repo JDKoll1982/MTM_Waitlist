@@ -6,12 +6,12 @@ gates it and the answer it captures. A consumer or a test codes against the iden
 ## 1. The steps
 
 ```text
-Work Centre ──▶ Category ──▶ [availability resolved] ──▶ Item ──▶ [Dunnage] ──▶ Details ──▶ Preview ──▶ Summary ──▶ Result
+Work Centre ──▶ Category ──▶ [availability resolved] ──▶ Item ──▶ [Dunnage | Die | Component] ──▶ Details ──▶ Preview ──▶ Summary ──▶ Result
 ```
 
-The **Dunnage** step is entered only when the chosen Item's configuration names the job's dunnage list as the source
-of its answer (§4); every other Item goes from Item straight to Details or Preview. Nothing else about the step order
-changes.
+The **Dunnage**, **Die** and **Component** steps are entered only when the chosen Item's configuration names the
+matching job list as the source of its answer (§4); every other Item goes from Item straight to Details or Preview.
+Nothing else about the step order changes.
 
 | Step | View model | Offers |
 |---|---|---|
@@ -19,8 +19,13 @@ changes.
 | Category | `NewRequestJobTypeViewModel` (re-laid) | the four Categories, each filtered by the availability pass (§3) |
 | Item | `NewRequestItemViewModel` (new) | the Items of the chosen Category that the requesting job supports, in the Item's `Order` |
 | Dunnage | `NewRequestDunnageViewModel` (new) | the dunnage parts the requesting job carries, as picture cards, plus the substitute picker (§9) |
+| Die | `NewRequestDieViewModel` | the dies the requesting job carries, as cards naming each die's number and where it lives, with a **select all** action (FR-054) |
+| Component | `NewRequestComponentViewModel` | the components the requesting job carries, as one **clickable box** each — the part number, and a picture box that draws the shared no-image placeholder until part numbers can be pictured — so the operator no longer picks a part number out of a drop-down list. The question is the **row's own prompt**, because the two component rows ask it differently (one collects, one brings) |
 | Details | `NewRequestDetailsViewModel` (re-laid) | the Item's configured prompt, limits and fields — nothing when the Item requires no answer |
 | Preview / Summary / Result | unchanged | unchanged |
+
+The Details step keeps its own control for an enumerated answer that names no job list of its own, so a row added
+later still has a step to land on without a build (FR-015).
 
 `NewRequestSubtypePage` and `NewRequestSubtypeViewModel` are **gone**; no screen offers a request type or a subtype
 (FR-003).
@@ -64,7 +69,7 @@ are catalogued but never offered (FR-028).
 |---|---|---|---|
 | `pickup-coil` | `HasCoil` **or** `HasFlatstock` (D21) | — | the coil number |
 | `pickup-die` | `HasDie` | pick **which die** — the job's dies are offered as cards, more than one may be chosen, and a **select all** action takes every die in one action; one request per die (D22) | the die's own number — `FGT0002000` (§10) |
-| `pickup-component` | `HasComponent` | pick which component, from the job's list | the component's part number |
+| `pickup-component` | `HasComponent` | pick which component, from the job's list — on the **component step**, as one clickable box per component the job carries (2026-09-22) | the component's part number |
 | `pickup-fg` | **out of scope** | — | — |
 | `pickup-ncm` | **out of scope** | — | — |
 | `pickup-wip` | **out of scope** | — | — |
@@ -77,6 +82,7 @@ are catalogued but never offered (FR-028).
 | `deliver-riser-table` | always offered | — | `Riser Table` (fixed) |
 | `deliver-hopper` | always offered | — | `Hopper` (fixed) |
 | `deliver-flatstock` | `HasFlatstock` | — | the flatstock part number |
+| `deliver-component` | `HasComponent` | pick which component, from the job's list — the Deliver counterpart of `pickup-component`, added 2026-09-22, asked on the **component step** as one clickable box per component | the component's part number |
 | `deliver-die` | `HasDie` | pick **which die**, exactly as `pickup-die` does — FR-054 applies to a die whichever Item raises it, so this Item asks the same question and offers the same select-all action | the die's own number — `FGT0002000` (§10) |
 | `deliver-dunnage` | `HasDunnage` | pick which dunnage they need, from the parts the job carries — on its own step, with the substitute picker beside it | the part they picked |
 | `deliver-wrong-coil` | `HasCoil` | one short explanation of why the coil is wrong | the **correct** coil being brought |

@@ -54,16 +54,18 @@ public static class WaitlistRequestTitles
     /// <para>
     /// The request holds one captured answer, and where the Item's identifier <b>is</b> that answer the template
     /// says so: a template naming <c>{dunnage_part}</c> is filled from the captured answer, which is the dunnage
-    /// part the operator ended on — one the job carried, or their substitute. The stored request cannot tell those
-    /// two apart and does not need to: the request stores the part the operator said they needed (FR-048,
-    /// FR-051).
+    /// part the operator ended on — one the job carried, or their substitute — and a template naming
+    /// <c>{component}</c> is filled from it for the same reason, because the component Items ask the operator
+    /// which component they need just as the dunnage Items ask which part. The stored request cannot tell those
+    /// apart and does not need to: the request stores what the operator said they needed (FR-035, FR-048, FR-051).
     /// </para>
     /// <para>
-    /// The die's number and its location, and the job's own part number, are <b>job</b> values, not answers — the
-    /// request never stored them — so they come from the job snapshot the composition root hands in. Each one is
-    /// filled only when the Item's templates actually name it, so an Item that asks for none of them is handed
-    /// none of them and its card is unchanged (FR-053). Every token left unfilled stays unresolved, with the
-    /// Item's own display name shown — never a substituted value, never a blank
+    /// A template naming <c>{part_number}</c> is filled with the <b>part the request is about</b> — see
+    /// <see cref="PartNumberFor"/> — and a template naming <c>{scrap_type}</c> with the scrap type the job has
+    /// already decided (FR-030). Both are job values the request never stored, so both come from the job snapshot
+    /// the composition root hands in. Each one is filled only when the Item's templates actually name it, so an
+    /// Item that asks for none of them is handed none of them and its card is unchanged (FR-053). Every token left
+    /// unfilled stays unresolved, with the Item's own display name shown — never a substituted value, never a blank
     /// (<c>contracts/card-and-identifier.md</c> §3).
     /// </para>
     /// <para>
@@ -96,11 +98,54 @@ public static class WaitlistRequestTitles
 
         return new RequestItemLine2Context(
             Answer: answer,
+            // The component the operator picked is the one answer the request carries, exactly as the dunnage part
+            // they picked is — so a component Item's identifier is that answer and never a word for the kind of
+            // thing it is (FR-035).
+            Component: NamesToken(item, "component") ? answer : null,
+            PartNumber: NamesToken(item, "part_number") ? PartNumberFor(item, job) : null,
+            ScrapType: NamesToken(item, "scrap_type") ? job?.ScrapType : null,
             DunnagePart: NamesToken(item, "dunnage_part") ? answer : null,
             JobPartNumber: NamesToken(item, "job_part_number") ? job?.JobPartNumber : null,
             DieNumber: namesDie ? (choseADie ? chosen?.PartNumber ?? storedDie : job?.DieNumber) : null,
             DieLocation: namesDie ? (choseADie ? chosen?.Location : job?.DieLocation) : null);
     }
+
+    /// <summary>
+    /// The part a request is <b>about</b>, for the Items whose identifier names <c>{part_number}</c>.
+    /// <para>
+    /// An Item that is about a material the job holds names <b>that material's own number</b> — the coil or the
+    /// flatstock the job carries, which is the part a handler goes and gets — and an Item that is about no
+    /// particular material (a table assist, and the finished-goods, non-conforming, work-in-process and
+    /// outside-service Items) names the <b>job's own part number</b>, which is the part the request is run
+    /// against. That is the same value the request page shows for a declared <c>Part</c> row, so the two surfaces
+    /// cannot disagree about the same request.
+    /// </para>
+    /// <para>
+    /// Which material an Item is about comes from the same rule that decides whether the Item is offered at all
+    /// (<see cref="RequestItemPickerRules.RequiredJobPart"/>), so the picker and the card cannot disagree about
+    /// what an Item is about (FR-002, FR-013). An Item the job cannot supply a part for yields nothing, and its
+    /// card reports the configuration problem rather than showing a name in place of a part (FR-026).
+    /// </para>
+    /// </summary>
+    private static string? PartNumberFor(RequestItemDefinition? item, RequestJobPartAvailability? job)
+    {
+        if (item is null || job is null)
+        {
+            return null;
+        }
+
+        // The merged Pickup Item covers a coil or a flatstock, so the material the job actually holds decides
+        // (D21); every other material Item names the one material it is about.
+        return RequestItemPickerRules.RequiredJobPart(item) switch
+        {
+            RequestJobPartKind.Coil => Trimmed(job.CoilPartNumber),
+            RequestJobPartKind.CoilOrFlatstock => Trimmed(job.CoilPartNumber) ?? Trimmed(job.FlatstockPartNumber),
+            RequestJobPartKind.Flatstock => Trimmed(job.FlatstockPartNumber),
+            _ => Trimmed(job.JobPartNumber),
+        };
+    }
+
+    private static string? Trimmed(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     /// <summary>
     /// The die the request stored, found among the dies the job carries so its number and its location can be read

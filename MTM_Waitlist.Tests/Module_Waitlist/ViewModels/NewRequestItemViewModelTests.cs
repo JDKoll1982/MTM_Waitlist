@@ -122,7 +122,7 @@ public sealed class NewRequestItemViewModelTests
 
     private static NewRequestFlowState CreateState(RequestCategory category, RequestJobPartAvailability availability) => new()
     {
-        WorkCenter = "100-3",
+        WorkCenter = "100-03",
         Category = category,
         Availability = availability,
     };

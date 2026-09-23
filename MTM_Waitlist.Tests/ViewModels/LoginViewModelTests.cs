@@ -8,12 +8,14 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
+using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.ViewModels;
 
 [TestClass]
 public sealed class LoginViewModelTests
 {
+    private const string LoginPageXamlPath = "Module_Startup/Views/LoginPage.xaml";
     [TestMethod]
     public async Task NewUserAsyncCommand_SubmitsRequestAndUpdatesStateAsync()
     {
@@ -297,18 +299,23 @@ public sealed class LoginViewModelTests
     }
 
     [TestMethod]
-    public void Constructor_WhenStartupRequiresAPasswordChange_OpensOnTheChangePanelWithoutTheSignInForm()
+    public void Constructor_WhenStartupRequiresAPasswordChange_StillShowsTheSignInForm()
     {
-        // Startup already established this from the store, so the operator must never see (or have to use)
-        // the sign-in form: the window opens on the set-a-new-password surface (Phase 32).
+        // A pending change is not proof of identity. Startup learns it from a read that carries no credential
+        // material, so the person must still present the temporary credential before the change panel opens;
+        // otherwise anyone at this workstation could set the password, and the attempt limit could never bite
+        // (decision 9, decision 14, FR-029).
         var startupState = SignedInState();
         startupState.RequirePasswordChange = true;
         startupState.PasswordChangeUserId = 42;
 
         var viewModel = CreateViewModel(startupState);
 
-        Assert.IsTrue(viewModel.ShowPasswordChangePrompt);
-        Assert.IsFalse(viewModel.ShowSignInForm, "The sign-in form must not appear when the password must change.");
+        Assert.IsFalse(viewModel.ShowPasswordChangePrompt, "The change panel must wait for the temporary credential.");
+        Assert.IsTrue(viewModel.ShowSignInForm, "The sign-in form is where the temporary credential is entered.");
+        Assert.IsTrue(
+            viewModel.LoginHint.Contains("temporary password", StringComparison.Ordinal),
+            "The person is told to sign in with the temporary password.");
     }
 
     [TestMethod]
@@ -321,24 +328,144 @@ public sealed class LoginViewModelTests
     }
 
     [TestMethod]
-    public async Task ChangePasswordAsync_WhenOpenedFromStartup_UpdatesTheResolvedAccountAsync()
+    public async Task ChangePasswordAsync_WhenTheTemporaryCredentialWasAccepted_UpdatesThatAccountAsync()
     {
-        var startupState = SignedInState();
-        startupState.RequirePasswordChange = true;
-        startupState.PasswordChangeUserId = 42;
-        var repository = new RecordingStartupSessionRepository();
+        // The account the change targets comes from the credential that was just accepted, never from anything
+        // startup inferred, so an update can only land on the person who proved they hold the credential.
+        var repository = new RecordingStartupSessionRepository
+        {
+            CheckCredentialsResult = StartupCredentialCheckResult.Success(42, "Developer", requiresPasswordChange: true),
+        };
         var viewModel = CreateViewModel(
-            startupState,
+            SignedInState(),
             gateService: new FakeComputerGateService { CheckResult = new ComputerGateCheck(ComputerGateStatus.Registered) },
             navigationService: new RecordingNavigationService(),
             windowService: new RecordingStartupWindowService(),
             sessionRepository: repository);
+        viewModel.Username = "johnk";
+        viewModel.Password = "4821";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.IsTrue(viewModel.ShowPasswordChangePrompt, "An accepted temporary credential opens the change panel.");
+
         viewModel.NewPassword = "pw-4321";
         viewModel.ConfirmPassword = "pw-4321";
 
         await viewModel.ChangePasswordCommand.ExecuteAsync(null);
 
-        Assert.AreEqual(42, repository.LastUpdatedUserId, "The update must target the account startup resolved.");
+        Assert.AreEqual(42, repository.LastUpdatedUserId, "The update must target the account that signed in.");
+    }
+
+    // ── The remaining-attempts line (FR-040, FR-041, FR-042, FR-044) ────────────────────────────────────
+
+    [TestMethod]
+    public async Task SignInAsync_AfterTheFirstWrongTryOnATemporaryCredential_ShowsHowManyAttemptsRemain()
+    {
+        var repository = new RecordingStartupSessionRepository
+        {
+            CheckCredentialsResult = StartupCredentialCheckResult.Failed() with
+            {
+                HoldsTemporaryCredential = true,
+                TemporaryCredentialFailedAttempts = 1,
+            },
+        };
+        var viewModel = CreateViewModel(SignedInState(), sessionRepository: repository);
+        viewModel.Username = "johnk";
+        viewModel.Password = "1234";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.IsTrue(viewModel.ShowRemainingAttempts, "The line appears once an attempt has failed (FR-041).");
+        StringAssert.Contains(viewModel.RemainingAttemptsMessage, "4", "Four of the five attempts remain after one failure (FR-041).");
+    }
+
+    [TestMethod]
+    public async Task SignInAsync_BeforeAnyAttemptHasFailed_ShowsNoAttemptLine()
+    {
+        var viewModel = CreateViewModel(
+            SignedInState(),
+            gateService: new FakeComputerGateService { CheckResult = new ComputerGateCheck(ComputerGateStatus.Registered) },
+            navigationService: new RecordingNavigationService(),
+            windowService: new RecordingStartupWindowService());
+        viewModel.Username = "johnk";
+        viewModel.Password = "pw-1234";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.IsFalse(viewModel.ShowRemainingAttempts, "Nothing is shown before an attempt has failed (FR-041).");
+        Assert.AreEqual(string.Empty, viewModel.RemainingAttemptsMessage);
+    }
+
+    [TestMethod]
+    public async Task SignInAsync_WhenTheTemporaryCredentialHasStoppedBeingAccepted_SaysAFreshResetIsNeeded()
+    {
+        var repository = new RecordingStartupSessionRepository
+        {
+            CheckCredentialsResult = StartupCredentialCheckResult.Failed() with
+            {
+                HoldsTemporaryCredential = true,
+                TemporaryCredentialFailedAttempts = 5,
+                TemporaryCredentialAttemptLimitReached = true,
+            },
+        };
+        var viewModel = CreateViewModel(SignedInState(), sessionRepository: repository);
+        viewModel.Username = "johnk";
+        viewModel.Password = "1234";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.IsTrue(viewModel.ShowRemainingAttempts);
+        StringAssert.Contains(
+            viewModel.RemainingAttemptsMessage,
+            "reset",
+            "The person must be told that someone entitled has to reset it (FR-044).");
+        StringAssert.Contains(viewModel.RemainingAttemptsMessage, "fresh", "A fresh credential is what they are waiting for (FR-044).");
+    }
+
+    [TestMethod]
+    public async Task SignInAsync_WhenAnAccountWithoutATemporaryCredentialFails_BehavesExactlyAsBefore()
+    {
+        // An ordinary account and a sign-in name that does not exist both arrive here as a plain failure, and an
+        // ordinary sign-in has no attempt limit at all (FR-040, FR-042).
+        var repository = new RecordingStartupSessionRepository { CheckCredentialsResult = StartupCredentialCheckResult.Failed() };
+        var viewModel = CreateViewModel(SignedInState(), sessionRepository: repository);
+        viewModel.Username = "nobody";
+        viewModel.Password = "pw-1234";
+
+        await viewModel.SignInCommand.ExecuteAsync(null);
+
+        Assert.IsFalse(viewModel.ShowRemainingAttempts, "The limit must not be visible for an account that holds no temporary credential.");
+        Assert.AreEqual(string.Empty, viewModel.RemainingAttemptsMessage);
+        Assert.AreEqual("Sign-in failed. Check your credentials and try again.", viewModel.LoginHint);
+    }
+
+    [TestMethod]
+    public void TheSignInPage_ShowsTheAttemptLine_AndOffersNoReset()
+    {
+        var xaml = ReadSource(LoginPageXamlPath);
+
+        StringAssert.Contains(
+            xaml,
+            "x:Load=\"{x:Bind ViewModel.ShowRemainingAttempts, Mode=OneWay}\"",
+            "The line is shown only when there is something to say (FR-041).");
+        StringAssert.Contains(xaml, "AutomationProperties.AutomationId=\"LoginPage_RemainingAttemptsText\"");
+        StringAssert.Contains(
+            xaml,
+            "{x:Bind ViewModel.RemainingAttemptsMessage, Mode=OneWay}",
+            "The line reads the view model's message.");
+
+        Assert.IsFalse(
+            xaml.Contains("reset", StringComparison.OrdinalIgnoreCase),
+            "No reset is offered anywhere on the sign-in screen, and a person cannot reset their own password (FR-028).");
+    }
+
+    private static string ReadSource(string relativePath)
+    {
+        var path = Path.Combine(RepositoryPatternScan.FindRepositoryRoot(), relativePath.Replace('/', Path.DirectorySeparatorChar));
+        Assert.IsTrue(File.Exists(path), $"The artifact is missing: {path}");
+
+        return File.ReadAllText(path);
     }
 
     private static StartupState SignedInState()

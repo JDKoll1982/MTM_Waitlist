@@ -29,8 +29,15 @@ using MTM_Waitlist.Notifications;
 
 namespace MTM_Waitlist.Services.DependencyInjection;
 
-public static class ServiceRegistrationExtensions
+public static partial class ServiceRegistrationExtensions
 {
+    /// <summary>
+    /// The routes feature 006's story phases contribute. Each phase registers its own page in its own file and adds
+    /// its route here, and the page service applies them as it builds its route table, so no phase edits the
+    /// factory the others also edit.
+    /// </summary>
+    private static readonly List<Action<PageService>> s_pageRouteRegistrations = [];
+
     public static IServiceCollection AddAppServices(this IServiceCollection services, HostBuilderContext context)
     {
         // Default activation handler
@@ -84,6 +91,7 @@ public static class ServiceRegistrationExtensions
             pageService.Configure<NewRequestItemViewModel, NewRequestItemPage>();
             pageService.Configure<NewRequestDunnageViewModel, NewRequestDunnagePage>();
             pageService.Configure<NewRequestDieViewModel, NewRequestDiePage>();
+            pageService.Configure<NewRequestComponentViewModel, NewRequestComponentPage>();
             pageService.Configure<NewRequestDetailsViewModel, NewRequestDetailsPage>();
             pageService.Configure<NewRequestPreviewViewModel, NewRequestPreviewPage>();
             pageService.Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
@@ -97,6 +105,14 @@ public static class ServiceRegistrationExtensions
             pageService.Configure<SetupDunnageTypeViewModel, SetupDunnageTypePage>();
             pageService.Configure<SetupReviewViewModel, SetupReviewPage>();
             pageService.Configure<SetupCompletionViewModel, SetupCompletionPage>();
+
+            // Feature 006's story phases each own their own registration file, so the routes they add are
+            // contributed there and applied here rather than being written into this factory by three phases.
+            foreach (var configureRoutes in s_pageRouteRegistrations)
+            {
+                configureRoutes(pageService);
+            }
+
             return pageService;
         });
         services.AddSingleton<IPageTransitionService, PageTransitionService>();
@@ -198,6 +214,8 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<NewRequestDunnagePage>();
         services.AddTransient<NewRequestDieViewModel>();
         services.AddTransient<NewRequestDiePage>();
+        services.AddTransient<NewRequestComponentViewModel>();
+        services.AddTransient<NewRequestComponentPage>();
         services.AddTransient<NewRequestDetailsViewModel>();
         services.AddTransient<NewRequestDetailsPage>();
         services.AddTransient<NewRequestPreviewViewModel>();
@@ -223,10 +241,26 @@ public static class ServiceRegistrationExtensions
             urgencyDeadlineService: provider.GetRequiredService<IUrgencyDeadlineService>(),
             messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>(),
             sortPreferenceService: provider.GetRequiredService<IWaitlistSortPreferenceService>(),
-            jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>()));
+            jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>(),
+            permissionService: provider.GetRequiredService<IPermissionService>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();
+
+        // User management and permissions (feature 006). One declaration of every permission, the user-management
+        // rules, and the store seam beneath them, all in MTM_Waitlist.Core so the sign-in path, the settings
+        // library, the setup library and the separate service host read one implementation rather than a copy.
+        services.AddSingleton<IPermissionService, PermissionService>();
+        services.AddSingleton<IRoleCatalogService, RoleCatalogService>();
+        services.AddSingleton<IUserManagementRepository, UserManagementRepository>();
+        services.AddSingleton<IUserManagementService, UserManagementService>();
+        services.AddSingleton<IPermissionAdministrationService, PermissionAdministrationService>();
+        // Feature 006's pages, one registration file per story phase so three phases never contend on this one.
+        // Each declaration below is implemented by its own file; a phase that has not landed yet contributes
+        // nothing, and the page is simply not reachable until it does.
+        RegisterUserManagementPages(services);
+        RegisterUserAccountPages(services);
+        RegisterPermissionsPages(services);
 
         // Configuration
         services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
@@ -240,8 +274,85 @@ public static class ServiceRegistrationExtensions
         // root the MTM Receiving Application writes via "Dunnage.Application.DefaultImageLocation").
         DunnageImagePathResolver.ConfigureRootFolder(context.Configuration["DunnageImageOptions:RootFolder"]);
 
+        // The local picture cache, mirroring both trees the application reads. The waitlist root is a setting, so
+        // the factory resolves it when a run starts rather than when the container is built; the Dunnage cache
+        // folder is the receiving application's own when this machine already has one, and ours when it does not.
+        services.AddSingleton<MTM_Waitlist.Module_Shared.Services.IImageCacheSyncService>(provider =>
+            new MTM_Waitlist.Module_Shared.Services.ImageCacheSyncService(async cancellationToken =>
+            {
+                var storageConfiguration = provider
+                    .GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageStorageConfigurationResolver>();
+
+                // Adopted before anything reads a cached path, so the folder the copy is written into and the
+                // folder the screens look in are the same one.
+                MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.SetCacheRoot(
+                    await storageConfiguration.GetImageCacheFolderPathAsync().ConfigureAwait(false));
+
+                if (await storageConfiguration.GetImageCacheEnabledAsync().ConfigureAwait(false) is false)
+                {
+                    // No sources means nothing is copied and nothing is removed: a machine with caching switched
+                    // off keeps whatever it already had and reads every picture from the share.
+                    return Array.Empty<MTM_Waitlist.Module_Shared.Services.ImageCacheSource>();
+                }
+
+                var sources = new List<MTM_Waitlist.Module_Shared.Services.ImageCacheSource>
+                {
+                    new(
+                        "dunnage pictures",
+                        DunnageImagePathResolver.RootFolder,
+                        MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.ResolveDunnageCacheFolder()),
+                };
+
+                // The image location service is initialized here rather than assumed. This delegate is the first
+                // thing to ask it for a path, and it runs inside startup, before any screen has initialized it:
+                // asking first threw, the synchroniser swallowed the throw as "nothing to do", and the cache was
+                // never built in the one run that is meant to build it — while the Settings screen went on saying
+                // that pictures are copied onto this computer when the application starts.
+                var imageLocationService = provider
+                    .GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>();
+
+                if (await imageLocationService.EnsureInitializedAsync().ConfigureAwait(false))
+                {
+                    sources.Insert(
+                        0,
+                        new MTM_Waitlist.Module_Shared.Services.ImageCacheSource(
+                            "waitlist pictures",
+                            await imageLocationService.GetSharedFolderPathAsync().ConfigureAwait(false),
+                            Path.Combine(
+                                MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.LocalCacheRoot,
+                                MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.WaitlistFolderName)));
+                }
+                else
+                {
+                    // One source skipped and one kept, rather than both lost: the Dunnage tree is still mirrored
+                    // from its own setting, and the waitlist pictures are read from the share for this run. The
+                    // service has already logged why it could not initialize.
+                    MTM_Waitlist.Module_Core.Helpers.StartupDebugLog.Info(
+                        "ImageCache",
+                        "The waitlist picture source is skipped for this run because the image locations could not be initialized; those pictures are read from the share.");
+                }
+
+                return sources;
+            }));
+
         services.AddModuleServices(context.Configuration);
 
         return services;
     }
+
+    /// <summary>
+    /// Registers the user-list page and its view model, in the story phase that builds them.
+    /// </summary>
+    static partial void RegisterUserManagementPages(IServiceCollection services);
+
+    /// <summary>
+    /// Registers the create page, the person's page and the one-time PIN window, in the story phase that builds
+    /// them.
+    /// </summary>
+    static partial void RegisterUserAccountPages(IServiceCollection services);
+
+    /// <summary>
+    /// Registers the permissions page and the who-holds-this view, in the story phase that builds them.
+    /// </summary>
+    static partial void RegisterPermissionsPages(IServiceCollection services);
 }

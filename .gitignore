@@ -380,3 +380,8 @@ FodyWeavers.xsd
 tools/tooltip-inventory/
 
 .codegraphy/*
+
+# A configured folder path that was taken literally instead of being expanded, which creates a folder *named*
+# after the variable beside whatever folder the application was started from. The picture cache used to land here
+# with 156 cached images, and they were committed before anyone noticed.
+/%LOCALAPPDATA%/

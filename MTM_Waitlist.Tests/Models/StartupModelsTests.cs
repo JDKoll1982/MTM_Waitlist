@@ -40,6 +40,7 @@ public sealed class StartupModelsTests
         Assert.AreEqual(string.Empty, state.HostnameNormalized);
         Assert.AreEqual(string.Empty, state.MacAddressNormalized);
         Assert.AreEqual(string.Empty, state.CurrentRole);
+        Assert.AreEqual(string.Empty, state.CurrentRoleCode);
         Assert.IsFalse(state.IsUserMatched);
         Assert.IsFalse(state.IsComputerRegistered);
         Assert.IsFalse(state.IsSessionValid);
@@ -48,7 +49,7 @@ public sealed class StartupModelsTests
         Assert.AreEqual(string.Empty, state.LoginHint);
         Assert.IsFalse(state.IsDeveloper);
 
-        state.CurrentRole = "Developer";
+        state.CurrentRoleCode = "developer";
 
         Assert.IsTrue(state.IsDeveloper);
     }

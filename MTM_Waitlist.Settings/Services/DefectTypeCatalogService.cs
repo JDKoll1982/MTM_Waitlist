@@ -1,4 +1,5 @@
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 
@@ -15,7 +16,8 @@ public sealed record DefectTypeMutationResult(bool Success, string Message)
 /// <summary>
 /// Read/write editor for the managed NCM defect-type list
 /// (<c>mtm_waitlist.waitlist_defect_types</c>) consumed by the Module_Settings defect editor (Phase 5)
-/// and, later, the Pickup NCM Item picker. SP-only access. Mutations are role-gated to Admin/Developer.
+/// and, later, the Pickup NCM Item picker. SP-only access. Mutations are gated on
+/// <c>permission.settings.defect_types</c> (FR-054).
 /// </summary>
 public interface IDefectTypeCatalogService
 {
@@ -26,7 +28,6 @@ public interface IDefectTypeCatalogService
         string name,
         string? description,
         int sortOrder,
-        string? currentUserRole,
         CancellationToken cancellationToken = default);
 
     Task<DefectTypeMutationResult> UpdateAsync(
@@ -34,16 +35,14 @@ public interface IDefectTypeCatalogService
         string name,
         string? description,
         int sortOrder,
-        string? currentUserRole,
         CancellationToken cancellationToken = default);
 
     Task<DefectTypeMutationResult> DeleteAsync(
         long id,
-        string? currentUserRole,
         CancellationToken cancellationToken = default);
 
-    /// <summary>Whether the given role may manage defect types (Admin/Developer).</summary>
-    bool CanManage(string? currentUserRole);
+    /// <summary>Whether the signed-in person may manage defect types.</summary>
+    Task<bool> CanManageAsync(CancellationToken cancellationToken = default);
 }
 
 /// <inheritdoc cref="IDefectTypeCatalogService"/>
@@ -51,13 +50,16 @@ public sealed class DefectTypeCatalogService : IDefectTypeCatalogService
 {
     private const MySqlDatabaseTarget DatabaseTarget = MySqlDatabaseTarget.MtmWaitlist;
 
-    private static readonly string[] AllowedRoles = { "admin", "administrator", "developer" };
+    /// <summary>The one permission that admits this catalogue's editor.</summary>
+    private const string ManagePermissionKey = PermissionKeys.SettingsDefectTypes;
 
     private readonly IMySqlHelperServer _mySqlHelperServer;
+    private readonly IPermissionService _permissionService;
 
-    public DefectTypeCatalogService(IMySqlHelperServer mySqlHelperServer)
+    public DefectTypeCatalogService(IMySqlHelperServer mySqlHelperServer, IPermissionService permissionService)
     {
         _mySqlHelperServer = mySqlHelperServer;
+        _permissionService = permissionService;
     }
 
     public async Task<IReadOnlyList<DefectTypeDefinition>> GetActiveAsync(CancellationToken cancellationToken = default)
@@ -80,11 +82,11 @@ public sealed class DefectTypeCatalogService : IDefectTypeCatalogService
     }
 
     public async Task<DefectTypeMutationResult> AddAsync(
-        string name, string? description, int sortOrder, string? currentUserRole, CancellationToken cancellationToken = default)
+        string name, string? description, int sortOrder, CancellationToken cancellationToken = default)
     {
-        if (!CanManage(currentUserRole))
+        if (!await CanManageAsync(cancellationToken).ConfigureAwait(false))
         {
-            return DefectTypeMutationResult.Fail("Only Admin/Developer roles can add defect types.");
+            return DefectTypeMutationResult.Fail("Only somebody who holds the defect-type permission can add defect types.");
         }
 
         if (string.IsNullOrWhiteSpace(name))
@@ -109,11 +111,11 @@ public sealed class DefectTypeCatalogService : IDefectTypeCatalogService
     }
 
     public async Task<DefectTypeMutationResult> UpdateAsync(
-        long id, string name, string? description, int sortOrder, string? currentUserRole, CancellationToken cancellationToken = default)
+        long id, string name, string? description, int sortOrder, CancellationToken cancellationToken = default)
     {
-        if (!CanManage(currentUserRole))
+        if (!await CanManageAsync(cancellationToken).ConfigureAwait(false))
         {
-            return DefectTypeMutationResult.Fail("Only Admin/Developer roles can edit defect types.");
+            return DefectTypeMutationResult.Fail("Only somebody who holds the defect-type permission can edit defect types.");
         }
 
         if (id <= 0 || string.IsNullOrWhiteSpace(name))
@@ -138,11 +140,11 @@ public sealed class DefectTypeCatalogService : IDefectTypeCatalogService
             : DefectTypeMutationResult.Fail("Unable to update defect type (not found or duplicate name?).");
     }
 
-    public async Task<DefectTypeMutationResult> DeleteAsync(long id, string? currentUserRole, CancellationToken cancellationToken = default)
+    public async Task<DefectTypeMutationResult> DeleteAsync(long id, CancellationToken cancellationToken = default)
     {
-        if (!CanManage(currentUserRole))
+        if (!await CanManageAsync(cancellationToken).ConfigureAwait(false))
         {
-            return DefectTypeMutationResult.Fail("Only Admin/Developer roles can remove defect types.");
+            return DefectTypeMutationResult.Fail("Only somebody who holds the defect-type permission can remove defect types.");
         }
 
         if (id <= 0)
@@ -160,9 +162,16 @@ public sealed class DefectTypeCatalogService : IDefectTypeCatalogService
             : DefectTypeMutationResult.Fail("Unable to remove defect type (not found).");
     }
 
-    public bool CanManage(string? currentUserRole)
-        => !string.IsNullOrWhiteSpace(currentUserRole)
-            && AllowedRoles.Contains(currentUserRole.Trim(), StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Whether the signed-in person may manage defect types, read from the declaration rather than from a list of
+    /// role names kept here (FR-054).
+    /// </summary>
+    /// <remarks>
+    /// A store that cannot be read is answered by the key's shipped fallback rather than by a refusal (FR-050),
+    /// and this key's fallback is a refusal, so an unanswerable question does not admit anybody.
+    /// </remarks>
+    public Task<bool> CanManageAsync(CancellationToken cancellationToken = default) =>
+        _permissionService.HasPermissionAsync(ManagePermissionKey, cancellationToken);
 
     private async Task<int> ExecuteNonQueryAsync(
         string procedure, IReadOnlyDictionary<string, object?> parameters, CancellationToken cancellationToken)

@@ -1,10 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using MTM_Waitlist.Module_Shared.Helpers;
+
 namespace MTM_Waitlist.Module_Shared.Models;
 
 public sealed partial class WorkCenterSelectionItem : ObservableObject
 {
-    private const string DefaultWorkCenterImagePath = "Assets/Placeholders/default-workstation-image.png";
+    private const string DefaultWorkCenterImagePath = ImagePicturePolicy.NoImagePath;
 
     private bool _isSelected;
 

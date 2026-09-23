@@ -13,12 +13,6 @@ namespace MTM_Waitlist.Module_Settings.ViewModels;
 /// </summary>
 public sealed partial class ComputerManagementViewModel : ObservableRecipient
 {
-    private static readonly string[] AllowedComputerManageRoles =
-    {
-        "Admin",
-        "Developer",
-    };
-
     private readonly IComputerRegistryService _computerRegistryService;
     private readonly StartupState _startupState;
 
@@ -30,8 +24,38 @@ public sealed partial class ComputerManagementViewModel : ObservableRecipient
         _startupState = startupState;
     }
 
-    public bool CanManageComputers => AllowedComputerManageRoles.Any(role =>
-        string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+    /// <summary>
+    /// Whether the signed-in person may manage the computer registry, answered from
+    /// <c>permission.settings.computers</c> rather than from a list of role names kept here (FR-054).
+    /// </summary>
+    /// <remarks>
+    /// The Settings screen asks the permission service once for every gate it and its child view models need, so
+    /// this is an answer handed in by <see cref="ApplyPermission"/> rather than a second read. It stays false
+    /// until that answer arrives, which is what keeps the registry from being listed for somebody who may not see
+    /// it.
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool CanManageComputers
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// Applies the answer the Settings screen read for this screen's one permission and, when it admits the
+    /// person, loads the registry.
+    /// </summary>
+    /// <param name="canManage">Whether the signed-in person holds it.</param>
+    public void ApplyPermission(bool canManage)
+    {
+        CanManageComputers = canManage;
+
+        if (canManage)
+        {
+            // The registry is only readable by somebody who may manage it, so the load is the answer's
+            // consequence rather than a second decision.
+            _ = LoadAsync();
+        }
+    }
 
     public bool IsComputersPanelVisible => CanManageComputers && MatchesSearch(
         "computer",

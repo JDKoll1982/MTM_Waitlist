@@ -422,6 +422,9 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
             return null;
         }
 
-        return resolvedConnectionString;
+        // The same host fallback every other reader applies. Without it this service's own connection, which
+        // is the one the hot-work-center save uses, tried the shared plant host and failed on a workstation
+        // that cannot reach it.
+        return MySqlHostFallback.Apply(resolvedConnectionString) ?? resolvedConnectionString;
     }
 }

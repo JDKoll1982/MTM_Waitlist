@@ -1,54 +1,33 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Media.Imaging;
+
+using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Settings.Converters;
 
 /// <summary>
-/// Turns a resolved image path into a bitmap. Handles absolute and UNC paths from the shared
-/// folder as well as app-relative asset paths, and falls back to the packaged default when the
-/// file cannot be reached so a broken share never blanks the preview.
+/// Turns a resolved image path into a bitmap the settings and waitlist surfaces can draw.
 /// </summary>
+/// <remarks>
+///   <para>
+///   This converter used to police its own fallbacks, and the branches disagreed: a missing relative path fell
+///   through to a package URI that silently resolved to nothing, and the fallback it did have named a file —
+///   <c>Assets/Placeholders/default-request-type.png</c> — that has never existed in this repository. Either way
+///   the tile went blank rather than saying "no picture".
+///   </para>
+///   <para>
+///   The whole decision now lives in <see cref="PictureSource"/>: absolute, UNC, application-relative and
+///   package-relative paths are all resolved to a file that is checked with the application's picture rule, and
+///   anything that is not a picture resolves to <see cref="ImagePicturePolicy.NoImagePath"/>.
+///   </para>
+/// </remarks>
 public sealed class ResolvedImagePathToSourceConverter : IValueConverter
 {
-    private const string FallbackAsset = "ms-appx:///Assets/Placeholders/default-request-type.png";
-
-    public object? Convert(object value, Type targetType, object parameter, string language)
-    {
-        var path = value as string;
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            return Fallback();
-        }
-
-        try
-        {
-            if (Path.IsPathRooted(path))
-            {
-                return File.Exists(path)
-                    ? new BitmapImage(new Uri(path))
-                    : Fallback();
-            }
-
-            var appRelative = Path.Combine(AppContext.BaseDirectory, path);
-            if (File.Exists(appRelative))
-            {
-                return new BitmapImage(new Uri(appRelative));
-            }
-
-            var packaged = path.Replace('\\', '/').TrimStart('/');
-            return new BitmapImage(new Uri($"ms-appx:///{packaged}"));
-        }
-        catch (UriFormatException)
-        {
-            return Fallback();
-        }
-    }
+    public object Convert(object value, Type targetType, object parameter, string language) =>
+        PictureSource.FromPath(value as string);
 
     public object ConvertBack(object value, Type targetType, object parameter, string language) =>
         throw new NotSupportedException();
-
-    private static BitmapImage Fallback() => new(new Uri(FallbackAsset));
 }
 
 /// <summary>Collapses an element when the bound boolean is false.</summary>

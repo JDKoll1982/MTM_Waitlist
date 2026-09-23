@@ -6,7 +6,8 @@ namespace MTM_Waitlist.Module_Settings.Models;
 /// Canonical Category → Item catalog for the Type/Category/Item model.
 /// Type/Category refactor (2026-09-07). Mirror of the authoritative implementation spec recorded in
 /// specs/004-unified-card-item-picker/contracts/request-picker-flow.md §4 and §6
-/// (23 rows: Pickup 11 / Deliver 8 / Assist 3 / Other 1).
+/// (24 rows: Pickup 11 / Deliver 9 / Assist 3 / Other 1). `deliver-component` was added 2026-09-22 so the
+/// Deliver family mirrors Pickup's Component choice.
 /// Expanded 2026-09-08 with legacy-only concepts confirmed by the user: Wrong Coil / Wrong Flatstock
 /// (Deliver-correct + Pickup-wrong replacements), Scrap offal removal, Pickup Hopper (do not return),
 /// and Table Remove Parts (Assist). Keeps stable GUID relationships intact via the existing
@@ -14,7 +15,7 @@ namespace MTM_Waitlist.Module_Settings.Models;
 /// </summary>
 public static class RequestItemCatalog
 {
-    /// <summary>All 23 canonical items, ordered by Category then Order.</summary>
+    /// <summary>All 24 canonical items, ordered by Category then Order.</summary>
     public static readonly IReadOnlyList<RequestItemDefinition> Items = new[]
     {
         // --- Pickup (11) ---
@@ -30,15 +31,16 @@ public static class RequestItemCatalog
         Item(RequestCategory.Pickup, 10, "pickup-scrap", "scrap-offal-removal", "{scrap_type}", "pickup-scrap"),
         Item(RequestCategory.Pickup, 11, "pickup-hopper", "hopper-pickup", "Hopper", "pickup-hopper"),
 
-        // --- Deliver (8) ---
+        // --- Deliver (9) ---
         Item(RequestCategory.Deliver, 1, "deliver-coil", "coil", "{part_number}", "deliver-coil"),
         Item(RequestCategory.Deliver, 2, "deliver-riser-table", "riser-table", "Riser Table", "deliver-riser-table"),
         Item(RequestCategory.Deliver, 3, "deliver-hopper", "hopper", "Hopper", "deliver-hopper"),
         Item(RequestCategory.Deliver, 4, "deliver-flatstock", "flatstock", "{part_number}", "deliver-flatstock"),
-        Item(RequestCategory.Deliver, 5, "deliver-die", "die", "{die}", "deliver-die", cardLine1Template: "{umbrella} {job_part_number}"),
-        Item(RequestCategory.Deliver, 6, "deliver-dunnage", "dunnage", "{dunnage_part}", "deliver-dunnage"),
-        Item(RequestCategory.Deliver, 7, "deliver-wrong-coil", "wrong-coil", "{part_number}", "deliver-wrong-coil"),
-        Item(RequestCategory.Deliver, 8, "deliver-wrong-flatstock", "wrong-flatstock", "{part_number}", "deliver-wrong-flatstock"),
+        Item(RequestCategory.Deliver, 5, "deliver-component", "component", "{component}", "deliver-component"),
+        Item(RequestCategory.Deliver, 6, "deliver-die", "die", "{die}", "deliver-die", cardLine1Template: "{umbrella} {job_part_number}"),
+        Item(RequestCategory.Deliver, 7, "deliver-dunnage", "dunnage", "{dunnage_part}", "deliver-dunnage"),
+        Item(RequestCategory.Deliver, 8, "deliver-wrong-coil", "wrong-coil", "{part_number}", "deliver-wrong-coil"),
+        Item(RequestCategory.Deliver, 9, "deliver-wrong-flatstock", "wrong-flatstock", "{part_number}", "deliver-wrong-flatstock"),
 
         // --- Assist (3) ---
         Item(RequestCategory.Assist, 1, "assist-coil-turn", "coil", "{part_number}", "assist-coil-turn"),
@@ -57,7 +59,7 @@ public static class RequestItemCatalog
     public static RequestItemDefinition? FindById(string? id) =>
         Items.FirstOrDefault(i => string.Equals(i.Id, id, StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>Total catalog count (23).</summary>
+    /// <summary>Total catalog count (24).</summary>
     public static int TotalCount => Items.Count;
 
     /// <summary>

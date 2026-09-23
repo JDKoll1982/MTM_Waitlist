@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 using Windows.Graphics.Imaging;
 
 namespace MTM_Waitlist.Module_Settings.Services;
@@ -194,9 +195,12 @@ public sealed class ImageStorageService : IImageStorageService
             var safeScope = SanitizeFileToken(scope);
             var safeItemId = SanitizeFileToken(itemId);
 
-            // Deterministic name so the active image is overwritten in place (spec 4.4).
-            var fileName = $"{safeScope}_{safeItemId}{extension}";
-            var targetPath = Path.Combine(storageRoot, fileName);
+            // One folder per scope, and a deterministic name inside it so the active picture is overwritten in
+            // place (spec 4.4). The scope folder is what lets a person read a picture's purpose off the share.
+            var relativePath = Path.Combine(safeScope, $"{safeItemId}{extension}");
+            var targetPath = Path.Combine(storageRoot, relativePath);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(targetPath) ?? storageRoot);
 
             if (File.Exists(targetPath) && config.EnableArchiveVersioning)
             {
@@ -209,7 +213,10 @@ public sealed class ImageStorageService : IImageStorageService
             return new ImageStorageResult
             {
                 Success = true,
-                StoredFilePath = targetPath,
+
+                // Relative to the root, deliberately. An absolute path can only be read on a machine with the same
+                // drive mapping, and changing the root in Settings would orphan every row that held one.
+                StoredFilePath = relativePath,
                 SourceFilePath = sourceFilePath,
                 StoredFileSizeBytes = finalInfo.Length,
                 Warnings = Array.Empty<string>()
@@ -313,7 +320,10 @@ public sealed class ImageStorageService : IImageStorageService
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (!File.Exists(storedFilePath))
+        // A stored path is relative to the picture root now; a row written earlier names the file itself. Both
+        // forms resolve the same way here, so a picture set before the layout changed can still be deleted.
+        var targetPath = AppStoragePaths.ResolvePicturePath(GetConfiguredSharePath(), storedFilePath);
+        if (string.IsNullOrWhiteSpace(targetPath) || !File.Exists(targetPath))
         {
             return false;
         }
@@ -322,14 +332,14 @@ public sealed class ImageStorageService : IImageStorageService
         {
             if (moveToArchive)
             {
-                var archiveFolder = Path.Combine(Path.GetDirectoryName(storedFilePath) ?? string.Empty, "Archive");
+                var archiveFolder = Path.Combine(Path.GetDirectoryName(targetPath) ?? string.Empty, AppStoragePaths.ArchiveFolderName);
                 Directory.CreateDirectory(archiveFolder);
-                var archivePath = Path.Combine(archiveFolder, $"{Path.GetFileNameWithoutExtension(storedFilePath)}_{DateTime.UtcNow:yyyyMMdd_HHmmss}{Path.GetExtension(storedFilePath)}");
-                File.Move(storedFilePath, archivePath);
+                var archivePath = Path.Combine(archiveFolder, $"{Path.GetFileNameWithoutExtension(targetPath)}_{DateTime.UtcNow:yyyyMMdd_HHmmss}{Path.GetExtension(targetPath)}");
+                File.Move(targetPath, archivePath);
                 return true;
             }
 
-            File.Delete(storedFilePath);
+            File.Delete(targetPath);
             return true;
         }
         catch (Exception ex)
@@ -397,11 +407,19 @@ public sealed class ImageStorageService : IImageStorageService
     }
 
     /// <summary>
-    /// Copies the current file into the Archive subfolder as {name}-MM-DD-YYYY-NN.ext (spec 4.4).
+    /// Copies the current file into the Archive subfolder as {name}-MM-DD-YYYY-NN.ext (spec 4.4),
+    /// beside the picture it replaces.
     /// </summary>
+    /// <remarks>
+    /// Beside the picture rather than in one folder at the root: pictures now live under a folder per scope, and
+    /// two scopes can legitimately use the same identifier, so a single shared archive would have them overwrite
+    /// each other's history.
+    /// </remarks>
     internal static string ArchiveExistingFile(string activeFilePath, string storageRoot)
     {
-        var archiveFolder = Path.Combine(storageRoot, "Archive");
+        var archiveFolder = Path.Combine(
+            Path.GetDirectoryName(activeFilePath) ?? storageRoot,
+            AppStoragePaths.ArchiveFolderName);
         Directory.CreateDirectory(archiveFolder);
 
         var baseName = Path.GetFileNameWithoutExtension(activeFilePath);

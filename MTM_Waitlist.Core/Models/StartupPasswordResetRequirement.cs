@@ -26,8 +26,11 @@ public sealed class StartupPasswordResetRequirement
     /// <summary>The account to update, from <c>core_users_profiles.id</c>.</summary>
     public long UserId { get; init; }
 
-    /// <summary>The account's role name, so the completed sign-in keeps its authorization.</summary>
+    /// <summary>The account's role name, so the completed sign-in keeps its authorization. Presentation only.</summary>
     public string CurrentRole { get; init; } = string.Empty;
+
+    /// <summary>The account's role code, from <c>auth_roles_catalog.role_code</c>.</summary>
+    public string CurrentRoleCode { get; init; } = string.Empty;
 
     /// <summary>The account's display name, for attribution on the completed sign-in.</summary>
     public string DisplayName { get; init; } = string.Empty;

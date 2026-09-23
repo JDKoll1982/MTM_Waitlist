@@ -216,9 +216,12 @@ public sealed class ImageOverrideDialogViewModelTests
 
         Assert.IsTrue(await viewModel.SaveAsync(), viewModel.ErrorMessage);
 
-        var stored = Path.Combine(_resolver.SharedFolderPath, $"request_item_{row.ItemId}.png");
+        var stored = Path.Combine(_resolver.SharedFolderPath, "request_item", $"{row.ItemId}.png");
         Assert.IsTrue(File.Exists(stored), "The chosen file must be copied into the share.");
-        Assert.AreEqual(stored, row.OriginalPath);
+        Assert.AreEqual(
+            Path.Combine("request_item", $"{row.ItemId}.png"),
+            row.OriginalPath,
+            "The stored path is relative to the root, which is what lets the root be changed without orphaning it.");
     }
 
     [TestMethod]

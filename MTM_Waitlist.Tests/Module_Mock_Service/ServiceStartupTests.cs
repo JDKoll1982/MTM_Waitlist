@@ -121,9 +121,9 @@ public sealed class ServiceStartupTests
         Assert.IsNotNull(outcome.Payload);
         Assert.AreEqual(5, outcome.Payload!.Shapes.Count);
         StringAssert.Contains(
-            outcome.Payload.OperatorRoles,
-            "Developer",
-            "The status surface states who may call the API, which is the operator-facing half of T147.");
+            outcome.Payload.OperatorAccessPermission,
+            "permission.cache.refresh_api",
+            "The status surface names the permission that decides who may call the API, which is the operator-facing half of T147.");
         StringAssert.Contains(
             outcome.Payload.Shapes[0].ValidationError,
             "mtm_mock connection",

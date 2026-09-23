@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="MTM_Waitlist.Module_Settings.Views.PinRevealDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d"
+    DefaultButton="None">
+
+    <!--
+        There is deliberately no CloseButton and no PrimaryButton: the two buttons the reader may use sit inside
+        this dialog's own content, so the only close that is accepted is the one that comes from them. Escape, the
+        system back button and every other dismissal reach the closing handler and are cancelled there.
+    -->
+    <StackPanel Spacing="12" HorizontalAlignment="Stretch">
+
+        <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.InstructionText}" TextWrapping="Wrap" />
+
+        <TextBlock
+            x:Name="PinValue"
+            AutomationProperties.AutomationId="PinRevealDialog_Pin"
+            HorizontalAlignment="Center"
+            Style="{ThemeResource TitleLargeTextBlockStyle}"
+            Text="{x:Bind ViewModel.Pin, Mode=OneWay}" />
+
+        <Grid ColumnSpacing="16" RowSpacing="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.PersonLabelText}" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind ViewModel.PersonName, Mode=OneWay}" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.SignInNameLabelText}" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind ViewModel.SignInName, Mode=OneWay}" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.CredentialLabelText}" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{x:Bind ViewModel.Pin, Mode=OneWay}" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.IssuedAtLabelText}" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{x:Bind ViewModel.IssuedAtText, Mode=OneWay}" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="4" Grid.Column="0" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.IssuedByLabelText}" />
+            <TextBlock Grid.Row="4" Grid.Column="1" Text="{x:Bind ViewModel.IssuedByText, Mode=OneWay}" TextWrapping="Wrap" />
+        </Grid>
+
+        <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind ViewModel.SecondResetText}" TextWrapping="Wrap" />
+
+        <muxc:ProgressRing
+            Width="24"
+            Height="24"
+            HorizontalAlignment="Left"
+            IsActive="{x:Bind ViewModel.IsPrinting, Mode=OneWay}" />
+
+        <!-- What a refused dismissal, or a failed print, says in the reader's words. -->
+        <TextBlock
+            Style="{ThemeResource BodyTextBlockStyle}"
+            Text="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+            TextWrapping="Wrap"
+            Visibility="{x:Bind ViewModel.HasMessage, Mode=OneWay}" />
+
+        <StackPanel Orientation="Horizontal" Spacing="12">
+            <Button
+                AutomationProperties.AutomationId="PinRevealDialog_Print"
+                Click="OnPrintClick"
+                Content="{x:Bind ViewModel.PrintLabelText}" />
+            <Button
+                AutomationProperties.AutomationId="PinRevealDialog_Close"
+                Click="OnCloseClick"
+                Content="{x:Bind ViewModel.CloseLabelText}"
+                Style="{ThemeResource AccentButtonStyle}" />
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>

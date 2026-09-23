@@ -113,6 +113,25 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
+    public async Task AcceptAsync_ViewerWithoutThePermission_RefusesAtTheAction()
+    {
+        // The screen offers a control only while its gate says so; this proves the action refuses as well, so a
+        // caller that never drew the screen — or drew it from stale data — is still refused (FR-056, FR-117).
+        var service = new WaitlistRequestService(permissionService: new RefusingPermissionService());
+
+        var submitted = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var requestId = submitted.Request!.Id;
+
+        var result = await service.AcceptAsync(requestId, "9001", "Morgan Reyes");
+
+        Assert.IsNull(result, "A caller who does not hold permission.requests.handle must be refused at the action.");
+        Assert.AreEqual(
+            "Pending",
+            service.GetRequest(requestId)!.Status,
+            "A refused action must leave the request exactly as it was.");
+    }
+
+    [TestMethod]
     public async Task SubmitAsync_ReturnsDuplicateWarningThenAllowsOverrideAsync()
     {
         var service = new WaitlistRequestService();
@@ -194,12 +213,12 @@ public sealed class WaitlistRequestServiceTests
             {
                 ["public_id"] = "f0000000-00aa-4000-8000-0000000000aa",
                 ["building"] = "Expo Drive",
-                ["work_center"] = "100-3",
+                ["work_center"] = "100-03",
                 ["category"] = "Pickup",
                 ["item"] = "pickup-coil",
                 ["input_value"] = null,
-                ["active_setup_job_id"] = "100-3",
-                ["work_center_name"] = "100-3",
+                ["active_setup_job_id"] = "100-03",
+                ["work_center_name"] = "100-03",
                 ["requester_employee_number"] = "6229",
                 ["requester_employee_name"] = "John Koll",
                 ["status"] = "Pending",
@@ -225,7 +244,7 @@ public sealed class WaitlistRequestServiceTests
         var request = service.GetActiveRequests("Expo Drive").SingleOrDefault();
         Assert.IsNotNull(request);
         Assert.AreEqual("Pending", request!.Status);
-        Assert.AreEqual("100-3", request.WorkCenter);
+        Assert.AreEqual("100-03", request.WorkCenter);
         Assert.AreEqual("db note", request.Note);
     }
 
@@ -659,7 +678,7 @@ public sealed class WaitlistRequestServiceTests
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
-            WorkCenter = "100-3",
+            WorkCenter = "100-03",
             Category = "Deliver",
             Item = "deliver-coil",
             Status = "Pending",
@@ -676,7 +695,7 @@ public sealed class WaitlistRequestServiceTests
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
-            WorkCenter = "100-6",
+            WorkCenter = "100-06",
             Category = "Deliver",
             Item = "deliver-coil",
             Status = "Pending",
@@ -702,7 +721,7 @@ public sealed class WaitlistRequestServiceTests
             {
                 Id = Guid.NewGuid(),
                 Building = "Expo Drive",
-                WorkCenter = "100-3",
+                WorkCenter = "100-03",
                 Category = "Deliver",
                 Item = "deliver-coil",
                 Status = status,
@@ -1567,5 +1586,22 @@ public sealed class WaitlistRequestServiceTests
         }
 
         public Task CorruptForTestAsync() => Task.CompletedTask;
+    }
+
+    /// <summary>A permission service that refuses every key, so the action path's own gate is provable.</summary>
+    private sealed class RefusingPermissionService : IPermissionService
+    {
+        public Task<bool> HasPermissionAsync(string permissionKey, CancellationToken cancellationToken = default) =>
+            Task.FromResult(false);
+
+        public Task<IReadOnlyDictionary<string, bool>> HasPermissionsAsync(
+            IEnumerable<string> permissionKeys,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyDictionary<string, bool>>(
+                permissionKeys.ToDictionary(key => key, _ => false, StringComparer.Ordinal));
+
+        public void Invalidate()
+        {
+        }
     }
 }

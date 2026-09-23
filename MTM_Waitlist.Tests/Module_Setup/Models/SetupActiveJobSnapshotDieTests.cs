@@ -10,7 +10,7 @@ namespace MTM_Waitlist.Tests.Module_Setup.Models;
 /// A die row is not always a die. The subordinate-parts query gives a job with no die a die row described
 /// <c>No Die</c> — normally the default <c>FGT0001-01</c> with an empty location. The rows below are the two
 /// shapes that query returns, taken from the live <c>setup_active_jobs</c> rows of the coil-only station
-/// <c>100-3</c> (the placeholder) and the die-only station <c>100-7</c> (a real die).
+/// <c>100-03</c> (the placeholder) and the die-only station <c>100-07</c> (a real die).
 /// </para>
 /// <para>
 /// <see cref="SetupActiveJobSnapshot.Dies"/> keeps everything the query returned, because the Setup screens show
@@ -98,7 +98,7 @@ public sealed class SetupActiveJobSnapshotDieTests
 
     private static SetupActiveJobSnapshot Snapshot(params SetupSubordinatePart[] parts) => new()
     {
-        WorkCenter = "100-3",
+        WorkCenter = "100-03",
         WorkOrder = "WO-900001",
         PartNumber = "PART-9001",
         SubordinateParts = parts,

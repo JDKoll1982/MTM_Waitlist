@@ -1,5 +1,15 @@
 -- Dev/test masked baseline seed
 -- Do not use real production identity/session data in non-production.
+--
+-- Roles and rungs (feature 006, FR-015/FR-018): every LIVE role this seed holds carries its rung, and
+-- `material_handler_lead` is added as a role in its own right rather than mapped onto Plant Manager. The
+-- retired `admin` row is deliberately NOT ranked here and is written by its own statement below, so it holds the
+-- column default of 0: that is what makes the role rename's paired reversal determinate, because the reversal
+-- re-inserts `admin` "carrying the rung that row held".
+--
+-- This seed does not remove the retired role, does not insert `it_department`, and does not repoint the masked
+-- `test.admin` account. Those belong entirely to `seed_role_admin_to_it_department`, so two seeds never own the
+-- same rows and the reversal stays exact for the reason it states.
 
 USE mtm_waitlist;
 
@@ -12,6 +22,7 @@ INSERT INTO
         public_id,
         role_code,
         role_name,
+        role_rank,
         created_utc,
         updated_utc
     )
@@ -19,6 +30,7 @@ VALUES (
         UUID(),
         'material_handler',
         'Material Handler',
+        10,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
     ),
@@ -26,6 +38,7 @@ VALUES (
         UUID(),
         'production',
         'Production',
+        10,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
     ),
@@ -33,6 +46,7 @@ VALUES (
         UUID(),
         'production_lead',
         'Production Lead',
+        70,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
     ),
@@ -40,6 +54,7 @@ VALUES (
         UUID(),
         'setup',
         'Setup',
+        10,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
     ),
@@ -47,6 +62,15 @@ VALUES (
         UUID(),
         'setup_lead',
         'Setup Lead',
+        60,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'material_handler_lead',
+        'Material Handler Lead',
+        50,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
     ),
@@ -54,6 +78,7 @@ VALUES (
         UUID(),
         'plant_manager',
         'Plant Manager',
+        80,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
     ),
@@ -61,10 +86,26 @@ VALUES (
         UUID(),
         'developer',
         'Developer',
+        100,
         UTC_TIMESTAMP(),
         UTC_TIMESTAMP()
-    ),
-    (
+    )
+ON DUPLICATE KEY UPDATE
+    role_name = VALUES(role_name),
+    role_rank = VALUES(role_rank),
+    updated_utc = VALUES(updated_utc);
+
+-- The retired role, left unranked on purpose so it holds the column default of 0. Its own statement, because a
+-- shared column list cannot omit `role_rank` for one row and supply it for the rest.
+INSERT INTO
+    auth_roles_catalog (
+        public_id,
+        role_code,
+        role_name,
+        created_utc,
+        updated_utc
+    )
+VALUES (
         UUID(),
         'admin',
         'Admin',
@@ -131,6 +172,8 @@ INSERT INTO
     core_users_profiles (
         public_id,
         username_normalized,
+        first_name,
+        last_name,
         password_hash,
         password_salt,
         require_password_change,
@@ -143,6 +186,8 @@ INSERT INTO
 VALUES (
         UUID(),
         'johnk',
+        'John',
+        'Koll',
         '0000',
         NULL,
         1,
@@ -155,6 +200,8 @@ VALUES (
     (
         UUID(),
         'jkoll',
+        'John',
+        'Koll',
         '0000',
         NULL,
         1,
@@ -168,16 +215,18 @@ VALUES (
     -- exercised against a real store instead of only the tests' stub resolver. The credential is the
     -- placeholder the accounts above use, so none of these can log in; the operator-role lookup the
     -- service performs needs identity and role only (`sp_auth_user_row_get`).
-    (UUID(), 'test.admin', '0000', NULL, 1, 'Test Admin', '9001', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.developer', '0000', NULL, 1, 'Test Developer', '9002', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.plant.manager', '0000', NULL, 1, 'Test Plant Manager', '9003', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.setup.lead', '0000', NULL, 1, 'Test Setup Lead', '9004', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.production.lead', '0000', NULL, 1, 'Test Production Lead', '9005', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.admin', 'Test', 'Admin', '0000', NULL, 1, 'Test Admin', '9001', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.developer', 'Test', 'Developer', '0000', NULL, 1, 'Test Developer', '9002', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.plant.manager', 'Test', 'Plant Manager', '0000', NULL, 1, 'Test Plant Manager', '9003', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.setup.lead', 'Test', 'Setup Lead', '0000', NULL, 1, 'Test Setup Lead', '9004', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.production.lead', 'Test', 'Production Lead', '0000', NULL, 1, 'Test Production Lead', '9005', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
     -- Deliberately NOT approved operator roles: these are the accounts that prove the refusal branch.
-    (UUID(), 'test.setup', '0000', NULL, 1, 'Test Setup', '9006', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.production', '0000', NULL, 1, 'Test Production', '9007', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.material.handler', '0000', NULL, 1, 'Test Material Handler', '9008', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP())
+    (UUID(), 'test.setup', 'Test', 'Setup', '0000', NULL, 1, 'Test Setup', '9006', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.production', 'Test', 'Production', '0000', NULL, 1, 'Test Production', '9007', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.material.handler', 'Test', 'Material Handler', '0000', NULL, 1, 'Test Material Handler', '9008', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP())
 ON DUPLICATE KEY UPDATE
+    first_name = VALUES(first_name),
+    last_name = VALUES(last_name),
     password_hash = VALUES(password_hash),
     password_salt = VALUES(password_salt),
     require_password_change = VALUES(require_password_change),

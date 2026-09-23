@@ -26,18 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\pickup_fg.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\pickup_ncm.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\pickup_os.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\pickup_wip.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Database\InforVisual\Queues\Module_Setup\**\*.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -82,15 +70,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Assets\coil.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="Assets\scrap.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="Assets\RequestTypes\*.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Update="Assets\Placeholders\*.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

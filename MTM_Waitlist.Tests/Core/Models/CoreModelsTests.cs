@@ -16,6 +16,8 @@ public sealed class CoreModelsTests
         Assert.AreEqual("Preparing startup checks...", state.StatusText);
         Assert.AreEqual(string.Empty, state.Username);
         Assert.AreEqual(string.Empty, state.CurrentRole);
+        Assert.AreEqual(string.Empty, state.CurrentRoleCode);
+        Assert.AreEqual(0, state.UserId);
         Assert.AreEqual(StartupState.SessionTokenSourceNone, state.SessionTokenSource);
         Assert.IsFalse(state.IsDeveloper);
         Assert.IsFalse(state.IsUserMatched);
@@ -23,11 +25,18 @@ public sealed class CoreModelsTests
     }
 
     [TestMethod]
-    public void StartupState_IsDeveloper_IsCaseInsensitive()
+    public void StartupState_IsDeveloper_ReadsTheRoleCodeAndNotTheDisplayName()
     {
-        Assert.IsTrue(new StartupState { CurrentRole = "Developer" }.IsDeveloper);
-        Assert.IsTrue(new StartupState { CurrentRole = "developer" }.IsDeveloper);
-        Assert.IsFalse(new StartupState { CurrentRole = "Operator" }.IsDeveloper);
+        // The code is the role's identity, so the check has to answer from it. The display name is presentation
+        // that a catalogue edit may change, and a hand-written role-name list is the defect this feature removes.
+        Assert.IsTrue(new StartupState { CurrentRoleCode = "developer" }.IsDeveloper);
+        Assert.IsTrue(new StartupState { CurrentRoleCode = "DEVELOPER" }.IsDeveloper);
+        Assert.IsFalse(new StartupState { CurrentRoleCode = "plant_manager" }.IsDeveloper);
+
+        // A display name that says Developer decides nothing.
+        Assert.IsFalse(new StartupState { CurrentRole = "Developer" }.IsDeveloper);
+        Assert.IsFalse(new StartupState { CurrentRole = "developer" }.IsDeveloper);
+        Assert.IsFalse(new StartupState { CurrentRole = "Developer", CurrentRoleCode = "setup" }.IsDeveloper);
     }
 
     [TestMethod]
@@ -90,7 +99,7 @@ public sealed class CoreModelsTests
             Id = 5,
             ComputerName = "johnspc",
             DisplayName = "John's Computer",
-            Description = "Press 100-3",
+            Description = "Press 100-03",
             MacAddressNormalized = "AA:BB:CC",
             IsRegistered = true
         };
@@ -98,7 +107,7 @@ public sealed class CoreModelsTests
         Assert.AreEqual(5, record.Id);
         Assert.AreEqual("johnspc", record.ComputerName);
         Assert.AreEqual("John's Computer", record.DisplayName);
-        Assert.AreEqual("Press 100-3", record.Description);
+        Assert.AreEqual("Press 100-03", record.Description);
         Assert.AreEqual("AA:BB:CC", record.MacAddressNormalized);
         Assert.IsTrue(record.IsRegistered);
     }
@@ -139,7 +148,7 @@ public sealed class CoreModelsTests
         var report = new PrintableReport
         {
             Title = "Setup Report",
-            Subtitle = "Press 100-3",
+            Subtitle = "Press 100-03",
             Sections = new[]
             {
                 new PrintableReportSection
@@ -156,7 +165,7 @@ public sealed class CoreModelsTests
         };
 
         Assert.AreEqual("Setup Report", report.Title);
-        Assert.AreEqual("Press 100-3", report.Subtitle);
+        Assert.AreEqual("Press 100-03", report.Subtitle);
         Assert.AreEqual(1, report.Sections.Count);
         Assert.AreEqual("Pairing", report.Sections[0].Title);
         Assert.AreEqual("Part", report.Sections[0].Fields[0].Label);

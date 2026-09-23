@@ -140,4 +140,59 @@ public sealed class ImageFileProbeTests
             ImageHeaderFixtures.DeleteTemporaryDirectory(relativeDirectory);
         }
     }
+
+    /// <summary>
+    /// The whole question the surfaces ask — <see cref="ImageFileProbe.IsUsablePicture"/> — is stricter than
+    /// <see cref="ImageFileProbe.CarriesPicture"/>: the application's image screens only accept square pictures, so
+    /// a picture of the wrong shape is refused and the surface draws the no-image placeholder instead.
+    /// </summary>
+    [TestMethod]
+    public void APictureOfTheWrongShapeIsNotUsable()
+    {
+        ImageHeaderFixtures.WritePng(_filePath, 96, 96);
+        Assert.IsTrue(ImageFileProbe.IsUsablePicture(_filePath), "A square picture at the accepted size is usable.");
+
+        ImageHeaderFixtures.WritePng(_filePath, 96, 48);
+        Assert.IsFalse(
+            ImageFileProbe.IsUsablePicture(_filePath),
+            "A picture that is not square is refused, however many pixels it carries.");
+        Assert.IsTrue(
+            ImageFileProbe.CarriesPicture(_filePath),
+            "The size-only question still answers for it, because being the wrong shape is not being too small.");
+
+        ImageHeaderFixtures.WritePng(_filePath, 48, 96);
+        Assert.IsFalse(ImageFileProbe.IsUsablePicture(_filePath), "The shape rule is not one-directional.");
+    }
+
+    /// <summary>
+    /// The size floor and the shape rule are one answer: the floor itself is accepted, and anything under it is
+    /// refused whatever its shape.
+    /// </summary>
+    [TestMethod]
+    public void TheUsablePictureFloorIsTheApplicationsOwn()
+    {
+        ImageHeaderFixtures.WritePng(_filePath, ImageFileProbe.MinimumPixels - 1, ImageFileProbe.MinimumPixels - 1);
+        Assert.IsFalse(ImageFileProbe.IsUsablePicture(_filePath), "A picture under the floor is refused.");
+
+        ImageHeaderFixtures.WritePng(_filePath, ImageFileProbe.MinimumPixels, ImageFileProbe.MinimumPixels);
+        Assert.IsTrue(ImageFileProbe.IsUsablePicture(_filePath), "The smallest accepted picture is usable.");
+    }
+
+    /// <summary>
+    /// The answers that are not pictures, asked of the whole rule: nothing named, a path with no file behind it,
+    /// and a file that is no kind of picture.
+    /// </summary>
+    [TestMethod]
+    public void NothingThereIsNotAUsablePicture()
+    {
+        Assert.IsFalse(ImageFileProbe.IsUsablePicture(null), "No path is no picture.");
+        Assert.IsFalse(ImageFileProbe.IsUsablePicture(string.Empty), "A blank path is no picture.");
+        Assert.IsFalse(ImageFileProbe.IsUsablePicture("   "), "A whitespace path is no picture.");
+        Assert.IsFalse(
+            ImageFileProbe.IsUsablePicture(Path.Combine(_directory, "absent.png")),
+            "A path with no file behind it is no picture.");
+
+        ImageHeaderFixtures.WriteTextFile(_filePath);
+        Assert.IsFalse(ImageFileProbe.IsUsablePicture(_filePath), "A file that is not a picture is no picture.");
+    }
 }

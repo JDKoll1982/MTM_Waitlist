@@ -1,6 +1,6 @@
 # MTM Waitlist — Features in the Live Application
 
-**Audience:** plant-floor operators, material handlers, setup techs, leads, and administrators.
+**Audience:** plant-floor operators, material handlers, setup teams, leads, and IT Department.
 **Written in plain language — no code, no jargon.**
 **Last verified against:** the working tree at commit `692091f` (2026-09-20). The previous pin was
 `7bf6857` (2026-09-12); since then `specs/002-truthful-data-and-controls` and
@@ -32,9 +32,8 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
 - **Sign in.** Enter your user name and password and choose **Sign In**. Any problem is reported on the
   same screen.
 - **Remember me on this device.** A checkbox that keeps you signed in on this computer.
-- **Temporary password change.** If your account is still on its temporary default password, the app
-  switches to an **Update Password** panel — new password and confirmation — and tells you why before
-  you can sign in.
+- **Temporary password change.** If your account is still on a temporary password, you sign in with it as
+  usual and the app then switches to an **Update Password** panel — new password and confirmation.
 - **Create Account.** Offered to a new user with a **Create Account** button.
 - **Computer registration gate.** The app recognises the machine you are on from its name and hardware
   address. A machine that is not registered is held at the registration step; a machine whose hardware
@@ -135,8 +134,8 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
 - **A five-step wizard** — Work Center → Work Order → Part → Operation → Dunnage & Scrap — followed by
   Review and Result, with the step strip across the top.
 - **Choose the work center.** Search by work center, work order, sequence or part number, see each work
-  center's current job, and (for Setup Tech, Admin and above) **Manage Work Centers** to add, rename or
-  remove one.
+  center's current job, and (for Setup Leads and anyone the work-centre setup permission is given to)
+  **Manage Work Centers** to add, rename or remove one.
 - **Enter the work order.** You may type it in any of the usual forms — `76951`, `076951` or
   `WO-076951` — and the app normalizes it. If the format is wrong or no parts exist, it says so.
 - **Choose the part**, then **choose the operation** from the ones available for that part.
@@ -267,7 +266,7 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
   refuses to run on a machine that is not the server, so it cannot be deployed onto the wrong host by
   mistake.
 
-## 11. Tools for administrators and developers
+## 11. Tools for IT Department and developers
 
 - **Control inspector** — shows the details behind a control on screen (its tooltip wording, related
   files, and the fallback text used when no wording is loaded). It has no menu entry, so it is not
@@ -325,10 +324,11 @@ change is visible.
   `specs/003` US3 shipped it: the list sorts most-urgent-first by default
   (`WaitlistViewViewModel.SortOrder` falls back to `WaitlistSortOrder.MostUrgent` and the ordering runs
   through `UrgencyCalculator.OrderBy`), with the due and overdue sums as before.
-- **Analytics, the cancelled-request view for administrators, retention/archiving of old requests, and
-  user management** are planned work that has not started. (The *requester's own* cancel shipped with
-  `specs/003` — see the first entry above. A view for **administrators** over all cancelled requests is
-  still not built.) Seeds: `WeekendProject/SpecTemplates/04-…`, `…/05-…`, `…/06-…`.
+- **Analytics, the cancelled-request view for IT Department, and retention/archiving of old requests**
+  are planned work that has not started. (The *requester's own* cancel shipped with `specs/003` — see the
+  first entry above. A view for **IT Department** over all cancelled requests is still not built.)
+  **User management and permissions shipped** — see section 15. Seeds: `WeekendProject/SpecTemplates/04-…`,
+  `…/05-…`, `…/06-…`.
 - ~~**The remaining time on the detail page does not tick**~~ — **CORRECTED 2026-09-20.** The detail page
   now refreshes itself every 30 seconds (`WaitlistViewDetailViewModel.RefreshInterval`) and each refresh
   rebuilds the field rows including "Remaining time", so the countdown does update while the page is open.
@@ -358,6 +358,36 @@ The two rows whose follow-on has no spec yet name their **seed template** in
 | Low | `defects/Closed-Low-Settings-SearchIgnoresThreeSettingsPanels.md` — three panels do not re-evaluate when the settings search changes | Settings search | **Closed by `specs/002`** — T025/T029/T030: the three panels are registered and the coverage check fails on the next unregistered one. |
 | Low | `defects/Closed-Low-Localization-RetiredMockWordingStillShips.md` — "Setup saved using sample data" string and stale sample/mock comments | Setup result, code docs | **Closed by `specs/002`** — T037/T038 with T036's wording scan as the standing check: the orphan entry and the stale comments are gone. |
 | Low | `defects/Closed-Partial-Low-Notifications-ToastActivationShowsTodoDialog.md` — tapping a toast while the app runs shows a "TODO" dialog | Notifications | **Closed by `specs/002`** — T032/T033/T034: the placeholder dialogs are deleted and one shared deep-link helper handles activation. ⚠️ Proving it on a delivered notification is owned by the notification-delivery workstream — seed `WeekendProject/SpecTemplates/08-notification-delivery-and-packaging.md`, not yet specified. |
+
+---
+
+## 15. User management and permissions
+
+Everything here lives in **Settings → Administration**, and the area appears only for people who may use it.
+
+- **Users** — the roster of everyone in the store, including the people who are switched off. Search it by
+  sign-in name, name, employee number or role, and narrow it by role. The filter you leave is applied again when
+  you come back, and the page says how many people it is hiding.
+- **Open a person** — their details and their actions on one page. Save a correction, switch the account off or
+  back on, and reset their password. An account you cannot change is shown read-only with the reason in words
+  rather than hidden, and your own account cannot be switched off or renamed from here.
+- **Add a person** — five fields and one role. The role list offers the roles at or below your own, and a new
+  account is created active.
+- **The one-time password** — a create or a reset issues a random four-digit password and shows it once, in a
+  window that must be closed deliberately and can be printed. It stops working after five wrong tries, the count
+  survives closing the application, and a fresh reset is the way back.
+- **Permissions** — one card per area of the permission set, that area's permissions across the top under their
+  plain-language labels with what each one gates, and the people down the side. A cell says whether the person
+  holds that permission because it was chosen for them, because their role's baseline gives it, or not at all: the
+  two "yes" states are drawn as different shapes so they can be told apart without colour, and each cell says its
+  state in words for a screen reader. Saving is confirmed, names the person, and can be undone afterwards. The
+  permission that opens the page is shown locked, and a person whose role is above yours has every cell of their
+  row shown unavailable with the reason in words.
+- **Who holds this** — on the same page: which roles' baselines give a chosen feature, and then only the people
+  who differ from their own role.
+- **One named permission per gated action.** A person starts from their role's baseline, and a change made for
+  them takes effect for them and nobody else. Role baselines are shipped data, so what a role may do changes
+  without a code change.
 
 ---
 

@@ -1,6 +1,9 @@
+using System.Reflection;
+
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Settings.ViewModels;
@@ -15,7 +18,7 @@ namespace MTM_Waitlist.Tests.Module_Settings;
 /// per-row batched commit are the ones that were already there.
 /// </summary>
 /// <remarks>
-/// FR-020's "the role gate" is <b>two</b> gates today: the minutes editor's
+/// FR-020's "the gate" is <b>two</b> gates today: the minutes editor's
 /// <c>CanManageUrgencySettings</c> and this screen's <c>CanManageImageLocationSettings</c>. The last check in
 /// this class proves they are still two — neither collapsed into one nor replaced by a new one.
 /// </remarks>
@@ -185,38 +188,32 @@ public sealed class RequestItemImagesDialogViewModelTests
     // ── FR-020: two gates, still two ────────────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public void ThePictureScreensGate_IsADifferentGateFromTheMinutesEditors()
+    public void ThePictureScreensGate_IsADifferentPermissionFromTheMinutesEditors()
     {
-        var imageRoles = DeclaredRoles(typeof(SettingsViewModel), "AllowedImageLocationManageRoles");
-        var urgencyRoles = DeclaredRoles(typeof(UrgencyAllotmentEditorViewModel), "AllowedUrgencyManageRoles");
+        var pictures = PermissionRegistry.Find(PermissionKeys.SettingsPartPictures);
+        var minutes = PermissionRegistry.Find(PermissionKeys.SettingsUrgencyMinutes);
 
-        Assert.IsTrue(imageRoles.Count > 0, "The picture screen's gate must admit somebody, or it is not a gate.");
-        Assert.IsTrue(urgencyRoles.Count > 0, "The minutes editor's gate must admit somebody.");
+        Assert.IsNotNull(pictures, "The picture screen's gate must be a declared permission (FR-046).");
+        Assert.IsNotNull(minutes, "The minutes editor's gate must be a declared permission.");
+        Assert.AreNotEqual(
+            pictures!.Key,
+            minutes!.Key,
+            "The two screens keep two gates: collapsing them would hand the picture screen to somebody who only ever had the minutes.");
 
         Assert.IsTrue(
-            urgencyRoles.Contains("Plant Manager", StringComparer.OrdinalIgnoreCase),
-            "The minutes editor is governed by CanManageUrgencySettings, which admits Plant Manager and above.");
-        Assert.IsFalse(
-            imageRoles.Contains("Plant Manager", StringComparer.OrdinalIgnoreCase),
-            "The picture screen is governed by CanManageImageLocationSettings, a different gate.");
-
-        Assert.IsNotNull(
-            typeof(SettingsViewModel).GetProperty(nameof(SettingsViewModel.CanManageImageLocationSettings)),
+            typeof(SettingsViewModel).GetProperty(nameof(SettingsViewModel.CanManageImageLocationSettings)) is not null,
             "The picture screen's gate is CanManageImageLocationSettings.");
         Assert.IsTrue(
             typeof(UrgencyAllotmentEditorViewModel).GetProperty(nameof(UrgencyAllotmentEditorViewModel.CanManageUrgencySettings)) is not null,
             "The minutes editor's gate is CanManageUrgencySettings.");
-    }
 
-    /// <summary>
-    /// Reads a screen's declared role set. Each gate is declared as data precisely so the two cannot drift
-    /// into one, and this is where that declaration is checked rather than described.
-    /// </summary>
-    private static IReadOnlyList<string> DeclaredRoles(Type screen, string fieldName)
-    {
-        var field = screen.GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-        Assert.IsNotNull(field, $"{screen.Name}.{fieldName} is missing; FR-020's two gates are declared as data.");
-
-        return (IReadOnlyList<string>)(field.GetValue(null) ?? Array.Empty<string>());
+        // Neither gate is a role list any more: the two types carry no role-name array at all, which is what
+        // makes the pair of permissions rather than the pair of lists the two independent gates (FR-054).
+        Assert.IsNull(
+            typeof(SettingsViewModel).GetField("AllowedImageLocationManageRoles", BindingFlags.NonPublic | BindingFlags.Static),
+            "The picture screen's retired role list must be gone rather than left beside its permission.");
+        Assert.IsNull(
+            typeof(UrgencyAllotmentEditorViewModel).GetField("AllowedUrgencyManageRoles", BindingFlags.NonPublic | BindingFlags.Static),
+            "The minutes editor's retired role list must be gone rather than left beside its permission.");
     }
 }

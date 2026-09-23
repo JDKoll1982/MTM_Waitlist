@@ -8,6 +8,7 @@ using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Shared.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
@@ -21,7 +22,7 @@ namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 /// </summary>
 public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavigationAware
 {
-    private const string DefaultWorkCenterImagePath = "Assets/Placeholders/default-workstation-image.png";
+    private const string DefaultWorkCenterImagePath = ImagePicturePolicy.NoImagePath;
 
     private readonly INavigationService _navigationService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;

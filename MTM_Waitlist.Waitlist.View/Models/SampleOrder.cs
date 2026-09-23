@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Waitlist.Models;
 
@@ -85,8 +86,6 @@ public sealed class SampleOrder : INotifyPropertyChanged
     /// </summary>
     public bool IsOverdueAtSource { get; set; }
 
-    public string ImagePath { get; set; } = string.Empty;
-
     /// <summary>
     /// The Item code the request asked for (FR-004). The row's identity: the picture, the request page's
     /// sections and the sort all resolve from it, so no reader has to be told what the request "really" was
@@ -107,16 +106,26 @@ public sealed class SampleOrder : INotifyPropertyChanged
     public long? WorkCenterCatalogId { get; set; }
     public string ResolvedImagePath { get; set; } = string.Empty;
     public string WorkCenterImagePath { get; set; } = string.Empty;
-    public string EffectiveImagePath =>
-        !string.IsNullOrWhiteSpace(ResolvedImagePath)
-            ? ResolvedImagePath
-            : string.IsNullOrWhiteSpace(ImagePath)
-                ? "Assets/Placeholders/default-request-type.png"
-                : $"Assets/{ImagePath}";
 
+    /// <summary>
+    /// The picture the card draws: the picture configured for this request's Item, and the application's
+    /// no-image placeholder when none is configured.
+    /// </summary>
+    /// <remarks>
+    /// There is no built-in artwork to fall back to. An Item's picture is a setting, so a request for an Item
+    /// nobody has given a picture to says so — with the placeholder — rather than borrowing a picture of some
+    /// other thing. The converter applies the picture rule as well, so a path that names a missing, unreadable
+    /// or empty file lands on the placeholder too.
+    /// </remarks>
+    public string EffectiveImagePath =>
+        string.IsNullOrWhiteSpace(ResolvedImagePath)
+            ? ImagePicturePolicy.NoImagePath
+            : ResolvedImagePath;
+
+    /// <summary>The work centre's picture, or the application's no-image placeholder when none resolved.</summary>
     public string EffectiveWorkCenterImagePath =>
         string.IsNullOrWhiteSpace(WorkCenterImagePath)
-            ? "Assets/Placeholders/default-workstation-image.png"
+            ? ImagePicturePolicy.NoImagePath
             : WorkCenterImagePath;
 
     /// <summary>

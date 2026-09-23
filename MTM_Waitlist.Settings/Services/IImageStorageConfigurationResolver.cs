@@ -15,11 +15,43 @@ public interface IImageStorageConfigurationResolver
     /// Resolution order:
     /// 1. Database override from config_settings_values (if set and not null)
     /// 2. appsettings.json ImageStorage.SharedFolderPath
-    /// 3. Hard-coded default: X:\Software Development\Live Applications\MTM_Waitlist\Images
+    /// 3. Hard-coded default from <c>AppStoragePaths.ImagesRootDefault</c>
     /// </summary>
     /// <returns>The effective shared folder path</returns>
     /// <exception cref="InvalidOperationException">If configuration is invalid or inaccessible</exception>
     Task<string> GetSharedFolderPathAsync();
+
+    /// <summary>
+    /// Gets the effective key-files folder path with database override support.
+    /// Resolution order:
+    /// 1. Database override from config_settings_values (if set and not null)
+    /// 2. appsettings.json ImageStorage.KeysFolderPath
+    /// 3. Hard-coded default from <c>AppStoragePaths.KeysFolderDefault</c>
+    /// </summary>
+    /// <returns>The effective key-files folder path</returns>
+    /// <exception cref="InvalidOperationException">If configuration cannot be resolved</exception>
+    Task<string> GetKeysFolderPathAsync();
+
+    /// <summary>
+    /// Gets the effective local picture cache folder with database override support.
+    /// Resolution order:
+    /// 1. Database override from config_settings_values (if set and not null)
+    /// 2. appsettings.json ImageStorage.CacheFolderPath
+    /// 3. Hard-coded default from <c>ImageCachePaths.DefaultCacheRoot</c>
+    /// </summary>
+    /// <returns>The effective cache folder path</returns>
+    /// <exception cref="InvalidOperationException">If configuration cannot be resolved</exception>
+    Task<string> GetImageCacheFolderPathAsync();
+
+    /// <summary>
+    /// Gets whether startup mirrors the picture roots onto this computer.
+    /// Resolution order:
+    /// 1. Database override from config_settings_values (if set and is bool type)
+    /// 2. appsettings.json ImageStorage.CacheEnabled
+    /// 3. Hard-coded default: true
+    /// </summary>
+    /// <returns><see langword="true"/> when pictures are cached locally.</returns>
+    Task<bool> GetImageCacheEnabledAsync();
 
     /// <summary>
     /// Gets the effective maximum file size in bytes with database override support.

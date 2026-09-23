@@ -7,12 +7,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using MTM_Waitlist.Mock.Service.Contracts;
+using MTM_Waitlist.Mock.Service.Models;
 
 namespace MTM_Waitlist.Mock.Service.Api;
 
 /// <summary>
 /// Gates every service endpoint behind the calling user's application role (T147, replacing the shared
-/// credential of FR-026).
+/// credential of FR-026) and the named permission that role may hold (T038).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -21,15 +22,16 @@ namespace MTM_Waitlist.Mock.Service.Api;
 /// remembering to protect it.
 /// </para>
 /// <para>
-/// The caller names itself in <see cref="ServiceOperatorRoles.UserNameHeaderName"/>; the role is then
-/// resolved from the application's own store by <see cref="IServiceOperatorRoleResolver"/>, and a role
-/// outside <see cref="ServiceOperatorRoles.Approved"/> is refused. The presented user name is never echoed
-/// in a response and never included in the refusal's body: a refusal carries the contract's error model and
-/// nothing else.
+/// The caller names itself in <see cref="ServiceOperatorRoles.UserNameHeaderName"/>; the caller is then
+/// resolved to an application identity by <see cref="IServiceOperatorRoleResolver"/>, and
+/// <c>permission.cache.refresh_api</c> is read for that person from the same store through the same declaration
+/// every other gate reads. Both halves are refused with one indistinguishable answer. The presented user name is
+/// never echoed in a response and never included in the refusal's body: a refusal carries the contract's error
+/// model and nothing else.
 /// </para>
 /// <para>
-/// <b>A store failure fails closed.</b> If the role cannot be resolved because the store is unreachable, the
-/// caller is refused rather than admitted — an unanswerable authorization question is a "no".
+/// <b>A store failure fails closed.</b> If the identity or the permission cannot be read because the store is
+/// unreachable, the caller is refused rather than admitted — an unanswerable authorization question is a "no".
 /// </para>
 /// </remarks>
 public sealed class ServiceOperatorAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
@@ -43,7 +45,7 @@ public sealed class ServiceOperatorAuthenticationHandler : AuthenticationHandler
     /// <param name="options">Framework options.</param>
     /// <param name="logger">Logger; receives the refusal reason.</param>
     /// <param name="encoder">URL encoder supplied by the framework.</param>
-    /// <param name="roleResolver">Resolves the caller's role from the application's store.</param>
+    /// <param name="roleResolver">Resolves the caller's identity and permission from the application's store.</param>
     public ServiceOperatorAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
@@ -72,38 +74,56 @@ public sealed class ServiceOperatorAuthenticationHandler : AuthenticationHandler
             return AuthenticateResult.Fail("unauthorized");
         }
 
-        string? role;
+        ServiceOperatorIdentity? operatorIdentity;
 
         try
         {
-            role = await _roleResolver.ResolveRoleAsync(userName, Context.RequestAborted).ConfigureAwait(false);
+            operatorIdentity = await _roleResolver.ResolveAsync(userName, Context.RequestAborted).ConfigureAwait(false);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            // Fail closed: a role that cannot be resolved is not an approved role.
+            // Fail closed: an identity that cannot be resolved is not an admitted one.
             Logger.LogWarning(
                 exception,
-                "The operator role for '{UserName}' could not be resolved, so the request was refused.",
+                "The operator identity for '{UserName}' could not be resolved, so the request was refused.",
                 userName);
             return AuthenticateResult.Fail("unauthorized");
         }
 
-        if (string.IsNullOrWhiteSpace(role))
+        if (operatorIdentity is null)
         {
             LogRefusal($"'{userName}' is not an active user with a role assignment");
             return AuthenticateResult.Fail("unauthorized");
         }
 
-        if (!ServiceOperatorRoles.IsApproved(role))
+        bool isPermitted;
+
+        try
         {
-            LogRefusal($"'{userName}' holds role '{role}', which is not an approved operator role");
+            isPermitted = await _roleResolver
+                .IsPermittedAsync(operatorIdentity, Context.RequestAborted)
+                .ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            // Fail closed: a permission that cannot be read is not a permission that was granted.
+            Logger.LogWarning(
+                exception,
+                "The operator permission for '{UserName}' could not be read, so the request was refused.",
+                userName);
+            return AuthenticateResult.Fail("unauthorized");
+        }
+
+        if (!isPermitted)
+        {
+            LogRefusal($"'{userName}' does not hold '{ServiceOperatorRoles.RequiredPermissionKey}'");
             return AuthenticateResult.Fail("unauthorized");
         }
 
         var identity = new ClaimsIdentity(
             [
                 new Claim(ClaimTypes.Name, userName),
-                new Claim(ClaimTypes.Role, role.Trim()),
+                new Claim(ClaimTypes.Role, operatorIdentity.RoleCode),
             ],
             SchemeName);
 

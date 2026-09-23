@@ -185,7 +185,9 @@ public static class NewRequestFlowRules
 
         // An answer the job supplies is asked for by the step that can show it: the dunnage list is asked for on
         // the dunnage step, as picture cards of the parts the job carries, with the substitute picker beside them
-        // (FR-048, FR-049), and the die list on the die step, as cards of the dies the job carries (FR-054).
+        // (FR-048, FR-049); the die list on the die step, as cards of the dies the job carries (FR-054); and the
+        // component list on the component step, as clickable cards of the components the job carries, so the
+        // operator picks a part they can see rather than a number out of a drop-down list.
         // Which list it is comes from the row's declaration, never from the Item's identity (FR-013).
         return RequestItemAnswerOptionsResolver.DeclaredJobListName(configuration) switch
         {
@@ -193,6 +195,8 @@ public static class NewRequestFlowRules
                 => typeof(NewRequestDunnageViewModel),
             var list when string.Equals(list, RequestItemFieldDefinition.Lists.Die, StringComparison.OrdinalIgnoreCase)
                 => typeof(NewRequestDieViewModel),
+            var list when string.Equals(list, RequestItemFieldDefinition.Lists.Component, StringComparison.OrdinalIgnoreCase)
+                => typeof(NewRequestComponentViewModel),
             _ => typeof(NewRequestDetailsViewModel),
         };
     }

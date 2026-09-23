@@ -7,17 +7,17 @@ namespace MTM_Waitlist.Tests.Module_Settings;
 public sealed class RequestItemCatalogTests
 {
     [TestMethod]
-    public void Catalog_HasAllTwentyThreeRows()
+    public void Catalog_HasAllTwentyFourRows()
     {
-        Assert.AreEqual(23, RequestItemCatalog.TotalCount);
-        Assert.AreEqual(23, RequestItemCatalog.Items.Count);
+        Assert.AreEqual(24, RequestItemCatalog.TotalCount);
+        Assert.AreEqual(24, RequestItemCatalog.Items.Count);
     }
 
     [TestMethod]
     public void Catalog_CountsPerCategory_MatchSpec()
     {
         Assert.AreEqual(11, RequestItemCatalog.GetByCategory(RequestCategory.Pickup).Count);
-        Assert.AreEqual(8, RequestItemCatalog.GetByCategory(RequestCategory.Deliver).Count);
+        Assert.AreEqual(9, RequestItemCatalog.GetByCategory(RequestCategory.Deliver).Count);
         Assert.AreEqual(3, RequestItemCatalog.GetByCategory(RequestCategory.Assist).Count);
         Assert.AreEqual(1, RequestItemCatalog.GetByCategory(RequestCategory.Other).Count);
     }
@@ -40,6 +40,22 @@ public sealed class RequestItemCatalogTests
         Assert.IsNotNull(RequestItemCatalog.FindById("pickup-scrap"));
         Assert.IsNotNull(RequestItemCatalog.FindById("pickup-hopper"));
         Assert.IsNotNull(RequestItemCatalog.FindById("assist-table-remove"));
+    }
+
+    [TestMethod]
+    public void Catalog_DeliverComponent_MirrorsThePickupComponentChoice()
+    {
+        // Added 2026-09-22: a job carrying a component is offered a Deliver component wherever Pickup offers
+        // one, so the two families cannot drift apart again.
+        var deliver = RequestItemCatalog.FindById("deliver-component");
+        var pickup = RequestItemCatalog.FindById("pickup-component")!;
+
+        Assert.IsNotNull(deliver);
+        Assert.AreEqual(RequestCategory.Deliver, deliver!.Category);
+        Assert.AreEqual(pickup.NormalizedName, deliver.NormalizedName);
+        Assert.AreEqual(pickup.CardLine2Template, deliver.CardLine2Template);
+        Assert.AreEqual("deliver-component", deliver.ProducedValue);
+        Assert.AreEqual("Deliver", deliver.UmbrellaVerb);
     }
 
     [TestMethod]

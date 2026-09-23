@@ -8,18 +8,18 @@
 -- below so a database which still holds them is cleaned by re-running this file.
 --
 -- The five and the two, as the decisions left the split to the implementation to choose:
---   100-3     (Expo Drive)  coil only            MMC subordinate, a REAL scrap type
---   100-6     (Expo Drive)  flatstock only       MMF subordinate deliberately tagged Component, so the
+--   100-03     (Expo Drive)  coil only            MMC subordinate, a REAL scrap type
+--   100-06     (Expo Drive)  flatstock only       MMF subordinate deliberately tagged Component, so the
 --                                                part-number prefix wins (this is the job that proves a
 --                                                flatstock-only job is offered pickup-coil, D21)
---   100-7     (Expo Drive)  die only             FGT subordinate, scrap value 'Scrap Type Required'
+--   100-07     (Expo Drive)  die only             FGT subordinate, scrap value 'Scrap Type Required'
 --   100-18    (Expo Drive)  component only       non-prefixed part, stored Category Component, scrap value
 --                                                'No Scrap'
 --   100-1806  (Expo Drive)  dunnage only         no subordinate part, an assigned dunnage part
 --   V100-33   (Vits Drive)  everything at once   coil + flatstock + die + component, a REAL scrap type, and
 --                                                dunnage
 --   V100-34   (Vits Drive)  no subordinate part  an empty subordinate array, no dunnage
---   (100-8)   a work centre with NO active job: realised by the ABSENCE of a row, which is what the resolver
+--   (100-08)   a work centre with NO active job: realised by the ABSENCE of a row, which is what the resolver
 --             reads as "no active job" — the seed inserts nothing for it on purpose.
 --
 -- A live Setup save on any of these work centres overwrites its `setup_active_jobs` row, so the matrix is no
@@ -47,18 +47,18 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 DELETE FROM setup_active_jobs
 WHERE work_center IN (
-    '100-3', '100-6', '100-7', '100-18', '100-1806', 'V100-33', 'V100-34',
+    '100-03', '100-06', '100-07', '100-18', '100-1806', 'V100-33', 'V100-34',
     '900-1', '900-2', '900-3', '900-4', '900-5', '900-6', '900-7');
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- --------------------------------------------------------------- 100-3: coil only, a real scrap type
+-- --------------------------------------------------------------- 100-03: coil only, a real scrap type
 INSERT INTO setup_active_jobs
     (public_id, work_order, part_number, sequence_number, work_center,
      selected_dunnage_type_id, selected_dunnage_part_id,
      subordinate_parts_json, selected_dunnage_parts_json, is_active, created_utc, updated_utc)
 VALUES
-    ('c3000000-0000-4000-8000-000000000001', 'WO-900001', 'PART-9001', '10', '100-3',
+    ('c3000000-0000-4000-8000-000000000001', 'WO-900001', 'PART-9001', '10', '100-03',
      NULL, NULL,
      JSON_ARRAY(JSON_OBJECT(
         'Category', 'Coil',
@@ -71,8 +71,8 @@ VALUES
         'IsLowStock', FALSE)),
      NULL, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
--- --------------------------------------------------------------- 100-6: flatstock only, prefix wins over the stored tag
-    ('c3000000-0000-4000-8000-000000000002', 'WO-900002', 'PART-9002', '10', '100-6',
+-- --------------------------------------------------------------- 100-06: flatstock only, prefix wins over the stored tag
+    ('c3000000-0000-4000-8000-000000000002', 'WO-900002', 'PART-9002', '10', '100-06',
      NULL, NULL,
      JSON_ARRAY(JSON_OBJECT(
         'Category', 'Component',
@@ -85,8 +85,8 @@ VALUES
         'IsLowStock', FALSE)),
      NULL, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
--- --------------------------------------------------------------- 100-7: die only, the placeholder scrap value
-    ('c3000000-0000-4000-8000-000000000003', 'WO-900003', 'PART-9003', '10', '100-7',
+-- --------------------------------------------------------------- 100-07: die only, the placeholder scrap value
+    ('c3000000-0000-4000-8000-000000000003', 'WO-900003', 'PART-9003', '10', '100-07',
      NULL, NULL,
      JSON_ARRAY(JSON_OBJECT(
         'Category', 'Die',

@@ -48,6 +48,18 @@ public sealed partial class SettingsPage : Page
         await dialog.ShowAsync();
     }
 
+    /// <summary>Stores the picture cache folder that is in the box.</summary>
+    /// <remarks>
+    /// Through the view model's command rather than the box's own text, so that the value saved is the one the
+    /// command validates and the same one a test can drive without a control.
+    /// </remarks>
+    private void SavePictureCacheFolder_Click(object sender, RoutedEventArgs e) =>
+        ViewModel.SavePictureCacheFolderCommand.Execute(null);
+
+    /// <summary>Copies the pictures onto this computer without waiting for the next start.</summary>
+    private void RefreshPictureCache_Click(object sender, RoutedEventArgs e) =>
+        ViewModel.RefreshPictureCacheCommand.Execute(null);
+
     private async void AddComputer_Click(object sender, RoutedEventArgs e)
     {
         if (!ViewModel.ComputerManagement.CanManageComputers)

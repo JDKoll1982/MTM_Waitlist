@@ -971,7 +971,7 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
   `MTM_Waitlist.Tests/Module_Setup/Services/ActiveJobSeedRoundTripTests.cs`
 - [x] **T120a** [US1] (2026-09-14) `ActiveJobSeedRoundTripTests` now **writes its own seven fixture rows** under a
   per-run `IT-ROUNDTRIP-*` work centre and deletes them in teardown, so the matrix no longer reads the deployed
-  seed. The re-point T120 landed was not survivable in practice: work centre `100-3` had already been overwritten
+  seed. The re-point T120 landed was not survivable in practice: work centre `100-03` had already been overwritten
   by a live Setup save for `WO-060954`, which made `Seeded100_3_CoilOnly_NormalisesToCoil` red for a reason that
   was not a defect. The shapes asserted are unchanged (the same seven situations through the same deserializer),
   and `Retired900Fixtures_ResolveToNoActiveJob` still reads live rows because its subject is an absence. ·
@@ -1016,7 +1016,7 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
 **Wave 3 — the prepared situations move to real work centres (single task; the seed's own owner):**
 
 - [x] **T125** [US1] Re-point `seed_setup_active_jobs_eight_configurations`: five of the seven situations onto Expo
-  Drive work centres and two onto Vits Drive work centres (`100-3`, `100-6` … `100-28`, `100-1806`, `100-1807`; and
+  Drive work centres and two onto Vits Drive work centres (`100-03`, `100-06` … `100-28`, `100-1806`, `100-1807`; and
   `V100-33`, `V100-34`, `V100-35`), keeping each situation's job shape and the exact `subordinate_parts_json` shape
   `sp_setup_save_setup` writes. Record which five and which two in the seed's header comment, as that seed already
   records its own matrix. The eighth case stays an absent job. Paired rollback in the same change. ·
@@ -1078,10 +1078,10 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
   `jkoll` twice), `32`/`33` `9001 Test Admin`, `35`/`48` `9002 Test Developer`, `36`/`37` `9003 Test Plant
   Manager`, `38`/`39` `9004 Test Setup Lead`, `40`/`41` `9005 Test Production Lead`, `42`/`43` `9006 Test Setup`,
   `49` `9007 Test Production`, `50`/`51` `9008 Test Material Handler`. Nineteen distinct `item` values (one per
-  in-scope Item), eight work centres (`100-3`, `100-6`, `100-7`, `100-12`, `100-18`, `100-1806`, `V100-33`,
+  in-scope Item), eight work centres (`100-03`, `100-06`, `100-07`, `100-12`, `100-18`, `100-1806`, `V100-33`,
   `V100-34`) across both buildings, all eight roles represented. Material-dependent Items were raised only where
   the work centre's active job carries the material (`100-1806` dunnage `DNG0007788`, `100-18` component
-  `CMP0004455`, `100-6` flatstock `MMF0001154`, `100-12` coil `MMC0000789`, `100-7` die `FGT0002000`, `V100-33`
+  `CMP0004455`, `100-06` flatstock `MMF0001154`, `100-12` coil `MMC0000789`, `100-07` die `FGT0002000`, `V100-33`
   coil `MMC0001001` / flatstock `MMF0001155`). All nineteen left `Pending` — none accepted, completed or canceled.
   Two recorded limitations: `johnk` and `jkoll` are two accounts on one employee number (`6229`), so the store —
   which has no user-id column — shows nine distinct requesters for ten sign-ins; and the eighteen
@@ -1141,11 +1141,11 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
   handler's assignment is gone and the second handler's stands, then prove the self-accept completes. · the running app
 
   Evidence recorded (2026-09-20, Debug build, driven through the running app's own card buttons). **Outcome 5** on
-  row `31` (`deliver-die`, `100-7`, raised by `6229`) — `johnk` (`6229`) accepted it (`assigned=6229`,
+  row `31` (`deliver-die`, `100-07`, raised by `6229`) — `johnk` (`6229`) accepted it (`assigned=6229`,
   `accepted_utc=14:41:45`), gave it back (one row, back to `Pending`, `assigned=NULL`, `released_utc=14:42:17`),
   then signed out and `test.setup` (`9006`) signed in, saw `accept` alone on that card and accepted it. The row now
   reads `Accepted`, `assigned=9006`, `accepted_utc` still `14:41:45`, and `6229` appears nowhere on it — the first
-  handler's assignment is gone and the second handler's stands. **Outcome 6** on row `32` (`pickup-coil`, `100-6`,
+  handler's assignment is gone and the second handler's stands. **Outcome 6** on row `32` (`pickup-coil`, `100-06`,
   raised by `9001`) — signed in as `test.admin` (`9001`), the raiser's own waiting request offered `accept` and
   `cancel`; the self-accept was **permitted** (`status=Accepted`, `assigned=9001`, `accepted_utc=14:44:07`,
   `requester=9001`) and the self-complete finished it (`Completed`, `completed_utc=14:44:28`). FR-041 holds: a
@@ -1182,7 +1182,7 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
     `Seeds/seed_waitlist_request_item_configs/create.sql`,
     `Seeds/seed_setup_active_jobs_eight_configurations/create.sql`. Post-state verified: the procedure now exposes
     **7 parameters with `p_expected_status` present**, `waitlist_request_item_configs` holds **23 rows**, and
-    `setup_active_jobs` holds all **seven prepared situations** (`100-3`, `100-6`, `100-7`, `100-18`, `100-1806`,
+    `setup_active_jobs` holds all **seven prepared situations** (`100-03`, `100-06`, `100-07`, `100-18`, `100-1806`,
     `V100-33`, `V100-34`).
   - *Paired artifacts reversed.* All three `rollback.sql` files were applied the same way, each exiting `0`, and each
     reversed its artifact: the procedure row count dropped to **0**, `waitlist_request_item_configs` to **0 rows**,
@@ -1191,9 +1191,9 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
     state.
   - *Seven situations resolve from real work centres.* Resolved through the real read path
     (`sp_setup_active_jobs_latest_by_work_center_get`, which takes **no arguments** and returns every work centre's
-    latest job) rather than by reading the table: `100-3` Coil; `100-6` Component; `100-7` Die; `100-18` Component;
+    latest job) rather than by reading the table: `100-03` Coil; `100-06` Component; `100-07` Die; `100-18` Component;
     `100-1806` no subordinate parts plus dunnage; `V100-33` all four plus dunnage; `V100-34` none — the absent-job
-    case. **Zero rows at `100-8`** and **zero rows at `900-*`**. Three rows require an enum and carry NULL options.
+    case. **Zero rows at `100-08`** and **zero rows at `900-*`**. Three rows require an enum and carry NULL options.
   - *FR-043 proved behaviourally, not by inspection.* Inside a transaction on a real queued request: a **stale**
     `p_expected_status` updated **0 rows** and left `assigned_material_handler` NULL; a **matching**
     `p_expected_status` updated **1 row** and set `assigned_material_handler`; an **absent/empty**
@@ -1204,7 +1204,7 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
     its replacement by the real-work-centre seed. No `source` directive drift: the master file mirrors the seed
     files' content.
   - *Nothing else moved.* `waitlist_requests_queue` still holds **24 rows**; the seven `setup_active_jobs` rows were
-    restored to their exact pre-round-trip contents, including `100-3`'s live `WO-055691` row that a real Setup save
+    restored to their exact pre-round-trip contents, including `100-03`'s live `WO-055691` row that a real Setup save
     had left there on 2026-09-14.
 - [x] **T138** **Sign-out gate.** On a computer where "remember me" is set and the session had been restored, choose
   Sign out from the badge and prove the application **restarts to the sign-in screen** rather than restoring the
@@ -1236,7 +1236,7 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
     Lead, Production Lead, Setup, Production, Material Handler), so every role raised at least one.
   - *SC-016 — zero fixture work centres; five Expo and two Vits carry the seven situations.* **PASS, corroborated
     live.** `setup_work_centers_catalog` holds **0** rows matching `900-%` and `setup_active_jobs` holds **0** rows
-    at `900-%`. `setup_active_jobs` holds **8** rows: the seven prepared situations on `100-3`, `100-6`, `100-7`,
+    at `900-%`. `setup_active_jobs` holds **8** rows: the seven prepared situations on `100-03`, `100-06`, `100-07`,
     `100-18`, `100-1806` (Expo Drive) and `V100-33`, `V100-34` (Vits Drive), plus `100-12`, which is a live Setup
     save rather than a prepared situation. The no-active-job case is an absence, not a row.
   - *SC-017 — all seven handling outcomes exercised and recorded.* **PARTIAL: five of seven proven.** Outcomes 1, 2,
@@ -1685,17 +1685,17 @@ the code cannot disagree. · `WeekendProject/Documents/Request-Config-Template.c
 -p:Platform=x64` → `Failed: 0`. Evidence recorded: build succeeded, `total: 1064, failed: 0, succeeded: 1037,
 skipped: 27`. · `MTM_Waitlist.sln`, `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
 - [x] **T174** **UI gate.** In the running app, raise a pickup-die and a deliver-die request from a work centre whose
-job carries a die (the seed's `100-7`), and prove from a text dump rather than from the code: Line 1 reads
+job carries a die (the seed's `100-07`), and prove from a text dump rather than from the code: Line 1 reads
 `Pickup Die: <the job's part number>` / `Deliver Die: <the job's part number>`, and Line 2 reads
 `<FGT number>-<die location>`. Then move the die's location in the store and reload, to prove the card follows the job
 rather than a stale copy. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
   — **VERIFIED 2026-09-20** against the running app (driven by UI Automation; the window is located by process id,
-  never by title). Work centre `100-7`, whose job is `PART-9003` with die `FGT0002000` at `DIE SHOP`.
+  never by title). Work centre `100-07`, whose job is `PART-9003` with die `FGT0002000` at `DIE SHOP`.
   **Clause 1 — Line 1.** The shell text dump read `Pickup Die: PART-9003` and `Deliver Die: PART-9003`: the label
   comes from `RequestItem.<item>.Line1` and the value is the **job's** part number, not the die's.
   **Clause 2 — Line 2.** Both cards' second line read `FGT0002000-DIE SHOP`, i.e. `<FGT number>-<die location>`,
   composed by `RequestDiePart.ComposeLabel` from the job's die row.
-  **Clause 3 — the card follows the job, not a stale copy.** `subordinate_parts_json` for `100-7` was moved to
+  **Clause 3 — the card follows the job, not a stale copy.** `subordinate_parts_json` for `100-07` was moved to
   `DIE SHOP B`, the waitlist was reloaded (Work Center Setup and back), and the deliver card's Line 2 became
   `FGT0002000-DIE SHOP B`; the stored `input_value` of the existing request was unchanged throughout. The job JSON
   was then restored to `DIE SHOP` and re-read.
@@ -1719,7 +1719,7 @@ rather than a stale copy. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/
 `sp_setup_active_jobs_latest_by_work_center_get` returns the job's `part_number` and the die row's `PartNumber` /
 `Location` for a real active job, so the two lines have something to resolve against outside the seed. · local
 `mtm_waitlist` — **VERIFIED 2026-09-20**: the procedure takes **no arguments** (it returns every work centre's latest
-job — a correction to this task's original wording) and returned **8** rows; for `100-7` it carries
+job — a correction to this task's original wording) and returned **8** rows; for `100-07` it carries
 `part_number = PART-9003`, `sequence_number = 10` and a `subordinate_parts_json` holding the Die row `FGT0002000` /
 `DIE SHOP`, which is exactly what FR-052/FR-053's two lines resolve against
 
@@ -1728,7 +1728,7 @@ requesting job's part number and an identifier carrying the die's own number and
 destination answer no longer changes either line; and an Item that names none of these tokens is provably untouched.
 FR-052, FR-053, the amended FR-005 and SC-024 are provable from this phase's tests alone, and **both gates are now
 closed**: T175 read the two lines' source back out of the live `sp_setup_active_jobs_latest_by_work_center_get`
-(`100-7` carries `part_number = PART-9003` and the die row `FGT0002000` / `DIE SHOP`), and T174 raised both die
+(`100-07` carries `part_number = PART-9003` and the die row `FGT0002000` / `DIE SHOP`), and T174 raised both die
 requests in the running app and read the rendered cards from a text dump — including the clause that the card follows
 the **job**, not a stale copy, proved by moving the die's location in the store and reloading. The one thing T174
 could **not** do on the live store as it stands is raise a die request without help: the live `pickup-die` /
@@ -1741,7 +1741,7 @@ what removes that caveat**, and until it runs the die step is unreachable on the
 
 ## Phase 13: Fifth Follow-Up Batch — What Counts as a Die, and One Request per Die
 
-The batch that a live job forced. `100-3` carries a die row described `No Die` with an empty location — the query's
+The batch that a live job forced. `100-03` carries a die row described `No Die` with an empty location — the query's
 way of saying "this job has no die" — yet it was counted as a die, offered to the operator, and rendered as a
 dangling separator. So this phase settles what a die **is** (FR-055), how a die is **written** (FR-056), and what a
 request for a die shows on the **request page** as well as the card (FR-052, FR-053); then it builds the step that
@@ -1888,7 +1888,7 @@ change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (
   — **VERIFIED 2026-09-20 in the running app.** The request opened for T184 was raised from a job carrying two
   dies, and its page's **Pickup location** read **`DIE SHOP, PRESS BAY`** — every location the job carries, not
   only the request's own — while `Item details → Die` showed the request's own `FGT0002000-DIE SHOP`. A job
-  carrying a single die is unaffected: `100-7`'s own pre-fixture data resolves to `DIE SHOP` alone (T185).
+  carrying a single die is unaffected: `100-07`'s own pre-fixture data resolves to `DIE SHOP` alone (T185).
   Evidence: `%TEMP%\die-walk\15-detail-die1.txt`.
 - [x] **T183** [US1] **Raise one request per selected die** (FR-054): the confirmation step submits one request for
   each die the operator selected — never one request carrying several dies — and reports how many were raised. ·
@@ -1900,24 +1900,24 @@ change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (
   reports the count in plain language when more than one went through. Each draft carries its own die in
   `InputValue`, so several entries from one job stay distinguishable with no schema change. Evidence: the 6
   `NewRequestOneRequestPerDieTests` cases, green.
-- [x] **T184** **UI gate.** In the running app, raise a die request from the seed's `100-7` and prove from a text
+- [x] **T184** **UI gate.** In the running app, raise a die request from the seed's `100-07` and prove from a text
   dump that the card and the request page both carry the die's number **and** its location, then do the same for a
   job carrying two dies and confirm one entry appears per die selected. · `bin/x64/Debug/net10.0-windows10.0.19041.0/win-x64/MTM_Waitlist.exe`
   — **VERIFIED 2026-09-20 in the running app** (local store, both connection-string overrides; Infor Visual is
   unreachable from this workstation, so the shell showed its cached-data bar, but the job values under test are
-  internal-store reads and were live). Walk: Work Centre `100-7` → Category `Pickup` → Item `Die` → the die step
+  internal-store reads and were live). Walk: Work Centre `100-07` → Category `Pickup` → Item `Die` → the die step
   asked *"Which die is this request for? Choose one or more."* and offered **both** cards — `FGT0002000-DIE SHOP`
   (Die 9003-A) and `FGT0002001-PRESS BAY` (Die 9006-B) — so the **card carries the die's number and its location**.
   Selecting both and submitting raised **two** waitlist cards, `Pickup Die: PART-9003` carrying
-  `FGT0002000-DIE SHOP` and `FGT0002001-PRESS BAY` respectively, each `100-7` and `Waiting < 1m`: **one entry per
+  `FGT0002000-DIE SHOP` and `FGT0002001-PRESS BAY` respectively, each `100-07` and `Waiting < 1m`: **one entry per
   die selected**, and each entry distinguishable by its own die. Opening the first showed the request page carrying
   the same value as `Identifier`, `Request details` and `Item details → Die`, again number **and** location.
   **Stated rather than smoothed over:** the **Preview** step listed only one `Detail` row although two dies were
   selected, so the preview under-reports what will be raised even though the submission itself was correct.
-  **Raised as T233 and fixed the same day** — both review steps now list one row per die. **Fixture, and its reversal:** the seed's `100-7` job carries **one** die, so the
+  **Raised as T233 and fixed the same day** — both review steps now list one row per die. **Fixture, and its reversal:** the seed's `100-07` job carries **one** die, so the
   two-die half of this gate was walked against a temporary local edit of
   `setup_active_jobs.subordinate_parts_json` adding the seed's `V100-33` die (`FGT0002001` / `PRESS BAY`) to
-  `100-7` — real seed data, not invented. The original single-die value was snapshotted before the edit and written
+  `100-07` — real seed data, not invented. The original single-die value was snapshotted before the edit and written
   back afterwards. Evidence: `%TEMP%\die-walk\03-workcenter.txt`, `04-category.txt`, `05-item.txt`,
   `06-die-options.txt`, `07-select-die1.txt`, `08-select-die2.txt`, `09-after-continue.txt`, `10-confirm.txt`,
   `11-state.txt`, `12-invokables.txt`, `13-submitted.txt`, `14-waitlist-card.txt`, `15-detail-die1.txt`.
@@ -1931,7 +1931,7 @@ change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (
   `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestPreviewViewModel.cs`,
   `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSummaryViewModel.cs`,
   `Module_Waitlist/Views/NewRequestPreviewPage.xaml`, `Module_Waitlist/Views/NewRequestSummaryPage.xaml`
-  — **VERIFIED 2026-09-20 in the running app.** Walked again with two dies on `100-7` (the same temporary fixture
+  — **VERIFIED 2026-09-20 in the running app.** Walked again with two dies on `100-07` (the same temporary fixture
   T184 used, applied and reversed again): the preview now reads `Detail / FGT0002000-DIE SHOP / FGT0002001-PRESS BAY`
   and the confirmation reads `Details / FGT0002000-DIE SHOP / FGT0002001-PRESS BAY` beside
   *"This will raise 2 requests — one for each die you chose."* **Why the old tests missed it, which is the part worth
@@ -1956,7 +1956,7 @@ change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (
   `MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs`, `spec.md` (FR-053/FR-056),
   `contracts/card-and-identifier.md`, `contracts/request-picker-flow.md`,
   `WeekendProject/Documents/Request-Config-Template.csv` — **VERIFIED 2026-09-20 in the running app.** The die step's
-  card on `100-7` reads `FGT0002000` with the location gone, and the waitlist's existing die requests render
+  card on `100-07` reads `FGT0002000` with the location gone, and the waitlist's existing die requests render
   `FGT0002000`, `FGT1088-01` and `FGT0401-01`. **One of them does not, and that is correct:** `FGT0002001-PRESS BAY`
   still shows its stored text verbatim, because the job no longer carries that die (the T184 fixture was reverted) and
   the fallback deliberately refuses to split a stored value at a hyphen a die's own number may contain. Tests: the
@@ -1971,17 +1971,17 @@ change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (
   decide whether to offer the Item at all — so the card and the picker cannot disagree, nothing keys on the Item's
   identity (FR-013), and a request that does not involve the coil does not even **read** it. ·
   `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSummaryViewModel.cs` — **VERIFIED 2026-09-20 in the running
-  app**, on `100-3`, whose job carries `MMC0000268` (`3,140 lb`): a **Riser Table** request's confirm page shows the
+  app**, on `100-03`, whose job carries `MMC0000268` (`3,140 lb`): a **Riser Table** request's confirm page shows the
   request summary and **no coil card at all**, while a **Coil or Flatstock** request's confirm page shows
   `Coil details / MMC0000268 / 1500 / Coil, 12Ga X 4.875 / 3,140 lb`. Tests: the 4 new cases in
   `NewRequestSummaryHonestyTests` — the card hidden for a die request on a coil job, the coil **never read** for one
   (which is what stops the card appearing later), and two guards keeping it drawn where it belongs. Evidence:
   `%TEMP%\die-walk\51-confirm-riser.txt`, `60-confirm-coil.txt`.
-- [x] **T185** **Live database validation.** Confirm the live `100-3` job offers **no** die Item — its only die row is
-  the `No Die` placeholder — while `100-7` and `V100-33` do, and that the die values resolve from the live read
+- [x] **T185** **Live database validation.** Confirm the live `100-03` job offers **no** die Item — its only die row is
+  the `No Die` placeholder — while `100-07` and `V100-33` do, and that the die values resolve from the live read
   rather than the seed. · local `mtm_waitlist` — **VERIFIED 2026-09-20** against the local store: the Die rows carried
-  are `100-3` → `FGT0001-01` described **`No Die`** with an **empty Location** (the placeholder FR-055 refuses),
-  `100-7` → `FGT0002000` / `DIE SHOP`, `V100-33` → `FGT0002001` / `PRESS BAY`. Read through
+  are `100-03` → `FGT0001-01` described **`No Die`** with an **empty Location** (the placeholder FR-055 refuses),
+  `100-07` → `FGT0002000` / `DIE SHOP`, `V100-33` → `FGT0002001` / `PRESS BAY`. Read through
   `JSON_TABLE(setup_active_jobs.subordinate_parts_json)`, so the split is the live data's, not the seed's
 
 **Checkpoint — half closed, the decision taken, and the build now landed.** FR-055, FR-056, the amended
@@ -2015,7 +2015,7 @@ this file is unchecked.**
 it, not assumed:**
 
 - **The live `mtm_waitlist` round-trip — permitted and doable.** The store exists on this machine (**23 tables**,
-the **seven prepared jobs** including `100-3`, `100-7` and `V100-33`), the plant host is unreachable and
+the **seven prepared jobs** including `100-03`, `100-07` and `V100-33`), the plant host is unreachable and
 `MySqlHostFallback` correctly points the stores at localhost. Apply and reverse the paired artifacts here. One
 limit worth knowing: the shipped installer `Database/install_local_database.bat` is **GUI-only** — a `wscript` VBS
 that uses InputBox dialogs — so a *full* reinstall still needs a person at the keyboard. Use the SQL artifacts
@@ -2524,6 +2524,121 @@ labelled as owed.
 
 ---
 
+## Phase 15: Sixth Follow-Up Batch — The Deliver Family Offers the Component Choice
+
+**Why.** A job that carries a component was offered the Pickup component choice and **no Deliver counterpart**, so
+an operator who needed a component brought to the press had no Item for it and fell back to Other. The owner's
+request (2026-09-22): *the Deliver options should mirror the Pickup options.* The addition moves the catalog to
+**twenty-four codes, twenty in scope** — recorded in `spec.md`'s post-delivery amendment and in the `data-model.md`
+codes and counts, with the two normative contract tables updated in the same change. Walking the new card then found
+its second line reading the Item's own name, which is the second task below and the larger of the two.
+
+- [x] **T236** **Add `deliver-component`, the Deliver counterpart of `pickup-component`.** One catalog row gated on
+  `HasComponent`; one configuration row that asks **which** component and draws its choices from the job's own
+  component list (the `component` job list, named explicitly — the list `pickup-component` reaches by fallback);
+  one display-name resource entry; and every count that pinned 23 rows / Deliver 8 moved to 24 / Deliver 9, the
+  in-scope population moving from nineteen to twenty with them. · `MTM_Waitlist.Settings/Models/RequestItemCatalog.cs`,
+  `MTM_Waitlist.Settings/Services/RequestItemPickerRules.cs`,
+  `Database/Seeds/seed_waitlist_request_item_configs/create.sql`, `Database/Seeds/AllSeeds.sql`,
+  `Database/Tables/31_waitlist_request_item_configs/create.sql`, `Database/Tables/AllTables.sql`,
+  `Strings/en-us/Resources.resw`, `MTM_Waitlist.Tests/Module_Settings/{RequestItemCatalogTests.cs,RequestItemCatalogServiceTests.cs,Services/RequestItemPickerRulesTests.cs}`,
+  `specs/004-unified-card-item-picker/{spec.md,data-model.md,contracts/request-picker-flow.md,contracts/card-and-identifier.md,contracts/item-configuration.md}`,
+  `WeekendProject/Documents/Request-Config-Template.csv`
+  **Done 2026-09-22 — the picker rule is the part that had to be remembered, not the catalog row.** A catalogued Item
+  with no `RequiredJobPart` arm falls through to `RequestJobPartKind.None`, which `IsVisible` reads as *always
+  offered*: the row **alone** would have put a Deliver Component on every job, including a job with no components at
+  all. `RequiredJobPart` now maps both component Items to `RequestJobPartKind.Component`, and
+  `DeliverComponent_IsGatedOnAJobComponent_LikeItsPickupTwin` asserts the two are gated alike, so the pairing cannot
+  rot. The visible-set matrix gains the Item in exactly the two configurations that carry a component (`100-18` and
+  `V100-33`) and in no other, and the Item's own row is pinned by
+  `Catalog_DeliverComponent_MirrorsThePickupComponentChoice`. **Evidence (run 2026-09-22 on this workstation):**
+  `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` → *Build succeeded*, no warnings and
+  no errors; the full suite → **1290 passed, 0 failed**. The design-time spreadsheet still parses to
+  **24 rows, Pickup 11 / Deliver 9 / Assist 3 / Other 1**. **Not verified, and stated as such:** no live
+  `mtm_waitlist` was reinstalled, so the new seed row has not been loaded by a real store, and the running app was not
+  driven — the new Item has not been seen on screen. Those are the owner's steps, and they are what T189–T228's
+  live-database and UI gates already cover.
+
+- [x] **T237** **Make a card's second line name the part involved rather than the kind of request it is** (FR-005;
+  found from the owner's screenshot of the new card, which read `Deliver` / `Component` where it should read
+  `Deliver` / `V-EMB-2`). The identifier templates name `{part_number}`, `{scrap_type}` and `{component}`, and **no
+  source supplied any of the three**, so the resolver's configured fallback — show the Item's own display name and
+  report the configuration problem — is what every affected card did: a coil request read `Coil`, a work-in-process
+  request read `Work In Process (WIP)`, the component request read `Component`. Three sources were added:
+  `{component}` from the request's captured answer (the component the operator chose, exactly as `{dunnage_part}`
+  already worked); `{part_number}` from the job — the material the job holds for an Item that is *about* one, and the
+  job's own part number otherwise, keyed on `RequestItemPickerRules.RequiredJobPart` so the picker and the card use
+  one rule for what an Item is about; and `{scrap_type}` from the job's real scrap decision. The job's coil number,
+  its flatstock number and its scrap type now travel on `RequestJobPartAvailability`
+  (`CoilPartNumber`, `FlatstockPartNumber`, `ScrapType`), mapped at the composition root. ·
+  `MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs`, `Services/RequestJobAvailabilityProvider.cs`,
+  `MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs`,
+  `MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs`,
+  `specs/004-unified-card-item-picker/contracts/card-and-identifier.md`
+  **Evidence (run 2026-09-22 on this workstation):** the solution builds with no warnings and no errors; the full
+  suite → **1382 passed, 0 failed, 48 skipped (1430 total)**; and the four new cases —
+  `ResolveLine2_ComponentRequests_ShowThePartTheOperatorChose`,
+  `ResolveLine2_MaterialRequests_NameThePartTheJobCarries`,
+  `ResolveLine2_MergedPickupCoil_NamesTheMaterialTheJobActuallyHolds` and
+  `ResolveLine2_ScrapRequest_ShowsTheTypeTheJobAlreadyDecided` — pass. **Not verified, and stated as such:** no card
+  has been seen on screen; the walk needs the reinstall below. **Left deliberately, and named here so it is not
+  mistaken for done:** the request page's own declared *job* rows (its `Coil number` and `Scrap type` labels) still
+  resolve to nothing, so those rows are omitted rather than drawn wrong — `RequestJobFieldValues` is unchanged, and
+  the page and the card agree about every value they both show.
+
+**Checkpoint — the two component choices behave as one, and a card's second line names a part.** The Deliver family
+offers everything the Pickup family offers wherever the job supports it, the counts in the code, the seeds, the
+resources, the tests and the spec of record all say twenty-four, every card whose identifier is a part reads that
+part instead of the kind of request it is, and the only things left are the reinstall and the walk below.
+
+---
+
+## Phase 16: Seventh Follow-Up Batch — The Component Choice Is Clicked, Not Listed
+
+**Why.** The component answer was the only one still drawn as a drop-down on the Details step: a list of part
+numbers with no part beside it. The owner's request (2026-09-22): *show clickable boxes for each component the job
+carries instead of the dropdown, and add a temporary image placeholder — images are coming for all Visual and WIP
+part numbers.* The answer is a part the operator recognises by sight, so it belongs on a step that shows parts, which
+is what the dunnage step already does for dunnage.
+
+- [x] **T238** **Give the component answer its own step: `NewRequestComponentViewModel` + `NewRequestComponentPage`,
+  one clickable box per component the job carries, each with a named picture placeholder.** Reached because the
+  chosen Item's row declares an enumerated answer naming the job's `component` list — read through
+  `RequestItemAnswerOptionsResolver.DeclaredJobListName` — and never because of the Item's identity, so both component
+  rows (`pickup-component`, `deliver-component`) are served by one step and a row added later needs no build
+  (FR-013). One component is one answer, so a click records it and moves on — the dunnage step's behaviour, not the
+  die step's. The question is the **row's own prompt**, because the two rows ask it differently (one collects, one
+  brings) and the dunnage/die steps' shared wording would flatten that (FR-013, FR-022). Each box carries the part
+  number, an `AutomationProperties.AutomationId` named after the part, and a picture box that draws
+  `ImagePicturePolicy.NoImagePath` — the application's shared no-image placeholder — with its own per-part automation
+  name, so the stand-in is findable and provable until Visual and WIP part numbers can be resolved to pictures. The
+  Details step keeps its own enumerated-answer control as the landing place for a row naming no job list of its own,
+  so no configuration is orphaned (FR-015). · `MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestComponentOption.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestComponentViewModel.cs`,
+  `MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowRules.cs`, `Module_Waitlist/Views/NewRequestComponentPage.xaml`,
+  `Module_Waitlist/Views/NewRequestComponentPage.xaml.cs`, `Services/DependencyInjection/ServiceRegistrationExtensions.cs`,
+  `Strings/en-us/Resources.resw`, `MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestComponentViewModelTests.cs`,
+  `MTM_Waitlist.Tests/Module_Waitlist/Models/NewRequestFlowStateTests.cs`,
+  `specs/004-unified-card-item-picker/contracts/{request-picker-flow.md,item-configuration.md}`
+  **Done 2026-09-22. Evidence:** the solution builds with **no errors and no warnings**;
+  `GetNextStepType_ReturnsTheDetailsStep_WhenTheAnswerNamesTheComponentList` was **replaced** by
+  `…ReturnsTheComponentStep…` plus a new captured-answer case, and the eight new
+  `NewRequestComponentViewModelTests` cases cover the boxes the job carries, the placeholder and its automation names,
+  the row's own prompt, the resource fallback, the click-and-move-on capture, the remembered choice, the empty job and
+  the missing state — **25 targeted tests pass and the full suite reports 0 failures**. **Open, and stated as such:**
+  the naming validator flags the three new `NewRequest_Component.*` resource keys, because its rule allows exactly one
+  dot in a key and this file's `x:Uid` convention needs `…Title.Text`; **200 keys in `Resources.resw` are flagged the
+  same way, including the sibling `NewRequest_Die.*` and `NewRequest_Dunnage.*` keys these three mirror**, so this is
+  the file's grandfathered debt (D-4) rather than a new divergence — renaming them would make this step's resources
+  the only ones spelled differently. Every C#, XAML and test file this task touched validates clean. **Also open:** no
+  on-screen walk — the app was stopped to release its build output, and the boxes have not been seen running.
+
+**Checkpoint — the component answer is a part a person can see.** Both component rows ask their own question on a step
+of boxes, every box is findable by name, the picture on every box is the shared placeholder waiting to be replaced by
+a real part picture, and the only steps left are the relaunch and the walk.
+
+---
+
 ## Dependencies & Execution Order
 
 **Phase dependencies.**
@@ -2621,6 +2736,21 @@ situations re-pointed (T125) → the fixtures retired (T126) → `pickup-compone
   a chosen die, and T181–T183 cannot be written until it is answered. Phase 13's first two waves came from the same
   audit Phase 12's closing note asked for, and they found what it predicted — a job offering a die it does not have,
   and a request page that never received the job its rows resolve against.
+
+- **Phase 15 Deliver Component** — two tasks. T236 has no wave order to respect: the catalog row, the picker rule
+  arm, the seed row, the resource entry and the counts all move in one pass. T237 then answers what the walk of the
+  new card found, and its own order is the point: the three identifier sources had to exist before the card could
+  name a part, and the `{part_number}` source is keyed on `RequiredJobPart` — the rule the picker already uses — so
+  the two surfaces cannot drift into disagreeing about what an Item is about. The trap worth naming is that the rule
+  arm of T236 is the only member whose omission is **silent** — a catalogued Item with no `RequiredJobPart` arm is
+  *always* offered rather than never, so the row alone would have gone out looking correct and put a Deliver
+  Component on every job on the floor.
+
+- **Phase 16 Component Step** — one task (T238), and its order is only inside itself: the step view model, its page
+  and its registration have to exist before the flow rule can name them, or `GetNextStepType` routes to a type that
+  is not a page. The trap worth naming is the reverse of Phase 15's: there, a missing rule arm made an Item *always*
+  offered; here, adding the rule arm **before** the step exists makes the wizard navigate to a page key with no
+  registration, which is a runtime blank rather than a build error.
 
 **Parallel opportunities.** Every wave of `[P]` tasks may be built concurrently — different files, no unfinished
 dependency between them. The largest are Phase 2 W1 (six new stored artifacts), Phase 2 W5 (seven model files) and

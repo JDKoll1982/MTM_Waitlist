@@ -130,9 +130,9 @@ The shell SHALL be entered directly only when identity, session and device regis
 - **AND** the hint says the computer is not registered
 
 #### Scenario: the account is on its temporary password
-- **WHEN** the account still holds the temporary default password
-- **THEN** the sign-in surface opens on setting a new password
-- **AND** the hint says why, so the operator is not asked to sign in with a password they must immediately replace
+- **WHEN** the account still holds a temporary credential
+- **THEN** the sign-in surface asks for that credential like any other sign-in, and the hint says it is temporary and must be replaced
+- **AND** the set-a-new-password panel opens only once the credential has been accepted, because knowing a change is due is not proof of identity, and an attempt limit cannot apply to a credential nobody was ever asked for
 
 ### The splash offers only the remedies that can work, and retry repeats the phase that failed
 
@@ -186,6 +186,28 @@ A second entry into the splash surface SHALL NOT start a second sequence, so a r
 - **THEN** the second entry returns without starting anything
 - **AND** the first sequence's outcome is the one that stands
 
+### The pictures a screen will need are copied onto the computer while it starts
+
+Startup SHALL refresh the local copy of the pictures the application draws, on the way past the session check and
+before the first screen is shown, and SHALL report a line naming that refresh. The refresh SHALL be best effort: a
+picture source that cannot be reached SHALL be recorded and SHALL NOT prevent the application from opening or the
+remaining checks from running.
+
+`[observed]` Added 2026-09-22 by the picture-storage-and-cache feature (`specs/007-picture-storage-and-cache`).
+The step runs between the session check and the loading step, and the capability it serves is described there: the
+first screen a person reaches reads its pictures from local disk instead of reaching across the network for each
+one.
+
+#### Scenario: the pictures are already on the computer
+- **WHEN** the application starts and every source picture already has a copy that has not changed
+- **THEN** nothing is copied and nothing is removed
+- **AND** the line naming the refresh is reported anyway, so the splash does not appear to skip a step
+
+#### Scenario: a picture source cannot be reached
+- **WHEN** a source folder is unavailable while the pictures are being refreshed
+- **THEN** the failure is recorded and the existing copies are left in place
+- **AND** the application still opens
+
 ## Uncovered
 
 Read in full: `StartupCoordinator.cs`, `StartupShellStateService.cs`, `StartupWindowService.cs`, `ComputerGateService.cs`, `StartupRecoveryService.cs`, `SplashViewModel.cs`.
@@ -204,3 +226,8 @@ Two things this draft does **not** verify, and a reviewer should weigh both:
 
 The `startup-diagnostics` sibling owns `StartupLogService.cs` and `StartupLogForwarder.cs`; they are therefore
 not enumerated here, and nothing above depends on them.
+
+The picture refresh the startup sequence runs is the picture cache's own behaviour, and that capability is not
+registered as a living spec. This capability owns only the sequence and the best-effort rule: that the refresh is
+attempted in the right place, reports a line, and cannot block the start. What the refresh copies and removes is
+tested where it lives, not here.

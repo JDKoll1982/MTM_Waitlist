@@ -8,7 +8,9 @@ using Microsoft.UI.Xaml.Navigation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Views;
+using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Views;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.Views;
@@ -313,17 +315,14 @@ public partial class ShellViewModel : ObservableRecipient
         CurrentUserBadgeBrush = CreateUserBadgeBrush(userPresentation.ColorHex);
     }
 
-    private static (string Glyph, string ColorHex) GetUserPresentation(string? role)
+    private static (string Glyph, string ColorHex) GetUserPresentation(string? roleCode)
     {
-        return role?.Trim().ToLowerInvariant() switch
-        {
-            "developer" => ("\uE713", "#FF0078D4"),
-            "admin" or "administrator" => ("\uE7EF", "#FFC4314B"),
-            "supervisor" or "manager" => ("\uE716", "#FFD67D00"),
-            "quality" or "quality inspector" => ("\uE73E", "#FF107C10"),
-            "material handler" => ("\uE7B8", "#FF008272"),
-            _ => ("\uE77B", "#FF5C5C5C")
-        };
+        // Keyed on the role code through the one lookup, so every role the catalogue holds gets its own badge and
+        // no role reaches the grey default (FR-105). The badge stays presentation: it is fixed rather than gated,
+        // and it is not a permission (FR-058).
+        var badge = RoleBadgeCatalog.For(roleCode);
+
+        return (badge.Glyph, badge.ColorHex);
     }
 
     private static SolidColorBrush CreateUserBadgeBrush(string colorHex)
@@ -580,21 +579,30 @@ public partial class ShellViewModel : ObservableRecipient
             return;
         }
 
-        var jobType = item.ImagePath.Trim().ToLowerInvariant() switch
-        {
-            "coil.png" => "Coil",
-            "pickup_fg.png" => "Finished Goods",
-            "pickup_ncm.png" => "NCM",
-            "pickup_os.png" => "Outside Service",
-            "pickup_wip.png" => "WIP",
-            "scrap.png" => "Scrap",
-            _ => item.Title
-        };
+        var jobType = ResolveRequestItemName(item);
         var workCenter = string.IsNullOrWhiteSpace(item.RequestedPressName)
             ? "Unknown Work Center"
             : item.RequestedPressName;
 
         HeaderText = $"Details for {jobType}, requested by {workCenter}";
+    }
+
+    /// <summary>
+    /// The name the detail header gives the request's Item.
+    /// </summary>
+    /// <remarks>
+    /// It is read from the Item catalog by the request's own identity — the Item code — rather than from a
+    /// picture file name. The picture used to name the Item because every Item had its own built-in artwork; an
+    /// Item's picture is now either one somebody configured or the no-image placeholder, and neither of those
+    /// names anything. An Item the catalog does not describe falls back to the card's own Line 1 phrase.
+    /// </remarks>
+    private static string ResolveRequestItemName(SampleOrder item)
+    {
+        var definition = RequestItemCatalog.FindById(item.ItemCode);
+
+        return definition is null
+            ? item.Title
+            : RequestItemCatalog.ResolveDisplayName(definition);
     }
 
     partial void OnSelectedBuildingChanged(string? value)

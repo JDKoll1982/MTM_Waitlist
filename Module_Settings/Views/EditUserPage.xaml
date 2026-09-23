@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.Module_Settings.Views.EditUserPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d">
+
+    <!--
+        One page with a read-only state rather than two pages: the fields sit in a form at the top and the actions
+        in a clearly separated area below, each with its own heading, and no control carries a fixed width.
+    -->
+    <ScrollViewer Padding="24">
+        <StackPanel Spacing="16" MaxWidth="720" HorizontalAlignment="Left">
+
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Button
+                    Grid.Column="0"
+                    AutomationProperties.AutomationId="EditUserPage_Back"
+                    Click="OnBackClick"
+                    Content="{x:Bind ViewModel.BackLabelText}"
+                    VerticalAlignment="Top" />
+
+                <TextBlock
+                    Grid.Column="1"
+                    Style="{ThemeResource TitleTextBlockStyle}"
+                    Text="{x:Bind ViewModel.TitleText}" />
+            </Grid>
+
+            <!-- A reader who cannot act on this person is told so at the top, with the reason in words. -->
+            <InfoBar
+                x:Name="ReadOnlyBar"
+                AutomationProperties.AutomationId="EditUserPage_ReadOnly"
+                x:Load="{x:Bind ViewModel.IsReadOnly, Mode=OneWay}"
+                IsClosable="False"
+                IsOpen="True"
+                Message="{x:Bind ViewModel.ReadOnlyReasonText, Mode=OneWay}"
+                Severity="Warning"
+                Title="{x:Bind ViewModel.TitleText}" />
+
+            <InfoBar
+                x:Name="MissingBar"
+                AutomationProperties.AutomationId="EditUserPage_Missing"
+                x:Load="{x:Bind ViewModel.IsMissing, Mode=OneWay}"
+                IsClosable="False"
+                IsOpen="True"
+                Message="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+                Severity="Error"
+                Title="{x:Bind ViewModel.TitleText}" />
+
+            <!-- The fields -->
+            <StackPanel x:Name="FieldsPanel" Spacing="12">
+                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.FieldsHeadingText}" />
+
+                <TextBox
+                    AutomationProperties.AutomationId="EditUserPage_SignInName"
+                    Header="{x:Bind ViewModel.SignInNameLabelText}"
+                    IsReadOnly="{x:Bind ViewModel.IsSelfRenameUnavailable, Mode=OneWay}"
+                    Text="{x:Bind ViewModel.Username, Mode=TwoWay}" />
+                <TextBlock
+                    Style="{ThemeResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.SelfRenameUnavailableText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.IsSelfRenameUnavailable, Mode=OneWay}" />
+
+                <TextBox
+                    AutomationProperties.AutomationId="EditUserPage_FirstName"
+                    Header="{x:Bind ViewModel.FirstNameLabelText}"
+                    Text="{x:Bind ViewModel.FirstName, Mode=TwoWay}" />
+                <TextBox
+                    AutomationProperties.AutomationId="EditUserPage_LastName"
+                    Header="{x:Bind ViewModel.LastNameLabelText}"
+                    Text="{x:Bind ViewModel.LastName, Mode=TwoWay}" />
+                <TextBox
+                    AutomationProperties.AutomationId="EditUserPage_EmployeeNumber"
+                    Header="{x:Bind ViewModel.EmployeeNumberLabelText}"
+                    Text="{x:Bind ViewModel.EmployeeNumber, Mode=TwoWay}" />
+
+                <muxc:ComboBox
+                    HorizontalAlignment="Stretch"
+                    AutomationProperties.AutomationId="EditUserPage_Role"
+                    Header="{x:Bind ViewModel.RoleLabelText}"
+                    IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}"
+                    ItemsSource="{x:Bind ViewModel.RoleOptions}"
+                    SelectedItem="{x:Bind ViewModel.SelectedRole, Mode=TwoWay}" />
+
+                <ToggleSwitch
+                    AutomationProperties.AutomationId="EditUserPage_Active"
+                    Header="{x:Bind ViewModel.ActiveLabelText}"
+                    IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}"
+                    IsOn="{x:Bind ViewModel.IsAccountActive, Mode=TwoWay}" />
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button
+                        AutomationProperties.AutomationId="EditUserPage_Save"
+                        Click="OnSaveClick"
+                        Content="{x:Bind ViewModel.SaveLabelText}"
+                        IsEnabled="{x:Bind ViewModel.CanSave, Mode=OneWay}"
+                        Style="{ThemeResource AccentButtonStyle}" />
+                    <Button
+                        AutomationProperties.AutomationId="EditUserPage_Discard"
+                        Command="{x:Bind ViewModel.DiscardChangesCommand}"
+                        Content="{x:Bind ViewModel.DiscardLabelText}"
+                        IsEnabled="{x:Bind ViewModel.HasUnsavedChanges, Mode=OneWay}" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- The actions, in their own area below the fields. -->
+            <StackPanel x:Name="ActionsPanel" Spacing="12" x:Load="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
+                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.ActionsHeadingText}" />
+
+                <muxc:ProgressRing
+                    Width="24"
+                    Height="24"
+                    HorizontalAlignment="Left"
+                    IsActive="{x:Bind ViewModel.IsSaving, Mode=OneWay}" />
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <!-- Offered only to a reader holding the key, and refused at the action with the same answer. -->
+                    <Button
+                        AutomationProperties.AutomationId="EditUserPage_ResetPassword"
+                        Click="OnResetClick"
+                        Content="{x:Bind ViewModel.ResetPasswordLabelText}"
+                        IsEnabled="{x:Bind ViewModel.IsResetPasswordOffered, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.IsResetPasswordOffered, Mode=OneWay}" />
+                    <Button
+                        AutomationProperties.AutomationId="EditUserPage_Deactivate"
+                        Click="OnDeactivateClick"
+                        Content="{x:Bind ViewModel.DeactivateLabelText}"
+                        IsEnabled="{x:Bind ViewModel.CanDeactivate, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.IsAccountActive, Mode=OneWay}" />
+                    <Button
+                        AutomationProperties.AutomationId="EditUserPage_Reactivate"
+                        Click="OnReactivateClick"
+                        Content="{x:Bind ViewModel.ReactivateLabelText}"
+                        IsEnabled="{x:Bind ViewModel.IsEditable, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.IsSwitchedOff, Mode=OneWay}" />
+                </StackPanel>
+
+                <!-- The deactivation sentence stays on the page, so it is findable after the confirmation is gone. -->
+                <TextBlock
+                    Style="{ThemeResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.DeactivateExplanationText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.IsAccountActive, Mode=OneWay}" />
+                <TextBlock
+                    Style="{ThemeResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.ReactivateExplanationText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.IsSwitchedOff, Mode=OneWay}" />
+                <TextBlock
+                    Style="{ThemeResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.SelfDeactivateUnavailableText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.IsSelfDeactivateUnavailable, Mode=OneWay}" />
+                <TextBlock
+                    Style="{ThemeResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.SelfResetUnavailableText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.IsSelfResetUnavailable, Mode=OneWay}" />
+
+                <TextBlock
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Text="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+
+                <!-- An action with unsaved edits is refused with the instruction to save or discard. -->
+                <TextBlock
+                    Style="{ThemeResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.ActionNeedsSaveText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.ActionNeedsSave, Mode=OneWay}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

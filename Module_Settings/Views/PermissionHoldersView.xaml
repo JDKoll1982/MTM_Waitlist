@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="MTM_Waitlist.Module_Settings.Views.PermissionHoldersView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d">
+
+    <!--
+        The second view of the same data: which roles' baselines give a feature, and only the people who differ from
+        their role. It is read-only, and it carries no fixed width.
+    -->
+    <StackPanel Spacing="8">
+        <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.HeadingText}" />
+
+        <muxc:ComboBox
+            HorizontalAlignment="Stretch"
+            AutomationProperties.AutomationId="PermissionHoldersView_Feature"
+            Header="{x:Bind ViewModel.FeatureLabelText}"
+            ItemsSource="{x:Bind ViewModel.Features}"
+            SelectedItem="{x:Bind ViewModel.SelectedFeature, Mode=TwoWay}" />
+
+        <muxc:ProgressRing
+            Width="24"
+            Height="24"
+            HorizontalAlignment="Left"
+            IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+
+        <TextBlock
+            Style="{ThemeResource BodyTextBlockStyle}"
+            Text="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+            TextWrapping="Wrap" />
+
+        <Button
+            AutomationProperties.AutomationId="PermissionHoldersView_Retry"
+            Command="{x:Bind ViewModel.LoadCommand}"
+            Content="{x:Bind ViewModel.RetryText}"
+            Visibility="{x:Bind ViewModel.IsStoreUnavailable, Mode=OneWay}" />
+
+        <!-- A feature nobody holds is stated in words rather than shown as an empty region. -->
+        <TextBlock
+            AutomationProperties.AutomationId="PermissionHoldersView_Nobody"
+            Style="{ThemeResource BodyTextBlockStyle}"
+            Text="{x:Bind ViewModel.NobodyText}"
+            TextWrapping="Wrap"
+            Visibility="{x:Bind ViewModel.NobodyHoldsIt, Mode=OneWay}" />
+
+        <TextBlock
+            Style="{ThemeResource BodyStrongTextBlockStyle}"
+            Text="{x:Bind ViewModel.RolesHeadingText}"
+            Visibility="{x:Bind ViewModel.HasRoles, Mode=OneWay}" />
+
+        <!-- The roles, each on its own line, wrapping rather than being clipped. -->
+        <ItemsControl
+            AutomationProperties.AutomationId="PermissionHoldersView_Roles"
+            ItemsSource="{x:Bind ViewModel.View.RoleTexts, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.HasRoles, Mode=OneWay}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind}" TextWrapping="Wrap" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock
+            Style="{ThemeResource BodyStrongTextBlockStyle}"
+            Text="{x:Bind ViewModel.PeopleHeadingText}"
+            Visibility="{x:Bind ViewModel.HasPeople, Mode=OneWay}" />
+
+        <!-- Only the people who differ, each opening their own page. -->
+        <ListView
+            AutomationProperties.AutomationId="PermissionHoldersView_People"
+            IsItemClickEnabled="True"
+            ItemClick="OnPersonInvoked"
+            ItemsSource="{x:Bind ViewModel.View.People, Mode=OneWay}"
+            SelectionMode="None"
+            Visibility="{x:Bind ViewModel.HasPeople, Mode=OneWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:PermissionHolderRow">
+                    <Grid ColumnSpacing="12" Padding="8" RowSpacing="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Style="{ThemeResource BodyStrongTextBlockStyle}"
+                            Text="{x:Bind DisplayName}"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Style="{ThemeResource BodyTextBlockStyle}"
+                            Text="{x:Bind RoleText}"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Text="{x:Bind MarkText}"
+                            TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Text="{x:Bind SwitchedOffText}"
+                            TextWrapping="Wrap" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackPanel>
+</UserControl>

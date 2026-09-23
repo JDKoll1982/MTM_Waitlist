@@ -99,13 +99,13 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task EveryRoutedEndpoint_RefusesAUserWhoseRoleIsNotApproved()
+    public async Task EveryRoutedEndpoint_RefusesAUserWithoutTheOperatorPermission()
     {
         var fixture = await GetFixtureAsync();
 
-        // 'shop.user' resolves to the ordinary 'Setup' role: a real, active user who is simply not an
-        // operator. The refusal must be indistinguishable from the anonymous case, so the surface cannot be
-        // used to enumerate the plant's users or their roles.
+        // 'shop.user' resolves to a real, active user on the ordinary 'Setup' role who simply does not hold
+        // permission.cache.refresh_api. The refusal must be indistinguishable from the anonymous case, so the
+        // surface cannot be used to enumerate the plant's users or their roles.
         foreach (var path in new[] { "/api/status", "/api/refresh", "/api/backup", "/api/backups" })
         {
             using var response = await fixture.SendAsync(HttpMethod.Get, path, "shop.user").ConfigureAwait(false);
@@ -113,7 +113,7 @@ public sealed class ServiceApiTests
             Assert.AreEqual(
                 HttpStatusCode.Unauthorized,
                 response.StatusCode,
-                $"'{path}' admitted a user whose role is not approved.");
+                $"'{path}' admitted a user who does not hold the operator permission.");
         }
     }
 
@@ -156,9 +156,9 @@ public sealed class ServiceApiTests
         using var payload = JsonDocument.Parse(body);
         Assert.AreEqual(5, payload.RootElement.GetProperty("shapes").GetArrayLength());
         StringAssert.Contains(
-            payload.RootElement.GetProperty("operatorRoles").GetString(),
-            "Developer",
-            "The payload states which roles may call the API, so an operator can read it off the service.");
+            payload.RootElement.GetProperty("operatorAccessPermission").GetString(),
+            "permission.cache.refresh_api",
+            "The payload names the permission that decides API access, so an operator can read it off the service.");
     }
 
     [TestMethod]
@@ -256,7 +256,7 @@ public sealed class ServiceApiTests
             _host = host;
         }
 
-        /// <summary>A user whose resolved role is approved, so it may call the API.</summary>
+        /// <summary>A user the declaration admits, so it may call the API.</summary>
         public string OperatorUserName { get; }
 
         public static async Task<ApiFixture> StartAsync()

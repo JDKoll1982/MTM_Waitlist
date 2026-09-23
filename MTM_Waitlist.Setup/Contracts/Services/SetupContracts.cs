@@ -43,9 +43,9 @@ public interface IDunnageWorkflowService
     /// </summary>
     Task<IReadOnlyList<SetupDunnagePart>> GetAllDunnagePartsAsync(CancellationToken cancellationToken = default);
 
-    Task<SetupSelectionResult> AddDunnageTypeAsync(string typeName, string currentUserRole, CancellationToken cancellationToken = default);
+    Task<SetupSelectionResult> AddDunnageTypeAsync(string typeName, CancellationToken cancellationToken = default);
 
-    Task<SetupSelectionResult> AddDunnagePartAsync(string dunnageTypeId, string partName, string currentUserRole, CancellationToken cancellationToken = default);
+    Task<SetupSelectionResult> AddDunnagePartAsync(string dunnageTypeId, string partName, CancellationToken cancellationToken = default);
 }
 
 public interface IActiveJobCoordinatorService

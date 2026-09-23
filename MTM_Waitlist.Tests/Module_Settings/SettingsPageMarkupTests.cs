@@ -113,6 +113,89 @@ public sealed class SettingsPageMarkupTests
         return File.ReadAllText(path);
     }
 
+    /// <summary>
+    /// US1 (T046, FR-080, FR-082, FR-084, SC-020). The Administration category's two entries are cards that
+    /// navigate, not expanders, each loaded lazily with its own name, each carrying its own title from its own
+    /// resource key, and neither shown to a reader who cannot use it.
+    /// </summary>
+    [TestMethod]
+    public void TheAdministrationEntries_NavigateAndCarryTheirOwnLabels()
+    {
+        var markup = PageMarkup();
+
+        foreach (var entry in new[] { "UserManagementEntryCard", "PermissionsEntryCard" })
+        {
+            var card = ElementWithName(markup, entry);
+
+            Assert.IsTrue(
+                card.StartsWith("<wct:SettingsCard", StringComparison.Ordinal),
+                $"'{entry}' must be a card that navigates rather than an expander that unfolds (FR-082).");
+            StringAssert.Contains(card, "x:Load=", $"'{entry}' is loaded only for a reader who may use it.");
+            StringAssert.Contains(card, "IsClickEnabled=\"True\"", $"'{entry}' is clicked, not expanded.");
+            StringAssert.Contains(card, "Command=", $"'{entry}' navigates through a command.");
+            StringAssert.Contains(card, "AutomationProperties.Name=", $"'{entry}' announces what it opens.");
+        }
+
+        // Neither entry is an expander, and the category itself is not one either.
+        Assert.IsFalse(
+            ElementWithName(markup, "AdministrationCategoryPanel").Contains("SettingsExpander", StringComparison.Ordinal),
+            "The Administration category holds entries that navigate, so nothing in it expands.");
+
+        var titles = ResourceValues(["Administration_Users.Title", "Administration_Permissions.Title"]);
+        Assert.AreEqual(2, titles.Count, "Both entries must have a title of their own.");
+        Assert.AreNotEqual(
+            titles[0],
+            titles[1],
+            "No two labels may share a key or a value, so the two entries do not read as the same thing (SC-020).");
+    }
+
+    /// <summary>The one element carrying <paramref name="xName"/>, from its opening tag to its matching close.</summary>
+    private static string ElementWithName(string markup, string xName)
+    {
+        var start = markup.IndexOf($"x:Name=\"{xName}\"", StringComparison.Ordinal);
+        Assert.IsTrue(start >= 0, $"'{xName}' was not found in the settings markup.");
+
+        var tagStart = markup.LastIndexOf('<', start);
+        var tagEnd = markup.IndexOf('>', start);
+
+        // A self-closing element ends at its own '>'; otherwise take the element's own closing tag.
+        if (markup[tagEnd - 1] == '/')
+        {
+            return markup[tagStart..(tagEnd + 1)];
+        }
+
+        var openingTag = markup[tagStart..(tagEnd + 1)];
+        var elementName = openingTag.TrimStart('<');
+        var nameEnd = elementName.IndexOfAny([' ', '>', '\r', '\n']);
+        elementName = nameEnd < 0 ? elementName : elementName[..nameEnd];
+
+        var closing = markup.IndexOf($"</{elementName}>", tagEnd, StringComparison.Ordinal);
+        Assert.IsTrue(closing > tagEnd, $"'{xName}' has no closing tag, so it is not a well-formed element.");
+
+        return markup[tagStart..(closing + elementName.Length + 3)];
+    }
+
+    /// <summary>The shipped values of the given resource keys, read from the resource files.</summary>
+    private static List<string> ResourceValues(IReadOnlyList<string> resourceKeys)
+    {
+        var values = new List<string>();
+        var scope = new RepositoryScanScope { Extensions = [".resw"] };
+
+        foreach (var file in RepositoryPatternScan.EnumerateScannedFiles(RepositoryPatternScan.FindRepositoryRoot(), scope))
+        {
+            foreach (var data in XDocument.Load(file).Descendants("data"))
+            {
+                var name = data.Attribute("name")?.Value;
+                if (name is not null && resourceKeys.Contains(name, StringComparer.Ordinal))
+                {
+                    values.Add(data.Element("value")?.Value ?? string.Empty);
+                }
+            }
+        }
+
+        return values;
+    }
+
     private static IReadOnlyList<string> DeclaredUids()
     {
         var path = Path.Combine(

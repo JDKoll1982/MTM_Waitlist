@@ -65,12 +65,12 @@ public sealed class WaitlistViewDetailViewModelTests
         var draft = new WaitlistRequestDraft
         {
             Building = "Expo Drive",
-            WorkCenter = "100-3",
+            WorkCenter = "100-03",
             Category = definition!.Category.ToString(),
             Item = itemCode,
             InputValue = inputValue,
-            ActiveSetupJobId = "100-3",
-            WorkCenterName = "100-3",
+            ActiveSetupJobId = "100-03",
+            WorkCenterName = "100-03",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
         };
@@ -100,11 +100,11 @@ public sealed class WaitlistViewDetailViewModelTests
         var draft = new WaitlistRequestDraft
         {
             Building = "Expo Drive",
-            WorkCenter = "100-3",
+            WorkCenter = "100-03",
             Category = RequestCategory.Pickup.ToString(),
             Item = "pickup-coil",
-            ActiveSetupJobId = "100-3",
-            WorkCenterName = "100-3",
+            ActiveSetupJobId = "100-03",
+            WorkCenterName = "100-03",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
         };
@@ -134,11 +134,11 @@ public sealed class WaitlistViewDetailViewModelTests
         var draft = new WaitlistRequestDraft
         {
             Building = "Expo Drive",
-            WorkCenter = "100-3",
+            WorkCenter = "100-03",
             Category = RequestCategory.Pickup.ToString(),
             Item = "pickup-coil",
             ActiveSetupJobId = "WO-204",
-            WorkCenterName = "100-3",
+            WorkCenterName = "100-03",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
         };
@@ -158,7 +158,7 @@ public sealed class WaitlistViewDetailViewModelTests
 
         var contextSection = viewModel.TemplateSections.First(section =>
             string.Equals(section.Title, "Request context", StringComparison.OrdinalIgnoreCase));
-        Assert.AreEqual("100-3", SectionField(contextSection, "Work center"));
+        Assert.AreEqual("100-03", SectionField(contextSection, "Work center"));
         Assert.AreEqual("John Koll", SectionField(contextSection, "Requesting user"));
         Assert.AreEqual("6229", SectionField(contextSection, "Employee number"), "Employee number should come from the requester.");
     }

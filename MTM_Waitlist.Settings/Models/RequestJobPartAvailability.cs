@@ -81,6 +81,22 @@ public sealed record RequestJobPartAvailability(
     public IReadOnlyList<string> ComponentPartNumbers { get; init; } = Array.Empty<string>();
 
     /// <summary>
+    /// The number of the coil the requesting job carries (its <c>MMC</c> subordinate), or empty when it has none.
+    /// <para>
+    /// This is the part a card's identifier names for a request that is <b>about</b> a material the job holds — the
+    /// coil Items, the wrong-coil Item and the coil-turn assist — so the second line reads a real part number
+    /// instead of falling back to the Item's own display name (FR-005).
+    /// </para>
+    /// </summary>
+    public string CoilPartNumber { get; init; } = string.Empty;
+
+    /// <summary>
+    /// The number of the flatstock the requesting job carries (its <c>MMF</c> subordinate), or empty when it has
+    /// none. It is the part the flatstock Items' identifier names, read exactly as the coil's is.
+    /// </summary>
+    public string FlatstockPartNumber { get; init; } = string.Empty;
+
+    /// <summary>
     /// The dunnage parts assigned to the requesting job, in the job's own order (FR-035).
     /// <para>
     /// This is the list the dunnage step shows as picture cards, and the list an Item whose configuration names
@@ -102,6 +118,13 @@ public sealed record RequestJobPartAvailability(
 
     /// <summary>The primary die's location, or empty. Read from the die subordinate row's <c>Location</c> (FR-053).</summary>
     public string DieLocation { get; init; } = string.Empty;
+
+    /// <summary>
+    /// The scrap type the requesting job's <b>real</b> scrap decision names, or empty when no decision was made or
+    /// the decision was <c>No Scrap</c>. The Scrap Item's card shows this, so its line reads the type the job has
+    /// already recorded rather than the Item's own display name (FR-030, FR-031).
+    /// </summary>
+    public string ScrapType { get; init; } = string.Empty;
 
     /// <summary>
     /// Every die assigned to the requesting job, in the job's own order (FR-054).

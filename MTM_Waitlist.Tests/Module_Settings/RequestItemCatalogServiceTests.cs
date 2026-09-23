@@ -11,20 +11,20 @@ public sealed class RequestItemCatalogServiceTests
     private readonly IRequestItemCatalogService _service = new RequestItemCatalogService();
 
     [TestMethod]
-    public void GetAllItems_ReturnsAll23CanonicalRows()
+    public void GetAllItems_ReturnsAll24CanonicalRows()
     {
         var items = _service.GetAllItems();
 
-        Assert.AreEqual(23, items.Count);
+        Assert.AreEqual(24, items.Count);
         Assert.AreEqual("pickup-coil", items[0].Id);
         Assert.AreEqual("other", items[^1].Id);
     }
 
     [TestMethod]
-    public void GetByCategory_MatchesCsvCounts_Pickup11_Deliver8_Assist3_Other1()
+    public void GetByCategory_MatchesCsvCounts_Pickup11_Deliver9_Assist3_Other1()
     {
         Assert.AreEqual(11, _service.GetByCategory(RequestCategory.Pickup).Count);
-        Assert.AreEqual(8, _service.GetByCategory(RequestCategory.Deliver).Count);
+        Assert.AreEqual(9, _service.GetByCategory(RequestCategory.Deliver).Count);
         Assert.AreEqual(3, _service.GetByCategory(RequestCategory.Assist).Count);
         Assert.AreEqual(1, _service.GetByCategory(RequestCategory.Other).Count);
     }

@@ -4,6 +4,7 @@ using System.Threading;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Shared.Services;
 
 namespace MTM_Waitlist.Module_Settings.Services;
@@ -114,6 +115,31 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
         {
             _initializationLock.Release();
         }
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> EnsureInitializedAsync(CancellationToken cancellationToken = default)
+    {
+        if (_isInitialized)
+        {
+            return true;
+        }
+
+        try
+        {
+            await InitializeAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // A screen that cannot reach the image share must still open: it draws the application's no-image
+            // placeholder rather than failing, so the failure is reported here and answered with false.
+            _logger.LogWarning(
+                ex,
+                "Image location service could not be initialized; callers fall back to the no-image placeholder.");
+            return false;
+        }
+
+        return _isInitialized;
     }
 
     /// <inheritdoc />
@@ -520,15 +546,64 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
         }
 
         var normalized = candidatePath.Trim();
-        var exists = DoesPathExist(normalized);
-        if (exists)
+
+        // A stored picture path is relative to the picture root, which is what lets the root be changed in
+        // Settings without orphaning a row. A row written before that change names the file itself, and a
+        // packaged default names an asset in the application folder; both are taken as they stand.
+        if (!Path.IsPathRooted(AppStoragePaths.NormalizeSeparators(normalized)))
         {
-            return normalized;
+            var root = await _configurationResolver.GetSharedFolderPathAsync().ConfigureAwait(false);
+            var resolved = AppStoragePaths.ResolvePicturePath(root, normalized);
+
+            if (resolved is not null && DoesPathExist(resolved))
+            {
+                return PreferCachedCopy(root, resolved);
+            }
+
+            // The picture root is not where this path points, but the application folder may still hold it: the
+            // scope defaults are packaged assets rather than files on the share.
+            if (DoesPathExist(normalized))
+            {
+                return normalized;
+            }
+
+            _logger.LogWarning(
+                "Resolved image path does not exist for {Scope}:{ScopeItemId}; using default asset. Path={Path}, Root={Root}",
+                scope,
+                scopeItemId,
+                normalized,
+                root);
+            return fallbackPath;
+        }
+
+        if (DoesPathExist(normalized))
+        {
+            // A rooted stored path belongs to the configured picture root, which is what the cached copy's own
+            // path is worked out from.
+            var root = await _configurationResolver.GetSharedFolderPathAsync().ConfigureAwait(false);
+            return PreferCachedCopy(root, normalized);
         }
 
         _logger.LogWarning("Resolved image path does not exist for {Scope}:{ScopeItemId}; using default asset. Path={Path}", scope, scopeItemId, normalized);
         return fallbackPath;
     }
+
+    /// <summary>
+    /// The copy of this picture on this computer, when one has been cached.
+    /// </summary>
+    /// <param name="pictureRoot">The configured picture root the path belongs to.</param>
+    /// <param name="resolvedPath">The picture's path on the share.</param>
+    /// <returns>The cached copy's path when there is one, otherwise the share's.</returns>
+    /// <remarks>
+    /// The cache is worth having only because the screens read from it: this is where a resolved picture becomes a
+    /// local file, with the share left as the fallback for a picture this computer has never managed to copy.
+    /// </remarks>
+    private static string PreferCachedCopy(string? pictureRoot, string resolvedPath) =>
+        ImageCachePaths.TryGetCachedCopy(
+            pictureRoot,
+            Path.Combine(ImageCachePaths.LocalCacheRoot, ImageCachePaths.WaitlistFolderName),
+            resolvedPath)
+        ?? resolvedPath;
 
     private static bool DoesPathExist(string candidatePath)
     {
@@ -537,7 +612,7 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
             return false;
         }
 
-        var target = candidatePath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
+        var target = AppStoragePaths.NormalizeSeparators(candidatePath);
         if (Path.IsPathRooted(target))
         {
             return File.Exists(target);

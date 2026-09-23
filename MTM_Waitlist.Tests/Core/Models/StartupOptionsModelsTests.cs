@@ -112,16 +112,21 @@ public sealed class StartupOptionsModelsTests
         Assert.IsFalse(result.RequiresPasswordChange);
         Assert.AreEqual(0, result.UserId);
         Assert.AreEqual(string.Empty, result.CurrentRole);
+        Assert.AreEqual(string.Empty, result.CurrentRoleCode);
+        Assert.IsFalse(result.HoldsTemporaryCredential);
+        Assert.AreEqual(0, result.TemporaryCredentialFailedAttempts);
+        Assert.IsFalse(result.TemporaryCredentialAttemptLimitReached);
     }
 
     [TestMethod]
     public void StartupCredentialCheckResult_Success()
     {
-        var result = StartupCredentialCheckResult.Success(42, "Developer", requiresPasswordChange: true);
+        var result = StartupCredentialCheckResult.Success(42, "Developer", requiresPasswordChange: true, currentRoleCode: "developer");
 
         Assert.IsTrue(result.IsAuthenticated);
         Assert.IsTrue(result.RequiresPasswordChange);
         Assert.AreEqual(42, result.UserId);
         Assert.AreEqual("Developer", result.CurrentRole);
+        Assert.AreEqual("developer", result.CurrentRoleCode);
     }
 }

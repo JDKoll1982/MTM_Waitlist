@@ -2,7 +2,7 @@
 
 The entities this feature **introduces** or **reshapes**. Everything the feature does not touch is left out. Field
 names in `code spans` are the real identifiers; the stored column names and the four Category codes, the
-twenty-three Item codes, the status vocabulary and the two bring phrases are copied verbatim from the spec's
+twenty-four Item codes, the status vocabulary and the two bring phrases are copied verbatim from the spec's
 Verbatim Constraints and must not be renamed, recased or pluralized.
 
 ---
@@ -29,7 +29,7 @@ normalises to the stored casing. Anything else is not a Category and the row is 
 
 ## 2. Item — *existing catalog, reshaped*
 
-`RequestItemDefinition` in `MTM_Waitlist.Settings/Models`, produced by `RequestItemCatalog.Items`. Twenty-three
+`RequestItemDefinition` in `MTM_Waitlist.Settings/Models`, produced by `RequestItemCatalog.Items`. Twenty-four
 rows. This feature keeps the identity and display columns and **moves the behaviour columns off it** (§3).
 
 | Property | Type | Source | Notes |
@@ -46,16 +46,16 @@ rows. This feature keeps the identity and display columns and **moves the behavi
 | ~~`ValueType`~~ | — | CSV col 10 | **moved** to `RequestItemConfiguration.AnswerValueType` |
 | ~~`NeedsUserEntry`~~ | — | CSV col 12 | **moved** to `RequestItemConfiguration.RequiresAnswer` |
 
-**The twenty-three codes, verbatim.** Pickup — `pickup-coil`, `pickup-die`, `pickup-component`, `pickup-fg`,
+**The twenty-four codes, verbatim.** Pickup — `pickup-coil`, `pickup-die`, `pickup-component`, `pickup-fg`,
 `pickup-ncm`, `pickup-wip`, `pickup-outside-service`, `pickup-riser-table`, `pickup-dunnage`, `pickup-scrap`,
 `pickup-hopper`. Deliver — `deliver-coil`, `deliver-riser-table`, `deliver-hopper`, `deliver-flatstock`,
-`deliver-die`, `deliver-dunnage`, `deliver-wrong-coil`, `deliver-wrong-flatstock`. Assist — `assist-coil-turn`,
-`assist-table-place`, `assist-table-remove`. Other — `other`.
+`deliver-component`, `deliver-die`, `deliver-dunnage`, `deliver-wrong-coil`, `deliver-wrong-flatstock`. Assist —
+`assist-coil-turn`, `assist-table-place`, `assist-table-remove`. Other — `other`.
 
-**In scope: nineteen.** **Out of scope, catalogued but never offered: `pickup-fg`, `pickup-ncm`, `pickup-wip`,
+**In scope: twenty.** **Out of scope, catalogued but never offered: `pickup-fg`, `pickup-ncm`, `pickup-wip`,
 `pickup-outside-service`** — excluded by the visibility rules, not by deletion (FR-028).
 
-**Validation.** The catalog is asserted as it is today: twenty-three rows, the Category split (11 / 8 / 3 / 1), the
+**Validation.** The catalog is asserted as it is today: twenty-four rows, the Category split (11 / 9 / 3 / 1), the
 per-Category order, the umbrella verb, and the Line 2 template. These are identity assertions and stay. No test may
 assert an Item's *field list* or *flow* — those are configuration (§3) and deliberately mutable (FR-015).
 
@@ -65,7 +65,7 @@ assert an Item's *field list* or *flow* — those are configuration (§3) and de
 
 ## 3. Item configuration — **new entity, new table**
 
-Stores `waitlist_request_item_configs`. One row per Item, twenty-three rows. This is where "how far the flow goes,
+Stores `waitlist_request_item_configs`. One row per Item, twenty-four rows. This is where "how far the flow goes,
 whether an answer is required, the prompt, the length limits, the options and the fields the Item's page shows" come
 from (FR-013), and it is what makes each of those changeable as data (FR-015).
 
@@ -100,7 +100,7 @@ render. The read is `sp_waitlist_request_item_configs_get`; the minutes editor w
 `AllTables.sql`, `AllSPs.sql`, `AllSeeds.sql` and `Bootstrap/update_table_descriptions.sql` move in the same change
 (FR-024, FR-025).
 
-**Seed.** One row for every one of the twenty-three Items, so a missing row is the exception rather than the normal
+**Seed.** One row for every one of the twenty-four Items, so a missing row is the exception rather than the normal
 case, and so `FR-014`'s "every Item MUST have a configuration row" is true of the shipped data. The four
 out-of-scope Items are seeded too and hidden by rule — a missing row and a hidden Item are different states and must
 not be conflated.
@@ -157,7 +157,7 @@ applied — the average covers all of an Item's completed requests.
 | `request_type` | **removed** | FR-004, FR-023 |
 | `subtype` | **removed** | FR-004, FR-023 |
 | `category` | **added** `VARCHAR(16) NOT NULL` | one of `Pickup`, `Deliver`, `Assist`, `Other` |
-| `item` | **added** `VARCHAR(64) NOT NULL` | one of the twenty-three Item codes |
+| `item` | **added** `VARCHAR(64) NOT NULL` | one of the twenty-four Item codes |
 | `input_value` | kept | the one value the flow captured, where an Item captures one. For a die Item it carries **which die the request is for** — the destination question retired 2026-09-20, which freed this column (D22). No column is added |
 | `status` | kept | `Pending`, `Accepted`, `Completed`, `Canceled` — **unchanged, not extended** |
 | `requested_utc` | kept | the "Waiting" row's anchor |
@@ -197,6 +197,20 @@ property of the row selects a layout; FR-006 admits no Item-based variant.
 `RequestDiePart.ComposeLabel`, with no conditional on any answer: the destination question its old switch turned on
 retired 2026-09-20 (D22), and `destination` left the token set with it. An unresolvable token renders the Item's own
 display name and reports the configuration problem rather than rendering a blank (FR-026).
+
+**Where each job-derived token's value comes from (2026-09-22).** `part_number` is the part the request is **about**:
+the material the job holds where the Item is about one — its coil (`MMC`) or its flatstock (`MMF`), with the merged
+`pickup-coil` taking the coil the job holds and falling back to its flatstock on a flatstock-only job (D21) — and the
+**job's own part number** where the Item is about no particular material (the two table assists and the four
+out-of-scope Items), which is the value the request page shows for a declared `Part` row. Which material an Item is
+about is `RequestItemPickerRules.RequiredJobPart`, the same rule that gates whether the Item is offered at all.
+`scrap_type` is the type the job's **real** scrap decision names (FR-030, FR-031 — the same rule the Scrap Item's
+visibility gates on), and `component` is the component the operator chose, read from the request's captured answer
+exactly as `dunnage_part` is (FR-035). The job's coil number, its flatstock number and its scrap type travel on
+`RequestJobPartAvailability` for this purpose. Before this, **no source supplied any of the three tokens**, so every
+card whose identifier named one showed the Item's own display name — a `deliver-component` request read `Deliver` /
+`Component` where it should read `Deliver` / `V-EMB-2`. A job that holds nothing for the token still leaves it
+unresolved, and the card reports that rather than inventing a part.
 
 **The detail-field grid is not on the card.** It moves to the request page, where the declared fields (FR-007) are
 laid out in declared order, two per row; a field alone on its row takes that row's full width. The span is derived

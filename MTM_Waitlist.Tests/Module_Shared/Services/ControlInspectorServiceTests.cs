@@ -75,7 +75,7 @@ public sealed class ControlInspectorServiceTests
     [TestMethod]
     public void ResolvePresentation_AndDetailModel_CarryAssociatedFiles()
     {
-        var tooltipService = new TooltipService(new StartupState { CurrentRole = "Developer" });
+        var tooltipService = new TooltipService(new StartupState { CurrentRoleCode = "developer" });
         var presentation = tooltipService.ResolvePresentation(
             "Shell_SelectFacility_Tooltip",
             new[] { "Module_Core/Views/ShellPage.xaml", "ViewModels/ShellViewModel.cs" },

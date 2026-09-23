@@ -1,11 +1,27 @@
 namespace MTM_Waitlist.Module_Core.Services;
 
+using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Permissions;
+
 /// <summary>
 /// Pure role-/ownership-aware request-card action policy for the file-07 Accept / Complete / Release work.
-/// Given a request's status and assignee and the viewer's employee number/role capability, decides which actions
-/// the current viewer may take. Status strings are compared case-insensitively; the app supplies the inputs.
-/// Deterministic and unit-testable.
+/// Given a request's status and assignee and the viewer's employee number, decides which actions the current
+/// viewer may take. Status strings are compared case-insensitively; the app supplies the inputs. Deterministic
+/// and unit-testable.
 /// </summary>
+/// <remarks>
+/// <para>
+/// <b>The handler question is a named permission, not a list of role names.</b> This type used to carry
+/// <c>HandlerRoles</c> — eight display names compared case-insensitively — and answer
+/// <c>CanViewerHandleRequests(role)</c> from it. That list is gone: who may handle requests is
+/// <see cref="PermissionKeys.RequestsHandle"/>, resolved from the one declaration, so a change to who may
+/// handle is a change to stored data and never a change to this file (FR-050, FR-054).
+/// </para>
+/// <para>
+/// The status and ownership rules below stay here and stay pure: they are about a request, not about a person,
+/// and they take the handler answer as an input rather than deciding it.
+/// </para>
+/// </remarks>
 public static class RequestActionPolicy
 {
     private static readonly string[] OpenStatuses = { "Pending", "Released" };
@@ -13,28 +29,41 @@ public static class RequestActionPolicy
     private static readonly string[] DoneStatuses = { "Completed", "Done", "Canceled", "Cancelled" };
 
     /// <summary>
-    /// Every role at or above Material Handler, i.e. every role that may handle requests. This is the same
-    /// vocabulary the Settings screens gate their broadest management panel on, so the waitlist's UI gate and
-    /// the store's own gate agree on who a handler is instead of drifting apart.
+    /// The one permission that admits a viewer to the handler actions. Read from the declaration rather than
+    /// restated, so the key a gate asks for and the key a baseline is written under cannot drift.
     /// </summary>
-    private static readonly string[] HandlerRoles =
-    {
-        "Material Handler",
-        "Production",
-        "Production Lead",
-        "Setup",
-        "Setup Lead",
-        "Plant Manager",
-        "Admin",
-        "Developer",
-    };
+    public static string HandleRequestsPermissionKey => PermissionKeys.RequestsHandle;
 
     /// <summary>
-    /// True when the viewer's role is Material Handler or above, which is the gate for being offered any
-    /// handler action at all. Compared case-insensitively; a blank role may never handle requests.
+    /// The answer used when no permission service is available, which is the declaration's own shipped
+    /// fallback. It is read from the declaration rather than written here, so the single decision about what an
+    /// unanswerable store admits lives in one place (FR-050).
     /// </summary>
-    public static bool CanViewerHandleRequests(string? role)
-        => In(HandlerRoles, role);
+    public static bool FallbackCanHandleRequests =>
+        PermissionRegistry.Find(PermissionKeys.RequestsHandle)?.Fallback ?? false;
+
+    /// <summary>
+    /// Whether the signed-in person holds <see cref="HandleRequestsPermissionKey"/>.
+    /// </summary>
+    /// <param name="permissionService">
+    /// The permission service, or <see langword="null"/> when the host has none — a headless test host, for
+    /// instance. A missing service is answered from the shipped fallback rather than treated as a refusal, so a
+    /// failure to ask the question never silently disables the shop floor's work.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public static async Task<bool> CanViewerHandleRequestsAsync(
+        IPermissionService? permissionService,
+        CancellationToken cancellationToken = default)
+    {
+        if (permissionService is null)
+        {
+            return FallbackCanHandleRequests;
+        }
+
+        return await permissionService
+            .HasPermissionAsync(HandleRequestsPermissionKey, cancellationToken)
+            .ConfigureAwait(false);
+    }
 
     /// <summary>True if the request has no assignee yet (open) and is not done.</summary>
     public static bool IsAvailable(string? status) => In(OpenStatuses, status);

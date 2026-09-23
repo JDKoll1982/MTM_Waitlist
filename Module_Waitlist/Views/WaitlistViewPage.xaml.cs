@@ -1,9 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Imaging;
-
-using System.IO;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
@@ -35,15 +33,10 @@ public sealed partial class WaitlistViewPage : Page
             return;
         }
 
-        var localPath = Path.Combine(AppContext.BaseDirectory, "Assets", "Images", "waitlist-empty-state.png");
-
-        if (File.Exists(localPath))
-        {
-            EmptyStateImage.Source = new BitmapImage(new Uri(localPath, UriKind.Absolute));
-            return;
-        }
-
-            EmptyStateImage.Source = new BitmapImage(new Uri("ms-appx:///Assets/Placeholders/waitlist-empty-state.png"));
+        // The illustration is the app's own artwork, not a configured picture: it is drawn when it ships, and
+        // falls back to the no-image placeholder only if the asset is missing from the deployment. The folder
+        // this used to look in first (Assets/Images) has never existed in this repository.
+        EmptyStateImage.Source = PictureSource.FromPath("Assets/Placeholders/waitlist-empty-state.png");
     }
 
     private void ListView_ItemClick(object sender, ItemClickEventArgs e)

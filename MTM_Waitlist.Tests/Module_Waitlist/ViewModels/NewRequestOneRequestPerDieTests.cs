@@ -44,7 +44,7 @@ public sealed class NewRequestOneRequestPerDieTests
         // request — the change adds requests, it does not replace the single-request path.
         var state = new NewRequestFlowState
         {
-            WorkCenter = "100-7",
+            WorkCenter = "100-07",
             Category = RequestCategory.Other,
             Item = RequestItemCatalog.FindById("other"),
             InputValue = "Skid 4471 is on the wrong dock",
@@ -118,7 +118,7 @@ public sealed class NewRequestOneRequestPerDieTests
 
         return new NewRequestFlowState
         {
-            WorkCenter = "100-7",
+            WorkCenter = "100-07",
             Category = RequestCategory.Pickup,
             Item = RequestItemCatalog.FindById("pickup-die"),
             Availability = (RequestJobPartAvailability.None with { HasActiveJob = true, HasDie = true }).WithDies(parts),

@@ -44,8 +44,14 @@ public sealed class ImageStorageServiceStorageTests
         Assert.IsTrue(first.Success, first.ErrorMessage);
         Assert.IsTrue(second.Success, second.ErrorMessage);
         Assert.AreEqual(first.StoredFilePath, second.StoredFilePath);
-        Assert.AreEqual("request_item_abc-123.png", Path.GetFileName(first.StoredFilePath));
-        Assert.AreEqual(1, Directory.GetFiles(_sharePath).Length, "The active image must be replaced in place.");
+        Assert.AreEqual(
+            Path.Combine("request_item", "abc-123.png"),
+            first.StoredFilePath,
+            "A picture is stored relative to the root, under the folder naming its scope.");
+        Assert.AreEqual(
+            1,
+            Directory.GetFiles(Path.Combine(_sharePath, "request_item")).Length,
+            "The active image must be replaced in place.");
     }
 
     [TestMethod]
@@ -57,14 +63,14 @@ public sealed class ImageStorageServiceStorageTests
         await _service.CopyImageToStorageAsync(source, "work_center", "42");
         await _service.CopyImageToStorageAsync(source, "work_center", "42");
 
-        var archiveFolder = Path.Combine(_sharePath, "Archive");
-        Assert.IsTrue(Directory.Exists(archiveFolder), "Replacing an image must create the Archive folder.");
+        var archiveFolder = Path.Combine(_sharePath, "work_center", "Archive");
+        Assert.IsTrue(Directory.Exists(archiveFolder), "Replacing an image must create the Archive folder beside it.");
 
         var archived = Directory.GetFiles(archiveFolder);
         Assert.AreEqual(1, archived.Length);
         StringAssert.Matches(
             Path.GetFileName(archived[0]),
-            new System.Text.RegularExpressions.Regex(@"^work_center_42-\d{2}-\d{2}-\d{4}-01\.png$"));
+            new System.Text.RegularExpressions.Regex(@"^42-\d{2}-\d{2}-\d{4}-01\.png$"));
     }
 
     [TestMethod]
@@ -77,7 +83,7 @@ public sealed class ImageStorageServiceStorageTests
         await _service.CopyImageToStorageAsync(source, "work_center", "42");
         await _service.CopyImageToStorageAsync(source, "work_center", "42");
 
-        var archived = Directory.GetFiles(Path.Combine(_sharePath, "Archive"));
+        var archived = Directory.GetFiles(Path.Combine(_sharePath, "work_center", "Archive"));
         Assert.AreEqual(2, archived.Length);
         CollectionAssert.AllItemsAreUnique(archived);
     }
@@ -123,7 +129,7 @@ public sealed class ImageStorageServiceStorageTests
     }
 
     [TestMethod]
-    public async Task CopyImageToStorageAsync_SanitisesScopeAndItemIdIntoTheFileName()
+    public async Task CopyImageToStorageAsync_SanitisesScopeAndItemIdIntoTheStoredPath()
     {
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
@@ -131,7 +137,10 @@ public sealed class ImageStorageServiceStorageTests
         var result = await _service.CopyImageToStorageAsync(source, "request_item", "a/b:c");
 
         Assert.IsTrue(result.Success, result.ErrorMessage);
-        Assert.AreEqual("request_item_a_b_c.png", Path.GetFileName(result.StoredFilePath));
+        Assert.AreEqual(
+            Path.Combine("request_item", "a_b_c.png"),
+            result.StoredFilePath,
+            "The scope names the folder and the identifier is made safe as the file name.");
     }
 
     [TestMethod]

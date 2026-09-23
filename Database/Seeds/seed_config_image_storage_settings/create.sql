@@ -6,7 +6,14 @@
 
 USE mtm_waitlist;
 
+-- Guarded: config_settings_history holds a foreign key back to this table, and MySQL refuses TRUNCATE on a
+-- referenced table even when the child is empty. Without the guard the whole seed phase stops here on a fresh
+-- store, and every seed after this one in AllSeeds.sql never runs.
+SET FOREIGN_KEY_CHECKS = 0;
+
 TRUNCATE TABLE config_settings_values;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO
     config_settings_values (

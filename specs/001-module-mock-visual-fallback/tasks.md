@@ -431,7 +431,7 @@ the two mechanical audits (SC-013), and the final build/test gates (SC-015).
   `ON DUPLICATE KEY UPDATE` clause, N round trips instead of one, which is the only shape the procedure has.
 - **Live validation** (constitution III), all inside a transaction that was **rolled back**, so no live row changed:
   two `_upsert` calls produced 2 rows for `computer_id 1`, `sp_config_hot_workcenters_get_for_computer('johnspc')`
-  returned `100-3 | 1` and `100-6 | 2` (name + sort rank, in rank order — exactly what the C# reads), and after
+  returned `100-03 | 1` and `100-06 | 2` (name + sort rank, in rank order — exactly what the C# reads), and after
   `ROLLBACK` the table was back to its original **0** rows.
 - `System.Text` (the `StringBuilder` insert builder) is no longer used by the file and its using directive was
   removed. No test constructs this service (all seven call sites use `FakeWorkCenterCatalogService`), so no test

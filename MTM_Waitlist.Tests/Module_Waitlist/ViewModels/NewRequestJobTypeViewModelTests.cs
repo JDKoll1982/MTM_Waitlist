@@ -23,7 +23,7 @@ public sealed class NewRequestJobTypeViewModelTests
     {
         var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
 
-        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-3" });
+        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-03" });
 
         await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
 
@@ -65,7 +65,7 @@ public sealed class NewRequestJobTypeViewModelTests
     public async Task OnNavigatedTo_ResolvesTheAvailabilitySnapshotAndKeepsItOnTheState()
     {
         var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
-        var state = new NewRequestFlowState { WorkCenter = "100-3" };
+        var state = new NewRequestFlowState { WorkCenter = "100-03" };
 
         viewModel.OnNavigatedTo(state);
 
@@ -80,7 +80,7 @@ public sealed class NewRequestJobTypeViewModelTests
     {
         var viewModel = CreateViewModel(coil: new WaitlistCoilInfo { HasCoil = true, CoilNumber = "COIL-204", QuantityOnHand = "18 coils", Description = "galvanized", AverageWeight = "1,240 lb" });
 
-        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-3" });
+        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-03" });
 
         await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
 
@@ -106,7 +106,7 @@ public sealed class NewRequestJobTypeViewModelTests
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation, availability: RequestJobPartAvailability.All);
-        var state = new NewRequestFlowState { WorkCenter = "100-3" };
+        var state = new NewRequestFlowState { WorkCenter = "100-03" };
         viewModel.OnNavigatedTo(state);
 
         await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
@@ -124,7 +124,7 @@ public sealed class NewRequestJobTypeViewModelTests
     public async Task SelectCategory_LeavesNoTypeOrSubtypeBehind()
     {
         var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
-        var state = new NewRequestFlowState { WorkCenter = "100-3" };
+        var state = new NewRequestFlowState { WorkCenter = "100-03" };
         viewModel.OnNavigatedTo(state);
 
         await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
@@ -151,7 +151,7 @@ public sealed class NewRequestJobTypeViewModelTests
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation, availability: RequestJobPartAvailability.All);
-        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-3" });
+        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-03" });
 
         await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 0);
         viewModel.BackCommand.Execute(null);

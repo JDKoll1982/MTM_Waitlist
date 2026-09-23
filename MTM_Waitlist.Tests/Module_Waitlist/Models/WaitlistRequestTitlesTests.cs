@@ -184,6 +184,118 @@ public sealed class WaitlistRequestTitlesTests
         Assert.IsNull(coil.DieNumber, "pickup-coil's identifier is the coil's number, not the job's die.");
         Assert.IsNull(coil.DieLocation);
         Assert.IsNull(coil.JobPartNumber, "pickup-coil does not name the job's part number, so it is handed none.");
+        Assert.IsNull(
+            coil.PartNumber,
+            "This job holds no coil and no flatstock, so the merged Pickup Item is handed no part rather than a name.");
+    }
+
+    /// <summary>A job holding a coil, a flatstock and a component, with a real scrap decision.</summary>
+    private static RequestJobPartAvailability MaterialJob() => RequestJobPartAvailability.None with
+    {
+        HasActiveJob = true,
+        HasCoil = true,
+        HasFlatstock = true,
+        HasComponent = true,
+        HasScrapDecision = true,
+        JobPartNumber = "PART-9004",
+        CoilPartNumber = "MMC0001000",
+        FlatstockPartNumber = "MMF0001154",
+        ScrapType = "Steel Offal",
+    };
+
+    /// <summary>A job holding a component, which is all the component Items need.</summary>
+    private static RequestJobPartAvailability ComponentJob() => RequestJobPartAvailability.None with
+    {
+        HasActiveJob = true,
+        HasComponent = true,
+        JobPartNumber = "PART-9004",
+    };
+
+    [TestMethod]
+    public void ResolveLine2_ComponentRequests_ShowThePartTheOperatorChose()
+    {
+        // The component Items ask which component the operator needs, so the request carries the part they chose
+        // and the card reads it back through `{component}` — the rule the dunnage Items already follow. Before
+        // this, nothing supplied the token, so both cards fell back to the Item's own name and the second line
+        // read the word "Component" (FR-035).
+        foreach (var itemId in new[] { "pickup-component", "deliver-component" })
+        {
+            var request = new WaitlistRequest { Item = itemId, InputValue = "V-EMB-2" };
+
+            var result = WaitlistRequestTitles.ResolveLine2(
+                Find(itemId),
+                WaitlistRequestTitles.ResolveContext(request, ComponentJob()));
+
+            Assert.IsTrue(result.IsResolved, $"'{itemId}' resolves its identifier from the answer the request holds.");
+            Assert.AreEqual("V-EMB-2", result.Text, $"'{itemId}' names the component, not the word for the kind of request it is.");
+        }
+    }
+
+    [TestMethod]
+    public void ResolveLine2_MaterialRequests_NameThePartTheJobCarries()
+    {
+        // Every Item whose identifier names `{part_number}` names the part the request is about: the material the
+        // job holds where the Item is about one, and the job's own part number where it is not. Before this, no
+        // source supplied the token, so the second line read the Item's own display name on every one of these
+        // cards — "Coil", "Flatstock", "Work In Process (WIP)" — which is the kind of request rather than the
+        // part a handler has to go and get (FR-005).
+        var job = MaterialJob();
+
+        foreach (var (itemId, expected) in new[]
+        {
+            ("pickup-coil", "MMC0001000"),
+            ("deliver-coil", "MMC0001000"),
+            ("deliver-wrong-coil", "MMC0001000"),
+            ("assist-coil-turn", "MMC0001000"),
+            ("deliver-flatstock", "MMF0001154"),
+            ("deliver-wrong-flatstock", "MMF0001154"),
+            ("assist-table-place", "PART-9004"),
+            ("assist-table-remove", "PART-9004"),
+            ("pickup-fg", "PART-9004"),
+            ("pickup-wip", "PART-9004"),
+        })
+        {
+            var request = new WaitlistRequest { Item = itemId };
+
+            var result = WaitlistRequestTitles.ResolveLine2(
+                Find(itemId),
+                WaitlistRequestTitles.ResolveContext(request, job));
+
+            Assert.IsTrue(result.IsResolved, $"'{itemId}' resolves its identifier from the job.");
+            Assert.AreEqual(expected, result.Text, $"'{itemId}' names the part involved, never the Item's own name.");
+        }
+    }
+
+    [TestMethod]
+    public void ResolveLine2_MergedPickupCoil_NamesTheMaterialTheJobActuallyHolds()
+    {
+        // The merged Pickup Item covers a coil or a flatstock (D21), so which material the job holds decides what
+        // its second line says — a flatstock-only job must not be handed a coil it does not have.
+        var flatstockOnly = MaterialJob() with { HasCoil = false, CoilPartNumber = string.Empty };
+        var request = new WaitlistRequest { Item = "pickup-coil" };
+
+        var result = WaitlistRequestTitles.ResolveLine2(
+            Find("pickup-coil"),
+            WaitlistRequestTitles.ResolveContext(request, flatstockOnly));
+
+        Assert.IsTrue(result.IsResolved);
+        Assert.AreEqual("MMF0001154", result.Text);
+    }
+
+    [TestMethod]
+    public void ResolveLine2_ScrapRequest_ShowsTheTypeTheJobAlreadyDecided()
+    {
+        // FR-030: the scrap type is set on the job during Setup, so the card reads it rather than the Item's own
+        // name. A job with no real decision is not offered the Scrap Item at all (FR-031), and this snapshot is the
+        // same value that rule gates on, so visibility and the card cannot disagree.
+        var request = new WaitlistRequest { Item = "pickup-scrap" };
+
+        var result = WaitlistRequestTitles.ResolveLine2(
+            Find("pickup-scrap"),
+            WaitlistRequestTitles.ResolveContext(request, MaterialJob()));
+
+        Assert.IsTrue(result.IsResolved);
+        Assert.AreEqual("Steel Offal", result.Text);
     }
 
     /// <summary>A job carrying a die, as the composition root maps it onto the wizard's snapshot.</summary>
@@ -265,6 +377,7 @@ public sealed class WaitlistRequestTitlesTests
         var context = WaitlistRequestTitles.ResolveContext(coil);
 
         Assert.IsNull(context.DunnagePart, "An Item that does not name the dunnage token must not be handed one.");
+        Assert.IsNull(context.Component, "An Item that does not name the component token must not be handed one.");
         Assert.AreEqual("MMC0001000", context.Answer, "The captured answer is still available to the tokens it belongs to.");
     }
 

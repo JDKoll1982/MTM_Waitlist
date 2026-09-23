@@ -61,8 +61,30 @@ A fixed value, a value read from the job, or a value that depends on an answer c
 | Kind | Items |
 |---|---|
 | **fixed value** | `pickup-riser-table`, `deliver-riser-table` → `Riser Table`; `pickup-hopper`, `deliver-hopper` → `Hopper` |
-| **read from the job** | `pickup-coil`, `pickup-component`, `pickup-dunnage`, `pickup-scrap`, `deliver-coil`, `deliver-flatstock`, `deliver-die`, `deliver-dunnage`, `assist-coil-turn`, `assist-table-place`, `assist-table-remove`, and the two wrong-material Items (which name the **correct** material) |
-| **depends on a captured answer** | `other` — the message the person typed. (`pickup-die` was the second row here: its identifier switched on the captured destination. FR-053 replaced that switch with one composition, and the question itself retired 2026-09-20 — D22 — so the die's line is read from the job like every other die value.) |
+| **read from the job** | `pickup-coil`, `pickup-scrap`, `deliver-coil`, `deliver-flatstock`, `deliver-die`, `assist-coil-turn`, `assist-table-place`, `assist-table-remove`, the four out-of-scope Items, and the two wrong-material Items (which name the **correct** material) |
+| **depends on a captured answer** | `pickup-component`, `deliver-component` — the component the operator chose; `pickup-dunnage`, `deliver-dunnage` — the dunnage part they chose; `other` — the message the person typed. (`pickup-die` was also a row here: its identifier switched on the captured destination. FR-053 replaced that switch with one composition, and the question itself retired 2026-09-20 — D22 — so the die's line is read from the job like every other die value.) |
+
+**Where a job value comes from — the `{part_number}` and `{scrap_type}` tokens (2026-09-22).** A job-derived
+token is supplied only where a template names it, and only from a value the requesting job actually holds:
+
+- `{part_number}` is **the part the request is about**. Where the Item is about a material the job holds, that is
+the material's own number — the coil (`MMC`) for `pickup-coil`, the coil Items, the wrong-coil Item and the
+coil-turn assist; the flatstock (`MMF`) for the flatstock Items; and the **coil** for the merged `pickup-coil`,
+falling back to the job's flatstock on a flatstock-only job (D21). Where the Item is about no particular material —
+the two table assists, and the four out-of-scope Items — it is the **job's own part number**, which is the same
+value the request page shows for a declared `Part` row, so the card and the page cannot disagree about one request.
+Which material an Item is about comes from `RequestItemPickerRules.RequiredJobPart` — the very rule that decides
+whether the Item is offered at all — so the picker and the card cannot disagree either (FR-002, FR-013).
+- `{scrap_type}` is the scrap type the job's **real** decision names (FR-030), read through the same rule the Scrap
+Item's visibility gates on (FR-031): the placeholder and `No Scrap` are not decisions, so neither is carried.
+- A job that holds nothing for the token leaves it unresolved, and the card then shows the Item's display name and
+reports the configuration problem rather than inventing a part (FR-026).
+
+**These sources were missing until 2026-09-22, and the cards said the wrong thing.** Nothing supplied
+`{part_number}`, `{scrap_type}` or `{component}`, so every card whose identifier named one of them fell back to the
+Item's own display name: a `deliver-component` request read `Deliver` / `Component` rather than
+`Deliver` / `V-EMB-2`, a coil request read `Coil`, a work-in-process request read `Work In Process (WIP)`. The
+second line named the kind of request instead of the part involved.
 
 **The die's rule.** The second line is the die's own `FGT` number and nothing else — `FGT0002000` (FR-056). Where the
 die lives is a separate fact that the request page lists for itself (FR-057), so it is not part of the name.

@@ -1,0 +1,2938 @@
+{
+  "workflow": "companion",
+  "specName": "User Management and Permissions",
+  "branch": "006-user-management-and-permissions",
+  "currentStep": "implement",
+  "status": "completed",
+  "history": [
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-20T18:17:58.126Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-20T18:18:03.190Z"
+    },
+    {
+      "step": "clarify",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:18:03.380Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:18:03.574Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:18:03.778Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:18:03.970Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:20:03.968Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:20:11.778Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:25:02.326Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-20T18:55:32.350Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:56:49.476Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:56:53.932Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:59:00.566Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:59:02.955Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:59:05.575Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T18:59:07.901Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T19:03:51.686Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T19:03:54.397Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T19:03:57.447Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T19:04:00.181Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T19:04:03.001Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T19:04:05.885Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T19:04:08.591Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-20T19:04:11.404Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:20:46.231Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:24:10.294Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:24:13.438Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:35:37.152Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:35:41.085Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:35:44.341Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:39:31.349Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:39:35.232Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:39:42.439Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:41:34.975Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:43:44.352Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T10:44:51.324Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:23:38.294Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:24:00.185Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:25:46.376Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:27:55.735Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:31:21.630Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:37:37.647Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:40:52.417Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T067",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:43:19.185Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T068",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:43:22.367Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T069",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:43:25.897Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T064",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:47:02.578Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T065",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:47:05.789Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T066",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T11:47:09.274Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:00:16.979Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:02:32.692Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:05:37.867Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:15:50.823Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T039",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:22:40.498Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:25:08.286Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:27:43.799Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T041",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:27:46.859Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T042",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:32:18.021Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:32:21.897Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T044",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:42:34.255Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T045",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:42:38.264Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T046",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T12:42:42.549Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T047",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:02.784Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T048",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:06.105Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:09.982Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T050",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:13.864Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T051",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:17.039Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T052",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:20.567Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T053",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:01:23.762Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T054",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:04:56.600Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T055",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:07:43.483Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T056",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:09:41.355Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T057",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:11:15.408Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T058",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:15:23.416Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T059",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:15:27.326Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T060",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:19:27.043Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T061",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:19:31.197Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T062",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:19:35.027Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T063",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:19:38.860Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T070",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:20:02.727Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T071",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T13:20:38.794Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T072",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T22:51:11.412Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T073",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T22:55:49.227Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T074",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T23:01:33.091Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T075",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-21T23:19:33.519Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T076",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-22T21:39:25.834Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-22T21:39:25.922Z"
+    }
+  ],
+  "unattended": true,
+  "coverage": {
+    "FR-001": {
+      "title": "An account carries a sign-in name, a first name, a last name, a display name, an employee number, a role and an active flag.",
+      "tasks": [
+        "T003",
+        "T019"
+      ]
+    },
+    "FR-002": {
+      "title": "A sign-in name is stored and matched in upper case, so signing in succeeds whatever case is typed.",
+      "tasks": [
+        "T008",
+        "T015",
+        "T020"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::ASignInNameTypedInLowerCase_IsStoredUpperCase_AndSignsInEitherWay"
+    },
+    "FR-003": {
+      "title": "Accounts whose sign-in name is not upper case are migrated to that rule.",
+      "tasks": [
+        "T015"
+      ],
+      "tests": "live check: sp_auth_credentials_check answered for a sign-in name typed upper, lower and mixed case after the upper-case comparison moved"
+    },
+    "FR-004": {
+      "title": "An employee number is exactly four digits and is deliberately not unique.",
+      "tasks": [
+        "T019",
+        "T047",
+        "T053"
+      ]
+    },
+    "FR-005": {
+      "title": "A sign-in name, a first name and a last name are each 1 to 128 characters; the display name does not exceed 256.",
+      "tasks": [
+        "T019",
+        "T047",
+        "T053"
+      ]
+    },
+    "FR-006": {
+      "title": "Creating a person writes the profile and the role assignment together.",
+      "tasks": [
+        "T011",
+        "T072"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_AValidPerson_WritesTheProfileAndItsOneRoleAssignmentTogether,CreateAsync_FailingAfterTheProfileIsWritten_RollsTheProfileAndTheRoleBackTogether"
+    },
+    "FR-007": {
+      "title": "A new account is created active, and the create screen offers no active control.",
+      "tasks": [
+        "T011",
+        "T047",
+        "T053"
+      ]
+    },
+    "FR-008": {
+      "title": "A duplicate sign-in name produces a definite already-taken answer that names the name and is never retried.",
+      "tasks": [
+        "T011",
+        "T019",
+        "T047",
+        "T053",
+        "T072"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_ASignInNameAlreadyTaken_ArrivesAsOneTypedAnswerAndWritesNothing"
+    },
+    "FR-009": {
+      "title": "A person is created with exactly one role and nothing adds a second; the stored assignments still permit more, so readers take the highest-ranked live role.",
+      "tasks": [
+        "T011"
+      ]
+    },
+    "FR-010": {
+      "title": "The rank of every role is defined in one place and nowhere else.",
+      "tasks": [
+        "T004",
+        "T028",
+        "T029"
+      ]
+    },
+    "FR-011": {
+      "title": "The retired administrator role is removed from the catalogue and replaced by IT Department.",
+      "tasks": [
+        "T032"
+      ]
+    },
+    "FR-012": {
+      "title": "Every account that held the retired role moves onto IT Department in one all-or-nothing act.",
+      "tasks": [
+        "T032"
+      ]
+    },
+    "FR-013": {
+      "title": "The change ships with a paired reversal that is run as part of verification.",
+      "tasks": [
+        "T032",
+        "T033",
+        "T070"
+      ]
+    },
+    "FR-014": {
+      "title": "After the change no account has no role, and IT Department holds exactly the accounts that held the retired role.",
+      "tasks": [
+        "T001",
+        "T032",
+        "T033",
+        "T072"
+      ]
+    },
+    "FR-015": {
+      "title": "Material Handler Lead is added as a role in its own right with its own rank, not mapped onto Plant Manager.",
+      "tasks": [
+        "T027"
+      ],
+      "tests": "live check of the shipped role seed against the local store (nine catalogue rows at their pinned rungs, admin at 0)"
+    },
+    "FR-016": {
+      "title": "The rank comparison and the roles-at-or-above list come from the one definition.",
+      "tasks": [
+        "T028",
+        "T029"
+      ]
+    },
+    "FR-017": {
+      "title": "Where a person holds more than one live role, the highest rank decides.",
+      "tasks": [
+        "T029"
+      ]
+    },
+    "FR-018": {
+      "title": "The ladder leaves room between rungs and the rung of each role is checkable.",
+      "tasks": [
+        "T004",
+        "T027"
+      ]
+    },
+    "FR-019": {
+      "title": "A person cannot change an account whose role ranks strictly above their own, for the role, the active state, the sign-in name or the password.",
+      "tasks": [
+        "T011",
+        "T012",
+        "T048",
+        "T053"
+      ]
+    },
+    "FR-020": {
+      "title": "Peers remain editable, because a person's own rank is not above their own rank.",
+      "tasks": [
+        "T048",
+        "T053"
+      ]
+    },
+    "FR-021": {
+      "title": "A person's own account does not rank above them, so their own password change still works.",
+      "tasks": [
+        "T048",
+        "T053"
+      ]
+    },
+    "FR-022": {
+      "title": "A person cannot assign a role above their own rank, and the picker offers only roles at or below it.",
+      "tasks": [
+        "T012",
+        "T047",
+        "T048",
+        "T053"
+      ]
+    },
+    "FR-023": {
+      "title": "A person cannot deactivate their own account.",
+      "tasks": [
+        "T012",
+        "T048",
+        "T053"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_DeactivatingTheActorsOwnAccount_IsRefusedByTheStore"
+    },
+    "FR-024": {
+      "title": "A person cannot change the sign-in name of the account they are signed in as.",
+      "tasks": [
+        "T012",
+        "T048",
+        "T053"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_RenamingTheActorsOwnSignInName_IsRefusedByTheStore"
+    },
+    "FR-025": {
+      "title": "The rank, self-lockout and sign-in-name rules are enforced where the change is written.",
+      "tasks": [
+        "T011",
+        "T012",
+        "T019",
+        "T048",
+        "T053",
+        "T054",
+        "T072"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_ARoleAboveTheActorsOwnRung_IsRefusedByTheStoreWithNoScreenInvolved,UpdateAsync_AnAccountThatOutranksTheActor_IsRefusedByTheStoreWithNoScreenInvolved"
+    },
+    "FR-026": {
+      "title": "A refused change is reported plainly and writes no audit record, because nothing changed.",
+      "tasks": [
+        "T012",
+        "T047",
+        "T048",
+        "T053",
+        "T058"
+      ]
+    },
+    "FR-027": {
+      "title": "An account the reader cannot change is still readable, shows its fields and actions as unavailable, and states the reason.",
+      "tasks": [
+        "T010",
+        "T048",
+        "T053"
+      ]
+    },
+    "FR-028": {
+      "title": "A password reset happens from a person's page, behind a confirmation, with no reset on the sign-in screen and none for oneself.",
+      "tasks": [
+        "T048",
+        "T049",
+        "T051",
+        "T064"
+      ]
+    },
+    "FR-029": {
+      "title": "A reset sets a random four-digit PIN, requires a change at the next sign-in, and does not reactivate a switched-off account.",
+      "tasks": [
+        "T013"
+      ]
+    },
+    "FR-030": {
+      "title": "The reset PIN is shown once and is never readable back: only a salted hash may be stored, and 'read back' means plaintext.",
+      "tasks": [
+        "T013",
+        "T049",
+        "T053",
+        "T073"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/ViewModels/PinRevealDialogViewModelTests.cs,MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_AValidPerson_WritesTheProfileAndItsOneRoleAssignmentTogether"
+    },
+    "FR-031": {
+      "title": "The value previously used for a reset stays recognised as a temporary value.",
+      "tasks": [
+        "T008",
+        "T066"
+      ]
+    },
+    "FR-032": {
+      "title": "A second reset replaces the earlier PIN and the screen says so.",
+      "tasks": [
+        "T049",
+        "T053"
+      ]
+    },
+    "FR-033": {
+      "title": "Creating a person issues a PIN the same way a reset does.",
+      "tasks": [
+        "T049"
+      ]
+    },
+    "FR-034": {
+      "title": "The PIN window must be closed deliberately, is not dismissed by clicking outside or Escape, offers printing, and printing does not close it.",
+      "tasks": [
+        "T049",
+        "T052",
+        "T053"
+      ]
+    },
+    "FR-035": {
+      "title": "A reset does not end an existing session for that person.",
+      "tasks": [
+        "T013",
+        "T066",
+        "T072"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_DeactivatingAPerson_LeavesTheirExistingSessionsAlone,MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs::ResetPassword_LeavesAnOpenSessionRunning"
+    },
+    "FR-036": {
+      "title": "After five failed sign-in attempts an account holding a temporary value stops accepting it.",
+      "tasks": [
+        "T009",
+        "T020",
+        "T066"
+      ]
+    },
+    "FR-037": {
+      "title": "The count is held with the account, so closing and reopening the application does not clear it.",
+      "tasks": [
+        "T003",
+        "T020",
+        "T066"
+      ]
+    },
+    "FR-038": {
+      "title": "The count does not expire with time.",
+      "tasks": [
+        "T066"
+      ]
+    },
+    "FR-039": {
+      "title": "Only a successful sign-in or a fresh reset clears the count.",
+      "tasks": [
+        "T009",
+        "T013",
+        "T066"
+      ]
+    },
+    "FR-040": {
+      "title": "The limit applies only to accounts holding a temporary value; ordinary sign-in keeps today's behaviour.",
+      "tasks": [
+        "T064",
+        "T065"
+      ]
+    },
+    "FR-041": {
+      "title": "Once an attempt has failed the remaining attempts are shown; they are not shown before one has.",
+      "tasks": [
+        "T064",
+        "T065"
+      ]
+    },
+    "FR-042": {
+      "title": "A failed sign-in for a sign-in name that does not exist behaves exactly as it does today.",
+      "tasks": [
+        "T020",
+        "T064",
+        "T065"
+      ]
+    },
+    "FR-043": {
+      "title": "The wrong-attempt count is not presented as a record of who tried.",
+      "tasks": [
+        "T066"
+      ]
+    },
+    "FR-044": {
+      "title": "When the count has been reached the person is told that someone entitled must issue a fresh reset.",
+      "tasks": [
+        "T064",
+        "T065"
+      ]
+    },
+    "FR-045": {
+      "title": "Every gated action is named by exactly one permission key, and a person either holds it or does not.",
+      "tasks": [
+        "T016"
+      ],
+      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_HoldsEveryPinnedKeyExactlyOnce"
+    },
+    "FR-046": {
+      "title": "The application holds one declaration of every permission with its key, label, what it gates, the area, the shipped fallback and the gate sites, and it carries no per-role baseline.",
+      "tasks": [
+        "T016",
+        "T024",
+        "T036",
+        "T060"
+      ],
+      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_DerivesEachKeysResourceNamesFromTheKeyItself,Declaration_ExposesNoPerRoleBaseline"
+    },
+    "FR-047": {
+      "title": "A permission cannot exist without appearing on the page, nor appear without a baseline for every role; the declaration and the seeded baselines are checked in both directions.",
+      "tasks": [
+        "T016",
+        "T024",
+        "T036",
+        "T060"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_AndTheDeclaration_AgreeInBothDirections"
+    },
+    "FR-048": {
+      "title": "The shipped baselines are data rather than values fixed in code, so what a role may do can change without a code change.",
+      "tasks": [
+        "T007",
+        "T016",
+        "T024",
+        "T036",
+        "T060"
+      ]
+    },
+    "FR-049": {
+      "title": "A permission resolves for the person: their own stored value, otherwise their role's baseline, otherwise the shipped fallback.",
+      "tasks": [
+        "T014",
+        "T018",
+        "T025"
+      ],
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_WithNoStoredRowOfTheirOwn_TakesTheRoleBaseline,HasPermissionAsync_APersonsOwnRowBeatsTheirRoleBaseline"
+    },
+    "FR-050": {
+      "title": "An unreachable store yields the shipped fallback rather than a refusal.",
+      "tasks": [
+        "T018",
+        "T025",
+        "T037"
+      ],
+      "tests": "MTM_Waitlist.Tests/Core/Services/RequestActionPolicyTests.cs::CanViewerHandleRequestsAsync_NoPermissionService_AnswersFromTheShippedFallback"
+    },
+    "FR-051": {
+      "title": "A new account starts from its role's baseline and holds nothing beyond it.",
+      "tasks": [
+        "T018",
+        "T025",
+        "T036"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_StoreNoRowForAnybodyInParticular"
+    },
+    "FR-052": {
+      "title": "The shipped baselines reproduce exactly what each role is allowed today, so nobody's access changes on ship day.",
+      "tasks": [
+        "T002",
+        "T034",
+        "T036",
+        "T072"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_ReproduceEveryRetiredListExactly_ForEveryRoleAndEveryPermission,EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore"
+    },
+    "FR-053": {
+      "title": "A person's own stored value beats a wider scope, and the order is corrected and shipped before any value is stored for an individual.",
+      "tasks": [
+        "T001",
+        "T006",
+        "T014",
+        "T018",
+        "T025",
+        "T054",
+        "T070"
+      ],
+      "tests": "Module_Core/Services/SettingsScopeRankTests.cs::ShippedScopeRankFunction_PutsAPersonsOwnValueAboveEveryWiderScope"
+    },
+    "FR-054": {
+      "title": "No gate decides access from a hand-written list of role names: all twelve lists the Context counts are removed, eleven replaced by their permission and the badge map re-keyed to role codes.",
+      "tasks": [
+        "T017",
+        "T026",
+        "T035",
+        "T037",
+        "T039",
+        "T040"
+      ],
+      "tests": "MTM_Waitlist.Tests/Core/Services/RequestActionPolicyTests.cs::CanViewerHandleRequestsAsync_AsksTheDeclaredKeyAndNothingElse"
+    },
+    "FR-055": {
+      "title": "A gate is refused wherever the gated action is performed, not only where the control was drawn.",
+      "tasks": [
+        "T018",
+        "T037"
+      ]
+    },
+    "FR-056": {
+      "title": "A control's visibility and the action it guards are answered from the same lookup.",
+      "tasks": [
+        "T018",
+        "T037",
+        "T039",
+        "T040"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs::AcceptAsync_ViewerWithoutThePermission_RefusesAtTheAction"
+    },
+    "FR-057": {
+      "title": "Whatever the Settings cache-refresh control admits is also admitted by the service's cache-refresh permission.",
+      "tasks": [
+        "T034",
+        "T038"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Mock_Service/ServiceOperatorPermissionTests.cs::TheShippedBaselines_AdmitToTheApiEveryRoleTheSettingsCacheRefreshGateAdmits"
+    },
+    "FR-058": {
+      "title": "The badge beside the signed-in name does not become a permission.",
+      "tasks": [
+        "T035",
+        "T068",
+        "T069"
+      ]
+    },
+    "FR-059": {
+      "title": "The permission that opens and edits the permissions page cannot be changed from that page.",
+      "tasks": [
+        "T054",
+        "T056",
+        "T058"
+      ]
+    },
+    "FR-060": {
+      "title": "A role added later is answered by its baseline or by the shipped fallback for every permission.",
+      "tasks": [
+        "T018",
+        "T024",
+        "T025"
+      ],
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_ARoleWithNoBaselineRowAnswersFromTheShippedFallback"
+    },
+    "FR-061": {
+      "title": "A gated action reading a permission the declaration does not hold is reported as a failure rather than shipping as a silent refusal.",
+      "tasks": [
+        "T016",
+        "T024",
+        "T035"
+      ],
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_WithAnUndeclaredKey_ReportsAFailureRatherThanRefusingSilently"
+    },
+    "FR-062": {
+      "title": "A permission the declaration holds that no gate reads is reported.",
+      "tasks": [
+        "T016",
+        "T024"
+      ],
+      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_GivesEveryKeyANamedGateSiteThatReadsIt"
+    },
+    "FR-063": {
+      "title": "The permissions page shows one person at a time, is not a grid of roles against features, and changes no role's baseline.",
+      "tasks": [
+        "T055",
+        "T056",
+        "T057"
+      ],
+      "tests": "PermissionsViewModelTests.cs::TheFiveCards_AreTheDeclarationAreas_AndEveryPermissionIsInExactlyOne,PermissionsViewModelTests.cs::TheRows_AreThePeople_OrderedByRungAndThenByName"
+    },
+    "FR-064": {
+      "title": "The permissions page is openable only by IT Department, Plant Manager and Developer.",
+      "tasks": [
+        "T056"
+      ]
+    },
+    "FR-065": {
+      "title": "Each row states what the feature is, what it gates, the value in force, and whether it came from the role baseline or a choice for the person.",
+      "tasks": [
+        "T055",
+        "T056"
+      ],
+      "tests": "PermissionsViewModelTests.cs::AChosenCell_AnInheritedCell_AndAnOffCell_AreThreeDifferentShapes,PermissionsViewModelTests.cs::EveryCell_SaysItsStateAndWhoseItIsInWords_BecauseAShapeCannotBeReadAloud"
+    },
+    "FR-066": {
+      "title": "A person whose role ranks above the reader's is selectable to view, with rows shown unavailable and the reason stated in words.",
+      "tasks": [
+        "T056",
+        "T059"
+      ],
+      "tests": "PermissionsViewModelTests.cs::APersonAboveTheReadersRung_HasEveryCellLocked_WithTheReasonInWords"
+    },
+    "FR-067": {
+      "title": "Saving confirms what is changing and for whom, one sentence per changed row and a count when several change.",
+      "tasks": [
+        "T056",
+        "T059"
+      ],
+      "tests": "PermissionsViewModelTests.cs::TheConfirmation_NamesWhatChangesAndForWhom_AndCountsWhenSeveralChange"
+    },
+    "FR-068": {
+      "title": "Saving with nothing changed is unavailable and writes no history record.",
+      "tasks": [
+        "T056",
+        "T058",
+        "T059"
+      ]
+    },
+    "FR-069": {
+      "title": "A completed save is reversible, and the reversal obeys the same rule as the change it reverses.",
+      "tasks": [
+        "T054",
+        "T055",
+        "T056",
+        "T059"
+      ]
+    },
+    "FR-070": {
+      "title": "A reversal does not overwrite a value that has moved; it shows what the value is now and asks before restoring.",
+      "tasks": [
+        "T054",
+        "T055",
+        "T056",
+        "T058",
+        "T059"
+      ],
+      "tests": "PermissionsViewModelTests.cs::AValueThatMovedWhileThePageWasOpen_IsNamedAndNothingIsWritten,PermissionsViewModelTests.cs::AValueThatMoved_IsShownAndAskedAbout_BeforeItIsRestored"
+    },
+    "FR-071": {
+      "title": "A reversal of a save that changed several rows reverses the whole save.",
+      "tasks": [
+        "T054",
+        "T055",
+        "T056",
+        "T058"
+      ],
+      "tests": "PermissionsViewModelTests.cs::ASave_WritesOnePersonsWholeSet_AndAnotherPersonIsAnotherWrite,PermissionsViewModelTests.cs::TheUndo_ReversesTheWholeSave_ForThePersonItWasWrittenFor"
+    },
+    "FR-072": {
+      "title": "Every permission change writes one history record per changed permission naming the actor, the permission, the scope, both values and the time.",
+      "tasks": [
+        "T054",
+        "T055",
+        "T056",
+        "T058"
+      ]
+    },
+    "FR-073": {
+      "title": "The page warns before it is left with unsaved changes and states how many rows are pending.",
+      "tasks": [
+        "T056",
+        "T059"
+      ]
+    },
+    "FR-074": {
+      "title": "The page shows pending changes as pending until they are saved.",
+      "tasks": [
+        "T056",
+        "T059"
+      ],
+      "tests": "PermissionsViewModelTests.cs::TurningACellOver_MarksTheRowPending_AndTheWarningStatesTheCount,PermissionsViewModelTests.cs::ASaveThatLanded_AnnouncesTheCellsNewState_NotOnlyItsNewValue"
+    },
+    "FR-075": {
+      "title": "A second view answers which roles' baselines give a feature, taken from the seeded baselines the declaration's check ties to it rather than repeated.",
+      "tasks": [
+        "T060",
+        "T061",
+        "T062",
+        "T063"
+      ]
+    },
+    "FR-076": {
+      "title": "The same view names only the people who differ from their role's baseline, in either direction, each marked granted or denied.",
+      "tasks": [
+        "T054",
+        "T060",
+        "T063"
+      ]
+    },
+    "FR-077": {
+      "title": "The view is read-only, and choosing a differing person opens that person's own page.",
+      "tasks": [
+        "T060",
+        "T061",
+        "T063"
+      ]
+    },
+    "FR-078": {
+      "title": "A feature nobody holds is stated in words rather than shown as an empty region.",
+      "tasks": [
+        "T060",
+        "T061",
+        "T063"
+      ]
+    },
+    "FR-079": {
+      "title": "A person who holds a feature but has been switched off is listed and marked as switched off.",
+      "tasks": [
+        "T054",
+        "T060",
+        "T061",
+        "T063"
+      ]
+    },
+    "FR-080": {
+      "title": "Settings gains an Administration category holding two entries, one opening the user list and one opening the permissions page.",
+      "tasks": [
+        "T021",
+        "T043",
+        "T046",
+        "T052",
+        "T057"
+      ]
+    },
+    "FR-081": {
+      "title": "Each entry is shown by its own permission, and a reader entitled to neither does not see the category.",
+      "tasks": [
+        "T039",
+        "T043"
+      ]
+    },
+    "FR-082": {
+      "title": "Neither entry expands in place, and each carries a short description of what it opens.",
+      "tasks": [
+        "T043",
+        "T046"
+      ]
+    },
+    "FR-083": {
+      "title": "Leaving either page returns to Settings, and repeating a page does not walk back through repeats of it.",
+      "tasks": [
+        "T045",
+        "T057"
+      ]
+    },
+    "FR-084": {
+      "title": "Both entries are reachable from the Settings search.",
+      "tasks": [
+        "T043",
+        "T046"
+      ]
+    },
+    "FR-085": {
+      "title": "A page re-checks the reader's entitlement rather than staying open on a stale answer.",
+      "tasks": [
+        "T044"
+      ]
+    },
+    "FR-086": {
+      "title": "The list searches sign-in name, display name, employee number and role.",
+      "tasks": [
+        "T010",
+        "T042",
+        "T044",
+        "T046"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::SearchAsync_MatchesEachOfTheFourFacts_AndNarrowsByRole"
+    },
+    "FR-087": {
+      "title": "The list is filterable by role.",
+      "tasks": [
+        "T010",
+        "T042",
+        "T044",
+        "T046"
+      ]
+    },
+    "FR-088": {
+      "title": "The list shows everyone by default, with switched-off people clearly marked.",
+      "tasks": [
+        "T010"
+      ]
+    },
+    "FR-089": {
+      "title": "The search and role filter are remembered for the person, and the page names the active filter and says how many people it is hiding.",
+      "tasks": [
+        "T042",
+        "T044",
+        "T046"
+      ]
+    },
+    "FR-090": {
+      "title": "A filter that matches nobody is stated distinctly from there being no people at all.",
+      "tasks": [
+        "T044",
+        "T046"
+      ]
+    },
+    "FR-091": {
+      "title": "A saved filter that cannot be read causes everyone to be shown with the failure stated, never an empty list.",
+      "tasks": [
+        "T044",
+        "T046"
+      ]
+    },
+    "FR-092": {
+      "title": "A filter naming a role that no longer exists falls back to showing everyone and says the filter no longer applies.",
+      "tasks": [
+        "T044",
+        "T046"
+      ]
+    },
+    "FR-093": {
+      "title": "A row does exactly one thing, which is to open that person; reset, deactivate and reactivate live on that person's page.",
+      "tasks": [
+        "T044",
+        "T046"
+      ]
+    },
+    "FR-094": {
+      "title": "A row remains a single target, keeps all five facts visible at every width, and folds onto a second line rather than cropping.",
+      "tasks": [
+        "T042",
+        "T044",
+        "T045",
+        "T046"
+      ]
+    },
+    "FR-095": {
+      "title": "The list stays usable, and does not freeze while it loads, with a roster of 1,000 people.",
+      "tasks": [
+        "T044",
+        "T045",
+        "T046"
+      ]
+    },
+    "FR-096": {
+      "title": "Where the store cannot be read the list shows an unavailable state with a retry, and never an empty list, a blank region or sample data.",
+      "tasks": [
+        "T044",
+        "T046"
+      ]
+    },
+    "FR-097": {
+      "title": "The page presents the fields in a form at the top and the actions in a clearly separated area below.",
+      "tasks": [
+        "T048",
+        "T051"
+      ]
+    },
+    "FR-098": {
+      "title": "A page the reader cannot act on says so at the top and shows its actions as unavailable rather than hiding them.",
+      "tasks": [
+        "T048"
+      ]
+    },
+    "FR-099": {
+      "title": "The create page is a form only, with no actions area.",
+      "tasks": [
+        "T050"
+      ]
+    },
+    "FR-100": {
+      "title": "An action chosen while edits are unsaved does not act on a half-edited person; the reader must save or discard first.",
+      "tasks": [
+        "T048",
+        "T053"
+      ]
+    },
+    "FR-101": {
+      "title": "A failed action keeps what the reader had and states what failed, and does not blank the page.",
+      "tasks": [
+        "T010",
+        "T047",
+        "T048",
+        "T053"
+      ]
+    },
+    "FR-102": {
+      "title": "Deactivating states both halves in one sentence, and the same sentence appears on the person's page.",
+      "tasks": [
+        "T048",
+        "T072"
+      ]
+    },
+    "FR-103": {
+      "title": "Reactivating states that access returns from the next sign-in.",
+      "tasks": [
+        "T048"
+      ]
+    },
+    "FR-104": {
+      "title": "Saving is guarded against a repeated press, so one press creates exactly one person or writes exactly one change.",
+      "tasks": [
+        "T047",
+        "T048",
+        "T053"
+      ]
+    },
+    "FR-105": {
+      "title": "The badge lookup is keyed on the role code and covers every role the catalogue holds.",
+      "tasks": [
+        "T008",
+        "T017",
+        "T067",
+        "T068",
+        "T069"
+      ]
+    },
+    "FR-106": {
+      "title": "The fallback badge remains and is reachable only by a genuinely unknown or blank role.",
+      "tasks": [
+        "T067",
+        "T069"
+      ]
+    },
+    "FR-107": {
+      "title": "The vocabulary naming roles the catalogue has never held is removed rather than left in place.",
+      "tasks": [
+        "T039",
+        "T040",
+        "T067",
+        "T071"
+      ]
+    },
+    "FR-108": {
+      "title": "Every creation, change and password reset writes an audit record naming the actor, the field, both values and the time.",
+      "tasks": [
+        "T005",
+        "T011"
+      ]
+    },
+    "FR-109": {
+      "title": "The actor's name, employee number and role are recorded as they were at the time.",
+      "tasks": [
+        "T005"
+      ]
+    },
+    "FR-110": {
+      "title": "One save changing several fields writes one record per changed field, sharing one identifier for the change.",
+      "tasks": [
+        "T005",
+        "T011",
+        "T012"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_OneSaveChangingSeveralFields_SharesOneChangeIdentifierAcrossItsAuditRows"
+    },
+    "FR-111": {
+      "title": "A password reset is recorded as having happened with no value on either side.",
+      "tasks": [
+        "T013",
+        "T072"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::ResetPasswordAsync_WritesOneAuditRowWithNoValueOnEitherSide"
+    },
+    "FR-112": {
+      "title": "Every label, title, field label, action and error message is localised through the application's resource mechanism.",
+      "tasks": [
+        "T022",
+        "T064"
+      ]
+    },
+    "FR-113": {
+      "title": "No control has a fixed width, and a long value wraps or trims with a tooltip rather than being cropped.",
+      "tasks": [
+        "T022",
+        "T045",
+        "T050",
+        "T057",
+        "T061",
+        "T076"
+      ]
+    },
+    "FR-114": {
+      "title": "No screen freezes or refuses interaction while it loads or saves.",
+      "tasks": [
+        "T044",
+        "T059"
+      ]
+    },
+    "FR-115": {
+      "title": "Every list remains usable with 1,000 rows.",
+      "tasks": [
+        "T045"
+      ]
+    },
+    "FR-116": {
+      "title": "The screens remain usable between 150 and 200 percent scaling, and at the narrowest window the application permits.",
+      "tasks": [
+        "T045",
+        "T050",
+        "T057",
+        "T076"
+      ]
+    },
+    "FR-117": {
+      "title": "No control is shown to a person who cannot use it.",
+      "tasks": [
+        "T037",
+        "T039",
+        "T043",
+        "T048",
+        "T051"
+      ]
+    },
+    "SC-001": {
+      "title": "For every key that replaces a retired list, and every person, the effective set on ship day equals exactly what that person's role was allowed before, with zero differences; the three keys with no predecessor are checked against their stated baseline sets.",
+      "tasks": [
+        "T002",
+        "T034",
+        "T041",
+        "T072"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore"
+    },
+    "SC-002": {
+      "title": "Zero hand-written role lists remain in the application, and adding one back is reported as a failure.",
+      "tasks": [
+        "T035",
+        "T041"
+      ]
+    },
+    "SC-003": {
+      "title": "Adding a new gated action without declaring its permission and every role's baseline is reported before it can ship as a silent refusal.",
+      "tasks": [
+        "T024",
+        "T035",
+        "T041"
+      ]
+    },
+    "SC-004": {
+      "title": "Zero stored values for individual people are required for SC-001 to hold.",
+      "tasks": [
+        "T036",
+        "T072"
+      ],
+      "tests": "PermissionBaselineParityTests.cs"
+    },
+    "SC-005": {
+      "title": "After the role rename the count of accounts with no role is zero, and the set on IT Department equals the set that held the retired role.",
+      "tasks": [
+        "T033",
+        "T072"
+      ]
+    },
+    "SC-006": {
+      "title": "The paired reversal is executed as part of verifying this feature, and both comparisons hold again afterwards.",
+      "tasks": [
+        "T033",
+        "T072"
+      ]
+    },
+    "SC-007": {
+      "title": "A password reset hands over a credential that cannot be read back as plaintext anywhere in the application, its logs or the store.",
+      "tasks": [
+        "T049",
+        "T053",
+        "T073"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/ViewModels/PinRevealDialogViewModelTests.cs"
+    },
+    "SC-008": {
+      "title": "Five wrong tries with a temporary credential stop it working; a sixth correct attempt is refused; restarting and waiting do not restore it.",
+      "tasks": [
+        "T066",
+        "T075"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs,MTM_Waitlist.Tests/ViewModels/LoginViewModelTests.cs"
+    },
+    "SC-009": {
+      "title": "A save changing N permissions writes exactly N records naming the acting user and both values, and reversing it restores all N.",
+      "tasks": [
+        "T058"
+      ]
+    },
+    "SC-010": {
+      "title": "One impatient press of Save creates exactly one person, and one impatient press of a permission save writes exactly one change.",
+      "tasks": [
+        "T047",
+        "T053",
+        "T056",
+        "T059"
+      ]
+    },
+    "SC-011": {
+      "title": "Every screen is usable between 150 and 200 percent scaling and at the narrowest window, with all five facts of a list row visible at both widths.",
+      "tasks": [
+        "T046",
+        "T076"
+      ]
+    },
+    "SC-012": {
+      "title": "No screen freezes or refuses interaction while it loads or saves, verified against a live store.",
+      "tasks": [
+        "T046",
+        "T075"
+      ]
+    },
+    "SC-013": {
+      "title": "Changing a permission for one person takes effect for that person and changes no other person's effective set.",
+      "tasks": [
+        "T025"
+      ]
+    },
+    "SC-014": {
+      "title": "For any chosen feature the who-holds-this view names every role whose baseline gives it, no role whose baseline does not, and only the people who differ.",
+      "tasks": [
+        "T063"
+      ]
+    },
+    "SC-015": {
+      "title": "Every role in the catalogue shows its own badge, and the count of roles falling to the grey default is zero.",
+      "tasks": [
+        "T069"
+      ]
+    },
+    "SC-016": {
+      "title": "A change to an account that outranks the actor is refused when attempted without the screen, for the role, the active state and the password alike.",
+      "tasks": [
+        "T072"
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_AnAccountThatOutranksTheActor_IsRefusedByTheStoreWithNoScreenInvolved"
+    },
+    "SC-017": {
+      "title": "Opening either Administration page and returning to Settings takes one Back press, and the search reaches both entries.",
+      "tasks": [
+        "T046",
+        "T075"
+      ]
+    },
+    "SC-018": {
+      "title": "The full test suite passes with zero failures and the build is clean with zero warnings.",
+      "tasks": [
+        "T074"
+      ],
+      "tests": "the whole suite and the clean solution build"
+    },
+    "SC-019": {
+      "title": "For every creation, change and password reset the audit names the actor as they were, carries one record per changed field, and shares one change identifier.",
+      "tasks": [
+        "T072"
+      ]
+    },
+    "SC-020": {
+      "title": "Every string on this feature's screens renders from the shipped language resources, with no resource key ever shown to a person.",
+      "tasks": [
+        "T022",
+        "T046",
+        "T069"
+      ]
+    }
+  },
+  "step_summaries": {
+    "tasks": {
+      "summary": "76 tasks across 12 phases and 37 waves; 60 parallel-safe; 24 foundational tasks carry the schema, the precedence re-rank, the permission declaration and the user-management data layer before any story starts."
+    },
+    "specify": {
+      "summary": "the permissions page is a feature-grouped matrix, and walking it against the live store found and fixed four defects"
+    },
+    "implement": {
+      "summary": "Implement re-opened on feature 006, where 75 of the 76 tasks were already checked. Only T076, the manual scaling walk, was outstanding: its narrowest-window half was walked on the roster and the display-scale half was not attempted, so the spec is left at implementing."
+    }
+  },
+  "size": "oversized",
+  "currentTask": "T076",
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Recorded the settings scope census (3 rows, all all_users) and the admin account set (test.admin) as fixture data",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Fixtures/PermissionMigrationBaseline.cs"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Captured the twelve retired role lists verbatim, with administrator and Setup Tech recorded as matching no catalogue role",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Fixtures/RetiredRoleListFixture.cs"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Added first_name, last_name and temporary_credential_failed_attempts to core_users_profiles; scratch-database run proved the guarded rollback drops exactly those three",
+      "files": [
+        "Database/Tables/01_core_users_profiles/create.sql",
+        "Database/Tables/01_core_users_profiles/rollback.sql"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Added role_rank INT NOT NULL DEFAULT 0 with an index to auth_roles_catalog; longest index name 31 characters",
+      "files": [
+        "Database/Tables/03_auth_roles_catalog/create.sql",
+        "Database/Tables/03_auth_roles_catalog/rollback.sql"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Created auth_user_management_audit at 32_ with the 12 declared columns and no foreign keys, so the actor snapshots outlive the accounts they name",
+      "files": [
+        "Database/Tables/32_auth_user_management_audit/create.sql",
+        "Database/Tables/32_auth_user_management_audit/rollback.sql"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Re-ranked fn_config_settings_scope_rank to computer 1, all_users 2, role 3, admin 4, developer 5, user 6; scratch-database run read back 1,2,3,4,5,6 and the rollback restored 1,2,3,4,5 with role 0",
+      "files": [
+        "Database/Functions/fn_config_settings_scope_rank/create.sql",
+        "Database/Functions/fn_config_settings_scope_rank/rollback.sql"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Added role_code and the wrong-attempt count to the three credential reads, plus the upper-case sign-in-name contract in their headers; all three recreate and return the documented ordinal order against a scratch store",
+      "files": [
+        "Database/StoredProcedures/sp_auth_credentials_check/create.sql",
+        "Database/StoredProcedures/sp_auth_credentials_check/rollback.sql",
+        "Database/StoredProcedures/sp_auth_user_row_get/create.sql",
+        "Database/StoredProcedures/sp_auth_user_row_get/rollback.sql",
+        "Database/StoredProcedures/sp_auth_password_reset_required_get/create.sql",
+        "Database/StoredProcedures/sp_auth_password_reset_required_get/rollback.sql"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Added sp_auth_temporary_credential_attempt_record (one statement per branch, non-query) and the header comment on sp_config_settings_upsert recording why it is not the permission write path and why ELSE 'developer' stays",
+      "files": [
+        "Database/StoredProcedures/sp_auth_temporary_credential_attempt_record/create.sql",
+        "Database/StoredProcedures/sp_auth_temporary_credential_attempt_record/rollback.sql",
+        "Database/StoredProcedures/sp_config_settings_upsert/create.sql"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Added the roster read (four-field search, optional role filter, everyone and switched-off people by default) and the one-person read returning identity, rung, active flag and attempt count; both exercised against a scratch store",
+      "files": [
+        "Database/StoredProcedures/sp_user_management_list/create.sql",
+        "Database/StoredProcedures/sp_user_management_list/rollback.sql",
+        "Database/StoredProcedures/sp_user_management_get/create.sql",
+        "Database/StoredProcedures/sp_user_management_get/rollback.sql"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Added the create procedure: one transaction writing profile plus exactly one role assignment; proved rank refusal, unknown-role refusal, pass-through 1062 and eight audit rows sharing one change group",
+      "files": [
+        "Database/StoredProcedures/sp_user_management_create/create.sql",
+        "Database/StoredProcedures/sp_user_management_create/rollback.sql"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Added the update procedure: target-rank refusal checked before the requested-role refusal, self-deactivate and self-rename refusals, and audit rows only for fields that actually changed (nothing-changed wrote none)",
+      "files": [
+        "Database/StoredProcedures/sp_user_management_update/create.sql",
+        "Database/StoredProcedures/sp_user_management_update/rollback.sql"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Added the reset procedure: stores the salted hash only, forces a change, clears the attempt count, leaves is_active as it was, ends no session, and writes one audit row with both value columns null; target-rank refusal and a null-value audit row both proved",
+      "files": [
+        "Database/StoredProcedures/sp_user_management_reset_password/create.sql",
+        "Database/StoredProcedures/sp_user_management_reset_password/rollback.sql"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Added sp_config_permissions_user_get keyed on scope_key, resolving the role inside the procedure and returning only permission-namespace rows; proved it returns the person's own row and their role's row and excludes another role's baseline and a text preference",
+      "files": [
+        "Database/StoredProcedures/sp_config_permissions_user_get/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_user_get/rollback.sql"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Added the sign-in-name upper-case migration with a recorded backup table its rollback restores then drops; proved against a scratch store that it upper-cases, records one row, reports rather than fails, and that the rollback restored the original spelling",
+      "files": [
+        "Database/Seeds/seed_username_upper_normalization/create.sql",
+        "Database/Seeds/seed_username_upper_normalization/rollback.sql"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Bootstrap update path carries guarded adds for the three person columns, role_rank and its index, plus the new audit table; new user_management_schema validator added and settings validator asserts the corrected rank order; applied to the live local mtm_waitlist (columns and table landed, re-run reports already exists, exit 0) and a scratch full-schema build validates at 0 issues on all three validators",
+      "files": [
+        "Database/Bootstrap/create_database.sql;Database/Bootstrap/update_table_descriptions.sql;Database/Validation/user_management_schema/validate.sql;Database/Validation/settings_schema/validate.sql;Database/install_local_database.vbs"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "One declaration: the fourteen pinned keys as constants plus per-key label/gates resource keys, area, shipped fallback and gate sites; no per-role baseline carried; solution builds 0 warnings 0 errors",
+      "files": [
+        "MTM_Waitlist.Core/Permissions/PermissionKeys.cs;MTM_Waitlist.Core/Permissions/PermissionRegistry.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "StartupState carries the signed-in person's role code and id, the code is threaded through StartupCredentialCheckResult, StartupSessionSnapshot and StartupPasswordResetRequirement, StartupState.IsDeveloper now reads the role code and not the display name, and the coordinator plus the sign-in view model are the producers that set both; solution builds 0 warnings 0 errors",
+      "files": [
+        "MTM_Waitlist.Core/Models/StartupState.cs;MTM_Waitlist.Core/Models/StartupCredentialCheckResult.cs;MTM_Waitlist.Core/Models/StartupSessionSnapshot.cs;MTM_Waitlist.Core/Models/StartupPasswordResetRequirement.cs;MTM_Waitlist.Startup/Services/StartupCoordinator.cs;MTM_Waitlist.Startup/ViewModels/LoginViewModel.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Permission resolution for one person: own stored row, then the role baseline, then the shipped fallback, composed from one read of sp_config_permissions_user_get, cached per person with explicit invalidation, undeclared keys throw rather than refusing silently, and an unreachable store answers from the fallback; solution builds 0 warnings 0 errors",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IPermissionService.cs;MTM_Waitlist.Core/Services/PermissionService.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "User-management service and repository behind the six procedures: identity rules and the 256-bounded derived display name applied in the service, the actor taken from the signed-in state, the 1062 duplicate and each mtm_* refusal turned into one typed reason in the repository, every write through the non-query seam, no statement text; live store proof of the create path (profile + one assignment + 7 field audit rows + 1 null-value credential row, actor snapshotted) and of the pinned 1062 answer, both cleaned up afterwards",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IUserManagementService.cs;MTM_Waitlist.Core/Contracts/Services/IUserManagementRepository.cs;MTM_Waitlist.Core/Services/UserManagementService.cs;MTM_Waitlist.Core/Services/UserManagementRepository.cs;MTM_Waitlist.Core/Services/PasswordSecretHasher.cs;MTM_Waitlist.Core/Models/UserManagement/UserRosterRow.cs;MTM_Waitlist.Core/Models/UserManagement/UserAccount.cs;MTM_Waitlist.Core/Models/UserManagement/UserAccountEdit.cs;MTM_Waitlist.Core/Models/UserManagement/UserManagementResult.cs;MTM_Waitlist.Core/Models/UserManagement/UserManagementMessages.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Sign-in repository stores and compares sign-in names in upper case, carries the role code and wrong-attempt count through all three credential reads with the caller ordinals moved, records a temporary-credential attempt through the new procedure outside the retry so one try moves the count once, and enforces the five-attempt limit before comparing the value; verified live - the three reads answer for a name typed upper, lower and mixed case, the count moves to 2 and clears to 0, and all 75 procedures applied to the live store with 0 failures",
+      "files": [
+        "MTM_Waitlist.Startup/Services/StartupSessionRepository.cs;MTM_Waitlist.Core/Models/StartupCredentialCheckResult.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "PermissionService, IUserManagementRepository/UserManagementRepository and IUserManagementService/UserManagementService registered in the composition root; the registration class is partial with RegisterUserManagementPages, RegisterUserAccountPages and RegisterPermissionsPages declared and called; solution builds 0 warnings 0 errors",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Resource keys for the whole feature: 28 permission label/gates keys generated from the declaration's own key names, the nine Role_<role_code> display texts, the Administration category pair, the roster, create, person, PIN, permissions and who-holds-this strings, and the thirteen UserManagement_Outcome keys the service resolves; file parses, 454 keys total, no duplicate key, every key the code resolves is present",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "All four roll-ups plus AllViews regenerated from the artifact folders; installed into a scratch schema in the installer's own order and every one applied cleanly, all three validators report 0 issues, and the installed counts match the folders (22 tables, 75 procedures, 3 functions, 2 views). Found and fixed a pre-existing fresh-store defect on the way: seed_config_image_storage_settings truncated a table another table holds a foreign key to, which stopped the whole seed phase; the truncate is now guarded",
+      "files": [
+        "Database/Tables/AllTables.sql;Database/Functions/AllFunct.sql;Database/Views/AllViews.sql;Database/StoredProcedures/AllSPs.sql;Database/Seeds/AllSeeds.sql;Database/Seeds/seed_config_image_storage_settings/create.sql"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Every suite that built a state for the developer check now sets the role code: CoreModelsTests (the display name is proved to decide nothing), StartupModelsTests, StartupOptionsModelsTests, ControlInspectorServiceTests, TooltipServiceTests and StartupCoordinatorTests. SplashViewModelTests needed no change - it constructs a bare StartupState and never sets a role, checked rather than assumed. Suite green: 1181 total, 0 failed, 1154 passed, 27 skipped",
+      "files": [
+        "MTM_Waitlist.Tests/Core/Models/CoreModelsTests.cs;MTM_Waitlist.Tests/Models/StartupModelsTests.cs;MTM_Waitlist.Tests/Core/Models/StartupOptionsModelsTests.cs;MTM_Waitlist.Tests/Module_Shared/Services/ControlInspectorServiceTests.cs;MTM_Waitlist.Tests/Module_Shared/Services/TooltipServiceTests.cs;MTM_Waitlist.Tests/Services/StartupCoordinatorTests.cs"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Permission resolution and the precedence trap asserted: a role baseline is inherited, a person's own row beats it in either row order, a role with no baseline answers from the fallback, a store that throws answers from the fallback, an undeclared key reports a failure, several keys are answered from one store read, the cache holds for the session and drops on invalidate and on a sign-in that resolves a different person; SettingsScopeRankTests asserts the six rungs and the corrected order by reading the shipped function artifact. 24 new cases, all pass",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionResolutionTests.cs;MTM_Waitlist.Tests/Module_Core/Services/SettingsScopeRankTests.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "The shipped role seed gives every live role its rung (developer 100, plant_manager 80, production_lead 70, setup_lead 60, material_handler_lead 50, the three worker roles 10), adds Material Handler Lead as a role in its own right, leaves the retired admin row unranked in its own statement so it holds the column default 0, and now supplies first_name and last_name on every seeded account; the rollback removes exactly the row it added. Applied to the live local store: the nine catalogue rows read back at those rungs with admin at 0, and no account is missing its name parts. The fresh-store aggregate install now runs its whole seed phase cleanly",
+      "files": [
+        "Database/Seeds/seed_dev_masked_baseline/create.sql;Database/Seeds/seed_dev_masked_baseline/rollback.sql;Database/Seeds/AllSeeds.sql"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Ran PermissionRegistryTests against the live-store environment: 10/10 passed, so the declaration half T024 still owns holds; the baseline comparison stays in T034",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionRegistryTests.cs"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Added sp_auth_roles_list with create.sql and rollback.sql, applied to live MySQL 5.7 and read back: 8 rows ordered by rung desc then code, retired admin row excluded while still present in the catalogue",
+      "files": [
+        "Database/StoredProcedures/sp_auth_roles_list/create.sql",
+        "Database/StoredProcedures/sp_auth_roles_list/rollback.sql"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Added RoleAuthorization (IsAtLeast, IsAbove, AtOrAbove, AtOrBelow, Highest over catalogue entries) plus IRoleCatalogService and RoleCatalogService reading sp_auth_roles_list with a session cache; registered in the composition root; clean solution build 0 warnings 0 errors",
+      "files": [
+        "MTM_Waitlist.Core/Permissions/RoleAuthorization.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IRoleCatalogService.cs",
+        "MTM_Waitlist.Core/Services/RoleCatalogService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Regenerated AllSPs.sql with a UTF-8-safe generator: +37 lines for sp_auth_roles_list only, 76 of 76 procedure artifacts present verbatim and the rebuild is byte-identical. AllSeeds.sql left unchanged because feature 006's seed revision is already present verbatim; its two drifted blocks belong to other features and were reported instead of silently rewritten",
+      "files": [
+        "Database/StoredProcedures/AllSPs.sql"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Phase 3 ladder suite exists and passes against the live store: 23 passed, 0 failed, 0 skipped across RoleAuthorizationTests, RoleCatalogServiceTests and RoleLadderSeedTests, including the live nine-code catalogue check.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/RoleAuthorizationTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RoleCatalogServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RoleLadderSeedTests.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Rename seed written with a transactional procedure and an EXIT HANDLER that rolls back and resignals; AllSeeds.sql regenerated from the folders and proved by building a scratch store from the aggregates, which ends with it_department at rung 90, admin absent, one account on the renamed role and zero accounts holding no role.",
+      "files": [
+        "Database/Seeds/seed_role_admin_to_it_department/create.sql",
+        "Database/Seeds/seed_role_admin_to_it_department/rollback.sql",
+        "Database/Seeds/AllSeeds.sql"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Live proof ran the shipped create.sql, rolled it back with the shipped rollback.sql and re-applied it: the accounts on IT Department equal the set that held admin, no account holds no role at any of the three points, a switched-off fixture moved and stayed switched off, and the run ends with it_department at rung 90 and admin absent.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/RoleRenameMigrationTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RoleCatalogServiceTests.cs"
+      ]
+    },
+    "T067": {
+      "status": "DONE",
+      "did": "RoleBadgeCatalog added: one entry per role the catalogue holds, each with its own glyph and colour, the grey default reachable only by a genuinely unknown or blank role, and the retired vocabulary plus the display-name branches removed. Glyphs are drawn only from codepoints this application already renders.",
+      "files": [
+        "MTM_Waitlist.Core/Permissions/RoleBadgeCatalog.cs"
+      ]
+    },
+    "T068": {
+      "status": "DONE",
+      "did": "ShellViewModel's badge now reads RoleBadgeCatalog.For(role code) instead of its own switch over display names, so the badge is answered by the one lookup and stays presentation rather than becoming a permission.",
+      "files": [
+        "ViewModels/ShellViewModel.cs"
+      ]
+    },
+    "T069": {
+      "status": "DONE",
+      "did": "RoleBadgeCatalogTests proves the lookup covers every role the shipped seeds write, that the count reaching the grey default is zero, that each role's glyph and colour are distinct, that the retired vocabulary and display names reach the default, and that the badge is not a permission; ShellViewModelTests proves the shell reads the lookup and keeps no retired branch. 33 passed, 0 failed.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/RoleBadgeCatalogTests.cs",
+        "MTM_Waitlist.Tests/Module_Core/ViewModels/ShellViewModelTests.cs"
+      ]
+    },
+    "T064": {
+      "status": "DONE",
+      "did": "The sign-in view model shows the remaining attempts once an attempt has failed and never before, says a fresh reset is needed when the limit has been reached, clears the line on a successful sign-in, and keeps an ordinary account and an unknown sign-in name exactly as they were; the sign-in page carries the line through x:Load with a stable AutomationId and offers no reset. Two resource keys added under Startup_SignIn.",
+      "files": [
+        "MTM_Waitlist.Startup/ViewModels/LoginViewModel.cs",
+        "Module_Startup/Views/LoginPage.xaml",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T065": {
+      "status": "DONE",
+      "did": "Sign-in view-model cases added: the line appears after the first failure and not before, the reached-the-limit wording names a reset by somebody entitled, an account without a temporary credential keeps today's hint and shows no line, and the sign-in page carries the bound line with no reset offered. 22 tests in the file pass.",
+      "files": [
+        "MTM_Waitlist.Tests/ViewModels/LoginViewModelTests.cs"
+      ]
+    },
+    "T066": {
+      "status": "DONE",
+      "did": "Live end-to-end proof added: five wrong attempts stop the temporary credential, the sixth attempt with the correct value is refused, the count survives a new repository instance, nothing in the path computes a window so waiting cannot restore it, a successful sign-in clears it, the legacy 0000 marker is limited the same way, an unknown sign-in name moves no count, a failed attempt writes no audit row, a reset clears the count and issues a working value that supersedes the old PIN, and a reset leaves an open session running. 9 tests pass against the live store. Finding: the repository recorded every failed attempt against user id 0, so the count never moved and the limit never bit; the resolved account id now travels beside the verdict.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs",
+        "MTM_Waitlist.Startup/Services/StartupSessionRepository.cs"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Seeded one role-scoped bool row per permission per role (14 keys x 9 roles = 126 rows), keyed role:<role_code> in the permission namespace; proved live against MAMP MySQL 5.7 (126 rows, 14 keys, 9 roles, subset rule settings.cache_refresh subset of cache.refresh_api holds, zero user-scoped rows); AllSeeds.sql regenerated from the folders and holds exactly one copy of the new body.",
+      "files": [
+        "Database/Seeds/seed_permission_role_baselines/create.sql",
+        "Database/Seeds/seed_permission_role_baselines/rollback.sql",
+        "Database/Seeds/AllSeeds.sql"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Wrote the baseline parity test (per role and per permission against the twelve retired lists, the three stated no-predecessor keys, the declaration-vs-baseline check in both directions, the stated material_handler_lead row and zero per-person rows) and the service-host subset test (settings.cache_refresh admits nobody the cache.refresh_api baseline refuses, declared gate site, fail-closed fallback, retired operator list preserved). 11/11 pass.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceOperatorPermissionTests.cs"
+      ]
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "Re-closed with the full change: the composition root now names the new permissionService parameter on WaitlistViewViewModel (WaitlistViewRegistrationTests.ListViewModelRegistration_NamesEveryConstructorParameter caught the omission, which is the guard working). Solution builds 0 errors; full suite 1282 total / 1244 passed / 38 skipped / 0 failed against the live MAMP store.",
+      "files": [
+        "MTM_Waitlist.Core/Services/RequestActionPolicy.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Core/Services/RequestActionPolicyTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs"
+      ]
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "The service host's role list is gone: the API now answers permission.cache.refresh_api for the caller's own id, read from mtm_waitlist and composed by the same StoredPermissionAnswers the client app uses. Live proof: developer id 1 resolves 1, setup id 8 resolves 0, identity read returns id/role_code for TEST.DEVELOPER.",
+      "files": [
+        "MTM_Waitlist.Mock.Service/Api/ServiceOperatorRoles.cs",
+        "MTM_Waitlist.Mock.Service/Api/ServiceOperatorAuthenticationHandler.cs",
+        "MTM_Waitlist.Mock.Service/Api/ServiceApiContracts.cs",
+        "MTM_Waitlist.Mock.Service/Contracts/IServiceOperatorRoleResolver.cs",
+        "MTM_Waitlist.Mock.Service/Models/ServiceOperatorIdentity.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceOperatorRoleResolver.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceApiOperations.cs",
+        "MTM_Waitlist.Mock.Service/ViewModels/ServiceSettingsViewModel.cs",
+        "MTM_Waitlist.Mock.Service/ViewModels/ServiceStatusViewModel.cs",
+        "MTM_Waitlist.Mock.Service/Views/ServiceSettingsPage.xaml",
+        "MTM_Waitlist.Mock.Service/Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Core/Permissions/StoredPermissionAnswers.cs",
+        "MTM_Waitlist.Core/Services/PermissionService.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/FakeOperatorRoleResolver.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceApiTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceApiSecurityTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceStartupTests.cs"
+      ]
+    },
+    "T039": {
+      "status": "DONE",
+      "did": "The Settings screen's four lists, its two Administration entries, the minutes editor, the defect-type catalogue and the computer registry now read named permissions. SettingsViewModel is INavigationAware and loads all eight answers in one call in OnNavigatedTo (the repository's own navigation-aware pattern), handing the two child view models their answers; every gate stays false until its answer arrives. Four Settings suites rewritten to state permissions instead of role names; the reflection lookup that named the deleted arrays is gone. Settings module: 277 passed, 11 skipped, 0 failed.",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs",
+        "MTM_Waitlist.Settings/ViewModels/UrgencyAllotmentEditorViewModel.cs",
+        "MTM_Waitlist.Settings/ViewModels/ComputerManagementViewModel.cs",
+        "MTM_Waitlist.Settings/Services/DefectTypeCatalogService.cs",
+        "MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/UrgencyAllotmentEditorViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/DefectTypeCatalogServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/RequestItemImagesDialogViewModelTests.cs"
+      ]
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "Dunnage Quick Add now reads permission.setup.dunnage_quick_add and work-centre setup reads permission.setup.work_centers; the Setup Tech entry that matched no catalogue role is gone, so a plain Setup person is no longer given work-centre setup by default. SetupWorkCenterViewModel loads its one answer in OnNavigatedTo (navigation-aware, the repo's own pattern) and the management controls stay hidden until it arrives; the service gate refuses at the action in the same words. Setup module: 60 passed, 16 skipped, 0 failed.",
+      "files": [
+        "MTM_Waitlist.Setup/Services/DunnageWorkflowService.cs",
+        "MTM_Waitlist.Setup/Contracts/Services/SetupContracts.cs",
+        "MTM_Waitlist.Setup/ViewModels/SetupWorkCenterViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Setup/Services/SetupDunnageWorkflowServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Setup/Services/SetupWorkflowServiceTests.cs"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "The gate-site audit lands green and lands LAST, as the sequencing rule requires: it enumerates all thirteen sites from the spec's Context (twelve retired lists in nine files plus StartupState.IsDeveloper in a tenth), reads the nine role display names from the shipped Resource.resw rather than restating them, reads the keys from the declaration, and fails on a role-name array in any production .cs file or on a gate asking for an undeclared key. 7/7 pass, so 'no gate reads its own role list' is now provably true.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionGateSiteAuditTests.cs"
+      ]
+    },
+    "T041": {
+      "status": "DONE",
+      "did": "Ran the audit, the parity test and the subset test together: 18 passed, 0 failed. Audit green (13 sites, 11 named permissions, no role list), parity at zero differences for the eleven replaced keys and the three stated baseline sets, subset rule holding. The per-person side of the ship-day comparison needs a live store and is DEFERRED to T072, not passed.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionGateSiteAuditTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs"
+      ]
+    },
+    "T042": {
+      "status": "DONE",
+      "did": "Added UserSummary (the five facts a row always shows, with the role's text resolved from the resource keyed on the role code and a switched-off mark that uses the shipped key) and UserListFilter (search text plus role code as one JSON payload, so a half-saved filter cannot exist, with Read/None/Unreadable stated rather than guessed). Build clean; Settings suite 277 passed, 11 skipped, 0 failed.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/UserSummary.cs",
+        "MTM_Waitlist.Settings/Models/UserListFilter.cs"
+      ]
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "The Settings page's Administration category is two SettingsCards that navigate (x:Load + x:Name on each, IsClickEnabled + Command binding), each shown only to a reader holding its permission and each reachable from the Settings search. WIDENED, as the task could not be done in the XAML alone: SettingsViewModel gained the two entry-visibility properties (registered as search-aware), the category aggregate, the two navigation commands (routed by view-model name, which is how PageService routes) and the localized strings resolved from the shipped Administration_* keys. SettingsPage.xaml.cs needed no change. Settings suite 277 passed, 11 skipped, 0 failed.",
+      "files": [
+        "Module_Settings/Views/SettingsPage.xaml",
+        "Module_Settings/Views/SettingsPage.xaml.cs",
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs"
+      ]
+    },
+    "T044": {
+      "status": "DONE",
+      "did": "The roster view model: entitlement re-read on every arrival, roles from the one catalogue, the saved filter restored with the role-gone and unreadable cases falling back to everyone and saying so, the five states (everyone with switched-off people marked, empty roster, filter matching nobody, unreadable filter, unavailable store with a manual retry), search across the four fields passed to the store that matches them, hidden count from a second unfiltered read only when a filter is applied, and one row action that opens that person. WIDENED by one file: MTM_Waitlist.Settings/Models/UserListFilterOption.cs, because the filter's choices are a type and T042 did not carry it. Its suite is T046: 10 passed, 0 failed. It caught a real defect: choosing the opening 'every role' while setting the screen up ran synchronously through the filter handler and overwrote the saved filter before it was restored.",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/UserManagementViewModel.cs",
+        "MTM_Waitlist.Settings/Models/UserListFilterOption.cs"
+      ]
+    },
+    "T045": {
+      "status": "DONE",
+      "did": "The roster page: a virtualised ListView whose rows are one keyboard-reachable target announcing what they open, no fixed width anywhere, the search box and role picker, the active filter named with its hidden count and a show-everyone button, the five states rendered distinctly, and a Back that returns to Settings. Registered through T021's partial method in this phase's own file, and the composition root now applies per-phase route contributions instead of three phases editing one factory. Build: 0 errors, 0 warnings. WMC0907 (x:Load requires x:Name) was a real XAML error the compiler reported plainly, not a masked one.",
+      "files": [
+        "Module_Settings/Views/UserManagementPage.xaml",
+        "Module_Settings/Views/UserManagementPage.xaml.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.UserManagement.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T046": {
+      "status": "DONE",
+      "did": "The roster suite (10 passed, 0 failed): all five states including the two that must never render as an empty list, the filter restored for the person and named with its hidden count, the unreadable filter and the vanished role each falling back to everyone with their own sentence, the unavailable store never shown as an empty roster, the term and the role travelling together, a row opening that person, and the entitlement re-read on arrival. Plus SettingsPageMarkupTests: both Administration entries are cards that navigate, each lazily loaded with its own name and its own title, and the two titles differ. Whole suite: 1301 total, 1263 passed, 38 skipped, 0 failed.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/UserManagementViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/SettingsPageMarkupTests.cs"
+      ]
+    },
+    "T047": {
+      "status": "DONE",
+      "did": "Person detail, edit request snapshot and typed-outcome resolver, plus the create form's view model: rung-bounded picker, guarded save, typed duplicate and over-length refusals that keep the typed values",
+      "files": [
+        "MTM_Waitlist.Settings/Models/UserDetail.cs",
+        "MTM_Waitlist.Settings/Models/UserEditRequest.cs",
+        "MTM_Waitlist.Settings/Models/UserManagementResults.cs",
+        "MTM_Waitlist.Settings/Models/IssuedCredential.cs",
+        "MTM_Waitlist.Settings/ViewModels/CreateUserViewModel.cs"
+      ]
+    },
+    "T048": {
+      "status": "DONE",
+      "did": "The person's page view model: one page with a read-only state, the two self-lockout refusals, unsaved-edit gating for every action, and the reset gated on permission.admin.reset_password at both the control and the action",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/EditUserViewModel.cs"
+      ]
+    },
+    "T049": {
+      "status": "DONE",
+      "did": "The one-time credential window's view model: the credential held only while open, a print that never closes the window and costs nothing when it fails, a refused dismissal, and a close that releases the credential",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/PinRevealDialogViewModel.cs"
+      ]
+    },
+    "T050": {
+      "status": "DONE",
+      "did": "The create page: a form only, with no actions area and no active control, every label localised through the view model, and the bound on the picker stated in words",
+      "files": [
+        "Module_Settings/Views/CreateUserPage.xaml",
+        "Module_Settings/Views/CreateUserPage.xaml.cs"
+      ]
+    },
+    "T051": {
+      "status": "DONE",
+      "did": "The person's page: fields in a form at the top and the actions in their own area below, the deactivation sentence repeated on the page, and the reset offered only behind a confirmation to a reader holding the key",
+      "files": [
+        "Module_Settings/Views/EditUserPage.xaml",
+        "Module_Settings/Views/EditUserPage.xaml.cs"
+      ]
+    },
+    "T052": {
+      "status": "DONE",
+      "did": "The credential window and the phase's own registration file: two buttons in its content and no framework close button, so Escape and every other dismissal hit the cancelling handler and pass through the existing print service",
+      "files": [
+        "Module_Settings/Views/PinRevealDialog.xaml",
+        "Module_Settings/Views/PinRevealDialog.xaml.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.UserAccount.cs"
+      ]
+    },
+    "T053": {
+      "status": "DONE",
+      "did": "The three flow suites: 27 tests over one press one person, the typed duplicate and over-length refusals, the rung-bounded picker, the derived display name bound, 6229 shared by two people, the read-only and self-lockout states, unsaved-edit gating, the four-digit credential and its release, and a print that cannot start",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/CreateUserViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/EditUserViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/PinRevealDialogViewModelTests.cs"
+      ]
+    },
+    "T054": {
+      "status": "DONE",
+      "did": "the change-set procedure reads the value row id back rather than trusting LAST_INSERT_ID, so a reversal is no longer refused by the foreign key on a pooled connection",
+      "files": [
+        "Database/StoredProcedures/sp_config_permissions_user_set/create.sql",
+        "Database/StoredProcedures/AllSPs.sql"
+      ]
+    },
+    "T055": {
+      "status": "DONE",
+      "did": "The page-facing permissions service behind two procedures and a new reversal read: one-person composition of chosen/inherited/fallback, the change set as one atomic call, the reversal built from the recorded history, and the resolution cache invalidated on a successful save. The change-set procedure was amended to stamp one clock per call and to accept to:null so a reversal restores an inherited value rather than leaving a false nobody chose",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IPermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Contracts/Services/PermissionAdministrationMessages.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "Database/StoredProcedures/sp_config_permissions_user_set/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_reversal_get/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_reversal_get/rollback.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T056": {
+      "status": "DONE",
+      "did": "the page models are the matrix: a cell with three states, a card per area, a card row, a column, and a person row carrying what a save writes",
+      "files": [
+        "MTM_Waitlist.Settings/Models/PermissionCell.cs",
+        "MTM_Waitlist.Settings/Models/PermissionAreaCard.cs",
+        "MTM_Waitlist.Settings/Models/PermissionCardRow.cs",
+        "MTM_Waitlist.Settings/Models/PermissionColumn.cs",
+        "MTM_Waitlist.Settings/Models/PermissionMatrixRow.cs",
+        "MTM_Waitlist.Settings/Models/PermissionChangeSet.cs",
+        "MTM_Waitlist.Settings/ViewModels/PermissionsViewModel.cs"
+      ]
+    },
+    "T057": {
+      "status": "DONE",
+      "did": "the permissions page is five area cards with the permissions across the top and the people down the side, three shapes per cell each with an accessible name, and the who-holds-this block in the same card chrome",
+      "files": [
+        "Module_Settings/Views/PermissionsPage.xaml",
+        "Module_Settings/Views/PermissionsPage.xaml.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T058": {
+      "status": "DONE",
+      "did": "The change-set suite against a live store: 1 test, 8 claims, 0 skipped with the gate variable set. It found two real defects: the helper server's bounded retry reported a refused change as a landed one, so the service now talks to the provider directly; and a value row cannot be deleted and still be recorded, so the reversal restores the value that was in force and the reversal read returns the role baseline",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PermissionChangeSetServiceTests.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "Database/StoredProcedures/sp_config_permissions_user_set/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_reversal_get/create.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "specs/006-user-management-and-permissions/contracts/database-contract.md"
+      ]
+    },
+    "T059": {
+      "status": "DONE",
+      "did": "the page suite asserts the matrix: the five areas, the three cell states and their words, one save per person, the from that is null for a value the person does not own, the re-base announcement, outranked rows, the fixed cell and the moved value",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/PermissionsViewModelTests.cs"
+      ]
+    },
+    "T060": {
+      "status": "DONE",
+      "did": "The holders models and view model: the roles read from the seeded baselines through a new baseline procedure rather than restated beside the view, only the people who differ in either direction, a feature nobody holds stated in words, a switched-off holder marked, and a picker over every declared permission",
+      "files": [
+        "MTM_Waitlist.Settings/Models/PermissionHoldersView.cs",
+        "MTM_Waitlist.Settings/Models/PermissionFeatureOption.cs",
+        "MTM_Waitlist.Settings/ViewModels/PermissionHoldersViewModel.cs",
+        "Database/StoredProcedures/sp_config_permissions_feature_baseline_get/create.sql",
+        "Database/StoredProcedures/sp_config_permissions_feature_baseline_get/rollback.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "MTM_Waitlist.Core/Contracts/Services/IPermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs"
+      ]
+    },
+    "T061": {
+      "status": "DONE",
+      "did": "The who-holds-this control: feature picker, the roles as a list, only differing people each opening their own page, the nobody-holds statement in words, and no fixed width. WrapPanel was not available from the toolkit on this machine, so the roles are an ItemsControl rather than a wrap panel",
+      "files": [
+        "Module_Settings/Views/PermissionHoldersView.xaml",
+        "Module_Settings/Views/PermissionHoldersView.xaml.cs"
+      ]
+    },
+    "T062": {
+      "status": "DONE",
+      "did": "the who-holds-this view is hosted in a bordered block wearing the same card chrome as the five area cards",
+      "files": [
+        "Module_Settings/Views/PermissionsPage.xaml",
+        "MTM_Waitlist.Settings/ViewModels/PermissionHoldersViewModel.cs"
+      ]
+    },
+    "T063": {
+      "status": "DONE",
+      "did": "The who-holds-this suite: 10 tests over the roles read from the store rather than a second copy, only the differing people, the denied direction named and marked, a switched-off holder listed and marked, nobody-holds stated in words and kept distinct from nobody-differing, the view writing nothing, one read for one answer, and an unread answer never claimed as an empty one",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/PermissionHoldersViewModelTests.cs"
+      ]
+    },
+    "T070": {
+      "status": "DONE",
+      "did": "The ruleset gains the new role scope, the corrected precedence order with the reason it moved, and the note that a value row cannot be deleted and still be recorded; the quickstart gains a section naming the two orderings that must not be reversed, with the re-rank-before-per-person-row gate first",
+      "files": [
+        "Database/Database-Ruleset.md",
+        "specs/006-user-management-and-permissions/quickstart.md"
+      ]
+    },
+    "T071": {
+      "status": "DONE",
+      "did": "The retired role vocabulary is out of FEATURES.md and the changelog header, user management is no longer listed as unstarted, the feature has its own catalogue section and its own plain-language changelog entry",
+      "files": [
+        "FEATURES.md",
+        "CHANGELOG.md"
+      ]
+    },
+    "T072": {
+      "status": "DONE",
+      "did": "Live gated pass green: 20/20 with the live store. New UserManagementLiveIntegrationTests proves one-act create, 1062 to a typed answer, a lock-induced mid-way rollback (1205) leaving neither write, both rank refusals, both self-lockout refusals, one reset audit row with no value on either side, deactivate leaving sessions untouched, and one change identifier per save; PermissionBaselineParityTests now proves each person's effective set equals their role's retired list for the eleven keys, the three stated sets, and zero per-person rows. Running it revealed sp_user_management_update failing on every call from a utf8mb4 connection (UNION collation mix), now fixed in the folder and the roll-up.",
+      "files": [
+        "Database/StoredProcedures/sp_user_management_update/create.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs"
+      ]
+    },
+    "T073": {
+      "status": "DONE",
+      "did": "Reset performed against the live store with a PIN chosen to collide with nothing (7391 absent from all 133 character columns), hashed exactly as PasswordSecretHasher does. Searched it as a whole value in all 133 character columns of mtm_waitlist (0 held it), in the account's own row (the hash is that PBKDF2 under the stored salt, 32-byte base64 hash with a 16-byte salt and not the PIN), in the application's own files (28 files, 0), in the journal (30 files, five matches, all four-digit runs inside the journal's own chained Hash fields written days before the reset, 0 lines after it), and in the source tree (three unrelated data matches). The reset's audit trail is one row with both value columns empty. Recorded in quickstart.md and cleaned up: 0 probe rows left.",
+      "files": [
+        "specs/006-user-management-and-permissions/quickstart.md"
+      ]
+    },
+    "T074": {
+      "status": "DONE",
+      "did": "Suite green with all five store connections exported: 1364 total, 1360 passed, 4 skipped, 0 failed. Solution build: Build succeeded, 0 Warning(s), 0 Error(s), no WMC9999. InlineSqlAuditTests + RetiredSymbolAuditTests filtered run: 10/10. The four skips are the Infor Visual reachability gates (server unreachable, the credential variables are set, so no MySQL connection can un-gate them). The eleven gate-2 cases are mapped to the case that carries each in quickstart.md; two of them (the four-fact search and the upper-case sign-in name) had no live case, so they were added to the live pass and run, and UI-thread collection safety is recorded as a stated gap. Recorded in quickstart.md.",
+      "files": [
+        "specs/006-user-management-and-permissions/quickstart.md",
+        "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs"
+      ]
+    },
+    "T075": {
+      "status": "DONE",
+      "did": "Walked the running app against the live store through UI Automation with both connection overrides set: Administration category with both entries navigating, Settings search reaching both, roster with its filter remembered, the person's page showing both self-lockout refusals on the reader's own account and a peer fully editable, a create ending in the PIN window that survived a click far outside it and Escape and Print, the permissions page with its fixed row locked and Save disabled, and the five-attempt limit refusing the sixth correct attempt and still refusing it after a restart. Two defects found only by running it: the roster had no Add control bound at all, so the create form was unreachable (fixed and re-walked successfully), and the hidden count was a one-time binding so it read 0 (fixed in markup, not re-observed at runtime because the sign-in form would not accept programmatic input after the walk's own sign-out). Recorded in quickstart.md; the store was left with its ten accounts.",
+      "files": [
+        "specs/006-user-management-and-permissions/quickstart.md",
+        "Module_Settings/Views/UserManagementPage.xaml"
+      ]
+    },
+    "T076": {
+      "status": "DONE",
+      "did": "Closed on the owner's instruction without the scaling walk: only the roster's narrowest-window half was walked, at the 500x500 minimum on a 100 percent scale display.",
+      "files": [
+        "Module_Settings/Views/UserManagementPage.xaml",
+        "Module_Settings/Views/EditUserPage.xaml",
+        "Module_Settings/Views/PermissionsPage.xaml"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "solution build (0 warnings, 0 errors)",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 30.6,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:30.37"
+    },
+    {
+      "what": "full test suite (1181 total, 0 failed, 1154 passed, 27 skipped)",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 47.2,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1154, Skipped:    27, Total:  1181, Duration: 33 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 51.6,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1178, Skipped:    27, Total:  1205, Duration: 32 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "clean solution build",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 27.1,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:26.93"
+    },
+    {
+      "what": "live local mtm_waitlist: the nine catalogue rows carry their pinned rungs",
+      "command": "mysql -h 127.0.0.1 -u root -N -B mtm_waitlist -e \"SELECT COUNT(*) FROM auth_roles_catalog WHERE (role_code='developer' AND role_rank=100) OR (role_code='plant_manager' AND role_rank=80) OR (role_code='production_lead' AND role_rank=70) OR (role_code='setup_lead' AND role_rank=60) OR (role_code='material_handler_lead' AND role_rank=50) OR (role_code IN ('material_handler','production','setup') AND role_rank=10) OR (role_code='admin' AND role_rank=0)\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0,
+      "result": "9"
+    },
+    {
+      "what": "clean solution build (warnings and errors)",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31.5,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:31.35"
+    },
+    {
+      "what": "whole test suite with the live store exported",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 46.4,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1229, Skipped:    38, Total:  1267, Duration: 31 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31.0,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:30.81"
+    },
+    {
+      "what": "full test suite against live MAMP MySQL 5.7",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\johnk\\AppData\\Local\\Temp\\verify006_round4_suite.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 45.6,
+      "result": "Passed!  - Failed:     0, Passed:  1244, Skipped:    38, Total:  1282,  · Duration: 29 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "clean solution build (Debug, x64)",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 26.1,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:25.94"
+    },
+    {
+      "what": "full test suite against live MySQL 5.7.24",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 45.3,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1263, Skipped:    38, Total:  1301, Duration: 31 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "clean solution build, 0 warnings 0 errors",
+      "command": "powershell -NoProfile -Command \"cd c:\\Users\\johnk\\source\\repos\\MTM_Waitlist; $env:MSBUILDDISABLENODEREUSE='1'; dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false --no-incremental\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 41.1,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:40.70"
+    },
+    {
+      "what": "whole test suite with all four store connections exported",
+      "command": "powershell -NoProfile -Command \"cd c:\\Users\\johnk\\source\\repos\\MTM_Waitlist; $env:MSBUILDDISABLENODEREUSE='1'; $cs='Server=127.0.0.1;Port=3306;Database=mtm_waitlist;User Id=root;Password=root;'; $env:MTM_WAITLIST_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING=$cs; $env:MTM_MOCK_DB_CONNECTION_STRING='Server=127.0.0.1;Port=3306;Database=mtm_mock;User Id=root;Password=root;'; $env:MTM_RECEIVING_APPLICATION_DB_CONNECTION_STRING='Server=127.0.0.1;Port=3306;Database=mtm_receiving_application;User Id=root;Password=root;'; dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64\"",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 55.0,
+      "result": "  Skipped GetSubordinatePartsQuery_ReturnsRows_WhenServerIsAvailable [< 1 ms] ·   Skipped EmployeeLookupQuery_ReturnsEmployeeStatus_WhenServerIsAvailable [< 1 ms] · Failed!  - Failed:     1, Passed:  1346, Skipped:     4, Total:  1351, Duration: 39 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "the T072 live pass with all three storage variables exported",
+      "command": "powershell -NoProfile -Command $env:MSBUILDDISABLENODEREUSE='1'; $cs='Server=127.0.0.1;Port=3306;Database=mtm_waitlist;User Id=root;Password=root;'; $env:MTM_WAITLIST_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING=$cs; cd c:\\Users\\johnk\\source\\repos\\MTM_Waitlist; dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --filter 'FullyQualifiedName~PermissionBaselineParityTests|FullyQualifiedName~PermissionChangeSetServiceTests|FullyQualifiedName~RoleRenameMigrationTests|FullyQualifiedName~UserManagementLiveIntegrationTests'",
+      "source": "derived",
+      "exitCode": 255,
+      "durationSeconds": 0.0,
+      "result": "'FullyQualifiedName~PermissionChangeSetServiceTests' is not recognized as an internal or external command, · operable program or batch file.",
+      "warnings": [
+        "exited 255"
+      ]
+    },
+    {
+      "what": "the T073 reset PIN search",
+      "command": "powershell -NoProfile -File C:\\Users\\johnk\\AppData\\Local\\Temp\\t073_pin_search.ps1",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 0.3,
+      "result": "+              ~~~~~~~~ ·     + CategoryInfo          : ObjectNotFound: (New-Guid:String) [], ParentContainsErrorRecordException ·     + FullyQualifiedErrorId : CommandNotFoundException",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "the T072 live integration pass (the roster, permissions and baseline suites against the live store)",
+      "command": "pwsh -NoProfile -File C:\\Users\\johnk\\AppData\\Local\\Temp\\t072_live_pass.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 19.5,
+      "result": "Test run for C:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\MTM_Waitlist.Tests\\bin\\x64\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0) · A total of 1 test files matched the specified pattern. · Passed!  - Failed:     0, Passed:   126, Skipped:     0, Total:   126, Duration: 4 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "the T073 reset PIN search (store, journal and application files)",
+      "command": "pwsh -NoProfile -File C:\\Users\\johnk\\AppData\\Local\\Temp\\t073_pin_search.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 1.8,
+      "result": "    31 journal files searched against the reset time 2026-09-21 18:20:41Z; lines after the reset carrying the PIN: 0 ·     (the earlier matches are four-digit runs inside the journal's own `Hash` fields, written days before the reset.) · probe rows left in the store: 0"
+    },
+    {
+      "what": "the whole suite and the clean solution build, with all five store connections exported",
+      "command": "pwsh -NoProfile -File C:\\Users\\johnk\\AppData\\Local\\Temp\\t074_suite_and_build.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 85.0,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:30.83"
+    },
+    {
+      "what": "the walk through the running application (T075)",
+      "command": "UI Automation against bin\\x64\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\MTM_Waitlist.exe with both connection overrides pointed at 127.0.0.1",
+      "result": "observed: the Administration category with both entries navigating, the Settings search reaching both, the roster with all five facts per row and its filter remembered, both self-lockout refusals on the reader's own account with Deactivate disabled, a create ending in the PIN window that survived a click far outside it, Escape and Print, the permissions page with its fixed row locked and Save disabled, and the five-attempt limit moving 4-3-2-1-0 with the sixth correct attempt refused before and after a restart",
+      "warnings": [
+        "Print raised the Windows print preview, which had to be closed before the page beneath would take a click again",
+        "the sign-in form's password field accepts no programmatic input, so the walk could not be signed back in afterwards"
+      ]
+    },
+    {
+      "what": "the four skipped cases in the suite belong to another feature and cannot be un-gated here",
+      "command": "read the suite log and the guard",
+      "result": "all four are the Infor Visual live checks, whose guard probes the Infor Visual SQL Server; INFOR_VISUAL_SQL_USER and INFOR_VISUAL_SQL_PASSWORD are set on this machine, so the skip is the unreachable server and no MySQL connection changes it",
+      "warnings": []
+    },
+    {
+      "what": "the fixed-width reading of the three screens (not a walk)",
+      "command": "read the XAML of the three pages and the two others this feature adds",
+      "result": "no content control declares a fixed Width; the reading does find Width=24 progress rings, a MaxWidth=720 on the create and person form stacks and a MinWidth=200 on the permissions page's people column, which are judgement items for whoever does the scaling walk",
+      "warnings": []
+    },
+    {
+      "what": "solution build after the permissions page was rebuilt as a matrix",
+      "command": "powershell -NoProfile -Command \"cd c:\\Users\\johnk\\source\\repos\\MTM_Waitlist; dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 35.9,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:35.53"
+    },
+    {
+      "what": "whole suite after the matrix rebuild, with all five store connections exported",
+      "command": "powershell -NoProfile -Command \"cd c:\\Users\\johnk\\source\\repos\\MTM_Waitlist; $env:MSBUILDDISABLENODEREUSE='1'; $cs='Server=127.0.0.1;Port=3306;Database=mtm_waitlist;User Id=root;Password=root;'; $env:MTM_WAITLIST_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING=$cs; $env:MTM_WAITLIST_TEST_DB_CONNECTION_STRING=$cs; $env:MTM_MOCK_DB_CONNECTION_STRING='Server=127.0.0.1;Port=3306;Database=mtm_mock;User Id=root;Password=root;'; $env:MTM_RECEIVING_APPLICATION_DB_CONNECTION_STRING='Server=127.0.0.1;Port=3306;Database=mtm_receiving_application;User Id=root;Password=root;'; dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 51.7,
+      "result": "  Skipped GetSubordinatePartsQuery_ReturnsRows_WhenServerIsAvailable [< 1 ms] ·   Skipped EmployeeLookupQuery_ReturnsEmployeeStatus_WhenServerIsAvailable [1 ms] · Passed!  - Failed:     0, Passed:  1383, Skipped:     4, Total:  1387, Duration: 35 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "T076 narrowest-window pass, partial: the application's minimum window is 500x500 logical pixels (320x320 was asked for and the window manager clamped it to exactly 500x500 at DPI 96), matching MainWindow.xaml's MinWidth and MinHeight of 500",
+      "result": "measured on the running Debug build, maximized window 1936x1048 at 100 percent scale"
+    },
+    {
+      "what": "T076 narrowest-window pass, partial: the roster keeps all five facts in the tree and none of them is dropped, and the no-fixed-width rule is not broken by the minimum - the list reports itself horizontally scrollable, so the 650-pixel minimum row scrolls sideways instead of losing a column, which is what decision 28 promises",
+      "result": "UI Automation read of UserManagementPage_Roster at 500x500",
+      "warnings": [
+        "the rows did not render at 500x500: the ListView and every row reported offscreen with empty rectangles, and the captured window image shows the list region blank",
+        "only the roster screen was walked; the person's page and the permissions page were not reached",
+        "the 150 percent and 200 percent display-scale halves of the walk were not attempted: changing the session's display scale is not something this pass can do unattended"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "sp_config_permissions_user_get matches on scope_key (user:ID and role:CODE) rather than on the user_id column. Why: the data model pins scope_key as the keying, so the read does not depend on a second column being populated by whoever writes the row, and a user_id-keyed form was proved to miss a correctly keyed row. Rejected: keying on user_id on the assumption the writer always fills it."
+    },
+    {
+      "decision": "sp_user_management_update checks the target rung before the requested role rung. Why: a reader editing somebody who outranks them must be told that, not told they cannot assign the role. The second refusal is true but describes the smaller half of the problem, and the page states the first. Rejected: checking the requested role first, which returned mtm_rank_denied for an outranking target."
+    },
+    {
+      "decision": "The account-change audit table carries no foreign keys. Why: actor_user_id and target_user_id must outlive the accounts they name, so a constraint would contradict the snapshot rule and block the hard delete of a person the audit talks about. Rejected: foreign keys mirroring auth_roles_assignments."
+    },
+    {
+      "decision": "seed_username_upper_normalization records originals in a backup table that its rollback drops. Why: upper-casing destroys the original spelling, so reversibility needs it recorded, and the table is not a permanent schema artifact so it needs no AllTables entry. Rejected: a rollback that cannot restore case because nothing was recorded."
+    },
+    {
+      "decision": "Writing an account initial credential in sp_user_management_create also writes an audit row with both value columns null. Why: it keeps one rule for a credential being set across create and reset, and the PIN is never stored so there is no before or after value to record (FR-111). Rejected: omitting the row, which would leave create and reset recording the same act two different ways."
+    },
+    {
+      "decision": "T007 leaves Database/Bootstrap/create_database.sql without DDL and only documents the fresh-store path in its header.",
+      "why": "That file drops and recreates the database, so it can never be part of the update path, and a fresh store gets its table shape from Database/Tables/**/create.sql (rolled up in AllTables.sql) with the guarded additions in update_table_descriptions.sql running last. Putting the same DDL in it as well would have been two owners for one shape, and dead statements on the only path that reads it.",
+      "rejected": "Duplicating the column and table DDL in create_database.sql, which the task text named alongside update_table_descriptions.sql."
+    },
+    {
+      "decision": "UserManagementRepository opens its own MySqlConnection for reads and writes instead of going through IMySqlHelperServer.",
+      "why": "The helper server answers a failed call with its neutral result, which would fold a duplicate sign-in name into a generic failure and would hand an unreachable store on as an empty roster. Both requirements need the provider own answer: the pinned 1062 for a duplicate, and a loud failure so an empty list is never shown for an outage.",
+      "rejected": "Reading and writing through IMySqlHelperServer and inferring the cause from an empty result."
+    },
+    {
+      "decision": "One shipped fallback rule: permission.requests.handle answers true, the other thirteen answer false.",
+      "why": "An unreachable store must not turn every control into a refusal (FR-050), and it must not hand out anything new either. Exactly one key is operationally load-bearing while the store is down, so the shop floor keeps working and nobody gains administration.",
+      "rejected": "Answering true everywhere, which would grant administration during an outage, and answering false everywhere, which would stop the floor from accepting requests."
+    },
+    {
+      "decision": "PasswordSecretHasher holds the one implementation of the credential hashing, used by the sign-in path and the reset path.",
+      "why": "A reset writes a credential the sign-in path has to accept. Two copies of PBKDF2 with the same constants would let a change in one make every PIN issued from the other silently unusable, and nothing in the build or the suite could see it.",
+      "rejected": "Keeping the private hashing helpers in StartupSessionRepository and a second copy in the user-management service."
+    },
+    {
+      "decision": "The temporary-credential attempt count is moved outside the sign-in retry wrapper.",
+      "why": "The read runs under a bounded retry, and a retry that re-ran the count would add a second failure for one try. One press of Sign in must move the count exactly once.",
+      "rejected": "Recording the attempt inside the retried lambda."
+    },
+    {
+      "decision": "The role seed writes the retired admin row in its own INSERT that omits role_rank.",
+      "why": "A shared column list cannot omit the column for one row and supply it for the rest, and the task requires the row to be left unranked so it holds the column default. The role rename reads that rung back when it reverses, so writing an explicit 0 would quietly change what the reversal claims to restore.",
+      "rejected": "One INSERT carrying an explicit 0 for admin."
+    },
+    {
+      "decision": "The permission registry declares no per-role baseline and a test asserts the type has no member for one.",
+      "why": "FR-046 and FR-048 split the two tiers on purpose: baselines are seeded data so what a role may do changes without a code change. The check is visible in the type rather than only in a comment about where the data lives.",
+      "rejected": "Carrying a baseline table on the declaration, which the seed contradiction suggested and the research settled against."
+    },
+    {
+      "decision": "The permission baselines are seeded as role-scoped rows keyed role:<role_code>, one per permission per role, in the same config_settings_values shape sp_config_permissions_user_get matches on",
+      "why": "The declaration must not carry per-role baselines (FR-046/FR-048) and the read already matches on scope_key rather than on user_id",
+      "rejected": "A per-role dictionary inside PermissionRegistry, which would have put the answers back in code"
+    },
+    {
+      "decision": "material_handler_lead's whole row is stated rather than compared against a retired list: it holds requests.handle, cache.refresh_api, admin.users and admin.reset_password, and nothing else",
+      "why": "Phase 3 added the role after the twelve lists were captured, so no list can describe it; the specification's Assumptions state it and explicitly deny it ignored_locations",
+      "rejected": "Deriving it from the worker roles' union, which would have granted ignored_locations against the specification"
+    },
+    {
+      "decision": "RequestActionPolicy keeps its pure status and assignee rules and takes the handler answer as an input, but the answer itself is now the named permission",
+      "why": "Deleting the eight-name list is what FR-054 asks for, and the policy stays unit-testable because it never resolves the permission itself",
+      "rejected": "Making the whole policy asynchronous and store-backed",
+      "files": "MTM_Waitlist.Core/Services/RequestActionPolicy.cs"
+    },
+    {
+      "decision": "WaitlistViewDetailViewModel's dead role field was deleted rather than turned into a permission reader",
+      "why": "It was assigned from StartupState and read nowhere, and the detail page carries no action gates; a reader there would be a wrapper with no decision behind it",
+      "rejected": "Adding an unused permission read so the file would appear in the audit's gate-site list",
+      "files": "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+    },
+    {
+      "decision": "induce the mid-way create failure by holding the role-assignment table's rows and gaps in another transaction while the create runs",
+      "why": "every refusal the create's inputs can provoke is raised before the profile insert, so no input reaches a failure after it, and proving the rollback needed a failure that really lands mid-way",
+      "rejected": "reporting a lock wait or a first-write failure as if it were the mid-way case"
+    },
+    {
+      "decision": "write the update procedure's two active flags as literals instead of CAST(... AS CHAR)",
+      "why": "a CAST takes the connection's collation while the routine's variables take the database's, and MySQL 5.7 refuses to union the two, so the save failed on every call from a utf8mb4 connection",
+      "rejected": "forcing a collation with COLLATE, which pins the store to one collation name"
+    },
+    {
+      "decision": "add the missing Add control to the roster page's header behind the same entitlement as the entry",
+      "why": "the view model's AddPersonCommand and AddLabelText and the shipped UserManagement_Add.Label key existed but nothing was bound to them, so the create form and the PIN window were unreachable in the running application",
+      "rejected": "reaching the create form from the person's page instead, which the contract does not ask for"
+    },
+    {
+      "decision": "bind the roster's hidden count one way",
+      "why": "it was a one-time binding, so it read 0 hidden while nine people were hidden",
+      "rejected": "leaving it, since the count is what FR-094 promises"
+    },
+    {
+      "decision": "add live cases for the four-fact search and the upper-case sign-in name while running T074",
+      "why": "gate 2 names eleven live cases and those two had no live case at all, only a view-model assertion that the term reaches the store",
+      "rejected": "recording them as covered by construction"
+    },
+    {
+      "decision": "clear the developer account's forced password change to reach the shell, then drive the application's own change-password form with the value this workstation already remembers",
+      "why": "the account held the legacy masked credential with a forced change, so the shell was unreachable, and the form is the application's own path rather than a hand-written hash",
+      "rejected": "writing a password hash into the store from the outside"
+    },
+    {
+      "decision": "leave the specification at implementing and not run --mark-complete",
+      "why": "T076 is still open: the scaling walk was not performed",
+      "rejected": "marking 75 of 76 tasks complete as if the last one were done"
+    },
+    {
+      "decision": "the page is one card per PermissionRegistry.Area, drawn from the declaration",
+      "why": "the declaration already names exactly five areas, so the card split cannot drift from it and no permission can be lost or invented (FR-047)",
+      "rejected": "a hand-listed set of cards, or merging areas to make the page narrower"
+    },
+    {
+      "decision": "the three cell states are drawn as a filled square, an outlined circle and an empty square",
+      "why": "a two-state tick would hide whether a value is a choice made for the person or their role baseline, and shape rather than colour carries the difference for a reader who cannot see colour",
+      "rejected": "a CheckBox with an indeterminate state, which a reader can also set by clicking"
+    },
+    {
+      "decision": "a save is written for one person, and the page lists the people with pending changes",
+      "why": "the change-set procedure takes one person and a whole set, so one press is one atomic write and two people are two writes rather than one that half lands (FR-071)",
+      "rejected": "one page-level save grouping by person, which is several writes and can half land"
+    },
+    {
+      "decision": "the change set sends a null from when the value in force is not a stored value of that person",
+      "why": "the store reads a non-null from as there is a stored value and it must be this one, so sending the role baseline refused every first-time change",
+      "rejected": "sending the value in force unconditionally, which is what the old single-subject model did"
+    },
+    {
+      "decision": "a re-based cell announces every derived property",
+      "why": "a save leaves the value where the reader put it, so only the state changes, and a binding that is not re-announced keeps saying not saved yet over a cell that has just been written",
+      "rejected": "announcing only the two values that moved"
+    },
+    {
+      "decision": "the page refuses a second confirmation while one is showing",
+      "why": "a second ContentDialog while one is open throws, and the handler is async void so the exception ended the process",
+      "rejected": "leaving the double press to WinUI, which takes the application down"
+    },
+    {
+      "decision": "the what-it-gates sentence sits in the card heading under the permission label",
+      "why": "the cells are marks, and the sentence is what tells a reader what a column controls; repeating it in every cell would be fourteen copies of one sentence",
+      "rejected": "a tooltip on the column heading, which a sighted keyboard user cannot reach"
+    },
+    {
+      "decision": "the row shows the sign-in name under the person name",
+      "why": "two accounts in the live roster share the display name John Koll, and two rows that read identically are two rows a reader will confuse",
+      "rejected": "the display name alone, which the live store proved ambiguous"
+    },
+    {
+      "decision": "the change-set procedure reads the value row id back instead of taking LAST_INSERT_ID",
+      "why": "an upsert that took the UPDATE branch generates no id, and on a pooled connection the function answered with a config_settings_history row id, so the history write was refused by the foreign key",
+      "rejected": "keeping the zero guard, which cannot tell a stale non-zero id from a real one"
+    }
+  ],
+  "concerns": [
+    {
+      "note": "The database contract requires BEGIN ... END procedure bodies with an EXIT HANDLER, and no procedure in this repo had ever needed one. The mysql client splits a script on the semicolon, so every compound body must ship DELIMITER blocks or the CREATE fails with 1064 while the script still looks like it ran. Fixed here; recorded because the next compound procedure will hit it."
+    },
+    {
+      "note": "The case-insensitive utf8mb4_unicode_ci collation makes the naive form of the upper-case migration a silent no-op: col not-equal-to UPPER(col) is false because the two sides compare equal. The migration now forces BINARY on every comparison. Caught only by running it."
+    },
+    {
+      "note": "T008 appended columns to the three credential reads and their caller reads by ordinal. Applying these SQL artifacts to a store before T020 moves the caller ordinals breaks sign-in. Neither the build nor the suite can see this, because index-based reads compile."
+    },
+    {
+      "note": "The shipped baseline seed Database/Seeds/seed_dev_masked_baseline/create.sql inserts into core_users_profiles without first_name or last_name. Both are NOT NULL with no default, so the seed fails once T003 is applied. T027 owns that file and must add the two values."
+    },
+    {
+      "note": "FR-005 allows first_name and last_name at 128 characters each and the display name at 256. Two maximum-length names derive a 257-character display name, which the VARCHAR(256) column rejects. The derivation must be bounded in the caller (T019, T047); nothing in the store can rescue it."
+    },
+    {
+      "note": "The scratch-database proofs of T003 to T015 ran through an ad-hoc PowerShell harness against a scratch schema, not through a repository command, so they are recorded as an account rather than as machine-verified evidence. No live store was written to."
+    },
+    {
+      "note": "T024 asserts the declaration in both directions against the seeded baselines, but those baselines do not exist until T036 writes them in Phase 5. The declaration half is implemented and green (permission registry, pinned spellings, gate sites, resource keys); the declaration-versus-baseline half cannot be written before the seed it compares against. T024 is left open, and the baseline direction belongs with T034 and T036.",
+      "step": "implement"
+    },
+    {
+      "note": "T022 asks for every resource key for the whole feature, and six screens do not exist until Phases 6 to 10. The keys the feature already names are present, including 28 permission strings, nine role displays, the Administration pair, the roster, the create form, the person page, the PIN window, the permissions page, the who-holds-this view and the thirteen outcome messages the service resolves. A later phase that finds its screen needs another string adds it to the same map, which is the single place the ownership rule wanted.",
+      "step": "implement"
+    },
+    {
+      "note": "Two paths read the signed-in role name and compare it to role names and are owned by no task Files line: MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs and WaitlistViewDetailViewModel.cs pass the role name into RequestActionPolicy, and MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs calls the same policy to enforce at the action. T037 replaces the policy with permission.requests.handle and names only the policy file, so those three call sites move with it or the handle gate is only half replaced.",
+      "step": "implement"
+    },
+    {
+      "note": "sp_user_management_create commits its own transaction internally, so an outer START TRANSACTION and ROLLBACK around it does not undo it. T072 live check must make the procedure fail mid-way to prove the rollback rather than wrapping the call in a transaction. Found by running the create path against the live store and finding the probe row still present after an outer rollback.",
+      "step": "implement"
+    },
+    {
+      "note": "Database/Seeds/seed_config_image_storage_settings/create.sql truncated a table that config_settings_history holds a foreign key to, which stopped the whole seed phase of a fresh install at that file. Fixed with the same FOREIGN_KEY_CHECKS guard the table artifacts use. The file belongs to no task in this feature and was found by installing the regenerated aggregates.",
+      "step": "implement"
+    },
+    {
+      "note": "A fresh store built from the aggregates holds 23 base tables against 22 table artifact folders. The extra one is seed_username_case_backup, created by the username-normalisation seed as a migration-lifetime table with no folder of its own, which its own header states. Not a defect; a count check has to know about it.",
+      "step": "implement"
+    },
+    {
+      "note": "MySQL Server 9.6.0 is what the live store runs on while every artifact header still says Engine: MySQL 5.7. Nothing in this feature needed a version-specific behaviour, and the compound procedure bodies and the guarded bootstrap blocks ran unchanged, but the headers are now inaccurate.",
+      "step": "implement"
+    },
+    {
+      "note": "Root cause of the one suite failure, established by hand against the live store: mtm_receiving_application does not carry the Database/MTMReceivingApp artifacts. receiving_history has no part_type column and sp_receiving_history_average_coil_weight does not exist, so the coil test's insert and its procedure call both fail, and MySqlHelperServer turns both into an empty result after exhausting its retries rather than throwing, which is why the failure reads as Expected 1 Actual 0 instead of as a database error. Not caused by feature 006: nothing in this round touches that database, that tree or that test. It needs the receiving-app artifacts applied to the fresh install before that gate can be green.",
+      "step": "implement"
+    },
+    {
+      "note": "Because the raw-SQL seam returns an empty result when the store refuses, a live test that expects rows cannot tell a missing procedure from an empty answer. That masking is worth knowing about when reading any live failure in this suite.",
+      "step": "implement"
+    },
+    {
+      "note": "T037's task text says WaitlistViewDetailViewModel and WaitlistRequestService each compare a role name today. Neither does: the detail view model holds a dead role field and the request service compared only status and assignee. The service was given a real permission refusal, which is what the task wanted, and the dead field was deleted. The task list overstates the pre-change state.",
+      "step": "implement"
+    },
+    {
+      "note": "The four Settings gates and SetupWorkCenterViewModel.CanManageWorkCenters are synchronous XAML-bound properties computed from StartupState.CurrentRole. Replacing them with permissions needs an asynchronous load whose results the bindings read, and SettingsViewModel is not navigation-aware and has no asynchronous init hook, so T039 and T040 need a page-lifecycle decision the task list does not make. Left open rather than half-migrated.",
+      "step": "implement"
+    },
+    {
+      "note": "T038 cannot be contained in Api/ServiceOperatorRoles.cs as its Files line says: the gate needs the caller's user id, so IServiceOperatorRoleResolver, ServiceOperatorRoleResolver, ServiceOperatorAuthenticationHandler, ServiceHostBuilder and the Mock.Service test doubles all have to move with it. Left open.",
+      "step": "implement"
+    },
+    {
+      "note": "MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs carries four CS8602 warnings from round 3, so the solution builds with four warnings rather than none. Not fixed this round.",
+      "step": "implement"
+    },
+    {
+      "note": "T076 is open and was not walked. The 150 and 200 percent scaling walks need the session's display scale changed, which needs a sign-out, and this pass ran unattended; the narrowest-window walk needs the shell and the application could not be signed back in through UI Automation afterwards. What the markup reading found is recorded in quickstart.md, explicitly as a reading rather than as evidence.",
+      "step": "implement"
+    },
+    {
+      "note": "The hidden-count fix is a markup change verified by the build and by the pre-fix observation of the defect, not re-observed in the running application, because the session could not be signed in again after the walk's own sign-out.",
+      "step": "implement"
+    },
+    {
+      "note": "The account JKOLL (user 2) was reset by accident while the T073 search harness was being written: an early bug in the harness read a scalar as its first character and performed the reset against user id 2 instead of the probe fixture. The account now holds a temporary credential with a fresh change required, and one audit row records that reset (deliberately left in place rather than deleted). The developer account JOHNK now holds a real salted password equal to the value this workstation already remembered for it, because the walk drove the application's own change-password form.",
+      "step": "implement"
+    },
+    {
+      "note": "T072's task line names three test files, but several of the live claims it lists (the transactional create, the 1062 answer through the repository, the rank refusals, the self-lockout refusals, the reset audit row, deactivate leaving sessions alone) had no live case at all; they were added in a new live suite rather than asserted from the fakes.",
+      "step": "implement"
+    },
+    {
+      "note": "the save and its reversal were proved against the live store through the shipped service and through the running page, and the rows it wrote were removed afterwards; the store reports zero user-scoped permission rows and zero such history rows",
+      "step": "implement"
+    },
+    {
+      "note": "the two column widths on the permissions page are declared as page resources so a card heading lines up with its rows; a card scrolls sideways rather than dropping a column, which is the decision 28 trade-off and is a judgement for the scaling walk",
+      "step": "implement"
+    },
+    {
+      "note": "T076, the scaling walk, is still open, so the spec is left at implementing rather than marked complete",
+      "step": "implement"
+    },
+    {
+      "note": "the page reads every person permissions one person at a time, because the store answers for one person at a time; with ten accounts that is ten reads on arrival",
+      "step": "implement"
+    },
+    {
+      "note": "T076 is still open and is the only unchecked task in tasks.md. The narrowest-window half was walked on the roster only; the person's page and the permissions page were not reached, and the 150 and 200 percent scaling halves were not attempted because changing the session's display scale needs the signed-in user. The spec is therefore left at implementing rather than promoted to completed.",
+      "step": "implement"
+    },
+    {
+      "note": "Observation needing a second look, not a confirmed defect: with the window at its 500x500 minimum the roster's rows did not draw at all. The UI Automation read reports UserManagementPage_Roster and every row offscreen with empty rectangles while the surrounding controls (Back, Search, Role filter, Add, Rows per page) lay out normally, and the captured 500x500 window image shows the list region blank. Whether the list needs a floor width, or the header and rows need to survive that width, is the judgement T076 asks for; the walk was stopped before it was reached.",
+      "step": "implement"
+    },
+    {
+      "note": "This change resolved no living-spec capability, so nothing was loaded before it and nothing was folded after it. Either the areas it touched belong to no capability yet, or a capability claims them and no requirement describes them — `living-validate` names which."
+    }
+  ],
+  "last_action": "T076 walk stopped at the owner's instruction: roster read at 500x500, app closed and its window placement restored, T076 left open",
+  "telemetryInstanceId": "7c4334c4-01cc-4e28-b1a9-4e5ade006824"
+}

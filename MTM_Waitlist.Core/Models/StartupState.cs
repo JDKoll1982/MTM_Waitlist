@@ -16,6 +16,12 @@ public sealed class StartupState
 
     public string Username { get; set; } = string.Empty;
 
+    /// <summary>
+    /// The signed-in person's <c>core_users_profiles.id</c>, so a gate or an audit row can name the person
+    /// rather than their text. Zero means no account has been resolved yet.
+    /// </summary>
+    public long UserId { get; set; }
+
     public bool ConfigurationLoaded { get; set; }
 
     public string ConfigurationFolder { get; set; } = string.Empty;
@@ -26,7 +32,14 @@ public sealed class StartupState
 
     public string MacAddressNormalized { get; set; } = string.Empty;
 
+    /// <summary>The signed-in person's role name. Presentation only: no access decision reads it (FR-054).</summary>
     public string CurrentRole { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The signed-in person's role code, from <c>auth_roles_catalog.role_code</c>. This is the role's identity,
+    /// so every access decision and every rank comparison reads this and never <see cref="CurrentRole"/>.
+    /// </summary>
+    public string CurrentRoleCode { get; set; } = string.Empty;
 
     public string EmployeeNumber { get; set; } = string.Empty;
 
@@ -57,7 +70,11 @@ public sealed class StartupState
 
     public string LoginHint { get; set; } = string.Empty;
 
-    public bool IsDeveloper => string.Equals(CurrentRole, "Developer", StringComparison.OrdinalIgnoreCase);
+    /// <summary>
+    /// Whether the signed-in person holds the developer role. Answered from the role code, because a display
+    /// name is presentation that may change and must never decide access (FR-054).
+    /// </summary>
+    public bool IsDeveloper => string.Equals(CurrentRoleCode, "developer", StringComparison.OrdinalIgnoreCase);
 
     public bool IsEmployeeIdentified =>
         !string.IsNullOrWhiteSpace(EmployeeNumber)

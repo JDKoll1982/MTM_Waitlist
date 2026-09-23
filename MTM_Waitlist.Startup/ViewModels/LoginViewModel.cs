@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -22,6 +24,18 @@ public partial class LoginViewModel : ObservableRecipient
     private const string RememberedUsernameKey = SignInSessionKeys.RememberedUsername;
     private const string RememberedPasswordKey = SignInSessionKeys.RememberedPassword;
 
+    /// <summary>The remaining-attempts line, and the one shown once the temporary credential has stopped being accepted (FR-041, FR-044).</summary>
+    private const string RemainingAttemptsResourceKey = "Startup_SignIn.RemainingAttempts.Text";
+
+    private const string AttemptLimitReachedResourceKey = "Startup_SignIn.AttemptLimitReached.Text";
+
+    /// <summary>The key for the sentence a store that cannot be reached is given on the sign-in form.</summary>
+    private const string StoreUnavailableResourceKey = "Startup_SignIn.StoreUnavailable.Text";
+
+    /// <summary>The sentence used when the resource map does not carry that key.</summary>
+    private const string StoreUnavailableFallback =
+        "The store could not be reached, so the sign-in could not be checked. Try again.";
+
     private readonly IStartupSessionRepository _startupSessionRepository;
     private readonly IStartupRegistrationService _startupRegistrationService;
     private readonly ILocalSettingsService _localSettingsService;
@@ -33,6 +47,7 @@ public partial class LoginViewModel : ObservableRecipient
     private readonly StartupState _startupState;
     private long _pendingUserIdForPasswordChange;
     private string _pendingRole = string.Empty;
+    private string _pendingRoleCode = string.Empty;
     private string _pendingDisplayName = string.Empty;
     private string _pendingEmployeeIdentifier = string.Empty;
     private ComputerGateCheck? _pendingGateCheck;
@@ -100,6 +115,29 @@ public partial class LoginViewModel : ObservableRecipient
     /// </summary>
     [ObservableProperty]
     public partial bool ShowSignInForm
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Whether the remaining-attempts line has something to say. It is false until at least one attempt has
+    /// failed, and it stays false for an ordinary account and for a sign-in name that does not exist, so those
+    /// two paths behave exactly as they did before (FR-040, FR-041, FR-042).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowRemainingAttempts
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// How many attempts the temporary credential has left, or that it has stopped being accepted and somebody
+    /// entitled must issue a fresh one (FR-041, FR-044). It is never shown before an attempt has failed.
+    /// </summary>
+    [ObservableProperty]
+    public partial string RemainingAttemptsMessage
     {
         get;
         set;
@@ -202,6 +240,8 @@ public partial class LoginViewModel : ObservableRecipient
         ShowNewUserAction = _startupState.RequireNewUserAction;
         ShowPasswordChangePrompt = false;
         ShowSignInForm = true;
+        ShowRemainingAttempts = false;
+        RemainingAttemptsMessage = string.Empty;
         ComputerGateState = ComputerGateStatus.Registered;
         ComputerGateHint = string.Empty;
         DetectedComputerName = string.Empty;
@@ -211,18 +251,16 @@ public partial class LoginViewModel : ObservableRecipient
         ComputerDescription = string.Empty;
         ComputerGateError = string.Empty;
 
-        // Startup already established that this account still holds its temporary default password, so open
-        // on the set-a-new-password surface: the operator must not have to sign in with that password first
-        // (Phase 32). Everything the change needs — the account id for the update, and the identity and role
-        // for the sign-in that follows — was resolved before the window was shown.
-        if (_startupState.RequirePasswordChange && _startupState.PasswordChangeUserId > 0)
+        // A pending password change does NOT open the change panel by itself. Startup learns that a change is
+        // pending from a read that carries no credential material, and knowing a change is due is not the same
+        // as being the person: opening the panel here let anyone at this workstation set the account's password
+        // without ever entering the temporary credential, which also put the attempt limit out of reach.
+        // SignInAsync opens the panel, and only once the temporary credential itself has been accepted
+        // (decision 9, decision 14, FR-029). The hint tells the person what is expected of them.
+        if (_startupState.RequirePasswordChange)
         {
-            _pendingUserIdForPasswordChange = _startupState.PasswordChangeUserId;
-            _pendingRole = _startupState.CurrentRole;
-            _pendingDisplayName = _startupState.EmployeeName;
-            _pendingEmployeeIdentifier = _startupState.EmployeeNumber;
-            ShowPasswordChangePrompt = true;
-            ShowSignInForm = false;
+            LoginHint = "Sign in with your temporary password to set a new one.";
+            _startupState.LoginHint = LoginHint;
         }
     }
 
@@ -260,13 +298,43 @@ public partial class LoginViewModel : ObservableRecipient
             return;
         }
 
+        try
+        {
+            await CheckCredentialsAndProceedAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            // A store that cannot be reached is a sentence on the screen, not an unhandled fault that takes the
+            // window down. Both halves of this path talk to the store — the credential check, and the wrong-attempt
+            // counter, which is written on its own connection — and either can fail while the answer is in flight.
+            StartupDebugLog.Error(
+                "Login",
+                ex,
+                "The sign-in could not be checked against the store; the reader is told to try again.");
+
+            LoginHint = ResolveStartupString(StoreUnavailableResourceKey, StoreUnavailableFallback);
+            _startupState.LoginHint = LoginHint;
+        }
+    }
+
+    /// <summary>
+    /// The credential check and everything that follows a successful one, kept in its own method so the command can
+    /// report a store it could not reach rather than faulting on the window.
+    /// </summary>
+    private async Task CheckCredentialsAndProceedAsync()
+    {
         var credentialResult = await _startupSessionRepository.CheckCredentialsAsync(Username, Password);
         if (!credentialResult.IsAuthenticated)
         {
+            // The line describes THIS attempt, so it is cleared before it is re-read: a failure that has
+            // nothing to say leaves nothing behind from an earlier one.
+            ApplyTemporaryCredentialAttemptState(credentialResult);
             LoginHint = "Sign-in failed. Check your credentials and try again.";
             _startupState.LoginHint = LoginHint;
             return;
         }
+
+        ClearTemporaryCredentialAttemptState();
 
         _pendingDisplayName = credentialResult.DisplayName;
         _pendingEmployeeIdentifier = credentialResult.EmployeeIdentifier;
@@ -277,15 +345,20 @@ public partial class LoginViewModel : ObservableRecipient
         {
             _pendingUserIdForPasswordChange = credentialResult.UserId;
             _pendingRole = credentialResult.CurrentRole;
+            _pendingRoleCode = credentialResult.CurrentRoleCode;
             ShowPasswordChangePrompt = true;
             ShowSignInForm = false;
-            LoginHint = "You signed in with temporary password 0000. Set a new password now.";
+
+            // The panel carries its own description, so the shared hint is cleared rather than left showing
+            // the guidance from the sign-in step. It no longer names a temporary value either: the credential
+            // is a per-person PIN now, not the shared 0000 constant it used to be (decision 9).
+            LoginHint = string.Empty;
             _startupState.LoginHint = LoginHint;
             Password = string.Empty;
             return;
         }
 
-        await CompleteLoginAsync(credentialResult.UserId, credentialResult.CurrentRole, Password);
+        await CompleteLoginAsync(credentialResult.UserId, credentialResult.CurrentRole, credentialResult.CurrentRoleCode, Password);
     }
 
     [RelayCommand]
@@ -331,7 +404,7 @@ public partial class LoginViewModel : ObservableRecipient
         ShowSignInForm = true;
         LoginHint = "Password updated. Completing sign-in...";
         _startupState.LoginHint = LoginHint;
-        await CompleteLoginAsync(_pendingUserIdForPasswordChange, _pendingRole, NewPassword);
+        await CompleteLoginAsync(_pendingUserIdForPasswordChange, _pendingRole, _pendingRoleCode, NewPassword);
     }
 
     [RelayCommand]
@@ -353,10 +426,63 @@ public partial class LoginViewModel : ObservableRecipient
         LoginHint = _startupState.LoginHint;
     }
 
-    private async Task CompleteLoginAsync(long userId, string currentRole, string passwordToRemember)
+    /// <summary>
+    /// The remaining-attempts line for this attempt, or nothing at all.
+    /// </summary>
+    /// <remarks>
+    /// Only an account that holds a temporary credential reaches either message. An ordinary account, and a
+    /// sign-in name that does not exist, leave the line hidden, which is what keeps the limit from being usable
+    /// to discover which names exist (FR-042) and keeps ordinary sign-in exactly as it was (FR-040).
+    /// </remarks>
+    private void ApplyTemporaryCredentialAttemptState(StartupCredentialCheckResult credentialResult)
+    {
+        ClearTemporaryCredentialAttemptState();
+
+        if (!credentialResult.HoldsTemporaryCredential || credentialResult.TemporaryCredentialFailedAttempts <= 0)
+        {
+            return;
+        }
+
+        if (credentialResult.TemporaryCredentialAttemptLimitReached)
+        {
+            RemainingAttemptsMessage = ResolveStartupString(
+                AttemptLimitReachedResourceKey,
+                "This temporary password is no longer accepted. Someone who can reset passwords must issue a fresh one.");
+            ShowRemainingAttempts = true;
+            return;
+        }
+
+        var remaining = Math.Max(
+            0,
+            StartupSessionRepository.TemporaryCredentialAttemptLimit - credentialResult.TemporaryCredentialFailedAttempts);
+
+        RemainingAttemptsMessage = string.Format(
+            CultureInfo.CurrentCulture,
+            ResolveStartupString(RemainingAttemptsResourceKey, "Attempts remaining on this temporary password: {0}."),
+            remaining);
+        ShowRemainingAttempts = true;
+    }
+
+    private void ClearTemporaryCredentialAttemptState()
+    {
+        ShowRemainingAttempts = false;
+        RemainingAttemptsMessage = string.Empty;
+    }
+
+    private static string ResolveStartupString(string resourceKey, string fallback)
+    {
+        var localized = resourceKey.GetLocalized();
+
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, resourceKey, StringComparison.Ordinal)
+            ? fallback
+            : localized;
+    }
+
+    private async Task CompleteLoginAsync(long userId, string currentRole, string currentRoleCode, string passwordToRemember)
     {
         _startupState.Username = Username.Trim().ToLowerInvariant();
         _startupState.CurrentRole = currentRole;
+        _startupState.CurrentRoleCode = currentRoleCode;
         _startupState.EmployeeName = string.IsNullOrWhiteSpace(_pendingDisplayName) ? _startupState.EmployeeName : _pendingDisplayName;
         _startupState.EmployeeNumber = string.IsNullOrWhiteSpace(_pendingEmployeeIdentifier) ? _startupState.EmployeeNumber : _pendingEmployeeIdentifier;
         _startupState.IsUserMatched = true;

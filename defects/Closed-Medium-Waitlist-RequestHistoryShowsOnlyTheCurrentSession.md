@@ -123,7 +123,7 @@ The fix is the four parts section 4 asked for, and it is verified against the da
    timestamps and the queue's `updated_utc` agree to the second on the rows the app wrote — so both are UTC and
    the new-message comparison compares like with like.
 4. Opening a request in the built app logged `Audit trail loaded for request 'f0000000-0001-…'. Entries=1.`,
-   and the page rendered that entry with its **detail text** (`Request submitted for press 100-3.`) — the defect
+   and the page rendered that entry with its **detail text** (`Request submitted for press 100-03.`) — the defect
    this file reported alongside T034.
 
 **One honest caveat, unchanged by this fix.** The history is read for the request the page is showing. There is

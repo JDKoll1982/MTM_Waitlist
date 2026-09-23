@@ -1,6 +1,8 @@
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Shared.Services;
 using System.Text.Json;
@@ -9,24 +11,21 @@ namespace MTM_Waitlist.Module_Setup.Services;
 
 public sealed class DunnageWorkflowService : IDunnageWorkflowService
 {
-    private static readonly string[] AllowedQuickAddRoles =
-    {
-        "Admin",
-        "Developer",
-        "Plant Manager",
-        "Setup Lead",
-        "Production Lead",
-    };
+    /// <summary>The one permission that admits the Quick Add definitions.</summary>
+    private const string QuickAddPermissionKey = PermissionKeys.SetupDunnageQuickAdd;
 
     private readonly MySqlHelperServer _mySqlHelperServer;
     private readonly IDunnageTypeVisibilityCatalogService? _dunnageTypeVisibilityCatalogService;
+    private readonly IPermissionService? _permissionService;
 
     public DunnageWorkflowService(
         MySqlHelperServer mySqlHelperServer,
-        IDunnageTypeVisibilityCatalogService? dunnageTypeVisibilityCatalogService = null)
+        IDunnageTypeVisibilityCatalogService? dunnageTypeVisibilityCatalogService = null,
+        IPermissionService? permissionService = null)
     {
         _mySqlHelperServer = mySqlHelperServer;
         _dunnageTypeVisibilityCatalogService = dunnageTypeVisibilityCatalogService;
+        _permissionService = permissionService;
     }
 
     public async Task<IReadOnlyList<SetupDunnageType>> GetDunnageTypesAsync(string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
@@ -47,11 +46,11 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
         return await GetAllDunnagePartsFromBackendAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<SetupSelectionResult> AddDunnageTypeAsync(string typeName, string currentUserRole, CancellationToken cancellationToken = default)
+    public async Task<SetupSelectionResult> AddDunnageTypeAsync(string typeName, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupDunnage", $"AddDunnageTypeAsync started. TypeName='{typeName}', Role='{currentUserRole}'.");
+        StartupDebugLog.Info("SetupDunnage", $"AddDunnageTypeAsync started. TypeName='{typeName}'.");
 
-        if (!CanManageDefinitions(currentUserRole))
+        if (!await CanManageDefinitionsAsync(cancellationToken).ConfigureAwait(false))
         {
             return new SetupSelectionResult
             {
@@ -95,11 +94,11 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
         };
     }
 
-    public async Task<SetupSelectionResult> AddDunnagePartAsync(string dunnageTypeId, string partName, string currentUserRole, CancellationToken cancellationToken = default)
+    public async Task<SetupSelectionResult> AddDunnagePartAsync(string dunnageTypeId, string partName, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupDunnage", $"AddDunnagePartAsync started. TypeId='{dunnageTypeId}', PartName='{partName}', Role='{currentUserRole}'.");
+        StartupDebugLog.Info("SetupDunnage", $"AddDunnagePartAsync started. TypeId='{dunnageTypeId}', PartName='{partName}'.");
 
-        if (!CanManageDefinitions(currentUserRole))
+        if (!await CanManageDefinitionsAsync(cancellationToken).ConfigureAwait(false))
         {
             return new SetupSelectionResult
             {
@@ -431,9 +430,25 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
         return $"Quantity Type: {quantitySegment} | Home Location: {locationSegment}";
     }
 
-    private static bool CanManageDefinitions(string currentUserRole)
+    /// <summary>
+    /// Whether the signed-in person may add dunnage definitions, answered from
+    /// <c>permission.setup.dunnage_quick_add</c> rather than from a list of role names kept here (FR-054).
+    /// </summary>
+    /// <remarks>
+    /// A gate refused here is refused in the same words as the control's absence, so a person never meets two
+    /// accounts of the same rule (FR-117). A host with no permission service — a headless test host — is refused
+    /// rather than admitted, so an unanswerable question never grants the write.
+    /// </remarks>
+    private async Task<bool> CanManageDefinitionsAsync(CancellationToken cancellationToken)
     {
-        return AllowedQuickAddRoles.Any(role => string.Equals(role, currentUserRole, StringComparison.OrdinalIgnoreCase));
+        if (_permissionService is null)
+        {
+            return false;
+        }
+
+        return await _permissionService
+            .HasPermissionAsync(QuickAddPermissionKey, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static string GetCurrentUserName()

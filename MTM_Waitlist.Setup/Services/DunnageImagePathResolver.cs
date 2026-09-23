@@ -1,7 +1,6 @@
 using System.IO;
 
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
+using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Setup.Services;
 
@@ -10,7 +9,8 @@ namespace MTM_Waitlist.Module_Setup.Services;
 /// <c>Parts/Steel Rack.png</c>, <c>Types/DunnageType-Boxes.png</c>) to absolute file
 /// paths under the shared Dunnage image root — the same root the MTM Receiving
 /// Application writes under its <c>Dunnage.Application.DefaultImageLocation</c> setting
-/// (verified live: <c>X:\Software Development\Live Applications\Shared\Images\Dunnage</c>).
+/// (on this site that share is reached as <c>X:</c>; it is named here as <c>\\mtmanu-fs01\Expo Drive</c> so the
+/// root works on a machine that has no drive mapping).
 /// </summary>
 public static class DunnageImagePathResolver
 {
@@ -21,7 +21,12 @@ public static class DunnageImagePathResolver
     /// configured <c>Dunnage.Application.DefaultImageLocation</c> and the waitlist
     /// <c>DunnageImageOptions:RootFolder</c> appsettings value.
     /// </summary>
-    public const string DefaultRootFolder = @"X:\Software Development\Live Applications\Shared\Images\Dunnage";
+    /// <remarks>
+    /// Written as the share's own name rather than as the <c>X:</c> drive letter that reaches it on this site
+    /// (<c>X:</c> is <c>\\mtmanu-fs01\Expo Drive</c>): a drive letter is only meaningful on a machine that has the
+    /// mapping, and this root has to be readable from every workstation.
+    /// </remarks>
+    public const string DefaultRootFolder = @"\\mtmanu-fs01\Expo Drive\Software Development\Live Applications\Shared\Images\Dunnage";
 
     private static string? _configuredRootFolder;
 
@@ -63,32 +68,21 @@ public static class DunnageImagePathResolver
 
         if (Path.IsPathRooted(normalized))
         {
-            return File.Exists(normalized) ? normalized : null;
+            return File.Exists(normalized) ? PreferCachedCopy(normalized) : null;
         }
 
         var combined = Path.Combine(RootFolder, normalized);
-        return File.Exists(combined) ? combined : null;
+        return File.Exists(combined) ? PreferCachedCopy(combined) : null;
     }
 
     /// <summary>
-    /// Creates an <see cref="ImageSource"/> for a DB-relative Dunnage image path, or
-    /// <c>null</c> when the file is not present on disk.
+    /// The copy of a Dunnage picture on this computer, when one has been cached, so a card reads a local file
+    /// instead of reaching across the network for every paint. The share remains the fallback, so a picture this
+    /// computer has never managed to copy still shows.
     /// </summary>
-    public static ImageSource? CreateImageSource(string? relativeImagePath)
-    {
-        var displayPath = GetDisplayPath(relativeImagePath);
-        if (string.IsNullOrWhiteSpace(displayPath))
-        {
-            return null;
-        }
-
-        try
-        {
-            return new BitmapImage(new Uri(displayPath));
-        }
-        catch
-        {
-            return null;
-        }
-    }
+    /// <param name="resolvedPath">The picture's path on the share.</param>
+    /// <returns>The cached copy's path when there is one, otherwise the share's.</returns>
+    private static string PreferCachedCopy(string resolvedPath) =>
+        ImageCachePaths.TryGetCachedCopy(RootFolder, ImageCachePaths.ResolveDunnageCacheFolder(), resolvedPath)
+        ?? resolvedPath;
 }

@@ -6,9 +6,11 @@ using CommunityToolkit.Mvvm.Input;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Shared.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Core.Models;
 
@@ -16,17 +18,7 @@ namespace MTM_Waitlist.Module_Setup.ViewModels;
 
 public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigationAware
 {
-    private const string DefaultWorkCenterImagePath = "Assets/Placeholders/default-workstation-image.png";
-
-    private static readonly string[] AllowedManageRoles =
-    {
-        "Setup Tech",
-        "Admin",
-        "Developer",
-        "Plant Manager",
-        "Setup Lead",
-        "Production Lead",
-    };
+    private const string DefaultWorkCenterImagePath = ImagePicturePolicy.NoImagePath;
 
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
@@ -34,7 +26,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     private readonly IWorkCenterImageService _imageLocationService;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IBuildingSelectionService _buildingSelectionService;
-    private readonly StartupState _startupState;
+    private readonly IPermissionService _permissionService;
     private readonly HashSet<string> _hotWorkCenterNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly ObservableCollection<SetupWorkCenter> _displayedHotWorkCenters = new();
     private readonly ObservableCollection<SetupWorkCenter> _displayedOtherWorkCenters = new();
@@ -106,7 +98,21 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
 
     public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
 
-    public bool CanManageWorkCenters => AllowedManageRoles.Any(role => string.Equals(role, _startupState.CurrentRole, StringComparison.OrdinalIgnoreCase));
+    /// <summary>
+    /// Whether the signed-in person may add, rename or remove a work centre, answered from
+    /// <c>permission.setup.work_centers</c> rather than from a list of role names kept here (FR-054).
+    /// </summary>
+    /// <remarks>
+    /// False until the page's permission read returns, so the management controls are never offered on a guess.
+    /// The retired list carried a <c>Setup Tech</c> entry that matched no role the catalogue holds, so a plain
+    /// Setup person was given work-centre setup by default; the owner flips the permission on for whoever needs
+    /// it instead (FR-107).
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool CanManageWorkCenters
+    {
+        get; set;
+    }
 
     public SetupWorkCenterViewModel(
         INavigationService navigationService,
@@ -114,16 +120,16 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         ISetupWorkCenterService workCenterService,
         IWorkCenterImageService imageLocationService,
         IWorkCenterCatalogService workCenterCatalogService,
-        StartupState startupState,
-        IBuildingSelectionService buildingSelectionService)
+        IBuildingSelectionService buildingSelectionService,
+        IPermissionService permissionService)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
         _workCenterService = workCenterService;
         _imageLocationService = imageLocationService;
         _workCenterCatalogService = workCenterCatalogService;
-        _startupState = startupState;
         _buildingSelectionService = buildingSelectionService;
+        _permissionService = permissionService;
     }
 
     public void OnNavigatedTo(object parameter)
@@ -136,6 +142,33 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
             string.Equals(item.Building, _buildingSelectionService.SelectedBuilding, StringComparison.OrdinalIgnoreCase)
             && string.Equals(item.Name, State.SelectedWorkCenter, StringComparison.OrdinalIgnoreCase));
         _ = LoadWorkCentersAsync();
+        _ = LoadPermissionsAsync();
+    }
+
+    /// <summary>
+    /// Asks the permission service for the page's one gate when the page is reached, so the answer is read per
+    /// visit rather than decided from stored session state at construction (FR-114).
+    /// </summary>
+    /// <remarks>
+    /// The read is issued here rather than in a layout pass, so the page is never drawn from an answer that has
+    /// not arrived and the interface thread is never blocked waiting for one. An unreachable store answers from
+    /// the key's shipped fallback rather than refusing (FR-050); the failure is recorded rather than swallowed.
+    /// </remarks>
+    private async Task LoadPermissionsAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            CanManageWorkCenters = await _permissionService
+                .HasPermissionAsync(PermissionKeys.SetupWorkCenters, cancellationToken)
+                .ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "SetupWorkCenters",
+                ex,
+                "The work-centre setup permission could not be read, so the management controls stay hidden rather than being offered on a guess.");
+        }
     }
 
     public void OnNavigatedFrom()
@@ -324,9 +357,15 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
 
     private async Task<string> ResolveWorkCenterImagePathAsync(SetupWorkCenter workstation, CancellationToken cancellationToken = default)
     {
-        if (_imageLocationService is null
-            || !_imageLocationService.IsInitialized
-            || string.IsNullOrWhiteSpace(workstation.Id))
+        if (_imageLocationService is null || string.IsNullOrWhiteSpace(workstation.Id))
+        {
+            return DefaultWorkCenterImagePath;
+        }
+
+        // Initialized on demand rather than assumed. Nothing initializes this service at startup, so a guard that
+        // bailed out while it was not ready yet left every card on the placeholder for the whole first visit, and
+        // the pictures configured for the work centers only appeared once some other screen had got there first.
+        if (!await _imageLocationService.EnsureInitializedAsync(cancellationToken).ConfigureAwait(true))
         {
             return DefaultWorkCenterImagePath;
         }

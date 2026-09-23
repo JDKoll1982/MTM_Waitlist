@@ -7,11 +7,11 @@ namespace MTM_Waitlist.Module_Waitlist.Helpers;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The service always answers with a path: when neither an override nor a catalog <c>default_image_path</c> is
-/// configured, it returns <see cref="ImageLocationDefaults.RequestTypeDefaultPath"/> — the "no image available"
-/// placeholder — rather than reporting that it had nothing to offer. The card cannot tell that apart from a
-/// real answer, and it prefers any non-empty resolved path over the image it already has, so accepting the
-/// placeholder replaces a good picture with a placeholder card.
+/// The service always answers with a path: when neither an override nor a catalog default is configured, it
+/// returns <see cref="ImageLocationDefaults.RequestItemDefaultPath"/> — the "no image available" placeholder —
+/// rather than reporting that it had nothing to offer. The card cannot tell that apart from a real answer, and
+/// it prefers any non-empty resolved path over the image it already has, so accepting the placeholder replaces a
+/// good picture with a placeholder card.
 /// </para>
 /// <para>
 /// That is not hypothetical. Nothing initializes the image service at startup, so the first list load skips
@@ -47,16 +47,17 @@ public static class RequestImagePathPolicy
     /// </summary>
     /// <param name="resolvedPath">What the image-location service returned, or null.</param>
     /// <returns>
-    /// <see langword="true"/> only for a genuine path to a file that holds a picture of at least the size the
-    /// application accepts. A placeholder, a missing file, an unreadable file and a single-pixel stand-in all
-    /// answer <see langword="false"/>, which leaves the row's existing image in place.
+    /// <see langword="true"/> only for a genuine path to a file the application will draw: readable, square, and
+    /// at least the size the application accepts. A placeholder, a missing file, an unreadable file, a
+    /// single-pixel stand-in and a picture of the wrong shape all answer <see langword="false"/>, which leaves
+    /// the row's existing image in place.
     /// </returns>
     /// <remarks>
     /// This is the rule the card and the request page both apply: a picture that shows nothing must never replace
     /// a picture that shows something, whichever way the empty answer is spelled.
     /// </remarks>
     public static bool IsUsableResolvedPicture(string? resolvedPath) =>
-        IsUsableResolvedPath(resolvedPath) && ImageFileProbe.CarriesPicture(resolvedPath);
+        IsUsableResolvedPath(resolvedPath) && ImageFileProbe.IsUsablePicture(resolvedPath);
 
     /// <summary>
     /// Whether a path is one of the service's own fallbacks.

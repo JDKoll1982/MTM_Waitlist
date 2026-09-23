@@ -317,7 +317,7 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
         yield return ApiBindAddressLabelText;
         yield return ApiPortLabelText;
         yield return OperatorAccessHeaderText;
-        yield return ApprovedRolesLabelText;
+        yield return OperatorAccessPermissionLabelText;
         yield return VisualHeaderText;
         yield return VisualServerLabelText;
         yield return VisualDatabaseLabelText;
@@ -344,7 +344,7 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     public string SubtitleText => "Service_Settings.Subtitle".GetLocalized();
 
     /// <summary>Heading of the operator-access setting.</summary>
-    public string ApprovedRolesLabelText => "Service_Settings.ApprovedRolesLabel".GetLocalized();
+    public string OperatorAccessPermissionLabelText => "Service_Settings.ApprovedRolesLabel".GetLocalized();
 
     /// <summary>Heading of the save setting, which applies to every group above it.</summary>
     public string SaveHeaderText => "Service_Settings.SaveHeader".GetLocalized();
@@ -382,8 +382,12 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
     /// <summary>Header for the operator-access section.</summary>
     public string OperatorAccessHeaderText => "Service_Settings.OperatorAccessHeader".GetLocalized();
 
-    /// <summary>The application roles permitted to call the service API, as one readable list.</summary>
-    public string ApprovedRolesText => ServiceOperatorRoles.DisplayText;
+    /// <summary>The permission that decides whether a caller may use the service API.</summary>
+    /// <remarks>
+    /// The roles that permission admits are stored data in the application store, so this surface names the
+    /// permission rather than keeping a copy of a role list that could go stale (T038).
+    /// </remarks>
+    public string OperatorAccessPermissionText => ServiceOperatorRoles.DisplayText;
 
     /// <summary>Statement that a caller is identified by user name rather than by a password.</summary>
     public string OperatorAccessDescriptionText => "Service_Settings.OperatorAccessDescription".GetLocalized();

@@ -17,7 +17,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 [TestClass]
 public sealed class CoilAvailabilityServiceTests
 {
-    private const string WorkCenter = "100-3";
+    private const string WorkCenter = "100-03";
 
     [TestMethod]
     public async Task GetCoilForJobAsync_ReadsTheSavedActiveJob_AndReportsTheRealCoil()

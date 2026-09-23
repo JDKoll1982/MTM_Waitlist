@@ -10,7 +10,7 @@ public sealed class TooltipServiceTests
     [TestMethod]
     public void ResolvePresentation_WhenRoleIsDeveloper_UsesDeveloperModeAndKeepsFiles()
     {
-        var service = CreateService("Developer");
+        var service = CreateService("developer");
 
         var presentation = service.ResolvePresentation(
             "Shell_SelectFacility_Tooltip",
@@ -32,7 +32,7 @@ public sealed class TooltipServiceTests
     [TestMethod]
     public void ResolvePresentation_WhenRoleIsNormal_UsesStandardMode()
     {
-        var service = CreateService("Operator");
+        var service = CreateService("production");
 
         var presentation = service.ResolvePresentation(
             "Shell_SelectFacility_Tooltip",
@@ -47,7 +47,7 @@ public sealed class TooltipServiceTests
     [TestMethod]
     public void ResolvePresentation_WhenResourceKeyMissing_UsesFallbackText()
     {
-        var service = CreateService("Operator");
+        var service = CreateService("production");
 
         var presentation = service.ResolvePresentation(null, null, "Fallback tooltip text");
 
@@ -56,11 +56,11 @@ public sealed class TooltipServiceTests
         Assert.AreEqual(0, presentation.AssociatedFiles.Count);
     }
 
-    private static TooltipService CreateService(string role)
+    private static TooltipService CreateService(string roleCode)
     {
         var startupState = new StartupState
         {
-            CurrentRole = role,
+            CurrentRoleCode = roleCode,
         };
 
         return new TooltipService(startupState);

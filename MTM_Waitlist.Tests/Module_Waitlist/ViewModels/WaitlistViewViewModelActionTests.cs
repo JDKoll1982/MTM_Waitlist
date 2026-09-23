@@ -81,12 +81,15 @@ public sealed class WaitlistViewViewModelActionTests
         Assert.AreEqual(expectCancel, row.CanCancelRequest, "Cancel gate");
 
         // The policy is the same answer, stated independently — a drift here is the defect FR-018 forbids.
+        // Whether the viewer may handle at all is now a named permission rather than a role name compared in a
+        // list, so the expected answer is the same fact the stub permission service was built with.
+        var canHandle = role == HandlerRole;
         Assert.AreEqual(
-            RequestActionPolicy.CanViewerAccept(status, RequestActionPolicy.CanViewerHandleRequests(role)),
+            RequestActionPolicy.CanViewerAccept(status, canHandle),
             row.CanAccept,
             "The screen's Accept gate disagrees with RequestActionPolicy.");
         Assert.AreEqual(
-            RequestActionPolicy.CanViewerCompleteOrRelease(status, assigneeNumber, viewerEmployeeNumber, RequestActionPolicy.CanViewerHandleRequests(role)),
+            RequestActionPolicy.CanViewerCompleteOrRelease(status, assigneeNumber, viewerEmployeeNumber, canHandle),
             row.CanCompleteOrRelease,
             "The screen's Complete/Release gate disagrees with RequestActionPolicy.");
     }
@@ -709,12 +712,40 @@ public sealed class WaitlistViewViewModelActionTests
         {
             EmployeeNumber = employeeNumber,
             EmployeeName = "Morgan Reyes",
+
+            // Presentation only: nothing in the screen compares this any more. The permission service below is
+            // what decides, which is what FR-054 requires and what this parameter now stands for.
             CurrentRole = role,
         },
         storeAvailabilityTracker: null,
         actionPrompt: prompt ?? new NoOpWaitlistRequestActionPrompt(),
         messageSeenStore: messageSeenStore,
-        sortPreferenceService: sortPreferenceService);
+        sortPreferenceService: sortPreferenceService,
+        permissionService: new StubPermissionService(role == HandlerRole));
+
+    /// <summary>
+    /// The permission service as this screen meets it: one answer for the one key it asks about. A stub rather
+    /// than the real service because the question here is what the screen offers, not how the answer is stored.
+    /// </summary>
+    private sealed class StubPermissionService : IPermissionService
+    {
+        private readonly bool _holds;
+
+        public StubPermissionService(bool holds) => _holds = holds;
+
+        public Task<bool> HasPermissionAsync(string permissionKey, CancellationToken cancellationToken = default) =>
+            Task.FromResult(_holds);
+
+        public Task<IReadOnlyDictionary<string, bool>> HasPermissionsAsync(
+            IEnumerable<string> permissionKeys,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyDictionary<string, bool>>(
+                permissionKeys.ToDictionary(key => key, _ => _holds, StringComparer.Ordinal));
+
+        public void Invalidate()
+        {
+        }
+    }
 
     /// <summary>The viewer's remembered order, without a settings file anywhere near the test.</summary>
     private sealed class StubSortPreferenceService : IWaitlistSortPreferenceService

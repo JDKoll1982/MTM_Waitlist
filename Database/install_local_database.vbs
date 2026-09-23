@@ -199,7 +199,8 @@ appScripts = Array( _
     "Seeds\AllSeeds.sql", _
     "Bootstrap\update_table_descriptions.sql", _
     "Validation\startup_schema\validate.sql", _
-    "Validation\settings_schema\validate.sql" _
+    "Validation\settings_schema\validate.sql", _
+    "Validation\user_management_schema\validate.sql" _
 )
 
 ' Dependency order for the cache database (see the header of
