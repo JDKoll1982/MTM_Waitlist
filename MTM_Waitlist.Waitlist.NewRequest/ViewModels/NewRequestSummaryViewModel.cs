@@ -8,6 +8,7 @@ using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 
@@ -24,7 +25,40 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
     private readonly IWaitlistRequestService _requestService;
     private readonly ICoilAvailabilityService _coilAvailabilityService;
 
+    /// <summary>
+    /// The reader this step resolves the part being asked for through, so the confirmation names and pictures the
+    /// same part the waitlist card will (FR-003, FR-018). Null on a headless host, which leaves the step on the one
+    /// shared placeholder.
+    /// </summary>
+    private readonly IPartPictureResolver? _partPictureResolver;
+
     private NewRequestFlowState? _state;
+
+    /// <summary>
+    /// The part this confirmation is asking for, or empty when the request names no particular material. Read from
+    /// the same rule the card's own identifier uses, so the step cannot promise a different part from the one the
+    /// request will name (FR-018).
+    /// </summary>
+    [ObservableProperty]
+    public partial string PartNumber
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>Whether this step names a part at all — a request about no material draws no part block.</summary>
+    public bool HasPart => !string.IsNullOrWhiteSpace(PartNumber);
+
+    partial void OnPartNumberChanged(string value) => OnPropertyChanged(nameof(HasPart));
+
+    /// <summary>
+    /// The part's picture, and the one shared placeholder when the part cannot be pictured. Never empty: a part
+    /// with no picture is shown with the placeholder rather than a blank space (FR-014, FR-018).
+    /// </summary>
+    [ObservableProperty]
+    public partial string PartPicturePath
+    {
+        get; set;
+    } = ImagePicturePolicy.NoImagePath;
 
     [ObservableProperty]
     public partial string WorkCenter
@@ -152,11 +186,16 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
 
     partial void OnIsSubmittingChanged(bool value) => OnPropertyChanged(nameof(CanSubmit));
 
-    public NewRequestSummaryViewModel(INavigationService navigationService, IWaitlistRequestService requestService, ICoilAvailabilityService coilAvailabilityService)
+    public NewRequestSummaryViewModel(
+        INavigationService navigationService,
+        IWaitlistRequestService requestService,
+        ICoilAvailabilityService coilAvailabilityService,
+        IPartPictureResolver? partPictureResolver = null)
     {
         _navigationService = navigationService;
         _requestService = requestService;
         _coilAvailabilityService = coilAvailabilityService;
+        _partPictureResolver = partPictureResolver;
     }
 
     public void OnNavigatedTo(object parameter)
@@ -179,12 +218,50 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         IsStatusError = false;
         StatusMessage = string.Empty;
 
+        PartNumber = WaitlistRequestTitles.ResolveMaterialPartNumber(state.Item, state.Availability) ?? string.Empty;
+        PartPicturePath = ImagePicturePolicy.NoImagePath;
+        if (HasPart)
+        {
+            _ = LoadPartPictureAsync(PartNumber);
+        }
+
         AnnounceHowManyRequests(state);
 
         ResetCoilDetail();
         if (IsCoilRequest(state))
         {
             _ = LoadCoilAsync();
+        }
+    }
+
+    /// <summary>
+    /// Resolves the part's picture off the render path and carries it on the step, so the block draws a value it
+    /// was handed (FR-018). A part that cannot be pictured keeps the one shared placeholder (FR-014).
+    /// </summary>
+    private async Task LoadPartPictureAsync(string partNumber)
+    {
+        if (_partPictureResolver is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var resolved = await _partPictureResolver
+                .ResolvePartPicturePathAsync(PartPictureLayout.VisualPartScope, partNumber)
+                .ConfigureAwait(true);
+
+            if (!string.IsNullOrWhiteSpace(resolved))
+            {
+                PartPicturePath = resolved;
+            }
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "NewRequestSummary",
+                ex,
+                $"Resolving the picture for part '{partNumber}' failed; the step will draw the no-image placeholder.");
         }
     }
 

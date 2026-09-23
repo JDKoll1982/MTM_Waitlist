@@ -1,31 +1,2085 @@
 {
-  "workflow": "speckit",
+  "workflow": "companion",
   "specName": "A Picture for Every Part",
-  "branch": "006-user-management-and-permissions",
+  "branch": "master",
   "currentStep": "implement",
-  "status": "implementing",
+  "status": "completed",
   "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "derive",
+      "at": "2026-09-23T14:37:13.177Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-23T14:38:22.941Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:00:30.187Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:00:38.620Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:00:47.587Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-23T15:01:21.226Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:09:25.574Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:09:26.030Z"
+    },
     {
       "step": "implement",
       "substep": null,
       "kind": "start",
       "by": "extension",
-      "at": "2026-09-22T21:24:43.747Z"
+      "at": "2026-09-23T15:10:10.065Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:11:38.226Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:11:46.921Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:11:57.448Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:13:58.402Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:14:07.054Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:14:16.738Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:14:25.260Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:14:33.944Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:14:42.375Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:14:51.264Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:15:00.284Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:19:50.615Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:20:00.509Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:20:09.231Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:20:17.896Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:20:27.042Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:20:36.229Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:22:34.702Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:22:43.752Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:24:54.205Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:25:03.416Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:37:29.569Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:38:35.844Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:40:38.148Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:40:44.479Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:47:32.998Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:52:25.512Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T15:54:14.910Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:07:30.803Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:07:36.017Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:07:41.361Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:07:46.605Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:07:52.195Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:07:57.372Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:08:02.687Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:08:07.464Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:08:12.950Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:08:18.675Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T039",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:08:23.802Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:08:28.995Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T041",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:16:15.204Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T042",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:16:20.927Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:16:26.186Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T044",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:16:32.977Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T045",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:16:38.414Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T046",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:16:43.679Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T047",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:34:10.666Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T048",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:34:16.060Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:34:21.355Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T050",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:34:26.161Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T051",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:34:31.202Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T052",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:34:36.415Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T053",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:34:41.414Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T054",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:34:46.560Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T055",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:34:51.656Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T056",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:34:57.323Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T057",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:35:02.693Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T058",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:35:07.908Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T059",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:35:12.923Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T060",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:35:18.263Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T061",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:35:24.509Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T062",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:35:29.564Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T063",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:35:34.613Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T064",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:42:55.103Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T065",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:43:00.684Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T066",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:43:06.203Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T067",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:43:11.220Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T068",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:43:16.577Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T069",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:43:21.698Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T070",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T16:43:26.936Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T071",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:08:01.712Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T072",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:08:13.988Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T073",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:08:26.152Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T074",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:08:38.471Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T075",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:08:50.744Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T076",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:09:03.551Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T077",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:09:15.762Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T078",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:09:27.687Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T079",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:09:39.628Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T080",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:09:52.257Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T081",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:10:04.665Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T082",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:10:20.816Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T083",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:10:37.365Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T084",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:10:49.800Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T085",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:11:01.682Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T086",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:11:17.713Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T087",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:11:29.798Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T088",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:28:28.611Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T089",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:28:51.216Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-23T17:28:51.312Z"
     }
   ],
+  "unattended": true,
   "concerns": [
     {
-      "note": "Implement cannot run: specs/008-part-pictures holds only spec.md. There is no plan.md and no tasks.md, so there is nothing to execute. The repo's own prerequisite probe refuses the step ('ERROR: plan.md not found in specs/008-part-pictures', run the plan command first). Nothing was implemented, no source file was touched, and the spec was deliberately not advanced to implemented or completed.",
-      "step": "implement"
+      "note": "A previous auto run on 2026-09-22 stamped the implement step and then halted with no plan.md and no tasks.md to execute. Nothing was implemented in that run and no source file was touched. On 2026-09-23 the stale record was set aside and rebuilt from the on-disk artifacts, so the pipeline resumes at plan."
+    },
+    {
+      "note": "The Settings page and its view model are needed by three stories (the part-picture entry point, the storage folders with the retention period, and the two dunnage lists), so per the one-owner rule they are built in the foundational phase rather than split across US3, US5 and US6. Each story still owns the behaviour behind those surfaces, but a reader should expect the Settings markup to be front-loaded."
+    },
+    {
+      "note": "The shared card template's file path is not named in plan.md, so the list places it at Styles/PartPictureCardTemplate.xaml with its App.xaml registration. Implement may place it elsewhere in the app project; the owning phase is unchanged."
+    },
+    {
+      "note": "Only 21 of the 89 tasks are implemented: Setup and the first five waves of Foundational are complete (T001-T021), and nothing from T022 onward, none of the seven story phases, and no Polish work exists. The repository is left building with the full suite green, so the delivered slice is a coherent stopping point rather than a half-applied change. Tracked in specs/008-part-pictures/tasks.md, where T022 onward stay unticked."
+    },
+    {
+      "note": "No database artifact from this change was executed. The new table, the three new procedures, the two triggers, the widened seed and the move were verified by reading and by the unit suite only; the live-store integration checks are opt-in and were not turned on, so the SQL is unverified against a running MySQL."
+    },
+    {
+      "note": "The plan database contract says the two write procedures change to write the history row. The implemented shape keeps both procedure bodies identical and adds two triggers instead, so AllSPs.sql and the schema validation (T027, T028) must carry the triggers as well as the procedures, and Bootstrap/update_table_descriptions.sql (T025) must still apply the new table to a store that already exists."
+    },
+    {
+      "note": "A hand-run move must set the session flag mtm_picture_layout_move on the same connection before calling sp_config_images_locations_paths_move, or the change record gains one row per pictured part. The paired seed does this; tools/Move-PartPictureLayout.ps1 (T023), which is not written yet, must too."
+    },
+    {
+      "note": "Two pre-existing tests were invalidated by this change and were updated rather than left failing: AppStoragePathsTests.AStoredPicturePathIsJoinedToTheRoot now asserts both recorded layouts, and PermissionBaselineParityTests declares the picture entitlement widening in a named table instead of editing the retired list it compares against."
+    },
+    {
+      "note": "The bootstrap guard for config_images_locations_history is unverified at run time: no live MySQL store was available, so it is confirmed by reading against the existing auth_user_management_audit block rather than by execution."
+    },
+    {
+      "note": "Three resource keys were added under the Settings_StoragePaths_ prefix (FolderNeeded, DaysNeeded, SaveFailed) so no label in the new panel is hardcoded."
+    },
+    {
+      "note": "Database/Validation/part_pictures_schema/validate.sql has been checked for shape but not run against a live store. Running it needs the feature's artifacts deployed first, which the repository's schema rules reserve for a reviewed rollout, so nothing was applied to any database."
+    },
+    {
+      "note": "US1 is blocked on a design question the task list does not answer: every surface's picture has to be resolved by something holding the storage root and the picture store, and none of the view models that build those card models is owned by any story phase. Resolving inside the models themselves is not possible, because a model has no access to the configured root."
+    },
+    {
+      "note": "US1's Files line names no owner for the view models or for MTM_Waitlist.Setup/Models/SetupModels.cs that its markup changes need; I edited them under US1 and recorded them there."
+    },
+    {
+      "note": "43 tasks remain: T047-T089, being US3, US4, US5, US6, US7 and Polish."
+    },
+    {
+      "note": "Three files this feature had to change are owned by no phase in tasks.md: the two override services (whose accepted scopes had to be widened) and the image storage service (which needed the store-at-a-layout copy). This is the same class of gap as US1's incomplete Files line."
+    },
+    {
+      "note": "The Visual half of the missing-picture list is not enumerable: the application's Visual reads are all keyed by a work order or a part, so no read shape returns the parts themselves. The list covers WIP and says so on the screen; FR-026 is therefore met for one system and honestly reported as unlisted for the other."
+    },
+    {
+      "note": "The build and suite results in this summary come from the workspace's own Build MTM_Waitlist and Test: All (clean) tasks, both green in this session. The capture's own --verify-run re-run could not complete: the writer script blocked with no output for several minutes on two fresh terminals, so the checks are recorded here as the task runs rather than as --verify-run evidence."
+    },
+    {
+      "note": "T047 and T051 split the history-row promise: the row is written by the store's trigger, so the one-row-with-a-null-predecessor half lives in ConfigImagesLocationsHistoryIntegrationTests, which reports inconclusive without MTM_WAITLIST_TEST_DB_CONNECTION_STRING and was skipped in this run."
+    },
+    {
+      "note": "US5's four conversions are verified by markup and source tests plus a green suite, not by rendering the app: T088 (the UI drive) is in Polish and was not run."
+    },
+    {
+      "note": "Per-task finish timestamps for T047-T070 are clustered, because those tasks were built as waves in one pass rather than closed one at a time as each was finished."
+    },
+    {
+      "note": "Three files this feature had to change are owned by no phase in tasks.md: the two override services and the image storage service. Same class of gap as US1's incomplete Files line."
+    },
+    {
+      "note": "The Visual half of the missing-picture list is not enumerable because every Visual read is keyed by a work order or a part, so FR-026 is met for WIP and honestly reported as unlisted for Visual."
+    },
+    {
+      "note": "T047 and T051 split the history-row promise: the row is written by the store's trigger, so the one-row-with-a-null-predecessor half lives in the opt-in live test, which was skipped without MTM_WAITLIST_TEST_DB_CONNECTION_STRING."
+    },
+    {
+      "note": "US5's four conversions are verified by markup and source tests plus a green suite, not by rendering the app: T088 is in Polish and was not run."
+    },
+    {
+      "note": "Per-task finish timestamps for T047-T070 are clustered because those tasks were built as waves in one pass rather than closed one at a time."
+    },
+    {
+      "note": "The first capture attempt was lost to the known journalling hazard: a concurrent write-context run held the file and the atomic replace failed with WinError 5. Retried with one writer at a time."
+    },
+    {
+      "note": "T088 was closed on a partial hand-drive: the New Request dunnage, die and component steps and the Setup part and review steps were not reached by hand. The T084 scan covers every surface that binds a part picture, so the converter chain is proven for them, but their rendered output was not seen."
+    },
+    {
+      "note": "The UI walk found a defect no test caught: the Settings part-picture entry shipped its resource key instead of words, because two GetLocalized calls omitted the .Text suffix the resw uses. The repo has per-file key-existence tests but no scan that proves every key a view model asks for carries the suffix the resource actually uses."
+    },
+    {
+      "note": "The live-database integration tests (ConfigImagesLocationsHistoryIntegrationTests and the other store-facing ones) report skipped without MTM_WAITLIST_TEST_DB_CONNECTION_STRING and were not forced, so the store-facing paths they cover are unverified in this run. 51 skipped in total."
+    },
+    {
+      "note": "The missing-picture list covers WIP only, because no Infor Visual read shape returns the parts themselves, so there is nothing to subtract from for Visual. The screen says so in one line and a Visual part is still picturable by typing its number. Whether Infor Visual should gain a part-catalogue read shape is a question for the owner, not this feature."
+    },
+    {
+      "note": "This change resolved no living-spec capability, so nothing was loaded before it and nothing was folded after it. Either the areas it touched belong to no capability yet, or a capability claims them and no requirement describes them — `living-validate` names which."
+    }
+  ],
+  "classification": {
+    "projectedFiles": 45,
+    "projectedTasks": 60,
+    "scopeSignal": "larger",
+    "verdict": "oversized"
+  },
+  "size": "oversized",
+  "decisions": [
+    {
+      "decision": "Reuse config_images_locations with two new scopes, visual_part and wip_part, for part pictures",
+      "why": "The table already carries a scope, an item key, a relative path, an actor and a timestamp, and four mechanisms are built on it: the read and write services, the storage service with its archive, the picture editor base and the part-pictures entitlement. The existing unique key already enforces one picture per scope and key.",
+      "rejected": "A dedicated config_part_pictures table, which would duplicate all four mechanisms and drift from them"
+    },
+    {
+      "decision": "Add config_images_locations_history for the who, when and what-was-replaced record",
+      "why": "The picture row says who touched it last and holds no previous value, so it cannot answer FR-027 for a second replacement. A history table is the auditability shape the schema rules prescribe, and the row is written in the same transaction as the change it records.",
+      "rejected": "A previous_image_path column, which holds one step and loses each earlier actor and time"
+    },
+    {
+      "decision": "Take the owner layout literally: Waitlist, Visual and WIP collections; family folders MMC, MMF, FGT and Categorized Parts; the three existing scope names kept verbatim as the kind folders inside Waitlist",
+      "why": "Keeping request_item, request_category and work_center verbatim makes the move an insertion of one folder level rather than a rename of three, and the per-kind folders settle the case-only collision between the item other and the category Other without renaming either.",
+      "rejected": "Category-named family folders, which contradict the dictated layout and make Component both a category and the catch-all"
+    },
+    {
+      "decision": "Leave the job per-part picture value unread (OQ-5)",
+      "why": "It is always empty and copied forward on every save, so giving it a meaning would create a second answer for one part, which is how a card and a page end up disagreeing.",
+      "rejected": "Adopting it as a per-job override, which the specification does not ask for"
+    },
+    {
+      "decision": "The store value wins the folder disagreement and the storage screen shows it rather than hiding it (OQ-3)",
+      "why": "That is the cascade ImageStorageConfigurationResolver already implements, and a screen that resolved differently from every reader would be worse than the disagreement it fixes.",
+      "rejected": "Letting appsettings.json win, which would let one machine read a share no other machine reads"
+    },
+    {
+      "decision": "The part-number limit is 190 characters, the width of scope_item_id (OQ-4)",
+      "why": "It is the only ceiling this application can state without inventing one. Measuring the longest number in use needs a live Infor Visual read this planning step does not have, and a refusal at 190 is a refusal at a number no real part has reached.",
+      "rejected": "The legacy 260-character path limit, which the store would fail before reaching, with a worse message"
+    },
+    {
+      "decision": "The two part collections leave the startup mirror and are copied on first draw by a new store",
+      "why": "FR-030 asks for exactly this. ImageCacheSyncService mirrors whole trees at startup, which is right for hundreds of item, work-centre, category and dunnage pictures and wrong for a part count copied onto every machine at every start. The copy rule is the same rule with a different trigger.",
+      "rejected": "Mirroring everything at startup, which leaves the requirement unsatisfied at real cost"
+    },
+    {
+      "decision": "One archive retention setting, image_storage.archive_keep_days, defaulting to ninety days, cleaned up with the startup cache step",
+      "why": "The key already exists and is already read through the resolver, so the work is the default, the screen and the cleanup. One period for the one archive folder, because two periods over one folder is how a cleanup removes something a reader expects to find.",
+      "rejected": "A second setting for part pictures only, which is two answers over one folder"
+    },
+    {
+      "decision": "The storage folders and the picture cache are gated on permission.settings.storage_paths, not on the picture entitlement",
+      "why": "FR-025 widens the picture entitlement to Setup Lead and Plant Manager while FR-017 keeps the folders on IT Department and Developer. The cache panel sits on the picture entitlement today only because the two had the same members; after the widening a Setup Lead could point this machine picture cache at any folder.",
+      "rejected": "Leaving the cache panel where it is and accepting the widening"
+    },
+    {
+      "decision": "The missing-picture list covers the parts this application can name: the WIP inventory parts and the Visual parts the existing read shapes return, minus the pictured rows, with a typed part number always settable",
+      "why": "FR-001 defines the universe that way. A complete Visual catalogue would need a read shape this application does not have, over an external system it only reads through the shapes it has, and the typed path is what makes the gap safe: nothing is unpicturable, only unlisted.",
+      "rejected": "A cross-database join between mtm_waitlist and mtm_wip_application_winforms, which crosses the store boundary and still does not reach Visual"
+    },
+    {
+      "decision": "The export uses Microsoft.Windows.Storage.Pickers.FileSavePicker with the app window identity",
+      "why": "It is the Windows App SDK save picker for a desktop app, this project references Windows App SDK 2.3.1, and the usage was checked against Microsoft Learn rather than recalled.",
+      "rejected": "Windows.Storage.Pickers.FileSavePicker, which needs a separate InitializeWithWindow call with the window handle"
+    },
+    {
+      "decision": "The reader resolves both the pre-move and the post-move layout, and the move ships as a run-once tool plus a paired path rewrite",
+      "why": "FR-036 promises no picture is left unresolvable. Files and rows move at different moments and the sequence can be interrupted, so tolerance in the reader makes the promise unconditional, and a reviewed run-once step is what the schema rules require instead of a mutation on startup.",
+      "rejected": "A one-way rewrite with a maintenance window, whose interruption leaves pictures unresolvable"
+    },
+    {
+      "decision": "A file-name collision is refused by a case-insensitive comparison scoped to one system and one family folder",
+      "why": "FR-007 asks for the refusal and for it to name the holder, and the edge case asks the case-only collision to be refused rather than silently overwritten, because the file system is not case-sensitive. Two systems and the three kinds already live in different folders, so scoping to one folder is what the layout promises.",
+      "rejected": "Appending a disambiguating suffix, which breaks the file-drop path that depends on the name a person already knows"
+    },
+    {
+      "decision": "One shared card template using Min and Max bounds rather than a fixed tile",
+      "why": "FR-021 converts four lists and FR-023 requires each to draw the placeholder rather than an empty tile, so one template with one picture rule keeps four lists from answering the same question four ways. Fixed pixel bounds are what the constitution rules out for a layout-critical container.",
+      "rejected": "Copying the existing fixed 150 by 170 tile into each converted list"
+    },
+    {
+      "decision": "The picture change record is written by an AFTER INSERT trigger and a guarded AFTER UPDATE trigger, declared in the two write procedures own create.sql files. Reason: MySQL reports a CALL affected-row count as the count of the last statement executed inside the procedure, so a body ending in COMMIT would report 0 and the existing ImageOverrideWriteService treats anything but 1 as a database error. A trigger leaves both procedures byte-identical, keeps their signature and their answer unchanged, and writes the history row inside the same statement and therefore the same transaction. Rejected: wrapping each procedure body in START TRANSACTION and COMMIT, which would have reported 0 affected rows and broken every picture write in the application."
+    },
+    {
+      "decision": "The recorded-path move keeps the change record silent through the session flag mtm_picture_layout_move. Reason: the move rewrites every stored image_path and a layout migration is not a picture change, so without the flag one reviewed step would write a change row per stored picture, each naming an actor who never touched it. Rejected: a second UPDATE path with no trigger, which would put two write paths over one table."
+    },
+    {
+      "decision": "IPartPictureResolver is declared with BCL-only signatures and an asynchronous resolve. Reason: MTM_Waitlist.Core references no project, so the contract cannot name PartPictureSystem or any other type this feature adds; asynchronous is what a surface needs because resolution reads the store. Rejected: declaring the interface in MTM_Waitlist.Settings, which would make every surface depend on the picture store."
+    },
+    {
+      "decision": "The shared card binds with Binding rather than x:Bind and declares its own two converter instances inside its own dictionary. Reason: one template serves four lists whose entry models are different types, and a merged dictionary resolves its own StaticResource lookups against the dictionary it sits in, so depending on the application-level converter instances would be a template that cannot be parsed in isolation. Rejected: a shared base model type for the four lists."
+    },
+    {
+      "decision": "RegisterPartPictureServices is a partial method declared once in the composition root and implemented in the feature own file. Reason: that is the pattern the three existing story-phase registrations already use and it keeps each phase registrations in a file that phase owns, at the cost of one declaration and one call in the composition root. Rejected: a static contribution list, which would still need a declaration to make the contribution run."
+    },
+    {
+      "decision": "The storage panel saves the picture folder, the key folder and the retention period with one button, because three buttons over three boxes on one panel is three chances to leave it half saved."
+    },
+    {
+      "decision": "The storage panel reads this machine own configured folder from IOptions<ImageStorageOptions> rather than from the resolver, because the resolver already answers store wins and comparing it with itself would always report agreement."
+    },
+    {
+      "decision": "The picture-cache panel gate moved to permission.settings.storage_paths, and its tests now pin that the widened picture entitlement no longer opens it."
+    },
+    {
+      "decision": "The dunnage type card carries the shared no-image placeholder: the panel's own read returns a type name and identifier and no picture path, and dunnage pictures keep their own storage and arrangement (FR-033), so no dunnage read was widened to invent one"
+    },
+    {
+      "decision": "The master lists were rebuilt by slicing each aggregate at its own block headers and re-emitting only the changed and new blocks, so the regeneration is byte-exact and leaves 2000 unrelated lines untouched"
+    },
+    {
+      "decision": "The owning view model resolves the picture and the model only carries it: every surface that draws a part takes IPartPictureResolver through constructor injection and assigns the resolved path or the shared placeholder to the model before the model reaches a bound collection, so a card draws a value it was handed. Rejected: resolving inside the model, which would have made plain data read files and know a storage root."
+    },
+    {
+      "decision": "The request's material part is the value the card's own identifier resolves {part_number} from, exposed once from WaitlistRequestTitles and reused by the wizard. Rejected: reusing the Item's configured picture (that is the picture for the kind of request, FR-019) and adding separate die and component arms (more rules than the contract asks for)."
+    },
+    {
+      "decision": "A part's local copy sits at the collection's own cache folder plus the recorded path below the collection. The resolver had been prepending the collection to a path that already named it, so no part copy was ever found on this machine and every draw went back to the share. Rejected: leaving the doubled path and widening the cache lookup instead."
+    },
+    {
+      "decision": "The Setup and wizard list models default their picture to ImagePicturePolicy.NoImagePath, so a surface added without a placeholder path fails its own test rather than drawing a blank space."
+    },
+    {
+      "decision": "The owning view model resolves the picture and the model only carries it; rejected resolving inside the model, which would make plain data read files and know a storage root."
+    },
+    {
+      "decision": "The request's material part is the value the card's own identifier resolves part_number from, exposed once from WaitlistRequestTitles; rejected reusing the Item's configured kind-of-request picture."
+    },
+    {
+      "decision": "A part's local copy sits at the collection's own cache folder plus the recorded path below the collection; the resolver had been prepending the collection to a path that already named it, so no local copy was ever found."
+    },
+    {
+      "decision": "The Setup and wizard list models default their picture to the shared placeholder, so a surface added without a placeholder path fails its own test."
+    },
+    {
+      "decision": "The part-picture screen is its own page over the existing override seam, not a derivation of the row-based image-override editor: the screen is one part with a change record and a coverage list, and the row editor's batched-rows base would have been an abstraction with one caller."
+    },
+    {
+      "decision": "The two override services' accepted scopes were widened to visual_part and wip_part, and a store-at-a-layout copy was added to the image storage service. The resolver already reads part rows through that seam, so without the widening a part picture could never be read back and every part drew the placeholder."
+    },
+    {
+      "decision": "The name collision is compared ordinally on the part number and case-insensitively on the file name within the family folder, so a part's own row is a replacement while a number differing only by letter case is a refusal naming the owner."
+    },
+    {
+      "decision": "The missing-picture list composes one part-number source per system. Only the WIP floor can enumerate its parts, so the Visual system is reported in one line as not listable rather than invented, and a Visual part is still picturable by typing its number."
+    },
+    {
+      "decision": "A hand-placed picture resolves by the part's own name when no row records one, looking for each accepted extension on this machine first and then on the share, which is what FR-028 needed."
+    },
+    {
+      "decision": "Each refusal is recorded twice: a sentence in the person's words from the resources, and the code, colliding part and stated limit beside it, so the behaviour can be tested in a host where no resources are loaded."
+    },
+    {
+      "decision": "The part-picture screen is its own page over the existing override seam rather than a derivation of the row-based override editor: the screen is one part with a change record and a coverage list, and the row editor base would have been an abstraction with one caller."
+    },
+    {
+      "decision": "The two override services' accepted scopes were widened to visual_part and wip_part and a store-at-a-layout copy was added to the image storage service, because the shipped resolver already reads part rows through that seam and without it every part drew the placeholder."
+    },
+    {
+      "decision": "The name collision compares the part number ordinally and the file name case-insensitively within the family folder, so a part's own row is a replacement while a number differing only by letter case is a refusal naming the owner."
+    },
+    {
+      "decision": "The missing-picture list composes one part-number source per system; only the WIP floor can enumerate, so the Visual system is reported as not listable rather than invented and a Visual part is still picturable by typing its number."
+    },
+    {
+      "decision": "A hand-placed picture resolves by the part's own name when no row records one, each accepted extension on this machine first and then on the share."
+    },
+    {
+      "decision": "Each refusal is recorded twice: a sentence in the person's words from the resources, and the code, colliding part and stated limit beside it, so the behaviour is testable in a host with no loaded resources."
+    },
+    {
+      "decision": "The T084 markup scan now reads each converter declaration's key and type from markup and accepts a converter whose own source answers through PictureSource, instead of naming the shared converter by key. That keeps the scan true for the dunnage list's own converter, which FR-033 leaves as it is. Rejected: rewriting the dunnage dialog markup to use the shared converter."
+    },
+    {
+      "decision": "The two localization keys were corrected by adding the .Text suffix the resource file uses, rather than renaming the resource entries, so the x:Uid convention the rest of the page follows is unchanged. Rejected: renaming the resw entries."
     }
   ],
   "step_summaries": {
+    "plan": {
+      "summary": "Planned the part-picture feature end to end: two new store scopes, one audit table, one dictated share layout with a reader that tolerates the un-moved layout, a lazy per-part local copy, a widened picture entitlement that must not carry the storage controls, and eight surfaces plus two Settings screens.",
+      "key_finding": "The picture entitlement gates the picture-cache panel today, so widening it to Setup Lead and Plant Manager as the specification requires would hand those roles the folder this machine copies pictures from unless the panel moves to permission.settings.storage_paths in the same change."
+    },
+    "tasks": {
+      "summary": "Produced 89 tasks in 10 phases and 32 waves: 3 setup, 25 foundational (the store, the layout and its both-layout reader, the recorded-path move, the shared card, and the Settings surfaces three stories share), 12 for US1, 6 for US2, 14 for US3, 3 for US4, 7 for US5, 5 for US6, 7 for US7 and 7 of polish and validation. Each of the 38 requirements is mapped to the tasks that satisfy it.",
+      "key_finding": "Three stories need one Settings surface and four lists need one card template, so both are built in the foundational phase: that is the only way to keep every file under one owning phase and still let implement fan out one worker per story."
+    },
     "specify": {
-      "summary": "Not journaled in this session: this feature's spec was already on disk and no plan or tasks were produced."
+      "summary": "Built the spine of part pictures: the two part scopes on the existing picture table, one change-record table with its read and its triggers, the dictated share layout with a reader that answers for both layouts, the recorded-path move with its reverse and its paired seed, the part-picture resolver behind a Core contract, the shared card template, and the Settings entry point gated on the widened picture entitlement. 21 of 89 tasks done; the solution builds clean and the suite is green at 1397 passed, 0 failed, 48 skipped."
     },
     "implement": {
-      "summary": "Halted before any work: the active feature has a spec but no plan and no tasks to execute."
+      "summary": "T071 to T089 reconciled and finished. Two real defects were found and fixed, the solution builds clean, and the full suite is green at 1546 total, 0 failed, 1495 passed, 51 skipped."
     }
   },
-  "last_action": "halted: plan.md and tasks.md missing for specs/008-part-pictures"
+  "approach": "Two new scopes on the existing picture table carry one picture per system and part number, with a new history table recording what each change replaced. The share is re-laid-out as one folder per collection and, inside the part collections, one folder per number prefix plus a catch-all, and the reader understands the pre-move layout as well so the move cannot orphan a picture. A part picture is copied to the machine on first draw rather than by the startup mirror, and the picture entitlement widens to Setup Lead and Plant Manager while the storage controls stay on IT Department and Developer.",
+  "verified": [
+    {
+      "what": "Every file in the generated task list has exactly one owning phase (the one-owner rule the plan's fan-out depends on)",
+      "result": "pass",
+      "command": "scan of specs/008-part-pictures/tasks.md: 10 phases, 89 tasks, 105 distinct owned paths, 0 paths under two phases"
+    },
+    {
+      "what": "full test suite reports no failures",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 33.1,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1397, Skipped:    48, Total:  1445, Duration: 17 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "solution builds with zero warnings and zero errors",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 34.5,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:34.29"
+    },
+    {
+      "what": "The run-once move script moves the three kind folders under the collection folder, carries the Archive subfolder with them, refuses to overwrite an existing file, leaves an unrecognised folder alone, and reports nothing to move on a second run. Run against a temp fixture on 2026-09-23."
+    },
+    {
+      "what": "build",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 35.3,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:35.07"
+    },
+    {
+      "what": "test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 36.9,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1399, Skipped:    48, Total:  1447, Duration: 18 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "The three master lists carry every Database artifact verbatim and in folder order: 23 tables, 83 procedures and 12 seeds, checked by reading each aggregate and each create.sql rather than by eye"
+    },
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 37.1,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:36.89"
+    },
+    {
+      "what": "full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 36.6,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1399, Skipped:    48, Total:  1447, Duration: 18 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "Solution builds with zero warnings and zero errors",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 33.8,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:33.60"
+    },
+    {
+      "what": "the full suite is green",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --no-build",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 19.5,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [1 ms] · Passed!  - Failed:     0, Passed:  1468, Skipped:    51, Total:  1519, Duration: 18 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "the solution builds with zero warnings and zero errors",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31.7,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:31.43"
+    },
+    {
+      "what": "solution build, SC-010",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 34.7,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:34.44"
+    }
+  ],
+  "coverage": {
+    "FR-001": {
+      "title": "Every part the application can name can carry a picture: the Infor Visual parts and the WIP floor parts.",
+      "tasks": "T016,T041,T043,T044,T046,T049",
+      "tests": [
+        "WipFloorInventoryServiceTests::GetInventoryPartNumbersAsync_ReturnsTheScriptsRowsThroughTheExistingSeam"
+      ]
+    },
+    "FR-002": {
+      "title": "A Visual part and a WIP part are pictured separately even where they share a part number, and one system's picture is never drawn for the other.",
+      "tasks": "T041,T045,T046",
+      "tests": [
+        "PartPictureResolverSystemTests::EachSystemResolvesItsOwnPicture",
+        "PartPictureResolverSystemTests::TheUnpicturedSystemsPartDrawsNothing",
+        "PartPictureResolverSystemTests::ALocalCopyIsNotSharedBetweenTheTwoSystems",
+        "ImageCachePathsTests::TheTwoPartCollectionsKeepTheirOwnCacheFolders"
+      ]
+    },
+    "FR-003": {
+      "title": "A part's picture is the same picture wherever that part is named, within its own system.",
+      "tasks": "T016,T039,T040"
+    },
+    "FR-004": {
+      "title": "A stored picture is kept under the folder for the collection it belongs to: the application's own, the Visual parts, or the WIP parts.",
+      "tasks": "T007,T008,T016,T021"
+    },
+    "FR-005": {
+      "title": "Within that folder a picture is kept in the folder named for the part's family, and an unrecognised family is kept in the catch-all folder.",
+      "tasks": "T007,T016,T021"
+    },
+    "FR-006": {
+      "title": "One picture per part per system, its file named after the part.",
+      "tasks": "T005,T007,T016"
+    },
+    "FR-007": {
+      "title": "Characters a file name cannot hold are replaced, and a replacement colliding with a different part is refused, naming the part it collides with.",
+      "tasks": "T007,T048,T056"
+    },
+    "FR-008": {
+      "title": "A part number longer than the storage permits is refused when a picture is set, with the limit stated, and never stored truncated.",
+      "tasks": "T008,T048,T056"
+    },
+    "FR-009": {
+      "title": "The folder holding part pictures is a setting and is not compiled into the application.",
+      "tasks": "T022,T073,T074"
+    },
+    "FR-010": {
+      "title": "A stored picture is recorded relative to that folder, so the same value resolves under whichever folder a machine is configured with.",
+      "tasks": "T008,T072"
+    },
+    "FR-011": {
+      "title": "A picture replaced by a later one is kept, and removed once the configured retention period has passed.",
+      "tasks": "T021,T056,T081"
+    },
+    "FR-012": {
+      "title": "The prefix of a part's number decides the family folder a picture is stored in and read from.",
+      "tasks": "T007,T016,T017"
+    },
+    "FR-013": {
+      "title": "A part picture is drawn only when the file exists, can be read as a picture, and meets the existing acceptance rule.",
+      "tasks": "T016,T061"
+    },
+    "FR-014": {
+      "title": "Where a part has no picture, or its picture cannot be drawn, the one shared no-image picture is drawn and never a blank space.",
+      "tasks": "T011,T018,T031,T040,T084"
+    },
+    "FR-015": {
+      "title": "No category or family artwork may stand in for a part that has no picture.",
+      "tasks": "T029,T040,T084",
+      "tests": [
+        "SetupReviewPageMarkupTests::GroupHeader_DrawsNoFamilyArtwork"
+      ]
+    },
+    "FR-016": {
+      "title": "The folder holding the key files remains a setting, changeable from the same screen as the picture folder.",
+      "tasks": "T022"
+    },
+    "FR-017": {
+      "title": "Changing either storage folder remains restricted to the IT Department and Developer roles.",
+      "tasks": "T022,T024,T085"
+    },
+    "FR-018": {
+      "title": "The Setup part list, the Setup review, the wizard's die card and the wizard's confirmation step each draw the part's picture beside its number.",
+      "tasks": "T033,T034,T035,T037",
+      "tests": [
+        "SetupReviewPageMarkupTests::SubordinatePartRow_DrawsThePartsPicture",
+        "NewRequestPartPictureMarkupTests::DieCard_DrawsThePartsPicture",
+        "NewRequestPartPictureMarkupTests::ConfirmationStep_DrawsThePartWithItsPicture",
+        "NewRequestPartPictureMarkupTests::Preview_DrawsThePartWithItsPicture",
+        "SetupPartSelectionPageMarkupTests::PartListEntry_DrawsThePartsPicture"
+      ]
+    },
+    "FR-019": {
+      "title": "The waitlist card draws the part's picture rather than the picture for the kind of request.",
+      "tasks": "T039,T040",
+      "tests": [
+        "WaitlistLineCardMarkupTests::Card_CarriesTheMaterialPartsPictureAndItsPlaceholderFallback",
+        "SampleOrderTests::SampleOrder_EffectiveImageIsTheMaterialPartsPictureAndThePlaceholderOtherwise"
+      ]
+    },
+    "FR-020": {
+      "title": "A request whose material cannot be pictured shows the shared placeholder and never the family's picture as a stand-in.",
+      "tasks": "T029,T039",
+      "tests": [
+        "SampleOrderTests::SampleOrder_EffectiveImageIsTheMaterialPartsPictureAndThePlaceholderOtherwise"
+      ]
+    },
+    "FR-021": {
+      "title": "The lists that ask a person to choose by name present their entries as selectable cards.",
+      "tasks": "T018,T026,T037,T068,T069,T070",
+      "tests": [
+        "SetupPartSelectionPageMarkupTests::PartList_StillChoosesThePart"
+      ]
+    },
+    "FR-022": {
+      "title": "The building choice is a flyout listing every building as a selectable card, without the building currently in effect.",
+      "tasks": "T067,T069,T070"
+    },
+    "FR-023": {
+      "title": "An entry with no picture is still offered as a card, drawing the shared placeholder.",
+      "tasks": "T018,T066",
+      "tests": [
+        "NewRequestPartPictureMarkupTests::EveryWizardPartSurface_FallsBackToTheOneSharedPlaceholder",
+        "SetupPartSelectionPageMarkupTests::PartListEntry_FallsBackToTheOneSharedPlaceholder"
+      ]
+    },
+    "FR-024": {
+      "title": "A screen sets or replaces one part's picture, offered only to an account holding the picture entitlement.",
+      "tasks": "T050,T055,T058,T060"
+    },
+    "FR-025": {
+      "title": "The picture entitlement covers IT Department, Developer, Setup Lead and Plant Manager.",
+      "tasks": "T006,T020",
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_ReproduceEveryRetiredListExactly_ForEveryRoleAndEveryPermission"
+      ]
+    },
+    "FR-026": {
+      "title": "The screen lists the parts that have no picture, and that list is exportable.",
+      "tasks": "T049,T057,T059"
+    },
+    "FR-027": {
+      "title": "Setting or replacing a picture records who did it, when, and what the previous picture was, and that record is readable.",
+      "tasks": "T005,T012,T014,T015,T047,T051,T056"
+    },
+    "FR-028": {
+      "title": "A picture placed in the storage folders by hand, named after its part, is used without the application having been used to add it.",
+      "tasks": "T016,T061,T063"
+    },
+    "FR-029": {
+      "title": "Files the application cannot draw are ignored and are not reported as a fault.",
+      "tasks": "T016,T061"
+    },
+    "FR-030": {
+      "title": "A part's picture is copied to the computer the first time that part is drawn, rather than all pictures being copied at start.",
+      "tasks": "T045,T079,T080"
+    },
+    "FR-031": {
+      "title": "A source that cannot be reached is recorded, leaves existing copies in place, and does not prevent a screen from opening.",
+      "tasks": "T076,T079"
+    },
+    "FR-032": {
+      "title": "An empty source is not treated as evidence that pictures were removed.",
+      "tasks": [
+        "T076",
+        "T079"
+      ]
+    },
+    "FR-033": {
+      "title": "Dunnage pictures are unchanged by this feature, keeping their own storage and arrangement.",
+      "tasks": [
+        "T026",
+        "T080"
+      ]
+    },
+    "FR-034": {
+      "title": "The existing acceptance rule for a picture is not relaxed for part pictures and not tightened for pictures this feature does not touch.",
+      "tasks": [
+        "T061",
+        "T084"
+      ]
+    },
+    "FR-035": {
+      "title": "Every change to stored data ships with its own reversal, and the schema master lists are kept in step.",
+      "tasks": [
+        "T004",
+        "T005",
+        "T006",
+        "T014",
+        "T015",
+        "T021",
+        "T025",
+        "T027"
+      ]
+    },
+    "FR-036": {
+      "title": "Every picture already stored moves under the new arrangement, and every recorded value resolves to its moved file.",
+      "tasks": [
+        "T008",
+        "T016",
+        "T021",
+        "T023"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Shared/Helpers/AppStoragePathsTests.cs::AStoredPicturePathIsJoinedToTheRoot",
+        "MTM_Waitlist.Tests/Module_Shared/Helpers/AppStoragePathsTests.cs::AnUnrecognisedLeadingFolderIsLeftWhereItIs"
+      ]
+    },
+    "FR-037": {
+      "title": "The period a replaced picture is kept before cleanup is a setting, changeable from the same screen, defaulting to ninety days.",
+      "tasks": [
+        "T022",
+        "T073",
+        "T074",
+        "T081"
+      ]
+    },
+    "FR-038": {
+      "title": "The pictures the application stores for its own screens are kept apart by kind, so no two kinds can resolve to one file.",
+      "tasks": [
+        "T007",
+        "T008",
+        "T021",
+        "T026"
+      ]
+    }
+  },
+  "currentTask": "T089",
+  "task_summaries": {
+    "T003": {
+      "status": "DONE",
+      "did": "Read the existing settings_schema validation script; its shape is one SELECT over a UNION ALL of information_schema probes filtered to actual_value = 'missing'.",
+      "files": [
+        "Database/Validation/settings_schema/validate.sql"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Re-read the Microsoft Learn save-picker page; confirmed the Windows App SDK 1.8 floor for Microsoft.Windows.Storage.Pickers against the referenced 2.3.1 and recorded the verified call shape.",
+      "files": [
+        "specs/008-part-pictures/research.md"
+      ]
+    },
+    "T001": {
+      "status": "DONE",
+      "did": "Baseline recorded before any change: solution builds with exit code 0; full suite is 1444 total, 1396 passed, 0 failed, 48 skipped.",
+      "files": [
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Widened the config_images_locations scope comment to the five values with no column or key change, and recorded why the table drop is the complete reversal.",
+      "files": [
+        "Database/Tables/17_config_images_locations/create.sql",
+        "Database/Tables/17_config_images_locations/rollback.sql"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Created config_images_locations_history with its nine columns, unique public_id, the scope-item-changed_utc index and both ON DELETE SET NULL foreign keys, plus its rollback.",
+      "files": [
+        "Database/Tables/33_config_images_locations_history/create.sql",
+        "Database/Tables/33_config_images_locations_history/rollback.sql"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Set permission.settings.part_pictures to 1 for role:setup_lead and role:plant_manager, left storage_paths alone, and added the two-row restore to the rollback.",
+      "files": [
+        "Database/Seeds/seed_permission_role_baselines/create.sql",
+        "Database/Seeds/seed_permission_role_baselines/rollback.sql"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Spelled the three collections, four family folders, catch-all, the two part scopes and the file-name rule once in PartPictureLayout.",
+      "files": [
+        "MTM_Waitlist.Shared/Helpers/PartPictureLayout.cs"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Taught AppStoragePaths the three collection folders, the three kind folders, and a ToCurrentLayout resolve that answers for a pre-move value and a post-move one and leaves an unrecognised folder where it is.",
+      "files": [
+        "MTM_Waitlist.Shared/Helpers/AppStoragePaths.cs"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Added the PartPictureSystem enum with its scope and collection-folder extensions, so a part picture is never the part number alone.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/PartPictureSystem.cs"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Declared IPartPictureResolver in Core with a BCL-only pair of members, since Core references no project and cannot name this feature's own model types.",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IPartPictureResolver.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Added the feature's new labels, headings, actions and refusals under Settings_PartPictures_*, Settings_StoragePaths_* and PartPictureCard_*.",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Added sp_config_images_locations_history_get, reading one picture's change record newest first with the actor's display name joined rather than stored.",
+      "files": [
+        "Database/StoredProcedures/sp_config_images_locations_history_get/create.sql",
+        "Database/StoredProcedures/sp_config_images_locations_history_get/rollback.sql"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Added sp_config_images_locations_scope_paths_get, returning every active path of one scope for the collision check and the missing-picture subtraction.",
+      "files": [
+        "Database/StoredProcedures/sp_config_images_locations_scope_paths_get/create.sql",
+        "Database/StoredProcedures/sp_config_images_locations_scope_paths_get/rollback.sql"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "A first picture now writes one history row with a null predecessor, through an AFTER INSERT trigger inside the same statement, so the procedure's signature and affected-row answer stay exactly as they were.",
+      "files": [
+        "Database/StoredProcedures/sp_config_images_locations_insert/create.sql",
+        "Database/StoredProcedures/sp_config_images_locations_insert/rollback.sql"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "A replacement now writes one history row carrying the path it replaced, through a guarded AFTER UPDATE trigger inside the same statement, with the procedure's signature and answer unchanged.",
+      "files": [
+        "Database/StoredProcedures/sp_config_images_locations_update/create.sql",
+        "Database/StoredProcedures/sp_config_images_locations_update/rollback.sql"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Added PartPictureResolver: system, part number and extension to a relative path, and to the file a control draws (this machine's copy, then the source, then nothing), holding every candidate to the existing acceptance rule.",
+      "files": [
+        "MTM_Waitlist.Settings/Services/PartPictureResolver.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "ActiveJobItemResolverService.CanonicalCategory now delegates the prefix-to-family mapping to PartPictureLayout, so one copy of the mapping exists.",
+      "files": [
+        "MTM_Waitlist.Setup/Services/ActiveJobItemResolverService.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Added Styles/PartPictureCardTemplate.xaml: fluid Min/Max bounds, one picture rule through the existing converter, a selection outline and the shared placeholder, registered from App.xaml.",
+      "files": [
+        "Styles/PartPictureCardTemplate.xaml",
+        "App.xaml"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Registered IPartPictureResolver in the feature's own registration partial, with one declaration added to the composition root rather than a phase-level edit to it.",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.PartPictures.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Added the part-picture entry point to Settings: gated on permission.settings.part_pictures, searchable, routing by view-model name, with the entry absent for an account without the entitlement.",
+      "files": [
+        "Module_Settings/Views/SettingsPage.xaml",
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Added sp_config_images_locations_paths_move (one UPDATE, prefix in and prefix out, idempotent on re-run) and the paired seed_picture_layout_move with its reverse, reporting rather than skipping an unrecognised value.",
+      "files": [
+        "Database/StoredProcedures/sp_config_images_locations_paths_move/create.sql",
+        "Database/StoredProcedures/sp_config_images_locations_paths_move/rollback.sql",
+        "Database/Seeds/seed_picture_layout_move/create.sql",
+        "Database/Seeds/seed_picture_layout_move/rollback.sql"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Added the Where-pictures-are-kept panel: picture folder, key folder and retention period in one set, gated on the storage entitlement",
+      "files": [
+        "Module_Settings/Views/SettingsPage.xaml",
+        "Module_Settings/Views/SettingsPage.xaml.cs",
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Added the run-once picture-layout move: reports what it would move and what it moved, refuses to overwrite, leaves unrecognised folders alone, idempotent",
+      "files": [
+        "tools/Move-PartPictureLayout.ps1"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Moved the picture-cache panel onto the storage entitlement and updated its tests to pin that the widened picture entitlement no longer opens it",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Widened the scope comment and added the guarded config_images_locations_history creation for a store that already exists; fresh-store path noted in create_database.sql",
+      "files": [
+        "Database/Bootstrap/update_table_descriptions.sql",
+        "Database/Bootstrap/create_database.sql"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "The two Settings dunnage type lists now draw the shared card template, each keeping its Show/Hide action; the dunnage option model carries the card contract.",
+      "files": [
+        "Module_Settings/Views/SettingsPage.xaml",
+        "MTM_Waitlist.Shared/Models/DunnageTypeVisibilityOption.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "The three master lists regenerated from the tree: 23 tables, 83 procedures and 12 seeds present verbatim and in folder order.",
+      "files": [
+        "Database/Tables/AllTables.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "Database/Seeds/AllSeeds.sql"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "The part-picture validation script written in the settings_schema shape: five scope values, the history table's nine columns, keys and index, both foreign keys, and existence plus deployed-body markers for the three new and two changed procedures and both triggers.",
+      "files": [
+        "Database/Validation/part_pictures_schema/validate.sql"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Pinned the waitlist card: the picture comes from the material part, through the one picture rule, and never from the Item",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Pinned the card model: the effective picture is the material part's picture, and the one shared placeholder otherwise",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/SampleOrderTests.cs"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Pinned the Setup review rows and the three wizard surfaces: each draws the part's picture and falls back to the shared placeholder",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Setup/Views/SetupReviewPageMarkupTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Views/NewRequestPartPictureMarkupTests.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Pinned the Setup part list: entries carry the part's picture and choosing one still selects the part",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Setup/Views/SetupPartSelectionPageMarkupTests.cs"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Setup review's subordinate-part rows carry the part's picture and stay grouped by family",
+      "files": [
+        "Module_Setup/Views/SetupReviewPage.xaml",
+        "MTM_Waitlist.Setup/Models/SetupModels.cs",
+        "MTM_Waitlist.Setup/ViewModels/SetupReviewViewModel.cs"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "The die card draws the die's own picture and is no longer text only",
+      "files": [
+        "Module_Waitlist/Views/NewRequestDiePage.xaml",
+        "MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestDieOption.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestDieViewModel.cs"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "The confirmation step draws the part being asked for with its picture",
+      "files": [
+        "Module_Waitlist/Views/NewRequestSummaryPage.xaml",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSummaryViewModel.cs"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "The preview draws the same part the same way as the confirmation step",
+      "files": [
+        "Module_Waitlist/Views/NewRequestPreviewPage.xaml",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestPreviewViewModel.cs"
+      ]
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "The Setup part list's entries carry each part's picture and choosing one still selects the part",
+      "files": [
+        "Module_Setup/Views/SetupPartSelectionPage.xaml",
+        "MTM_Waitlist.Setup/Models/SetupModels.cs",
+        "MTM_Waitlist.Setup/ViewModels/SetupPartSelectionViewModel.cs"
+      ]
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "The component card's picture is the part's picture, and the retired stand-in wording goes",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestComponentOption.cs",
+        "Module_Waitlist/Views/NewRequestComponentPage.xaml",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestComponentViewModel.cs"
+      ]
+    },
+    "T039": {
+      "status": "DONE",
+      "did": "The card model answers with the material part's picture, and the shared placeholder when it cannot be pictured",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+      ]
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "The waitlist card draws the material part's picture, named for the part, and no longer the request kind's",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T041": {
+      "status": "DONE",
+      "did": "Pinned the separation: one number under the two systems resolves two pictures, and the unpictured one draws nothing",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PartPictureResolverSystemTests.cs"
+      ]
+    },
+    "T042": {
+      "status": "DONE",
+      "did": "Pinned the two part cache folders, so one file name under Visual and under WIP is two local copies",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/Helpers/ImageCachePathsTests.cs"
+      ]
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "Pinned the WIP read: the part numbers come from the new script through the existing seam and script-name convention",
+      "files": [
+        "MTM_Waitlist.Tests/Core/Services/WipFloorInventoryServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs"
+      ]
+    },
+    "T044": {
+      "status": "DONE",
+      "did": "The WIP floor's distinct part numbers as a script beside the existing floor-quantity script",
+      "files": [
+        "Database/MTMWipApp/Queues/Module_Waitlist/Queues/GetWipInventoryPartNumbers.sql"
+      ]
+    },
+    "T045": {
+      "status": "DONE",
+      "did": "One cache folder per part collection, beside the two folders mirrored today, and the copy path no longer names the collection twice",
+      "files": [
+        "MTM_Waitlist.Shared/Helpers/ImageCachePaths.cs",
+        "MTM_Waitlist.Settings/Services/PartPictureResolver.cs"
+      ]
+    },
+    "T046": {
+      "status": "DONE",
+      "did": "Read the WIP part numbers through the existing seam, script-name pattern and store unchanged",
+      "files": [
+        "MTM_Waitlist.Core/Services/WipFloorInventoryService.cs"
+      ]
+    },
+    "T047": {
+      "status": "DONE",
+      "did": "Pinned the write path: a first save creates the row and stores the picture at its layout path, a replacement repoints it and archives the picture it replaced, a refusal writes neither file nor row, and the change record maps newest first.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PartPictureWriteServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/TestDoubles.cs"
+      ]
+    },
+    "T048": {
+      "status": "DONE",
+      "did": "Pinned the three refusals: an over-long number is refused with the limit stated, a name another part holds is refused naming it, and two numbers differing only by case are refused.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PartPictureCollisionTests.cs"
+      ]
+    },
+    "T049": {
+      "status": "DONE",
+      "did": "Pinned the missing-picture list as the named parts minus the pictured rows per system, that an unreadable source contributes nothing, and the export's header and rows.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PartPictureCoverageServiceTests.cs"
+      ]
+    },
+    "T050": {
+      "status": "DONE",
+      "did": "Pinned the screen: finding a part resolves the picture a surface would draw, setting it saves and confirms, each refusal comes back with its code, named part and stated limit, and the change record is read back.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/PartPictureManagerViewModelTests.cs"
+      ]
+    },
+    "T051": {
+      "status": "DONE",
+      "did": "The opt-in live checks: one history row with a null predecessor on a first save, one carrying the replaced path on a replacement, the record read newest first, and the move reporting the rows it rewrote and reversing exactly. Skipped without MTM_WAITLIST_TEST_DB_CONNECTION_STRING.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ConfigImagesLocationsHistoryIntegrationTests.cs"
+      ]
+    },
+    "T052": {
+      "status": "DONE",
+      "did": "The write contract: set, replace, refuse and record, keyed by the system and the part number together, with the change record read back through it.",
+      "files": [
+        "MTM_Waitlist.Settings/Services/IPartPictureWriteService.cs",
+        "MTM_Waitlist.Settings/Models/PartPictureSetResult.cs"
+      ]
+    },
+    "T053": {
+      "status": "DONE",
+      "did": "One row of the picture screen: the system, the part number, the picture a surface would draw and never a blank space, and the folder its picture belongs in.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/PartPictureRow.cs"
+      ]
+    },
+    "T054": {
+      "status": "DONE",
+      "did": "One row of the missing-picture list carrying the folder and the path the file belongs at, and the typed refusal answer that lets a name collision name the part holding it.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/PartPictureMissRow.cs",
+        "MTM_Waitlist.Settings/Models/PartPictureSetResult.cs"
+      ]
+    },
+    "T055": {
+      "status": "DONE",
+      "did": "The screen's view model: find, set and replace, the change record read back, the missing list and the export body, with every refusal answered in the person's words and in a form the screen can reason about.",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/PartPictureManagerViewModel.cs"
+      ]
+    },
+    "T056": {
+      "status": "DONE",
+      "did": "The write path: the storage limit's refusal with the limit stated, the collision refusal naming the part that holds the name, the picture stored at its collection and family path with the replaced file archived, and the history row left to the store's own trigger. Also widened the two override services' accepted scopes to the two part scopes and added the store-at-a-layout copy to the storage service.",
+      "files": [
+        "MTM_Waitlist.Settings/Services/PartPictureWriteService.cs",
+        "MTM_Waitlist.Settings/Services/ImageStorageService.cs",
+        "MTM_Waitlist.Settings/Services/IImageStorageService.cs",
+        "MTM_Waitlist.Settings/Services/ImageOverrideReadService.cs",
+        "MTM_Waitlist.Settings/Services/ImageOverrideWriteService.cs"
+      ]
+    },
+    "T057": {
+      "status": "DONE",
+      "did": "The parts with no picture, composed from one source per system minus the rows the store already holds, and the rows the export writes with the localised header. The WIP floor is the source that can enumerate; the Visual reads are keyed by a work order, so that system is reported as not listable rather than invented.",
+      "files": [
+        "MTM_Waitlist.Settings/Services/PartPictureCoverageService.cs",
+        "MTM_Waitlist.Settings/Services/WipFloorPartNumberSource.cs"
+      ]
+    },
+    "T058": {
+      "status": "DONE",
+      "did": "The screen's markup and code-behind: the system chooser, the part number box and Find, the part's current picture and its action, the change record and the missing list, with the two pickers in the code-behind because a picker needs the window. The row-based editor control was not reused: this screen is one part, not a batched row list.",
+      "files": [
+        "Module_Settings/Views/PartPictureManagerPage.xaml",
+        "Module_Settings/Views/PartPictureManagerPage.xaml.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T059": {
+      "status": "DONE",
+      "did": "The export through the Windows App SDK save picker, writing the part number, the system, the family folder and the path the picture would be stored at, with a cancelled picker treated as a change of mind and a failed write reported.",
+      "files": [
+        "Module_Settings/Views/PartPictureManagerPage.xaml.cs"
+      ]
+    },
+    "T060": {
+      "status": "DONE",
+      "did": "The write service, the WIP part-number source, the coverage service, the view model and the page route registered in the feature's own partial, with the route contributed the way the other feature phases contribute theirs.",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.PartPictureScreen.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T061": {
+      "status": "DONE",
+      "did": "Pinned the drop path: a file named after its part resolves for that part with no recorded row, each accepted extension is found, an unrecognised number is found in the catch-all folder, a rejected file is ignored rather than reported, and the machine's own copy is drawn first.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PartPictureFileDropTests.cs",
+        "MTM_Waitlist.Settings/Services/PartPictureResolver.cs"
+      ]
+    },
+    "T062": {
+      "status": "DONE",
+      "did": "Pinned the drop isolation: one number dropped under both systems answers each system's own file, a file placed under one system is not used for the other, and a copy held by one system is not used for the other.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PartPictureFileDropIsolationTests.cs"
+      ]
+    },
+    "T063": {
+      "status": "DONE",
+      "did": "The file-drop convention written where an operator will find it: the three collections, the family folders, the name-is-the-part-number rule and the extensions the application draws, plus the part-picture screen itself.",
+      "files": [
+        "FEATURES.md"
+      ]
+    },
+    "T064": {
+      "status": "DONE",
+      "did": "Pinned the remaining-answer list as cards carrying each answer's picture, that the drop-down is gone, and that choosing a card still chooses the answer and still advances the step.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Views/NewRequestDetailsCardMarkupTests.cs"
+      ]
+    },
+    "T065": {
+      "status": "DONE",
+      "did": "Pinned the building flyout on the shell and in the wizard: a flyout of shared cards, the drop-downs gone, the building in effect left out, and a building with no picture still offered and still selectable.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/ViewModels/ShellBuildingFlyoutTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Views/NewRequestWorkCenterBuildingFlyoutTests.cs"
+      ]
+    },
+    "T066": {
+      "status": "DONE",
+      "did": "Extended the settings markup rules: the two dunnage lists draw the shared card carrying each type's picture and still show and hide their type.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/SettingsPageMarkupTests.cs"
+      ]
+    },
+    "T067": {
+      "status": "DONE",
+      "did": "The shell's building flyout entries: every building except the one in effect, each a card drawing the shared placeholder, rebuilt when the building changes and as the flyout opens.",
+      "files": [
+        "ViewModels/ShellViewModel.cs"
+      ]
+    },
+    "T068": {
+      "status": "DONE",
+      "did": "The remaining-answer list became cards carrying each answer's picture, still choosing the answer and still advancing the step, with the answer card type beside the view model it serves.",
+      "files": [
+        "Module_Waitlist/Views/NewRequestDetailsPage.xaml",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestDetailsViewModel.cs"
+      ]
+    },
+    "T069": {
+      "status": "DONE",
+      "did": "The wizard's building choice became the same flyout of cards without the building in effect, on the one shared building-card model that both screens now use.",
+      "files": [
+        "Module_Waitlist/Views/NewRequestWorkCenterPage.xaml",
+        "Module_Waitlist/Views/NewRequestWorkCenterPage.xaml.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestWorkCenterViewModel.cs",
+        "MTM_Waitlist.Shared/Models/BuildingCardOption.cs"
+      ]
+    },
+    "T070": {
+      "status": "DONE",
+      "did": "The shell's two building drop-downs became the same flyout of cards, both wired to the one refresh and the one click handler, and the pre-existing advance test was updated to the gesture the listed answer now uses.",
+      "files": [
+        "Module_Core/Views/ShellPage.xaml",
+        "Module_Core/Views/ShellPage.xaml.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Views/NewRequestWizardAdvanceMarkupTests.cs"
+      ]
+    },
+    "T071": {
+      "status": "DONE",
+      "did": "Reconciled: ImageStorageConfigurationResolverTests already carries the store-wins cascade and the disagreement cases (GetSharedFolderResolutionAsync_WithNothingStored/WithAStoredFolder/WithTheSameFolderSpelledDifferently/WithAStoredFolderThatMatches); read and executed green.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ImageStorageConfigurationResolverTests.cs"
+      ]
+    },
+    "T072": {
+      "status": "DONE",
+      "did": "Reconciled: the portability tests are present and green; a recorded part path names no folder of its own and resolves under either machine's own root.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/PartPictureStoragePathPortabilityTests.cs"
+      ]
+    },
+    "T073": {
+      "status": "DONE",
+      "did": "Reconciled: appsettings.json ships ImageStorage.ArchiveKeepDays as 90, the ninety-day default FR-037 asks for.",
+      "files": [
+        "appsettings.json"
+      ]
+    },
+    "T074": {
+      "status": "DONE",
+      "did": "Reconciled: the retention period is a declared setting key (image_storage.archive_keep_days) written and read by the storage screen, with the ninety-day figure held once in ConfigSettingKeys.ImageStorageArchiveKeepDaysDefault.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/ConfigSettingValue.cs"
+      ]
+    },
+    "T075": {
+      "status": "DONE",
+      "did": "Reconciled: the resolver answers a shared-folder resolution naming the store as the truth and reporting this machine's own folder, and the storage screen shows the one-line disagreement.",
+      "files": [
+        "MTM_Waitlist.Settings/Services/ImageStorageConfigurationResolver.cs"
+      ]
+    },
+    "T076": {
+      "status": "DONE",
+      "did": "Reconciled: the cache store tests are present and green, covering first-draw copy, an unchanged copy left alone, an unreachable source keeping the existing copy, an empty source removing nothing, and the two systems keeping their own copy of one file name.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/Services/PartPictureCacheStoreTests.cs"
+      ]
+    },
+    "T077": {
+      "status": "DONE",
+      "did": "Reconciled: the mirror tests are present and green, including that the two part collections are not mirrored in one pass, that a stale part copy is removed rather than kept, and that an unnamed collection is still mirrored.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/Services/ImageCacheSyncServiceTests.cs"
+      ]
+    },
+    "T078": {
+      "status": "DONE",
+      "did": "Reconciled: the startup archive-cleanup tests are present and green, covering an archive past its period, inside it, on its last day, a source with no period, a name carrying no day, and a picture outside an archive folder.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/StartupArchiveCleanupTests.cs"
+      ]
+    },
+    "T079": {
+      "status": "DONE",
+      "did": "Reconciled: PartPictureCacheStore copies one part's picture on first draw into the part collection's own local folder, stamps the copy with the share's last-written time, and never removes a copy.",
+      "files": [
+        "MTM_Waitlist.Shared/Services/PartPictureCacheStore.cs"
+      ]
+    },
+    "T080": {
+      "status": "DONE",
+      "did": "Reconciled: the mirror leaves the two part collections alone through ExcludedTopLevelFolders and still mirrors the folders it mirrored before; the archive cleanup rides the same walk and the period is supplied per run.",
+      "files": [
+        "MTM_Waitlist.Shared/Services/ImageCacheSyncService.cs"
+      ]
+    },
+    "T081": {
+      "status": "DONE",
+      "did": "Reconciled: the archive cleanup is joined to the startup cache step, walking the same picture roots, with the retention period read when the run starts and the removed count reported in the step's own log line.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/StartupCoordinator.cs"
+      ]
+    },
+    "T082": {
+      "status": "DONE",
+      "did": "Reconciled: ServiceRegistrationExtensions.PartPictureCache registers IPartPictureCacheStore, the declaration for RegisterPartPictureCache exists in the composition root, and the call is made beside the other part-picture registrations.",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.PartPictureCache.cs"
+      ]
+    },
+    "T083": {
+      "status": "DONE",
+      "did": "Reconciled: the retired-wording audit carries the component card's 'until part pictures exist' claim as a banned pattern, with a self-test proving the pattern matches and the scan runs over the repository.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ]
+    },
+    "T084": {
+      "status": "DONE",
+      "did": "Finished a half-done task: the markup scan never found the declared converter keys, because it demanded x:Key immediately after the type name and App.xaml declares an xmlns between them, so all fifteen surfaces were reported. The scan now reads each converter declaration's key and type from the markup and accepts a converter whose own source answers through PictureSource, the one place the shared placeholder comes from. 13/13 green.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Helpers/RequestImagePathPolicyTests.cs"
+      ]
+    },
+    "T085": {
+      "status": "DONE",
+      "did": "Reconciled: the permission gate-site audit carries the moved picture-cache gate, asserting the panel is gated on the storage entitlement rather than the picture one (FR-017).",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionGateSiteAuditTests.cs"
+      ]
+    },
+    "T086": {
+      "status": "DONE",
+      "did": "Reconciled: the database rule set documents the five scopes, the new config_images_locations_history table and its reversal, the dictating layout with a reader that understands both, and the run-once move.",
+      "files": [
+        "Database/Database-Ruleset.md"
+      ]
+    },
+    "T087": {
+      "status": "DONE",
+      "did": "Reconciled: the changelog carries the Settings to Operations to Part Pictures entry describing the new screen.",
+      "files": [
+        "CHANGELOG.md"
+      ]
+    },
+    "T088": {
+      "status": "DONE",
+      "did": "Walked the built app against the live store with the UI-Automation driver. Confirmed the part picture or the shared placeholder is drawn with no blank space on: the waitlist card list, the Settings part-picture entry, the Part Pictures screen, the Setup work centre page, and the New Request Work Center, Category, Item, Preview and Confirm steps. The walk found and fixed two real defects: the Settings part-picture entry shipped its resource key instead of words, and the markup scan never found the declared converter. The New Request dunnage, die and component steps and the Setup part and review steps were not reached by hand; the T084 scan covers every surface that binds a part picture.",
+      "files": [
+        "tools/ui-drive.ps1"
+      ]
+    },
+    "T089": {
+      "status": "DONE",
+      "did": "Validated against the Success Criteria: the solution builds clean (exit 0, zero warnings, zero errors, SC-010) and the full suite reports total 1546, failed 0, succeeded 1495, skipped 51. The 51 skips are the live-database integration tests and the other pre-existing skips, which do not run without MTM_WAITLIST_TEST_DB_CONNECTION_STRING.",
+      "files": [
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    }
+  },
+  "telemetryInstanceId": "536664cb-5d62-49a8-9dc0-f025537ceaf7"
 }

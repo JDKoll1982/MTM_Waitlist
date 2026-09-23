@@ -1,0 +1,87 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters">
+
+    <!--
+        The two converters this card needs are declared here rather than reached for from the application resources.
+        A merged dictionary's own StaticResource lookups are resolved against the dictionary it sits in, so a card
+        that depended on the application-level instances would be a template that could not be parsed in isolation.
+        Both types are stateless, so a second instance costs nothing.
+    -->
+    <settingsConverters:ResolvedImagePathToSourceConverter x:Key="PartPictureCardImageSourceConverter" />
+    <settingsConverters:BoolToVisibilityConverter x:Key="PartPictureCardSelectionVisibilityConverter" />
+
+    <!--
+        The one card every list this feature converts uses, so four lists answer the picture question once.
+
+        The template binds with {Binding} rather than {x:Bind} on purpose: it is shared by lists whose entries are
+        different model types, and a common base type would buy nothing but a hierarchy. A model that wants this
+        card exposes five members, and this comment is their contract:
+
+          Title                 the entry's name or number, drawn as the card's label and used as its automation name
+          AutomationId          <CardIdPrefix>_<key>, the card's own automation id
+          ImageAutomationId     <CardIdPrefix>Image_<key>, the picture box's automation id
+          ImagePath             the picture to draw, which always resolves to a drawable picture: a model with no
+                                picture answers ImagePicturePolicy.NoImagePath rather than an empty string, so an
+                                entry without a picture is still offered as a card and never draws a blank space
+          IsSelected            whether this is the entry currently chosen, which draws the selection outline
+
+        The bounds are Min* and Max* rather than a fixed width and height: one template serves a list of long names
+        and a list of short codes, and a layout-critical container is not pinned to hardcoded pixel boundaries.
+    -->
+    <DataTemplate x:Key="PartPictureCardTemplate">
+        <Grid
+            Margin="8"
+            AutomationProperties.AutomationId="{Binding AutomationId}"
+            AutomationProperties.Name="{Binding Title}">
+            <Border
+                MinWidth="120"
+                MinHeight="140"
+                MaxWidth="200"
+                MaxHeight="220"
+                Padding="10"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="10">
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="8">
+                    <!-- The picture box. It draws the entry's own picture, and the one shared no-image placeholder
+                         when the entry has none: never a blank space, and never family artwork standing in. -->
+                    <Border
+                        MinWidth="84"
+                        MinHeight="84"
+                        MaxWidth="120"
+                        MaxHeight="120"
+                        Padding="4"
+                        HorizontalAlignment="Center"
+                        Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                        CornerRadius="8">
+                        <Image
+                            AutomationProperties.AutomationId="{Binding ImageAutomationId}"
+                            Source="{Binding ImagePath, Converter={StaticResource PartPictureCardImageSourceConverter}}"
+                            Stretch="Uniform" />
+                    </Border>
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        TextAlignment="Center"
+                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                        Text="{Binding Title}"
+                        TextWrapping="WrapWholeWords" />
+                </StackPanel>
+            </Border>
+
+            <!-- Selection outline, drawn only on the card currently chosen. -->
+            <Border
+                BorderBrush="{ThemeResource SystemControlHighlightAccentBrush}"
+                BorderThickness="2"
+                CornerRadius="10"
+                IsHitTestVisible="False"
+                Visibility="{Binding IsSelected, Mode=OneWay, Converter={StaticResource PartPictureCardSelectionVisibilityConverter}}" />
+        </Grid>
+    </DataTemplate>
+
+</ResourceDictionary>

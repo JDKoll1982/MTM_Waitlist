@@ -39,15 +39,20 @@
                     MaxWidth="520"
                     HorizontalAlignment="Left"
                     Visibility="{x:Bind ViewModel.IsTextInput, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <ComboBox
-                    x:Name="OptionCombo"
-                    AutomationProperties.AutomationId="NewRequestDetailsPage_OptionCombo"
-                    Header="{x:Bind ViewModel.PromptText, Mode=OneWay}"
-                    ItemsSource="{x:Bind ViewModel.Options, Mode=OneWay}"
-                    SelectedItem="{x:Bind ViewModel.SelectedOption, Mode=TwoWay}"
-                    SelectionChanged="OnOptionComboSelectionChanged"
-                    MinWidth="360"
+                <!-- The listed answers are cards rather than a drop-down (FR-021, FR-023): choosing one still
+                     chooses the answer, because the card carries the answer itself. -->
+                <GridView
+                    x:Name="OptionCardList"
+                    AutomationProperties.AutomationId="NewRequestDetailsPage_OptionCards"
+                    AutomationProperties.Name="{x:Bind ViewModel.PromptText, Mode=OneWay}"
+                    MaxWidth="520"
                     HorizontalAlignment="Left"
+                    IsItemClickEnabled="True"
+                    ItemClick="OnOptionCardClick"
+                    ItemTemplate="{StaticResource PartPictureCardTemplate}"
+                    ItemsSource="{x:Bind ViewModel.OptionCards, Mode=OneWay}"
+                    SelectionMode="None"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
                     Visibility="{x:Bind ViewModel.IsOptionPick, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                 <TextBlock
                     Foreground="{ThemeResource SystemFillColorCriticalBrush}"

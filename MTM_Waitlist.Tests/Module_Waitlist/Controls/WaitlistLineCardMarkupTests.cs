@@ -322,17 +322,31 @@ public sealed class WaitlistLineCardMarkupTests
         }
     }
 
+    /// <summary>
+    /// The card draws the <b>material part's</b> picture, and the one shared placeholder when that material
+    /// cannot be pictured. What it must never draw is the picture for the kind of request, or the part's family's
+    /// artwork standing in for a part that has none (FR-019, FR-020).
+    /// </summary>
+    /// <remarks>
+    /// The row itself is what decides: <c>EffectiveImagePath</c> answers the material part's resolved picture and
+    /// nothing else, and the row no longer carries any Item-derived picture at all, so a markup change back to
+    /// one would not even compile. The markup assertion here is that the picture box still goes through the
+    /// resolver that applies the application's one picture rule and the one placeholder.
+    /// </remarks>
     [TestMethod]
-    public void Card_CarriesTheItemsPictureAndItsPlaceholderFallback()
+    public void Card_CarriesTheMaterialPartsPictureAndItsPlaceholderFallback()
     {
         var image = LoadCard()
             .Descendants(s_presentation + "Image")
             .FirstOrDefault(candidate => ((string?)candidate.Attribute("Source"))?.Contains("Order.EffectiveImagePath", StringComparison.Ordinal) == true);
 
-        Assert.IsNotNull(image, "The card no longer draws the Item's picture (FR-009).");
+        Assert.IsNotNull(image, "The card no longer draws the material part's picture (FR-019).");
         Assert.IsTrue(
             ((string?)image!.Attribute("Source"))!.Contains("ResolvedImagePathToSourceConverter", StringComparison.Ordinal),
-            "The picture must go through the resolver that keeps the placeholder from replacing a resolved image (FR-021).");
+            "The picture must go through the resolver that applies the application's one picture rule (FR-013).");
+        Assert.IsFalse(
+            ((string?)image.Attribute("Source"))!.Contains("ItemCode", StringComparison.Ordinal),
+            "The card's picture must not resolve from the Item — that is the picture for the kind of request (FR-019).");
     }
 
     /// <summary>

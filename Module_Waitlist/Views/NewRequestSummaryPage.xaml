@@ -102,6 +102,33 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </Grid>
+
+                    <!--
+                        The part this confirmation is asking for, drawn with its own picture, and with the one
+                        shared placeholder when the part cannot be pictured — never a blank space and never artwork
+                        chosen from the part's family (FR-014, FR-015, FR-018). A request that names no particular
+                        material draws no part block at all.
+                    -->
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Spacing="12"
+                        Visibility="{x:Bind ViewModel.HasPart, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Border
+                            MinWidth="72"
+                            MinHeight="72"
+                            Padding="4"
+                            Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                            CornerRadius="8">
+                            <Image
+                                AutomationProperties.AutomationId="NewRequestSummaryPage_PartPicture"
+                                Source="{x:Bind ViewModel.PartPicturePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                Stretch="Uniform" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RequestDialogFieldLabelStyle}" Text="Part" />
+                            <TextBlock Style="{StaticResource RequestDialogFieldValueStyle}" Text="{x:Bind ViewModel.PartNumber, Mode=OneWay}" />
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

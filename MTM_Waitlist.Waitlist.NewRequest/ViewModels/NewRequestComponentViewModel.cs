@@ -41,6 +41,13 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
 {
     private readonly INavigationService _navigationService;
 
+    /// <summary>
+    /// The reader this step resolves each component's picture through, before the card reaches the bound
+    /// collection. Null on a headless host, which leaves every card on the one shared placeholder rather than
+    /// drawing a blank space.
+    /// </summary>
+    private readonly IPartPictureResolver? _partPictureResolver;
+
     private NewRequestFlowState? _state;
 
     [ObservableProperty]
@@ -73,12 +80,15 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
     /// <summary>The components the requesting job carries, in the job's own order, one card each.</summary>
     public ObservableCollection<NewRequestComponentOption> Options { get; } = new();
 
-    public NewRequestComponentViewModel(INavigationService navigationService)
+    public NewRequestComponentViewModel(
+        INavigationService navigationService,
+        IPartPictureResolver? partPictureResolver = null)
     {
         _navigationService = navigationService;
+        _partPictureResolver = partPictureResolver;
     }
 
-    public void OnNavigatedTo(object parameter)
+    public async void OnNavigatedTo(object parameter)
     {
         if (parameter is not NewRequestFlowState state || state.Item is null)
         {
@@ -91,7 +101,7 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
         PromptText = ResolvePrompt(state);
         UnavailableMessage = string.Empty;
         IsUnavailableVisible = false;
-        LoadCards(state);
+        await LoadCardsAsync(state).ConfigureAwait(true);
     }
 
     public void OnNavigatedFrom()
@@ -103,13 +113,25 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
     /// never hides what the operator picked. A job carrying no component leaves the step empty and says why rather
     /// than offering a card that stands for nothing (FR-026).
     /// </summary>
-    private void LoadCards(NewRequestFlowState state)
+    /// <remarks>
+    /// Each component's picture is resolved here, where the resolver is in hand, and carried on the card: the card
+    /// draws a value it was handed rather than asking for one while it renders (FR-018).
+    /// </remarks>
+    private async Task LoadCardsAsync(NewRequestFlowState state)
     {
         Options.Clear();
 
         foreach (var partNumber in state.Availability?.ComponentPartNumbers ?? Array.Empty<string>())
         {
-            Options.Add(CreateOption(partNumber, state.InputValue));
+            var trimmed = partNumber.Trim();
+            Options.Add(new NewRequestComponentOption
+            {
+                PartNumber = trimmed,
+                Title = trimmed,
+                ImagePath = await ResolvePartPictureAsync(trimmed).ConfigureAwait(true),
+                IsSelected = !string.IsNullOrWhiteSpace(state.InputValue)
+                    && string.Equals(trimmed, state.InputValue.Trim(), StringComparison.OrdinalIgnoreCase),
+            });
         }
 
         if (Options.Count == 0)
@@ -123,6 +145,32 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
         StartupDebugLog.Info(
             "NewRequestComponent",
             $"Component step for work center '{state.WorkCenter}' bound {Options.Count} card(s) for item '{state.Item?.Id}'.");
+    }
+
+    /// <summary>The part's picture, or the one shared placeholder when the part cannot be pictured (FR-014, FR-023).</summary>
+    private async Task<string> ResolvePartPictureAsync(string partNumber)
+    {
+        if (_partPictureResolver is null || string.IsNullOrWhiteSpace(partNumber))
+        {
+            return ImagePicturePolicy.NoImagePath;
+        }
+
+        try
+        {
+            var resolved = await _partPictureResolver
+                .ResolvePartPicturePathAsync(PartPictureLayout.VisualPartScope, partNumber)
+                .ConfigureAwait(true);
+
+            return string.IsNullOrWhiteSpace(resolved) ? ImagePicturePolicy.NoImagePath : resolved;
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "NewRequestComponent",
+                ex,
+                $"Resolving the picture for component '{partNumber}' failed; the card will draw the no-image placeholder.");
+            return ImagePicturePolicy.NoImagePath;
+        }
     }
 
     /// <summary>
@@ -176,18 +224,6 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
             ? LocalizeOrDefault("NewRequest_Component.Prompt", "Which component do you need?")
             : configured;
     }
-
-    private static NewRequestComponentOption CreateOption(string partNumber, string? chosenPartNumber) => new()
-    {
-        PartNumber = partNumber.Trim(),
-        Title = partNumber.Trim(),
-        // The temporary stand-in: nothing can picture a part number yet, so every card draws the application's
-        // shared no-image placeholder. When Visual and WIP part numbers can be resolved to pictures, this single
-        // assignment changes and nothing else on the card has to.
-        ImagePath = ImagePicturePolicy.NoImagePath,
-        IsSelected = !string.IsNullOrWhiteSpace(chosenPartNumber)
-            && string.Equals(partNumber.Trim(), chosenPartNumber.Trim(), StringComparison.OrdinalIgnoreCase),
-    };
 
     private static string LocalizeOrDefault(string key, string fallback)
     {

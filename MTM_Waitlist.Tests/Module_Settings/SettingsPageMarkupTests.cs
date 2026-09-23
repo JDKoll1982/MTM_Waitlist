@@ -100,6 +100,30 @@ public sealed class SettingsPageMarkupTests
         StringAssert.Contains(codeBehind, "App.GetService<RequestItemImagesDialogViewModel>()");
     }
 
+    /// <summary>
+    /// US5 (FR-021, FR-023). The two dunnage lists are the shared card carrying each type's picture, and showing
+    /// or hiding a type is still the card's own action — the conversion adds the picture without taking the
+    /// action away.
+    /// </summary>
+    [TestMethod]
+    public void TheTwoDunnageLists_AreCardsThatStillShowAndHideTheirType()
+    {
+        var markup = PageMarkup();
+
+        StringAssert.Contains(markup, "AutomationProperties.AutomationId=\"SettingsPage_VisibleDunnageTypesList\"");
+        StringAssert.Contains(markup, "AutomationProperties.AutomationId=\"SettingsPage_HiddenDunnageTypesList\"");
+
+        // Three occurrences in all: one per dunnage list, and the same template the converted part list uses.
+        var cardUses = markup.Split("ContentTemplate=\"{StaticResource PartPictureCardTemplate}\"", StringSplitOptions.None).Length - 1;
+        Assert.IsTrue(
+            cardUses >= 2,
+            $"Both dunnage lists draw the shared card carrying each type's picture; found {cardUses} use(s).");
+
+        StringAssert.Contains(markup, "Content=\"{Binding}\"", "The card is handed the whole type, so its picture and its name come from it.");
+        StringAssert.Contains(markup, "ViewModel.HideDunnageTypeCommand", "Hiding a type is still the visible list's action.");
+        StringAssert.Contains(markup, "ViewModel.ShowDunnageTypeCommand", "Showing a type is still the hidden list's action.");
+    }
+
     private static string PageMarkup()
     {
         var path = Path.Combine(

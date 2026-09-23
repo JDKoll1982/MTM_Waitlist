@@ -14,6 +14,7 @@ using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 
@@ -56,6 +57,13 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly Dictionary<string, RequestJobPartAvailability> _jobAvailabilityCache = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly IRequestJobPartAvailabilityProvider? _jobAvailabilityProvider;
+
+    /// <summary>
+    /// The reader every surface that draws a part calls. This screen resolves each row's material picture from it
+    /// before the row reaches the list, so the card draws a value it was handed rather than asking for one
+    /// (FR-019). Null on a headless host, which draws the one shared placeholder and nothing invented.
+    /// </summary>
+    private readonly IPartPictureResolver? _partPictureResolver;
 
     /// <summary>
     /// The one place this screen asks what a person may do. Access is a named permission resolved from the one
@@ -117,7 +125,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? messageSeenStore = null,
         IWaitlistSortPreferenceService? sortPreferenceService = null,
         IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null,
-        IPermissionService? permissionService = null)
+        IPermissionService? permissionService = null,
+        IPartPictureResolver? partPictureResolver = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -136,6 +145,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _messageSeenStore = messageSeenStore;
         _sortPreferenceService = sortPreferenceService;
         _jobAvailabilityProvider = jobAvailabilityProvider;
+        _partPictureResolver = partPictureResolver;
 
         // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
         // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
@@ -867,11 +877,19 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         var line1 = WaitlistRequestTitles.ResolveLine1(definition, context);
         var line2 = WaitlistRequestTitles.ResolveLine2(definition, context);
 
+        // The part this request is about — its material — captured on the row here because this is where the
+        // requesting job is in hand. It is the same rule the card's own identifier resolves {part_number} from,
+        // so the picture the card draws and the part the card names can never be two different parts (FR-019).
+        // A request that names no material carries none, and its card draws the one shared placeholder (FR-020).
+        var materialPartNumber = WaitlistRequestTitles.ResolveMaterialPartNumber(request, jobAvailability);
+
         var item = new SampleOrder
         {
             Id = request.Id.GetHashCode(),
             RequestId = request.Id,
             ItemCode = request.Item,
+            MaterialPartNumber = materialPartNumber ?? string.Empty,
+            MaterialPartScope = materialPartNumber is null ? string.Empty : PartPictureLayout.VisualPartScope,
             RequesterEmployeeNumber = request.RequesterEmployeeNumber,
             AssignedMaterialHandler = request.AssignedMaterialHandler,
             Note = request.Note,
@@ -1037,32 +1055,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IReadOnlyDictionary<string, (long WorkCenterId, string ResolvedPath)> workCenterImageLookup,
         CancellationToken cancellationToken = default)
     {
-        if (_imageLocationService is not null && _imageLocationService.IsInitialized)
-        {
-            try
-            {
-                var resolvedImagePath = await ResolveRequestImagePathAsync(request, cancellationToken).ConfigureAwait(false);
-                if (RequestImagePathPolicy.IsUsableResolvedPicture(resolvedImagePath))
-                {
-                    order.ResolvedImagePath = resolvedImagePath!;
-                }
-                else if (!string.IsNullOrWhiteSpace(resolvedImagePath))
-                {
-                    // Either the service had nothing configured and answered with its own placeholder, or the path
-                    // it answered with is a file carrying no picture (a stand-in, or artwork that never shipped).
-                    // An Item's picture is a setting and there is no built-in artwork behind it any more, so the
-                    // card says "no picture" rather than showing a picture of something else. Logged because the
-                    // substitution is otherwise invisible.
-                    StartupDebugLog.Info(
-                        "WaitlistRequest",
-                        $"Request '{request.Id}' has no picture to resolve to '{resolvedImagePath}'; the card will draw the no-image placeholder.");
-                }
-            }
-            catch
-            {
-                // Keep legacy fallback image when resolver path cannot be resolved.
-            }
-        }
+        await ApplyResolvedPartPictureAsync(order, cancellationToken).ConfigureAwait(false);
 
         if (workCenterImageLookup.TryGetValue(request.WorkCenter, out var workCenterImage))
         {
@@ -1075,25 +1068,51 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     }
 
     /// <summary>
-    /// Resolves the request's configured picture through the Item, falling back to the Category family and
-    /// then to the resolver's own placeholder (FR-009). The legacy request-type/subtype scopes are not
-    /// consulted: a request's picture is keyed by the Item it names.
+    /// Resolves the row's <b>material part's</b> picture and carries it on the row, so the card draws a value it
+    /// was handed. A request that names no material, and a material whose picture cannot be resolved, both leave
+    /// the row empty — and the card then draws the one shared placeholder rather than a picture of the kind of
+    /// request or the part's family (FR-014, FR-019, FR-020).
     /// </summary>
-    private async Task<string?> ResolveRequestImagePathAsync(WaitlistRequest request, CancellationToken cancellationToken)
+    /// <remarks>
+    /// A resolver that cannot answer is not worth failing the whole list for: the row keeps its placeholder, the
+    /// reason is logged, and the list stays readable.
+    /// </remarks>
+    private async Task ApplyResolvedPartPictureAsync(SampleOrder order, CancellationToken cancellationToken)
     {
-        if (_imageLocationService is null || !_imageLocationService.IsInitialized)
+        if (_partPictureResolver is null
+            || string.IsNullOrWhiteSpace(order.MaterialPartNumber)
+            || string.IsNullOrWhiteSpace(order.MaterialPartScope))
         {
-            return null;
+            return;
         }
 
-        if (string.IsNullOrWhiteSpace(request.Item))
+        try
         {
-            return null;
-        }
+            var resolved = await _partPictureResolver
+                .ResolvePartPicturePathAsync(order.MaterialPartScope, order.MaterialPartNumber, cancellationToken)
+                .ConfigureAwait(false);
 
-        return await _imageLocationService
-            .ResolveRequestItemImagePathAsync(request.Item, cancellationToken)
-            .ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(resolved))
+            {
+                StartupDebugLog.Info(
+                    "WaitlistRequest",
+                    $"Request '{order.RequestId}' has no picture for its part '{order.MaterialPartNumber}'; the card will draw the no-image placeholder.");
+                return;
+            }
+
+            order.ResolvedPartImagePath = resolved;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "WaitlistRequest",
+                ex,
+                $"Resolving the picture for part '{order.MaterialPartNumber}' failed; the card will draw the no-image placeholder.");
+        }
     }
 
     private static void AddRequestFields(SampleOrder item, WaitlistRequest request)

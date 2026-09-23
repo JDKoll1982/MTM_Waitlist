@@ -94,6 +94,42 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
     /// <summary>The options the configuration declares, in declared order.</summary>
     public ObservableCollection<string> Options { get; } = new();
 
+    /// <summary>
+    /// The same options as cards, for the list a person chooses from (FR-021, FR-023).
+    /// </summary>
+    /// <remarks>
+    /// An answer is a word the configuration declares and has no picture of its own, so every card draws the one
+    /// shared no-image picture and the answer is still offered and still selectable. The cards are the list; the
+    /// answer behind them is unchanged, which is why the choice still flows through
+    /// <see cref="SelectedOption"/> exactly as it did through the drop-down.
+    /// </remarks>
+    public ObservableCollection<AnswerOptionCard> OptionCards { get; } = new();
+
+    /// <summary>Rebuilds the answer cards, marking the answer currently chosen.</summary>
+    private void RefreshOptionCards()
+    {
+        OptionCards.Clear();
+
+        foreach (var option in Options)
+        {
+            OptionCards.Add(new AnswerOptionCard(
+                option,
+                string.Equals(option, SelectedOption, StringComparison.OrdinalIgnoreCase)));
+        }
+    }
+
+    /// <summary>Chooses an answer from the list of cards.</summary>
+    /// <param name="answer">The answer whose card was chosen.</param>
+    public void SelectAnswer(string? answer)
+    {
+        if (!string.IsNullOrWhiteSpace(answer))
+        {
+            SelectedOption = answer;
+        }
+    }
+
+    partial void OnSelectedOptionChanged(string? value) => RefreshOptionCards();
+
     public int MinLength
     {
         get;
@@ -146,6 +182,7 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
 
         InputValue = state.InputValue ?? string.Empty;
         SelectedOption = IsOptionPick ? state.InputValue : null;
+        RefreshOptionCards();
 
         // Read before the list is bound: the binding applies this value to the list control, which reports it back
         // as a selection change. Recording it here means the view can tell that report from a person's pick without
@@ -213,4 +250,37 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
     {
         _navigationService.GoBack();
     }
+}
+
+/// <summary>
+/// One listed answer, shaped for the shared part-picture card: the card needs a title, a picture to draw, a chosen
+/// flag and two automation ids, and an answer the configuration declares has no picture of its own.
+/// </summary>
+public sealed class AnswerOptionCard
+{
+    public AnswerOptionCard(string answer, bool isSelected)
+    {
+        Answer = answer ?? string.Empty;
+        IsSelected = isSelected;
+        AutomationId = $"NewRequestDetailsPage_AnswerCard_{Answer}";
+        ImageAutomationId = $"NewRequestDetailsPage_AnswerCardImage_{Answer}";
+    }
+
+    /// <summary>The answer this card stands for, which is what choosing it selects.</summary>
+    public string Answer { get; }
+
+    /// <summary>The card's label: the answer's own words.</summary>
+    public string Title => Answer;
+
+    /// <summary>The picture the card draws: the one shared no-image picture, never a blank space.</summary>
+    public string ImagePath => MTM_Waitlist.Module_Shared.Helpers.ImagePicturePolicy.NoImagePath;
+
+    /// <summary>Whether this is the answer currently chosen, which draws the card's selection outline.</summary>
+    public bool IsSelected { get; }
+
+    /// <summary>The card's automation id.</summary>
+    public string AutomationId { get; }
+
+    /// <summary>The card's picture box automation id.</summary>
+    public string ImageAutomationId { get; }
 }

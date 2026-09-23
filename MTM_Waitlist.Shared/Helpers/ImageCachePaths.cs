@@ -138,6 +138,19 @@ public static class ImageCachePaths
         ReceivingApplicationDunnageCaches.FirstOrDefault(Directory.Exists)
             ?? Path.Combine(LocalCacheRoot, DunnageFolderName);
 
+    /// <summary>
+    /// The local cache folder one part collection's copies live in, named for the collection itself.
+    /// </summary>
+    /// <param name="collectionFolder">The collection folder the picture belongs to, from the share layout.</param>
+    /// <returns>The absolute cache folder.</returns>
+    /// <remarks>
+    /// One folder per collection is what keeps the two part systems apart on this machine as well as on the share:
+    /// a Visual part and a WIP part that share a number are two parts, so the same file name under
+    /// <c>Visual</c> and under <c>WIP</c> is two copies and can never resolve to one file (FR-002, FR-030).
+    /// </remarks>
+    public static string PartCollectionCacheFolder(string collectionFolder) =>
+        Path.Combine(LocalCacheRoot, collectionFolder.Trim());
+
     /// <summary>Whether a file is one of the picture kinds the cache carries.</summary>
     /// <param name="path">The file name or path to test.</param>
     /// <returns><see langword="true"/> for a supported picture extension.</returns>

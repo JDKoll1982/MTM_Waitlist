@@ -450,7 +450,7 @@ ALTER TABLE config_images_locations COMMENT = 'Image path overrides for request 
 ALTER TABLE config_images_locations
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for image location override row.',
-MODIFY COLUMN scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_item, request_category, or work_center.',
+MODIFY COLUMN scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_item, request_category, work_center, visual_part, or wip_part.',
 MODIFY COLUMN scope_item_id VARCHAR(190) NOT NULL COMMENT 'Identifier within scope: the Item or Category code, or the numeric work center id.',
 MODIFY COLUMN image_path VARCHAR(500) NOT NULL COMMENT 'File system path to the image file copied to the shared network folder.',
 MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Soft-delete flag; inactive rows are ignored during path resolution cascades.',
@@ -535,6 +535,40 @@ MODIFY COLUMN allotted_minutes INT NULL COMMENT 'The Item configured allotment i
 MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last changed this configuration row. Audit only; not part of the read contract.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the configuration row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the configuration row was last updated.';
+
+-- ============================================================
+-- config_images_locations_history - feature 008-part-pictures
+-- ============================================================
+-- New table. The owning artifact is Database/Tables/33_config_images_locations_history/create.sql; the guarded
+-- statement below carries the same shape so a store that ALREADY EXISTS gains the table when this maintenance
+-- file is run, which is the only path that reaches such a store. FOREIGN_KEY_CHECKS is off for the creation
+-- because the table carries two foreign keys, and the order in which the referenced tables were created is not
+-- this file's to assume.
+SET FOREIGN_KEY_CHECKS = 0;
+
+SET
+    @has_config_images_locations_history_table := (
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'config_images_locations_history'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_config_images_locations_history_table = 0,
+        'CREATE TABLE config_images_locations_history (id BIGINT NOT NULL AUTO_INCREMENT COMMENT ''Surrogate primary key.'', public_id CHAR(36) NOT NULL COMMENT ''Public UUID for external references.'', image_location_id BIGINT NULL COMMENT ''The picture row this change belongs to; NULL once that row is retired'', scope VARCHAR(16) NOT NULL COMMENT ''Copied at write time: request_item, request_category, work_center, visual_part, or wip_part'', scope_item_id VARCHAR(190) NOT NULL COMMENT ''Copied at write time: the item code, category code, work center id, or part number'', previous_image_path VARCHAR(500) NULL COMMENT ''The relative path this change replaced; NULL for a first picture'', new_image_path VARCHAR(500) NOT NULL COMMENT ''The relative path that replaced it'', changed_by_user_id BIGINT NULL COMMENT ''The actor who set or replaced the picture'', changed_utc DATETIME NOT NULL COMMENT ''UTC timestamp of the change'', PRIMARY KEY (id), UNIQUE KEY uq_config_images_locations_history_public_id (public_id), KEY idx_config_images_locations_history_scope_item (scope, scope_item_id, changed_utc) COMMENT ''Read one part''''s record newest first'', KEY idx_config_images_locations_history_image_location_id (image_location_id), KEY idx_config_images_locations_history_changed_by_user_id (changed_by_user_id), CONSTRAINT fk_config_images_locations_history_image_location_id FOREIGN KEY (image_location_id) REFERENCES config_images_locations (id) ON DELETE SET NULL, CONSTRAINT fk_config_images_locations_history_changed_by_user_id FOREIGN KEY (changed_by_user_id) REFERENCES core_users_profiles (id) ON DELETE SET NULL) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = ''Who set or replaced a stored picture, when, and what the previous picture was.''',
+        'SELECT ''config_images_locations_history already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
 -- auth_user_management_audit - feature 006

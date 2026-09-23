@@ -14,7 +14,7 @@ using MTM_Waitlist.Module_Shared.Helpers;
 ///   "AllowedExtensions": [".png", ".jpg", ".jpeg"],
 ///   "RequireSquareAspectRatio": true,
 ///   "EnableArchiveVersioning": true,
-///   "ArchiveKeepDays": 30
+///   "ArchiveKeepDays": 90
 /// }
 /// 
 /// All paths are resolved through the cascade:
@@ -90,11 +90,15 @@ public sealed class ImageStorageOptions
 
     /// <summary>
     /// Number of days to keep archived image files before cleanup.
-    /// Default: 30
+    /// Default: <see cref="ConfigSettingKeys.ImageStorageArchiveKeepDaysDefault"/> (ninety days)
     /// Used for retention policy when archive cleanup is run.
     /// Set to 0 to disable automatic cleanup.
     /// </summary>
-    public int ArchiveKeepDays { get; init; } = 30;
+    /// <remarks>
+    /// The value here is only the fallback for a machine whose configuration file does not carry the key. The
+    /// period in force is the stored setting, which the storage screen owns (FR-037).
+    /// </remarks>
+    public int ArchiveKeepDays { get; init; } = ConfigSettingKeys.ImageStorageArchiveKeepDaysDefault;
 
     /// <summary>
     /// Validates that the configuration is well-formed.

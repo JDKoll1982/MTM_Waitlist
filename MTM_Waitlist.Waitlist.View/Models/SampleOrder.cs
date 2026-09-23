@@ -104,23 +104,46 @@ public sealed class SampleOrder : INotifyPropertyChanged
     public bool HasLine2Problem => !string.IsNullOrWhiteSpace(Line2Problem);
 
     public long? WorkCenterCatalogId { get; set; }
-    public string ResolvedImagePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The part this request is <b>about</b>, or empty when the request names no part at all. It is the material
+    /// the card draws a picture of: the coil or flatstock the job holds, the die the request is for, or the
+    /// component the operator picked. It is captured where the card's own identifier is resolved, so the picture
+    /// and the second line can never disagree about which part the request is about.
+    /// </summary>
+    public string MaterialPartNumber { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The store scope the material part belongs to — which of the systems it is a part of. Empty when the
+    /// request names no part. A Visual part and a WIP part that share a number are two parts, so the scope
+    /// travels beside the number and never instead of it (FR-002).
+    /// </summary>
+    public string MaterialPartScope { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The material part's picture, resolved by the list before this row reached the bound collection. Carried
+    /// rather than computed: the model is plain data and knows neither a storage root nor a picture rule.
+    /// Empty when nothing resolved, which draws the shared placeholder.
+    /// </summary>
+    public string ResolvedPartImagePath { get; set; } = string.Empty;
+
     public string WorkCenterImagePath { get; set; } = string.Empty;
 
     /// <summary>
-    /// The picture the card draws: the picture configured for this request's Item, and the application's
-    /// no-image placeholder when none is configured.
+    /// The picture the card draws: the <b>material part's</b> picture, and the application's one shared
+    /// no-image placeholder when the request names no part or its part cannot be pictured.
     /// </summary>
     /// <remarks>
-    /// There is no built-in artwork to fall back to. An Item's picture is a setting, so a request for an Item
-    /// nobody has given a picture to says so — with the placeholder — rather than borrowing a picture of some
-    /// other thing. The converter applies the picture rule as well, so a path that names a missing, unreadable
-    /// or empty file lands on the placeholder too.
+    /// The picture for the kind of request is deliberately not drawn here. A card that showed its Item's artwork
+    /// would be showing a picture of a category where the person needs to recognise a part (FR-019), and the
+    /// family's artwork standing in for a part that has none is exactly what FR-015 and FR-020 forbid. One
+    /// placeholder, and no other stand-in. The converter applies the picture rule as well, so a path that names
+    /// a missing, unreadable or unusable file lands on the placeholder too.
     /// </remarks>
     public string EffectiveImagePath =>
-        string.IsNullOrWhiteSpace(ResolvedImagePath)
+        string.IsNullOrWhiteSpace(ResolvedPartImagePath)
             ? ImagePicturePolicy.NoImagePath
-            : ResolvedImagePath;
+            : ResolvedPartImagePath;
 
     /// <summary>The work centre's picture, or the application's no-image placeholder when none resolved.</summary>
     public string EffectiveWorkCenterImagePath =>

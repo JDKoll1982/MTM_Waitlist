@@ -48,6 +48,14 @@ public sealed partial class SettingsPage : Page
         await dialog.ShowAsync();
     }
 
+    /// <summary>Stores the two storage folders and the retention period that are in the boxes.</summary>
+    /// <remarks>
+    /// Through the view model's command for the same reason the cache folder is: the value that is saved is the one
+    /// the command validated, and a test can drive it without a control.
+    /// </remarks>
+    private void SaveStoragePaths_Click(object sender, RoutedEventArgs e) =>
+        ViewModel.SaveStoragePathsCommand.Execute(null);
+
     /// <summary>Stores the picture cache folder that is in the box.</summary>
     /// <remarks>
     /// Through the view model's command rather than the box's own text, so that the value saved is the one the

@@ -23,11 +23,38 @@
         <ListView AutomationProperties.AutomationId="SetupPartSelectionPage_PartList" Grid.Row="1" ItemsSource="{x:Bind ViewModel.Parts, Mode=OneWay}" SelectionMode="Single" SelectedItem="{x:Bind ViewModel.SelectedPart, Mode=TwoWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:SetupPartResult">
-                    <StackPanel AutomationProperties.Name="{x:Bind PartNumber}" Padding="14" Spacing="6">
-                        <TextBlock Style="{ThemeResource BodyLargeTextBlockStyle}" Text="{x:Bind PartNumber}" />
-                        <TextBlock Text="{x:Bind Description}" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind WorkCenter}" />
-                    </StackPanel>
+                    <!--
+                        One card per part (FR-021). The part's own picture is drawn beside its number, and an entry
+                        with no picture draws the one shared placeholder rather than a blank space (FR-014, FR-018).
+                        The entry is still a list item, so choosing it still selects the part.
+                    -->
+                    <Grid
+                        Margin="4"
+                        ColumnSpacing="12"
+                        AutomationProperties.AutomationId="{x:Bind AutomationId}"
+                        AutomationProperties.Name="{x:Bind PartNumber}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border
+                            MinWidth="72"
+                            MinHeight="72"
+                            Padding="4"
+                            VerticalAlignment="Center"
+                            Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                            CornerRadius="8">
+                            <Image
+                                AutomationProperties.AutomationId="{x:Bind ImageAutomationId}"
+                                Source="{x:Bind ImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                Stretch="Uniform" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Padding="0,6,0,6" Spacing="6">
+                            <TextBlock Style="{ThemeResource BodyLargeTextBlockStyle}" Text="{x:Bind PartNumber}" />
+                            <TextBlock Text="{x:Bind Description}" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind WorkCenter}" />
+                        </StackPanel>
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

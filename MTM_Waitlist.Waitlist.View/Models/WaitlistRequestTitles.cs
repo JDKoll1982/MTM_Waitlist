@@ -111,6 +111,44 @@ public static class WaitlistRequestTitles
     }
 
     /// <summary>
+    /// The <b>material part</b> the request is about, or <see langword="null"/> when the request names no
+    /// material at all.
+    /// </summary>
+    /// <param name="request">The request, whose stored Item and captured answer are read.</param>
+    /// <param name="jobAvailability">The requesting job, which is where a material the request never stored comes from.</param>
+    /// <returns>The part number, or <see langword="null"/>.</returns>
+    /// <remarks>
+    /// This is the same value the card's identifier resolves <c>{part_number}</c> from — the coil or the flatstock
+    /// the job holds, or the job's own part number for an Item that is about no particular material — stated once
+    /// so the picture the card draws and the part the card names can never disagree (FR-005, FR-019). A request
+    /// that names no material answers null rather than a guess, and its card draws the one shared placeholder
+    /// instead of artwork chosen on its behalf (FR-014, FR-020).
+    /// </remarks>
+    public static string? ResolveMaterialPartNumber(
+        WaitlistRequest? request,
+        RequestJobPartAvailability? jobAvailability = null)
+        => ResolveMaterialPartNumber(request?.ItemDefinition, jobAvailability);
+
+    /// <summary>
+    /// The same rule, stated on the Item, so a surface that is drawing a request the store has not been asked
+    /// about yet — the confirmation step and the preview — names and pictures the same part the card will.
+    /// </summary>
+    /// <param name="item">The catalogued Item the request was raised with.</param>
+    /// <param name="jobAvailability">The requesting job.</param>
+    /// <returns>The part number, or <see langword="null"/>.</returns>
+    public static string? ResolveMaterialPartNumber(
+        RequestItemDefinition? item,
+        RequestJobPartAvailability? jobAvailability = null)
+    {
+        if (item is null || NamesToken(item, "part_number") is false)
+        {
+            return null;
+        }
+
+        return Trimmed(PartNumberFor(item, jobAvailability));
+    }
+
+    /// <summary>
     /// The part a request is <b>about</b>, for the Items whose identifier names <c>{part_number}</c>.
     /// <para>
     /// An Item that is about a material the job holds names <b>that material's own number</b> — the coil or the

@@ -264,4 +264,69 @@ public sealed class ImageCacheSyncServiceTests
             ImageCachePaths.ResolveDunnageCacheFolder(),
             "With no receiving-application cache on this machine the pictures go into our own folder.");
     }
+
+    // ── The part collections are left to the part cache store (US7, FR-030) ─────────────────────────────────────
+
+    /// <summary>Writes a picture in one of the shape a run leaves to the part store.</summary>
+    private void WritePartCollectionPicture(string collectionFolder, string partFileName)
+    {
+        var path = Path.Combine(_shareRoot, collectionFolder, "MMC", partFileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllBytes(path, [5, 5, 5, 5]);
+    }
+
+    private ImageCacheSource PictureSource() =>
+        new(
+            "waitlist pictures",
+            _shareRoot,
+            _cacheRoot,
+            PartPictureLayout.PartCollectionFolders,
+            ArchiveKeepDays: 0);
+
+    [TestMethod]
+    public void TheTwoPartCollectionsAreNotMirroredInOnePassAtStartup()
+    {
+        WriteSharedPicture(@"Waitlist\request_item\pickup-coil.png");
+        WritePartCollectionPicture(PartPictureLayout.VisualCollection, "MMC-1.png");
+        WritePartCollectionPicture(PartPictureLayout.WipCollection, "MMC-1.png");
+
+        var result = ImageCacheSyncService.Synchronize([PictureSource()]);
+
+        Assert.AreEqual(
+            1,
+            result.Copied,
+            "Only the application's own pictures are mirrored; a part's picture is copied when that part is first drawn.");
+        Assert.IsTrue(File.Exists(Path.Combine(_cacheRoot, "Waitlist", "request_item", "pickup-coil.png")));
+        Assert.IsFalse(Directory.Exists(Path.Combine(_cacheRoot, PartPictureLayout.VisualCollection)));
+        Assert.IsFalse(Directory.Exists(Path.Combine(_cacheRoot, PartPictureLayout.WipCollection)));
+    }
+
+    [TestMethod]
+    public void APartCollectionCopyLeftByAnEarlierRunIsRemoved()
+    {
+        WriteSharedPicture(@"Waitlist\request_item\pickup-coil.png");
+        WritePartCollectionPicture(PartPictureLayout.VisualCollection, "MMC-1.png");
+
+        var staleCopy = Path.Combine(_cacheRoot, PartPictureLayout.VisualCollection, "MMC", "MMC-1.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(staleCopy)!);
+        File.WriteAllBytes(staleCopy, [5, 5, 5, 5]);
+
+        var result = ImageCacheSyncService.Synchronize([PictureSource()]);
+
+        Assert.AreEqual(1, result.Removed, "A part picture is the part store's to keep, not the mirror's.");
+        Assert.IsFalse(File.Exists(staleCopy));
+    }
+
+    [TestMethod]
+    public void ACollectionTheSourceDoesNotNameIsStillMirrored()
+    {
+        WriteSharedPicture(@"Visual\MMC\MMC-1.png");
+
+        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+
+        Assert.AreEqual(
+            1,
+            result.Copied,
+            "Only a source that names a folder as excluded leaves it alone, so the Dunnage tree is untouched by this rule.");
+    }
 }

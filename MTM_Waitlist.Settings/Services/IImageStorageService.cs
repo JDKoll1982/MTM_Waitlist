@@ -67,6 +67,28 @@ public interface IImageStorageService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Validates an image and stores it at a path the caller has already laid out, relative to the configured
+    /// picture root.
+    /// </summary>
+    /// <param name="sourceFilePath">The full path to the source image file</param>
+    /// <param name="relativePath">
+    /// Where the file belongs, relative to the configured root — for example <c>Visual/MMC/MMC0001000.png</c>.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token for the operation</param>
+    /// <returns>StorageResult holding the same relative path on success, or the validation failure</returns>
+    /// <remarks>
+    /// The other copy entry point names the file after the scope and the item; a part picture is named after the
+    /// part and kept in its family folder instead, so the caller decides the layout and this method decides
+    /// whether the file may be stored and what happens to the picture already there. Replacing a picture archives
+    /// the one it replaces, exactly as the item path does.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">If any parameter is null or empty</exception>
+    Task<ImageStorageResult> CopyImageToRelativePathAsync(
+        string sourceFilePath,
+        string relativePath,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Checks if the configured image share folder is currently accessible.
     /// Useful for pre-flight checks before attempting to save images.
     /// </summary>

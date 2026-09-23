@@ -8,6 +8,7 @@ using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 
@@ -38,6 +39,12 @@ namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAware
 {
     private readonly INavigationService _navigationService;
+
+    /// <summary>
+    /// The reader this step resolves each die's picture through, before the card reaches the bound collection. Null
+    /// on a headless host, which leaves every card on the one shared placeholder rather than drawing a blank space.
+    /// </summary>
+    private readonly IPartPictureResolver? _partPictureResolver;
 
     private NewRequestFlowState? _state;
 
@@ -71,12 +78,15 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
     /// <summary>The dies the requesting job carries, in the job's own order, marked where already chosen.</summary>
     public ObservableCollection<NewRequestDieOption> Options { get; } = new();
 
-    public NewRequestDieViewModel(INavigationService navigationService)
+    public NewRequestDieViewModel(
+        INavigationService navigationService,
+        IPartPictureResolver? partPictureResolver = null)
     {
         _navigationService = navigationService;
+        _partPictureResolver = partPictureResolver;
     }
 
-    public void OnNavigatedTo(object parameter)
+    public async void OnNavigatedTo(object parameter)
     {
         if (parameter is not NewRequestFlowState state || state.Item is null)
         {
@@ -88,7 +98,7 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
         WorkCenterText = $"Work Center: {state.WorkCenter}";
         UnavailableMessage = string.Empty;
         IsUnavailableVisible = false;
-        LoadCards(state);
+        await LoadCardsAsync(state).ConfigureAwait(true);
     }
 
     public void OnNavigatedFrom()
@@ -100,13 +110,24 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
     /// step never hides what they picked. A job carrying no die leaves the step empty and says why, rather than
     /// offering a card that stands for nothing (FR-055, FR-026).
     /// </summary>
-    private void LoadCards(NewRequestFlowState state)
+    /// <remarks>
+    /// Each die's picture is resolved here, where the resolver is in hand, and carried on the card: the card draws
+    /// a value it was handed rather than asking for one while it renders (FR-018).
+    /// </remarks>
+    private async Task LoadCardsAsync(NewRequestFlowState state)
     {
         Options.Clear();
 
         foreach (var die in state.Availability?.Dies ?? Array.Empty<RequestDiePart>())
         {
-            Options.Add(CreateOption(die, state));
+            Options.Add(new NewRequestDieOption
+            {
+                Die = die,
+                Title = die.Label,
+                Summary = die.Summary,
+                ImagePath = await ResolvePartPictureAsync(die.PartNumber).ConfigureAwait(true),
+                IsSelected = WasChosen(die, state),
+            });
         }
 
         if (Options.Count == 0)
@@ -120,6 +141,32 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
         StartupDebugLog.Info(
             "NewRequestDie",
             $"Die step for work center '{state.WorkCenter}' bound {Options.Count} card(s) for item '{state.Item?.Id}'.");
+    }
+
+    /// <summary>The part's picture, or the one shared placeholder when the part cannot be pictured (FR-014, FR-023).</summary>
+    private async Task<string> ResolvePartPictureAsync(string? partNumber)
+    {
+        if (_partPictureResolver is null || string.IsNullOrWhiteSpace(partNumber))
+        {
+            return ImagePicturePolicy.NoImagePath;
+        }
+
+        try
+        {
+            var resolved = await _partPictureResolver
+                .ResolvePartPicturePathAsync(PartPictureLayout.VisualPartScope, partNumber.Trim())
+                .ConfigureAwait(true);
+
+            return string.IsNullOrWhiteSpace(resolved) ? ImagePicturePolicy.NoImagePath : resolved;
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "NewRequestDie",
+                ex,
+                $"Resolving the picture for die '{partNumber}' failed; the card will draw the no-image placeholder.");
+            return ImagePicturePolicy.NoImagePath;
+        }
     }
 
     /// <summary>
@@ -197,14 +244,6 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
         IsUnavailableVisible = false;
         UnavailableMessage = string.Empty;
     }
-
-    private static NewRequestDieOption CreateOption(RequestDiePart die, NewRequestFlowState state) => new()
-    {
-        Die = die,
-        Title = die.Label,
-        Summary = die.Summary,
-        IsSelected = WasChosen(die, state),
-    };
 
     /// <summary>
     /// Whether the operator already chose this die: either it is in the list the step recorded, or — for a state

@@ -168,4 +168,26 @@ public sealed class ImageCachePathsTests
             ImageCachePaths.SetCacheRoot(null);
         }
     }
+
+    /// <summary>
+    /// The two part collections keep their own cache folders, named for the collections themselves. A Visual part
+    /// and a WIP part may share a part number, so a shared folder would make one copy stand for two parts
+    /// (FR-002, FR-030).
+    /// </summary>
+    [TestMethod]
+    public void TheTwoPartCollectionsKeepTheirOwnCacheFolders()
+    {
+        var visual = ImageCachePaths.PartCollectionCacheFolder(PartPictureLayout.VisualCollection);
+        var wip = ImageCachePaths.PartCollectionCacheFolder(PartPictureLayout.WipCollection);
+
+        Assert.AreNotEqual(visual, wip, "The two systems must not share one cache folder.");
+        Assert.IsTrue(visual.EndsWith(PartPictureLayout.VisualCollection, StringComparison.Ordinal));
+        Assert.IsTrue(wip.EndsWith(PartPictureLayout.WipCollection, StringComparison.Ordinal));
+
+        // The same file name in the two collections is two different files on this machine.
+        Assert.AreNotEqual(
+            ImageCachePaths.CachePathFor(visual, "MMC/MMC0001000.png"),
+            ImageCachePaths.CachePathFor(wip, "MMC/MMC0001000.png"),
+            "A number shared by the two systems must resolve to two local copies, never to one file.");
+    }
 }

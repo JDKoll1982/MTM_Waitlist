@@ -4,6 +4,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Setup.Services;
 
@@ -101,22 +102,18 @@ public sealed class ActiveJobItemResolverService : IActiveJobItemResolverService
     /// legacy/mis-tagged part still lands in the correct bucket (e.g. the sample
     /// <c>MMF0001154</c> tagged Component still resolves as Flatstock).
     /// </summary>
+    /// <remarks>
+    /// The prefix-to-family mapping itself lives in <see cref="PartPictureLayout"/>, because a part's family also
+    /// decides which folder its picture is stored in and read from. Two copies of that mapping is how a part ends
+    /// up grouped as one family and filed under another, so this method delegates rather than repeating it.
+    /// </remarks>
     internal static string CanonicalCategory(SetupSubordinatePart part)
     {
         var partNumber = part.PartNumber?.Trim() ?? string.Empty;
-        if (partNumber.StartsWith("MMC", StringComparison.OrdinalIgnoreCase))
+        var prefixFamily = PartPictureLayout.FamilyFor(partNumber);
+        if (prefixFamily is not null)
         {
-            return "Coil";
-        }
-
-        if (partNumber.StartsWith("MMF", StringComparison.OrdinalIgnoreCase))
-        {
-            return "Flatstock";
-        }
-
-        if (partNumber.StartsWith("FGT", StringComparison.OrdinalIgnoreCase))
-        {
-            return "Die";
+            return prefixFamily;
         }
 
         var stored = part.Category?.Trim() ?? string.Empty;

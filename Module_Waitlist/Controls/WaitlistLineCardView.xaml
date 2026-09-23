@@ -35,7 +35,9 @@
                 Background="{Binding AccentBrush, ElementName=Root}"
                 CornerRadius="6" />
 
-            <!-- The Item's image + badge (fixed square, not stretched). -->
+            <!-- The material part's picture + badge (fixed square, not stretched). This is the part the request is
+                 about, never the picture for the kind of request, and never the part's family's artwork: a request
+                 whose material cannot be pictured draws the one shared placeholder (FR-019, FR-020). -->
             <Border
                 Grid.Row="0"
                 Grid.RowSpan="3"
@@ -50,6 +52,7 @@
                     <Image
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
+                        AutomationProperties.AutomationId="WaitlistLineCardView_PartPicture"
                         Source="{Binding Order.EffectiveImagePath, ElementName=Root, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                         Stretch="Uniform" />
 

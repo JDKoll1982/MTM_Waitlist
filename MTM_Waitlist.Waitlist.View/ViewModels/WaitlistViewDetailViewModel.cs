@@ -26,6 +26,13 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     private readonly IImageLocationService? _imageLocationService;
     private readonly IRequestItemConfigurationService? _itemConfigurationService;
     private readonly IRequestJobPartAvailabilityProvider? _jobAvailabilityProvider;
+
+    /// <summary>
+    /// The reader this page resolves the row's material picture through, so the request page and the list card
+    /// draw the same picture of the same part (FR-003, FR-019). Null on a headless host, which leaves the page
+    /// on the one shared placeholder.
+    /// </summary>
+    private readonly IPartPictureResolver? _partPictureResolver;
     private readonly Dictionary<string, RequestJobPartAvailability> _jobAvailabilityCache = new(StringComparer.OrdinalIgnoreCase);
     private readonly string _currentEmployeeNumber;
     private readonly string _currentEmployeeName;
@@ -177,7 +184,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         DispatcherQueue? dispatcherQueue = null,
         IWaitlistMessageSeenStore? messageSeenStore = null,
         IRequestItemConfigurationService? itemConfigurationService = null,
-        IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null)
+        IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null,
+        IPartPictureResolver? partPictureResolver = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -189,6 +197,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _inventoryService = inventoryService;
         _itemConfigurationService = itemConfigurationService;
         _jobAvailabilityProvider = jobAvailabilityProvider;
+        _partPictureResolver = partPictureResolver;
         _currentEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
         _currentEmployeeName = startupState?.EmployeeName?.Trim() ?? string.Empty;
         _dispatcherQueue = dispatcherQueue;
@@ -955,7 +964,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
     private void OnImageLocationChanged(ImageLocationChangedEventArgs args)
     {
-        if (Item is null || _imageLocationService is null || !_imageLocationService.IsInitialized)
+        if (Item is null)
         {
             return;
         }
@@ -965,26 +974,17 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
     private async Task RefreshResolvedPathsAsync(SampleOrder item)
     {
+        // The row's picture is its material part's, resolved by the same rule the list uses. It is resolved first
+        // and unconditionally, because it does not depend on the image-location service at all: this page used to
+        // take the Item's configured picture here, which is a picture of the kind of request rather than of the
+        // part the person has in front of them (FR-019). Nothing resolved leaves the row empty, and the page
+        // draws the one shared placeholder (FR-014).
+        item.ResolvedPartImagePath = await ResolvePartPictureAsync(item).ConfigureAwait(false);
+
         if (_imageLocationService is null || !_imageLocationService.IsInitialized)
         {
+            OnPropertyChanged(nameof(Item));
             return;
-        }
-
-        // Both pictures follow the card's rule rather than taking whatever the service answered with: a resolved
-        // path is only worth taking when it is something other than the resolver's "nothing configured" placeholder
-        // and when the file it names actually carries a picture. This page used to take the resolver's answer
-        // unconditionally, so a request whose Item had no configured picture lost the picture it already had the
-        // moment an image location changed.
-        if (!string.IsNullOrWhiteSpace(item.ItemCode))
-        {
-            var resolvedItemPath = await _imageLocationService
-                .ResolveRequestItemImagePathAsync(item.ItemCode)
-                .ConfigureAwait(false);
-
-            if (RequestImagePathPolicy.IsUsableResolvedPicture(resolvedItemPath))
-            {
-                item.ResolvedImagePath = resolvedItemPath!;
-            }
         }
 
         if (item.WorkCenterCatalogId.HasValue)
@@ -1003,5 +1003,32 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
 
         OnPropertyChanged(nameof(Item));
+    }
+
+    /// <summary>The row's material picture, or empty when the request names no part or its part cannot be pictured.</summary>
+    private async Task<string> ResolvePartPictureAsync(SampleOrder item)
+    {
+        if (_partPictureResolver is null
+            || string.IsNullOrWhiteSpace(item.MaterialPartNumber)
+            || string.IsNullOrWhiteSpace(item.MaterialPartScope))
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            return await _partPictureResolver
+                .ResolvePartPicturePathAsync(item.MaterialPartScope, item.MaterialPartNumber)
+                .ConfigureAwait(false)
+                ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "WaitlistDetail",
+                ex,
+                $"Resolving the picture for part '{item.MaterialPartNumber}' failed; the page will draw the no-image placeholder.");
+            return string.Empty;
+        }
     }
 }

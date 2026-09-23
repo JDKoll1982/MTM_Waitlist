@@ -39,14 +39,48 @@ public sealed class AppStoragePathsTests
     /// A picture is stored relative to the root, which is what lets the root be changed in Settings without
     /// orphaning a row and what makes two machines agree about where the file is.
     /// </summary>
+    /// <remarks>
+    /// Both recorded layouts are asserted here, because the reader has to answer for both: 008-part-pictures
+    /// re-laid the share out under one folder per collection, and a value written before that move names the old
+    /// place. The two resolve to the same file, which is what makes the move safe to interrupt.
+    /// </remarks>
     [TestMethod]
     public void AStoredPicturePathIsJoinedToTheRoot()
     {
         Assert.AreEqual(
-            Path.Combine(AppStoragePaths.ImagesRootDefault, "request_item", "pickup-coil.png"),
+            Path.Combine(AppStoragePaths.ImagesRootDefault, "Waitlist", "request_item", "pickup-coil.png"),
             AppStoragePaths.ResolvePicturePath(
                 AppStoragePaths.ImagesRootDefault,
-                @"request_item\pickup-coil.png"));
+                @"request_item\pickup-coil.png"),
+            "A value in the pre-move layout resolves under the collection folder it belongs to.");
+
+        Assert.AreEqual(
+            Path.Combine(AppStoragePaths.ImagesRootDefault, "Waitlist", "request_item", "pickup-coil.png"),
+            AppStoragePaths.ResolvePicturePath(
+                AppStoragePaths.ImagesRootDefault,
+                "Waitlist/request_item/pickup-coil.png"),
+            "A value already in the move's layout is taken as it stands.");
+
+        Assert.AreEqual(
+            Path.Combine(AppStoragePaths.ImagesRootDefault, "Visual", "MMC", "MMC0001000.png"),
+            AppStoragePaths.ResolvePicturePath(
+                AppStoragePaths.ImagesRootDefault,
+                "Visual/MMC/MMC0001000.png"),
+            "A part picture names its own collection, so it is never re-prefixed with the application's.");
+    }
+
+    /// <summary>
+    /// A folder the move does not recognise is left exactly where it is. Guessing would put a picture somewhere no
+    /// reader looks.
+    /// </summary>
+    [TestMethod]
+    public void AnUnrecognisedLeadingFolderIsLeftWhereItIs()
+    {
+        Assert.AreEqual(
+            Path.Combine(AppStoragePaths.ImagesRootDefault, "something-else", "pickup-coil.png"),
+            AppStoragePaths.ResolvePicturePath(
+                AppStoragePaths.ImagesRootDefault,
+                "something-else/pickup-coil.png"));
     }
 
     /// <summary>

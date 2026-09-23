@@ -43,7 +43,9 @@ public sealed class SampleOrderTests
         {
             Title = "Pickup",
             Subtitle = "MMC0001000",
-            ResolvedImagePath = @"X:\Software Development\Live Applications\MTM_Waitlist\Images\request_item_pickup-coil.png",
+            MaterialPartNumber = "MMC0001000",
+            MaterialPartScope = "visual_part",
+            ResolvedPartImagePath = @"X:\Software Development\Live Applications\MTM_Waitlist\Images\Visual\MMC\MMC0001000.png",
             ItemCode = "pickup-coil",
             RequestedByName = "Ada Lovelace",
             RequestedPressName = "Press 4",
@@ -54,16 +56,72 @@ public sealed class SampleOrderTests
         Assert.AreEqual("Pickup", order.Title, "Line 1 is the Item's umbrella phrase.");
         Assert.AreEqual("MMC0001000", order.Subtitle, "Line 2 is the Item's identifier.");
         Assert.AreEqual("pickup-coil", order.ItemCode, "The row's identity is the Item code the request was raised with.");
+        Assert.AreEqual("MMC0001000", order.MaterialPartNumber, "The row carries the part the request is about.");
+        Assert.AreEqual("visual_part", order.MaterialPartScope, "The row carries which system that part belongs to.");
         Assert.AreEqual(
-            @"X:\Software Development\Live Applications\MTM_Waitlist\Images\request_item_pickup-coil.png",
+            @"X:\Software Development\Live Applications\MTM_Waitlist\Images\Visual\MMC\MMC0001000.png",
             order.EffectiveImagePath,
-            "The picture configured for the Item is what the card draws.");
+            "The material part's resolved picture is what the card draws.");
 
         Assert.AreEqual("Ada Lovelace", order.RequestedByName, "The Requested by row.");
         Assert.AreEqual("Press 4", order.RequestedPressName, "The Press row.");
         Assert.AreEqual("01:20", order.RemainingTimeText, "The Remaining time row.");
         Assert.AreEqual("Waiting 35m", order.WaitingForText, "The Waiting row.");
         Assert.IsTrue(order.HasWaitingFor, "A row that carries a waiting age shows the Waiting row.");
+    }
+
+    /// <summary>
+    /// The card draws the <b>part's</b> picture and nothing else. A request whose material cannot be pictured
+    /// draws the one shared placeholder; it never borrows the picture for the kind of request, and never the
+    /// part's family's artwork (FR-019, FR-020).
+    /// </summary>
+    /// <remarks>
+    /// The row still carries the Item code it was raised with — the request page and the card's lines read it —
+    /// but nothing about the row turns that code into a picture: the only picture the row can draw is the one the
+    /// list resolved for the material part.
+    /// </remarks>
+    [TestMethod]
+    public void SampleOrder_EffectiveImageIsTheMaterialPartsPictureAndThePlaceholderOtherwise()
+    {
+        // A request about a material, pictured.
+        var pictured = new SampleOrder
+        {
+            ItemCode = "pickup-coil",
+            MaterialPartNumber = "MMC0001000",
+            MaterialPartScope = "visual_part",
+            ResolvedPartImagePath = @"X:\Shared\Images\Visual\MMC\MMC0001000.png",
+        };
+
+        Assert.AreEqual(
+            @"X:\Shared\Images\Visual\MMC\MMC0001000.png",
+            pictured.EffectiveImagePath,
+            "A pictured material part is what the card draws.");
+
+        // The same request, with the material named but nothing resolved for it.
+        var unpictured = new SampleOrder
+        {
+            ItemCode = "pickup-coil",
+            MaterialPartNumber = "MMC0001000",
+            MaterialPartScope = "visual_part",
+        };
+
+        Assert.AreEqual(
+            ImagePicturePolicy.NoImagePath,
+            unpictured.EffectiveImagePath,
+            "A material that cannot be pictured draws the one shared placeholder, not a blank and not artwork.");
+
+        // A request that names no material at all — a table assist, a consumable, a dunnage request.
+        var noMaterial = new SampleOrder { ItemCode = "pickup-dunnage" };
+
+        Assert.AreEqual(
+            ImagePicturePolicy.NoImagePath,
+            noMaterial.EffectiveImagePath,
+            "A request that names no part draws the one shared placeholder rather than inventing a picture.");
+
+        Assert.AreEqual(
+            string.Empty,
+            noMaterial.MaterialPartNumber,
+            "A request that names no part says so on the row rather than naming a part it does not have.");
     }
 
     /// <summary>

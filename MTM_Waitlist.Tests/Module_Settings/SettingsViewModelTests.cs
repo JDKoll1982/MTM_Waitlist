@@ -481,14 +481,15 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     /// <summary>
-    /// The picture cache is offered on the picture permission, which Developer and IT Department hold.
+    /// The picture cache is offered on the storage permission, which IT Department and Developer hold.
     /// </summary>
     /// <remarks>
-    /// One gate, not two: "only IT Department and Developer may change it" is answered by the picture screen's own
-    /// key, and a second permission for the same subject would be a second thing to keep in step with the seed.
+    /// It is not offered on the picture permission, and that is the whole point of the move: FR-025 widens the
+    /// picture entitlement to Setup Lead and Plant Manager, so a gate that went on reading it would hand those two
+    /// roles the folder this machine copies pictures from, which FR-017 keeps to IT Department and Developer.
     /// </remarks>
     [TestMethod]
-    public void ThePictureCacheIsOfferedOnlyOnThePicturePermission()
+    public void ThePictureCacheIsOfferedOnlyOnTheStoragePermission()
     {
         var settings = new RecordingLocalSettingsService();
         var resolver = new FakeImageStorageConfigurationResolver();
@@ -497,9 +498,67 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             BuildViewModel(settings, imageStorageConfigurationResolver: resolver).IsPictureCachePanelVisible,
             "With the permission not held the section must not be offered at all.");
 
-        Assert.IsTrue(
+        Assert.IsFalse(
             BuildViewModel(settings, [PermissionKeys.SettingsPartPictures], imageStorageConfigurationResolver: resolver)
+                .IsPictureCachePanelVisible,
+            "The picture entitlement must no longer open the storage panel: FR-025 widens it past the roles FR-017 names.");
+
+        Assert.IsTrue(
+            BuildViewModel(settings, [PermissionKeys.SettingsStoragePaths], imageStorageConfigurationResolver: resolver)
                 .IsPictureCachePanelVisible);
+    }
+
+    /// <summary>
+    /// The storage folders are offered on the storage permission and on nothing else.
+    /// </summary>
+    [TestMethod]
+    public void TheStorageFoldersAreOfferedOnlyOnTheStoragePermission()
+    {
+        var resolver = new FakeImageStorageConfigurationResolver();
+
+        Assert.IsFalse(
+            BuildViewModel(new RecordingLocalSettingsService(), imageStorageConfigurationResolver: resolver)
+                .IsStoragePathsPanelVisible);
+
+        Assert.IsFalse(
+            BuildViewModel(
+                new RecordingLocalSettingsService(),
+                [PermissionKeys.SettingsPartPictures],
+                imageStorageConfigurationResolver: resolver)
+                .IsStoragePathsPanelVisible,
+            "The picture entitlement is not the storage entitlement.");
+
+        Assert.IsTrue(
+            BuildViewModel(
+                new RecordingLocalSettingsService(),
+                [PermissionKeys.SettingsStoragePaths],
+                imageStorageConfigurationResolver: resolver)
+                .IsStoragePathsPanelVisible);
+    }
+
+    /// <summary>Both storage folders and the retention period are stored for every computer in one action.</summary>
+    [TestMethod]
+    public void SavingTheStorageFoldersStoresAllThreeValuesForEveryUser()
+    {
+        var configuration = new FakeConfigSettingsValueService();
+        var viewModel = BuildViewModel(
+            new RecordingLocalSettingsService(),
+            [PermissionKeys.SettingsStoragePaths],
+            configSettingsValueService: configuration,
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
+
+        viewModel.PictureFolderInput = @"\\share\pictures";
+        viewModel.KeysFolderInput = @"\\share\keys";
+        viewModel.ArchiveKeepDaysInput = 90;
+        viewModel.SaveStoragePathsCommand.Execute(null);
+
+        var saved = configuration.SavedValues.ToDictionary(value => value.SettingKey, StringComparer.Ordinal);
+        Assert.AreEqual(@"\\share\pictures", saved[ConfigSettingKeys.ImageStorageSharedFolderPath].SettingValue);
+        Assert.AreEqual(@"\\share\keys", saved[ConfigSettingKeys.KeysFolderPath].SettingValue);
+        Assert.AreEqual(90L, saved[ConfigSettingKeys.ImageStorageArchiveKeepDays].SettingValueInt);
+        Assert.IsTrue(
+            saved.Values.All(value => value.ScopeType == "all_users" && value.ScopeKey == "all_users"),
+            "A person-scoped row would leave every other machine unchanged.");
     }
 
     /// <summary>
@@ -514,7 +573,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     {
         var viewModel = BuildViewModel(
             new RecordingLocalSettingsService(),
-            [PermissionKeys.SettingsPartPictures]);
+            [PermissionKeys.SettingsStoragePaths]);
 
         Assert.IsFalse(viewModel.IsPictureCachePanelVisible);
     }
@@ -528,7 +587,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
             new RecordingLocalSettingsService(),
-            [PermissionKeys.SettingsPartPictures],
+            [PermissionKeys.SettingsStoragePaths],
             configSettingsValueService: configuration,
             imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
 
@@ -548,7 +607,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
             new RecordingLocalSettingsService(),
-            [PermissionKeys.SettingsPartPictures],
+            [PermissionKeys.SettingsStoragePaths],
             configSettingsValueService: configuration,
             imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
 
@@ -579,7 +638,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
         var viewModel = BuildViewModel(
             new RecordingLocalSettingsService(),
-            [PermissionKeys.SettingsPartPictures],
+            [PermissionKeys.SettingsStoragePaths],
             imageCacheSyncService: cache,
             imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
 

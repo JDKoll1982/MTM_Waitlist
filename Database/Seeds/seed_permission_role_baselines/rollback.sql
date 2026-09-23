@@ -20,3 +20,17 @@ DELETE FROM config_settings_values
 WHERE scope_type = 'role'
   AND setting_key LIKE 'permission.%'
   AND value_type = 'bool';
+
+-- Feature 008-part-pictures (task T006) widened `permission.settings.part_pictures` to two more roles: `setup_lead`
+-- and `plant_manager`. Reversing that widening is this UPDATE, which puts exactly those two rows back to the value
+-- this seed shipped before the change and touches no other row. The DELETE above is the seed's own full reversal,
+-- so on a whole-seed rollback these two rows are already gone and this statement changes nothing; it is here for a
+-- store where only the widening is being reversed. `permission.settings.storage_paths` is deliberately NOT named:
+-- that key was not widened and its two holders keep it (FR-017).
+UPDATE config_settings_values
+SET setting_value_bool = 0,
+    updated_utc = UTC_TIMESTAMP()
+WHERE scope_type = 'role'
+  AND value_type = 'bool'
+  AND setting_key = 'permission.settings.part_pictures'
+  AND scope_key IN ('role:setup_lead', 'role:plant_manager');

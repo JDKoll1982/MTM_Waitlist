@@ -1,6 +1,6 @@
 -- Stored Procedure: sp_config_images_locations_insert
 -- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T094)
+-- Feature: 001-module-mock-visual-fallback (task T094), history row added by 008-part-pictures (task T014)
 --
 -- Purpose: create one image override. Replaces the inline INSERT in
 --          `ImageOverrideWriteService.CreateOverrideAsync` (FR-015).
@@ -20,9 +20,29 @@
 --
 -- Parameter widths are the live column widths, so an over-long value fails here rather than being silently
 -- truncated by the server.
+--
+-- ============================================================
+-- 008-part-pictures: the picture change record (FR-027, task T014)
+-- ============================================================
+-- A first picture writes one row into `config_images_locations_history` with a NULL predecessor. That row is
+-- written by the `AFTER INSERT` trigger below rather than by this procedure, and the reason is the contract above:
+-- this procedure's answer to its caller IS its affected-row count, and MySQL reports, for a CALL, "the value that
+-- it would return for the last statement executed within the procedure" (C API, mysql_affected_rows). A body that
+-- wrapped the insert in BEGIN / START TRANSACTION / COMMIT would therefore report the count of its own COMMIT —
+-- 0 — and every picture write in the application would be read as a database error. A trigger leaves this
+-- statement exactly as it was, so the count the caller checks is still this insert's, while the history row is
+-- written inside the same statement and therefore inside the same transaction: a change is never recorded without
+-- happening, and never happens without being recorded.
+--
+-- Suppressing the record during a migration: the trigger records a first picture, which is what an application
+-- write is. The recorded-path move (sp_config_images_locations_paths_move, T021) also updates image_path, but it is
+-- a layout migration and not a picture change, so it sets the session flag `@mtm_picture_layout_move` and the
+-- update trigger stays silent while it runs.
 -- ============================================================
 
 USE mtm_waitlist;
+
+DROP TRIGGER IF EXISTS trg_config_images_locations_history_on_insert;
 
 DROP PROCEDURE IF EXISTS sp_config_images_locations_insert;
 
@@ -55,3 +75,35 @@ VALUES (
     UTC_TIMESTAMP(),
     UTC_TIMESTAMP()
 );
+
+-- DELIMITER because a trigger body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE TRIGGER trg_config_images_locations_history_on_insert
+AFTER INSERT ON config_images_locations
+FOR EACH ROW
+BEGIN
+    INSERT INTO config_images_locations_history (
+        public_id,
+        image_location_id,
+        scope,
+        scope_item_id,
+        previous_image_path,
+        new_image_path,
+        changed_by_user_id,
+        changed_utc
+    )
+    VALUES (
+        UUID(),
+        NEW.id,
+        NEW.scope,
+        NEW.scope_item_id,
+        NULL,
+        NEW.image_path,
+        NEW.created_by_user_id,
+        NEW.created_utc
+    );
+END$$
+
+DELIMITER ;

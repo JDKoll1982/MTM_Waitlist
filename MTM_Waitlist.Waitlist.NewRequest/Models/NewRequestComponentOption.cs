@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using MTM_Waitlist.Module_Shared.Helpers;
+
 namespace MTM_Waitlist.Module_Waitlist.Models;
 
 /// <summary>
@@ -8,15 +10,14 @@ namespace MTM_Waitlist.Module_Waitlist.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The card's <see cref="ImagePath"/> is a <b>temporary stand-in</b>. Nothing can resolve a Visual or WIP part
-/// number to a picture yet, so every card draws the application's shared no-image placeholder rather than a drawing
-/// invented here. When parts can be pictured, the value this property is given changes and the card, its layout and
-/// its automation names do not.
+/// The card's <see cref="ImagePath"/> is the <b>part's own picture</b>, resolved by the step before the option
+/// reached the collection because the step is where the resolver is in hand. A part the application cannot picture
+/// draws the one shared no-image placeholder — never a blank space, and never artwork standing in for the part
+/// (FR-014, FR-023).
 /// </para>
 /// <para>
-/// <see cref="AutomationId"/> and <see cref="ImageAutomationId"/> exist because the stand-in has to be verifiable:
-/// they name the card and the picture box inside it after the part, so automation can find a specific component's
-/// tile — and prove its placeholder is the one drawn — before any real picture exists.
+/// <see cref="AutomationId"/> and <see cref="ImageAutomationId"/> name the card and the picture box inside it after
+/// the part, so automation can find a specific component's tile and the picture it is drawing.
 /// </para>
 /// </remarks>
 public sealed partial class NewRequestComponentOption : ObservableObject
@@ -33,8 +34,11 @@ public sealed partial class NewRequestComponentOption : ObservableObject
     /// </summary>
     public string Title { get; init; } = string.Empty;
 
-    /// <summary>The picture the card draws — the shared no-image placeholder until part pictures exist.</summary>
-    public string ImagePath { get; init; } = string.Empty;
+    /// <summary>
+    /// The picture the card draws: the part's own picture, and the one shared placeholder when the part cannot be
+    /// pictured. Never empty (FR-023).
+    /// </summary>
+    public string ImagePath { get; init; } = ImagePicturePolicy.NoImagePath;
 
     /// <summary>This card's automation name, unique to the part it offers.</summary>
     public string AutomationId => $"{AutomationIdPrefix}_{PartNumber}";

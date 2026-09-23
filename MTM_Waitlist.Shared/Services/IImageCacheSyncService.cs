@@ -31,14 +31,18 @@ public interface IImageCacheSyncService
 /// <param name="Copied">How many pictures were copied because they were missing or had changed.</param>
 /// <param name="Removed">How many cached pictures were removed because their original is no longer there.</param>
 /// <param name="SourcesSkipped">The sources that could not be read, so nothing under them was touched.</param>
+/// <param name="ArchivesRemoved">
+/// How many replaced pictures were cleaned up because their retention period had passed (FR-011).
+/// </param>
 public sealed record ImageCacheSyncResult(
     int Copied,
     int Removed,
-    IReadOnlyList<string> SourcesSkipped)
+    IReadOnlyList<string> SourcesSkipped,
+    int ArchivesRemoved = 0)
 {
     /// <summary>A run that had nothing to do and nothing to report.</summary>
     public static ImageCacheSyncResult NothingToDo { get; } = new(0, 0, Array.Empty<string>());
 
     /// <summary>Whether anything about the cache changed.</summary>
-    public bool ChangedAnything => Copied > 0 || Removed > 0;
+    public bool ChangedAnything => Copied > 0 || Removed > 0 || ArchivesRemoved > 0;
 }

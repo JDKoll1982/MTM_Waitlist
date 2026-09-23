@@ -61,7 +61,7 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Spacing="8">
-                                        <!-- The picture box. It draws the shared no-image placeholder until part pictures exist, and it is named after the part so the stand-in can be found by automation. -->
+                                        <!-- The picture box. It draws the part's own picture, and the one shared no-image placeholder when the part cannot be pictured: never a blank space, and never artwork standing in for the part (FR-014, FR-018, FR-023). -->
                                         <Border
                                             Width="84"
                                             Height="84"

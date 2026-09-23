@@ -26,26 +26,25 @@ public sealed partial class NewRequestDetailsPage : Page
         InitializeComponent();
     }
 
-    private void OnOptionComboSelectionChanged(object sender, SelectionChangedEventArgs e)
+    /// <summary>
+    /// Chooses the answer whose card was clicked, and moves the flow on exactly as a drop-down selection did.
+    /// </summary>
+    private void OnOptionCardClick(object sender, ItemClickEventArgs e)
     {
-        if (OptionCombo.SelectedItem is not string chosen)
+        if (e.ClickedItem is not AnswerOptionCard card)
         {
             return;
         }
 
-        // Coming Back to this step restores the answer it was entered with, and the restored value arrives here as
-        // a selection change. Comparing against the answer the view model recorded on the way in is what tells that
-        // apart from a pick — the step must stand so the answer can be corrected. Reading it from the view model
-        // rather than caching it in a load handler matters: the binding applies the restored value while the page is
-        // still loading, so a cache filled in Loaded would be set after this had already fired once.
-        if (string.Equals(chosen, ViewModel.RestoredAnswer, StringComparison.Ordinal))
+        // Coming Back to this step restores the answer it was entered with, and that restore is drawn as the card
+        // already chosen. Comparing against the answer the view model recorded on the way in is what tells that
+        // apart from a pick — the step must stand so the answer can be corrected.
+        if (string.Equals(card.Answer, ViewModel.RestoredAnswer, StringComparison.Ordinal))
         {
             return;
         }
 
-        // Written here rather than left to the TwoWay binding, whose update order relative to this event is not
-        // something to rely on.
-        ViewModel.SelectedOption = chosen;
+        ViewModel.SelectAnswer(card.Answer);
         ViewModel.ContinueCommand.Execute(null);
     }
 

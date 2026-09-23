@@ -106,6 +106,41 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
 
     public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
 
+    /// <summary>
+    /// The buildings the step's flyout offers: every building except the one in effect (FR-022).
+    /// </summary>
+    /// <remarks>
+    /// Rebuilt when the flyout opens and whenever the building changes, because the one value that decides its
+    /// contents is the building in effect. A building has no picture of its own, so each card draws the shared
+    /// no-image picture and is still offered and still selectable (FR-023).
+    /// </remarks>
+    public ObservableCollection<BuildingCardOption> BuildingCards { get; } = new();
+
+    /// <summary>Rebuilds the flyout's entries, leaving out the building currently in effect.</summary>
+    public void RefreshBuildingCards()
+    {
+        var current = SelectedBuilding;
+
+        BuildingCards.Clear();
+
+        foreach (var building in Buildings.Where(building =>
+                     !string.IsNullOrWhiteSpace(building)
+                     && !string.Equals(building, current, StringComparison.OrdinalIgnoreCase)))
+        {
+            BuildingCards.Add(new BuildingCardOption(building, "NewRequestWorkCenterPage_BuildingCard"));
+        }
+    }
+
+    /// <summary>Chooses a building from the flyout, which re-reads the work centers for it.</summary>
+    /// <param name="building">The building that was chosen. A blank one changes nothing.</param>
+    public void SelectBuilding(string? building)
+    {
+        if (!string.IsNullOrWhiteSpace(building))
+        {
+            SelectedBuilding = building;
+        }
+    }
+
     public string OtherWorkCentersHeader => IsOtherWorkCentersExpanded
         ? "Hide Other Work Centers"
         : "Show Other Work Centers";
@@ -146,6 +181,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
 
         _buildingSelectionService.BuildingChanged += OnBuildingChanged;
         SelectedBuilding = _buildingSelectionService.SelectedBuilding;
+        RefreshBuildingCards();
         FilterText = string.Empty;
 
         await LoadWorkCentersAsync().ConfigureAwait(true);

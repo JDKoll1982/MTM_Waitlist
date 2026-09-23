@@ -1,13 +1,16 @@
 ﻿using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Reflection;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Options;
 using Microsoft.UI.Xaml;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Permissions;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -33,6 +36,13 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     internal const string PermissionsViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.PermissionsViewModel";
 
     /// <summary>
+    /// The part-picture screen's view model, routed the same way (008-part-pictures). It is reached by name for
+    /// the same reason the two Administration pages are: this screen must not hold a reference to a type the story
+    /// phase that builds the page owns.
+    /// </summary>
+    internal const string PartPictureManagerViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.PartPictureManagerViewModel";
+
+    /// <summary>
     /// Every permission this screen asks about, in one read: the four Settings subjects it gates itself, the two
     /// Administration entries it offers, and the two its child view models gate on (FR-056).
     /// </summary>
@@ -46,6 +56,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         PermissionKeys.SettingsIgnoredLocations,
         PermissionKeys.SettingsHotWorkCenters,
         PermissionKeys.SettingsPartPictures,
+        PermissionKeys.SettingsStoragePaths,
         PermissionKeys.SettingsCacheRefresh,
         PermissionKeys.SettingsUrgencyMinutes,
         PermissionKeys.SettingsComputers,
@@ -74,9 +85,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         nameof(IsNewRequestAlertsPanelVisible),
         nameof(IsUrgencyAllotmentsPanelVisible),
         nameof(IsImageLocationSettingsPanelVisible),
+        nameof(IsStoragePathsPanelVisible),
         nameof(IsPictureCachePanelVisible),
         nameof(IsUserManagementEntryVisible),
         nameof(IsPermissionsEntryVisible),
+        nameof(IsPartPicturesEntryVisible),
     ];
 
     private readonly IThemeSelectorService _themeSelectorService;
@@ -225,6 +238,79 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         get; set;
     }
 
+    /// <summary>
+    /// The picture folder that is in effect for every computer, as the store holds it (FR-009, FR-010).
+    /// </summary>
+    [ObservableProperty]
+    public partial string PictureFolderPath
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>What the picture folder box holds, kept apart from the saved value for the same reason as the cache folder.</summary>
+    [ObservableProperty]
+    public partial string PictureFolderInput
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>The folder holding the key files, as the store holds it (FR-016).</summary>
+    [ObservableProperty]
+    public partial string KeysFolderPath
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>What the key folder box holds.</summary>
+    [ObservableProperty]
+    public partial string KeysFolderInput
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>
+    /// How many days a replaced picture is kept before it is cleaned up (FR-037).
+    /// </summary>
+    /// <remarks>
+    /// A <see cref="double"/> because it is bound to a <c>NumberBox</c>, whose value is one; it is rounded to a
+    /// whole number of days before it is stored, so a half-typed figure never reaches the store.
+    /// </remarks>
+    [ObservableProperty]
+    public partial double ArchiveKeepDaysInput
+    {
+        get; set;
+    } = ConfigSettingKeys.ImageStorageArchiveKeepDaysDefault;
+
+    /// <summary>What the storage panel last did, in a sentence.</summary>
+    [ObservableProperty]
+    public partial string StoragePathsStatusMessage
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>Whether the storage panel is saving, so its button is not started twice.</summary>
+    [ObservableProperty]
+    public partial bool IsStoragePathsBusy
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// One line naming this computer's own configured picture folder when that is not the folder every computer
+    /// reads, and empty when the two agree.
+    /// </summary>
+    /// <remarks>
+    /// The store is the truth (OQ-3, settled by this feature): a computer whose settings file still carries the old
+    /// path must be told so in one sentence rather than left to wonder why a picture is not where it expected
+    /// (FR-010). Reporting it beats silently following the file, which is what would make two computers disagree
+    /// about where one recorded picture lives.
+    /// </remarks>
+    [ObservableProperty]
+    public partial string StoragePathsDisagreementMessage
+    {
+        get; set;
+    } = string.Empty;
+
     public ObservableCollection<ComputerOption> AvailableWorkstations { get; } = new();
 
     public ObservableCollection<string> HotWorkCenters { get; } = new();
@@ -254,6 +340,20 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// <summary>Whether the signed-in person may change the part-picture locations.</summary>
     [ObservableProperty]
     public partial bool CanManageImageLocationSettings
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// Whether the signed-in person may change where the pictures are kept (FR-017).
+    /// </summary>
+    /// <remarks>
+    /// This is <c>permission.settings.storage_paths</c>, which is not the picture entitlement: FR-025 widens the
+    /// picture entitlement to Setup Lead and Plant Manager, and the folders stay with IT Department and Developer.
+    /// Reading the two keys separately is what keeps the widening from handing a Setup Lead the picture root.
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool CanManageStoragePaths
     {
         get; set;
     }
@@ -354,6 +454,34 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// <summary>What the Permissions entry opens, in a sentence.</summary>
     public string PermissionsEntryDescription => "Administration_Permissions.Description".GetLocalized();
 
+    /// <summary>
+    /// The part-picture entry (008-part-pictures, FR-024). Offered to an account holding the picture entitlement
+    /// and absent for an account without it, exactly as the two Administration entries are: the entitlement is
+    /// read from the permission store and never from a list of role names kept here.
+    /// </summary>
+    public bool IsPartPicturesEntryVisible => CanManageImageLocationSettings && MatchesSearch(
+        "part",
+        "parts",
+        "picture",
+        "pictures",
+        "image",
+        "images",
+        "photo",
+        "photos",
+        "visual",
+        "wip",
+        "missing");
+
+    /// <summary>Opens the part-picture screen.</summary>
+    [RelayCommand]
+    private void OpenPartPictures() => _navigationService.NavigateTo(PartPictureManagerViewModelName);
+
+    /// <summary>The part-picture entry's title.</summary>
+    public string PartPicturesEntryTitle => "Settings_PartPictures_SectionTitle.Text".GetLocalized();
+
+    /// <summary>What the part-picture entry opens, in a sentence.</summary>
+    public string PartPicturesEntryDescription => "Settings_PartPictures_Description.Text".GetLocalized();
+
     public bool IsCacheRefreshPanelVisible => CanRequestCacheRefresh && MatchesSearch(
         "cache",
         "refresh",
@@ -449,16 +577,73 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "item",
         "work center");
 
+    /// <summary>The storage panel's heading.</summary>
+    public string StoragePathsPanelTitle => "Settings_StoragePaths_SectionTitle.Text".GetLocalized();
+
+    /// <summary>What the storage panel holds, in a sentence.</summary>
+    public string StoragePathsPanelDescription => "Settings_StoragePaths_Description.Text".GetLocalized();
+
+    /// <summary>The label on the picture-folder box.</summary>
+    public string StoragePathsImageFolderLabel => "Settings_StoragePaths_ImageFolder.Label".GetLocalized();
+
+    /// <summary>The label on the key-folder box.</summary>
+    public string StoragePathsKeysFolderLabel => "Settings_StoragePaths_KeysFolder.Label".GetLocalized();
+
+    /// <summary>The label on the retention-period box.</summary>
+    public string StoragePathsArchiveKeepDaysLabel => "Settings_StoragePaths_ArchiveKeepDays.Label".GetLocalized();
+
+    /// <summary>The panel's save action.</summary>
+    public string StoragePathsSaveLabel => "Settings_StoragePaths_Save.Label".GetLocalized();
+
+    /// <summary>The line saying that what is shown is what every computer reads.</summary>
+    public string StoragePathsStoreIsTruthText => "Settings_StoragePaths_StoreIsTruth.Text".GetLocalized();
+
+    /// <summary>
+    /// Whether the disagreement line has anything to say.
+    /// </summary>
+    /// <remarks>
+    /// Collapsed rather than empty, so a machine that agrees with the store is not shown a blank line that reads
+    /// as a message that failed to load.
+    /// </remarks>
+    public Visibility StoragePathsDisagreementVisibility =>
+        string.IsNullOrEmpty(StoragePathsDisagreementMessage) ? Visibility.Collapsed : Visibility.Visible;
+
+    partial void OnStoragePathsDisagreementMessageChanged(string value) =>
+        OnPropertyChanged(nameof(StoragePathsDisagreementVisibility));
+
+    /// <summary>
+    /// The panel holding the two storage folders and the period a replaced picture is kept (FR-016, FR-037).
+    /// </summary>
+    /// <remarks>
+    /// Gated on the storage entitlement rather than the picture entitlement, because FR-017 keeps the folders with
+    /// IT Department and Developer while FR-025 widens the picture entitlement past them. A host with no storage
+    /// resolver offers nothing, so no control is drawn that would do nothing.
+    /// </remarks>
+    public bool IsStoragePathsPanelVisible => CanManageStoragePaths
+        && _imageStorageConfigurationResolver is not null
+        && MatchesSearch(
+            "storage",
+            "picture folder",
+            "image folder",
+            "key folder",
+            "keys folder",
+            "retention",
+            "archive",
+            "keep days",
+            "replaced picture");
+
     /// <summary>
     /// The picture cache's settings.
     /// </summary>
     /// <remarks>
-    /// Gated on <see cref="CanManageImageLocationSettings"/>, which is the picture screen's own gate: deciding
-    /// where this application keeps its pictures is the same subject as deciding which picture an item uses, and
-    /// the requirement to restrict both to IT Department and Developer is met by that one permission
-    /// (<c>permission.settings.part_pictures</c>) rather than by a second gate that could drift from it.
+    /// Gated on <see cref="CanManageStoragePaths"/> — <c>permission.settings.storage_paths</c>, which is IT
+    /// Department and Developer — and <b>not</b> on the picture entitlement. It was on the picture entitlement
+    /// only because the two keys happened to have the same members; FR-025 widens the picture entitlement to Setup
+    /// Lead and Plant Manager, and this panel chooses the folder this machine copies pictures from, which is a
+    /// storage control FR-017 reserves (research D10). Moving the gate is what stops the widening handing a Setup
+    /// Lead that folder.
     /// </remarks>
-    public bool IsPictureCachePanelVisible => CanManageImageLocationSettings
+    public bool IsPictureCachePanelVisible => CanManageStoragePaths
         && _imageStorageConfigurationResolver is not null
         && MatchesSearch(
             "picture cache",
@@ -478,7 +663,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "display name",
         string.Join(" ", ComputerManagement.Computers.Select(record => record.GetDisplayLabel())));
 
-    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsPictureCachePanelVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
+    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsPictureCachePanelVisible || IsPartPicturesEntryVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
@@ -535,6 +720,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
         _ = UrgencyAllotments.LoadAsync();
         InitializeIgnoredLocations();
+        _ = InitializeStoragePathsAsync();
         _ = InitializePictureCacheAsync();
 
         SwitchThemeCommand = new RelayCommand<ElementTheme>(
@@ -607,6 +793,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             CanManageIgnoredLocations = answers[PermissionKeys.SettingsIgnoredLocations];
             CanManageHotWorkCenters = answers[PermissionKeys.SettingsHotWorkCenters];
             CanManageImageLocationSettings = answers[PermissionKeys.SettingsPartPictures];
+            CanManageStoragePaths = answers[PermissionKeys.SettingsStoragePaths];
             CanRequestCacheRefresh = answers[PermissionKeys.SettingsCacheRefresh];
             CanOpenUserManagement = answers[PermissionKeys.AdminUsers];
             CanOpenPermissions = answers[PermissionKeys.AdminPermissions];
@@ -1287,6 +1474,166 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
+    /// Loads the two storage folders and the retention period, then reports any disagreement with this machine's
+    /// own settings file.
+    /// </summary>
+    /// <remarks>
+    /// Started from the constructor and awaited by nothing, like the other panels here: the page must not block on
+    /// a store read. A read that fails leaves the boxes empty and says so, rather than showing a value nobody
+    /// configured.
+    /// </remarks>
+    private async Task InitializeStoragePathsAsync()
+    {
+        if (_imageStorageConfigurationResolver is null)
+        {
+            return;
+        }
+
+        try
+        {
+            PictureFolderPath = await _imageStorageConfigurationResolver
+                .GetSharedFolderPathAsync()
+                .ConfigureAwait(true);
+            PictureFolderInput = PictureFolderPath;
+
+            KeysFolderPath = await _imageStorageConfigurationResolver
+                .GetKeysFolderPathAsync()
+                .ConfigureAwait(true);
+            KeysFolderInput = KeysFolderPath;
+
+            ArchiveKeepDaysInput = await _imageStorageConfigurationResolver
+                .GetArchiveKeepDaysAsync()
+                .ConfigureAwait(true);
+
+            await ReportStoragePathDisagreementAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            StoragePathsStatusMessage = "Settings_StoragePaths_Unavailable.Text".GetLocalized();
+            StartupDebugLog.Error(
+                "SettingsStoragePaths",
+                ex,
+                "The storage folders could not be read; the boxes are left empty and the store is asked again next visit.");
+        }
+        finally
+        {
+            RefreshSearchVisibility();
+        }
+    }
+
+    /// <summary>
+    /// Names this machine's own configured picture folder when it is not the folder every computer reads.
+    /// </summary>
+    /// <remarks>
+    /// The store wins (OQ-3), so a machine still carrying the old path in its settings file is working from the
+    /// store's answer while appearing to be configured otherwise. Saying so in one line is what stops that reading
+    /// as a picture that is simply not there. Which folder is the truth, and whether this machine's file disagrees
+    /// with it, is the resolver's answer rather than a comparison kept here, so the rule has one home (FR-010).
+    /// </remarks>
+    private async Task ReportStoragePathDisagreementAsync()
+    {
+        if (_imageStorageConfigurationResolver is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var resolution = await _imageStorageConfigurationResolver
+                .GetSharedFolderResolutionAsync()
+                .ConfigureAwait(true);
+
+            StoragePathsDisagreementMessage = resolution.MachineDisagrees
+                ? string.Format(
+                    CultureInfo.CurrentCulture,
+                    "Settings_StoragePaths_Disagreement.Text".GetLocalized(),
+                    resolution.MachineFolderPath)
+                : string.Empty;
+        }
+        catch (Exception ex)
+        {
+            // A folder that cannot be resolved is already reported by the read above; the panel must not fail on
+            // the line that explains it.
+            StoragePathsDisagreementMessage = string.Empty;
+            StartupDebugLog.Error(
+                "SettingsStoragePaths",
+                ex,
+                "The storage folder's disagreement with this machine's own configuration could not be worked out.");
+        }
+    }
+
+    /// <summary>
+    /// Stores the picture folder, the key folder and the retention period for every computer.
+    /// </summary>
+    /// <remarks>
+    /// One button for the three, because they are one subject and one screen: three buttons over three boxes on one
+    /// panel is three chances to leave the panel half saved. The period is refused when it is not a positive whole
+    /// number of days rather than stored as a figure the cleanup would read as zero.
+    /// </remarks>
+    [RelayCommand]
+    private async Task SaveStoragePathsAsync()
+    {
+        if (_configSettingsValueService is null || _imageStorageConfigurationResolver is null || IsStoragePathsBusy)
+        {
+            return;
+        }
+
+        var pictureFolder = PictureFolderInput?.Trim() ?? string.Empty;
+        var keysFolder = KeysFolderInput?.Trim() ?? string.Empty;
+        var keepDays = (int)Math.Round(ArchiveKeepDaysInput, MidpointRounding.AwayFromZero);
+
+        if (pictureFolder.Length == 0 || keysFolder.Length == 0)
+        {
+            StoragePathsStatusMessage = "Settings_StoragePaths_FolderNeeded.Text".GetLocalized();
+            return;
+        }
+
+        if (keepDays < 1)
+        {
+            StoragePathsStatusMessage = "Settings_StoragePaths_DaysNeeded.Text".GetLocalized();
+            return;
+        }
+
+        IsStoragePathsBusy = true;
+
+        try
+        {
+            await SaveAppWideSettingAsync(
+                ConfigSettingKeys.ImageStorageSharedFolderPath,
+                "text",
+                pictureFolder,
+                boolean: null).ConfigureAwait(true);
+
+            await SaveAppWideSettingAsync(
+                ConfigSettingKeys.KeysFolderPath,
+                "text",
+                keysFolder,
+                boolean: null).ConfigureAwait(true);
+
+            await SaveAppWideSettingAsync(
+                ConfigSettingKeys.ImageStorageArchiveKeepDays,
+                "int",
+                text: null,
+                boolean: null,
+                integer: keepDays).ConfigureAwait(true);
+
+            PictureFolderPath = pictureFolder;
+            KeysFolderPath = keysFolder;
+            await ReportStoragePathDisagreementAsync().ConfigureAwait(true);
+            StoragePathsStatusMessage = "Settings_StoragePaths_Saved.Text".GetLocalized();
+        }
+        catch (Exception ex)
+        {
+            StoragePathsStatusMessage = "Settings_StoragePaths_SaveFailed.Text".GetLocalized();
+            StartupDebugLog.Error("SettingsStoragePaths", ex, "A storage setting could not be stored.");
+        }
+        finally
+        {
+            IsStoragePathsBusy = false;
+        }
+    }
+
+    /// <summary>
     /// Writes one picture-cache setting for every user of the application.
     /// </summary>
     /// <remarks>
@@ -1298,7 +1645,13 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// <param name="valueType">The value's type, so the right column is written.</param>
     /// <param name="text">The text value, for a text setting.</param>
     /// <param name="boolean">The flag value, for a flag setting.</param>
-    private async Task SaveAppWideSettingAsync(string settingKey, string valueType, string? text, bool? boolean)
+    /// <param name="integer">The whole-number value, for an int setting.</param>
+    private async Task SaveAppWideSettingAsync(
+        string settingKey,
+        string valueType,
+        string? text,
+        bool? boolean,
+        long? integer = null)
     {
         if (_configSettingsValueService is null)
         {
@@ -1313,6 +1666,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 ScopeKey = "all_users",
                 SettingValue = text,
                 SettingValueBool = boolean,
+                SettingValueInt = integer,
                 ValueType = valueType,
             },
             _startupState.UserId > 0 ? _startupState.UserId : null).ConfigureAwait(true);

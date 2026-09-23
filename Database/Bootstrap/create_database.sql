@@ -14,6 +14,10 @@
 --                                      guarded new-table creation that a store which ALREADY exists needs. It runs
 --                                      last, so the four feature-006 columns and auth_user_management_audit reach
 --                                      a fresh store and an existing store through the same blocks.
+--                                      Feature 008's config_images_locations_history and its widened
+--                                      config_images_locations.scope comment reach both stores the same way: this
+--                                      file creates the database and nothing else, and the guarded block in that
+--                                      maintenance file is what gives an existing store the new table.
 
 DROP DATABASE IF EXISTS mtm_waitlist;
 

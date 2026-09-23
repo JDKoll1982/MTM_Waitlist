@@ -213,6 +213,32 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
 - **Cached Infor Visual data** — ask the cache service on the server to rebuild the cached Infor Visual
   data right away instead of waiting for its next scheduled run, and see the result in plain language
   (including "this workstation is not pointed at a service"). For Plant Manager, Admin and Developer.
+- **Part pictures** — give a Visual part or a WIP part its own picture. Type or paste a part number,
+  choose the system it belongs to, and pick the picture; the screen shows the picture the rest of the
+  application would draw for that part, who set or replaced it and when, and the list of parts that
+  still have no picture, which can be exported to a file to work through away from the shop floor. For
+  IT Department, Developer, Setup Lead and Plant Manager. A part with no picture is offered too — type
+  its number in and give it one.
+
+**Adding part pictures without the application (the file-drop convention).** Photographing hundreds of
+parts is a file copy, not a dialog opened once per part. These are the rules the share follows, and a
+file placed this way is used the next time that part is drawn.
+
+- **Three collections, three folders.** Everything under the picture folder sits in one of three
+  folders: `Waitlist` (the pictures the application keeps for its own screens — the request items, the
+  work centres and the categories, each in its own folder inside it), `Visual` (the Infor Visual parts)
+  and `WIP` (the WIP floor parts). A Visual part and a WIP part are two parts even when they share a
+  number, so each keeps its picture in its own collection and neither one borrows the other's.
+- **Family folders inside the part collections.** A part's number decides its folder: `MMC` for coil,
+  `MMF` for flatstock, `FGT` for a die, and `Categorized Parts` for every number no prefix recognises,
+  so an unrecognised part is still picturable rather than silently unpicturable.
+- **The file is named after the part.** One picture per part per system, and its name is the part
+  number — for example `Visual\MMC\MMC0001000.png`. Characters a file name cannot hold are replaced
+  with an underscore when the application itself stores a picture; when setting one from a screen, a
+  name that would land on a part that already owns it is refused and says which part that is.
+- **`.png`, `.jpg` and `.jpeg` are drawn.** Anything else in those folders is ignored rather than
+  reported as a problem, and so is a picture that is too small or not square: the part simply draws the
+  application's one "no picture" image instead of a blank space.
 
 **About**
 

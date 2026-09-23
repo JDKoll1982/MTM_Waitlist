@@ -61,22 +61,41 @@
                                         <ItemsControl ItemsSource="{x:Bind Parts}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="models:SetupSubordinatePart">
+                                                    <!--
+                                                        Each row carries the part's own picture beside its number,
+                                                        still grouped by the family the group header names. A part
+                                                        that cannot be pictured draws the one shared placeholder — never
+                                                        the family's artwork (FR-014, FR-015, FR-018).
+                                                    -->
                                                     <Grid AutomationProperties.Name="{x:Bind PartNumber}" Margin="0,0,0,8" ColumnSpacing="12">
                                                         <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
                                                             <ColumnDefinition Width="2*" />
                                                             <ColumnDefinition Width="2*" />
                                                             <ColumnDefinition Width="*" />
                                                         </Grid.ColumnDefinitions>
-                                                        <StackPanel>
+                                                        <Border
+                                                            MinWidth="64"
+                                                            MinHeight="64"
+                                                            Padding="4"
+                                                            VerticalAlignment="Center"
+                                                            Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                                                            CornerRadius="8">
+                                                            <Image
+                                                                AutomationProperties.AutomationId="{x:Bind ImageAutomationId}"
+                                                                Source="{x:Bind ImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                                                Stretch="Uniform" />
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1">
                                                             <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind PartNumber}" />
                                                             <TextBlock Text="{x:Bind Description}" TextWrapping="WrapWholeWords" />
                                                         </StackPanel>
-                                                        <StackPanel Grid.Column="1">
+                                                        <StackPanel Grid.Column="2">
                                                             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Location" />
                                                             <TextBlock Text="{x:Bind LocationDisplay}" />
                                                         </StackPanel>
                                                         <!-- Hidden for dies: they are never inventoried, so a 0 here would read as a stock-out. -->
-                                                        <StackPanel Grid.Column="2" HorizontalAlignment="Right" Visibility="{x:Bind ShowsOnHand, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                        <StackPanel Grid.Column="3" HorizontalAlignment="Right" Visibility="{x:Bind ShowsOnHand, Converter={StaticResource BoolToVisibilityConverter}}">
                                                             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="On Hand" />
                                                             <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind OnHandDisplay}" HorizontalAlignment="Right" />
                                                         </StackPanel>

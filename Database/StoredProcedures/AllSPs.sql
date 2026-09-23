@@ -859,9 +859,58 @@ WHERE scope = p_scope
   AND is_active = 1
 ORDER BY updated_utc DESC;
 
+-- Stored Procedure: sp_config_images_locations_history_get
+-- Engine: MySQL 5.7
+-- Feature: 008-part-pictures (task T012)
+--
+-- Purpose: read one picture's change record, newest first, with the actor's display name (FR-027).
+--
+-- Contract:
+--   IN  p_scope          VARCHAR(16)   the system the picture belongs to
+--   IN  p_scope_item_id  VARCHAR(190)  the item code, category code, work centre id or part number
+--   OUT a result set of previous_image_path, new_image_path, changed_by_user_id, changed_by_display_name,
+--       changed_utc — one row per set or replace, newest first. It is a read and returns a result set, so it goes
+--       through the query seam rather than the non-query one.
+--
+-- `changed_by_display_name` is joined rather than stored: the name a person is shown must be the name the person
+-- has today, and a row that is NULL because the actor's profile was retired answers with an empty name rather
+-- than losing the record. The actor's id and the moment are copied into the history row itself, so the record
+-- survives its actor.
+--
+-- The ORDER is newest first and `id DESC` breaks a tie: two changes can share a second, and a record that showed
+-- them in an arbitrary order would be a record that reported the wrong final picture.
+--
+-- The index idx_config_images_locations_history_scope_item (scope, scope_item_id, changed_utc) matches this
+-- filter and this ordering left to right, which is why it is shaped that way rather than on the actor.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_history_get;
+
+CREATE PROCEDURE sp_config_images_locations_history_get(
+    IN p_scope VARCHAR(16),
+    IN p_scope_item_id VARCHAR(190)
+)
+SELECT
+    h.previous_image_path,
+    h.new_image_path,
+    h.changed_by_user_id,
+    COALESCE(u.display_name, '') AS changed_by_display_name,
+    h.changed_utc
+FROM
+    config_images_locations_history h
+    LEFT JOIN core_users_profiles u ON u.id = h.changed_by_user_id
+WHERE
+    h.scope = p_scope
+    AND h.scope_item_id = p_scope_item_id
+ORDER BY
+    h.changed_utc DESC,
+    h.id DESC;
+
 -- Stored Procedure: sp_config_images_locations_insert
 -- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T094)
+-- Feature: 001-module-mock-visual-fallback (task T094), history row added by 008-part-pictures (task T014)
 --
 -- Purpose: create one image override. Replaces the inline INSERT in
 --          `ImageOverrideWriteService.CreateOverrideAsync` (FR-015).
@@ -881,9 +930,29 @@ ORDER BY updated_utc DESC;
 --
 -- Parameter widths are the live column widths, so an over-long value fails here rather than being silently
 -- truncated by the server.
+--
+-- ============================================================
+-- 008-part-pictures: the picture change record (FR-027, task T014)
+-- ============================================================
+-- A first picture writes one row into `config_images_locations_history` with a NULL predecessor. That row is
+-- written by the `AFTER INSERT` trigger below rather than by this procedure, and the reason is the contract above:
+-- this procedure's answer to its caller IS its affected-row count, and MySQL reports, for a CALL, "the value that
+-- it would return for the last statement executed within the procedure" (C API, mysql_affected_rows). A body that
+-- wrapped the insert in BEGIN / START TRANSACTION / COMMIT would therefore report the count of its own COMMIT —
+-- 0 — and every picture write in the application would be read as a database error. A trigger leaves this
+-- statement exactly as it was, so the count the caller checks is still this insert's, while the history row is
+-- written inside the same statement and therefore inside the same transaction: a change is never recorded without
+-- happening, and never happens without being recorded.
+--
+-- Suppressing the record during a migration: the trigger records a first picture, which is what an application
+-- write is. The recorded-path move (sp_config_images_locations_paths_move, T021) also updates image_path, but it is
+-- a layout migration and not a picture change, so it sets the session flag `@mtm_picture_layout_move` and the
+-- update trigger stays silent while it runs.
 -- ============================================================
 
 USE mtm_waitlist;
+
+DROP TRIGGER IF EXISTS trg_config_images_locations_history_on_insert;
 
 DROP PROCEDURE IF EXISTS sp_config_images_locations_insert;
 
@@ -916,6 +985,89 @@ VALUES (
     UTC_TIMESTAMP(),
     UTC_TIMESTAMP()
 );
+
+-- DELIMITER because a trigger body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE TRIGGER trg_config_images_locations_history_on_insert
+AFTER INSERT ON config_images_locations
+FOR EACH ROW
+BEGIN
+    INSERT INTO config_images_locations_history (
+        public_id,
+        image_location_id,
+        scope,
+        scope_item_id,
+        previous_image_path,
+        new_image_path,
+        changed_by_user_id,
+        changed_utc
+    )
+    VALUES (
+        UUID(),
+        NEW.id,
+        NEW.scope,
+        NEW.scope_item_id,
+        NULL,
+        NEW.image_path,
+        NEW.created_by_user_id,
+        NEW.created_utc
+    );
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_config_images_locations_paths_move
+-- Engine: MySQL 5.7
+-- Feature: 008-part-pictures (task T021)
+--
+-- Purpose: rewrite the recorded picture paths from one layout to another, as the reviewed run-once step FR-036
+--          calls for. One prefix in, one prefix out, and the rows it rewrote reported by the affected-row count.
+--
+-- Contract:
+--   IN  p_old_prefix  VARCHAR(64)  the token every value to rewrite begins with, e.g. 'request_item'
+--   IN  p_new_prefix  VARCHAR(64)  the token to put in its place, e.g. 'Waitlist/request_item'
+--   OUT affected row count, through the non-query seam. The statement is a single UPDATE and is the procedure's
+--       last statement, so MySQL reports this UPDATE's count for the CALL and a caller can say how many rows it
+--       rewrote rather than guessing.
+--
+-- Why the prefix carries no separator: a recorded value is written with either separator depending on how it was
+-- produced, and the move must not care. Rewriting only the leading token leaves whatever separator followed it
+-- exactly where it was, so `request_item\pickup-coil.png` and `request_item/pickup-coil.png` both become
+-- `Waitlist/request_item\pickup-coil.png` and `Waitlist/request_item/pickup-coil.png`.
+--
+-- Running it twice is safe. After the first run no value begins with the old prefix any more — a moved value
+-- begins with the collection folder — so the second run matches nothing and reports zero rows. The two guards in
+-- the WHERE clause are the same promise stated for the degenerate inputs: an empty prefix would match every row
+-- and a prefix equal to its replacement would rewrite every row to itself, so neither is allowed to do anything.
+--
+-- Never run from application startup. Schema and data changes are hand-maintained, reviewed and promoted
+-- (constitution III, database-schema-rules), and this one rewrites every picture the application has stored.
+--
+-- The picture change record: the image_path update triggers the AFTER UPDATE history trigger, and a layout move is
+-- not a picture change. The caller sets the session flag `@mtm_picture_layout_move = 1` on the same connection
+-- before calling this and clears it afterwards, which the trigger checks before recording. The paired seed does
+-- exactly that; a hand-run move must too.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_paths_move;
+
+CREATE PROCEDURE sp_config_images_locations_paths_move(
+    IN p_old_prefix VARCHAR(64),
+    IN p_new_prefix VARCHAR(64)
+)
+UPDATE config_images_locations
+SET image_path = CONCAT(
+        p_new_prefix,
+        SUBSTRING(image_path, CHAR_LENGTH(p_old_prefix) + 1)
+    )
+WHERE is_active = 1
+  AND p_old_prefix <> ''
+  AND p_old_prefix <> p_new_prefix
+  AND image_path LIKE CONCAT(p_old_prefix, '%');
 
 -- Stored Procedure: sp_config_images_locations_purge_inactive
 -- Engine: MySQL 5.7
@@ -1038,6 +1190,50 @@ FROM config_images_locations
 ORDER BY updated_utc DESC
 LIMIT p_max_rows;
 
+-- Stored Procedure: sp_config_images_locations_scope_paths_get
+-- Engine: MySQL 5.7
+-- Feature: 008-part-pictures (task T013)
+--
+-- Purpose: every active picture path of one scope, as `scope_item_id` and `image_path` pairs. Two callers, and
+-- both need the whole scope rather than one row.
+--
+--   1. The file-name collision check before a save (FR-007). A new picture's file name has to be compared against
+--      the names the same scope and the same family folder already hold, case-insensitively, so that two part
+--      numbers differing only by letter case are refused rather than silently becoming one file.
+--   2. The subtraction that produces the missing-picture list (FR-026): the parts the application can name, minus
+--      the rows this returns.
+--
+-- Reading the whole scope is deliberate. Both callers need to compare against every row, so a per-item procedure
+-- would mean one round trip per part on a screen that lists hundreds. A scope holds the pictures for one system,
+-- which is the unit both callers work in.
+--
+-- Only active rows are returned: an inactive row is not a picture, and a withdrawn picture must not hold a file
+-- name against a part that wants it.
+--
+-- Contract:
+--   IN  p_scope  VARCHAR(16)
+--   OUT a result set of scope_item_id, image_path, ordered by scope_item_id so a caller that diffs two reads
+--       gets a stable order.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_scope_paths_get;
+
+CREATE PROCEDURE sp_config_images_locations_scope_paths_get(
+    IN p_scope VARCHAR(16)
+)
+SELECT
+    i.scope_item_id,
+    i.image_path
+FROM
+    config_images_locations i
+WHERE
+    i.scope = p_scope
+    AND i.is_active = 1
+ORDER BY
+    i.scope_item_id;
+
 -- Stored Procedure: sp_config_images_locations_status_get
 -- Engine: MySQL 5.7
 -- Feature: 001-module-mock-visual-fallback (task T094)
@@ -1075,7 +1271,7 @@ LIMIT 1;
 
 -- Stored Procedure: sp_config_images_locations_update
 -- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T094)
+-- Feature: 001-module-mock-visual-fallback (task T094), history row added by 008-part-pictures (task T015)
 --
 -- Purpose: repoint one live override at a different image. Replaces the inline UPDATE in
 --          `ImageOverrideWriteService.UpdateOverrideAsync` (FR-015).
@@ -1090,9 +1286,29 @@ LIMIT 1;
 -- `AND is_active = 1` is kept from the statement this replaces: an update is only meaningful for a live override,
 -- and the caller has already reported NOT_FOUND when it could not read one. `created_*` columns are untouched —
 -- repointing an image is not a new row.
+--
+-- ============================================================
+-- 008-part-pictures: the picture change record (FR-027, task T015)
+-- ============================================================
+-- A replacement writes one row into `config_images_locations_history` carrying the path it replaced. That row is
+-- written by the `AFTER UPDATE` trigger below rather than by this procedure, for the same reason T014 records: this
+-- procedure's answer to its caller is its affected-row count, and a CALL reports the count of the last statement
+-- it executed, so a body ending in COMMIT would report 0 and every picture write would be read as a database
+-- error. A trigger leaves this statement — and therefore its signature and its answer — exactly as they were,
+-- while the history row is written inside the same statement and so inside the same transaction.
+--
+-- Two guards on the trigger, and both matter:
+--   * `NOT (OLD.image_path <=> NEW.image_path)` — only a path that actually changed is a picture change. Clearing
+--     `is_active` to withdraw a picture updates the row without changing its path, and the change record has
+--     nothing to say about it.
+--   * `@mtm_picture_layout_move IS NULL` — the recorded-path move (sp_config_images_locations_paths_move, T021)
+--     rewrites every image_path in the store as a layout migration. Without this guard that one reviewed step
+--     would write a change row per stored picture, each naming an actor who never touched it.
 -- ============================================================
 
 USE mtm_waitlist;
+
+DROP TRIGGER IF EXISTS trg_config_images_locations_history_on_update;
 
 DROP PROCEDURE IF EXISTS sp_config_images_locations_update;
 
@@ -1109,6 +1325,40 @@ SET image_path = p_image_path,
 WHERE scope = p_scope
   AND scope_item_id = p_scope_item_id
   AND is_active = 1;
+
+-- DELIMITER because a trigger body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE TRIGGER trg_config_images_locations_history_on_update
+AFTER UPDATE ON config_images_locations
+FOR EACH ROW
+BEGIN
+    IF NOT (OLD.image_path <=> NEW.image_path) AND @mtm_picture_layout_move IS NULL THEN
+        INSERT INTO config_images_locations_history (
+            public_id,
+            image_location_id,
+            scope,
+            scope_item_id,
+            previous_image_path,
+            new_image_path,
+            changed_by_user_id,
+            changed_utc
+        )
+        VALUES (
+            UUID(),
+            NEW.id,
+            NEW.scope,
+            NEW.scope_item_id,
+            OLD.image_path,
+            NEW.image_path,
+            NEW.updated_by_user_id,
+            NEW.updated_utc
+        );
+    END IF;
+END$$
+
+DELIMITER ;
 
 -- Stored Procedure: sp_config_permissions_feature_baseline_get
 -- Engine: MySQL 5.7
@@ -1434,6 +1684,12 @@ DELIMITER ;
 -- One history row per changed key carries the actor, the key, the scope, both values and the time (FR-072). A
 -- removal records the value it removed as `previous_setting_value_bool` and writes NULL as the changed value,
 -- which is what "this person no longer has a choice here" looks like in a value column.
+--
+-- THE VALUE ROW'S ID IS READ, NEVER TAKEN FROM LAST_INSERT_ID(). The upsert takes the UPDATE branch whenever the
+-- person already has a row of their own, and an upsert that updated generates no id: LAST_INSERT_ID() then answers
+-- with whatever the last insert on the connection generated, which on a pooled connection is another table's id
+-- entirely. That is not a precaution — it named a config_settings_history row as a value row and the foreign key
+-- refused the reversal, which is how it was found by running a save and its reversal against the live store.
 -- ============================================================
 
 USE mtm_waitlist;

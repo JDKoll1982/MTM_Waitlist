@@ -1,8 +1,12 @@
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Helpers;
+using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Helpers;
 
@@ -201,6 +205,191 @@ public sealed class RequestImagePathPolicyTests
                 alreadyResolved,
                 chosen,
                 $"'{nothingConfigured}' replaced the image the request already resolves, which FR-009/FR-021 forbid.");
+        }
+    }
+
+    // ── A part drawn without the placeholder path fails here (US1, FR-014, SC-002) ───────────────────────────────
+
+    /// <summary>The properties a surface binds when it draws a part, in the spellings this application uses.</summary>
+    private static readonly string[] s_partPictureProperties =
+    [
+        "ImagePath",
+        "PartPicturePath",
+        "PicturePath",
+        "ResolvedImagePath",
+        "ResolvedPartImagePath",
+        "EffectiveImagePath",
+        "CurrentPicturePath",
+    ];
+
+    /// <summary>
+    /// The picture the surfaces draw when they have nothing usable of their own is never blank.
+    /// </summary>
+    /// <remarks>
+    /// The other half of the scan below: a surface may reach the placeholder only through a converter, and the
+    /// converter only ever answers with this one path. A blank or missing path here would put the blank space back
+    /// that FR-014 forbids, behind a converter everything still goes through.
+    /// </remarks>
+    [TestMethod]
+    public void TheOnePlaceholderIsNeverBlank()
+    {
+        Assert.IsFalse(
+            string.IsNullOrWhiteSpace(ImagePicturePolicy.NoImagePath),
+            "There is no blank space where a part's picture belongs: the fallback is a file.");
+        Assert.IsFalse(
+            RequestImagePathPolicy.IsUsableResolvedPath(ImagePicturePolicy.NoImagePath),
+            "The placeholder is the answer to 'there is nothing to draw', not a picture a surface may mistake for a part's own.");
+    }
+
+    /// <summary>
+    /// Every surface that draws a part goes through the converter that substitutes the shared placeholder.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A scan rather than a per-surface case, because the failure it catches is a <em>new</em> surface: a binding
+    /// written as <c>Source="{x:Bind ImagePath}"</c> draws nothing at all when the part has no picture, and no
+    /// existing per-surface test notices a file it was never told about.
+    /// </para>
+    /// <para>
+    /// The converter is not named here, it is read from the markup that declares it and its own source is read to
+    /// see where it answers. That is what makes the dunnage list's own converter acceptable beside the app-wide
+    /// one: both end at the one shared placeholder, and FR-033 keeps dunnage arrangement as it is. What the scan
+    /// refuses is a part picture bound with no converter, with a key nothing declares, or through a converter that
+    /// answers with something other than the shared placeholder — the ways a part with no picture ends as a blank
+    /// space or as a stand-in that is not the part's own picture.
+    /// </para>
+    /// </remarks>
+    [TestMethod]
+    public void EverySurfaceThatDrawsAPart_PassesItThroughThePlaceholderConverter()
+    {
+        var root = RepositoryPatternScan.FindRepositoryRoot();
+        var markupFiles = EnumerateMarkup(root).ToArray();
+        Assert.IsTrue(markupFiles.Length > 0, "The scan found no markup to read, so it would pass without proving anything.");
+
+        var declaredConverters = markupFiles
+            .SelectMany(file => XDocument.Load(file).Descendants())
+            .Select(element => (
+                Type: element.Name.LocalName,
+                Key: element.Attributes().FirstOrDefault(attribute => attribute.Name.LocalName == "Key")?.Value))
+            .Where(declared => declared.Key is not null
+                && declared.Type.EndsWith("Converter", StringComparison.Ordinal))
+            .ToList();
+
+        // A converter counts when its own source answers through PictureSource, which is the one place a picture
+        // path becomes a bitmap and so the one place "there is nothing to draw" becomes the shared placeholder.
+        var placeholderConverters = EnumerateSource(root)
+            .Where(file => File.ReadAllText(file).Contains("PictureSource.", StringComparison.Ordinal))
+            .Select(file => Path.GetFileNameWithoutExtension(file))
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.IsTrue(
+            placeholderConverters.Contains("ResolvedImagePathToSourceConverter"),
+            "The converter that substitutes the placeholder has no source that answers with it, so every picture binding below would be reported.");
+
+        var offenders = new List<string>();
+
+        foreach (var file in markupFiles)
+        {
+            var relativePath = Path.GetRelativePath(root, file);
+
+            foreach (var attribute in XDocument.Load(file)
+                .Descendants()
+                .SelectMany(element => element.Attributes())
+                .Where(attribute => attribute.Name.LocalName is "Source" or "ImageSource"))
+            {
+                var binding = attribute.Value;
+                if (!binding.Contains("{Binding", StringComparison.Ordinal)
+                    && !binding.Contains("{x:Bind", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var property = s_partPictureProperties
+                    .FirstOrDefault(name => Regex.IsMatch(binding, $@"\b{Regex.Escape(name)}\b"));
+
+                if (property is null)
+                {
+                    continue;
+                }
+
+                var key = Regex.Match(binding, @"Converter=\{StaticResource\s+(?<key>[A-Za-z0-9_]+)\}").Groups["key"].Value;
+
+                if (key.Length == 0)
+                {
+                    offenders.Add(
+                        $"{relativePath}: '{property}' is drawn with no converter, so a part with no picture draws nothing at all (FR-014).");
+                    continue;
+                }
+
+                var converterType = declaredConverters
+                    .Where(declared => string.Equals(declared.Key, key, StringComparison.Ordinal))
+                    .Select(declared => declared.Type)
+                    .FirstOrDefault();
+
+                if (converterType is null)
+                {
+                    offenders.Add(
+                        $"{relativePath}: '{property}' goes through '{key}', which no markup declares, so the placeholder never applies (FR-014).");
+                }
+                else if (placeholderConverters.Contains(converterType) is false)
+                {
+                    offenders.Add(
+                        $"{relativePath}: '{property}' goes through '{key}', a {converterType} that never answers with the shared placeholder (FR-014).");
+                }
+            }
+        }
+
+        Assert.AreEqual(
+            0,
+            offenders.Count,
+            "Every surface that draws a part must fall back to the one shared placeholder:"
+                + Environment.NewLine
+                + string.Join(Environment.NewLine, offenders));
+    }
+
+    /// <summary>Every markup file the scan reads: source markup, not build output or design notes.</summary>
+    private static IEnumerable<string> EnumerateMarkup(string root)
+    {
+        string[] excluded =
+        [
+            $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
+            $"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}",
+            $"{Path.DirectorySeparatorChar}.git{Path.DirectorySeparatorChar}",
+            $"{Path.DirectorySeparatorChar}specs{Path.DirectorySeparatorChar}",
+            $"{Path.DirectorySeparatorChar}WeekendProject{Path.DirectorySeparatorChar}",
+        ];
+
+        foreach (var file in Directory.EnumerateFiles(root, "*.xaml", SearchOption.AllDirectories))
+        {
+            if (excluded.Any(folder => file.Contains(folder, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            yield return file;
+        }
+    }
+
+    /// <summary>Every production C# file the scan reads, so a converter's own behaviour can be looked at.</summary>
+    private static IEnumerable<string> EnumerateSource(string root)
+    {
+        string[] excluded =
+        [
+            $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
+            $"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}",
+            $"{Path.DirectorySeparatorChar}.git{Path.DirectorySeparatorChar}",
+            $"{Path.DirectorySeparatorChar}specs{Path.DirectorySeparatorChar}",
+            $"{Path.DirectorySeparatorChar}WeekendProject{Path.DirectorySeparatorChar}",
+        ];
+
+        foreach (var file in Directory.EnumerateFiles(root, "*.cs", SearchOption.AllDirectories))
+        {
+            if (excluded.Any(folder => file.Contains(folder, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            yield return file;
         }
     }
 }

@@ -87,6 +87,9 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
 
     public int ArchiveKeepDays { get; set; } = 30;
 
+    /// <summary>This machine's own configured folder, named when it differs from the folder every computer reads.</summary>
+    public string MachineSharedFolderPath { get; set; } = string.Empty;
+
     public bool RequireSquareAspectRatio { get; set; } = true;
 
     public Task<string> GetSharedFolderPathAsync() => Task.FromResult(SharedFolderPath);
@@ -102,6 +105,9 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public Task<bool> GetEnableArchiveVersioningAsync() => Task.FromResult(EnableArchiveVersioning);
 
     public Task<int> GetArchiveKeepDaysAsync() => Task.FromResult(ArchiveKeepDays);
+
+    public Task<SharedFolderResolution> GetSharedFolderResolutionAsync() =>
+        Task.FromResult(new SharedFolderResolution(SharedFolderPath, MachineSharedFolderPath));
 
     public Task<ImageStorageOptions> GetEffectiveConfigurationAsync() => Task.FromResult(new ImageStorageOptions
     {
@@ -122,6 +128,9 @@ internal sealed class FakeImageOverrideReadService : IImageOverrideReadService
 {
     private readonly Dictionary<string, ImageOverride> _overrides = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>When set, every whole-scope read fails. Used to prove a save is refused when the pictured set cannot be read.</summary>
+    public Exception? FailScopeReads { get; set; }
+
     public void AddOverride(string scope, string scopeItemId, string imagePath) =>
         _overrides[Key(scope, scopeItemId)] = new ImageOverride
         {
@@ -135,8 +144,10 @@ internal sealed class FakeImageOverrideReadService : IImageOverrideReadService
         Task.FromResult(_overrides.TryGetValue(Key(scope, scopeItemId), out var value) ? value : null);
 
     public Task<IReadOnlyList<ImageOverride>> GetOverridesByScopeAsync(string scope, CancellationToken cancellationToken = default) =>
-        Task.FromResult<IReadOnlyList<ImageOverride>>(
-            _overrides.Values.Where(o => string.Equals(o.Scope, scope, StringComparison.OrdinalIgnoreCase)).ToList());
+        FailScopeReads is not null
+            ? Task.FromException<IReadOnlyList<ImageOverride>>(FailScopeReads)
+            : Task.FromResult<IReadOnlyList<ImageOverride>>(
+                _overrides.Values.Where(o => string.Equals(o.Scope, scope, StringComparison.OrdinalIgnoreCase)).ToList());
 
     public Task<bool> HasOverrideAsync(string scope, string scopeItemId, CancellationToken cancellationToken = default) =>
         Task.FromResult(_overrides.ContainsKey(Key(scope, scopeItemId)));
@@ -410,4 +421,136 @@ internal sealed class FakeMySqlHelperServer : IMySqlHelperServer
             ["created_utc"] = DateTime.UtcNow,
             ["updated_utc"] = DateTime.UtcNow
         };
+}
+
+/// <summary>
+/// The picture-row writer, recorded rather than executed. Proves whether a save created a row or replaced one,
+/// and — for a refusal — that neither happened.
+/// </summary>
+/// <remarks>
+/// The change record itself is written by the store's triggers, so it is proved against a live database in
+/// <c>ConfigImagesLocationsHistoryIntegrationTests</c> rather than asserted here.
+/// </remarks>
+internal sealed class RecordingOverrideWriteService : IImageOverrideWriteService
+{
+    private readonly Dictionary<string, string> _paths = new(StringComparer.OrdinalIgnoreCase);
+
+    public List<(string Scope, string Item, string Path)> Creates { get; } = new();
+
+    public List<(string Scope, string Item, string Path)> Updates { get; } = new();
+
+    public Exception? Failure { get; set; }
+
+    /// <summary>
+    /// Invoked after a write is recorded, so a test can mirror it into the reader it also passes to the service
+    /// under test. A real write is visible to a real read; a fake write has to be told to be.
+    /// </summary>
+    public Action<string, string, string>? Written { get; set; }
+
+    public void Seed(string scope, string scopeItemId, string imagePath) => _paths[Key(scope, scopeItemId)] = imagePath;
+
+    public Task<ImageOverrideWriteResult> CreateOverrideAsync(
+        string scope,
+        string scopeItemId,
+        string imagePath,
+        long? userId = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (Failure is not null)
+        {
+            return Task.FromException<ImageOverrideWriteResult>(Failure);
+        }
+
+        Creates.Add((scope, scopeItemId, imagePath));
+        _paths[Key(scope, scopeItemId)] = imagePath;
+        Written?.Invoke(scope, scopeItemId, imagePath);
+
+        return Task.FromResult(Result(scope, scopeItemId, "CREATE"));
+    }
+
+    public Task<ImageOverrideWriteResult> UpdateOverrideAsync(
+        string scope,
+        string scopeItemId,
+        string newImagePath,
+        long? userId = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (Failure is not null)
+        {
+            return Task.FromException<ImageOverrideWriteResult>(Failure);
+        }
+
+        Updates.Add((scope, scopeItemId, newImagePath));
+        _paths[Key(scope, scopeItemId)] = newImagePath;
+        Written?.Invoke(scope, scopeItemId, newImagePath);
+
+        return Task.FromResult(Result(scope, scopeItemId, "UPDATE"));
+    }
+
+    public Task<ImageOverrideWriteResult> DeleteOverrideAsync(
+        string scope,
+        string scopeItemId,
+        long? userId = null,
+        CancellationToken cancellationToken = default)
+    {
+        _paths.Remove(Key(scope, scopeItemId));
+        return Task.FromResult(Result(scope, scopeItemId, "DELETE"));
+    }
+
+    public Task<ImageOverrideWriteResult> DeleteByPublicIdAsync(
+        string publicId,
+        long? userId = null,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(new ImageOverrideWriteResult { Success = true, OperationType = "DELETE" });
+
+    public Task<bool> DeleteIfExistsAsync(
+        string scope,
+        string scopeItemId,
+        long? userId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var removed = _paths.Remove(Key(scope, scopeItemId));
+        return Task.FromResult(removed);
+    }
+
+    public Task<int> PurgeInactiveOverridesAsync(CancellationToken cancellationToken = default) => Task.FromResult(0);
+
+    public Task<int> DeactivateAllForScopeAsync(
+        string scope,
+        long? userId = null,
+        CancellationToken cancellationToken = default) => Task.FromResult(0);
+
+    private static string Key(string scope, string scopeItemId) => $"{scope}|{scopeItemId}";
+
+    private static ImageOverrideWriteResult Result(string scope, string scopeItemId, string operationType) => new()
+    {
+        Success = true,
+        OperationType = operationType,
+        AffectedScope = scope,
+        AffectedScopeItemId = scopeItemId,
+    };
+}
+
+/// <summary>
+/// One source of part numbers the application can name, scripted, so the coverage subtraction can be proved
+/// against exactly the parts a test hands it.
+/// </summary>
+internal sealed class StubPartNumberSource : IPartNumberSource
+{
+    public StubPartNumberSource(PartPictureSystem system, params string[] partNumbers)
+    {
+        System = system;
+        PartNumbers = partNumbers.ToList();
+    }
+
+    public PartPictureSystem System { get; }
+
+    public List<string> PartNumbers { get; }
+
+    public Exception? Failure { get; set; }
+
+    public Task<IReadOnlyList<string>> GetPartNumbersAsync(CancellationToken cancellationToken = default) =>
+        Failure is null
+            ? Task.FromResult<IReadOnlyList<string>>(PartNumbers)
+            : Task.FromException<IReadOnlyList<string>>(Failure);
 }

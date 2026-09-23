@@ -6,21 +6,66 @@ using System.Text;
 namespace MTM_Waitlist.Module_Core.Services;
 
 /// <summary>
-/// Executes the checked-in MTM WIP Application queue script <c>GetWipFloorQuantities.sql</c> against
-/// the <c>mtm_wip_application_winforms</c> database (via <see cref="IMySqlHelperServer"/> with
-/// <see cref="MySqlDatabaseTarget.MtmWipApplication"/>) and maps the single result row to a
-/// <see cref="WipFloorQuantitySnapshot"/>. Never throws: a missing script/connection or SQL error
-/// yields <c>null</c> so the disposition resolver can fall back to the Infor-only snapshot.
+/// Executes the checked-in MTM WIP Application queue scripts <c>GetWipFloorQuantities.sql</c> and
+/// <c>GetWipInventoryPartNumbers.sql</c> against the <c>mtm_wip_application_winforms</c> database (via
+/// <see cref="IMySqlHelperServer"/> with <see cref="MySqlDatabaseTarget.MtmWipApplication"/>), and maps
+/// <c>GetWipFloorQuantities</c>' single result row to a <see cref="WipFloorQuantitySnapshot"/>. Never throws: a
+/// missing script/connection or SQL error yields <c>null</c> (or no part numbers) so a caller can fall back.
 /// </summary>
 public sealed class WipFloorInventoryService
 {
     private const string FloorSnapshotScriptName = "GetWipFloorQuantities";
+    private const string InventoryPartNumbersScriptName = "GetWipInventoryPartNumbers";
 
     private readonly IMySqlHelperServer _mysqlHelperServer;
 
     public WipFloorInventoryService(IMySqlHelperServer mysqlHelperServer)
     {
         _mysqlHelperServer = mysqlHelperServer;
+    }
+
+    /// <summary>
+    /// The distinct part numbers the WIP floor holds inventory for, in the script's own order, or an empty list
+    /// when the floor cannot be read.
+    /// </summary>
+    /// <param name="cancellationToken">A token to cancel the read.</param>
+    /// <returns>The part numbers the WIP floor can name; empty when the store or the script is unavailable.</returns>
+    /// <remarks>
+    /// A part the application can name is a part it can picture (FR-001), so this is the WIP half of the
+    /// missing-picture list. An unreachable floor answers with no parts rather than throwing: a coverage read that
+    /// cannot reach one system reports the systems it could reach, and never invents the ones it could not.
+    /// </remarks>
+    public async Task<IReadOnlyList<string>> GetInventoryPartNumbersAsync(CancellationToken cancellationToken = default)
+    {
+        var script = await WaitlistWipMySqlScriptStore.LoadAsync(InventoryPartNumbersScriptName, cancellationToken).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(script))
+        {
+            StartupDebugLog.Info("WipFloorInventory", $"Script '{InventoryPartNumbersScriptName}' loaded empty; returning no part numbers.");
+            return Array.Empty<string>();
+        }
+
+        try
+        {
+            var rows = await _mysqlHelperServer.ExecuteSqlQueryAsync(
+                script,
+                new Dictionary<string, object?>(),
+                MySqlDatabaseTarget.MtmWipApplication,
+                cancellationToken).ConfigureAwait(false);
+
+            var partNumbers = rows
+                .Select(row => GetString(row, "PartNumber"))
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            StartupDebugLog.Info("WipFloorInventory", $"GetInventoryPartNumbersAsync returned {partNumbers.Length} part number(s).");
+            return partNumbers;
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error("WipFloorInventory", ex, "GetInventoryPartNumbersAsync failed.");
+            return Array.Empty<string>();
+        }
     }
 
     /// <summary>Returns the live floor snapshot for a part, or <c>null</c> when unavailable.</summary>
@@ -100,6 +145,11 @@ public sealed class WipFloorInventoryService
             _ => decimal.TryParse(Convert.ToString(value), out var parsed) ? parsed : 0m,
         };
     }
+
+    private static string GetString(IReadOnlyDictionary<string, object?> row, string key) =>
+        row.TryGetValue(key, out var value) && value is not null
+            ? Convert.ToString(value)?.Trim() ?? string.Empty
+            : string.Empty;
 }
 
 /// <summary>

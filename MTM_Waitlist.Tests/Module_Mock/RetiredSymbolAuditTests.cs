@@ -65,6 +65,12 @@ public sealed class RetiredSymbolAuditTests
         ("retired image scope value", new Regex(@"\brequest_(type|subtype)\b", RegexOptions.Compiled)),
         ("retired per-subtype local-settings key", new Regex(@"\bMaxAllottedMinutes\b", RegexOptions.Compiled)),
         ("retired user-visible picture wording", new Regex(@"Request Type & Subtype Images|Request Subtype Images|Manage subtypes|subtype images", RegexOptions.Compiled)),
+
+        // ── feature 008-part-pictures (FR-014, FR-015, SC-002): the component card's stand-in claim ──
+        // The component card used to say its placeholder stood in "until part pictures exist", which stopped being
+        // true the moment every part could carry a picture of its own. A surface that says it has no picture to draw
+        // is exactly what FR-014 forbids, so the wording must not come back in code, markup or a resource string.
+        ("retired part-picture stand-in wording", new Regex(@"until part pictures exist", RegexOptions.Compiled | RegexOptions.IgnoreCase)),
     ];
 
     /// <summary>File extensions this audit treats as code or database artifacts.</summary>
@@ -258,6 +264,7 @@ public sealed class RetiredSymbolAuditTests
         ["retired image scope value"] = "<value>request_subtype</value>",
         ["retired per-subtype local-settings key"] = "SaveSettingAsync(\"Urgency.MaxAllottedMinutes.Pickup Coil\", 45)",
         ["retired user-visible picture wording"] = "<value>Manage subtypes</value>",
+        ["retired part-picture stand-in wording"] = "The no-image picture stands in until part pictures exist.",
     };
 
     /// <summary>

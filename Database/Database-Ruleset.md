@@ -85,6 +85,48 @@ This document applies your completed naming conventions and database architectur
   key to `config_settings_values.id`, so a removal cannot write a history row naming the row it removed. A reversal
   therefore restores the *value* that was in force rather than the absence of a row.
 
+## Part Picture Storage (008-part-pictures)
+
+Every part the application can name may carry a picture of its own, kept apart by system so a Visual part and a WIP
+part that share a number are two pictures. The store already held what this needed; what follows is what the feature
+added or changed inside it.
+
+- **The five `config_images_locations.scope` values** are `request_item`, `request_category`, `work_center`,
+  `visual_part` and `wip_part`. The column and the unique key `uq_config_images_locations_scope_item` are unchanged:
+  a part picture is one row per scope-and-item, exactly as a request-item picture always was. A part is identified by
+  its system and its number together, never by the part number alone, so the two part scopes are two rows.
+- **`config_images_locations_history` is new** and is the change record FR-027 asks for: nine columns, a
+  `uq_config_images_locations_history_public_id` unique key, an `idx_config_images_locations_history_scope_item`
+  index, and two `ON DELETE SET NULL` foreign keys so a record outlives the row it describes. A row is written in the
+  same transaction as the write it records — a first picture carries a null predecessor, a replacement carries the
+  path it replaced — by `sp_config_images_locations_insert` and `sp_config_images_locations_update`, and it is read
+  through `sp_config_images_locations_history_get`. No application code writes it.
+- **The layout inside the configured root** is compiled, while the root itself stays a setting. Every picture sits
+  inside a collection folder: `Waitlist` (everything the application pictures for its own screens, one folder per
+  kind inside it), `Visual` and `WIP` (the two part systems). Inside a part collection a picture is kept in the
+  folder its part number's prefix decides — `MMC`, `MMF`, `FGT` — with `Categorized Parts` as the catch-all for a
+  number no prefix recognises, and the file is named after the part. What makes a recorded value portable is that it
+  is stored **relative** to the root, not that these folders are configurable: a value is read against whichever
+  root the machine is configured with, so a picture recorded under a drive letter resolves under a UNC path.
+- **The three kinds inside the application's own collection have their own folders**, named for their scopes
+  verbatim. That is what settles the case-only collision between the item `other` and the category `Other`: neither
+  name is changed, and neither can resolve to the other's file (FR-038).
+- **The move of everything already stored** is `Seeds/seed_picture_layout_move` with
+  `sp_config_images_locations_paths_move`, which rewrites each recorded path and reports through affected rows, with
+  its own paired `rollback.sql`; the files themselves are moved by `tools/Move-PartPictureLayout.ps1`. It is
+  run-once, and it is safe to interrupt: `AppStoragePaths.ToCurrentLayout` reads a value in either layout, so a
+  picture resolves in the gap between the files moving and the rows moving. `AllTables.sql`, `AllSPs.sql` and
+  `AllSeeds.sql` are regenerated in the same change, and the schema is proved by
+  `Database/Validation/part_pictures_schema/validate.sql`.
+- **A replaced picture is kept, then cleaned up.** The storage service copies the picture it replaces into an
+  `Archive` folder beside it, and the startup cache step removes an archived file once
+  `image_storage.archive_keep_days` days have passed. The period is a stored setting owned by the storage screen and
+  defaults to ninety days (FR-037); it is not compiled into the application.
+- **The picture entitlement was widened, the storage entitlement was not.** `permission.settings.part_pictures`
+  becomes 1 for `role:setup_lead` and `role:plant_manager` as well as the IT Department and Developer, while
+  `permission.settings.storage_paths` keeps its members: the folders stay with IT Department and Developer (FR-017,
+  FR-025). Both live in `Seeds/seed_permission_role_baselines`, whose rollback restores exactly the two changed rows.
+
 ## Artifact Layout and Release Governance
 - Use a file-per-artifact layout under `Database/`.
 - Bootstrap database creation lives in `Database/Bootstrap/create_database.sql`.

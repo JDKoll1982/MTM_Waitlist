@@ -74,9 +74,11 @@ public sealed class NewRequestWizardAdvanceMarkupTests
     {
         var markup = ReadMarkup("NewRequestDetailsPage.xaml");
 
+        // The listed answer is a list of cards (FR-021), so picking one is a click on a card rather than a
+        // selection change on a drop-down — the way out of the step is the same, the gesture that takes it is not.
         Assert.IsTrue(
-            Regex.IsMatch(markup, @"SelectionChanged=""\w+"""),
-            "The listed answer needs a selection handler: picking one is the way out of this step.");
+            Regex.IsMatch(markup, @"ItemClick=""\w+"""),
+            "The listed answer needs its click handler wired: picking one is the way out of this step.");
     }
 
     private static string ReadMarkup(string fileName)

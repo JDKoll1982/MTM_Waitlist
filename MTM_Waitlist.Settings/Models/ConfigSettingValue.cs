@@ -150,9 +150,23 @@ public static class ConfigSettingKeys
     /// Value Type: "int" (days)
     /// Scope: "all_users" (global setting)
     /// Description: Number of days to keep archived image files before cleanup.
-    /// Default: 30
+    ///             <b>Owned by the storage screen</b> (Settings, the storage panel), not compiled in: the panel
+    ///             writes this row and the cleanup reads it, so the size of the archive is the owner's to bound
+    ///             without a new release (FR-037).
+    /// Default: <see cref="ImageStorageArchiveKeepDaysDefault"/> (ninety days, which is what appsettings.json
+    ///             ships and what the screen's box starts at).
     /// </summary>
     public const string ImageStorageArchiveKeepDays = "image_storage.archive_keep_days";
+
+    /// <summary>
+    /// The retention period this application ships with, in days, and the one place the figure is written: the
+    /// shipped configuration, the storage screen's box and the compiled fallback all read it from here.
+    /// </summary>
+    /// <remarks>
+    /// A name rather than a literal in three files. The period is a setting rather than a constant (FR-037), so
+    /// the only thing that may be fixed at build time is the figure a machine uses before anybody changes it.
+    /// </remarks>
+    public const int ImageStorageArchiveKeepDaysDefault = 90;
 
     /// <summary>
     /// The folder on this computer that pictures are mirrored into.

@@ -249,6 +249,105 @@ public sealed class ImageStorageService : IImageStorageService
     }
 
     /// <inheritdoc />
+    public async Task<ImageStorageResult> CopyImageToRelativePathAsync(
+        string sourceFilePath,
+        string relativePath,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(sourceFilePath))
+        {
+            throw new ArgumentNullException(nameof(sourceFilePath), "Source file path cannot be null or empty");
+        }
+
+        if (string.IsNullOrWhiteSpace(relativePath))
+        {
+            throw new ArgumentNullException(nameof(relativePath), "Relative path cannot be null or empty");
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var validation = await ValidateImageAsync(sourceFilePath, cancellationToken).ConfigureAwait(false);
+        if (!validation.IsValid)
+        {
+            return new ImageStorageResult
+            {
+                Success = false,
+                SourceFilePath = sourceFilePath,
+                ErrorCode = validation.ErrorCode,
+                ErrorMessage = validation.ErrorMessage,
+                ValidationError = validation,
+                StoredFileSizeBytes = 0
+            };
+        }
+
+        try
+        {
+            var config = await _configurationResolver.GetEffectiveConfigurationAsync().ConfigureAwait(false);
+            var storageRoot = config.SharedFolderPath;
+
+            if (!await IsShareAccessibleAsync(cancellationToken).ConfigureAwait(false))
+            {
+                return new ImageStorageResult
+                {
+                    Success = false,
+                    SourceFilePath = sourceFilePath,
+                    ErrorCode = "SHARE_UNREACHABLE",
+                    ErrorMessage = $"The image share '{storageRoot}' is unavailable or not writable.",
+                    StoredFileSizeBytes = 0
+                };
+            }
+
+            // The caller's layout is taken as given, separator by separator: it is the same value that is recorded
+            // in the store, so a picture written anywhere else than where the row says would be a picture the
+            // application could not find again. The physical path is built from the platform's own separator so
+            // the file lands in the folder the recorded value names.
+            var recordedPath = relativePath.Trim();
+            var targetPath = Path.Combine(storageRoot, AppStoragePaths.NormalizeSeparators(recordedPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(targetPath) ?? storageRoot);
+
+            if (File.Exists(targetPath) && config.EnableArchiveVersioning)
+            {
+                ArchiveExistingFile(targetPath, storageRoot);
+            }
+
+            File.Copy(sourceFilePath, targetPath, overwrite: true);
+
+            return new ImageStorageResult
+            {
+                Success = true,
+                StoredFilePath = recordedPath,
+                SourceFilePath = sourceFilePath,
+                StoredFileSizeBytes = new FileInfo(targetPath).Length,
+                Warnings = Array.Empty<string>()
+            };
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogError(ex, "No write access to the image share for {SourceFilePath}", sourceFilePath);
+            return new ImageStorageResult
+            {
+                Success = false,
+                SourceFilePath = sourceFilePath,
+                ErrorCode = "ACCESS_DENIED",
+                ErrorMessage = "The configured image share is not writable with the current Windows account.",
+                StoredFileSizeBytes = 0
+            };
+        }
+        catch (IOException ex)
+        {
+            _logger.LogError(ex, "Image copy failed for {SourceFilePath}", sourceFilePath);
+            return new ImageStorageResult
+            {
+                Success = false,
+                SourceFilePath = sourceFilePath,
+                ErrorCode = "COPY_FAILED",
+                ErrorMessage = ex.Message,
+                StoredFileSizeBytes = 0
+            };
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<ImageStorageResult> ValidateAndStoreImageAsync(string sourceFilePath, string scope, string itemId, CancellationToken cancellationToken = default)
     {
         var validation = await ValidateImageAsync(sourceFilePath, cancellationToken).ConfigureAwait(false);

@@ -38,6 +38,20 @@ public sealed partial class NewRequestWorkCenterPage : Page
         };
     }
 
+    /// <summary>
+    /// Rebuilds the building flyout's cards as it opens, so the building in effect is never among them (FR-022).
+    /// </summary>
+    private void BuildingFlyout_Opening(object? sender, object e) => ViewModel.RefreshBuildingCards();
+
+    /// <summary>Chooses the building whose card was clicked, which is the same choice the drop-down used to make.</summary>
+    private void BuildingCard_Click(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is BuildingCardOption card)
+        {
+            ViewModel.SelectBuilding(card.Building);
+        }
+    }
+
     private void WorkCenterGridView_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         UpdateItemSize();

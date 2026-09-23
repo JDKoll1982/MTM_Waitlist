@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Permissions;
+using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Core.Permissions;
@@ -337,6 +338,49 @@ public sealed class PermissionGateSiteAuditTests
 
             yield return (relativePath, StripComments(File.ReadAllText(file)));
         }
+    }
+
+    /// <summary>
+    /// The picture cache's gate reads the storage entitlement, not the picture one (008-part-pictures, FR-017,
+    /// FR-025).
+    /// </summary>
+    /// <remarks>
+    /// The two keys stopped having the same members when the picture entitlement was widened to Setup Lead and
+    /// Plant Manager, so a panel still reading the picture key would hand a Setup Lead the folder this machine
+    /// copies pictures from — a storage control FR-017 keeps with the IT Department and Developer. The read is
+    /// proved at the assignment as well as at the gate, because a panel gated on a property whose own name means
+    /// nothing is the failure a check of the gate alone would miss.
+    /// </remarks>
+    [TestMethod]
+    public void ThePictureCacheGate_ReadsTheStorageEntitlementAndNotThePictureOne()
+    {
+        var settings = ReadProductionFile("MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs");
+
+        var gate = Regex.Match(settings, @"IsPictureCachePanelVisible\s*=>[^;]+;").Value;
+
+        Assert.IsFalse(
+            string.IsNullOrWhiteSpace(gate),
+            "IsPictureCachePanelVisible is the moved gate; it moved, so update this audit rather than deleting it.");
+        StringAssert.Contains(
+            gate,
+            nameof(SettingsViewModel.CanManageStoragePaths),
+            "The picture cache's panel must be gated on the storage entitlement (FR-017).");
+        Assert.IsFalse(
+            gate.Contains(nameof(SettingsViewModel.CanManageImageLocationSettings), StringComparison.Ordinal),
+            "The panel must not be gated on the picture entitlement, which FR-025 widened past the storage roles.");
+        Assert.IsFalse(
+            gate.Contains("PermissionKeys.", StringComparison.Ordinal),
+            "A gate reads a permission through the property that already resolved it, never a key of its own (FR-054).");
+
+        var assignment = Regex.Match(settings, @"CanManageStoragePaths\s*=\s*answers\[(?<key>PermissionKeys\.[A-Za-z_]+)\]");
+
+        Assert.IsTrue(
+            assignment.Success,
+            "CanManageStoragePaths must be answered from the permission read, or the gate decides on a guess.");
+        Assert.AreEqual(
+            $"PermissionKeys.{nameof(PermissionKeys.SettingsStoragePaths)}",
+            assignment.Groups["key"].Value,
+            "The storage entitlement is what the picture cache's panel belongs to (FR-017).");
     }
 
     private static string StripComments(string source) =>

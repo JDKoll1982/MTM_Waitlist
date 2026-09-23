@@ -146,6 +146,22 @@ public sealed class PermissionBaselineParityTests
         "seed_permission_role_baselines",
         "create.sql");
 
+    /// <summary>
+    /// The keys a later feature deliberately widened, naming the roles it added. Nothing else about the parity
+    /// claim changes: a key in neither table is still held only by the roles its retired list admitted.
+    /// </summary>
+    /// <remarks>
+    /// 008-part-pictures (FR-025) grants the picture entitlement to Setup Lead and Plant Manager on top of the IT
+    /// Department and Developer it already covered, which is the entitlement change the feature exists to make.
+    /// The retired list that key replaced is left exactly as it was, so this table is where the widening is
+    /// declared rather than an edit to the list — a list that had been changed would stop being the record of what
+    /// the application did before.
+    /// </remarks>
+    private static readonly Dictionary<string, string[]> WidenedAfterShipDay = new(StringComparer.Ordinal)
+    {
+        [PermissionKeys.SettingsPartPictures] = ["setup_lead", "plant_manager"],
+    };
+
     [TestMethod]
     public void TheShippedBaselines_ReproduceEveryRetiredListExactly_ForEveryRoleAndEveryPermission()
     {
@@ -154,6 +170,9 @@ public sealed class PermissionBaselineParityTests
         foreach (var (key, retiredList) in ReplacedLists)
         {
             var expectedTrue = ExpectedHolders(key, retiredList);
+            var widened = WidenedAfterShipDay.TryGetValue(key, out var widenedRoles)
+                ? widenedRoles
+                : [];
 
             foreach (var roleCode in CatalogueRoleCodes)
             {
@@ -161,7 +180,7 @@ public sealed class PermissionBaselineParityTests
                 // compared against and its row is the specification's stated one instead.
                 var expected = roleCode == StatedRoleCode
                     ? MaterialHandlerLeadGranted.Contains(key)
-                    : expectedTrue.Contains(roleCode);
+                    : expectedTrue.Contains(roleCode) || widened.Contains(roleCode);
                 var actual = baselines[(key, roleCode)];
 
                 Assert.AreEqual(

@@ -149,6 +149,27 @@
                     Style="{ThemeResource BodyStrongTextBlockStyle}"
                     Text="Operations" />
 
+                <!-- Part pictures (008-part-pictures). Offered only to an account holding the picture entitlement;
+                     the gate is the permission key, read from the store, not a list of role names. -->
+                <wct:SettingsCard
+                    x:Name="PartPicturesEntryCard"
+                    x:Load="{x:Bind ViewModel.IsPartPicturesEntryVisible, Mode=OneWay}"
+                    AutomationProperties.AutomationId="SettingsPage_PartPicturesEntry"
+                    AutomationProperties.Name="{x:Bind ViewModel.PartPicturesEntryTitle}"
+                    HorizontalAlignment="Stretch"
+                    IsClickEnabled="True"
+                    Command="{x:Bind ViewModel.OpenPartPicturesCommand}">
+                    <wct:SettingsCard.Header>
+                        <TextBlock Text="{x:Bind ViewModel.PartPicturesEntryTitle}" />
+                    </wct:SettingsCard.Header>
+                    <wct:SettingsCard.Description>
+                        <TextBlock Text="{x:Bind ViewModel.PartPicturesEntryDescription}" />
+                    </wct:SettingsCard.Description>
+                    <wct:SettingsCard.HeaderIcon>
+                        <SymbolIcon Symbol="Pictures" />
+                    </wct:SettingsCard.HeaderIcon>
+                </wct:SettingsCard>
+
                 <!-- Image location settings -->
                 <wct:SettingsExpander
                     AutomationProperties.AutomationId="SettingsPage_ImageLocationExpander"
@@ -183,6 +204,88 @@
                                 MinWidth="120"
                                 Click="WorkCenterImages_Click"
                                 Content="Manage" />
+                        </wct:SettingsCard>
+                    </wct:SettingsExpander.Items>
+                </wct:SettingsExpander>
+
+                <!-- Where pictures are kept (008-part-pictures, T022). The picture folder, the key folder and the
+                     period a replaced picture is kept, on the storage entitlement rather than the picture
+                     entitlement, because FR-017 reserves the folders to IT Department and Developer while FR-025
+                     widens the picture entitlement past them. -->
+                <wct:SettingsExpander
+                    AutomationProperties.AutomationId="SettingsPage_StoragePathsExpander"
+                    x:Name="StoragePathsExpander"
+                    x:Load="{x:Bind ViewModel.IsStoragePathsPanelVisible, Mode=OneWay}"
+                    Description="{x:Bind ViewModel.StoragePathsPanelDescription}"
+                    Header="{x:Bind ViewModel.StoragePathsPanelTitle}"
+                    HorizontalAlignment="Stretch"
+                    IsExpanded="False">
+                    <wct:SettingsExpander.HeaderIcon>
+                        <SymbolIcon Symbol="Folder" />
+                    </wct:SettingsExpander.HeaderIcon>
+
+                    <wct:SettingsExpander.Items>
+                        <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsImageFolderLabel}">
+                            <TextBox
+                                AutomationProperties.AutomationId="SettingsPage_StoragePaths_ImageFolderBox"
+                                AutomationProperties.Name="{x:Bind ViewModel.StoragePathsImageFolderLabel}"
+                                MinWidth="420"
+                                Text="{x:Bind ViewModel.PictureFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </wct:SettingsCard>
+
+                        <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsKeysFolderLabel}">
+                            <TextBox
+                                AutomationProperties.AutomationId="SettingsPage_StoragePaths_KeysFolderBox"
+                                AutomationProperties.Name="{x:Bind ViewModel.StoragePathsKeysFolderLabel}"
+                                MinWidth="420"
+                                Text="{x:Bind ViewModel.KeysFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </wct:SettingsCard>
+
+                        <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsArchiveKeepDaysLabel}">
+                            <NumberBox
+                                AutomationProperties.AutomationId="SettingsPage_StoragePaths_KeepDaysBox"
+                                AutomationProperties.Name="{x:Bind ViewModel.StoragePathsArchiveKeepDaysLabel}"
+                                MinWidth="140"
+                                Minimum="1"
+                                SpinButtonPlacementMode="Compact"
+                                Value="{x:Bind ViewModel.ArchiveKeepDaysInput, Mode=TwoWay}" />
+                        </wct:SettingsCard>
+
+                        <wct:SettingsCard
+                            ContentAlignment="Vertical"
+                            HorizontalContentAlignment="Stretch">
+                            <StackPanel Spacing="8">
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    Spacing="8">
+                                    <Button
+                                        AutomationProperties.AutomationId="SettingsPage_StoragePaths_SaveButton"
+                                        AutomationProperties.Name="{x:Bind ViewModel.StoragePathsSaveLabel}"
+                                        MinWidth="150"
+                                        Click="SaveStoragePaths_Click"
+                                        Content="{x:Bind ViewModel.StoragePathsSaveLabel}" />
+                                    <ProgressRing
+                                        Width="20"
+                                        Height="20"
+                                        IsActive="{x:Bind ViewModel.IsStoragePathsBusy, Mode=OneWay}" />
+                                </StackPanel>
+
+                                <TextBlock
+                                    MaxWidth="680"
+                                    Text="{x:Bind ViewModel.StoragePathsStoreIsTruthText}"
+                                    TextWrapping="Wrap" />
+
+                                <TextBlock
+                                    MaxWidth="680"
+                                    Text="{x:Bind ViewModel.StoragePathsDisagreementMessage, Mode=OneWay}"
+                                    TextWrapping="Wrap"
+                                    Visibility="{x:Bind ViewModel.StoragePathsDisagreementVisibility, Mode=OneWay}" />
+
+                                <TextBlock
+                                    MaxWidth="680"
+                                    Text="{x:Bind ViewModel.StoragePathsStatusMessage, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
                         </wct:SettingsCard>
                     </wct:SettingsExpander.Items>
                 </wct:SettingsExpander>
@@ -419,34 +522,41 @@
                                         <TextBlock
                                             Style="{ThemeResource BodyStrongTextBlockStyle}"
                                             Text="Shown Dunnage Types" />
-                                        <ItemsControl AutomationProperties.AutomationId="SettingsPage_VisibleDunnageTypesList" ItemsSource="{x:Bind ViewModel.VisibleDunnageTypes, Mode=OneWay}">
-                                            <ItemsControl.ItemTemplate>
+                                        <!--
+                                            Every shown type is the shared card, so this list answers the picture question the way the
+                                            other converted lists do. Hiding a type is the card's action and is unchanged.
+                                        -->
+                                        <GridView
+                                            AutomationProperties.AutomationId="SettingsPage_VisibleDunnageTypesList"
+                                            ItemsSource="{x:Bind ViewModel.VisibleDunnageTypes, Mode=OneWay}"
+                                            IsItemClickEnabled="False"
+                                            SelectionMode="None">
+                                            <GridView.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <ItemsWrapGrid Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </GridView.ItemsPanel>
+                                            <GridView.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Grid
+                                                    <StackPanel
                                                         Margin="0,0,0,8"
-                                                        ColumnSpacing="8">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="Auto" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <Border
-                                                            Grid.Column="0"
-                                                            Style="{StaticResource SettingsListPillStyle}"
-                                                            Background="{ThemeResource SystemFillColorSuccessBrush}">
-                                                            <TextBlock Foreground="White" Text="{Binding Name}" />
-                                                        </Border>
+                                                        HorizontalAlignment="Center"
+                                                        Spacing="6">
+                                                        <ContentControl
+                                                            HorizontalContentAlignment="Stretch"
+                                                            Content="{Binding}"
+                                                            ContentTemplate="{StaticResource PartPictureCardTemplate}" />
                                                         <Button
                                                             AutomationProperties.Name="{Binding Name}"
-                                                            Grid.Column="1"
-                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Center"
                                                             Command="{Binding ViewModel.HideDunnageTypeCommand, ElementName=RootPage}"
                                                             CommandParameter="{Binding Id}"
                                                             Content="Hide"
                                                             IsEnabled="{Binding ViewModel.CanManageDunnageTypeVisibility, ElementName=RootPage}" />
-                                                    </Grid>
+                                                    </StackPanel>
                                                 </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                            </GridView.ItemTemplate>
+                                        </GridView>
                                     </StackPanel>
 
                                     <StackPanel
@@ -455,34 +565,38 @@
                                         <TextBlock
                                             Style="{ThemeResource BodyStrongTextBlockStyle}"
                                             Text="Hidden Dunnage Types" />
-                                        <ItemsControl AutomationProperties.AutomationId="SettingsPage_HiddenDunnageTypesList" ItemsSource="{x:Bind ViewModel.HiddenDunnageTypes, Mode=OneWay}">
-                                            <ItemsControl.ItemTemplate>
+                                        <!-- The hidden types are the same card, with showing a type as the card's action. -->
+                                        <GridView
+                                            AutomationProperties.AutomationId="SettingsPage_HiddenDunnageTypesList"
+                                            ItemsSource="{x:Bind ViewModel.HiddenDunnageTypes, Mode=OneWay}"
+                                            IsItemClickEnabled="False"
+                                            SelectionMode="None">
+                                            <GridView.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <ItemsWrapGrid Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </GridView.ItemsPanel>
+                                            <GridView.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Grid
+                                                    <StackPanel
                                                         Margin="0,0,0,8"
-                                                        ColumnSpacing="8">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="Auto" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <Border
-                                                            Grid.Column="0"
-                                                            Style="{StaticResource SettingsListPillStyle}"
-                                                            Background="{ThemeResource AccentFillColorSecondaryBrush}">
-                                                            <TextBlock Text="{Binding Name}" />
-                                                        </Border>
+                                                        HorizontalAlignment="Center"
+                                                        Spacing="6">
+                                                        <ContentControl
+                                                            HorizontalContentAlignment="Stretch"
+                                                            Content="{Binding}"
+                                                            ContentTemplate="{StaticResource PartPictureCardTemplate}" />
                                                         <Button
                                                             AutomationProperties.Name="{Binding Name}"
-                                                            Grid.Column="1"
-                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Center"
                                                             Command="{Binding ViewModel.ShowDunnageTypeCommand, ElementName=RootPage}"
                                                             CommandParameter="{Binding Id}"
                                                             Content="Show"
                                                             IsEnabled="{Binding ViewModel.CanManageDunnageTypeVisibility, ElementName=RootPage}" />
-                                                    </Grid>
+                                                    </StackPanel>
                                                 </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                            </GridView.ItemTemplate>
+                                        </GridView>
                                     </StackPanel>
                                 </Grid>
 

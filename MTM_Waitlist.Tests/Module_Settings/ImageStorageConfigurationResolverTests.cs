@@ -111,4 +111,56 @@ public sealed class ImageStorageConfigurationResolverTests
             Options.Create(new ImageStorageOptions()),
             null!));
     }
+
+    // ── Which folder is the truth, and the disagreement to report (US6, FR-009, FR-010) ────────────────────────
+
+    [TestMethod]
+    public async Task GetSharedFolderResolutionAsync_WithNothingStored_ReportsThisMachinesOwnFolderAndNoDisagreement()
+    {
+        var resolution = await _resolver.GetSharedFolderResolutionAsync();
+
+        Assert.AreEqual(AppsettingsPath, resolution.FolderPath, "With nothing stored, this machine's own folder is the truth.");
+        Assert.AreEqual(AppsettingsPath, resolution.MachineFolderPath);
+        Assert.IsFalse(resolution.MachineDisagrees, "The two agree, so there is no disagreement to report.");
+    }
+
+    [TestMethod]
+    public async Task GetSharedFolderResolutionAsync_WithAStoredFolder_ReportsTheStoredFolderAndTheDisagreement()
+    {
+        _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, @"\\server\images");
+
+        var resolution = await _resolver.GetSharedFolderResolutionAsync();
+
+        Assert.AreEqual(
+            @"\\server\images",
+            resolution.FolderPath,
+            "The store wins over this machine's own file, which is what makes one recorded picture resolve for every computer.");
+        Assert.AreEqual(AppsettingsPath, resolution.MachineFolderPath, "The file's own value is named beside it.");
+        Assert.IsTrue(resolution.MachineDisagrees, "This machine is configured with a folder other than the one in force.");
+    }
+
+    [TestMethod]
+    public async Task GetSharedFolderResolutionAsync_WithTheSameFolderSpelledDifferently_ReportsNoDisagreement()
+    {
+        // A share is written with forward slashes in some of this application's files and backslashes in others, and
+        // one is not a disagreement about where the pictures are.
+        _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, AppsettingsPath.Replace('\\', '/'));
+
+        var resolution = await _resolver.GetSharedFolderResolutionAsync();
+
+        Assert.IsFalse(
+            resolution.MachineDisagrees,
+            "The same folder spelled with the other separator is the same folder.");
+    }
+
+    [TestMethod]
+    public async Task GetSharedFolderResolutionAsync_WithAStoredFolderThatMatches_ReportsNoDisagreement()
+    {
+        _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, AppsettingsPath);
+
+        var resolution = await _resolver.GetSharedFolderResolutionAsync();
+
+        Assert.AreEqual(AppsettingsPath, resolution.FolderPath);
+        Assert.IsFalse(resolution.MachineDisagrees);
+    }
 }

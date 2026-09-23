@@ -237,11 +237,27 @@ public sealed class SetupWorkCenter : ObservableObject
 
 public sealed class SetupPartResult
 {
+    /// <summary>The prefix every automation name on this list is built from.</summary>
+    public const string AutomationIdPrefix = "SetupPartSelectionPage_Part";
+
     public string PartNumber { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
 
     public string WorkCenter { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The part's own picture, resolved by the step before this result reached the list, and the one shared
+    /// placeholder when the part cannot be pictured. Never empty, so an unpicturable part is still offered as a
+    /// card rather than as a blank space (FR-014, FR-018, FR-023).
+    /// </summary>
+    public string ImagePath { get; set; } = ImagePicturePolicy.NoImagePath;
+
+    /// <summary>This entry's automation name, unique to the part it offers.</summary>
+    public string AutomationId => $"{AutomationIdPrefix}_{PartNumber}";
+
+    /// <summary>The automation name of the picture box inside this entry, unique to the part it offers.</summary>
+    public string ImageAutomationId => $"{AutomationIdPrefix}Image_{PartNumber}";
 
     public string Summary => string.IsNullOrWhiteSpace(Description)
         ? PartNumber
@@ -259,9 +275,22 @@ public sealed class SetupSequenceResult
 
 public sealed class SetupSubordinatePart
 {
+    /// <summary>The prefix every automation name on the review's part rows is built from.</summary>
+    public const string AutomationIdPrefix = "SetupReviewPage_SubordinatePart";
+
     public string Category { get; set; } = string.Empty;
 
     public string PartNumber { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The part's own picture, resolved by the review step before this row was drawn, and the one shared
+    /// placeholder when the part cannot be pictured. Never empty, so a row grouped by family still shows the
+    /// part's own picture or the one placeholder rather than family artwork or a blank space (FR-014, FR-018).
+    /// </summary>
+    public string ImagePath { get; set; } = ImagePicturePolicy.NoImagePath;
+
+    /// <summary>The automation name of the picture box inside this row, unique to the part it offers.</summary>
+    public string ImageAutomationId => $"{AutomationIdPrefix}Image_{PartNumber}";
 
     public string Description { get; set; } = string.Empty;
 

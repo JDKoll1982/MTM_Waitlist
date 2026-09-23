@@ -390,13 +390,20 @@ public sealed class StartupCoordinator : IStartupCoordinator
     }
 
     /// <summary>
-    /// Mirrors the picture roots onto this computer before the shell is shown.
+    /// Mirrors the picture roots onto this computer before the shell is shown, and cleans up the pictures a replace
+    /// has archived once their retention period has passed.
     /// </summary>
     /// <remarks>
     /// <para>
     /// Run here for the same reason the MTM Receiving Application runs its own cache step inside startup: the first
     /// list a person sees should draw from local disk. The splash reports the line it is on, and then the numbered
     /// steps carry on.
+    /// </para>
+    /// <para>
+    /// The archive cleanup is joined to this step rather than given one of its own: it walks the same picture roots
+    /// the mirror walks, so running it here costs no second trip over the share, and a picture that was replaced
+    /// stops taking up space without anybody having to remember to tidy up. The period it removes past is the
+    /// stored setting, read when the run starts (FR-011, FR-037).
     /// </para>
     /// <para>
     /// Best effort, and deliberately so: a cache that cannot be built is reported and the application opens
@@ -427,7 +434,7 @@ public sealed class StartupCoordinator : IStartupCoordinator
 
             StartupDebugLog.Info(
                 "StartupCoordinator",
-                $"Picture cache synchronized. Copied={result.Copied}, Removed={result.Removed}{skipped}");
+                $"Picture cache synchronized. Copied={result.Copied}, Removed={result.Removed}, ArchivesRemoved={result.ArchivesRemoved}{skipped}");
         }
         catch (OperationCanceledException)
         {

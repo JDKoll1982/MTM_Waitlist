@@ -47,30 +47,51 @@
                         <DataTemplate x:DataType="models:NewRequestDieOption">
                             <Grid Margin="8" AutomationProperties.Name="{x:Bind Title}">
                                 <Border
-                                    Width="170"
-                                    Height="130"
+                                    MinWidth="170"
+                                    MinHeight="130"
+                                    MaxWidth="240"
                                     Padding="12"
                                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1"
                                     CornerRadius="10">
-                                    <StackPanel
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Spacing="8">
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            TextAlignment="Center"
-                                            Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                            Text="{x:Bind Title}"
-                                            TextWrapping="WrapWholeWords" />
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            TextAlignment="Center"
-                                            Style="{StaticResource RequestDialogCaptionStyle}"
-                                            Text="{x:Bind Summary}"
-                                            TextWrapping="WrapWholeWords" />
-                                    </StackPanel>
+                                    <Grid ColumnSpacing="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <!-- The die card is no longer text only: it draws the die's own picture, or
+                                             the one shared placeholder when the die cannot be pictured (FR-018). -->
+                                        <Border
+                                            MinWidth="64"
+                                            MinHeight="64"
+                                            Padding="4"
+                                            VerticalAlignment="Center"
+                                            Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                                            CornerRadius="8">
+                                            <Image
+                                                AutomationProperties.AutomationId="{x:Bind ImageAutomationId}"
+                                                Source="{x:Bind ImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                                Stretch="Uniform" />
+                                        </Border>
+                                        <StackPanel
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Spacing="8">
+                                            <TextBlock
+                                                HorizontalAlignment="Center"
+                                                TextAlignment="Center"
+                                                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                                Text="{x:Bind Title}"
+                                                TextWrapping="WrapWholeWords" />
+                                            <TextBlock
+                                                HorizontalAlignment="Center"
+                                                TextAlignment="Center"
+                                                Style="{StaticResource RequestDialogCaptionStyle}"
+                                                Text="{x:Bind Summary}"
+                                                TextWrapping="WrapWholeWords" />
+                                        </StackPanel>
+                                    </Grid>
                                 </Border>
 
                                 <!-- Selection outline, drawn only on the cards currently chosen. -->

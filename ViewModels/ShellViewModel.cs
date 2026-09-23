@@ -14,6 +14,7 @@ using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Views;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.Views;
+using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Views;
 
@@ -246,6 +247,42 @@ public partial class ShellViewModel : ObservableRecipient
 
     public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
 
+    /// <summary>
+    /// The buildings the flyout offers: every building except the one in effect (FR-022).
+    /// </summary>
+    /// <remarks>
+    /// Rebuilt when the flyout opens rather than kept in step with every change, because the one value that
+    /// decides its contents is the building in effect and that is exactly what opening the flyout is about to
+    /// change. A building has no picture of its own in this application, so each card draws the one shared
+    /// no-image picture: the entry is still offered and still selectable (FR-023).
+    /// </remarks>
+    public ObservableCollection<BuildingCardOption> BuildingCards { get; } = new();
+
+    /// <summary>Rebuilds the flyout's entries, leaving out the building currently in effect.</summary>
+    public void RefreshBuildingCards()
+    {
+        var current = SelectedBuilding;
+
+        BuildingCards.Clear();
+
+        foreach (var building in Buildings.Where(building =>
+                     !string.IsNullOrWhiteSpace(building)
+                     && !string.Equals(building, current, StringComparison.OrdinalIgnoreCase)))
+        {
+            BuildingCards.Add(new BuildingCardOption(building, "ShellPage_FacilityCard"));
+        }
+    }
+
+    /// <summary>Chooses a building from the flyout.</summary>
+    /// <param name="building">The building that was chosen. A blank one changes nothing.</param>
+    public void SelectBuilding(string? building)
+    {
+        if (!string.IsNullOrWhiteSpace(building))
+        {
+            SelectedBuilding = building;
+        }
+    }
+
     public INavigationService NavigationService
     {
         get;
@@ -283,6 +320,7 @@ public partial class ShellViewModel : ObservableRecipient
         _setupWorkflowState.PropertyChanged += OnSetupWorkflowStateChanged;
         _startupState = startupState;
         SelectedBuilding = _buildingSelectionService.SelectedBuilding;
+        RefreshBuildingCards();
         HeaderText = "MTM Waitlist";
         RefreshUserInfo();
     }
@@ -613,6 +651,7 @@ public partial class ShellViewModel : ObservableRecipient
         }
 
         _buildingSelectionService.SelectedBuilding = value;
+        RefreshBuildingCards();
 
         if (_isWaitlistPageActive)
         {

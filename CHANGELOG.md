@@ -10,6 +10,47 @@
 
 ---
 
+## 2026-09-23 — every part has its own picture, and the pictures have a home you can change
+
+**What changed:** the application can now picture **a part**, not just the kind of request it belongs to. A part's
+picture appears wherever that part is named — the waitlist cards, the request detail page, the setup part list and
+review, the wizard's die card, the confirmation step and the preview. A **Visual** part and a **WIP** part are
+pictured separately, even when they share a part number, so one system's picture is never shown for the other. Where
+there is no picture, the same **no-image** picture as everywhere else is drawn: never a blank space, and never
+another part's or a family's artwork.
+
+**Why it matters:** the waitlist card used to show the picture for the *kind of request*, so two requests for two
+different parts looked alike, and a request for a part nobody had photographed still showed generic artwork. A person
+on the floor could not tell from the card which part they were being asked for. Now the card shows the part.
+
+**What to expect:**
+
+- **Settings → Operations → Part Pictures** (IT Department, Developer, Setup Lead and Plant Manager) is a new screen:
+  search for a part, see the picture it has, set or replace it, read who changed it and what it replaced, and see the
+  list of parts that still have no picture — which can be exported in one action. Each part is listed and pictured
+  under its system, so Visual and WIP parts are never confused.
+- **A picture can be added without the application.** Drop a correctly named file into the picture folder — the part
+  number, with `.png`, `.jpg` or `.jpeg`, in the folder for the part's family — and the application uses it.
+- **Lists that ask you to choose by name are now cards with pictures**: the dunnage types that may be shown or
+  hidden, the setup part list, the remaining answer list in the wizard, and the building choice — which is now a
+  flyout of building cards with the building you are already in left out.
+- **Settings → Operations → Storage folders** (IT Department and Developer) holds the picture folder, the key-file
+  folder, and **how long a replaced picture is kept** (ninety days by default). All three are company-wide settings,
+  so changing one here changes it on every computer. Where a computer's own configuration still names a different
+  picture folder, the screen says so in one line: what is shown is what every computer reads, and the store is the
+  truth.
+- **Pictures arrive faster.** A part's picture is copied to your computer the **first time that part is drawn**,
+  rather than every picture being copied when the application starts. A picture you replace shows up without
+  restarting, and the picture it replaced is kept beside it until its retention period has passed. If the picture
+  share cannot be reached, the screens still open and draw what they have.
+
+**Housekeeping:** every picture the application already stored has been moved into the new arrangement — one folder
+per collection, one per family — and every saved picture still resolves, so nothing needs to be set again by hand.
+The pictures are still stored relative to the picture folder, so a machine that reaches the share by a different
+route finds exactly the same picture.
+
+---
+
 ## 2026-09-22 — pictures are copied onto your computer when the app starts
 
 **What changed:** the application now keeps a copy of every picture on the computer it is running on, the same way

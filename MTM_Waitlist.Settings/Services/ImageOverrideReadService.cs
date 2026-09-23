@@ -3,6 +3,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Settings.Services;
 
@@ -17,12 +18,16 @@ public sealed class ImageOverrideReadService : IImageOverrideReadService
     private readonly IMySqlHelperServer _mySqlHelperServer;
     private readonly ILogger<ImageOverrideReadService> _logger;
     // Valid scope values. The request-type and subtype scopes retired with the vocabulary (FR-023); what remains
-    // is the Item, its Category family, and the work center.
+    // is the Item, its Category family, the work center, and the two part scopes this feature adds. The part
+    // scopes are spelled by PartPictureLayout rather than copied here, because the same four strings decide the
+    // folder a picture lives in and the two must not drift apart.
     private static readonly HashSet<string> ValidScopes = new(StringComparer.OrdinalIgnoreCase)
     {
         "request_item",
         "request_category",
-        "work_center"
+        "work_center",
+        PartPictureLayout.VisualPartScope,
+        PartPictureLayout.WipPartScope,
     };
 
     // Stored procedure names. Constitution III keeps every SQL statement in Database/StoredProcedures, so the

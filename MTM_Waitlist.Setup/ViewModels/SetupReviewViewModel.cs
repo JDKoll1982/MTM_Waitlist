@@ -11,6 +11,7 @@ using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Setup.ViewModels;
 
@@ -19,6 +20,14 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
     private readonly IAppWindowProvider _appWindowProvider;
+
+    /// <summary>
+    /// The reader this review resolves each subordinate part's picture through, before the rows are drawn. The rows
+    /// stay grouped by family exactly as they were; what each row gains is the <b>part's own</b> picture, never the
+    /// family's artwork (FR-014, FR-015, FR-018). Null on a headless host, which leaves every row on the one shared
+    /// placeholder.
+    /// </summary>
+    private readonly IPartPictureResolver? _partPictureResolver;
 
     [ObservableProperty]
     public partial string StatusMessage
@@ -70,16 +79,29 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
 
     public string SelectedDunnageSummary => State.SelectedDunnageSummary;
 
-    public SetupReviewViewModel(INavigationService navigationService, ISetupWorkflowService workflowService, IAppWindowProvider appWindowProvider)
+    public SetupReviewViewModel(
+        INavigationService navigationService,
+        ISetupWorkflowService workflowService,
+        IAppWindowProvider appWindowProvider,
+        IPartPictureResolver? partPictureResolver = null)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
         _appWindowProvider = appWindowProvider;
+        _partPictureResolver = partPictureResolver;
     }
 
-    public void OnNavigatedTo(object parameter)
+    public async void OnNavigatedTo(object parameter)
     {
         StatusMessage = State.StatusMessage;
+
+        // Every subordinate part's picture is resolved here, where the resolver is in hand, and carried on the
+        // row (FR-018).
+        foreach (var part in State.SubordinateParts)
+        {
+            part.ImagePath = await ResolvePartPictureAsync(part.PartNumber).ConfigureAwait(true);
+        }
+
         OnPropertyChanged(nameof(PageTitle));
         OnPropertyChanged(nameof(ProgressText));
         OnPropertyChanged(nameof(SubordinatePartGroups));
@@ -87,6 +109,32 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
         OnPropertyChanged(nameof(ConfirmButtonVisibility));
         OnPropertyChanged(nameof(SelectedDunnageSummary));
         OnPropertyChanged(nameof(DunnageAssignmentDisplays));
+    }
+
+    /// <summary>The part's picture, or the one shared placeholder when the part cannot be pictured (FR-014, FR-015).</summary>
+    private async Task<string> ResolvePartPictureAsync(string? partNumber)
+    {
+        if (_partPictureResolver is null || string.IsNullOrWhiteSpace(partNumber))
+        {
+            return ImagePicturePolicy.NoImagePath;
+        }
+
+        try
+        {
+            var resolved = await _partPictureResolver
+                .ResolvePartPicturePathAsync(PartPictureLayout.VisualPartScope, partNumber.Trim())
+                .ConfigureAwait(true);
+
+            return string.IsNullOrWhiteSpace(resolved) ? ImagePicturePolicy.NoImagePath : resolved;
+        }
+        catch (Exception ex)
+        {
+            StartupDebugLog.Error(
+                "SetupReview",
+                ex,
+                $"Resolving the picture for part '{partNumber}' failed; the row will draw the no-image placeholder.");
+            return ImagePicturePolicy.NoImagePath;
+        }
     }
 
     public void OnNavigatedFrom()

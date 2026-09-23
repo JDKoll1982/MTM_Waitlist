@@ -79,6 +79,64 @@ public sealed class WipFloorInventoryServiceTests
         Assert.IsFalse(snapshot!.HasAnyFloorQuantity);
     }
 
+    /// <summary>
+    /// The WIP inventory's distinct part numbers come from their own checked-in queue script, read through the
+    /// same seam and against the same store the floor snapshot is read from. A part the WIP floor can name is a
+    /// part this application can picture (FR-001).
+    /// </summary>
+    [TestMethod]
+    public async Task GetInventoryPartNumbersAsync_ReturnsTheScriptsRowsThroughTheExistingSeam()
+    {
+        var stub = new StubMySqlHelperServer(new[]
+        {
+            new Dictionary<string, object?> { ["PartNumber"] = "MMC0001000" },
+            new Dictionary<string, object?> { ["PartNumber"] = "  A22-77724-100  " },
+        });
+
+        var service = new WipFloorInventoryService(stub);
+        var partNumbers = await service.GetInventoryPartNumbersAsync();
+
+        CollectionAssert.AreEqual(
+            new[] { "MMC0001000", "A22-77724-100" },
+            partNumbers.ToArray(),
+            "The part numbers come back trimmed and in the script's own order.");
+
+        Assert.AreEqual(MySqlDatabaseTarget.MtmWipApplication, stub.LastDatabaseTarget);
+        StringAssert.Contains(stub.LastSql!, "AS PartNumber", "The read must execute the part-number script, not the floor-quantity one.");
+        StringAssert.Contains(stub.LastSql!, "inv_inventory", "The read must execute the part-number script, not the floor-quantity one.");
+        StringAssert.Contains(stub.LastSql!, "Dunnage", "Dunnage rows are packaging stock and are not parts the application pictures.");
+        Assert.AreEqual(0, stub.LastParameterCount, "The part-number read is not parameterised: it lists the floor.");
+    }
+
+    /// <summary>An empty floor is an empty list, not a failure and not a fabricated part.</summary>
+    [TestMethod]
+    public async Task GetInventoryPartNumbersAsync_NoRows_ReturnsAnEmptyList()
+    {
+        var stub = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
+        var service = new WipFloorInventoryService(stub);
+
+        Assert.AreEqual(0, (await service.GetInventoryPartNumbersAsync()).Count);
+    }
+
+    /// <summary>
+    /// A row whose part number is blank names no part, so it is left out rather than offered as a part with no
+    /// key. A repeated number is one part, not two.
+    /// </summary>
+    [TestMethod]
+    public async Task GetInventoryPartNumbersAsync_LeavesOutBlankPartNumbersAndRepeats()
+    {
+        var stub = new StubMySqlHelperServer(new[]
+        {
+            new Dictionary<string, object?> { ["PartNumber"] = "MMC0001000" },
+            new Dictionary<string, object?> { ["PartNumber"] = "   " },
+            new Dictionary<string, object?> { ["PartNumber"] = "mmc0001000" },
+        });
+
+        var service = new WipFloorInventoryService(stub);
+
+        CollectionAssert.AreEqual(new[] { "MMC0001000" }, (await service.GetInventoryPartNumbersAsync()).ToArray());
+    }
+
     private static Dictionary<string, object?> FloorRow(
         decimal finishedGoods = 0m,
         decimal outsideService = 0m,
@@ -103,6 +161,10 @@ public sealed class WipFloorInventoryServiceTests
 
         public string? LastPartNumber { get; private set; }
 
+        public string? LastSql { get; private set; }
+
+        public int LastParameterCount { get; private set; }
+
         public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
             string storedProcedureName,
             IReadOnlyDictionary<string, object?> parameters,
@@ -125,6 +187,8 @@ public sealed class WipFloorInventoryServiceTests
         {
             QueryCallCount++;
             LastDatabaseTarget = databaseTarget;
+            LastSql = sql;
+            LastParameterCount = parameters.Count;
             LastPartNumber = parameters.TryGetValue("PartNumber", out var part) ? Convert.ToString(part) : null;
             return Task.FromResult(_rows);
         }

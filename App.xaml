@@ -14,6 +14,7 @@
                 <ResourceDictionary Source="/Styles/TooltipDeveloper.xaml" />
                 <ResourceDictionary Source="/Styles/ControlInspector.xaml" />
                 <ResourceDictionary Source="/Styles/RequestDialogs.xaml" />
+                <ResourceDictionary Source="/Styles/PartPictureCardTemplate.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:StringToImageSourceConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="StringToImageSourceConverter" />
             <converters:RemainingTimeToBrushConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="RemainingTimeToBrushConverter" />

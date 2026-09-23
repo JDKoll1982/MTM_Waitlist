@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Settings.Services;
 
@@ -313,6 +314,18 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
     }
 
     /// <inheritdoc />
+    public async Task<SharedFolderResolution> GetSharedFolderResolutionAsync()
+    {
+        // The path first, and through the ordinary cascade: the store wins over this machine's own settings file
+        // (OQ-3), so the folder reported here is the folder every computer reads.
+        var folderPath = await GetSharedFolderPathAsync().ConfigureAwait(false);
+
+        return new SharedFolderResolution(
+            folderPath,
+            _appsettingsOptions.Value.SharedFolderPath?.Trim() ?? string.Empty);
+    }
+
+    /// <inheritdoc />
     public async Task<ImageStorageOptions> GetEffectiveConfigurationAsync()
     {
         _logger.LogInformation("Resolving effective image storage configuration with database overrides");
@@ -387,6 +400,37 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
         public bool IsValid() =>
             DateTime.UtcNow - CachedAtUtc < CacheTtl;
     }
+}
+
+/// <summary>
+/// Which folder holds the pictures for every computer, and which folder this machine's own settings file names.
+/// </summary>
+/// <param name="FolderPath">
+/// The folder every computer reads, resolved through the ordinary cascade, so the store's value when there is one.
+/// This is the truth: a recorded picture is stored relative to it and resolves under it (FR-009, FR-010).
+/// </param>
+/// <param name="MachineFolderPath">The folder this machine's own configuration carries, as it was written.</param>
+/// <remarks>
+/// The two are reported together because the interesting case is the one where they differ: a machine still
+/// carrying the old path in its settings file works from the store's answer while appearing to be configured
+/// otherwise, and that has to be said in one line rather than left to look like a picture that is simply not there
+/// (OQ-3: the store is the truth).
+/// </remarks>
+public sealed record SharedFolderResolution(string FolderPath, string MachineFolderPath)
+{
+    /// <summary>
+    /// Whether this machine's own configuration names a folder other than the one every computer reads.
+    /// </summary>
+    /// <remarks>
+    /// Compared after unifying separators and without regard to case, because the same share is written both ways
+    /// across this application's files and a difference in spelling is not a difference in folder.
+    /// </remarks>
+    public bool MachineDisagrees =>
+        MachineFolderPath.Length > 0
+        && string.Equals(
+            AppStoragePaths.NormalizeSeparators(MachineFolderPath),
+            AppStoragePaths.NormalizeSeparators(FolderPath),
+            StringComparison.OrdinalIgnoreCase) is false;
 }
 
 /// <summary>

@@ -1617,4 +1617,147 @@
   <data name="Permissions_Back.Label" xml:space="preserve">
     <value>Back to Settings</value>
   </data>
+
+  <!-- Feature 008-part-pictures (task T011). The part-picture screen and the storage panel. -->
+  <data name="Settings_PartPictures_SectionTitle.Text" xml:space="preserve">
+    <value>Part pictures</value>
+  </data>
+  <data name="Settings_PartPictures_Description.Text" xml:space="preserve">
+    <value>Give a Visual or WIP part a picture, and see which parts still have none.</value>
+  </data>
+  <data name="Settings_PartPictures_Open.Label" xml:space="preserve">
+    <value>Open part pictures</value>
+  </data>
+  <data name="Settings_PartPictures_Title.Text" xml:space="preserve">
+    <value>Part pictures</value>
+  </data>
+  <data name="Settings_PartPictures_System.Label" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="Settings_PartPictures_System_Visual.Content" xml:space="preserve">
+    <value>Visual</value>
+  </data>
+  <data name="Settings_PartPictures_System_Wip.Content" xml:space="preserve">
+    <value>WIP</value>
+  </data>
+  <data name="Settings_PartPictures_PartNumber.Label" xml:space="preserve">
+    <value>Part number</value>
+  </data>
+  <data name="Settings_PartPictures_PartNumber.PlaceholderText" xml:space="preserve">
+    <value>Type or paste a part number</value>
+  </data>
+  <data name="Settings_PartPictures_Find.Label" xml:space="preserve">
+    <value>Find part</value>
+  </data>
+  <data name="Settings_PartPictures_Set.Label" xml:space="preserve">
+    <value>Set picture</value>
+  </data>
+  <data name="Settings_PartPictures_Replace.Label" xml:space="preserve">
+    <value>Replace picture</value>
+  </data>
+  <data name="Settings_PartPictures_CurrentPicture.Text" xml:space="preserve">
+    <value>Current picture</value>
+  </data>
+  <data name="Settings_PartPictures_NoCurrentPicture.Text" xml:space="preserve">
+    <value>This part has no picture yet.</value>
+  </data>
+  <data name="Settings_PartPictures_StoredAt.Text" xml:space="preserve">
+    <value>Stored at</value>
+  </data>
+  <data name="Settings_PartPictures_History_Title.Text" xml:space="preserve">
+    <value>Change record</value>
+  </data>
+  <data name="Settings_PartPictures_History_Empty.Text" xml:space="preserve">
+    <value>Nothing has been changed for this part yet.</value>
+  </data>
+  <data name="Settings_PartPictures_History_FirstPicture.Text" xml:space="preserve">
+    <value>First picture set</value>
+  </data>
+  <data name="Settings_PartPictures_History_Replaced.Text" xml:space="preserve">
+    <value>Replaced</value>
+  </data>
+  <data name="Settings_PartPictures_Missing_Title.Text" xml:space="preserve">
+    <value>Parts with no picture</value>
+  </data>
+  <data name="Settings_PartPictures_Missing_Empty.Text" xml:space="preserve">
+    <value>Every part the application can name already has a picture.</value>
+  </data>
+  <data name="Settings_PartPictures_Missing_Count.Text" xml:space="preserve">
+    <value>{0} parts have no picture.</value>
+  </data>
+  <data name="Settings_PartPictures_Missing_Export.Label" xml:space="preserve">
+    <value>Export list</value>
+  </data>
+  <data name="Settings_PartPictures_Missing_Export_SuggestedFileName.Text" xml:space="preserve">
+    <value>parts-without-pictures</value>
+  </data>
+  <data name="Settings_PartPictures_Missing_CsvHeader.Text" xml:space="preserve">
+    <value>Part number,System,Family folder,Path the picture would be stored at</value>
+  </data>
+  <data name="Settings_PartPictures_Export_Written.Text" xml:space="preserve">
+    <value>Exported {0} parts.</value>
+  </data>
+  <data name="Settings_PartPictures_PickPicture_Title.Text" xml:space="preserve">
+    <value>Choose a picture</value>
+  </data>
+  <data name="Settings_PartPictures_Saved.Text" xml:space="preserve">
+    <value>Picture saved.</value>
+  </data>
+  <data name="Settings_PartPictures_Refusal_TooLong.Text" xml:space="preserve">
+    <value>That part number is longer than the {0} characters the picture store can hold. Shorten it, or picture this part by a shorter number.</value>
+  </data>
+  <data name="Settings_PartPictures_Refusal_Collision.Text" xml:space="preserve">
+    <value>Another part already uses that file name: {0}. Its picture would be overwritten, so nothing was saved.</value>
+  </data>
+  <data name="Settings_PartPictures_Refusal_NotAPart.Text" xml:space="preserve">
+    <value>Type a part number before setting a picture.</value>
+  </data>
+  <data name="Settings_PartPictures_Unavailable.Text" xml:space="preserve">
+    <value>The picture store could not be read. The parts with no picture cannot be listed right now.</value>
+  </data>
+  <data name="Settings_PartPictures_Missing_NotListable.Text" xml:space="preserve">
+    <value>{0} part numbers cannot be listed here: they are not read by any list this application already holds. Type one in above to give it a picture.</value>
+  </data>
+  <data name="Settings_StoragePaths_SectionTitle.Text" xml:space="preserve">
+    <value>Where pictures are kept</value>
+  </data>
+  <data name="Settings_StoragePaths_Description.Text" xml:space="preserve">
+    <value>The folder every picture sits under, the folder holding the key files, and how long a replaced picture is kept.</value>
+  </data>
+  <data name="Settings_StoragePaths_ImageFolder.Label" xml:space="preserve">
+    <value>Picture folder</value>
+  </data>
+  <data name="Settings_StoragePaths_KeysFolder.Label" xml:space="preserve">
+    <value>Key folder</value>
+  </data>
+  <data name="Settings_StoragePaths_ArchiveKeepDays.Label" xml:space="preserve">
+    <value>Keep a replaced picture for (days)</value>
+  </data>
+  <data name="Settings_StoragePaths_Save.Label" xml:space="preserve">
+    <value>Save storage settings</value>
+  </data>
+  <data name="Settings_StoragePaths_Saved.Text" xml:space="preserve">
+    <value>Storage settings saved.</value>
+  </data>
+  <data name="Settings_StoragePaths_StoreIsTruth.Text" xml:space="preserve">
+    <value>These are the values every computer reads.</value>
+  </data>
+  <data name="Settings_StoragePaths_Disagreement.Text" xml:space="preserve">
+    <value>This computer is configured with {0}, which is not what the other computers read. The value above is the one that is used.</value>
+  </data>
+  <data name="Settings_StoragePaths_Unavailable.Text" xml:space="preserve">
+    <value>The storage settings could not be read from the store.</value>
+  </data>
+  <data name="Settings_StoragePaths_FolderNeeded.Text" xml:space="preserve">
+    <value>A folder is needed in both boxes before this can be saved.</value>
+  </data>
+  <data name="Settings_StoragePaths_DaysNeeded.Text" xml:space="preserve">
+    <value>Keep a replaced picture for at least one day.</value>
+  </data>
+  <data name="Settings_StoragePaths_SaveFailed.Text" xml:space="preserve">
+    <value>Unable to save those settings.</value>
+  </data>
+  <data name="PartPictureCard_NoPicture.Text" xml:space="preserve">
+    <value>No picture</value>
+  </data>
 </root>

@@ -45,6 +45,37 @@ public static class AppStoragePaths
     public const string ArchiveFolderName = "Archive";
 
     /// <summary>
+    /// The three collection folders a picture is kept under, one per collection: the application's own pictures,
+    /// the Infor Visual parts, and the WIP floor parts.
+    /// </summary>
+    /// <remarks>
+    /// The names are spelled once, in <see cref="PartPictureLayout"/>, so this class and the layout cannot
+    /// disagree about them.
+    /// </remarks>
+    public static readonly IReadOnlyList<string> CollectionFolderNames =
+    [
+        PartPictureLayout.WaitlistCollection,
+        PartPictureLayout.VisualCollection,
+        PartPictureLayout.WipCollection,
+    ];
+
+    /// <summary>
+    /// The three kind folders inside the application's own collection, one per scope: the request items, the
+    /// category families and the work centres.
+    /// </summary>
+    /// <remarks>
+    /// They exist so no two kinds can resolve to one file. The item <c>other</c> and the category <c>Other</c>
+    /// differ only by letter case and a file name cannot tell them apart, so neither is renamed and each keeps its
+    /// own folder. The names are the scope values themselves, kept verbatim.
+    /// </remarks>
+    public static readonly IReadOnlyList<string> ApplicationOwnKindFolderNames =
+    [
+        "work_center",
+        "request_item",
+        "request_category",
+    ];
+
+    /// <summary>
     /// The name a key is read from: <c>{keyname}.txt</c>, written out so a reader added later does not have to
     /// invent the convention.
     /// </summary>
@@ -58,9 +89,15 @@ public static class AppStoragePaths
     /// <param name="root">The configured picture root. Ignored for a rooted <paramref name="storedPath"/>.</param>
     /// <param name="storedPath">
     /// What the store holds: a path relative to <paramref name="root"/> — how a picture is written now — or a
-    /// rooted path, which is how a picture was written before the layout changed.
+    /// rooted path, which is how a picture was written before the layout changed. A relative value in either the
+    /// pre-move or the post-move shape is answered: see <see cref="ToCurrentLayout"/>.
     /// </param>
     /// <returns>The path to read, or <see langword="null"/> when there is nothing to resolve.</returns>
+    /// <remarks>
+    /// Reading both layouts is what lets the recorded-path move happen in any order and be interrupted without
+    /// leaving a picture unresolvable: the files and the rows move at different moments, so a reader that
+    /// understood only one shape would answer null in the gap between them.
+    /// </remarks>
     public static string? ResolvePicturePath(string? root, string? storedPath)
     {
         if (string.IsNullOrWhiteSpace(storedPath))
@@ -83,8 +120,49 @@ public static class AppStoragePaths
             return null;
         }
 
-        return Path.Combine(NormalizeSeparators(root), relative);
+        return Path.Combine(NormalizeSeparators(root), ToCurrentLayout(relative));
     }
+
+    /// <summary>
+    /// The same recorded value, expressed in the layout the share uses now.
+    /// </summary>
+    /// <param name="storedPath">A recorded relative path, in either layout.</param>
+    /// <returns>
+    /// The path under the collection folder the value belongs to. A value that already names a collection is
+    /// returned unchanged, a pre-move value that names one of the application's three kinds gains the
+    /// <c>Waitlist</c> collection in front of it, and a value this method does not recognise is left exactly where
+    /// it is rather than being guessed at.
+    /// </returns>
+    public static string ToCurrentLayout(string storedPath)
+    {
+        if (string.IsNullOrWhiteSpace(storedPath))
+        {
+            return string.Empty;
+        }
+
+        var normalized = NormalizeSeparators(storedPath);
+        var segments = normalized.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+
+        if (segments.Length == 0 || IsCollectionFolder(segments[0]))
+        {
+            return normalized;
+        }
+
+        var collection = PartPictureLayout.CollectionFolderFor(segments[0]);
+
+        // An unrecognised leading folder is left alone: moving a file the move does not understand is how a
+        // picture ends up somewhere no reader looks.
+        return collection is null
+            ? normalized
+            : Path.Combine(collection, normalized);
+    }
+
+    /// <summary>Whether a folder name is one of the three collection folders.</summary>
+    /// <param name="folderName">The leading folder of a recorded path.</param>
+    /// <returns><see langword="true"/> for <c>Waitlist</c>, <c>Visual</c> or <c>WIP</c>.</returns>
+    public static bool IsCollectionFolder(string? folderName) =>
+        !string.IsNullOrWhiteSpace(folderName)
+        && CollectionFolderNames.Contains(folderName.Trim(), StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Joins a folder and a file name the way every path in this application is compared: separators unified, so a

@@ -140,6 +140,20 @@ public sealed partial class ShellPage : Page
     }
 
     /// <summary>
+    /// Rebuilds the facility flyout's cards as it opens, so the building in effect is never among them (FR-022).
+    /// </summary>
+    private void FacilityFlyout_Opening(object? sender, object e) => ViewModel.RefreshBuildingCards();
+
+    /// <summary>Chooses the building whose card was clicked, which is the same choice the drop-down used to make.</summary>
+    private void FacilityCard_Click(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is MTM_Waitlist.Module_Shared.Models.BuildingCardOption card)
+        {
+            ViewModel.SelectBuilding(card.Building);
+        }
+    }
+
+    /// <summary>
     /// Marks the order the viewer is currently using. The options live in the shell's own header template, so
     /// their tick is set here when the menu opens rather than by a binding into that template.
     /// </summary>

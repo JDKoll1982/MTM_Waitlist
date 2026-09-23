@@ -4,6 +4,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 using System.Globalization;
 using System.Text;
 
@@ -22,12 +23,16 @@ public sealed class ImageOverrideWriteService : IImageOverrideWriteService
     private readonly IImageOverrideReadService _readService;
     private readonly IImageLocationService _imageLocationService;
 
-    // Valid scope values. The request-type and subtype scopes retired with the vocabulary (FR-023).
+    // Valid scope values. The request-type and subtype scopes retired with the vocabulary (FR-023); the two part
+    // scopes are the ones this feature writes through, and they are spelled by PartPictureLayout so the scope a
+    // row carries and the folder its picture lives in cannot disagree.
     private static readonly HashSet<string> ValidScopes = new(StringComparer.OrdinalIgnoreCase)
     {
         "request_item",
         "request_category",
-        "work_center"
+        "work_center",
+        PartPictureLayout.VisualPartScope,
+        PartPictureLayout.WipPartScope,
     };
 
     private const int MaxImagePathLength = 500;

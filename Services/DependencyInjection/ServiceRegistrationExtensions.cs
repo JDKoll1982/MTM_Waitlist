@@ -202,7 +202,8 @@ public static partial class ServiceRegistrationExtensions
             dispatcherQueue: DispatcherQueue.GetForCurrentThread(),
             messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>(),
             itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>(),
-            jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>()));
+            jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>(),
+            partPictureResolver: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPartPictureResolver>()));
         services.AddTransient<WaitlistViewDetailPage>();
         services.AddTransient<NewRequestWorkCenterViewModel>();
         services.AddTransient<NewRequestWorkCenterPage>();
@@ -242,7 +243,8 @@ public static partial class ServiceRegistrationExtensions
             messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>(),
             sortPreferenceService: provider.GetRequiredService<IWaitlistSortPreferenceService>(),
             jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>(),
-            permissionService: provider.GetRequiredService<IPermissionService>()));
+            permissionService: provider.GetRequiredService<IPermissionService>(),
+            partPictureResolver: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPartPictureResolver>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();
@@ -261,6 +263,9 @@ public static partial class ServiceRegistrationExtensions
         RegisterUserManagementPages(services);
         RegisterUserAccountPages(services);
         RegisterPermissionsPages(services);
+        RegisterPartPictureServices(services);
+        RegisterPartPictureScreen(services);
+        RegisterPartPictureCache(services);
 
         // Configuration
         services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
@@ -320,7 +325,15 @@ public static partial class ServiceRegistrationExtensions
                             await imageLocationService.GetSharedFolderPathAsync().ConfigureAwait(false),
                             Path.Combine(
                                 MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.LocalCacheRoot,
-                                MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.WaitlistFolderName)));
+                                MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.WaitlistFolderName),
+
+                            // The two part collections are left to the part cache store: a part's picture is
+                            // copied when that part is first drawn, not mirrored in one pass at startup (FR-030).
+                            MTM_Waitlist.Module_Shared.Helpers.PartPictureLayout.PartCollectionFolders,
+
+                            // The same walk cleans up the pictures a replace has archived, once their retention
+                            // period has passed: the period is the store's setting and is read here, per run.
+                            await storageConfiguration.GetArchiveKeepDaysAsync().ConfigureAwait(false)));
                 }
                 else
                 {
@@ -355,4 +368,21 @@ public static partial class ServiceRegistrationExtensions
     /// Registers the permissions page and the who-holds-this view, in the story phase that builds them.
     /// </summary>
     static partial void RegisterPermissionsPages(IServiceCollection services);
+
+    /// <summary>
+    /// Feature 008's own services: the part-picture reader, and later the part-picture screen and the local copy
+    /// store. Each is implemented in its own file beside this one, so no phase edits the factory the others edit.
+    /// </summary>
+    static partial void RegisterPartPictureServices(IServiceCollection services);
+
+    /// <summary>
+    /// Feature 008's part-picture screen: the write path, the coverage read, the view model and the page route.
+    /// </summary>
+    static partial void RegisterPartPictureScreen(IServiceCollection services);
+
+    /// <summary>
+    /// Feature 008's local copy store: this computer's copy of one part's picture, made the first time that part is
+    /// drawn rather than in one pass at startup.
+    /// </summary>
+    static partial void RegisterPartPictureCache(IServiceCollection services);
 }
