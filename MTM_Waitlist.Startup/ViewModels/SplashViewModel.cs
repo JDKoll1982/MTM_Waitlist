@@ -207,6 +207,7 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
         UpdateState();
 
         StartupResult result;
+        Task verdictPriming;
         try
         {
             var progress = new Progress<string>(message =>
@@ -217,11 +218,9 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
 
             // Settle the verdict while the rest of startup runs, and await both before the shell activates, so
             // the first read of the session is never the thing that discovers Infor Visual is unreachable.
-            var verdictPriming = PrimeReachabilityVerdictAsync();
+            verdictPriming = PrimeReachabilityVerdictAsync();
 
             result = await _startupCoordinator.RunAsync(progress, default, retryDatabasePhaseOnly);
-
-            await verdictPriming;
         }
         catch (Exception ex)
         {
@@ -233,6 +232,12 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
             "SplashViewModel",
             $"Startup result received. Success={result.IsSuccess}, Blocked={result.IsBlocked}, Route={result.RouteTarget}, Status={result.StatusMessage}");
 
+        // The outcome is reported *before* the reachability verdict settles. The verdict is awaited only so the
+        // shell cannot open while the application is still deciding whether to attempt Infor Visual, and a
+        // blocked run opens no shell at all. Waiting first left the operator reading whichever step label was
+        // last reported, with the spinner still turning and no buttons to press, which reads as a hang on that
+        // step rather than as the diagnosis startup actually produced (seen on 2026-09-24: a workstation whose
+        // centralized logging destination was not configured appeared to stall on "Step 3 of 5").
         StatusText = string.IsNullOrWhiteSpace(result.StatusMessage)
             ? "Startup completed."
             : result.StatusMessage;
@@ -247,6 +252,13 @@ public partial class SplashViewModel : ObservableRecipient, INavigationAware
 
         if (result.IsSuccess && !result.IsBlocked && !string.IsNullOrWhiteSpace(result.RouteTarget))
         {
+            // The verdict is awaited only here. It exists to keep the shell from opening while the application
+            // is still deciding whether to attempt Infor Visual, and a blocked run opens nothing at all — so
+            // making a blocked run wait for an answer it will never use is what left the splash looking frozen
+            // on whichever step label was last reported. The primer never throws, so leaving it unawaited on the
+            // blocked path cannot produce an unobserved fault.
+            await verdictPriming;
+
             StartupDebugLog.Info("SplashViewModel", "Startup succeeded; transitioning to main mode.");
             try
             {
