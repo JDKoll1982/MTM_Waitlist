@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="using:MTM_Waitlist.Module_Setup.Converters"
     xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     Title="Search Dunnage Parts by Image"
     CloseButtonText="Cancel"
     DefaultButton="Close"
@@ -123,7 +124,8 @@
                                     BorderThickness="1"
                                     CornerRadius="8">
                                     <Grid>
-                                        <Image
+                                        <sharedControls:ClickToEnlargeImageView
+                                            AutomationProperties.Name="{x:Bind PartNumber}"
                                             Source="{x:Bind ImagePath, Converter={StaticResource SetupImagePathToImageSourceConverter}}"
                                             Stretch="Uniform"
                                             Visibility="{x:Bind HasImage, Converter={StaticResource BooleanToVisibilityConverter}}" />

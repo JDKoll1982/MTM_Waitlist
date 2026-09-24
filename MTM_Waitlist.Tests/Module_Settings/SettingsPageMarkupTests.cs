@@ -17,6 +17,9 @@ public sealed class SettingsPageMarkupTests
 {
     private static readonly Regex s_xUid = new(@"x:Uid=""(?<uid>[^""]+)""", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
+    /// <summary>The XAML language namespace, which is where <c>x:Load</c> and <c>x:Name</c> live.</summary>
+    private static readonly XNamespace s_xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
+
     [TestMethod]
     public void SettingsPage_DeclaresEachXUidAtMostOnce()
     {
@@ -135,6 +138,45 @@ public sealed class SettingsPageMarkupTests
         Assert.IsTrue(File.Exists(path), $"The settings markup was not found at '{path}'.");
 
         return File.ReadAllText(path);
+    }
+
+    /// <summary>
+    /// No element inside a <c>SettingsExpander.Items</c> collection may carry <c>x:Load</c>.
+    /// </summary>
+    /// <remarks>
+    /// That collection is not in the page's namescope, and the code a <c>x:Load</c> binding generates resolves the
+    /// element with <c>FindName</c> — which answers null there and terminates the process while the page is being
+    /// built. Observed 2026-09-24: opening the Settings page closed the application, and the only record was
+    /// <c>.NET Runtime</c> in the event log naming
+    /// <c>SettingsPage_obj1_Bindings.Update_ViewModel_…</c> → <c>FrameworkElement.FindName</c>. Hide the element
+    /// with a <c>Visibility</c> binding instead: that is a property binding and needs no name lookup.
+    /// </remarks>
+    [TestMethod]
+    public void NoElementInsideASettingsExpanderItems_CarriesXLoad()
+    {
+        var violations = new List<string>();
+
+        foreach (var file in RepositoryPatternScan.EnumerateScannedFiles(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            new RepositoryScanScope { Extensions = [".xaml"] }))
+        {
+            var document = XDocument.Load(file);
+
+            violations.AddRange(document
+                .Descendants()
+                .Where(element => element.Name.LocalName == "SettingsExpander.Items")
+                .SelectMany(items => items.Descendants())
+                .Where(element => element.Attribute(s_xaml + "Load") is not null)
+                .Select(element => $"{Path.GetRelativePath(RepositoryPatternScan.FindRepositoryRoot(), file)}: <{element.Name.LocalName}>"));
+        }
+
+        Assert.AreEqual(
+            0,
+            violations.Count,
+            "An x:Load inside a SettingsExpander's item collection cannot be resolved by name, and the page that "
+                + "declares it closes the application when it opens:"
+                + Environment.NewLine
+                + string.Join(Environment.NewLine, violations));
     }
 
     /// <summary>

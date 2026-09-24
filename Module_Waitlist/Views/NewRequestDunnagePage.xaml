@@ -5,6 +5,7 @@
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
@@ -72,7 +73,7 @@
                                             HorizontalAlignment="Center"
                                             Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
                                             CornerRadius="8">
-                                            <Image
+                                            <sharedControls:ClickToEnlargeImageView
                                                 Source="{x:Bind ImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                                                 Stretch="Uniform" />
                                         </Border>

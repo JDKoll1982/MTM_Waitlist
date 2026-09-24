@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
     xmlns:vm="using:MTM_Waitlist.Module_Settings.ViewModels"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <!--
@@ -99,7 +100,7 @@
                     Padding="4"
                     Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
                     CornerRadius="8">
-                    <Image
+                    <sharedControls:ClickToEnlargeImageView
                         AutomationProperties.AutomationId="PartPictureManagerPage_CurrentPicture"
                         AutomationProperties.Name="{x:Bind ViewModel.CurrentPictureLabel}"
                         Source="{x:Bind ViewModel.CurrentPicturePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
@@ -148,25 +149,44 @@
                 Severity="Informational" />
         </StackPanel>
 
-        <!-- The change record, and the parts still to photograph -->
+        <!--
+            The change record, and the parts still to photograph.
+
+            Both columns are a Grid rather than a StackPanel: a StackPanel hands every child unlimited height, so a
+            list inside one grows to its full content height and nothing ever scrolls it — the page has no scroll
+            viewer of its own, so the rows simply ran off the bottom of the window. The star row bounds each list and
+            the list's own scroll viewer then scrolls it, wheel included.
+        -->
         <Grid Grid.Row="4" ColumnSpacing="16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.HistoryTitle}" />
+            <Grid Grid.Column="0" RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
                 <TextBlock
+                    Grid.Row="0"
+                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                    Text="{x:Bind ViewModel.HistoryTitle}" />
+
+                <TextBlock
+                    Grid.Row="1"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="{x:Bind ViewModel.HistoryEmptyText}"
                     Visibility="{x:Bind ViewModel.HistoryEmptyVisibility, Mode=OneWay}" />
 
                 <ListView
+                    Grid.Row="2"
                     AutomationProperties.AutomationId="PartPictureManagerPage_ChangeRecord"
                     AutomationProperties.Name="{x:Bind ViewModel.HistoryTitle}"
                     ItemsSource="{x:Bind ViewModel.ChangeRecord}"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
                     SelectionMode="None">
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="vm:PartPictureChangeDisplay">
@@ -181,10 +201,18 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-            </StackPanel>
+            </Grid>
 
-            <StackPanel Grid.Column="1" Spacing="8">
-                <Grid ColumnSpacing="12">
+            <Grid Grid.Column="1" RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -205,11 +233,13 @@
                 </Grid>
 
                 <TextBlock
+                    Grid.Row="1"
                     AutomationProperties.AutomationId="PartPictureManagerPage_MissingCount"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="{x:Bind ViewModel.MissingCountText, Mode=OneWay}" />
 
                 <TextBlock
+                    Grid.Row="2"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{ThemeResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.CoverageNote, Mode=OneWay}"
@@ -217,14 +247,17 @@
                     Visibility="{x:Bind ViewModel.CoverageNoteVisibility, Mode=OneWay}" />
 
                 <TextBlock
+                    Grid.Row="3"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="{x:Bind ViewModel.MissingEmptyText}"
                     Visibility="{x:Bind ViewModel.MissingEmptyVisibility, Mode=OneWay}" />
 
                 <ListView
+                    Grid.Row="4"
                     AutomationProperties.AutomationId="PartPictureManagerPage_MissingList"
                     AutomationProperties.Name="{x:Bind ViewModel.MissingTitle}"
                     ItemsSource="{x:Bind ViewModel.MissingParts}"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
                     SelectionMode="None">
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="models:PartPictureMissRow">
@@ -247,7 +280,7 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-            </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </Page>

@@ -18,6 +18,9 @@ public sealed class SetupReviewPageMarkupTests
 {
     private static readonly XNamespace s_presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
 
+    /// <summary>The shared picture control, which is what every surface draws a content picture with (009 A3).</summary>
+    private const string PictureControlName = "ClickToEnlargeImageView";
+
     /// <summary>
     /// The row's picture box holds an image bound to the part's own picture. Without it the row is text only,
     /// which is what this feature removes.
@@ -33,6 +36,27 @@ public sealed class SetupReviewPageMarkupTests
         Assert.IsTrue(
             ((string?)image.Attribute("Source"))!.Contains("ResolvedImagePathToSourceConverter", StringComparison.Ordinal),
             "The picture must go through the resolver that applies the application's one picture rule (FR-013).");
+    }
+
+    /// <summary>
+    /// The row's picture is drawn as a fixed-size thumbnail. A frame bounded only by Min* measured in an
+    /// auto-width column sizes itself to the picture's own natural size, which blew the row up around a large
+    /// picture.
+    /// </summary>
+    [TestMethod]
+    public void SubordinatePartRow_DrawsThePictureInAFixedSizeThumbnail()
+    {
+        var frame = SubordinatePartRowImage().Parent;
+
+        Assert.IsNotNull(frame, "The review row's picture has no frame around it, so nothing bounds its size.");
+
+        static bool Declares(XElement element, string attribute) =>
+            !string.IsNullOrWhiteSpace((string?)element.Attribute(attribute));
+
+        Assert.IsTrue(
+            (Declares(frame!, "Width") && Declares(frame!, "Height"))
+                || (Declares(frame!, "MaxWidth") && Declares(frame!, "MaxHeight")),
+            "The review row bounds its picture with Min* only, so a large picture is drawn at its own natural size instead of as a thumbnail.");
     }
 
     /// <summary>
@@ -73,8 +97,9 @@ public sealed class SetupReviewPageMarkupTests
         var page = LoadPage();
 
         var image = page
-            .Descendants(s_presentation + "Image")
-            .FirstOrDefault(candidate => ((string?)candidate.Attribute("Source"))?.Contains("ImagePath", StringComparison.Ordinal) == true);
+            .Descendants()
+            .FirstOrDefault(candidate => candidate.Name.LocalName == PictureControlName
+                && ((string?)candidate.Attribute("Source"))?.Contains("ImagePath", StringComparison.Ordinal) == true);
 
         Assert.IsNotNull(image, "The Setup review's subordinate-part row no longer draws the part's picture (FR-018).");
 

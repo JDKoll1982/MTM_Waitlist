@@ -18,13 +18,17 @@ public sealed class SetupPartSelectionPageMarkupTests
 {
     private static readonly XNamespace s_presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
 
+    /// <summary>The shared picture control, which is what every surface draws a content picture with (009 A3).</summary>
+    private const string PictureControlName = "ClickToEnlargeImageView";
+
     /// <summary>Each entry draws the part's own picture, through the application's one picture rule.</summary>
     [TestMethod]
     public void PartListEntry_DrawsThePartsPicture()
     {
         var image = LoadPage()
-            .Descendants(s_presentation + "Image")
-            .FirstOrDefault(candidate => ((string?)candidate.Attribute("Source"))?.Contains("ImagePath", StringComparison.Ordinal) == true);
+            .Descendants()
+            .FirstOrDefault(candidate => candidate.Name.LocalName == PictureControlName
+                && ((string?)candidate.Attribute("Source"))?.Contains("ImagePath", StringComparison.Ordinal) == true);
 
         Assert.IsNotNull(image, "The Setup part list's entries no longer carry the part's picture (FR-018).");
 
@@ -36,6 +40,34 @@ public sealed class SetupPartSelectionPageMarkupTests
         Assert.IsTrue(
             source.Contains("ResolvedImagePathToSourceConverter", StringComparison.Ordinal),
             "The picture must go through the resolver that applies the application's one picture rule (FR-013).");
+    }
+
+    /// <summary>
+    /// Each entry's picture is drawn as a fixed-size thumbnail. A frame bounded only by Min* measured in an
+    /// auto-width column sizes itself to the picture's own natural size, which blew the row up around a large
+    /// picture.
+    /// </summary>
+    [TestMethod]
+    public void PartListEntry_DrawsThePictureInAFixedSizeThumbnail()
+    {
+        var image = LoadPage()
+            .Descendants()
+            .FirstOrDefault(candidate => candidate.Name.LocalName == PictureControlName
+                && ((string?)candidate.Attribute("Source"))?.Contains("ImagePath", StringComparison.Ordinal) == true);
+
+        Assert.IsNotNull(image, "The Setup part list's entries no longer carry the part's picture (FR-018).");
+
+        var frame = image!.Parent;
+
+        Assert.IsNotNull(frame, "The entry's picture has no frame around it, so nothing bounds its size.");
+
+        static bool Declares(XElement element, string attribute) =>
+            !string.IsNullOrWhiteSpace((string?)element.Attribute(attribute));
+
+        Assert.IsTrue(
+            (Declares(frame!, "Width") && Declares(frame!, "Height"))
+                || (Declares(frame!, "MaxWidth") && Declares(frame!, "MaxHeight")),
+            "The entry bounds its picture with Min* only, so a large picture is drawn at its own natural size instead of as a thumbnail.");
     }
 
     /// <summary>

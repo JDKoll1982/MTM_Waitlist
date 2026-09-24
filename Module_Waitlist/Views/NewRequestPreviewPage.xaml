@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:MTM_Waitlist.Module_Settings.Converters"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -96,14 +97,20 @@
                     Orientation="Horizontal"
                     Spacing="12"
                     Visibility="{x:Bind ViewModel.HasPart, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <!--
+                        The picture box is a fixed-size thumbnail, the same way every card in the wizard draws one.
+                        A frame bounded only by Min* measures the picture in a horizontal stack at the picture's own
+                        natural size, so a large picture is drawn full size instead of as a thumbnail.
+                    -->
                     <Border
-                        MinWidth="72"
-                        MinHeight="72"
+                        Width="72"
+                        Height="72"
                         Padding="4"
                         Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
                         CornerRadius="8">
-                        <Image
+                        <sharedControls:ClickToEnlargeImageView
                             AutomationProperties.AutomationId="NewRequestPreviewPage_PartPicture"
+                            AutomationProperties.Name="{x:Bind ViewModel.PartNumber, Mode=OneWay}"
                             Source="{x:Bind ViewModel.PartPicturePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                             Stretch="Uniform" />
                     </Border>

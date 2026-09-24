@@ -1,0 +1,26 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Shared.Controls.ClickToEnlargeImageView"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        The one picture every screen draws, with the one enlarge behaviour: the surface keeps its own frame and
+        hands this control a Source, and the control owns everything else — the click, the enlarged view, and
+        whether the reader has asked for enlarging at all.
+
+        The control replaces the Image inside a frame rather than the frame itself, so the deliberate sizes and
+        themed backgrounds the surfaces already use (72, 64, 96, 120) are untouched. A consumer that also sets
+        AutomationProperties.Name here gets that name on the picture itself and on the enlarged view, so a screen
+        reader says which picture it is about to open.
+    -->
+    <Image
+        x:Name="Thumbnail"
+        AutomationProperties.Name="{Binding Path=(AutomationProperties.Name), ElementName=Root}"
+        Source="{Binding Source, ElementName=Root}"
+        Stretch="{Binding Stretch, ElementName=Root}"
+        Tapped="OnThumbnailTapped" />
+</UserControl>

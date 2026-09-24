@@ -352,6 +352,14 @@ public partial class App : Application
             await App.GetService<IActivationService>().ActivateAsync(args, activateMainWindow: false);
             StartupDebugLog.Info("Launch", "Activation service completed with deferred main window activation.");
 
+            // The per-person picture preference is read here, once the startup session has been settled: a click on
+            // a picture may not wait on the store, and a picture must not be un-enlargeable because the read had
+            // not happened yet. A failure inside LoadAsync is recorded there, not raised here.
+            await App.GetService<MTM_Waitlist.Module_Core.Contracts.Services.IPictureEnlargePreference>()
+                .LoadAsync()
+                .ConfigureAwait(true);
+            StartupDebugLog.Info("Launch", "Picture enlarge preference loaded.");
+
             ShowSplashWindow();
             StartupDebugLog.Info("Launch", "Splash requested from OnLaunched.");
         }

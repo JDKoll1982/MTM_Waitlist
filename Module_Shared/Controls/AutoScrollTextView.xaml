@@ -1,0 +1,36 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Shared.Controls.AutoScrollTextView"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        One line of text that stays readable when it does not fit: it scrolls across its own field, and stops when
+        the system has animations switched off — then it is truncated with an ellipsis instead of moving.
+
+        The viewport clips the line, and the line itself is given its full width while scrolling, so the whole
+        value is laid out and the part that is off the edge is hidden rather than cut out of the text. Text is
+        bound to the control's own properties so a caller can keep using the font and colour it already had.
+    -->
+    <Grid x:Name="Viewport" SizeChanged="OnViewportSizeChanged">
+        <Grid.Clip>
+            <RectangleGeometry x:Name="ViewportClip" />
+        </Grid.Clip>
+        <TextBlock
+            x:Name="Line"
+            HorizontalAlignment="Stretch"
+            MaxLines="1"
+            TextTrimming="CharacterEllipsis"
+            TextWrapping="NoWrap"
+            FontFamily="{Binding FontFamily, ElementName=Root}"
+            FontSize="{Binding FontSize, ElementName=Root}"
+            FontStyle="{Binding FontStyle, ElementName=Root}"
+            FontWeight="{Binding FontWeight, ElementName=Root}"
+            Foreground="{Binding Foreground, ElementName=Root}"
+            Text="{Binding Text, ElementName=Root}"
+            TextAlignment="{Binding TextAlignment, ElementName=Root}" />
+    </Grid>
+</UserControl>

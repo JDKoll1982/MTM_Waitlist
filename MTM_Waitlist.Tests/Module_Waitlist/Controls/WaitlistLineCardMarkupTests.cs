@@ -232,7 +232,9 @@ public sealed class WaitlistLineCardMarkupTests
 
         Assert.IsNotNull(host, "The card's fixed 96-wide request image host is gone.");
         Assert.AreEqual("96", (string?)host!.Attribute("Height"), "The request image host must stay a fixed 96x96 square, not a stretched column.");
-        Assert.IsTrue(host.Descendants(s_presentation + "Image").Any(), "The 96x96 host must still hold the request image.");
+        Assert.IsTrue(
+            host.Descendants().Any(element => element.Name.LocalName == "ClickToEnlargeImageView"),
+            "The 96x96 host must still hold the request picture, drawn by the shared picture control (FR-019, 009 A3).");
     }
 
     [TestMethod]
@@ -337,8 +339,9 @@ public sealed class WaitlistLineCardMarkupTests
     public void Card_CarriesTheMaterialPartsPictureAndItsPlaceholderFallback()
     {
         var image = LoadCard()
-            .Descendants(s_presentation + "Image")
-            .FirstOrDefault(candidate => ((string?)candidate.Attribute("Source"))?.Contains("Order.EffectiveImagePath", StringComparison.Ordinal) == true);
+            .Descendants()
+            .FirstOrDefault(candidate => candidate.Name.LocalName == "ClickToEnlargeImageView"
+                && ((string?)candidate.Attribute("Source"))?.Contains("Order.EffectiveImagePath", StringComparison.Ordinal) == true);
 
         Assert.IsNotNull(image, "The card no longer draws the material part's picture (FR-019).");
         Assert.IsTrue(

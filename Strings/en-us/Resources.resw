@@ -729,6 +729,27 @@
     <value>Get notified when a new waitlist request is submitted for your work center.</value>
   </data>
 
+  <!-- Settings → Appearance → Enlarge pictures (009). A reading preference of the signed-in person: it follows
+       the account rather than the computer, and it is on unless the person turns it off. -->
+  <data name="Settings_EnlargePictures.Title" xml:space="preserve">
+    <value>Enlarge pictures when clicked</value>
+  </data>
+  <data name="Settings_EnlargePictures.Description" xml:space="preserve">
+    <value>Click a picture anywhere in the application to see it full size. This is your own setting, so it follows your account and does not change anything for anyone else.</value>
+  </data>
+
+  <!-- The shared picture control (009): the hint offered while a click would do something, and the wording of the
+       enlarged view itself. The hint is not shown when the reader has switched enlarging off. -->
+  <data name="Shared_ClickToEnlarge.Tooltip" xml:space="preserve">
+    <value>Click to view this picture full size.</value>
+  </data>
+  <data name="Shared_ClickToEnlarge.CloseButton" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Shared_ClickToEnlarge.ViewerName" xml:space="preserve">
+    <value>Full size picture</value>
+  </data>
+
   <!-- Module_Mock read-status indicator (FR-003/FR-005/FR-017/FR-022).
        The message keys are format strings: {0} the unreachable statement, {1} the cached-data-in-use
        statement, {2} the cached-data age for the AgeText key only. -->

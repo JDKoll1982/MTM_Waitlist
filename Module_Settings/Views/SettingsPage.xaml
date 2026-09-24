@@ -134,6 +134,26 @@
                                 </RadioButton>
                             </StackPanel>
                         </wct:SettingsCard>
+
+                        <!-- Enlarge pictures (009). A reading preference of the signed-in person, so there is no
+                             permission gate in front of it: anybody may decide this for themselves.
+                             Hidden with Visibility rather than x:Load on purpose: an element inside a
+                             SettingsExpander's item collection is not in the page's namescope, and the generated
+                             x:Load binding resolves it with FindName — which answers null and terminates the
+                             process the moment this page is opened (verified 2026-09-24, .NET Runtime event log). -->
+                        <wct:SettingsCard
+                            AutomationProperties.AutomationId="SettingsPage_EnlargePicturesCard"
+                            AutomationProperties.Name="{x:Bind ViewModel.EnlargePicturesTitle}"
+                            Description="{x:Bind ViewModel.EnlargePicturesDescription}"
+                            Header="{x:Bind ViewModel.EnlargePicturesTitle}"
+                            Visibility="{x:Bind ViewModel.IsEnlargePicturesPanelVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <ToggleSwitch
+                                AutomationProperties.AutomationId="SettingsPage_EnlargePicturesSwitch"
+                                AutomationProperties.Name="{x:Bind ViewModel.EnlargePicturesTitle}"
+                                IsOn="{x:Bind ViewModel.EnlargePicturesOnClick, Mode=TwoWay}"
+                                OffContent="Off"
+                                OnContent="On" />
+                        </wct:SettingsCard>
                     </wct:SettingsExpander.Items>
                 </wct:SettingsExpander>
             </StackPanel>

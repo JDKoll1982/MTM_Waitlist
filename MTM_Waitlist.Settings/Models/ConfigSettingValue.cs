@@ -187,4 +187,15 @@ public static class ConfigSettingKeys
     /// Default: true
     /// </summary>
     public const string ImageCacheEnabled = "image_cache.enabled";
+
+    /// <summary>
+    /// Whether clicking a picture shows it enlarged.
+    /// Setting Key: "display.enlarge_pictures_on_click"
+    /// Value Type: "bool" (true/false)
+    /// Scope: "user" (the person's own preference, scope key "user:&lt;id&gt;") — the only setting stored this way
+    ///          as a flag; the alternative is a workstation value that two people sharing a computer would share.
+    /// Description: When false, pictures are drawn as before and clicking one does nothing.
+    /// Default: true
+    /// </summary>
+    public const string EnlargePicturesOnClick = "display.enlarge_pictures_on_click";
 }

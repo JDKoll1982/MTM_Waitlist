@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <Grid Style="{StaticResource SetupPageGridStyle}">
@@ -37,15 +38,18 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
+                        <!-- A fixed-size thumbnail: a frame bounded only by Min* measured in an auto-width column
+                             sizes itself to the picture's own natural size, so a large picture blew the row up. -->
                         <Border
-                            MinWidth="72"
-                            MinHeight="72"
+                            Width="72"
+                            Height="72"
                             Padding="4"
                             VerticalAlignment="Center"
                             Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
                             CornerRadius="8">
-                            <Image
+                            <sharedControls:ClickToEnlargeImageView
                                 AutomationProperties.AutomationId="{x:Bind ImageAutomationId}"
+                                AutomationProperties.Name="{x:Bind PartNumber}"
                                 Source="{x:Bind ImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                                 Stretch="Uniform" />
                         </Border>

@@ -1,7 +1,8 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters">
+    xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls">
 
     <!--
         The two converters this card needs are declared here rather than reached for from the application resources.
@@ -50,7 +51,8 @@
                     VerticalAlignment="Center"
                     Spacing="8">
                     <!-- The picture box. It draws the entry's own picture, and the one shared no-image placeholder
-                         when the entry has none: never a blank space, and never family artwork standing in. -->
+                         when the entry has none: never a blank space, and never family artwork standing in. The
+                         picture can be enlarged by clicking it (009). -->
                     <Border
                         MinWidth="84"
                         MinHeight="84"
@@ -60,17 +62,24 @@
                         HorizontalAlignment="Center"
                         Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
                         CornerRadius="8">
-                        <Image
+                        <sharedControls:ClickToEnlargeImageView
                             AutomationProperties.AutomationId="{Binding ImageAutomationId}"
+                            AutomationProperties.Name="{Binding Title}"
                             Source="{Binding ImagePath, Converter={StaticResource PartPictureCardImageSourceConverter}}"
                             Stretch="Uniform" />
                     </Border>
-                    <TextBlock
-                        HorizontalAlignment="Center"
+                    <!--
+                        One line, always. A card that wrapped to two or three lines either pushed the card out of
+                        shape or was cut off, so the value is kept on one line and scrolls across the card's own
+                        width when it does not fit (009). The card's own strong-body size is set here because the
+                        control draws its own text and cannot inherit a TextBlock style.
+                    -->
+                    <sharedControls:AutoScrollTextView
+                        HorizontalAlignment="Stretch"
+                        FontSize="14"
+                        FontWeight="SemiBold"
                         TextAlignment="Center"
-                        Style="{ThemeResource BodyStrongTextBlockStyle}"
-                        Text="{Binding Title}"
-                        TextWrapping="WrapWholeWords" />
+                        Text="{Binding Title}" />
                 </StackPanel>
             </Border>
 

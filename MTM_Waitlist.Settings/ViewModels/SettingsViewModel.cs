@@ -76,6 +76,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     private static readonly string[] s_searchAwareProperties =
     [
         nameof(IsAppearancePanelVisible),
+        nameof(IsEnlargePicturesPanelVisible),
         nameof(IsHotWorkCentersPanelVisible),
         nameof(IsDunnageTypeVisibilityPanelVisible),
         nameof(IsIgnoredLocationsPanelVisible),
@@ -104,6 +105,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     private readonly IImageStorageConfigurationResolver? _imageStorageConfigurationResolver;
     private readonly IConfigSettingsValueService? _configSettingsValueService;
     private readonly IImageCacheSyncService? _imageCacheSyncService;
+    private readonly IPictureEnlargePreference? _pictureEnlargePreference;
 
     // Suppresses the OnNewRequestAlertsEnabledChanged side effect while the initial value is loaded in the
     // constructor, so opening the page does not log a misleading "changed" or re-persist.
@@ -112,6 +114,9 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     // The same guard for the picture cache's toggle: the stored value arrives after the constructor has run, and
     // reading it must not be mistaken for somebody having changed it.
     private bool _pictureCacheInitializing = true;
+
+    // And the same guard for the enlarge-pictures toggle.
+    private bool _enlargePicturesInitializing = true;
 
     public ComputerManagementViewModel ComputerManagement { get; }
 
@@ -134,6 +139,16 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         get; set;
     }
+
+    /// <summary>
+    /// Whether clicking a picture enlarges it. A reading preference of the signed-in person (default on), so it
+    /// needs no permission gate: anybody may decide this for themselves.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool EnlargePicturesOnClick
+    {
+        get; set;
+    } = true;
 
     [ObservableProperty]
     public partial string SearchQuery
@@ -492,6 +507,20 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     public bool IsAppearancePanelVisible => MatchesSearch("appearance", "app theme", "light", "dark", "default", SelectedThemeText);
 
     /// <summary>
+    /// The enlarge-pictures row. It lives inside the Appearance section, which is what the category below accounts
+    /// for: searching for this row must leave its section standing rather than hiding the thing that matched.
+    /// </summary>
+    public bool IsEnlargePicturesPanelVisible => MatchesSearch(
+        "enlarge",
+        "enlarged",
+        "click",
+        "zoom",
+        "full size",
+        "full picture",
+        "picture",
+        "image");
+
+    /// <summary>
     /// Whether this installation can actually deliver a new-request notification.
     /// </summary>
     /// <remarks>
@@ -511,6 +540,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     public string NewRequestAlertsDescription => IsNewRequestAlertsAvailable
         ? "Settings_NewRequestAlerts.Description".GetLocalized()
         : NewRequestAlertsUnavailableMessage;
+
+    /// <summary>The enlarge-pictures row's label, in the reader's language.</summary>
+    public string EnlargePicturesTitle => "Settings_EnlargePictures.Title".GetLocalized();
+
+    /// <summary>What the row does, and whose setting it is.</summary>
+    public string EnlargePicturesDescription => "Settings_EnlargePictures.Description".GetLocalized();
 
     public bool IsNewRequestAlertsPanelVisible => MatchesSearch(
         "alert",
@@ -558,7 +593,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     public bool IsAboutPanelVisible => MatchesSearch("about", "version", "privacy", VersionDescription, "mtm waitlist");
 
-    public bool IsAppearanceCategoryVisible => IsAppearancePanelVisible;
+    public bool IsAppearanceCategoryVisible => IsAppearancePanelVisible || IsEnlargePicturesPanelVisible;
 
     /// <summary>
     /// The picture screen's entry point. Its visibility is gated on
@@ -689,7 +724,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         IMockServiceRefreshClient mockServiceRefreshClient,
         IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
         IConfigSettingsValueService? configSettingsValueService = null,
-        IImageCacheSyncService? imageCacheSyncService = null)
+        IImageCacheSyncService? imageCacheSyncService = null,
+        IPictureEnlargePreference? pictureEnlargePreference = null)
     {
         StartupDebugLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
@@ -707,6 +743,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _imageStorageConfigurationResolver = imageStorageConfigurationResolver;
         _configSettingsValueService = configSettingsValueService;
         _imageCacheSyncService = imageCacheSyncService;
+        _pictureEnlargePreference = pictureEnlargePreference;
         ComputerManagement = computerManagement;
         UrgencyAllotments = urgencyAllotments;
 
@@ -717,6 +754,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _newRequestAlertInitializing = true;
         NewRequestAlertsEnabled = _newRequestAlertService.GetEnabledAsync().GetAwaiter().GetResult();
         _newRequestAlertInitializing = false;
+
+        // The signed-in person's enlarge-pictures preference, default ON. The service holds the value already, so
+        // reading it here costs nothing; with no service registered the shipped default is shown.
+        _enlargePicturesInitializing = true;
+        EnlargePicturesOnClick = _pictureEnlargePreference?.IsEnabled ?? true;
+        _enlargePicturesInitializing = false;
 
         _ = UrgencyAllotments.LoadAsync();
         InitializeIgnoredLocations();
@@ -848,6 +891,21 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         StartupDebugLog.Info("SettingsViewModel", $"SearchQuery changed to '{value}'.");
         RefreshSearchVisibility();
+    }
+
+    /// <summary>
+    /// Stores the enlarge-pictures preference for the signed-in person. Applied through the shared service, so the
+    /// screens already open follow the change rather than needing a restart.
+    /// </summary>
+    partial void OnEnlargePicturesOnClickChanged(bool value)
+    {
+        if (_enlargePicturesInitializing)
+        {
+            return;
+        }
+
+        StartupDebugLog.Info("SettingsViewModel", $"EnlargePicturesOnClick changed to {value}.");
+        _ = _pictureEnlargePreference?.SetEnabledAsync(value);
     }
 
     partial void OnSelectedWorkstationChanged(string value)
