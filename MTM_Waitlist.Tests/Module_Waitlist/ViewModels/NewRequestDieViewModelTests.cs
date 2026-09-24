@@ -111,9 +111,10 @@ public sealed class NewRequestDieViewModelTests
             state.InputValue,
             "The request's stored value is one die, so several dies can never be folded into one entry (FR-054).");
         Assert.AreEqual(
-            typeof(NewRequestPreviewViewModel).FullName,
+            typeof(NewRequestSummaryViewModel).FullName,
             navigation.Navigations[0].PageKey,
-            "With the answer captured the flow continues, rather than asking the same question again.");
+            "With the answer captured the flow continues to the confirmation step, rather than asking the same "
+            + "question again.");
     }
 
     [TestMethod]

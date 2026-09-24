@@ -241,8 +241,9 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
 
         IsValidationVisible = false;
 
-        // The answer is complete; never route back to this page.
-        _navigationService.NavigateTo(typeof(NewRequestPreviewViewModel).FullName!, _state);
+        // The answer is complete; never route back to this page. The confirmation step is the next and last
+        // step before the request is raised.
+        _navigationService.NavigateTo(typeof(NewRequestSummaryViewModel).FullName!, _state);
     }
 
     [RelayCommand]

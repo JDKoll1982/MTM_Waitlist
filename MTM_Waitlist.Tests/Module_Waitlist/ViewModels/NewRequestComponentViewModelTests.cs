@@ -115,9 +115,10 @@ public sealed class NewRequestComponentViewModelTests
             state.InputValue,
             "The clicked box's part number becomes the request's answer, which the card's second line reads back.");
         Assert.AreEqual(
-            typeof(NewRequestPreviewViewModel).FullName,
+            typeof(NewRequestSummaryViewModel).FullName,
             navigation.Navigations[0].PageKey,
-            "One component is one answer, so the click moves the flow on rather than marking a card to commit later.");
+            "One component is one answer, so the click moves the flow on to the confirmation step rather than "
+            + "marking a card to commit later.");
         Assert.IsTrue(viewModel.Options[1].IsSelected, "The chosen box is marked.");
         Assert.IsFalse(viewModel.Options[0].IsSelected, "Choosing one component does not mark another.");
     }

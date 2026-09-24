@@ -49,7 +49,7 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
   role.
 - **Step progress strip.** The wizard screens show numbered steps across the top and tick each one as
   it is completed — for Setup: Work Center → Work Order → Part → Operation → Dunnage & Scrap → Review →
-  Result; for a new request: Work Center → Category → Item → Details → Preview → Confirm → Complete.
+  Result; for a new request: Work Center → Category → Item → Details → Confirm → Complete.
 - **Search box.** In the title bar. As you type, it suggests matching requests (up to eight) and
   opening a suggestion takes you straight to that request. It is a way to jump to a request, not a
   filter for the list.
@@ -104,7 +104,7 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
 
 ## 5. Waitlist — creating a request
 
-- **Seven steps:** Work Center → Category → Item → Details → Preview → Confirm → Complete.
+- **Six steps:** Work Center → Category → Item → Details → Confirm → Complete.
 - **Choose a work center.** Search by work center, work order, sequence or part number; choose the
   building; pick from the presses saved to this computer ("Local Work Centers") or from the rest
   ("Other Workcenters"). Each tile shows the work center's current job, part number and when it was
@@ -113,11 +113,17 @@ claims they falsified were corrected. Where a row says **corrected 2026-09-20**,
   from a file shipped with the app. The item list offers only what the requesting job actually supports, and
   it is filtered before it is shown, so an unsupported item is never offered and then refused.
 - **Add the details** — a short multi-line description of what you need.
-- **Preview, then Confirm.** Preview reads everything back before you continue. Confirm shows the
-  request summary and refuses a duplicate or a request whose current job has changed. The **Coil
-  details** section (requested coil, quantity in house, coil description, average coil weight) was
-  removed — nothing on that screen could source those values, so they are not shown. Restoring them is
-  owned by **`specs/004-unified-card-item-picker`** (in flight).
+- **Confirm — the one and only review step.** Confirm reads everything back — the work center, the
+  category, the item, the details you gave, the part's picture, and the coil the current job carries —
+  and refuses a duplicate or a request whose current job has changed. When a request is for several dies
+  it says how many requests the run will raise.
+  **Corrected 2026-09-24:** the wizard used to have a **Preview** step between the last answer and
+  Confirm. Preview repeated a subset of the same fields, checked nothing, changed nothing, and its only
+  button led to Confirm, so it was removed; the last answer now goes straight to Confirm.
+  **Corrected 2026-09-24:** the **Coil details** section (requested coil, quantity in house, coil
+  description, average coil weight) is back. An earlier note in this file said it had been removed for
+  want of a source; `specs/004-unified-card-item-picker` gave it one, so the section now shows the coil
+  the current job carries.
 - ⚠️ **The "Queue & wait time" section on Confirm is gone, because it was not real.** It always read
   the same figure no matter how busy the work center was, so the card was removed rather than shown. Any
   substantiated queue count or wait estimate is owned by the analytics workstream — seed

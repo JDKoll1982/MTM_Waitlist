@@ -232,9 +232,21 @@ public sealed class WaitlistLineCardMarkupTests
 
         Assert.IsNotNull(host, "The card's fixed 96-wide request image host is gone.");
         Assert.AreEqual("96", (string?)host!.Attribute("Height"), "The request image host must stay a fixed 96x96 square, not a stretched column.");
-        Assert.IsTrue(
-            host.Descendants().Any(element => element.Name.LocalName == "ClickToEnlargeImageView"),
-            "The 96x96 host must still hold the request picture, drawn by the shared picture control (FR-019, 009 A3).");
+
+        // The card is the click target that opens the request, so the picture's plain click belongs to the card.
+        // The shared control works that out for itself and enlarges on Shift+click here, which keeps the whole row
+        // opening on an ordinary click while the picture stays enlargeable (FR-019, 009 A3).
+        var picture = host
+            .Descendants()
+            .FirstOrDefault(element => element.Name.LocalName == "ClickToEnlargeImageView");
+
+        Assert.IsNotNull(
+            picture,
+            "The 96x96 host must hold the request picture, drawn by the shared picture control (FR-019, 009 A3).");
+        StringAssert.Contains(
+            (string?)picture!.Attribute("Source") ?? string.Empty,
+            "Order.EffectiveImagePath",
+            "The picture must be the request's material part, resolved through the application's one picture rule.");
     }
 
     [TestMethod]
@@ -333,7 +345,9 @@ public sealed class WaitlistLineCardMarkupTests
     /// The row itself is what decides: <c>EffectiveImagePath</c> answers the material part's resolved picture and
     /// nothing else, and the row no longer carries any Item-derived picture at all, so a markup change back to
     /// one would not even compile. The markup assertion here is that the picture box still goes through the
-    /// resolver that applies the application's one picture rule and the one placeholder.
+    /// resolver that applies the application's one picture rule and the one placeholder, and that the picture is
+    /// drawn by the shared control — which asks for Shift+click inside this card, because the card's own click
+    /// opens the request.
     /// </remarks>
     [TestMethod]
     public void Card_CarriesTheMaterialPartsPictureAndItsPlaceholderFallback()

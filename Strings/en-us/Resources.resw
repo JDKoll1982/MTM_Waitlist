@@ -568,12 +568,9 @@
     <value>Details</value>
   </data>
   <data name="NewRequest_Header.Step5" xml:space="preserve">
-    <value>Preview</value>
-  </data>
-  <data name="NewRequest_Header.Step6" xml:space="preserve">
     <value>Confirm</value>
   </data>
-  <data name="NewRequest_Header.Step7" xml:space="preserve">
+  <data name="NewRequest_Header.Step6" xml:space="preserve">
     <value>Complete</value>
   </data>
   <data name="Setup_DunnagePair.NoScrap" xml:space="preserve">
@@ -742,6 +739,9 @@
        enlarged view itself. The hint is not shown when the reader has switched enlarging off. -->
   <data name="Shared_ClickToEnlarge.Tooltip" xml:space="preserve">
     <value>Click to view this picture full size.</value>
+  </data>
+  <data name="Shared_ClickToEnlarge.ShiftTooltip" xml:space="preserve">
+    <value>Shift+click to view this picture full size.</value>
   </data>
   <data name="Shared_ClickToEnlarge.CloseButton" xml:space="preserve">
     <value>Close</value>
@@ -959,9 +959,6 @@
   </data>
   <data name="NewRequest_Summary.RequestsRaised" xml:space="preserve">
     <value>{0} requests were raised — one for each die you chose.</value>
-  </data>
-  <data name="NewRequest_Preview.ItemLabel.Text" xml:space="preserve">
-    <value>Item</value>
   </data>
   <data name="RequestItem_Unavailable.Message" xml:space="preserve">
     <value>This item isn't available right now. Its configuration is missing, so a supervisor needs to check it.</value>

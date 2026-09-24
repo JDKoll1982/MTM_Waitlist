@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -65,11 +66,13 @@
                                     CornerRadius="10"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="2">
-                                    <Border.Background>
-                                        <ImageBrush
-                                            ImageSource="{x:Bind ImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-                                            Stretch="UniformToFill" />
-                                    </Border.Background>
+                                    <!-- The photo is drawn by the shared picture control like every other content
+                                         picture (009 A3). This card is clickable, so the control asks for
+                                         Shift+click here and leaves an ordinary click to the card. -->
+                                    <sharedControls:ClickToEnlargeImageView
+                                        AutomationProperties.Name="{x:Bind Name}"
+                                        Source="{x:Bind ImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                        Stretch="UniformToFill" />
                                 </Border>
                                 <!-- Blue photo frame, only on the selected card. -->
                                 <Border

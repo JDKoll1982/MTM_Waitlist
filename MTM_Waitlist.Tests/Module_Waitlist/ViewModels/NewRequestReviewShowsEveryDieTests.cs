@@ -11,38 +11,30 @@ using MTM_Waitlist.Tests.Module_Mock;
 namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 
 /// <summary>
-/// The two review steps show <b>one row per entry the wizard will raise</b>, not one row per request.
+/// The review step — the confirmation — shows <b>one row per entry the wizard will raise</b>, not one row per
+/// request.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Found by walking the wizard in the running app on 2026-09-20: with two dies chosen the preview listed a single
-/// die, and the confirmation listed a single die <b>and never showed the count it had already computed</b> — so
-/// both steps understated what the operator was about to raise, even though the submission raised one request per
-/// die correctly. These checks close the pair: the field content, and the markup that has to render it.
+/// Found by walking the wizard in the running app on 2026-09-20: with two dies chosen the review listed a single
+/// die <b>and never showed the count it had already computed</b>, so the step understated what the operator was
+/// about to raise, even though the submission raised one request per die correctly. These checks close the pair:
+/// the field content, and the markup that has to render it.
 /// </para>
 /// <para>
-/// <see cref="NewRequestFlowState.ToDrafts"/> is the single answer to "what will be raised". Both steps are tied
-/// to it rather than to the request's one value column, so neither can drift from the submission again.
+/// <see cref="NewRequestFlowState.ToDrafts"/> is the single answer to "what will be raised". The step is tied
+/// to it rather than to the request's one value column, so it cannot drift from the submission again.
+/// </para>
+/// <para>
+/// The wizard carried two review steps until 2026-09-24 — a preview that repeated a subset of these fields and a
+/// confirmation that submitted. The preview was removed, so the checks that used to be asserted twice are
+/// asserted here once, against the step that survived.
 /// </para>
 /// </remarks>
 [TestClass]
 public sealed class NewRequestReviewShowsEveryDieTests
 {
     private static readonly XNamespace s_presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
-
-    [TestMethod]
-    public void PreviewStep_WithTwoDiesChosen_ShowsOneRowPerDie()
-    {
-        var viewModel = new NewRequestPreviewViewModel(new WaitlistTestNavigationService());
-
-        viewModel.OnNavigatedTo(DieState(("FGT0002000", "DIE SHOP"), ("FGT0002001", "PRESS BAY")));
-
-        CollectionAssert.AreEqual(
-            new[] { "FGT0002000", "FGT0002001" },
-            viewModel.DetailLines.ToArray(),
-            "The preview lists every die the operator chose, in the order they will be raised.");
-        Assert.IsTrue(viewModel.HasDetail, "Two dies is something to show, so the row is not hidden.");
-    }
 
     [TestMethod]
     public void ConfirmStep_WithTwoDiesChosen_ShowsOneRowPerDie()
@@ -59,7 +51,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
     }
 
     [TestMethod]
-    public void BothReviewSteps_ListExactlyWhatWillBeRaised()
+    public void ConfirmStep_ListsExactlyWhatWillBeRaised()
     {
         // The invariant, rather than a count: whatever the submission will raise is what the operator was shown.
         var state = DieState(
@@ -69,18 +61,14 @@ public sealed class NewRequestReviewShowsEveryDieTests
 
         var expected = state.ToDrafts().Select(draft => draft.InputValue!).ToArray();
 
-        var preview = new NewRequestPreviewViewModel(new WaitlistTestNavigationService());
-        preview.OnNavigatedTo(state);
-
         var confirm = BuildSummaryViewModel();
         confirm.OnNavigatedTo(state);
 
-        CollectionAssert.AreEqual(expected, preview.DetailLines.ToArray(), "The preview must not understate the run.");
         CollectionAssert.AreEqual(expected, confirm.DetailLines.ToArray(), "The confirmation must not understate the run.");
     }
 
     [TestMethod]
-    public void PreviewStep_WithOneAnswer_IsThatOneRow()
+    public void ConfirmStep_WithOneAnswer_IsThatOneRow()
     {
         // The ordinary single-request wizard is untouched by the list.
         var state = new NewRequestFlowState
@@ -91,7 +79,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
             InputValue = "Skid 4471 is on the wrong dock",
         };
 
-        var viewModel = new NewRequestPreviewViewModel(new WaitlistTestNavigationService());
+        var viewModel = BuildSummaryViewModel();
 
         viewModel.OnNavigatedTo(state);
 
@@ -99,7 +87,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
     }
 
     [TestMethod]
-    public void PreviewStep_WithNothingToShow_ShowsNoLabelledEmptyRow()
+    public void ConfirmStep_WithNothingToShow_ShowsNoLabelledEmptyRow()
     {
         var state = new NewRequestFlowState
         {
@@ -108,20 +96,12 @@ public sealed class NewRequestReviewShowsEveryDieTests
             Item = RequestItemCatalog.FindById("pickup-die"),
         };
 
-        var viewModel = new NewRequestPreviewViewModel(new WaitlistTestNavigationService());
+        var viewModel = BuildSummaryViewModel();
 
         viewModel.OnNavigatedTo(state);
 
         Assert.AreEqual(0, viewModel.DetailLines.Count, "Nothing was chosen, so there is nothing to list.");
         Assert.IsFalse(viewModel.HasDetail, "An empty list must not render a label with no value under it.");
-    }
-
-    [TestMethod]
-    public void PreviewPage_RendersTheDetailAsARepeatingList()
-    {
-        var markup = File.ReadAllText(PagePath("NewRequestPreviewPage.xaml"));
-
-        AssertDetailIsAList(markup, "NewRequestPreviewPage");
     }
 
     [TestMethod]

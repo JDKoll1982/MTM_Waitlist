@@ -54,6 +54,7 @@ public partial class ShellViewModel : ObservableRecipient
         "Result",
     };
 
+    // Six steps, not seven: the wizard has one review step, and the confirmation step is it.
     private static readonly string[] s_newRequestStepLabelKeys =
     {
         "NewRequest_Header.Step1",
@@ -62,7 +63,6 @@ public partial class ShellViewModel : ObservableRecipient
         "NewRequest_Header.Step4",
         "NewRequest_Header.Step5",
         "NewRequest_Header.Step6",
-        "NewRequest_Header.Step7",
     };
 
     private static readonly string[] s_newRequestStepLabelFallbacks =
@@ -71,7 +71,6 @@ public partial class ShellViewModel : ObservableRecipient
         "Category",
         "Item",
         "Details",
-        "Preview",
         "Confirm",
         "Complete",
     };
@@ -549,19 +548,14 @@ public partial class ShellViewModel : ObservableRecipient
             return ("New Request — Details", 4);
         }
 
-        if (pageType == typeof(NewRequestPreviewPage))
-        {
-            return ("New Request — Preview", 5);
-        }
-
         if (pageType == typeof(NewRequestSummaryPage))
         {
-            return ("New Request — Confirm", 6);
+            return ("New Request — Confirm", 5);
         }
 
         if (pageType == typeof(NewRequestResultPage))
         {
-            return ("New Request — Complete", 7);
+            return ("New Request — Complete", 6);
         }
 
         return ("New Request", 0);

@@ -93,7 +93,6 @@ public static partial class ServiceRegistrationExtensions
             pageService.Configure<NewRequestDieViewModel, NewRequestDiePage>();
             pageService.Configure<NewRequestComponentViewModel, NewRequestComponentPage>();
             pageService.Configure<NewRequestDetailsViewModel, NewRequestDetailsPage>();
-            pageService.Configure<NewRequestPreviewViewModel, NewRequestPreviewPage>();
             pageService.Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
             pageService.Configure<NewRequestResultViewModel, NewRequestResultPage>();
             pageService.Configure<ControlInspectorDetailViewModel, ControlInspectorDetailPage>();
@@ -219,8 +218,6 @@ public static partial class ServiceRegistrationExtensions
         services.AddTransient<NewRequestComponentPage>();
         services.AddTransient<NewRequestDetailsViewModel>();
         services.AddTransient<NewRequestDetailsPage>();
-        services.AddTransient<NewRequestPreviewViewModel>();
-        services.AddTransient<NewRequestPreviewPage>();
         services.AddTransient<NewRequestSummaryViewModel>();
         services.AddTransient<NewRequestSummaryPage>();
         services.AddTransient<NewRequestResultViewModel>();

@@ -10,7 +10,7 @@ specification or the existing markup already pins.
 | The Setup part list | `Module_Setup/Views/SetupPartSelectionPage.xaml` | the list becomes cards carrying the part's picture; choosing one still selects the part | FR-018, FR-021 |
 | The Setup review of a job's parts | `Module_Setup/Views/SetupReviewPage.xaml` | each subordinate part's row gains its picture, still grouped by family | FR-018 |
 | The wizard's die card | `Module_Waitlist/Views/NewRequestDiePage.xaml` | the die card draws the part's picture; it is no longer text only | FR-018 |
-| The wizard's confirmation step | `Module_Waitlist/Views/NewRequestSummaryPage.xaml`, and the same list in `NewRequestPreviewPage.xaml` | the part being asked for is drawn with its picture | FR-018 |
+| The wizard's confirmation step | `Module_Waitlist/Views/NewRequestSummaryPage.xaml` (and the same list in `NewRequestPreviewPage.xaml` until that step was removed on 2026-09-24) | the part being asked for is drawn with its picture | FR-018 |
 | The waitlist card | `Module_Waitlist/Controls/WaitlistLineCardView.xaml` | the card draws the **part's** picture rather than the picture for the kind of request | FR-019 |
 | A request whose material cannot be pictured | the same card | the one shared placeholder, and never the family's picture as a stand-in | FR-020 |
 

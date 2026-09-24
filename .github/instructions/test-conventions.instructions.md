@@ -34,7 +34,7 @@ external reads are cached).
 - `[TestClass] public sealed class <Subject>Tests`; each case is `[TestMethod] public void` or `public async Task`
 - **The name is the specification**: `<Method>_<Scenario>_<Expectation>` — for example
   `Constructor_SelectsFirstBuildingByDefault`, `AcceptAsync_NotAvailable_ReturnsNull`,
-  `SelectSequenceAsync_OmitsSubordinatePartsAtDefaultIgnoredPlantLocations`,
+  `SelectSequenceAsync_KeepsTheJobsCoilAtItsWorkCentreLocation`,
   `WaitlistViewViewModel_RefreshesActiveList_WhenRequestIsSubmitted`. A test whose scenario needs a comment to
   explain it is misnamed
 - Arrange / Act / Assert with one behavioural claim per test. No assertion-free tests, no tests that merely

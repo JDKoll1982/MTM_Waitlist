@@ -7,6 +7,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <UserControl.Resources>
+        <!-- The enlarged view's backdrop. Semi-transparent on purpose: the page the picture was clicked on stays
+             visible behind it, dimmed, and the whole of it is the click target that closes the view. -->
+        <SolidColorBrush x:Key="EnlargedViewBackdropBrush" Color="#99000000" />
+    </UserControl.Resources>
+
     <!--
         The one picture every screen draws, with the one enlarge behaviour: the surface keeps its own frame and
         hands this control a Source, and the control owns everything else — the click, the enlarged view, and
@@ -17,10 +23,71 @@
         AutomationProperties.Name here gets that name on the picture itself and on the enlarged view, so a screen
         reader says which picture it is about to open.
     -->
-    <Image
-        x:Name="Thumbnail"
-        AutomationProperties.Name="{Binding Path=(AutomationProperties.Name), ElementName=Root}"
-        Source="{Binding Source, ElementName=Root}"
-        Stretch="{Binding Stretch, ElementName=Root}"
-        Tapped="OnThumbnailTapped" />
+    <Grid>
+        <!--
+            The thumbnail. A plain click enlarges it, except where that click already belongs to something else — a
+            button, or a list row that acts on a click — in which case Shift+click is the enlarging gesture. The
+            control works that out from where it sits, so no surface has to declare anything. See the code-behind.
+        -->
+        <Image
+            x:Name="Thumbnail"
+            AutomationProperties.Name="{Binding Path=(AutomationProperties.Name), ElementName=Root}"
+            PointerPressed="OnThumbnailPointerPressed"
+            Source="{Binding Source, ElementName=Root}"
+            Stretch="{Binding Stretch, ElementName=Root}"
+            Tapped="OnThumbnailTapped" />
+
+        <!--
+            The enlarged view. A Popup rather than a dialog, because the view has to cover the page it was opened
+            from: a dialog draws chrome of its own, is measured against its content rather than the page, and
+            cannot be dismissed by clicking around it.
+
+            A Popup measures to its child, so the backdrop is given the page's own size by the code-behind when
+            the view opens, and is re-sized if the page changes while it is open.
+
+            Light dismiss is off on purpose: it also closes a popup when the application loses focus, so a reader
+            who alt-tabbed away would come back to a view that had closed itself. The backdrop is the way out, and
+            it covers the page, so there is nothing outside it to click.
+        -->
+        <Popup
+            x:Name="EnlargedView"
+            IsLightDismissEnabled="False">
+            <Grid
+                x:Name="EnlargedBackdrop"
+                AutomationProperties.AutomationId="ClickToEnlargeImageView_Viewer"
+                Background="{StaticResource EnlargedViewBackdropBrush}"
+                KeyDown="OnEnlargedBackdropKeyDown"
+                Tapped="OnEnlargedBackdropTapped">
+                <!-- The picture: at its own size where it fits, fitted to the page where it does not. The margin
+                     is the edge that keeps the backdrop clickable all the way round, and the close button clear
+                     of the picture. A tap on the picture is not a dismissal — only the backdrop is. -->
+                <Image
+                    x:Name="EnlargedPicture"
+                    Margin="64"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    AutomationProperties.Name="{Binding Path=(AutomationProperties.Name), ElementName=Root}"
+                    Source="{Binding Source, ElementName=Root}"
+                    Stretch="Uniform"
+                    Tapped="OnEnlargedPictureTapped" />
+
+                <!-- Close is the X in the top-right corner of the view, over the backdrop: that is where a reader
+                     looks for it in something that covers the page, and a bottom panel would need a dialog's
+                     chrome to sit in. -->
+                <Button
+                    x:Name="CloseButton"
+                    Width="40"
+                    Height="40"
+                    Margin="0,16,16,0"
+                    Padding="0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    AutomationProperties.AutomationId="ClickToEnlargeImageView_CloseButton"
+                    Click="OnCloseClicked"
+                    CornerRadius="8">
+                    <FontIcon FontSize="16" Glyph="&#xE711;" />
+                </Button>
+            </Grid>
+        </Popup>
+    </Grid>
 </UserControl>

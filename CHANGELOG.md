@@ -10,6 +10,28 @@
 
 ---
 
+## 2026-09-24 — the New Request wizard asks, then confirms: one review step instead of two
+
+**What changed:** the wizard no longer shows a separate **Preview** step before **Confirm**. After the last
+question — the details, or the dies, dunnage or components you pick — the next screen is the confirmation that
+raises the request. The step strip across the top now reads six steps: Work Center → Category → Item → Details →
+Confirm → Complete.
+
+**Why it matters:** Preview showed a subset of the same fields (work center, item, details, the part's picture)
+and nothing else: it checked nothing, changed nothing, and its only button led to Confirm. Every request therefore
+cost an extra screen and an extra click to read the same information twice.
+
+**What to expect:**
+
+- **One review step.** Confirm still shows everything: the work center, the category, the item, the details you
+  gave, the part's picture, the coil the current job carries, and — when a request will raise several entries — how
+  many requests it will raise. It still refuses a duplicate, or a request whose current job has changed, and it is
+  still the screen that actually raises the request.
+- **Back on Confirm returns to your last answer** (the details, or the die / dunnage / component picker), not to a
+  page in between.
+
+---
+
 ## 2026-09-23 — every part has its own picture, and the pictures have a home you can change
 
 **What changed:** the application can now picture **a part**, not just the kind of request it belongs to. A part's

@@ -9,10 +9,14 @@ using MTM_Waitlist.Tests.Module_Mock;
 namespace MTM_Waitlist.Tests.Module_Waitlist.Views;
 
 /// <summary>
-/// The three wizard surfaces that name a part draw it with its picture: the die card, the confirmation step and
-/// the preview. Each falls back to the one shared placeholder rather than a blank space, and none of them draws
-/// family or category artwork in place of a part's picture (FR-014, FR-015, FR-018, FR-023).
+/// The wizard surfaces that name a part draw it with its picture: the die card and the confirmation step. Each
+/// falls back to the one shared placeholder rather than a blank space, and none of them draws family or category
+/// artwork in place of a part's picture (FR-014, FR-015, FR-018, FR-023).
 /// </summary>
+/// <remarks>
+/// The preview step was one of these surfaces until 2026-09-24, when it was removed as a duplicate of the
+/// confirmation step; the checks it carried are the same rule the confirmation step's checks assert.
+/// </remarks>
 [TestClass]
 public sealed class NewRequestPartPictureMarkupTests
 {
@@ -48,25 +52,8 @@ public sealed class NewRequestPartPictureMarkupTests
             "The confirmation step no longer names the part it is asking for (FR-018).");
     }
 
-    /// <summary>The preview draws the same list the same way as the confirmation step.</summary>
-    [TestMethod]
-    public void Preview_DrawsThePartWithItsPicture()
-    {
-        var image = ImageBoundTo("PartPicturePath", "NewRequestPreviewPage.xaml");
-
-        Assert.IsNotNull(image, "The preview does not draw the part's picture (FR-018).");
-        Assert.IsTrue(
-            ((string?)image!.Attribute("Source"))!.Contains("ResolvedImagePathToSourceConverter", StringComparison.Ordinal),
-            "The picture must go through the resolver that applies the application's one picture rule (FR-013).");
-        Assert.IsTrue(
-            PageBinds("NewRequestPreviewPage.xaml", "PartNumber"),
-            "The preview no longer names the part it is asking for (FR-018).");
-    }
-
-    /// <summary>
-    /// The die card draws its picture as a fixed-size thumbnail. A frame bounded only by Min* is measured
-    /// against the picture's own natural size, so a large picture is drawn full size inside the card.
-    /// </summary>
+    /// <summary>The die card draws its picture as a fixed-size thumbnail. A frame bounded only by Min* is measured
+    /// against the picture's own natural size, so a large picture is drawn full size inside the card.</summary>
     [TestMethod]
     public void DieCard_DrawsThePictureInAFixedSizeThumbnail()
     {
@@ -75,20 +62,13 @@ public sealed class NewRequestPartPictureMarkupTests
 
     /// <summary>
     /// The confirmation step draws its picture as a fixed-size thumbnail. This is the defect that shipped: with
-    /// only Min* on the frame, the picture was drawn at its own natural size and filled the step (a wide preview
-    /// area with the placeholder drawn near-full size).
+    /// only Min* on the frame, the picture was drawn at its own natural size and filled the step, pushing the part
+    /// number aside.
     /// </summary>
     [TestMethod]
     public void ConfirmationStep_DrawsThePictureInAFixedSizeThumbnail()
     {
         AssertPictureFrameIsBounded("NewRequestSummaryPage.xaml");
-    }
-
-    /// <summary>The preview draws its picture as a fixed-size thumbnail, the same way the confirmation step does.</summary>
-    [TestMethod]
-    public void Preview_DrawsThePictureInAFixedSizeThumbnail()
-    {
-        AssertPictureFrameIsBounded("NewRequestPreviewPage.xaml");
     }
 
     /// <summary>

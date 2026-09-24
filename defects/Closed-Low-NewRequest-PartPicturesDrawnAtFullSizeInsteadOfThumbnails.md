@@ -9,6 +9,7 @@
 | **Status** | **FIXED** in the working tree on top of `0b78b2c`. Not visually re-verified in the running app — see §5. |
 | **Fixed by** | A fixed-size thumbnail frame on each of the five surfaces that declared only `Min*` |
 | **Files** | `Module_Waitlist/Views/NewRequestPreviewPage.xaml`, `Module_Waitlist/Views/NewRequestSummaryPage.xaml`, `Module_Waitlist/Views/NewRequestDiePage.xaml`, `Module_Setup/Views/SetupPartSelectionPage.xaml`, `Module_Setup/Views/SetupReviewPage.xaml` |
+| **Superseded in part** | **2026-09-24:** `NewRequestPreviewPage.xaml` and its step were removed — the preview repeated a subset of the confirmation step and changed nothing. The fix recorded here lives on in `NewRequestSummaryPage.xaml` and the other three surfaces; the preview's copy of it went with the page, as did the `Preview_*` guards named in §5 |
 
 ---
 
@@ -77,7 +78,7 @@ unbounded growth is removed. The `Max*` pair is equally valid — the guard in �
 
 | Item | Evidence |
 | --- | --- |
-| Guard added | `NewRequestPartPictureMarkupTests.DieCard_/ConfirmationStep_/Preview_DrawsThePictureInAFixedSizeThumbnail`, `SetupPartSelectionPageMarkupTests.PartListEntry_DrawsThePictureInAFixedSizeThumbnail`, `SetupReviewPageMarkupTests.SubordinatePartRow_DrawsThePictureInAFixedSizeThumbnail` — each fails unless the picture's frame declares a fixed `Width`+`Height` or a paired `MaxWidth`+`MaxHeight` |
+| Guard added | `NewRequestPartPictureMarkupTests.DieCard_/ConfirmationStep_/Preview_DrawsThePictureInAFixedSizeThumbnail`, `SetupPartSelectionPageMarkupTests.PartListEntry_DrawsThePictureInAFixedSizeThumbnail`, `SetupReviewPageMarkupTests.SubordinatePartRow_DrawsThePictureInAFixedSizeThumbnail` — each fails unless the picture's frame declares a fixed `Width`+`Height` or a paired `MaxWidth`+`MaxHeight`. **The two `Preview_*` guards were removed on 2026-09-24 with the page they guarded** |
 | **Fails before the fix** | The five tests were run against the reverted markup (`git stash push` of the five `.xaml` files): **5 failed, 0 passed**, each with the message *"bounds its picture with Min* only, so a large picture is drawn at its own natural size instead of as a thumbnail."* |
 | Passes after the fix | Same five tests: **5 passed, 0 failed** |
 | Build | `dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false` — succeeded, no XAML errors |

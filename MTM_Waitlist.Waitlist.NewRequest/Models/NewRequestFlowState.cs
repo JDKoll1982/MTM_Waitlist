@@ -86,10 +86,10 @@ public sealed class NewRequestFlowState
     /// carries (FR-054).
     /// </summary>
     /// <remarks>
-    /// Both review steps render <b>this</b> rather than the request's single <see cref="InputValue"/>, which is what
-    /// they did until 2026-09-20: with two dies chosen the preview and the confirmation each showed one die, so both
-    /// understated a run that was about to raise two requests. Reading the same list the submission reads is what
-    /// stops the two from drifting apart again.
+    /// The confirmation step renders <b>this</b> rather than the request's single <see cref="InputValue"/>, which is
+    /// what it did until 2026-09-20: with two dies chosen the review showed one die, so it understated a run that was
+    /// about to raise two requests. Reading the same list the submission reads is what stops the two from drifting
+    /// apart again.
     /// </remarks>
     public IReadOnlyList<string> DetailLines() =>
         ToDrafts()

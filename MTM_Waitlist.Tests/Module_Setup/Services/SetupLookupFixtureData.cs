@@ -52,8 +52,9 @@ internal static class SetupLookupFixtureData
     }
 
     /// <summary>
-    /// Shape 3 — the subordinate parts of an operation. Includes rows at the default-ignored plant codes
-    /// so the ignored-location filtering stays covered.
+    /// Shape 3 — the subordinate parts of an operation. Includes rows at the default-ignored plant codes, because
+    /// Setup keeps them: it does not consult the ignored-locations set, and a coil is issued to a work centre, so
+    /// its location really is <c>WC</c> (WO-074171's coil, the case this fixture carries).
     /// </summary>
     public static IReadOnlyList<VisualSubordinatePartRow> GetSubordinateParts(string normalizedWorkOrder, string partNumber, string sequenceNumber)
     {
@@ -117,6 +118,15 @@ internal static class SetupLookupFixtureData
                 Location = "WC",
                 User8 = "DIE",
                 OnHandQuantity = 2m,
+            },
+            new VisualSubordinatePartRow
+            {
+                Category = "Coil",
+                PartNumber = "MMC0000887",
+                Description = "Coil, .375 X 10.394",
+                Location = "WC",
+                User8 = "Scrap = Galvanized",
+                OnHandQuantity = 149691.80m,
             },
         };
     }

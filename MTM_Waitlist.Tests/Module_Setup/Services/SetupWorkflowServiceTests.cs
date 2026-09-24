@@ -82,34 +82,43 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task SelectSequenceAsync_OmitsSubordinatePartsAtDefaultIgnoredPlantLocations()
+    public async Task SelectSequenceAsync_KeepsSubordinatePartsWhoseLocationIsAPlantCode()
     {
+        // Setup does not consult the ignored-locations set: that set keeps plant inventory codes out of the
+        // waitlist's inventory location LISTS, and applying it here removed whole parts from the job.
         var service = CreateService();
 
         await service.SearchWorkOrderAsync("WO-076951");
         await service.SelectPartAsync("12345679");
         await service.SelectSequenceAsync("20");
 
-        var ignored = new[] { "WC", "NCM", "V-WC", "NCM-VITS", "SHIP" };
-        Assert.IsFalse(service.State.SubordinateParts.Any(part =>
-            !string.IsNullOrWhiteSpace(part.Location) &&
-            ignored.Contains(part.Location.Trim().ToUpperInvariant())));
-        // Non-ignored rack rows still load after the ignored plant-code rows (NCM/SHIP) are removed.
-        Assert.IsTrue(service.State.SubordinateParts.Any(part => string.Equals(part.Location, "Rack A1", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(service.State.SubordinateParts.Any(part => string.Equals(part.Location, "Kit Shelf 2", StringComparison.OrdinalIgnoreCase)));
+        foreach (var plantCode in new[] { "WC", "NCM", "SHIP" })
+        {
+            Assert.IsTrue(
+                service.State.SubordinateParts.Any(part =>
+                    string.Equals(part.Location, plantCode, StringComparison.OrdinalIgnoreCase)),
+                $"The subordinate part at '{plantCode}' is missing, so Setup is still filtering on ignored locations.");
+        }
     }
 
     [TestMethod]
-    public async Task SelectSequenceAsync_OmitsSubordinatePartsAtCustomIgnoredLocations()
+    public async Task SelectSequenceAsync_KeepsTheJobsCoilAtItsWorkCentreLocation()
     {
-        var service = CreateService(ignoredLocations: new[] { "Kit Shelf 2" });
+        // The job's own coil, as WO-074171 has it: issued to the work centre, so Infor Visual reports its location
+        // as 'WC'. Dropping it made the review, the saved record and the waitlist's coil availability all see a
+        // job with no coil while Infor Visual carried one all along.
+        var service = CreateService();
 
         await service.SearchWorkOrderAsync("WO-076951");
         await service.SelectPartAsync("12345679");
         await service.SelectSequenceAsync("20");
 
-        Assert.IsFalse(service.State.SubordinateParts.Any(part => string.Equals(part.Location, "Kit Shelf 2", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(service.State.SubordinateParts.Any(part => string.Equals(part.Location, "Rack A1", StringComparison.OrdinalIgnoreCase)));
+        var coil = service.State.SubordinateParts
+            .SingleOrDefault(part => string.Equals(part.PartNumber, "MMC0000887", StringComparison.OrdinalIgnoreCase));
+
+        Assert.IsNotNull(coil, "The job's coil is missing from the subordinate parts.");
+        Assert.AreEqual("Coil", coil!.Category);
+        Assert.AreEqual("WC", coil.Location, "The coil is at the work centre; its location is reported as it comes.");
     }
 
     [TestMethod]
@@ -151,18 +160,13 @@ public sealed class SetupWorkflowServiceTests
     private static DunnageWorkflowService CreateDunnageWorkflowService() =>
         new(new MySqlHelperServer(), permissionService: new AlwaysPermittingPermissionService());
 
-    private static SetupWorkflowService CreateService(IReadOnlyList<string>? ignoredLocations = null)
+    private static SetupWorkflowService CreateService()
     {
         var state = new SetupWorkflowState();
 
-        // No mock toggle is seeded: internal stores are always live and the retired demo toggles no longer
-        // exist (FR-003/FR-014). The only setting this fixture needs is the ignored-locations set.
-        var settings = new InMemoryLocalSettingsService([]);
-        if (ignoredLocations is { Count: > 0 })
-        {
-            settings.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, ignoredLocations.ToList()).GetAwaiter().GetResult();
-        }
-
+        // No mock toggle is seeded: internal stores are always live and the retired demo toggles no longer exist
+        // (FR-003/FR-014). The Setup reads take no settings at all — the ignored-locations set is the waitlist's
+        // inventory rule, and Setup no longer consults it.
         var mySqlHelperServer = new MySqlHelperServer();
         var workOrderValidationService = new WorkOrderValidationService();
 
@@ -175,8 +179,7 @@ public sealed class SetupWorkflowServiceTests
             new FakeVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow>(
                 request => SetupLookupFixtureData.GetSequences(request.NormalizedWorkOrder, request.PartNumber)),
             new FakeVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow>(
-                request => SetupLookupFixtureData.GetSubordinateParts(request.NormalizedWorkOrder, request.PartNumber, request.SequenceNumber)),
-            new IgnoredLocationsService(settings));
+                request => SetupLookupFixtureData.GetSubordinateParts(request.NormalizedWorkOrder, request.PartNumber, request.SequenceNumber)));
         var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer, permissionService: new AlwaysPermittingPermissionService());
         var activeJobCoordinatorService = new SetupActiveJobCoordinatorService();
         var persistenceService = new SetupPersistenceService(activeJobCoordinatorService, mySqlHelperServer);

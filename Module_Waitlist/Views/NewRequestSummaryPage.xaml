@@ -115,9 +115,9 @@
                         Spacing="12"
                         Visibility="{x:Bind ViewModel.HasPart, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <!--
-                            The picture box is a fixed-size thumbnail, drawn exactly as the preview step draws it. A
-                            frame bounded only by Min* measures the picture in a horizontal stack at the picture's
-                            own natural size, so a large picture is drawn full size instead of as a thumbnail.
+                            The picture box is a fixed-size thumbnail. A frame bounded only by Min* measures the
+                            picture in a horizontal stack at the picture's own natural size, so a large picture is
+                            drawn full size instead of as a thumbnail.
                         -->
                         <Border
                             Width="72"

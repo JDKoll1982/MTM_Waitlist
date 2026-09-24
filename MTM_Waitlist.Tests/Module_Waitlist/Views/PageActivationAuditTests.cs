@@ -45,7 +45,6 @@ public sealed class PageActivationAuditTests
         "NewRequestJobTypePage",
         "NewRequestItemPage",
         "NewRequestDetailsPage",
-        "NewRequestPreviewPage",
         "NewRequestSummaryPage",
         "NewRequestResultPage",
     ];

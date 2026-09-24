@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Shared.Models"
     xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -60,11 +61,13 @@
                                     CornerRadius="10"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="2">
-                                    <Border.Background>
-                                        <ImageBrush
-                                            ImageSource="{x:Bind ResolvedImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-                                            Stretch="UniformToFill" />
-                                    </Border.Background>
+                                    <!-- The photo is drawn by the shared picture control like every other content
+                                         picture (009 A3). This card is clickable — choosing it is the step — so the
+                                         control asks for Shift+click here and leaves a plain click to the card. -->
+                                    <sharedControls:ClickToEnlargeImageView
+                                        AutomationProperties.Name="{x:Bind WorkCenterName}"
+                                        Source="{x:Bind ResolvedImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                        Stretch="UniformToFill" />
                                 </Border>
                                 <!-- Blue photo frame, only on the selected card. -->
                                 <Border

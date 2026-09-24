@@ -38,7 +38,11 @@
 
             <!-- The material part's picture + badge (fixed square, not stretched). This is the part the request is
                  about, never the picture for the kind of request, and never the part's family's artwork: a request
-                 whose material cannot be pictured draws the one shared placeholder (FR-019, FR-020). -->
+                 whose material cannot be pictured draws the one shared placeholder (FR-019, FR-020).
+
+                 The card is the click target that opens the request, so the picture's plain click belongs to the
+                 card. The control works that out for itself and enlarges on Shift+click here, which keeps the whole
+                 row opening on an ordinary click while the picture is still enlargeable (009 A3). -->
             <Border
                 Grid.Row="0"
                 Grid.RowSpan="3"

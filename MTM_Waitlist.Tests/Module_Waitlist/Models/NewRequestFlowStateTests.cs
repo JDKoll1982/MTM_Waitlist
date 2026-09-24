@@ -100,7 +100,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsPreview_WhenTheConfigurationAsksForNothing()
+    public void GetNextStepType_ReturnsTheConfirmationStep_WhenTheConfigurationAsksForNothing()
     {
         var state = StateWith(new RequestItemConfiguration
         {
@@ -108,11 +108,11 @@ public sealed class NewRequestFlowStateTests
             ControlFlow = RequestItemConfiguration.DirectToConfirmation,
         });
 
-        Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsPreview_OnceTheAnswerIsCaptured()
+    public void GetNextStepType_ReturnsTheConfirmationStep_OnceTheAnswerIsCaptured()
     {
         var state = StateWith(
             new RequestItemConfiguration
@@ -124,7 +124,7 @@ public sealed class NewRequestFlowStateTests
             },
             inputValue: "Please assist");
 
-        Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
 
     [TestMethod]
@@ -153,11 +153,11 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsPreview_OnceTheDieAnswerIsCaptured()
+    public void GetNextStepType_ReturnsTheConfirmationStep_OnceTheDieAnswerIsCaptured()
     {
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Die), inputValue: "FGT0002000");
 
-        Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
 
     [TestMethod]
@@ -182,19 +182,19 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsPreview_OnceTheComponentAnswerIsCaptured()
+    public void GetNextStepType_ReturnsTheConfirmationStep_OnceTheComponentAnswerIsCaptured()
     {
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Component), inputValue: "V-EMB-2");
 
-        Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsPreview_OnceTheDunnageAnswerIsCaptured()
+    public void GetNextStepType_ReturnsTheConfirmationStep_OnceTheDunnageAnswerIsCaptured()
     {
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Dunnage), inputValue: "DN-STL-4");
 
-        Assert.AreEqual(typeof(NewRequestPreviewViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
     }
 
     /// <summary>A usable row that asks for one enumerated answer drawn from the named job list.</summary>

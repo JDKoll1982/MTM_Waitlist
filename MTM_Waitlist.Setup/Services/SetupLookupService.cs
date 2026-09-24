@@ -15,6 +15,15 @@ namespace MTM_Waitlist.Module_Setup.Services;
 /// the <c>mtm_mock</c> mirror only when Infor Visual is unreachable (FR-002). The previous
 /// mock/backend branching — and the sample-data catalogue behind it — is gone: internal behaviour no
 /// longer depends on a demo toggle (FR-001, FR-014).
+/// <para>
+/// <b>Setup does not consult the ignored-locations set.</b> That set exists to keep plant inventory codes
+/// (<c>WC</c>, <c>NCM</c>, <c>SHIP</c>) out of the waitlist's <i>inventory location lists</i>, where they are
+/// noise. A job's requirement data is a different thing: a coil's location in Infor Visual <i>is</i> the plant or
+/// work-centre code it was issued to. Filtering the subordinate parts on it removed whole parts from the job —
+/// the coil on WO-074171 vanished from the Setup review, from the saved record and so from the waitlist's coil
+/// availability, while Infor Visual carried it all along. Every subordinate part the read returns is kept, and
+/// its location is shown as it comes (FR-019).
+/// </para>
 /// </remarks>
 public sealed class SetupLookupService : IInforVisualLookupService, ISubordinatePartService
 {
@@ -23,28 +32,23 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
     private readonly IVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow> _workOrderLookupFallback;
     private readonly IVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow> _operationSequencesFallback;
     private readonly IVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow> _subordinatePartsFallback;
-    private readonly IIgnoredLocationsService _ignoredLocationsService;
 
     /// <summary>Creates the lookup service.</summary>
     /// <param name="workOrderLookupFallback">Shape 1, work-order parts.</param>
     /// <param name="operationSequencesFallback">Shape 2, operation sequences.</param>
     /// <param name="subordinatePartsFallback">Shape 3, subordinate parts.</param>
-    /// <param name="ignoredLocationsService">Shared ignored-locations set.</param>
     public SetupLookupService(
         IVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow> workOrderLookupFallback,
         IVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow> operationSequencesFallback,
-        IVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow> subordinatePartsFallback,
-        IIgnoredLocationsService ignoredLocationsService)
+        IVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow> subordinatePartsFallback)
     {
         ArgumentNullException.ThrowIfNull(workOrderLookupFallback);
         ArgumentNullException.ThrowIfNull(operationSequencesFallback);
         ArgumentNullException.ThrowIfNull(subordinatePartsFallback);
-        ArgumentNullException.ThrowIfNull(ignoredLocationsService);
 
         _workOrderLookupFallback = workOrderLookupFallback;
         _operationSequencesFallback = operationSequencesFallback;
         _subordinatePartsFallback = subordinatePartsFallback;
-        _ignoredLocationsService = ignoredLocationsService;
     }
 
     /// <inheritdoc />
@@ -137,38 +141,12 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
                 .Where(item => !string.IsNullOrWhiteSpace(item.PartNumber))
                 .ToArray();
 
-            return await ExcludeIgnoredLocationsAsync(parts, cancellationToken).ConfigureAwait(false);
+            return parts;
         }
         catch (Exception ex)
         {
             StartupDebugLog.Error("SetupLookup", ex, $"GetSubordinatePartsAsync failed. WO='{normalizedWorkOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
             return Array.Empty<SetupSubordinatePart>();
         }
-    }
-
-    /// <summary>
-    /// Omits subordinate parts whose <see cref="SetupSubordinatePart.Location"/> is in the shared
-    /// ignored-locations set (plant inventory codes like WC/NCM/SHIP edited in Settings), so Setup
-    /// location lists match the Waitlist/Coil filtering rule. Empty/unassigned locations are kept.
-    /// </summary>
-    private async Task<IReadOnlyList<SetupSubordinatePart>> ExcludeIgnoredLocationsAsync(
-        IReadOnlyList<SetupSubordinatePart> parts,
-        CancellationToken cancellationToken)
-    {
-        if (parts is null || parts.Count == 0)
-        {
-            return parts ?? Array.Empty<SetupSubordinatePart>();
-        }
-
-        var ignored = await _ignoredLocationsService.GetIgnoredLocationsAsync(cancellationToken).ConfigureAwait(false);
-        if (ignored.Count == 0)
-        {
-            return parts;
-        }
-
-        var ignoredSet = new HashSet<string>(ignored, StringComparer.OrdinalIgnoreCase);
-        return parts
-            .Where(part => string.IsNullOrWhiteSpace(part.Location) || !ignoredSet.Contains(part.Location.Trim()))
-            .ToArray();
     }
 }

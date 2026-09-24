@@ -165,9 +165,14 @@ public static class NewRequestFlowRules
 
     /// <summary>
     /// Resolves which wizard page follows the current accumulated state.
-    /// Text-input flows go to Details; no-subtype flows show the intermediate
-    /// Preview page; everything else goes straight to the confirmation Summary page.
+    /// Text-input flows go to Details; once the answer is captured, or where the row asks for nothing at all,
+    /// the confirmation Summary page follows and it is the last step before the request is raised.
     /// </summary>
+    /// <remarks>
+    /// There is no separate review-then-confirm pair: the confirmation step already shows every field the
+    /// wizard collected, the coil the job carries, and the count of requests it will raise, so an intermediate
+    /// page between the last answer and the submission only repeated it and cost the operator a click.
+    /// </remarks>
     public static Type GetNextStepType(NewRequestFlowState state)
     {
         ArgumentNullException.ThrowIfNull(state);
@@ -180,7 +185,7 @@ public static class NewRequestFlowRules
         var answerCaptured = !string.IsNullOrWhiteSpace(state.InputValue);
         if (!requiresAnswer || answerCaptured)
         {
-            return typeof(NewRequestPreviewViewModel);
+            return typeof(NewRequestSummaryViewModel);
         }
 
         // An answer the job supplies is asked for by the step that can show it: the dunnage list is asked for on

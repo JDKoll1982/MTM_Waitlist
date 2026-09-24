@@ -48,7 +48,7 @@ public sealed class NewRequestDetailsViewModelTests
 
         Assert.IsFalse(viewModel.IsValidationVisible);
         Assert.AreEqual(chosen, state.InputValue);
-        Assert.AreEqual(typeof(NewRequestPreviewViewModel).FullName, navigation.Navigations[0].PageKey);
+        Assert.AreEqual(typeof(NewRequestSummaryViewModel).FullName, navigation.Navigations[0].PageKey);
     }
 
     [TestMethod]
@@ -82,7 +82,7 @@ public sealed class NewRequestDetailsViewModelTests
 
         Assert.IsFalse(viewModel.IsValidationVisible);
         Assert.AreEqual("Coil is loaded backwards", state.InputValue);
-        Assert.AreEqual(typeof(NewRequestPreviewViewModel).FullName, navigation.Navigations[0].PageKey);
+        Assert.AreEqual(typeof(NewRequestSummaryViewModel).FullName, navigation.Navigations[0].PageKey);
     }
 
     [TestMethod]

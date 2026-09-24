@@ -53,9 +53,10 @@ public sealed class NewRequestDunnageViewModelTests
 
         Assert.AreEqual(SecondAssignedPart, state.InputValue, "The part the operator picked is the request's value (FR-048).");
         Assert.AreEqual(
-            typeof(NewRequestPreviewViewModel).FullName,
+            typeof(NewRequestSummaryViewModel).FullName,
             navigation.Navigations[0].PageKey,
-            "With the answer captured the flow continues, rather than asking the same question again.");
+            "With the answer captured the flow continues to the confirmation step, rather than asking the same "
+            + "question again.");
         Assert.IsTrue(viewModel.Options[1].IsSelected, "The card they chose is the marked one.");
     }
 
@@ -97,9 +98,9 @@ public sealed class NewRequestDunnageViewModelTests
             state.SelectedDunnagePart?.PartNumber,
             "The step remembers the substitute as its current choice, so coming back to it does not hide it.");
         Assert.AreEqual(
-            typeof(NewRequestPreviewViewModel).FullName,
+            typeof(NewRequestSummaryViewModel).FullName,
             navigation.Navigations[0].PageKey,
-            "A substitute advances the flow exactly as an assigned part does.");
+            "A substitute advances the flow to the confirmation step exactly as an assigned part does.");
     }
 
     [TestMethod]

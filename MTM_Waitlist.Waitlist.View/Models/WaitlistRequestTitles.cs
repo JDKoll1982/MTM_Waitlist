@@ -131,7 +131,7 @@ public static class WaitlistRequestTitles
 
     /// <summary>
     /// The same rule, stated on the Item, so a surface that is drawing a request the store has not been asked
-    /// about yet — the confirmation step and the preview — names and pictures the same part the card will.
+    /// about yet — the confirmation step — names and pictures the same part the card will.
     /// </summary>
     /// <param name="item">The catalogued Item the request was raised with.</param>
     /// <param name="jobAvailability">The requesting job.</param>
