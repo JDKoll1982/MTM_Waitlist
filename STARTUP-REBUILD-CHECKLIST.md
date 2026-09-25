@@ -299,14 +299,15 @@ Next task: **Service Layer: Delete `StartupLogService`, `StartupLogForwarder` an
 
 > The permission keys this phase adds. Each needs a catalogue row, a role baseline, a seed and a place on the
 > Settings privileges page: the machine-configuration key (IT Department and Developer, S10), the plant-wide
-> ignored-locations edit key (IT Department and Developer, S11.5.6), and the log-panel key (S9).
+> ignored-locations edit key (IT Department and Developer, S11.5.6), the log-panel key (S9), and the
+> session-length key (IT Department and Developer, S2 row 21).
 > This phase is self-contained: the setup gate authenticates the person itself, so it does not depend on the
 > pipeline's identity handling.
 
 ### Subphase 7.1: The pre-sign-in machine-setup screen
 - [ ] **Frontend: Build the machine-setup screen, shown when the machine is unconfigured and before any operator sign-in.** (Ref: S10) | **Persona: Frontend Engineer**
 - [ ] **Service Layer: Add the gate that unlocks setup — an IT Department or Developer sign-in, authorising configuration only and never the shell.** (Ref: S10, S10.1) *Depends on: the screen task above* | **Persona: Backend Engineer**
-- [ ] **Frontend: Capture the machine's display name and description, the shared picture sources and the logging destination on that screen.** (Ref: S10) *Depends on: the screen task above* | **Persona: Frontend Engineer**
+- [ ] **Frontend: Capture the machine's display name and description and the shared picture sources on that screen.** (Ref: S10) *Depends on: the screen task above* | **Persona: Frontend Engineer**
 - [ ] **Service Layer: Write the captured configuration to the store against the machine.** (Ref: S10) *Depends on: the capture task above* | **Persona: Backend Engineer**
 - [ ] **Full Stack: Return the step whenever the machine is unconfigured, or its configuration is removed, revoked or unreadable.** (Ref: S10.1) *Depends on: the write task above* | **Persona: Full Stack Engineer**
 
@@ -322,19 +323,21 @@ Next task: **Frontend: Build the machine-setup screen, shown when the machine is
 Next task: **Service Layer: Refuse to continue while the machine is unconfigured, so a dismissal route the screen misses still cannot reach the shell.** | **Persona: Backend Engineer**
 
 ### Subphase 7.3: Permission keys and the privileges page
-- [ ] **Database Table: Add the three permission keys to the catalogue.** (Ref: S9, S10, S11.5.6) | **Persona: Database Engineer**
-- [ ] **Settings Page: Add all three keys to the privileges page.** (Ref: S10) *Depends on: the catalogue task above* | **Persona: Frontend Engineer**
+- [ ] **Database Table: Add the four permission keys to the catalogue.** (Ref: S9, S10, S11.5.6, S2) | **Persona: Database Engineer**
+- [ ] **Settings Page: Add all four keys to the privileges page.** (Ref: S10) *Depends on: the catalogue task above* | **Persona: Frontend Engineer**
 - [ ] **Service Layer: Enforce each key where the action happens, not only where the control is drawn.** (Ref: S11.5.6) *Depends on: the catalogue task above* | **Persona: Backend Engineer**
 - [ ] **Full Stack: Make the ignored-locations editor read-only for every role but IT Department and Developer.** (Ref: S11.5.6) *Depends on: the enforcement task above* | **Persona: Full Stack Engineer**
+- [ ] **Full Stack: Add the session-length setting to the settings panel, changeable only by IT Department or Developer.** (Ref: S2) *Depends on: the catalogue task above* | **Persona: Full Stack Engineer**
+- [ ] **Service Layer: Inventory every setting that is role-restricted today and confirm each keeps the same restriction.** (Ref: S2) | **Persona: Backend Engineer**
 
-Next task: **Database Table: Add the three permission keys to the catalogue.** | **Persona: Database Engineer**
+Next task: **Database Table: Add the four permission keys to the catalogue.** | **Persona: Database Engineer**
 
 ### Subphase 7.4: Seeds and role baselines
-- [ ] **Database Migration: Baseline the three keys per role, including IT Department.** (Ref: S10, S11.5.6) *Depends on: Subphase 7.3* | **Persona: Database Engineer**
-- [ ] **Database Migration: Extend the development seed so a fresh store grants IT Department and Developer the three keys.** (Ref: S10) *Depends on: the baseline task above* | **Persona: Database Engineer**
+- [ ] **Database Migration: Baseline the four keys per role, including IT Department.** (Ref: S10, S11.5.6, S2) *Depends on: Subphase 7.3* | **Persona: Database Engineer**
+- [ ] **Database Migration: Extend the development seed so `JKoll` and `JohnK` hold Developer on both seeded machines, and a fresh store grants IT Department and Developer the four keys.** (Ref: S10, S2) *Depends on: the baseline task above* | **Persona: Database Engineer**
 - [ ] **Testing: Confirm a fresh store seeds the keys, and that a role without them cannot use the features.** (Ref: S10, S11.5.6) *Depends on: the seed task above* | **Persona: QA Engineer**
 
-Next task: **Database Migration: Baseline the three keys per role, including IT Department.** | **Persona: Database Engineer**
+Next task: **Database Migration: Baseline the four keys per role, including IT Department.** | **Persona: Database Engineer**
 
 **GATE: an unconfigured machine stops at the setup screen, it cannot be bypassed by any input or by any code path, and the three keys are seeded and enforced.**
 

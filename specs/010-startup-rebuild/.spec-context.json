@@ -1,0 +1,397 @@
+{
+  "workflow": "companion",
+  "specName": "Startup Rebuild",
+  "branch": "010-startup-rebuild",
+  "currentStep": "tasks",
+  "status": "ready-to-implement",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-25T19:02:17.155Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-25T19:04:58.433Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-25T19:14:33.913Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-25T19:18:53.974Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-25T19:18:59.579Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-25T19:20:19.232Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-25T19:23:19.884Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-25T19:28:49.614Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-25T19:30:29.323Z"
+    }
+  ],
+  "telemetryInstanceId": "d17871b9-a196-497b-ab7f-10b9cd871cc0",
+  "unattended": true,
+  "livingSpecs": {
+    "loaded": [
+      "startup"
+    ]
+  },
+  "last_action": "living specs loaded (startup)",
+  "coverage": {
+    "FR-028": {
+      "title": "The replaced launch behaviour is not reintroduced, and a build fails if it is.",
+      "tasks": [
+        "T001",
+        "T004",
+        "T005",
+        "T169"
+      ]
+    },
+    "FR-001": {
+      "title": "The launch ends at exactly one of: the main screens, sign-in, machine setup, or a stated stop.",
+      "tasks": [
+        "T077",
+        "T082"
+      ]
+    },
+    "FR-002": {
+      "title": "The launch names each piece of work before performing it.",
+      "tasks": [
+        "T071",
+        "T073",
+        "T080",
+        "T086",
+        "T087",
+        "T116"
+      ]
+    },
+    "FR-003": {
+      "title": "Every wait on the launch path has a stated maximum and none is unbounded.",
+      "tasks": [
+        "T071",
+        "T073",
+        "T074",
+        "T080",
+        "T084"
+      ]
+    },
+    "FR-004": {
+      "title": "A stopped launch states a cause specific to what stopped it.",
+      "tasks": [
+        "T085",
+        "T090",
+        "T124"
+      ]
+    },
+    "FR-005": {
+      "title": "An error is shown in a strip at the bottom of the launch window without covering the list of work.",
+      "tasks": [
+        "T090"
+      ]
+    },
+    "FR-006": {
+      "title": "A machine with no configuration does not reach the main screens by any route.",
+      "tasks": [
+        "T077",
+        "T096",
+        "T101",
+        "T103"
+      ]
+    },
+    "FR-007": {
+      "title": "Machine setup is authorised only by IT Department or Developer, and that authorisation does not open the main screens.",
+      "tasks": [
+        "T052",
+        "T095",
+        "T099",
+        "T100"
+      ]
+    },
+    "FR-008": {
+      "title": "Every route out of machine setup that is not completion ends the application with a stated reason.",
+      "tasks": [
+        "T078",
+        "T096",
+        "T102",
+        "T127"
+      ]
+    },
+    "FR-009": {
+      "title": "A machine whose configuration is removed, revoked or unreadable is treated as unconfigured at the next check.",
+      "tasks": [
+        "T075",
+        "T097",
+        "T101"
+      ]
+    },
+    "FR-010": {
+      "title": "Session validity is judged by the store clock, not the computer clock.",
+      "tasks": [
+        "T044",
+        "T045",
+        "T107",
+        "T111"
+      ]
+    },
+    "FR-011": {
+      "title": "A session is cleared when the person signs out, before the application restarts.",
+      "tasks": [
+        "T044",
+        "T045",
+        "T107",
+        "T111"
+      ]
+    },
+    "FR-012": {
+      "title": "An account holding a temporary credential is refused after five failed attempts, including with the correct value, and the refusal survives a restart.",
+      "tasks": [
+        "T106",
+        "T110"
+      ]
+    },
+    "FR-013": {
+      "title": "The set-a-new-password step opens only after the temporary credential has been accepted.",
+      "tasks": [
+        "T115"
+      ]
+    },
+    "FR-014": {
+      "title": "A remembered sign-in is held against the person in the store and encrypted, and an unreadable key falls back to the ordinary sign-in form.",
+      "tasks": [
+        "T046",
+        "T108",
+        "T113",
+        "T117"
+      ]
+    },
+    "FR-015": {
+      "title": "A computer whose hardware identity cannot be read is admitted.",
+      "tasks": [
+        "T112"
+      ]
+    },
+    "FR-016": {
+      "title": "A stopped launch offers to repeat the failed work.",
+      "tasks": [
+        "T077",
+        "T121",
+        "T125"
+      ]
+    },
+    "FR-017": {
+      "title": "Resetting is offered only where resetting could remove the cause.",
+      "tasks": [
+        "T119",
+        "T122",
+        "T124"
+      ]
+    },
+    "FR-018": {
+      "title": "Resetting states what it will reset before acting and affects only this machine configuration, never people, roles or permissions.",
+      "tasks": [
+        "T120",
+        "T122",
+        "T123",
+        "T126"
+      ]
+    },
+    "FR-019": {
+      "title": "A fault that can be repaired without the person involvement is repaired without asking.",
+      "tasks": [
+        "T121",
+        "T123"
+      ]
+    },
+    "FR-020": {
+      "title": "Repeating failed work repeats only that work and what follows it.",
+      "tasks": [
+        "T077",
+        "T082",
+        "T121",
+        "T125"
+      ]
+    },
+    "FR-021": {
+      "title": "Every diagnostic is written to the store with severity, area, machine, person, error kind and message.",
+      "tasks": [
+        "T047",
+        "T048",
+        "T064",
+        "T065",
+        "T130"
+      ]
+    },
+    "FR-022": {
+      "title": "Identity and machine facts are available to the rest of the application for reading only, and only the launch may change them.",
+      "tasks": [
+        "T035",
+        "T036",
+        "T037",
+        "T038",
+        "T042"
+      ]
+    },
+    "FR-023": {
+      "title": "A person preferences are held against the person in the store.",
+      "tasks": [
+        "T138",
+        "T140",
+        "T141",
+        "T143",
+        "T144",
+        "T145"
+      ]
+    },
+    "FR-024": {
+      "title": "The list of locations to hide belongs to the whole plant and is changeable only by IT Department or Developer.",
+      "tasks": [
+        "T052",
+        "T053",
+        "T137",
+        "T142",
+        "T146"
+      ]
+    },
+    "FR-025": {
+      "title": "Only what is needed to reach the store is kept on a computer, apart from the local copy of pictures.",
+      "tasks": [
+        "T150",
+        "T151",
+        "T152",
+        "T155",
+        "T156",
+        "T157"
+      ]
+    },
+    "FR-026": {
+      "title": "The copy of pictures is best effort and cannot stop the launch.",
+      "tasks": [
+        "T083",
+        "T088"
+      ]
+    },
+    "FR-027": {
+      "title": "Whether the external system can be reached is settled before the main screens open.",
+      "tasks": [
+        "T084",
+        "T089"
+      ]
+    },
+    "FR-029": {
+      "title": "How long a session lasts is changeable from the settings panel, and only by IT Department or Developer.",
+      "tasks": [
+        "T052",
+        "T053",
+        "T137",
+        "T147"
+      ]
+    },
+    "FR-030": {
+      "title": "Every setting that is restricted to particular roles today keeps the same restriction.",
+      "tasks": [
+        "T052",
+        "T139",
+        "T149"
+      ]
+    },
+    "FR-031": {
+      "title": "The cases found by the three read-only sweeps are recorded in the repository as the acceptance surface, and every case is either covered by a test or recorded as no longer applying, with its reason.",
+      "tasks": [
+        "T159",
+        "T167"
+      ]
+    }
+  },
+  "size": "oversized",
+  "decisions": [
+    {
+      "decision": "Rebuild MTM_Waitlist.Startup in place under the same project name: the solution entry and the two project references are re-pointed rather than re-invented, and the composition-root split is preserved. Rejected a new project name, which adds edits and widens the window where the tree does not build."
+    },
+    {
+      "decision": "Delete the old startup surface first and prove removal with a placeholder window before building anything new, so a green build at that point means the removal is complete rather than that new code compensates for it. Rejected building the new pipeline alongside the old and switching over at the end."
+    },
+    {
+      "decision": "Defer StartupDebugLog to Phase 6 and StartupState to Phase 4 instead of deleting them with the rest of the surface: 489 call sites and roughly twenty consumers mean deleting either in Phase 2 leaves the tree uncompilable and the Phase 2 gate unreachable."
+    },
+    {
+      "decision": "The replacement logging seam is unconditional, with no Conditional attribute, because StartupDebugLog is Conditional DEBUG and therefore records nothing at all in a Release build, which is exactly what SC-003 requires to change."
+    },
+    {
+      "decision": "Gate the ignored-locations write with a new key permission.settings.ignored_locations_edit rather than narrowing the existing key. FR-024 needs two roles to change it while FR-030 needs every existing restriction to hold, and the existing key is granted to seven roles, so narrowing it would remove read access from five. Rejected narrowing the existing key, and rejected gating the write in the UI only."
+    },
+    {
+      "decision": "Add three new permission keys and do not reuse permission.settings.computers for machine setup. No key today contains machine, log or session; machine setup has a different blast radius from the Settings computers screen because it admits a computer to the fleet before anyone signs in. Rejected reusing permission.settings.computers, whose baseline is already exactly IT Department and Developer at 1 and every other role at 0."
+    },
+    {
+      "decision": "Store the remembered sign-in in a new table auth_remembered_sign_ins keyed by person and machine. FR-014 needs it decrypted and held in the store, and it cannot live on user_active_sessions because sign-out clears that while surviving sign-out is its whole purpose. Rejected columns on core_users_profiles, columns on user_active_sessions, and a local DPAPI file."
+    },
+    {
+      "decision": "Resolve the shared key file at its UNC path and treat it as read-only. X: is a per-user mapped drive that does not exist for another account, session or service, and the file pre-exists and is likely shared with other MTM authentication. Rejected generating a new key and rejected storing the key in appsettings.json."
+    },
+    {
+      "decision": "The seven scoped preferences move into the existing config_settings_values store with no new storage, because the scoped store and its rank function already exist and PictureEnlargePreference already uses them, so each migration is one substitution. Rejected a new user_preferences table, which would duplicate scope precedence that already exists."
+    },
+    {
+      "decision": "Repurpose ops_startup_logs as the one log store rather than renaming a successor: the identifier is pinned verbatim by the spec, the table already carries correlation and chain-hash columns, and it has no writer today. Rejected a new ops_application_logs table, which renames a pinned identifier for no gain."
+    }
+  ],
+  "approach": "Delete the whole startup surface first and prove it with a placeholder window, then rebuild in place: a data-driven launch pipeline of named steps with an activity feed, two read-only identity contracts replacing StartupState, sessions on the new user_active_sessions table judged on the store clock, diagnostics on ops_startup_logs through one unconditional logging module in a new MTM_Waitlist.Logging library, and a pre-sign-in machine-setup gate that cannot be bypassed.",
+  "context": [
+    "Owner design brief STARTUP-REBUILD-BRIEF.md sections S1 to S16 is the primary design source; the plan maps it rather than redesigning it.",
+    "Owner execution checklist STARTUP-REBUILD-CHECKLIST.md, 179 tasks, 11 phases, 11 gates, is the instrument tasks.md must not contradict.",
+    "Living spec capability startup read whole; it contributed the ordered-step, store-clock, unreadable-hardware-identity-admitted, three-destination, remedy-scope and best-effort-picture requirements.",
+    "Resolved permission baseline from Database/Seeds/seed_permission_role_baselines/create.sql: permission.settings.ignored_locations is granted to seven roles and denied to two, while permission.settings.computers is already exactly IT Department and Developer.",
+    "Resolved schemas from Database: auth_sessions_tokens already carries the token hash, salt, issue, expiry, revocation and source shape that user_active_sessions needs; ops_startup_logs already carries correlation_id, previous_hash and entry_hash with no writer today."
+  ],
+  "step_summaries": {
+    "specify": {
+      "summary": "Spec written for the startup rebuild: 6 user stories, FR-001 to FR-030, SC-001 to SC-012, 14 edge cases and 8 key entities, plus a requirements quality checklist."
+    },
+    "plan": {
+      "summary": "Full oversized plan written for the startup rebuild: plan.md with a Scale note, Technical Context, real project structure, a nine-row Constitution Check and the eleven-phase gate map, plus research.md with 24 decisions, data-model.md with ten entities and the launch state machine, and five interface contracts. Sequenced to match the owner 11-phase checklist and its 11 gates."
+    },
+    "tasks": {
+      "summary": "170 tasks in 9 phases: Setup 5, Foundational 77 (removal and proof, identity contracts, store foundation, logging, pipeline), US1 12, US2 11, US3 13, US4 10, US5 8, US6 22, Polish 12; every phase laid out as ordered waves with join points and a single owner phase per file."
+    }
+  }
+}

@@ -26,7 +26,7 @@ longer reach the shell, the old logic is gone. Only then is the new module built
 | 5 | Steps become data with a derived count, and the splash shows **everything the process is doing**. |
 | 6 | Errors surface as a **toast anchored to the bottom of the splash window**. |
 | 7 | The session moves into the store. **Only connection strings may remain local, plus one reviewed exception: `MockServiceClient` (S11.5.4).** |
-| 8 | The logging destination stays a **hard gate**, satisfied by a new **machine configuration** step. |
+| 8 | Machine configuration stays a **hard gate**, satisfied by a new machine-setup step. **Amended 2026-09-25: there is no logging destination to configure, because records live only in the store (S10).** |
 | 9 | Machine configuration is reachable **before any operator sign-in**, unlocked by an IT Department or Developer sign-in. **It cannot be bypassed: the only outcomes are a configured machine that continues, or the process ending (S10.1).** |
 | 10 | All logging goes to the **database**; logging becomes its own module with a **developer log panel**. |
 | 11 | One blocked-state surface; **Restore Defaults states exactly what it will reset and resets only what is broken**. |
@@ -39,6 +39,10 @@ longer reach the shell, the old logic is gone. Only then is the new module built
 | 18 | The encryption key is read from a pre-existing shared key file, addressed by its UNC path (S8.3). |
 | 19 | The session lives in a new **`user_active_sessions`** table. |
 | 20 | Every deployed table, procedure, function and view is audited for dead weight; dead SQL files are deleted. |
+| 21 | How long a session lasts is a setting, changeable from the settings panel by IT Department or Developer only. |
+| 22 | Every setting that is role-restricted today keeps the same restriction after the rebuild. |
+| 23 | Machine configuration carries no destination for records, because records live only in the store. |
+| 24 | The development seed grants `Developer` to `JKoll` and `JohnK`, so each of the two seeded machines has a developer who can sign in. |
 
 ## S3. What is being removed
 
@@ -139,7 +143,8 @@ body; it is rewritten against the new contracts.
   token stored as a **salted hash**, an expiry, an issued time, and the machine key.
 - Session validity is judged on the **store's clock** (`fn_server_utc_now`), never the workstation's.
 - The app writes the row when sign-in completes (only after the machine gate passes) and clears it on sign-out.
-- The eight-hour lifetime is retained unless the user says otherwise.
+- The eight-hour lifetime is the default, not a fixed value: it is changeable from the settings panel by
+  IT Department or Developer only (S2 row 21).
 
 ### S8.2 Remember-me
 - Stored in the store against the person, never in a local file.
@@ -240,8 +245,10 @@ in Phase 2.
   sign-in**.
 - It is unlocked by an **IT Department or Developer** sign-in, which authorises configuration only and does
   not open the shell.
-- It captures what the old local settings held and the destination needs: the machine's display name and
-  description, the shared picture sources, and the logging destination.
+- It captures the machine's display name and description and the shared picture sources. **There is no record
+  destination to capture**, because records live only in the store (S2 row 23). The old prompt for a log folder
+  therefore disappears for a second reason: not just because logging moved, but because a folder was never the
+  destination in the first place.
 - The privilege surface must be updated in the same change: new permission keys in the permission catalogue,
   the Settings privileges page, the role baselines, and the seeds. The user expects the Settings page to
   break without this work.
