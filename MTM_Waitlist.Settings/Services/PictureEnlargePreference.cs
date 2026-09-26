@@ -1,6 +1,5 @@
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
-using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 
 namespace MTM_Waitlist.Module_Settings.Services;
@@ -31,17 +30,17 @@ public sealed class PictureEnlargePreference : IPictureEnlargePreference
     private const string UserScopeType = "user";
 
     private readonly IConfigSettingsValueService _settingsValueService;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
     private bool _isEnabled = true;
     private bool _hasLoaded;
 
     public PictureEnlargePreference(
         IConfigSettingsValueService settingsValueService,
-        StartupState startupState)
+        IPersonIdentity personIdentity)
     {
         _settingsValueService = settingsValueService ?? throw new ArgumentNullException(nameof(settingsValueService));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
+        _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
     }
 
     /// <inheritdoc />
@@ -55,7 +54,7 @@ public sealed class PictureEnlargePreference : IPictureEnlargePreference
             return;
         }
 
-        if (_startupState.UserId <= 0)
+        if (_personIdentity.UserId <= 0)
         {
             // Nobody is signed in, so there is no account to read a preference for and no account to write one
             // against. The declared default stands, and the load is *not* marked done: a later call, once the
@@ -92,7 +91,7 @@ public sealed class PictureEnlargePreference : IPictureEnlargePreference
         _isEnabled = enabled;
         _hasLoaded = true;
 
-        if (_startupState.UserId <= 0)
+        if (_personIdentity.UserId <= 0)
         {
             return;
         }
@@ -105,11 +104,11 @@ public sealed class PictureEnlargePreference : IPictureEnlargePreference
                     SettingKey = ConfigSettingKeys.EnlargePicturesOnClick,
                     ScopeType = UserScopeType,
                     ScopeKey = UserScopeKey(),
-                    UserId = _startupState.UserId,
+                    UserId = _personIdentity.UserId,
                     SettingValueBool = enabled,
                     ValueType = "bool",
                 },
-                _startupState.UserId).ConfigureAwait(true);
+                _personIdentity.UserId).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -121,5 +120,5 @@ public sealed class PictureEnlargePreference : IPictureEnlargePreference
     }
 
     /// <summary>The scope key that names this person: <c>user:&lt;id&gt;</c>, exactly as the list filter uses it.</summary>
-    private string UserScopeKey() => $"user:{_startupState.UserId}";
+    private string UserScopeKey() => $"user:{_personIdentity.UserId}";
 }

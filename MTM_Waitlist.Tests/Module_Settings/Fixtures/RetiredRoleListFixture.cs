@@ -15,7 +15,8 @@ namespace MTM_Waitlist.Tests.Module_Settings.Fixtures;
 /// <b>Eleven of the twelve become named permissions.</b> The twelfth, <see cref="ShellBadgeRoleVocabulary"/>,
 /// is the badge map. It is re-keyed to role codes and stays presentation, so it must not become a permission.
 /// It is listed here because the audit that proves no gate reads its own role list counts thirteen sites, and
-/// this is the one a hand count of twelve missed alongside <c>StartupState.IsDeveloper</c>.
+/// this is the one a hand count of twelve missed alongside the developer check in the retired launch-state
+/// object.
 /// </para>
 /// <para>
 /// <b>The case is part of the data.</b> Some lists compare display names case-insensitively and store them in

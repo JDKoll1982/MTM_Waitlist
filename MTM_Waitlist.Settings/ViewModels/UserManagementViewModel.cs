@@ -81,7 +81,7 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
     private readonly IPermissionService _permissionService;
     private readonly IConfigSettingsValueService _settingsValueService;
     private readonly INavigationService _navigationService;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
     public UserManagementViewModel(
         IUserManagementService userManagementService,
@@ -89,14 +89,14 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
         IPermissionService permissionService,
         IConfigSettingsValueService settingsValueService,
         INavigationService navigationService,
-        StartupState startupState)
+        IPersonIdentity personIdentity)
     {
         _userManagementService = userManagementService ?? throw new ArgumentNullException(nameof(userManagementService));
         _roleCatalogService = roleCatalogService ?? throw new ArgumentNullException(nameof(roleCatalogService));
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _settingsValueService = settingsValueService ?? throw new ArgumentNullException(nameof(settingsValueService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
+        _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
     }
 
     /// <summary>The work the page's arrival started, so a caller can await it rather than wait and hope.</summary>
@@ -620,11 +620,11 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
                     SettingKey = UserListFilter.SettingKey,
                     ScopeType = "user",
                     ScopeKey = UserScopeKey(),
-                    UserId = _startupState.UserId > 0 ? _startupState.UserId : null,
+                    UserId = _personIdentity.UserId > 0 ? _personIdentity.UserId : null,
                     SettingValue = CurrentFilter().ToStoredValue(),
                     ValueType = "text",
                 },
-                _startupState.UserId > 0 ? _startupState.UserId : null).ConfigureAwait(true);
+                _personIdentity.UserId > 0 ? _personIdentity.UserId : null).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -639,7 +639,7 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
         SearchText ?? string.Empty,
         SelectedRole is { IsAllRoles: false } ? SelectedRole.RoleCode : string.Empty);
 
-    private string UserScopeKey() => $"user:{_startupState.UserId}";
+    private string UserScopeKey() => $"user:{_personIdentity.UserId}";
 
     private void ReplacePeople(IReadOnlyList<Module_Core.Models.UserManagement.UserRosterRow> rows)
     {

@@ -100,7 +100,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     private readonly INewRequestAlertService _newRequestAlertService;
     private readonly IPermissionService _permissionService;
     private readonly INavigationService _navigationService;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
     private readonly IMockServiceRefreshClient _mockServiceRefreshClient;
     private readonly IImageStorageConfigurationResolver? _imageStorageConfigurationResolver;
     private readonly IConfigSettingsValueService? _configSettingsValueService;
@@ -718,7 +718,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         INewRequestAlertService newRequestAlertService,
         IPermissionService permissionService,
         INavigationService navigationService,
-        StartupState startupState,
+        IPersonIdentity personIdentity,
         ComputerManagementViewModel computerManagement,
         UrgencyAllotmentEditorViewModel urgencyAllotments,
         IMockServiceRefreshClient mockServiceRefreshClient,
@@ -735,7 +735,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _newRequestAlertService = newRequestAlertService;
         _permissionService = permissionService;
         _navigationService = navigationService;
-        _startupState = startupState;
+        _personIdentity = personIdentity;
         _mockServiceRefreshClient = mockServiceRefreshClient;
 
         // Optional so that a host without a picture cache still opens this screen: with none registered the
@@ -1727,7 +1727,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 SettingValueInt = integer,
                 ValueType = valueType,
             },
-            _startupState.UserId > 0 ? _startupState.UserId : null).ConfigureAwait(true);
+            _personIdentity.UserId > 0 ? _personIdentity.UserId : null).ConfigureAwait(true);
 
         _imageStorageConfigurationResolver?.InvalidateCache();
     }

@@ -7,6 +7,7 @@ using MTM_Waitlist.Module_Reporting.Services.DependencyInjection;
 using MTM_Waitlist.Module_Setup.Services.DependencyInjection;
 using MTM_Waitlist.Module_Settings.Services.DependencyInjection;
 using MTM_Waitlist.Module_Shared.Services.DependencyInjection;
+using MTM_Waitlist.Module_Startup.Services.DependencyInjection;
 using MTM_Waitlist.Module_Waitlist.Services.DependencyInjection;
 
 namespace MTM_Waitlist.Services.DependencyInjection;
@@ -17,6 +18,7 @@ public static class ModuleDependencyInjectionExtensions
     {
         services.Configure<ModuleCoreSettingsOptions>(configuration.GetSection(nameof(ModuleCoreSettingsOptions)));
         services.AddCoreModuleServices(configuration);
+        services.AddStartupModuleServices(configuration);
         services.AddSharedModuleServices(configuration);
         services.AddSetupModuleServices(configuration);
         services.AddWaitlistViewServices(configuration);

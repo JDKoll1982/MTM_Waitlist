@@ -56,7 +56,6 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<IComputerRegistryService, MTM_Waitlist.Module_Startup.Services.ComputerRegistryService>();
         services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
         services.AddSingleton<IBuildingSelectionService, BuildingSelectionService>();
-        services.AddSingleton<MTM_Waitlist.Module_Core.Models.StartupState>();
         services.AddTransient<INavigationViewService, NavigationViewService>();
         services.AddSingleton<PageService>();
         services.AddSingleton<IPageService>(sp =>
@@ -171,7 +170,7 @@ public static partial class ServiceRegistrationExtensions
             imageLocationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>(),
             requestService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
             inventoryService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistInventoryService>(),
-            startupState: provider.GetRequiredService<MTM_Waitlist.Module_Core.Models.StartupState>(),
+            personIdentity: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPersonIdentity>(),
             dispatcherQueue: DispatcherQueue.GetForCurrentThread(),
             messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>(),
             itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>(),
@@ -207,7 +206,7 @@ public static partial class ServiceRegistrationExtensions
             waitlistRequestService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
             imageLocationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>(),
             dispatcherQueue: DispatcherQueue.GetForCurrentThread(),
-            startupState: provider.GetRequiredService<MTM_Waitlist.Module_Core.Models.StartupState>(),
+            personIdentity: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPersonIdentity>(),
             storeAvailabilityTracker: provider.GetRequiredService<IStoreAvailabilityTracker>(),
             actionPrompt: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt>(),
             urgencyDeadlineService: provider.GetRequiredService<IUrgencyDeadlineService>(),

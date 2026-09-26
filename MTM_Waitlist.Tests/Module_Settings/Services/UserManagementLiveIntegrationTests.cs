@@ -11,6 +11,7 @@ using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Models.UserManagement;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Startup.Services;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Settings.Services;
 
@@ -508,7 +509,7 @@ public sealed class UserManagementLiveIntegrationTests
     private IUserManagementService BuildService(long userId, string signInName, string roleCode) =>
         new UserManagementService(
             new UserManagementRepository(Options.Create(_options!)),
-            new StartupState { UserId = userId, Username = signInName, CurrentRoleCode = roleCode });
+            new FakePersonIdentity { UserId = userId, SignInName = signInName, CurrentRoleCode = roleCode });
 
     /// <summary>One search fact, and the peer found by it. The store is where the matching happens.</summary>
     private async Task AssertFindsThePeerAsync(string searchText, string what)

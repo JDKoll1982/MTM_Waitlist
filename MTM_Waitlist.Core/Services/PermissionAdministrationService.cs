@@ -65,18 +65,18 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
 
     private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;
     private readonly IPermissionService _permissionService;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
     public PermissionAdministrationService(
         IOptions<WaitlistDatabaseOptions> waitlistDatabaseOptions,
         IPermissionService permissionService,
-        StartupState startupState)
+        IPersonIdentity personIdentity)
     {
         ArgumentNullException.ThrowIfNull(waitlistDatabaseOptions);
 
         _waitlistDatabaseOptions = waitlistDatabaseOptions.Value;
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
+        _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
     }
 
     /// <inheritdoc />
@@ -185,7 +185,7 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
                     new Dictionary<string, object?>
                     {
                         ["p_user_id"] = userId,
-                        ["p_actor_user_id"] = _startupState.UserId,
+                        ["p_actor_user_id"] = _personIdentity.UserId,
                         ["p_changes_json"] = payload,
                     },
                     cancellationToken)

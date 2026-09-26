@@ -11,7 +11,6 @@ using Microsoft.UI.Xaml.Media;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.ViewModels;
-using MTM_Waitlist.Module_Core.Models;
 using Windows.System;
 using Windows.UI.Core;
 
@@ -21,19 +20,27 @@ public sealed class ControlInspectorService : IControlInspectorService
 {
     private static readonly ConditionalWeakTable<FrameworkElement, ControlInspectorTrackState> s_trackStates = new();
 
-    private readonly StartupState _startupState;
+    /// <summary>
+    /// The developer role, spelled as the declaration's scope key spells it. The identity contract answers the
+    /// question from the roles the store put the person in, so this is not a role list kept here (FR-054).
+    /// </summary>
+    private const string DeveloperRoleCode = "role:developer";
+
+    private readonly IPersonIdentity _personIdentity;
     private readonly ITooltipService _tooltipService;
     private readonly INavigationService _navigationService;
 
     public ControlInspectorService(
-        StartupState startupState,
+        IPersonIdentity personIdentity,
         ITooltipService tooltipService,
         INavigationService navigationService)
     {
-        _startupState = startupState;
+        _personIdentity = personIdentity;
         _tooltipService = tooltipService;
         _navigationService = navigationService;
     }
+
+    private bool IsDeveloper => _personIdentity.Holds(DeveloperRoleCode);
 
     public FrameworkElement? ActiveElement { get; private set; }
 
@@ -42,7 +49,7 @@ public sealed class ControlInspectorService : IControlInspectorService
     private bool IsPointerHoveringActiveElement { get; set; }
 
     public bool CanOpenActiveDetail =>
-        _startupState.IsDeveloper
+        IsDeveloper
         && IsPointerHoveringActiveElement
         && ActiveElement is not null
         && ActiveDetail is not null;
@@ -53,7 +60,7 @@ public sealed class ControlInspectorService : IControlInspectorService
         IEnumerable<string>? associatedFiles = null,
         string? fallbackText = null)
     {
-        if (element is null || !_startupState.IsDeveloper)
+        if (element is null || !IsDeveloper)
         {
             return;
         }
@@ -83,7 +90,7 @@ public sealed class ControlInspectorService : IControlInspectorService
 
     public void SetActiveElement(FrameworkElement? element)
     {
-        if (!_startupState.IsDeveloper)
+        if (!IsDeveloper)
         {
             ActiveElement = null;
             ActiveDetail = null;
@@ -280,7 +287,7 @@ public sealed class ControlInspectorService : IControlInspectorService
 
     private void OnTrackedPointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
-        if (!_startupState.IsDeveloper || sender is not FrameworkElement element)
+        if (!IsDeveloper || sender is not FrameworkElement element)
         {
             return;
         }
@@ -420,7 +427,7 @@ public sealed class ControlInspectorService : IControlInspectorService
         yield return "MTM_Waitlist.Core/Services/BuildingSelectionService.cs";
         yield return "MTM_Waitlist.Core/Services/NavigationService.cs";
         yield return "Services/PageService.cs";
-        yield return "MTM_Waitlist.Core/Models/StartupState.cs";
+        yield return "MTM_Waitlist.Core/Contracts/Services/IPersonIdentity.cs";
         yield return "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs";
     }
 

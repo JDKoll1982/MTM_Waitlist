@@ -2,12 +2,17 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.ApplicationModel.Resources;
-using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Contracts.Services;
 
 namespace MTM_Waitlist.Module_Shared.Services;
 
 public sealed class TooltipService : ITooltipService
 {
+    /// <summary>
+    /// The developer role, spelled as the declaration's scope key spells it. Asked of the identity contract,
+    /// which answers from the roles the store put the person in, never from a display name (FR-054).
+    /// </summary>
+    private const string DeveloperRoleCode = "role:developer";
     private const string StandardChromeStyleKey = "TooltipStandardChromeStyle";
     private const string StandardContainerStyleKey = "TooltipStandardContainerStyle";
     private const string StandardTextStyleKey = "TooltipStandardTextStyle";
@@ -18,12 +23,14 @@ public sealed class TooltipService : ITooltipService
     private const string DeveloperTitleStyleKey = "TooltipDeveloperTitleStyle";
     private const string DeveloperShortcutStyleKey = "TooltipDeveloperShortcutStyle";
 
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
-    public TooltipService(StartupState startupState)
+    public TooltipService(IPersonIdentity personIdentity)
     {
-        _startupState = startupState;
+        _personIdentity = personIdentity;
     }
+
+    private bool IsDeveloper => _personIdentity.Holds(DeveloperRoleCode);
 
     public TooltipPresentation ResolvePresentation(string? resourceKey, IEnumerable<string>? associatedFiles = null, string? fallbackText = null)
     {
@@ -39,13 +46,13 @@ public sealed class TooltipService : ITooltipService
             return new TooltipPresentation(
                 string.IsNullOrWhiteSpace(fallbackText) ? "More details" : fallbackText!,
                 files,
-                _startupState.IsDeveloper);
+                IsDeveloper);
         }
 
         return new TooltipPresentation(
             GetTooltipText(resourceKey, fallbackText),
             files,
-            _startupState.IsDeveloper);
+            IsDeveloper);
     }
 
     public ToolTip CreateTooltip(string? resourceKey, IEnumerable<string>? associatedFiles = null, string? fallbackText = null)
@@ -69,10 +76,10 @@ public sealed class TooltipService : ITooltipService
 
     private string GetTooltipText(string resourceKey, string? fallbackText)
     {
-        var preferredMap = _startupState.IsDeveloper ? "TooltipResources.developer" : "TooltipResources";
+        var preferredMap = IsDeveloper ? "TooltipResources.developer" : "TooltipResources";
         var localized = TryGetNamedResourceString(preferredMap, resourceKey);
 
-        if (string.IsNullOrWhiteSpace(localized) && _startupState.IsDeveloper)
+        if (string.IsNullOrWhiteSpace(localized) && IsDeveloper)
         {
             // Developer map missing a key: fall back to normal tooltip resources.
             localized = TryGetNamedResourceString("TooltipResources", resourceKey);

@@ -117,6 +117,11 @@ public sealed class RetiredSymbolAuditTests
         ("retired startup registration request model", new Regex(@"\bStartupRegistrationRequest\b", RegexOptions.Compiled)),
         ("retired startup result model", new Regex(@"\bStartupResult\b", RegexOptions.Compiled)),
         ("retired startup session snapshot model", new Regex(@"\bStartupSessionSnapshot\b", RegexOptions.Compiled)),
+        // Narrowed for the same reason and just as narrowly as the sign-in session keys above. The one surviving
+        // mention is a tooltip's AssociatedFiles entry, "Module_Startup/Models/StartupState.cs", which T019
+        // removes with the owner's other XAML work in Module_Core/Views/ShellPage.xaml — a file this task is
+        // forbidden to touch. A reintroduced identifier is not followed by ".cs", so it still fails.
+        ("retired launch-state object", new Regex(@"\bStartupState\b(?!\.cs)", RegexOptions.Compiled)),
         ("retired startup window options", new Regex(@"\bStartupWindowOptions\b", RegexOptions.Compiled)),
         ("retired sign-in window", new Regex(@"\bLoginWindow\b", RegexOptions.Compiled)),
         ("retired sign-in page", new Regex(@"\bLoginPage\b", RegexOptions.Compiled)),
@@ -202,6 +207,7 @@ public sealed class RetiredSymbolAuditTests
         "StartupResult", "StartupSessionSnapshot", "StartupCredentialCheckResult",
         "StartupPasswordResetRequirement", "StartupRegistrationRequest",
         "StartupDevelopmentOptions", "StartupWindowOptions", "StartupDatabaseOptions",
+        "StartupState",
     ];
 
     /// <summary>
@@ -426,6 +432,7 @@ public sealed class RetiredSymbolAuditTests
         ["retired startup registration request model"] = "public sealed class StartupRegistrationRequest",
         ["retired startup result model"] = "public sealed class StartupResult",
         ["retired startup session snapshot model"] = "public sealed class StartupSessionSnapshot",
+        ["retired launch-state object"] = "public sealed class StartupState",
         ["retired startup window options"] = "public sealed class StartupWindowOptions",
         ["retired sign-in window"] = "public sealed partial class LoginWindow : WindowEx",
         ["retired sign-in page"] = "public sealed partial class LoginPage : Page",

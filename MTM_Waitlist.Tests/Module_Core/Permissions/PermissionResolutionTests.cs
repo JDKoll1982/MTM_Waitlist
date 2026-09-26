@@ -4,6 +4,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Tests.Fixtures;
 using MTM_Waitlist.Tests.Module_Settings;
 
 namespace MTM_Waitlist.Tests.Module_Core.Permissions;
@@ -145,7 +146,7 @@ public sealed class PermissionResolutionTests
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(Row(PermissionKeys.AdminUsers, "user", "user:7", value: true));
-        var state = new StartupState { UserId = 7, CurrentRoleCode = "production" };
+        var state = new FakePersonIdentity { UserId = 7, CurrentRoleCode = "production" };
         var service = new PermissionService(helper, state);
 
         Assert.IsTrue(await service.HasPermissionAsync(PermissionKeys.AdminUsers));
@@ -171,7 +172,7 @@ public sealed class PermissionResolutionTests
 
     private static PermissionService CreateService(IMySqlHelperServer helper, long userId = 7)
     {
-        var state = new StartupState { UserId = userId, CurrentRoleCode = "production" };
+        var state = new FakePersonIdentity { UserId = userId, CurrentRoleCode = "production" };
         return new PermissionService(helper, state);
     }
 

@@ -7,6 +7,7 @@ using MTM_Waitlist.Module_Core.Models.UserManagement;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Settings.ViewModels;
 
@@ -216,7 +217,7 @@ public sealed class CreateUserViewModelTests
     private static CreateUserViewModel Build(
         InMemoryUserManagementRepository? repository = null,
         IUserManagementService? service = null,
-        StartupState? state = null,
+        FakePersonIdentity? state = null,
         bool entitled = true,
         string readerRoleCode = "developer")
     {
@@ -230,11 +231,11 @@ public sealed class CreateUserViewModelTests
             reader);
     }
 
-    private static StartupState Reader(string roleCode = "developer") => new()
+    private static FakePersonIdentity Reader(string roleCode = "developer") => new()
     {
         UserId = SignedInUserId,
-        Username = "JSMITH",
-        EmployeeName = "Jane Smith",
+        SignInName = "JSMITH",
+        DisplayName = "Jane Smith",
         CurrentRoleCode = roleCode,
     };
 

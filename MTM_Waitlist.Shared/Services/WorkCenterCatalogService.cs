@@ -30,24 +30,24 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
     private const string ComputerLookupByNameProcedure = "sp_core_computers_registry_lookup_by_name_get";
 
     private readonly MySqlHelperServer _mySqlHelperServer;
-    private readonly StartupState _startupState;
+    private readonly IMachineFacts _machineFacts;
     private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;
 
     public WorkCenterCatalogService(
         MySqlHelperServer mySqlHelperServer,
-        StartupState startupState,
+        IMachineFacts machineFacts,
         IOptions<WaitlistDatabaseOptions> waitlistDatabaseOptions)
     {
         _mySqlHelperServer = mySqlHelperServer;
-        _startupState = startupState;
+        _machineFacts = machineFacts;
         _waitlistDatabaseOptions = waitlistDatabaseOptions?.Value ?? new WaitlistDatabaseOptions();
     }
 
     public string GetCurrentComputerName()
     {
-        if (!string.IsNullOrWhiteSpace(_startupState.HostnameNormalized))
+        if (!string.IsNullOrWhiteSpace(_machineFacts.Hostname))
         {
-            return _startupState.HostnameNormalized;
+            return _machineFacts.Hostname;
         }
 
         return Environment.MachineName;

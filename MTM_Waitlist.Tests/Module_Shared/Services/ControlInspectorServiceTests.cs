@@ -4,7 +4,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Shared.ViewModels;
-using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Shared.Services;
 
@@ -75,7 +75,7 @@ public sealed class ControlInspectorServiceTests
     [TestMethod]
     public void ResolvePresentation_AndDetailModel_CarryAssociatedFiles()
     {
-        var tooltipService = new TooltipService(new StartupState { CurrentRoleCode = "developer" });
+        var tooltipService = new TooltipService(new FakePersonIdentity { CurrentRoleCode = "developer" });
         var presentation = tooltipService.ResolvePresentation(
             "Shell_SelectFacility_Tooltip",
             new[] { "Module_Core/Views/ShellPage.xaml", "ViewModels/ShellViewModel.cs" },
@@ -145,9 +145,9 @@ public sealed class ControlInspectorServiceTests
 
     private static ControlInspectorService CreateService(string role, RecordingNavigationService navigation)
     {
-        var startupState = new StartupState { CurrentRole = role };
-        var tooltipService = new TooltipService(startupState);
-        return new ControlInspectorService(startupState, tooltipService, navigation);
+        var person = new FakePersonIdentity { CurrentRoleCode = role };
+        var tooltipService = new TooltipService(person);
+        return new ControlInspectorService(person, tooltipService, navigation);
     }
 
     private sealed class RecordingNavigationService : INavigationService

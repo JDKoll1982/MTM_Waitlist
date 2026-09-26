@@ -43,20 +43,20 @@ public partial class CreateUserViewModel : ObservableRecipient, INavigationAware
     private readonly IRoleCatalogService _roleCatalogService;
     private readonly IPermissionService _permissionService;
     private readonly INavigationService _navigationService;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
     public CreateUserViewModel(
         IUserManagementService userManagementService,
         IRoleCatalogService roleCatalogService,
         IPermissionService permissionService,
         INavigationService navigationService,
-        StartupState startupState)
+        IPersonIdentity personIdentity)
     {
         _userManagementService = userManagementService ?? throw new ArgumentNullException(nameof(userManagementService));
         _roleCatalogService = roleCatalogService ?? throw new ArgumentNullException(nameof(roleCatalogService));
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
+        _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
     }
 
     /// <summary>The work the page's arrival started, so a caller can await it rather than wait and hope.</summary>
@@ -236,7 +236,7 @@ public partial class CreateUserViewModel : ObservableRecipient, INavigationAware
                 DeriveDisplayName(request.FirstName, request.LastName),
                 request.Username.ToUpperInvariant(),
                 DateTimeOffset.UtcNow,
-                _startupState.EmployeeName);
+                _personIdentity.DisplayName);
         }
         catch (Exception ex)
         {
@@ -289,7 +289,7 @@ public partial class CreateUserViewModel : ObservableRecipient, INavigationAware
         RoleOptions.Clear();
 
         var readerRole = catalogue.FirstOrDefault(
-            entry => string.Equals(entry.RoleCode, _startupState.CurrentRoleCode, StringComparison.OrdinalIgnoreCase));
+            entry => string.Equals(entry.RoleCode, _personIdentity.CurrentRoleCode, StringComparison.OrdinalIgnoreCase));
 
         if (readerRole is null)
         {

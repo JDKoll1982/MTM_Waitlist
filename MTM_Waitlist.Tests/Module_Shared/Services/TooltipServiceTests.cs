@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Shared.Services;
-using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Shared.Services;
 
@@ -58,11 +58,11 @@ public sealed class TooltipServiceTests
 
     private static TooltipService CreateService(string roleCode)
     {
-        var startupState = new StartupState
+        var person = new FakePersonIdentity
         {
             CurrentRoleCode = roleCode,
         };
 
-        return new TooltipService(startupState);
+        return new TooltipService(person);
     }
 }

@@ -14,6 +14,7 @@ using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Mock.Models;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Settings;
 
@@ -685,8 +686,8 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         IConfigSettingsValueService? configSettingsValueService = null,
         IImageCacheSyncService? imageCacheSyncService = null)
     {
-        var startupState = new StartupState();
-        var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), startupState);
+        var person = new FakePersonIdentity();
+        var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), new FakeMachineFacts());
         var urgencyAllotments = new UrgencyAllotmentEditorViewModel(
             new UrgencySettingsService(new FakeRequestItemAllottedMinutesStore()),
             new FakeRequestItemObservedTimeService());
@@ -698,7 +699,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             new NewRequestAlertService(settings),
             PermissionStub.Holding(heldPermissionKeys),
             new RecordingNavigationService(),
-            startupState,
+            person,
             computerManagement,
             urgencyAllotments,
             refreshClient ?? new FakeMockServiceRefreshClient(),

@@ -28,7 +28,7 @@ public partial class ShellViewModel : ObservableRecipient
     private readonly IWaitlistSortPreferenceService _sortPreferenceService;
     private readonly ISignOutService _signOutService;
     private readonly SetupWorkflowState _setupWorkflowState;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
     private Type? _currentPageType;
     private bool _isWaitlistPageActive;
 
@@ -297,7 +297,7 @@ public partial class ShellViewModel : ObservableRecipient
         INavigationViewService navigationViewService,
         IBuildingSelectionService buildingSelectionService,
         SetupWorkflowState setupWorkflowState,
-        StartupState startupState,
+        IPersonIdentity personIdentity,
         IWaitlistSortPreferenceService sortPreferenceService,
         ISignOutService signOutService)
     {
@@ -305,7 +305,7 @@ public partial class ShellViewModel : ObservableRecipient
         ArgumentNullException.ThrowIfNull(navigationViewService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
         ArgumentNullException.ThrowIfNull(setupWorkflowState);
-        ArgumentNullException.ThrowIfNull(startupState);
+        ArgumentNullException.ThrowIfNull(personIdentity);
         ArgumentNullException.ThrowIfNull(sortPreferenceService);
         ArgumentNullException.ThrowIfNull(signOutService);
 
@@ -317,7 +317,7 @@ public partial class ShellViewModel : ObservableRecipient
         _signOutService = signOutService;
         _setupWorkflowState = setupWorkflowState;
         _setupWorkflowState.PropertyChanged += OnSetupWorkflowStateChanged;
-        _startupState = startupState;
+        _personIdentity = personIdentity;
         SelectedBuilding = _buildingSelectionService.SelectedBuilding;
         RefreshBuildingCards();
         HeaderText = "MTM Waitlist";
@@ -343,11 +343,11 @@ public partial class ShellViewModel : ObservableRecipient
 
     public void RefreshUserInfo()
     {
-        CurrentUserDisplayName = string.IsNullOrWhiteSpace(_startupState.Username)
+        CurrentUserDisplayName = string.IsNullOrWhiteSpace(_personIdentity.SignInName)
             ? "Not signed in"
-            : _startupState.Username;
-        CurrentUserRole = _startupState.CurrentRole;
-        var userPresentation = GetUserPresentation(_startupState.CurrentRole);
+            : _personIdentity.SignInName;
+        CurrentUserRole = _personIdentity.CurrentRoleCode;
+        var userPresentation = GetUserPresentation(_personIdentity.CurrentRoleCode);
         CurrentUserIconGlyph = userPresentation.Glyph;
         CurrentUserBadgeBrush = CreateUserBadgeBrush(userPresentation.ColorHex);
     }

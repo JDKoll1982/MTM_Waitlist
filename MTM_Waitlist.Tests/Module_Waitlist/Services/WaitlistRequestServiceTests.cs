@@ -6,6 +6,7 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
+using MTM_Waitlist.Tests.Fixtures;
 using MTM_Waitlist.Tests.Module_Settings;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
@@ -1287,8 +1288,8 @@ public sealed class WaitlistRequestServiceTests
     {
         var buildingSelectionService = new StubBuildingSelectionService("Expo Drive");
         var requestService = new WaitlistRequestService();
-        var startupState = new MTM_Waitlist.Module_Core.Models.StartupState { EmployeeNumber = "6229" };
-        var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), buildingSelectionService, requestService, startupState: startupState);
+        var person = new FakePersonIdentity { EmployeeNumber = "6229" };
+        var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), buildingSelectionService, requestService, personIdentity: person);
 
         viewModel.OnNavigatedTo(null!);
         await viewModel.RefreshAsync();

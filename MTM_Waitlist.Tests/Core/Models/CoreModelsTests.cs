@@ -8,46 +8,6 @@ namespace MTM_Waitlist.Tests.Core.Models;
 public sealed class CoreModelsTests
 {
     [TestMethod]
-    public void StartupState_Defaults()
-    {
-        var state = new StartupState();
-
-        Assert.IsTrue(state.IsBusy);
-        Assert.AreEqual("Preparing startup checks...", state.StatusText);
-        Assert.AreEqual(string.Empty, state.Username);
-        Assert.AreEqual(string.Empty, state.CurrentRole);
-        Assert.AreEqual(string.Empty, state.CurrentRoleCode);
-        Assert.AreEqual(0, state.UserId);
-        Assert.AreEqual(StartupState.SessionTokenSourceNone, state.SessionTokenSource);
-        Assert.IsFalse(state.IsDeveloper);
-        Assert.IsFalse(state.IsUserMatched);
-        Assert.IsFalse(state.IsComputerRegistered);
-    }
-
-    [TestMethod]
-    public void StartupState_IsDeveloper_ReadsTheRoleCodeAndNotTheDisplayName()
-    {
-        // The code is the role's identity, so the check has to answer from it. The display name is presentation
-        // that a catalogue edit may change, and a hand-written role-name list is the defect this feature removes.
-        Assert.IsTrue(new StartupState { CurrentRoleCode = "developer" }.IsDeveloper);
-        Assert.IsTrue(new StartupState { CurrentRoleCode = "DEVELOPER" }.IsDeveloper);
-        Assert.IsFalse(new StartupState { CurrentRoleCode = "plant_manager" }.IsDeveloper);
-
-        // A display name that says Developer decides nothing.
-        Assert.IsFalse(new StartupState { CurrentRole = "Developer" }.IsDeveloper);
-        Assert.IsFalse(new StartupState { CurrentRole = "developer" }.IsDeveloper);
-        Assert.IsFalse(new StartupState { CurrentRole = "Developer", CurrentRoleCode = "setup" }.IsDeveloper);
-    }
-
-    [TestMethod]
-    public void StartupState_SessionTokenSources_AreStable()
-    {
-        Assert.AreEqual("None", StartupState.SessionTokenSourceNone);
-        Assert.AreEqual("Local", StartupState.SessionTokenSourceLocal);
-        Assert.AreEqual("Database", StartupState.SessionTokenSourceDatabase);
-    }
-
-    [TestMethod]
     public void ComputerRecord_Defaults()
     {
         var record = new ComputerRecord();

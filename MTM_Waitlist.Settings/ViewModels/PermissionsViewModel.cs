@@ -51,7 +51,7 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
     private readonly IUserManagementService _userManagementService;
     private readonly IRoleCatalogService _roleCatalogService;
     private readonly INavigationService _navigationService;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
     /// <summary>The person whose last save can be undone, or zero when there is nothing to undo.</summary>
     private long _undoUserId;
@@ -62,14 +62,14 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
         IUserManagementService userManagementService,
         IRoleCatalogService roleCatalogService,
         INavigationService navigationService,
-        StartupState startupState)
+        IPersonIdentity personIdentity)
     {
         _permissionAdministrationService = permissionAdministrationService ?? throw new ArgumentNullException(nameof(permissionAdministrationService));
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _userManagementService = userManagementService ?? throw new ArgumentNullException(nameof(userManagementService));
         _roleCatalogService = roleCatalogService ?? throw new ArgumentNullException(nameof(roleCatalogService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
+        _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
     }
 
     /// <summary>The work the page's arrival started.</summary>
@@ -525,7 +525,7 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
         }
 
         var readerRole = catalogue.FirstOrDefault(
-            entry => string.Equals(entry.RoleCode, _startupState.CurrentRoleCode, StringComparison.OrdinalIgnoreCase));
+            entry => string.Equals(entry.RoleCode, _personIdentity.CurrentRoleCode, StringComparison.OrdinalIgnoreCase));
 
         Replace(people, readings, catalogue, readerRole);
     }

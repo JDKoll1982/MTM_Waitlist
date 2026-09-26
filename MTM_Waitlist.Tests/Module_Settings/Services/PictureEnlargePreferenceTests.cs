@@ -1,9 +1,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
-using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Settings.Services;
 
@@ -91,7 +91,7 @@ public sealed class PictureEnlargePreferenceTests
     {
         var stored = new FakeConfigSettingsValueService();
         stored.SetBool(ConfigSettingKeys.EnlargePicturesOnClick, false);
-        var state = new StartupState();
+        var state = new FakePersonIdentity();
         var preference = new PictureEnlargePreference(stored, state);
 
         await preference.LoadAsync();
@@ -106,7 +106,7 @@ public sealed class PictureEnlargePreferenceTests
     }
 
     private static PictureEnlargePreference Build(IConfigSettingsValueService stored, long userId) =>
-        new(stored, new StartupState { UserId = userId, Username = "JSMITH" });
+        new(stored, new FakePersonIdentity { UserId = userId, SignInName = "JSMITH" });
 
     /// <summary>A store that refuses everything, which is what an unreachable database answers with.</summary>
     private sealed class UnreachableSettingsValueService : IConfigSettingsValueService

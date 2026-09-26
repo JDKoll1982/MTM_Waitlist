@@ -30,10 +30,11 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
     private readonly IBuildingSelectionService _buildingSelectionService;
 
     /// <summary>
-    /// The signed-in person's own identity, carried from startup. The step attributes the request to them and to
-    /// nobody else: a literal here is what attributed every request in the store to one man (FR-046).
+    /// The signed-in person's own identity, read from the launch pipeline's resolved person. The step attributes
+    /// the request to them and to nobody else: a literal here is what attributed every request in the store to
+    /// one man (FR-046).
     /// </summary>
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
     /// <summary>
     /// The account records, read by the identifier the session carries. The directory is the authority on whether
@@ -155,14 +156,14 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         IWorkCenterCatalogService workCenterCatalogService,
         INewRequestFlowService flowService,
         IBuildingSelectionService buildingSelectionService,
-        StartupState startupState,
+        IPersonIdentity personIdentity,
         IEmployeeDirectoryService employeeDirectoryService)
     {
         _navigationService = navigationService;
         _workCenterCatalogService = workCenterCatalogService;
         _flowService = flowService;
         _buildingSelectionService = buildingSelectionService;
-        _startupState = startupState;
+        _personIdentity = personIdentity;
         _employeeDirectoryService = employeeDirectoryService;
     }
 
@@ -354,11 +355,12 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         try
         {
             // No ConfigureAwait(false): the continuation sets bindable state, which is UI-thread-only.
+            var employeeNumber = _personIdentity.EmployeeNumber ?? string.Empty;
             var storedEmployee = await _employeeDirectoryService
-                .FindByEmployeeIdentifierAsync(_startupState.EmployeeNumber)
+                .FindByEmployeeIdentifierAsync(employeeNumber)
                 .ConfigureAwait(true);
 
-            verification = NewRequestFlowRules.VerifyEmployeeIdentity(_startupState.EmployeeNumber, storedEmployee);
+            verification = NewRequestFlowRules.VerifyEmployeeIdentity(employeeNumber, storedEmployee);
         }
         catch (Exception ex)
         {

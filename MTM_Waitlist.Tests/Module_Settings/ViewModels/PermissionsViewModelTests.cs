@@ -7,6 +7,7 @@ using MTM_Waitlist.Module_Core.Models.UserManagement;
 using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Settings.ViewModels;
 
@@ -735,11 +736,11 @@ public sealed class PermissionsViewModelTests
         bool entitled = true,
         string readerRoleCode = "developer")
     {
-        var state = new StartupState
+        var state = new FakePersonIdentity
         {
             UserId = SignedInUserId,
-            Username = "JSMITH",
-            EmployeeName = "Jane Smith",
+            SignInName = "JSMITH",
+            DisplayName = "Jane Smith",
             CurrentRoleCode = readerRoleCode,
         };
 

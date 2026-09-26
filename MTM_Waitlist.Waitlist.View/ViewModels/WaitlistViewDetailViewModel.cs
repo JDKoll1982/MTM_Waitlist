@@ -180,7 +180,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         IImageLocationService? imageLocationService = null,
         IWaitlistRequestService? requestService = null,
         IWaitlistInventoryService? inventoryService = null,
-        StartupState? startupState = null,
+        IPersonIdentity? personIdentity = null,
         DispatcherQueue? dispatcherQueue = null,
         IWaitlistMessageSeenStore? messageSeenStore = null,
         IRequestItemConfigurationService? itemConfigurationService = null,
@@ -198,8 +198,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         _itemConfigurationService = itemConfigurationService;
         _jobAvailabilityProvider = jobAvailabilityProvider;
         _partPictureResolver = partPictureResolver;
-        _currentEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
-        _currentEmployeeName = startupState?.EmployeeName?.Trim() ?? string.Empty;
+        _currentEmployeeNumber = personIdentity?.EmployeeNumber?.Trim() ?? string.Empty;
+        _currentEmployeeName = personIdentity?.DisplayName?.Trim() ?? string.Empty;
         _dispatcherQueue = dispatcherQueue;
         _messageSeenStore = messageSeenStore;
         SortInventoryCommand = new RelayCommand<string>(SortInventoryBy);

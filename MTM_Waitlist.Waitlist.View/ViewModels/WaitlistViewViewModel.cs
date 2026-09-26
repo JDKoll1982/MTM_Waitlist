@@ -118,7 +118,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService waitlistRequestService,
         IImageLocationService? imageLocationService = null,
         DispatcherQueue? dispatcherQueue = null,
-        StartupState? startupState = null,
+        IPersonIdentity? personIdentity = null,
         IStoreAvailabilityTracker? storeAvailabilityTracker = null,
         MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt? actionPrompt = null,
         IUrgencyDeadlineService? urgencyDeadlineService = null,
@@ -137,8 +137,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _waitlistRequestService = waitlistRequestService;
         _imageLocationService = imageLocationService;
         _dispatcherQueue = dispatcherQueue;
-        _currentRequesterEmployeeNumber = startupState?.EmployeeNumber?.Trim() ?? string.Empty;
-        _currentEmployeeName = startupState?.EmployeeName?.Trim() ?? string.Empty;
+        _currentRequesterEmployeeNumber = personIdentity?.EmployeeNumber?.Trim() ?? string.Empty;
+        _currentEmployeeName = personIdentity?.DisplayName?.Trim() ?? string.Empty;
         _permissionService = permissionService;
         _actionPrompt = actionPrompt;
         _urgencyDeadlineService = urgencyDeadlineService;

@@ -25,17 +25,17 @@ namespace MTM_Waitlist.Module_Core.Services;
 public sealed class PermissionService : IPermissionService
 {
     private readonly IMySqlHelperServer _mySqlHelperServer;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
     private readonly SemaphoreSlim _readGate = new(1, 1);
 
     private Dictionary<string, bool>? _storedAnswers;
     private long _cachedUserId = long.MinValue;
     private string _cachedRoleCode = string.Empty;
 
-    public PermissionService(IMySqlHelperServer mySqlHelperServer, StartupState startupState)
+    public PermissionService(IMySqlHelperServer mySqlHelperServer, IPersonIdentity personIdentity)
     {
         _mySqlHelperServer = mySqlHelperServer ?? throw new ArgumentNullException(nameof(mySqlHelperServer));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
+        _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
     }
 
     /// <inheritdoc />
@@ -87,8 +87,8 @@ public sealed class PermissionService : IPermissionService
     /// </summary>
     private async Task<Dictionary<string, bool>> ReadStoredAnswersAsync(CancellationToken cancellationToken)
     {
-        var userId = _startupState.UserId;
-        var roleCode = _startupState.CurrentRoleCode?.Trim() ?? string.Empty;
+        var userId = _personIdentity.UserId;
+        var roleCode = _personIdentity.CurrentRoleCode?.Trim() ?? string.Empty;
 
         await _readGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
