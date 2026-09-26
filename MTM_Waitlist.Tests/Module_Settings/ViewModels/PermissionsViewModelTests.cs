@@ -60,7 +60,11 @@ public sealed class PermissionsViewModelTests
             "Every declared permission appears in its area's card, and none appears twice (FR-047).");
 
         var settings = viewModel.Cards.Single(card => card.Columns.Any(column => column.Key == PermissionKeys.SettingsHotWorkCenters));
-        Assert.AreEqual(8, settings.Columns.Count, "The largest card carries eight permissions.");
+
+        // Twelve rather than eight since 010-startup-rebuild (T052) added its four keys to the Settings area:
+        // machine configuration, the ignored-locations edit key, the log panel and the session length. Settings is
+        // still the largest card, which is the shape this assertion exists to notice.
+        Assert.AreEqual(12, settings.Columns.Count, "The largest card carries twelve permissions.");
     }
 
     [TestMethod]

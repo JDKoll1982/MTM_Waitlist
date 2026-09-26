@@ -29,6 +29,12 @@
 --     * `permission.admin.permissions` ships to IT Department, Plant Manager and Developer only, and is fixed
 --       rather than editable (decision 9).
 --
+--   Four keys were added later by 010-startup-rebuild (T053) for the privileged surfaces the rebuilt launch
+--   introduces, and they are stated too, because no retired list could describe a key that did not exist when the
+--   lists were written: `permission.settings.machine_configuration`, `permission.settings.ignored_locations_edit`
+--   and `permission.settings.session_length` ship to IT Department and Developer, and
+--   `permission.settings.log_panel` to Developer alone. Their nine rows each are at the end of this file.
+--
 --   `material_handler_lead` appears in none of the retired lists, so its whole row is stated: the worker level,
 --   plus handling requests and the service cache refresh, and nothing else. It is deliberately NOT granted the
 --   ignored-locations feature although a plain worker in a production role is. Nobody holds the role on ship
@@ -237,6 +243,133 @@ VALUES
     (UUID(), 'permission.settings.storage_paths', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
     (UUID(), 'permission.settings.storage_paths', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
     (UUID(), 'permission.settings.storage_paths', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+-- ---------------------------------------------------------------------------
+-- 010-startup-rebuild (task T053) — the four keys the new privileged surfaces read
+--
+--   Four surfaces the rebuilt launch adds had no key of their own, so each gets one here, role-explicitly: every
+--   one of the nine catalogue roles carries a row for every one of the four keys, which is what makes a role
+--   without a key a decision recorded in this file rather than an absence a reader has to infer.
+--
+--     permission.settings.machine_configuration   IT Department and Developer 1, every other role 0   (FR-007)
+--     permission.settings.ignored_locations_edit  IT Department and Developer 1, every other role 0   (FR-024)
+--     permission.settings.session_length          IT Department and Developer 1, every other role 0   (FR-029)
+--     permission.settings.log_panel               Developer 1 alone, every other role 0                (US5, SC-005)
+--
+--   `permission.settings.ignored_locations` is deliberately NOT among them and its nine rows above are unchanged.
+--   Reading the plant-wide list stays with the roles that already held it, which is what keeps FR-030 true; the
+--   new `_edit` key carries FR-024's two-role requirement for writing it instead (research D10). `machine_
+--   configuration` is likewise not a reuse of `permission.settings.computers`, although the two have the same
+--   role set: machine setup admits a computer to the fleet before anyone signs in, so the two blast radii are not
+--   the same and a later loosening of one must not open the other (research D11).
+--
+--   Written as its own statements rather than woven into the nine role blocks above, for the same reason
+--   `permission.settings.storage_paths` is: what each role inherited from the retired lists stays unedited and
+--   this addition is reviewable on its own.
+-- ---------------------------------------------------------------------------
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:it_department', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:plant_manager', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:production_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:setup_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:material_handler_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:it_department', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:plant_manager', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:production_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:setup_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:material_handler_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:it_department', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:plant_manager', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:production_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:setup_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:material_handler_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.session_length', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:it_department', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:plant_manager', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:production_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:setup_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:material_handler_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
 ON DUPLICATE KEY UPDATE
     setting_value_bool = VALUES(setting_value_bool),
     value_type = VALUES(value_type),

@@ -287,6 +287,39 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- Create table: ops_startup_logs
 -- Engine: MySQL 5.7
+-- Feature: the log store is the existing one; 010-startup-rebuild (task T047) widened it, and this file is that
+--          widened shape rather than a second table.
+--
+-- This is the one log store. The launch pipeline, the shell, Settings and the module libraries all write to it
+-- through `sp_ops_startup_logs_insert`, which is its only writer, and read it through the filter and group
+-- procedures. Nothing on the machine records a substitute entry when the store refuses a write (FR-025).
+--
+-- ============================================================
+-- 010-startup-rebuild (task T047, plan D19): four columns and six indexes
+-- ============================================================
+-- Four columns were added for the developer panel, and each answers a question the previous shape could not:
+--
+--   * `module` names the part of the application an entry came from, so the panel can filter to one module
+--     instead of reading every entry. It is also where an `ILogger` category name lands.
+--   * `error_type` names the fault's type, which is what a reader searches by when they know what broke.
+--   * `exception_detail` holds the serialized exception chain as a JSON array, one node per exception,
+--     outermost first (contracts/logging-contract.md section 1.1). It is one column and not a child table on
+--     purpose: the entry's hash covers one row, and splitting the chain would break the chain the store keeps.
+--   * `error_fingerprint` is the SHA-256 of the fault's shape, so the same fault hashes the same on any machine
+--     (FR-033, SC-014). It is what makes grouping possible, and it is NULL for an entry raised without an
+--     exception.
+--
+-- All four are NULLable. A store that already holds entries has none of these values for them, and an entry
+-- that is merely informational has no fault to describe.
+--
+-- Six indexes were added, one per filter the panel offers, each keyed on its own column followed by
+-- `created_utc`. The order is the one every panel query uses: equality on the filter column, then a range over
+-- the window, newest first. `created_utc` is second rather than first because the panel always filters before
+-- it orders, and a leading `created_utc` would make each index a second copy of the existing one.
+--
+-- The chain columns are untouched and the table stays append-only: nothing updates or removes an entry except
+-- `sp_ops_startup_logs_purge`, which removes only the oldest entries and only within the retention the operator
+-- set.
 
 USE mtm_waitlist;
 
@@ -306,6 +339,10 @@ CREATE TABLE IF NOT EXISTS ops_startup_logs (
     actor_id VARCHAR(128) NULL,
     host_id VARCHAR(128) NULL,
     mac_address VARCHAR(64) NULL,
+    module VARCHAR(64) NULL COMMENT 'The part of the application the entry came from; an ILogger category name lands here',
+    error_type VARCHAR(128) NULL COMMENT 'The fault type, when there was a fault',
+    exception_detail MEDIUMTEXT NULL COMMENT 'The serialized exception chain, one JSON node per exception, outermost first',
+    error_fingerprint CHAR(64) NULL COMMENT 'SHA-256 of the fault shape, so the same fault groups together across machines; NULL without an exception',
     message TEXT NOT NULL,
     payload_json MEDIUMTEXT NULL,
     previous_hash CHAR(64) NULL,
@@ -313,7 +350,13 @@ CREATE TABLE IF NOT EXISTS ops_startup_logs (
     PRIMARY KEY (id),
     UNIQUE KEY uq_ops_startup_logs_public_id (public_id),
     KEY idx_ops_startup_logs_created_utc (created_utc),
-    KEY idx_ops_startup_logs_correlation_id (correlation_id)
+    KEY idx_ops_startup_logs_correlation_id (correlation_id),
+    KEY idx_ops_startup_logs_level_created_utc (level, created_utc) COMMENT 'Panel filter: severity',
+    KEY idx_ops_startup_logs_host_id_created_utc (host_id, created_utc) COMMENT 'Panel filter: machine',
+    KEY idx_ops_startup_logs_module_created_utc (module, created_utc) COMMENT 'Panel filter: module',
+    KEY idx_ops_startup_logs_actor_id_created_utc (actor_id, created_utc) COMMENT 'Panel filter: person',
+    KEY idx_ops_startup_logs_error_type_created_utc (error_type, created_utc) COMMENT 'Panel filter: fault type',
+    KEY idx_ops_startup_logs_error_fingerprint_created_utc (error_fingerprint, created_utc) COMMENT 'Panel grouping and filter: fault fingerprint'
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -521,6 +564,42 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- and changes nothing else. No column is added, dropped or retyped, and `uq_config_images_locations_scope_item`
 -- is untouched: for a part scope that key is the system and the part number together, which is exactly one
 -- picture per part per system.
+--
+-- Feature 010-startup-rebuild (task T051) adds the sixth scope, `computer`, and the machine column that goes
+-- with it. This is where a machine's picture sources are stored — the shared picture folder, the keys folder and
+-- the dunnage root — because those are machine configuration, not columns on `core_computers_registry`.
+--
+-- ============================================================
+-- 010-startup-rebuild (task T051): the machine scope
+-- ============================================================
+-- The five picture scopes answer "which picture does this item, category, work centre or part have". The sixth
+-- answers a different question: "where does this machine read its pictures from". Each machine holds three rows,
+-- one per source kind, and the source kind is what makes them three rows rather than one.
+--
+-- At `computer` scope, `scope_item_id` is `<computer_id>:<source_kind>` — for example `4:shared_folder` — with
+-- these three kinds:
+--
+--   shared_folder  the root every stored picture sits under
+--   keys_folder    the folder holding the shared key material
+--   dunnage_root   the root the dunnage pictures sit under
+--
+-- A composite item id is not decoration. `uq_config_images_locations_scope_item` is what stops one scope holding
+-- two pictures for the same item, and a machine's three folders have to repeat a scope without repeating an item.
+-- The obvious alternative — adding the machine column to that unique key — does not work in MySQL, and the
+-- failure is silent rather than loud: a UNIQUE key treats NULLs as distinct, so a nullable machine column would
+-- let every one of the five item-like scopes hold unlimited duplicate rows from the moment it was added, quietly
+-- losing the guarantee the table exists to provide. Putting the machine into the item id instead keeps the key,
+-- and with it the guarantee, exactly as it was.
+--
+-- `computer_id` carries the same machine as a foreign key, so the row is joinable and a machine's rows cannot
+-- outlive the machine: the key deletes with it, which is why a decommissioned computer leaves no picture-source
+-- rows behind. The two representations agree because there is one writer,
+-- `sp_config_images_locations_computer_sources_set`; that procedure composes both from one parameter, and no
+-- other procedure writes a `computer` scope row.
+--
+-- The three folder values are machine configuration and are read by that machine's launch, not by everyone's:
+-- `sp_config_images_locations_computer_sources_get` reads one machine's three rows, which is the only reader
+-- that does not have to care that other machines share the `computer` scope.
 
 USE mtm_waitlist;
 
@@ -531,8 +610,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 CREATE TABLE IF NOT EXISTS config_images_locations (
     id BIGINT NOT NULL AUTO_INCREMENT,
     public_id CHAR(36) NOT NULL,
-    scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_item, request_category, work_center, visual_part, wip_part',
-    scope_item_id VARCHAR(190) NOT NULL COMMENT 'Identifier within scope: Item code, Category code, or numeric work center id',
+    scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_item, request_category, work_center, visual_part, wip_part, computer',
+    scope_item_id VARCHAR(190) NOT NULL COMMENT 'Identifier within scope: Item code, Category code, numeric work center id, or <computer_id>:<source_kind> at computer scope',
+    computer_id BIGINT NULL COMMENT 'At computer scope, the machine the row belongs to; NULL for the five picture scopes',
     image_path VARCHAR(500) NOT NULL COMMENT 'File system path to the copied image',
     is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Soft-delete flag; inactive rows are ignored during resolution',
     created_by_user_id BIGINT NULL COMMENT 'User who created this override',
@@ -543,11 +623,13 @@ CREATE TABLE IF NOT EXISTS config_images_locations (
     UNIQUE KEY uq_config_images_locations_public_id (public_id),
     UNIQUE KEY uq_config_images_locations_scope_item (scope, scope_item_id) COMMENT 'Ensure only one active override per scope/item pair',
     KEY idx_config_images_locations_scope_active (scope, is_active) COMMENT 'Composite index for scope queries with active filter',
+    KEY idx_config_images_locations_computer_id (computer_id) COMMENT 'Read the six rows of one machine without scanning the scope',
     KEY idx_config_images_locations_created_by_user_id (created_by_user_id),
     KEY idx_config_images_locations_updated_by_user_id (updated_by_user_id),
+    CONSTRAINT fk_config_images_locations_core_computers_registry_computer_id FOREIGN KEY (computer_id) REFERENCES core_computers_registry (id) ON DELETE CASCADE,
     CONSTRAINT fk_config_images_locations_created_by_user_id FOREIGN KEY (created_by_user_id) REFERENCES core_users_profiles (id) ON DELETE SET NULL,
     CONSTRAINT fk_config_images_locations_updated_by_user_id FOREIGN KEY (updated_by_user_id) REFERENCES core_users_profiles (id) ON DELETE SET NULL
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'Image location overrides for request types, work centers, and request subtypes. Supports cascade resolution with JSON defaults and fallback assets.';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'Image location overrides for request types, work centers, request subtypes, parts and machines. Supports cascade resolution with JSON defaults and fallback assets.';
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -803,5 +885,111 @@ CREATE TABLE IF NOT EXISTS config_images_locations_history (
     CONSTRAINT fk_config_images_locations_history_image_location_id FOREIGN KEY (image_location_id) REFERENCES config_images_locations (id) ON DELETE SET NULL,
     CONSTRAINT fk_config_images_locations_history_changed_by_user_id FOREIGN KEY (changed_by_user_id) REFERENCES core_users_profiles (id) ON DELETE SET NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'Who set or replaced a stored picture, when, and what the previous picture was.';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Create table: user_active_sessions
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T044)
+-- Purpose: the one active session for a person on a machine (FR-010, FR-011).
+--
+-- One row per person per machine, enforced by `uq_user_active_sessions_user_computer` rather than by the
+-- procedures, so a second sign-in on the same machine replaces this row instead of adding a second one. The
+-- row is reused across sign-outs: signing out sets `revoked_utc` and `is_active = 0` in place, and the next
+-- sign-in repoints the same row at a freshly issued token. Nothing here is ever inserted twice for one person
+-- and one machine, which is why the key can be the pair and not the pair plus a status.
+--
+-- The token is held as a salted hash and never in plaintext (ruleset, "Session and Security"): `token_hash`
+-- is the SHA-256 hex digest the caller computed and `token_salt` is the salt it used. A reader of this table
+-- can replay nothing and can reverse nothing; the store only ever compares digests.
+--
+-- Validity is decided by the store's own clock, never the workstation's: the reader compares
+-- `fn_server_utc_now()` against `expires_utc`, and this table stores no "now" of its own. `fn_server_utc_now`
+-- is deliberately retained for exactly this reason (contracts/sql-contracts.md section 5).
+--
+-- `source_label` records where the session came from in the caller's vocabulary (for example `sign_in`,
+-- `remembered_sign_in`), which is what lets the support reader tell a remembered session from a typed one
+-- without storing anything about the credential.
+--
+-- No row is ever hard-deleted by the application: a signed-out or expired row is the evidence that the session
+-- existed, and the retention of that evidence is not this table's decision to make.
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS user_active_sessions (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    public_id CHAR(36) NOT NULL,
+    user_id BIGINT NOT NULL,
+    computer_id BIGINT NOT NULL,
+    token_hash CHAR(64) NOT NULL COMMENT 'SHA-256 hex digest of the issued token; never the token itself',
+    token_salt VARBINARY(32) NOT NULL COMMENT 'Salt the digest was computed with; present whenever a digest is',
+    issued_utc DATETIME NOT NULL COMMENT 'When the token was issued, from the store clock',
+    expires_utc DATETIME NOT NULL COMMENT 'When the token stops being valid, from the store clock',
+    revoked_utc DATETIME NULL COMMENT 'When the session was cleared; NULL while it has not been',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Soft state: 0 once cleared, so the row survives as evidence',
+    source_label VARCHAR(32) NOT NULL COMMENT 'Caller vocabulary for where the session came from',
+    created_utc DATETIME NOT NULL COMMENT 'When this row was first written; unchanged by a later sign-in',
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_active_sessions_public_id (public_id),
+    UNIQUE KEY uq_user_active_sessions_user_computer (user_id, computer_id) COMMENT 'One active row per person per machine',
+    KEY idx_user_active_sessions_is_active_expires_utc (is_active, expires_utc) COMMENT 'Live-session reads filter on this pair',
+    KEY idx_user_active_sessions_computer_id (computer_id),
+    CONSTRAINT fk_user_active_sessions_core_users_profiles_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id),
+    CONSTRAINT fk_user_active_sessions_core_computers_registry_computer_id FOREIGN KEY (computer_id) REFERENCES core_computers_registry (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'The one active session for a person on a machine: a salted token digest, its lifetime and its machine key.';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Create table: auth_remembered_sign_ins
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T046, plan D12)
+-- Purpose: the encrypted payload that lets a machine offer "remember me" without keeping a credential in
+--          plaintext anywhere (FR-014).
+--
+-- The payload is written and read only by the application, which encrypts it before it arrives and decrypts it
+-- after it leaves. This table therefore stores three things and understands none of them: `payload_ciphertext`,
+-- the `payload_iv` it was encrypted with, and `key_fingerprint`, which names which key was used.
+--
+-- `key_fingerprint` is the reason a rotated key degrades instead of failing (FR-014). A fingerprint that no
+-- longer matches the key in hand means the payload cannot be decrypted, and the sign-in form is shown rather
+-- than an error being raised. Without the fingerprint the application would have to try to decrypt and treat
+-- the failure as a fault, which is exactly the behaviour the requirement forbids.
+--
+-- One row per person per machine, enforced by `uq_auth_remembered_sign_ins_user_computer`, so a re-remember
+-- replaces the payload in place. Clearing sets `is_active = 0` and blanks the payload rather than deleting the
+-- row: a cleared row keeps its provenance and loses the only thing that could be decrypted. A read never
+-- returns an inactive row, so a cleared payload cannot be decrypted by mistake.
+--
+-- `payload_iv` is never absent. A ciphertext without its initialisation vector cannot be decrypted at all, so a
+-- row like that could only ever be a bug; the column is NOT NULL so the store refuses to hold one, and the
+-- validation script asserts the same shape (contracts/sql-contracts.md section 2).
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS auth_remembered_sign_ins (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    public_id CHAR(36) NOT NULL,
+    user_id BIGINT NOT NULL,
+    computer_id BIGINT NOT NULL,
+    payload_ciphertext VARBINARY(512) NOT NULL COMMENT 'The encrypted remembered payload; opaque to the store',
+    payload_iv VARBINARY(16) NOT NULL COMMENT 'The initialisation vector the ciphertext was produced with',
+    key_fingerprint CHAR(64) NOT NULL COMMENT 'Identifies the key that encrypted the payload, so a rotated key is detected rather than raised',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Soft state: 0 once cleared, and a cleared row is never read',
+    created_utc DATETIME NOT NULL COMMENT 'When this person first used this machine to remember a sign-in',
+    updated_utc DATETIME NOT NULL COMMENT 'When the payload was last written or cleared',
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_auth_remembered_sign_ins_public_id (public_id),
+    UNIQUE KEY uq_auth_remembered_sign_ins_user_computer (user_id, computer_id) COMMENT 'One remembered sign-in per person per machine',
+    CONSTRAINT fk_auth_remembered_sign_ins_core_users_profiles_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id),
+    CONSTRAINT fk_auth_remembered_sign_ins_core_computers_registry_computer_id FOREIGN KEY (computer_id) REFERENCES core_computers_registry (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'An encrypted remembered sign-in per person and machine, with the initialisation vector and the fingerprint of the key that produced it.';
 
 SET FOREIGN_KEY_CHECKS = 1;

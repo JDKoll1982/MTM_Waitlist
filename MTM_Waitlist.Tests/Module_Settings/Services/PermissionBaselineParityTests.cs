@@ -38,9 +38,11 @@ namespace MTM_Waitlist.Tests.Module_Settings.Services;
 /// asserted against that stated set. Nobody holds the role on ship day.
 /// </para>
 /// <para>
-/// <b>Three keys have no predecessor at all</b> (<c>permission.admin.users</c>,
-/// <c>permission.admin.reset_password</c> and <c>permission.admin.permissions</c>), so they are asserted against
-/// their stated sets rather than against a retired list. This is what makes SC-001 evaluable for them.
+/// <b>Seven keys have no predecessor at all</b> (<c>permission.admin.users</c>,
+/// <c>permission.admin.reset_password</c>, <c>permission.admin.permissions</c>, and the four
+/// 010-startup-rebuild keys <c>machine_configuration</c>, <c>ignored_locations_edit</c>, <c>log_panel</c> and
+/// <c>session_length</c>), so they are asserted against their stated sets rather than against a retired list.
+/// This is what makes SC-001 evaluable for them.
 /// </para>
 /// <para>
 /// <b>The per-person side is deliberately absent.</b> The ship-day claim that somebody relying on their role
@@ -107,7 +109,17 @@ public sealed class PermissionBaselineParityTests
         (PermissionKeys.SetupWorkCenters, RetiredRoleListFixture.SetupWorkCenterManageRoles),
     ];
 
-    /// <summary>The keys with no predecessor list, and the roles their baselines are stated to ship to.</summary>
+    /// <summary>
+    /// The keys with no predecessor list, and the roles their baselines are stated to ship to.
+    /// </summary>
+    /// <remarks>
+    /// Three of them replace no retired list because the three account-administration keys were new when the
+    /// declaration was written. The other four were added later by 010-startup-rebuild (T053) for the privileged
+    /// surfaces the rebuilt launch introduces, so no retired list written earlier could describe them either. Both
+    /// groups are asserted against their stated sets rather than against a list — that is what makes SC-001
+    /// evaluable for them — and every one of the nine roles is checked, so a role the key is stated not to ship to
+    /// fails here if it is granted it.
+    /// </remarks>
     private static readonly Dictionary<string, string[]> StatedSetsWithNoPredecessor = new(StringComparer.Ordinal)
     {
         [PermissionKeys.AdminUsers] =
@@ -116,6 +128,16 @@ public sealed class PermissionBaselineParityTests
             ["production_lead", "setup_lead", "material_handler_lead", "plant_manager", "it_department", "developer"],
         [PermissionKeys.AdminPermissions] =
             ["it_department", "plant_manager", "developer"],
+        [PermissionKeys.SettingsMachineConfiguration] =
+            ["it_department", "developer"],
+        [PermissionKeys.SettingsIgnoredLocationsEdit] =
+            ["it_department", "developer"],
+        [PermissionKeys.SettingsSessionLength] =
+            ["it_department", "developer"],
+        // Developer alone: the panel exists to read one machine's history (US5, SC-005), so IT Department is
+        // deliberately not on this one even though it holds the other three.
+        [PermissionKeys.SettingsLogPanel] =
+            ["developer"],
     };
 
     /// <summary>
@@ -215,7 +237,7 @@ public sealed class PermissionBaselineParityTests
     }
 
     [TestMethod]
-    public void TheShippedBaselines_GiveTheThreeKeysWithNoPredecessorTheirStatedSets()
+    public void TheShippedBaselines_GiveTheKeysWithNoPredecessorTheirStatedSets()
     {
         var baselines = ReadShippedBaselines();
 

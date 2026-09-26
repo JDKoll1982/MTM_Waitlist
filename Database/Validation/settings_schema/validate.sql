@@ -200,6 +200,30 @@ FROM (
                 AND fn_config_settings_scope_rank('user') > fn_config_settings_scope_rank('admin')
                 AND fn_config_settings_scope_rank('user') > fn_config_settings_scope_rank('developer'), 'present', 'missing'
             )
+        UNION ALL
+        -- 010-startup-rebuild (task T053): the four keys the new privileged surfaces read must each carry a
+        -- `role`-scoped baseline row for every role the catalogue holds, not merely for the two the contract names.
+        -- The check is written role-explicitly for that reason: it joins the four keys against the catalogue
+        -- itself, so a role added later is covered without this file being edited, and a key that answers only for
+        -- IT Department and Developer while silently refusing a role is reported rather than passing on the
+        -- strength of the rows that do exist.
+        SELECT
+            'missing_role_baseline' AS issue_type,
+            CONCAT(k.setting_key, ' for role:', r.role_code) AS object_name,
+            'role-scoped boolean baseline row' AS expected_value,
+            IF(v.id IS NULL, 'missing', 'present') AS actual_value
+        FROM (
+            SELECT 'permission.settings.machine_configuration' AS setting_key
+            UNION ALL SELECT 'permission.settings.ignored_locations_edit'
+            UNION ALL SELECT 'permission.settings.log_panel'
+            UNION ALL SELECT 'permission.settings.session_length'
+        ) AS k
+        CROSS JOIN auth_roles_catalog AS r
+        LEFT JOIN config_settings_values AS v
+            ON v.setting_key = k.setting_key
+            AND v.scope_type = 'role'
+            AND v.scope_key = CONCAT('role:', r.role_code)
+            AND v.value_type = 'bool'
     ) validation_results
 WHERE
     actual_value = 'missing';

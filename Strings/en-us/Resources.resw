@@ -1132,6 +1132,30 @@
   <data name="Permission_settings_storage_paths.Gates" xml:space="preserve">
     <value>Change where the application keeps its pictures and its key files.</value>
   </data>
+  <data name="Permission_settings_machine_configuration.Label" xml:space="preserve">
+    <value>Machine configuration</value>
+  </data>
+  <data name="Permission_settings_machine_configuration.Gates" xml:space="preserve">
+    <value>Set up this machine and save its configuration.</value>
+  </data>
+  <data name="Permission_settings_ignored_locations_edit.Label" xml:space="preserve">
+    <value>Edit ignored locations</value>
+  </data>
+  <data name="Permission_settings_ignored_locations_edit.Gates" xml:space="preserve">
+    <value>Change the plant-wide list of locations to hide. Everyone may still read it.</value>
+  </data>
+  <data name="Permission_settings_log_panel.Label" xml:space="preserve">
+    <value>Developer log panel</value>
+  </data>
+  <data name="Permission_settings_log_panel.Gates" xml:space="preserve">
+    <value>Read the application's log entries in Settings.</value>
+  </data>
+  <data name="Permission_settings_session_length.Label" xml:space="preserve">
+    <value>Session length</value>
+  </data>
+  <data name="Permission_settings_session_length.Gates" xml:space="preserve">
+    <value>Change how long a sign-in lasts.</value>
+  </data>
   <data name="Permission_setup_dunnage_quick_add.Label" xml:space="preserve">
     <value>Quick Add dunnage</value>
   </data>

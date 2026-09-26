@@ -21,6 +21,13 @@ WHERE scope_type = 'role'
   AND setting_key LIKE 'permission.%'
   AND value_type = 'bool';
 
+-- The four keys 010-startup-rebuild (T053) added — `permission.settings.machine_configuration`,
+-- `permission.settings.ignored_locations_edit`, `permission.settings.log_panel` and
+-- `permission.settings.session_length` — need no statement of their own: every row this seed wrote for them is
+-- `role`-scoped, inside the `permission.` namespace and of boolean type, so the DELETE above removes all
+-- thirty-six of them along with the rest. Nothing was widened for these keys, which is the case the UPDATE below
+-- exists to reverse, so reversing this addition is the DELETE alone.
+
 -- Feature 008-part-pictures (task T006) widened `permission.settings.part_pictures` to two more roles: `setup_lead`
 -- and `plant_manager`. Reversing that widening is this UPDATE, which puts exactly those two rows back to the value
 -- this seed shipped before the change and touches no other row. The DELETE above is the seed's own full reversal,

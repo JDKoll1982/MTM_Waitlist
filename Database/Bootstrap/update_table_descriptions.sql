@@ -276,6 +276,10 @@ MODIFY COLUMN actor_kind VARCHAR(32) NULL COMMENT 'Actor type for event source.'
 MODIFY COLUMN actor_id VARCHAR(128) NULL COMMENT 'Actor identifier value.',
 MODIFY COLUMN host_id VARCHAR(128) NULL COMMENT 'Host/computer identifier captured for event.',
 MODIFY COLUMN mac_address VARCHAR(64) NULL COMMENT 'MAC address captured for event.',
+MODIFY COLUMN module VARCHAR(64) NULL COMMENT 'The part of the application the entry came from; an ILogger category name lands here.',
+MODIFY COLUMN error_type VARCHAR(128) NULL COMMENT 'The fault type, when there was a fault.',
+MODIFY COLUMN exception_detail MEDIUMTEXT NULL COMMENT 'The serialized exception chain, one JSON node per exception, outermost first.',
+MODIFY COLUMN error_fingerprint CHAR(64) NULL COMMENT 'SHA-256 of the fault shape, so the same fault groups together across machines; NULL without an exception.',
 MODIFY COLUMN message TEXT NOT NULL COMMENT 'Primary log message text.',
 MODIFY COLUMN payload_json MEDIUMTEXT NULL COMMENT 'Optional structured payload as JSON text.',
 MODIFY COLUMN previous_hash CHAR(64) NULL COMMENT 'Previous entry hash for chain validation.',
@@ -445,13 +449,14 @@ MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the 
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was last updated.';
 
-ALTER TABLE config_images_locations COMMENT = 'Image path overrides for request items, their Category families, and work centers. Enables role-based customization of visual assets via cascade resolution pattern.';
+ALTER TABLE config_images_locations COMMENT = 'Image location overrides for request items, their Category families, work centers, parts and machines. Enables role-based customization of visual assets via cascade resolution pattern.';
 
 ALTER TABLE config_images_locations
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for image location override row.',
-MODIFY COLUMN scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_item, request_category, work_center, visual_part, or wip_part.',
-MODIFY COLUMN scope_item_id VARCHAR(190) NOT NULL COMMENT 'Identifier within scope: the Item or Category code, or the numeric work center id.',
+MODIFY COLUMN scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_item, request_category, work_center, visual_part, wip_part, or computer.',
+MODIFY COLUMN scope_item_id VARCHAR(190) NOT NULL COMMENT 'Identifier within scope: the Item or Category code, the numeric work center id, the part number, or <computer_id>:<source_kind> at computer scope.',
+MODIFY COLUMN computer_id BIGINT NULL COMMENT 'At computer scope, the machine the row belongs to; NULL for the five picture scopes.',
 MODIFY COLUMN image_path VARCHAR(500) NOT NULL COMMENT 'File system path to the image file copied to the shared network folder.',
 MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Soft-delete flag; inactive rows are ignored during path resolution cascades.',
 MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the image override.',
@@ -598,6 +603,72 @@ PREPARE stmt FROM @sql_stmt;
 EXECUTE stmt;
 
 DEALLOCATE PREPARE stmt;
+
+-- ============================================================
+-- user_active_sessions - feature 010-startup-rebuild (task T044)
+-- ============================================================
+-- New table. The owning artifact is Database/Tables/34_user_active_sessions/create.sql; the guarded statement
+-- below carries the same shape so a store that ALREADY EXISTS gains the table when this maintenance file is run,
+-- which is the only path that reaches such a store. FOREIGN_KEY_CHECKS is off for the creation because the table
+-- carries two foreign keys, and the order in which the referenced tables were created is not this file's to
+-- assume.
+SET FOREIGN_KEY_CHECKS = 0;
+
+SET
+    @has_user_active_sessions_table := (
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'user_active_sessions'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_user_active_sessions_table = 0,
+        'CREATE TABLE user_active_sessions (id BIGINT NOT NULL AUTO_INCREMENT COMMENT ''Surrogate primary key.'', public_id CHAR(36) NOT NULL COMMENT ''Public UUID for external references.'', user_id BIGINT NOT NULL COMMENT ''The person the session belongs to.'', computer_id BIGINT NOT NULL COMMENT ''The machine the session was issued on.'', token_hash CHAR(64) NOT NULL COMMENT ''SHA-256 hex digest of the issued token; never the token itself'', token_salt VARBINARY(32) NOT NULL COMMENT ''Salt the digest was computed with; present whenever a digest is'', issued_utc DATETIME NOT NULL COMMENT ''When the token was issued, from the store clock'', expires_utc DATETIME NOT NULL COMMENT ''When the token stops being valid, from the store clock'', revoked_utc DATETIME NULL COMMENT ''When the session was cleared; NULL while it has not been'', is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT ''Soft state: 0 once cleared, so the row survives as evidence'', source_label VARCHAR(32) NOT NULL COMMENT ''Caller vocabulary for where the session came from'', created_utc DATETIME NOT NULL COMMENT ''When this row was first written; unchanged by a later sign-in'', PRIMARY KEY (id), UNIQUE KEY uq_user_active_sessions_public_id (public_id), UNIQUE KEY uq_user_active_sessions_user_computer (user_id, computer_id) COMMENT ''One active row per person per machine'', KEY idx_user_active_sessions_is_active_expires_utc (is_active, expires_utc), KEY idx_user_active_sessions_computer_id (computer_id), CONSTRAINT fk_user_active_sessions_core_users_profiles_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id), CONSTRAINT fk_user_active_sessions_core_computers_registry_computer_id FOREIGN KEY (computer_id) REFERENCES core_computers_registry (id)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = ''The one active session for a person on a machine: a salted token digest, its lifetime and its machine key.''',
+        'SELECT ''user_active_sessions already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- auth_remembered_sign_ins - feature 010-startup-rebuild (task T046, plan D12)
+-- ============================================================
+-- New table. The owning artifact is Database/Tables/35_auth_remembered_sign_ins/create.sql; the guarded statement
+-- below carries the same shape so a store that ALREADY EXISTS gains the table when this maintenance file is run.
+-- FOREIGN_KEY_CHECKS is off for the same reason as above: the table carries two foreign keys.
+SET FOREIGN_KEY_CHECKS = 0;
+
+SET
+    @has_auth_remembered_sign_ins_table := (
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'auth_remembered_sign_ins'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_auth_remembered_sign_ins_table = 0,
+        'CREATE TABLE auth_remembered_sign_ins (id BIGINT NOT NULL AUTO_INCREMENT COMMENT ''Surrogate primary key.'', public_id CHAR(36) NOT NULL COMMENT ''Public UUID for external references.'', user_id BIGINT NOT NULL COMMENT ''The person the remembered sign-in belongs to.'', computer_id BIGINT NOT NULL COMMENT ''The machine the remembered sign-in was made on.'', payload_ciphertext VARBINARY(512) NOT NULL COMMENT ''The encrypted remembered payload; opaque to the store'', payload_iv VARBINARY(16) NOT NULL COMMENT ''The initialisation vector the ciphertext was produced with'', key_fingerprint CHAR(64) NOT NULL COMMENT ''Identifies the key that encrypted the payload, so a rotated key is detected rather than raised'', is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT ''Soft state: 0 once cleared, and a cleared row is never read'', created_utc DATETIME NOT NULL COMMENT ''When this person first used this machine to remember a sign-in'', updated_utc DATETIME NOT NULL COMMENT ''When the payload was last written or cleared'', PRIMARY KEY (id), UNIQUE KEY uq_auth_remembered_sign_ins_public_id (public_id), UNIQUE KEY uq_auth_remembered_sign_ins_user_computer (user_id, computer_id) COMMENT ''One remembered sign-in per person per machine'', CONSTRAINT fk_auth_remembered_sign_ins_core_users_profiles_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id), CONSTRAINT fk_auth_remembered_sign_ins_core_computers_registry_computer_id FOREIGN KEY (computer_id) REFERENCES core_computers_registry (id)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = ''An encrypted remembered sign-in per person and machine, with the initialisation vector and the fingerprint of the key that produced it.''',
+        'SELECT ''auth_remembered_sign_ins already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
 -- Retired objects - feature 001-module-mock-visual-fallback (FR-014)
