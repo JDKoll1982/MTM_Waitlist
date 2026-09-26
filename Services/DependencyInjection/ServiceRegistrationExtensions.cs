@@ -241,7 +241,10 @@ public static partial class ServiceRegistrationExtensions
         services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
         services.Configure<WaitlistDatabaseOptions>(context.Configuration.GetSection(nameof(WaitlistDatabaseOptions)));
         services.Configure<ReceivingDatabaseOptions>(context.Configuration.GetSection(nameof(ReceivingDatabaseOptions)));
-        services.Configure<StartupLoggingOptions>(context.Configuration.GetSection(nameof(StartupLoggingOptions)));
+
+        // The file-based logging path's registration is gone: the seam and the store-backed ILogger provider are
+        // registered by the logging module (AddLoggingModuleServices), and nothing writes a local log file any
+        // more (FR-025). The retired options' binding went with it, so nothing reads a file destination.
 
         // Dunnage images (Setup) resolve against the shared Dunnage image root (the same
         // root the MTM Receiving Application writes via "Dunnage.Application.DefaultImageLocation").

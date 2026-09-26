@@ -15,6 +15,11 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.10" />
+    <!-- The host's shutdown flush (IHostedService) and the ILogger surface the provider serves. Both are stated
+         here rather than inherited transitively from MTM_Waitlist.Core, so this project's own build declares what
+         it compiles against. -->
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
   </ItemGroup>
 
   <ItemGroup>
