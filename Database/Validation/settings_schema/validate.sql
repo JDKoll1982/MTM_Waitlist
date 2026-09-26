@@ -30,16 +30,6 @@ FROM (
                 ), 'present', 'missing'
             )
         UNION ALL
-        SELECT 'missing_table', 'core_buildings_catalog', 'table exists', IF(
-                EXISTS (
-                    SELECT 1
-                    FROM information_schema.tables
-                    WHERE
-                        table_schema = DATABASE()
-                        AND table_name = 'core_buildings_catalog'
-                ), 'present', 'missing'
-            )
-        UNION ALL
         SELECT 'missing_column', 'config_settings_values.scope_type', 'VARCHAR(16) NOT NULL', IF(
                 EXISTS (
                     SELECT 1
@@ -110,16 +100,6 @@ FROM (
                 ), 'present', 'missing'
             )
         UNION ALL
-        SELECT 'missing_table', 'core_buildings_history', 'table exists', IF(
-                EXISTS (
-                    SELECT 1
-                    FROM information_schema.tables
-                    WHERE
-                        table_schema = DATABASE()
-                        AND table_name = 'core_buildings_history'
-                ), 'present', 'missing'
-            )
-        UNION ALL
         SELECT 'missing_routine', 'fn_config_settings_scope_rank', 'function exists', IF(
                 EXISTS (
                     SELECT 1
@@ -149,17 +129,6 @@ FROM (
                     WHERE
                         routine_schema = DATABASE()
                         AND routine_name = 'sp_config_settings_upsert'
-                        AND routine_type = 'PROCEDURE'
-                ), 'present', 'missing'
-            )
-        UNION ALL
-        SELECT 'missing_routine', 'sp_core_buildings_upsert', 'procedure exists', IF(
-                EXISTS (
-                    SELECT 1
-                    FROM information_schema.routines
-                    WHERE
-                        routine_schema = DATABASE()
-                        AND routine_name = 'sp_core_buildings_upsert'
                         AND routine_type = 'PROCEDURE'
                 ), 'present', 'missing'
             )

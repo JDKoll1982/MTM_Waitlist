@@ -354,41 +354,6 @@ ON DUPLICATE KEY UPDATE
     assigned_utc = VALUES(assigned_utc),
     assigned_by_user_id = VALUES(assigned_by_user_id);
 
-TRUNCATE TABLE core_buildings_catalog;
-
-INSERT INTO
-    core_buildings_catalog (
-        public_id,
-        building_code,
-        building_name,
-        is_active,
-        created_utc,
-        updated_utc,
-        updated_by_user_id
-    )
-VALUES (
-        UUID(),
-        'expo_drive',
-        'Expo Drive',
-        1,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP(),
-        NULL
-    ),
-    (
-        UUID(),
-        'vits_drive',
-        'Vits Drive',
-        1,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP(),
-        NULL
-    )
-ON DUPLICATE KEY UPDATE
-    building_name = VALUES(building_name),
-    is_active = VALUES(is_active),
-    updated_utc = VALUES(updated_utc);
-
 TRUNCATE TABLE core_computers_registry;
 
 INSERT INTO

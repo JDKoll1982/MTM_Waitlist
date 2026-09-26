@@ -193,31 +193,6 @@ MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the token
 MODIFY COLUMN source_label VARCHAR(32) NOT NULL COMMENT 'Token source label such as startup or login.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.';
 
-ALTER TABLE core_buildings_catalog COMMENT = 'Active building and facility catalog.';
-
-ALTER TABLE core_buildings_catalog
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for building record.',
-MODIFY COLUMN building_code VARCHAR(64) NOT NULL COMMENT 'Unique building code.',
-MODIFY COLUMN building_name VARCHAR(128) NOT NULL COMMENT 'Display name for building/facility.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the building is active.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.',
-MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the building record.';
-
-ALTER TABLE core_buildings_history COMMENT = 'Audit history for building catalog changes.';
-
-ALTER TABLE core_buildings_history
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for history record.',
-MODIFY COLUMN building_id BIGINT NOT NULL COMMENT 'Foreign key to core_buildings_catalog.id.',
-MODIFY COLUMN building_code VARCHAR(64) NOT NULL COMMENT 'Building code at time of change.',
-MODIFY COLUMN building_name VARCHAR(128) NOT NULL COMMENT 'Building name at time of change.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL COMMENT 'Active state snapshot at time of change.',
-MODIFY COLUMN change_action VARCHAR(16) NOT NULL COMMENT 'Change action such as insert, update, or deactivate.',
-MODIFY COLUMN changed_by_user_id BIGINT NULL COMMENT 'User who performed the change.',
-MODIFY COLUMN changed_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the change occurred.';
-
 ALTER TABLE config_settings_values COMMENT = 'Current effective configuration setting values by scope.';
 
 ALTER TABLE config_settings_values
@@ -699,7 +674,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 --     columns stopped existing when waitlist_requests_queue was re-keyed.
 
 -- ============================================================
--- Retired objects - feature 010-startup-rebuild (tasks T020, T023)
+-- Retired objects - feature 010-startup-rebuild (tasks T020, T023, T061)
 -- ============================================================
 -- The old startup surface was removed and is being rebuilt, so the procedures only that surface used are no
 -- longer created by an artifact in this tree and no longer carry descriptions here. The matching rollback
@@ -721,3 +696,17 @@ SET FOREIGN_KEY_CHECKS = 1;
 --   Retained, unchanged: `fn_server_utc_now`. The rebuilt session, remembered sign-in, log and
 --     picture-source procedures all compare against the store's own clock through it, so it stays the single
 --     implementation of "now" (S8.1).
+--   T061 then retired three more objects that the dead-weight audit (T056) found orphaned of application code.
+--     They were not reached only by the old startup surface; their only consumers were the development seed and
+--     this feature's own settings validator, and both were edited in the same change (T062), so nothing writes
+--     or asserts them any more. Their rollback artifacts remain as the drop statements:
+--     Tables (drop via Database/Tables/<name>/rollback.sql):
+--       core_buildings_catalog, core_buildings_history
+--     Stored procedures (drop via Database/StoredProcedures/<name>/rollback.sql):
+--       sp_core_buildings_upsert
+--     Seed: Database/Seeds/seed_dev_masked_baseline no longer truncates or inserts into core_buildings_catalog,
+--       and its mirror block in Database/Seeds/AllSeeds.sql was removed with it.
+--     Validation: Database/Validation/settings_schema/validate.sql no longer asserts the three objects exist. It
+--       was reworked rather than deleted, keeping its checks on config_settings_values, config_settings_history,
+--       fn_config_settings_scope_rank, sp_config_settings_get_effective, sp_config_settings_upsert and
+--       vw_config_settings_scope_catalog.
