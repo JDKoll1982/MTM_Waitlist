@@ -9,8 +9,8 @@ namespace MTM_Waitlist.Mock.Service.Services;
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>Why this exists (T148(c)).</b> Every failure path in the shipped service wrote through
-/// <see cref="MTM_Waitlist.Module_Core.Helpers.StartupDebugLog"/>, which is marked
+/// <b>Why this exists (T148(c)).</b> Every failure path in the shipped service wrote through the
+/// application's retired conditional debug log type, which was marked
 /// <see cref="ConditionalAttribute"/>(<c>"DEBUG"</c>) — so a published <c>Release</c> build compiled the
 /// calls out entirely — and which only reached <see cref="Debug.WriteLine"/>. Nothing on the host recorded
 /// why a refresh cycle failed, and the two surfaces that would have reported it (<c>GET /api/status</c> and

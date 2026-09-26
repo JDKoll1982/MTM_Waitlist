@@ -82,7 +82,7 @@ public sealed partial class PinRevealDialog : ContentDialog
         _credentialReleased = true;
         ViewModel.Closed();
 
-        StartupDebugLog.Info("PinRevealDialog", "Closed; the credential has been released and is held nowhere.");
+        AppLog.Info("PinRevealDialog", "Closed; the credential has been released and is held nowhere.");
     }
 
     /// <summary>Printing leaves the window open, whatever it does: a failed or cancelled print costs nothing.</summary>

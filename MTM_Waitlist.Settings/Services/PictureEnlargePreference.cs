@@ -77,7 +77,7 @@ public sealed class PictureEnlargePreference : IPictureEnlargePreference
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "PictureEnlargePreference",
                 ex,
                 "The enlarge-pictures preference could not be read; pictures will enlarge, which is the shipped default.");
@@ -112,7 +112,7 @@ public sealed class PictureEnlargePreference : IPictureEnlargePreference
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "PictureEnlargePreference",
                 ex,
                 "The enlarge-pictures preference could not be stored; it applies to this session only.");

@@ -93,7 +93,7 @@ public sealed class RequestDeepLinkHandler
         {
             // Unrecognised: record it so the argument can be diagnosed from the log, and show nothing. The
             // window still comes forward, because the user did interact with the app.
-            StartupDebugLog.Info(
+            AppLog.Info(
                 DiagnosticArea,
                 $"Unrecognised activation argument '{arguments ?? "(none)"}'; nothing was shown and no navigation was queued.");
 
@@ -101,7 +101,7 @@ public sealed class RequestDeepLinkHandler
             return false;
         }
 
-        StartupDebugLog.Info(DiagnosticArea, $"Notification deep-link to request '{requestId:D}'.");
+        AppLog.Info(DiagnosticArea, $"Notification deep-link to request '{requestId:D}'.");
 
         // The Waitlist detail page resolves a request by its list id, which is request.Id.GetHashCode().
         var parameter = requestId.GetHashCode();

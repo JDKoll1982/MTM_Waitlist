@@ -1,3 +1,5 @@
+using MTM_Waitlist.Module_Core.Contracts.Services;
+
 namespace MTM_Waitlist.Module_Logging;
 
 /// <summary>
@@ -20,8 +22,14 @@ namespace MTM_Waitlist.Module_Logging;
 /// <b>The write path never throws to its caller.</b> The seam absorbs its own failures and records nothing
 /// about them, so one broken write cannot produce a fault that produces a fault (FR-037, SC-016).
 /// </para>
+/// <para>
+/// <b>This interface is also the static façade's sink.</b> It satisfies <see cref="IAppLogSink"/>, which is
+/// declared in <c>MTM_Waitlist.Module_Core</c> — the side of the reference edge that the static façade and every
+/// module library can see — so a static call site reaches this seam without those libraries referencing this
+/// project, which would be circular because this project references theirs.
+/// </para>
 /// </remarks>
-public interface ILogService
+public interface ILogService : IAppLogSink
 {
     /// <summary>
     /// Records an entry the caller has already described.
@@ -35,7 +43,7 @@ public interface ILogService
     /// <param name="module">The part of the application the entry came from.</param>
     /// <param name="message">What the entry says.</param>
     /// <param name="target">The UI target the caller can name, when it can name one.</param>
-    void Info(string module, string message, string? target = null);
+    new void Info(string module, string message, string? target = null);
 
     /// <summary>
     /// Records that something happened which did not stop the caller but is worth a reader's attention.
@@ -54,7 +62,7 @@ public interface ILogService
     /// The fault, when there is one. The seam serializes its complete chain into <c>exception_detail</c> and
     /// derives the fingerprint from it; no call site serializes an exception (contract §1.1, §1.2).
     /// </param>
-    void Error(string module, string message, Exception? exception = null);
+    new void Error(string module, string message, Exception? exception = null);
 
     /// <summary>
     /// Records that the operation under way failed and the application could not continue as it was.

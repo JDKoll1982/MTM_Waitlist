@@ -174,7 +174,7 @@ public partial class PinRevealDialogViewModel : ObservableObject
         {
             // A failed print is not a failed reset: the credential is still on screen, so this is reported and
             // swallowed rather than allowed to take the window down with it.
-            StartupDebugLog.Error("PinReveal", ex, "The handover slip could not be printed; the credential stays on screen.");
+            AppLog.Error("PinReveal", ex, "The handover slip could not be printed; the credential stays on screen.");
             MessageText = "PinReveal_PrintFailed.Text".GetLocalized();
             return false;
         }

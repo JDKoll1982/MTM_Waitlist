@@ -12,9 +12,9 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 /// </summary>
 /// <remarks>
 /// The point of these assertions is not that a string is written; it is that the record survives a
-/// <c>Release</c> publish. The previous path was <c>StartupDebugLog</c>, whose calls carry
-/// <c>[Conditional("DEBUG")]</c> and were therefore compiled out of the shipped build entirely, leaving
-/// only <c>Debug.WriteLine</c> output that nothing on the host could read.
+/// <c>Release</c> publish. The previous path was the application's retired conditional debug log type,
+/// whose calls carried <c>[Conditional("DEBUG")]</c> and were therefore compiled out of the shipped build
+/// entirely, leaving only <c>Debug.WriteLine</c> output that nothing on the host could read.
 /// </remarks>
 [TestClass]
 public sealed class ServiceLogTests

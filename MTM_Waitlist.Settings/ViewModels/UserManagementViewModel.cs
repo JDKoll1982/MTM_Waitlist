@@ -386,7 +386,7 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "UserManagement",
                 ex,
                 "The user store could not be read, so the list shows its unavailable state rather than an empty list (FR-096).");
@@ -628,7 +628,7 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "UserManagement",
                 ex,
                 "The list filter could not be stored for this person; the list still works, and the next visit simply starts unfiltered.");

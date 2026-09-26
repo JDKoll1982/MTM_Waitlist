@@ -39,7 +39,7 @@ public sealed partial class ShellPage : Page
 
         if (AppTitleBar is null || AppTitleBarText is null)
         {
-            StartupDebugLog.Info("ShellPage", "Title bar elements were unavailable on load.");
+            AppLog.Info("ShellPage", "Title bar elements were unavailable on load.");
             return;
         }
 
@@ -181,7 +181,7 @@ public sealed partial class ShellPage : Page
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("ShellPage", ex, "Signing out failed before the application could be relaunched.");
+            AppLog.Error("ShellPage", ex, "Signing out failed before the application could be relaunched.");
             result = SignOutResult.Refused(MTM_Waitlist.Module_Startup.Services.SignOutService.ResolveRestartFailedMessage());
         }
 

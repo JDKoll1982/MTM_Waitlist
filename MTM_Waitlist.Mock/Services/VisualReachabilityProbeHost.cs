@@ -197,7 +197,7 @@ public sealed class VisualReachabilityProbeHost : IVisualReachabilityProbeHost, 
             }
         }
 
-        StartupDebugLog.Info(
+        AppLog.Info(
             nameof(VisualReachabilityProbeHost),
             $"Startup priming settled the Infor Visual verdict as {_detector.Current}.");
     }

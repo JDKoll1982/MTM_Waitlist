@@ -171,7 +171,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
         var connectionString = ResolveConnectionString(databaseTarget);
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            StartupDebugLog.Info("MySqlHelperServer", $"{operationName} skipped: no connection configured for '{GetDatabaseName(databaseTarget)}'.");
+            AppLog.Info("MySqlHelperServer", $"{operationName} skipped: no connection configured for '{GetDatabaseName(databaseTarget)}'.");
             return unavailableResult;
         }
 
@@ -183,7 +183,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
 
             try
             {
-                StartupDebugLog.Info("MySqlHelperServer", $"{operationName} started. {statementDescription}, Target='{databaseName}', Attempt={attempt}.");
+                AppLog.Info("MySqlHelperServer", $"{operationName} started. {statementDescription}, Target='{databaseName}', Attempt={attempt}.");
 
                 await using var connection = new MySqlConnection(connectionString);
                 await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
@@ -198,7 +198,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
             }
             catch (Exception ex)
             {
-                StartupDebugLog.Error(
+                AppLog.Error(
                     "MySqlHelperServer",
                     ex,
                     $"{operationName} failed. {statementDescription}, Target='{databaseName}', Attempt={attempt} of {_retryPolicy.MaxAttempts}.");
@@ -237,7 +237,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "MySqlHelperServer",
                 ex,
                 "The store availability observation could not be recorded, so the screen was not told. The read's own outcome is unaffected.");

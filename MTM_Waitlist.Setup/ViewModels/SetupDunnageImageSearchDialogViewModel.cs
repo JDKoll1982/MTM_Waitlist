@@ -101,7 +101,7 @@ public partial class SetupDunnageImageSearchDialogViewModel : ObservableRecipien
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SetupDunnageImageSearch", ex, "Failed to load dunnage parts for image search.");
+            AppLog.Error("SetupDunnageImageSearch", ex, "Failed to load dunnage parts for image search.");
             DisplayedParts = new ObservableCollection<SetupDunnagePart>();
             EmptyStateMessage = "Failed to load Dunnage parts.";
             OnPropertyChanged(nameof(HasNoResults));
@@ -166,7 +166,7 @@ public partial class SetupDunnageImageSearchDialogViewModel : ObservableRecipien
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SetupDunnageImageSearch", ex, "Failed to load 'show parts without images' preference. Falling back to show all.");
+            AppLog.Error("SetupDunnageImageSearch", ex, "Failed to load 'show parts without images' preference. Falling back to show all.");
 
             _persistedShowPartsWithoutImages = true;
             ShowPartsWithoutImages = true;
@@ -187,7 +187,7 @@ public partial class SetupDunnageImageSearchDialogViewModel : ObservableRecipien
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SetupDunnageImageSearch", ex, "Failed to save 'show parts without images' preference.");
+            AppLog.Error("SetupDunnageImageSearch", ex, "Failed to save 'show parts without images' preference.");
 
             _isRestoringShowPartsPreference = true;
             ShowPartsWithoutImages = _persistedShowPartsWithoutImages;

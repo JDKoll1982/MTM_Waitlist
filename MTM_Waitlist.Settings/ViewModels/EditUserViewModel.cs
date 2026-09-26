@@ -392,7 +392,7 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("EditUser", ex, "The save did not reach the store; the reader's work is kept.");
+            AppLog.Error("EditUser", ex, "The save did not reach the store; the reader's work is kept.");
             MessageText = UnavailableMessage();
         }
         finally
@@ -486,7 +486,7 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("EditUser", ex, "The reset did not reach the store; nothing was issued.");
+            AppLog.Error("EditUser", ex, "The reset did not reach the store; nothing was issued.");
             MessageText = UnavailableMessage();
         }
         finally
@@ -574,7 +574,7 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("EditUser", ex, "The change of state did not reach the store; the reader's work is kept.");
+            AppLog.Error("EditUser", ex, "The change of state did not reach the store; the reader's work is kept.");
             MessageText = UnavailableMessage();
         }
         finally

@@ -20,10 +20,10 @@ public sealed partial class EditUserPage : Page
 
     public EditUserPage()
     {
-        StartupDebugLog.Info("EditUserPage", "Constructor started.");
+        AppLog.Info("EditUserPage", "Constructor started.");
         ViewModel = App.GetService<EditUserViewModel>();
         InitializeComponent();
-        StartupDebugLog.Info("EditUserPage", "Constructor completed.");
+        AppLog.Info("EditUserPage", "Constructor completed.");
     }
 
     private void OnBackClick(object sender, RoutedEventArgs e) => ViewModel.GoBackCommand.Execute(null);

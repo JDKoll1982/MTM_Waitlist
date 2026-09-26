@@ -41,7 +41,7 @@ public sealed class WaitlistInventoryService : IWaitlistInventoryService
             return Array.Empty<InventoryLocationRow>();
         }
 
-        StartupDebugLog.Info("WaitlistInventory", $"GetInventoryLocationRowsAsync started. Part='{normalizedPart}'.");
+        AppLog.Info("WaitlistInventory", $"GetInventoryLocationRowsAsync started. Part='{normalizedPart}'.");
 
         IReadOnlyList<InventoryLocationRow> rows;
         try
@@ -54,13 +54,13 @@ public sealed class WaitlistInventoryService : IWaitlistInventoryService
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("WaitlistInventory", ex, $"GetInventoryLocationRowsAsync failed. Part='{normalizedPart}'.");
+            AppLog.Error("WaitlistInventory", ex, $"GetInventoryLocationRowsAsync failed. Part='{normalizedPart}'.");
             return Array.Empty<InventoryLocationRow>();
         }
 
         var ignored = await _ignoredLocationsService.GetIgnoredLocationsAsync(cancellationToken).ConfigureAwait(false);
         var filtered = InventoryLocationFiltering.Apply(rows, ignored);
-        StartupDebugLog.Info("WaitlistInventory", $"GetInventoryLocationRowsAsync completed. Part='{normalizedPart}', Raw={rows.Count}, Displayed={filtered.Count}.");
+        AppLog.Info("WaitlistInventory", $"GetInventoryLocationRowsAsync completed. Part='{normalizedPart}', Raw={rows.Count}, Displayed={filtered.Count}.");
         return filtered;
     }
 

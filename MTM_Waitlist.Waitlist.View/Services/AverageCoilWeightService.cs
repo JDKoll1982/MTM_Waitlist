@@ -35,7 +35,7 @@ public sealed class AverageCoilWeightService : IAverageCoilWeightService
         }
 
         // The receiving store is always read live (FR-001): there is no sample/mock short-circuit.
-        StartupDebugLog.Info("AverageCoilWeight", $"Querying receiving_history. Part='{normalizedPart}'.");
+        AppLog.Info("AverageCoilWeight", $"Querying receiving_history. Part='{normalizedPart}'.");
         var parameters = new Dictionary<string, object?>(StringComparer.Ordinal) { ["@p_part_id"] = normalizedPart };
         var rows = await _mySqlHelperServer
             .ExecuteStoredProcedureQueryAsync(
@@ -47,14 +47,14 @@ public sealed class AverageCoilWeightService : IAverageCoilWeightService
 
         if (rows.Count == 0 || !rows[0].TryGetValue("AverageWeight", out var raw) || raw is null)
         {
-            StartupDebugLog.Info("AverageCoilWeight", $"No rows for Part='{normalizedPart}'. Returning empty.");
+            AppLog.Info("AverageCoilWeight", $"No rows for Part='{normalizedPart}'. Returning empty.");
             return string.Empty;
         }
 
         var average = Convert.ToDecimal(raw, CultureInfo.InvariantCulture);
         var rounded = decimal.Round(average, 0);
         var text = $"{rounded.ToString("N0", CultureInfo.InvariantCulture)} lb";
-        StartupDebugLog.Info("AverageCoilWeight", $"Part='{normalizedPart}' average skid weight = '{text}'.");
+        AppLog.Info("AverageCoilWeight", $"Part='{normalizedPart}' average skid weight = '{text}'.");
         return text;
     }
 }

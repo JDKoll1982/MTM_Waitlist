@@ -223,11 +223,11 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
             ApplyFilter();
             UpdateWorkCenterSectionsVisibility();
 
-            StartupDebugLog.Info("NewRequestWorkCenter", $"Catalog loaded. Workstation='{catalog.ComputerName}', HotCount={catalog.HotWorkCenters.Count}, OtherCount={catalog.OtherWorkCenters.Count}, ActiveJobCount={_activeJobWorkCenters.Count}.");
+            AppLog.Info("NewRequestWorkCenter", $"Catalog loaded. Workstation='{catalog.ComputerName}', HotCount={catalog.HotWorkCenters.Count}, OtherCount={catalog.OtherWorkCenters.Count}, ActiveJobCount={_activeJobWorkCenters.Count}.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("NewRequestWorkCenter", ex, "Failed to load the work center catalog.");
+            AppLog.Error("NewRequestWorkCenter", ex, "Failed to load the work center catalog.");
             WorkstationName = string.Empty;
             HotWorkCenters.Clear();
             OtherWorkCenters.Clear();
@@ -345,7 +345,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         var normalizedWorkCenter = workCenterItem.WorkCenterName.Trim();
         if (!_activeJobWorkCenters.Contains(normalizedWorkCenter))
         {
-            StartupDebugLog.Info("NewRequestWorkCenter", $"Blocked workstation selection for '{normalizedWorkCenter}' because no active setup job exists.");
+            AppLog.Info("NewRequestWorkCenter", $"Blocked workstation selection for '{normalizedWorkCenter}' because no active setup job exists.");
             IsNoActiveJobWarningVisible = true;
             IsVerificationWarningVisible = false;
             return;
@@ -364,7 +364,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("NewRequestWorkCenter", ex, "The employee lookup failed; the request was not started.");
+            AppLog.Error("NewRequestWorkCenter", ex, "The employee lookup failed; the request was not started.");
             IsNoActiveJobWarningVisible = false;
             IsVerificationWarningVisible = true;
             VerificationMessage = "The employee records could not be read, so this request could not be attributed. Try again.";
@@ -376,7 +376,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
             IsNoActiveJobWarningVisible = false;
             IsVerificationWarningVisible = true;
             VerificationMessage = verification.Message;
-            StartupDebugLog.Info("NewRequestWorkCenter", $"Employee verification blocked the request. Message='{verification.Message}'.");
+            AppLog.Info("NewRequestWorkCenter", $"Employee verification blocked the request. Message='{verification.Message}'.");
             return;
         }
 
@@ -384,7 +384,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         _state.RequesterEmployeeNumber = verification.EmployeeNumber;
         _state.RequesterEmployeeName = verification.EmployeeName;
 
-        StartupDebugLog.Info("NewRequestWorkCenter", $"Selected workstation '{normalizedWorkCenter}' for employee '{verification.EmployeeNumber}'.");
+        AppLog.Info("NewRequestWorkCenter", $"Selected workstation '{normalizedWorkCenter}' for employee '{verification.EmployeeNumber}'.");
         _navigationService.NavigateTo(typeof(NewRequestJobTypeViewModel).FullName!, _state);
     }
 

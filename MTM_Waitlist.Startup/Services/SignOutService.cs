@@ -54,7 +54,7 @@ public sealed class SignOutService : ISignOutService
     public async Task<SignOutResult> SignOutAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        StartupDebugLog.Info("SignOutService", "Sign out requested; clearing the remembered credential and session keys.");
+        AppLog.Info("SignOutService", "Sign out requested; clearing the remembered credential and session keys.");
 
         // 1. Nothing the restarted instance reads may survive: this is what makes it ask for credentials
         //    instead of restoring the session (FR-034).
@@ -71,20 +71,20 @@ public sealed class SignOutService : ISignOutService
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SignOutService", ex, "Signing out could not relaunch the application; the person is being told so.");
+            AppLog.Error("SignOutService", ex, "Signing out could not relaunch the application; the person is being told so.");
             return SignOutResult.Refused(ResolveRestartFailedMessage());
         }
 
         if (!started)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SignOutService",
                 new InvalidOperationException("The application could not be relaunched."),
                 "Signing out could not relaunch the application; the person is being told so.");
             return SignOutResult.Refused(ResolveRestartFailedMessage());
         }
 
-        StartupDebugLog.Info("SignOutService", "The replacement instance is running; exiting the signed-in session.");
+        AppLog.Info("SignOutService", "The replacement instance is running; exiting the signed-in session.");
         AppLifecycleHost.ExitApplication();
         return SignOutResult.Success();
     }

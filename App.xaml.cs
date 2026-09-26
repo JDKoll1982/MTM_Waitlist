@@ -63,7 +63,7 @@ public partial class App : Application
 
     public App()
     {
-        StartupDebugLog.Info("App", "App constructor started.");
+        AppLog.Info("App", "App constructor started.");
 
         // Captured here, on the UI thread, so a caller on any other thread can still end the session.
         _uiDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
@@ -84,8 +84,8 @@ public partial class App : Application
         // reference this project, and only the host can marshal the exit onto the UI thread.
         MTM_Waitlist.Module_Startup.Services.AppLifecycleHost.Exit = ExitApplication;
 
-        StartupDebugLog.Configure(Host.Services.GetService<IStartupLogService>());
-        StartupDebugLog.Info("App", "Host built.");
+        AppLog.Configure(Host.Services.GetService<ILogService>());
+        AppLog.Info("App", "Host built.");
 
         try
         {
@@ -93,26 +93,26 @@ public partial class App : Application
             // (T123). Probing only: refresh scheduling belongs to the on-host service (FR-025), and a probe
             // failure must never block startup.
             App.GetService<IVisualReachabilityProbeHost>().Start();
-            StartupDebugLog.Info("App", "Visual reachability probe host started.");
+            AppLog.Info("App", "Visual reachability probe host started.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("App", ex, "The Visual reachability probe host failed to start.");
+            AppLog.Error("App", ex, "The Visual reachability probe host failed to start.");
         }
 
         try
         {
             App.GetService<IAppNotificationService>().Initialize();
-            StartupDebugLog.Info("App", "App notification service initialized.");
+            AppLog.Info("App", "App notification service initialized.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("App", ex, "App notification service failed to initialize.");
+            AppLog.Error("App", ex, "App notification service failed to initialize.");
             throw;
         }
 
         UnhandledException += App_UnhandledException;
-        StartupDebugLog.Info("App", "UnhandledException handler registered.");
+        AppLog.Info("App", "UnhandledException handler registered.");
 
     #if DEBUG
         AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
@@ -121,10 +121,10 @@ public partial class App : Application
 
     public static void ShowStartupPlaceholderWindow()
     {
-        StartupDebugLog.Info("StartupPlaceholder", "ShowStartupPlaceholderWindow called.");
+        AppLog.Info("StartupPlaceholder", "ShowStartupPlaceholderWindow called.");
         _placeholderWindow ??= new StartupPlaceholderWindow();
         _placeholderWindow.Activate();
-        StartupDebugLog.Info("StartupPlaceholder", "Startup placeholder window activated.");
+        AppLog.Info("StartupPlaceholder", "Startup placeholder window activated.");
     }
 
     /// <summary>
@@ -135,25 +135,25 @@ public partial class App : Application
 
     private async Task ShutdownAsync()
     {
-        StartupDebugLog.Info("Shutdown", "Shutdown started.");
+        AppLog.Info("Shutdown", "Shutdown started.");
         try
         {
             App.GetService<IAppNotificationService>().Unregister();
-            StartupDebugLog.Info("Shutdown", "App notification service unregistered.");
+            AppLog.Info("Shutdown", "App notification service unregistered.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Shutdown", ex, "Failed to unregister app notification service.");
+            AppLog.Error("Shutdown", ex, "Failed to unregister app notification service.");
         }
 
         try
         {
             await Host.StopAsync().ConfigureAwait(false);
-            StartupDebugLog.Info("Shutdown", "Host stopped.");
+            AppLog.Info("Shutdown", "Host stopped.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Shutdown", ex, "Failed to stop host.");
+            AppLog.Error("Shutdown", ex, "Failed to stop host.");
         }
     }
 
@@ -161,11 +161,11 @@ public partial class App : Application
     {
         if (e.Exception is not null)
         {
-            StartupDebugLog.Error("UnhandledException", e.Exception, $"Unhandled exception message: {e.Message}");
+            AppLog.Error("UnhandledException", e.Exception, $"Unhandled exception message: {e.Message}");
             return;
         }
 
-        StartupDebugLog.Info("UnhandledException", $"Unhandled exception message: {e.Message}");
+        AppLog.Info("UnhandledException", $"Unhandled exception message: {e.Message}");
     }
 
     private static void CurrentDomain_FirstChanceException(object? sender, FirstChanceExceptionEventArgs e)
@@ -176,7 +176,7 @@ public partial class App : Application
             var stack = comException.StackTrace ?? string.Empty;
             if (stack.Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase))
             {
-                StartupDebugLog.Error("FirstChance", comException, $"First-chance COMException in MTM_Waitlist stack. HResult=0x{comException.HResult:X8}.");
+                AppLog.Error("FirstChance", comException, $"First-chance COMException in MTM_Waitlist stack. HResult=0x{comException.HResult:X8}.");
             }
         }
 
@@ -185,7 +185,7 @@ public partial class App : Application
             var stack = nullReferenceException.StackTrace ?? string.Empty;
             if (stack.Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase))
             {
-                StartupDebugLog.Error("FirstChance", nullReferenceException, "First-chance NullReferenceException in MTM_Waitlist stack.");
+                AppLog.Error("FirstChance", nullReferenceException, "First-chance NullReferenceException in MTM_Waitlist stack.");
             }
         }
 
@@ -200,7 +200,7 @@ public partial class App : Application
                 var fileName = string.IsNullOrWhiteSpace(fileNotFoundException.FileName)
                     ? "<unknown>"
                     : fileNotFoundException.FileName;
-                StartupDebugLog.Error(
+                AppLog.Error(
                     "FirstChance",
                     fileNotFoundException,
                     $"First-chance FileNotFoundException. FileName='{fileName}'.");
@@ -211,23 +211,23 @@ public partial class App : Application
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        StartupDebugLog.Info("Launch", "OnLaunched started.");
+        AppLog.Info("Launch", "OnLaunched started.");
         base.OnLaunched(args);
 
         try
         {
             // Starts the generic background thread host runtime manager engine
             await Host.StartAsync();
-            StartupDebugLog.Info("Launch", "Host started.");
+            AppLog.Info("Launch", "Host started.");
 
             // The placeholder is the only surface a launch produces while the startup pipeline is rebuilt. No
             // shell navigation, no sign-in form and no store read happens on this path.
             ShowStartupPlaceholderWindow();
-            StartupDebugLog.Info("Launch", "Startup placeholder requested from OnLaunched.");
+            AppLog.Info("Launch", "Startup placeholder requested from OnLaunched.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Launch", ex, "Unhandled exception during launch pipeline.");
+            AppLog.Error("Launch", ex, "Unhandled exception during launch pipeline.");
             throw;
         }
     }

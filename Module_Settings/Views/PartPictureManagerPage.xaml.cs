@@ -21,10 +21,10 @@ public sealed partial class PartPictureManagerPage : Page
 
     public PartPictureManagerPage()
     {
-        StartupDebugLog.Info("PartPictureManagerPage", "Constructor started.");
+        AppLog.Info("PartPictureManagerPage", "Constructor started.");
         ViewModel = App.GetService<PartPictureManagerViewModel>();
         InitializeComponent();
-        StartupDebugLog.Info("PartPictureManagerPage", "Constructor completed.");
+        AppLog.Info("PartPictureManagerPage", "Constructor completed.");
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -90,12 +90,12 @@ public sealed partial class PartPictureManagerPage : Page
         }
         catch (IOException ex)
         {
-            StartupDebugLog.Error("PartPictureManagerPage", ex, "The missing-picture list could not be written.");
+            AppLog.Error("PartPictureManagerPage", ex, "The missing-picture list could not be written.");
             ViewModel.ReportExportFailure(ex.Message);
         }
         catch (UnauthorizedAccessException ex)
         {
-            StartupDebugLog.Error("PartPictureManagerPage", ex, "The missing-picture list could not be written.");
+            AppLog.Error("PartPictureManagerPage", ex, "The missing-picture list could not be written.");
             ViewModel.ReportExportFailure(ex.Message);
         }
     }

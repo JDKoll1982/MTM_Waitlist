@@ -164,7 +164,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SetupWorkCenters",
                 ex,
                 "The work-centre setup permission could not be read, so the management controls stay hidden rather than being offered on a guess.");
@@ -337,11 +337,11 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
                 _hotWorkCenterNames.Add(name.Trim());
             }
 
-            StartupDebugLog.Info("SetupWorkstation", $"Local work centers loaded for the setup selection screen. Count={_hotWorkCenterNames.Count}.");
+            AppLog.Info("SetupWorkstation", $"Local work centers loaded for the setup selection screen. Count={_hotWorkCenterNames.Count}.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SetupWorkstation", ex, "Failed to load Local work centers for the setup selection screen.");
+            AppLog.Error("SetupWorkstation", ex, "Failed to load Local work centers for the setup selection screen.");
         }
 
         UpdateWorkCenterSectionsVisibility();

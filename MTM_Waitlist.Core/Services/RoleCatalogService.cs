@@ -84,7 +84,7 @@ public sealed class RoleCatalogService : IRoleCatalogService
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "Roles",
                 ex,
                 "Could not read the role catalogue; the picker offers no role rather than a guessed one.");

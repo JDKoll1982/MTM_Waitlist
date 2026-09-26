@@ -99,7 +99,7 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "Permissions",
                 ex,
                 "The stored permission rows could not be read; the page shows its unavailable state rather than an answer it does not have.");
@@ -202,7 +202,7 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Permissions", ex, "The change set did not reach the store; nothing was written.");
+            AppLog.Error("Permissions", ex, "The change set did not reach the store; nothing was written.");
             return PermissionChangeResult.Failed(
                 PermissionChangeOutcomeKind.StoreUnavailable,
                 PermissionAdministrationMessages.StoreUnavailableKey,
@@ -237,7 +237,7 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Permissions", ex, "The recorded history could not be read; nothing was reversed.");
+            AppLog.Error("Permissions", ex, "The recorded history could not be read; nothing was reversed.");
             return PermissionChangeResult.Failed(
                 PermissionChangeOutcomeKind.StoreUnavailable,
                 PermissionAdministrationMessages.StoreUnavailableKey,

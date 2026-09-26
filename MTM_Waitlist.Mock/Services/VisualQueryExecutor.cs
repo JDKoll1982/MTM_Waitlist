@@ -79,14 +79,14 @@ public sealed class VisualQueryExecutor : IVisualQueryExecutor
         var script = await _scriptStore.LoadAsync(sourceScriptRelativePath, cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(script))
         {
-            StartupDebugLog.Info("VisualQuery", $"Read script '{sourceScriptRelativePath}' was not found in the content root.");
+            AppLog.Info("VisualQuery", $"Read script '{sourceScriptRelativePath}' was not found in the content root.");
             return VisualQueryOutcome.Failed($"Infor Visual read script '{sourceScriptRelativePath}' was not found.");
         }
 
         var connectionString = _connectionStringProvider.Resolve();
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            StartupDebugLog.Info("VisualQuery", "No Infor Visual connection is configured.");
+            AppLog.Info("VisualQuery", "No Infor Visual connection is configured.");
             return VisualQueryOutcome.Failed("No Infor Visual connection is configured.");
         }
 
@@ -125,7 +125,7 @@ public sealed class VisualQueryExecutor : IVisualQueryExecutor
                 rows.Add(row);
             }
 
-            StartupDebugLog.Info("VisualQuery", $"Read script '{sourceScriptRelativePath}' returned {rows.Count} row(s).");
+            AppLog.Info("VisualQuery", $"Read script '{sourceScriptRelativePath}' returned {rows.Count} row(s).");
             return VisualQueryOutcome.Ok(rows);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -142,7 +142,7 @@ public sealed class VisualQueryExecutor : IVisualQueryExecutor
         }
         catch (SqlException exception)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "VisualQuery",
                 exception,
                 $"Read script '{sourceScriptRelativePath}' failed with SQL error {exception.Number}.");
@@ -154,7 +154,7 @@ public sealed class VisualQueryExecutor : IVisualQueryExecutor
         }
         catch (Exception exception)
         {
-            StartupDebugLog.Error("VisualQuery", exception, $"Read script '{sourceScriptRelativePath}' failed.");
+            AppLog.Error("VisualQuery", exception, $"Read script '{sourceScriptRelativePath}' failed.");
             return VisualQueryOutcome.Failed(exception.Message);
         }
     }
@@ -194,7 +194,7 @@ public sealed class VisualQueryExecutor : IVisualQueryExecutor
         }
         catch (ArgumentException ex)
         {
-            StartupDebugLog.Info(
+            AppLog.Info(
                 "VisualQuery",
                 $"The Infor Visual connection string could not be bounded ({ex.GetType().Name}), so the read keeps its configured timeout.");
             return connectionString;
@@ -203,7 +203,7 @@ public sealed class VisualQueryExecutor : IVisualQueryExecutor
 
     private static VisualQueryOutcome ClassifyAsUnreachable(string sourceScriptRelativePath, Exception exception)
     {
-        StartupDebugLog.Error(
+        AppLog.Error(
             "VisualQuery",
             exception,
             $"Read script '{sourceScriptRelativePath}' could not reach Infor Visual.");

@@ -40,7 +40,7 @@ public sealed class WipFloorInventoryService
         var script = await WaitlistWipMySqlScriptStore.LoadAsync(InventoryPartNumbersScriptName, cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(script))
         {
-            StartupDebugLog.Info("WipFloorInventory", $"Script '{InventoryPartNumbersScriptName}' loaded empty; returning no part numbers.");
+            AppLog.Info("WipFloorInventory", $"Script '{InventoryPartNumbersScriptName}' loaded empty; returning no part numbers.");
             return Array.Empty<string>();
         }
 
@@ -58,12 +58,12 @@ public sealed class WipFloorInventoryService
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
 
-            StartupDebugLog.Info("WipFloorInventory", $"GetInventoryPartNumbersAsync returned {partNumbers.Length} part number(s).");
+            AppLog.Info("WipFloorInventory", $"GetInventoryPartNumbersAsync returned {partNumbers.Length} part number(s).");
             return partNumbers;
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("WipFloorInventory", ex, "GetInventoryPartNumbersAsync failed.");
+            AppLog.Error("WipFloorInventory", ex, "GetInventoryPartNumbersAsync failed.");
             return Array.Empty<string>();
         }
     }
@@ -82,11 +82,11 @@ public sealed class WipFloorInventoryService
         var script = await WaitlistWipMySqlScriptStore.LoadAsync(FloorSnapshotScriptName, cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(script))
         {
-            StartupDebugLog.Info("WipFloorInventory", $"Script '{FloorSnapshotScriptName}' loaded empty; returning null.");
+            AppLog.Info("WipFloorInventory", $"Script '{FloorSnapshotScriptName}' loaded empty; returning null.");
             return null;
         }
 
-        StartupDebugLog.Info("WipFloorInventory", $"GetFloorSnapshotAsync executing '{FloorSnapshotScriptName}' for part '{normalized}'.");
+        AppLog.Info("WipFloorInventory", $"GetFloorSnapshotAsync executing '{FloorSnapshotScriptName}' for part '{normalized}'.");
         try
         {
             var rows = await _mysqlHelperServer.ExecuteSqlQueryAsync(
@@ -104,14 +104,14 @@ public sealed class WipFloorInventoryService
             }
 
             var snapshot = MapToSnapshot(rows[0]);
-            StartupDebugLog.Info(
+            AppLog.Info(
                 "WipFloorInventory",
                 $"GetFloorSnapshotAsync completed for part '{normalized}': FG={snapshot.FinishedGoodsFloorQuantity}, O/S={snapshot.OutsideServiceFloorQuantity}, NCM={snapshot.NonConformingFloorQuantity}, WIP={snapshot.WipFloorQuantity}.");
             return snapshot;
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("WipFloorInventory", ex, $"GetFloorSnapshotAsync failed for part '{normalized}'.");
+            AppLog.Error("WipFloorInventory", ex, $"GetFloorSnapshotAsync failed for part '{normalized}'.");
             return null;
         }
     }

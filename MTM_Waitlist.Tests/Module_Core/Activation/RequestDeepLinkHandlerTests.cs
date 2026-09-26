@@ -19,7 +19,7 @@ namespace MTM_Waitlist.Tests.Module_Core.Activation;
 public sealed class RequestDeepLinkHandlerTests
 {
     [TestCleanup]
-    public void RestoreStartupLog() => StartupDebugLog.Configure(null);
+    public void RestoreAppLogSink() => AppLog.Configure(null);
 
     [TestMethod]
     public void MappedArgument_OpensTheRequestDetailAndShowsNothing()
@@ -47,8 +47,8 @@ public sealed class RequestDeepLinkHandlerTests
     [TestMethod]
     public void UnmappedArgument_ShowsNothingRecordsTheArgumentAndComesForward()
     {
-        var log = new RecordingStartupLogService();
-        StartupDebugLog.Configure(log);
+        var log = new RecordingAppLogSink();
+        AppLog.Configure(log);
 
         var navigation = new WaitlistTestNavigationService();
         var window = new RecordingDeepLinkWindow();
@@ -138,22 +138,22 @@ public sealed class RequestDeepLinkHandlerTests
         public void BringToFront() => BringToFrontCount++;
     }
 
-    /// <summary>Captures the diagnostics the handler writes.</summary>
-    private sealed class RecordingStartupLogService : IStartupLogService
+    /// <summary>Captures what the facade forwards to the seam.</summary>
+    private sealed class RecordingAppLogSink : IAppLogSink
     {
         public List<string> Messages { get; } = [];
 
         public List<string> Areas { get; } = [];
 
-        public void Info(string area, string message)
+        public void Info(string module, string message, string? target = null)
         {
-            Areas.Add(area);
+            Areas.Add(module);
             Messages.Add(message);
         }
 
-        public void Error(string area, Exception? exception, string message)
+        public void Error(string module, string message, Exception? exception = null)
         {
-            Areas.Add(area);
+            Areas.Add(module);
             Messages.Add(message);
         }
     }

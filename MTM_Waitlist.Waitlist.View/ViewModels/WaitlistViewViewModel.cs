@@ -100,7 +100,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     partial void OnShowMyRequestsOnlyChanged(bool value)
     {
-        StartupDebugLog.Info("Waitlist", $"My-Requests filter {(value ? "enabled" : "disabled")} for requester '{_currentRequesterEmployeeNumber}'.");
+        AppLog.Info("Waitlist", $"My-Requests filter {(value ? "enabled" : "disabled")} for requester '{_currentRequesterEmployeeNumber}'.");
         _ = LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
     }
 
@@ -239,7 +239,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Waitlist", ex, "Claiming the request failed; the row is unchanged.");
+            AppLog.Error("Waitlist", ex, "Claiming the request failed; the row is unchanged.");
             ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
             return;
         }
@@ -279,7 +279,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Waitlist", ex, "The action warning could not be shown; the refusal is still reported on the list.");
+            AppLog.Error("Waitlist", ex, "The action warning could not be shown; the refusal is still reported on the list.");
         }
     }
 
@@ -348,7 +348,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Waitlist", ex, "A waitlist request action failed; the row is unchanged.");
+            AppLog.Error("Waitlist", ex, "A waitlist request action failed; the row is unchanged.");
             ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
         }
     }
@@ -386,7 +386,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Waitlist", ex, "The cancel confirmation could not be shown; nothing was cancelled.");
+            AppLog.Error("Waitlist", ex, "The cancel confirmation could not be shown; nothing was cancelled.");
             ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
             return;
         }
@@ -428,7 +428,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Waitlist", ex, "Cancelling the request failed; the request is unchanged.");
+            AppLog.Error("Waitlist", ex, "Cancelling the request failed; the request is unchanged.");
             ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
         }
     }
@@ -522,7 +522,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         if (_imageLocationService is not null
             && !await _imageLocationService.EnsureInitializedAsync())
         {
-            StartupDebugLog.Info(
+            AppLog.Info(
                 "Waitlist",
                 "The image location service could not be initialized; the list will draw the no-image placeholder.");
         }
@@ -595,7 +595,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 // A dispatcher is not always available — the queue lookup itself throws where a thread has none,
                 // and a reachable queue does not always hand out a timer. The countdown text is not worth
                 // throwing out of navigation over: it simply stays where it was.
-                StartupDebugLog.Error("WaitlistRequest", ex, "The list could not get a countdown timer, so the remaining-time text will not tick.");
+                AppLog.Error("WaitlistRequest", ex, "The list could not get a countdown timer, so the remaining-time text will not tick.");
                 return;
             }
 
@@ -730,7 +730,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         await ApplyHandlerActionStateAsync(newItems, DateTimeOffset.UtcNow).ConfigureAwait(false);
 
         await ApplySourceUpdateAsync(newItems, refreshVersion);
-        StartupDebugLog.Info("Waitlist", $"Loaded building '{building}'. SessionRequests={activeRequestCount}, TotalRows={Source.Count}, MyRequestsOnly={ShowMyRequestsOnly}, SearchQuery='{SearchQuery}'.");
+        AppLog.Info("Waitlist", $"Loaded building '{building}'. SessionRequests={activeRequestCount}, TotalRows={Source.Count}, MyRequestsOnly={ShowMyRequestsOnly}, SearchQuery='{SearchQuery}'.");
         UpdateSearchSuggestions(SearchQuery);
     }
 
@@ -769,7 +769,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
         _sortOrder = normalized;
         ReorderSourceInPlace();
-        StartupDebugLog.Info("Waitlist", $"List re-ordered by '{normalized}' without a reload. Rows={Source.Count}.");
+        AppLog.Info("Waitlist", $"List re-ordered by '{normalized}' without a reload. Rows={Source.Count}.");
     }
 
     private void ReorderSourceInPlace()
@@ -799,7 +799,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         {
             if (!dispatcher.TryEnqueue(Apply))
             {
-                StartupDebugLog.Info("Waitlist", "The list could not be re-ordered because the UI queue is not accepting work.");
+                AppLog.Info("Waitlist", "The list could not be re-ordered because the UI queue is not accepting work.");
             }
 
             return;
@@ -945,7 +945,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Waitlist", ex, $"Reading the job for work center '{key}' failed while building the cards' lines.");
+            AppLog.Error("Waitlist", ex, $"Reading the job for work center '{key}' failed while building the cards' lines.");
         }
 
         _jobAvailabilityCache[key] = availability;
@@ -1032,7 +1032,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 // than a hole.
                 if (!ImageFileProbe.IsUsablePicture(resolvedPath))
                 {
-                    StartupDebugLog.Info(
+                    AppLog.Info(
                         "WaitlistRequest",
                         $"Work center '{workCenter.DisplayName}' has no picture to resolve to '{resolvedPath}'; the request page will draw the work centre placeholder instead.");
                     resolvedPath = string.Empty;
@@ -1094,7 +1094,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
             if (string.IsNullOrWhiteSpace(resolved))
             {
-                StartupDebugLog.Info(
+                AppLog.Info(
                     "WaitlistRequest",
                     $"Request '{order.RequestId}' has no picture for its part '{order.MaterialPartNumber}'; the card will draw the no-image placeholder.");
                 return;
@@ -1108,7 +1108,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "WaitlistRequest",
                 ex,
                 $"Resolving the picture for part '{order.MaterialPartNumber}' failed; the card will draw the no-image placeholder.");

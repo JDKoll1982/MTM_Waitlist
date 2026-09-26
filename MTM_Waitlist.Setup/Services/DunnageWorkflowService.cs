@@ -30,25 +30,25 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
 
     public async Task<IReadOnlyList<SetupDunnageType>> GetDunnageTypesAsync(string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupDunnage", $"GetDunnageTypesAsync started. Part='{partNumber}', Sequence='{sequenceNumber}'.");
+        AppLog.Info("SetupDunnage", $"GetDunnageTypesAsync started. Part='{partNumber}', Sequence='{sequenceNumber}'.");
         return await GetDunnageTypesFromBackendAsync(partNumber, sequenceNumber, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<SetupDunnagePart>> GetDunnagePartsAsync(string dunnageTypeId, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupDunnage", $"GetDunnagePartsAsync started. DunnageTypeId='{dunnageTypeId}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
+        AppLog.Info("SetupDunnage", $"GetDunnagePartsAsync started. DunnageTypeId='{dunnageTypeId}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
         return await GetDunnagePartsFromBackendAsync(dunnageTypeId, partNumber, sequenceNumber, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<SetupDunnagePart>> GetAllDunnagePartsAsync(CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupDunnage", "GetAllDunnagePartsAsync started.");
+        AppLog.Info("SetupDunnage", "GetAllDunnagePartsAsync started.");
         return await GetAllDunnagePartsFromBackendAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<SetupSelectionResult> AddDunnageTypeAsync(string typeName, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupDunnage", $"AddDunnageTypeAsync started. TypeName='{typeName}'.");
+        AppLog.Info("SetupDunnage", $"AddDunnageTypeAsync started. TypeName='{typeName}'.");
 
         if (!await CanManageDefinitionsAsync(cancellationToken).ConfigureAwait(false))
         {
@@ -83,7 +83,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             MySqlDatabaseTarget.MtmReceivingApplication,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupDunnage", $"AddDunnageTypeAsync completed. AffectedRows={affectedRows}.");
+        AppLog.Info("SetupDunnage", $"AddDunnageTypeAsync completed. AffectedRows={affectedRows}.");
 
         return new SetupSelectionResult
         {
@@ -96,7 +96,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
 
     public async Task<SetupSelectionResult> AddDunnagePartAsync(string dunnageTypeId, string partName, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupDunnage", $"AddDunnagePartAsync started. TypeId='{dunnageTypeId}', PartName='{partName}'.");
+        AppLog.Info("SetupDunnage", $"AddDunnagePartAsync started. TypeId='{dunnageTypeId}', PartName='{partName}'.");
 
         if (!await CanManageDefinitionsAsync(cancellationToken).ConfigureAwait(false))
         {
@@ -143,7 +143,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             MySqlDatabaseTarget.MtmReceivingApplication,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupDunnage", $"AddDunnagePartAsync completed. AffectedRows={affectedRows}.");
+        AppLog.Info("SetupDunnage", $"AddDunnagePartAsync completed. AffectedRows={affectedRows}.");
 
         return new SetupSelectionResult
         {
@@ -156,7 +156,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
 
     private async Task<IReadOnlyList<SetupDunnageType>> GetDunnageTypesFromBackendAsync(string partNumber, string sequenceNumber, CancellationToken cancellationToken)
     {
-        StartupDebugLog.Info("SetupDunnage", "Loading receiving SQL script GetDunnageTypes.");
+        AppLog.Info("SetupDunnage", "Loading receiving SQL script GetDunnageTypes.");
         _ = await SetupReceivingMySqlScriptStore.LoadAsync("GetDunnageTypes", cancellationToken).ConfigureAwait(false);
 
         var typeImageOverrides = await GetDunnageTypeImageOverridesAsync(cancellationToken).ConfigureAwait(false);
@@ -167,11 +167,11 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             MySqlDatabaseTarget.MtmReceivingApplication,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupDunnage", $"sp_Dunnage_Types_GetAll returned {rows.Count} row(s).");
+        AppLog.Info("SetupDunnage", $"sp_Dunnage_Types_GetAll returned {rows.Count} row(s).");
 
         if (rows.Count == 0)
         {
-            StartupDebugLog.Info("SetupDunnage", "No dunnage types returned from receiving database.");
+            AppLog.Info("SetupDunnage", "No dunnage types returned from receiving database.");
             return Array.Empty<SetupDunnageType>();
         }
 
@@ -188,14 +188,14 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
 
         if (_dunnageTypeVisibilityCatalogService is null)
         {
-            StartupDebugLog.Info("SetupDunnage", $"Dunnage type projection completed. Result count={results.Length}. Visibility filter not configured.");
+            AppLog.Info("SetupDunnage", $"Dunnage type projection completed. Result count={results.Length}. Visibility filter not configured.");
             return results;
         }
 
         var visibilityMap = await _dunnageTypeVisibilityCatalogService.GetVisibilityMapAsync(cancellationToken).ConfigureAwait(false);
         if (visibilityMap.Count == 0)
         {
-            StartupDebugLog.Info("SetupDunnage", $"Dunnage type projection completed. Result count={results.Length}. No visibility overrides found.");
+            AppLog.Info("SetupDunnage", $"Dunnage type projection completed. Result count={results.Length}. No visibility overrides found.");
             return results;
         }
 
@@ -203,19 +203,19 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             .Where(item => !visibilityMap.TryGetValue(item.Id, out var isVisible) || isVisible)
             .ToArray();
 
-        StartupDebugLog.Info("SetupDunnage", $"Dunnage type projection completed. Result count={results.Length}, FilteredCount={filteredResults.Length}.");
+        AppLog.Info("SetupDunnage", $"Dunnage type projection completed. Result count={results.Length}, FilteredCount={filteredResults.Length}.");
 
         return filteredResults;
     }
 
     private async Task<IReadOnlyList<SetupDunnagePart>> GetDunnagePartsFromBackendAsync(string dunnageTypeId, string partNumber, string sequenceNumber, CancellationToken cancellationToken)
     {
-        StartupDebugLog.Info("SetupDunnage", "Loading receiving SQL script GetDunnageParts.");
+        AppLog.Info("SetupDunnage", "Loading receiving SQL script GetDunnageParts.");
         _ = await SetupReceivingMySqlScriptStore.LoadAsync("GetDunnageParts", cancellationToken).ConfigureAwait(false);
 
         if (!int.TryParse(dunnageTypeId, out var typeId))
         {
-            StartupDebugLog.Info("SetupDunnage", $"DunnageTypeId '{dunnageTypeId}' is not numeric; returning empty backend result.");
+            AppLog.Info("SetupDunnage", $"DunnageTypeId '{dunnageTypeId}' is not numeric; returning empty backend result.");
             return Array.Empty<SetupDunnagePart>();
         }
 
@@ -228,11 +228,11 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             MySqlDatabaseTarget.MtmReceivingApplication,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupDunnage", $"sp_Dunnage_Parts_GetByType returned {rows.Count} row(s) for typeId={typeId}.");
+        AppLog.Info("SetupDunnage", $"sp_Dunnage_Parts_GetByType returned {rows.Count} row(s) for typeId={typeId}.");
 
         if (rows.Count == 0)
         {
-            StartupDebugLog.Info("SetupDunnage", "No dunnage parts returned from receiving database.");
+            AppLog.Info("SetupDunnage", "No dunnage parts returned from receiving database.");
             return Array.Empty<SetupDunnagePart>();
         }
 
@@ -255,14 +255,14 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             .Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.PartNumber))
             .ToArray();
 
-            StartupDebugLog.Info("SetupDunnage", $"Dunnage part projection completed. Result count={results.Length}.");
+            AppLog.Info("SetupDunnage", $"Dunnage part projection completed. Result count={results.Length}.");
 
             return results;
     }
 
     private async Task<IReadOnlyList<SetupDunnagePart>> GetAllDunnagePartsFromBackendAsync(CancellationToken cancellationToken)
     {
-        StartupDebugLog.Info("SetupDunnage", "Loading receiving SQL script GetDunnageParts.");
+        AppLog.Info("SetupDunnage", "Loading receiving SQL script GetDunnageParts.");
         _ = await SetupReceivingMySqlScriptStore.LoadAsync("GetDunnageParts", cancellationToken).ConfigureAwait(false);
 
         var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
@@ -271,11 +271,11 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             MySqlDatabaseTarget.MtmReceivingApplication,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupDunnage", $"sp_Dunnage_Parts_GetAll returned {rows.Count} row(s).");
+        AppLog.Info("SetupDunnage", $"sp_Dunnage_Parts_GetAll returned {rows.Count} row(s).");
 
         if (rows.Count == 0)
         {
-            StartupDebugLog.Info("SetupDunnage", "No dunnage parts returned from receiving database.");
+            AppLog.Info("SetupDunnage", "No dunnage parts returned from receiving database.");
             return Array.Empty<SetupDunnagePart>();
         }
 
@@ -303,7 +303,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             .Where(item => !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.PartNumber))
             .ToArray();
 
-        StartupDebugLog.Info("SetupDunnage", $"Dunnage all-parts projection completed. Result count={results.Length}.");
+        AppLog.Info("SetupDunnage", $"Dunnage all-parts projection completed. Result count={results.Length}.");
 
         return results;
     }
@@ -332,7 +332,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
             }
         }
 
-        StartupDebugLog.Info("SetupDunnage", $"Built dunnage type image overrides from part spec JSON. Count={overrides.Count}.");
+        AppLog.Info("SetupDunnage", $"Built dunnage type image overrides from part spec JSON. Count={overrides.Count}.");
         return overrides;
     }
 

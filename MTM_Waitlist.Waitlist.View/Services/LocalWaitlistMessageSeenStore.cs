@@ -61,7 +61,7 @@ public sealed class LocalWaitlistMessageSeenStore : IWaitlistMessageSeenStore
         catch (Exception ex)
         {
             // A last-seen time that cannot be written costs a lingering indicator, not a broken screen.
-            StartupDebugLog.Error("Waitlist", ex, "Recording the last-seen time for a request failed; the new-message indicator may repeat.");
+            AppLog.Error("Waitlist", ex, "Recording the last-seen time for a request failed; the new-message indicator may repeat.");
         }
     }
 
@@ -84,7 +84,7 @@ public sealed class LocalWaitlistMessageSeenStore : IWaitlistMessageSeenStore
         {
             // An unreadable settings file means "nothing has been seen yet", which at worst shows an
             // indicator the viewer has already read — never a crash on the list.
-            StartupDebugLog.Error("Waitlist", ex, "Reading the last-seen times failed; treating every request as unread this time.");
+            AppLog.Error("Waitlist", ex, "Reading the last-seen times failed; treating every request as unread this time.");
             return new Dictionary<string, DateTimeOffset>(StringComparer.OrdinalIgnoreCase);
         }
     }

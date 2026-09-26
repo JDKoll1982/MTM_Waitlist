@@ -61,7 +61,7 @@ public sealed class RequestDispositionResolver
             {
                 // A failed Visual read must not take down disposition resolution - the floor snapshot is
                 // still usable. Note the cache is never substituted for a genuine read failure (FR-024).
-                StartupDebugLog.Error("RequestDisposition", ex, $"Disposition input read failed for part '{normalizedPart}'.");
+                AppLog.Error("RequestDisposition", ex, $"Disposition input read failed for part '{normalizedPart}'.");
             }
         }
 

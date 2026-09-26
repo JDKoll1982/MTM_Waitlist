@@ -20,21 +20,21 @@ public sealed class SetupActiveJobCoordinatorService : IActiveJobCoordinatorServ
     public Task<bool> HasActiveJobAsync(string workCenter, CancellationToken cancellationToken = default)
     {
         var hasActiveJob = !string.IsNullOrWhiteSpace(workCenter) && _activeJobs.ContainsKey(workCenter);
-        StartupDebugLog.Info("SetupActiveJob", $"HasActiveJobAsync checked WorkCenter='{workCenter}'. Result={hasActiveJob}.");
+        AppLog.Info("SetupActiveJob", $"HasActiveJobAsync checked WorkCenter='{workCenter}'. Result={hasActiveJob}.");
         return Task.FromResult(hasActiveJob);
     }
 
     public Task RegisterActiveJobAsync(SetupSaveRequest request, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupActiveJob", $"RegisterActiveJobAsync started. WorkCenter='{request.WorkCenter}', WO='{request.WorkOrder}', Part='{request.PartNumber}', Sequence='{request.SequenceNumber}'.");
+        AppLog.Info("SetupActiveJob", $"RegisterActiveJobAsync started. WorkCenter='{request.WorkCenter}', WO='{request.WorkOrder}', Part='{request.PartNumber}', Sequence='{request.SequenceNumber}'.");
         if (!string.IsNullOrWhiteSpace(request.WorkCenter))
         {
             _activeJobs[request.WorkCenter] = request;
-            StartupDebugLog.Info("SetupActiveJob", $"Active job registered for WorkCenter='{request.WorkCenter}'.");
+            AppLog.Info("SetupActiveJob", $"Active job registered for WorkCenter='{request.WorkCenter}'.");
         }
         else
         {
-            StartupDebugLog.Info("SetupActiveJob", "RegisterActiveJobAsync skipped because WorkCenter was empty.");
+            AppLog.Info("SetupActiveJob", "RegisterActiveJobAsync skipped because WorkCenter was empty.");
         }
 
         return Task.CompletedTask;

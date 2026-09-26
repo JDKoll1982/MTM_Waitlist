@@ -94,7 +94,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
             ? await ResolveCurrentComputerNameAsync(cancellationToken).ConfigureAwait(false)
             : workstationName.Trim();
 
-        StartupDebugLog.Info("WorkCenterCatalog", $"GetCatalogAsync started. Workstation='{normalizedWorkstationName}'.");
+        AppLog.Info("WorkCenterCatalog", $"GetCatalogAsync started. Workstation='{normalizedWorkstationName}'.");
 
         var availableRows = await GetAvailableWorkCenterRowsAsync(cancellationToken).ConfigureAwait(false);
         var allWorkCenters = availableRows
@@ -187,7 +187,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
             WorkCenterDetails = workCenterDetails,
         };
 
-        StartupDebugLog.Info("WorkCenterCatalog", $"GetCatalogAsync completed. Workstation='{normalizedWorkstationName}', HotCount={hotWorkCenters.Count}, OtherCount={otherWorkCenters.Count}, ActiveJobCount={activeJobWorkCenters.Count}.");
+        AppLog.Info("WorkCenterCatalog", $"GetCatalogAsync completed. Workstation='{normalizedWorkstationName}', HotCount={hotWorkCenters.Count}, OtherCount={otherWorkCenters.Count}, ActiveJobCount={activeJobWorkCenters.Count}.");
         return result;
     }
 
@@ -199,7 +199,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
             ? await ResolveCurrentComputerNameAsync(cancellationToken).ConfigureAwait(false)
             : workstationName.Trim();
 
-        StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync started. Workstation='{normalizedWorkstationName}', RequestedCount={hotWorkCenters.Count}.");
+        AppLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync started. Workstation='{normalizedWorkstationName}', RequestedCount={hotWorkCenters.Count}.");
 
         var workstationRows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
             ComputerLookupByNameProcedure,
@@ -213,7 +213,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         var workstationId = GetInt64(workstationRows.FirstOrDefault(), "id");
         if (workstationId <= 0)
         {
-            StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. Workstation '{normalizedWorkstationName}' was not found.");
+            AppLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. Workstation '{normalizedWorkstationName}' was not found.");
             return "Unable to save Local workcenters: workstation not found.";
         }
 
@@ -256,7 +256,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         var connectionString = ResolveConnectionString();
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. No database connection was available for workstation '{normalizedWorkstationName}'.");
+            AppLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. No database connection was available for workstation '{normalizedWorkstationName}'.");
             return "Unable to save Local workcenters: database connection is not configured.";
         }
 
@@ -303,12 +303,12 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
             }
 
             await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-            StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync completed. Workstation='{normalizedWorkstationName}', PersistedCount={resolvedHotWorkCenters.Length}.");
+            AppLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync completed. Workstation='{normalizedWorkstationName}', PersistedCount={resolvedHotWorkCenters.Length}.");
             return null;
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("WorkCenterCatalog", ex, $"SaveHotWorkCentersAsync failed. Workstation='{normalizedWorkstationName}', RequestedCount={orderedHotWorkCenters.Length}.");
+            AppLog.Error("WorkCenterCatalog", ex, $"SaveHotWorkCentersAsync failed. Workstation='{normalizedWorkstationName}', RequestedCount={orderedHotWorkCenters.Length}.");
             return $"Unable to save Local workcenters: {ex.Message}";
         }
     }

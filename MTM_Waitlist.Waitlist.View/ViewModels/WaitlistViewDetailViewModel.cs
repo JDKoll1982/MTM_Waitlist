@@ -235,7 +235,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
                 if (dispatcher is null)
                 {
-                    StartupDebugLog.Info("WaitlistDetail", "No dispatcher is available, so the request page will not refresh while it is open.");
+                    AppLog.Info("WaitlistDetail", "No dispatcher is available, so the request page will not refresh while it is open.");
                     return;
                 }
 
@@ -244,7 +244,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             }
             catch (Exception ex)
             {
-                StartupDebugLog.Error("WaitlistDetail", ex, "The request page could not get a refresh timer, so it will not refresh while it is open.");
+                AppLog.Error("WaitlistDetail", ex, "The request page could not get a refresh timer, so it will not refresh while it is open.");
                 return;
             }
 
@@ -255,7 +255,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
 
         _refreshTimer.Start();
-        StartupDebugLog.Info("WaitlistDetail", $"The request page will refresh every {RefreshInterval.TotalSeconds:0} seconds while it is open.");
+        AppLog.Info("WaitlistDetail", $"The request page will refresh every {RefreshInterval.TotalSeconds:0} seconds while it is open.");
     }
 
     private void StopRefreshTimer() => _refreshTimer?.Stop();
@@ -268,7 +268,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("WaitlistDetail", ex, "The periodic refresh of the request page failed.");
+            AppLog.Error("WaitlistDetail", ex, "The periodic refresh of the request page failed.");
         }
     }
 
@@ -311,7 +311,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             InventoryRows.Add(row);
         }
 
-        StartupDebugLog.Info("WaitlistDetail", $"SortInventoryBy '{normalized}' descending={descending}. Count={InventoryRows.Count}.");
+        AppLog.Info("WaitlistDetail", $"SortInventoryBy '{normalized}' descending={descending}. Count={InventoryRows.Count}.");
     }
 
     // ── Note and history ──────────────────────────────────────────────────────────────────────────
@@ -420,7 +420,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("WaitlistDetail", ex, "Sending the message failed; the request is unchanged.");
+            AppLog.Error("WaitlistDetail", ex, "Sending the message failed; the request is unchanged.");
             NoteMessage = "Waitlist_Note.Refused".GetLocalized();
         }
     }
@@ -444,7 +444,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("WaitlistDetail", ex, "Refreshing the request page failed; the page keeps the previous state.");
+            AppLog.Error("WaitlistDetail", ex, "Refreshing the request page failed; the page keeps the previous state.");
         }
     }
 
@@ -529,7 +529,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         if (_imageLocationService is not null
             && !await _imageLocationService.EnsureInitializedAsync())
         {
-            StartupDebugLog.Info(
+            AppLog.Info(
                 "WaitlistRequest",
                 "The image location service could not be initialized; the request page will draw the no-image placeholder.");
         }
@@ -588,7 +588,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             IsItemPresent = false;
             IsEmptyStateVisible = false;
             EmptyStateMessage = string.Empty;
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "WaitlistDetail",
                 ex,
                 "The request read behind the detail sections failed; the failure is rendered in place with a retry.");
@@ -756,7 +756,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         {
             DeclaredFieldRows.Clear();
             DeclaredFieldsReport = SectionFailureMessage;
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "WaitlistDetail",
                 ex,
                 "The declared-field grid could not be read; the page reports the failure rather than drawing a substitute.");
@@ -839,7 +839,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "WaitlistDetail",
                 ex,
                 $"Reading the job for work center '{key}' failed; the page keeps the rows the request itself carries.");
@@ -933,7 +933,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
 
         IsInventoryEmpty = InventoryRows.Count == 0;
-        StartupDebugLog.Info("WaitlistDetail", $"LoadInventoryAsync completed. Part='{normalizedPart}', Rows={InventoryRows.Count}.");
+        AppLog.Info("WaitlistDetail", $"LoadInventoryAsync completed. Part='{normalizedPart}', Rows={InventoryRows.Count}.");
     }
 
     /// <summary>
@@ -1024,7 +1024,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "WaitlistDetail",
                 ex,
                 $"Resolving the picture for part '{item.MaterialPartNumber}' failed; the page will draw the no-image placeholder.");

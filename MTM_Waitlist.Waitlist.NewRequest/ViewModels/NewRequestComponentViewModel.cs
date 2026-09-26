@@ -142,7 +142,7 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
                 "This job has no components saved on it, so there is no component to choose. Go back and choose a different item.");
         }
 
-        StartupDebugLog.Info(
+        AppLog.Info(
             "NewRequestComponent",
             $"Component step for work center '{state.WorkCenter}' bound {Options.Count} card(s) for item '{state.Item?.Id}'.");
     }
@@ -165,7 +165,7 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "NewRequestComponent",
                 ex,
                 $"Resolving the picture for component '{partNumber}' failed; the card will draw the no-image placeholder.");
@@ -205,7 +205,7 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
             candidate.IsSelected = ReferenceEquals(candidate, option);
         }
 
-        StartupDebugLog.Info(
+        AppLog.Info(
             "NewRequestComponent",
             $"Component '{partNumber}' captured for work center '{state.WorkCenter}'.");
         _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);

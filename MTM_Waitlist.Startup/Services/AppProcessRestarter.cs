@@ -23,7 +23,7 @@ public sealed class AppProcessRestarter : IAppProcessRestarter
         var processPath = Environment.ProcessPath;
         if (string.IsNullOrWhiteSpace(processPath))
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "AppProcessRestarter",
                 new InvalidOperationException("The current process path is unavailable."),
                 "Signing out could not relaunch the application: the current process path is unavailable.");
@@ -40,7 +40,7 @@ public sealed class AppProcessRestarter : IAppProcessRestarter
             var entryAssemblyPath = Assembly.GetEntryAssembly()?.Location;
             if (string.IsNullOrWhiteSpace(entryAssemblyPath))
             {
-                StartupDebugLog.Error(
+                AppLog.Error(
                     "AppProcessRestarter",
                     new InvalidOperationException("The application assembly path is unavailable."),
                     "Signing out could not relaunch the application: the application assembly path is unavailable.");

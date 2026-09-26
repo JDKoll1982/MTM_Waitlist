@@ -138,11 +138,11 @@ public partial class NewRequestJobTypeViewModel : ObservableRecipient, INavigati
                 });
             }
 
-            StartupDebugLog.Info("NewRequestJobType", $"Category step for work center '{workCenter}' bound {Options.Count} category(ies).");
+            AppLog.Info("NewRequestJobType", $"Category step for work center '{workCenter}' bound {Options.Count} category(ies).");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("NewRequestJobType", ex, "Failed to load the request categories.");
+            AppLog.Error("NewRequestJobType", ex, "Failed to load the request categories.");
             IsLoadFailed = true;
             Options.Clear();
         }
@@ -170,7 +170,7 @@ public partial class NewRequestJobTypeViewModel : ObservableRecipient, INavigati
         _state.InputValue = null;
         _state.SelectedDunnagePart = null;
 
-        StartupDebugLog.Info("NewRequestJobType", $"Selected category '{category}' for work center '{_state.WorkCenter}'.");
+        AppLog.Info("NewRequestJobType", $"Selected category '{category}' for work center '{_state.WorkCenter}'.");
         _navigationService.NavigateTo(typeof(NewRequestItemViewModel).FullName!, _state);
     }
 

@@ -146,7 +146,7 @@ public sealed class PermissionService : IPermissionService
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "Permissions",
                 ex,
                 "Could not read the stored permission rows; every gate answers from the shipped fallback rather than refusing (FR-050).");

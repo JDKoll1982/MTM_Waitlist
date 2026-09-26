@@ -16,10 +16,10 @@ public sealed partial class SettingsPage : Page
 
     public SettingsPage()
     {
-        StartupDebugLog.Info("SettingsPage", "Constructor started.");
+        AppLog.Info("SettingsPage", "Constructor started.");
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
-        StartupDebugLog.Info("SettingsPage", "Constructor completed.");
+        AppLog.Info("SettingsPage", "Constructor completed.");
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)

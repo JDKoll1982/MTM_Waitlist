@@ -240,7 +240,7 @@ public partial class CreateUserViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "CreateUser",
                 ex,
                 "The create did not reach the store; the typed values are kept so the reader can try again (FR-104).");

@@ -31,7 +31,7 @@ public sealed partial class PermissionHoldersView : UserControl
     /// <summary>Fills the picker and reads the first answer when the control reaches the tree.</summary>
     private async void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        StartupDebugLog.Info("PermissionHoldersView", "Reached the tree; reading who holds the first feature.");
+        AppLog.Info("PermissionHoldersView", "Reached the tree; reading who holds the first feature.");
 
         ViewModel.LoadFeatures();
         await ViewModel.LoadAsync();

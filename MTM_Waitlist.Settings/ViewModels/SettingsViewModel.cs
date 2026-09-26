@@ -727,7 +727,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         IImageCacheSyncService? imageCacheSyncService = null,
         IPictureEnlargePreference? pictureEnlargePreference = null)
     {
-        StartupDebugLog.Info("SettingsViewModel", "Constructor started.");
+        AppLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
         _localSettingsService = localSettingsService;
         _workCenterCatalogService = workCenterCatalogService;
@@ -779,7 +779,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _ = InitializeHotWorkCentersAsync();
         _ = InitializeDunnageTypeVisibilityAsync();
         RefreshSearchVisibility();
-        StartupDebugLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}'.");
+        AppLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}'.");
     }
 
     /// <summary>
@@ -848,7 +848,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SettingsPermissions",
                 ex,
                 "The Settings screen's permission answers could not be read; every gated control stays hidden rather than being offered on a guess.");
@@ -862,7 +862,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     // whenever the ElementTheme property is modified, updating our custom XAML text field.
     partial void OnElementThemeChanged(ElementTheme value)
     {
-        StartupDebugLog.Info("SettingsViewModel", $"Theme changed to '{value}'.");
+        AppLog.Info("SettingsViewModel", $"Theme changed to '{value}'.");
         OnPropertyChanged(nameof(SelectedThemeText));
         RefreshSearchVisibility();
     }
@@ -878,18 +878,18 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         {
             // The installation cannot deliver a notification, so there is no preference to record. The
             // toggle is disabled for this reason; this guard keeps that structural rather than cosmetic.
-            StartupDebugLog.Info("SettingsViewModel", "NewRequestAlertsEnabled was asked for on an installation that cannot deliver a notification; nothing was stored.");
+            AppLog.Info("SettingsViewModel", "NewRequestAlertsEnabled was asked for on an installation that cannot deliver a notification; nothing was stored.");
             return;
         }
 
-        StartupDebugLog.Info("SettingsViewModel", $"NewRequestAlertsEnabled changed to {value}.");
+        AppLog.Info("SettingsViewModel", $"NewRequestAlertsEnabled changed to {value}.");
         _ = _newRequestAlertService.SetEnabledAsync(value);
         RefreshSearchVisibility();
     }
 
     partial void OnSearchQueryChanged(string value)
     {
-        StartupDebugLog.Info("SettingsViewModel", $"SearchQuery changed to '{value}'.");
+        AppLog.Info("SettingsViewModel", $"SearchQuery changed to '{value}'.");
         RefreshSearchVisibility();
     }
 
@@ -904,13 +904,13 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        StartupDebugLog.Info("SettingsViewModel", $"EnlargePicturesOnClick changed to {value}.");
+        AppLog.Info("SettingsViewModel", $"EnlargePicturesOnClick changed to {value}.");
         _ = _pictureEnlargePreference?.SetEnabledAsync(value);
     }
 
     partial void OnSelectedWorkstationChanged(string value)
     {
-        StartupDebugLog.Info("SettingsViewModel", $"SelectedWorkstation changed to '{value}'.");
+        AppLog.Info("SettingsViewModel", $"SelectedWorkstation changed to '{value}'.");
         if (string.IsNullOrWhiteSpace(value))
         {
             return;
@@ -933,10 +933,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
 
         var normalizedWorkCenter = workCenter.Trim();
-        StartupDebugLog.Info("SettingsHotWorkCenters", $"AddHotWorkCenterAsync started. WorkCenter='{normalizedWorkCenter}', Workstation='{SelectedWorkstation}'.");
+        AppLog.Info("SettingsHotWorkCenters", $"AddHotWorkCenterAsync started. WorkCenter='{normalizedWorkCenter}', Workstation='{SelectedWorkstation}'.");
         if (HotWorkCenters.Any(value => string.Equals(value, normalizedWorkCenter, StringComparison.OrdinalIgnoreCase)))
         {
-            StartupDebugLog.Info("SettingsHotWorkCenters", $"AddHotWorkCenterAsync skipped because '{normalizedWorkCenter}' is already pinned.");
+            AppLog.Info("SettingsHotWorkCenters", $"AddHotWorkCenterAsync skipped because '{normalizedWorkCenter}' is already pinned.");
             return;
         }
 
@@ -966,7 +966,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
 
         var normalizedWorkCenter = workCenter.Trim();
-        StartupDebugLog.Info("SettingsHotWorkCenters", $"RemoveHotWorkCenterAsync started. WorkCenter='{normalizedWorkCenter}', Workstation='{SelectedWorkstation}'.");
+        AppLog.Info("SettingsHotWorkCenters", $"RemoveHotWorkCenterAsync started. WorkCenter='{normalizedWorkCenter}', Workstation='{SelectedWorkstation}'.");
         var updatedHot = HotWorkCenters
             .Where(value => !string.Equals(value, normalizedWorkCenter, StringComparison.OrdinalIgnoreCase))
             .ToArray();
@@ -1004,7 +1004,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        StartupDebugLog.Info("SettingsDunnageVisibility", $"ShowDunnageTypeAsync started. DunnageTypeId='{normalizedId}'.");
+        AppLog.Info("SettingsDunnageVisibility", $"ShowDunnageTypeAsync started. DunnageTypeId='{normalizedId}'.");
 
         var nextHidden = HiddenDunnageTypes.Where(item => !string.Equals(item.Id, normalizedId, StringComparison.OrdinalIgnoreCase)).ToArray();
         var nextVisible = VisibleDunnageTypes.Concat(new[] { selectedOption }).ToArray();
@@ -1036,7 +1036,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        StartupDebugLog.Info("SettingsDunnageVisibility", $"HideDunnageTypeAsync started. DunnageTypeId='{normalizedId}'.");
+        AppLog.Info("SettingsDunnageVisibility", $"HideDunnageTypeAsync started. DunnageTypeId='{normalizedId}'.");
 
         var nextVisible = VisibleDunnageTypes.Where(item => !string.Equals(item.Id, normalizedId, StringComparison.OrdinalIgnoreCase)).ToArray();
         var nextHidden = HiddenDunnageTypes.Concat(new[] { selectedOption }).ToArray();
@@ -1050,7 +1050,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     private async Task InitializeHotWorkCentersAsync()
     {
-        StartupDebugLog.Info("SettingsViewModel", "InitializeHotWorkCentersAsync started.");
+        AppLog.Info("SettingsViewModel", "InitializeHotWorkCentersAsync started.");
         IsHotWorkCentersBusy = true;
         try
         {
@@ -1079,7 +1079,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
             RefreshSearchVisibility();
 
-            StartupDebugLog.Info("SettingsViewModel", $"InitializeHotWorkCentersAsync completed. Workstation='{SelectedWorkstation}', AvailableCount={AvailableWorkstations.Count}.");
+            AppLog.Info("SettingsViewModel", $"InitializeHotWorkCentersAsync completed. Workstation='{SelectedWorkstation}', AvailableCount={AvailableWorkstations.Count}.");
         }
         finally
         {
@@ -1089,7 +1089,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     private async Task LoadCatalogForWorkstationAsync(string workstationName)
     {
-        StartupDebugLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync started. Workstation='{workstationName}'.");
+        AppLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync started. Workstation='{workstationName}'.");
         IsHotWorkCentersBusy = true;
         try
         {
@@ -1098,11 +1098,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             ReplaceCollectionValues(OtherWorkCenters, catalog.OtherWorkCenters);
             HotWorkCentersStatusMessage = string.Empty;
             RefreshSearchVisibility();
-            StartupDebugLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync completed. Workstation='{workstationName}', HotCount={HotWorkCenters.Count}, OtherCount={OtherWorkCenters.Count}.");
+            AppLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync completed. Workstation='{workstationName}', HotCount={HotWorkCenters.Count}, OtherCount={OtherWorkCenters.Count}.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsViewModel", ex, $"LoadCatalogForWorkstationAsync failed. Workstation='{workstationName}'.");
+            AppLog.Error("SettingsViewModel", ex, $"LoadCatalogForWorkstationAsync failed. Workstation='{workstationName}'.");
             HotWorkCentersStatusMessage = $"Unable to load work centers: {ex.Message}";
         }
         finally
@@ -1115,7 +1115,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            StartupDebugLog.Info("SettingsHotWorkCenters", $"SaveCurrentHotWorkCentersAsync started. Workstation='{SelectedWorkstation}', Count={HotWorkCenters.Count}.");
+            AppLog.Info("SettingsHotWorkCenters", $"SaveCurrentHotWorkCentersAsync started. Workstation='{SelectedWorkstation}', Count={HotWorkCenters.Count}.");
             var saveMessage = await _workCenterCatalogService
                 .SaveHotWorkCentersAsync(SelectedWorkstation, HotWorkCenters.ToArray())
                 .ConfigureAwait(true);
@@ -1124,18 +1124,18 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 ? "Local workcenters saved."
                 : saveMessage;
 
-            StartupDebugLog.Info("SettingsHotWorkCenters", $"SaveCurrentHotWorkCentersAsync completed. Workstation='{SelectedWorkstation}', Message='{HotWorkCentersStatusMessage}'.");
+            AppLog.Info("SettingsHotWorkCenters", $"SaveCurrentHotWorkCentersAsync completed. Workstation='{SelectedWorkstation}', Message='{HotWorkCentersStatusMessage}'.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsHotWorkCenters", ex, $"SaveCurrentHotWorkCentersAsync failed. Workstation='{SelectedWorkstation}', Count={HotWorkCenters.Count}.");
+            AppLog.Error("SettingsHotWorkCenters", ex, $"SaveCurrentHotWorkCentersAsync failed. Workstation='{SelectedWorkstation}', Count={HotWorkCenters.Count}.");
             HotWorkCentersStatusMessage = $"Unable to save Local workcenters: {ex.Message}";
         }
     }
 
     private async Task InitializeDunnageTypeVisibilityAsync()
     {
-        StartupDebugLog.Info("SettingsDunnageVisibility", "InitializeDunnageTypeVisibilityAsync started.");
+        AppLog.Info("SettingsDunnageVisibility", "InitializeDunnageTypeVisibilityAsync started.");
         IsDunnageTypeVisibilityBusy = true;
         try
         {
@@ -1144,11 +1144,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             ReplaceDunnageTypeValues(HiddenDunnageTypes, catalog.HiddenDunnageTypes);
             DunnageTypeVisibilityStatusMessage = string.Empty;
             RefreshSearchVisibility();
-            StartupDebugLog.Info("SettingsDunnageVisibility", $"InitializeDunnageTypeVisibilityAsync completed. VisibleCount={VisibleDunnageTypes.Count}, HiddenCount={HiddenDunnageTypes.Count}.");
+            AppLog.Info("SettingsDunnageVisibility", $"InitializeDunnageTypeVisibilityAsync completed. VisibleCount={VisibleDunnageTypes.Count}, HiddenCount={HiddenDunnageTypes.Count}.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsDunnageVisibility", ex, "InitializeDunnageTypeVisibilityAsync failed.");
+            AppLog.Error("SettingsDunnageVisibility", ex, "InitializeDunnageTypeVisibilityAsync failed.");
             DunnageTypeVisibilityStatusMessage = $"Unable to load dunnage visibility: {ex.Message}";
         }
         finally
@@ -1170,11 +1170,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 ? "Dunnage visibility saved."
                 : saveMessage;
 
-            StartupDebugLog.Info("SettingsDunnageVisibility", $"SaveCurrentDunnageTypeVisibilityAsync completed. VisibleCount={VisibleDunnageTypes.Count}, HiddenCount={HiddenDunnageTypes.Count}, Message='{DunnageTypeVisibilityStatusMessage}'.");
+            AppLog.Info("SettingsDunnageVisibility", $"SaveCurrentDunnageTypeVisibilityAsync completed. VisibleCount={VisibleDunnageTypes.Count}, HiddenCount={HiddenDunnageTypes.Count}, Message='{DunnageTypeVisibilityStatusMessage}'.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsDunnageVisibility", ex, "SaveCurrentDunnageTypeVisibilityAsync failed.");
+            AppLog.Error("SettingsDunnageVisibility", ex, "SaveCurrentDunnageTypeVisibilityAsync failed.");
             DunnageTypeVisibilityStatusMessage = $"Unable to save dunnage visibility: {ex.Message}";
         }
         finally
@@ -1292,7 +1292,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
         ReplaceCollectionValues(IgnoredLocations, seed);
         IgnoredLocationsStatusMessage = string.Empty;
-        StartupDebugLog.Info("SettingsIgnoredLocations", $"InitializeIgnoredLocations completed. StoredCount={(stored is null ? 0 : stored.Count)}, ActiveCount={IgnoredLocations.Count}.");
+        AppLog.Info("SettingsIgnoredLocations", $"InitializeIgnoredLocations completed. StoredCount={(stored is null ? 0 : stored.Count)}, ActiveCount={IgnoredLocations.Count}.");
     }
 
     [RelayCommand]
@@ -1317,7 +1317,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        StartupDebugLog.Info("SettingsIgnoredLocations", $"AddIgnoredLocationAsync adding '{code}'.");
+        AppLog.Info("SettingsIgnoredLocations", $"AddIgnoredLocationAsync adding '{code}'.");
         IgnoredLocations.Add(code);
         SortCollection(IgnoredLocations);
         IgnoredLocationInput = string.Empty;
@@ -1346,7 +1346,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         ReplaceCollectionValues(IgnoredLocations, updated);
         IgnoredLocationsStatusMessage = string.Empty;
         RefreshSearchVisibility();
-        StartupDebugLog.Info("SettingsIgnoredLocations", $"RemoveIgnoredLocationAsync removed '{code}'. Remaining={IgnoredLocations.Count}.");
+        AppLog.Info("SettingsIgnoredLocations", $"RemoveIgnoredLocationAsync removed '{code}'. Remaining={IgnoredLocations.Count}.");
         await SaveIgnoredLocationsAsync().ConfigureAwait(true);
     }
 
@@ -1355,11 +1355,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         try
         {
             await _localSettingsService.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, IgnoredLocations.ToList()).ConfigureAwait(true);
-            StartupDebugLog.Info("SettingsIgnoredLocations", $"SaveIgnoredLocationsAsync saved {IgnoredLocations.Count} location(s).");
+            AppLog.Info("SettingsIgnoredLocations", $"SaveIgnoredLocationsAsync saved {IgnoredLocations.Count} location(s).");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsIgnoredLocations", ex, "SaveIgnoredLocationsAsync failed.");
+            AppLog.Error("SettingsIgnoredLocations", ex, "SaveIgnoredLocationsAsync failed.");
             IgnoredLocationsStatusMessage = $"Unable to save ignored locations: {ex.Message}";
         }
     }
@@ -1408,7 +1408,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SettingsPictureCache",
                 ex,
                 "The picture cache's settings could not be read; the shipped defaults are shown and the store will be asked again next visit.");
@@ -1454,7 +1454,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         catch (Exception ex)
         {
             PictureCacheStatusMessage = "Unable to save that change.";
-            StartupDebugLog.Error("SettingsPictureCache", ex, "The picture cache toggle could not be stored.");
+            AppLog.Error("SettingsPictureCache", ex, "The picture cache toggle could not be stored.");
         }
     }
 
@@ -1489,7 +1489,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         catch (Exception ex)
         {
             PictureCacheStatusMessage = "Unable to save that folder.";
-            StartupDebugLog.Error("SettingsPictureCache", ex, "The picture cache folder could not be stored.");
+            AppLog.Error("SettingsPictureCache", ex, "The picture cache folder could not be stored.");
         }
     }
 
@@ -1523,7 +1523,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         catch (Exception ex)
         {
             PictureCacheStatusMessage = "Unable to copy the pictures.";
-            StartupDebugLog.Error("SettingsPictureCache", ex, "The picture copy requested from the Settings screen failed.");
+            AppLog.Error("SettingsPictureCache", ex, "The picture copy requested from the Settings screen failed.");
         }
         finally
         {
@@ -1568,7 +1568,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         catch (Exception ex)
         {
             StoragePathsStatusMessage = "Settings_StoragePaths_Unavailable.Text".GetLocalized();
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SettingsStoragePaths",
                 ex,
                 "The storage folders could not be read; the boxes are left empty and the store is asked again next visit.");
@@ -1613,7 +1613,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             // A folder that cannot be resolved is already reported by the read above; the panel must not fail on
             // the line that explains it.
             StoragePathsDisagreementMessage = string.Empty;
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SettingsStoragePaths",
                 ex,
                 "The storage folder's disagreement with this machine's own configuration could not be worked out.");
@@ -1683,7 +1683,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         catch (Exception ex)
         {
             StoragePathsStatusMessage = "Settings_StoragePaths_SaveFailed.Text".GetLocalized();
-            StartupDebugLog.Error("SettingsStoragePaths", ex, "A storage setting could not be stored.");
+            AppLog.Error("SettingsStoragePaths", ex, "A storage setting could not be stored.");
         }
         finally
         {
@@ -1745,7 +1745,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
         try
         {
-            StartupDebugLog.Info("SettingsCacheRefresh", "RequestCacheRefreshAsync started.");
+            AppLog.Info("SettingsCacheRefresh", "RequestCacheRefreshAsync started.");
 
             var result = await _mockServiceRefreshClient.RequestRefreshAsync(null).ConfigureAwait(true);
 
@@ -1753,7 +1753,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             {
                 CacheRefreshStatusMessage = result.Message
                     ?? "The cache refresh service did not accept the request.";
-                StartupDebugLog.Info("SettingsCacheRefresh", $"Request not completed: {CacheRefreshStatusMessage}");
+                AppLog.Info("SettingsCacheRefresh", $"Request not completed: {CacheRefreshStatusMessage}");
                 return;
             }
 
@@ -1770,12 +1770,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                     + string.Join("; ", notRefreshed)
                     + ".";
 
-            StartupDebugLog.Info("SettingsCacheRefresh", $"Request completed. {CacheRefreshStatusMessage}");
+            AppLog.Info("SettingsCacheRefresh", $"Request completed. {CacheRefreshStatusMessage}");
         }
         catch (Exception ex)
         {
             CacheRefreshStatusMessage = $"Unable to request a cache refresh: {ex.Message}";
-            StartupDebugLog.Error("SettingsCacheRefresh", ex, "RequestCacheRefreshAsync failed.");
+            AppLog.Error("SettingsCacheRefresh", ex, "RequestCacheRefreshAsync failed.");
         }
         finally
         {

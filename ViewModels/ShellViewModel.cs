@@ -193,7 +193,7 @@ public partial class ShellViewModel : ObservableRecipient
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("ShellViewModel", ex, $"The sort order '{sortOrder}' could not be remembered; the list is still ordered by it.");
+            AppLog.Error("ShellViewModel", ex, $"The sort order '{sortOrder}' could not be remembered; the list is still ordered by it.");
         }
     }
 
@@ -399,7 +399,7 @@ public partial class ShellViewModel : ObservableRecipient
 
         if (e.SourcePageType == typeof(SettingsPage))
         {
-            StartupDebugLog.Info("ShellViewModel", "Settings page navigated to.");
+            AppLog.Info("ShellViewModel", "Settings page navigated to.");
             Selected = NavigationViewService.SettingsItem;
             HeaderText = "Settings";
             HideHeaderProgress();

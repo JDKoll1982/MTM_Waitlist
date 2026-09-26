@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 
 using MTM_Waitlist.Services;
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
@@ -311,7 +312,7 @@ public static partial class ServiceRegistrationExtensions
                     // One source skipped and one kept, rather than both lost: the Dunnage tree is still mirrored
                     // from its own setting, and the waitlist pictures are read from the share for this run. The
                     // service has already logged why it could not initialize.
-                    MTM_Waitlist.Module_Core.Helpers.StartupDebugLog.Info(
+                    AppLog.Info(
                         "ImageCache",
                         "The waitlist picture source is skipped for this run because the image locations could not be initialized; those pictures are read from the share.");
                 }

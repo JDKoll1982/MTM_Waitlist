@@ -258,7 +258,7 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "NewRequestSummary",
                 ex,
                 $"Resolving the picture for part '{partNumber}' failed; the step will draw the no-image placeholder.");
@@ -325,7 +325,7 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("NewRequestSummary", ex, "Failed to resolve coil details for the confirm screen.");
+            AppLog.Error("NewRequestSummary", ex, "Failed to resolve coil details for the confirm screen.");
             ResetCoilDetail();
         }
     }
@@ -348,7 +348,7 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
             StatusMessage = jobValidation.Message;
             IsStatusError = true;
             IsStatusVisible = true;
-            StartupDebugLog.Info("NewRequestSummary", $"Submission blocked because the active job changed for work center '{_state.WorkCenter}'.");
+            AppLog.Info("NewRequestSummary", $"Submission blocked because the active job changed for work center '{_state.WorkCenter}'.");
             return;
         }
 
@@ -404,7 +404,7 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("NewRequestSummary", ex, "Request submission threw an unexpected exception.");
+            AppLog.Error("NewRequestSummary", ex, "Request submission threw an unexpected exception.");
             StatusMessage = "The request could not be submitted. Please try again.";
             IsStatusError = true;
             IsStatusVisible = true;

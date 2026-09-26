@@ -131,7 +131,7 @@ public partial class NewRequestDunnageViewModel : ObservableRecipient, INavigati
                 "This job has no dunnage saved on it. Use a substitute if you need one, or go back and choose a different item.");
         }
 
-        StartupDebugLog.Info(
+        AppLog.Info(
             "NewRequestDunnage",
             $"Dunnage step for work center '{state.WorkCenter}' bound {Options.Count} card(s) for item '{state.Item?.Id}'.");
     }
@@ -177,7 +177,7 @@ public partial class NewRequestDunnageViewModel : ObservableRecipient, INavigati
         catch (Exception ex)
         {
             // A picker that could not open is reported rather than swallowed, and the assigned cards stay usable.
-            StartupDebugLog.Error("NewRequestDunnage", ex, "The substitute dunnage picker failed to open.");
+            AppLog.Error("NewRequestDunnage", ex, "The substitute dunnage picker failed to open.");
             IsUnavailableVisible = true;
             UnavailableMessage = LocalizeOrDefault(
                 "NewRequest_Dunnage.SubstituteFailed.Message",
@@ -227,7 +227,7 @@ public partial class NewRequestDunnageViewModel : ObservableRecipient, INavigati
             Options.Insert(0, CreateOption(part, partNumber));
         }
 
-        StartupDebugLog.Info(
+        AppLog.Info(
             "NewRequestDunnage",
             $"Dunnage part '{partNumber}' captured for work center '{state.WorkCenter}' (substitute={option is null}).");
         _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);

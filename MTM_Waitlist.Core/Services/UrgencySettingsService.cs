@@ -54,7 +54,7 @@ public sealed class UrgencySettingsService : IUrgencySettingsService
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "UrgencySettings",
                 ex,
                 $"Could not read the configured allotted minutes for item '{itemCode}'; answering the labelled {DefaultMinutes}-minute default so the request keeps its place in the urgency order (FR-017, SC-007).");
