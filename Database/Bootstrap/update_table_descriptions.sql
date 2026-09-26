@@ -697,3 +697,27 @@ SET FOREIGN_KEY_CHECKS = 1;
 --   Seed: seed_waitlist_request_catalog (artifact removed with the tables it populated), together with the
 --     dead Database/Seeds/seed_waitlist_requests_default/migrate_subtypes.sql whose request_type / subtype
 --     columns stopped existing when waitlist_requests_queue was re-keyed.
+
+-- ============================================================
+-- Retired objects - feature 010-startup-rebuild (tasks T020, T023)
+-- ============================================================
+-- The old startup surface was removed and is being rebuilt, so the procedures only that surface used are no
+-- longer created by an artifact in this tree and no longer carry descriptions here. The matching rollback
+-- artifacts remain as the drop statements, so a DBA can promote the removal, and each procedure's body was
+-- removed from Database/StoredProcedures/AllSPs.sql in the same change:
+--   Stored procedures (drop via Database/StoredProcedures/<name>/rollback.sql):
+--     sp_server_utc_now_get (the wrapper only; `fn_server_utc_now` is retained),
+--     sp_auth_credentials_check, sp_auth_user_password_update, sp_auth_computer_registered_get,
+--     sp_auth_session_expiry_get, sp_auth_password_reset_required_get
+--   Validation: Database/Validation/startup_schema/validate.sql was reworked rather than deleted (T021). It
+--     keeps the checks that cover shared tables and the retained `fn_server_utc_now`; the checks that covered
+--     the retired session table (auth_sessions_tokens) were removed with the surface that used it.
+--   Not retired, and deliberately so (T022): sp_core_computers_registry_lookup_by_name_mac_get,
+--     sp_core_computers_registry_lookup_by_mac_get and sp_core_computers_registry_update_by_mac. They were
+--     listed with the startup-only set, but a surviving artifact still names each of them — the rebuilt
+--     machine-facts contract reads a machine by its (name, hardware address) pair, and the retained computer
+--     registry service still calls all three — so removing them here would leave live code calling a
+--     procedure no install creates. They retire with that service instead (T187).
+--   Retained, unchanged: `fn_server_utc_now`. The rebuilt session, remembered sign-in, log and
+--     picture-source procedures all compare against the store's own clock through it, so it stays the single
+--     implementation of "now" (S8.1).

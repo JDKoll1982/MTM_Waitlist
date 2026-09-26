@@ -259,17 +259,6 @@ FROM (
                 ), 'present', 'missing'
             )
         UNION ALL
-        SELECT 'missing_routine', 'sp_auth_credentials_check', 'procedure exists', IF(
-                EXISTS (
-                    SELECT 1
-                    FROM information_schema.routines
-                    WHERE
-                        routine_schema = DATABASE()
-                        AND routine_name = 'sp_auth_credentials_check'
-                        AND routine_type = 'PROCEDURE'
-                ), 'present', 'missing'
-            )
-        UNION ALL
         SELECT 'missing_routine', 'sp_auth_user_row_get', 'procedure exists', IF(
                 EXISTS (
                     SELECT 1
@@ -277,17 +266,6 @@ FROM (
                     WHERE
                         routine_schema = DATABASE()
                         AND routine_name = 'sp_auth_user_row_get'
-                        AND routine_type = 'PROCEDURE'
-                ), 'present', 'missing'
-            )
-        UNION ALL
-        SELECT 'missing_routine', 'sp_auth_password_reset_required_get', 'procedure exists', IF(
-                EXISTS (
-                    SELECT 1
-                    FROM information_schema.routines
-                    WHERE
-                        routine_schema = DATABASE()
-                        AND routine_name = 'sp_auth_password_reset_required_get'
                         AND routine_type = 'PROCEDURE'
                 ), 'present', 'missing'
             )

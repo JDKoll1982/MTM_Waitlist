@@ -1,5 +1,10 @@
--- Validate current startup schema against the expected MTM_Waitlist baseline
+-- Validate the shared MTM_Waitlist schema baseline that survives the startup rebuild
 -- Engine: MySQL 5.7
+--
+-- Reworked by task T021 of specs/010-startup-rebuild: it keeps the checks that cover shared tables and the
+-- retained `fn_server_utc_now`, and the per-object checks for the retired startup session table were removed
+-- with the surface that used them. The log-store column and index checks stay, because `ops_startup_logs` is
+-- repurposed as the rebuilt application's log store rather than retired.
 
 USE mtm_waitlist;
 
@@ -48,16 +53,6 @@ FROM (
                 WHERE
                     table_schema = DATABASE()
                     AND table_name = 'core_computers_registry'
-            )
-        UNION ALL
-        SELECT 'missing_table', 'auth_sessions_tokens', 'table exists', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.tables
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
             )
         UNION ALL
         SELECT 'missing_table', 'config_settings_values', 'table exists', 'missing'
@@ -431,150 +426,6 @@ FROM (
                     table_schema = DATABASE()
                     AND table_name = 'core_computers_registry'
                     AND column_name = 'updated_utc'
-                    AND data_type = 'datetime'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.user_id', 'BIGINT NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'user_id'
-                    AND data_type = 'bigint'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.computer_id', 'BIGINT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'computer_id'
-                    AND data_type = 'bigint'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.token_hash', 'CHAR(64) NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'token_hash'
-                    AND data_type = 'char'
-                    AND character_maximum_length = 64
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.token_salt', 'VARBINARY(32) NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'token_salt'
-                    AND data_type = 'varbinary'
-                    AND character_maximum_length = 32
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.token_version', 'SMALLINT NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'token_version'
-                    AND data_type = 'smallint'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.issued_utc', 'DATETIME NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'issued_utc'
-                    AND data_type = 'datetime'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.expires_utc', 'DATETIME NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'expires_utc'
-                    AND data_type = 'datetime'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.revoked_utc', 'DATETIME NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'revoked_utc'
-                    AND data_type = 'datetime'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.is_active', 'TINYINT(1) NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'is_active'
-                    AND data_type = 'tinyint'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.source_label', 'VARCHAR(32) NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'source_label'
-                    AND data_type = 'varchar'
-                    AND character_maximum_length = 32
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.created_utc', 'DATETIME NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'created_utc'
                     AND data_type = 'datetime'
                     AND is_nullable = 'NO'
             )
