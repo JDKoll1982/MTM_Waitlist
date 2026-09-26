@@ -8,38 +8,9 @@ namespace MTM_Waitlist.Tests.Core.Models;
 public sealed class StartupOptionsModelsTests
 {
     [TestMethod]
-    public void StartupRegistrationRequest_Defaults()
+    public void WaitlistDatabaseOptions_Defaults()
     {
-        var request = new StartupRegistrationRequest();
-
-        Assert.AreEqual(string.Empty, request.Username);
-        Assert.AreEqual(string.Empty, request.HostnameNormalized);
-        Assert.AreEqual(string.Empty, request.MacAddressNormalized);
-        Assert.AreEqual(default, request.RequestedUtc);
-    }
-
-    [TestMethod]
-    public void StartupRegistrationRequest_CanBeInitialized()
-    {
-        var now = DateTimeOffset.UtcNow;
-        var request = new StartupRegistrationRequest
-        {
-            Username = "johnk",
-            HostnameNormalized = "JOHNSPC",
-            MacAddressNormalized = "AA:BB",
-            RequestedUtc = now
-        };
-
-        Assert.AreEqual("johnk", request.Username);
-        Assert.AreEqual("JOHNSPC", request.HostnameNormalized);
-        Assert.AreEqual("AA:BB", request.MacAddressNormalized);
-        Assert.AreEqual(now, request.RequestedUtc);
-    }
-
-    [TestMethod]
-    public void StartupDatabaseOptions_Defaults()
-    {
-        var options = new StartupDatabaseOptions();
+        var options = new WaitlistDatabaseOptions();
 
         Assert.AreEqual("MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING", options.ConnectionStringEnvironmentVariable);
         Assert.AreEqual(string.Empty, options.ConnectionString);
@@ -64,28 +35,6 @@ public sealed class StartupOptionsModelsTests
     }
 
     [TestMethod]
-    public void StartupDevelopmentOptions_Defaults()
-    {
-        var options = new StartupDevelopmentOptions();
-
-        Assert.IsNotNull(options.DefaultDeveloperUsernames);
-        Assert.AreEqual(0, options.DefaultDeveloperUsernames.Count);
-    }
-
-    [TestMethod]
-    public void StartupWindowOptions_Defaults()
-    {
-        var options = new StartupWindowOptions();
-
-        Assert.AreEqual(920, options.SplashWidth);
-        Assert.AreEqual(620, options.SplashHeight);
-        Assert.AreEqual(1600, options.MainWidth);
-        Assert.AreEqual(980, options.MainHeight);
-        Assert.IsTrue(options.CenterOnModeSwitch);
-        Assert.AreEqual(120, options.MainTransitionDelayMilliseconds);
-    }
-
-    [TestMethod]
     public void ModuleCoreSettingsOptions_Defaults()
     {
         var options = new ModuleCoreSettingsOptions();
@@ -101,32 +50,5 @@ public sealed class StartupOptionsModelsTests
 
         Assert.IsNull(options.ApplicationDataFolder);
         Assert.IsNull(options.LocalSettingsFile);
-    }
-
-    [TestMethod]
-    public void StartupCredentialCheckResult_Failed()
-    {
-        var result = StartupCredentialCheckResult.Failed();
-
-        Assert.IsFalse(result.IsAuthenticated);
-        Assert.IsFalse(result.RequiresPasswordChange);
-        Assert.AreEqual(0, result.UserId);
-        Assert.AreEqual(string.Empty, result.CurrentRole);
-        Assert.AreEqual(string.Empty, result.CurrentRoleCode);
-        Assert.IsFalse(result.HoldsTemporaryCredential);
-        Assert.AreEqual(0, result.TemporaryCredentialFailedAttempts);
-        Assert.IsFalse(result.TemporaryCredentialAttemptLimitReached);
-    }
-
-    [TestMethod]
-    public void StartupCredentialCheckResult_Success()
-    {
-        var result = StartupCredentialCheckResult.Success(42, "Developer", requiresPasswordChange: true, currentRoleCode: "developer");
-
-        Assert.IsTrue(result.IsAuthenticated);
-        Assert.IsTrue(result.RequiresPasswordChange);
-        Assert.AreEqual(42, result.UserId);
-        Assert.AreEqual("Developer", result.CurrentRole);
-        Assert.AreEqual("developer", result.CurrentRoleCode);
     }
 }

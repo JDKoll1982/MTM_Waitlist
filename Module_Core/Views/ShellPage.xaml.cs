@@ -16,26 +16,19 @@ namespace MTM_Waitlist.Module_Core.Views;
 // TODO: Update NavigationViewItem titles and icons in ShellPage.xaml.
 public sealed partial class ShellPage : Page
 {
-    private readonly IStartupShellStateService _startupShellStateService;
-
     public ShellViewModel ViewModel
     {
         get;
     }
 
-    public ShellPage(
-        ShellViewModel viewModel,
-        IStartupShellStateService startupShellStateService)
+    public ShellPage(ShellViewModel viewModel)
     {
         ViewModel = viewModel;
-        _startupShellStateService = startupShellStateService;
         InitializeComponent();
 
         ViewModel.NavigationService.Frame = NavigationFrame;
         ViewModel.NavigationViewService.Initialize(NavigationViewControl);
         NavigationFrame.Navigated += NavigationFrame_Navigated;
-        _startupShellStateService.StateChanged += OnStartupShellStateChanged;
-        ApplyStartupShellState();
     }
 
     private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -82,24 +75,9 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    private void OnStartupShellStateChanged(object? sender, EventArgs e)
-    {
-        _ = DispatcherQueue.TryEnqueue(() =>
-        {
-            ApplyStartupShellState();
-        });
-    }
-
-    private void ApplyStartupShellState()
-    {
-        NavigationViewControl.IsPaneVisible = _startupShellStateService.IsNavigationVisible;
-        NavigationViewControl.IsSettingsVisible = _startupShellStateService.IsNavigationVisible;
-    }
-
     private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
     {
         NavigationFrame.Navigated -= NavigationFrame_Navigated;
-        _startupShellStateService.StateChanged -= OnStartupShellStateChanged;
         Unloaded -= ShellPage_Unloaded;
     }
 

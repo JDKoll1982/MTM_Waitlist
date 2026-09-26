@@ -79,7 +79,7 @@ public sealed class RoleRenameMigrationTests
         }
 
         _helper = new MySqlHelperServer(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString! }));
     }
 
     [TestCleanup]

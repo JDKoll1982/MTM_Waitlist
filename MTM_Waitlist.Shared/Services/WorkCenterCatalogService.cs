@@ -31,16 +31,16 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
 
     private readonly MySqlHelperServer _mySqlHelperServer;
     private readonly StartupState _startupState;
-    private readonly StartupDatabaseOptions _startupDatabaseOptions;
+    private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;
 
     public WorkCenterCatalogService(
         MySqlHelperServer mySqlHelperServer,
         StartupState startupState,
-        IOptions<StartupDatabaseOptions> startupDatabaseOptions)
+        IOptions<WaitlistDatabaseOptions> waitlistDatabaseOptions)
     {
         _mySqlHelperServer = mySqlHelperServer;
         _startupState = startupState;
-        _startupDatabaseOptions = startupDatabaseOptions?.Value ?? new StartupDatabaseOptions();
+        _waitlistDatabaseOptions = waitlistDatabaseOptions?.Value ?? new WaitlistDatabaseOptions();
     }
 
     public string GetCurrentComputerName()
@@ -264,7 +264,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         {
             var builder = new MySqlConnectionStringBuilder(connectionString)
             {
-                ConnectionTimeout = (uint)Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds),
+                ConnectionTimeout = (uint)Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds),
                 Database = "mtm_waitlist",
             };
 
@@ -281,7 +281,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
                 CommandType = System.Data.CommandType.StoredProcedure,
             })
             {
-                deleteCommand.CommandTimeout = Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds);
+                deleteCommand.CommandTimeout = Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds);
                 deleteCommand.Parameters.AddWithValue("@p_computer_id", workstationId);
                 _ = await deleteCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -293,7 +293,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
                     CommandType = System.Data.CommandType.StoredProcedure,
                 };
 
-                upsertCommand.CommandTimeout = Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds);
+                upsertCommand.CommandTimeout = Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds);
                 upsertCommand.Parameters.AddWithValue("@p_computer_id", workstationId);
                 upsertCommand.Parameters.AddWithValue("@p_work_center_id", item.WorkCenterId);
                 upsertCommand.Parameters.AddWithValue("@p_sort_rank", item.SortRank);
@@ -411,7 +411,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
 
         var fallbackConnectionString = Environment.GetEnvironmentVariable("MTM_WAITLIST_DB_CONNECTION_STRING")?.Trim()
             ?? Environment.GetEnvironmentVariable("MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING")?.Trim()
-            ?? _startupDatabaseOptions.ConnectionString?.Trim();
+            ?? _waitlistDatabaseOptions.ConnectionString?.Trim();
 
         var resolvedConnectionString = string.IsNullOrWhiteSpace(environmentConnectionString)
             ? fallbackConnectionString

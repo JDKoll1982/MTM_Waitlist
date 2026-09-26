@@ -176,7 +176,7 @@ public sealed class RoleCatalogServiceTests
         }
 
         var helper = new MySqlHelperServer(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString! }));
         var service = new RoleCatalogService(helper);
 
         var roles = await service.GetRolesAsync();

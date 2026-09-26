@@ -222,51 +222,6 @@
   <data name="Shared_OtherWorkCentersGridView_Tooltip" xml:space="preserve">
     <value>Select an option in Other Work Centers Grid View.</value>
   </data>
-  <data name="Startup_UsernameTextBox_Tooltip" xml:space="preserve">
-    <value>Username.</value>
-  </data>
-  <data name="Startup_PasswordBox_Tooltip" xml:space="preserve">
-    <value>Password.</value>
-  </data>
-  <data name="Startup_LoginPage_CheckBox1_Tooltip" xml:space="preserve">
-    <value>Remember me on this device.</value>
-  </data>
-  <data name="Startup_NewPasswordBox_Tooltip" xml:space="preserve">
-    <value>New password.</value>
-  </data>
-  <data name="Startup_ConfirmPasswordBox_Tooltip" xml:space="preserve">
-    <value>Confirm new password.</value>
-  </data>
-  <data name="Startup_LoginPage_Button1_Tooltip" xml:space="preserve">
-    <value>Update Password.</value>
-  </data>
-  <data name="Startup_LoginPage_Button2_Tooltip" xml:space="preserve">
-    <value>Sign In.</value>
-  </data>
-  <data name="Startup_LoginPage_Button3_Tooltip" xml:space="preserve">
-    <value>Back.</value>
-  </data>
-  <data name="Startup_LoginPage_Button4_Tooltip" xml:space="preserve">
-    <value>Create Account.</value>
-  </data>
-  <data name="Startup_SplashPage_Button1_Tooltip" xml:space="preserve">
-    <value>Retry.</value>
-  </data>
-  <data name="Startup_SplashPage_Button2_Tooltip" xml:space="preserve">
-    <value>Restore Defaults.</value>
-  </data>
-  <data name="Startup_SplashPage_Button3_Tooltip" xml:space="preserve">
-    <value>Close.</value>
-  </data>
-  <data name="Startup_SplashView_Button1_Tooltip" xml:space="preserve">
-    <value>Retry.</value>
-  </data>
-  <data name="Startup_SplashView_Button2_Tooltip" xml:space="preserve">
-    <value>Restore Defaults.</value>
-  </data>
-  <data name="Startup_SplashView_Button3_Tooltip" xml:space="preserve">
-    <value>Close.</value>
-  </data>
   <data name="Waitlist_Cancel_Tooltip" xml:space="preserve">
     <value>Cancel.</value>
   </data>

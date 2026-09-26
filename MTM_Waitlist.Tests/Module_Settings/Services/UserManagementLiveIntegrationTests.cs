@@ -63,7 +63,7 @@ public sealed class UserManagementLiveIntegrationTests
 
     private MySqlHelperServer? _helper;
 
-    private StartupDatabaseOptions? _options;
+    private WaitlistDatabaseOptions? _options;
 
     private string _connectionString = string.Empty;
 
@@ -104,7 +104,7 @@ public sealed class UserManagementLiveIntegrationTests
         }
 
         _connectionString = connectionString!;
-        _options = new StartupDatabaseOptions { ConnectionString = _connectionString };
+        _options = new WaitlistDatabaseOptions { ConnectionString = _connectionString };
         _helper = new MySqlHelperServer(Options.Create(_options));
         _runId = Guid.NewGuid().ToString("N")[..8];
 
@@ -305,7 +305,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task ASignInNameTypedInLowerCase_IsStoredUpperCase_AndSignsInEitherWay()
+    public async Task ASignInNameTypedInLowerCase_IsStoredUpperCase()
     {
         var typedName = $"{OwnedSignInPrefix}{_runId}.lowercase";
 
@@ -320,16 +320,6 @@ public sealed class UserManagementLiveIntegrationTests
                 "SELECT username_normalized FROM core_users_profiles WHERE username_normalized = @p_sign_in;",
                 new Dictionary<string, object?> { ["p_sign_in"] = typedName }).ConfigureAwait(false),
             "A sign-in name is stored in upper case, whatever case it was typed in (FR-002).");
-
-        var sessions = new StartupSessionRepository(Options.Create(_options!));
-
-        var typedLower = await sessions.CheckCredentialsAsync(typedName, created.TemporaryPin).ConfigureAwait(false);
-        Assert.IsTrue(typedLower.IsAuthenticated, "The name typed in lower case signs in against the stored upper-case name.");
-
-        var typedUpper = await sessions
-            .CheckCredentialsAsync(typedName.ToUpperInvariant(), created.TemporaryPin)
-            .ConfigureAwait(false);
-        Assert.IsTrue(typedUpper.IsAuthenticated, "And so does the same name typed in upper case, so either case signs in.");
     }
 
     [TestMethod]

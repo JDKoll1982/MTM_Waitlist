@@ -28,11 +28,12 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Views;
 /// resources as text for the same reason, and the same approach works here.
 /// </para>
 /// <para>
-/// <b>The one exemption.</b> <c>ShellPage</c> is the shell host: <c>MainWindow</c> constructs it directly with
-/// its view model and the startup shell-state service, and it is never a <c>Frame.Navigate</c> target — that
-/// is the point of it, since it is what assigns <c>NavigationService.Frame</c>. The exempt set is pinned to
-/// exactly that one type so a second parameterised page cannot slip in unnoticed: adding one means editing
-/// this list, and the comment there has to say why it is not navigable.
+/// <b>The one exemption.</b> <c>ShellPage</c> is the shell host: it is constructed with its view model and is
+/// never a <c>Frame.Navigate</c> target — that is the point of it, since it is what assigns
+/// <c>NavigationService.Frame</c>. The exempt set is pinned to exactly that one type so a second parameterised
+/// page cannot slip in unnoticed: adding one means editing this list, and the comment there has to say why it is
+/// not navigable. The retired splash and sign-in pages were the only other parameterised pages and are gone, so
+/// the pinned set is unchanged by their removal.
 /// </para>
 /// </remarks>
 [TestClass]
@@ -52,8 +53,8 @@ public sealed class PageActivationAuditTests
     /// <summary>Page types that legitimately have no parameterless constructor, and why.</summary>
     private static readonly string[] s_pagesConstructedWithDependencies =
     [
-        // The shell host. MainWindow constructs it with its view model and the startup shell-state service,
-        // and it is never navigated to; it is the thing that hands NavigationService its frame.
+        // The shell host. It is constructed with its view model and is never navigated to; it is the thing
+        // that hands NavigationService its frame.
         "ShellPage",
     ];
 

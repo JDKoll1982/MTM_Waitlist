@@ -347,7 +347,7 @@ public sealed class PermissionBaselineParityTests
         }
 
         var helper = new MySqlHelperServer(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString! }));
 
         // Nothing is stored for anybody in particular, which is what makes this a comparison of what each
         // person's role gives them rather than of rows somebody wrote (SC-004).

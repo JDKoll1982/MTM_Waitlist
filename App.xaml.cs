@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
@@ -19,10 +18,7 @@ public partial class App : Application
 {
     private static Microsoft.UI.Dispatching.DispatcherQueue? _uiDispatcher;
     private static WindowEx? _mainWindow;
-    private static SplashWindow? _splashWindow;
-    private static LoginWindow? _loginWindow;
-    private static bool _mainWindowActivated;
-    private static bool _loginWindowActivated;
+    private static StartupPlaceholderWindow? _placeholderWindow;
 
     public IHost Host
     {
@@ -84,6 +80,10 @@ public partial class App : Application
         SharedServiceLocator.TooltipService = Host.Services.GetService<ITooltipService>();
         SharedServiceLocator.ControlInspectorService = Host.Services.GetService<IControlInspectorService>();
 
+        // Replaces the retired app-lifecycle service. The sign-out path lives in a class library that cannot
+        // reference this project, and only the host can marshal the exit onto the UI thread.
+        MTM_Waitlist.Module_Startup.Services.AppLifecycleHost.Exit = ExitApplication;
+
         StartupDebugLog.Configure(Host.Services.GetService<IStartupLogService>());
         StartupDebugLog.Info("App", "Host built.");
 
@@ -119,145 +119,19 @@ public partial class App : Application
     #endif
     }
 
-    public static void ShowSplashWindow()
+    public static void ShowStartupPlaceholderWindow()
     {
-        StartupDebugLog.Info("Splash", "ShowSplashWindow called.");
-
-        if (_splashWindow == null)
-        {
-            _splashWindow = new SplashWindow();
-            _splashWindow.Closed += SplashWindow_Closed;
-            StartupDebugLog.Info("Splash", "Splash window created.");
-        }
-
-        _splashWindow.Activate();
-        StartupDebugLog.Info("Splash", "Splash window activated.");
+        StartupDebugLog.Info("StartupPlaceholder", "ShowStartupPlaceholderWindow called.");
+        _placeholderWindow ??= new StartupPlaceholderWindow();
+        _placeholderWindow.Activate();
+        StartupDebugLog.Info("StartupPlaceholder", "Startup placeholder window activated.");
     }
 
-    public static void ShowMainWindowAndCloseSplash()
-    {
-        StartupDebugLog.Info("MainWindow", "Activating main window and closing splash.");
-        try
-        {
-            MainWindow.Closed += MainWindow_Closed;
-            _mainWindowActivated = true;
-            MainWindow.Activate();
-            CloseSplashWindow();
-        }
-        catch (Exception ex)
-        {
-            StartupDebugLog.Error("MainWindow", ex, "Failed while activating main window or closing splash.");
-            Current.Exit();
-        }
-    }
-
-    public static void ShowLoginWindowAndCloseSplash()
-    {
-        StartupDebugLog.Info("LoginWindow", "Activating login window and closing splash.");
-
-        try
-        {
-            if (_loginWindow == null)
-            {
-                _loginWindow = App.GetService<LoginWindow>();
-                _loginWindow.Closed += LoginWindow_Closed;
-                StartupDebugLog.Info("LoginWindow", "Login window created.");
-            }
-
-            _loginWindowActivated = true;
-            _loginWindow.Activate();
-            CloseSplashWindow();
-        }
-        catch (Exception ex)
-        {
-            StartupDebugLog.Error("LoginWindow", ex, "Failed while activating login window or closing splash.");
-            Current.Exit();
-        }
-    }
-
-    public static void ShowMainWindowAndCloseLoginWindow()
-    {
-        StartupDebugLog.Info("MainWindow", "Activating main window and closing login window.");
-
-        try
-        {
-            MainWindow.Closed += MainWindow_Closed;
-            _mainWindowActivated = true;
-            MainWindow.Activate();
-
-            if (_loginWindow is not null)
-            {
-                var windowToClose = _loginWindow;
-                _loginWindow = null;
-                _loginWindowActivated = false;
-                windowToClose.Closed -= LoginWindow_Closed;
-                windowToClose.Close();
-            }
-        }
-        catch (Exception ex)
-        {
-            StartupDebugLog.Error("MainWindow", ex, "Failed while activating main window or closing login window.");
-            Current.Exit();
-        }
-    }
-
-    private static void CloseSplashWindow()
-    {
-        if (_splashWindow == null)
-        {
-            return;
-        }
-
-        var windowToClose = _splashWindow;
-        _splashWindow = null;
-        windowToClose.Closed -= SplashWindow_Closed;
-        windowToClose.Close();
-        StartupDebugLog.Info("Splash", "Splash window closed.");
-    }
-
-    private static void SplashWindow_Closed(object sender, WindowEventArgs args)
-    {
-        StartupDebugLog.Info("Splash", $"Splash window closed event. MainWindowActivated={_mainWindowActivated}, LoginWindowActivated={_loginWindowActivated}.");
-        if (!_mainWindowActivated && !_loginWindowActivated)
-        {
-            Current.Exit();
-        }
-    }
-
-    private static void LoginWindow_Closed(object sender, WindowEventArgs args)
-    {
-        StartupDebugLog.Info("LoginWindow", "Login window closed event received.");
-
-        if (_loginWindow is null)
-        {
-            return;
-        }
-
-        _loginWindow.Closed -= LoginWindow_Closed;
-        _loginWindow = null;
-        _loginWindowActivated = false;
-
-        if (!_mainWindowActivated)
-        {
-            Current.Exit();
-        }
-    }
-
-    private static void MainWindow_Closed(object sender, WindowEventArgs args)
-    {
-        StartupDebugLog.Info("MainWindow", "Main window closed event received.");
-        if (_mainWindow is null)
-        {
-            return;
-        }
-
-        _mainWindow.Closed -= MainWindow_Closed;
-
-        if (Current is App app)
-        {
-            _ = app.ShutdownAsync();
-        }
-    }
+    /// <summary>
+    /// Stops the host so no background service outlives the last window.
+    /// </summary>
+    public static Task ShutdownHostAsync() =>
+        (Current as App)?.ShutdownAsync() ?? Task.CompletedTask;
 
     private async Task ShutdownAsync()
     {
@@ -346,22 +220,10 @@ public partial class App : Application
             await Host.StartAsync();
             StartupDebugLog.Info("Launch", "Host started.");
 
-            App.GetService<IAppNotificationService>().Show(string.Format("AppNotificationSamplePayload".GetLocalized(), AppContext.BaseDirectory));
-            StartupDebugLog.Info("Launch", "App notification shown.");
-
-            await App.GetService<IActivationService>().ActivateAsync(args, activateMainWindow: false);
-            StartupDebugLog.Info("Launch", "Activation service completed with deferred main window activation.");
-
-            // The per-person picture preference is read here, once the startup session has been settled: a click on
-            // a picture may not wait on the store, and a picture must not be un-enlargeable because the read had
-            // not happened yet. A failure inside LoadAsync is recorded there, not raised here.
-            await App.GetService<MTM_Waitlist.Module_Core.Contracts.Services.IPictureEnlargePreference>()
-                .LoadAsync()
-                .ConfigureAwait(true);
-            StartupDebugLog.Info("Launch", "Picture enlarge preference loaded.");
-
-            ShowSplashWindow();
-            StartupDebugLog.Info("Launch", "Splash requested from OnLaunched.");
+            // The placeholder is the only surface a launch produces while the startup pipeline is rebuilt. No
+            // shell navigation, no sign-in form and no store read happens on this path.
+            ShowStartupPlaceholderWindow();
+            StartupDebugLog.Info("Launch", "Startup placeholder requested from OnLaunched.");
         }
         catch (Exception ex)
         {

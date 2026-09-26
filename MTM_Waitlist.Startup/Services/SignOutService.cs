@@ -23,22 +23,31 @@ public sealed class SignOutService : ISignOutService
     /// <summary>The resource key of the plain-language report shown when the restart could not be performed.</summary>
     public const string RestartFailedMessageKey = "Shell_SignOut.RestartFailed";
 
+    /// <summary>
+    /// Every key a restarted instance would read to restore the previous session, in the order signing out
+    /// clears them. Clearing these is what makes the restarted application ask for credentials (FR-034).
+    /// </summary>
+    private static readonly string[] s_sessionKeys =
+    [
+        "Login.RememberPassword",
+        "Login.RememberedUsername",
+        "Login.RememberedPassword",
+        "Startup.Session.Token",
+        "Startup.Session.ExpiresUtc",
+    ];
+
     private readonly ILocalSettingsService _localSettingsService;
     private readonly IAppProcessRestarter _restarter;
-    private readonly IAppLifecycleService _lifecycle;
 
     public SignOutService(
         ILocalSettingsService localSettingsService,
-        IAppProcessRestarter restarter,
-        IAppLifecycleService lifecycle)
+        IAppProcessRestarter restarter)
     {
         ArgumentNullException.ThrowIfNull(localSettingsService);
         ArgumentNullException.ThrowIfNull(restarter);
-        ArgumentNullException.ThrowIfNull(lifecycle);
 
         _localSettingsService = localSettingsService;
         _restarter = restarter;
-        _lifecycle = lifecycle;
     }
 
     /// <inheritdoc />
@@ -49,7 +58,7 @@ public sealed class SignOutService : ISignOutService
 
         // 1. Nothing the restarted instance reads may survive: this is what makes it ask for credentials
         //    instead of restoring the session (FR-034).
-        foreach (var key in SignInSessionKeys.All)
+        foreach (var key in s_sessionKeys)
         {
             await _localSettingsService.ResetSettingAsync(key, cancellationToken).ConfigureAwait(false);
         }
@@ -76,7 +85,7 @@ public sealed class SignOutService : ISignOutService
         }
 
         StartupDebugLog.Info("SignOutService", "The replacement instance is running; exiting the signed-in session.");
-        _lifecycle.Exit();
+        AppLifecycleHost.ExitApplication();
         return SignOutResult.Success();
     }
 

@@ -1,31 +1,12 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Core.Models;
-using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Tests.Models;
 
 [TestClass]
 public sealed class StartupModelsTests
 {
-    [TestMethod]
-    public void StartupResult_SuccessAndBlockedFactories_SetExpectedValues()
-    {
-        var success = StartupResult.Success(typeof(WaitlistViewViewModel).FullName!, "Ready");
-        var blocked = StartupResult.Blocked("Missing config");
-
-        Assert.IsTrue(success.IsSuccess);
-        Assert.IsFalse(success.IsBlocked);
-        Assert.AreEqual(typeof(WaitlistViewViewModel).FullName, success.RouteTarget);
-        Assert.AreEqual("Ready", success.StatusMessage);
-
-        Assert.IsFalse(blocked.IsSuccess);
-        Assert.IsTrue(blocked.IsBlocked);
-        Assert.AreEqual(string.Empty, blocked.RouteTarget);
-        Assert.AreEqual("Missing config", blocked.StatusMessage);
-    }
-
     [TestMethod]
     public void StartupState_DefaultValues_AndDeveloperCheckWork()
     {
@@ -52,19 +33,6 @@ public sealed class StartupModelsTests
         state.CurrentRoleCode = "developer";
 
         Assert.IsTrue(state.IsDeveloper);
-    }
-
-    [TestMethod]
-    public void StartupWindowOptions_DefaultValuesMatchStartupLayout()
-    {
-        var options = new StartupWindowOptions();
-
-        Assert.AreEqual(920, options.SplashWidth);
-        Assert.AreEqual(620, options.SplashHeight);
-        Assert.AreEqual(1600, options.MainWidth);
-        Assert.AreEqual(980, options.MainHeight);
-        Assert.IsTrue(options.CenterOnModeSwitch);
-        Assert.AreEqual(120, options.MainTransitionDelayMilliseconds);
     }
 
     [TestMethod]

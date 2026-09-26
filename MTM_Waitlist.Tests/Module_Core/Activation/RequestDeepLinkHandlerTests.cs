@@ -2,7 +2,6 @@ using System.Text.RegularExpressions;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
@@ -86,18 +85,17 @@ public sealed class RequestDeepLinkHandlerTests
     }
 
     /// <summary>
-    /// The load-bearing half of G4 #10: no dialog is reachable from either activation path. Asserted against the
+    /// The load-bearing half of G4 #10: no dialog is reachable from any activation path. Asserted against the
     /// source because a dialog needs a UI thread to appear, and because the check must see a dialog *re-added*
-    /// to any of the three files.
+    /// to either file.
     /// </summary>
     [TestMethod]
-    public void NeitherActivationPathCanPresentADialogOrADeveloperMarker()
+    public void NoActivationPath_CanPresentADialogOrADeveloperMarker()
     {
         (string RelativePath, string Description)[] activationPaths =
         [
             ("MTM_Waitlist.Core/Services/AppNotificationService.cs", "the while-running path"),
-            ("MTM_Waitlist.Core/Activation/AppNotificationActivationHandler.cs", "the cold-start path"),
-            ("MTM_Waitlist.Core/Activation/RequestDeepLinkHandler.cs", "the shared handler"),
+            ("MTM_Waitlist.Core/Services/RequestDeepLinkHandler.cs", "the shared handler"),
         ];
 
         (string Description, string Pattern)[] forbidden =

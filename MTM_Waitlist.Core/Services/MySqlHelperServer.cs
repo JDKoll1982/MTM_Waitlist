@@ -28,7 +28,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
     private const string MockConnectionStringEnvironmentVariable = "MTM_MOCK_DB_CONNECTION_STRING";
     private const int DefaultCommandTimeoutSeconds = 15;
 
-    private readonly StartupDatabaseOptions _startupDatabaseOptions;
+    private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;
     private readonly ReceivingDatabaseOptions _receivingDatabaseOptions;
     private readonly IStoreAvailabilityTracker? _storeAvailability;
     private readonly InternalStoreRetryPolicy _retryPolicy;
@@ -51,12 +51,12 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
     /// </para>
     /// </remarks>
     public MySqlHelperServer(
-        IOptions<StartupDatabaseOptions>? startupDatabaseOptions = null,
+        IOptions<WaitlistDatabaseOptions>? waitlistDatabaseOptions = null,
         IOptions<ReceivingDatabaseOptions>? receivingDatabaseOptions = null,
         IStoreAvailabilityTracker? storeAvailability = null,
         InternalStoreRetryPolicy? retryPolicy = null)
     {
-        _startupDatabaseOptions = startupDatabaseOptions?.Value ?? new StartupDatabaseOptions();
+        _waitlistDatabaseOptions = waitlistDatabaseOptions?.Value ?? new WaitlistDatabaseOptions();
         _receivingDatabaseOptions = receivingDatabaseOptions?.Value ?? new ReceivingDatabaseOptions();
         _storeAvailability = storeAvailability;
         _retryPolicy = retryPolicy ?? InternalStoreRetryPolicy.Default;
@@ -326,7 +326,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
 
         var fallbackConnectionString = Environment.GetEnvironmentVariable(WaitlistConnectionStringEnvironmentVariable)?.Trim()
             ?? Environment.GetEnvironmentVariable(WaitlistStartupConnectionStringEnvironmentVariable)?.Trim()
-            ?? _startupDatabaseOptions.ConnectionString?.Trim();
+            ?? _waitlistDatabaseOptions.ConnectionString?.Trim();
 
         var resolvedConnectionString = string.IsNullOrWhiteSpace(environmentConnectionString)
             ? fallbackConnectionString

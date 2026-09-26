@@ -1,15 +1,19 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MTM_Waitlist.Module_Startup.Services;
 
 namespace MTM_Waitlist.Module_Startup.Services.DependencyInjection;
 
 public static class ModuleDependencyInjectionExtensions
 {
+    /// <summary>
+    /// The rebuilt startup module's registrations. The old surface's registrations were removed with it; each
+    /// startup phase appends its own registrations here in phase order.
+    /// </summary>
     public static IServiceCollection AddStartupModuleServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IAppModuleClock, MTM_Waitlist.Module_Core.Services.AppModuleClock>();
-        services.AddSingleton<StartupModuleService>();
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+
         return services;
     }
 }

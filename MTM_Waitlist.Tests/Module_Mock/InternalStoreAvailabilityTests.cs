@@ -102,7 +102,7 @@ public sealed class InternalStoreAvailabilityTests
             delay: (_, _) => Task.CompletedTask,
             maxAttempts: 1);
         var helper = new MySqlHelperServer(
-            startupDatabaseOptions: Options.Create(new StartupDatabaseOptions { ConnectionString = UnreachableConnectionString }),
+            waitlistDatabaseOptions: Options.Create(new WaitlistDatabaseOptions { ConnectionString = UnreachableConnectionString }),
             storeAvailability: tracker,
             retryPolicy: singleAttempt);
 
@@ -122,7 +122,7 @@ public sealed class InternalStoreAvailabilityTests
     {
         var tracker = new StoreAvailabilityTracker();
         var helper = new MySqlHelperServer(
-            startupDatabaseOptions: Options.Create(new StartupDatabaseOptions { ConnectionString = string.Empty }),
+            waitlistDatabaseOptions: Options.Create(new WaitlistDatabaseOptions { ConnectionString = string.Empty }),
             storeAvailability: tracker,
             retryPolicy: CreateInstantPolicy());
 
@@ -284,7 +284,7 @@ public sealed class InternalStoreAvailabilityTests
 
     private static MySqlHelperServer CreateUnreachableHelper(IStoreAvailabilityTracker tracker) =>
         new(
-            startupDatabaseOptions: Options.Create(new StartupDatabaseOptions { ConnectionString = UnreachableConnectionString }),
+            waitlistDatabaseOptions: Options.Create(new WaitlistDatabaseOptions { ConnectionString = UnreachableConnectionString }),
             storeAvailability: tracker,
             retryPolicy: CreateInstantPolicy());
 

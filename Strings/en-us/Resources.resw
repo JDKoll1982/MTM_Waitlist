@@ -1005,14 +1005,11 @@
   <data name="Shell_SignOut.Tooltip" xml:space="preserve">
     <value>Sign out and return to the sign-in screen.</value>
   </data>
-  <data name="Startup_SignIn.RemainingAttempts.Text" xml:space="preserve">
-    <value>Attempts remaining on this temporary password: {0}.</value>
+  <data name="Startup_Placeholder.Message" xml:space="preserve">
+    <value>Startup was removed from this build. This window is a placeholder until the rebuilt launch pipeline lands.</value>
   </data>
-  <data name="Startup_SignIn.AttemptLimitReached.Text" xml:space="preserve">
-    <value>This temporary password is no longer accepted. Someone who can reset passwords must issue a fresh one.</value>
-  </data>
-  <data name="Startup_SignIn.StoreUnavailable.Text" xml:space="preserve">
-    <value>The store could not be reached, so the sign-in could not be checked. Try again.</value>
+  <data name="Startup_Placeholder.Close" xml:space="preserve">
+    <value>Close</value>
   </data>
   <data name="Shell_SignOut.RestartFailed" xml:space="preserve">
     <value>You have been signed out, but the application could not restart. Close it and open it again to sign in.</value>

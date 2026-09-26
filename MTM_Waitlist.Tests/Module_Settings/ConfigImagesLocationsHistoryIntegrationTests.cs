@@ -49,7 +49,7 @@ public sealed class ConfigImagesLocationsHistoryIntegrationTests
         }
 
         _helper = new MySqlHelperServer(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString! }));
         _readService = new ImageOverrideReadService(_helper, NullLogger<ImageOverrideReadService>.Instance);
 
         // A folder of this run's own for the two source pictures, so the live row is written while the company

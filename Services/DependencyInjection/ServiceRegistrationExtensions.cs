@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 
-using MTM_Waitlist.Activation;
 using MTM_Waitlist.Services;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
@@ -15,8 +14,6 @@ using MTM_Waitlist.Module_Setup.Services;
 using MTM_Waitlist.Module_Setup.ViewModels;
 using MTM_Waitlist.Module_Setup.Views;
 using MTM_Waitlist.Module_Core.Models;
-using MTM_Waitlist.Module_Startup.ViewModels;
-using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Views;
 using MTM_Waitlist.Module_Waitlist.Services;
@@ -40,19 +37,12 @@ public static partial class ServiceRegistrationExtensions
 
     public static IServiceCollection AddAppServices(this IServiceCollection services, HostBuilderContext context)
     {
-        // Default activation handler
-        services.AddTransient<ActivationHandler<LaunchActivatedEventArgs>, DefaultActivationHandler>();
-
-        // Other activation handlers
-        services.AddTransient<IActivationHandler, AppNotificationActivationHandler>();
-
         // Services
         services.AddSingleton<IAppNotificationService, AppNotificationService>();
         services.AddSingleton<IAppWindowProvider, AppWindowProvider>();
         services.AddSingleton<IDeepLinkWindow, AppWindowDeepLinkWindow>();
         services.AddSingleton<RequestDeepLinkHandler>();
         services.AddSingleton<IShellContentProvider, ShellContentProvider>();
-        services.AddSingleton<IAppLifecycleService, AppLifecycleService>();
         services.AddSingleton<ISetupDialogService, SetupDialogService>();
         // The New Request dunnage step's substitute picker reuses the Setup dunnage image-search dialog, so the
         // bridge lives here where both sides are visible (FR-049).
@@ -61,25 +51,13 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<IWorkCenterImageService, MTM_Waitlist.Module_Settings.Services.ImageLocationService>();
         services.AddSingleton<ILocalSettingsService, MTM_Waitlist.Module_Settings.Services.LocalSettingsService>();
         services.AddSingleton<IIgnoredLocationsService, MTM_Waitlist.Module_Core.Services.IgnoredLocationsService>();
-        services.AddSingleton<IStartupRecoveryService, MTM_Waitlist.Module_Startup.Services.StartupRecoveryService>();
         services.AddSingleton<IAppProcessRestarter, MTM_Waitlist.Module_Startup.Services.AppProcessRestarter>();
         services.AddSingleton<ISignOutService, MTM_Waitlist.Module_Startup.Services.SignOutService>();
-        services.AddSingleton<IStartupRegistrationService, MTM_Waitlist.Module_Startup.Services.StartupRegistrationService>();
-        services.AddSingleton<IStartupSessionRepository, MTM_Waitlist.Module_Startup.Services.StartupSessionRepository>();
         services.AddSingleton<IComputerRegistryService, MTM_Waitlist.Module_Startup.Services.ComputerRegistryService>();
-        services.AddSingleton<IComputerGateService, MTM_Waitlist.Module_Startup.Services.ComputerGateService>();
-        services.AddSingleton<IStartupWindowService, MTM_Waitlist.Module_Startup.Services.StartupWindowService>();
-        services.AddSingleton<IStartupLogForwarder, MTM_Waitlist.Module_Startup.Services.StartupLogForwarder>();
-        services.AddSingleton<MTM_Waitlist.Module_Startup.Services.StartupLogService>();
-        services.AddSingleton<IStartupLogService>(provider => provider.GetRequiredService<MTM_Waitlist.Module_Startup.Services.StartupLogService>());
-        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<MTM_Waitlist.Module_Startup.Services.StartupLogService>());
         services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
         services.AddSingleton<IBuildingSelectionService, BuildingSelectionService>();
-        services.AddSingleton<IStartupShellStateService, MTM_Waitlist.Module_Startup.Services.StartupShellStateService>();
-        services.AddSingleton<IStartupCoordinator, MTM_Waitlist.Module_Startup.Services.StartupCoordinator>();
         services.AddSingleton<MTM_Waitlist.Module_Core.Models.StartupState>();
         services.AddTransient<INavigationViewService, NavigationViewService>();
-        services.AddSingleton<IActivationService, ActivationService>();
         services.AddSingleton<PageService>();
         services.AddSingleton<IPageService>(sp =>
         {
@@ -168,12 +146,8 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<IReportPrintService, ReportPrintService>();
 
         // Views and view models
-        services.AddTransient<SplashViewModel>();
-        services.AddTransient<LoginViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<UrgencyAllotmentEditorViewModel>();
-        services.AddTransient<LoginWindow>();
-        services.AddTransient<LoginPage>();
         services.AddTransient<SettingsPage>();
         services.AddTransient<SetupWorkOrderViewModel>();
         services.AddTransient<SetupWorkCenterViewModel>();
@@ -266,11 +240,9 @@ public static partial class ServiceRegistrationExtensions
 
         // Configuration
         services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
-        services.Configure<StartupDatabaseOptions>(context.Configuration.GetSection(nameof(StartupDatabaseOptions)));
+        services.Configure<WaitlistDatabaseOptions>(context.Configuration.GetSection(nameof(WaitlistDatabaseOptions)));
         services.Configure<ReceivingDatabaseOptions>(context.Configuration.GetSection(nameof(ReceivingDatabaseOptions)));
-        services.Configure<StartupDevelopmentOptions>(context.Configuration.GetSection(nameof(StartupDevelopmentOptions)));
         services.Configure<StartupLoggingOptions>(context.Configuration.GetSection(nameof(StartupLoggingOptions)));
-        services.Configure<StartupWindowOptions>(context.Configuration.GetSection(nameof(StartupWindowOptions)));
 
         // Dunnage images (Setup) resolve against the shared Dunnage image root (the same
         // root the MTM Receiving Application writes via "Dunnage.Application.DefaultImageLocation").

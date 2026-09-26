@@ -2,9 +2,8 @@ using Microsoft.UI.Dispatching;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
-using MTM_Waitlist.Module_Core.Services;
 
-namespace MTM_Waitlist.Activation;
+namespace MTM_Waitlist.Module_Core.Services;
 
 /// <summary>
 /// The window side of a deep-link activation: the two things the routing logic needs from the running app.
@@ -52,12 +51,10 @@ public sealed class AppWindowDeepLinkWindow : IDeepLinkWindow
 /// The one place a notification activation is turned into navigation.
 /// </summary>
 /// <remarks>
-/// Both entry points — the cold-start activation path
-/// (<c>AppNotificationActivationHandler</c>) and the while-running path
-/// (<c>AppNotificationService.OnNotificationInvoked</c>) — call this helper, and neither contains its own
-/// parse or its own fallback UI. A recognised request link opens that request's detail page; anything else is
-/// recorded for diagnosis and changes nothing the user can see. Neither outcome presents a dialog: an
-/// activation is not a place to explain the code to its author.
+/// The while-running path (<c>AppNotificationService.OnNotificationInvoked</c>) calls this helper, and it
+/// contains neither its own parse nor its own fallback UI. A recognised request link opens that request's
+/// detail page; anything else is recorded for diagnosis and changes nothing the user can see. Neither
+/// outcome presents a dialog: an activation is not a place to explain the code to its author.
 /// </remarks>
 public sealed class RequestDeepLinkHandler
 {

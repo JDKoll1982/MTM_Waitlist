@@ -120,7 +120,7 @@ public sealed class ActiveJobSeedRoundTripTests
         }
 
         _helper = new MySqlHelperServer(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString! }));
         _resolver = new ActiveJobItemResolverService(_helper);
 
         var runId = Guid.NewGuid().ToString("N")[..8];

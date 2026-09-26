@@ -59,7 +59,7 @@ public sealed class PermissionChangeSetServiceTests
         }
 
         _helper = new MySqlHelperServer(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString! }));
 
         await DeleteFixturesAsync().ConfigureAwait(false);
 
@@ -68,7 +68,7 @@ public sealed class PermissionChangeSetServiceTests
 
         var state = new StartupState { UserId = _actorUserId, Username = ActorSignInName, CurrentRoleCode = ActorRoleCode };
         _service = new PermissionAdministrationService(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString }),
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString }),
             new RecordingPermissionService(),
             state);
     }
