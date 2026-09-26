@@ -224,3 +224,91 @@ local MAMP instance supplies.
   workstation, so the validator results are the local schema's, not the shared one's.
 - **The reachability probe is untouched**, as the unit required. The caveat above is a finding to carry into the
   launch-pipeline rebuild, not something this proof repairs.
+
+## T056 — the dead-weight enumeration
+
+Subphase 5.6 makes both of its deletions depend on this enumeration, and it had not been run — which is why two
+attempts at T060 and T061 were stopped by consumers the plan had not accounted for. This is that step.
+
+### How it was produced
+
+Re-runnable, not asserted. One script walks the four artifact directories, reads each `create.sql` for the object it
+declares, then counts that object's name across six corpora: the application's own `.cs`/`.xaml`/`.resw`, the test
+project's, `Database/Seeds`, `Database/Validation`, `Database/Bootstrap`, and the `All*.sql` aggregates. The script
+was written for this run and is not committed.
+
+One limitation, found and corrected while running it: the first pass left **procedure bodies out of the corpora**, so
+an object used only by another procedure read as unreferenced. Two objects did exactly that — `vw_setup_work_centers_active`
+is used by `sp_setup_work_centers_catalog_get` and `sp_setup_work_centers_get_all`, and
+`fn_setup_work_center_name_normalized` by `sp_setup_work_centers_upsert`. A second search over the SQL artifacts put
+both back. **A name-absence result is only as good as the corpora it searched.**
+
+### The counts
+
+| Kind | Folders | Deployed (have `create.sql`) | Rollback-only |
+|---|---|---|---|
+| table | 35 | 25 | 10 |
+| procedure | 131 | 90 | 41 |
+| function | 3 | 3 | 0 |
+| view | 2 | 2 | 0 |
+| **total** | **171** | **120** | **51** |
+
+120 deployed objects is the figure the repository's own duplicate-object check reports, derived here independently —
+two methods agreeing on the number.
+
+### The consumerless set
+
+Eight deployed objects have no mention in application code, test code, seeds, validation, the bootstrap file or an
+aggregate. They are not eight pieces of dead weight, and the difference matters.
+
+**Five were created by this feature and have no consumer yet because their consumers are unbuilt.** None of the five
+exists on the owner's branch or on master, which is the proof: `sp_ops_startup_logs_filter`,
+`sp_ops_startup_logs_fingerprint_groups_get` and `sp_ops_startup_logs_purge` — the log panel's readers, whose callers
+arrive with the reporting panel — and `sp_config_images_locations_computer_sources_get` / `_set`, the machine
+configuration's picture sources. **These must not be read as deletions; deleting them would destroy this feature's own
+work.**
+
+**One is pre-existing and genuinely unreferenced:** `sp_waitlist_request_get`, which appears only in its own folder and
+in `AllSPs.sql`. No task names it and nothing calls it.
+
+**Two were initially reported consumerless and are not**, for the corpus reason above.
+
+### The four objects the plan names, and who consumes them
+
+| Object | Consumers found |
+|---|---|
+| `auth_sessions_tokens` | `MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs` lines 552, 570, 603 — an environment-gated live integration test inserts, cleans up and reads this table back |
+| `core_buildings_catalog` | `Database/Seeds/seed_dev_masked_baseline/create.sql` 280, 283, `.../rollback.sql` 27, `Database/Seeds/AllSeeds.sql` 357, 360, `Database/Validation/settings_schema/validate.sql` 33, 39, and the bootstrap descriptions file |
+| `core_buildings_history` | `Database/Validation/settings_schema/validate.sql` 113, 119, and the bootstrap descriptions file |
+| `sp_core_buildings_upsert` | `Database/Validation/settings_schema/validate.sql` 156, 162 |
+
+The seed consumer is the sharp one: the schema validator applies every seed on its success path, so while a surviving
+seed writes `core_buildings_catalog`, the live validator cannot pass. "Delete the table" and "the validator passes" are
+in direct tension until the seed stops writing it.
+
+### What the approval covers
+
+The owner approved the destructive database work on **2026-09-26**, on the basis that git can restore the schema
+artifacts and the local store can be rebuilt from the install scripts. That is the confirmation the Security & Secrets
+constraint requires at this second point. It was granted before this enumeration existed, and is recorded here so the
+basis of the deletions is auditable rather than assumed.
+
+### What this implies for T060, T061 and T062 as written
+
+- **T060 is executable, and its one consumer is already owned.** The test file belongs to T188, which exists to
+  "re-point or retire" those cases; T188 is unticked and last in the plan. Deleting the table while T188 is pending
+  leaves that test's SQL naming a table no artifact creates, which fails only when the test runs against a live store.
+- **T061 is not executable as written.** Two of its consumers — the seed and `settings_schema/validate.sql` — are named
+  by no task in the plan. Removing the three buildings objects requires removing the seed's writes to them and the
+  validation assertions, and neither edit is authorized anywhere.
+- **T062's file list is incomplete** for the same reason: it names the aggregates and the descriptions file, but not the
+  seed or the settings validation script.
+
+### Uncertainties, recorded rather than resolved
+
+- `sp_waitlist_request_get` is unreferenced by name, but a procedure could reach it through a name built at runtime.
+  Nothing in the six corpora suggests one; settling it needs the live store's routine dependency view, not text.
+- Consumers in environment-gated live tests are counted here by text, because those tests only execute when their
+  connection-string variable is set. A skipped count is not a consumer count.
+- This section was written after T021–T024 and most of T020 had run, so the "still outstanding" bullet above is stale
+  as of this section: six of the nine startup-only procedures are retired and the startup validator has been reworked.
