@@ -756,4 +756,149 @@ FROM (
                     AND character_maximum_length = 64
                     AND is_nullable = 'NO'
             )
+        -- 010-startup-rebuild (tasks T047 and T050): the four columns the developer panel reads and writes, and
+        -- the six indexes it filters on. Each is checked by name and by the columns the panel's query uses: an
+        -- index under the right name over the wrong column would pass an existence-only check and still leave
+        -- the panel doing a table scan, which is the failure worth catching.
+        UNION ALL
+        SELECT 'missing_column', 'ops_startup_logs.module', 'VARCHAR(64) NULL', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND column_name = 'module'
+                    AND data_type = 'varchar'
+                    AND character_maximum_length = 64
+                    AND is_nullable = 'YES'
+            )
+        UNION ALL
+        SELECT 'missing_column', 'ops_startup_logs.error_type', 'VARCHAR(128) NULL', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND column_name = 'error_type'
+                    AND data_type = 'varchar'
+                    AND character_maximum_length = 128
+                    AND is_nullable = 'YES'
+            )
+        UNION ALL
+        SELECT 'missing_column', 'ops_startup_logs.exception_detail', 'MEDIUMTEXT NULL', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND column_name = 'exception_detail'
+                    AND data_type = 'mediumtext'
+                    AND is_nullable = 'YES'
+            )
+        UNION ALL
+        SELECT 'missing_column', 'ops_startup_logs.error_fingerprint', 'CHAR(64) NULL', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND column_name = 'error_fingerprint'
+                    AND data_type = 'char'
+                    AND character_maximum_length = 64
+                    AND is_nullable = 'YES'
+            )
+        UNION ALL
+        SELECT 'missing_index', 'idx_ops_startup_logs_level_created_utc', 'index over (level, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_level_created_utc'
+                    AND column_name IN ('level', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
+        UNION ALL
+        SELECT 'missing_index', 'idx_ops_startup_logs_host_id_created_utc', 'index over (host_id, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_host_id_created_utc'
+                    AND column_name IN ('host_id', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
+        UNION ALL
+        SELECT 'missing_index', 'idx_ops_startup_logs_module_created_utc', 'index over (module, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_module_created_utc'
+                    AND column_name IN ('module', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
+        UNION ALL
+        SELECT 'missing_index', 'idx_ops_startup_logs_actor_id_created_utc', 'index over (actor_id, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_actor_id_created_utc'
+                    AND column_name IN ('actor_id', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
+        UNION ALL
+        SELECT 'missing_index', 'idx_ops_startup_logs_error_type_created_utc', 'index over (error_type, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_error_type_created_utc'
+                    AND column_name IN ('error_type', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
+        UNION ALL
+        SELECT
+            'missing_index', 'idx_ops_startup_logs_error_fingerprint_created_utc',
+            'index over (error_fingerprint, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_error_fingerprint_created_utc'
+                    AND column_name IN ('error_fingerprint', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
     ) AS validation_issues;
