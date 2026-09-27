@@ -640,6 +640,14 @@
       "kind": "complete",
       "by": "extension",
       "at": "2026-09-27T06:51:36.735Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T07:20:00.984Z"
     }
   ],
   "telemetryInstanceId": "d17871b9-a196-497b-ab7f-10b9cd871cc0",
@@ -973,7 +981,7 @@
       "summary": "170 tasks in 9 phases: Setup 5, Foundational 77 (removal and proof, identity contracts, store foundation, logging, pipeline), US1 12, US2 11, US3 13, US4 10, US5 8, US6 22, Polish 12; every phase laid out as ordered waves with join points and a single owner phase per file."
     }
   },
-  "currentTask": "T074",
+  "currentTask": "T019",
   "task_summaries": {
     "T002": {
       "status": "DONE",
@@ -1548,103 +1556,774 @@
         "MTM_Waitlist.Startup/Services/LaunchStepCatalog.cs",
         "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepCatalogTests.cs"
       ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Removed the two deleted file names from both tooltip strings in ShellPage.xaml and withdrew the guard's two narrow exemptions; build clean, guard 11/11 pass.",
+      "files": [
+        "Module_Core/Views/ShellPage.xaml",
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ],
+      "concerns": []
+    },
+    "T020": {
+      "status": "OPEN",
+      "did": "Delete the nine startup-only stored procedures listed in the brief: `sp_server_utc_now_get`, `sp_auth_credentials_check`, `sp_auth_user_password_update`, `sp_auth_computer_registered_get`, `sp_auth_session_expiry_get`, `sp_auth_password_reset_required_get`, `sp_core_computers_registry_lookup_by_name_mac_get`, `sp_core_computers_registry_lookup_by_mac_get`, `sp_core_computers_registry_update_by_mac`, under the recorded approval the Security & Secrets constraint requires for a destructive database operation (checklist 2.4a; plan.md → Complexity Tracking).",
+      "files": [],
+      "concerns": []
+    },
+    "T026": {
+      "status": "OPEN",
+      "did": "Delete the two retired capability folders — `startup`, and `startup-diagnostics`, whose matched `MTM_Waitlist.Startup/Services/StartupLog*.cs` files T133 deletes; their `living-specs.yml` entries and their `capabilities/DRIFT.md` rows are retired in the close-out phase, so the registry is edited once, at re-adoption (checklist 2.5c, deliberate deferral).",
+      "files": [],
+      "concerns": []
+    },
+    "T053": {
+      "status": "OPEN",
+      "did": "Baseline the four keys per role and role-explicitly: `permission.settings.machine_configuration`, `permission.settings.ignored_locations_edit` and `permission.settings.session_length` at 1 for `IT Department` and `Developer` and 0 for every other role, and `permission.settings.log_panel` at 1 for `Developer` alone, then add the plant-scope rows and the seed rows the seven preferences need, confirming the settings upsert procedure and the scope rank function cover them (checklist 7.4a, 5.1h; contract §5, plan D11).",
+      "files": [],
+      "concerns": []
+    },
+    "T060": {
+      "status": "OPEN",
+      "did": "Delete `auth_sessions_tokens`, superseded by `user_active_sessions`, with its aggregate entries (checklist 5.6b).",
+      "files": [],
+      "concerns": []
+    },
+    "T075": {
+      "status": "OPEN",
+      "did": "Implement the machine configuration service: the configuration state with its four unconfigured reasons, the save that refuses a display name already in use, and the reset that `IMachineConfigurationService.ResetToDefaultsAsync` performs on this machine's configuration only — the mechanism, and the only code that writes these rows (plan FR-006, FR-009, FR-018; contract §1, §4).",
+      "files": [],
+      "concerns": []
+    },
+    "T076": {
+      "status": "OPEN",
+      "did": "Build the launch steps that run before sign-in — configuration, store reachability and the machine readiness check — each announcing itself first (checklist 8.1b, FR-002).",
+      "files": [],
+      "concerns": []
+    },
+    "T077": {
+      "status": "OPEN",
+      "did": "Build the launch pipeline behind a single entry point: `RunAsync` ending at exactly one of the main screens, sign-in, machine setup, a stated stop or an ended process; `RetryFromAsync` repeating the named step and what follows it only; a re-entrant entry refused; and the pipeline, not the screen, refusing to continue while the machine is unconfigured (checklist 8.3a, plan D3, FR-001, FR-006, FR-020).",
+      "files": [],
+      "concerns": []
+    },
+    "T078": {
+      "status": "OPEN",
+      "did": "Replace the app-lifecycle seam so the host owns one call and two events, states the reason before the process ends, keeps the shell hidden until the pipeline routes to it, and no longer owns window handoff (checklist 8.3b–8.3d, FR-008).",
+      "files": [],
+      "concerns": []
+    },
+    "T079": {
+      "status": "OPEN",
+      "did": "Register the pipeline, the runner, the catalog and the pre-sign-in steps in the host (checklist 8.1, 8.3).",
+      "files": [],
+      "concerns": []
+    },
+    "T080": {
+      "status": "OPEN",
+      "did": "Test the runner: each step is named before it runs, a stalled step reports at its stated maximum, and a sub-operation names its operation, its target and its outcome (checklist 8.1b, FR-002, FR-003).",
+      "files": [],
+      "concerns": []
+    },
+    "T081": {
+      "status": "OPEN",
+      "did": "Test the feed: append-only, timestamped, never cleared while a launch runs, and a best-effort failure still gets a line (checklist 8.2, FR-026).",
+      "files": [],
+      "concerns": []
+    },
+    "T082": {
+      "status": "OPEN",
+      "did": "Test retry: it repeats the failed step and the steps after it, never the whole pipeline and never step 1 for a store-only retry (checklist 8.1c, FR-020).",
+      "files": [],
+      "concerns": []
+    },
+    "T083": {
+      "status": "OPEN",
+      "did": "[US1] Test the picture refresh: it cannot stop the launch, and an unreachable source is recorded with existing copies left in place (checklist 8.5c, FR-026).",
+      "files": [],
+      "concerns": []
+    },
+    "T084": {
+      "status": "OPEN",
+      "did": "[US1] Test the verdict priming: the verdict is settled before a screen opens, neither best-effort step can hold the splash past its bound, and an awaiting run waits only on the step that opens one (checklist 8.5c, FR-003, FR-027).",
+      "files": [],
+      "concerns": []
+    },
+    "T085": {
+      "status": "OPEN",
+      "did": "[US1] Test the splash: a line appears before the work it describes, and a stop states its cause rather than leaving a step number on screen (checklist 8.2, FR-002, FR-004).",
+      "files": [],
+      "concerns": []
+    },
+    "T086": {
+      "status": "OPEN",
+      "did": "[US1] Build the splash window with the live, append-only activity feed bound to the launch activity feed, replacing the placeholder (checklist 8.2a).",
+      "files": [],
+      "concerns": []
+    },
+    "T087": {
+      "status": "OPEN",
+      "did": "[US1] Build the splash view model: the feed lines, the derived count and the diagnosis carried on the line that caused it (checklist 8.2e, FR-002, FR-004).",
+      "files": [],
+      "concerns": []
+    },
+    "T088": {
+      "status": "OPEN",
+      "did": "[US1] Add the picture-cache step: kept in the sequence, best effort, its own feed line, bounded more tightly than the thirty-second ceiling (checklist 8.5a, plan D21, FR-026).",
+      "files": [],
+      "concerns": []
+    },
+    "T089": {
+      "status": "OPEN",
+      "did": "[US1] Add the verdict-priming step: settled before a screen opens, awaited only on the run that opens one, never able to hold the launch (checklist 8.5b, FR-027).",
+      "files": [],
+      "concerns": []
+    },
+    "T090": {
+      "status": "OPEN",
+      "did": "Add the error toast anchored to the bottom of the splash, never covering the feed, and show each diagnosis on the feed line that caused it and in the toast (checklist 8.2b, 8.2e, FR-005).",
+      "files": [],
+      "concerns": []
+    },
+    "T091": {
+      "status": "OPEN",
+      "did": "Keep the launch window size configurable and its sizing failures non-fatal (checklist 8.2c).",
+      "files": [],
+      "concerns": []
+    },
+    "T092": {
+      "status": "OPEN",
+      "did": "Build the splash page that hosts the feed for the single-window path (plan, `SplashPage` rebuilt).",
+      "files": [],
+      "concerns": []
+    },
+    "T093": {
+      "status": "OPEN",
+      "did": "Register the splash surface, its view model and the two best-effort steps in the host.",
+      "files": [],
+      "concerns": []
+    },
+    "T094": {
+      "status": "OPEN",
+      "did": "Retire the placeholder window and its code-behind once the splash is the launch surface, and re-pin the page-activation exemption list to the rebuilt page set in the same pass, which is the second re-pin T031 owed (the Phase 2 hand-off).",
+      "files": [],
+      "concerns": []
+    },
+    "T095": {
+      "status": "OPEN",
+      "did": "[US2] Test the gate: an `IT Department` or `Developer` sign-in authorises configuration only and never opens the main screens, and a refusal is stated (FR-007).",
+      "files": [],
+      "concerns": []
+    },
+    "T096": {
+      "status": "OPEN",
+      "did": "[US2] Test the closed gate: no input sequence reaches the shell from an unconfigured machine, and every abort route ends the process with its reason stated first (checklist 7.2d, 7.2e, FR-006, FR-008, SC-004, SC-006).",
+      "files": [],
+      "concerns": []
+    },
+    "T097": {
+      "status": "OPEN",
+      "did": "[US2] Test the setup screen: a display name already in use is refused and a different one is asked for, and the save writes this machine's identity and its picture sources (FR-009).",
+      "files": [],
+      "concerns": []
+    },
+    "T098": {
+      "status": "OPEN",
+      "did": "[US2] Build the machine-setup screen, shown when the machine is unconfigured and before any operator signs in, with a stable automation id (checklist 7.1a).",
+      "files": [],
+      "concerns": []
+    },
+    "T099": {
+      "status": "OPEN",
+      "did": "[US2] Build the gate that unlocks setup: an `IT Department` or `Developer` sign-in that authorises configuration only and never the shell, authenticating the person itself (checklist 7.1b, plan D11, FR-007).",
+      "files": [],
+      "concerns": []
+    },
+    "T100": {
+      "status": "OPEN",
+      "did": "[US2] Build the setup view model: capture the display name, the description and the shared picture sources, and enforce the machine-configuration permission where the save happens rather than only where the control is drawn (checklist 7.1c, 7.3c, FR-007).",
+      "files": [],
+      "concerns": []
+    },
+    "T101": {
+      "status": "OPEN",
+      "did": "Add the setup step: it returns setup whenever the machine is unconfigured, or its configuration is removed, revoked or unreadable, and it writes the captured configuration to the store against the machine (checklist 7.1d, 7.1e, FR-009).",
+      "files": [],
+      "concerns": []
+    },
+    "T102": {
+      "status": "OPEN",
+      "did": "End the process on every abort route — close box, Escape, Alt+F4, a cancel control, declining the setup sign-in — stating the reason first and localised, so the gate is never reported as a crash (checklist 7.2b, 7.2c, FR-008).",
+      "files": [],
+      "concerns": []
+    },
+    "T103": {
+      "status": "OPEN",
+      "did": "Confirm the pipeline, not the screen, is what refuses to continue while the machine is unconfigured, so a dismissal route the screen misses still cannot reach the shell (checklist 7.2a, FR-006).",
+      "files": [],
+      "concerns": []
+    },
+    "T104": {
+      "status": "OPEN",
+      "did": "Register the setup screen, its view model, the gate and the step in the host.",
+      "files": [],
+      "concerns": []
+    },
+    "T105": {
+      "status": "OPEN",
+      "did": "Add all four permission keys to the Settings privileges page so each has a place to be granted (checklist 7.3b).",
+      "files": [],
+      "concerns": []
+    },
+    "T106": {
+      "status": "OPEN",
+      "did": "[US3] Test the attempt limit: the sixth attempt on a temporary credential is refused even with the correct value, and it stays refused after a restart (checklist 8.4h, FR-012, SC-007).",
+      "files": [],
+      "concerns": []
+    },
+    "T107": {
+      "status": "OPEN",
+      "did": "[US3] Test the session: validity is judged on the store's clock and never the workstation's, and a sign-out clears the session before the restart (FR-010, FR-011).",
+      "files": [],
+      "concerns": []
+    },
+    "T108": {
+      "status": "OPEN",
+      "did": "[US3] Test the remembered sign-in: an unreadable key falls back to the ordinary form, the fault is recorded, and nothing is kept on the machine in its place (FR-014).",
+      "files": [],
+      "concerns": []
+    },
+    "T109": {
+      "status": "OPEN",
+      "did": "[US3] Test the sign-in surface: the hint states what is missing rather than leaving the person guessing (checklist 8.4a).",
+      "files": [],
+      "concerns": []
+    },
+    "T110": {
+      "status": "OPEN",
+      "did": "[US3] Implement the credential check with the five-attempt limit on temporary credentials only, using the store's existing attempt counter so the limit survives a restart (checklist 8.4b, FR-012).",
+      "files": [],
+      "concerns": []
+    },
+    "T111": {
+      "status": "OPEN",
+      "did": "[US3] Implement the session against `user_active_sessions`, judged on the store's clock, with the expiry resolved from the session-length setting at issue time so a change takes effect at the next sign-in (checklist 8.4e, plan D17, FR-010, FR-011, SC-011).",
+      "files": [],
+      "concerns": []
+    },
+    "T112": {
+      "status": "OPEN",
+      "did": "[US3] Implement the machine gate with its four outcomes, admitting a machine whose hardware identity cannot be read because a fact that could not be read is not a failed check (checklist 8.4d, FR-015).",
+      "files": [],
+      "concerns": []
+    },
+    "T113": {
+      "status": "OPEN",
+      "did": "[US3] Implement the remembered sign-in against the store, encrypted with the shared key file read at its UNC path, read only, with a key fingerprint so a rotated key is detected (checklist 8.4f, plan D13, FR-014).",
+      "files": [],
+      "concerns": []
+    },
+    "T114": {
+      "status": "OPEN",
+      "did": "[US3] Build the sign-in surface, carrying the hint that states what is missing (checklist 8.4a).",
+      "files": [],
+      "concerns": []
+    },
+    "T115": {
+      "status": "OPEN",
+      "did": "Build the sign-in view model and the forced password change, opened only once the temporary credential has been accepted (checklist 8.4c, FR-013).",
+      "files": [],
+      "concerns": []
+    },
+    "T116": {
+      "status": "OPEN",
+      "did": "Add the sign-in steps — sign-in, the machine gate, the forced password change and the session — each announcing itself before it runs (checklist 8.4, FR-002).",
+      "files": [],
+      "concerns": []
+    },
+    "T117": {
+      "status": "OPEN",
+      "did": "Fall back to the ordinary sign-in form when the key file cannot be read, recording the fault and storing nothing locally instead (checklist 8.4g, FR-014).",
+      "files": [],
+      "concerns": []
+    },
+    "T118": {
+      "status": "OPEN",
+      "did": "Register the sign-in services, its view models and its steps in the host.",
+      "files": [],
+      "concerns": []
+    },
+    "T119": {
+      "status": "OPEN",
+      "did": "[US4] Test the remedy table: a store outage offers no reset, and every stopping condition offers only actions that could remove its cause (FR-017, SC-010).",
+      "files": [],
+      "concerns": []
+    },
+    "T120": {
+      "status": "OPEN",
+      "did": "[US4] Test the reset: it previews exactly what it will reset, affects only this machine's configuration, and never touches a person, a role or a permission (FR-018).",
+      "files": [],
+      "concerns": []
+    },
+    "T121": {
+      "status": "OPEN",
+      "did": "[US4] Test retry from the surface: only the failed piece and what follows it are repeated, and a silent repair produces no prompt (FR-016, FR-019, FR-020).",
+      "files": [],
+      "concerns": []
+    },
+    "T122": {
+      "status": "OPEN",
+      "did": "[US4] Build the cause-to-remedy table, with `CanRestoreDefaults` false wherever a reset could not remove the cause and the preview naming exactly what a reset would touch (checklist 8.6b, 8.6c, FR-017, FR-018).",
+      "files": [],
+      "concerns": []
+    },
+    "T123": {
+      "status": "OPEN",
+      "did": "[US4] Implement the reset policy and the silent repair: decide when a reset is offered and drive it through `IMachineConfigurationService.ResetToDefaultsAsync` rather than writing configuration rows here, so the targeted reset has one implementation, and repair a fault without asking wherever it can be repaired without hurting the operator (checklist 8.6d, 8.6e, FR-018, FR-019; contract §4).",
+      "files": [],
+      "concerns": []
+    },
+    "T124": {
+      "status": "OPEN",
+      "did": "[US4] Build the single blocked-state surface with a diagnosis specific to the cause, and Hide Reset when the store is unreachable (checklist 8.6a, 8.6b, FR-004, FR-017).",
+      "files": [],
+      "concerns": []
+    },
+    "T125": {
+      "status": "OPEN",
+      "did": "Build the blocked-state view model, with Retry going through the pipeline's retry-from step so only the failed piece and what follows it are repeated (checklist 8.6f, FR-016, FR-020).",
+      "files": [],
+      "concerns": []
+    },
+    "T126": {
+      "status": "OPEN",
+      "did": "Show the popup that lists exactly what will be reset before anything is reset (checklist 8.6c, FR-018).",
+      "files": [],
+      "concerns": []
+    },
+    "T127": {
+      "status": "OPEN",
+      "did": "Make Close end the process with its reason stated, so the stop is never reported as a crash (FR-008).",
+      "files": [],
+      "concerns": []
+    },
+    "T128": {
+      "status": "OPEN",
+      "did": "Register the blocked-state surface, its view model and the recovery service in the host.",
+      "files": [],
+      "concerns": []
+    },
+    "T129": {
+      "status": "OPEN",
+      "did": "[US5] Test the panel: filtering by machine and by error kind together lists only matching entries, filtering by severity and machine together does the same, and every query is bounded by a time window and a page size (US5 acceptance scenario 2, SC-005).",
+      "files": [],
+      "concerns": []
+    },
+    "T130": {
+      "status": "OPEN",
+      "did": "[US5] Test coverage: a release build records at least one entry per completed launch where it records none today, and no local log file is produced (SC-003, SC-016).",
+      "files": [],
+      "concerns": []
+    },
+    "T131": {
+      "status": "OPEN",
+      "did": "[US5] Build the developer log panel: newest first, the filter set the store indexes — including grouping repeated faults by their fingerprint — the entry card showing the full message, the exception detail and the chain link, and the two copy affordances, on the entry card and in the header, whose text T183's formatter produces. Every query is bounded (checklist 6.5a, 6.5c, 6.5d, SC-014, FR-038).",
+      "files": [],
+      "concerns": []
+    },
+    "T132": {
+      "status": "OPEN",
+      "did": "[US5] Build the panel view model and gate it on `permission.settings.log_panel`, enforced in the view model rather than only hidden, with the two copy commands behind it and the clipboard call made through the options overload so a refused copy is reported rather than raised (checklist 6.5b, plan D11, D29).",
+      "files": [],
+      "concerns": []
+    },
+    "T133": {
+      "status": "OPEN",
+      "did": "Delete the deferred file-based logging path: the log service, the log forwarder, their two contracts and the logging options, and remove the file-based provider registration (checklist 6.6a, deliberate deferral — their implementations had to stay standing through Phase 2 for the tree to keep compiling).",
+      "files": [],
+      "concerns": []
+    },
+    "T134": {
+      "status": "OPEN",
+      "did": "[US5] Delete the test that exists only for the deleted log path (checklist 6.6b).",
+      "files": [],
+      "concerns": []
+    },
+    "T135": {
+      "status": "OPEN",
+      "did": "[US5] Rewrite the retired static-log and activation tests so they no longer require `IStartupLogService`, recording what replaces each assertion (checklist 2.5b, deferred to here because the contracts they name survive until this phase).",
+      "files": [],
+      "concerns": []
+    },
+    "T136": {
+      "status": "OPEN",
+      "did": "Register the panel view model in the host.",
+      "files": [],
+      "concerns": []
+    },
+    "T137": {
+      "status": "OPEN",
+      "did": "[US6] Test the ignored-locations editor: it is read-only for every role but `IT Department` and `Developer`, the write is refused where the action happens, and the session-length setting refuses an unauthorised change with a stated reason (checklist 7.3d, 7.3e, FR-024, FR-029, SC-012).",
+      "files": [],
+      "concerns": []
+    },
+    "T138": {
+      "status": "OPEN",
+      "did": "[US6] Test that theme, waitlist order, alerts, seen-requests and the parts-without-pictures choice are held against the person in the store and are already there on another computer (FR-023, SC-008).",
+      "files": [],
+      "concerns": []
+    },
+    "T139": {
+      "status": "OPEN",
+      "did": "[US6] Test the role-restriction inventory: every setting restricted to particular roles today is still restricted to the same roles, one setting at a time (FR-030, SC-012). For the ignored-locations list, SC-012 pins the read restriction — `permission.settings.ignored_locations`, whose grants do not change — and the narrowed write to `IT Department` and `Developer` through the new edit key is a named, deliberate exception (research D10).",
+      "files": [],
+      "concerns": []
+    },
+    "T140": {
+      "status": "OPEN",
+      "did": "[US6] Replace the settings read and write in the theme selector with the scoped store setting (checklist 5.1a, plan D9, FR-023).",
+      "files": [],
+      "concerns": []
+    },
+    "T141": {
+      "status": "OPEN",
+      "did": "[US6] Replace the settings read and write in the waitlist sort preference with the scoped store setting (checklist 5.1b, FR-023).",
+      "files": [],
+      "concerns": []
+    },
+    "T142": {
+      "status": "OPEN",
+      "did": "[US6] Replace the settings read in the ignored-locations service with the plant-scope store setting (checklist 5.1c, FR-024).",
+      "files": [],
+      "concerns": []
+    },
+    "T143": {
+      "status": "OPEN",
+      "did": "[US6] Replace the settings read and write in the new-request alert service with the scoped store setting (checklist 5.1d, FR-023).",
+      "files": [],
+      "concerns": []
+    },
+    "T144": {
+      "status": "OPEN",
+      "did": "[US6] Replace the settings read and write in the message-seen store with the scoped store setting (checklist 5.1e, FR-023).",
+      "files": [],
+      "concerns": []
+    },
+    "T145": {
+      "status": "OPEN",
+      "did": "[US6] Replace the settings read and write in the dunnage image-search view model with the scoped store setting (checklist 5.1g, FR-023).",
+      "files": [],
+      "concerns": []
+    },
+    "T146": {
+      "status": "OPEN",
+      "did": "Delete the duplicate ignored-locations read and write in the settings view model, call the service instead, and make the editor read-only for every role but `IT Department` and `Developer`, enforcing the edit key where the write happens (checklist 5.1f, 7.3c, 7.3d, FR-024).",
+      "files": [],
+      "concerns": []
+    },
+    "T147": {
+      "status": "OPEN",
+      "did": "Add the session-length setting to the settings panel, changeable only by `IT Department` or `Developer`, enforced where the change happens (checklist 7.3e, plan D17, FR-029).",
+      "files": [],
+      "concerns": []
+    },
+    "T148": {
+      "status": "OPEN",
+      "did": "Host the developer log panel from Phase 7 inside Settings (the Phase 7 hand-off).",
+      "files": [],
+      "concerns": []
+    },
+    "T149": {
+      "status": "OPEN",
+      "did": "[US6] Inventory every setting that is role-restricted today and confirm each keeps the same restriction (checklist 7.3f, FR-030), recording for the ignored-locations list that its unchanged restriction is the read key and that the narrowed write is the deliberate exception from research D10 (SC-012).",
+      "files": [],
+      "concerns": []
+    },
+    "T150": {
+      "status": "OPEN",
+      "did": "Delete the local settings service and its contract, including the test-only corruption helper (checklist 5.2a).",
+      "files": [],
+      "concerns": []
+    },
+    "T151": {
+      "status": "OPEN",
+      "did": "[US6] Delete the file service and its DI registration, since the local settings service was its only consumer (checklist 5.2b).",
+      "files": [],
+      "concerns": []
+    },
+    "T152": {
+      "status": "OPEN",
+      "did": "[US6] Delete the local settings options model and its configuration binding, and with it the two tests that construct the type — `LocalSettingsOptions_Defaults` and `LocalSettingsOptions_AcceptsConfiguredValues` (checklist 5.2c; `specs/010-startup-rebuild/local-state-test-migration.md` §4 item 5).",
+      "files": [],
+      "concerns": []
+    },
+    "T153": {
+      "status": "OPEN",
+      "did": "[US6] Delete the already-dead settings storage extensions (checklist 5.2d).",
+      "files": [],
+      "concerns": []
+    },
+    "T154": {
+      "status": "OPEN",
+      "did": "[US6] Confirm the packaging-mode helper call sites and the image cache paths are untouched, since packaging mode and the image cache both stay (checklist 5.2e).",
+      "files": [],
+      "concerns": []
+    },
+    "T155": {
+      "status": "OPEN",
+      "did": "[US6] Move the shared folder and keys folder paths, and the dunnage root folder, into the machine configuration captured by machine setup, and re-point the resolver that reads them (checklist 5.3b, 5.3c, FR-025).",
+      "files": [],
+      "concerns": []
+    },
+    "T156": {
+      "status": "OPEN",
+      "did": "[US6] Reduce `appsettings.json` to the connection strings plus the reviewed `MockServiceClient` exception, deleting the startup, local-settings and logging sections and confirming `ModuleSharedOptions` and `ModuleCoreSettingsOptions` before either is deleted (checklist 2.2e, 5.3a, 5.3d, 5.3e, 6.6c, plan D24, FR-025).",
+      "files": [],
+      "concerns": []
+    },
+    "T157": {
+      "status": "OPEN",
+      "did": "[US6] Delete the test that exists only for the local-file mechanism, and replace the local settings double with the store seam in the files listed in `specs/010-startup-rebuild/local-state-test-migration.md` §2 — ten doubles across eleven kept files, five replaced and five deleted outright, four of them already dead — keeping every existing assertion and removing the one test method that asserts local persistence, `AddAndRemove_PersistToLocalSettings` (checklist 5.4a, 5.4e).",
+      "files": [],
+      "concerns": []
+    },
+    "T158": {
+      "status": "OPEN",
+      "did": "Confirm no test in the suite still references a local settings type or key, and that the solution builds with no reference left to a deleted settings type (checklist 5.4f, 5.2f).",
+      "files": [],
+      "concerns": []
+    },
+    "T159": {
+      "status": "OPEN",
+      "did": "Expand S13 from its group summary into the plain list of the cases the three read-only sweeps found, and record the twenty-three cases in `spec.md`'s Edge Cases section as part of the same catalogue, then walk that list and write a test for each case that still applies, one test per case — the four spec cases T171 to T174 already own are covered by those tasks and are not written twice (checklist 9.1a, FR-031, SC-013). The list does not exist yet, so it is recorded here before anything is walked (checklist 9.1a, FR-031, SC-013).",
+      "files": [],
+      "concerns": []
+    },
+    "T160": {
+      "status": "OPEN",
+      "did": "Confirm the suite holds no disabled, skipped or commented-out startup test — a skipped case is a case dropped silently, which FR-031 forbids (checklist 9.1c, brief S16, FR-031, SC-013).",
+      "files": [],
+      "concerns": []
+    },
+    "T161": {
+      "status": "OPEN",
+      "did": "Run against a fresh store and prove the machine-setup gate appears and cannot be bypassed (checklist 9.2a, SC-004).",
+      "files": [],
+      "concerns": []
+    },
+    "T162": {
+      "status": "OPEN",
+      "did": "Write the embed guide for the new module with an `applyTo`, covering the entry point, the host seam, the contracts it needs and their registration order, how to add a step, how to add a log entry and how to add a machine-configuration field, plus the invariants a later change must not break (checklist 10.1a–10.1d).",
+      "files": [],
+      "concerns": []
+    },
+    "T163": {
+      "status": "OPEN",
+      "did": "Re-adopt a living spec for the new startup surface, retire both old capabilities' leftovers — the `startup` and `startup-diagnostics` rows in `living-specs.yml` and in `capabilities/DRIFT.md`'s two-capability table, whose matched files are gone — and confirm the registry matches the tree (checklist 10.2a, 10.2b; the deferred Phase 2 registry edit).",
+      "files": [],
+      "concerns": []
+    },
+    "T164": {
+      "status": "OPEN",
+      "did": "Record the rebuild in the changelog in the repo's end-user format (checklist 10.3a).",
+      "files": [],
+      "concerns": []
+    },
+    "T165": {
+      "status": "OPEN",
+      "did": "Update the README module list and remove every reference to the retired splash and sign-in surfaces (checklist 2.5f, 10.3b).",
+      "files": [],
+      "concerns": []
+    },
+    "T166": {
+      "status": "OPEN",
+      "did": "Correct the UI-automation instructions so they describe the new gate and the store-backed log panel instead of the retired splash, sign-in and log-directory path (checklist 2.5e, 6.6c, 10.3c).",
+      "files": [],
+      "concerns": []
+    },
+    "T171": {
+      "status": "OPEN",
+      "did": "Test the case where a temporary credential is reset while the person is signing in with the old one, so an in-flight sign-in meets the reset rather than it being assumed absent (spec.md Edge Cases; T159's catalogue; FR-031, SC-013).",
+      "files": [],
+      "concerns": []
+    },
+    "T172": {
+      "status": "OPEN",
+      "did": "Test that a credential reset issued while the person is signed in elsewhere does not end the session already running, matching the rule that no procedure clears sessions by person for a reset (spec.md Edge Cases; FR-011; contracts/sql-contracts.md §1).",
+      "files": [],
+      "concerns": []
+    },
+    "T173": {
+      "status": "OPEN",
+      "did": "Test that an account still holding the legacy temporary value signs in and has that value recognised exactly as it is today (spec.md Edge Cases; FR-012, FR-013).",
+      "files": [],
+      "concerns": []
+    },
+    "T174": {
+      "status": "OPEN",
+      "did": "Test that a sign-out whose restart fails still ends the session and tells the person to open the application again, rather than leaving a half-signed-out state (spec.md Edge Cases; FR-008, FR-011, SC-001).",
+      "files": [],
+      "concerns": []
+    },
+    "T167": {
+      "status": "OPEN",
+      "did": "Record in S13 the reason for every case that no longer applies, beside the case itself, rather than leaving it untested and unexplained (checklist 9.1b, FR-031, SC-013).",
+      "files": [],
+      "concerns": []
+    },
+    "T168": {
+      "status": "OPEN",
+      "did": "Run with the store unreachable and prove the diagnosis is shown and nothing is persisted anywhere; then run against a slow store and a stalled share and prove neither holds the splash past its bound; compare the closing result with the Phase 1 baseline and account for every difference, including the exclusions recorded in T167 (checklist 9.2b–9.2d, SC-001, SC-002).",
+      "files": [],
+      "concerns": []
+    },
+    "T169": {
+      "status": "OPEN",
+      "did": "Run the retired-symbol audit one final time and confirm nothing came back (checklist 10.3d, FR-028, SC-009).",
+      "files": [],
+      "concerns": []
+    },
+    "T170": {
+      "status": "OPEN",
+      "did": "Validate against the Success Criteria with the single suite run: stop any stale `MTM_Waitlist`, XAML-compiler or MSBuild process, set `MSBUILDDISABLENODEREUSE=1`, build `MTM_Waitlist.sln` for x64 Debug with `/m:1 /nodeReuse:false` at zero warnings and zero errors, then run the suite (checklist 3.2c, FR-001–FR-038, SC-001–SC-017).",
+      "files": [],
+      "concerns": []
+    },
+    "T180": {
+      "status": "OPEN",
+      "did": "Test the capture: the chain carries every exception with its depth and index, an aggregate contributes all of its independent failures, an over-long chain is truncated with its marker rather than silently, a member that throws on read is replaced instead of losing the entry, and a failing recorder raises no second diagnostic (FR-032, FR-037).",
+      "files": [],
+      "concerns": []
+    },
+    "T181": {
+      "status": "OPEN",
+      "did": "Test the fingerprint: the same fault raised twice produces the same value, a different fault or module produces a different one, the message's variable parts are normalized out, and an entry raised without an exception carries none (FR-033, SC-014).",
+      "files": [],
+      "concerns": []
+    },
+    "T182": {
+      "status": "OPEN",
+      "did": "Test the gathered context: the runtime, view and store objects are built by the seam and not by the caller, a store fault carries the provider's code and a statement fingerprint containing no parameter values, and nothing on the never-write list reaches any of them (FR-034 to FR-036, SC-015, SC-016).",
+      "files": [],
+      "concerns": []
+    },
+    "T175": {
+      "status": "OPEN",
+      "did": "Serialize the exception chain into `exception_detail`: one node per exception carrying its level, index, type, message, stack, source, HRESULT, help link, target site and allowlisted data, with `ToString()` stored once as `full`, capped at a node boundary with an explicit truncation marker, and defensive against a member that throws on read (plan D25, FR-032).",
+      "files": [],
+      "concerns": []
+    },
+    "T177": {
+      "status": "OPEN",
+      "did": "Build the context the seam gathers: the `runtime` object, the `ui` object from whatever the caller could name, and the `database` object read from the provider's own exception, with the statement recorded as a value-free fingerprint (plan D27, FR-034, FR-035, FR-036).",
+      "files": [],
+      "concerns": []
+    },
+    "T176": {
+      "status": "OPEN",
+      "did": "Derive `error_fingerprint` from the fault's type, module, action and a normalized message shape, and carry it on the entry so the write procedure can store it (plan D26, FR-033).",
+      "files": [],
+      "concerns": []
+    },
+    "T178": {
+      "status": "OPEN",
+      "did": "Redact before anything is written: parameter names and their count may be recorded, values and credentials may not, and a provider message is cut at the first `=` that follows a parameter name (FR-036; `contracts/logging-contract.md` §6).",
+      "files": [],
+      "concerns": []
+    },
+    "T179": {
+      "status": "OPEN",
+      "did": "Absorb the writer's own secondary failures — the two clauses T065 does not carry: no local substitute record, and no added wait for the caller whose fault is being recorded (plan D27, FR-037).",
+      "files": [],
+      "concerns": []
+    },
+    "T183": {
+      "status": "OPEN",
+      "did": "Format the panel's copy: the entries' columns in the order the panel shows them, the exception chain and payload exactly as stored, the chain link included, an entry separator, a header naming the filter the copy came from, and a stated ceiling cut with an explicit marker rather than silently — the ceiling's value is recorded in `contracts/logging-contract.md` §7 by this task, because no artifact states it yet (plan D29, FR-038).",
+      "files": [],
+      "concerns": []
+    },
+    "T184": {
+      "status": "OPEN",
+      "did": "Test the copy: it carries the chain, the runtime context, the store diagnostics and the chain link for the entries it was given, it names the filter it came from, it is cut with a marker at the ceiling, it holds nothing the store is forbidden to hold, and a refused clipboard is reported rather than raised (FR-038, SC-017).",
+      "files": [],
+      "concerns": []
+    },
+    "T185": {
+      "status": "OPEN",
+      "did": "Re-point the shell's sign-out off `ISignOutService` and `SignOutResult` before US3's registration pass deletes them: `ShellViewModel` injects `ISignOutService` and exposes `Task<SignOutResult> SignOutAsync`, and `ShellPage.xaml.cs` uses `SignOutResult` and calls `MTM_Waitlist.Module_Startup.Services.SignOutService.ResolveRestartFailedMessage()` at line 207 — the production file outside the startup module that names `MTM_Waitlist.Module_Startup.Services`, which T005's assertion covers; T188 owns the test-side reference. Move it onto the rebuilt session service, keep the refusal message it produces, and re-point `ShellViewModelTests`, which asserts that a sign-out goes through the service rather than merely clearing the displayed name (FR-011, SC-001).",
+      "files": [],
+      "concerns": []
+    },
+    "T186": {
+      "status": "OPEN",
+      "did": "Provide the process-restart path `IAppProcessRestarter` carried, so a sign-out still ends the session and restarts, and so a restart that fails is reported rather than leaving a half-signed-out state (FR-011; spec.md Edge Cases; the case T174 tests).",
+      "files": [],
+      "concerns": []
+    },
+    "T187": {
+      "status": "OPEN",
+      "did": "Rebuild the computer-management capability inside `MTM_Waitlist.Settings` before T015 empties the project its implementation lives in, and delete `IComputerRegistryService` with it (research D30). The Settings \"Computers\" panel keeps listing, adding, editing and deactivating registry rows: its service is recreated at `MTM_Waitlist.Settings/Services/ComputerRegistryService.cs` over the rebuilt machine contracts — this machine's record comes from `IMachineFacts` (T038), and the fleet's list, upsert, update and delete keep the `sp_core_computers_registry_*` procedures behind that seam — and `ComputerManagementViewModel` and `ComputerEditDialogViewModel` stop injecting the deleted interface. `FakeComputerRegistryService` in the kept `SettingsViewModelTests.cs` is re-pointed at the new seam or deleted with the interface; `ComputerManagementViewModel`'s `StartupState` injection is T040's to remove (FR-022).",
+      "files": [],
+      "concerns": []
+    },
+    "T188": {
+      "status": "OPEN",
+      "did": "Re-point or retire `MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs`: line 13 imports `MTM_Waitlist.Module_Startup.Services` and line 324 constructs `StartupSessionRepository`, a type T015 clears whose six procedures T020 deletes, so the file strands T015's green-build checkpoint. Move its session case onto the rebuilt session service, or record in the file why the case is retired (FR-010, FR-011).",
+      "files": [],
+      "concerns": []
+    },
+    "T189": {
+      "status": "OPEN",
+      "did": "Add the retired static logger to the reintroduction guard, with its re-introduction sample, so that reintroducing it fails the build as the guard exists to do per T069, FR-028, SC-009 (partial). The guard is currently inconsistent with its own purpose: T069 deleted the type in the same change as two other logging types that both carry patterns, so this is an omission rather than a deliberate exemption.",
+      "files": [],
+      "concerns": []
+    },
+    "T190": {
+      "status": "OPEN",
+      "did": "Reconcile the launch-step artifacts with the shipped catalog per FR-003, `contracts/launch-step-contract.md` (contradicts). The catalog reports seventeen individual operations while `plan.md`, the step record in this file, and the step ids retried by T077, T121 and T125 still describe the eleven grouped steps those operations replaced.",
+      "files": [],
+      "concerns": []
+    },
+    "T191": {
+      "status": "OPEN",
+      "did": "Record the four changes that carry no task — the schema validator repair, the picture-layout seed retirement, the three documentation corrections, and the orphaned logging contract's deletion — either as designed work in `plan.md` or as tasks, so that every change in the tree traces to something per Constitution I (unrequested).",
+      "files": [],
+      "concerns": []
+    },
+    "T192": {
+      "status": "OPEN",
+      "did": "Add the splash-visibility requirement to `spec.md` with its acceptance criterion — every individual thing the launch processes is shown on the splash — because the catalog implements it as seventeen entries and no requirement states it, leaving the code ahead of the specification per the owner's instruction of 2026-09-27 (missing).",
+      "files": [],
+      "concerns": []
+    },
+    "T193": {
+      "status": "OPEN",
+      "did": "Record the destructive approval for the phase 2.4 and 5.6 deletions in the plan's Complexity Tracking, which is where the plan states the approval is recorded before each deletion set runs, rather than only in the companion ledger per Constitution: Security & Secrets, `plan.md` → Complexity Tracking (partial).",
+      "files": [],
+      "concerns": []
+    },
+    "T194": {
+      "status": "OPEN",
+      "did": "Record coverage entries for FR-032 to FR-038 and for all seventeen success criteria, so the requirement record traces the work that already exists under the two addenda and so SC-013's demand that every acceptance case be covered or retired can be read from the record per SC-013 (partial).",
+      "files": [],
+      "concerns": []
+    },
+    "T195": {
+      "status": "OPEN",
+      "did": "Add the stored procedure that returns every role a person holds and read it in `MTM_Waitlist.Startup/Services/PersonIdentityService.cs`, so `HeldRoleCodes` stops carrying only the single role the existing logon read returns, which is the disclosed gap in `contracts/identity-contracts.md` (missing). `ResolveAsync` applies one role while `Apply` already accepts the full set, and no procedure under `Database` returns all of a person's assignments, so the reader is the whole of the work.",
+      "files": [],
+      "concerns": []
+    },
+    "T196": {
+      "status": "OPEN",
+      "did": "Correct the two documents that place the logging seam where it cannot go, so the record matches the tree: `contracts/logging-contract.md` section 5 and `research.md` D8 must state that the static facade lives in `MTM_Waitlist.Core` because the logging module already references that library, so the logging module would be a circular reference, and the contract's count of standalone `ILogger` call sites must be reconciled with the number that actually exists (partial).",
+      "files": [],
+      "concerns": []
     }
   },
-  "concerns": [
-    {
-      "note": "The shared store at 172.16.1.104:3306 does not accept a connection from this machine (TCP probe times out after 5 s), so four later tasks cannot be completed or verified here: T024, T033, T034 and T063. A separate MySQL listens on 127.0.0.1:3306."
-    },
-    {
-      "note": "T003 could not capture the sign-in form. Both launch configurations auto-signed-in and reached the main screens, because LocalSettings.json carries a live Startup.Session.Token and Startup.Session.ExpiresUtc. Captured: splash 760x460, automation name 'WinUI Desktop'; main window 3456x1408, restore 760x500. Clearing that token would show the sign-in form, but that mutates machine state rather than repository state."
-    },
-    {
-      "note": "T001, the retired-symbol guard, was not started. It turns the suite red by design until the whole Phase 2 removal lands, so adding it without completing that removal would leave a red suite behind a guard that proves nothing. Phase 2 spans roughly 50 to 70 source files, a new project, 26 database artifacts and the app and DI rewiring."
-    },
-    {
-      "note": "python3 is absent here and the py launcher's default interpreter (C:/Python314) is broken with 'Failed to import encodings module'. The working interpreter is 'python' (3.10.11)."
-    },
-    {
-      "note": "Supersedes the earlier T003 concern. The sign-in form was subsequently captured (820x760, automation name Sign in, buttons Sign In and Back) by temporarily clearing the remembered session, with LocalSettings.json backed up and then restored byte-identical (SHA-256 verified). T003 is complete and all three pre-removal windows now have a baseline figure."
-    },
-    {
-      "note": "The unreachable shared store no longer blocks T024, T033, T034 and T063 from being verified: the local MAMP MySQL carries a provisioned mtm_waitlist schema matching this features pre-removal baseline object for object. Verifying against it proves the schema artifacts are correct, but not that the shared host matches, so it substitutes for the checks and not for the environment."
-    },
-    {
-      "note": "The first recorded run of the local schema validator shows exit 1. That was a defect in the harness script, not a schema failure: the script set ErrorActionPreference to Stop, so the mysql client note on stderr about a password on the command line aborted it. The corrected script passes the credential through MYSQL_PWD and exits 0 with zero issue rows; its run is recorded as the entry labelled corrected harness. Read the exit 1 entry as a harness artefact."
-    },
-    {
-      "note": "Corrects the earlier claim that the local MAMP store is a faithful baseline for this feature without qualification. Running all four repository validators against it: startup_schema clean, settings_schema clean, user_management_schema clean, part_pictures_schema reports three stale_routine_body issues (sp_config_images_locations_paths_move, sp_config_images_locations_update, sp_config_images_locations_insert). The local store was therefore provisioned before feature 008 part pictures landed its procedure changes. It is current enough for this features startup schema work, but it must be re-provisioned from Database before any verification that spans the images locations procedures, and the exit code of one recorded check reflects that staleness rather than a script fault."
-    },
-    {
-      "note": "The 22 recorded task finishes cluster in time because one agent run completed the whole removal in a single pass, not because the record was batched as a shortcut. The per-task summaries and their order are accurate; the timestamps are best-effort and the doctor will flag the cluster."
-    },
-    {
-      "note": "Residual in the launch path for the T033 proof: the App constructor still starts IVisualReachabilityProbeHost. It is Mock-module machinery registered by AddVisualReadFallback rather than by startup, it opens no window and blocks nothing, but it does probe the external source, so either stop it in the launch phase or record that the T033 no-store-read check accepts it."
-    },
-    {
-      "note": "T019 is deliberately not done: Module_Core/Views/ShellPage.xaml has owner edits in progress, and two TooltipBehavior.AssociatedFiles strings still name the deleted SignInSignInKeys-era file SignInSessionKeys.cs and the mis-pathed StartupState.cs. They are inert strings and caused no build error."
-    },
-    {
-      "note": "Disclosure qualifying T030 and T033. The App constructor starts IVisualReachabilityProbeHost, whose background cycle reads the mtm_mock mirror through sp_visual_read_shape_freshness_get and issues no statement against any internal store. It was observed directly: while the app ran, its only established connection was to the local MySQL host with database mtm_mock, and that session vanished when the app closed. The no-store-read clauses therefore hold for the internal operational stores and are qualified for the mock mirror, which is the Visual verdict priming the plan keeps at launch. T030 was ticked for the placeholder being the only launch window; this is its disclosure."
-    },
-    {
-      "note": "Corrects two recorded validator checks. The temporary harness scripts counted the mysql batch column header as an issue row, so the all-four-validators entry over-states its issue-row count by one. The verdicts stand: startup, settings and user_management are clean, and part_pictures has three real stale routine bodies that predate this feature."
-    },
-    {
-      "note": "Disclosed gap in IPersonIdentity: HeldRoleCodes is only partly store-backed. No existing stored procedure returns all of a person role assignments and Database is out of scope for this unit, so PersonIdentityService.ResolveAsync applies only the single role the existing logon read returns, while Apply accepts the full set for the sign-in step T116 to supply. A later database task must add the reader that returns every held role."
-    },
-    {
-      "note": "The identity writer seams have no production caller yet. ResolveAsync, RefreshAsync, Apply and Clear are the launch pipeline calls, and the pipeline is a later wave, so they are currently uncalled in production code."
-    },
-    {
-      "note": "Machine address detection in MachineFactsService is new rather than following an existing reader, because the repository had none: it takes the first operational physical adapter carrying a six-byte address. The two new services have no dedicated unit tests; the fakes are exercised through their consumers."
-    },
-    {
-      "note": "Open accounting item against T034 discipline. The identity unit changed the suite total from 1471 to 1467 and the passed count from 1425 to 1421, while the count of tracked test method declarations fell only from 1385 to 1382, so three net declarations removed. The four removed results are consistent with four declarations removed and one added, or with one removed declaration being parameterised, but I could not prove which, and my first attempt at the finer accounting used a mis-escaped pattern so it is not evidence. The removed tests are the StartupState model tests in CoreModelsTests and StartupModelsTests; the four T005 guard tests were separately confirmed still present. One test result is therefore unattributed."
-    },
-    {
-      "note": "Sequencing hazard disclosed by the store-foundation unit. The amended startup_schema validator now asserts the four new columns and six indexes, so it reports ten issues against any store that has not yet been migrated, and the two new validators were appended to install_local_database.vbs deploy list, so a fresh local install performed before T057 and T058 register the new tables in the aggregates will report tables 34 and 35 as missing. That is the wiring running ahead of the aggregate registration those tasks own, and the order matters."
-    },
-    {
-      "note": "T053 is only half done and its box is therefore left unticked. Its four-keys-per-role half is implemented and verified role-explicitly across all nine catalogue roles. Its second half, the plant-scope rows and the seed rows the seven preferences need, is not: the five person-scoped preferences are per-person rows the person own choice writes, the ignored-locations live value is still a local file whose move is T142 write path, and the session-length setting key exists nowhere in the repository so a row for it would invent the name that T147 owns. Inventing two key names was judged worse than the gap."
-    },
-    {
-      "note": "Two validators now assert store shapes no store yet has: settings_schema reports 36 issues and startup_schema reports 10 against an un-migrated store. Both are the new assertions working ahead of a migration, and both fall to zero once a store is provisioned through Database/install_local_database.vbs, which should happen after T062 has removed the retired entries."
-    },
-    {
-      "note": "The logging seam is verified only through fakes: the store procedures exist as artifacts and are not deployed, so sp_ops_startup_logs_insert has never executed against a real store. payload_json.database carries the procedure, the database and the operation but leaves the server alias, timings, retry attempt and statement fingerprint null, and payload_json.ui carries only the caller target because the contract forbids touching the dispatcher during shutdown. T175-T182 chain normalisation, fingerprint normalisation and parameter redaction are deliberately deferred, and appsettings.json still carries the inert StartupLoggingOptions section until T133 deletes the type."
-    },
-    {
-      "note": "Migrating the static logging surface forced a decision the spec never made: the facade that 418 call sites now resolve cannot live in the logging module, because that module already references MTM_Waitlist.Core and Core holds 39 of the call sites, so that placement would be a circular reference. It was put in MTM_Waitlist.Core, in the namespace the retired type occupied, which is why the migration needed no per-file using edit; contract section 5 and research D8 premised the opposite and should be amended. Separately the contract counts seven standalone ILogger call sites but only six exist plus one doc-comment mention, so its 226 total holds only on that reading. And IStartupLogService with its StartupLogService implementation now have no production consumer at all: the old App.xaml.cs line passed GetService<IStartupLogService>(), which was registered nowhere, so the retired static log had been forwarding to null in production for as long as that line existed."
-    },
-    {
-      "note": "T020 is deliberately left unticked: it names nine procedures to delete, six were deleted and three were kept because the rebuilt startup services still call them (ComputerRegistryService for the by-mac lookup, by-name-and-mac lookup and update-by-mac, and MachineFactsService for the by-name-and-mac lookup). Deleting them would leave live code calling procedures no install creates, and the surviving protected lookup matches on name alone, which would weaken the machine gate. They should retire with ComputerRegistryService. The rollback drops for the six deleted procedures were kept, matching 41 other rollback-only procedure folders, 35 of them pre-existing. Two further items: the aggregate validator reports 120 artifacts creating 120 distinct objects after the six removals, down from 126, and its live phase is skipped because no connection string is configured, so the aggregate-and-tree agreement was proved by exact comparison instead; and the seeds aggregate has 11 headers for 12 seed folders, with two headers carrying the same name, which is pre-existing and untouched."
-    },
-    {
-      "note": "T061 cannot be executed as written. The enumeration found core_buildings_catalog is written by Database/Seeds/seed_dev_masked_baseline (create, rollback and the AllSeeds aggregate) and that Database/Validation/settings_schema/validate.sql asserts all three buildings objects exist; neither file is named by any task, so T062's file list is incomplete too. The seed consumer is sharp because the schema validator applies every seed on its success path, so the live validator cannot pass while a surviving seed writes a dropped table. T060 is executable, but its one consumer UserManagementLiveIntegrationTests belongs to the unticked final task T188, so deleting the table now leaves that test naming a table no artifact creates. Separately, eight deployed objects show no consumer by text and five of those are objects this feature just created whose consumers are the unbuilt log panel and machine configuration, so they must not be mistaken for dead weight; the first enumeration pass also wrongly read two objects as consumerless because procedure bodies were missing from the corpora, and both are in fact consumed by other procedures."
-    },
-    {
-      "note": "T063 is left unticked although the schema validator runs: settings_schema reports four issues, all missing_role_baseline for role:admin across the four new permission keys, and the role-baseline seed deliberately covers nine roles that do not include admin because a separate seed retires Admin in favour of IT Department, so the expected role set and the seeded role set disagree. That belongs to the unticked T053. The store is otherwise sound: startup, user management, remembered sign-ins and active sessions all validate clean, and part_pictures_schema keeps its three pre-existing stale-routine-body findings. Separately, .github/scripts/validate-database-schema.ps1 cannot exit zero whenever a connection string is configured: it splits each seed file on every semicolon and seed_dev_masked_baseline line 216 is a comment containing one, so the statement is cut in half and MySQL rejects it; that comment is byte-identical at HEAD, the defect predates this feature, and it was invisible until now because earlier runs skipped the live phase. Two more items: the rollback scripts for sp_auth_credentials_check and sp_auth_password_reset_required_get recreate rather than drop their procedure, so the local store keeps two retired procedures no artifact creates. And my own repair pass was briefly wrong: applying seed_dev_masked_baseline after seed_permission_role_baselines truncates config_settings_values at its line 119 and wiped all thirty-six baselines; re-applying the baselines in the correct order restored them and the table holds thirty-nine rows."
-    },
-    {
-      "note": "T063 is unticked although the validator runs: settings_schema reports four issues, all missing_role_baseline for role:admin across the four new permission keys. The role-baseline seed covers nine roles that exclude admin, because a separate seed retires Admin in favour of IT Department, so the expected role set and the seeded role set disagree. That belongs to the unticked T053. Everything else validates clean apart from the three pre-existing part_pictures stale-routine-body findings."
-    },
-    {
-      "note": "The repository schema validator cannot exit zero whenever a connection string is configured: it splits each seed file on every semicolon and seed_dev_masked_baseline line 216 is a comment containing one, so the statement is cut in half and MySQL rejects it. That comment is byte-identical at HEAD and the defect predates this feature; it was invisible until now because earlier runs skipped the live phase. Two smaller items: the rollback scripts for sp_auth_credentials_check and sp_auth_password_reset_required_get recreate rather than drop their procedure, so the local store keeps two retired procedures no artifact creates. And my own repair pass was briefly wrong: applying seed_dev_masked_baseline after seed_permission_role_baselines truncates config_settings_values at its line 119 and wiped all thirty-six baselines; re-applying the baselines in the correct order restored them and the table holds thirty-nine rows."
-    },
-    {
-      "note": "Two findings from the validator repair that no task owns. First, Database/Seeds/seed_picture_layout_move creates a helper procedure, calls it and never drops it, in both its folder file and the seeds aggregate, so the local store carries sp_seed_picture_layout_move with no create.sql artifact; its sibling seed does drop its helper and says so in its header, so this is an inconsistency rather than a convention, and the fix is two lines once someone owns it. Second, deleting the orphaned logging contract left stale prose in .github/instructions/winui3-ui-automation.instructions.md and two capability specs that still describe the deleted service as the live log path. Also worth recording: the local store legitimately carries two seed-created objects beyond the artifact set, so its 119 objects against 117 artifacts is explained and not drift."
-    },
-    {
-      "note": "The launch-step contract pins the shape of a step, the categories, the ceiling and the two best-effort steps, but it names no steps and no numbers, so the eleven-step sequence and every stated maximum in T074 were chosen by the implementer rather than taken from the contract and should be reviewed against the brief. LaunchRemedySet was also created because LaunchStepOutcome requires it, and no task owns it."
-    },
-    {
-      "note": "The code and the written spec now disagree in four places, all in files the owner has open, so I left them. LaunchStep gained a Target member, which data-model.md and the LaunchStep record shown in tasks.md do not show. STARTUP-REBUILD-BRIEF.md, STARTUP-REBUILD-CHECKLIST.md and tasks.md still describe the deleted logging service as a present type. And the step ids changed for every split entry, so the ids configuration, machine-readiness, machine-setup, session, sign-in, machine-gate and password-change no longer resolve as retry keys; only store-reachability, picture-cache, visual-priming and shell survived. One judgement to review: read-hardware-identity remains a single entry although it reads both the computer name and the hardware address, because they come from one local step with no external wait."
-    },
-    {
-      "note": "The 2026-09-27 analysis left this reconciliation outstanding, in the order the owner approved. Done already: the contract now states all seventeen maximums so FR-003 is verifiable against an artifact, and the data model step entity now carries the Target member. Outstanding, all in files the owner has open so they sit uncommitted on purpose: the stale type names across plan.md, research.md, tasks.md, STARTUP-REBUILD-BRIEF.md, STARTUP-REBUILD-CHECKLIST.md and two contracts, since none of them may be committed without sweeping the owner in-flight edits into my commit; the destructive approval recorded in the plans own Complexity Tracking rather than only in this ledger; the splash requirement added to spec.md; and the two task text corrections, T069s claim that the audit would flag the two doc comments when the audit in fact carries no pattern for that type, and the retry ids in T077, T121 and T125 which still name step ids the split retired. Also outstanding: coverage entries for FR-032 to FR-038 and for the seventeen success criteria, the three addendum phases reconciled against their main phases, and tasks created for the four unledgered changes. Two tasks stay blocked and should not be forced: T060, whose only consumer belongs to task T188 the plans last, and T019, which edits one of the owner uncommitted files."
-    }
-  ],
+  "concerns": [],
   "verified": [
     {
       "what": "baseline build",

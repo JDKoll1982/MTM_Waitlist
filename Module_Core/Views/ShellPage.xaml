@@ -427,7 +427,7 @@
                                 Background="Transparent"
                                 BorderThickness="0"
                                 shared:TooltipBehavior.ResourceKey="Shell_CurrentUser_Tooltip"
-                                shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs|MTM_Waitlist.Startup/Services/SignOutService.cs|MTM_Waitlist.Startup/Services/SignInSessionKeys.cs|MTM_Waitlist.Startup/Services/AppProcessRestarter.cs|Strings/en-us/Resources.resw|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
+                                shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|ViewModels/ShellViewModel.cs|MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs|MTM_Waitlist.Startup/Services/SignOutService.cs|MTM_Waitlist.Startup/Services/AppProcessRestarter.cs|Strings/en-us/Resources.resw|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
                                 shared:TooltipBehavior.FallbackText="View the current signed-in user, or sign out.">
                                 <Button.Flyout>
                                     <MenuFlyout Placement="BottomEdgeAlignedRight">
@@ -616,7 +616,7 @@
                                         Background="Transparent"
                                         BorderThickness="0"
                                         shared:TooltipBehavior.ResourceKey="Shell_CurrentUser_Tooltip"
-                                        shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs|MTM_Waitlist.Startup/Services/SignOutService.cs|MTM_Waitlist.Startup/Services/SignInSessionKeys.cs|MTM_Waitlist.Startup/Services/AppProcessRestarter.cs|Strings/en-us/Resources.resw|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
+                                        shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|ViewModels/ShellViewModel.cs|MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs|MTM_Waitlist.Startup/Services/SignOutService.cs|MTM_Waitlist.Startup/Services/AppProcessRestarter.cs|Strings/en-us/Resources.resw|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
                                         shared:TooltipBehavior.FallbackText="View the current signed-in user, or sign out.">
                                         <Button.Flyout>
                                             <MenuFlyout Placement="BottomEdgeAlignedRight">

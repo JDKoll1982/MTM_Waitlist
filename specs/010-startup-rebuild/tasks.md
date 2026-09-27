@@ -108,7 +108,7 @@ models and options deleted in T012, T013 and T014 · `MTM_Waitlist.Core/`, `Modu
 - [x] **T016** [P] Delete the whole `Module_Startup/Views` folder, including the dead `SplashPage` (checklist 2.3d). · `Module_Startup/Views/`
 - [x] **T017** [P] Create `MTM_Waitlist.Logging` as a project with its solution entry and its dependency-injection extension file, re-point the startup references in the app and test projects, and drop the `Compile Remove` entry (checklist 2.3b, 2.3c). · `MTM_Waitlist.sln`, `MTM_Waitlist.Logging/MTM_Waitlist.Logging.csproj`, `MTM_Waitlist.Logging/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`, `MTM_Waitlist.csproj`, `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`, `MTM_Waitlist.Startup/MTM_Waitlist.Startup.csproj`
 - [x] **T018** [P] Remove the eight sign-out/sign-in resource keys and the fifteen `Startup_*` tooltip keys, and add in the same pass every new localised string the rebuilt surfaces need: the feed lines, machine setup, the blocked state and the sign-in hint (checklist 2.5g, S15). · `Strings/en-us/Resources.resw`, `Strings/en-us/TooltipResources.resw`, `Strings/en-us/TooltipResources.developer.resw`
-- [ ] **T019** [P] Remove the deleted-file names from the two `TooltipBehavior.AssociatedFiles` strings and correct the mis-pathed `StartupState.cs` entry (checklist 2.5h). · `Module_Core/Views/ShellPage.xaml`
+- [x] **T019** [P] Remove the deleted-file names from the two `TooltipBehavior.AssociatedFiles` strings and correct the mis-pathed `StartupState.cs` entry (checklist 2.5h). · `Module_Core/Views/ShellPage.xaml`
 
 **⟶ Wait for Wave 4 to finish, then:**
 - [ ] **T020** [P] Delete the nine startup-only stored procedures listed in the brief: `sp_server_utc_now_get`, `sp_auth_credentials_check`, `sp_auth_user_password_update`, `sp_auth_computer_registered_get`, `sp_auth_session_expiry_get`, `sp_auth_password_reset_required_get`, `sp_core_computers_registry_lookup_by_name_mac_get`, `sp_core_computers_registry_lookup_by_mac_get`, `sp_core_computers_registry_update_by_mac`, under the recorded approval the Security & Secrets constraint requires for a destructive database operation (checklist 2.4a; plan.md → Complexity Tracking). · `Database/StoredProcedures/`
@@ -700,25 +700,35 @@ Appended by `/speckit.converge` on 2026-09-27, after the Phase 2 work landed and
 was run over the specification, the plan and this file. Every item below traces to the requirement, task or
 constraint that produced it, and nothing above this heading was changed.
 
-- [ ] T189 Add the retired static logger to the reintroduction guard, with its re-introduction sample, so that
+- [ ] **T189** Add the retired static logger to the reintroduction guard, with its re-introduction sample, so that
   reintroducing it fails the build as the guard exists to do per T069, FR-028, SC-009 (partial). The guard is
   currently inconsistent with its own purpose: T069 deleted the type in the same change as two other logging
   types that both carry patterns, so this is an omission rather than a deliberate exemption.
-- [ ] T190 Reconcile the launch-step artifacts with the shipped catalog per FR-003,
+- [ ] **T190** Reconcile the launch-step artifacts with the shipped catalog per FR-003,
   `contracts/launch-step-contract.md` (contradicts). The catalog reports seventeen individual operations while
   `plan.md`, the step record in this file, and the step ids retried by T077, T121 and T125 still describe the
   eleven grouped steps those operations replaced.
-- [ ] T191 Record the four changes that carry no task — the schema validator repair, the picture-layout seed
+- [ ] **T191** Record the four changes that carry no task — the schema validator repair, the picture-layout seed
   retirement, the three documentation corrections, and the orphaned logging contract's deletion — either as
   designed work in `plan.md` or as tasks, so that every change in the tree traces to something per
   Constitution I (unrequested).
-- [ ] T192 Add the splash-visibility requirement to `spec.md` with its acceptance criterion — every individual
+- [ ] **T192** Add the splash-visibility requirement to `spec.md` with its acceptance criterion — every individual
   thing the launch processes is shown on the splash — because the catalog implements it as seventeen entries
   and no requirement states it, leaving the code ahead of the specification per the owner's instruction of
   2026-09-27 (missing).
-- [ ] T193 Record the destructive approval for the phase 2.4 and 5.6 deletions in the plan's Complexity
+- [ ] **T193** Record the destructive approval for the phase 2.4 and 5.6 deletions in the plan's Complexity
   Tracking, which is where the plan states the approval is recorded before each deletion set runs, rather than
   only in the companion ledger per Constitution: Security & Secrets, `plan.md` → Complexity Tracking (partial).
-- [ ] T194 Record coverage entries for FR-032 to FR-038 and for all seventeen success criteria, so the
+- [ ] **T194** Record coverage entries for FR-032 to FR-038 and for all seventeen success criteria, so the
   requirement record traces the work that already exists under the two addenda and so SC-013's demand that
   every acceptance case be covered or retired can be read from the record per SC-013 (partial).
+- [ ] **T195** Add the stored procedure that returns every role a person holds and read it in
+  `MTM_Waitlist.Startup/Services/PersonIdentityService.cs`, so `HeldRoleCodes` stops carrying only the single
+  role the existing logon read returns, which is the disclosed gap in `contracts/identity-contracts.md`
+  (missing). `ResolveAsync` applies one role while `Apply` already accepts the full set, and no procedure under
+  `Database` returns all of a person's assignments, so the reader is the whole of the work.
+- [ ] **T196** Correct the two documents that place the logging seam where it cannot go, so the record matches
+  the tree: `contracts/logging-contract.md` section 5 and `research.md` D8 must state that the static facade
+  lives in `MTM_Waitlist.Core` because the logging module already references that library, so the logging
+  module would be a circular reference, and the contract's count of standalone `ILogger` call sites must be
+  reconciled with the number that actually exists (partial).

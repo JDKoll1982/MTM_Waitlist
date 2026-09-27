@@ -94,10 +94,7 @@ public sealed class RetiredSymbolAuditTests
         ("retired default activation handler", new Regex(@"\bDefaultActivationHandler\b", RegexOptions.Compiled)),
         ("retired app-lifecycle service", new Regex(@"\bAppLifecycleService\b", RegexOptions.Compiled)),
         ("retired computer-gate service", new Regex(@"\bComputerGateService\b", RegexOptions.Compiled)),
-        // The file-name exemption is narrow and deliberate. The one surviving mention is a tooltip's
-        // AssociatedFiles entry, "…/Services/SignInSessionKeys.cs"; T019 removes it with the owner's other
-        // XAML work. A reintroduced identifier is not followed by ".cs", so it still fails.
-        ("retired sign-in session keys", new Regex(@"\bSignInSessionKeys\b(?!\.cs)", RegexOptions.Compiled)),
+        ("retired sign-in session keys", new Regex(@"\bSignInSessionKeys\b", RegexOptions.Compiled)),
         ("retired startup coordinator", new Regex(@"\bStartupCoordinator\b", RegexOptions.Compiled)),
         ("retired startup module service", new Regex(@"\bStartupModuleService\b", RegexOptions.Compiled)),
         ("retired startup recovery service", new Regex(@"\bStartupRecoveryService\b", RegexOptions.Compiled)),
@@ -117,11 +114,7 @@ public sealed class RetiredSymbolAuditTests
         ("retired startup registration request model", new Regex(@"\bStartupRegistrationRequest\b", RegexOptions.Compiled)),
         ("retired startup result model", new Regex(@"\bStartupResult\b", RegexOptions.Compiled)),
         ("retired startup session snapshot model", new Regex(@"\bStartupSessionSnapshot\b", RegexOptions.Compiled)),
-        // Narrowed for the same reason and just as narrowly as the sign-in session keys above. The one surviving
-        // mention is a tooltip's AssociatedFiles entry, "Module_Startup/Models/StartupState.cs", which T019
-        // removes with the owner's other XAML work in Module_Core/Views/ShellPage.xaml — a file this task is
-        // forbidden to touch. A reintroduced identifier is not followed by ".cs", so it still fails.
-        ("retired launch-state object", new Regex(@"\bStartupState\b(?!\.cs)", RegexOptions.Compiled)),
+        ("retired launch-state object", new Regex(@"\bStartupState\b", RegexOptions.Compiled)),
         ("retired startup window options", new Regex(@"\bStartupWindowOptions\b", RegexOptions.Compiled)),
         ("retired sign-in window", new Regex(@"\bLoginWindow\b", RegexOptions.Compiled)),
         ("retired sign-in page", new Regex(@"\bLoginPage\b", RegexOptions.Compiled)),
