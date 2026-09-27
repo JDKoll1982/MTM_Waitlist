@@ -52,6 +52,36 @@ public enum LaunchStepCategory
 Derived, not stored: `TotalCount` from the step list, `CompletedCount`, and the progress text. Adding or
 removing a step must never leave a stale "of 5".
 
+### 1.1 The stated maximums (FR-003, SC-002)
+
+FR-003 requires every wait on the launch path to have a stated maximum. The maximums are therefore stated
+**here**, not left to the implementation, so the requirement is verifiable against the artifact that states it
+rather than against the code that happens to implement it. The ceiling is 30 seconds and no entry is unbounded.
+
+| Operation | Category | Maximum | Best effort |
+|---|---|---|---|
+| read this computer's saved settings | Configuration | 10 s | |
+| contact the store | Configuration | 15 s | |
+| read this computer's hardware identity | Machine | 5 s | |
+| read this computer's record | Machine | 10 s | |
+| read this computer's configuration | Machine | 10 s | |
+| save this computer's configuration | Machine | 30 s | |
+| read the remembered sign-in | Session | 10 s | |
+| resolve the person | Session | 15 s | |
+| resolve the person's roles | Session | 15 s | |
+| check the credential | Session | 30 s | |
+| judge the session | Session | 15 s | |
+| check this computer against the store | Session | 15 s | |
+| check whether a new password is needed | Session | 15 s | |
+| set a new password | Session | 30 s | |
+| refresh the picture copies | Pictures | 10 s | yes |
+| settle the external-system verdict | ExternalSystem | 5 s | yes |
+| hand over to the first screen | Shell | 10 s | |
+
+A change to a maximum is a change to this table first and to the catalog second. The catalog validates the list
+it ships — refusing an unbounded entry, one past the ceiling, a best-effort entry at the ceiling, a repeated id
+or a nameless entry — so the two cannot drift apart without the build failing.
+
 ## 2. Running one step
 
 ```csharp
