@@ -9,8 +9,7 @@ task line in that checklist. Nothing here is implemented yet; the removal checkl
 
 The entire startup surface is deleted and rebuilt from scratch: the `MTM_Waitlist.Startup` project, the
 `Module_Startup` views, the launch orchestration in `App.xaml.cs`, the activation surface, the startup
-contracts, models and options in `MTM_Waitlist.Core`, startup logging, the startup tests, the
-`capabilities/startup` living spec and its registry entry, and the docs that describe the old splash.
+contracts, models and options in `MTM_Waitlist.Core`, startup logging, the startup tests.
 
 The old logic is replaced first by a **placeholder window** so the removal is provable: if the app can no
 longer reach the shell, the old logic is gone. Only then is the new module built.
@@ -59,18 +58,16 @@ longer reach the shell, the old logic is gone. Only then is the new module built
   `SignOutResult`, `IAppProcessRestarter`, `IStartupWindowService`, `IStartupShellStateService`,
   `IStartupLogService`, `IStartupLogForwarder`, and the four `Startup*Options` models.
 - `Services/AppLifecycleService.cs` and the `IAppLifecycleService` seam it implements.
-- `StartupDebugLog` — see S9 for its 491 call sites.
+- `StartupDebugLog` — see S9 for its 489 call sites.
 - All startup tests, including `SplashViewModelTests`, `LoginViewModelTests`, `StartupCoordinatorTests`,
   `StartupLogServiceTests`, `StartupRecoveryServiceTests`, `ComputerGateServiceTests`,
   `ComputerRegistryServiceTests`, `TemporaryCredentialLimitTests`, `StartupArchiveCleanupTests`,
   `SignOutServiceTests`, `StartupModelsTests`, `StartupOptionsModelsTests`, `StartupDebugLogTests`, and
   `NoOpAppLifecycleService`.
-- `capabilities/startup/**`, the `startup` entry in `living-specs.yml`, and the `startup` row in
-  `capabilities/DRIFT.md`.
 - `STARTUP-FLOW.md`, `STARTUP-FLOW.html`, `STARTUP-FLOW.pdf`; the splash/sign-in steps in
   `.github/instructions/winui3-ui-automation.instructions.md`; the startup mentions in
   `.github/instructions/test-conventions.instructions.md`; the module list in `README.md`.
-- The eight `Shell_SignOut.*` / `Startup_SignIn.*` resource keys and the fourteen `Startup_*` tooltip keys
+- The eight `Shell_SignOut.*` / `Startup_SignIn.*` resource keys and the fifteen `Startup_*` tooltip keys
   (in **both** `TooltipResources.resw` and `TooltipResources.developer.resw`).
 
 ### S3.2 Shared artifacts that must survive untouched
@@ -82,8 +79,9 @@ longer reach the shell, the old logic is gone. Only then is the new module built
 **Seeds and aggregates**: `seed_dev_masked_baseline`, `seed_username_upper_normalization`,
 `seed_role_admin_to_it_department`, `AllSeeds.sql`, `update_table_descriptions.sql`, `AllTables.sql`,
 `AllSPs.sql`, `AllFunct.sql`.
-**Core services**: `MySqlHostFallback`, `ILocalSettingsService`, `IFileService`, `MySqlHelperServer`,
-`fn_server_utc_now`.
+**Core services**: `MySqlHostFallback`, `MySqlHelperServer`, `fn_server_utc_now`.
+`ILocalSettingsService` and `IFileService` stood in this list in the original audit and are **not** protected:
+the local-state removal deletes both with the mechanism they serve (see S11.5.1 and their own rows below).
 
 ### S3.3 Startup-only database artifacts (removable in isolation)
 `sp_server_utc_now_get`, `sp_auth_credentials_check`, `sp_auth_user_password_update`,
@@ -316,7 +314,7 @@ connection strings may remain local, so everything below is in scope.
 
 **No new storage is needed for these seven.** The scoped settings store already exists: `config_settings_values`
 with `fn_config_settings_scope_rank`, reached through `IConfigSettingsValueService` and
-`sp_config_settings_values_get` / `sp_config_settings_values_upsert`. `PictureEnlargePreference` already uses it
+`sp_config_settings_values_get` for reads and `sp_config_settings_upsert` for writes. `PictureEnlargePreference` already uses it
 and is the pattern to copy. The work is one substitution per item, plus a stored-procedure call at runtime
 rather than a file read.
 

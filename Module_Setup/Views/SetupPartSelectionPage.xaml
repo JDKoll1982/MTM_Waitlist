@@ -55,7 +55,9 @@
                         </Border>
                         <StackPanel Grid.Column="1" Padding="0,6,0,6" Spacing="6">
                             <TextBlock Style="{ThemeResource BodyLargeTextBlockStyle}" Text="{x:Bind PartNumber}" />
-                            <TextBlock Text="{x:Bind Description}" />
+                            <!-- The description is drawn by the one-line scrolling control (009 B1/B2): this row had
+                                 neither wrapping nor trimming, so a long description was simply cut off. -->
+                            <sharedControls:AutoScrollTextView Text="{x:Bind Description}" />
                             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind WorkCenter}" />
                         </StackPanel>
                     </Grid>

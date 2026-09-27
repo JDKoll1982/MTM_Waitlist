@@ -148,7 +148,8 @@ Settings screen silently opens the pre-sign-in gate.
 
 ## 6. What stays local
 
-Only the connection strings used to reach the store, plus one reviewed exception.
+Only the connection strings used to reach the store and the external read-only system, plus one reviewed
+exception.
 
 | Setting | Disposition |
 |---|---|

@@ -128,6 +128,8 @@ panel by machine and by severity.
    matching entries are listed.
 3. **Given** the store cannot be reached, **When** the application refuses to start, **Then** the window states
    the cause and nothing is kept on the machine as a substitute record.
+4. **Given** a developer has found a fault in the panel, **When** they copy it, **Then** they hold the whole
+   entry as text they can paste to someone who has no access to the store.
 
 ### User Story 6 - Preferences follow the person, not the computer (Priority: P3)
 
@@ -177,12 +179,25 @@ computer carries the last person's choices.
 - An account still holding the legacy temporary value signs in: that value is recognised, as it is today.
 - A credential reset is issued while the person is signed in elsewhere: the session already running is not
   ended by the reset.
+- A fault carries so much detail that the entry would exceed the store's ceiling: the detail is truncated with
+  an explicit marker, and the entry is still written.
+- A fault happens while the application is already recording one: the recorder does not raise a second
+  diagnostic and does not re-enter itself.
+- An aggregate fault holds several independent failures: every one of them is captured, not only the first.
+- A fault's own message contains a credential, a token or a statement's parameter value: the value is removed
+  before the entry is written.
+- The store refuses the write: the entry is dropped, nothing is kept on the machine in its place, and the
+  original fault is reported to the person exactly as it would have been.
+- The clipboard refuses a copy, because another process is holding it: the panel says the copy did not happen,
+  and nothing else about the list changes.
 
 ## Requirements
 
 ### Functional Requirements
 
-- **FR-001**: The launch MUST end at exactly one of: the main screens, sign-in, machine setup, or a stated stop.
+- **FR-001**: The launch MUST end at exactly one of: the main screens, sign-in, machine setup, a stated stop, or
+  an ended process. Those five are `LaunchOutcome` in `contracts/launch-step-contract.md` §5, which is the
+  single statement of the terminal outcomes.
 - **FR-002**: The launch MUST name each piece of work before it performs it.
 - **FR-003**: Every wait on the launch path MUST have a stated maximum, and no wait may be unbounded.
 - **FR-004**: A stopped launch MUST state a cause specific to what stopped it.
@@ -217,9 +232,9 @@ computer carries the last person's choices.
 - **FR-023**: A person's preferences MUST be held against the person in the store.
 - **FR-024**: The list of locations to hide MUST belong to the whole plant and MUST be changeable only by
   `IT Department` or `Developer`.
-- **FR-025**: Nothing except what is needed to reach the store MAY be kept on a computer, apart from the local
-  copy of pictures and the one reviewed exception, which holds neither a secret nor anything belonging to a
-  person or a machine.
+- **FR-025**: Nothing except what is needed to reach the store or the external read-only system MAY be kept on
+  a computer, apart from the local copy of pictures and the one reviewed exception, which holds neither a secret
+  nor anything belonging to a person or a machine.
 - **FR-026**: The copy of pictures MUST be best effort and MUST NOT be able to stop the launch.
 - **FR-027**: Whether the external system can be reached MUST be settled before the main screens open.
 - **FR-028**: The launch behaviour this feature replaces MUST NOT be reintroduced, and a build MUST fail if it
@@ -230,6 +245,27 @@ computer carries the last person's choices.
 - **FR-031**: The cases found by the three read-only sweeps MUST be recorded in the repository as the
   acceptance surface, and every case MUST be either covered by a test or recorded as no longer applying, with
   its reason. A case MAY NOT be dropped silently.
+- **FR-032**: A diagnostic MUST record the fault it came from in full: the exception's type, its message, its
+  stack trace and every exception in its chain, including each of an aggregate's independent failures, rather
+  than the outermost message alone.
+- **FR-033**: A diagnostic MUST carry a stable fingerprint derived from the fault itself, so repeated
+  occurrences of one fault can be grouped and counted.
+- **FR-034**: A diagnostic MUST carry the application's version and the context of the machine and process it
+  happened on — the operating system and its architecture, the process architecture, the runtime, the Windows
+  App SDK version, whether the build is packaged, the process and thread identity, and how long the application
+  had been running — gathered by the recording mechanism rather than supplied by the place that raised it.
+- **FR-035**: A diagnostic MUST carry the action under way, and the window, screen and control involved where
+  the caller can name them.
+- **FR-036**: A diagnostic raised by store work MUST carry the provider's own diagnostics where the provider
+  supplies them — the provider's error code, the SQL state, the server's error number, the procedure, a
+  fingerprint of the statement that contains no values, how long it took and which retry it was on — and MUST
+  NOT carry credentials, tokens, connection strings or statement parameter values.
+- **FR-037**: A fault MUST NOT be hidden by the act of recording it. A failure to record a diagnostic MUST NOT
+  raise another diagnostic, MUST NOT be reported in place of the original fault, and MUST NOT delay the caller.
+- **FR-038**: The developer log panel MUST be able to copy what it is showing — one entry, or the entries
+  currently listed, which the panel has already bounded — as plain text that can be pasted elsewhere, carrying
+  for each entry everything the store holds for it: the fault in full with its chain, the recorded context, the
+  store diagnostics and the entry's place in the chain. Copying MUST write nothing to the machine.
 
 ## Key Entities
 
@@ -244,7 +280,10 @@ computer carries the last person's choices.
   unreadable to anyone without the means to decrypt it.
 - **Scoped preference**: a choice that belongs to a person, a machine, a role or the whole plant.
 - **Diagnostic entry**: one thing the application recorded, with the time it happened, its severity, origin,
-  machine, person, error kind, message and its place in the tamper-evident chain.
+  machine, person, action, the fault in full — its type, message, stack and complete exception chain — a
+  fingerprint for grouping, the application's version and the machine's runtime context, the caller's view
+  context, the store's own diagnostics where the fault came from store work, and its place in the
+  tamper-evident chain.
 - **Launch step**: one named piece of work in the launch, with a name, a description and a category.
 
 ## Success Criteria
@@ -258,13 +297,13 @@ computer carries the last person's choices.
 - **SC-003**: A released build records at least one entry per completed launch in the store, where it currently
   records none.
 - **SC-004**: From a machine with no configuration, zero tested input sequences reach the main screens.
-- **SC-005**: A developer can find one machine's fault history in the panel, filtered by severity and machine,
-  in under a minute without asking anyone.
+- **SC-005**: A developer can find one machine's fault history in the panel, filtered by machine and by error
+  kind, and by severity and machine, in under a minute without asking anyone.
 - **SC-006**: Every tested route out of machine setup ends the application: all routes, not most.
 - **SC-007**: The five-attempt limit holds across a restart, verified with the correct value on the sixth
   attempt.
-- **SC-008**: No preference is lost when a person moves to a different computer: theme, waitlist order, alerts
-  and seen-requests all follow them.
+- **SC-008**: No preference is lost when a person moves to a different computer: theme, waitlist order, alerts,
+  seen-requests and the parts-without-pictures choice all follow them.
 - **SC-009**: A build fails when any replaced launch behaviour is reintroduced, verified by reintroducing one on
   purpose.
 - **SC-010**: A stopped launch offers no action that could not remove the cause, verified for each stopping
@@ -275,6 +314,15 @@ computer carries the last person's choices.
   setting at a time.
 - **SC-013**: Every case in the acceptance surface is either covered by a test or recorded as retired with its
   reason. Verified by working the whole catalogue end to end and accounting for each case.
+- **SC-014**: Two occurrences of the same fault produce the same fingerprint and are found as one group,
+  verified by raising the same fault twice and comparing what the store holds.
+- **SC-015**: A diagnostic written from a store failure carries the provider's error code, and its recorded
+  statement fingerprint contains no parameter values, verified against a deliberately failing procedure.
+- **SC-016**: A fault raised while the store is unreachable is recorded nowhere on the machine and still
+  reaches the caller unchanged, verified for a store outage and for a failing recording path.
+- **SC-017**: A developer can copy one entry from the panel and paste it whole, and the pasted text names the
+  exception type, every exception in the chain, the machine, the action and the entry's chain link. Verified by
+  raising a knowing fault, copying its entry and reading the pasted text.
 
 ## Assumptions
 
@@ -294,6 +342,21 @@ computer carries the last person's choices.
   setting that is restricted to particular roles today keeps that same restriction.
 - The launch window is the only surface shown while a launch runs, except when machine setup is triggered: that
   is a surface of its own and it appears before any operator signs in.
+- Severity is the five-level vocabulary the recording mechanism defines, and it is the one the store's column
+  and the panel both use.
+- Structured detail is held as JSON inside the store's existing text columns, matching how the store already
+  holds it, rather than in a separate table per shape.
+- The queue that carries diagnostics to the store is held in memory. An unrecorded diagnostic is therefore
+  lost rather than kept on the machine, and that loss is the deliberate price of keeping nothing local.
+- Grouping is in scope and triage is not: this feature groups repeated faults by their fingerprint, and does
+  not add assignment, resolution or fixed-version tracking, which need their own specification.
+- The store's provider is MySqlConnector.
+- The panel's copy goes to the clipboard and writes no file, because a saved diagnostic is application behaviour
+  kept on the machine and FR-025 removes it. A file export would need its own decision rather than arriving as a
+  convenience.
+- The copy is excluded from the clipboard's history and from syncing to other devices. A diagnosis names a
+  machine and a person, and both the platform's guidance and the defaults work against leaving that in a
+  clipboard history.
 
 ## Verbatim Constraints
 

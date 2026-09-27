@@ -77,18 +77,24 @@
                                                 Source="{x:Bind ImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                                                 Stretch="Uniform" />
                                         </Border>
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
+                                        <!-- The title and its caption are drawn by the one-line scrolling control
+                                             (009 B1/B2) so a long name or caption scrolls rather than wrapping
+                                             and pushing this fixed card out of shape. Both sizes are set here
+                                             because the control draws its own text and cannot inherit a
+                                             TextBlock style. -->
+                                        <sharedControls:AutoScrollTextView
+                                            HorizontalAlignment="Stretch"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                             TextAlignment="Center"
-                                            Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                            Text="{x:Bind Title}"
-                                            TextWrapping="WrapWholeWords" />
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
+                                            Text="{x:Bind Title}" />
+                                        <sharedControls:AutoScrollTextView
+                                            HorizontalAlignment="Stretch"
+                                            FontSize="13"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             TextAlignment="Center"
-                                            Style="{StaticResource RequestDialogCaptionStyle}"
-                                            Text="{x:Bind Summary}"
-                                            TextWrapping="WrapWholeWords" />
+                                            Text="{x:Bind Summary}" />
                                     </StackPanel>
                                 </Border>
 

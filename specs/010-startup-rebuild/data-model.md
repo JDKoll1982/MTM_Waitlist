@@ -143,7 +143,7 @@ active row per person per machine, and an index on `(is_active, expires_utc)` fo
 **Relationships**: one person to many sessions over time, at most one active per person per machine. One machine
 to many sessions. The column shape deliberately follows the table it supersedes, `auth_sessions_tokens`, which
 carries the same token, salt, issue, expiry, revocation and source fields; that table is deleted in the same
-phase (E9).
+phase (E10).
 
 **State transitions**
 
@@ -195,6 +195,10 @@ Keys: `PRIMARY KEY (id)`, `UNIQUE KEY` on `public_id`, `UNIQUE KEY` on `(user_id
 - The key comes from the shared file at
   `\\mtmanu-fs01\Expo Drive\Software Development\Live Applications\MTM_Application_Keys\MTM_AUTH_USER_SECRET_KEY.txt`.
   The file is read only, never written or rotated (D13).
+- The payload is decryption-capable by design, which departs from the constitution's requirement that stored
+  credentials be DPAPI-protected. The departure is deliberate and is recorded in `plan.md` → Complexity
+  Tracking: DPAPI binds a value to one Windows account on one machine, and this value has to be decrypted on
+  whatever machine the person next uses (D12).
 - The key, the payload and the plaintext are never logged.
 - A failed decrypt records the fault and never blocks the launch.
 
@@ -226,8 +230,10 @@ A choice that belongs to a person, a machine, a role or the whole plant. Store: 
   `permission.settings.ignored_locations_edit` (D10).
 - **FR-029**: the session length is changeable only by `IT Department` or `Developer`.
 - **FR-030**: every setting that is restricted to particular roles today keeps the same restriction. The four
-  new keys and the one new edit key are additions; no existing key's grants change.
-- **FR-025**: only what is needed to reach the store stays on the machine, apart from the local picture copy.
+  new keys are additions — `machine_configuration`, `log_panel` and `session_length`, plus the
+  `ignored_locations_edit` key D10 adds — and no existing key's grants change.
+- **FR-025**: only what is needed to reach the store or the external read-only system stays on the machine,
+  apart from the local picture copy and the one reviewed exception.
 - The `PictureEnlargePreference` key is the existing pattern to copy, since it already uses this store.
 - `LocalSettings.json` and the whole `ILocalSettingsService` mechanism are deleted, so no key above remains a
   file.
@@ -282,15 +288,29 @@ One thing the application recorded. Store: existing table `ops_startup_logs`, **
 | `entry_hash` | `CHAR(64) NOT NULL` | existing, the chain link |
 | `module` | `VARCHAR(64) NULL` | **new**. The area the entry came from |
 | `error_type` | `VARCHAR(128) NULL` | **new**. The kind of error |
-| `exception_detail` | `MEDIUMTEXT NULL` | **new**. The detail the panel's entry card shows |
+| `exception_detail` | `MEDIUMTEXT NULL` | **new**. The exception chain and full representation, as JSON (`contracts/logging-contract.md` §1.1) |
+| `error_fingerprint` | `CHAR(64) NULL` | **new**. SHA-256 that groups repeated occurrences of one fault |
 
 New indexes for the panel's filter set: `(level, created_utc)`, `(host_id, created_utc)`,
-`(module, created_utc)`, `(actor_id, created_utc)`, `(error_type, created_utc)`.
+`(module, created_utc)`, `(actor_id, created_utc)`, `(error_type, created_utc)`,
+`(error_fingerprint, created_utc)`.
 
 **Validation rules drawn from requirements**
 
 - **FR-021**: every diagnostic carries at least its severity, the area it came from, the machine, the person,
   the kind of error and the message. The mapping above names the column for each.
+- **FR-032**: the entry carries the fault whole — its type, message, stack and every exception in its chain,
+  including each of an aggregate's independent failures. That is `error_type` plus `exception_detail`; there is
+  no child-exception table, because the entry's hash covers one row and splitting the entry would break the
+  chain the store exists to keep.
+- **FR-033, SC-014**: `error_fingerprint` groups repeated faults. It is computed by the seam and stored, never
+  recomputed at read time, because a fingerprint that disagreed with itself would split a group it was meant to
+  hold together.
+- **FR-034 to FR-036**: the rest of the context — runtime, view and store diagnostics — is held in
+  `payload_json`, gathered by the recording mechanism. Nothing extra is written to the machine to carry it, and
+  statement parameter values never reach it.
+- **FR-037, SC-016**: a write that fails is dropped. It is not retried into a second diagnostic, and it never
+  becomes a record on the machine.
 - **SC-003**: a released build records at least one entry per completed launch, where it currently records none.
   This is why the seam is unconditional (D6).
 - **FR-021 with the store unreachable**: when the store cannot be reached the application refuses to start, so
@@ -316,6 +336,7 @@ One named piece of work in the launch. **In memory only.** Steps are data, not a
 | `Category` | groups the step, for example store, machine, session, pictures |
 | `MaximumWait` | the stated maximum for this step's wait (FR-003) |
 | `IsBestEffort` | true for the picture refresh and the verdict priming (FR-026, FR-027) |
+| `Target` | what the operation is about — the store, a share, the external system, a screen — written on every line the step produces, or null when it touches nothing a person could name (FR-002) |
 
 Derived, never stored: the displayed count, computed from the step list so adding or removing a step cannot
 leave a stale "of 5".
@@ -355,9 +376,10 @@ stateDiagram-v2
     Ended --> [*]
 ```
 
-Six terminating outcomes, which is FR-001's list plus the two process-ending routes:
-the main screens, the sign-in surface, machine setup, a stated stop, a completed configuration, and an ended
-process after an abort.
+Five terminating outcomes, which is exactly `LaunchOutcome` in `contracts/launch-step-contract.md` §5 and
+matches FR-001: the main screens, the sign-in surface, machine setup, a stated stop, and an ended process after
+an abort. The diagram's `Configured` is a transition rather than a terminus — a completed configuration carries
+on into identity resolution.
 
 ### Blocked-state transitions
 
@@ -395,12 +417,13 @@ Restore Defaults states exactly what it will reset before it acts and touches on
 | `sp_core_computers_registry_lookup_by_mac_get` | procedure | startup-only |
 | `sp_core_computers_registry_update_by_mac` | procedure | startup-only |
 
-Every deletion updates the hand-maintained aggregates (`AllTables.sql`, `AllSPs.sql`, `AllFunct.sql`,
-`AllViews.sql`, `AllSeeds.sql`), the validation scripts, and any document that names the artifact.
+Every deletion updates the hand-maintained aggregates (`Tables/AllTables.sql`, `StoredProcedures/AllSPs.sql`,
+`Functions/AllFunct.sql`, `Views/AllViews.sql`, `Seeds/AllSeeds.sql`), the retired-objects sections of
+`Bootstrap/update_table_descriptions.sql`, the validation scripts, and any document that names the artifact.
 
 **Never deleted by this audit**: the shared artifacts listed in the brief's S3.2 hold three foreign keys and
 several live consumers. They are `core_users_profiles`, `core_computers_registry`, `auth_roles_catalog`,
 `auth_roles_assignments`, `config_settings_values`, `sp_auth_user_row_get`,
 `sp_auth_temporary_credential_attempt_record`, the six `sp_core_computers_registry_*` procedures,
-`sp_auth_roles_list`, `sp_config_settings_values_get|upsert`, `fn_server_utc_now`, and the five seeds and
-aggregates. `fn_server_utc_now` in particular is retained deliberately: E4's validation rule depends on it.
+`sp_auth_roles_list`, `sp_config_settings_values_get`, `sp_config_settings_upsert`, `fn_server_utc_now`, the three
+seeds and the five aggregate and descriptions files. `fn_server_utc_now` in particular is retained deliberately: E4's validation rule depends on it.

@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
@@ -68,18 +69,24 @@
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Spacing="8">
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
+                                    <!-- The title and its caption are drawn by the one-line scrolling control
+                                         (009 B1/B2): a part's own display name runs long, and this card is a fixed
+                                         150 square, so the value scrolls instead of wrapping. Both sizes are set
+                                         here because the control draws its own text and cannot inherit a
+                                         TextBlock style. -->
+                                    <sharedControls:AutoScrollTextView
+                                        HorizontalAlignment="Stretch"
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                         TextAlignment="Center"
-                                        Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                        Text="{Binding DisplayName}"
-                                        TextWrapping="WrapWholeWords" />
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
+                                        Text="{Binding DisplayName}" />
+                                    <sharedControls:AutoScrollTextView
+                                        HorizontalAlignment="Stretch"
+                                        FontSize="13"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                         TextAlignment="Center"
-                                        Style="{StaticResource RequestDialogCaptionStyle}"
-                                        Text="{Binding Summary}"
-                                        TextWrapping="WrapWholeWords" />
+                                        Text="{Binding Summary}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>

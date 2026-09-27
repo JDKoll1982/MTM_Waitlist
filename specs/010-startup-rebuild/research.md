@@ -65,8 +65,9 @@ up. Rejected: a red tree for several phases destroys the baseline comparison tha
 ## D5. Both logging surfaces are settled in one change: a store-backed seam plus an `ILogger` provider
 
 **Decision**: The static surface (489 references in 83 files) is migrated by script to a new seam, and the
-`ILogger` surface (226 calls in 26 files) is served by a provider that writes to the same store. No `ILogger`
-call site is edited.
+`ILogger` surface (226 calls across 26 files tree-wide, of which 162 are the application's own — the other 64
+sit in `MTM_Waitlist.Mock.Service`, a separate host the provider does not serve) is served by a provider that
+writes to the same store. No `ILogger` call site is edited.
 
 **Rationale**: The two surfaces need opposite treatment. The static type is being replaced, so its call sites
 must change; the `ILogger` abstraction is sound and only lacks a destination, so its call sites must not
@@ -114,7 +115,8 @@ import.
 ## D9. The stored-procedure call sites replace the local settings file directly; no new storage is created
 
 **Decision**: The seven scoped preferences move into `config_settings_values` through the existing
-`IConfigSettingsValueService` and `sp_config_settings_values_get` / `sp_config_settings_values_upsert`.
+`IConfigSettingsValueService`; reads go through `sp_config_settings_values_get` and writes through
+`sp_config_settings_upsert`, which is the procedure that exists (`sp_config_settings_values_upsert` does not).
 
 **Rationale**: The scoped store, its scope rank function and its procedures already exist, and
 `PictureEnlargePreference` already uses them. Each migration is therefore one substitution plus a stored
@@ -144,7 +146,7 @@ access from five roles, which is a different feature. (b) Gate the write in the 
 S11.5.6: a hidden control is not a permission. (c) Make the list person-scoped so FR-030's "setting" framing
 applies per person. Rejected: FR-024 says the list belongs to the whole plant.
 
-## D11. Three surfaces need a new catalogue key, and the fourth does not
+## D11. Four surfaces need a new catalogue key, and one existing key is deliberately not reused
 
 **Decision**: Add `permission.settings.machine_configuration`, `permission.settings.log_panel` and
 `permission.settings.session_length`, plus the `permission.settings.ignored_locations_edit` key from D10. The
@@ -178,8 +180,15 @@ its entire purpose. The `auth_` prefix matches the existing `auth_roles_catalog`
 **Alternatives considered**: (a) Columns on `core_users_profiles`. Rejected: the choice is per machine
 ("be recognised on one machine"), and a shared profile row cannot hold a per-machine value. (b) Columns on
 `user_active_sessions`. Rejected: the sign-out clearing in FR-011 would destroy it. (c) A local DPAPI-protected
-file. Rejected by FR-025: nothing but what is needed to reach the store may stay on the machine, and FR-014 says
-held against the person in the store.
+file. Rejected by FR-025: nothing but what is needed to reach the store or the external read-only system may
+stay on the machine, and FR-014 says held against the person in the store.
+
+**Recorded deviation.** Storing a decryption-capable payload in the store departs from the constitution's
+Security & Secrets constraint, which requires service credentials to be stored DPAPI-protected (`ProtectedData`,
+`CurrentUser` scope). DPAPI binds a value to one Windows account on one machine, and this value must be
+decrypted on whatever machine the person next uses, so the constraint cannot be met without keeping the payload
+on the machine — which FR-025 forbids and which would defeat FR-014. The departure and its rejected alternatives
+are recorded in `plan.md` → Complexity Tracking, as the constitution's Review rule requires.
 
 ## D13. The key file is read at its UNC path, never at `X:`, and is never written
 
@@ -335,6 +344,120 @@ behaviour change, and the plan will not guess which it is.
 
 **Alternatives considered**: Delete both as dead weight by pattern. Rejected: the evidence does not yet support
 it, and a wrong deletion here would surface as a runtime default, not a build error.
+
+## D25. The exception chain is JSON in `exception_detail`, not child rows
+
+**Decision**: One node per exception in the chain, serialized as a JSON array into the new `exception_detail`
+column. No child-exception table, and no separate context or database tables either.
+
+**Rationale**: `ops_startup_logs` is a tamper-evident chain whose `entry_hash` covers one row, so a second table
+keyed by the entry would either sit outside the chain or make the chain span two tables on every insert. The
+panel's entry card shows the detail of one entry, so nothing reads the chain relationally, and JSON keeps each
+node's depth and index — which is what makes an aggregate legible.
+
+**Alternatives considered**: A normalised child table with a parent link. Rejected: it buys a query nothing
+asks for and puts part of the evidence outside the chain. One flattened string. Rejected: it loses the structure
+the reading above depends on.
+
+## D26. The seam computes the fingerprint, the procedure stores it
+
+**Decision**: `error_fingerprint` is SHA-256 over the fault's type, module, action and a normalized message
+shape, computed in `MTM_Waitlist.Logging` and passed to `sp_ops_startup_logs_insert`, which stores and indexes
+it.
+
+**Rationale**: Normalizing a message — replacing digits, identifiers and quoted values with placeholders — is a
+string operation that needs the message in hand. Computing it in C# also makes the rule unit-testable without a
+store, which matters because a fingerprint that drifts silently splits the group it exists to form (SC-014).
+
+**Alternatives considered**: Hashing the raw message in the procedure with `SHA2`. Rejected: it would hash the
+variable parts too, giving each occurrence of one fault its own fingerprint. Hashing `exception_detail` whole.
+Rejected: stack traces carry line numbers and paths that change between builds.
+
+## D27. No durable local queue, and this is the second decision to say so
+
+**Decision**: The write queue is in memory, bounded, drops its oldest entry when full, and flushes within a
+stated bound on shutdown. There is no disk queue, no local log file and no retry journal.
+
+**Rationale**: FR-025 permits nothing on the machine except what is needed to reach the store or the external
+read-only system, plus the picture cache and the one reviewed `MockServiceClient` exception. The reference document that prompted this work
+proposed a durable local queue "so database outages do not erase the diagnostic event". That proposal is
+rejected, and the cost is stated where a reader will find it — in `spec.md`'s Assumptions: an unrecorded
+diagnostic is lost. This restates D20 because the proposal contradicted it.
+
+**Alternatives considered**: A DPAPI-protected file queue bounded by size. Rejected: a file of application
+behaviour is exactly the local record FR-025 removes, and it would arrive needing its own retention, cleanup and
+security review.
+
+## D28. Grouping is in this feature; triage is not
+
+**Decision**: The fingerprint and its index are built here. Assignment, resolution status, resolution notes,
+resolved-at and fixed-in-version are not. **Decided 2026-09-26 by the owner: not wanted at all** — the panel's
+copy (D29) is the support path, so the store never needs to hold an assignment.
+
+**Rationale**: The reference document carries a triage workflow at its P1 priority. Nothing in this feature's
+requirements or success criteria asks for it, and it would arrive with its own tables, permissions and audit
+trail — a feature, not a field. Grouping, by contrast, is what makes a repeated fault readable in the panel this
+feature already builds.
+
+**Alternatives considered**: Add the five columns to `ops_startup_logs` now and leave them empty. Rejected: a
+column nothing writes drifts, and "someone will fill it in later" is how a schema acquires fields nobody can
+explain. A resolution table keyed by `public_id`, added later. Not needed: the owner's answer is to hand the entry
+to whoever is fixing it rather than to track it in the store.
+
+## D29. The panel's copy is clipboard text, excluded from clipboard history and roaming
+
+**Decision**: The developer log panel copies one entry, or the entries it is currently showing, to the clipboard
+as plain text. It writes no file. The copy uses `Clipboard.SetContentWithOptions` with `IsAllowedInHistory` and
+`IsRoamable` set to `false`, and reports a refusal instead of raising one.
+
+**Rationale**: The owner's support path is "paste it into chat", so the text is the deliverable; a file would only
+be opened and copied again. FR-025 is what rules the file out — a saved diagnostic is application behaviour kept
+on the machine, which is the thing this feature removes, and it would need its own review rather than arriving as
+a convenience. Excluding history and roaming is a deliberate second step, not a default:
+`IsAllowedInHistory` and `IsRoamable` both default to `true`, a diagnosis names a machine and a person, and
+Microsoft's clipboard guidance says plainly that the clipboard should not be used to transfer sensitive data.
+`SetContentWithOptions` also returns a boolean where `SetContent` throws when the process is not in the
+foreground, so a refused copy is reported to the reader rather than raising a fault while reporting one.
+
+**Alternatives considered**: A save-to-file button. Rejected for now rather than forever: it contradicts FR-025's
+plain reading and the paste workflow does not need it, so it would need its own decision. A structured attachment
+format such as JSON or a zip. Rejected: the reader is a person pasting into a conversation, and an artifact nobody
+reads is worse than text.
+
+**Grounded in**: `Clipboard.SetContentWithOptions` (Windows 10 1809, 10.0.17763.0, `UniversalApiContract` v7 — the
+app targets 10.0.19041.0), `ClipboardContentOptions.IsAllowedInHistory` and `IsRoamable` (both default `true`),
+`Clipboard.SetContent` remarks (throws when not in the foreground), and the Win32 clipboard overview's security
+note. The WinRT clipboard is usable from desktop apps, so no packaging guard is needed.
+
+## D30. The computer registry is rebuilt inside the Settings module, over the rebuilt machine contracts
+
+**Decision**: `IComputerRegistryService` is deleted with the rest of the old startup contracts (brief S3.1), and
+the capability it carried is recreated in `MTM_Waitlist.Settings` — the Settings "Computers" panel keeps listing,
+adding, editing and deactivating registry rows — built on the rebuilt machine contracts rather than on the retired
+startup service. `ComputerManagementViewModel` and `ComputerEditDialogViewModel` stop injecting the deleted
+interface, and `FakeComputerRegistryService` in the kept `Module_Settings/SettingsViewModelTests.cs` is re-pointed
+at the new seam or deleted with the interface. Owned by T187; recorded here at the owner's direction, 2026-09-26.
+
+**Rationale**: The interface was never startup-only, which is what made its deletion a question rather than a
+line in a list. The Settings computers screen holds it through two view models, and its only implementation lived
+in `MTM_Waitlist.Startup`, the project the rebuild empties. Deleting it outright would have taken a live Settings
+function with it; leaving it in place would have left a Core contract no rebuilt code uses, implemented in a
+project the rebuild owns. Rebuilding it where it is used ends both problems: the capability belongs to the screen
+that exercises it, and the machine facts it describes now come from the rebuilt contracts instead of being
+derived again.
+
+**Placement**: the rebuild runs in Foundational W4 beside T015, the task that empties `MTM_Waitlist.Startup`, and
+it owns the interface's deletion. T010 therefore keeps `IComputerRegistryService` standing, exactly as it keeps
+`ISignOutService`, `SignOutResult` and `IAppProcessRestarter` standing for T185 and T186 — a deferred deletion
+rather than a broken build.
+
+**Alternatives considered**: (a) Keep `IComputerRegistryService` in `MTM_Waitlist.Core` and move only its
+implementation. Rejected: the contract exists for one screen's use, so a Core home for it is a dependency the
+rest of the application should not be able to take. (b) Delete the interface and the Settings computers panel
+with it. Rejected: deactivating a retired machine is a live Settings function, and removing it would be a feature
+loss smuggled in under a rebuild. (c) Let the screen write through `IMachineFacts`. Rejected: FR-022 makes the
+identity and machine-fact contracts read-only, and only the launch may change them, so the fleet's write path
+stays where it is — behind a Settings-owned seam over the `sp_core_computers_registry_*` procedures.
 
 ---
 

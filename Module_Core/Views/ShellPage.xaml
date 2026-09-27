@@ -11,6 +11,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
     xmlns:mock="using:MTM_Waitlist.Module_Mock.Views"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     xmlns:selectors="using:MTM_Waitlist.Module_Core.Selectors"
     xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     x:Name="RootPage"
@@ -450,13 +451,16 @@
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center" />
                                     </Border>
-                                    <TextBlock
+                                    <!-- The signed-in name is drawn by the one-line scrolling control (009 B1/B2):
+                                         the box stays 220 px wide and a long name scrolls through it rather than
+                                         being cut off with an ellipsis. Body size and colour are set here because
+                                         the control draws its own text and cannot inherit a TextBlock style. -->
+                                    <sharedControls:AutoScrollTextView
                                         VerticalAlignment="Center"
                                         MaxWidth="220"
-                                        Style="{ThemeResource BodyTextBlockStyle}"
-                                        Text="{Binding CurrentUserDisplayName}"
-                                        TextTrimming="CharacterEllipsis"
-                                        TextWrapping="NoWrap" />
+                                        FontSize="14"
+                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                        Text="{Binding CurrentUserDisplayName}" />
                                 </StackPanel>
                             </Button>
                         </Grid>
@@ -636,13 +640,15 @@
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center" />
                                             </Border>
-                                            <TextBlock
+                                            <!-- The signed-in name is drawn by the one-line scrolling control (009
+                                                 B1/B2) here too, so the flyout and the header cannot disagree about
+                                                 how a long name is shown. -->
+                                            <sharedControls:AutoScrollTextView
                                                 VerticalAlignment="Center"
                                                 MaxWidth="220"
-                                                Style="{ThemeResource BodyTextBlockStyle}"
-                                                Text="{Binding CurrentUserDisplayName}"
-                                                TextTrimming="CharacterEllipsis"
-                                                TextWrapping="NoWrap" />
+                                                FontSize="14"
+                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                Text="{Binding CurrentUserDisplayName}" />
                                         </StackPanel>
                                     </Button>
                                 </Grid>

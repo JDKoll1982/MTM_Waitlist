@@ -110,6 +110,54 @@ public sealed class SharedControlsMarkupTests
     }
 
     /// <summary>
+    /// The line repeats without a jump. The control draws the value twice, one copy a gap behind the other on a
+    /// track, and slides that track by exactly one copy plus the gap, for ever: as a pass ends, the second copy is
+    /// standing where the first one began. A single copy — what this control drew before — slides the value past and
+    /// then snaps back to the first character, which is the jerk the reader saw, and the last characters are only
+    /// ever half in view.
+    /// </summary>
+    [TestMethod]
+    public void TheTextControl_LoopsTheValueInsteadOfSnappingBack()
+    {
+        var control = Load("Module_Shared", "Controls", "AutoScrollTextView.xaml");
+
+        var copies = control
+            .Descendants(s_presentation + "TextBlock")
+            .Where(line => ((string?)line.Attribute("Text"))?.Contains("Text", StringComparison.Ordinal) == true)
+            .ToList();
+
+        Assert.AreEqual(
+            2,
+            copies.Count,
+            "The control must draw the value twice, so the copy that follows can take over from the one being watched.");
+
+        var track = control
+            .Descendants(s_presentation + "StackPanel")
+            .SingleOrDefault(panel => (string?)panel.Attribute("Orientation") == "Horizontal");
+
+        Assert.IsNotNull(track, "The two copies must sit on a horizontal track, so their widths add up along the scroll.");
+        StringAssert.Contains(
+            (string?)track!.Attribute("Spacing") ?? string.Empty,
+            "Gap",
+            "The copies need the gap between them that stops the loop running the value onto itself.");
+
+        Assert.AreEqual(
+            "Collapsed",
+            (string?)copies[1].Attribute("Visibility"),
+            "The second copy is drawn only while the track moves; standing still it would be a duplicate the reader could see.");
+
+        var codeBehind = File.ReadAllText(Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Module_Shared",
+            "Controls",
+            "AutoScrollTextView.xaml.cs"));
+
+        StringAssert.Contains(codeBehind, "IterationBehavior.Forever", "The pass repeats for as long as the line is on screen.");
+        StringAssert.Contains(codeBehind, "SetIsTranslationEnabled(Track, true)", "The track is what moves, not one copy of the value.");
+        StringAssert.Contains(codeBehind, "Echo.Visibility", "The copy that follows is shown only while the track is moving.");
+    }
+
+    /// <summary>
     /// The picture control draws the picture it was handed and owns the enlarged view, so a surface that uses it
     /// gets the behaviour without declaring anything of its own.
     /// </summary>

@@ -142,10 +142,12 @@ never have been written by the upsert).
 Existing folder `Database/Tables/10_ops_startup_logs/`. `create.sql` is amended, not replaced, and
 `rollback.sql` is extended for the new columns and indexes. Registered in `AllTables.sql`.
 
-Added columns: `module VARCHAR(64) NULL`, `error_type VARCHAR(128) NULL`, `exception_detail MEDIUMTEXT NULL`.
+Added columns: `module VARCHAR(64) NULL`, `error_type VARCHAR(128) NULL`, `exception_detail MEDIUMTEXT NULL`,
+`error_fingerprint CHAR(64) NULL` (the fingerprint from `contracts/logging-contract.md` §1.2).
 
 Added indexes for the panel's filter set: `(level, created_utc)`, `(host_id, created_utc)`,
-`(module, created_utc)`, `(actor_id, created_utc)`, `(error_type, created_utc)`.
+`(module, created_utc)`, `(actor_id, created_utc)`, `(error_type, created_utc)`,
+`(error_fingerprint, created_utc)`.
 
 Existing columns reused unchanged: `public_id`, `correlation_id`, `created_utc`, `level` (severity),
 `event_action`, `outcome`, `actor_kind`, `actor_id` (person), `host_id` (machine), `mac_address`, `message`,
@@ -157,13 +159,15 @@ Existing columns reused unchanged: `public_id`, `correlation_id`, `created_utc`,
 -- The single writer. Reads previous_hash, computes entry_hash over the entry plus that link, inserts, and
 -- commits, inside one transaction, so concurrent writers cannot fork the chain.
 -- IN  p_public_id, p_correlation_id, p_level, p_event_action, p_outcome, p_actor_kind, p_actor_id,
---     p_host_id, p_mac_address, p_module, p_error_type, p_message, p_exception_detail, p_payload_json
+--     p_host_id, p_mac_address, p_module, p_error_type, p_message, p_exception_detail,
+--     p_error_fingerprint, p_payload_json
 -- OUT p_id, p_entry_hash
 sp_ops_startup_logs_insert
 
 -- The panel's reader. Every query is bounded by a time window and a page size, so a large store cannot
 -- freeze the screen.
--- IN  p_level, p_host_id, p_actor_id, p_module, p_error_type, p_from_utc, p_to_utc, p_page_size, p_offset
+-- IN  p_level, p_host_id, p_actor_id, p_module, p_error_type, p_error_fingerprint, p_from_utc, p_to_utc,
+--     p_page_size, p_offset
 -- OUT one row per entry, newest first, including message, exception_detail and the chain link
 sp_ops_startup_logs_filter
 
@@ -175,7 +179,7 @@ sp_ops_startup_logs_purge
 
 ### Validation script
 
-Existing log-store validation extended: the three new columns exist, all five new indexes exist, and every row
+Existing log-store validation extended: the four new columns exist, all six new indexes exist, and every row
 has `entry_hash` set.
 
 ---
@@ -205,7 +209,7 @@ Shared artifacts that three foreign keys and several live consumers depend on: `
 `core_computers_registry`, `auth_roles_catalog`, `auth_roles_assignments`, `config_settings_values`,
 `sp_auth_user_row_get`, `sp_auth_temporary_credential_attempt_record`, the six
 `sp_core_computers_registry_*` procedures, `sp_auth_roles_list`, `sp_config_settings_values_get`,
-`sp_config_settings_values_upsert`, `fn_server_utc_now`, `seed_dev_masked_baseline`,
+`sp_config_settings_upsert`, `fn_server_utc_now`, `seed_dev_masked_baseline`,
 `seed_username_upper_normalization`, `seed_role_admin_to_it_department`, `AllSeeds.sql`,
 `update_table_descriptions.sql`, `AllTables.sql`, `AllSPs.sql`, `AllFunct.sql`.
 
@@ -225,5 +229,6 @@ Developer granted to JKoll and JohnK
 The existing `permission.settings.ignored_locations` rows are left exactly as they are. That is deliberate: it
 is what keeps FR-030 true (see `machine-configuration-contract.md` section 5).
 
-A fresh store must grant `IT Department` and `Developer` the four keys, and a role without them must not be able
+A fresh store must grant `IT Department` and `Developer` three of the four keys, and `Developer` alone the
+log-panel key, per `contracts/machine-configuration-contract.md` §5; a role without them must not be able
 to use the feature. Both are asserted by tests in Phase 7.4.

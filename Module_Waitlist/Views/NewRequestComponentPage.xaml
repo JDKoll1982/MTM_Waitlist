@@ -75,12 +75,16 @@
                                                 Source="{x:Bind ImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                                                 Stretch="Uniform" />
                                         </Border>
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
+                                        <!-- The value is drawn by the one-line scrolling control (009 B1/B2). Its
+                                             strong-body size and weight are set here because the control draws its
+                                             own text and cannot inherit a TextBlock style. -->
+                                        <sharedControls:AutoScrollTextView
+                                            HorizontalAlignment="Stretch"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                             TextAlignment="Center"
-                                            Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                            Text="{x:Bind Title}"
-                                            TextWrapping="WrapWholeWords" />
+                                            Text="{x:Bind Title}" />
                                     </StackPanel>
                                 </Border>
 

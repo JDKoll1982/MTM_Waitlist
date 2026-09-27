@@ -82,18 +82,24 @@
                                             Grid.Column="1"
                                             VerticalAlignment="Center"
                                             Spacing="8">
-                                            <TextBlock
-                                                HorizontalAlignment="Center"
+                                            <!-- The die's title and caption are drawn by the one-line scrolling
+                                                 control (009 B1/B2): a die name runs long by nature, and this card
+                                                 is bounded, so the value scrolls instead of wrapping. Both sizes
+                                                 are set here because the control draws its own text and cannot
+                                                 inherit a TextBlock style. -->
+                                            <sharedControls:AutoScrollTextView
+                                                HorizontalAlignment="Stretch"
+                                                FontSize="14"
+                                                FontWeight="SemiBold"
+                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                                 TextAlignment="Center"
-                                                Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                                Text="{x:Bind Title}"
-                                                TextWrapping="WrapWholeWords" />
-                                            <TextBlock
-                                                HorizontalAlignment="Center"
+                                                Text="{x:Bind Title}" />
+                                            <sharedControls:AutoScrollTextView
+                                                HorizontalAlignment="Stretch"
+                                                FontSize="13"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                 TextAlignment="Center"
-                                                Style="{StaticResource RequestDialogCaptionStyle}"
-                                                Text="{x:Bind Summary}"
-                                                TextWrapping="WrapWholeWords" />
+                                                Text="{x:Bind Summary}" />
                                         </StackPanel>
                                     </Grid>
                                 </Border>

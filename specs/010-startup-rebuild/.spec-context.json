@@ -2,8 +2,8 @@
   "workflow": "companion",
   "specName": "Startup Rebuild",
   "branch": "010-startup-rebuild",
-  "currentStep": "tasks",
-  "status": "ready-to-implement",
+  "currentStep": "implement",
+  "status": "implementing",
   "history": [
     {
       "step": "specify",
@@ -67,6 +67,579 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-25T19:30:29.323Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-26T19:30:44.421Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T19:39:40.805Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T19:44:03.928Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:14.842Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:15.134Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:15.453Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:15.754Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:16.053Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:16.361Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:16.656Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:16.954Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:17.257Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:17.546Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:17.843Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:18.152Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:18.447Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:18.733Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:19.039Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:19.334Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:19.627Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:19.925Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:20.220Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T20:42:20.516Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:07:00.915Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:07:01.203Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:07:01.494Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:07:01.778Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:07:02.070Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:23:36.817Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:23:37.116Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:23:37.411Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:23:37.708Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T039",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:23:38.003Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:23:38.301Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T041",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:23:38.608Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T042",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:23:38.910Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:23:39.216Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T044",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:40:48.581Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T045",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:40:48.872Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T046",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:40:49.168Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T047",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:40:49.466Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T048",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:40:49.765Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:40:50.070Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T050",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:40:50.380Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T051",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T21:40:50.692Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T052",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:05:09.054Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T054",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:05:09.346Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T055",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:05:09.643Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T057",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:05:09.941Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T058",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:05:10.234Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T059",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:05:10.530Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T064",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:20:00.987Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T065",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:20:01.204Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T066",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:20:01.407Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T067",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:20:01.627Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T068",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:33:46.490Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T069",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:33:46.695Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T070",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:33:46.899Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:47:20.716Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:47:20.922Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:47:21.130Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:47:21.338Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T056",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T22:52:31.049Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T061",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T23:02:51.699Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T062",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-26T23:02:51.904Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T063",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T03:50:24.121Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T071",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T04:00:53.668Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T072",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T04:00:53.867Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T073",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T04:00:54.066Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T074",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T04:00:54.267Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-09-27T06:43:19.130Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-27T06:51:36.735Z"
     }
   ],
   "telemetryInstanceId": "d17871b9-a196-497b-ab7f-10b9cd871cc0",
@@ -76,7 +649,7 @@
       "startup"
     ]
   },
-  "last_action": "living specs loaded (startup)",
+  "last_action": "Owner instructions of 2026-09-27 executed; 69 of 188 ticked; suite 1528 total with 0 failed; catalog now 17 individual operations; owner branch fast-forwarded to efb2f3e",
   "coverage": {
     "FR-028": {
       "title": "The replaced launch behaviour is not reintroduced, and a build fails if it is.",
@@ -98,11 +671,11 @@
       "title": "The launch names each piece of work before performing it.",
       "tasks": [
         "T071",
-        "T073",
-        "T080",
-        "T086",
-        "T087",
-        "T116"
+        "T073"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepRunnerTests.cs::RunAsync_WhenTheStepRuns_TheStepIsAlreadyNamedOnTheFeed",
+        "RunAsync_WhenTheStepThrowsImmediately_TheAnnouncementIsStillOnTheFeed"
       ]
     },
     "FR-003": {
@@ -110,9 +683,14 @@
       "tasks": [
         "T071",
         "T073",
-        "T074",
-        "T080",
-        "T084"
+        "T074"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepCatalogTests.cs::Steps_EveryStep_DeclaresAStatedMaximum",
+        "Steps_NoStep_WaitsPastTheCeiling",
+        "Steps_TheTwoBestEffortSteps_AreBoundedMoreTightlyThanTheCeiling",
+        "Validate_WithAnUnboundedStep_IsRefused;MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepRunnerTests.cs::RunAsync_WhenTheStepPassesItsStatedMaximum_ReportsFailedRatherThanWaitingOnIt",
+        "RunAsync_WhenTheStepDeclaresNoMaximum_IsRefused"
       ]
     },
     "FR-004": {
@@ -381,7 +959,8 @@
     "Owner execution checklist STARTUP-REBUILD-CHECKLIST.md, 179 tasks, 11 phases, 11 gates, is the instrument tasks.md must not contradict.",
     "Living spec capability startup read whole; it contributed the ordered-step, store-clock, unreadable-hardware-identity-admitted, three-destination, remedy-scope and best-effort-picture requirements.",
     "Resolved permission baseline from Database/Seeds/seed_permission_role_baselines/create.sql: permission.settings.ignored_locations is granted to seven roles and denied to two, while permission.settings.computers is already exactly IT Department and Developer.",
-    "Resolved schemas from Database: auth_sessions_tokens already carries the token hash, salt, issue, expiry, revocation and source shape that user_active_sessions needs; ops_startup_logs already carries correlation_id, previous_hash and entry_hash with no writer today."
+    "Resolved schemas from Database: auth_sessions_tokens already carries the token hash, salt, issue, expiry, revocation and source shape that user_active_sessions needs; ops_startup_logs already carries correlation_id, previous_hash and entry_hash with no writer today.",
+    "Local MAMP MySQL at 127.0.0.1:3306 carries a provisioned mtm_waitlist schema (26 tables, 87 routines). Read only probe with MAMP mysql.exe confirms every object this feature deletes or extends is present: all nine startup-only procedures, sp_core_buildings_upsert, auth_sessions_tokens, core_buildings_catalog, core_buildings_history and ops_startup_logs, plus the five protected tables. The only absent objects are the three this feature creates, which is exactly right for a pre-removal baseline."
   ],
   "step_summaries": {
     "specify": {
@@ -393,5 +972,758 @@
     "tasks": {
       "summary": "170 tasks in 9 phases: Setup 5, Foundational 77 (removal and proof, identity contracts, store foundation, logging, pipeline), US1 12, US2 11, US3 13, US4 10, US5 8, US6 22, Polish 12; every phase laid out as ordered waves with join points and a single owner phase per file."
     }
-  }
+  },
+  "currentTask": "T074",
+  "task_summaries": {
+    "T002": {
+      "status": "DONE",
+      "did": "Recorded the pre-removal build (0 warnings, 0 errors, 33 s) and full suite (1507 passed, 0 failed, 55 skipped, 1562 total) plus the launch window evidence",
+      "files": [
+        "specs/010-startup-rebuild/baseline.md"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Captured all three pre-removal windows: splash 760x460, main 3456x1408, sign-in 820x760 named 'Sign in'. The form needed the remembered session cleared from LocalSettings.json, which was backed up and restored byte-identical.",
+      "files": [
+        "specs/010-startup-rebuild/baseline.md"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Removed the splash and sign-in window statics, the five window handoff methods, the three window-closed handlers and the splash and login exit safety nets",
+      "files": [
+        "App.xaml.cs"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Deleted the app-lifecycle service and retired the IAppLifecycleService seam, adding AppLifecycleHost so SignOutService can still end the process",
+      "files": [
+        "Services/AppLifecycleService.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IAppLifecycleService.cs",
+        "MTM_Waitlist.Startup/Services/AppLifecycleHost.cs"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Removed every startup registration from the app host, including the hosted log service",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Removed the startup module dependency injection call",
+      "files": [
+        "Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Deleted the removed startup contracts IActivationService and IComputerGateService, keeping the deferred sign-out and computer-registry seams standing",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Deleted the activation service and emptied the Core Activation folder, moving the live RequestDeepLinkHandler into Core Services because AppNotificationService uses it",
+      "files": [
+        "MTM_Waitlist.Core/Services/ActivationService.cs",
+        "MTM_Waitlist.Core/Activation/",
+        "MTM_Waitlist.Core/Services/RequestDeepLinkHandler.cs"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Deleted the old IStartup contracts, keeping the two log contracts standing as the plan defers them",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Deleted the retired startup models, leaving StartupState standing until Phase 4",
+      "files": [
+        "MTM_Waitlist.Core/Models/"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Deleted the startup development and window options and replaced StartupDatabaseOptions with WaitlistDatabaseOptions in Core, because Shared reads the same connection string and cannot reference Startup; the connection string and its environment variable name are kept",
+      "files": [
+        "MTM_Waitlist.Core/Models/WaitlistDatabaseOptions.cs",
+        "appsettings.json"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Emptied MTM_Waitlist.Startup of the old startup types, keeping the project, its solution entry and its two project references, and keeping the deferred log and computer-registry services",
+      "files": [
+        "MTM_Waitlist.Startup"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Deleted the whole Module_Startup Views folder, including the dead SplashPage",
+      "files": [
+        "Module_Startup/Views/"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Created MTM_Waitlist.Logging with its solution entry and dependency-injection extension, re-pointed the startup references, and added the Compile Remove entry the app project needs so the sibling folder is not globbed",
+      "files": [
+        "MTM_Waitlist.Logging/",
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.csproj"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Removed the fifteen Startup_ tooltip keys and the three Startup_SignIn keys, kept the four Shell_SignOut keys that surviving code still uses, and added only the two strings the placeholder shows because the feed, setup and sign-in strings belong to surfaces built in later phases",
+      "files": [
+        "Strings/en-us/Resources.resw",
+        "Strings/en-us/TooltipResources.resw",
+        "Strings/en-us/TooltipResources.developer.resw"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Deleted the startup test files and the recording fakes that existed only to serve them, and repaired the one extra file T025 does not list that had a fifth consumer of the deleted session repository",
+      "files": [
+        "MTM_Waitlist.Tests/Services/",
+        "MTM_Waitlist.Tests/ViewModels/",
+        "MTM_Waitlist.Tests/Module_Startup/Services/",
+        "MTM_Waitlist.Tests/NoOpAppLifecycleService.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Deleted the retired startup flow documents",
+      "files": [
+        "STARTUP-FLOW.md",
+        "STARTUP-FLOW.html",
+        "STARTUP-FLOW.pdf"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Updated the startup module mentions in the test-conventions instructions",
+      "files": [
+        ".github/instructions/test-conventions.instructions.md"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Created the startup placeholder window stating startup was removed, with one Close button, a stable automation id and a plain title",
+      "files": [
+        "Module_Startup/Views/StartupPlaceholderWindow.xaml",
+        "Module_Startup/Views/StartupPlaceholderWindow.xaml.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Wired the placeholder as the only window the host shows at launch with no shell navigation and no store read, and removed the launch-path app-notification toast and the picture-preference pre-read",
+      "files": [
+        "App.xaml.cs"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "The page-activation exemption list needed no re-pin: the placeholder is a Window rather than a Page, so the pinned set is still exactly ShellPage; the assertion comments were corrected to say so",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Views/PageActivationAuditTests.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "The placeholder Close button ends the process cleanly, leaving no orphan holding store connections",
+      "files": [
+        "Module_Startup/Views/StartupPlaceholderWindow.xaml.cs"
+      ]
+    },
+    "T001": {
+      "status": "DONE",
+      "did": "Added 45 retired-symbol patterns for the entire old startup surface, keyed on removed type and member names rather than on a namespace or a folder, so the rebuilt Services, ViewModels and Views namespaces stay legal; three patterns are deliberately narrowed and the narrowing is disclosed with its reason",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Added a reintroduction sample for every new pattern, which the existing EveryRetiredPattern_BitesOnAReintroductionOfItsSymbol test requires before it passes, and confirmed the patterns bite by temporarily reintroducing symbols and watching the audit fail",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Added four assertions: the ten removed view files do not exist; none of the 39 removed types or the five removed App members is declared anywhere, keyed on declarations so retirement prose stays legal; the 18 removed Core contracts, models and options are gone; and the rebuilt view set is asserted positively as the placeholder pair, with a guard so the removed-type inventory cannot scan vacuously",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Proved by automation that no launch path reaches the shell or the sign-in form and recorded the run: exactly one window, no edit fields, no list items, and no sign-in wording, with Close ending the process with no orphan. The no-store-read clause is read as the internal stores, which nothing touches: the App constructor's reachability probe does read the mtm_mock mirror, disclosed in the proof, and that probe is the Visual verdict priming the plan keeps at launch",
+      "files": [
+        "specs/010-startup-rebuild/removal-proof.md"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Ran the full suite and the schema validators against the live local store and recorded the comparison: build unchanged at 0 errors 0 warnings; suite 1507 passed 55 skipped 1562 total before, 1425 passed 46 skipped 1471 total after; 95 tests removed across the nine deleted files plus three surviving files and 4 added, which reconciles exactly; the 9-test skip fall is the deleted TemporaryCredentialLimitTests class gate, not a gate change; startup, settings and user_management validators pass and part_pictures reports three pre-existing stale routine bodies",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs",
+        "specs/010-startup-rebuild/removal-proof.md"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Defined IPersonIdentity in Core Contracts as a read-only identity: the profile id, the upper-normalised sign-in name, the display name, the optional employee number, the role in force, every held role code, an IsSignedIn flag and a Holds check that tolerates an optional role prefix",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IPersonIdentity.cs"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Defined IMachineFacts in Core Contracts: the hostname, the MAC normalised to the store's form or null when unreadable, the registry row as the existing ComputerRecord, an IsRegistered verdict and a HardwareIdentityReadable flag, so an unreadable address is admitted rather than punished",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMachineFacts.cs"
+      ]
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "Implemented PersonIdentityService against the store, exposing ResolveAsync, RefreshAsync, Apply and Clear as the launch pipeline's seams",
+      "files": [
+        "MTM_Waitlist.Startup/Services/PersonIdentityService.cs"
+      ]
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "Implemented MachineFactsService against the store, reusing ComputerRecord and taking the first operational physical adapter with a six-byte address for the MAC, there being no existing reader in the repository to follow",
+      "files": [
+        "MTM_Waitlist.Startup/Services/MachineFactsService.cs"
+      ]
+    },
+    "T039": {
+      "status": "DONE",
+      "did": "Registered both contracts in the startup module's dependency injection",
+      "files": [
+        "MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs"
+      ]
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "Migrated the StartupState consumers off it in brief S7's order across 19 production files and 20 test files, with three judgment calls recorded: the shell badge now reads the role code because the old role display name has no counterpart and nothing bound it in XAML, a work-centre lookup passes an empty string for a missing employee number, and a test helper that set a display name now sets the code",
+      "files": [
+        "repo-wide mechanical migration"
+      ]
+    },
+    "T041": {
+      "status": "DONE",
+      "did": "Rewrote the permission-gate audit so the developer gate it asserts points at IPersonIdentity rather than the deleted object",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionGateSiteAuditTests.cs"
+      ]
+    },
+    "T042": {
+      "status": "DONE",
+      "did": "Deleted StartupState and added it to the retired-symbol guard with its reintroduction sample and its inventory entry, narrowed to exclude a .cs suffix because Module_Core/Views/ShellPage.xaml still names the path inside a tooltip string that T019 owns, which Database provenance comments do not",
+      "files": [
+        "MTM_Waitlist.Core/Models/StartupState.cs",
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ]
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "Confirmed no consumer still reads the deleted object and that the build and the full suite are clean",
+      "files": [
+        "repo-wide build"
+      ]
+    },
+    "T044": {
+      "status": "DONE",
+      "did": "Created user_active_sessions with create.sql and rollback.sql: one active row per person per machine, the token held as a salted hash, with expiry, issued time and the machine key, giving 12 columns, 2 unique keys, 2 indexes and 2 foreign keys",
+      "files": [
+        "Database/Tables/34_user_active_sessions/"
+      ]
+    },
+    "T045": {
+      "status": "DONE",
+      "did": "Added the upsert, get, clear and list procedures for user_active_sessions, each with its rollback, and a validation script wired into the schema validator and the local installer's deploy list",
+      "files": [
+        "Database/StoredProcedures/sp_auth_user_active_sessions_upsert/",
+        "Database/StoredProcedures/sp_auth_user_active_sessions_get/",
+        "Database/StoredProcedures/sp_auth_user_active_sessions_clear/",
+        "Database/StoredProcedures/sp_auth_user_active_sessions_list/",
+        "Database/Validation/user_active_sessions_schema/"
+      ]
+    },
+    "T046": {
+      "status": "DONE",
+      "did": "Created auth_remembered_sign_ins with create.sql, rollback.sql, the read, upsert and clear procedures each with a rollback, and a validation script, keyed by person and machine and holding the encrypted payload, its initialisation vector and a key fingerprint",
+      "files": [
+        "Database/Tables/35_auth_remembered_sign_ins/",
+        "Database/StoredProcedures/sp_auth_remembered_sign_ins_get/",
+        "Database/StoredProcedures/sp_auth_remembered_sign_ins_upsert/",
+        "Database/StoredProcedures/sp_auth_remembered_sign_ins_clear/",
+        "Database/Validation/auth_remembered_sign_ins_schema/"
+      ]
+    },
+    "T047": {
+      "status": "DONE",
+      "did": "Extended ops_startup_logs with module, error_type, exception_detail and error_fingerprint plus the six panel indexes, by amending create.sql in place and extending rollback.sql with guarded per-object drops, which is the convention the existing table folders use; the first draft dropped the index before its foreign key and MySQL refused it with error 1553, corrected to key then index then column",
+      "files": [
+        "Database/Tables/10_ops_startup_logs/"
+      ]
+    },
+    "T048": {
+      "status": "DONE",
+      "did": "Added sp_ops_startup_logs_insert as the single writer, taking the fingerprint as a parameter, taking a named lock before it reads so two writers cannot both link to the same predecessor, and reading, hashing and inserting inside one transaction; a writer that cannot take the lock within ten seconds is refused rather than guessing a predecessor",
+      "files": [
+        "Database/StoredProcedures/sp_ops_startup_logs_insert/"
+      ]
+    },
+    "T049": {
+      "status": "DONE",
+      "did": "Added the panel reader sp_ops_startup_logs_filter with its filter set, grouping by error_fingerprint through sp_ops_startup_logs_fingerprint_groups_get, and sp_ops_startup_logs_purge bounded by age and by size, oldest first, each with its rollback; a deliberate race of two clients inserting eight entries each landed 16 rows with 0 broken links and every hash recomputing",
+      "files": [
+        "Database/StoredProcedures/sp_ops_startup_logs_filter/",
+        "Database/StoredProcedures/sp_ops_startup_logs_fingerprint_groups_get/",
+        "Database/StoredProcedures/sp_ops_startup_logs_purge/"
+      ]
+    },
+    "T050": {
+      "status": "DONE",
+      "did": "Extended the startup schema validation with the four new columns, the six indexes and a non-null entry_hash; with the extension applied it reports 0 issues, and against the un-migrated store it reports exactly those 10 as missing, which is the assertion working rather than a defect",
+      "files": [
+        "Database/Validation/startup_schema/"
+      ]
+    },
+    "T051": {
+      "status": "DONE",
+      "did": "Found the specification premise wrong and fixed it: config_images_locations carried no computer scope, and its unique key is scope plus scope_item_id, so a machine row could exist for one machine only. Added a nullable computer_id with its foreign key and index and two procedures, and expressed the machine shape inside the item id as computer_id:source_kind rather than adding the nullable column to the unique key, which would have silently permitted duplicates because a UNIQUE key treats NULLs as distinct. No column was added to core_computers_registry",
+      "files": [
+        "Database/Tables/17_config_images_locations/",
+        "Database/StoredProcedures/sp_config_images_locations_computer_sources_get/",
+        "Database/StoredProcedures/sp_config_images_locations_computer_sources_set/"
+      ]
+    },
+    "T052": {
+      "status": "DONE",
+      "did": "Added the four permission keys to the catalogue constants and the registry with their resource entries and strings, leaving permission.settings.ignored_locations exactly as it was, and corrected the one hard-coded settings-card permission count in a test the change invalidated",
+      "files": [
+        "MTM_Waitlist.Core/Permissions/PermissionKeys.cs",
+        "MTM_Waitlist.Core/Permissions/PermissionRegistry.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T054": {
+      "status": "DONE",
+      "did": "Verified rather than changed: the shipped development seed already assigns developer to johnk and jkoll, and the grant is person-scoped because auth_roles_assignments carries no machine column, so it holds on both seeded machines and needed no edit",
+      "files": [
+        "Database/Seeds/seed_dev_masked_baseline/create.sql"
+      ]
+    },
+    "T055": {
+      "status": "DONE",
+      "did": "Wrote the logging security review and recorded what it proves and what it cannot. Proved on the shipped artifacts: the log store has no credential column, exactly two statements touch it and neither is an update, the insert is the only writer and its parameter list cannot carry a secret, and neither trigger mentions the store. Could not prove: the seam, serializers and provider do not exist yet, so the prohibition holds because nothing writes rather than because code refuses",
+      "files": [
+        "Database/StoredProcedures/sp_ops_startup_logs_insert/",
+        "specs/010-startup-rebuild/security-review-logging.md"
+      ]
+    },
+    "T057": {
+      "status": "DONE",
+      "did": "Registered tables 34 and 35 and the extended table 10 in the table aggregate, added their descriptions and the four new log columns to the descriptions file, and amended the config_images_locations block and its machine scope, which the ruleset requires and which omitting would have left wrong",
+      "files": [
+        "Database/Tables/AllTables.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T058": {
+      "status": "DONE",
+      "did": "Registered the thirteen new session, remembered-sign-in, log and machine-source procedures in the procedure aggregate, including the two T051 added that the previous unit left unregistered",
+      "files": [
+        "Database/StoredProcedures/AllSPs.sql"
+      ]
+    },
+    "T059": {
+      "status": "DONE",
+      "did": "Registered the amended seeds in the seed aggregate",
+      "files": [
+        "Database/Seeds/AllSeeds.sql"
+      ]
+    },
+    "T064": {
+      "status": "DONE",
+      "did": "Built the logging seam and its entry type unconditionally, with no Conditional attribute and no debug guard anywhere in the project so a release build records what a debug build records, and made the seam itself capture the machine, the person, the error type, the serialised exception chain and the derived fingerprint so no call site supplies or hashes anything",
+      "files": [
+        "MTM_Waitlist.Logging/ILogService.cs",
+        "MTM_Waitlist.Logging/LogEntry.cs",
+        "MTM_Waitlist.Logging/LogSeverity.cs",
+        "MTM_Waitlist.Logging/LogService.cs",
+        "MTM_Waitlist.Logging/ExceptionDetailSerializer.cs",
+        "MTM_Waitlist.Logging/DiagnosticContext.cs",
+        "MTM_Waitlist.Tests/Module_Logging/"
+      ]
+    },
+    "T065": {
+      "status": "DONE",
+      "did": "Built StoreLogWriter over a bounded channel in DropOldest mode, so a caller returns before the store is touched and a full queue discards its oldest entry rather than the newest fault, with the flush bounded at five seconds and a write that outlasted it cancelled; the writer takes no logger and no seam, so its own failure cannot produce a second diagnostic",
+      "files": [
+        "MTM_Waitlist.Logging/StoreLogWriter.cs",
+        "MTM_Waitlist.Logging/StoreLogRecord.cs",
+        "MTM_Waitlist.Tests/Module_Logging/StoreLogWriterTests.cs"
+      ]
+    },
+    "T066": {
+      "status": "DONE",
+      "did": "Built StoreLoggerProvider as an ILoggerProvider so the 226 existing ILogger call sites across 26 files write to the same store with no call site edited: the category becomes the module, the level maps to severity and outcome, the exception goes through the seam's serializer, and structured state lands in payload_json rather than the message. MTM_Waitlist.Mock.Service builds its own container and is not served",
+      "files": [
+        "MTM_Waitlist.Logging/StoreLoggerProvider.cs",
+        "MTM_Waitlist.Tests/Module_Logging/StoreLoggerProviderTests.cs",
+        "MTM_Waitlist.Tests/Module_Logging/LoggingSeamAuditTests.cs"
+      ]
+    },
+    "T067": {
+      "status": "DONE",
+      "did": "Registered the writer as the host's hosted service so the shutdown flush is bounded, the seam behind ILogService as one shared instance, and the provider as an ILoggerProvider, and removed the last file-based registration, the StartupLoggingOptions Configure call in the app host, the earlier hosted and forwarder registrations having already gone with T008",
+      "files": [
+        "MTM_Waitlist.Logging/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Module_Logging/LoggingModuleRegistrationTests.cs"
+      ]
+    },
+    "T068": {
+      "status": "DONE",
+      "did": "Ran the call-site migration dry first and reconciled its 418 sites against the contract's 489, which reproduces exactly on the pre-removal commit and drops to 418 because the removed startup surface took 71 of them with it, then applied it, fixed the seven Configure call sites by hand and added the one global using; the facade AppLog sits in the namespace the retired type occupied so the migration needed no per-file using edit at all",
+      "files": [
+        "MTM_Waitlist.Core/Helpers/AppLog.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IAppLogSink.cs",
+        "Usings.cs",
+        "App.xaml.cs",
+        "Module_Core/Views/ShellPage.xaml.cs",
+        "Module_Settings/Views/",
+        "Module_Setup/Views/",
+        "MTM_Waitlist.Core/",
+        "MTM_Waitlist.Settings/",
+        "MTM_Waitlist.Setup/",
+        "MTM_Waitlist.Shared/",
+        "MTM_Waitlist.Startup/",
+        "MTM_Waitlist.Waitlist.NewRequest/",
+        "MTM_Waitlist.Waitlist.View/",
+        "MTM_Waitlist.Mock/Services/"
+      ]
+    },
+    "T069": {
+      "status": "DONE",
+      "did": "Deleted the retired static logging type and the test class that existed only to test it, reworded the two doc-comment mentions a member-call script cannot see so the raw-text scan reads zero, and built to prove no call site was left behind; the surviving Error argument order is the retired type's and is translated to the seam's inside the facade, which the migration cannot do because it never touches arguments",
+      "files": [
+        "MTM_Waitlist.Core/Helpers/StartupDebugLog.cs",
+        "MTM_Waitlist.Tests/Core/Helpers/StartupDebugLogTests.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceLog.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceLogTests.cs",
+        "MTM_Waitlist.Tests/Module_Core/Activation/RequestDeepLinkHandlerTests.cs"
+      ]
+    },
+    "T070": {
+      "status": "DONE",
+      "did": "Confirmed by count that no ILogger call site had to change, before and after, with the identical command: 219 _logger occurrences in 23 files, 13 standalone logger in 5 and 5 Logger in 3, unchanged; the contract's 226 total reproduces only if one doc-comment mention is counted alongside the six real standalone call sites",
+      "files": [
+        "repo-wide count"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Reworked the startup schema validation to keep only the checks covering shared tables, removing the retired session table's table-existence check and its eleven column checks, and stripping the two stale assertions that named deleted procedures from the user-management validation",
+      "files": [
+        "Database/Validation/startup_schema/validate.sql",
+        "Database/Validation/user_management_schema/validate.sql"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Confirmed the clock function is retained, still listed in the function aggregate and still checked by the validation script, and that nothing in the deleted set is referenced by a surviving artifact",
+      "files": [
+        "Database/Functions/AllFunct.sql",
+        "Database/StoredProcedures/"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Removed the six procedure sections from the procedure aggregate and appended a retired-objects section to the descriptions file in the same shape the two existing retired sections use, naming each retired procedure and recording the three registry procedures as deliberately kept",
+      "files": [
+        "Database/StoredProcedures/AllSPs.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Confirmed by presence and registration rather than assertion that no protected artifact was touched: all five shared tables, all eleven protected procedures plus the retained clock function and all three seeds still exist with both script files and still appear exactly once in their aggregate, and only the two files this unit was required to edit were edited",
+      "files": [
+        "Database/"
+      ]
+    },
+    "T056": {
+      "status": "DONE",
+      "did": "Enumerated all 120 deployed schema objects across four kinds and six consumer corpora with a re-runnable script, confirming the count the duplicate-object check reports and finding 51 rollback-only retirements; the consumerless set is eight, but five of those are this feature's own new objects whose consumers are unbuilt and one is a genuinely unreferenced pre-existing procedure, so the dead-weight set is far smaller than the plan assumed",
+      "files": [
+        "specs/010-startup-rebuild/removal-proof.md"
+      ]
+    },
+    "T061": {
+      "status": "DONE",
+      "did": "Retired the three orphaned buildings objects, each losing its create.sql while keeping its rollback drop, and closed the two consumers no task owned: the development seed no longer truncates or inserts into the buildings catalog, and the settings validator no longer asserts the three objects exist; the validator reports 117 artifacts creating 117 distinct objects, three fewer than before, and the local store was brought into agreement with the tree using the shipped rollback scripts",
+      "files": [
+        "Database/Tables/06_core_buildings_catalog/create.sql",
+        "Database/Tables/07_core_buildings_history/create.sql",
+        "Database/StoredProcedures/sp_core_buildings_upsert/create.sql",
+        "Database/Seeds/seed_dev_masked_baseline/create.sql",
+        "Database/Seeds/seed_dev_masked_baseline/rollback.sql",
+        "Database/Seeds/AllSeeds.sql",
+        "Database/Validation/settings_schema/validate.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T062": {
+      "status": "DONE",
+      "did": "Updated the table, procedure and seed aggregates for the three removals, left the function and view aggregates untouched because they carry no buildings reference, removed the three unconditional description statements, and appended the retirement to this feature's retired-objects section in the same shape the earlier sections use",
+      "files": [
+        "Database/Tables/AllTables.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "Database/Seeds/AllSeeds.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T063": {
+      "status": "DONE",
+      "did": "Ran the schema validator against the local store and it now exits zero: the script had two defects that kept it from ever passing, a naive semicolon split that cut a seed statement in half and a connection that read the seed catalog body session variable as a command parameter, and the settings validator no longer expects the admin role that a seed retires; every schema validates clean except the three pre-existing picture findings",
+      "files": [
+        ".github/scripts/validate-database-schema.ps1",
+        "Database/Validation/settings_schema/validate.sql",
+        "Database/StoredProcedures/sp_auth_credentials_check/rollback.sql",
+        "Database/StoredProcedures/sp_auth_password_reset_required_get/rollback.sql"
+      ]
+    },
+    "T071": {
+      "status": "DONE",
+      "did": "Defined the step model as an immutable record of id, name, description, category, stated maximum wait and the best-effort marker, with no counting member on it at all, so the displayed count is derived from the catalog length and from the distinct steps the feed says have ended rather than being stored anywhere",
+      "files": [
+        "MTM_Waitlist.Startup/Models/LaunchStep.cs",
+        "MTM_Waitlist.Startup/Models/LaunchStepCategory.cs",
+        "MTM_Waitlist.Startup/Models/LaunchStepStatus.cs",
+        "MTM_Waitlist.Startup/Models/LaunchStepOutcome.cs",
+        "MTM_Waitlist.Startup/Models/LaunchStepContext.cs",
+        "MTM_Waitlist.Startup/Models/LaunchRemedySet.cs",
+        "MTM_Waitlist.Startup/Models/LaunchFeedEntry.cs",
+        "MTM_Waitlist.Startup/Models/LaunchFeedEntryKind.cs"
+      ]
+    },
+    "T072": {
+      "status": "DONE",
+      "did": "Built the append-only activity feed carrying the timestamp, the step, the entry kind, the text, the target and the outcome; it is append-only structurally rather than by convention, because the only mutating member adds one entry under a lock, there is no clear remove or reorder member to call, the entries view is read-only and throws on an attempt to change it, and an entry has no setter",
+      "files": [
+        "MTM_Waitlist.Startup/Services/ILaunchActivityFeed.cs",
+        "MTM_Waitlist.Startup/Services/LaunchActivityFeed.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchActivityFeedTests.cs"
+      ]
+    },
+    "T073": {
+      "status": "DONE",
+      "did": "Built the runner so it appends the step's own name to the feed before the work starts, which is why an announcement survives a step that throws on its first statement, then races the step against its stated maximum and on overrun cancels it, observes the abandoned task so it cannot resurface, and records one failure naming the bound it passed; a blocking step fails with a retry remedy while a best-effort step is skipped so it cannot stop the launch, and a step declaring no maximum is refused rather than given an invented one",
+      "files": [
+        "MTM_Waitlist.Startup/Services/ILaunchStep.cs",
+        "MTM_Waitlist.Startup/Services/LaunchStepRunner.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepRunnerTests.cs"
+      ]
+    },
+    "T074": {
+      "status": "DONE",
+      "did": "Built the step catalog as data: eleven steps with a stated maximum each, none unbounded and none past the thirty-second ceiling, and the picture refresh and external-system priming bounded well inside it as the two best-effort steps; the sequence is validated as it is built, so an unbounded step, an over-ceiling step, a best-effort step at the ceiling, a repeated id or a nameless step all fail immediately rather than shipping",
+      "files": [
+        "MTM_Waitlist.Startup/Services/LaunchStepCatalog.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepCatalogTests.cs"
+      ]
+    }
+  },
+  "concerns": [
+    {
+      "note": "The shared store at 172.16.1.104:3306 does not accept a connection from this machine (TCP probe times out after 5 s), so four later tasks cannot be completed or verified here: T024, T033, T034 and T063. A separate MySQL listens on 127.0.0.1:3306."
+    },
+    {
+      "note": "T003 could not capture the sign-in form. Both launch configurations auto-signed-in and reached the main screens, because LocalSettings.json carries a live Startup.Session.Token and Startup.Session.ExpiresUtc. Captured: splash 760x460, automation name 'WinUI Desktop'; main window 3456x1408, restore 760x500. Clearing that token would show the sign-in form, but that mutates machine state rather than repository state."
+    },
+    {
+      "note": "T001, the retired-symbol guard, was not started. It turns the suite red by design until the whole Phase 2 removal lands, so adding it without completing that removal would leave a red suite behind a guard that proves nothing. Phase 2 spans roughly 50 to 70 source files, a new project, 26 database artifacts and the app and DI rewiring."
+    },
+    {
+      "note": "python3 is absent here and the py launcher's default interpreter (C:/Python314) is broken with 'Failed to import encodings module'. The working interpreter is 'python' (3.10.11)."
+    },
+    {
+      "note": "Supersedes the earlier T003 concern. The sign-in form was subsequently captured (820x760, automation name Sign in, buttons Sign In and Back) by temporarily clearing the remembered session, with LocalSettings.json backed up and then restored byte-identical (SHA-256 verified). T003 is complete and all three pre-removal windows now have a baseline figure."
+    },
+    {
+      "note": "The unreachable shared store no longer blocks T024, T033, T034 and T063 from being verified: the local MAMP MySQL carries a provisioned mtm_waitlist schema matching this features pre-removal baseline object for object. Verifying against it proves the schema artifacts are correct, but not that the shared host matches, so it substitutes for the checks and not for the environment."
+    },
+    {
+      "note": "The first recorded run of the local schema validator shows exit 1. That was a defect in the harness script, not a schema failure: the script set ErrorActionPreference to Stop, so the mysql client note on stderr about a password on the command line aborted it. The corrected script passes the credential through MYSQL_PWD and exits 0 with zero issue rows; its run is recorded as the entry labelled corrected harness. Read the exit 1 entry as a harness artefact."
+    },
+    {
+      "note": "Corrects the earlier claim that the local MAMP store is a faithful baseline for this feature without qualification. Running all four repository validators against it: startup_schema clean, settings_schema clean, user_management_schema clean, part_pictures_schema reports three stale_routine_body issues (sp_config_images_locations_paths_move, sp_config_images_locations_update, sp_config_images_locations_insert). The local store was therefore provisioned before feature 008 part pictures landed its procedure changes. It is current enough for this features startup schema work, but it must be re-provisioned from Database before any verification that spans the images locations procedures, and the exit code of one recorded check reflects that staleness rather than a script fault."
+    },
+    {
+      "note": "The 22 recorded task finishes cluster in time because one agent run completed the whole removal in a single pass, not because the record was batched as a shortcut. The per-task summaries and their order are accurate; the timestamps are best-effort and the doctor will flag the cluster."
+    },
+    {
+      "note": "Residual in the launch path for the T033 proof: the App constructor still starts IVisualReachabilityProbeHost. It is Mock-module machinery registered by AddVisualReadFallback rather than by startup, it opens no window and blocks nothing, but it does probe the external source, so either stop it in the launch phase or record that the T033 no-store-read check accepts it."
+    },
+    {
+      "note": "T019 is deliberately not done: Module_Core/Views/ShellPage.xaml has owner edits in progress, and two TooltipBehavior.AssociatedFiles strings still name the deleted SignInSignInKeys-era file SignInSessionKeys.cs and the mis-pathed StartupState.cs. They are inert strings and caused no build error."
+    },
+    {
+      "note": "Disclosure qualifying T030 and T033. The App constructor starts IVisualReachabilityProbeHost, whose background cycle reads the mtm_mock mirror through sp_visual_read_shape_freshness_get and issues no statement against any internal store. It was observed directly: while the app ran, its only established connection was to the local MySQL host with database mtm_mock, and that session vanished when the app closed. The no-store-read clauses therefore hold for the internal operational stores and are qualified for the mock mirror, which is the Visual verdict priming the plan keeps at launch. T030 was ticked for the placeholder being the only launch window; this is its disclosure."
+    },
+    {
+      "note": "Corrects two recorded validator checks. The temporary harness scripts counted the mysql batch column header as an issue row, so the all-four-validators entry over-states its issue-row count by one. The verdicts stand: startup, settings and user_management are clean, and part_pictures has three real stale routine bodies that predate this feature."
+    },
+    {
+      "note": "Disclosed gap in IPersonIdentity: HeldRoleCodes is only partly store-backed. No existing stored procedure returns all of a person role assignments and Database is out of scope for this unit, so PersonIdentityService.ResolveAsync applies only the single role the existing logon read returns, while Apply accepts the full set for the sign-in step T116 to supply. A later database task must add the reader that returns every held role."
+    },
+    {
+      "note": "The identity writer seams have no production caller yet. ResolveAsync, RefreshAsync, Apply and Clear are the launch pipeline calls, and the pipeline is a later wave, so they are currently uncalled in production code."
+    },
+    {
+      "note": "Machine address detection in MachineFactsService is new rather than following an existing reader, because the repository had none: it takes the first operational physical adapter carrying a six-byte address. The two new services have no dedicated unit tests; the fakes are exercised through their consumers."
+    },
+    {
+      "note": "Open accounting item against T034 discipline. The identity unit changed the suite total from 1471 to 1467 and the passed count from 1425 to 1421, while the count of tracked test method declarations fell only from 1385 to 1382, so three net declarations removed. The four removed results are consistent with four declarations removed and one added, or with one removed declaration being parameterised, but I could not prove which, and my first attempt at the finer accounting used a mis-escaped pattern so it is not evidence. The removed tests are the StartupState model tests in CoreModelsTests and StartupModelsTests; the four T005 guard tests were separately confirmed still present. One test result is therefore unattributed."
+    },
+    {
+      "note": "Sequencing hazard disclosed by the store-foundation unit. The amended startup_schema validator now asserts the four new columns and six indexes, so it reports ten issues against any store that has not yet been migrated, and the two new validators were appended to install_local_database.vbs deploy list, so a fresh local install performed before T057 and T058 register the new tables in the aggregates will report tables 34 and 35 as missing. That is the wiring running ahead of the aggregate registration those tasks own, and the order matters."
+    },
+    {
+      "note": "T053 is only half done and its box is therefore left unticked. Its four-keys-per-role half is implemented and verified role-explicitly across all nine catalogue roles. Its second half, the plant-scope rows and the seed rows the seven preferences need, is not: the five person-scoped preferences are per-person rows the person own choice writes, the ignored-locations live value is still a local file whose move is T142 write path, and the session-length setting key exists nowhere in the repository so a row for it would invent the name that T147 owns. Inventing two key names was judged worse than the gap."
+    },
+    {
+      "note": "Two validators now assert store shapes no store yet has: settings_schema reports 36 issues and startup_schema reports 10 against an un-migrated store. Both are the new assertions working ahead of a migration, and both fall to zero once a store is provisioned through Database/install_local_database.vbs, which should happen after T062 has removed the retired entries."
+    },
+    {
+      "note": "The logging seam is verified only through fakes: the store procedures exist as artifacts and are not deployed, so sp_ops_startup_logs_insert has never executed against a real store. payload_json.database carries the procedure, the database and the operation but leaves the server alias, timings, retry attempt and statement fingerprint null, and payload_json.ui carries only the caller target because the contract forbids touching the dispatcher during shutdown. T175-T182 chain normalisation, fingerprint normalisation and parameter redaction are deliberately deferred, and appsettings.json still carries the inert StartupLoggingOptions section until T133 deletes the type."
+    },
+    {
+      "note": "Migrating the static logging surface forced a decision the spec never made: the facade that 418 call sites now resolve cannot live in the logging module, because that module already references MTM_Waitlist.Core and Core holds 39 of the call sites, so that placement would be a circular reference. It was put in MTM_Waitlist.Core, in the namespace the retired type occupied, which is why the migration needed no per-file using edit; contract section 5 and research D8 premised the opposite and should be amended. Separately the contract counts seven standalone ILogger call sites but only six exist plus one doc-comment mention, so its 226 total holds only on that reading. And IStartupLogService with its StartupLogService implementation now have no production consumer at all: the old App.xaml.cs line passed GetService<IStartupLogService>(), which was registered nowhere, so the retired static log had been forwarding to null in production for as long as that line existed."
+    },
+    {
+      "note": "T020 is deliberately left unticked: it names nine procedures to delete, six were deleted and three were kept because the rebuilt startup services still call them (ComputerRegistryService for the by-mac lookup, by-name-and-mac lookup and update-by-mac, and MachineFactsService for the by-name-and-mac lookup). Deleting them would leave live code calling procedures no install creates, and the surviving protected lookup matches on name alone, which would weaken the machine gate. They should retire with ComputerRegistryService. The rollback drops for the six deleted procedures were kept, matching 41 other rollback-only procedure folders, 35 of them pre-existing. Two further items: the aggregate validator reports 120 artifacts creating 120 distinct objects after the six removals, down from 126, and its live phase is skipped because no connection string is configured, so the aggregate-and-tree agreement was proved by exact comparison instead; and the seeds aggregate has 11 headers for 12 seed folders, with two headers carrying the same name, which is pre-existing and untouched."
+    },
+    {
+      "note": "T061 cannot be executed as written. The enumeration found core_buildings_catalog is written by Database/Seeds/seed_dev_masked_baseline (create, rollback and the AllSeeds aggregate) and that Database/Validation/settings_schema/validate.sql asserts all three buildings objects exist; neither file is named by any task, so T062's file list is incomplete too. The seed consumer is sharp because the schema validator applies every seed on its success path, so the live validator cannot pass while a surviving seed writes a dropped table. T060 is executable, but its one consumer UserManagementLiveIntegrationTests belongs to the unticked final task T188, so deleting the table now leaves that test naming a table no artifact creates. Separately, eight deployed objects show no consumer by text and five of those are objects this feature just created whose consumers are the unbuilt log panel and machine configuration, so they must not be mistaken for dead weight; the first enumeration pass also wrongly read two objects as consumerless because procedure bodies were missing from the corpora, and both are in fact consumed by other procedures."
+    },
+    {
+      "note": "T063 is left unticked although the schema validator runs: settings_schema reports four issues, all missing_role_baseline for role:admin across the four new permission keys, and the role-baseline seed deliberately covers nine roles that do not include admin because a separate seed retires Admin in favour of IT Department, so the expected role set and the seeded role set disagree. That belongs to the unticked T053. The store is otherwise sound: startup, user management, remembered sign-ins and active sessions all validate clean, and part_pictures_schema keeps its three pre-existing stale-routine-body findings. Separately, .github/scripts/validate-database-schema.ps1 cannot exit zero whenever a connection string is configured: it splits each seed file on every semicolon and seed_dev_masked_baseline line 216 is a comment containing one, so the statement is cut in half and MySQL rejects it; that comment is byte-identical at HEAD, the defect predates this feature, and it was invisible until now because earlier runs skipped the live phase. Two more items: the rollback scripts for sp_auth_credentials_check and sp_auth_password_reset_required_get recreate rather than drop their procedure, so the local store keeps two retired procedures no artifact creates. And my own repair pass was briefly wrong: applying seed_dev_masked_baseline after seed_permission_role_baselines truncates config_settings_values at its line 119 and wiped all thirty-six baselines; re-applying the baselines in the correct order restored them and the table holds thirty-nine rows."
+    },
+    {
+      "note": "T063 is unticked although the validator runs: settings_schema reports four issues, all missing_role_baseline for role:admin across the four new permission keys. The role-baseline seed covers nine roles that exclude admin, because a separate seed retires Admin in favour of IT Department, so the expected role set and the seeded role set disagree. That belongs to the unticked T053. Everything else validates clean apart from the three pre-existing part_pictures stale-routine-body findings."
+    },
+    {
+      "note": "The repository schema validator cannot exit zero whenever a connection string is configured: it splits each seed file on every semicolon and seed_dev_masked_baseline line 216 is a comment containing one, so the statement is cut in half and MySQL rejects it. That comment is byte-identical at HEAD and the defect predates this feature; it was invisible until now because earlier runs skipped the live phase. Two smaller items: the rollback scripts for sp_auth_credentials_check and sp_auth_password_reset_required_get recreate rather than drop their procedure, so the local store keeps two retired procedures no artifact creates. And my own repair pass was briefly wrong: applying seed_dev_masked_baseline after seed_permission_role_baselines truncates config_settings_values at its line 119 and wiped all thirty-six baselines; re-applying the baselines in the correct order restored them and the table holds thirty-nine rows."
+    },
+    {
+      "note": "Two findings from the validator repair that no task owns. First, Database/Seeds/seed_picture_layout_move creates a helper procedure, calls it and never drops it, in both its folder file and the seeds aggregate, so the local store carries sp_seed_picture_layout_move with no create.sql artifact; its sibling seed does drop its helper and says so in its header, so this is an inconsistency rather than a convention, and the fix is two lines once someone owns it. Second, deleting the orphaned logging contract left stale prose in .github/instructions/winui3-ui-automation.instructions.md and two capability specs that still describe the deleted service as the live log path. Also worth recording: the local store legitimately carries two seed-created objects beyond the artifact set, so its 119 objects against 117 artifacts is explained and not drift."
+    },
+    {
+      "note": "The launch-step contract pins the shape of a step, the categories, the ceiling and the two best-effort steps, but it names no steps and no numbers, so the eleven-step sequence and every stated maximum in T074 were chosen by the implementer rather than taken from the contract and should be reviewed against the brief. LaunchRemedySet was also created because LaunchStepOutcome requires it, and no task owns it."
+    },
+    {
+      "note": "The code and the written spec now disagree in four places, all in files the owner has open, so I left them. LaunchStep gained a Target member, which data-model.md and the LaunchStep record shown in tasks.md do not show. STARTUP-REBUILD-BRIEF.md, STARTUP-REBUILD-CHECKLIST.md and tasks.md still describe the deleted logging service as a present type. And the step ids changed for every split entry, so the ids configuration, machine-readiness, machine-setup, session, sign-in, machine-gate and password-change no longer resolve as retry keys; only store-reachability, picture-cache, visual-priming and shell survived. One judgement to review: read-hardware-identity remains a single entry although it reads both the computer name and the hardware address, because they come from one local step with no external wait."
+    },
+    {
+      "note": "The 2026-09-27 analysis left this reconciliation outstanding, in the order the owner approved. Done already: the contract now states all seventeen maximums so FR-003 is verifiable against an artifact, and the data model step entity now carries the Target member. Outstanding, all in files the owner has open so they sit uncommitted on purpose: the stale type names across plan.md, research.md, tasks.md, STARTUP-REBUILD-BRIEF.md, STARTUP-REBUILD-CHECKLIST.md and two contracts, since none of them may be committed without sweeping the owner in-flight edits into my commit; the destructive approval recorded in the plans own Complexity Tracking rather than only in this ledger; the splash requirement added to spec.md; and the two task text corrections, T069s claim that the audit would flag the two doc comments when the audit in fact carries no pattern for that type, and the retry ids in T077, T121 and T125 which still name step ids the split retired. Also outstanding: coverage entries for FR-032 to FR-038 and for the seventeen success criteria, the three addendum phases reconciled against their main phases, and tasks created for the four unledgered changes. Two tasks stay blocked and should not be forced: T060, whose only consumer belongs to task T188 the plans last, and T019, which edits one of the owner uncommitted files."
+    }
+  ],
+  "verified": [
+    {
+      "what": "baseline build",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:30.84"
+    },
+    {
+      "what": "baseline suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 43.2,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1507, Skipped:    55, Total:  1562, Duration: 29 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "Sign-in form observed through UI Automation with the remembered session cleared: automation name Sign in, 820x760, normal state, text Sign In / Use your assigned credentials to continue. / Username / Password / Sign in to continue."
+    },
+    {
+      "what": "startup schema validator against the local MAMP store",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\johnk\\AppData\\Local\\Temp\\verify-startup-schema.ps1",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 0.3,
+      "result": "    + CategoryInfo          : NotSpecified: (mysql: [Warning...an be insecure.  ·    :String) [], RemoteException ·     + FullyQualifiedErrorId : NativeCommandError",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "startup schema validator against the local MAMP store (corrected harness)",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\johnk\\AppData\\Local\\Temp\\verify-startup-schema.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.3,
+      "result": "error lines   : 0 · issue rows    : 0 · startup schema validator: no issues reported by the local store"
+    },
+    {
+      "what": "all four repository schema validators against the local MAMP store",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\johnk\\AppData\\Local\\Temp\\verify-all-schemas.ps1",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 0.7,
+      "result": "         row: stale_routine_body\tsp_config_images_locations_update\tbody carries the replacement trigger, silent during the move\tmissing ·          row: stale_routine_body\tsp_config_images_locations_insert\tbody carries the first-picture trigger\tmissing · validators reporting issues: 1",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "post-removal solution build",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 71.1,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:01:10.86"
+    },
+    {
+      "what": "post-removal test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 54.9,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [2 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1421, Skipped:    46, Total:  1467, Duration: 33 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "the database schema gate passes end to end, live phase included",
+      "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-database-schema.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 1.3,
+      "result": "[db-validate] Applying seed file: C:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\Database\\Seeds\\seed_waitlist_request_item_images\\create.sql · [db-validate] Applying seed file: C:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\Database\\Seeds\\seed_waitlist_requests_default\\create.sql · [db-validate] Database schema validation passed using MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING."
+    },
+    {
+      "what": "D2 closed by evidence, not code: the three library APIs were checked against official Microsoft documentation on 2026-09-27. DropOldest is documented as removing and ignoring the oldest item to make room, which is what the store writer relies on; ILoggerProvider is IDisposable with CreateLogger and Dispose; IHostedService.StopAsync is triggered on graceful shutdown, which is why the writer is a hosted service. No code change was needed. The Microsoft Learn MCP tools reported disabled although a probe proved the server healthy, so the same Microsoft Learn pages were read directly; Context7 rejected both parameter spellings and is recorded as attempted but unusable."
+    }
+  ],
+  "owner_approval": "2026-09-26: the owner approved running the destructive tasks, on the basis that git can restore the schema artifacts. This is the recorded approval T056 and the phase 2.4 and 5.6 deletion tasks were waiting on.",
+  "orphan_logging_service_removed": "On the owner instruction the orphaned retired logging contract was deleted: IStartupLogService, its StartupLogService implementation and the test class that existed only to test it, with both names added to the retired-symbol guard and its reintroduction samples, so the audit now fails the build if either returns. The forwarder and options types those touched are also consumerless but T133 owns them.",
+  "owner_instructions_2026_09_27": "Three owner instructions executed. The launch now reports every individual operation the startup module processes: the catalog went from eleven grouped steps to seventeen entries, each with its own stated maximum and a named target, and LaunchStep gained that Target member so every line names what the operation reaches for. The stale documentation that described the deleted logging service as the live path was corrected in the automation instruction file and two capability specs, while dated analyses were left alone as records. The picture layout seed was removed so the application defaults out on first start; its helper procedure was dropped from the store and the retirement recorded."
 }

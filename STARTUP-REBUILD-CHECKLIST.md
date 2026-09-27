@@ -15,9 +15,9 @@ and the pipeline all wait on them.
 ### Subphase 0.1: Evidence
 - [x] **Documentation: Record every behaviour the startup path performs, in launch order, with file evidence.** (Ref: S13) | **Persona: Tech Lead** — verified 2026-09-25: three independent read-only sweeps (code+tests, docs/history+DB, integration/impact); 86 behaviours, 100 edge cases, 10 local settings keys, 4 unbounded waits.
 - [x] **Documentation: Record every edge case, branch, guard, retry and fallback across code, tests and documents.** (Ref: S13) | **Persona: Tech Lead** — verified 2026-09-25: 111 cases including 43 recorded only in docs, plus 12 documented contradictions.
-- [x] **Documentation: Map database artifact ownership and flag every shared artifact.** (Ref: S3.2, S3.3) | **Persona: Database Engineer** — verified 2026-09-25: 10 startup-only procedures identified; 12 shared procedures, 5 shared tables and 4 shared seeds flagged.
+- [x] **Documentation: Map database artifact ownership and flag every shared artifact.** (Ref: S3.2, S3.3) | **Persona: Database Engineer** — verified 2026-09-25: 10 startup-only procedures identified; 12 shared procedures, 5 shared tables, and 3 shared seeds with the 5 aggregate and descriptions files flagged.
 - [x] **Documentation: Write the design brief that the rebuild and this checklist both reference.** (Ref: S1) | **Persona: Tech Lead** — verified 2026-09-25: `STARTUP-REBUILD-BRIEF.md`, sections S1–S16.
-- [x] **Documentation: Lock the design decisions with the owner.** (Ref: S2) | **Persona: Tech Lead** — verified 2026-09-25: 20 decisions across three question rounds.
+- [x] **Documentation: Lock the design decisions with the owner.** (Ref: S2) | **Persona: Tech Lead** — verified 2026-09-25: 24 decisions across three question rounds.
 
 Next task: **none — this phase is complete.**
 
@@ -33,7 +33,7 @@ symbols creeping back during the rebuild.
 ### Subphase 1.1: Retired-symbol guard
 - [ ] **Testing: Add retired-symbol patterns for the entire old startup surface to `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`.** (Ref: S3.1) | **Persona: QA Engineer**
 - [ ] **Testing: Add a self-test proving each new pattern bites when its symbol is reintroduced.** (Ref: S3.1) *Depends on: the pattern-set task above* | **Persona: QA Engineer**
-- [ ] **Testing: Assert no file remains under `Module_Startup/Views` and no type remains in namespace `MTM_Waitlist.Module_Startup`.** (Ref: S3.1) *Depends on: the pattern-set task above* | **Persona: QA Engineer**
+- [ ] **Testing: Assert the removed view files are gone and no type remains in the retired `MTM_Waitlist.Module_Startup.Services` or `MTM_Waitlist.Module_Startup.ViewModels` namespaces — not that the views folder is empty, since the rebuilt surfaces live under `Module_Startup/Views`.** (Ref: S3.1) *Depends on: the pattern-set task above* | **Persona: QA Engineer**
 - [ ] **Testing: Assert no member of the removed `MTM_Waitlist.Core` startup contracts, models or options survives.** (Ref: S3.1) *Depends on: the pattern-set task above* | **Persona: QA Engineer**
 
 Next task: **Testing: Add retired-symbol patterns for the entire old startup surface to `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`.** | **Persona: QA Engineer**
@@ -102,7 +102,7 @@ Next task: **Database Migration: Delete the nine startup-only stored procedures 
 - [ ] **Documentation: Delete `STARTUP-FLOW.md`, `.html` and `.pdf`.** (Ref: S3.1) | **Persona: Tech Lead**
 - [ ] **Documentation: Rewrite the splash and sign-in steps in `.github/instructions/winui3-ui-automation.instructions.md` against the placeholder, including the now-wrong "reaches the shell with no sign-in" claim.** (Ref: S3.1) | **Persona: Tech Lead**
 - [ ] **Documentation: Update the module list in `README.md`, the startup module mentions in `.github/instructions/test-conventions.instructions.md`, and the naming-backlog report.** (Ref: S3.1) | **Persona: Tech Lead**
-- [ ] **Frontend: Remove the eight sign-out/sign-in resource keys and the fourteen `Startup_*` tooltip keys from `Resources.resw`, `TooltipResources.resw` and `TooltipResources.developer.resw`.** (Ref: S3.1) | **Persona: Frontend Engineer**
+- [ ] **Frontend: Remove the eight sign-out/sign-in resource keys and the fifteen `Startup_*` tooltip keys from `Resources.resw`, `TooltipResources.resw` and `TooltipResources.developer.resw`.** (Ref: S3.1) | **Persona: Frontend Engineer**
 - [ ] **Frontend: Remove the deleted-file names from the two `TooltipBehavior.AssociatedFiles` strings in `ShellPage.xaml` and correct the mis-pathed `StartupState.cs` entry.** (Ref: S3.1) *Depends on: the resource-key task above* | **Persona: Frontend Engineer**
 
 Next task: **Testing: Delete the startup test files and every recording fake that exists only to serve them.** | **Persona: QA Engineer**
@@ -179,7 +179,7 @@ Next task: **Testing: Rewrite `PermissionGateSiteAuditTests` so the developer ga
 - [ ] **Service Layer: Replace the settings read and write in `MTM_Waitlist.Waitlist.View/Services/LocalWaitlistMessageSeenStore.cs` (22, 26, 59, 76) with the scoped store setting.** (Ref: S11.5.1) | **Persona: Backend Engineer**
 - [ ] **Full Stack: Delete the duplicate `Feature.IgnoredLocations` read at `SettingsViewModel.cs:1288` and write at `:1357`, calling the service instead, and make the editor read-only for every role but IT Department and Developer.** (Ref: S11.5.1, S11.5.6) | **Persona: Full Stack Engineer**
 - [ ] **Full Stack: Replace the settings read and write in `MTM_Waitlist.Setup/ViewModels/SetupDunnageImageSearchDialogViewModel.cs` (23, 65, 162, 185) with the scoped store setting.** (Ref: S11.5.1) | **Persona: Full Stack Engineer**
-- [ ] **Database Migration: Confirm `sp_config_settings_values_upsert` and the scope rank function cover the plant scope these keys need, and add the seed rows they require plus the role baseline for the ignored-locations edit key.** (Ref: S11.5.1, S11.5.6) *Depends on: the seven substitutions above* | **Persona: Database Engineer**
+- [ ] **Database Migration: Confirm `sp_config_settings_upsert` and the scope rank function cover the plant scope these keys need, and add the seed rows they require plus the role baseline for the ignored-locations edit key.** (Ref: S11.5.1, S11.5.6) *Depends on: the seven substitutions above* | **Persona: Database Engineer**
 
 Next task: **Service Layer: Replace the settings read and write in `MTM_Waitlist.Core/Services/ThemeSelectorService.cs` (14, 17, 51, 63) with the scoped store setting.** | **Persona: Backend Engineer**
 
@@ -334,12 +334,12 @@ Next task: **Database Table: Add the four permission keys to the catalogue.** | 
 
 ### Subphase 7.4: Seeds and role baselines
 - [ ] **Database Migration: Baseline the four keys per role, including IT Department.** (Ref: S10, S11.5.6, S2) *Depends on: Subphase 7.3* | **Persona: Database Engineer**
-- [ ] **Database Migration: Extend the development seed so `JKoll` and `JohnK` hold Developer on both seeded machines, and a fresh store grants IT Department and Developer the four keys.** (Ref: S10, S2) *Depends on: the baseline task above* | **Persona: Database Engineer**
+- [ ] **Database Migration: Extend the development seed so `JKoll` and `JohnK` hold Developer on both seeded machines, and a fresh store grants IT Department and Developer three of the four keys and Developer alone the log-panel key.** (Ref: S10, S2) *Depends on: the baseline task above* | **Persona: Database Engineer**
 - [ ] **Testing: Confirm a fresh store seeds the keys, and that a role without them cannot use the features.** (Ref: S10, S11.5.6) *Depends on: the seed task above* | **Persona: QA Engineer**
 
 Next task: **Database Migration: Baseline the four keys per role, including IT Department.** | **Persona: Database Engineer**
 
-**GATE: an unconfigured machine stops at the setup screen, it cannot be bypassed by any input or by any code path, and the three keys are seeded and enforced.**
+**GATE: an unconfigured machine stops at the setup screen, it cannot be bypassed by any input or by any code path, and the four keys are seeded and enforced.**
 
 ---
 

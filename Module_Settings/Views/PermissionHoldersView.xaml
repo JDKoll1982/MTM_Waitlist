@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <!--
@@ -53,14 +54,15 @@
             Text="{x:Bind ViewModel.RolesHeadingText}"
             Visibility="{x:Bind ViewModel.HasRoles, Mode=OneWay}" />
 
-        <!-- The roles, each on its own line, wrapping rather than being clipped. -->
+        <!-- The roles, each on its own line and scrolled rather than clipped: a role name is never cut off, and
+             the line never grows into a second row (009 B1/B2). -->
         <ItemsControl
             AutomationProperties.AutomationId="PermissionHoldersView_Roles"
             ItemsSource="{x:Bind ViewModel.View.RoleTexts, Mode=OneWay}"
             Visibility="{x:Bind ViewModel.HasRoles, Mode=OneWay}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="x:String">
-                    <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind}" TextWrapping="Wrap" />
+                    <sharedControls:AutoScrollTextView FontSize="14" Foreground="{ThemeResource TextFillColorPrimaryBrush}" Text="{x:Bind}" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
@@ -90,30 +92,35 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock
+                        <!-- Each value is drawn by the one-line scrolling control (009 B1/B2), so a long name, role
+                             or reason scrolls its own line rather than wrapping and pushing the row down. The sizes
+                             and weights are set here because the control draws its own text and cannot inherit a
+                             TextBlock style. -->
+                        <sharedControls:AutoScrollTextView
                             Grid.Row="0"
                             Grid.Column="0"
-                            Style="{ThemeResource BodyStrongTextBlockStyle}"
-                            Text="{x:Bind DisplayName}"
-                            TextWrapping="Wrap" />
-                        <TextBlock
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                            Text="{x:Bind DisplayName}" />
+                        <sharedControls:AutoScrollTextView
                             Grid.Row="1"
                             Grid.Column="0"
-                            Style="{ThemeResource BodyTextBlockStyle}"
-                            Text="{x:Bind RoleText}"
-                            TextWrapping="Wrap" />
-                        <TextBlock
+                            FontSize="14"
+                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                            Text="{x:Bind RoleText}" />
+                        <sharedControls:AutoScrollTextView
                             Grid.Row="0"
                             Grid.Column="1"
-                            Style="{ThemeResource CaptionTextBlockStyle}"
-                            Text="{x:Bind MarkText}"
-                            TextWrapping="Wrap" />
-                        <TextBlock
+                            FontSize="12"
+                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                            Text="{x:Bind MarkText}" />
+                        <sharedControls:AutoScrollTextView
                             Grid.Row="1"
                             Grid.Column="1"
-                            Style="{ThemeResource CaptionTextBlockStyle}"
-                            Text="{x:Bind SwitchedOffText}"
-                            TextWrapping="Wrap" />
+                            FontSize="12"
+                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                            Text="{x:Bind SwitchedOffText}" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
