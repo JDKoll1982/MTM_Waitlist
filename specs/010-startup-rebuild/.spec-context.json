@@ -657,7 +657,7 @@
       "startup"
     ]
   },
-  "last_action": "Owner instructions of 2026-09-27 executed; 69 of 188 ticked; suite 1528 total with 0 failed; catalog now 17 individual operations; owner branch fast-forwarded to efb2f3e",
+  "last_action": "Blank-name identity defect fixed and verified; concerns list empty",
   "coverage": {
     "FR-028": {
       "title": "The replaced launch behaviour is not reintroduced, and a build fails if it is.",
@@ -959,6 +959,11 @@
     },
     {
       "decision": "Repurpose ops_startup_logs as the one log store rather than renaming a successor: the identifier is pinned verbatim by the spec, the table already carries correlation and chain-hash columns, and it has no writer today. Rejected a new ops_application_logs table, which renames a pinned identifier for no gain."
+    },
+    {
+      "decision": "A blank sign-in name now ends the identity in PersonIdentityService.ResolveAsync",
+      "why": "a resolve that finds nobody must not leave the previous person signed in; the store-holds-nobody path already ends it, so the two answers now agree",
+      "rejected": "leaving the early return as it was, which kept the previous identity standing"
     }
   ],
   "approach": "Delete the whole startup surface first and prove it with a placeholder window, then rebuild in place: a data-driven launch pipeline of named steps with an activity feed, two read-only identity contracts replacing StartupState, sessions on the new user_active_sessions table judged on the store clock, diagnostics on ops_startup_logs through one unconditional logging module in a new MTM_Waitlist.Logging library, and a pre-sign-in machine-setup gate that cannot be bypassed.",
@@ -2400,6 +2405,14 @@
     },
     {
       "what": "D2 closed by evidence, not code: the three library APIs were checked against official Microsoft documentation on 2026-09-27. DropOldest is documented as removing and ignoring the oldest item to make room, which is what the store writer relies on; ILoggerProvider is IDisposable with CreateLogger and Dispose; IHostedService.StopAsync is triggered on graceful shutdown, which is why the writer is a hosted service. No code change was needed. The Microsoft Learn MCP tools reported disabled although a probe proved the server healthy, so the same Microsoft Learn pages were read directly; Context7 rejected both parameter spellings and is recorded as attempted but unusable."
+    },
+    {
+      "what": "the whole test suite after the blank-name fix",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 48.6,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1507, Skipped:    46, Total:  1553, Duration: 31 s - MTM_Waitlist.Tests.dll (net10.0)"
     }
   ],
   "owner_approval": "2026-09-26: the owner approved running the destructive tasks, on the basis that git can restore the schema artifacts. This is the recorded approval T056 and the phase 2.4 and 5.6 deletion tasks were waiting on.",
