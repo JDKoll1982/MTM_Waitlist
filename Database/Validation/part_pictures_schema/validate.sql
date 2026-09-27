@@ -308,7 +308,7 @@ FROM (
                 ), 'present', 'missing'
             )
         UNION ALL
-        SELECT 'stale_routine_body', 'sp_config_images_locations_paths_move', 'body reports affected rows and honours the move flag', IF(
+        SELECT 'stale_routine_body', 'sp_config_images_locations_paths_move', 'body is the recorded-path update', IF(
                 EXISTS (
                     SELECT 1
                     FROM information_schema.routines
@@ -316,30 +316,31 @@ FROM (
                         routine_schema = DATABASE()
                         AND routine_name = 'sp_config_images_locations_paths_move'
                         AND routine_definition LIKE '%image_path%'
-                        AND routine_definition LIKE '%mtm_picture_layout_move%'
+                        AND routine_definition LIKE '%p_new_prefix%'
                 ), 'present', 'missing'
             )
         UNION ALL
-        SELECT 'stale_routine_body', 'sp_config_images_locations_insert', 'body carries the first-picture trigger', IF(
+        SELECT 'stale_routine_body', 'sp_config_images_locations_insert', 'body is the single insert that creates the row', IF(
                 EXISTS (
                     SELECT 1
                     FROM information_schema.routines
                     WHERE
                         routine_schema = DATABASE()
                         AND routine_name = 'sp_config_images_locations_insert'
-                        AND routine_definition LIKE '%trg_config_images_locations_history_on_insert%'
+                        AND routine_definition LIKE '%INSERT INTO config_images_locations%'
+                        AND routine_definition LIKE '%UTC_TIMESTAMP%'
                 ), 'present', 'missing'
             )
         UNION ALL
-        SELECT 'stale_routine_body', 'sp_config_images_locations_update', 'body carries the replacement trigger, silent during the move', IF(
+        SELECT 'stale_routine_body', 'sp_config_images_locations_update', 'body is the update that replaces the picture path', IF(
                 EXISTS (
                     SELECT 1
                     FROM information_schema.routines
                     WHERE
                         routine_schema = DATABASE()
                         AND routine_name = 'sp_config_images_locations_update'
-                        AND routine_definition LIKE '%trg_config_images_locations_history_on_update%'
-                        AND routine_definition LIKE '%mtm_picture_layout_move%'
+                        AND routine_definition LIKE '%UPDATE config_images_locations%'
+                        AND routine_definition LIKE '%updated_utc%'
                 ), 'present', 'missing'
             )
         UNION ALL
