@@ -135,16 +135,25 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_BlankSignInName_AnswersFalseWithoutReadingTheStore()
+    public async Task ResolveAsync_BlankSignInName_EndsAnyIdentityWithoutReadingTheStore()
     {
         var stub = new StubMySqlHelperServer([]);
         var person = new PersonIdentityService(stub);
+        person.Apply(42L, "JOHN", "John K", "E-1042", "developer", ["setup lead"]);
 
         Assert.IsFalse(await person.ResolveAsync("   "));
 
         // There is no person to look up, so the store is not asked: a read with nothing to match on would only
         // be a guess at which row the caller meant.
         Assert.AreEqual(0, stub.QueryCallCount);
+
+        // And the previous person does not survive an answer of "nobody", which is the same answer the store's
+        // empty read gives: resolving nothing must never leave somebody signed in.
+        Assert.IsFalse(person.IsSignedIn);
+        Assert.AreEqual(string.Empty, person.SignInName);
+        Assert.AreEqual(0, person.HeldRoleCodes.Count);
+        Assert.IsFalse(person.Holds("developer"));
+        Assert.IsFalse(person.Holds("setup lead"));
     }
 
     [TestMethod]

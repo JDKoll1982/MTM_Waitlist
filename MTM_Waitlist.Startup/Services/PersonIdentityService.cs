@@ -85,11 +85,21 @@ public sealed class PersonIdentityService : IPersonIdentity
     /// <param name="signInName">The sign-in name the credential check resolved, in the store's upper case.</param>
     /// <param name="cancellationToken">Cancels the store read.</param>
     /// <returns><see langword="true"/> when the store holds the person, otherwise <see langword="false"/>.</returns>
+    /// <remarks>
+    /// A blank name resolves nobody, so it ends any identity in force rather than leaving it standing. The answer
+    /// is "nobody is signed in" either way, and a caller that resolved nothing must never find the previous person
+    /// still there.
+    /// </remarks>
     public async Task<bool> ResolveAsync(string signInName, CancellationToken cancellationToken = default)
     {
         var normalizedSignInName = signInName?.Trim() ?? string.Empty;
         if (normalizedSignInName.Length == 0)
         {
+            // Nothing was asked for, so there is no person to resolve and no row that could answer. End the
+            // identity, which is the same answer the store's empty read gives below: a resolve that finds nobody
+            // never leaves the previous person signed in.
+            Clear();
+
             return false;
         }
 
