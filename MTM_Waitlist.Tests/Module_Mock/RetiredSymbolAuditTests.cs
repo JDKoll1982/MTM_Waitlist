@@ -136,6 +136,12 @@ public sealed class RetiredSymbolAuditTests
         // MainWindow.xaml.cs legitimately keeps an instance MainWindow_Closed of its own, so only the removed App
         // static handler is forbidden, and it is forbidden by shape rather than by name alone.
         ("retired static main-window closed handler", new Regex(@"\bstatic\s+void\s+MainWindow_Closed\b", RegexOptions.Compiled)),
+
+        // The file-based logging seam the rebuilt store-backed seam replaced. Both names are still forbidden
+        // even though T133 deletes the forwarder, its contract and the options model separately: a log service
+        // that quietly came back would satisfy neither the store-backed contract nor the no-local-log-file rule.
+        ("retired startup log-service contract", new Regex(@"\bIStartupLogService\b", RegexOptions.Compiled)),
+        ("retired startup log service", new Regex(@"\bStartupLogService\b", RegexOptions.Compiled)),
     ];
 
     /// <summary>File extensions this audit treats as code or database artifacts.</summary>
@@ -191,7 +197,7 @@ public sealed class RetiredSymbolAuditTests
         "LoginViewModel", "SplashViewModel",
         "StartupCredentialCheckResult", "StartupDatabaseOptions", "StartupDevelopmentOptions",
         "StartupPasswordResetRequirement", "StartupRegistrationRequest", "StartupResult",
-        "StartupSessionSnapshot", "StartupWindowOptions",
+        "StartupSessionSnapshot", "StartupWindowOptions", "StartupLogService",
         "LoginWindow", "LoginPage", "SplashWindow", "SplashPage", "SplashView",
     ];
 
@@ -207,7 +213,7 @@ public sealed class RetiredSymbolAuditTests
         "StartupResult", "StartupSessionSnapshot", "StartupCredentialCheckResult",
         "StartupPasswordResetRequirement", "StartupRegistrationRequest",
         "StartupDevelopmentOptions", "StartupWindowOptions", "StartupDatabaseOptions",
-        "StartupState",
+        "StartupState", "IStartupLogService",
     ];
 
     /// <summary>
@@ -445,6 +451,8 @@ public sealed class RetiredSymbolAuditTests
         ["retired splash-close member"] = "CloseSplashWindow();",
         ["retired window-closed handler"] = "SplashWindow_Closed(this, args);",
         ["retired static main-window closed handler"] = "private static void MainWindow_Closed(object sender, WindowEventArgs args)",
+        ["retired startup log-service contract"] = "public interface IStartupLogService { };",
+        ["retired startup log service"] = "public sealed class StartupLogService : BackgroundService, IStartupLogService",
     };
 
     /// <summary>

@@ -214,14 +214,117 @@ function Invoke-ValidatedCommand {
     [void]$executeNonQueryMethod.Invoke($command, @())
 }
 
+# Reads an install artifact as written. Stripping the `DELIMITER` directive and rewriting the terminator
+# belongs to statement splitting, not to reading: a body that was normalised to `END;` before splitting gets
+# cut at its own internal semicolons, so the text is passed on untouched and Split-SqlStatements honours the
+# delimiter the file declares.
 function Get-InstallSqlText {
     param([string]$Path)
 
-    $content = Get-Content -Path $Path -Raw
-    $content = $content -replace '(?im)^\s*DELIMITER.*$', ''
-    $content = $content -replace '(?m)^\s*\$\$\s*$', ''
-    $content = $content -replace 'END\s*\$\$', 'END;'
-    return $content
+    return (Get-Content -Path $Path -Raw)
+}
+
+# Splits a SQL script into individual statements at its statement delimiter.
+#
+# A naive `-split ';'` is wrong, and wrong for three separate reasons: a semicolon also occurs inside `--`
+# and `#` line comments, inside `/* */` block comments, and inside single-, double- and backtick-quoted text.
+# Splitting on one of those cuts a statement in half, and the server then rejects the half it was handed -
+# which is exactly what the comment on line 216 of Database/Seeds/seed_dev_masked_baseline/create.sql used to
+# cause. So the delimiter positions are found in a copy of the text whose comment and literal characters have
+# been masked out, and the original text is then sliced at those same offsets.
+#
+# A `DELIMITER <token>` line is a client directive rather than SQL the server parses: it switches the
+# delimiter for the statements that follow it, which is how a stored-program body keeps its own semicolons,
+# and it is dropped from the output. `DELIMITER ;` switches back.
+function Split-SqlStatements {
+    param([string]$Text)
+
+    $statements = New-Object System.Collections.Generic.List[string]
+
+    if ([string]::IsNullOrWhiteSpace($Text)) {
+        return , $statements
+    }
+
+    # Ordered so that a comment or a literal which starts earlier is consumed whole instead of being re-read
+    # from inside. `--` needs a space or a line end after it to begin a comment, which is MySQL's rule.
+    $protectedPattern = '(?s)--[ \t][^\r\n]*|--(?=\r|\n|$)|#[^\r\n]*|/\*.*?\*/' +
+    "|'(?:[^'\\]|\\.|'')*'" +
+    '|"(?:[^"\\]|\\.|"")*"' +
+    '|`(?:[^`]|``)*`'
+
+    $delimiter = ';'
+    $segment = New-Object System.Text.StringBuilder
+
+    foreach ($line in [regex]::Split($Text, '(?<=\n)')) {
+        $directive = [regex]::Match($line, '^\s*DELIMITER\s+(\S+?)\s*;?\s*$', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+
+        if ($directive.Success) {
+            foreach ($statement in (Split-SqlSegment -Text $segment.ToString() -Delimiter $delimiter -ProtectedPattern $protectedPattern)) {
+                $statements.Add($statement)
+            }
+
+            [void]$segment.Clear()
+            $delimiter = $directive.Groups[1].Value
+            continue
+        }
+
+        [void]$segment.Append($line)
+    }
+
+    foreach ($statement in (Split-SqlSegment -Text $segment.ToString() -Delimiter $delimiter -ProtectedPattern $protectedPattern)) {
+        $statements.Add($statement)
+    }
+
+    return , $statements
+}
+
+# Splits one delimiter segment. Comment and quoted-literal characters are masked in a copy of the text while
+# the length and the line breaks are kept, so a masked offset is the same offset in the SQL, and the original
+# text is sliced at each unmasked delimiter.
+function Split-SqlSegment {
+    param(
+        [string]$Text,
+        [string]$Delimiter,
+        [string]$ProtectedPattern
+    )
+
+    $statements = New-Object System.Collections.Generic.List[string]
+
+    if ([string]::IsNullOrWhiteSpace($Text)) {
+        return , $statements
+    }
+
+    $mask = [regex]::Replace($Text, $ProtectedPattern, {
+            param($match)
+
+            return ($match.Value -replace '[^\r\n]', ' ')
+        })
+
+    $start = 0
+
+    while ($true) {
+        $index = $mask.IndexOf($Delimiter, $start, [System.StringComparison]::Ordinal)
+
+        if ($index -lt 0) {
+            break
+        }
+
+        $statement = $Text.Substring($start, $index - $start).Trim()
+
+        if ($statement) {
+            $statements.Add($statement)
+        }
+
+        $start = $index + $Delimiter.Length
+    }
+
+    $tail = $Text.Substring($start).Trim()
+
+    if ($tail) {
+        $statements.Add($tail)
+    }
+
+    return , $statements
 }
 
 function Invoke-SqlStatements {
@@ -238,17 +341,37 @@ function Invoke-SqlStatements {
     }
 }
 
+# Builds a connection string for this script's own use. Two properties matter beyond what the caller
+# configured: a short timeout, so an unreachable store fails the run rather than hanging it, and
+# `AllowUserVariables`, because the seed phase executes stored-program bodies that set session variables
+# (`@mtm_picture_layout_move` in seed_picture_layout_move). Without it the connector reads an `@name` as a
+# command parameter, and nothing here passes a parameter: the variables the SQL declares are the only `@name`
+# in play, so they have to be left to the server.
+function New-ValidatedConnectionString {
+    param(
+        [string]$ConnectionString,
+        [string]$TargetDatabaseName
+    )
+
+    $builder = [Activator]::CreateInstance($builderType, @($ConnectionString))
+    $builderRuntimeType = $builder.GetType()
+    $builderRuntimeType.GetProperty('ConnectionTimeout').SetValue($builder, [uint32]10)
+    $builderRuntimeType.GetProperty('AllowUserVariables').SetValue($builder, $true)
+
+    if ($null -ne $TargetDatabaseName) {
+        $builderRuntimeType.GetProperty('Database').SetValue($builder, $TargetDatabaseName)
+    }
+
+    return $builderRuntimeType.GetProperty('ConnectionString').GetValue($builder)
+}
+
 function Install-Or-UpdateDatabase {
     param(
         [string]$ConnectionString,
         [string]$TargetDatabaseName
     )
 
-    $baseBuilder = [Activator]::CreateInstance($builderType, @($ConnectionString))
-    $baseBuilderType = $baseBuilder.GetType()
-    $baseBuilderType.GetProperty('ConnectionTimeout').SetValue($baseBuilder, [uint32]10)
-    $baseBuilderType.GetProperty('Database').SetValue($baseBuilder, '')
-    $serverConnectionString = $baseBuilderType.GetProperty('ConnectionString').GetValue($baseBuilder)
+    $serverConnectionString = New-ValidatedConnectionString -ConnectionString $ConnectionString -TargetDatabaseName ''
 
     Write-Log 'Bootstrap phase: opening server connection to create the database if needed.'
 
@@ -256,18 +379,14 @@ function Install-Or-UpdateDatabase {
     try {
         [void]$connectionType.GetMethod('Open', [Type[]]@()).Invoke($serverConnection, @())
         Write-Log 'Bootstrap phase: applying Database/Bootstrap/create_database.sql.'
-        $bootstrapStatements = (Get-InstallSqlText -Path $bootstrapCreatePath) -split ';'
+        $bootstrapStatements = Split-SqlStatements -Text (Get-InstallSqlText -Path $bootstrapCreatePath)
         Invoke-SqlStatements -Connection $serverConnection -Statements $bootstrapStatements
     }
     finally {
         $serverConnection.Dispose()
     }
 
-    $installBuilder = [Activator]::CreateInstance($builderType, @($ConnectionString))
-    $installBuilderType = $installBuilder.GetType()
-    $installBuilderType.GetProperty('ConnectionTimeout').SetValue($installBuilder, [uint32]10)
-    $installBuilderType.GetProperty('Database').SetValue($installBuilder, $TargetDatabaseName)
-    $targetConnectionString = $installBuilderType.GetProperty('ConnectionString').GetValue($installBuilder)
+    $targetConnectionString = New-ValidatedConnectionString -ConnectionString $ConnectionString -TargetDatabaseName $TargetDatabaseName
 
     $targetConnection = [Activator]::CreateInstance($connectionType, @($targetConnectionString))
     try {
@@ -276,21 +395,21 @@ function Install-Or-UpdateDatabase {
 
         foreach ($tableCreatePath in $tableCreatePaths) {
             Write-Log "Applying table file: $tableCreatePath"
-            $tableStatements = (Get-InstallSqlText -Path $tableCreatePath) -split ';'
+            $tableStatements = Split-SqlStatements -Text (Get-InstallSqlText -Path $tableCreatePath)
             Invoke-SqlStatements -Connection $targetConnection -Statements $tableStatements
         }
 
         Write-Log 'Install phase: applying function create.sql files.'
         foreach ($functionCreatePath in $functionCreatePaths) {
             Write-Log "Applying function file: $functionCreatePath"
-            $functionStatements = (Get-InstallSqlText -Path $functionCreatePath) -split ';'
+            $functionStatements = Split-SqlStatements -Text (Get-InstallSqlText -Path $functionCreatePath)
             Invoke-SqlStatements -Connection $targetConnection -Statements $functionStatements
         }
 
         Write-Log 'Install phase: applying view create.sql files.'
         foreach ($viewCreatePath in $viewCreatePaths) {
             Write-Log "Applying view file: $viewCreatePath"
-            $viewStatements = (Get-InstallSqlText -Path $viewCreatePath) -split ';'
+            $viewStatements = Split-SqlStatements -Text (Get-InstallSqlText -Path $viewCreatePath)
             Invoke-SqlStatements -Connection $targetConnection -Statements $viewStatements
         }
 
@@ -313,7 +432,7 @@ function Install-Or-UpdateDatabase {
         Write-Log 'Install phase: applying seed create.sql files.'
         foreach ($seedCreatePath in $seedCreatePaths) {
             Write-Log "Applying seed file: $seedCreatePath"
-            $seedStatements = (Get-InstallSqlText -Path $seedCreatePath) -split ';'
+            $seedStatements = Split-SqlStatements -Text (Get-InstallSqlText -Path $seedCreatePath)
             Invoke-SqlStatements -Connection $targetConnection -Statements $seedStatements
         }
     }
@@ -333,11 +452,7 @@ function Apply-Seeds {
         return
     }
 
-    $seedBuilder = [Activator]::CreateInstance($builderType, @($ConnectionString))
-    $seedBuilderType = $seedBuilder.GetType()
-    $seedBuilderType.GetProperty('ConnectionTimeout').SetValue($seedBuilder, [uint32]10)
-    $seedBuilderType.GetProperty('Database').SetValue($seedBuilder, $TargetDatabaseName)
-    $seedConnectionString = $seedBuilderType.GetProperty('ConnectionString').GetValue($seedBuilder)
+    $seedConnectionString = New-ValidatedConnectionString -ConnectionString $ConnectionString -TargetDatabaseName $TargetDatabaseName
 
     $seedConnection = [Activator]::CreateInstance($connectionType, @($seedConnectionString))
     try {
@@ -346,7 +461,7 @@ function Apply-Seeds {
 
         foreach ($seedCreatePath in $seedCreatePaths) {
             Write-Log "Applying seed file: $seedCreatePath"
-            $seedStatements = (Get-InstallSqlText -Path $seedCreatePath) -split ';'
+            $seedStatements = Split-SqlStatements -Text (Get-InstallSqlText -Path $seedCreatePath)
             Invoke-SqlStatements -Connection $seedConnection -Statements $seedStatements
         }
     }
@@ -361,10 +476,7 @@ function Test-DatabaseSchema {
         [string]$TargetDatabaseName
     )
 
-    $builder = [Activator]::CreateInstance($builderType, @($ConnectionString))
-    $builderType.GetProperty('ConnectionTimeout').SetValue($builder, [uint32]10)
-    $builderType.GetProperty('Database').SetValue($builder, $TargetDatabaseName)
-    $effectiveConnectionString = $builderType.GetProperty('ConnectionString').GetValue($builder)
+    $effectiveConnectionString = New-ValidatedConnectionString -ConnectionString $ConnectionString -TargetDatabaseName $TargetDatabaseName
 
     $connection = [Activator]::CreateInstance($connectionType, @($effectiveConnectionString))
     try {

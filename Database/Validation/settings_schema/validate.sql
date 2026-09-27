@@ -172,10 +172,15 @@ FROM (
         UNION ALL
         -- 010-startup-rebuild (task T053): the four keys the new privileged surfaces read must each carry a
         -- `role`-scoped baseline row for every role the catalogue holds, not merely for the two the contract names.
-        -- The check is written role-explicitly for that reason: it joins the four keys against the catalogue
-        -- itself, so a role added later is covered without this file being edited, and a key that answers only for
-        -- IT Department and Developer while silently refusing a role is reported rather than passing on the
-        -- strength of the rows that do exist.
+        -- The expected role set is therefore derived from `auth_roles_catalog` itself rather than written out
+        -- here, so a role added later is covered without this file being edited and the check cannot drift from
+        -- the catalogue.
+        --
+        -- One role is excluded by name: `admin` is the retired role, which `seed_role_admin_to_it_department`
+        -- replaces with `it_department` and for which `seed_permission_role_baselines` therefore writes no rows
+        -- by design. Expecting a baseline for it reports four findings that can never be satisfied - one per key
+        -- - so the check no longer expects the retired role. The exclusion is named rather than expressed as a
+        -- role list on purpose: the roles stay derived, and the single retirement is the only thing stated here.
         SELECT
             'missing_role_baseline' AS issue_type,
             CONCAT(k.setting_key, ' for role:', r.role_code) AS object_name,
@@ -193,6 +198,7 @@ FROM (
             AND v.scope_type = 'role'
             AND v.scope_key = CONCAT('role:', r.role_code)
             AND v.value_type = 'bool'
+        WHERE r.role_code <> 'admin'
     ) validation_results
 WHERE
     actual_value = 'missing';
