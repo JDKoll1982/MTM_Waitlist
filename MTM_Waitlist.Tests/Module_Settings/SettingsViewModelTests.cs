@@ -832,19 +832,10 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
     private sealed class FakeComputerRegistryService : IComputerRegistryService
     {
-        public Task<ComputerRecord?> LookupComputerAsync(string computerName, string macAddressNormalized, CancellationToken cancellationToken = default)
-            => Task.FromResult<ComputerRecord?>(null);
-
-        public Task<ComputerRecord?> LookupComputerByMacAsync(string macAddressNormalized, CancellationToken cancellationToken = default)
-            => Task.FromResult<ComputerRecord?>(null);
-
         public Task<IReadOnlyList<ComputerRecord>> GetAllComputersAsync(CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<ComputerRecord>>(Array.Empty<ComputerRecord>());
 
         public Task<ComputerRecord> UpsertComputerAsync(string computerName, string hostnameNormalized, string macAddressNormalized, string displayName, string? description, CancellationToken cancellationToken = default)
-            => Task.FromResult(new ComputerRecord());
-
-        public Task<ComputerRecord> UpdateComputerByMacAsync(string macAddressNormalized, string newComputerName, string hostnameNormalized, string displayName, string? description, CancellationToken cancellationToken = default)
             => Task.FromResult(new ComputerRecord());
 
         public Task<ComputerRecord> UpdateComputerAsync(long id, string computerName, string hostnameNormalized, string macAddressNormalized, string displayName, string? description, bool isRegistered, CancellationToken cancellationToken = default)

@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Settings.Services;
 
 namespace MTM_Waitlist.Module_Settings.ViewModels;
 

@@ -111,7 +111,7 @@ models and options deleted in T012, T013 and T014 · `MTM_Waitlist.Core/`, `Modu
 - [x] **T019** [P] Remove the deleted-file names from the two `TooltipBehavior.AssociatedFiles` strings and correct the mis-pathed `StartupState.cs` entry (checklist 2.5h). · `Module_Core/Views/ShellPage.xaml`
 
 **⟶ Wait for Wave 4 to finish, then:**
-- [ ] **T020** [P] Delete the nine startup-only stored procedures listed in the brief: `sp_server_utc_now_get`, `sp_auth_credentials_check`, `sp_auth_user_password_update`, `sp_auth_computer_registered_get`, `sp_auth_session_expiry_get`, `sp_auth_password_reset_required_get`, `sp_core_computers_registry_lookup_by_name_mac_get`, `sp_core_computers_registry_lookup_by_mac_get`, `sp_core_computers_registry_update_by_mac`, under the recorded approval the Security & Secrets constraint requires for a destructive database operation (checklist 2.4a; plan.md → Complexity Tracking). · `Database/StoredProcedures/`
+- [x] **T020** [P] Delete the nine startup-only stored procedures listed in the brief: `sp_server_utc_now_get`, `sp_auth_credentials_check`, `sp_auth_user_password_update`, `sp_auth_computer_registered_get`, `sp_auth_session_expiry_get`, `sp_auth_password_reset_required_get`, `sp_core_computers_registry_lookup_by_name_mac_get`, `sp_core_computers_registry_lookup_by_mac_get`, `sp_core_computers_registry_update_by_mac`, under the recorded approval the Security & Secrets constraint requires for a destructive database operation (checklist 2.4a; plan.md → Complexity Tracking). · `Database/StoredProcedures/`
 - [x] **T021** [P] Rework the startup schema validation, keeping only the checks that cover shared tables (checklist 2.4c). · `Database/Validation/startup_schema/validate.sql`
 
 **⟶ Wait for Wave 5 to finish, then:**
@@ -123,7 +123,7 @@ models and options deleted in T012, T013 and T014 · `MTM_Waitlist.Core/`, `Modu
 
 **⟶ Wait for Wave 7 to finish, then — tests, registry and documents (checklist 2.5):**
 - [x] **T025** [P] Delete the startup test files and every recording fake that exists only to serve them: the computer-gate, computer-registry, startup-coordinator and startup-recovery tests, the login and splash view-model tests, and the startup service tests (checklist 2.5a; the list includes `ViewModels/LoginViewModelTests.cs`, which S11.5.5 misclassifies as kept — see `specs/010-startup-rebuild/local-state-test-migration.md` §1C). · `MTM_Waitlist.Tests/Services/ComputerGateServiceTests.cs`, `MTM_Waitlist.Tests/Services/ComputerRegistryServiceTests.cs`, `MTM_Waitlist.Tests/Services/StartupCoordinatorTests.cs`, `MTM_Waitlist.Tests/Services/StartupRecoveryServiceTests.cs`, `MTM_Waitlist.Tests/ViewModels/LoginViewModelTests.cs`, `MTM_Waitlist.Tests/ViewModels/SplashViewModelTests.cs`, `MTM_Waitlist.Tests/Module_Startup/Services/SignOutServiceTests.cs`, `MTM_Waitlist.Tests/Module_Startup/Services/StartupArchiveCleanupTests.cs`, `MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs`
-- [ ] **T026** [P] Delete the two retired capability folders — `startup`, and `startup-diagnostics`, whose matched `MTM_Waitlist.Startup/Services/StartupLog*.cs` files T133 deletes; their `living-specs.yml` entries and their `capabilities/DRIFT.md` rows are retired in the close-out phase, so the registry is edited once, at re-adoption (checklist 2.5c, deliberate deferral). · `capabilities/startup/`, `capabilities/startup-diagnostics/`
+- [x] **T026** [P] Delete the two retired capability folders — `startup`, and `startup-diagnostics`, whose matched `MTM_Waitlist.Startup/Services/StartupLog*.cs` files T133 deletes; their `living-specs.yml` entries and their `capabilities/DRIFT.md` rows are retired in the close-out phase, so the registry is edited once, at re-adoption (checklist 2.5c, deliberate deferral). · `capabilities/startup/`, `capabilities/startup-diagnostics/`
 - [x] **T027** [P] Delete the retired flow documents (checklist 2.5d). · `STARTUP-FLOW.md`, `STARTUP-FLOW.html`, `STARTUP-FLOW.pdf`
 - [x] **T028** [P] Update the startup module mentions in the test-conventions instructions (checklist 2.5f). · `.github/instructions/test-conventions.instructions.md`
 
@@ -166,7 +166,7 @@ models and options deleted in T012, T013 and T014 · `MTM_Waitlist.Core/`, `Modu
 - [x] **T050** [P] Extend the log-store validation script with the four columns, the six indexes and a non-null `entry_hash` (checklist 6.1f). · `Database/Validation/`
 - [x] **T051** [P] Confirm the computer scope of `config_images_locations` can express the picture-source shape the machine configuration needs, and add whatever is missing as `create.sql` plus `rollback.sql` rather than columns on the computer registry (research.md, deferred to implementation). · `Database/StoredProcedures/`, `Database/Tables/17_config_images_locations/`
 - [x] **T052** [P] Add the four permission keys to the catalogue constants and registry, leaving `permission.settings.ignored_locations` exactly as it is (checklist 7.3a, plan D10, D11). · `MTM_Waitlist.Core/Permissions/PermissionKeys.cs`, `MTM_Waitlist.Core/Permissions/PermissionRegistry.cs`
-- [ ] **T053** [P] Baseline the four keys per role and role-explicitly: `permission.settings.machine_configuration`, `permission.settings.ignored_locations_edit` and `permission.settings.session_length` at 1 for `IT Department` and `Developer` and 0 for every other role, and `permission.settings.log_panel` at 1 for `Developer` alone, then add the plant-scope rows and the seed rows the seven preferences need, confirming the settings upsert procedure and the scope rank function cover them (checklist 7.4a, 5.1h; contract §5, plan D11). · `Database/Seeds/seed_permission_role_baselines/create.sql`, `Database/Seeds/seed_permission_role_baselines/rollback.sql`, `Database/Validation/settings_schema/validate.sql`
+- [x] **T053** [P] Baseline the four keys per role and role-explicitly: `permission.settings.machine_configuration`, `permission.settings.ignored_locations_edit` and `permission.settings.session_length` at 1 for `IT Department` and `Developer` and 0 for every other role, and `permission.settings.log_panel` at 1 for `Developer` alone, then add the plant-scope rows and the seed rows the seven preferences need, confirming the settings upsert procedure and the scope rank function cover them (checklist 7.4a, 5.1h; contract §5, plan D11). · `Database/Seeds/seed_permission_role_baselines/create.sql`, `Database/Seeds/seed_permission_role_baselines/rollback.sql`, `Database/Validation/settings_schema/validate.sql`
 - [x] **T054** [P] Extend the development seed so `JKoll` and `JohnK` hold `Developer` on both seeded machines, and a fresh store grants `permission.settings.machine_configuration`, `permission.settings.ignored_locations_edit` and `permission.settings.session_length` to `IT Department` and `Developer`, and `permission.settings.log_panel` to `Developer` alone (checklist 7.4b, plan D16; contract §5, plan D11). · `Database/Seeds/seed_dev_masked_baseline/create.sql`, `Database/Seeds/seed_dev_masked_baseline/rollback.sql`
 - [x] **T055** [P] Prove no credential, key material or remembered secret can reach the log store, and that the key file's path is the only secret-adjacent value ever written (checklist 6.1g). · `specs/010-startup-rebuild/security-review-logging.md`
 
@@ -177,7 +177,7 @@ models and options deleted in T012, T013 and T014 · `MTM_Waitlist.Core/`, `Modu
 - [x] **T059** Register the amended seeds in the seed aggregate (checklist 7.4a, 7.4b). · `Database/Seeds/AllSeeds.sql`
 
 **⟶ Wait for Wave 17 to finish, then:**
-- [ ] **T060** Delete `auth_sessions_tokens`, superseded by `user_active_sessions`, with its aggregate entries (checklist 5.6b). · `Database/Tables/05_auth_sessions_tokens/`, `Database/Tables/AllTables.sql`
+- [x] **T060** Delete `auth_sessions_tokens`, superseded by `user_active_sessions`, with its aggregate entries (checklist 5.6b). · `Database/Tables/05_auth_sessions_tokens/`, `Database/Tables/AllTables.sql`
 - [x] **T061** Delete the orphaned `core_buildings_catalog`, `core_buildings_history` and `sp_core_buildings_upsert` (checklist 5.6c). · `Database/Tables/06_core_buildings_catalog/`, `Database/Tables/07_core_buildings_history/`, `Database/StoredProcedures/`
 - [x] **T062** Update the table, procedure, function, view and seed aggregates for every deletion, and append the retired tables and procedures to the retired-objects sections of the descriptions file (checklist 5.6d; constitution III, `Database/Database-Ruleset.md`). · `Database/Tables/AllTables.sql`, `Database/StoredProcedures/AllSPs.sql`, `Database/Functions/AllFunct.sql`, `Database/Views/AllViews.sql`, `Database/Seeds/AllSeeds.sql`, `Database/Bootstrap/update_table_descriptions.sql`
 
@@ -201,9 +201,9 @@ models and options deleted in T012, T013 and T014 · `MTM_Waitlist.Core/`, `Modu
 - [x] **T071** [P] Define the step model — id, name, description, category, stated maximum wait and the best-effort marker — so the displayed count is derived rather than hard-coded (checklist 8.1a, FR-002, FR-003). · `MTM_Waitlist.Startup/Models/LaunchStep.cs`
 - [x] **T072** [P] Build the append-only activity feed with a timestamp, the step, the entry kind, the text, the target and the outcome (checklist 8.1d, FR-002). · `MTM_Waitlist.Startup/Services/LaunchActivityFeed.cs`
 - [x] **T073** [P] Build the runner that announces each step before it runs and reports started, completed and failed, and that enforces each step's stated maximum (checklist 8.1b, FR-002, FR-003). · `MTM_Waitlist.Startup/Services/LaunchStepRunner.cs`
-- [x] **T074** [P] Build the step catalog as data, with every step's stated maximum and no unbounded step, and the two best-effort steps bounded more tightly than the thirty-second ceiling (checklist 8.1a, plan D21, FR-003, SC-002). · `MTM_Waitlist.Startup/Services/LaunchStepCatalog.cs`
+- [x] **T074** [P] Build the step catalog as data, one entry per individual operation the launch performs rather than one per grouped phase — seventeen entries — with every entry's stated maximum and no unbounded entry, the two best-effort entries bounded more tightly than the thirty-second ceiling, and each entry naming the target it reaches for (checklist 8.1a, plan D21, FR-002, FR-003, SC-002). · `MTM_Waitlist.Startup/Services/LaunchStepCatalog.cs`
 - [ ] **T075** [P] Implement the machine configuration service: the configuration state with its four unconfigured reasons, the save that refuses a display name already in use, and the reset that `IMachineConfigurationService.ResetToDefaultsAsync` performs on this machine's configuration only — the mechanism, and the only code that writes these rows (plan FR-006, FR-009, FR-018; contract §1, §4). · `MTM_Waitlist.Startup/Services/MachineConfigurationService.cs`
-- [ ] **T076** [P] Build the launch steps that run before sign-in — configuration, store reachability and the machine readiness check — each announcing itself first (checklist 8.1b, FR-002). · `MTM_Waitlist.Startup/Services/ConfigurationStep.cs`, `MTM_Waitlist.Startup/Services/StoreReachabilityStep.cs`, `MTM_Waitlist.Startup/Services/MachineReadinessStep.cs`
+- [ ] **T076** [P] Build the launch steps that run before sign-in — the local settings read, store reachability, the hardware identity, the computer record, the machine configuration and the save that sets it, and the remembered sign-in (`read-local-settings`, `store-reachability`, `read-hardware-identity`, `read-computer-record`, `read-machine-configuration`, `save-machine-configuration`, `read-remembered-sign-in`) — each announcing itself first (checklist 8.1b, FR-002). · `MTM_Waitlist.Startup/Services/ConfigurationStep.cs`, `MTM_Waitlist.Startup/Services/StoreReachabilityStep.cs`, `MTM_Waitlist.Startup/Services/MachineReadinessStep.cs`
 
 **⟶ Wait for Wave 23 to finish, then:**
 - [ ] **T077** Build the launch pipeline behind a single entry point: `RunAsync` ending at exactly one of the main screens, sign-in, machine setup, a stated stop or an ended process; `RetryFromAsync` repeating the named step and what follows it only; a re-entrant entry refused; and the pipeline, not the screen, refusing to continue while the machine is unconfigured (checklist 8.3a, plan D3, FR-001, FR-006, FR-020). · `MTM_Waitlist.Startup/Services/LaunchPipeline.cs`
@@ -331,7 +331,7 @@ Registrations for this phase append to the Phase 2-owned startup DI extension.
 
 **⟶ Wait for Wave 1 to finish, then:**
 - [ ] **T115** [US3] Build the sign-in view model and the forced password change, opened only once the temporary credential has been accepted (checklist 8.4c, FR-013). · `MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs`, `MTM_Waitlist.Startup/ViewModels/PasswordChangeViewModel.cs`
-- [ ] **T116** [US3] Add the sign-in steps — sign-in, the machine gate, the forced password change and the session — each announcing itself before it runs (checklist 8.4, FR-002). · `MTM_Waitlist.Startup/Services/SignInSteps.cs`
+- [ ] **T116** [US3] Add the sign-in steps — resolving the person and their roles, checking the credential, judging the session, checking the computer against the store, checking whether a new password is needed and setting it (`resolve-person`, `resolve-roles`, `check-credential`, `judge-session`, `check-computer-against-store`, `check-temporary-credential`, `set-new-password`) — each announcing itself before it runs (checklist 8.4, FR-002). · `MTM_Waitlist.Startup/Services/SignInSteps.cs`
 
 **⟶ Wait for Wave 2 to finish, then:**
 - [ ] **T117** [US3] Fall back to the ordinary sign-in form when the key file cannot be read, recording the fault and storing nothing locally instead (checklist 8.4g, FR-014). · `MTM_Waitlist.Startup/Services/RememberedSignInService.cs`
@@ -608,8 +608,8 @@ standing until these tasks land. They are numbered last so that the identifiers 
 - [ ] **T186** [US3] Provide the process-restart path `IAppProcessRestarter` carried, so a sign-out still ends the
   session and restarts, and so a restart that fails is reported rather than leaving a half-signed-out state
   (FR-011; spec.md Edge Cases; the case T174 tests). · `MTM_Waitlist.Startup/Services/`, `ViewModels/ShellViewModel.cs`
-- [ ] **T187** Rebuild the computer-management capability inside `MTM_Waitlist.Settings` before T015 empties the project its implementation lives in, and delete `IComputerRegistryService` with it (research D30). The Settings "Computers" panel keeps listing, adding, editing and deactivating registry rows: its service is recreated at `MTM_Waitlist.Settings/Services/ComputerRegistryService.cs` over the rebuilt machine contracts — this machine's record comes from `IMachineFacts` (T038), and the fleet's list, upsert, update and delete keep the `sp_core_computers_registry_*` procedures behind that seam — and `ComputerManagementViewModel` and `ComputerEditDialogViewModel` stop injecting the deleted interface. `FakeComputerRegistryService` in the kept `SettingsViewModelTests.cs` is re-pointed at the new seam or deleted with the interface; `ComputerManagementViewModel`'s `StartupState` injection is T040's to remove (FR-022). · `MTM_Waitlist.Settings/Services/ComputerRegistryService.cs`, `MTM_Waitlist.Settings/ViewModels/ComputerManagementViewModel.cs`, `MTM_Waitlist.Settings/ViewModels/ComputerEditDialogViewModel.cs`, `MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs`, `MTM_Waitlist.Core/Contracts/Services/IComputerRegistryService.cs`
-- [ ] **T188** [US3] Re-point or retire `MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs`:
+- [x] **T187** Rebuild the computer-management capability inside `MTM_Waitlist.Settings` before T015 empties the project its implementation lives in, and delete `IComputerRegistryService` with it (research D30). The Settings "Computers" panel keeps listing, adding, editing and deactivating registry rows: its service is recreated at `MTM_Waitlist.Settings/Services/ComputerRegistryService.cs` over the rebuilt machine contracts — this machine's record comes from `IMachineFacts` (T038), and the fleet's list, upsert, update and delete keep the `sp_core_computers_registry_*` procedures behind that seam — and `ComputerManagementViewModel` and `ComputerEditDialogViewModel` stop injecting the deleted interface. `FakeComputerRegistryService` in the kept `SettingsViewModelTests.cs` is re-pointed at the new seam or deleted with the interface; `ComputerManagementViewModel`'s `StartupState` injection is T040's to remove (FR-022). · `MTM_Waitlist.Settings/Services/ComputerRegistryService.cs`, `MTM_Waitlist.Settings/ViewModels/ComputerManagementViewModel.cs`, `MTM_Waitlist.Settings/ViewModels/ComputerEditDialogViewModel.cs`, `MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs`, `MTM_Waitlist.Core/Contracts/Services/IComputerRegistryService.cs`
+- [x] **T188** [US3] Re-point or retire `MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs`:
   line 13 imports `MTM_Waitlist.Module_Startup.Services` and line 324 constructs `StartupSessionRepository`, a type
   T015 clears whose six procedures T020 deletes, so the file strands T015's green-build checkpoint. Move its session
   case onto the rebuilt session service, or record in the file why the case is retired (FR-010, FR-011). · `MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs`
@@ -700,34 +700,34 @@ Appended by `/speckit.converge` on 2026-09-27, after the Phase 2 work landed and
 was run over the specification, the plan and this file. Every item below traces to the requirement, task or
 constraint that produced it, and nothing above this heading was changed.
 
-- [ ] **T189** Add the retired static logger to the reintroduction guard, with its re-introduction sample, so that
+- [x] **T189** Add the retired static logger to the reintroduction guard, with its re-introduction sample, so that
   reintroducing it fails the build as the guard exists to do per T069, FR-028, SC-009 (partial). The guard is
   currently inconsistent with its own purpose: T069 deleted the type in the same change as two other logging
   types that both carry patterns, so this is an omission rather than a deliberate exemption.
-- [ ] **T190** Reconcile the launch-step artifacts with the shipped catalog per FR-003,
+- [x] **T190** Reconcile the launch-step artifacts with the shipped catalog per FR-003,
   `contracts/launch-step-contract.md` (contradicts). The catalog reports seventeen individual operations while
   `plan.md`, the step record in this file, and the step ids retried by T077, T121 and T125 still describe the
   eleven grouped steps those operations replaced.
-- [ ] **T191** Record the four changes that carry no task — the schema validator repair, the picture-layout seed
+- [x] **T191** Record the four changes that carry no task — the schema validator repair, the picture-layout seed
   retirement, the three documentation corrections, and the orphaned logging contract's deletion — either as
   designed work in `plan.md` or as tasks, so that every change in the tree traces to something per
   Constitution I (unrequested).
-- [ ] **T192** Add the splash-visibility requirement to `spec.md` with its acceptance criterion — every individual
+- [x] **T192** Add the splash-visibility requirement to `spec.md` with its acceptance criterion — every individual
   thing the launch processes is shown on the splash — because the catalog implements it as seventeen entries
   and no requirement states it, leaving the code ahead of the specification per the owner's instruction of
   2026-09-27 (missing).
-- [ ] **T193** Record the destructive approval for the phase 2.4 and 5.6 deletions in the plan's Complexity
+- [x] **T193** Record the destructive approval for the phase 2.4 and 5.6 deletions in the plan's Complexity
   Tracking, which is where the plan states the approval is recorded before each deletion set runs, rather than
   only in the companion ledger per Constitution: Security & Secrets, `plan.md` → Complexity Tracking (partial).
 - [ ] **T194** Record coverage entries for FR-032 to FR-038 and for all seventeen success criteria, so the
   requirement record traces the work that already exists under the two addenda and so SC-013's demand that
   every acceptance case be covered or retired can be read from the record per SC-013 (partial).
-- [ ] **T195** Add the stored procedure that returns every role a person holds and read it in
+- [x] **T195** Add the stored procedure that returns every role a person holds and read it in
   `MTM_Waitlist.Startup/Services/PersonIdentityService.cs`, so `HeldRoleCodes` stops carrying only the single
   role the existing logon read returns, which is the disclosed gap in `contracts/identity-contracts.md`
   (missing). `ResolveAsync` applies one role while `Apply` already accepts the full set, and no procedure under
   `Database` returns all of a person's assignments, so the reader is the whole of the work.
-- [ ] **T196** Correct the two documents that place the logging seam where it cannot go, so the record matches
+- [x] **T196** Correct the two documents that place the logging seam where it cannot go, so the record matches
   the tree: `contracts/logging-contract.md` section 5 and `research.md` D8 must state that the static facade
   lives in `MTM_Waitlist.Core` because the logging module already references that library, so the logging
   module would be a circular reference, and the contract's count of standalone `ILogger` call sites must be

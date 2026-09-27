@@ -27,6 +27,9 @@ the last line.
    reports that and either carries on or stops with a cause. It never waits without end.
 4. **Given** the launch has an error to report, **When** the message appears, **Then** it appears in a strip at
    the bottom of the window and does not cover the list of work.
+5. **Given** the launch is under way, **When** it performs an individual operation, **Then** that operation is
+   shown as its own line on the window, so every individual thing the launch processes is visible rather than a
+   single line standing for a group of them.
 
 ### User Story 2 - A new machine is configured deliberately, and cannot be skipped (Priority: P1)
 
@@ -266,6 +269,9 @@ computer carries the last person's choices.
   currently listed, which the panel has already bounded — as plain text that can be pasted elsewhere, carrying
   for each entry everything the store holds for it: the fault in full with its chain, the recorded context, the
   store diagnostics and the entry's place in the chain. Copying MUST write nothing to the machine.
+- **FR-039**: The launch MUST show every individual operation it processes on the launch window — each operation
+  holding its own line rather than standing behind a group's single line — so what the person watches matches
+  what the launch does.
 
 ## Key Entities
 

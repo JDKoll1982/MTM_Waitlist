@@ -25,7 +25,11 @@ surface is deleted, and a minimal placeholder window runs as the only launched s
 pipeline built.
 
 The rebuilt launch is a data-driven pipeline of named steps that announces each step before running it and
-renders an append-only activity feed, with an error toast anchored to the bottom of the window. Two read-only
+renders an append-only activity feed, with an error toast anchored to the bottom of the window. The step
+catalogue holds one entry per individual operation the launch performs rather than one per grouped phase —
+seventeen entries as shipped — so every operation is individually reportable: each carries its own stated
+maximum, its best-effort marker and the target it reaches for (the store, a share, the external system, a
+screen), and the count the window shows is derived from the list rather than stored. Two read-only
 contracts, person identity and machine facts, replace the single `StartupState` object. Sessions move into a
 new `user_active_sessions` table judged on the store's clock, remembered sign-in moves into the store encrypted
 with a pre-existing shared key read from a UNC path, and every diagnostic goes to the store on
@@ -111,7 +115,7 @@ it does not exist today, `DELETED` means it is removed.
 MTM_Waitlist.Startup/                                  # REBUILT in place, same project name and sln entry
 ├── Services/
 │   ├── LaunchPipeline.cs                              # NEW  the single entry point the host calls
-│   ├── LaunchStepCatalog.cs                           # NEW  steps as data: name, description, category
+│   ├── LaunchStepCatalog.cs                           # NEW  steps as data, one entry per operation: name, description, category, stated maximum, best-effort marker, target
 │   ├── LaunchStepRunner.cs                            # NEW  announce, run, report started/completed/failed
 │   ├── LaunchActivityFeed.cs                          # NEW  the append-only line sink the splash binds
 │   ├── MachineConfigurationService.cs                 # NEW  read/write this machine's configuration
@@ -251,6 +255,11 @@ the phase checkpoints, and the approval is recorded before each deletion set run
 startup-only procedures and at T056 for the dead-weight set. That is why the
 row above is not a second deviation.
 
+**The approval, recorded here rather than only in the companion ledger.** On 2026-09-26 the owner approved
+running the destructive tasks on the basis that git can restore the schema artifacts. The approval covers the
+phase 2.4 startup-only procedure deletions and the phase 5.6 dead-weight deletions — the two sets named above,
+at T020 and T056 — and it is the record those deletions run under.
+
 No other constitution violation is necessary. Two plan-level resolutions are worth the owner's eye even though
 neither is a violation: the ignored-locations editor gains a distinct edit key rather than narrowing the
 existing key (so FR-030 keeps holding while FR-024 is satisfied), and the remembered sign-in needs a table the
@@ -281,6 +290,20 @@ served more directly than before.
   panel's copy carries nothing beyond it. The copy also excludes clipboard history and device syncing, because a
   diagnosis names a machine and a person and both options default to on.
 
+### Changes carried without a task
+
+Four changes in this tree appear in no task's artifact list. Each was forced by work that is tasked — a
+validator run, a seed's consumer removed, the logging seam's arrival — so the task owns the run and the repair
+had nowhere to be written. They are recorded here as designed work rather than left as unattributed edits, so
+every change in the tree traces to something (Constitution I).
+
+| Change | What was changed | Why it was needed |
+|---|---|---|
+| The repository schema validator was repaired | `.github/scripts/validate-database-schema.ps1` now passes the store credential through `MYSQL_PWD` so the mysql client's password note no longer aborts the run with exit 1, no longer splits a seed file at a semicolon inside a comment, and no longer drops `fn_server_utc_now` once per procedure file; `Database/Validation/part_pictures_schema/validate.sql` stopped demanding strings that belong to the triggers and the caller rather than to the procedure bodies | The check could not exit zero while a connection string was configured, so the validator proof carried a harness fault as if it were a schema fault, and the retained clock function was being reported as removed. Both are proof-of-removal instruments for this feature |
+| The picture-layout seed was retired | `Database/Seeds/seed_picture_layout_move/` (`create.sql`, `rollback.sql`) deleted with its block in `Database/Seeds/AllSeeds.sql`, and the retirement recorded in `Database/Bootstrap/update_table_descriptions.sql` and `Database/Database-Ruleset.md` | The application now defaults the picture layout on first start, so the seed's helper procedure left the store holding an object no artifact created. Its sibling seed drops its own helper, so the asymmetry was a defect rather than a convention |
+| Three documents that named the deleted logging service were corrected | `.github/instructions/winui3-ui-automation.instructions.md`, `capabilities/startup/spec.md` and `capabilities/startup-diagnostics/spec.md` | Each described the deleted service as the live log path, which would have sent a reader to a type the tree no longer holds. Dated analyses were left alone as records; the two capability specs were deleted with the living spec in Phase 2, and the instruction file is current |
+| The orphaned logging contract was deleted | `MTM_Waitlist.Core/Contracts/Services/IStartupLogService.cs`, `MTM_Waitlist.Startup/Services/StartupLogService.cs` and `MTM_Waitlist.Tests/Services/StartupLogServiceTests.cs` | The unconditional seam in `MTM_Waitlist.Logging` replaced it and nothing constructed it, so the removal phase had left it standing as dead weight. Deleting it also closed the last reference to the file-based log path FR-025 removes |
+
 ## Delivery phases
 
 The order below is the owner's checklist order. `tasks.md` carries its content, its phases and its gates
@@ -296,7 +319,7 @@ follow from that are named in its Dependencies & Execution Order section.
 | 5. Local state removal and store foundation | The seven preferences into `config_settings_values`, the local-settings mechanism deleted, `appsettings.json` reduced, the mechanism-only tests deleted, `user_active_sessions` created, the dead-weight SQL audit | No production code references a local settings type, only connection strings and the reviewed exception remain, the schema validator passes |
 | 6. Logging module and panel | The log store on `ops_startup_logs`, the unconditional seam, the exception chain and the fingerprint it groups by, the gathered runtime, view and store context, the 489 call-site migration, the `ILogger` provider, the developer panel, the panel's copy of one entry or the listed view, the file-based path removed | A release build writes entries to the store carrying the fault whole, the panel reads, groups and filters them, a developer can copy one entry as pasteable text without writing a file, and no local log file is produced |
 | 7. Machine configuration and privileges | The pre-sign-in setup screen, the gate that unlocks it, the pipeline refusal, the abort routes, the four permission keys, the seeds | An unconfigured machine stops at setup and cannot be bypassed by any input or code path |
-| 8. The new pipeline | Steps as data, the runner and the feed, the splash and toast, the host seam, sign-in with the machine gate, forced password change, remember-me, the picture step and the verdict priming, the blocked state and targeted reset | The pipeline reaches the shell, the gate and setup in the right order, every block states its cause, no wait is unbounded |
+| 8. The new pipeline | Steps as data, one entry per operation, the runner and the feed, the splash and toast, the host seam, sign-in with the machine gate, forced password change, remember-me, the picture step and the verdict priming, the blocked state and targeted reset | The pipeline reaches the shell, the gate and setup in the right order, every block states its cause, no wait is unbounded |
 | 9. Acceptance surface | A test for every reconstructed edge case, and live runs against a fresh store, an unreachable store and a slow store | Every applicable edge case has a test, the live runs pass, the difference against the baseline is explained |
 | 10. Embed instructions and close-out | The module instruction file, living-spec re-adoption, changelog, README, the final audit | The embed guide exists, the registry matches the tree, the audit is clean |
 

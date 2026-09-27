@@ -11,6 +11,10 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IAppModuleClock, MTM_Waitlist.Module_Core.Services.AppModuleClock>();
         services.AddSingleton<SettingsModuleService>();
         services.AddSingleton<IConfigSettingsValueService, ConfigSettingsValueService>();
+
+        // The "Computers" screen's registry seam moved into this module with the launch rebuild (T187), so it
+        // is registered where its screen lives rather than in the app's own registration file.
+        services.AddSingleton<IComputerRegistryService, ComputerRegistryService>();
         services.AddImageLocationServices(configuration);
 
         // A singleton on purpose: the controls read it while a click is being handled, and the settings screen

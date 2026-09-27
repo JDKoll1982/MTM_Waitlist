@@ -54,7 +54,6 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<IIgnoredLocationsService, MTM_Waitlist.Module_Core.Services.IgnoredLocationsService>();
         services.AddSingleton<IAppProcessRestarter, MTM_Waitlist.Module_Startup.Services.AppProcessRestarter>();
         services.AddSingleton<ISignOutService, MTM_Waitlist.Module_Startup.Services.SignOutService>();
-        services.AddSingleton<IComputerRegistryService, MTM_Waitlist.Module_Startup.Services.ComputerRegistryService>();
         services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
         services.AddSingleton<IBuildingSelectionService, BuildingSelectionService>();
         services.AddTransient<INavigationViewService, NavigationViewService>();

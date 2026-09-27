@@ -31,9 +31,25 @@ public interface IPersonIdentity
 | `SignInName` | `core_users_profiles.username_normalized` | unique and upper-normalised |
 | `DisplayName` | `core_users_profiles.display_name` | the name the shell badge and the tooltips show |
 | `EmployeeNumber` | `core_users_profiles.employee_identifier` | nullable |
-| `CurrentRoleCode` | the role in force for this session | read from the store, never from a local claim |
-| `HeldRoleCodes` | every assignment for the person | the set. `Holds` is answered from this |
+| `CurrentRoleCode` | the role in force for this session (`sp_auth_user_row_get`) | read from the store, never from a local claim |
+| `HeldRoleCodes` | every assignment for the person (`sp_auth_user_roles_get`) | the set. `Holds` is answered from this |
 | `IsSignedIn` | derived | false before sign-in completes, and false after sign-out |
+
+### Store reads behind the identity
+
+Two reads supply this contract, both against `mtm_waitlist` and both keyed on the sign-in name:
+
+- `sp_auth_user_row_get` resolves one active person and the single role in force for the session, with the
+  display name and the employee identifier. It is the identity read, and it is what `CurrentRoleCode` carries.
+- `sp_auth_user_roles_get` returns every role the person holds, one row per assignment, so `HeldRoleCodes` is the
+  person's whole set rather than the one role the logon read returns.
+
+`ResolveAsync` applies both: the identity read gives the person and `CurrentRoleCode`, and the assignment read
+gives `HeldRoleCodes`. The assignment read is made only once the identity read has found the person, so a name the
+store does not hold costs one read rather than two. A person the store holds no assignment for resolves to the
+role in force alone, which `Apply` always keeps — a person is never answered as not holding the role the store
+put them in. This is the gap the concerns log disclosed and this contract previously could not promise; it is
+closed by task T195.
 
 Rules drawn from requirements:
 

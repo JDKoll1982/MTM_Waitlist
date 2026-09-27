@@ -1,60 +1,58 @@
 using MTM_Waitlist.Module_Core.Contracts.Services;
-using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Services;
 
-namespace MTM_Waitlist.Module_Startup.Services;
+namespace MTM_Waitlist.Module_Settings.Services;
 
+/// <summary>
+/// The registry seam's implementation, over the shared <c>sp_core_computers_registry_*</c> procedures the
+/// brief protects (T187; brief S3.2).
+/// </summary>
+/// <remarks>
+/// <para>
+/// <b>The procedures are the shared ones, not new ones.</b> The list, upsert, update and delete procedures
+/// survive the launch rebuild because the brief keeps them for Settings and Work Center Catalogue, so this
+/// type reads and writes through them rather than introducing a parallel set.
+/// </para>
+/// <para>
+/// <b>A save is followed by a read.</b> The upsert and update procedures report affected rows and return no
+/// row, so the row a caller receives is re-read through
+/// <c>sp_core_computers_registry_lookup_by_name_get</c>. That read resolves a machine by its computer name or
+/// its normalized hostname, which is the pair the screen actually has.
+/// </para>
+/// </remarks>
 public sealed class ComputerRegistryService : IComputerRegistryService
 {
-    private const string LookupByNameMacProcedure = "sp_core_computers_registry_lookup_by_name_mac_get";
-    private const string LookupByMacProcedure = "sp_core_computers_registry_lookup_by_mac_get";
-    private const string UpsertProcedure = "sp_core_computers_registry_upsert";
-    private const string UpdateByMacProcedure = "sp_core_computers_registry_update_by_mac";
     private const string GetAllProcedure = "sp_core_computers_registry_get_all";
+    private const string UpsertProcedure = "sp_core_computers_registry_upsert";
     private const string UpdateProcedure = "sp_core_computers_registry_update";
     private const string DeleteProcedure = "sp_core_computers_registry_delete";
+    private const string LookupByNameProcedure = "sp_core_computers_registry_lookup_by_name_get";
 
     private readonly IMySqlHelperServer _mySqlHelperServer;
 
     public ComputerRegistryService(IMySqlHelperServer mySqlHelperServer)
     {
-        _mySqlHelperServer = mySqlHelperServer;
+        _mySqlHelperServer = mySqlHelperServer ?? throw new ArgumentNullException(nameof(mySqlHelperServer));
     }
 
-    public async Task<ComputerRecord?> LookupComputerAsync(
-        string computerName,
-        string macAddressNormalized,
-        CancellationToken cancellationToken = default)
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ComputerRecord>> GetAllComputersAsync(CancellationToken cancellationToken = default)
     {
         var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
-            LookupByNameMacProcedure,
-            new Dictionary<string, object?>
-            {
-                ["p_computer_name"] = computerName.Trim(),
-                ["p_mac_address_normalized"] = macAddressNormalized.Trim(),
-            },
+            GetAllProcedure,
+            new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        return Map(rows.FirstOrDefault());
+        return rows
+            .Select(Map)
+            .Where(record => record is not null)
+            .Select(record => record!)
+            .ToList();
     }
 
-    public async Task<ComputerRecord?> LookupComputerByMacAsync(
-        string macAddressNormalized,
-        CancellationToken cancellationToken = default)
-    {
-        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
-            LookupByMacProcedure,
-            new Dictionary<string, object?>
-            {
-                ["p_mac_address_normalized"] = macAddressNormalized.Trim(),
-            },
-            MySqlDatabaseTarget.MtmWaitlist,
-            cancellationToken).ConfigureAwait(false);
-
-        return Map(rows.FirstOrDefault());
-    }
-
+    /// <inheritdoc />
     public async Task<ComputerRecord> UpsertComputerAsync(
         string computerName,
         string hostnameNormalized,
@@ -76,50 +74,11 @@ public sealed class ComputerRegistryService : IComputerRegistryService
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        var record = await LookupComputerAsync(computerName, macAddressNormalized, cancellationToken).ConfigureAwait(false);
-        return record ?? throw new InvalidOperationException("Computer upsert failed: no registry row returned.");
+        return await ReadByNameAsync(computerName, cancellationToken).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Computer upsert failed: no registry row returned.");
     }
 
-    public async Task<ComputerRecord> UpdateComputerByMacAsync(
-        string macAddressNormalized,
-        string newComputerName,
-        string hostnameNormalized,
-        string displayName,
-        string? description,
-        CancellationToken cancellationToken = default)
-    {
-        _ = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
-            UpdateByMacProcedure,
-            new Dictionary<string, object?>
-            {
-                ["p_mac_address_normalized"] = macAddressNormalized.Trim(),
-                ["p_computer_name"] = newComputerName.Trim(),
-                ["p_hostname_normalized"] = hostnameNormalized.Trim(),
-                ["p_display_name"] = displayName.Trim(),
-                ["p_description"] = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
-            },
-            MySqlDatabaseTarget.MtmWaitlist,
-            cancellationToken).ConfigureAwait(false);
-
-        var record = await LookupComputerAsync(newComputerName, macAddressNormalized, cancellationToken).ConfigureAwait(false);
-        return record ?? throw new InvalidOperationException("Computer update failed: no registry row returned.");
-    }
-
-    public async Task<IReadOnlyList<ComputerRecord>> GetAllComputersAsync(CancellationToken cancellationToken = default)
-    {
-        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
-            GetAllProcedure,
-            new Dictionary<string, object?>(),
-            MySqlDatabaseTarget.MtmWaitlist,
-            cancellationToken).ConfigureAwait(false);
-
-        return rows
-            .Select(Map)
-            .Where(record => record is not null)
-            .Select(record => record!)
-            .ToList();
-    }
-
+    /// <inheritdoc />
     public async Task<ComputerRecord> UpdateComputerAsync(
         long id,
         string computerName,
@@ -145,10 +104,11 @@ public sealed class ComputerRegistryService : IComputerRegistryService
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        var record = await LookupComputerAsync(computerName, macAddressNormalized, cancellationToken).ConfigureAwait(false);
-        return record ?? throw new InvalidOperationException("Computer update failed: no registry row returned.");
+        return await ReadByNameAsync(computerName, cancellationToken).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Computer update failed: no registry row returned.");
     }
 
+    /// <inheritdoc />
     public async Task<bool> DeleteComputerAsync(long id, CancellationToken cancellationToken = default)
     {
         var affected = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
@@ -161,6 +121,20 @@ public sealed class ComputerRegistryService : IComputerRegistryService
             cancellationToken).ConfigureAwait(false);
 
         return affected > 0;
+    }
+
+    private async Task<ComputerRecord?> ReadByNameAsync(string name, CancellationToken cancellationToken)
+    {
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            LookupByNameProcedure,
+            new Dictionary<string, object?>
+            {
+                ["p_name"] = name.Trim(),
+            },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        return Map(rows.FirstOrDefault());
     }
 
     private static ComputerRecord? Map(IReadOnlyDictionary<string, object?>? row)

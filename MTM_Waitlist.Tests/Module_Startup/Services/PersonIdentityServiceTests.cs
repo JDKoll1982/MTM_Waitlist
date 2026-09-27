@@ -28,6 +28,7 @@ namespace MTM_Waitlist.Tests.Module_Startup.Services;
 public sealed class PersonIdentityServiceTests
 {
     private const string IdentityProcedure = "sp_auth_user_row_get";
+    private const string RolesProcedure = "sp_auth_user_roles_get";
 
     [TestMethod]
     public void ANewService_ReportsNobodySignedIn()
@@ -157,18 +158,23 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_Row_AppliesThePersonTheStoreReports()
+    public async Task ResolveAsync_Row_AppliesThePersonTheStoreReportsAndEveryHeldRole()
     {
-        var stub = new StubMySqlHelperServer([PersonRow("role:developer")]);
+        var stub = new StubMySqlHelperServer(
+            [PersonRow("role:developer")],
+            [RoleRow("role:developer"), RoleRow("role:setup_lead")]);
         var person = new PersonIdentityService(stub);
 
         var resolved = await person.ResolveAsync("  john  ");
 
         Assert.IsTrue(resolved);
-        Assert.AreEqual(IdentityProcedure, stub.LastStoredProcedureName);
+        CollectionAssert.AreEqual(
+            new[] { IdentityProcedure, RolesProcedure },
+            stub.StoredProcedureNamesCalled,
+            "the identity read resolves the person and the assignment read returns the held set");
         Assert.AreEqual(MySqlDatabaseTarget.MtmWaitlist, stub.LastDatabaseTarget);
         Assert.AreEqual("john", stub.LastParameters["p_username"], "the name is matched trimmed");
-        Assert.AreEqual(1, stub.QueryCallCount);
+        Assert.AreEqual(2, stub.QueryCallCount);
 
         Assert.IsTrue(person.IsSignedIn);
         Assert.AreEqual(42L, person.UserId);
@@ -177,6 +183,37 @@ public sealed class PersonIdentityServiceTests
         Assert.AreEqual("E-1042", person.EmployeeNumber);
         Assert.AreEqual("role:developer", person.CurrentRoleCode);
         Assert.IsTrue(person.Holds("developer"), "the prefix the store returned is not part of the held code");
+        Assert.IsTrue(person.Holds("setup_lead"), "every assignment is held, not only the role in force");
+    }
+
+    [TestMethod]
+    public async Task ResolveAsync_WhenTheStoreHoldsNoAssignment_HoldsOnlyTheRoleInForce()
+    {
+        // An inner-joined assignment read answers nothing for a person with no assignment, and the identity read
+        // still puts one role in force. The gate must admit that role and nothing else.
+        var stub = new StubMySqlHelperServer([PersonRow("role:developer")]);
+        var person = new PersonIdentityService(stub);
+
+        Assert.IsTrue(await person.ResolveAsync("john"));
+
+        Assert.AreEqual(2, stub.QueryCallCount, "the assignment read is still made when it answers nothing");
+        Assert.AreEqual(1, person.HeldRoleCodes.Count);
+        Assert.IsTrue(person.Holds("developer"));
+        Assert.IsFalse(person.Holds("setup_lead"));
+    }
+
+    [TestMethod]
+    public async Task ResolveAsync_IgnoresAnAssignmentRowWithNoRoleCode()
+    {
+        var stub = new StubMySqlHelperServer(
+            [PersonRow("role:developer")],
+            [RoleRow(string.Empty), RoleRow("role:setup_lead")]);
+        var person = new PersonIdentityService(stub);
+
+        Assert.IsTrue(await person.ResolveAsync("john"));
+
+        Assert.AreEqual(2, person.HeldRoleCodes.Count, "the role in force joins the one coded assignment");
+        Assert.IsTrue(person.Holds("setup_lead"));
     }
 
     [TestMethod]
@@ -218,17 +255,35 @@ public sealed class PersonIdentityServiceTests
         ["role_code"] = roleCode,
     };
 
+    /// <summary>One assignment row as the roles read returns it, in the column names the mapping reads.</summary>
+    private static Dictionary<string, object?> RoleRow(string roleCode) => new()
+    {
+        ["role_code"] = roleCode,
+        ["role_name"] = "Role",
+        ["role_rank"] = 0,
+        ["assigned_utc"] = "2026-01-01 00:00:00",
+    };
+
     /// <summary>
     /// Records what it was asked for and answers with the rows it was built with, so the seam can be read back
     /// without a database.
     /// </summary>
     private sealed class StubMySqlHelperServer : IMySqlHelperServer
     {
-        private readonly IReadOnlyList<Dictionary<string, object?>> _rows;
+        private readonly IReadOnlyList<Dictionary<string, object?>> _identityRows;
+        private readonly IReadOnlyList<Dictionary<string, object?>> _rolesRows;
 
-        public StubMySqlHelperServer(IReadOnlyList<Dictionary<string, object?>> rows) => _rows = rows;
+        public StubMySqlHelperServer(
+            IReadOnlyList<Dictionary<string, object?>> identityRows,
+            IReadOnlyList<Dictionary<string, object?>>? rolesRows = null)
+        {
+            _identityRows = identityRows;
+            _rolesRows = rolesRows ?? [];
+        }
 
         public int QueryCallCount { get; private set; }
+
+        public List<string> StoredProcedureNamesCalled { get; } = [];
 
         public string? LastStoredProcedureName { get; private set; }
 
@@ -244,11 +299,17 @@ public sealed class PersonIdentityServiceTests
             CancellationToken cancellationToken = default)
         {
             QueryCallCount++;
+            StoredProcedureNamesCalled.Add(storedProcedureName);
             LastStoredProcedureName = storedProcedureName;
             LastParameters = parameters;
             LastDatabaseTarget = databaseTarget;
 
-            return Task.FromResult(_rows);
+            // The identity read and the assignment read answer different shapes, so the stub answers whichever
+            // one was asked for rather than handing both the same rows.
+            return Task.FromResult(
+                string.Equals(storedProcedureName, RolesProcedure, StringComparison.Ordinal)
+                    ? _rolesRows
+                    : _identityRows);
         }
 
         public Task<int> ExecuteStoredProcedureNonQueryAsync(
@@ -263,7 +324,7 @@ public sealed class PersonIdentityServiceTests
             IReadOnlyDictionary<string, object?> parameters,
             MySqlDatabaseTarget databaseTarget,
             CancellationToken cancellationToken = default)
-            => Task.FromResult(_rows);
+            => Task.FromResult(_identityRows);
 
         public Task<int> ExecuteSqlNonQueryAsync(
             string sql,

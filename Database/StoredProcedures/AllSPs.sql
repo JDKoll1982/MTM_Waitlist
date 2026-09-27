@@ -490,6 +490,43 @@ END$$
 
 DELIMITER ;
 
+-- Stored Procedure: sp_auth_user_roles_get
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T195)
+--
+-- Purpose: return every role a named person holds, one row per assignment, so the identity contract's
+--          `HeldRoleCodes` is the person's whole set rather than the single role `sp_auth_user_row_get` puts in
+--          force. Closes the held-roles gap disclosed in the concerns log.
+--
+-- Contract:
+--   IN  p_username  VARCHAR(128)   the sign-in name as the caller holds it, upper-normalised in the store
+--
+--   OUT zero or more rows, ordered by the assignment moment descending then code ascending:
+--     role_code, role_name, role_rank, assigned_utc
+--
+-- It is read-only: a read returns rows and takes no OUT parameter. It owns no data, so a reversal cannot lose a
+-- row. An inner join on the assignments is deliberate: a person with no assignment holds no role, so the honest
+-- answer to that is zero rows rather than a row with a blank code. The retired `admin` code is deliberately not
+-- filtered, because `HeldRoleCodes` is defined as "every assignment for the person".
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_roles_get;
+
+CREATE PROCEDURE sp_auth_user_roles_get(
+    IN p_username VARCHAR(128)
+)
+SELECT COALESCE(r.role_code, '') AS role_code,
+       COALESCE(r.role_name, '') AS role_name,
+       COALESCE(r.role_rank, 0) AS role_rank,
+       ra.assigned_utc AS assigned_utc
+FROM core_users_profiles u
+JOIN auth_roles_assignments ra ON ra.user_id = u.id
+JOIN auth_roles_catalog r ON r.id = ra.role_id
+WHERE u.username_normalized = p_username
+  AND u.is_active = 1
+ORDER BY ra.assigned_utc DESC, r.role_code ASC;
+
 -- Stored Procedure: sp_auth_user_row_get
 -- Engine: MySQL 5.7
 -- Feature: 001-module-mock-visual-fallback (task T093); extended by
@@ -717,6 +754,56 @@ ON DUPLICATE KEY UPDATE
     is_active = 1,
     updated_by_user_id = VALUES(updated_by_user_id),
     updated_utc = UTC_TIMESTAMP();
+
+-- Stored Procedure: sp_config_images_locations_computer_sources_all_get
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T075)
+--
+-- Purpose: this machine's picture sources *including the ones that have been withdrawn*, so the readiness check
+--          can tell "never given its folders" apart from "its folders were removed" (FR-004, FR-009).
+--
+-- Contract:
+--   IN  p_computer_id  BIGINT  the machine, from `core_computers_registry.id`
+--   OUT zero to three rows: source_kind, image_path, is_active — live rows first, then by source kind
+--
+-- Why this exists beside sp_config_images_locations_computer_sources_get
+-- ---------------------------------------------------------------------
+-- That read filters `is_active = 1`, because the machine's *current* folders are the live ones. The diagnosis
+-- needs a second and different answer: whether this machine was ever given folders at all. A machine with no
+-- rows has never been configured; a machine whose rows have all been withdrawn had a configuration that was
+-- removed; and only a read that returns the withdrawn rows can tell those two apart. Adding an `is_active`
+-- filter here, or a second `_get` that duplicated this one with different WHERE clause, would collapse the two
+-- answers into one and make FR-004's "specific to the cause" impossible to honour.
+--
+-- It reads one machine's rows and only that machine's. `computer_id` is the machine column T051 added, and every
+-- row in the `computer` scope carries it, so no identifier is parsed here to work out whose row it is looking at.
+-- `scope = 'computer'` is kept as well, so a future scope that happened to use a machine id cannot leak into this
+-- answer.
+--
+-- `source_kind` is derived from the item id exactly as the `_get` read derives it — the shape is documented on
+-- the table and is `<computer_id>:<source_kind>` — so the two reads cannot disagree about a row's kind.
+--
+-- This is a read and returns a result set. It owns no data, so its rollback drops nothing but the routine.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_config_images_locations_computer_sources_all_get;
+
+CREATE PROCEDURE sp_config_images_locations_computer_sources_all_get(
+    IN p_computer_id BIGINT
+)
+SELECT
+    SUBSTRING_INDEX(i.scope_item_id, ':', -1) AS source_kind,
+    i.image_path,
+    i.is_active
+FROM
+    config_images_locations i
+WHERE
+    i.scope = 'computer'
+    AND i.computer_id = p_computer_id
+ORDER BY
+    i.is_active DESC,
+    SUBSTRING_INDEX(i.scope_item_id, ':', -1);
 
 -- Stored Procedure: sp_config_images_locations_computer_sources_get
 -- Engine: MySQL 5.7
@@ -2468,6 +2555,47 @@ CREATE PROCEDURE sp_core_computers_registry_delete(
 DELETE FROM core_computers_registry
 WHERE id = p_id;
 
+-- Stored Procedure: sp_core_computers_registry_display_name_get
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T075)
+--
+-- Purpose: answer which machine already holds a display name, so a save can ask for a different one instead of
+--          colliding on the store's unique key, and a reset can refuse before it writes anything.
+--
+-- Contract:
+--   IN  p_display_name  VARCHAR(128)   the name being claimed (column width from core_computers_registry)
+--   OUT zero or one row: id, computer_name, display_name, is_registered
+--
+-- At most one row can be returned, and that is a fact about the schema rather than about this read:
+-- `uq_core_computers_registry_display_name` makes the column unique, so the `LIMIT 1` is there to keep the answer
+-- unambiguous rather than to break a tie.
+--
+-- The read is deliberately keyed on the name and not on the machine. A caller asking "is this name free" knows
+-- the name it wants but may not yet have a row at all — a first save creates one — and comparing against the
+-- machine it thinks it is would answer the wrong question: the interesting case is precisely the name belonging
+-- to a *different* machine, which is what a machine-scoped comparison would miss.
+--
+-- `id` is returned so the caller can tell "the name is mine already" (rewriting the same name onto the same
+-- machine, which is not a collision) from "the name is somebody else's" (a refusal).
+--
+-- This is a read and returns a result set. It owns no data, so its rollback drops nothing but the routine.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_display_name_get;
+
+CREATE PROCEDURE sp_core_computers_registry_display_name_get(
+    IN p_display_name VARCHAR(128)
+)
+SELECT
+    id,
+    computer_name,
+    display_name,
+    is_registered
+FROM core_computers_registry
+WHERE display_name = p_display_name
+LIMIT 1;
+
 -- Stored Procedure: sp_core_computers_registry_get_all
 -- Engine: MySQL 5.7
 -- Feature: 001-module-mock-visual-fallback (task T092)
@@ -2497,39 +2625,6 @@ SELECT
     is_registered
 FROM core_computers_registry
 ORDER BY display_name ASC, computer_name ASC;
-
--- Stored Procedure: sp_core_computers_registry_lookup_by_mac_get
--- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T092)
---
--- Purpose: find the most recently updated registry row for a MAC address, whatever name it currently holds.
---          Replaces the inline SELECT in ComputerRegistryService.LookupComputerByMacAsync (FR-015).
---
--- Contract:
---   IN  p_mac_address_normalized  VARCHAR(64)
---   OUT zero or one row: id, computer_name, display_name, description, mac_address_normalized, is_registered
---       (newest updated_utc first — the same tie-break the inline statement used, so a machine that was
---        renamed resolves to its current row rather than an older one)
--- ============================================================
-
-USE mtm_waitlist;
-
-DROP PROCEDURE IF EXISTS sp_core_computers_registry_lookup_by_mac_get;
-
-CREATE PROCEDURE sp_core_computers_registry_lookup_by_mac_get(
-    IN p_mac_address_normalized VARCHAR(64)
-)
-SELECT
-    id,
-    computer_name,
-    display_name,
-    description,
-    mac_address_normalized,
-    is_registered
-FROM core_computers_registry
-WHERE mac_address_normalized = p_mac_address_normalized
-ORDER BY updated_utc DESC
-LIMIT 1;
 
 -- Stored Procedure: sp_core_computers_registry_lookup_by_name_get
 -- Engine: MySQL 5.7
@@ -2578,42 +2673,6 @@ FROM core_computers_registry
 WHERE computer_name = p_name
    OR hostname_normalized = p_name
 ORDER BY CASE WHEN computer_name = p_name THEN 0 ELSE 1 END
-LIMIT 1;
-
--- Stored Procedure: sp_core_computers_registry_lookup_by_name_mac_get
--- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T092)
---
--- Purpose: find the registry row for one exact (computer_name, mac_address_normalized) pair — the identity a
---          logon presents. Replaces the inline SELECT in ComputerRegistryService.LookupComputerAsync (FR-015).
---
--- Contract:
---   IN  p_computer_name           VARCHAR(128)  column width from core_computers_registry
---   IN  p_mac_address_normalized  VARCHAR(64)
---   OUT zero or one row: id, computer_name, display_name, description, mac_address_normalized, is_registered
---
--- No TRIM here: the caller already trims both values, so adding it would only hide a caller that stopped
--- doing so. The predicate is otherwise byte-for-byte the statement this replaces.
--- ============================================================
-
-USE mtm_waitlist;
-
-DROP PROCEDURE IF EXISTS sp_core_computers_registry_lookup_by_name_mac_get;
-
-CREATE PROCEDURE sp_core_computers_registry_lookup_by_name_mac_get(
-    IN p_computer_name VARCHAR(128),
-    IN p_mac_address_normalized VARCHAR(64)
-)
-SELECT
-    id,
-    computer_name,
-    display_name,
-    description,
-    mac_address_normalized,
-    is_registered
-FROM core_computers_registry
-WHERE computer_name = p_computer_name
-  AND mac_address_normalized = p_mac_address_normalized
 LIMIT 1;
 
 -- Stored Procedure: sp_core_computers_registry_registered_get
@@ -2691,47 +2750,6 @@ SET computer_name = p_computer_name,
     is_registered = p_is_registered,
     updated_utc = UTC_TIMESTAMP()
 WHERE id = p_id;
-
--- Stored Procedure: sp_core_computers_registry_update_by_mac
--- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T092)
---
--- Purpose: follow a machine that was renamed — update the newest row for a MAC address. Replaces the inline
---          UPDATE in ComputerRegistryService.UpdateComputerByMacAsync (FR-015).
---
--- Contract:
---   IN  p_mac_address_normalized   VARCHAR(64)
---   IN  p_computer_name            VARCHAR(128)
---   IN  p_hostname_normalized      VARCHAR(255)
---   IN  p_display_name             VARCHAR(128)
---   IN  p_description              VARCHAR(255)   NULL when the caller has no description
---
--- `ORDER BY id DESC LIMIT 1` is kept deliberately: a MAC can legitimately have more than one row (renames,
--- reimages), and the caller's intent is to move the newest one. `mac_address_normalized` and `is_registered`
--- are not touched — the statement this replaces did not touch them either, and rewriting the MAC here would
--- break the identity the row is being found by.
--- ============================================================
-
-USE mtm_waitlist;
-
-DROP PROCEDURE IF EXISTS sp_core_computers_registry_update_by_mac;
-
-CREATE PROCEDURE sp_core_computers_registry_update_by_mac(
-    IN p_mac_address_normalized VARCHAR(64),
-    IN p_computer_name VARCHAR(128),
-    IN p_hostname_normalized VARCHAR(255),
-    IN p_display_name VARCHAR(128),
-    IN p_description VARCHAR(255)
-)
-UPDATE core_computers_registry
-SET computer_name = p_computer_name,
-    hostname_normalized = p_hostname_normalized,
-    display_name = p_display_name,
-    description = p_description,
-    updated_utc = UTC_TIMESTAMP()
-WHERE mac_address_normalized = p_mac_address_normalized
-ORDER BY id DESC
-LIMIT 1;
 
 -- Stored Procedure: sp_core_computers_registry_upsert
 -- Engine: MySQL 5.7
@@ -2836,6 +2854,139 @@ WHERE u.employee_identifier IS NOT NULL
   AND u.employee_identifier = p_employee_identifier
 ORDER BY u.is_active DESC, u.id ASC
 LIMIT 1;
+
+-- Stored Procedure: sp_machine_configuration_reset
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T075)
+--
+-- Purpose: restore this machine's configuration to its defaults, and only the parts it is told are broken
+--          (FR-018, FR-019; contracts/machine-configuration-contract.md section 4).
+--
+-- Contract:
+--   IN  p_computer_id             BIGINT        the machine, from `core_computers_registry.id`
+--   IN  p_actor_user_id           BIGINT        the person driving the reset; NULL when there is none
+--   IN  p_default_display_name    VARCHAR(128)  the name a reset display name is restored to
+--   IN  p_reset_display_name      TINYINT       1 to restore the display name, 0 to leave it
+--   IN  p_reset_description       TINYINT       1 to clear the description, 0 to leave it
+--   IN  p_reset_picture_sources   TINYINT       1 to withdraw this machine's picture sources, 0 to leave them
+--   IN  p_reset_scoped_preferences TINYINT      1 to remove this machine's scoped preference rows, 0 to leave them
+--   OUT the affected-row count, through the non-query seam. A reset that matched nothing is a successful no-op,
+--       exactly like the other writes in this repository.
+--
+-- One procedure rather than three, and why
+-- ----------------------------------------
+-- A reset spans three tables — `core_computers_registry` for the identity half, `config_images_locations` for the
+-- picture sources, and `config_settings_values` for the machine's scoped preferences — and a reset that stopped
+-- half way would leave a machine in a state none of the three can express on its own: a name with no folders, or
+-- folders with no name, which the readiness check would have to call "removed" when nobody removed anything. So
+-- the three writes are one transaction behind one call, and this procedure is the single writer of a machine's
+-- configuration reset. Its name is descriptive rather than table-prefixed for that reason: there is no one table
+-- it belongs to. (The repository's procedure names are lower snake_case and within the 64-character limit; no
+-- banned term appears in this one.)
+--
+-- What it may never touch, enforced by the WHERE clauses and not by convention
+-- -------------------------------------------------------------------------
+-- Every statement below is filtered to `p_computer_id`:
+--   * `core_computers_registry` by `id`, so no other machine's name or description can be reached;
+--   * `config_images_locations` by `computer_id` (and `scope = 'computer'`, so a future scope carrying a machine
+--     id cannot be caught), so no other machine's folders are withdrawn;
+--   * `config_settings_values` by `computer_id`, so no other machine's preference — and no person-scoped or
+--     role-scoped row, which carry a NULL `computer_id` — is removed.
+-- Nothing here reads or writes a person, a role, a permission, a session or a log entry. In particular it does
+-- not delete the registry row itself: that row is also referenced by `user_active_sessions` and
+-- `auth_remembered_sign_ins` through foreign keys that would refuse the delete, and clearing either of those is
+-- explicitly outside what a reset may do (section 4, "must never touch … any session").
+--
+-- Why the display name is restored rather than emptied
+-- ---------------------------------------------------
+-- `core_computers_registry.display_name` is NOT NULL and carries `uq_core_computers_registry_display_name`, so it
+-- cannot be emptied: a second machine restored the same way would collide on that key and the reset would fail.
+-- The default this procedure restores is therefore the machine's own name, which is what it is known by before
+-- anybody gives it a friendlier one and what machine setup pre-fills. The caller checks the default is free
+-- before calling here (sp_core_computers_registry_display_name_get), so a taken default is a clean refusal in the
+-- application rather than a duplicate-key error raised out of a write.
+--
+-- Why picture sources are withdrawn rather than deleted
+-- ----------------------------------------------------
+-- `is_active = 0` is this table's own word for a withdrawn override, and it is what keeps the three rows from
+-- being re-inserted as duplicates: `uq_config_images_locations_scope_item` spans (scope, item id) regardless of
+-- `is_active`, so a machine that is set up again has its three rows replaced in place and reactivated by
+-- sp_config_images_locations_computer_sources_set. The withdrawn rows are also what make the readiness check
+-- answer "configuration removed" rather than "never configured" for this machine (FR-009), which is the honest
+-- report of what a reset just did.
+--
+-- Why the scoped-preference delete is safe
+-- ----------------------------------------
+-- `config_settings_history.config_setting_id` references `config_settings_values.id`, and the foreign key has no
+-- ON DELETE rule, so a value row named by a history row cannot be removed. The only writer of that history table
+-- is sp_config_permissions_user_set, and it writes `scope_type = 'user'` rows with a NULL `computer_id`. A row
+-- scoped to a machine therefore cannot be named by a history row, and this delete cannot silently destroy an
+-- audit record. If that ever changed, the foreign key would refuse the delete loudly here rather than the record
+-- being lost — which is the safe direction for that to fail in.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_machine_configuration_reset;
+
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_machine_configuration_reset(
+    IN p_computer_id BIGINT,
+    IN p_actor_user_id BIGINT,
+    IN p_default_display_name VARCHAR(128),
+    IN p_reset_display_name TINYINT,
+    IN p_reset_description TINYINT,
+    IN p_reset_picture_sources TINYINT,
+    IN p_reset_scoped_preferences TINYINT
+)
+BEGIN
+    DECLARE v_now_utc DATETIME;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    SET v_now_utc = fn_server_utc_now();
+
+    START TRANSACTION;
+
+    IF p_reset_picture_sources = 1 THEN
+        UPDATE config_images_locations
+        SET is_active = 0,
+            updated_by_user_id = p_actor_user_id,
+            updated_utc = v_now_utc
+        WHERE scope = 'computer'
+          AND computer_id = p_computer_id
+          AND is_active = 1;
+    END IF;
+
+    IF p_reset_display_name = 1 OR p_reset_description = 1 THEN
+        UPDATE core_computers_registry
+        SET display_name = CASE
+                WHEN p_reset_display_name = 1 THEN p_default_display_name
+                ELSE display_name
+            END,
+            description = CASE
+                WHEN p_reset_description = 1 THEN NULL
+                ELSE description
+            END,
+            updated_utc = v_now_utc
+        WHERE id = p_computer_id;
+    END IF;
+
+    IF p_reset_scoped_preferences = 1 THEN
+        DELETE FROM config_settings_values
+        WHERE computer_id = p_computer_id;
+    END IF;
+
+    COMMIT;
+END$$
+
+DELIMITER ;
 
 -- Stored Procedure: sp_ops_startup_logs_filter
 -- Engine: MySQL 5.7

@@ -35,6 +35,13 @@
 --   and `permission.settings.session_length` ship to IT Department and Developer, and
 --   `permission.settings.log_panel` to Developer alone. Their nine rows each are at the end of this file.
 --
+--   The same task (T053) also writes the two plant-owned *values*, which are not permissions and are not
+--   role-scoped: the list of locations to hide (`Feature.IgnoredLocations`) and the session length. Both belong
+--   to the whole plant, which this store spells `all_users` — `fn_config_settings_scope_rank` ranks it 2 and
+--   `sp_config_settings_upsert` writes it with `scope_key = 'all_users'` — so both are in this file as their own
+--   `all_users` rows at the very end. The five person-owned preferences need no row here: a person's answer is
+--   written the first time they choose one, and no row means the shipped default.
+--
 --   `material_handler_lead` appears in none of the retired lists, so its whole row is stated: the worker level,
 --   plus handling requests and the service cache refresh, and nothing else. It is deliberately NOT granted the
 --   ignored-locations feature although a plain worker in a production role is. Nobody holds the role on ship
@@ -372,5 +379,48 @@ VALUES
     (UUID(), 'permission.settings.session_length', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
 ON DUPLICATE KEY UPDATE
     setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+-- The plant's list of locations to hide (FR-024). The value is the normalized, uppercase, comma-separated form
+-- `IgnoredLocationsService` returns, so the store holds the same shape the code compares against rather than a
+-- second shape that has to be parsed back. `value_type` is `text`, which is the vocabulary this table already
+-- uses for a readable value; no new type is introduced.
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'Feature.IgnoredLocations', 'all_users', 'all_users', 'WC,NCM,V-WC,NCM-VITS,SHIP', 'text', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value = VALUES(setting_value),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+-- The session length (FR-029, research D17): eight hours, held against the plant and read when a session row is
+-- written. Integer hours, so the value travels in the column the rank function and the effective-settings read
+-- already project.
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_int,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'sessions.length_hours', 'all_users', 'all_users', 8, 'int', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_int = VALUES(setting_value_int),
     value_type = VALUES(value_type),
     updated_utc = VALUES(updated_utc);

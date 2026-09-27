@@ -199,6 +199,25 @@ FROM (
             AND v.scope_key = CONCAT('role:', r.role_code)
             AND v.value_type = 'bool'
         WHERE r.role_code <> 'admin'
+        UNION ALL
+        -- 010-startup-rebuild (task T053): the two plant-owned preference values must each carry an `all_users`
+        -- row, which is the scope `fn_config_settings_scope_rank` ranks 2 and `sp_config_settings_upsert` writes
+        -- with `scope_key = 'all_users'`. The value type is pinned as well, because a row written into the wrong
+        -- column is one the effective-settings read cannot answer from even though the row exists.
+        SELECT
+            'missing_plant_preference' AS issue_type,
+            p.setting_key AS object_name,
+            CONCAT(p.expected_value_type, '-valued row at scope all_users') AS expected_value,
+            IF(v.id IS NULL, 'missing', 'present') AS actual_value
+        FROM (
+            SELECT 'Feature.IgnoredLocations' AS setting_key, 'text' AS expected_value_type
+            UNION ALL SELECT 'sessions.length_hours', 'int'
+        ) AS p
+        LEFT JOIN config_settings_values AS v
+            ON v.setting_key = p.setting_key
+            AND v.scope_type = 'all_users'
+            AND v.scope_key = 'all_users'
+            AND v.value_type = p.expected_value_type
     ) validation_results
 WHERE
     actual_value = 'missing';

@@ -646,6 +646,69 @@ DEALLOCATE PREPARE stmt;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
+-- sp_auth_user_roles_get - feature 010-startup-rebuild (task T195)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the read is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_auth_user_roles_get/create.sql, with its rollback beside it,
+--     and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it reads: the existing auth_roles_assignments joined to auth_roles_catalog for one active person, one
+--     row per assignment. It owns no data and it drops cleanly.
+--   Why it exists: it closes the held-roles gap on the identity contract. sp_auth_user_row_get resolves the
+--     person and the single role in force; this read returns every assignment, so IPersonIdentity.HeldRoleCodes
+--     is the person's whole set rather than the one role the logon read happens to return.
+
+-- ============================================================
+-- sp_config_images_locations_computer_sources_all_get - feature 010-startup-rebuild (task T075)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the read is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_config_images_locations_computer_sources_all_get/create.sql,
+--     with its rollback beside it, and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it reads: one machine's picture-source rows in `config_images_locations` at `computer` scope, withdrawn
+--     ones included, where the existing `..._computer_sources_get` read filters to live rows only.
+--   Why it exists: the readiness check has to tell "this machine was never given its folders" apart from "its
+--     folders were removed", because the two are different unconfigured reasons and the remedy offered differs
+--     (FR-004, FR-009). Only a read that returns the withdrawn rows can tell them apart.
+
+-- ============================================================
+-- sp_core_computers_registry_display_name_get - feature 010-startup-rebuild (task T075)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the read is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_core_computers_registry_display_name_get/create.sql, with its
+--     rollback beside it, and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it reads: the one row `uq_core_computers_registry_display_name` allows to hold a given display name.
+--   Why it exists: a machine save must ask for a different display name when another machine already holds the
+--     one it was given (the contract's edge case), and the same read lets a reset refuse before it writes when
+--     the default name it would restore is taken. Both are answers the screen acts on rather than exceptions.
+
+-- ============================================================
+-- sp_machine_configuration_reset - feature 010-startup-rebuild (task T075)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the write is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_machine_configuration_reset/create.sql, with its rollback
+--     beside it, and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it writes: this machine's own configuration and nothing else — its display name and description in
+--     `core_computers_registry`, its picture sources in `config_images_locations` (withdrawn, not deleted), and
+--     its scoped preference rows in `config_settings_values`. All three writes are one transaction behind one
+--     call, because a half-finished reset leaves a machine in a state none of the three tables can express.
+--   Why it exists: FR-018 requires a targeted restore of exactly the parts named as broken, on this machine
+--     only, with a single implementation that the recovery step drives rather than re-implementing. It never
+--     touches a person, a role, a permission, another machine, a session or a log entry, and it deliberately
+--     does not delete the registry row: that row is referenced by `user_active_sessions` and
+--     `auth_remembered_sign_ins`, and neither may be cleared by a machine-configuration reset.
+
+-- ============================================================
 -- Retired objects - feature 001-module-mock-visual-fallback (FR-014)
 -- ============================================================
 -- The database-backed demo/sample family was retired in full. These objects are no longer created

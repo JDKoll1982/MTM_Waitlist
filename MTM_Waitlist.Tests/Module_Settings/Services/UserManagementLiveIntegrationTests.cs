@@ -10,7 +10,6 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Models.UserManagement;
 using MTM_Waitlist.Module_Core.Services;
-using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Settings.Services;
@@ -548,9 +547,14 @@ public sealed class UserManagementLiveIntegrationTests
 
     private async Task InsertSessionAsync(long userId)
     {
+        // The rebuilt session store holds one row per person per machine, so the fixture's running session is
+        // written through the same upsert shape the sign-in path uses rather than as a second row that a real
+        // sign-in could never produce.
         await _helper!.ExecuteSqlNonQueryAsync(
-            "INSERT INTO auth_sessions_tokens (public_id, user_id, computer_id, token_hash, token_salt, token_version, issued_utc, expires_utc, revoked_utc, is_active, source_label, created_utc) "
-                + "VALUES (UUID(), @p_user_id, NULL, @p_token_hash, @p_token_salt, 1, UTC_TIMESTAMP(), @p_expires_utc, NULL, 1, 'login', UTC_TIMESTAMP());",
+            "INSERT INTO user_active_sessions (public_id, user_id, computer_id, token_hash, token_salt, issued_utc, expires_utc, revoked_utc, is_active, source_label, created_utc) "
+                + "SELECT UUID(), @p_user_id, c.id, @p_token_hash, @p_token_salt, UTC_TIMESTAMP(), @p_expires_utc, NULL, 1, 'sign_in', UTC_TIMESTAMP() "
+                + "FROM core_computers_registry c ORDER BY c.id ASC LIMIT 1 "
+                + "ON DUPLICATE KEY UPDATE token_hash = VALUES(token_hash), token_salt = VALUES(token_salt), issued_utc = VALUES(issued_utc), expires_utc = VALUES(expires_utc), revoked_utc = NULL, is_active = 1;",
             new Dictionary<string, object?>
             {
                 ["p_user_id"] = userId,
@@ -567,7 +571,7 @@ public sealed class UserManagementLiveIntegrationTests
 
         await _helper!.ExecuteSqlNonQueryAsync(
             "DELETE FROM auth_user_management_audit WHERE target_user_id IN (SELECT id FROM core_users_profiles WHERE username_normalized LIKE @p_prefix);"
-                + " DELETE FROM auth_sessions_tokens WHERE user_id IN (SELECT id FROM core_users_profiles WHERE username_normalized LIKE @p_prefix);"
+                + " DELETE FROM user_active_sessions WHERE user_id IN (SELECT id FROM core_users_profiles WHERE username_normalized LIKE @p_prefix);"
                 + " DELETE ra FROM auth_roles_assignments ra INNER JOIN core_users_profiles u ON u.id = ra.user_id WHERE u.username_normalized LIKE @p_prefix;"
                 + " DELETE FROM core_users_profiles WHERE username_normalized LIKE @p_prefix;",
             parameters,
@@ -600,7 +604,7 @@ public sealed class UserManagementLiveIntegrationTests
     private Task<string> SessionStateAsync(long userId) =>
         ScalarAsync(
             "SELECT GROUP_CONCAT(CONCAT(is_active, '|', expires_utc) ORDER BY id ASC SEPARATOR ',') "
-                + "FROM auth_sessions_tokens WHERE user_id = @p_user_id;",
+                + "FROM user_active_sessions WHERE user_id = @p_user_id;",
             new Dictionary<string, object?> { ["p_user_id"] = userId });
 
     private async Task<long> MaxAuditIdAsync()

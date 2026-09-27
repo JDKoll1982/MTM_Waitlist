@@ -12,9 +12,9 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// <remarks>
 /// <para>
 /// <b>The hostname and the hardware address are read from the machine itself</b>, not from the store, because
-/// they are the facts the machine presents for matching. The registry row is then read from the store by that
-/// pair through the existing <c>sp_core_computers_registry_lookup_by_name_mac_get</c>, which is the same read
-/// the computer registry service uses, so this type does not invent a second way to find a machine.
+/// they are the facts the machine presents for matching. The registry row is then read from the store by name
+/// through <c>sp_core_computers_registry_lookup_by_name_get</c>, and that row is accepted only when the address
+/// it holds equals the one read from this machine, so the name-and-address pair is still what identifies it.
 /// </para>
 /// <para>
 /// <b>An unreadable hardware identity is admitted (FR-015).</b> When no usable address can be read,
@@ -30,8 +30,8 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// </remarks>
 public sealed class MachineFactsService : IMachineFacts
 {
-    /// <summary>The store read that finds one machine by its (computer name, hardware address) pair.</summary>
-    private const string LookupByNameMacProcedure = "sp_core_computers_registry_lookup_by_name_mac_get";
+    /// <summary>The store read that resolves one machine by name, before its hardware address confirms it.</summary>
+    private const string LookupByNameProcedure = "sp_core_computers_registry_lookup_by_name_get";
 
     private readonly IMySqlHelperServer _mySqlHelperServer;
     private readonly string _hostname;
@@ -80,17 +80,22 @@ public sealed class MachineFactsService : IMachineFacts
 
         var rows = await _mySqlHelperServer
             .ExecuteStoredProcedureQueryAsync(
-                LookupByNameMacProcedure,
+                LookupByNameProcedure,
                 new Dictionary<string, object?>
                 {
-                    ["p_computer_name"] = _hostname,
-                    ["p_mac_address_normalized"] = _macAddress,
+                    ["p_name"] = _hostname,
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _registeredComputer = Map(rows.FirstOrDefault());
+        var row = Map(rows.FirstOrDefault());
+
+        // The name resolves the candidate and the hardware address confirms it. A row holding a different
+        // address is another machine that happens to share a name, so it is not this machine's record.
+        _registeredComputer = string.Equals(row?.MacAddressNormalized, _macAddress, StringComparison.OrdinalIgnoreCase)
+            ? row
+            : null;
 
         return IsRegistered;
     }

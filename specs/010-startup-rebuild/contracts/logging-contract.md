@@ -148,12 +148,26 @@ and `error_fingerprint`.
 
 ## 4. The `ILogger` surface
 
-The application already makes 226 `ILogger` call sites across 26 files — 219 `_logger.` sites plus 7 standalone
-`logger.`/`Logger.` call sites — and 31 files import `Microsoft.Extensions.Logging`. That figure is tree-wide:
-64 of the 226 sit in `MTM_Waitlist.Mock.Service`, a separate host with its own file logger that this provider
-does not serve (58 of the 219 `_logger.` sites, and 6 of the 7 standalone sites), so the application's own
-surface is 162 call sites. **No `ILogger` call site is edited.** One provider writes those calls to the
-same store through the same `ILogService`.
+The application makes 225 `ILogger` call sites across 25 files — 219 `_logger.` sites plus 6 standalone
+`logger.`/`Logger.` call sites — and 31 files import `Microsoft.Extensions.Logging`. Those figures are the
+application's own: `MTM_Waitlist.Tests` is excluded, and it adds 5 further standalone `ILogger` call sites — 4
+for the logging module and 1 for the host's file logger. 64 of the 225 sit in `MTM_Waitlist.Mock.Service`, a
+separate host with its own file logger
+that this provider does not serve (58 of the 219 `_logger.` sites, and all 6 standalone sites), so the
+application's own surface is 161 call sites. **No `ILogger` call site is edited.** One provider writes those
+calls to the same store through the same `ILogService`.
+
+*Re-derived from the tree on 2026-09-27 (T196), searching every `*.cs` outside `bin` and `obj` for `_logger\.`
+plus a standalone `[Ll]ogger\.`: 219 `_logger.` sites in 23 files, and 18 standalone matches in 8 files — 11
+logging calls, 4 `IsEnabled` assertions and 3 XML-documentation lines (`logger.` inside a `<summary>`, and
+`<param name="logger">Logger.</param>` twice).* The figures recorded here were 226 across 26 files, with the
+application's own surface at 162; the tree gives 225 across 25 files and 161. The 219 `_logger.` sites and the
+31 importing files hold exactly, and `MTM_Waitlist.Mock.Service`'s 64 holds as 58 plus 6. The standalone count
+is what moved, and its scope is the point: the tree holds 6 standalone `ILogger` call sites in application
+code, all of them in `MTM_Waitlist.Mock.Service`, so the application contributes none of its own and its
+surface is 161. The recorded 7 is those 6 plus one further match that is not an application call site, which is
+also what took the file count to 26 — a `MTM_Waitlist.Tests` site on one reading and a documentation mention on
+another.
 
 ```csharp
 public sealed class StoreLoggerProvider : ILoggerProvider
@@ -181,6 +195,13 @@ then the old type is deleted.
 Rules:
 
 - The script touches only the type token. Arguments, line structure and multi-line formatting are untouched.
+- **The new type lives in `MTM_Waitlist.Core`, and it cannot live in `MTM_Waitlist.Logging`.** `AppLog` is
+  `MTM_Waitlist.Core/Helpers/AppLog.cs`, in the `MTM_Waitlist.Module_Core.Helpers` namespace the retired type
+  occupied. The logging module already references `MTM_Waitlist.Core` — `MTM_Waitlist.Logging.csproj` carries
+  that `ProjectReference`, and `ILogService` derives from `IAppLogSink`, the sink contract
+  `MTM_Waitlist.Core/Contracts/Services` owns — so a façade in the module would be a circular reference for
+  every consumer, `MTM_Waitlist.Core` included. Placed in Core, the façade is visible to the module that
+  references Core, and the module supplies the implementation behind `IAppLogSink`.
 - The script does not rewrite using directives. `MTM_Waitlist.Module_Core.Helpers` holds ten other types and is
   imported by 134 files, so the new type is made reachable with one global using.
 - The one fully-qualified production call site is handled by consuming the qualifier rather than leaving it

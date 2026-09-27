@@ -135,6 +135,17 @@ public sealed class RetiredSymbolAuditTests
         // that quietly came back would satisfy neither the store-backed contract nor the no-local-log-file rule.
         ("retired startup log-service contract", new Regex(@"\bIStartupLogService\b", RegexOptions.Compiled)),
         ("retired startup log service", new Regex(@"\bStartupLogService\b", RegexOptions.Compiled)),
+
+        // The debug-only static logger T069 deleted in the same change as those two, and the omission this
+        // pattern closes: a guard that names two of three removed logging types is inconsistent with its own
+        // purpose, not deliberately narrower. The bare name is forbidden because the type was static, so every
+        // reappearance is a call site (`StartupDebugLog.Info(...)`) rather than a declaration, and because its
+        // methods are `[Conditional("DEBUG")]` a reintroduction would silently record nothing in a Release
+        // build — the exact defect SC-003 exists to stop. T069 also rewrote the two raw-text doc-comment
+        // mentions this whole-file scan would otherwise have flagged (`MTM_Waitlist.Mock.Service/Services/
+        // ServiceLog.cs` and `MTM_Waitlist.Tests/Module_Mock_Service/ServiceLogTests.cs`); a reappearance of
+        // either fails here too, since the scan matches raw text rather than resolved symbols.
+        ("retired debug-only static logger", new Regex(@"\bStartupDebugLog\b", RegexOptions.Compiled)),
     ];
 
     /// <summary>File extensions this audit treats as code or database artifacts.</summary>
@@ -446,6 +457,7 @@ public sealed class RetiredSymbolAuditTests
         ["retired static main-window closed handler"] = "private static void MainWindow_Closed(object sender, WindowEventArgs args)",
         ["retired startup log-service contract"] = "public interface IStartupLogService { };",
         ["retired startup log service"] = "public sealed class StartupLogService : BackgroundService, IStartupLogService",
+        ["retired debug-only static logger"] = "StartupDebugLog.Info(\"Startup\", \"Launching MTM Waitlist\");",
     };
 
     /// <summary>

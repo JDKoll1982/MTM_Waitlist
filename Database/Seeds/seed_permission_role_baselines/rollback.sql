@@ -2,9 +2,10 @@
 -- Engine: MySQL 5.7
 -- Feature: 006-user-management-and-permissions (task T036)
 --
--- Removes exactly the rows `create.sql` added: the `role`-scoped rows in the `permission.` namespace. Nothing
--- else in this table is touched — the `all_users`-scoped image-storage rows and any `user`-scoped row written
--- since ship day both stay as they are, because this seed did not write them.
+-- Removes exactly the rows `create.sql` added: the `role`-scoped rows in the `permission.` namespace, and the
+-- two `all_users`-scoped plant preference rows 010-startup-rebuild (T053) added. Nothing else in this table is
+-- touched — the `all_users`-scoped image-storage rows and any `user`-scoped row written since ship day both stay
+-- as they are, because this seed did not write them.
 --
 -- The delete is narrowed by the same three facts the seed writes with (scope_type `role`, the `permission.`
 -- namespace, and a boolean value type), so a `user`-scoped permission row — the kind the permissions page
@@ -20,6 +21,14 @@ DELETE FROM config_settings_values
 WHERE scope_type = 'role'
   AND setting_key LIKE 'permission.%'
   AND value_type = 'bool';
+
+-- The two plant-owned rows 010-startup-rebuild (T053) added sit at a different scope, so the DELETE above does
+-- not reach them and they are named exactly rather than swept up by a scope-wide predicate. Naming them is what
+-- keeps this rollback from removing the `all_users`-scoped image-storage rows, which this seed never wrote.
+DELETE FROM config_settings_values
+WHERE scope_type = 'all_users'
+  AND scope_key = 'all_users'
+  AND setting_key IN ('Feature.IgnoredLocations', 'sessions.length_hours');
 
 -- The four keys 010-startup-rebuild (T053) added — `permission.settings.machine_configuration`,
 -- `permission.settings.ignored_locations_edit`, `permission.settings.log_panel` and

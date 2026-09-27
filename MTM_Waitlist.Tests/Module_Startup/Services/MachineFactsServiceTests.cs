@@ -11,9 +11,9 @@ namespace MTM_Waitlist.Tests.Module_Startup.Services;
 
 /// <summary>
 /// The machine facts contract's own promises (`contracts/machine-configuration-contract.md`; FR-015): this
-/// machine's name and hardware address are read from the machine, the registry row is read by that pair through
-/// the one existing lookup rather than a second way of finding a machine, and an unreadable hardware identity is
-/// admitted instead of being reported as a failed check.
+/// machine's name and hardware address are read from the machine, the registry row is resolved by name and
+/// accepted only on the address the machine presents rather than through a second way of finding a machine, and
+/// an unreadable hardware identity is admitted instead of being reported as a failed check.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -30,7 +30,7 @@ namespace MTM_Waitlist.Tests.Module_Startup.Services;
 [TestClass]
 public sealed class MachineFactsServiceTests
 {
-    private const string LookupProcedure = "sp_core_computers_registry_lookup_by_name_mac_get";
+    private const string LookupProcedure = "sp_core_computers_registry_lookup_by_name_get";
 
     /// <summary>The form the store holds a hardware address in: lower case, hyphen separated, six bytes.</summary>
     private static readonly Regex s_storesForm = new("^[0-9a-f]{2}(-[0-9a-f]{2}){5}$", RegexOptions.Compiled);
@@ -78,9 +78,36 @@ public sealed class MachineFactsServiceTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_ReadsTheRegistryByThePairTheMachinePresents()
+    public async Task RefreshAsync_ReadsTheRegistryByNameAndConfirmsTheAddress()
     {
-        var stub = new StubMySqlHelperServer([RegistryRow(isRegistered: 1L)]);
+        // The constructor reads this machine's own address and cannot be given one, so the store's answer is
+        // built from what the machine reports rather than from a constant the test would have to keep in step.
+        var probe = new MachineFactsService(new StubMySqlHelperServer([]));
+
+        if (!probe.HardwareIdentityReadable)
+        {
+            Assert.Inconclusive("This machine reports no hardware address, so the registry read cannot be exercised.");
+        }
+
+        var stub = new StubMySqlHelperServer([RegistryRow(isRegistered: 1L, macAddress: probe.MacAddress)]);
+        var service = new MachineFactsService(stub);
+
+        var registered = await service.RefreshAsync();
+
+        Assert.IsTrue(registered);
+        Assert.AreEqual(LookupProcedure, stub.LastStoredProcedureName);
+        Assert.AreEqual(MySqlDatabaseTarget.MtmWaitlist, stub.LastDatabaseTarget);
+        Assert.AreEqual(service.Hostname, stub.LastParameters["p_name"]);
+        Assert.AreEqual(1, stub.LastParameters.Count);
+        Assert.AreEqual(1, stub.QueryCallCount);
+        Assert.IsTrue(service.IsRegistered);
+        Assert.AreEqual("Shop floor station", service.RegisteredComputer!.DisplayName);
+    }
+
+    [TestMethod]
+    public async Task RefreshAsync_WhenTheRowCarriesAnotherMachinesAddress_IsNotThisMachinesRecord()
+    {
+        var stub = new StubMySqlHelperServer([RegistryRow(isRegistered: 1L, macAddress: "00-00-00-00-00-01")]);
         var service = new MachineFactsService(stub);
 
         if (!service.HardwareIdentityReadable)
@@ -88,16 +115,11 @@ public sealed class MachineFactsServiceTests
             Assert.Inconclusive("This machine reports no hardware address, so the registry read cannot be exercised.");
         }
 
-        var registered = await service.RefreshAsync();
-
-        Assert.IsTrue(registered);
-        Assert.AreEqual(LookupProcedure, stub.LastStoredProcedureName);
-        Assert.AreEqual(MySqlDatabaseTarget.MtmWaitlist, stub.LastDatabaseTarget);
-        Assert.AreEqual(service.Hostname, stub.LastParameters["p_computer_name"]);
-        Assert.AreEqual(service.MacAddress, stub.LastParameters["p_mac_address_normalized"]);
+        // The name resolved a row and that row's stored address belongs to somebody else, so the row does not
+        // describe this machine. The read still happened, which is why the call count is pinned.
+        Assert.IsFalse(await service.RefreshAsync());
         Assert.AreEqual(1, stub.QueryCallCount);
-        Assert.IsTrue(service.IsRegistered);
-        Assert.AreEqual("Shop floor station", service.RegisteredComputer!.DisplayName);
+        Assert.IsNull(service.RegisteredComputer);
     }
 
     [TestMethod]
@@ -105,13 +127,15 @@ public sealed class MachineFactsServiceTests
     {
         // The driver surfaces a TINYINT(1) column as a bool, and reading it as a number would throw rather than
         // answer, so the registered flag is pinned in that form too.
-        var stub = new StubMySqlHelperServer([RegistryRow(isRegistered: true)]);
-        var service = new MachineFactsService(stub);
+        var probe = new MachineFactsService(new StubMySqlHelperServer([]));
 
-        if (!service.HardwareIdentityReadable)
+        if (!probe.HardwareIdentityReadable)
         {
             Assert.Inconclusive("This machine reports no hardware address, so the registry read cannot be exercised.");
         }
+
+        var stub = new StubMySqlHelperServer([RegistryRow(isRegistered: true, macAddress: probe.MacAddress)]);
+        var service = new MachineFactsService(stub);
 
         Assert.IsTrue(await service.RefreshAsync());
         Assert.IsTrue(service.IsRegistered);
@@ -155,13 +179,13 @@ public sealed class MachineFactsServiceTests
     }
 
     /// <summary>One registry row as the lookup returns it, in the column names the mapping reads.</summary>
-    private static Dictionary<string, object?> RegistryRow(object isRegistered) => new()
+    private static Dictionary<string, object?> RegistryRow(object isRegistered, string? macAddress = null) => new()
     {
         ["id"] = 7L,
         ["computer_name"] = Environment.MachineName.Trim(),
         ["display_name"] = "Shop floor station",
         ["description"] = "a row the test owns",
-        ["mac_address_normalized"] = "aa-bb-cc-dd-ee-ff",
+        ["mac_address_normalized"] = macAddress ?? "aa-bb-cc-dd-ee-ff",
         ["is_registered"] = isRegistered,
     };
 

@@ -65,15 +65,17 @@ up. Rejected: a red tree for several phases destroys the baseline comparison tha
 ## D5. Both logging surfaces are settled in one change: a store-backed seam plus an `ILogger` provider
 
 **Decision**: The static surface (489 references in 83 files) is migrated by script to a new seam, and the
-`ILogger` surface (226 calls across 26 files tree-wide, of which 162 are the application's own — the other 64
-sit in `MTM_Waitlist.Mock.Service`, a separate host the provider does not serve) is served by a provider that
-writes to the same store. No `ILogger` call site is edited.
+`ILogger` surface (225 calls across 25 files, of which 161 are the application's own — the other 64 sit in
+`MTM_Waitlist.Mock.Service`, a separate host the provider does not serve) is served by a provider that writes
+to the same store. No `ILogger` call site is edited. The application figure is re-derived from the tree on
+2026-09-27 (T196); the earlier 226/162 counted 7 standalone sites where the tree holds 6, and the contract's
+§4 carries the reconciliation and its scope.
 
 **Rationale**: The two surfaces need opposite treatment. The static type is being replaced, so its call sites
 must change; the `ILogger` abstraction is sound and only lacks a destination, so its call sites must not
-change. S9.1 measured both, and the provider approach converts 226 edits into one registration.
+change. S9.1 measured both, and the provider approach converts 225 edits into one registration.
 
-**Alternatives considered**: Migrate both surfaces by script. Rejected: it would edit 226 call sites for no
+**Alternatives considered**: Migrate both surfaces by script. Rejected: it would edit 225 call sites for no
 benefit and would lose the structured properties `ILogger` already carries.
 
 ## D6. The replacement logging seam is unconditional
@@ -104,13 +106,22 @@ reports them one build at a time and the ordering guarantee would be lost.
 
 ## D8. The new type is made reachable with a global using, and the script does not touch using directives
 
-**Decision**: One global using rather than 134 per-file using edits.
+**Decision**: One global using rather than 134 per-file using edits. The new type, `AppLog`, lives in
+`MTM_Waitlist.Core` (`MTM_Waitlist.Core/Helpers/AppLog.cs`, namespace `MTM_Waitlist.Module_Core.Helpers`), not
+in `MTM_Waitlist.Logging`.
 
 **Rationale**: `MTM_Waitlist.Module_Core.Helpers` holds ten other types and is imported by 134 files. Adding
 one global using is one line; rewriting using directives in 134 files is 134 chances to break an unrelated
-import.
+import. The location is forced rather than chosen: `MTM_Waitlist.Logging.csproj` already carries a
+`ProjectReference` to `..\MTM_Waitlist.Core\MTM_Waitlist.Core.csproj`, and `ILogService` derives from
+`IAppLogSink`, the sink contract that lives in `MTM_Waitlist.Core/Contracts/Services`. A façade placed in the
+logging module would therefore be a circular reference, because `MTM_Waitlist.Core` and every module library
+would have to reference the module back. In `MTM_Waitlist.Core` the façade is visible to the module — which
+references Core — while `IAppLogSink` keeps Core from having to reference the module in return.
 
-**Alternatives considered**: Per-file using edits. Rejected on the same ground.
+**Alternatives considered**: (a) Per-file using edits. Rejected on the same ground. (b) Put the façade in
+`MTM_Waitlist.Logging`, beside the seam it forwards to. Rejected: the logging module already references
+`MTM_Waitlist.Core`, so the reference would be circular.
 
 ## D9. The stored-procedure call sites replace the local settings file directly; no new storage is created
 

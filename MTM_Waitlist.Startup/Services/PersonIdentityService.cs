@@ -16,21 +16,27 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// </para>
 /// <para>
 /// <b>Roles come from the store only.</b> <see cref="ResolveAsync"/> reads
-/// <c>sp_auth_user_row_get</c> — the existing "resolve one active user's identity and role at logon" read — so
-/// the role in force is the store's answer and never a local claim. The development allow-list in
+/// <c>sp_auth_user_row_get</c> — the existing "resolve one active user's identity and role at logon" read — for
+/// the role in force, and <c>sp_auth_user_roles_get</c> for the roles the person holds, so both the role in
+/// force and the held set are the store's answer and never a local claim. The development allow-list in
 /// <c>appsettings.json</c> is retired (D16).
 /// </para>
 /// <para>
 /// <b>Held roles.</b> <see cref="Apply"/> takes every role code the sign-in step resolved, which is what
-/// answers <see cref="Holds"/> for a person who holds more than one. <see cref="ResolveAsync"/> itself knows the
-/// one role the store's logon read returns, so it applies that as the single held role; the wider set is the
-/// sign-in step's to apply when it reads the person's assignments.
+/// answers <see cref="Holds"/> for a person who holds more than one. <see cref="ResolveAsync"/> supplies the
+/// whole set itself: beside the identity read it makes the assignment read
+/// (<c>sp_auth_user_roles_get</c>), which returns one row per role the person holds, so the resolved identity
+/// carries the person's full set rather than only the single role the logon read puts in force. A person the
+/// store holds no assignment for resolves to the role in force alone, which <see cref="Apply"/> always keeps.
 /// </para>
 /// </remarks>
 public sealed class PersonIdentityService : IPersonIdentity
 {
     /// <summary>The store read that resolves one active person's identity and role at logon.</summary>
     private const string IdentityProcedure = "sp_auth_user_row_get";
+
+    /// <summary>The store read that returns every role the person holds, one row per assignment.</summary>
+    private const string RolesProcedure = "sp_auth_user_roles_get";
 
     /// <summary>The scope-key prefix a role code may be written with, as in <c>role:developer</c>.</summary>
     private const string RoleCodePrefix = "role:";
@@ -83,12 +89,18 @@ public sealed class PersonIdentityService : IPersonIdentity
     /// step; nothing else writes here.
     /// </summary>
     /// <param name="signInName">The sign-in name the credential check resolved, in the store's upper case.</param>
-    /// <param name="cancellationToken">Cancels the store read.</param>
+    /// <param name="cancellationToken">Cancels the store reads.</param>
     /// <returns><see langword="true"/> when the store holds the person, otherwise <see langword="false"/>.</returns>
     /// <remarks>
     /// A blank name resolves nobody, so it ends any identity in force rather than leaving it standing. The answer
     /// is "nobody is signed in" either way, and a caller that resolved nothing must never find the previous person
     /// still there.
+    /// <para>
+    /// Two reads supply the answer. The identity read (<c>sp_auth_user_row_get</c>) resolves the person and the
+    /// single role in force; the assignment read (<c>sp_auth_user_roles_get</c>) returns every role the person
+    /// holds. Both are keyed on the same sign-in name, and the second is made only once the first has found the
+    /// person, so a name the store does not hold costs one read and not two.
+    /// </para>
     /// </remarks>
     public async Task<bool> ResolveAsync(string signInName, CancellationToken cancellationToken = default)
     {
@@ -120,13 +132,28 @@ public sealed class PersonIdentityService : IPersonIdentity
 
         var roleCode = ReadString(row, "role_code");
 
+        var roleRows = await _mySqlHelperServer
+            .ExecuteStoredProcedureQueryAsync(
+                RolesProcedure,
+                new Dictionary<string, object?> { ["p_username"] = normalizedSignInName },
+                MySqlDatabaseTarget.MtmWaitlist,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        // The held set is every assignment the store reports. A row with no code is skipped rather than held as
+        // an empty role, which is the same rule Apply applies to whatever it is handed.
+        var heldRoleCodes = roleRows
+            .Select(roleRow => ReadString(roleRow, "role_code"))
+            .Where(code => code.Length > 0)
+            .ToList();
+
         Apply(
             ReadInt64(row, "id"),
             normalizedSignInName,
             ReadString(row, "display_name"),
             NullableString(row, "employee_identifier"),
             roleCode,
-            [roleCode]);
+            heldRoleCodes);
 
         return IsSignedIn;
     }
