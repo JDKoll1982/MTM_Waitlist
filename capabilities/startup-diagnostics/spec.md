@@ -2,6 +2,16 @@
 
 > [DRAFT] Surface-first draft from existing code — every requirement is observed from the code surface unless tagged otherwise. Review before trusting.
 
+> **[RETIRED SUBJECT — 2026-09-27]** This capability was drafted from the file-based log service,
+> `MTM_Waitlist.Startup/Services/StartupLogService.cs`, which the startup rebuild has since **deleted** along with
+> its `IStartupLogService` contract and the options binding it read. The requirements and scenarios below are
+> therefore the record of a retired path, not a description of the running application. The application now
+> records every diagnostic through `MTM_Waitlist.Logging` — `ILogService` → `StoreLogWriter` →
+> `sp_ops_startup_logs_insert` — into the store's `ops_startup_logs` table, and writes no local log file at all
+> (FR-025). What survives here is `StartupLogForwarder.cs` and `StartupLoggingOptions.cs`: both still exist, both
+> are consumerless, and a later task (T133) owns them. Do not follow this spec to a running surface without
+> checking that first.
+
 ## Purpose
 
 Startup is the hardest part of this application to debug in place: it runs before the shell exists, it runs on a shop-floor workstation that nobody is watching a console on, and its commonest failure — a machine that cannot reach the store — is exactly the failure that makes the application's own database-backed records unavailable. This capability exists so that a failed launch still leaves a readable account of what was attempted and in what order. Without it, the only evidence of a startup fault is what the operator remembers of the splash.
@@ -131,9 +141,18 @@ The application's diagnostic seam SHALL be safe to call from the earliest part o
 
 ## Uncovered
 
-`StartupLogService.cs` was read in full for every path this spec asserts — the entry contract, enqueue and shutdown (1–95), and payload, hashing, persistence, forwarding and retention (96–235) — but not its tail (236–259: the directory resolution's remainder and the payload declarations). `StartupLogForwarder.cs` was read in full except its destination-resolution fallbacks beyond the first source.
+`StartupLogService.cs` was read in full when this draft was written — the entry contract, enqueue and shutdown
+(1–95), and payload, hashing, persistence, forwarding and retention (96–235) — but not its tail (236–259: the
+directory resolution's remainder and the payload declarations). It **has since been deleted**, so the paths this
+spec asserts from it no longer have a subject. `StartupLogForwarder.cs` still exists and was read in full except
+its destination-resolution fallbacks beyond the first source; nothing constructs it.
 
-Not read, so nothing above depends on them: `IStartupLogService`'s registration and configuration in `ModuleDependencyInjectionExtensions.cs` (13 lines), and the concrete values behind the logging options — channel capacity, retention window, size bound, and forward-retry count. Those are asserted here as *behaviour and bounds* ("bounded by age and by size", "retried a bounded number of times"), not as figures. A reader who needs the numbers should read the options rather than this draft.
+Not read, so nothing above depends on them: `IStartupLogService`'s registration and configuration in
+`ModuleDependencyInjectionExtensions.cs` (13 lines), and the concrete values behind the logging options — channel
+capacity, retention window, size bound, and forward-retry count. The registration no longer exists, because the
+file-based path's last `Configure<>` binding was removed with the startup rebuild, so the options are unbound and
+nothing reaches those figures; they are asserted here as *behaviour and bounds* ("bounded by age and by size",
+"retried a bounded number of times"), not as values a reader can still find in the running application.
 
 One consequence a reviewer should weigh: because the two writes for an entry are sequential inside a single
 best-effort handler, a failure to write the machine's own record also costs that entry's forwarded copy. The

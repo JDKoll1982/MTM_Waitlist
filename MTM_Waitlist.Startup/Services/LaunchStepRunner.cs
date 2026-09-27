@@ -8,6 +8,13 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// </summary>
 /// <remarks>
 /// <para>
+/// <b>Every line names what the step is about.</b> A step's own lines carry its
+/// <see cref="LaunchStep.Target"/>, so once the catalogue holds one entry per operation — several of which touch
+/// the store and several of which touch nothing — the feed says which is which rather than leaving every line
+/// reading the same (FR-002). A step that declares no target writes none, which is the honest answer for an
+/// operation that touches nothing a person could name.
+/// </para>
+/// <para>
 /// <b>The step is named before it runs.</b> <see cref="RunAsync"/> appends the
 /// <see cref="LaunchFeedEntryKind.StepStarted"/> line first and only then calls the step, so the announcement is
 /// on the feed even if the step throws on its first statement. A stall therefore has a name attached to it
@@ -207,14 +214,14 @@ public sealed class LaunchStepRunner
         return RecordFailure(descriptor, diagnosis);
     }
 
-    /// <summary>Adds one line to the feed, stamped as it is written.</summary>
+    /// <summary>Adds one line to the feed, stamped as it is written and naming what the step is about.</summary>
     private void Append(LaunchStep descriptor, LaunchFeedEntryKind kind, string text, bool? succeeded)
         => _feed.Append(new LaunchFeedEntry(
             DateTimeOffset.UtcNow,
             descriptor.Id,
             kind,
             text,
-            null,
+            descriptor.Target,
             succeeded));
 
     /// <summary>Observes an abandoned step's failure, so it cannot surface later as an unhandled exception.</summary>

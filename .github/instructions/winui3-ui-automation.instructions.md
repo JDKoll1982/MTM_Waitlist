@@ -50,17 +50,22 @@ Start-Process $exe
 
 - The project is `<OutputType>WinExe</OutputType>`, so `Start-Process` returns immediately and the
   shell prompt comes back. That is expected, not a failure, and console output is not captured.
-- For behavior that runs before the shell loads, use startup diagnostics instead of stdout. The
-  `StartupDebugLog` helper writes to `Debug.WriteLine` (visible only when a debugger is attached)
-  and forwards to `StartupLogService`, which appends JSON Lines to
-  `%LOCALAPPDATA%\MTM_Waitlist\Logs\Startup\startup_daily_<yyyy_MM_dd>.jsonl`. That directory is
-  overridable through `StartupLoggingOptions.HostedVmLogDirectory`.
-- Check the newest file in that folder before trusting it — **but do not conclude the log service is
-  down from this folder alone**. `LocalSettings.json` may override
-  `Startup.Logging.HostedVmLogDirectory`; on `MTMFG-161` it points at the shared path
-  `X:\Software Development\Live Applications\MTM_Waitlist\Logs`, so the **local** daily folder is
-  frozen at `startup_daily_2026_07_30.jsonl` while `startup_forwarded_<yyyy_MM_dd>.jsonl` on `X:` is
-  current. Read both before deciding. (`X:` is a real mapped drive on this workstation.)
+- For behavior that runs before the shell loads, use startup diagnostics instead of stdout. The static seam
+  is `AppLog` (`MTM_Waitlist.Core/Helpers/AppLog.cs`), which the retired `StartupDebugLog` call sites were
+  repointed to; `App.xaml.cs` points it at the store-backed `ILogService`, whose writer
+  (`MTM_Waitlist.Logging/StoreLogWriter.cs`) records each entry through `sp_ops_startup_logs_insert` in the
+  store's `ops_startup_logs` table. **Nothing writes a local log file any more** (FR-025).
+- **The file-based log path this section used to document is retired, so do not look for it.**
+  `StartupLogService` used to append JSON Lines to
+  `%LOCALAPPDATA%\MTM_Waitlist\Logs\Startup\startup_daily_<yyyy_MM_dd>.jsonl`, with the directory overridable
+  through `StartupLoggingOptions.HostedVmLogDirectory`, and `StartupLogForwarder` wrote
+  `startup_forwarded_<yyyy_MM_dd>.jsonl` to the centralized destination. The startup rebuild deleted
+  `StartupLogService`, `IStartupLogService` and the options binding it read; nothing constructs the remaining
+  `StartupLogForwarder` and `StartupLoggingOptions` types, which a later task (T133) owns. A
+  `startup_daily_*.jsonl` or `startup_forwarded_*.jsonl` found on a machine is therefore a leftover from before
+  the rebuild, and its newest timestamp says nothing about the build under test — read `ops_startup_logs` (or the
+  developer log panel) instead. The `X:` mapped drive and the `LocalSettings.json` redirect this section used to
+  describe went with the file-based path.
 - Read the UIA text dump as the primary signal. It shows what the user sees, which the startup log
   does not.
 - **To get past the startup gate on a workstation whose `appsettings.json` still points at `localhost`,
@@ -297,7 +302,7 @@ below on **2026-09-11**, and the pre-shell windows only; the second table, furth
 | Buttons appear in the text dump | **incorrect as written** — they are `ControlType.Button`; corrected above |
 | `GetWindowPlacement` / `GetWindowRect` recipe | **correct** — returned `showCmd=1`, `760x460` (splash), `820x760` (sign-in) |
 | `showCmd` 1/2/3 = normal/minimized/maximized | **consistent** (`1` on both windows) |
-| Startup log staleness check | **the guidance was wrong and is corrected above** — the local daily folder IS frozen (newest `startup_daily_2026_07_30.jsonl`), but that is a `LocalSettings.json` redirect to the shared `X:` path, **not** a stopped log service: `X:\…\Logs\startup_forwarded_2026_09_11.jsonl` is current and was being written during the run |
+| Startup log staleness check | **superseded** — the file-based log path this row was recorded against has since been retired with the startup rebuild, so `startup_daily_*.jsonl` and `startup_forwarded_*.jsonl` are leftovers and their timestamps say nothing about the current build. The row is kept as the record of what was measured on those two dates; read `ops_startup_logs` instead |
 | Close recipe leaves no orphan | **correct** — 0 instances afterwards |
 | `Add-Type` fails on a duplicate type | **did not reproduce** — see the note in step 4; the real hazard here is the opposite (types do not survive between commands) |
 

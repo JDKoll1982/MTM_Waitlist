@@ -12,6 +12,12 @@ prove retry repeats only what failed.
 
 Steps are data. The displayed count is derived from the list, never stored.
 
+**One entry per operation, not one per phase.** A phase that bundles several distinct operations is split until
+each individual thing the launch processes holds its own entry, so every one of them is individually reportable
+rather than standing behind a group's single line. The catalogue's length therefore grows with the number of
+operations the launch performs and is never pinned: more, smaller entries is the direction, and the displayed
+count (below) is what keeps the window honest.
+
 ```csharp
 public sealed record LaunchStep(
     string Id,
@@ -19,7 +25,8 @@ public sealed record LaunchStep(
     string Description,
     LaunchStepCategory Category,
     TimeSpan MaximumWait,
-    bool IsBestEffort);
+    bool IsBestEffort,
+    string? Target = null);
 
 public enum LaunchStepCategory
 {
@@ -40,6 +47,7 @@ public enum LaunchStepCategory
 | `Category` | groups the feed and lets a remedy be matched to a cause | FR-004 |
 | `MaximumWait` | always set. 30 seconds is the ceiling; `IsBestEffort` steps are bounded more tightly | FR-003, SC-002 |
 | `IsBestEffort` | true for the picture refresh and the external-system priming. A best-effort step cannot stop the launch | FR-026, FR-027 |
+| `Target` | what the operation is about — the store, a share, the external system, a screen — written on every line the step produces, or `null` when it touches nothing a person could name | FR-002 |
 
 Derived, not stored: `TotalCount` from the step list, `CompletedCount`, and the progress text. Adding or
 removing a step must never leave a stale "of 5".
@@ -110,7 +118,9 @@ public enum LaunchFeedEntryKind
 
 Rules:
 
-- The feed names the operation, its target (store, share, server) and its outcome (S5).
+- The feed names the operation, its target (store, share, server) and its outcome (S5). A step's own lines carry
+  the step's `Target`, so once the catalogue holds one entry per operation the feed says what a line is about
+  rather than only that it finished; a step that declares no target writes none.
 - A step announces itself before it runs, so a stall has a name attached (FR-002, US1 scenario 1).
 - The feed is the debugging surface for a live fault. It is never cleared while a launch is running.
 - A best-effort failure still gets a line. It is reported, not hidden (FR-026).

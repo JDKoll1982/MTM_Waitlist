@@ -3,8 +3,8 @@ using MTM_Waitlist.Module_Startup.Models;
 namespace MTM_Waitlist.Module_Startup.Services;
 
 /// <summary>
-/// The launch sequence as data: every step's name, description, category, stated maximum and best-effort marker
-/// (`contracts/launch-step-contract.md` §1; plan D21; FR-002, FR-003, SC-002).
+/// The launch sequence as data: every individual operation's name, description, category, stated maximum,
+/// best-effort marker and target (`contracts/launch-step-contract.md` §1; plan D21; FR-002, FR-003, SC-002).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -14,6 +14,12 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// adding or removing a step cannot leave a stale "of 5".
 /// </para>
 /// <para>
+/// <b>One entry per operation, not one per phase.</b> A phase that bundled several distinct operations has been
+/// split until each thing the launch does holds its own entry, so every one of them is individually reportable on
+/// the splash rather than standing behind a group's single line. More, smaller entries is the deliberate
+/// direction: a grouped step hides which part of it stalled, and the point of the feed is that a stall has a name.
+/// </para>
+/// <para>
 /// <b>The catalogue is bounded, and it proves it.</b> The construction validates the shipped list, so a future
 /// edit that adds a step without a maximum, or a best-effort step at the ceiling, fails immediately rather than
 /// shipping an unbounded wait. <see cref="Ceiling"/> is the 30 seconds FR-003 and SC-002 call the ceiling for any
@@ -21,10 +27,11 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// priming — are bounded more tightly because neither may hold the launch (FR-026, FR-027).
 /// </para>
 /// <para>
-/// <b>The sequence:</b> the machine's configuration and the store that holds it; this computer's readiness and
-/// its configuration when it needs one; who is signed in and whether their session still stands; the sign-in, the
-/// machine check and a temporary credential's replacement when they apply; the picture copies and the
-/// external-system verdict, both best effort; and finally the hand-over to the first screen.
+/// <b>The sequence:</b> what this computer keeps locally; whether the store answers; this computer's own name and
+/// hardware address, its record and its configuration; the save that configures it when it needs one; the
+/// remembered sign-in and the key that unlocks it; who is signing in and the roles they hold; the credential
+/// check, the session, the machine gate and a temporary credential's replacement when they apply; the picture
+/// copies and the external-system verdict, both best effort; and finally the hand-over to the first screen.
 /// </para>
 /// </remarks>
 public sealed class LaunchStepCatalog
@@ -38,12 +45,22 @@ public sealed class LaunchStepCatalog
     /// The launch sequence, in the order it runs. Declared after <see cref="Ceiling"/> so a ceiling-sized bound
     /// reads as the ceiling rather than as a second 30.
     /// </summary>
+    /// <remarks>
+    /// <b>One entry per thing the launch does.</b> Where this list used to hold a phase — "reading this computer's
+    /// configuration", "working out who is signed in" — that bundled several operations, each operation now holds
+    /// its own entry, so a person watching the launch window sees every one of them progress rather than a single
+    /// line standing for a group. The order is the launch order, and the straight runs are: what this computer
+    /// keeps; whether the store answers; this computer's identity and its record; this computer's configuration
+    /// and the save that sets it; the remembered sign-in; who is signing in and the roles they hold; the
+    /// credential, the session, the machine gate and a temporary credential's replacement; the picture copies and
+    /// the external-system verdict, both best effort; and the hand-over to the first screen.
+    /// </remarks>
     private static readonly LaunchStep[] s_steps =
     [
         new(
-            "configuration",
-            "Reading this computer's configuration",
-            "Reads what this machine needs before anyone signs in.",
+            "read-local-settings",
+            "Reading this computer's saved settings",
+            "Reads what this computer keeps so it can reach the store.",
             LaunchStepCategory.Configuration,
             TimeSpan.FromSeconds(10),
             false),
@@ -53,63 +70,119 @@ public sealed class LaunchStepCatalog
             "Confirms the store that holds the records answers.",
             LaunchStepCategory.Configuration,
             TimeSpan.FromSeconds(15),
+            false,
+            "the store"),
+        new(
+            "read-hardware-identity",
+            "Reading this computer's identity",
+            "Reads this computer's name and the hardware address it presents.",
+            LaunchStepCategory.Machine,
+            TimeSpan.FromSeconds(5),
             false),
         new(
-            "machine-readiness",
-            "Checking this computer",
-            "Reads this computer's identity and confirms it is one the store knows.",
+            "read-computer-record",
+            "Reading this computer's record",
+            "Finds this computer in the store by its name and hardware address.",
             LaunchStepCategory.Machine,
             TimeSpan.FromSeconds(10),
-            false),
+            false,
+            "the store"),
         new(
-            "machine-setup",
-            "Configuring this computer",
+            "read-machine-configuration",
+            "Reading this computer's configuration",
+            "Reads what this computer needs and whether it is configured.",
+            LaunchStepCategory.Machine,
+            TimeSpan.FromSeconds(10),
+            false,
+            "the store"),
+        new(
+            "save-machine-configuration",
+            "Saving this computer's configuration",
             "Names this computer and points it at the shared picture sources.",
             LaunchStepCategory.Machine,
             Ceiling,
-            false),
+            false,
+            "the store"),
         new(
-            "session",
+            "read-remembered-sign-in",
+            "Reading the remembered sign-in",
+            "Reads, and unlocks, the sign-in this computer was asked to remember.",
+            LaunchStepCategory.Session,
+            TimeSpan.FromSeconds(10),
+            false,
+            "the shared key file"),
+        new(
+            "resolve-person",
             "Working out who is signed in",
-            "Resolves the person and whether their session still stands.",
+            "Resolves the person from the store by their sign-in name.",
             LaunchStepCategory.Session,
             TimeSpan.FromSeconds(15),
-            false),
+            false,
+            "the store"),
         new(
-            "sign-in",
-            "Signing in",
-            "Takes the person's credentials and checks them against the store.",
+            "resolve-roles",
+            "Reading the roles they hold",
+            "Reads every role the person holds, so their actions carry the right authority.",
+            LaunchStepCategory.Session,
+            TimeSpan.FromSeconds(15),
+            false,
+            "the store"),
+        new(
+            "check-credential",
+            "Checking the sign-in",
+            "Checks the credential the person presented against the store.",
             LaunchStepCategory.Session,
             Ceiling,
-            false),
+            false,
+            "the store"),
         new(
-            "machine-gate",
+            "judge-session",
+            "Checking whether their session still stands",
+            "Judges the session against the store's clock rather than this computer's.",
+            LaunchStepCategory.Session,
+            TimeSpan.FromSeconds(15),
+            false,
+            "the store"),
+        new(
+            "check-computer-against-store",
             "Checking this computer against the store",
             "Confirms the computer the person signed in on is one the store holds.",
             LaunchStepCategory.Session,
             TimeSpan.FromSeconds(15),
-            false),
+            false,
+            "the store"),
         new(
-            "password-change",
+            "check-temporary-credential",
+            "Checking whether a new password is needed",
+            "Checks whether the account is still on a temporary credential.",
+            LaunchStepCategory.Session,
+            TimeSpan.FromSeconds(15),
+            false,
+            "the store"),
+        new(
+            "set-new-password",
             "Setting a new password",
             "Replaces a temporary credential before the person carries on.",
             LaunchStepCategory.Session,
             Ceiling,
-            false),
+            false,
+            "the store"),
         new(
             "picture-cache",
             "Refreshing the picture copies",
             "Copies the shared pictures this computer keeps. Recorded, never blocking.",
             LaunchStepCategory.Pictures,
             TimeSpan.FromSeconds(10),
-            true),
+            true,
+            "the picture share"),
         new(
             "visual-priming",
             "Asking whether the external system answers",
             "Settles whether the read-only external system can be reached. Recorded, never blocking.",
             LaunchStepCategory.ExternalSystem,
             TimeSpan.FromSeconds(5),
-            true),
+            true,
+            "the external system"),
         new(
             "shell",
             "Opening the first screen",
@@ -124,7 +197,8 @@ public sealed class LaunchStepCatalog
     /// </summary>
     /// <exception cref="InvalidOperationException">
     /// A step declares no maximum, exceeds the ceiling, is best effort at the ceiling, repeats another step's id,
-    /// or carries no name or description — each of which would leave the launch unbounded or unreadable.
+    /// declares a blank target, or carries no name or description — each of which would leave the launch
+    /// unbounded or unreadable.
     /// </exception>
     public LaunchStepCatalog()
     {
@@ -233,6 +307,12 @@ public sealed class LaunchStepCatalog
             {
                 throw new InvalidOperationException(
                     $"'{step.Id}' waits {step.MaximumWait.TotalSeconds:0.#} seconds, past the {Ceiling.TotalSeconds:0}-second ceiling for any single wait (FR-003, SC-002).");
+            }
+
+            if (step.Target is not null && string.IsNullOrWhiteSpace(step.Target))
+            {
+                throw new InvalidOperationException(
+                    $"'{step.Id}' declares a blank target, so its lines would name nothing where the whole point is that a line names what it is about (FR-002).");
             }
 
             if (step.IsBestEffort && step.MaximumWait >= Ceiling)

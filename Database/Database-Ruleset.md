@@ -111,13 +111,13 @@ added or changed inside it.
 - **The three kinds inside the application's own collection have their own folders**, named for their scopes
   verbatim. That is what settles the case-only collision between the item `other` and the category `Other`: neither
   name is changed, and neither can resolve to the other's file (FR-038).
-- **The move of everything already stored** is `Seeds/seed_picture_layout_move` with
-  `sp_config_images_locations_paths_move`, which rewrites each recorded path and reports through affected rows, with
-  its own paired `rollback.sql`; the files themselves are moved by `tools/Move-PartPictureLayout.ps1`. It is
-  run-once, and it is safe to interrupt: `AppStoragePaths.ToCurrentLayout` reads a value in either layout, so a
-  picture resolves in the gap between the files moving and the rows moving. `AllTables.sql`, `AllSPs.sql` and
-  `AllSeeds.sql` are regenerated in the same change, and the schema is proved by
-  `Database/Validation/part_pictures_schema/validate.sql`.
+- **The move of everything already stored** is `sp_config_images_locations_paths_move`, which rewrites each
+  recorded path and reports through affected rows, with its own paired `rollback.sql`; the files themselves are
+  moved by `tools/Move-PartPictureLayout.ps1`. **The seed that used to pair the row move is retired**
+  (`Seeds/seed_picture_layout_move`, removed with its block in `AllSeeds.sql`): the application defaults out on
+  first use, so no migration is needed to reach a working default, and a row whose file is absent already falls
+  back to the application's own no-image path. `AllTables.sql`, `AllSPs.sql` and `AllSeeds.sql` are regenerated in
+  the same change, and the schema is proved by `Database/Validation/part_pictures_schema/validate.sql`.
 - **A replaced picture is kept, then cleaned up.** The storage service copies the picture it replaces into an
   `Archive` folder beside it, and the startup cache step removes an archived file once
   `image_storage.archive_keep_days` days have passed. The period is a stored setting owned by the storage screen and

@@ -710,3 +710,20 @@ SET FOREIGN_KEY_CHECKS = 1;
 --       was reworked rather than deleted, keeping its checks on config_settings_values, config_settings_history,
 --       fn_config_settings_scope_rank, sp_config_settings_get_effective, sp_config_settings_upsert and
 --       vw_config_settings_scope_catalog.
+--   The picture-layout seed was then retired with the helper only it deployed: the seed folder
+--     Database/Seeds/seed_picture_layout_move (create and rollback removed together, so no artifact creates it and
+--     none reverses it), its block removed from Database/Seeds/AllSeeds.sql, and its helper procedure
+--     sp_seed_picture_layout_move dropped from the store rather than left behind — the seed created it and neither
+--     the seed nor its rollback ever dropped it, so the drop is the store side of the retirement.
+--     Why it goes: the application defaults out on first use, so the migration is not needed to reach a working
+--     default. A scope with no row resolves to the application's own no-image path
+--     (MTM_Waitlist.Settings/Models/ImageLocationDefaults.cs), and the only writers of config_images_locations
+--     rows are the picture screen (sp_config_images_locations_insert) and
+--     sp_config_images_locations_computer_sources_set — no seed inserts a row — so the move only ever rewrote rows
+--     an operator or the computer-sources write had already put there.
+--     Why nothing breaks: a store with no rows resolves to the default, and a row whose file is absent falls back
+--     to the default asset (ImageLocationService.ResolveExistingPathAsync), so removing the seed falls back to the
+--     application's own defaults rather than to nothing.
+--     Retained, not retired: sp_config_images_locations_paths_move with its rollback, which the hand-run move
+--     (tools/Move-PartPictureLayout.ps1) still uses, and Database/Validation/part_pictures_schema/validate.sql,
+--     which still asserts that pair exists.

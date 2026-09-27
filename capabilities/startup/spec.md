@@ -224,8 +224,9 @@ Two things this draft does **not** verify, and a reviewer should weigh both:
   `ModuleDependencyInjectionExtensions.cs` are unread, so what "register this computer" actually does — and
   whether the gate's registration path can succeed — is outside this draft.
 
-The `startup-diagnostics` sibling owns `StartupLogService.cs` and `StartupLogForwarder.cs`; they are therefore
-not enumerated here, and nothing above depends on them.
+The `startup-diagnostics` sibling owns `MTM_Waitlist.Startup/Services/StartupLog*.cs`. `StartupLogService.cs` has
+since been deleted with the retired file-based logging contract, leaving only `StartupLogForwarder.cs`; that
+sibling's spec records the current state. Neither is enumerated here, and nothing above depends on them.
 
 The picture refresh the startup sequence runs is the picture cache's own behaviour, and that capability is not
 registered as a living spec. This capability owns only the sequence and the best-effort rule: that the refresh is

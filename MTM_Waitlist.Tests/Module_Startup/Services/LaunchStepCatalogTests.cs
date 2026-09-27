@@ -28,6 +28,50 @@ public sealed class LaunchStepCatalogTests
 {
     private readonly LaunchStepCatalog _catalog = new();
 
+    /// <summary>
+    /// Every individual thing the launch processes, in launch order. The grouped phases the catalogue used to hold
+    /// — "reading this computer's configuration", "working out who is signed in" — each bundled several of these,
+    /// and each of them now holds its own entry.
+    /// </summary>
+    private static readonly string[] s_individualOperations =
+    [
+        "read-local-settings",
+        "store-reachability",
+        "read-hardware-identity",
+        "read-computer-record",
+        "read-machine-configuration",
+        "save-machine-configuration",
+        "read-remembered-sign-in",
+        "resolve-person",
+        "resolve-roles",
+        "check-credential",
+        "judge-session",
+        "check-computer-against-store",
+        "check-temporary-credential",
+        "set-new-password",
+        "picture-cache",
+        "visual-priming",
+        "shell",
+    ];
+
+    /// <summary>
+    /// The operations whose whole point is a round trip to the store, and which must therefore name it.
+    /// </summary>
+    private static readonly string[] s_storeTouchingOperations =
+    [
+        "store-reachability",
+        "read-computer-record",
+        "read-machine-configuration",
+        "save-machine-configuration",
+        "resolve-person",
+        "resolve-roles",
+        "check-credential",
+        "judge-session",
+        "check-computer-against-store",
+        "check-temporary-credential",
+        "set-new-password",
+    ];
+
     /// <summary>The catalogue's own source, which is the whole scope of the derived-count check.</summary>
     private static RepositoryScanScope CatalogSourceScope => new()
     {
@@ -140,6 +184,75 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
+    public void Steps_EveryIndividualOperationTheLaunchProcesses_HasItsOwnEntry()
+    {
+        // Act / Assert: one entry per operation, not one per phase. The set is pinned so a later edit cannot
+        // quietly re-bundle two operations behind a single line and hide which of them stalled.
+        CollectionAssert.AreEqual(
+            s_individualOperations,
+            _catalog.Steps.Select(step => step.Id).ToArray(),
+            "the catalogue is not the individual-operation sequence the launch reports");
+    }
+
+    [TestMethod]
+    public void Steps_TheOperationsThatRoundTripToTheStore_AllNameTheStore()
+    {
+        // Act / Assert: the store is the target a reader would most want named, and eleven entries read it or
+        // write it, so a missing target there would leave most of the feed unattributable.
+        foreach (var id in s_storeTouchingOperations)
+        {
+            CollectionAssert.Contains(s_individualOperations, id, $"'{id}' is not in the catalogue any more");
+            Assert.AreEqual(
+                "the store",
+                _catalog.Find(id)?.Target,
+                $"'{id}' reads or writes the store but does not name it");
+        }
+    }
+
+    [TestMethod]
+    public void Steps_TheTwoBestEffortOperations_NameWhatTheyReachFor()
+    {
+        // Act / Assert: the two best-effort entries are the ones that reach outside this computer, so each names
+        // what it reaches for (FR-026, FR-027).
+        Assert.AreEqual("the picture share", _catalog.Find("picture-cache")?.Target);
+        Assert.AreEqual("the external system", _catalog.Find("visual-priming")?.Target);
+    }
+
+    [TestMethod]
+    public void Steps_AnOperationThatTouchesNothingOutsideThisComputer_DeclaresNoTarget()
+    {
+        // Act / Assert: reading this computer's own settings and name, and opening the screen, touch nothing a
+        // person could name, so those entries declare no target rather than an invented one.
+        Assert.IsNull(_catalog.Find("read-local-settings")!.Target);
+        Assert.IsNull(_catalog.Find("read-hardware-identity")!.Target);
+        Assert.IsNull(_catalog.Find("shell")!.Target);
+    }
+
+    [TestMethod]
+    public void Steps_EveryDeclaredTarget_IsPlainLanguageAndNotPadded()
+    {
+        // Act / Assert: a padded or blank target reads as a mistake on the feed rather than as a name.
+        foreach (var step in _catalog.Steps.Where(step => step.Target is not null))
+        {
+            Assert.IsFalse(string.IsNullOrWhiteSpace(step.Target), $"'{step.Id}' declares a blank target");
+            Assert.AreEqual(step.Target!.Trim(), step.Target, $"'{step.Id}' declares a padded target");
+        }
+    }
+
+    [TestMethod]
+    public void Steps_NoTwoOperations_ShareANameOrADescription()
+    {
+        // Act / Assert: two entries reading the same on the splash would be indistinguishable, which is exactly
+        // what one-entry-per-operation is supposed to fix.
+        CollectionAssert.AllItemsAreUnique(
+            _catalog.Steps.Select(step => step.Name).ToArray(),
+            "two operations share a name, so the splash could not tell them apart");
+        CollectionAssert.AllItemsAreUnique(
+            _catalog.Steps.Select(step => step.Description).ToArray(),
+            "two operations share a description, so the splash could not tell them apart");
+    }
+
+    [TestMethod]
     public void TotalCount_IsTheLengthOfTheStepList()
     {
         // Act / Assert: the displayed total is derived, which is what stops it going stale when the list changes.
@@ -161,8 +274,8 @@ public sealed class LaunchStepCatalogTests
     {
         // Arrange: two steps have ended, one of them through a failure, and a third has only been announced.
         var feed = new LaunchActivityFeed();
-        feed.Append(Line("configuration", LaunchFeedEntryKind.StepStarted));
-        feed.Append(Line("configuration", LaunchFeedEntryKind.StepCompleted));
+        feed.Append(Line("read-local-settings", LaunchFeedEntryKind.StepStarted));
+        feed.Append(Line("read-local-settings", LaunchFeedEntryKind.StepCompleted));
         feed.Append(Line("store-reachability", LaunchFeedEntryKind.StepStarted));
         feed.Append(Line("store-reachability", LaunchFeedEntryKind.StepFailed));
         feed.Append(Line("shell", LaunchFeedEntryKind.StepStarted));
@@ -180,8 +293,8 @@ public sealed class LaunchStepCatalogTests
     {
         // Arrange: a repeated step is one step, however many lines it took.
         var feed = new LaunchActivityFeed();
-        feed.Append(Line("configuration", LaunchFeedEntryKind.StepFailed));
-        feed.Append(Line("configuration", LaunchFeedEntryKind.StepCompleted));
+        feed.Append(Line("read-local-settings", LaunchFeedEntryKind.StepFailed));
+        feed.Append(Line("read-local-settings", LaunchFeedEntryKind.StepCompleted));
 
         // Act
         var completed = _catalog.CompletedCount(feed);
@@ -250,6 +363,27 @@ public sealed class LaunchStepCatalogTests
         [
             Step("configuration", TimeSpan.FromSeconds(5), bestEffort: false),
             Step("configuration", TimeSpan.FromSeconds(5), bestEffort: false),
+        ];
+
+        // Act / Assert
+        Assert.ThrowsException<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
+    }
+
+    [TestMethod]
+    public void Validate_WithABlankTarget_IsRefused()
+    {
+        // Arrange: a declared-but-blank target would leave a line naming nothing where the point is that it names
+        // what the operation is about.
+        LaunchStep[] steps =
+        [
+            new(
+                "configuration",
+                "configuration name",
+                "configuration description",
+                LaunchStepCategory.Configuration,
+                TimeSpan.FromSeconds(5),
+                false,
+                "   "),
         ];
 
         // Act / Assert

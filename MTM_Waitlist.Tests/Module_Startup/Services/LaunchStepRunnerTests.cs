@@ -249,12 +249,51 @@ public sealed class LaunchStepRunnerTests
         Assert.AreEqual("StepStarted", KindSequence(feed));
     }
 
+    [TestMethod]
+    public async Task RunAsync_WhenTheStepDeclaresATarget_EveryLineTheStepWritesNamesIt()
+    {
+        // Arrange
+        var feed = new LaunchActivityFeed();
+        var runner = new LaunchStepRunner(feed);
+
+        var step = StepWith("store-reachability", (_, _) => Task.FromResult(Succeeded()), target: "the store");
+
+        // Act
+        await runner.RunAsync(step, Context(feed), CancellationToken.None);
+
+        // Assert: with one entry per operation, a line that does not say what it is about cannot be told from a
+        // line about something else (FR-002, contract §3).
+        Assert.AreEqual(2, feed.Entries.Count);
+        Assert.IsTrue(
+            feed.Entries.All(entry => entry.Target == "the store"),
+            "a line the step wrote does not name the step's target");
+    }
+
+    [TestMethod]
+    public async Task RunAsync_WhenTheStepDeclaresNoTarget_WritesNoTarget()
+    {
+        // Arrange
+        var feed = new LaunchActivityFeed();
+        var runner = new LaunchStepRunner(feed);
+
+        var step = StepWith("read-hardware-identity", (_, _) => Task.FromResult(Succeeded()));
+
+        // Act
+        await runner.RunAsync(step, Context(feed), CancellationToken.None);
+
+        // Assert: an operation that touches nothing a person could name writes no target rather than an invented
+        // one, which is the honest answer for reading this computer's own hardware address.
+        Assert.AreEqual(2, feed.Entries.Count);
+        Assert.IsTrue(feed.Entries.All(entry => entry.Target is null));
+    }
+
     /// <summary>Builds a step whose work is the delegate the test supplies.</summary>
     private static ILaunchStep StepWith(
         string id,
         Func<LaunchStepContext, CancellationToken, Task<LaunchStepOutcome>> work,
         TimeSpan? maximum = null,
-        bool bestEffort = false)
+        bool bestEffort = false,
+        string? target = null)
         => new RecordingLaunchStep(
             new LaunchStep(
                 id,
@@ -262,7 +301,8 @@ public sealed class LaunchStepRunnerTests
                 $"{id} description",
                 LaunchStepCategory.Configuration,
                 maximum ?? TimeSpan.FromSeconds(5),
-                bestEffort),
+                bestEffort,
+                target),
             work);
 
     /// <summary>The context a step runs with: no person yet, a machine double, and the feed under test.</summary>
