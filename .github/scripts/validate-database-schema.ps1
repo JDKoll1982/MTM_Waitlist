@@ -417,13 +417,10 @@ function Install-Or-UpdateDatabase {
         foreach ($procedureCreatePath in $procedureCreatePaths) {
             Write-Log "Applying stored procedure file: $procedureCreatePath"
             $procedureText = Get-Content -Path $procedureCreatePath -Raw
-            $procedureDrop = 'DROP FUNCTION IF EXISTS fn_server_utc_now;'
-            $procedureCreate = $procedureText -replace '(?im)^\s*DROP FUNCTION IF EXISTS fn_server_utc_now;\s*', ''
-            $procedureCreate = $procedureCreate -replace '(?im)^\s*DELIMITER.*$', ''
+            $procedureCreate = $procedureText -replace '(?im)^\s*DELIMITER.*$', ''
             $procedureCreate = $procedureCreate -replace '(?m)^\s*\$\$\s*$', ''
             $procedureCreate = $procedureCreate -replace 'END\s*\$\$', 'END;'
 
-            Invoke-ValidatedCommand -Connection $targetConnection -CommandText $procedureDrop
             if ($procedureCreate.Trim()) {
                 Invoke-ValidatedCommand -Connection $targetConnection -CommandText $procedureCreate
             }
