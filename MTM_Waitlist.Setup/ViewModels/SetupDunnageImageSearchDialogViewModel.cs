@@ -17,10 +17,11 @@ namespace MTM_Waitlist.Module_Setup.ViewModels;
 /// </summary>
 public partial class SetupDunnageImageSearchDialogViewModel : ObservableRecipient
 {
-    private const string ShowPartsWithoutImagesKey = "Setup.DunnageImageSearch.ShowPartsWithoutImages";
+    /// <summary>The scoped-preference key the parts-without-pictures choice is stored under, against the person.</summary>
+    public const string SettingsKey = "Setup.DunnageImageSearch.ShowPartsWithoutImages";
 
     private readonly IDunnageWorkflowService _dunnageWorkflowService;
-    private readonly ILocalSettingsService _localSettingsService;
+    private readonly IScopedPreferenceStore _preferences;
     private List<SetupDunnagePart> _allParts = new();
     private bool _isRestoringShowPartsPreference;
     private bool _persistedShowPartsWithoutImages = true;
@@ -62,10 +63,10 @@ public partial class SetupDunnageImageSearchDialogViewModel : ObservableRecipien
 
     public SetupDunnageImageSearchDialogViewModel(
         IDunnageWorkflowService dunnageWorkflowService,
-        ILocalSettingsService localSettingsService)
+        IScopedPreferenceStore preferences)
     {
         _dunnageWorkflowService = dunnageWorkflowService;
-        _localSettingsService = localSettingsService;
+        _preferences = preferences;
     }
 
     public async Task InitializeAsync()
@@ -159,7 +160,7 @@ public partial class SetupDunnageImageSearchDialogViewModel : ObservableRecipien
         {
             // Default to "Show all" (true) so all parts are visible on first use;
             // only narrow to images-only when the user has explicitly saved that.
-            var savedPreference = await _localSettingsService.ReadSettingAsync<bool?>(ShowPartsWithoutImagesKey);
+            var savedPreference = await _preferences.ReadFlagAsync(SettingsKey, PreferenceScope.Person);
             var resolved = savedPreference ?? true;
             _persistedShowPartsWithoutImages = resolved;
             ShowPartsWithoutImages = resolved;
@@ -182,7 +183,7 @@ public partial class SetupDunnageImageSearchDialogViewModel : ObservableRecipien
     {
         try
         {
-            await _localSettingsService.SaveSettingAsync(ShowPartsWithoutImagesKey, isChecked);
+            await _preferences.WriteFlagAsync(SettingsKey, PreferenceScope.Person, isChecked);
             _persistedShowPartsWithoutImages = isChecked;
         }
         catch (Exception ex)

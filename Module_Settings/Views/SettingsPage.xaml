@@ -6,6 +6,7 @@
     xmlns:helpers="using:MTM_Waitlist.Module_Core.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:views="using:MTM_Waitlist.Module_Settings.Views"
     xmlns:wct="using:CommunityToolkit.WinUI.Controls"
     xmlns:xaml="using:Microsoft.UI.Xaml"
     x:Name="RootPage"
@@ -737,7 +738,7 @@
                     <wct:SettingsExpander.Description>
                         <TextBlock
                             x:Uid="Settings_IgnoredLocations_Description"
-                            Text="Locations omitted from inventory lists and totals (for example WC, NCM, V-WC, NCM-VITS, SHIP). Editing is limited to roles above Material Handler." />
+                            Text="Locations omitted from inventory lists and totals (for example WC, NCM, V-WC, NCM-VITS, SHIP). Everyone can read the list; changing it is limited to the IT team." />
                     </wct:SettingsExpander.Description>
 
                     <wct:SettingsExpander.Items>
@@ -832,6 +833,62 @@
                             </Grid>
                         </wct:SettingsCard>
                     </wct:SettingsExpander.Items>
+                </wct:SettingsExpander>
+
+                <!-- How long a sign-in lasts (FR-029). The panel is only offered to a person who may change the
+                     length, and the command refuses the write on the same answer. -->
+                <wct:SettingsExpander
+                    AutomationProperties.AutomationId="SettingsPage_SessionLengthExpander"
+                    x:Name="SessionLengthExpander"
+                    x:Load="{x:Bind ViewModel.IsSessionLengthPanelVisible, Mode=OneWay}"
+                    Description="{x:Bind ViewModel.SessionLengthDescription}"
+                    Header="{x:Bind ViewModel.SessionLengthTitle}"
+                    HorizontalAlignment="Stretch"
+                    IsExpanded="False">
+                    <wct:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE916;" />
+                    </wct:SettingsExpander.HeaderIcon>
+
+                    <wct:SettingsExpander.Items>
+                        <wct:SettingsCard
+                            ContentAlignment="Vertical"
+                            HorizontalContentAlignment="Stretch">
+                            <StackPanel Spacing="8">
+                                <muxc:NumberBox
+                                    AutomationProperties.AutomationId="SettingsPage_SessionLength_Minutes"
+                                    Header="{x:Bind ViewModel.SessionLengthLabel}"
+                                    Maximum="1440"
+                                    Minimum="15"
+                                    SmallChange="15"
+                                    SpinButtonPlacementMode="Compact"
+                                    Value="{x:Bind ViewModel.SessionLengthMinutes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button
+                                    AutomationProperties.AutomationId="SettingsPage_SessionLength_SaveButton"
+                                    HorizontalAlignment="Left"
+                                    Command="{x:Bind ViewModel.SaveSessionLengthCommand}"
+                                    Content="{x:Bind ViewModel.SessionLengthSaveLabel}" />
+                                <TextBlock
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Text="{x:Bind ViewModel.SessionLengthStatusMessage, Mode=OneWay}" />
+                            </StackPanel>
+                        </wct:SettingsCard>
+                    </wct:SettingsExpander.Items>
+                </wct:SettingsExpander>
+
+                <!-- The developer log panel from Phase 7 (US5, SC-005). Kept out of the tree for a person who
+                     may not open it; the panel's own view model is what enforces the read and the copy. -->
+                <wct:SettingsExpander
+                    AutomationProperties.AutomationId="SettingsPage_DeveloperLogExpander"
+                    x:Name="DeveloperLogExpander"
+                    x:Load="{x:Bind ViewModel.IsDeveloperLogPanelVisible, Mode=OneWay}"
+                    Header="{x:Bind ViewModel.DeveloperLogPanelTitle}"
+                    HorizontalAlignment="Stretch"
+                    IsExpanded="False">
+                    <wct:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE9D9;" />
+                    </wct:SettingsExpander.HeaderIcon>
+
+                    <views:DeveloperLogPanelView x:Name="DeveloperLogPanel" />
                 </wct:SettingsExpander>
 
                 <!-- New request alerts -->

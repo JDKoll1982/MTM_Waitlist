@@ -1,13 +1,69 @@
 # Feature Specification: Startup Rebuild
 
+## Clarifications
+
+### Session 2026-09-28
+
+- Q: Should the launch copy key files from the shared keys folder into the local cache, and if so which ones?
+  → A: Nothing copies or reads any key file. Withdrawing remember-me removes the only reader of the shared key
+  file, so the file and any local copy of it are retired together. (Supersedes the earlier answer that only the
+  keys actually read would be copied, and the later one that kept a copy as a fallback.)
+- Q: The permission test that expects the older, narrower role list fails whenever the store is online. → A:
+  Update the test to the widened list the seed grants; the seed is right and the test is stale.
+- Q: No stored procedure returns a person's stored credential, so machine setup would refuse every sign-in on a
+  real machine. → A: Add the procedure that returns it.
+- Q: A quiet repair cannot tell a repaired machine setting from a store outage, so the first stop always looks
+  fixed. → A: The repair must verify what actually changed before it calls itself successful.
+- Q: The installer seeds the session length under one key name while the launch reads another. → A: The key the
+  launch reads wins; reseed and correct the validator.
+- Q: The build guard lost its pattern for the retired recovery service, so that name could return unnoticed. →
+  A: Restore the pattern.
+- Q: A recorded removal proof describes the placeholder phase rather than the shipped behaviour. → A: Re-take
+  it against the shipped behaviour.
+- Q: The launch's step list declares more operations than are implemented. → A: Bring the list and the
+  implemented steps level.
+- Q: The new database procedures have never been validated against a real store. → A: Run the schema validator
+  against the store.
+- Q: A live integration test file still names replaced code and was never run. → A: Fix it and run it.
+- Q: The shared strings file's older naming findings would fail a changed-file check on a future change. → A:
+  Fix the older findings now.
+- Q: The application settings file declares a logging section for a type that no longer exists. → A: Remove it.
+- Q: The launch hands over to the main window on a background thread. → A: Hand back on the interface thread.
+- Q: A seed folder is named for work centres but contains workstations, duplicating another folder. → A:
+  Delete it.
+- Q: Two installer defects are corrected in the scripts but not yet applied. → A: Run the installer and apply
+  them to the store.
+- Q: Two acceptance runs have never been run. → A: Validate them against the shared-location change first, then
+  run both.
+- Q: Three new surfaces have never been reviewed by a person. → A: The launch window must open centred on the
+  screen, and its list of performed steps becomes a single line showing only the work under way, with no
+  history; the administrator sign-in that precedes machine setup and the machine setup screen are both to be
+  reworked with cards, padding and margins. The administrator sign-in has not yet been seen by the person.
+- Q: The blocked-state window keeps its original wording while every other surface was rewritten. → A:
+  Rewrite it to match.
+- Q: The window-behaviour cases are proved by reading the window's code rather than driving the application. →
+  A: Drive the running application.
+- Q: The close route and the reset preview are covered by unit tests only. → A: Prove them end to end against a
+  reachable store.
+- Q: The theme is asserted by reading the store rather than by a real window. → A: Prove it in a real window.
+- Q: A machine with no readable hardware address cannot be exercised on this workstation. → A: Accept the case
+  as environment-gated.
+- Q: The sweeps' original 111-case breakdown was not recovered. → A: Recover the full breakdown and review it
+  with the person.
+- Q: A remembered sign-in cannot be read before a name is typed, because the store keys it by person and
+  machine. → A: Withdraw remember-me and add a previous-users section to the sign-in screen: a modal showing
+  the last six people who signed in, as cards that fill in the user name, with the password still required.
+- Q: Now that remember-me is withdrawn, does the local copy of the shared key file survive? → A: No. Asked
+  what would still open the key once remember-me goes, the answer was to remove it, so neither the key file nor
+  a copy of it is read or kept.
+
 ## User Scenarios & Testing
 
 ### User Story 1 - A launch that can be watched and diagnosed (Priority: P1)
 
-Someone opens the application. The launch window shows, line by line and in plain language, everything the
-application is doing while it starts: reading its configuration, contacting the store, checking this computer,
-working out who is signed in, and preparing the first screen. If the launch stops, the window says which line
-stopped it and why.
+Someone opens the application. The launch window shows, in plain language, the piece of work it is on while it
+starts: reading its configuration, contacting the store, checking this computer, working out who is signed in,
+and preparing the first screen. If the launch stops, the window names the work that stopped it and why.
 
 **Why this priority**: today a stopped launch is indistinguishable from a slow one. Support is told "it hangs",
 and nobody can say where. Making the launch readable turns every other fault in this feature from a report into
@@ -27,9 +83,9 @@ the last line.
    reports that and either carries on or stops with a cause. It never waits without end.
 4. **Given** the launch has an error to report, **When** the message appears, **Then** it appears in a strip at
    the bottom of the window and does not cover the list of work.
-5. **Given** the launch is under way, **When** it performs an individual operation, **Then** that operation is
-   shown as its own line on the window, so every individual thing the launch processes is visible rather than a
-   single line standing for a group of them.
+5. **Given** the launch is under way, **When** it moves from one piece of work to the next, **Then** the window
+   replaces the line it is showing rather than adding to it, so the window states what is happening now and
+   keeps no history.
 
 ### User Story 2 - A new machine is configured deliberately, and cannot be skipped (Priority: P1)
 
@@ -63,8 +119,8 @@ Then confirm that no combination of closing, cancelling or dismissing reaches th
 A person signs in and the application decides three things: whether the store recognises them, whether their
 session is still good, and whether this machine is one it knows. A session is judged by the store's clock. An
 account still on a temporary credential is asked for that credential, allowed five tries, and then required to
-set a new password before it can carry on. A person may choose to be remembered on that machine, and if the
-application cannot read what it needs to honour that, the ordinary sign-in form appears instead.
+set a new password before it can carry on. The sign-in screen offers the last six people who signed in on this
+computer, and choosing one fills in the user name while the password is still required.
 
 **Why this priority**: every action on the shop floor is attributed to a person, and an attribution made on a
 half-checked identity is worse than no attribution at all.
@@ -80,8 +136,8 @@ refused even with the correct value, then restart and confirm it is still refuse
    attempt is refused even with the correct value, and it stays refused across a restart.
 3. **Given** a temporary credential has been accepted, **When** the person carries on, **Then** they are asked
    to set a new password before anything else.
-4. **Given** what is needed to honour a remembered sign-in cannot be read, **When** the person arrives at
-   sign-in, **Then** the ordinary form is offered and nothing is kept on the machine in its place.
+4. **Given** a computer where several people have signed in, **When** the sign-in screen is shown, **Then** the
+   last six are offered as cards, choosing one fills in the user name only, and the password is still asked for.
 5. **Given** a machine's hardware identity cannot be read, **When** the machine check runs, **Then** the person
    is admitted, because a fact that could not be read is not a failed check.
 6. **Given** a person signs out, **When** the application restarts, **Then** nothing about their session
@@ -155,6 +211,36 @@ computer carries the last person's choices.
 3. **Given** a computer holds nothing but what it needs to reach the store, **When** the application starts,
    **Then** it starts normally and finds everything else in the store.
 
+### User Story 7 - The shared locations belong to the plant, and work carries on when the share does not (Priority: P2)
+
+An installer points a new computer at the store and gives it a name. Where the pictures and the keys live is the
+plant's answer, already held by the settings panel, so the installer is not asked for it and two computers cannot
+disagree about it. When the file share cannot be reached the computer carries on from the copies it holds, and it
+says so rather than showing a copy as though it were the shared one.
+
+**Why this priority**: Asking the setup screen for the shared folders made every computer a second owner of a
+plant-wide answer, and a plant-wide answer with several owners drifts. A computer that shows yesterday's picture
+and says so is worth more than one that stops because a file server is down.
+
+**Independent Test**: Set a computer up and confirm the screen asks only for its name and note. Then make the
+share unreachable and confirm the application still starts, still draws pictures from the copies held on the
+computer, and states that those copies are what it is using.
+
+**Acceptance Scenarios**:
+
+1. **Given** a computer that has not been set up, **When** the setup screen is shown, **Then** it asks for the
+   computer's name and an optional note and offers nothing that would set a shared folder per computer.
+2. **Given** the shared pictures folder changed in the settings panel, **When** any computer next reads a
+   picture, **Then** it reads from the changed folder without being set up again.
+3. **Given** a share that cannot be reached, **When** the launch runs, **Then** it finishes, pictures resolve
+   under the local cache, and the launch states that the copies held on this computer are being used.
+4. **Given** a share that cannot be reached, **When** the launch shows a picture the computer has already
+   copied, **Then** the copy held on the computer is used.
+5. **Given** a share that cannot be reached and a picture the computer has never copied, **When** the launch
+   runs, **Then** the picture is reported as missing and the launch still finishes.
+
+---
+
 ## Edge Cases
 
 - The store cannot be reached at launch: the launch stops, states the cause, keeps no record on the machine, and
@@ -163,8 +249,8 @@ computer carries the last person's choices.
   carries on.
 - A machine's configuration is deleted while the application is running: setup returns at the next check.
 - The machine's display name is already in use: the save is refused and a different name is asked for.
-- What is needed to honour a remembered sign-in cannot be read: sign-in works normally and remember-me quietly
-  does not.
+- The store cannot say who signed in last on this computer: the sign-in screen offers no names and the person
+  types their user name.
 - A reset of a temporary credential happens while the person is signing in with the old one.
 - The launch window is closed while a launch is running.
 - The machine has no readable hardware address.
@@ -218,8 +304,10 @@ computer carries the last person's choices.
 - **FR-012**: An account holding a temporary credential MUST be refused after five failed attempts, including
   attempts presenting the correct value, and the refusal MUST survive a restart.
 - **FR-013**: The set-a-new-password step MUST open only after the temporary credential has been accepted.
-- **FR-014**: A remembered sign-in MUST be held against the person in the store and MUST be encrypted, and a
-  failure to read what protects it MUST fall back to the ordinary sign-in form.
+- **FR-014**: The sign-in screen MUST offer the last six people who signed in on this computer as a list of
+  choices drawn from the store, and choosing one MUST fill in the user name only. The password MUST still be
+  entered, nothing about a person's sign-in MAY be kept on the computer to make that offer, and no sign-in MAY
+  be honoured without a password.
 - **FR-015**: A computer whose hardware identity cannot be read MUST be admitted.
 - **FR-016**: A stopped launch MUST offer to repeat the failed work.
 - **FR-017**: Resetting MUST be offered only where resetting could remove the cause.
@@ -237,7 +325,8 @@ computer carries the last person's choices.
   `IT Department` or `Developer`.
 - **FR-025**: Nothing except what is needed to reach the store or the external read-only system MAY be kept on
   a computer, apart from the local copy of pictures and the one reviewed exception, which holds neither a secret
-  nor anything belonging to a person or a machine.
+  nor anything belonging to a person or a machine. No key material from the shared folder MAY be kept, and no
+  key file MAY be read or copied, because withdrawing remember-me removes the only thing that ever opened one.
 - **FR-026**: The copy of pictures MUST be best effort and MUST NOT be able to stop the launch.
 - **FR-027**: Whether the external system can be reached MUST be settled before the main screens open.
 - **FR-028**: The launch behaviour this feature replaces MUST NOT be reintroduced, and a build MUST fail if it
@@ -269,9 +358,23 @@ computer carries the last person's choices.
   currently listed, which the panel has already bounded — as plain text that can be pasted elsewhere, carrying
   for each entry everything the store holds for it: the fault in full with its chain, the recorded context, the
   store diagnostics and the entry's place in the chain. Copying MUST write nothing to the machine.
-- **FR-039**: The launch MUST show every individual operation it processes on the launch window — each operation
-  holding its own line rather than standing behind a group's single line — so what the person watches matches
-  what the launch does.
+- **FR-039**: The launch window MUST show the piece of work it is on as a single line that is replaced as the
+  launch moves on, so the window states the present rather than accumulating a history of what it has already
+  done.
+
+- **FR-040**: The shared pictures folder MUST be held once for the whole plant, changeable from the settings
+  panel, and MUST NOT be captured per computer. There is no shared keys folder: nothing reads a key file.
+- **FR-041**: A computer MUST count as configured once the store holds its record and its name, and MUST NOT
+  require any folder to be set before it can be used.
+- **FR-042**: When the configured shared folder cannot be reached, a picture MUST resolve under the local cache
+  folder, and the launch MUST state that the copies held on this computer are the ones being used.
+- **FR-043**: No key file MUST be read, copied or kept. Withdrawing remember-me removes the only reader of the
+  shared key file, so the file named in Verbatim Constraints is retired with it, and nothing takes its place.
+- **FR-044**: A picture whose copy is not held locally and whose share cannot be reached MUST be reported as
+  missing rather than drawn from a stand-in, and MUST NOT stop the launch.
+- **FR-045**: The launch window MUST open centred on the screen.
+- **FR-046**: The sign-in that authorises machine setup, and the machine setup screen itself, MUST be laid out
+  with cards, padding and margins rather than as plain stacked fields.
 
 ## Key Entities
 
@@ -279,11 +382,12 @@ computer carries the last person's choices.
   store and never editable from the application during a launch.
 - **Machine**: the computer the application is running on, identified by its name and a stable hardware address,
   with a display name and description that people recognise.
-- **Machine configuration**: what a machine needs before it may be used: its own identity, and where its
-  pictures come from. Records are not part of it, because records live only in the store.
+- **Machine configuration**: what a machine needs before it may be used: its own identity — its name and the
+  description people recognise it by. Records are not part of it, because records live only in the store, and
+  neither is where its pictures come from, which is held once for the plant.
 - **Session**: a person's signed-in period on one machine, with an end time, judged against the store's clock.
-- **Remembered sign-in**: a person's choice to be recognised on one machine, held against the person and kept
-  unreadable to anyone without the means to decrypt it.
+- **Previous sign-in**: the record that a person signed in on a computer, held in the store so the sign-in
+  screen can offer them as a choice. It carries no password and no means of signing in without one.
 - **Scoped preference**: a choice that belongs to a person, a machine, a role or the whole plant.
 - **Diagnostic entry**: one thing the application recorded, with the time it happened, its severity, origin,
   machine, person, action, the fault in full — its type, message, stack and complete exception chain — a
@@ -330,6 +434,15 @@ computer carries the last person's choices.
   exception type, every exception in the chain, the machine, the action and the entry's chain link. Verified by
   raising a knowing fault, copying its entry and reading the pasted text.
 
+- **SC-018**: A new computer is set up by giving it a name and, optionally, a note. The setup screen asks for
+  nothing else, and no shared folder can be set from it.
+- **SC-019**: With the share unreachable, the application still starts and still draws pictures from the copies
+  held on the computer, and the launch states that those copies are the ones being used.
+- **SC-020**: Changing the shared pictures folder in the settings panel changes where every computer reads its
+  pictures from, with no computer set up again.
+- **SC-021**: A computer that already holds its own picture-source rows keeps working across this change, and
+  its readings come from the plant-wide settings afterwards.
+
 ## Assumptions
 
 - A session lasts eight hours by default, and that default is changeable from the settings panel by `IT
@@ -340,10 +453,17 @@ computer carries the last person's choices.
 - Roles come from the store, and the local list that used to grant a developer everything on a machine is
   retired. A person needing developer access needs it in the store. The development seed grants `Developer` to
   `JKoll` and `JohnK`, so each of the two existing seeded machines has a developer who can sign in.
+- A share that cannot be reached is a state to work through rather than a fault to report: the computer holds
+  copies of what it has already read, and those copies are what it uses until the share answers again.
+- A computer set up before this change holds its own picture-source rows. They are read once to keep that
+  computer working and are not written again by anything; where the pictures come from afterwards is the
+  plant-wide setting.
 - Records live only in the store, so machine configuration carries no destination path for them. What a machine
-  is configured with is its own identity and where its pictures come from.
-- The means to decrypt a remembered sign-in already exists as a shared secret file. The application reads it to
-  obtain the key. It is not created, changed or rotated by this work.
+  is configured with is its own identity and nothing else: where its pictures come from is held once for the
+  plant, and what it reads from a shared folder is copied locally only so the computer keeps working when that
+  folder cannot be reached.
+- The shared key file is retired along with remember-me. It was first kept as a fallback for an unreachable
+  share, but once remember-me goes nothing opens it, so it is not read, not copied and not kept.
 - Preferences belong to the person, except the list of locations to hide, which belongs to the plant. Every
   setting that is restricted to particular roles today keeps that same restriction.
 - The launch window is the only surface shown while a launch runs, except when machine setup is triggered: that
@@ -368,7 +488,9 @@ computer carries the last person's choices.
 
 These were pinned by the request and must match exactly:
 
-- The shared key file: `\\mtmanu-fs01\Expo Drive\Software Development\Live Applications\MTM_Application_Keys\MTM_AUTH_USER_SECRET_KEY.txt`
+- The shared key file, retired 2026-09-28: `\\mtmanu-fs01\Expo Drive\Software Development\Live Applications\MTM_Application_Keys\MTM_AUTH_USER_SECRET_KEY.txt`
+  — named here as the file this feature stops reading, so the record still shows what was withdrawn and what
+  was once relied on.
 - The session table: `user_active_sessions`
 - The records table reused for diagnostics: `ops_startup_logs`
 - The two roles that may configure a machine or change the plant-wide list: `IT Department` and `Developer`

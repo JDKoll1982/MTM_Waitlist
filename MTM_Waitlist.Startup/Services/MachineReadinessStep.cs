@@ -119,7 +119,7 @@ internal sealed class ReadHardwareIdentityStep : ILaunchStep
 
     /// <summary>Creates the step over the sequence it takes its descriptor from.</summary>
     /// <param name="catalog">The sequence, which is where the step takes its descriptor from rather than restating it.</param>
-    internal ReadHardwareIdentityStep(LaunchStepCatalog catalog)
+    public ReadHardwareIdentityStep(LaunchStepCatalog catalog)
         => _descriptor = LaunchStepSupport.DescriptorFor(catalog, StepId);
 
     /// <inheritdoc />
@@ -172,7 +172,7 @@ internal sealed class ReadComputerRecordStep : ILaunchStep
     /// <summary>Creates the step over the machine facts service, which is the pipeline's one writer for the row.</summary>
     /// <param name="catalog">The sequence, which is where the step takes its descriptor from rather than restating it.</param>
     /// <param name="machineFacts">The concrete service, because the store read is its write, and the read-only contract has none.</param>
-    internal ReadComputerRecordStep(LaunchStepCatalog catalog, MachineFactsService machineFacts)
+    public ReadComputerRecordStep(LaunchStepCatalog catalog, MachineFactsService machineFacts)
     {
         ArgumentNullException.ThrowIfNull(machineFacts);
 
@@ -256,7 +256,7 @@ internal sealed class SaveMachineConfigurationStep : ILaunchStep
     /// <param name="catalog">The sequence, which is where the step takes its descriptor from rather than restating it.</param>
     /// <param name="configuration">The service that owns these rows, and the only writer of them.</param>
     /// <param name="pending">The configuration captured and not yet saved.</param>
-    internal SaveMachineConfigurationStep(
+    public SaveMachineConfigurationStep(
         LaunchStepCatalog catalog,
         IMachineConfigurationService configuration,
         IPendingMachineConfiguration pending)

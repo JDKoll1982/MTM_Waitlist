@@ -93,7 +93,10 @@ public static class ExceptionDetailSerializer
 
             if (nodes.Count > 0 && nodes[0] is JsonObject first)
             {
-                first[FullKey] = ReadMember(exception.ToString, AbsentMarker);
+                // The familiar representation goes through the same redaction as the structured members: a
+                // provider writes a statement's parameters into the text it produces, and ToString() is that
+                // text for the whole chain (§6, FR-036).
+                first[FullKey] = RedactMessage(ReadMember(exception.ToString, AbsentMarker));
 
                 if (truncated)
                 {
@@ -136,11 +139,106 @@ public static class ExceptionDetailSerializer
             (errorType ?? string.Empty).Trim().ToLowerInvariant(),
             (module ?? string.Empty).Trim().ToLowerInvariant(),
             (action ?? string.Empty).Trim().ToLowerInvariant(),
-            NormalizeMessage(message));
+            NormalizeMessage(RedactMessage(message)));
 
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(shape));
         return Convert.ToHexStringLower(hash);
     }
+
+    /// <summary>
+    /// Removes a fault message's parameter values before anything is written, keeping the names and their count
+    /// (`contracts/logging-contract.md` §6; FR-036).
+    /// </summary>
+    /// <param name="message">The message, as the provider or the caller wrote it.</param>
+    /// <returns>
+    /// The message cut at the first <c>=</c> that follows a parameter name. A message with no such parameter is
+    /// returned unchanged, so a fault that carries no values loses nothing. When values were removed, the names
+    /// that were found and their count are named in their place: a reader needs to know which parameter the store
+    /// objected to, and naming it records the name rather than the value.
+    /// </returns>
+    /// <remarks>
+    /// A provider puts a statement's parameters into its message as <c>@name=value</c>, which is why a message is
+    /// the one part of a fault that can carry a credential even though nothing here ever asked for one. The cut
+    /// is deliberately blunt and one-way: the cost of cutting a message that had no value in it is a shorter
+    /// message, while the cost of keeping one that did is a credential in a store built to be copied out of a
+    /// panel.
+    /// </remarks>
+    public static string RedactMessage(string? message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return string.Empty;
+        }
+
+        var names = new List<string>();
+        var searchFrom = 0;
+
+        while (searchFrom < message.Length)
+        {
+            var equals = message.IndexOf('=', searchFrom);
+            if (equals < 0)
+            {
+                break;
+            }
+
+            var name = ParameterNameBefore(message, equals);
+
+            if (name.Length > 0)
+            {
+                names.Add(name);
+
+                // Everything from the '=' onwards belongs to a parameter, and the message's own words end here.
+                var kept = message[..equals];
+                var recorded = string.Join(", ", names);
+
+                return $"{kept}<parameter values removed; {names.Count} recorded: {recorded}>";
+            }
+
+            searchFrom = equals + 1;
+        }
+
+        return message;
+    }
+
+    /// <summary>
+    /// The parameter name immediately before an <c>=</c>, or an empty string when what precedes it is not one.
+    /// </summary>
+    /// <param name="message">The message being read.</param>
+    /// <param name="equalsIndex">The index of the <c>=</c>.</param>
+    /// <remarks>
+    /// A parameter name is an identifier of two or more characters — letters, digits and underscores, optionally
+    /// written with the <c>@</c> or <c>:</c> sigil a provider uses — standing on its own. Requiring two characters
+    /// and a delimiter before it is what keeps an ordinary sentence's <c>=</c> from cutting the message short.
+    /// </remarks>
+    private static string ParameterNameBefore(string message, int equalsIndex)
+    {
+        var start = equalsIndex;
+
+        while (start > 0 && IsParameterNameCharacter(message[start - 1]))
+        {
+            start--;
+        }
+
+        var name = message[start..equalsIndex];
+        var bare = name.TrimStart('@', ':', '?');
+
+        if (bare.Length < 2)
+        {
+            return string.Empty;
+        }
+
+        // The name has to stand on its own: a word touching a letter before it is prose rather than a parameter.
+        if (start > 0 && char.IsLetterOrDigit(message[start - 1]))
+        {
+            return string.Empty;
+        }
+
+        return bare;
+    }
+
+    /// <summary>Whether a character may appear in a parameter name.</summary>
+    private static bool IsParameterNameCharacter(char character)
+        => char.IsLetterOrDigit(character) || character is '_' or '@' or ':' or '?';
 
     /// <summary>
     /// Reduces a message to its shape: quoted values become a placeholder and digit runs become a placeholder, so
@@ -215,7 +313,7 @@ public static class ExceptionDetailSerializer
             ["level"] = level,
             ["index"] = index,
             ["type"] = ReadMember(() => exception.GetType().FullName, AbsentMarker),
-            ["message"] = ReadMember(() => exception.Message, AbsentMarker),
+            ["message"] = RedactMessage(ReadMember(() => exception.Message, AbsentMarker)),
             ["stackTrace"] = ReadMember(() => exception.StackTrace, AbsentMarker),
             ["source"] = ReadMember(() => exception.Source, AbsentMarker),
             ["hresult"] = ReadHResult(exception),
@@ -352,6 +450,28 @@ public static class ExceptionDetailSerializer
 
     private static bool IsDenied(string name) =>
         s_deniedKeyFragments.Any(fragment => name.Contains(fragment, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// Whether a name may never be written, whatever value stands beside it (`contracts/logging-contract.md` §6).
+    /// </summary>
+    /// <param name="name">The name of a custom data key or a structured property.</param>
+    /// <returns><c>true</c> when the value beside that name must be dropped rather than written.</returns>
+    /// <remarks>
+    /// A name that names a path is not denied by a fragment it also carries. §6 grants one exception in so many
+    /// words — the shared key file's path is the only secret-adjacent value ever written, deliberately, so that a
+    /// support reader can see which key a decryption failure used — and a path is not the material it points at.
+    /// Without this the blunt fragment match would drop <c>keyPath</c> for containing "key" and take that reader's
+    /// only clue with it.
+    /// </remarks>
+    public static bool IsNeverWritten(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return false;
+        }
+
+        return !name.Contains("path", StringComparison.OrdinalIgnoreCase) && IsDenied(name);
+    }
 
     private static bool TryDescribeValue(object? value, out JsonNode? described)
     {

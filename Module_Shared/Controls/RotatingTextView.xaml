@@ -1,0 +1,45 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Shared.Controls.RotatingTextView"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        One line of status that changes as work moves on: the line already on screen slips up and fades, and the
+        line replacing it rises into its place. It is what makes a launch that is still working look like it is
+        still working, and it is why the status is a control rather than a bare TextBlock — a value that changes
+        with no transition reads as a flicker.
+
+        The viewport clips the movement, so the two lines are never both half-drawn outside the field. The system's
+        animation setting is honoured: with animations switched off the value is simply replaced, because movement
+        a person has asked not to see is not a decoration, it is a defect.
+
+        Text and type are bound to the control's own properties so a caller keeps the font and colour it already
+        had, exactly as the scrolling text control beside this one does.
+    -->
+    <Grid x:Name="Viewport" SizeChanged="OnViewportSizeChanged">
+        <Grid.Clip>
+            <RectangleGeometry x:Name="ViewportClip" />
+        </Grid.Clip>
+        <TextBlock
+            x:Name="Line"
+            AutomationProperties.AutomationId="RotatingTextLine"
+            MaxLines="2"
+            TextTrimming="CharacterEllipsis"
+            TextWrapping="Wrap"
+            FontFamily="{Binding FontFamily, ElementName=Root}"
+            FontSize="{Binding FontSize, ElementName=Root}"
+            FontStyle="{Binding FontStyle, ElementName=Root}"
+            FontWeight="{Binding FontWeight, ElementName=Root}"
+            Foreground="{Binding Foreground, ElementName=Root}"
+            Text="{Binding Text, ElementName=Root}"
+            TextAlignment="{Binding TextAlignment, ElementName=Root}">
+            <TextBlock.RenderTransform>
+                <TranslateTransform x:Name="Slide" />
+            </TextBlock.RenderTransform>
+        </TextBlock>
+    </Grid>
+</UserControl>

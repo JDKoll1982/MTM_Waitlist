@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="MTM_Waitlist.Module_Settings.Views.DeveloperLogPanelView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:logging="using:MTM_Waitlist.Module_Logging"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d">
+
+    <!--
+        The developer log panel. It holds no rule of its own: what may be read, what the filter means, what the
+        copy contains and whether the reader may open it at all come from the view model, so the gate is enforced
+        where the work happens rather than by hiding this control.
+    -->
+    <StackPanel Spacing="10" Visibility="{x:Bind ViewModel.IsPermitted, Mode=OneWay}">
+
+        <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.HeadingText}" />
+        <TextBlock
+            Style="{ThemeResource BodyTextBlockStyle}"
+            Text="{x:Bind ViewModel.DescriptionText}"
+            TextWrapping="Wrap" />
+
+        <!-- The filter set the store indexes: severity, machine, person, module, fault type, and the window. -->
+        <Grid ColumnSpacing="12" RowSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <muxc:ComboBox
+                Grid.Row="0"
+                Grid.Column="0"
+                AutomationProperties.AutomationId="DeveloperLogPanelView_Severity"
+                Header="{x:Bind ViewModel.SeverityLabelText}"
+                HorizontalAlignment="Stretch"
+                ItemsSource="{x:Bind ViewModel.SeverityOptions}"
+                SelectedItem="{x:Bind ViewModel.SelectedSeverity, Mode=TwoWay}" />
+
+            <TextBox
+                Grid.Row="0"
+                Grid.Column="1"
+                AutomationProperties.AutomationId="DeveloperLogPanelView_Machine"
+                Header="{x:Bind ViewModel.MachineLabelText}"
+                Text="{x:Bind ViewModel.HostId, Mode=TwoWay}" />
+
+            <TextBox
+                Grid.Row="0"
+                Grid.Column="2"
+                AutomationProperties.AutomationId="DeveloperLogPanelView_Person"
+                Header="{x:Bind ViewModel.PersonLabelText}"
+                Text="{x:Bind ViewModel.ActorId, Mode=TwoWay}" />
+
+            <TextBox
+                Grid.Row="1"
+                Grid.Column="0"
+                AutomationProperties.AutomationId="DeveloperLogPanelView_Module"
+                Header="{x:Bind ViewModel.ModuleLabelText}"
+                Text="{x:Bind ViewModel.Module, Mode=TwoWay}" />
+
+            <TextBox
+                Grid.Row="1"
+                Grid.Column="1"
+                AutomationProperties.AutomationId="DeveloperLogPanelView_ErrorType"
+                Header="{x:Bind ViewModel.ErrorTypeLabelText}"
+                Text="{x:Bind ViewModel.ErrorType, Mode=TwoWay}" />
+
+            <StackPanel
+                Grid.Row="1"
+                Grid.Column="2"
+                Orientation="Horizontal"
+                Spacing="12">
+                <muxc:ComboBox
+                    MinWidth="120"
+                    AutomationProperties.AutomationId="DeveloperLogPanelView_Window"
+                    Header="{x:Bind ViewModel.WindowLabelText}"
+                    ItemsSource="{x:Bind ViewModel.WindowDayOptions}"
+                    SelectedItem="{x:Bind ViewModel.WindowDays, Mode=TwoWay}" />
+                <muxc:ComboBox
+                    MinWidth="120"
+                    AutomationProperties.AutomationId="DeveloperLogPanelView_PageSize"
+                    Header="{x:Bind ViewModel.PageSizeLabelText}"
+                    ItemsSource="{x:Bind ViewModel.PageSizeOptions}"
+                    SelectedItem="{x:Bind ViewModel.PageSize, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Row="2"
+                Grid.Column="0"
+                Grid.ColumnSpan="3"
+                Orientation="Horizontal"
+                Spacing="12">
+                <CheckBox
+                    VerticalAlignment="Center"
+                    AutomationProperties.AutomationId="DeveloperLogPanelView_Group"
+                    Content="{x:Bind ViewModel.GroupLabelText}"
+                    IsChecked="{x:Bind ViewModel.GroupByFingerprint, Mode=TwoWay}" />
+                <Button
+                    AutomationProperties.AutomationId="DeveloperLogPanelView_Apply"
+                    Command="{x:Bind ViewModel.LoadCommand}"
+                    Content="{x:Bind ViewModel.ApplyLabelText}" />
+                <Button
+                    AutomationProperties.AutomationId="DeveloperLogPanelView_CopyList"
+                    Command="{x:Bind ViewModel.CopyListCommand}"
+                    Content="{x:Bind ViewModel.CopyListLabelText}" />
+            </StackPanel>
+        </Grid>
+
+        <muxc:ProgressRing
+            Width="24"
+            Height="24"
+            HorizontalAlignment="Left"
+            IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+
+        <TextBlock
+            AutomationProperties.AutomationId="DeveloperLogPanelView_Message"
+            Style="{ThemeResource BodyTextBlockStyle}"
+            Text="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+            TextWrapping="Wrap" />
+
+        <Button
+            AutomationProperties.AutomationId="DeveloperLogPanelView_Retry"
+            Command="{x:Bind ViewModel.LoadCommand}"
+            Content="{x:Bind ViewModel.RetryLabelText}"
+            Visibility="{x:Bind ViewModel.IsStoreUnavailable, Mode=OneWay}" />
+
+        <!-- A read that matched nothing is stated in words rather than shown as an empty region. -->
+        <TextBlock
+            AutomationProperties.AutomationId="DeveloperLogPanelView_Nothing"
+            Style="{ThemeResource BodyTextBlockStyle}"
+            Text="{x:Bind ViewModel.NothingText}"
+            TextWrapping="Wrap"
+            Visibility="{x:Bind ViewModel.HasNothing, Mode=OneWay}" />
+
+        <!-- The grouped view: one line per distinct fault, most frequent first, so a repeated fault reads as
+             one signal with a count rather than as a page of its occurrences. -->
+        <ItemsControl
+            AutomationProperties.AutomationId="DeveloperLogPanelView_Groups"
+            ItemsSource="{x:Bind ViewModel.Groups, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.IsGrouped, Mode=OneWay}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <TextBlock
+                        Margin="0,0,0,4"
+                        IsTextSelectionEnabled="True"
+                        Style="{ThemeResource BodyTextBlockStyle}"
+                        Text="{x:Bind}"
+                        TextWrapping="Wrap" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- The flat view, newest first. Each card carries the full message, the exception chain as the store
+             holds it, the context the seam gathered, and this entry's place in the chain. -->
+        <ListView
+            AutomationProperties.AutomationId="DeveloperLogPanelView_Entries"
+            ItemsSource="{x:Bind ViewModel.Entries, Mode=OneWay}"
+            SelectionMode="None"
+            Visibility="{x:Bind ViewModel.IsFlattened, Mode=OneWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="logging:LogPanelEntry">
+                    <Border
+                        Margin="0,0,0,8"
+                        Padding="12"
+                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                        <StackPanel Spacing="6">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind CreatedText}" />
+                                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Level}" />
+                                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Module}" />
+                                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Outcome}" />
+                                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind HostId}" />
+                                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind EventAction}" />
+                            </StackPanel>
+
+                            <TextBlock
+                                IsTextSelectionEnabled="True"
+                                Style="{ThemeResource BodyTextBlockStyle}"
+                                Text="{x:Bind Message}"
+                                TextWrapping="Wrap" />
+
+                            <TextBlock
+                                IsTextSelectionEnabled="True"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ErrorType}"
+                                TextWrapping="Wrap" />
+
+                            <!-- The chain link, so a support reader can check the entry against the one before
+                                 it, which is the only way this chain is ever verified. -->
+                            <TextBlock
+                                IsTextSelectionEnabled="True"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ChainLinkText}"
+                                TextWrapping="Wrap" />
+
+                            <TextBlock
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ErrorFingerprint}"
+                                TextWrapping="Wrap" />
+
+                            <!-- The exception chain exactly as it was stored, never re-formatted and never
+                                 summarized: the panel reads the evidence, it does not write a summary of it. -->
+                            <ScrollViewer
+                                MaxHeight="220"
+                                HorizontalScrollBarVisibility="Disabled"
+                                VerticalScrollBarVisibility="Auto">
+                                <TextBlock
+                                    IsTextSelectionEnabled="True"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind ExceptionDetail}"
+                                    TextWrapping="Wrap" />
+                            </ScrollViewer>
+
+                            <ScrollViewer
+                                MaxHeight="160"
+                                HorizontalScrollBarVisibility="Disabled"
+                                VerticalScrollBarVisibility="Auto">
+                                <TextBlock
+                                    IsTextSelectionEnabled="True"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind PayloadJson}"
+                                    TextWrapping="Wrap" />
+                            </ScrollViewer>
+
+                            <Button
+                                AutomationProperties.AutomationId="DeveloperLogPanelView_CopyEntry"
+                                Click="OnCopyEntryClick"
+                                Tag="{x:Bind}"
+                                x:Uid="Settings_LogPanel_Copy_Entry_Button" />
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackPanel>
+</UserControl>

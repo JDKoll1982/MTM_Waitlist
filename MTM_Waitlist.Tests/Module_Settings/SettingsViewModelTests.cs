@@ -25,7 +25,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     public void DefaultSeed_PopulatesTheDefaultIgnoredLocations()
     {
         var viewModel = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsIgnoredLocations]);
 
         CollectionAssert.AreEquivalent(
@@ -33,13 +33,60 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             viewModel.IgnoredLocations.ToArray());
     }
 
+    /// <summary>
+    /// T137. The editor is read-only for every role but the two that may change the plant-wide list, and the
+    /// refusal is stated rather than silently ignored (FR-024, SC-012).
+    /// </summary>
     [TestMethod]
-    public async Task AddAndRemove_PersistToLocalSettings()
+    public async Task TheEditor_IsReadOnly_ForEveryRoleButTheTwoThatMayChangeIt()
     {
-        var settings = new RecordingLocalSettingsService();
-        var viewModel = BuildViewModel(settings, [PermissionKeys.SettingsIgnoredLocations]);
+        var preferences = new InMemoryScopedPreferenceStore();
+        var viewModel = BuildViewModel(preferences, [PermissionKeys.SettingsIgnoredLocations]);
 
-        // Add (auto-uppercased, dedupes) then remove.
+        Assert.IsTrue(viewModel.CanReadIgnoredLocations, "A reader holds the existing read entitlement.");
+        Assert.IsFalse(viewModel.CanManageIgnoredLocations, "Reading the list is not changing it (FR-024).");
+
+        viewModel.IgnoredLocationInput = "SCRAP-2";
+        viewModel.AddIgnoredLocationCommand.Execute(null);
+        await Task.Delay(30);
+
+        Assert.IsFalse(viewModel.IgnoredLocations.Contains("SCRAP-2"), "A read-only reader cannot add a location.");
+        Assert.AreEqual(0, preferences.Writes.Count, "Nothing may be written by a reader who may not change the list.");
+        Assert.IsFalse(
+            string.IsNullOrWhiteSpace(viewModel.IgnoredLocationsStatusMessage),
+            "A refused change states its reason rather than doing nothing quietly (FR-029).");
+    }
+
+    /// <summary>
+    /// T137. The write is refused where it happens, not only where the control is drawn: the service is the write
+    /// seam and it holds its own answer, so a caller that reaches it without going through the screen is refused
+    /// as well (FR-024).
+    /// </summary>
+    [TestMethod]
+    public async Task TheWrite_IsRefused_WhereItHappens_NotOnlyWhereTheControlIsDrawn()
+    {
+        var preferences = new InMemoryScopedPreferenceStore();
+        var service = new IgnoredLocationsService(
+            preferences,
+            PermissionStub.Holding([PermissionKeys.SettingsIgnoredLocations]));
+
+        var saved = await service.SaveIgnoredLocationsAsync(["SCRAP-3"]);
+
+        Assert.IsFalse(saved, "The write is refused for a person who holds only the read entitlement.");
+        Assert.AreEqual(0, preferences.Writes.Count, "A refused write writes nothing at all.");
+    }
+
+    /// <summary>
+    /// T137. An authorised change is stored at plant scope, so one edit decides for every computer (FR-024).
+    /// </summary>
+    [TestMethod]
+    public async Task AnAuthorisedChange_IsStoredAtPlantScope()
+    {
+        var preferences = new InMemoryScopedPreferenceStore();
+        var viewModel = BuildViewModel(
+            preferences,
+            [PermissionKeys.SettingsIgnoredLocations, PermissionKeys.SettingsIgnoredLocationsEdit]);
+
         viewModel.IgnoredLocationInput = "wc";
         viewModel.AddIgnoredLocationCommand.Execute(null);
         await Task.Delay(30);
@@ -49,70 +96,127 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         await Task.Delay(30);
         Assert.IsFalse(viewModel.IgnoredLocations.Contains("WC"), "Removed location should be gone.");
 
-        var stored = settings.ReadSettingAsync<List<string>?>("Feature.IgnoredLocations").GetAwaiter().GetResult();
-        Assert.IsNotNull(stored);
-        Assert.IsFalse(stored!.Contains("WC", StringComparer.OrdinalIgnoreCase));
-        Assert.IsTrue(stored.Contains("NCM", StringComparer.OrdinalIgnoreCase));
+        var stored = preferences.TextFor(IgnoredLocationDefaults.SettingKey, PreferenceScope.Plant);
+        Assert.IsNotNull(stored, "The plant-wide list is what was written.");
+
+        // Compared as codes rather than as text: one code can be a substring of another (V-WC contains WC), so a
+        // substring check would report a removed location as still there.
+        var storedCodes = stored!.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        CollectionAssert.DoesNotContain(storedCodes, "WC", "The removed location is gone from what was stored.");
+        CollectionAssert.Contains(storedCodes, "NCM", "The rest of the list was stored as it stood.");
+        Assert.AreEqual(
+            0,
+            preferences.Writes.Count(write => write.Scope is PreferenceScope.Person),
+            "A plant-wide list is never written against one person.");
+    }
+
+    /// <summary>
+    /// T137. The session-length setting refuses an unauthorised change with a stated reason, where the change
+    /// happens (FR-029, SC-011).
+    /// </summary>
+    [TestMethod]
+    public async Task TheSessionLength_RefusesAnUnauthorisedChangeWithAStatedReason()
+    {
+        var preferences = new InMemoryScopedPreferenceStore();
+        var viewModel = BuildViewModel(preferences, [PermissionKeys.SettingsIgnoredLocations]);
+
+        Assert.IsFalse(viewModel.CanManageSessionLength, "The session length is gated on its own key.");
+
+        viewModel.SessionLengthMinutes = 240;
+        viewModel.SaveSessionLengthCommand.Execute(null);
+        await Task.Delay(30);
+
+        Assert.AreEqual(0, preferences.Writes.Count, "An unauthorised change writes nothing.");
+        Assert.IsFalse(
+            string.IsNullOrWhiteSpace(viewModel.SessionLengthStatusMessage),
+            "The refusal states a reason rather than failing silently.");
+    }
+
+    /// <summary>
+    /// T147. An authorised change is stored at plant scope, so it applies to the next sign-in anywhere rather than
+    /// only on the computer it was made on (FR-029, SC-011).
+    /// </summary>
+    [TestMethod]
+    public async Task TheSessionLength_WhenAuthorised_IsStoredAtPlantScopeAndClamped()
+    {
+        var preferences = new InMemoryScopedPreferenceStore();
+        var viewModel = BuildViewModel(preferences, [PermissionKeys.SettingsSessionLength]);
+
+        viewModel.SessionLengthMinutes = 240;
+        viewModel.SaveSessionLengthCommand.Execute(null);
+        await Task.Delay(30);
+
+        Assert.AreEqual(
+            240,
+            preferences.NumberFor(ScopedPreferenceKeys.SessionLengthMinutes, PreferenceScope.Plant),
+            "The length is stored once for the whole plant.");
+
+        // Below the declared floor and above its ceiling, the value is clamped rather than stored as given.
+        viewModel.SessionLengthMinutes = 1;
+        viewModel.SaveSessionLengthCommand.Execute(null);
+        await Task.Delay(30);
+        Assert.AreEqual(
+            ScopedPreferenceKeys.MinimumSessionLengthMinutes,
+            preferences.NumberFor(ScopedPreferenceKeys.SessionLengthMinutes, PreferenceScope.Plant));
+
+        viewModel.SessionLengthMinutes = 99999;
+        viewModel.SaveSessionLengthCommand.Execute(null);
+        await Task.Delay(30);
+        Assert.AreEqual(
+            ScopedPreferenceKeys.MaximumSessionLengthMinutes,
+            preferences.NumberFor(ScopedPreferenceKeys.SessionLengthMinutes, PreferenceScope.Plant));
     }
 
     [TestMethod]
     public void PersistenceRoundTrip_SeedsFromStoredInsteadOfDefaults()
     {
-        var settings = new RecordingLocalSettingsService();
-        settings.SaveSettingAsync("Feature.IgnoredLocations", new List<string> { "WC", "SCRAP-1" }).GetAwaiter().GetResult();
+        var preferences = new InMemoryScopedPreferenceStore();
+        preferences.SeedText(IgnoredLocationDefaults.SettingKey, PreferenceScope.Plant, "WC,SCRAP-1");
 
-        var viewModel = BuildViewModel(settings, [PermissionKeys.SettingsIgnoredLocations]);
+        var viewModel = BuildViewModel(preferences, [PermissionKeys.SettingsIgnoredLocations]);
 
         CollectionAssert.AreEquivalent(new[] { "WC", "SCRAP-1" }, viewModel.IgnoredLocations.ToArray());
     }
 
     [TestMethod]
-    public void AddRejectsInvalidCode_WhenThePermissionIsNotHeld()
-    {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
-
-        // The gate is permission.settings.ignored_locations, and this person does not hold it.
-        Assert.IsFalse(viewModel.CanManageIgnoredLocations);
-
-        viewModel.IgnoredLocationInput = "SCRAP-2";
-        viewModel.AddIgnoredLocationCommand.Execute(null);
-        Assert.IsFalse(viewModel.IgnoredLocations.Contains("SCRAP-2"));
-    }
-
-    [TestMethod]
-    public void CanManageIgnoredLocations_FollowsThePermissionAndNothingElse()
+    public void CanManageIgnoredLocations_FollowsTheEditKeyAndNothingElse()
     {
         Assert.IsFalse(
-            BuildViewModel(new RecordingLocalSettingsService()).CanManageIgnoredLocations,
+            BuildViewModel(new InMemoryScopedPreferenceStore()).CanManageIgnoredLocations,
             "A person who does not hold the permission may not manage ignored locations, whatever role they are on.");
 
         Assert.IsTrue(
-            BuildViewModel(new RecordingLocalSettingsService(), [PermissionKeys.SettingsIgnoredLocations])
+            BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.SettingsIgnoredLocationsEdit])
                 .CanManageIgnoredLocations,
-            "The shipped baseline for the permission is the whole answer.");
+            "The shipped baseline for the edit key is the whole answer.");
 
         Assert.IsFalse(
-            BuildViewModel(new RecordingLocalSettingsService(), [PermissionKeys.SettingsPartPictures])
+            BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.SettingsIgnoredLocations])
                 .CanManageIgnoredLocations,
-            "Holding a different permission opens nothing here: the gates are named and independent.");
+            "The read entitlement is not the write entitlement: the two keys are named and independent (research D10).");
+
+        Assert.IsFalse(
+            BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.SettingsPartPictures])
+                .CanManageIgnoredLocations,
+            "Holding a different permission opens nothing here.");
     }
 
     [TestMethod]
     public async Task OnNavigatedTo_ReadsTheScreensGates_AndTheyStayShutUntilTheAnswerArrives()
     {
         var viewModel = BuildViewModelWithoutLoading(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsIgnoredLocations]);
 
         Assert.IsFalse(
-            viewModel.CanManageIgnoredLocations,
+            viewModel.CanReadIgnoredLocations,
             "No gate may answer before its read has returned, or the screen would offer a control it may have to take back.");
         Assert.IsFalse(viewModel.IsAdministrationCategoryVisible, "The Administration category starts hidden.");
 
         viewModel.OnNavigatedTo(null!);
         await viewModel.PermissionLoad;
 
-        Assert.IsTrue(viewModel.CanManageIgnoredLocations, "The page's own load settles the gates.");
+        Assert.IsTrue(viewModel.CanReadIgnoredLocations, "The page's own load settles the gates.");
         Assert.IsFalse(
             viewModel.IsAdministrationCategoryVisible,
             "A reader entitled to neither Administration entry does not see the category at all (FR-081).");
@@ -138,14 +242,14 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public void NewRequestAlerts_DefaultsOff()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
+        var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore());
         Assert.IsFalse(viewModel.NewRequestAlertsEnabled);
     }
 
     [TestMethod]
     public void NewRequestAlerts_PanelAndCategoryMatchSearch_AndTheChangeIsAnnounced()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
+        var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore());
         Assert.IsTrue(viewModel.IsNewRequestAlertsPanelVisible, "Panel visible with no search query.");
 
         var announced = new List<string>();
@@ -167,13 +271,13 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public async Task NewRequestAlerts_TogglePersistsOnlyWhenTheInstallationCanDeliver()
     {
-        var settings = new RecordingLocalSettingsService();
+        var settings = new InMemoryScopedPreferenceStore();
         var viewModel = BuildViewModel(settings);
 
         viewModel.NewRequestAlertsEnabled = true;
         await Task.Delay(30);
 
-        var stored = settings.ReadSettingAsync<bool?>(NewRequestAlertService.SettingKeyName).GetAwaiter().GetResult();
+        var stored = settings.FlagFor(NewRequestAlertService.SettingKeyName, PreferenceScope.Person);
 
         if (viewModel.IsNewRequestAlertsAvailable)
         {
@@ -193,17 +297,17 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         // The gate is permission.settings.cache_refresh, and its shipped baseline is the same trio the Max
         // Allotted Time panel gates on. The subse rule that ties it to the service host's own permission is
         // asserted against the shipped baselines, where both sides' data is visible (FR-057).
-        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService()).CanRequestCacheRefresh);
+        Assert.IsFalse(BuildViewModel(new InMemoryScopedPreferenceStore()).CanRequestCacheRefresh);
         Assert.IsFalse(
-            BuildViewModel(new RecordingLocalSettingsService(), [PermissionKeys.SettingsHotWorkCenters])
+            BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.SettingsHotWorkCenters])
                 .CanRequestCacheRefresh,
             "A different permission opens nothing here.");
 
-        var holding = BuildViewModel(new RecordingLocalSettingsService(), [PermissionKeys.SettingsCacheRefresh]);
+        var holding = BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.SettingsCacheRefresh]);
         Assert.IsTrue(holding.CanRequestCacheRefresh);
 
         // The panel is "access only": without the permission the surface is not drawn at all.
-        Assert.IsFalse(BuildViewModel(new RecordingLocalSettingsService()).IsCacheRefreshPanelVisible);
+        Assert.IsFalse(BuildViewModel(new InMemoryScopedPreferenceStore()).IsCacheRefreshPanelVisible);
         Assert.IsTrue(holding.IsCacheRefreshPanelVisible);
     }
 
@@ -211,7 +315,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     public async Task RequestCacheRefresh_DoesNotReachTheService_WithoutThePermission()
     {
         var client = new FakeMockServiceRefreshClient();
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), refreshClient: client);
+        var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore(), refreshClient: client);
 
         await viewModel.RequestCacheRefreshCommand.ExecuteAsync(null);
 
@@ -235,7 +339,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             },
         };
         var viewModel = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsCacheRefresh],
             client);
 
@@ -263,7 +367,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             },
         };
         var viewModel = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsCacheRefresh],
             client);
 
@@ -280,7 +384,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             Result = RefreshRequestResult.Unavailable("No endpoint is installed."),
         };
         var viewModel = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsCacheRefresh],
             client);
 
@@ -293,7 +397,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public void NewRequestAlerts_ReportsTheInstallationCapability()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
+        var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore());
 
         // The test host runs unpackaged, and the delivery path refuses to show a notification without
         // package identity (AppNotificationService.Initialize and Show both gate on RuntimeHelper.IsMSIX),
@@ -314,7 +418,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public async Task NewRequestAlerts_DoesNotPersistWhileTheInstallationCannotDeliver()
     {
-        var settings = new RecordingLocalSettingsService();
+        var settings = new InMemoryScopedPreferenceStore();
         var viewModel = BuildViewModel(settings);
 
         Assert.IsFalse(viewModel.IsNewRequestAlertsAvailable, "This check assumes an installation that cannot deliver.");
@@ -322,7 +426,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         viewModel.NewRequestAlertsEnabled = true;
         await Task.Delay(30);
 
-        var stored = settings.ReadSettingAsync<bool?>(NewRequestAlertService.SettingKeyName).GetAwaiter().GetResult();
+        var stored = settings.FlagFor(NewRequestAlertService.SettingKeyName, PreferenceScope.Person);
 
         Assert.IsNull(stored, "No preference may be written while the installation cannot deliver a notification.");
     }
@@ -332,7 +436,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     {
         // The About card's version value must say something on this build too, not only when the
         // packaged-only API is available (contract C4).
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
+        var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore());
 
         Assert.IsFalse(
             string.IsNullOrWhiteSpace(viewModel.VersionDescription),
@@ -342,7 +446,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public void SearchQuery_ChangeAnnouncesEveryPanelThatConsumesTheTerm()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService());
+        var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore());
 
         var announced = new List<string>();
         viewModel.PropertyChanged += (_, args) => announced.Add(args.PropertyName ?? string.Empty);
@@ -402,12 +506,12 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     public void TheMinutesPanel_AndThePicturePanel_EachKeepTheirOwnGate()
     {
         var minutesOnly = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsUrgencyMinutes]);
         var picturesOnly = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsPartPictures]);
-        var neither = BuildViewModel(new RecordingLocalSettingsService());
+        var neither = BuildViewModel(new InMemoryScopedPreferenceStore());
 
         // The minutes editor is governed by permission.settings.urgency_minutes and nothing else...
         Assert.IsTrue(minutesOnly.UrgencyAllotments.CanManageUrgencySettings);
@@ -428,7 +532,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public void SearchQuery_ReachesBothReKeyedConfigurationPanels()
     {
-        var viewModel = BuildViewModel(new RecordingLocalSettingsService(), [PermissionKeys.SettingsPartPictures]);
+        var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.SettingsPartPictures]);
 
         viewModel.SearchQuery = "allotted minutes";
         Assert.IsTrue(viewModel.IsUrgencyAllotmentsPanelVisible, "The minutes panel is keyed by Item and finds the term.");
@@ -492,7 +596,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     [TestMethod]
     public void ThePictureCacheIsOfferedOnlyOnTheStoragePermission()
     {
-        var settings = new RecordingLocalSettingsService();
+        var settings = new InMemoryScopedPreferenceStore();
         var resolver = new FakeImageStorageConfigurationResolver();
 
         Assert.IsFalse(
@@ -518,12 +622,12 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         var resolver = new FakeImageStorageConfigurationResolver();
 
         Assert.IsFalse(
-            BuildViewModel(new RecordingLocalSettingsService(), imageStorageConfigurationResolver: resolver)
+            BuildViewModel(new InMemoryScopedPreferenceStore(), imageStorageConfigurationResolver: resolver)
                 .IsStoragePathsPanelVisible);
 
         Assert.IsFalse(
             BuildViewModel(
-                new RecordingLocalSettingsService(),
+                new InMemoryScopedPreferenceStore(),
                 [PermissionKeys.SettingsPartPictures],
                 imageStorageConfigurationResolver: resolver)
                 .IsStoragePathsPanelVisible,
@@ -531,7 +635,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
         Assert.IsTrue(
             BuildViewModel(
-                new RecordingLocalSettingsService(),
+                new InMemoryScopedPreferenceStore(),
                 [PermissionKeys.SettingsStoragePaths],
                 imageStorageConfigurationResolver: resolver)
                 .IsStoragePathsPanelVisible);
@@ -543,7 +647,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsStoragePaths],
             configSettingsValueService: configuration,
             imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
@@ -573,7 +677,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     public void WithoutACacheServiceTheSectionIsNotOffered()
     {
         var viewModel = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsStoragePaths]);
 
         Assert.IsFalse(viewModel.IsPictureCachePanelVisible);
@@ -587,7 +691,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsStoragePaths],
             configSettingsValueService: configuration,
             imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
@@ -607,7 +711,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsStoragePaths],
             configSettingsValueService: configuration,
             imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
@@ -638,7 +742,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         };
 
         var viewModel = BuildViewModel(
-            new RecordingLocalSettingsService(),
+            new InMemoryScopedPreferenceStore(),
             [PermissionKeys.SettingsStoragePaths],
             imageCacheSyncService: cache,
             imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
@@ -653,7 +757,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     private static SettingsViewModel BuildViewModel(
-        RecordingLocalSettingsService settings,
+        InMemoryScopedPreferenceStore settings,
         string[]? heldPermissionKeys = null,
         IMockServiceRefreshClient? refreshClient = null,
         IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
@@ -679,7 +783,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// the page's own load.
     /// </summary>
     private static SettingsViewModel BuildViewModelWithoutLoading(
-        RecordingLocalSettingsService settings,
+        InMemoryScopedPreferenceStore settings,
         string[]? heldPermissionKeys = null,
         IMockServiceRefreshClient? refreshClient = null,
         IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
@@ -691,13 +795,19 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         var urgencyAllotments = new UrgencyAllotmentEditorViewModel(
             new UrgencySettingsService(new FakeRequestItemAllottedMinutesStore()),
             new FakeRequestItemObservedTimeService());
+
+        // One permission service for both the screen and the ignored-locations service, so a test that opens the
+        // write gate opens it on both sides and the refusal the service enforces is the same answer the screen read.
+        var permissions = PermissionStub.Holding(heldPermissionKeys);
+
         return new SettingsViewModel(
             new FakeThemeSelectorService(),
+            new IgnoredLocationsService(settings, permissions),
             settings,
             new FakeWorkCenterCatalogService(),
             new FakeDunnageTypeVisibilityCatalogService(),
             new NewRequestAlertService(settings),
-            PermissionStub.Holding(heldPermissionKeys),
+            permissions,
             new RecordingNavigationService(),
             person,
             computerManagement,
@@ -843,40 +953,5 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
         public Task<bool> DeleteComputerAsync(long id, CancellationToken cancellationToken = default)
             => Task.FromResult(true);
-    }
-
-    private sealed class RecordingLocalSettingsService : ILocalSettingsService
-    {
-        private readonly Dictionary<string, object> _values = new(StringComparer.Ordinal);
-
-        public Task<T?> ReadSettingAsync<T>(string key)
-        {
-            if (_values.TryGetValue(key, out var value) && value is T typed)
-            {
-                return Task.FromResult<T?>(typed);
-            }
-
-            return Task.FromResult(default(T));
-        }
-
-        public Task SaveSettingAsync<T>(string key, T value)
-        {
-            _values[key] = value!;
-            return Task.CompletedTask;
-        }
-
-        public Task ResetSettingAsync(string key, CancellationToken cancellationToken = default)
-        {
-            _values.Remove(key);
-            return Task.CompletedTask;
-        }
-
-        public Task ResetAsync()
-        {
-            _values.Clear();
-            return Task.CompletedTask;
-        }
-
-        public Task CorruptForTestAsync() => Task.CompletedTask;
     }
 }

@@ -1,7 +1,18 @@
 param(
     [string[]]$ConnectionStringEnvironmentVariables = @('MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_HOME', 'MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_WORK', 'MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING'),
     [string]$DatabaseName = 'mtm_waitlist',
-    [string]$ValidationSqlPath = (Join-Path $PSScriptRoot '..\..\Database\Validation\startup_schema\validate.sql')
+    [string]$ValidationSqlPath = (Join-Path $PSScriptRoot '..\..\Database\Validation\startup_schema\validate.sql'),
+
+    # Seed data is applied only when this switch is passed. Validation is the default.
+    #
+    # The seed files are not read-only. seed_dev_masked_baseline truncates and rewrites core_users_profiles,
+    # auth_roles_catalog, auth_roles_assignments, config_settings_values and core_computers_registry, so
+    # running it against a store somebody is using replaces those accounts, their credentials and the
+    # permission baselines. This script points at whatever store its connection strings name - in CI those are
+    # secrets pointing at a real one - so applying seeds by default meant a pull request touching any
+    # Database/**/*.sql file rewrote that store's users. A schema that validates needs no seed data to be
+    # judged, so populating a store is now the deliberate act rather than the side effect of checking it.
+    [switch]$ApplySeeds
 )
 
 $ErrorActionPreference = 'Stop'
@@ -426,11 +437,16 @@ function Install-Or-UpdateDatabase {
             }
         }
 
-        Write-Log 'Install phase: applying seed create.sql files.'
-        foreach ($seedCreatePath in $seedCreatePaths) {
-            Write-Log "Applying seed file: $seedCreatePath"
-            $seedStatements = Split-SqlStatements -Text (Get-InstallSqlText -Path $seedCreatePath)
-            Invoke-SqlStatements -Connection $targetConnection -Statements $seedStatements
+        if ($ApplySeeds) {
+            Write-Log 'Install phase: applying seed create.sql files.'
+            foreach ($seedCreatePath in $seedCreatePaths) {
+                Write-Log "Applying seed file: $seedCreatePath"
+                $seedStatements = Split-SqlStatements -Text (Get-InstallSqlText -Path $seedCreatePath)
+                Invoke-SqlStatements -Connection $targetConnection -Statements $seedStatements
+            }
+        }
+        else {
+            Write-Log 'Install phase: schema installed, seed files not applied (pass -ApplySeeds to populate the store).'
         }
     }
     finally {
@@ -438,6 +454,8 @@ function Install-Or-UpdateDatabase {
     }
 }
 
+# Applies the seed files to the store. Only ever reached when -ApplySeeds is passed, because every one of these
+# files is a writer and one of them truncates the account table.
 function Apply-Seeds {
     param(
         [string]$ConnectionString,
@@ -522,16 +540,23 @@ foreach ($entry in $resolvedConnectionStrings) {
         }
 
         if ($issueCount -eq 0) {
-            Write-Log "$($entry.EnvironmentName) schema is valid. Applying seeds before success exit."
-            Apply-Seeds -ConnectionString $entry.ConnectionString -TargetDatabaseName $DatabaseName
+            Write-Log "$($entry.EnvironmentName) schema is valid."
+            if ($ApplySeeds) {
+                Apply-Seeds -ConnectionString $entry.ConnectionString -TargetDatabaseName $DatabaseName
+            }
+            else {
+                Write-Log 'Seed phase skipped: this run read the store and wrote nothing. Pass -ApplySeeds to apply seed data, which rewrites the seeded tables.'
+            }
             Write-Log "Database schema validation passed using $($entry.EnvironmentName)."
             exit 0
         }
 
         $attemptErrors.Add("$($entry.EnvironmentName) connected, but schema validation still failed after migration attempt.")
         Write-Log "Remaining missing-object count: $issueCount"
-        Write-Log "Applying seeds after repair attempt for $($entry.EnvironmentName)."
-        Apply-Seeds -ConnectionString $entry.ConnectionString -TargetDatabaseName $DatabaseName
+        if ($ApplySeeds) {
+            Write-Log "Applying seeds after repair attempt for $($entry.EnvironmentName)."
+            Apply-Seeds -ConnectionString $entry.ConnectionString -TargetDatabaseName $DatabaseName
+        }
     }
     catch {
         Write-Log "$($entry.EnvironmentName) failed with: $($_.Exception.Message)"

@@ -1,0 +1,107 @@
+<windowex:WindowEx
+    x:Class="MTM_Waitlist.Module_Startup.Views.BlockedStateWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:windowex="using:WinUIEx"
+    MinWidth="520"
+    MinHeight="420"
+    mc:Ignorable="d">
+
+    <!--
+        Four rows, and the cause is its own row rather than something laid over anything else: the person reads
+        what stopped the launch and then chooses from the actions beneath it, which never cover the words that
+        explain them (FR-005's rule, applied here). The restore control is drawn only when a reset could remove
+        the cause, so a store that cannot be reached never shows one (FR-017).
+    -->
+    <Grid
+        x:Name="RootGrid"
+        Padding="32"
+        AutomationProperties.AutomationId="BlockedStateWindow_Root"
+        AutomationProperties.Name="The launch stopped"
+        RowSpacing="16">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock
+                AutomationProperties.AutomationId="BlockedStateWindow_Heading"
+                Style="{ThemeResource TitleTextBlockStyle}"
+                Text="{x:Bind ViewModel.HeadingText}" />
+            <TextBlock
+                AutomationProperties.AutomationId="BlockedStateWindow_Subtitle"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind ViewModel.SubtitleText}"
+                TextWrapping="Wrap" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="8">
+                <TextBlock
+                    AutomationProperties.AutomationId="BlockedStateWindow_DiagnosisLabel"
+                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                    Text="{x:Bind ViewModel.DiagnosisLabelText}" />
+                <Border
+                    AutomationProperties.AutomationId="BlockedStateWindow_Diagnosis"
+                    Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+                    CornerRadius="4"
+                    Padding="12">
+                    <TextBlock
+                        x:Name="DiagnosisText"
+                        Text="{x:Bind ViewModel.Diagnosis}"
+                        TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border
+            x:Name="MessageStrip"
+            AutomationProperties.AutomationId="BlockedStateWindow_Message"
+            Grid.Row="2"
+            Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+            CornerRadius="4"
+            Padding="12"
+            Visibility="{x:Bind ViewModel.HasMessage, Mode=OneWay}">
+            <TextBlock
+                x:Name="MessageText"
+                Text="{x:Bind ViewModel.Message, Mode=OneWay}"
+                TextWrapping="Wrap" />
+        </Border>
+
+        <StackPanel
+            Grid.Row="3"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="8">
+            <ProgressRing
+                AutomationProperties.AutomationId="BlockedStateWindow_Busy"
+                IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
+                Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+            <Button
+                x:Name="CloseButton"
+                AutomationProperties.AutomationId="BlockedStateWindow_CloseButton"
+                Click="OnCloseClick"
+                Content="{x:Bind ViewModel.CloseActionText}" />
+            <Button
+                x:Name="RestoreDefaultsButton"
+                AutomationProperties.AutomationId="BlockedStateWindow_RestoreDefaultsButton"
+                Click="OnRestoreDefaultsClick"
+                Content="{x:Bind ViewModel.RestoreDefaultsActionText}"
+                IsEnabled="{x:Bind ViewModel.CanRestoreDefaults, Mode=OneWay}"
+                Visibility="{x:Bind ViewModel.CanRestoreDefaults, Mode=OneWay}" />
+            <Button
+                x:Name="RetryButton"
+                AutomationProperties.AutomationId="BlockedStateWindow_RetryButton"
+                Click="OnRetryClick"
+                Content="{x:Bind ViewModel.RetryActionText}"
+                IsEnabled="{x:Bind ViewModel.CanRetry, Mode=OneWay}"
+                Style="{StaticResource AccentButtonStyle}" />
+        </StackPanel>
+    </Grid>
+</windowex:WindowEx>

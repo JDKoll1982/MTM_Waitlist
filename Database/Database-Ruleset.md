@@ -161,6 +161,22 @@ truncated artifact, and it must not be "tidied" away:
   duplicate-object check `validate-database-schema.ps1` performs over `create.sql` files.
 - The same convention applies to retired procedures under `Database/StoredProcedures/`.
 
+### Review note — validation never writes seed data (approved 2026-09-27)
+
+`.github/scripts/validate-database-schema.ps1` used to apply every `Database/Seeds/**/create.sql` file whenever
+validation passed, and again after a failed repair attempt. That made a read-only check into a writer:
+`seed_dev_masked_baseline` truncates and rewrites `core_users_profiles`, `auth_roles_catalog`,
+`auth_roles_assignments`, `config_settings_values` and `core_computers_registry`. Because the script points at
+whatever store its connection strings name — and in `.github/workflows/database-schema-validation.yml` those are
+secrets pointing at a real store — a pull request touching any `Database/**/*.sql` file silently replaced that
+store's accounts, their credentials and the permission baselines. A credential set by hand survived only until the
+next validation run.
+
+- Seed application is now opt-in: pass **`-ApplySeeds`** to populate a store. Validation on its own writes nothing.
+- The same switch gates the seed step of the install path, so a repair run no longer populates either.
+- A schema that validates needs no seed data to be judged, so nothing is lost by the default. A store that is
+  installed and wants data is the case the switch exists for.
+
 ### Review note — the `mtm_mock` mirror schema lives only under `Database/Mock/`
 
 - The five `visual_*_result` mirror tables, their `_stage` twins and the `sp_visual_*` procedures are defined

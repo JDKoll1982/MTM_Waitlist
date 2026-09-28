@@ -37,6 +37,20 @@
   default and recorded under Assumptions, which is the preferred route.
 - Six user stories, ordered P1, P1, P2, P2, P2, P3. The two P1 stories are independently valuable: a readable
   launch, and a machine that cannot be used unconfigured.
+
+## Amendment pass
+
+- Second pass run 2026-09-28, after the owner answered five questions about where the shared folders live and
+  what a computer keeps when it cannot reach them. The specification was revised in place; no new feature
+  directory and no branch were created, on the owner's instruction.
+- Added: User Story 7 (P2) with five acceptance scenarios; FR-040 to FR-044; SC-018 to SC-021; three edge cases;
+  two assumptions. Amended: FR-025, which now names the cached key as a second exception held to three
+  conditions instead of leaving key material on disk unaccounted for. Revised: the assumption that described
+  machine configuration as carrying "where its pictures come from", which the change makes false.
+- Seven user stories now, ordered P1, P1, P2, P2, P2, P2, P3.
+- All content-quality, completeness and readiness items still pass. The new requirements are single testable
+  MUST statements, the new success criteria are measurable without naming a technology, and no implementation
+  detail entered the specification - the four stored-procedure and model names live only in `tasks.md`.
 - Literal identifiers appear only in Verbatim Constraints, where the request pinned them, plus the two role
   names and the ignored-locations wording inside FR-007, FR-024 and US2, US6. Those are names a reader would
   copy, not ordinary nouns.

@@ -98,7 +98,7 @@ internal sealed class ReadRememberedSignInStep : ILaunchStep
 
     /// <summary>Creates the step over the sequence it takes its descriptor from.</summary>
     /// <param name="catalog">The sequence, which is where the step takes its descriptor from rather than restating it.</param>
-    internal ReadRememberedSignInStep(LaunchStepCatalog catalog)
+    public ReadRememberedSignInStep(LaunchStepCatalog catalog)
         => _descriptor = LaunchStepSupport.DescriptorFor(catalog, StepId);
 
     /// <inheritdoc />
@@ -110,10 +110,119 @@ internal sealed class ReadRememberedSignInStep : ILaunchStep
         ArgumentNullException.ThrowIfNull(context);
         cancellationToken.ThrowIfCancellationRequested();
 
+        // Nothing is held: the read and its unlock belong to the remembered-sign-in service (T113). The pipeline
+        // reads the holder rather than this step's prose, so the step may not answer as though it had decrypted
+        // something, and a step that held a sign-in it had not decrypted would let the launch past the form
+        // without asking (FR-014).
         return Task.FromResult(new LaunchStepOutcome(
             LaunchStepStatus.Skipped,
             "No remembered sign-in is read yet, so the sign-in form will ask for the name and the password.",
             LaunchRemedySet.None));
+    }
+}
+
+/// <summary>
+/// The sign-in the launch holds: what the remembered-sign-in read found, and what the sign-in surface captured
+/// when it had to ask.
+/// </summary>
+/// <remarks>
+/// <para>
+/// <b>The launch needs one answer from this before it can go on: may it resolve a person without asking?</b>
+/// <see cref="HasSignInToPresent"/> is that answer. The pipeline reads it to decide between carrying on and
+/// ending at the sign-in surface (FR-001), and it is answered here rather than read back out of a step's
+/// prose diagnosis, which no caller could rely on.
+/// </para>
+/// <para>
+/// <b>It holds a sign-in, not a stored value.</b> Nothing here is written to the store or to the machine, and
+/// the credential is cleared the moment it has been checked, so a sign-in lives in memory for one launch and
+/// nowhere else (FR-025).
+/// </para>
+/// </remarks>
+internal interface IPendingSignIn
+{
+    /// <summary>Whether the launch holds a sign-in it can present without asking the person (FR-014).</summary>
+    bool HasSignInToPresent { get; }
+
+    /// <summary>The sign-in name to resolve, or <c>null</c> when the launch holds no sign-in.</summary>
+    string? SignInName { get; }
+
+    /// <summary>The credential to check, or <c>null</c> when the launch holds no sign-in.</summary>
+    string? Secret { get; }
+
+    /// <summary>Keeps the sign-in the person presented, ready for the steps that check it.</summary>
+    /// <param name="signInName">The name the person gave.</param>
+    /// <param name="secret">The credential the person gave.</param>
+    void Hold(string signInName, string secret);
+
+    /// <summary>Clears what was held, once it has been checked.</summary>
+    void Clear();
+}
+
+/// <inheritdoc />
+internal sealed class PendingSignIn : IPendingSignIn
+{
+    private readonly object _gate = new();
+
+    private string? _signInName;
+    private string? _secret;
+
+    /// <inheritdoc />
+    public bool HasSignInToPresent
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return !string.IsNullOrWhiteSpace(_signInName) && _secret is not null;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public string? SignInName
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _signInName;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public string? Secret
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _secret;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public void Hold(string signInName, string secret)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(signInName);
+        ArgumentNullException.ThrowIfNull(secret);
+
+        lock (_gate)
+        {
+            _signInName = signInName;
+            _secret = secret;
+        }
+    }
+
+    /// <inheritdoc />
+    public void Clear()
+    {
+        lock (_gate)
+        {
+            _signInName = null;
+            _secret = null;
+        }
     }
 }
 

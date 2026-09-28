@@ -5,18 +5,28 @@ using MTM_Waitlist.Module_Core.Helpers;
 
 namespace MTM_Waitlist.Module_Core.Services;
 
+/// <inheritdoc cref="IThemeSelectorService"/>
+/// <remarks>
+/// The chosen theme is held against the person in the store rather than in this computer's settings file, so
+/// signing in on a different computer brings the same theme with it (FR-023, SC-008). It is a reading preference
+/// and it belongs to the person: two operators sharing a desk should not have to agree about it.
+/// </remarks>
 public class ThemeSelectorService : IThemeSelectorService
 {
-    private const string SettingsKey = "AppBackgroundRequestedTheme";
+    /// <summary>The key the chosen background theme is stored under, against the person.</summary>
+    public const string SettingsKey = "AppBackgroundRequestedTheme";
 
     public ElementTheme Theme { get; set; } = ElementTheme.Default;
 
-    private readonly ILocalSettingsService _localSettingsService;
+    private readonly IScopedPreferenceStore _preferences;
     private readonly IAppWindowProvider _appWindowProvider;
 
-    public ThemeSelectorService(ILocalSettingsService localSettingsService, IAppWindowProvider appWindowProvider)
+    public ThemeSelectorService(IScopedPreferenceStore preferences, IAppWindowProvider appWindowProvider)
     {
-        _localSettingsService = localSettingsService;
+        ArgumentNullException.ThrowIfNull(preferences);
+        ArgumentNullException.ThrowIfNull(appWindowProvider);
+
+        _preferences = preferences;
         _appWindowProvider = appWindowProvider;
     }
 
@@ -48,7 +58,9 @@ public class ThemeSelectorService : IThemeSelectorService
 
     private async Task<ElementTheme> LoadThemeFromSettingsAsync()
     {
-        var themeName = await _localSettingsService.ReadSettingAsync<string>(SettingsKey);
+        var themeName = await _preferences
+            .ReadTextAsync(SettingsKey, PreferenceScope.Person)
+            .ConfigureAwait(false);
 
         if (Enum.TryParse(themeName, out ElementTheme cacheTheme))
         {
@@ -60,6 +72,17 @@ public class ThemeSelectorService : IThemeSelectorService
 
     private async Task SaveThemeInSettingsAsync(ElementTheme theme)
     {
-        await _localSettingsService.SaveSettingAsync(SettingsKey, theme.ToString());
+        try
+        {
+            await _preferences
+                .WriteTextAsync(SettingsKey, PreferenceScope.Person, theme.ToString())
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // The theme has already been applied to the open window, so a store that refuses the write costs the
+            // person the choice at the next sign-in rather than the change they just made.
+            AppLog.Error("Theme", ex, "The chosen theme could not be stored; it applies to this session only.");
+        }
     }
 }

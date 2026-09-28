@@ -265,8 +265,8 @@ VALUES (
         'johnk',
         'John',
         'Koll',
-        '0000',
-        NULL,
+        'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=',
+        UNHEX('C3B851513BAF5951482CEC1D8D585EBF'),
         1,
         'John Koll',
         '6229',
@@ -279,8 +279,8 @@ VALUES (
         'jkoll',
         'John',
         'Koll',
-        '0000',
-        NULL,
+        'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=',
+        UNHEX('C3B851513BAF5951482CEC1D8D585EBF'),
         1,
         'John Koll',
         '6229',
@@ -289,18 +289,26 @@ VALUES (
         UTC_TIMESTAMP()
     ),
     -- One masked account per user type (T157), so every service-operator authorization branch can be
-    -- exercised against a real store instead of only the tests' stub resolver. The credential is the
-    -- placeholder the accounts above use, so none of these can log in; the operator-role lookup the
+    -- exercised against a real store instead of only the tests' stub resolver. The operator-role lookup the
     -- service performs needs identity and role only (`sp_auth_user_row_get`).
-    (UUID(), 'test.admin', 'Test', 'Admin', '0000', NULL, 1, 'Test Admin', '9001', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.developer', 'Test', 'Developer', '0000', NULL, 1, 'Test Developer', '9002', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.plant.manager', 'Test', 'Plant Manager', '0000', NULL, 1, 'Test Plant Manager', '9003', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.setup.lead', 'Test', 'Setup Lead', '0000', NULL, 1, 'Test Setup Lead', '9004', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.production.lead', 'Test', 'Production Lead', '0000', NULL, 1, 'Test Production Lead', '9005', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    --
+    -- The credential is a development placeholder, salted and hashed the way PasswordSecretHasher.Hash does it,
+    -- so a fresh install can be signed into. It used to be written as the bare four-character marker with a null
+    -- salt, and PasswordSecretHasher.Verify refuses a null salt, so no comparison could ever confirm it and
+    -- every seeded account was unable to sign in anywhere. The flag below still makes it a temporary credential,
+    -- so the person is asked to choose a real password at the first sign-in.
+    --
+    -- Every seeded account deliberately shares this value, and it is visible in source control. It is a
+    -- development placeholder rather than a secret, and it belongs to no real person.
+    (UUID(), 'test.admin', 'Test', 'Admin', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Admin', '9001', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.developer', 'Test', 'Developer', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Developer', '9002', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.plant.manager', 'Test', 'Plant Manager', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Plant Manager', '9003', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.setup.lead', 'Test', 'Setup Lead', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Setup Lead', '9004', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.production.lead', 'Test', 'Production Lead', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Production Lead', '9005', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
     -- Deliberately NOT approved operator roles: these are the accounts that prove the refusal branch.
-    (UUID(), 'test.setup', 'Test', 'Setup', '0000', NULL, 1, 'Test Setup', '9006', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.production', 'Test', 'Production', '0000', NULL, 1, 'Test Production', '9007', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.material.handler', 'Test', 'Material Handler', '0000', NULL, 1, 'Test Material Handler', '9008', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP())
+    (UUID(), 'test.setup', 'Test', 'Setup', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Setup', '9006', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.production', 'Test', 'Production', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Production', '9007', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.material.handler', 'Test', 'Material Handler', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Material Handler', '9008', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP())
 ON DUPLICATE KEY UPDATE
     first_name = VALUES(first_name),
     last_name = VALUES(last_name),
@@ -770,6 +778,56 @@ VALUES
     (UUID(), 'permission.settings.session_length', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
 ON DUPLICATE KEY UPDATE
     setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+-- The two plant-scoped preference rows this seed owns (010-startup-rebuild T053, T054).
+--
+-- They are here rather than only in `seed_permission_role_baselines/create.sql` because THIS file is what the
+-- installer runs: `AllSeeds.sql` is the hand-maintained aggregate, and a row that exists only in the individual
+-- seed is a row a fresh store never receives. That is exactly what happened on 2026-09-27: the validator
+-- reported `Feature.IgnoredLocations` and `auth.session_length_minutes` missing at scope all_users after an
+-- install that had run successfully, because the aggregate had never carried them.
+--
+-- The plant's list of locations to hide (FR-024). The value is the normalized, uppercase, comma-separated form
+-- `IgnoredLocationsService` returns, so the store holds the same shape the code compares against rather than a
+-- second shape that has to be parsed back.
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'Feature.IgnoredLocations', 'all_users', 'all_users', 'WC,NCM,V-WC,NCM-VITS,SHIP', 'text', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value = VALUES(setting_value),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+-- The session length (FR-029, research D17): eight hours, held against the plant and read when a session row is
+-- written. Minutes, because that is the unit the launch resolves and the settings panel writes
+-- (`ScopedPreferenceKeys.SessionLengthMinutes`).
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_int,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'auth.session_length_minutes', 'all_users', 'all_users', 480, 'int', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_int = VALUES(setting_value_int),
     value_type = VALUES(value_type),
     updated_utc = VALUES(updated_utc);
 

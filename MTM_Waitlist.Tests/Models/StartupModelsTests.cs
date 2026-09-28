@@ -7,16 +7,17 @@ namespace MTM_Waitlist.Tests.Models;
 [TestClass]
 public sealed class StartupModelsTests
 {
+    /// <summary>
+    /// The module-core options still bind to their defaults, which is the confirmation T156 asks for before either
+    /// of the two option types is deleted: neither key appears in appsettings.json, and neither carries machine or
+    /// person state, so they are left in place rather than deleted blind.
+    /// </summary>
     [TestMethod]
-    public void LocalSettingsOptions_AcceptsConfiguredValues()
+    public void ModuleCoreSettingsOptions_Defaults()
     {
-        var options = new LocalSettingsOptions
-        {
-            ApplicationDataFolder = "MTM_Waitlist/ApplicationData",
-            LocalSettingsFile = "LocalSettings.json"
-        };
+        var options = new ModuleCoreSettingsOptions();
 
-        Assert.AreEqual("MTM_Waitlist/ApplicationData", options.ApplicationDataFolder);
-        Assert.AreEqual("LocalSettings.json", options.LocalSettingsFile);
+        Assert.AreEqual(30, options.DefaultRefreshIntervalSeconds);
+        Assert.IsTrue(options.EnableModuleDiagnostics);
     }
 }

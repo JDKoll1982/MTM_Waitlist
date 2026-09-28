@@ -211,7 +211,7 @@ FROM (
             IF(v.id IS NULL, 'missing', 'present') AS actual_value
         FROM (
             SELECT 'Feature.IgnoredLocations' AS setting_key, 'text' AS expected_value_type
-            UNION ALL SELECT 'sessions.length_hours', 'int'
+            UNION ALL SELECT 'auth.session_length_minutes', 'int'
         ) AS p
         LEFT JOIN config_settings_values AS v
             ON v.setting_key = p.setting_key

@@ -5,6 +5,8 @@ description: Companion specify — a feature spec with prioritized user stories
 
 <!-- Extension: companion -->
 <!-- Config: .specify/extensions/companion/ -->
+
+
 ## User Input
 
 ```text

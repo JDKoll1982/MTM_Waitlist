@@ -22,8 +22,8 @@ namespace MTM_Waitlist.Tests.Module_Core.ViewModels;
 /// this class does.
 /// </para>
 /// <para>
-/// The <b>negative case</b> is the point of FR-034 and is asserted below: the sign-out path must reach
-/// <c>ISignOutService</c> and must not merely clear <c>CurrentUserDisplayName</c>. A view model that never
+/// The <b>negative case</b> is the point of FR-011 and is asserted below: the sign-out path must reach the
+/// rebuilt sign-out service and must not merely clear <c>CurrentUserDisplayName</c>. A view model that never
 /// calls the service is a view model that leaves the session — and the person — signed in.
 /// </para>
 /// </remarks>
@@ -33,7 +33,7 @@ public sealed class ShellViewModelTests
     private const string ShellPageXamlPath = "Module_Core/Views/ShellPage.xaml";
     private const string ShellViewModelPath = "ViewModels/ShellViewModel.cs";
     private const string ShellPageCodeBehindPath = "Module_Core/Views/ShellPage.xaml.cs";
-    private const string ServiceRegistrationPath = "Services/DependencyInjection/ServiceRegistrationExtensions.cs";
+    private const string StartupServiceRegistrationPath = "MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs";
     private const string ResourcesPath = "Strings/en-us/Resources.resw";
 
     // ── The badge offers Sign out (FR-033) ──────────────────────────────────────────────────────────────
@@ -85,16 +85,16 @@ public sealed class ShellViewModelTests
 
         StringAssert.Contains(
             source,
-            "ISignOutService",
-            "The shell must depend on the sign-out service; a badge that cannot reach one cannot end a session (FR-034).");
+            "SignOutService",
+            "The shell must depend on the sign-out service; a badge that cannot reach one cannot end a session (FR-011).");
         StringAssert.Contains(
             command,
             "_signOutService.SignOutAsync(",
-            "Choosing Sign out must invoke the sign-out path — the service that clears the session and relaunches (FR-034).");
+            "Choosing Sign out must invoke the sign-out path — the service that ends the session and relaunches (FR-011).");
 
         Assert.IsFalse(
             Regex.IsMatch(command, @"CurrentUserDisplayName\s*="),
-            "Clearing the displayed name while the session persists is exactly what FR-034 rules out: the sign-out path must not merely blank the badge.");
+            "Clearing the displayed name while the session persists is exactly what FR-011 rules out: the sign-out path must not merely blank the badge.");
     }
 
     [TestMethod]
@@ -130,10 +130,13 @@ public sealed class ShellViewModelTests
     [TestMethod]
     public void TheSignOutService_IsRegisteredInTheCompositionRoot()
     {
+        // The rebuilt sign-out service is the startup module's, so its registration lives with the module rather
+        // than in the app's own service extensions: the retired IAppProcessRestarter and ISignOutService entries
+        // were removed from there when the contracts were deleted (T185, T186).
         StringAssert.Contains(
-            ReadSource(ServiceRegistrationPath),
-            "ISignOutService",
-            "The composition root must register the sign-out service, or the shell cannot be constructed (FR-033).");
+            ReadSource(StartupServiceRegistrationPath),
+            "SignOutService",
+            "The startup module must register the sign-out service, or the shell cannot be constructed (FR-011).");
     }
 
     [DataTestMethod]

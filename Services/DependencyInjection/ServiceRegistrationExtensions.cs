@@ -50,10 +50,10 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IDunnageSubstitutePicker, DunnageSubstitutePicker>();
         services.AddSingleton<IWaitlistRequestActionPrompt, WaitlistRequestActionPrompt>();
         services.AddSingleton<IWorkCenterImageService, MTM_Waitlist.Module_Settings.Services.ImageLocationService>();
-        services.AddSingleton<ILocalSettingsService, MTM_Waitlist.Module_Settings.Services.LocalSettingsService>();
+        // The folder dialog is a surface concern - it has to be owned by the window on screen - so its one
+        // implementation lives here rather than in the startup module, which stays free of windows.
+        services.AddSingleton<IFolderBrowserService, WindowsFolderBrowserService>();
         services.AddSingleton<IIgnoredLocationsService, MTM_Waitlist.Module_Core.Services.IgnoredLocationsService>();
-        services.AddSingleton<IAppProcessRestarter, MTM_Waitlist.Module_Startup.Services.AppProcessRestarter>();
-        services.AddSingleton<ISignOutService, MTM_Waitlist.Module_Startup.Services.SignOutService>();
         services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
         services.AddSingleton<IBuildingSelectionService, BuildingSelectionService>();
         services.AddTransient<INavigationViewService, NavigationViewService>();
@@ -138,10 +138,9 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<IUrgencySettingsService, MTM_Waitlist.Module_Core.Services.UrgencySettingsService>();
         services.AddSingleton<IUrgencyDeadlineService, MTM_Waitlist.Module_Core.Services.UrgencyDeadlineService>();
 
-        // The list's order is a per-viewer display preference remembered through the existing local settings,
-        // not a new store (§D7, FR-011).
+        // The list's order is the viewer's own preference, held against them in the store so it follows them to
+        // another computer rather than staying on the machine it was set on (FR-023, SC-008).
         services.AddSingleton<IWaitlistSortPreferenceService, MTM_Waitlist.Module_Core.Services.WaitlistSortPreferenceService>();
-        services.AddSingleton<IFileService, FileService>();
         services.AddSingleton<IReportPrintService, ReportPrintService>();
 
         // Views and view models
@@ -238,7 +237,6 @@ public static partial class ServiceRegistrationExtensions
         RegisterPartPictureCache(services);
 
         // Configuration
-        services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
         services.Configure<WaitlistDatabaseOptions>(context.Configuration.GetSection(nameof(WaitlistDatabaseOptions)));
         services.Configure<ReceivingDatabaseOptions>(context.Configuration.GetSection(nameof(ReceivingDatabaseOptions)));
 
@@ -247,8 +245,9 @@ public static partial class ServiceRegistrationExtensions
         // more (FR-025). The retired options' binding went with it, so nothing reads a file destination.
 
         // Dunnage images (Setup) resolve against the shared Dunnage image root (the same
-        // root the MTM Receiving Application writes via "Dunnage.Application.DefaultImageLocation").
-        DunnageImagePathResolver.ConfigureRootFolder(context.Configuration["DunnageImageOptions:RootFolder"]);
+        // root the MTM Receiving Application writes via "Dunnage.Application.DefaultImageLocation"). The root is
+        // this machine's own configuration and is adopted at launch, below, rather than from appsettings: the
+        // folders a machine reads now live in its configuration rows (T155, FR-025).
 
         // The local picture cache, mirroring both trees the application reads. The waitlist root is a setting, so
         // the factory resolves it when a run starts rather than when the container is built; the Dunnage cache
@@ -258,6 +257,19 @@ public static partial class ServiceRegistrationExtensions
             {
                 var storageConfiguration = provider
                     .GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageStorageConfigurationResolver>();
+
+                // The dunnage root is this machine's own, captured by machine setup, and it is adopted here
+                // before anything resolves a dunnage path (T155, FR-025). A machine that names no root keeps the
+                // shipped default rather than resolving nothing.
+                var machineConfiguration = provider
+                    .GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IMachineConfigurationService>();
+
+                var machineState = await machineConfiguration.GetStateAsync(cancellationToken).ConfigureAwait(false);
+
+                DunnageImagePathResolver.ConfigureRootFolder(
+                    machineState.PictureSources
+                        .FirstOrDefault(source => source.Kind == MTM_Waitlist.Module_Core.Models.MachineConfigurationSourceKinds.DunnageRoot)
+                        ?.Path);
 
                 // Adopted before anything reads a cached path, so the folder the copy is written into and the
                 // folder the screens look in are the same one.

@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 
@@ -11,13 +13,21 @@ public sealed class ImageStorageConfigurationResolverTests
 {
     private const string AppsettingsPath = @"X:\Software Development\Live Applications\MTM_Waitlist\Images";
 
+    /// <summary>A folder this machine's own configuration names, used to stand for what machine setup captured.</summary>
+    private const string MachinePath = @"X:\this-machine\Images";
+
+    /// <summary>A folder the plant names, which is the site-wide answer that applies to every computer.</summary>
+    private const string PlantPath = @"\\server\images";
+
     private FakeConfigSettingsValueService _configService = null!;
+    private StubMachineConfigurationService _machineConfiguration = null!;
     private ImageStorageConfigurationResolver _resolver = null!;
 
     [TestInitialize]
     public void TestInitialize()
     {
         _configService = new FakeConfigSettingsValueService();
+        _machineConfiguration = new StubMachineConfigurationService();
         _resolver = new ImageStorageConfigurationResolver(
             NullLogger<ImageStorageConfigurationResolver>.Instance,
             Options.Create(new ImageStorageOptions
@@ -29,13 +39,47 @@ public sealed class ImageStorageConfigurationResolverTests
                 EnableArchiveVersioning = true,
                 ArchiveKeepDays = 30
             }),
-            _configService);
+            _configService,
+            _machineConfiguration);
     }
 
     [TestMethod]
-    public async Task GetSharedFolderPathAsync_WithNoDatabaseOverride_UsesAppsettingsValue()
+    public async Task GetSharedFolderPathAsync_WithNoDatabaseOverrideAndNoMachineFolder_UsesAppsettingsValue()
     {
         Assert.AreEqual(AppsettingsPath, await _resolver.GetSharedFolderPathAsync());
+    }
+
+    /// <summary>
+    /// T155: the folder this machine was configured with at setup is what it reads, rather than one compiled into
+    /// the build (FR-025).
+    /// </summary>
+    [TestMethod]
+    public async Task GetSharedFolderPathAsync_WithAMachineFolderAndNoPlantOverride_UsesTheMachinesOwnFolder()
+    {
+        _machineConfiguration.SetFolder(MachineConfigurationSourceKinds.SharedFolder, MachinePath);
+
+        Assert.AreEqual(MachinePath, await _resolver.GetSharedFolderPathAsync());
+    }
+
+    /// <summary>
+    /// A plant-wide decision applies to every computer, so it is the answer even where one machine's own
+    /// configuration names a different folder, and the difference is reported rather than hidden (FR-009).
+    /// </summary>
+    [TestMethod]
+    public async Task GetSharedFolderPathAsync_WithBothAMachineFolderAndAPlantOverride_UsesThePlantOverride()
+    {
+        _machineConfiguration.SetFolder(MachineConfigurationSourceKinds.SharedFolder, MachinePath);
+        _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, PlantPath);
+
+        Assert.AreEqual(PlantPath, await _resolver.GetSharedFolderPathAsync());
+    }
+
+    [TestMethod]
+    public async Task GetKeysFolderPathAsync_WithAMachineFolderAndNoPlantOverride_UsesTheMachinesOwnFolder()
+    {
+        _machineConfiguration.SetFolder(MachineConfigurationSourceKinds.KeysFolder, MachinePath);
+
+        Assert.AreEqual(MachinePath, await _resolver.GetKeysFolderPathAsync());
     }
 
     [TestMethod]
@@ -115,27 +159,41 @@ public sealed class ImageStorageConfigurationResolverTests
     // ── Which folder is the truth, and the disagreement to report (US6, FR-009, FR-010) ────────────────────────
 
     [TestMethod]
-    public async Task GetSharedFolderResolutionAsync_WithNothingStored_ReportsThisMachinesOwnFolderAndNoDisagreement()
+    public async Task GetSharedFolderResolutionAsync_WithNothingStored_ReportsTheShippedDefaultAndNoMachineFolder()
     {
         var resolution = await _resolver.GetSharedFolderResolutionAsync();
 
-        Assert.AreEqual(AppsettingsPath, resolution.FolderPath, "With nothing stored, this machine's own folder is the truth.");
-        Assert.AreEqual(AppsettingsPath, resolution.MachineFolderPath);
+        Assert.AreEqual(AppsettingsPath, resolution.FolderPath, "With nothing stored anywhere, the shipped default is what is read.");
+        Assert.AreEqual(string.Empty, resolution.MachineFolderPath, "No machine row was read, so there is nothing to name beside it.");
+        Assert.IsFalse(resolution.MachineDisagrees, "With nothing to compare, there is no disagreement to report.");
+    }
+
+    [TestMethod]
+    public async Task GetSharedFolderResolutionAsync_WithTheMachineAndThePlantAgreeing_ReportsNoDisagreement()
+    {
+        _machineConfiguration.SetFolder(MachineConfigurationSourceKinds.SharedFolder, AppsettingsPath);
+        _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, AppsettingsPath);
+
+        var resolution = await _resolver.GetSharedFolderResolutionAsync();
+
+        Assert.AreEqual(AppsettingsPath, resolution.FolderPath);
+        Assert.AreEqual(AppsettingsPath, resolution.MachineFolderPath, "This machine's own folder is named beside it.");
         Assert.IsFalse(resolution.MachineDisagrees, "The two agree, so there is no disagreement to report.");
     }
 
     [TestMethod]
-    public async Task GetSharedFolderResolutionAsync_WithAStoredFolder_ReportsTheStoredFolderAndTheDisagreement()
+    public async Task GetSharedFolderResolutionAsync_WithTheMachineHoldingAnotherFolder_ReportsTheStoredFolderAndTheDisagreement()
     {
-        _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, @"\\server\images");
+        _machineConfiguration.SetFolder(MachineConfigurationSourceKinds.SharedFolder, MachinePath);
+        _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, PlantPath);
 
         var resolution = await _resolver.GetSharedFolderResolutionAsync();
 
         Assert.AreEqual(
-            @"\\server\images",
+            PlantPath,
             resolution.FolderPath,
-            "The store wins over this machine's own file, which is what makes one recorded picture resolve for every computer.");
-        Assert.AreEqual(AppsettingsPath, resolution.MachineFolderPath, "The file's own value is named beside it.");
+            "The plant override wins over this machine's own folder, which is what makes one recorded picture resolve for every computer.");
+        Assert.AreEqual(MachinePath, resolution.MachineFolderPath, "This machine's own folder is named beside it.");
         Assert.IsTrue(resolution.MachineDisagrees, "This machine is configured with a folder other than the one in force.");
     }
 
@@ -144,6 +202,7 @@ public sealed class ImageStorageConfigurationResolverTests
     {
         // A share is written with forward slashes in some of this application's files and backslashes in others, and
         // one is not a disagreement about where the pictures are.
+        _machineConfiguration.SetFolder(MachineConfigurationSourceKinds.SharedFolder, AppsettingsPath);
         _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, AppsettingsPath.Replace('\\', '/'));
 
         var resolution = await _resolver.GetSharedFolderResolutionAsync();
@@ -153,14 +212,32 @@ public sealed class ImageStorageConfigurationResolverTests
             "The same folder spelled with the other separator is the same folder.");
     }
 
-    [TestMethod]
-    public async Task GetSharedFolderResolutionAsync_WithAStoredFolderThatMatches_ReportsNoDisagreement()
+    /// <summary>
+    /// This machine's picture sources, as the machine configuration service answers them. Only the read is needed:
+    /// the resolver never writes a machine's configuration.
+    /// </summary>
+    private sealed class StubMachineConfigurationService : IMachineConfigurationService
     {
-        _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, AppsettingsPath);
+        private readonly Dictionary<string, string> _folders = new(StringComparer.Ordinal);
 
-        var resolution = await _resolver.GetSharedFolderResolutionAsync();
+        public void SetFolder(string kind, string path) => _folders[kind] = path;
 
-        Assert.AreEqual(AppsettingsPath, resolution.FolderPath);
-        Assert.IsFalse(resolution.MachineDisagrees);
+        public Task<MachineConfigurationState> GetStateAsync(CancellationToken cancellationToken) =>
+            Task.FromResult(new MachineConfigurationState(
+                IsConfigured: _folders.Count > 0,
+                DisplayName: "Fixture Machine",
+                Description: null,
+                PictureSources: _folders.Select(pair => new PictureSource(pair.Key, pair.Value)).ToArray(),
+                UnconfiguredReason: null));
+
+        public Task<MachineConfigurationSaveResult> SaveAsync(
+            MachineConfigurationDraft draft,
+            CancellationToken cancellationToken) =>
+            throw new NotSupportedException("The resolver is a reader and never saves a machine's configuration.");
+
+        public Task<MachineConfigurationResetResult> ResetToDefaultsAsync(
+            IReadOnlyList<string> whatIsBroken,
+            CancellationToken cancellationToken) =>
+            throw new NotSupportedException("The resolver is a reader and never resets a machine's configuration.");
     }
 }

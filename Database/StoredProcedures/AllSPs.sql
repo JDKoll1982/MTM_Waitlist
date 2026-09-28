@@ -490,6 +490,123 @@ END$$
 
 DELIMITER ;
 
+-- Stored Procedure: sp_auth_user_credential_get
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T110)
+--
+-- Purpose: return one account's identity and the material that confirms its credential, keyed on the
+--          upper-normalised sign-in name, so a caller can check a credential without a second read of the
+--          same row.
+--
+-- Contract:
+--   IN  p_username  VARCHAR(128)  the sign-in name as the caller holds it, stored upper case
+--
+--   OUT zero or one row: id, role_code, display_name, employee_identifier, password_hash, password_salt,
+--       require_password_change, temporary_credential_failed_attempts
+--
+-- Why this exists: `sp_auth_credentials_check` was retired with the rest of the startup-only procedures
+-- (T020), and nothing that survives returns a credential column. `sp_auth_user_row_get` deliberately omits
+-- them, so an identity read never pulls a hash into memory. Two callers need the credential material, and
+-- they are asking the same question, so they share one read instead of each inventing one: the sign-in
+-- path's credential check, and the machine-setup gate that authenticates the person who configures a
+-- computer.
+--
+-- It mirrors `sp_auth_user_row_get` on purpose, with the same join, the same active-row filter and the same
+-- `ORDER BY ra.assigned_utc DESC LIMIT 1`, so the two reads cannot disagree about which row is the person or
+-- which role is in force. What it adds is the four columns that read leaves out.
+--
+-- Two credential-state columns travel with the identity because one attempt must cost one read.
+-- `require_password_change` is what makes an account "still on a temporary credential" rather than "on an
+-- ordinary one", and the five-attempt limit applies to the temporary state alone (FR-012).
+-- `temporary_credential_failed_attempts` is the count that limit is judged against, held with the account so
+-- it survives closing and reopening the application (FR-012, SC-007).
+--
+-- `role_code` is the identity a gate compares and `role_name` is presentation, so only the code is returned.
+--
+-- The read owns no data and writes nothing. It never returns the plaintext of anything: `password_hash` is a
+-- PBKDF2 digest and `password_salt` is the salt it was computed with, which is all a comparison needs.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_credential_get;
+
+CREATE PROCEDURE sp_auth_user_credential_get(
+    IN p_username VARCHAR(128)
+)
+SELECT u.id,
+       COALESCE(r.role_code, '') AS role_code,
+       COALESCE(u.display_name, '') AS display_name,
+       COALESCE(u.employee_identifier, '') AS employee_identifier,
+       COALESCE(u.password_hash, '') AS password_hash,
+       u.password_salt,
+       u.require_password_change,
+       u.temporary_credential_failed_attempts
+FROM core_users_profiles u
+LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
+LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
+WHERE u.username_normalized = p_username
+  AND u.is_active = 1
+ORDER BY ra.assigned_utc DESC
+LIMIT 1;
+
+-- Stored Procedure: sp_auth_user_password_set
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T116)
+--
+-- Purpose: replace one account's password with a new one it has just chosen, and leave the temporary state it
+--          was in, in one act.
+--
+-- Contract:
+--   IN  p_user_id       BIGINT
+--   IN  p_password_hash VARCHAR(128)  the salted hash of the new password, computed by the caller
+--   IN  p_password_salt VARBINARY(32) the salt that hash was computed with
+--
+--   OUT the affected-row count, through the non-query seam. 0 means no such account, which is reported rather
+--       than treated as a silent success.
+--
+-- Why this exists: FR-013 requires a person still on a temporary credential to set a new password before
+-- anything else, and `sp_auth_user_password_update` was retired with the rest of the startup-only procedures
+-- (T020). Nothing that survives writes this column pair for the account itself: `sp_user_management_update`
+-- deliberately leaves credentials alone, and `sp_user_management_reset_password` issues a fresh one-time PIN
+-- for an administrator to hand over, which is a different act and would set `require_password_change` back to 1
+-- rather than clearing it.
+--
+-- What it writes, and nothing else:
+--   * `password_hash` and `password_salt`, which together are the whole of the credential;
+--   * `require_password_change = 0`, because the person has just replaced the credential the flag stood for.
+--     This is what takes the account out of the temporary state the five-attempt limit applies to (FR-012);
+--   * `temporary_credential_failed_attempts = 0`, because the count is judged against a state the account has
+--     just left, and carrying it forward would refuse a fresh password on a later sign-in.
+--
+-- It deliberately does not touch `is_active`, `display_name`, the role assignment or any session: a person
+-- changing their own password does not change who they are, whether they may sign in, or where they are already
+-- signed in. It writes no audit row, because the account has no actor to name and the store's audit table is the
+-- user-management screen's record of what an administrator did to somebody else.
+--
+-- The plaintext never arrives. The caller computes the hash and the salt and passes those, so nothing
+-- recoverable is ever sent to, held by, or logged by the store.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_password_set;
+
+CREATE PROCEDURE sp_auth_user_password_set(
+    IN p_user_id BIGINT,
+    IN p_password_hash VARCHAR(128),
+    IN p_password_salt VARBINARY(32)
+)
+UPDATE core_users_profiles
+SET
+    password_hash = TRIM(p_password_hash),
+    password_salt = p_password_salt,
+    require_password_change = 0,
+    temporary_credential_failed_attempts = 0
+WHERE
+    id = p_user_id
+    AND is_active = 1;
+
 -- Stored Procedure: sp_auth_user_roles_get
 -- Engine: MySQL 5.7
 -- Feature: 010-startup-rebuild (task T195)

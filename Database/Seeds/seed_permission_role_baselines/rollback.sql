@@ -28,7 +28,7 @@ WHERE scope_type = 'role'
 DELETE FROM config_settings_values
 WHERE scope_type = 'all_users'
   AND scope_key = 'all_users'
-  AND setting_key IN ('Feature.IgnoredLocations', 'sessions.length_hours');
+  AND setting_key IN ('Feature.IgnoredLocations', 'auth.session_length_minutes');
 
 -- The four keys 010-startup-rebuild (T053) added — `permission.settings.machine_configuration`,
 -- `permission.settings.ignored_locations_edit`, `permission.settings.log_panel` and

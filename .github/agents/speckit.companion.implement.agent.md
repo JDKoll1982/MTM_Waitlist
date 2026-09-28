@@ -5,6 +5,8 @@ description: Companion implement — execute tasks.md in dependency order, then 
 
 <!-- Extension: companion -->
 <!-- Config: .specify/extensions/companion/ -->
+
+
 ## User Input
 
 ```text

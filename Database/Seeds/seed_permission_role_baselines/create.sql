@@ -405,8 +405,9 @@ ON DUPLICATE KEY UPDATE
     updated_utc = VALUES(updated_utc);
 
 -- The session length (FR-029, research D17): eight hours, held against the plant and read when a session row is
--- written. Integer hours, so the value travels in the column the rank function and the effective-settings read
--- already project.
+-- written. Minutes, because that is the unit the launch resolves and the settings panel writes
+-- (`ScopedPreferenceKeys.SessionLengthMinutes`): a row written under another name or in another unit is one the
+-- read cannot answer from even though the row exists.
 INSERT INTO
     config_settings_values (
         public_id,
@@ -419,7 +420,7 @@ INSERT INTO
         updated_utc
     )
 VALUES
-    (UUID(), 'sessions.length_hours', 'all_users', 'all_users', 8, 'int', NULL, UTC_TIMESTAMP())
+    (UUID(), 'auth.session_length_minutes', 'all_users', 'all_users', 480, 'int', NULL, UTC_TIMESTAMP())
 ON DUPLICATE KEY UPDATE
     setting_value_int = VALUES(setting_value_int),
     value_type = VALUES(value_type),

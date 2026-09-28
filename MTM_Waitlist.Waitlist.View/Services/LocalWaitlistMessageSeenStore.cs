@@ -4,29 +4,35 @@ using MTM_Waitlist.Module_Core.Helpers;
 namespace MTM_Waitlist.Module_Waitlist.Services;
 
 /// <summary>
-/// Stores the per-request "last looked at" times in the app's per-user local settings file, so the
+/// Stores the per-request "last looked at" times against the signed-in person in the store, so the
 /// new-message indicator survives a restart rather than re-flagging everything the viewer has already read.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Persisted as one dictionary under a single key: the values are tiny and always read together. The map is
 /// trimmed to the most recent <see cref="MaxTrackedRequests"/> entries so it cannot grow without bound on a
 /// long-lived installation.
+/// </para>
+/// <para>
+/// Held against the person rather than on the computer, so a request a viewer has read stays read when they move
+/// to another computer (FR-023, SC-008). The stored value is text, which is what the store's own column holds.
+/// </para>
 /// </remarks>
 public sealed class LocalWaitlistMessageSeenStore : IWaitlistMessageSeenStore
 {
-    /// <summary>The local-settings key holding the per-request last-seen times.</summary>
+    /// <summary>The scoped-preference key holding the per-request last-seen times, against the person.</summary>
     public const string SettingsKey = "Waitlist.MessageSeen";
 
     private const int MaxTrackedRequests = 500;
 
-    private readonly ILocalSettingsService _settings;
+    private readonly IScopedPreferenceStore _preferences;
 
     private Task<Dictionary<string, DateTimeOffset>>? _load;
 
-    public LocalWaitlistMessageSeenStore(ILocalSettingsService settings)
+    public LocalWaitlistMessageSeenStore(IScopedPreferenceStore preferences)
     {
-        ArgumentNullException.ThrowIfNull(settings);
-        _settings = settings;
+        ArgumentNullException.ThrowIfNull(preferences);
+        _preferences = preferences;
     }
 
     /// <inheritdoc />
@@ -47,7 +53,7 @@ public sealed class LocalWaitlistMessageSeenStore : IWaitlistMessageSeenStore
         if (map.TryGetValue(key, out var existing) && existing >= seenUtc)
         {
             // Already seen at least this far: nothing to write, so a page that refreshes every 30 seconds
-            // does not rewrite the settings file just for being open.
+            // does not rewrite the stored value just for being open.
             return;
         }
 
@@ -56,7 +62,9 @@ public sealed class LocalWaitlistMessageSeenStore : IWaitlistMessageSeenStore
 
         try
         {
-            await _settings.SaveSettingAsync(SettingsKey, map).ConfigureAwait(false);
+            await _preferences
+                .WriteTextAsync(SettingsKey, PreferenceScope.Person, await Json.StringifyAsync(map).ConfigureAwait(false), cancellationToken)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -72,17 +80,24 @@ public sealed class LocalWaitlistMessageSeenStore : IWaitlistMessageSeenStore
     {
         try
         {
-            var stored = await _settings
-                .ReadSettingAsync<Dictionary<string, DateTimeOffset>>(SettingsKey)
+            var stored = await _preferences
+                .ReadTextAsync(SettingsKey, PreferenceScope.Person, cancellationToken)
                 .ConfigureAwait(false);
 
-            return stored is null
+            if (string.IsNullOrWhiteSpace(stored))
+            {
+                return new Dictionary<string, DateTimeOffset>(StringComparer.OrdinalIgnoreCase);
+            }
+
+            var map = await Json.ToObjectAsync<Dictionary<string, DateTimeOffset>>(stored).ConfigureAwait(false);
+
+            return map is null
                 ? new Dictionary<string, DateTimeOffset>(StringComparer.OrdinalIgnoreCase)
-                : new Dictionary<string, DateTimeOffset>(stored, StringComparer.OrdinalIgnoreCase);
+                : new Dictionary<string, DateTimeOffset>(map, StringComparer.OrdinalIgnoreCase);
         }
         catch (Exception ex)
         {
-            // An unreadable settings file means "nothing has been seen yet", which at worst shows an
+            // A value that cannot be read means "nothing has been seen yet", which at worst shows an
             // indicator the viewer has already read — never a crash on the list.
             AppLog.Error("Waitlist", ex, "Reading the last-seen times failed; treating every request as unread this time.");
             return new Dictionary<string, DateTimeOffset>(StringComparer.OrdinalIgnoreCase);

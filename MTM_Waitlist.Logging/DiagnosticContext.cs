@@ -147,6 +147,7 @@ public static class DiagnosticContext
     private static JsonObject BuildProperties(IReadOnlyDictionary<string, object?> properties)
     {
         var projected = new JsonObject();
+        var removed = 0;
 
         foreach (var (name, value) in properties)
         {
@@ -155,7 +156,21 @@ public static class DiagnosticContext
                 continue;
             }
 
+            // A structured property is a name a call site chose, so it is as capable of naming a credential as
+            // an exception's data is. §6 forbids the value, and the name is recorded as a count instead of as
+            // itself: whether a call site grouped its properties by "password" is a fact about the call site.
+            if (ExceptionDetailSerializer.IsNeverWritten(name))
+            {
+                removed++;
+                continue;
+            }
+
             projected[name] = ReadValue(value);
+        }
+
+        if (removed > 0)
+        {
+            projected["valuesRemoved"] = removed;
         }
 
         return projected;

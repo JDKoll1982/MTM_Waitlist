@@ -109,6 +109,14 @@ public sealed class LogService : ILogService
     {
         try
         {
+            // An entry raised from inside a write to the log store is the recorder describing its own work. It is
+            // dropped here rather than queued, because the data-access seam announces every call it makes and the
+            // announcement of a log write would itself be a log write (§1.4, FR-037).
+            if (LogWriteScope.IsWriting)
+            {
+                return;
+            }
+
             _writer.Enqueue(Compose(entry, exception, properties));
         }
         catch (Exception)

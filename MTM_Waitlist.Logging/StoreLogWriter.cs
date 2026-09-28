@@ -247,13 +247,19 @@ public sealed class StoreLogWriter : IHostedService
     {
         try
         {
-            await _store
-                .ExecuteStoredProcedureNonQueryAsync(
-                    InsertProcedureName,
-                    ToParameters(record),
-                    MySqlDatabaseTarget.MtmWaitlist,
-                    token)
-                .ConfigureAwait(false);
+            // The data-access seam logs what it does, so the write is marked as the recorder's own work before
+            // it starts and unmarked when it ends. Everything the seam says about this write is dropped rather
+            // than queued, which is what stops one entry from becoming an unbounded stream of them (§1.4).
+            using (LogWriteScope.Enter())
+            {
+                await _store
+                    .ExecuteStoredProcedureNonQueryAsync(
+                        InsertProcedureName,
+                        ToParameters(record),
+                        MySqlDatabaseTarget.MtmWaitlist,
+                        token)
+                    .ConfigureAwait(false);
+            }
         }
         catch (OperationCanceledException)
         {

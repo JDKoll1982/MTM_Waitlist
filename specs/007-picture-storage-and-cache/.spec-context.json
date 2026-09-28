@@ -1,0 +1,18 @@
+{
+  "workflow": "companion",
+  "specName": "007-picture-storage-and-cache",
+  "branch": "007-picture-storage-and-cache",
+  "selectedAt": "2026-09-27T16:23:18.048Z",
+  "currentStep": "specify",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "user",
+      "at": "2026-09-27T16:23:27.797Z"
+    }
+  ],
+  "telemetryInstanceId": "79271ffb-c575-417d-afa4-00996cd1b468"
+}

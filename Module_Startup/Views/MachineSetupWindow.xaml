@@ -1,0 +1,202 @@
+<windowex:WindowEx
+    x:Class="MTM_Waitlist.Module_Startup.Views.MachineSetupWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:windowex="using:WinUIEx"
+    MinWidth="560"
+    MinHeight="620"
+    mc:Ignorable="d">
+
+    <!--
+        Four rows, and the message is its own row rather than something laid over the form: a refusal or a stated
+        reason for the ending never covers the fields the person is working in (FR-005's rule, applied here).
+        The route out of setup that is not completion is a control in the action row, and every other route the
+        window offers funnels into the same ending so none of them can be missed (FR-008).
+    -->
+    <Grid
+        x:Name="RootGrid"
+        Padding="32"
+        AutomationProperties.AutomationId="MachineSetupWindow_Root"
+        AutomationProperties.Name="Set up this computer"
+        RowSpacing="16">
+
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator Key="Escape" Invoked="OnEscapeInvoked" />
+            <KeyboardAccelerator Key="F4" Modifiers="Menu" Invoked="OnAltF4Invoked" />
+        </Grid.KeyboardAccelerators>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock
+                AutomationProperties.AutomationId="MachineSetupWindow_Heading"
+                Style="{ThemeResource TitleTextBlockStyle}"
+                Text="{x:Bind ViewModel.TitleText}" />
+            <TextBlock
+                AutomationProperties.AutomationId="MachineSetupWindow_Subtitle"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind ViewModel.SubtitleText}"
+                TextWrapping="Wrap" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16">
+
+                <!-- The unlock. It is offered until somebody is authorised, and the save checks that again. -->
+                <StackPanel
+                    AutomationProperties.AutomationId="MachineSetupWindow_SignInPanel"
+                    Spacing="8"
+                    Visibility="{x:Bind ViewModel.ShowSignInForm, Mode=OneWay}">
+                    <TextBlock
+                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind ViewModel.SignInHeadingText}" />
+                    <TextBox
+                        x:Name="SignInNameBox"
+                        AutomationProperties.AutomationId="MachineSetupWindow_SignInName"
+                        Header="{x:Bind ViewModel.SignInNameLabelText}"
+                        PlaceholderText="{x:Bind ViewModel.SignInNameHintText}"
+                        Text="{x:Bind ViewModel.SignInName, Mode=TwoWay}" />
+                    <PasswordBox
+                        x:Name="CredentialBox"
+                        AutomationProperties.AutomationId="MachineSetupWindow_Credential"
+                        Header="{x:Bind ViewModel.CredentialLabelText}"
+                        PlaceholderText="{x:Bind ViewModel.CredentialHintText}" />
+                    <Button
+                        x:Name="SignInButton"
+                        AutomationProperties.AutomationId="MachineSetupWindow_SignInButton"
+                        Click="OnSignInClick"
+                        Content="{x:Bind ViewModel.SignInActionText}"
+                        IsEnabled="{x:Bind ViewModel.CanSignIn, Mode=OneWay}"
+                        Style="{StaticResource AccentButtonStyle}" />
+                </StackPanel>
+
+                <!-- What this computer is. It appears only once the gate has authorised a person. -->
+                <StackPanel
+                    AutomationProperties.AutomationId="MachineSetupWindow_ConfigurationPanel"
+                    Spacing="8"
+                    Visibility="{x:Bind ViewModel.ShowConfigurationForm, Mode=OneWay}">
+                    <TextBlock
+                        AutomationProperties.AutomationId="MachineSetupWindow_AuthorizedPerson"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.AuthorizedPersonName, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.HasAuthorizedPerson, Mode=OneWay}" />
+                    <TextBlock
+                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind ViewModel.IdentityHeadingText}" />
+                    <TextBox
+                        x:Name="DisplayNameBox"
+                        AutomationProperties.AutomationId="MachineSetupWindow_DisplayName"
+                        Header="{x:Bind ViewModel.DisplayNameLabelText}"
+                        Text="{x:Bind ViewModel.DisplayName, Mode=TwoWay}" />
+                    <TextBox
+                        x:Name="DescriptionBox"
+                        AutomationProperties.AutomationId="MachineSetupWindow_Description"
+                        Header="{x:Bind ViewModel.DescriptionLabelText}"
+                        Text="{x:Bind ViewModel.Description, Mode=TwoWay}" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox
+                            x:Name="SharedFolderBox"
+                            AutomationProperties.AutomationId="MachineSetupWindow_SharedFolder"
+                            Header="{x:Bind ViewModel.SharedFolderLabelText}"
+                            PlaceholderText="{x:Bind ViewModel.SharedFolderHintText}"
+                            Text="{x:Bind ViewModel.SharedFolderPath, Mode=TwoWay}" />
+                        <Button
+                            AutomationProperties.AutomationId="MachineSetupWindow_SharedFolderBrowse"
+                            AutomationProperties.Name="{x:Bind ViewModel.BrowseActionText}"
+                            Command="{x:Bind ViewModel.BrowseSharedFolderCommand}"
+                            Content="{x:Bind ViewModel.BrowseActionText}"
+                            Grid.Column="1"
+                            VerticalAlignment="Bottom" />
+                    </Grid>
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox
+                            x:Name="KeysFolderBox"
+                            AutomationProperties.AutomationId="MachineSetupWindow_KeysFolder"
+                            Header="{x:Bind ViewModel.KeysFolderLabelText}"
+                            PlaceholderText="{x:Bind ViewModel.KeysFolderHintText}"
+                            Text="{x:Bind ViewModel.KeysFolderPath, Mode=TwoWay}" />
+                        <Button
+                            AutomationProperties.AutomationId="MachineSetupWindow_KeysFolderBrowse"
+                            AutomationProperties.Name="{x:Bind ViewModel.BrowseActionText}"
+                            Command="{x:Bind ViewModel.BrowseKeysFolderCommand}"
+                            Content="{x:Bind ViewModel.BrowseActionText}"
+                            Grid.Column="1"
+                            VerticalAlignment="Bottom" />
+                    </Grid>
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox
+                            x:Name="DunnageRootBox"
+                            AutomationProperties.AutomationId="MachineSetupWindow_DunnageRoot"
+                            Header="{x:Bind ViewModel.DunnageRootLabelText}"
+                            PlaceholderText="{x:Bind ViewModel.DunnageRootHintText}"
+                            Text="{x:Bind ViewModel.DunnageRootPath, Mode=TwoWay}" />
+                        <Button
+                            AutomationProperties.AutomationId="MachineSetupWindow_DunnageRootBrowse"
+                            AutomationProperties.Name="{x:Bind ViewModel.BrowseActionText}"
+                            Command="{x:Bind ViewModel.BrowseDunnageRootCommand}"
+                            Content="{x:Bind ViewModel.BrowseActionText}"
+                            Grid.Column="1"
+                            VerticalAlignment="Bottom" />
+                    </Grid>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border
+            x:Name="MessageStrip"
+            AutomationProperties.AutomationId="MachineSetupWindow_Message"
+            Grid.Row="2"
+            Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+            CornerRadius="4"
+            Padding="12"
+            Visibility="{x:Bind ViewModel.HasMessage, Mode=OneWay}">
+            <TextBlock
+                x:Name="MessageText"
+                Text="{x:Bind ViewModel.Message, Mode=OneWay}"
+                TextWrapping="Wrap" />
+        </Border>
+
+        <StackPanel
+            Grid.Row="3"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="8">
+            <ProgressRing
+                AutomationProperties.AutomationId="MachineSetupWindow_Busy"
+                IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
+                Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+            <Button
+                x:Name="CancelButton"
+                AutomationProperties.AutomationId="MachineSetupWindow_CancelButton"
+                Click="OnCancelClick"
+                Content="{x:Bind ViewModel.CancelActionText}" />
+            <Button
+                x:Name="SaveButton"
+                AutomationProperties.AutomationId="MachineSetupWindow_SaveButton"
+                Click="OnSaveClick"
+                Content="{x:Bind ViewModel.SaveActionText}"
+                IsEnabled="{x:Bind ViewModel.CanSave, Mode=OneWay}"
+                Style="{StaticResource AccentButtonStyle}"
+                Visibility="{x:Bind ViewModel.ShowConfigurationForm, Mode=OneWay}" />
+        </StackPanel>
+    </Grid>
+</windowex:WindowEx>

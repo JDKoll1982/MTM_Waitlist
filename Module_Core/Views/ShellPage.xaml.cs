@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Media;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -167,14 +168,14 @@ public sealed partial class ShellPage : Page
     }
 
     /// <summary>
-    /// Signs out from the badge (FR-033, FR-034). The view model hands the work to the sign-out service, which
-    /// clears the remembered credential and the local session, launches a replacement instance and exits this
-    /// one — so a successful sign-out never comes back here. A relaunch that could not be performed is
-    /// reported in plain language rather than leaving the person apparently signed in (FR-026).
+    /// Signs out from the badge (FR-011). The view model hands the work to the sign-out service, which ends the
+    /// session in the store and this process's identity, launches a replacement instance and exits this one — so
+    /// a successful sign-out never comes back here. A session that could not be ended, or a relaunch that could
+    /// not be performed, is reported in plain language rather than leaving the person apparently signed in.
     /// </summary>
     private async void SignOutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        SignOutResult result;
+        SignOutOutcome result;
         try
         {
             result = await ViewModel.SignOutAsync();
@@ -182,7 +183,7 @@ public sealed partial class ShellPage : Page
         catch (Exception ex)
         {
             AppLog.Error("ShellPage", ex, "Signing out failed before the application could be relaunched.");
-            result = SignOutResult.Refused(MTM_Waitlist.Module_Startup.Services.SignOutService.ResolveRestartFailedMessage());
+            result = SignOutOutcome.Refused(SignOutService.ResolveRestartFailedMessage());
         }
 
         if (result.Succeeded)

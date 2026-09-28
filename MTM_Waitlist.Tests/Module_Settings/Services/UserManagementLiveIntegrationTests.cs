@@ -433,6 +433,20 @@ public sealed class UserManagementLiveIntegrationTests
                 + "because the credential is never stored (FR-030, FR-111).");
     }
 
+    /// <summary>
+    /// Switching a person off ends no session they already hold, which is the rule that no account-management
+    /// write clears sessions by person (FR-011, FR-102).
+    /// </summary>
+    /// <remarks>
+    /// <b>Why this case reads the session table rather than the rebuilt session service (T188).</b> The claim is a
+    /// property of the store: an unrelated update to an account leaves another table's row byte-for-byte alone.
+    /// <c>LaunchSessionService</c> can only judge a session this process issued, because it presents a digest it
+    /// generated and never holds; it has no way to observe somebody else's row. The session repository this case
+    /// used to go through is retired, and so are the six procedures it wrapped, so the row is now seeded and read
+    /// here directly through <c>user_active_sessions</c>, which is the same table the current session procedures
+    /// read and write. Driving it through a faked session service would prove what the fake does rather than what
+    /// the store does.
+    /// </remarks>
     [TestMethod]
     public async Task UpdateAsync_DeactivatingAPerson_LeavesTheirExistingSessionsAlone()
     {

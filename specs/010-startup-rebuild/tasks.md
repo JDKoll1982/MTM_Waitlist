@@ -202,20 +202,20 @@ models and options deleted in T012, T013 and T014 · `MTM_Waitlist.Core/`, `Modu
 - [x] **T072** [P] Build the append-only activity feed with a timestamp, the step, the entry kind, the text, the target and the outcome (checklist 8.1d, FR-002). · `MTM_Waitlist.Startup/Services/LaunchActivityFeed.cs`
 - [x] **T073** [P] Build the runner that announces each step before it runs and reports started, completed and failed, and that enforces each step's stated maximum (checklist 8.1b, FR-002, FR-003). · `MTM_Waitlist.Startup/Services/LaunchStepRunner.cs`
 - [x] **T074** [P] Build the step catalog as data, one entry per individual operation the launch performs rather than one per grouped phase — seventeen entries — with every entry's stated maximum and no unbounded entry, the two best-effort entries bounded more tightly than the thirty-second ceiling, and each entry naming the target it reaches for (checklist 8.1a, plan D21, FR-002, FR-003, SC-002). · `MTM_Waitlist.Startup/Services/LaunchStepCatalog.cs`
-- [ ] **T075** [P] Implement the machine configuration service: the configuration state with its four unconfigured reasons, the save that refuses a display name already in use, and the reset that `IMachineConfigurationService.ResetToDefaultsAsync` performs on this machine's configuration only — the mechanism, and the only code that writes these rows (plan FR-006, FR-009, FR-018; contract §1, §4). · `MTM_Waitlist.Startup/Services/MachineConfigurationService.cs`
-- [ ] **T076** [P] Build the launch steps that run before sign-in — the local settings read, store reachability, the hardware identity, the computer record, the machine configuration and the save that sets it, and the remembered sign-in (`read-local-settings`, `store-reachability`, `read-hardware-identity`, `read-computer-record`, `read-machine-configuration`, `save-machine-configuration`, `read-remembered-sign-in`) — each announcing itself first (checklist 8.1b, FR-002). · `MTM_Waitlist.Startup/Services/ConfigurationStep.cs`, `MTM_Waitlist.Startup/Services/StoreReachabilityStep.cs`, `MTM_Waitlist.Startup/Services/MachineReadinessStep.cs`
+- [x] **T075** [P] Implement the machine configuration service: the configuration state with its four unconfigured reasons, the save that refuses a display name already in use, and the reset that `IMachineConfigurationService.ResetToDefaultsAsync` performs on this machine's configuration only — the mechanism, and the only code that writes these rows (plan FR-006, FR-009, FR-018; contract §1, §4). · `MTM_Waitlist.Startup/Services/MachineConfigurationService.cs`
+- [x] **T076** [P] Build the launch steps that run before sign-in — the local settings read, store reachability, the hardware identity, the computer record, the machine configuration and the save that sets it, and the remembered sign-in (`read-local-settings`, `store-reachability`, `read-hardware-identity`, `read-computer-record`, `read-machine-configuration`, `save-machine-configuration`, `read-remembered-sign-in`) — each announcing itself first (checklist 8.1b, FR-002). · `MTM_Waitlist.Startup/Services/ConfigurationStep.cs`, `MTM_Waitlist.Startup/Services/StoreReachabilityStep.cs`, `MTM_Waitlist.Startup/Services/MachineReadinessStep.cs`
 
 **⟶ Wait for Wave 23 to finish, then:**
-- [ ] **T077** Build the launch pipeline behind a single entry point: `RunAsync` ending at exactly one of the main screens, sign-in, machine setup, a stated stop or an ended process; `RetryFromAsync` repeating the named step and what follows it only; a re-entrant entry refused; and the pipeline, not the screen, refusing to continue while the machine is unconfigured (checklist 8.3a, plan D3, FR-001, FR-006, FR-020). · `MTM_Waitlist.Startup/Services/LaunchPipeline.cs`
+- [x] **T077** Build the launch pipeline behind a single entry point: `RunAsync` ending at exactly one of the main screens, sign-in, machine setup, a stated stop or an ended process; `RetryFromAsync` repeating the named step and what follows it only; a re-entrant entry refused; and the pipeline, not the screen, refusing to continue while the machine is unconfigured (checklist 8.3a, plan D3, FR-001, FR-006, FR-020). · `MTM_Waitlist.Startup/Services/LaunchPipeline.cs`
 
 **⟶ Wait for Wave 24 to finish, then:**
-- [ ] **T078** Replace the app-lifecycle seam so the host owns one call and two events, states the reason before the process ends, keeps the shell hidden until the pipeline routes to it, and no longer owns window handoff (checklist 8.3b–8.3d, FR-008). · `App.xaml.cs`
-- [ ] **T079** [P] Register the pipeline, the runner, the catalog and the pre-sign-in steps in the host (checklist 8.1, 8.3). · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
+- [x] **T078** Replace the app-lifecycle seam so the host owns one call and two events, states the reason before the process ends, keeps the shell hidden until the pipeline routes to it, and no longer owns window handoff (checklist 8.3b–8.3d, FR-008). · `App.xaml.cs`
+- [x] **T079** [P] Register the pipeline, the runner, the catalog and the pre-sign-in steps in the host (checklist 8.1, 8.3). · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
 
 **⟶ Wait for Wave 25 to finish, then:**
-- [ ] **T080** [P] Test the runner: each step is named before it runs, a stalled step reports at its stated maximum, and a sub-operation names its operation, its target and its outcome (checklist 8.1b, FR-002, FR-003). · `MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepRunnerTests.cs`
-- [ ] **T081** [P] Test the feed: append-only, timestamped, never cleared while a launch runs, and a best-effort failure still gets a line (checklist 8.2, FR-026). · `MTM_Waitlist.Tests/Module_Startup/Services/LaunchActivityFeedTests.cs`
-- [ ] **T082** [P] Test retry: it repeats the failed step and the steps after it, never the whole pipeline and never step 1 for a store-only retry (checklist 8.1c, FR-020). · `MTM_Waitlist.Tests/Module_Startup/Services/LaunchPipelineRetryTests.cs`
+- [x] **T080** [P] Test the runner: each step is named before it runs, a stalled step reports at its stated maximum, and a sub-operation names its operation, its target and its outcome (checklist 8.1b, FR-002, FR-003). · `MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepRunnerTests.cs`
+- [x] **T081** [P] Test the feed: append-only, timestamped, never cleared while a launch runs, and a best-effort failure still gets a line (checklist 8.2, FR-026). · `MTM_Waitlist.Tests/Module_Startup/Services/LaunchActivityFeedTests.cs`
+- [x] **T082** [P] Test retry: it repeats the failed step and the steps after it, never the whole pipeline and never step 1 for a store-only retry (checklist 8.1c, FR-020). · `MTM_Waitlist.Tests/Module_Startup/Services/LaunchPipelineRetryTests.cs`
 
 **Checkpoint**: the old surface is gone with the guard passing, the app launches only to the placeholder, the
 two identity contracts are the only identity source, the store holds sessions, remembered sign-ins and
@@ -236,26 +236,26 @@ Retires `Module_Startup/Views/StartupPlaceholderWindow.xaml` and `.xaml.cs` (cre
 Registrations for this phase append to the Phase 2-owned startup DI extension.
 
 ### Tests
-- [ ] **T083** [P] [US1] Test the picture refresh: it cannot stop the launch, and an unreachable source is recorded with existing copies left in place (checklist 8.5c, FR-026). · `MTM_Waitlist.Tests/Module_Startup/Services/PictureCacheStepTests.cs`
-- [ ] **T084** [P] [US1] Test the verdict priming: the verdict is settled before a screen opens, neither best-effort step can hold the splash past its bound, and an awaiting run waits only on the step that opens one (checklist 8.5c, FR-003, FR-027). · `MTM_Waitlist.Tests/Module_Startup/Services/VisualVerdictPrimingStepTests.cs`
-- [ ] **T085** [P] [US1] Test the splash: a line appears before the work it describes, and a stop states its cause rather than leaving a step number on screen (checklist 8.2, FR-002, FR-004). · `MTM_Waitlist.Tests/Module_Startup/ViewModels/SplashViewModelTests.cs`
+- [x] **T083** [P] [US1] Test the picture refresh: it cannot stop the launch, and an unreachable source is recorded with existing copies left in place (checklist 8.5c, FR-026). · `MTM_Waitlist.Tests/Module_Startup/Services/PictureCacheStepTests.cs`
+- [x] **T084** [P] [US1] Test the verdict priming: the verdict is settled before a screen opens, neither best-effort step can hold the splash past its bound, and an awaiting run waits only on the step that opens one (checklist 8.5c, FR-003, FR-027). · `MTM_Waitlist.Tests/Module_Startup/Services/VisualVerdictPrimingStepTests.cs`
+- [x] **T085** [P] [US1] Test the splash: a line appears before the work it describes, and a stop states its cause rather than leaving a step number on screen (checklist 8.2, FR-002, FR-004). · `MTM_Waitlist.Tests/Module_Startup/ViewModels/SplashViewModelTests.cs`
 
 ### Implementation
 
 **Wave 1 — independent (different files):**
-- [ ] **T086** [P] [US1] Build the splash window with the live, append-only activity feed bound to the launch activity feed, replacing the placeholder (checklist 8.2a). · `Module_Startup/Views/SplashWindow.xaml`, `Module_Startup/Views/SplashWindow.xaml.cs`
-- [ ] **T087** [P] [US1] Build the splash view model: the feed lines, the derived count and the diagnosis carried on the line that caused it (checklist 8.2e, FR-002, FR-004). · `MTM_Waitlist.Startup/ViewModels/SplashViewModel.cs`
-- [ ] **T088** [P] [US1] Add the picture-cache step: kept in the sequence, best effort, its own feed line, bounded more tightly than the thirty-second ceiling (checklist 8.5a, plan D21, FR-026). · `MTM_Waitlist.Startup/Services/PictureCacheStep.cs`
-- [ ] **T089** [P] [US1] Add the verdict-priming step: settled before a screen opens, awaited only on the run that opens one, never able to hold the launch (checklist 8.5b, FR-027). · `MTM_Waitlist.Startup/Services/VisualVerdictPrimingStep.cs`
+- [x] **T086** [P] [US1] Build the splash window with the live, append-only activity feed bound to the launch activity feed, replacing the placeholder (checklist 8.2a). · `Module_Startup/Views/SplashWindow.xaml`, `Module_Startup/Views/SplashWindow.xaml.cs`
+- [x] **T087** [P] [US1] Build the splash view model: the feed lines, the derived count and the diagnosis carried on the line that caused it (checklist 8.2e, FR-002, FR-004). · `MTM_Waitlist.Startup/ViewModels/SplashViewModel.cs`
+- [x] **T088** [P] [US1] Add the picture-cache step: kept in the sequence, best effort, its own feed line, bounded more tightly than the thirty-second ceiling (checklist 8.5a, plan D21, FR-026). · `MTM_Waitlist.Startup/Services/PictureCacheStep.cs`
+- [x] **T089** [P] [US1] Add the verdict-priming step: settled before a screen opens, awaited only on the run that opens one, never able to hold the launch (checklist 8.5b, FR-027). · `MTM_Waitlist.Startup/Services/VisualVerdictPrimingStep.cs`
 
 **⟶ Wait for Wave 1 to finish, then:**
-- [ ] **T090** [US1] Add the error toast anchored to the bottom of the splash, never covering the feed, and show each diagnosis on the feed line that caused it and in the toast (checklist 8.2b, 8.2e, FR-005). · `Module_Startup/Views/SplashWindow.xaml`
-- [ ] **T091** [US1] Keep the launch window size configurable and its sizing failures non-fatal (checklist 8.2c). · `Module_Startup/Views/SplashWindow.xaml`, `Module_Startup/Views/SplashWindow.xaml.cs`
-- [ ] **T092** [US1] Build the splash page that hosts the feed for the single-window path (plan, `SplashPage` rebuilt). · `Module_Startup/Views/SplashPage.xaml`, `Module_Startup/Views/SplashPage.xaml.cs`
+- [x] **T090** [US1] Add the error toast anchored to the bottom of the splash, never covering the feed, and show each diagnosis on the feed line that caused it and in the toast (checklist 8.2b, 8.2e, FR-005). · `Module_Startup/Views/SplashWindow.xaml`
+- [x] **T091** [US1] Keep the launch window size configurable and its sizing failures non-fatal (checklist 8.2c). · `Module_Startup/Views/SplashWindow.xaml`, `Module_Startup/Views/SplashWindow.xaml.cs`
+- [x] **T092** [US1] Build the splash page that hosts the feed for the single-window path (plan, `SplashPage` rebuilt). · `Module_Startup/Views/SplashPage.xaml`, `Module_Startup/Views/SplashPage.xaml.cs`
 
 **⟶ Wait for Wave 2 to finish, then:**
-- [ ] **T093** [US1] Register the splash surface, its view model and the two best-effort steps in the host. · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
-- [ ] **T094** [US1] Retire the placeholder window and its code-behind once the splash is the launch surface, and re-pin the page-activation exemption list to the rebuilt page set in the same pass, which is the second re-pin T031 owed (the Phase 2 hand-off). · `Module_Startup/Views/StartupPlaceholderWindow.xaml`, `Module_Startup/Views/StartupPlaceholderWindow.xaml.cs`, `MTM_Waitlist.Tests/Module_Waitlist/Views/PageActivationAuditTests.cs`
+- [x] **T093** [US1] Register the splash surface, its view model and the two best-effort steps in the host. · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
+- [x] **T094** [US1] Retire the placeholder window and its code-behind once the splash is the launch surface, and re-pin the page-activation exemption list to the rebuilt page set in the same pass, which is the second re-pin T031 owed (the Phase 2 hand-off). · `Module_Startup/Views/StartupPlaceholderWindow.xaml`, `Module_Startup/Views/StartupPlaceholderWindow.xaml.cs`, `MTM_Waitlist.Tests/Module_Waitlist/Views/PageActivationAuditTests.cs`
 
 **Checkpoint**: the launch window renders the feed, names each piece of work before it runs, reports every stop
 with a cause specific to it in a strip at the bottom, and no wait on the launch path is unbounded; the picture
@@ -275,25 +275,25 @@ Phase 5 lands, which is the story's own boundary rather than a gap.
 Registrations for this phase append to the Phase 2-owned startup DI extension.
 
 ### Tests
-- [ ] **T095** [P] [US2] Test the gate: an `IT Department` or `Developer` sign-in authorises configuration only and never opens the main screens, and a refusal is stated (FR-007). · `MTM_Waitlist.Tests/Module_Startup/Services/MachineSetupGateTests.cs`
-- [ ] **T096** [P] [US2] Test the closed gate: no input sequence reaches the shell from an unconfigured machine, and every abort route ends the process with its reason stated first (checklist 7.2d, 7.2e, FR-006, FR-008, SC-004, SC-006). · `MTM_Waitlist.Tests/Module_Startup/Services/MachineSetupNoBypassTests.cs`
-- [ ] **T097** [P] [US2] Test the setup screen: a display name already in use is refused and a different one is asked for, and the save writes this machine's identity and its picture sources (FR-009). · `MTM_Waitlist.Tests/Module_Startup/ViewModels/MachineSetupViewModelTests.cs`
+- [x] **T095** [P] [US2] Test the gate: an `IT Department` or `Developer` sign-in authorises configuration only and never opens the main screens, and a refusal is stated (FR-007). · `MTM_Waitlist.Tests/Module_Startup/Services/MachineSetupGateTests.cs`
+- [x] **T096** [P] [US2] Test the closed gate: no input sequence reaches the shell from an unconfigured machine, and every abort route ends the process with its reason stated first (checklist 7.2d, 7.2e, FR-006, FR-008, SC-004, SC-006). · `MTM_Waitlist.Tests/Module_Startup/Services/MachineSetupNoBypassTests.cs`
+- [x] **T097** [P] [US2] Test the setup screen: a display name already in use is refused and a different one is asked for, and the save writes this machine's identity and its picture sources (FR-009). · `MTM_Waitlist.Tests/Module_Startup/ViewModels/MachineSetupViewModelTests.cs`
 
 ### Implementation
 
 **Wave 1 — independent (different files):**
-- [ ] **T098** [P] [US2] Build the machine-setup screen, shown when the machine is unconfigured and before any operator signs in, with a stable automation id (checklist 7.1a). · `Module_Startup/Views/MachineSetupWindow.xaml`, `Module_Startup/Views/MachineSetupWindow.xaml.cs`
-- [ ] **T099** [P] [US2] Build the gate that unlocks setup: an `IT Department` or `Developer` sign-in that authorises configuration only and never the shell, authenticating the person itself (checklist 7.1b, plan D11, FR-007). · `MTM_Waitlist.Startup/Services/MachineSetupGate.cs`
-- [ ] **T100** [P] [US2] Build the setup view model: capture the display name, the description and the shared picture sources, and enforce the machine-configuration permission where the save happens rather than only where the control is drawn (checklist 7.1c, 7.3c, FR-007). · `MTM_Waitlist.Startup/ViewModels/MachineSetupViewModel.cs`
+- [x] **T098** [P] [US2] Build the machine-setup screen, shown when the machine is unconfigured and before any operator signs in, with a stable automation id (checklist 7.1a). · `Module_Startup/Views/MachineSetupWindow.xaml`, `Module_Startup/Views/MachineSetupWindow.xaml.cs`
+- [x] **T099** [P] [US2] Build the gate that unlocks setup: an `IT Department` or `Developer` sign-in that authorises configuration only and never the shell, authenticating the person itself (checklist 7.1b, plan D11, FR-007). · `MTM_Waitlist.Startup/Services/MachineSetupGate.cs`
+- [x] **T100** [P] [US2] Build the setup view model: capture the display name, the description and the shared picture sources, and enforce the machine-configuration permission where the save happens rather than only where the control is drawn (checklist 7.1c, 7.3c, FR-007). · `MTM_Waitlist.Startup/ViewModels/MachineSetupViewModel.cs`
 
 **⟶ Wait for Wave 1 to finish, then:**
-- [ ] **T101** [US2] Add the setup step: it returns setup whenever the machine is unconfigured, or its configuration is removed, revoked or unreadable, and it writes the captured configuration to the store against the machine (checklist 7.1d, 7.1e, FR-009). · `MTM_Waitlist.Startup/Services/MachineSetupStep.cs`
-- [ ] **T102** [US2] End the process on every abort route — close box, Escape, Alt+F4, a cancel control, declining the setup sign-in — stating the reason first and localised, so the gate is never reported as a crash (checklist 7.2b, 7.2c, FR-008). · `Module_Startup/Views/MachineSetupWindow.xaml`, `Module_Startup/Views/MachineSetupWindow.xaml.cs`
+- [x] **T101** [US2] Add the setup step: it returns setup whenever the machine is unconfigured, or its configuration is removed, revoked or unreadable, and it writes the captured configuration to the store against the machine (checklist 7.1d, 7.1e, FR-009). · `MTM_Waitlist.Startup/Services/MachineSetupStep.cs`
+- [x] **T102** [US2] End the process on every abort route — close box, Escape, Alt+F4, a cancel control, declining the setup sign-in — stating the reason first and localised, so the gate is never reported as a crash (checklist 7.2b, 7.2c, FR-008). · `Module_Startup/Views/MachineSetupWindow.xaml`, `Module_Startup/Views/MachineSetupWindow.xaml.cs`
 
 **⟶ Wait for Wave 2 to finish, then:**
-- [ ] **T103** [US2] Confirm the pipeline, not the screen, is what refuses to continue while the machine is unconfigured, so a dismissal route the screen misses still cannot reach the shell (checklist 7.2a, FR-006). · `MTM_Waitlist.Startup/Services/LaunchPipeline.cs`
-- [ ] **T104** [US2] Register the setup screen, its view model, the gate and the step in the host. · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
-- [ ] **T105** [US2] Add all four permission keys to the Settings privileges page so each has a place to be granted (checklist 7.3b). · `Module_Settings/Views/PermissionsPage.xaml`, `MTM_Waitlist.Settings/ViewModels/PermissionsViewModel.cs`
+- [x] **T103** [US2] Confirm the pipeline, not the screen, is what refuses to continue while the machine is unconfigured, so a dismissal route the screen misses still cannot reach the shell (checklist 7.2a, FR-006). · `MTM_Waitlist.Startup/Services/LaunchPipeline.cs`
+- [x] **T104** [US2] Register the setup screen, its view model, the gate and the step in the host. · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
+- [x] **T105** [US2] Add all four permission keys to the Settings privileges page so each has a place to be granted (checklist 7.3b). · `Module_Settings/Views/PermissionsPage.xaml`, `MTM_Waitlist.Settings/ViewModels/PermissionsViewModel.cs`
 
 **Checkpoint**: an unconfigured machine stops at setup before any operator signs in, no input or code path
 reaches the shell from it, every abort route ends the process with its reason stated, and the four keys exist,
@@ -315,27 +315,27 @@ are baselined per role and are listed on the privileges page.
 Registrations for this phase append to the Phase 2-owned startup DI extension.
 
 ### Tests
-- [ ] **T106** [P] [US3] Test the attempt limit: the sixth attempt on a temporary credential is refused even with the correct value, and it stays refused after a restart (checklist 8.4h, FR-012, SC-007). · `MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialAttemptLimitTests.cs`
-- [ ] **T107** [P] [US3] Test the session: validity is judged on the store's clock and never the workstation's, and a sign-out clears the session before the restart (FR-010, FR-011). · `MTM_Waitlist.Tests/Module_Startup/Services/LaunchSessionServiceTests.cs`
-- [ ] **T108** [P] [US3] Test the remembered sign-in: an unreadable key falls back to the ordinary form, the fault is recorded, and nothing is kept on the machine in its place (FR-014). · `MTM_Waitlist.Tests/Module_Startup/Services/RememberedSignInServiceTests.cs`
-- [ ] **T109** [P] [US3] Test the sign-in surface: the hint states what is missing rather than leaving the person guessing (checklist 8.4a). · `MTM_Waitlist.Tests/Module_Startup/ViewModels/SignInViewModelTests.cs`
+- [x] **T106** [P] [US3] Test the attempt limit: the sixth attempt on a temporary credential is refused even with the correct value, and it stays refused after a restart (checklist 8.4h, FR-012, SC-007). · `MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialAttemptLimitTests.cs`
+- [x] **T107** [P] [US3] Test the session: validity is judged on the store's clock and never the workstation's, and a sign-out clears the session before the restart (FR-010, FR-011). · `MTM_Waitlist.Tests/Module_Startup/Services/LaunchSessionServiceTests.cs`
+- [x] **T108** [P] [US3] Test the remembered sign-in: an unreadable key falls back to the ordinary form, the fault is recorded, and nothing is kept on the machine in its place (FR-014). · `MTM_Waitlist.Tests/Module_Startup/Services/RememberedSignInServiceTests.cs`
+- [x] **T109** [P] [US3] Test the sign-in surface: the hint states what is missing rather than leaving the person guessing (checklist 8.4a). · `MTM_Waitlist.Tests/Module_Startup/ViewModels/SignInViewModelTests.cs`
 
 ### Implementation
 
 **Wave 1 — independent (different files):**
-- [ ] **T110** [P] [US3] Implement the credential check with the five-attempt limit on temporary credentials only, using the store's existing attempt counter so the limit survives a restart (checklist 8.4b, FR-012). · `MTM_Waitlist.Startup/Services/CredentialCheckService.cs`
-- [ ] **T111** [P] [US3] Implement the session against `user_active_sessions`, judged on the store's clock, with the expiry resolved from the session-length setting at issue time so a change takes effect at the next sign-in (checklist 8.4e, plan D17, FR-010, FR-011, SC-011). · `MTM_Waitlist.Startup/Services/LaunchSessionService.cs`
-- [ ] **T112** [P] [US3] Implement the machine gate with its four outcomes, admitting a machine whose hardware identity cannot be read because a fact that could not be read is not a failed check (checklist 8.4d, FR-015). · `MTM_Waitlist.Startup/Services/MachineGateService.cs`
-- [ ] **T113** [P] [US3] Implement the remembered sign-in against the store, encrypted with the shared key file read at its UNC path, read only, with a key fingerprint so a rotated key is detected (checklist 8.4f, plan D13, FR-014). · `MTM_Waitlist.Startup/Services/RememberedSignInService.cs`
-- [ ] **T114** [P] [US3] Build the sign-in surface, carrying the hint that states what is missing (checklist 8.4a). · `Module_Startup/Views/SignInWindow.xaml`, `Module_Startup/Views/SignInWindow.xaml.cs`
+- [x] **T110** [P] [US3] Implement the credential check with the five-attempt limit on temporary credentials only, using the store's existing attempt counter so the limit survives a restart (checklist 8.4b, FR-012). · `MTM_Waitlist.Startup/Services/CredentialCheckService.cs`
+- [x] **T111** [P] [US3] Implement the session against `user_active_sessions`, judged on the store's clock, with the expiry resolved from the session-length setting at issue time so a change takes effect at the next sign-in (checklist 8.4e, plan D17, FR-010, FR-011, SC-011). · `MTM_Waitlist.Startup/Services/LaunchSessionService.cs`
+- [x] **T112** [P] [US3] Implement the machine gate with its four outcomes, admitting a machine whose hardware identity cannot be read because a fact that could not be read is not a failed check (checklist 8.4d, FR-015). · `MTM_Waitlist.Startup/Services/MachineGateService.cs`
+- [x] **T113** [P] [US3] Implement the remembered sign-in against the store, encrypted with the shared key file read at its UNC path, read only, with a key fingerprint so a rotated key is detected (checklist 8.4f, plan D13, FR-014). · `MTM_Waitlist.Startup/Services/RememberedSignInService.cs`
+- [x] **T114** [P] [US3] Build the sign-in surface, carrying the hint that states what is missing (checklist 8.4a). · `Module_Startup/Views/SignInWindow.xaml`, `Module_Startup/Views/SignInWindow.xaml.cs`
 
 **⟶ Wait for Wave 1 to finish, then:**
-- [ ] **T115** [US3] Build the sign-in view model and the forced password change, opened only once the temporary credential has been accepted (checklist 8.4c, FR-013). · `MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs`, `MTM_Waitlist.Startup/ViewModels/PasswordChangeViewModel.cs`
-- [ ] **T116** [US3] Add the sign-in steps — resolving the person and their roles, checking the credential, judging the session, checking the computer against the store, checking whether a new password is needed and setting it (`resolve-person`, `resolve-roles`, `check-credential`, `judge-session`, `check-computer-against-store`, `check-temporary-credential`, `set-new-password`) — each announcing itself before it runs (checklist 8.4, FR-002). · `MTM_Waitlist.Startup/Services/SignInSteps.cs`
+- [x] **T115** [US3] Build the sign-in view model and the forced password change, opened only once the temporary credential has been accepted (checklist 8.4c, FR-013). · `MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs`, `MTM_Waitlist.Startup/ViewModels/PasswordChangeViewModel.cs`
+- [x] **T116** [US3] Add the sign-in steps — resolving the person and their roles, checking the credential, judging the session, checking the computer against the store, checking whether a new password is needed and setting it (`resolve-person`, `resolve-roles`, `check-credential`, `judge-session`, `check-computer-against-store`, `check-temporary-credential`, `set-new-password`) — each announcing itself before it runs (checklist 8.4, FR-002). · `MTM_Waitlist.Startup/Services/SignInSteps.cs`
 
 **⟶ Wait for Wave 2 to finish, then:**
-- [ ] **T117** [US3] Fall back to the ordinary sign-in form when the key file cannot be read, recording the fault and storing nothing locally instead (checklist 8.4g, FR-014). · `MTM_Waitlist.Startup/Services/RememberedSignInService.cs`
-- [ ] **T118** [US3] Register the sign-in services, its view models and its steps in the host. · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
+- [x] **T117** [US3] Fall back to the ordinary sign-in form when the key file cannot be read, recording the fault and storing nothing locally instead (checklist 8.4g, FR-014). · `MTM_Waitlist.Startup/Services/RememberedSignInService.cs`
+- [x] **T118** [US3] Register the sign-in services, its view models and its steps in the host. · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
 
 **Checkpoint**: signing in decides whether the store recognises the person, whether the session is still good and
 whether the machine is known; the store's clock decides validity; the five-attempt limit holds across a restart;
@@ -355,26 +355,26 @@ ordinary form.
 Registrations for this phase append to the Phase 2-owned startup DI extension.
 
 ### Tests
-- [ ] **T119** [P] [US4] Test the remedy table: a store outage offers no reset, and every stopping condition offers only actions that could remove its cause (FR-017, SC-010). · `MTM_Waitlist.Tests/Module_Startup/Services/BlockedStateRemediesTests.cs`
-- [ ] **T120** [P] [US4] Test the reset: it previews exactly what it will reset, affects only this machine's configuration, and never touches a person, a role or a permission (FR-018). · `MTM_Waitlist.Tests/Module_Startup/Services/StartupRecoveryServiceTests.cs`
-- [ ] **T121** [P] [US4] Test retry from the surface: only the failed piece and what follows it are repeated, and a silent repair produces no prompt (FR-016, FR-019, FR-020). · `MTM_Waitlist.Tests/Module_Startup/ViewModels/BlockedStateViewModelTests.cs`
+- [x] **T119** [P] [US4] Test the remedy table: a store outage offers no reset, and every stopping condition offers only actions that could remove its cause (FR-017, SC-010). · `MTM_Waitlist.Tests/Module_Startup/Services/BlockedStateRemediesTests.cs`
+- [x] **T120** [P] [US4] Test the reset: it previews exactly what it will reset, affects only this machine's configuration, and never touches a person, a role or a permission (FR-018). · `MTM_Waitlist.Tests/Module_Startup/Services/StartupRecoveryServiceTests.cs`
+- [x] **T121** [P] [US4] Test retry from the surface: only the failed piece and what follows it are repeated, and a silent repair produces no prompt (FR-016, FR-019, FR-020). · `MTM_Waitlist.Tests/Module_Startup/ViewModels/BlockedStateViewModelTests.cs`
 
 ### Implementation
 
 **Wave 1 — independent (different files):**
-- [ ] **T122** [P] [US4] Build the cause-to-remedy table, with `CanRestoreDefaults` false wherever a reset could not remove the cause and the preview naming exactly what a reset would touch (checklist 8.6b, 8.6c, FR-017, FR-018). · `MTM_Waitlist.Startup/Services/BlockedStateRemedies.cs`
-- [ ] **T123** [P] [US4] Implement the reset policy and the silent repair: decide when a reset is offered and drive it through `IMachineConfigurationService.ResetToDefaultsAsync` rather than writing configuration rows here, so the targeted reset has one implementation, and repair a fault without asking wherever it can be repaired without hurting the operator (checklist 8.6d, 8.6e, FR-018, FR-019; contract §4). · `MTM_Waitlist.Startup/Services/StartupRecoveryService.cs`
-- [ ] **T124** [P] [US4] Build the single blocked-state surface with a diagnosis specific to the cause, and Hide Reset when the store is unreachable (checklist 8.6a, 8.6b, FR-004, FR-017). · `Module_Startup/Views/BlockedStateWindow.xaml`, `Module_Startup/Views/BlockedStateWindow.xaml.cs`
+- [x] **T122** [P] [US4] Build the cause-to-remedy table, with `CanRestoreDefaults` false wherever a reset could not remove the cause and the preview naming exactly what a reset would touch (checklist 8.6b, 8.6c, FR-017, FR-018). · `MTM_Waitlist.Startup/Services/BlockedStateRemedies.cs`
+- [x] **T123** [P] [US4] Implement the reset policy and the silent repair: decide when a reset is offered and drive it through `IMachineConfigurationService.ResetToDefaultsAsync` rather than writing configuration rows here, so the targeted reset has one implementation, and repair a fault without asking wherever it can be repaired without hurting the operator (checklist 8.6d, 8.6e, FR-018, FR-019; contract §4). · `MTM_Waitlist.Startup/Services/StartupRecoveryService.cs`
+- [x] **T124** [P] [US4] Build the single blocked-state surface with a diagnosis specific to the cause, and Hide Reset when the store is unreachable (checklist 8.6a, 8.6b, FR-004, FR-017). · `Module_Startup/Views/BlockedStateWindow.xaml`, `Module_Startup/Views/BlockedStateWindow.xaml.cs`
 
 **⟶ Wait for Wave 1 to finish, then:**
-- [ ] **T125** [US4] Build the blocked-state view model, with Retry going through the pipeline's retry-from step so only the failed piece and what follows it are repeated (checklist 8.6f, FR-016, FR-020). · `MTM_Waitlist.Startup/ViewModels/BlockedStateViewModel.cs`
+- [x] **T125** [US4] Build the blocked-state view model, with Retry going through the pipeline's retry-from step so only the failed piece and what follows it are repeated (checklist 8.6f, FR-016, FR-020). · `MTM_Waitlist.Startup/ViewModels/BlockedStateViewModel.cs`
 
 **⟶ Wait for Wave 2 to finish, then:**
-- [ ] **T126** [US4] Show the popup that lists exactly what will be reset before anything is reset (checklist 8.6c, FR-018). · `Module_Startup/Views/BlockedStateWindow.xaml`
-- [ ] **T127** [US4] Make Close end the process with its reason stated, so the stop is never reported as a crash (FR-008). · `Module_Startup/Views/BlockedStateWindow.xaml`, `Module_Startup/Views/BlockedStateWindow.xaml.cs`
+- [x] **T126** [US4] Show the popup that lists exactly what will be reset before anything is reset (checklist 8.6c, FR-018). · `Module_Startup/Views/BlockedStateWindow.xaml`
+- [x] **T127** [US4] Make Close end the process with its reason stated, so the stop is never reported as a crash (FR-008). · `Module_Startup/Views/BlockedStateWindow.xaml`, `Module_Startup/Views/BlockedStateWindow.xaml.cs`
 
 **⟶ Wait for Wave 3 to finish, then:**
-- [ ] **T128** [US4] Register the blocked-state surface, its view model and the recovery service in the host. · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
+- [x] **T128** [US4] Register the blocked-state surface, its view model and the recovery service in the host. · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
 
 **Checkpoint**: a stopped launch names a cause specific to it, offers only remedies that could remove that
 cause, previews a reset before it acts and confines it to this machine's configuration, and repairs a
@@ -394,22 +394,22 @@ repairable fault without asking.
 The panel is hosted inside Settings in Phase 8, where the Settings page is owned.
 
 ### Tests
-- [ ] **T129** [P] [US5] Test the panel: filtering by machine and by error kind together lists only matching entries, filtering by severity and machine together does the same, and every query is bounded by a time window and a page size (US5 acceptance scenario 2, SC-005). · `MTM_Waitlist.Tests/Module_Settings/ViewModels/DeveloperLogPanelViewModelTests.cs`
-- [ ] **T130** [P] [US5] Test coverage: a release build records at least one entry per completed launch where it records none today, and no local log file is produced (SC-003, SC-016). · `MTM_Waitlist.Tests/Module_Startup/Services/StoreLogCoverageTests.cs`
+- [x] **T129** [P] [US5] Test the panel: filtering by machine and by error kind together lists only matching entries, filtering by severity and machine together does the same, and every query is bounded by a time window and a page size (US5 acceptance scenario 2, SC-005). · `MTM_Waitlist.Tests/Module_Settings/ViewModels/DeveloperLogPanelViewModelTests.cs`
+- [x] **T130** [P] [US5] Test coverage: a release build records at least one entry per completed launch where it records none today, and no local log file is produced (SC-003, SC-016). · `MTM_Waitlist.Tests/Module_Startup/Services/StoreLogCoverageTests.cs`
 
 ### Implementation
 
 **Wave 1 — independent (different files):**
-- [ ] **T131** [P] [US5] Build the developer log panel: newest first, the filter set the store indexes — including grouping repeated faults by their fingerprint — the entry card showing the full message, the exception detail and the chain link, and the two copy affordances, on the entry card and in the header, whose text T183's formatter produces. Every query is bounded (checklist 6.5a, 6.5c, 6.5d, SC-014, FR-038). · `Module_Settings/Views/DeveloperLogPanelView.xaml`, `Module_Settings/Views/DeveloperLogPanelView.xaml.cs`
-- [ ] **T132** [P] [US5] Build the panel view model and gate it on `permission.settings.log_panel`, enforced in the view model rather than only hidden, with the two copy commands behind it and the clipboard call made through the options overload so a refused copy is reported rather than raised (checklist 6.5b, plan D11, D29). · `MTM_Waitlist.Settings/ViewModels/DeveloperLogPanelViewModel.cs`
+- [x] **T131** [P] [US5] Build the developer log panel: newest first, the filter set the store indexes — including grouping repeated faults by their fingerprint — the entry card showing the full message, the exception detail and the chain link, and the two copy affordances, on the entry card and in the header, whose text T183's formatter produces. Every query is bounded (checklist 6.5a, 6.5c, 6.5d, SC-014, FR-038). · `Module_Settings/Views/DeveloperLogPanelView.xaml`, `Module_Settings/Views/DeveloperLogPanelView.xaml.cs`
+- [x] **T132** [P] [US5] Build the panel view model and gate it on `permission.settings.log_panel`, enforced in the view model rather than only hidden, with the two copy commands behind it and the clipboard call made through the options overload so a refused copy is reported rather than raised (checklist 6.5b, plan D11, D29). · `MTM_Waitlist.Settings/ViewModels/DeveloperLogPanelViewModel.cs`
 
 **⟶ Wait for Wave 1 to finish, then:**
-- [ ] **T133** [US5] Delete the deferred file-based logging path: the log service, the log forwarder, their two contracts and the logging options, and remove the file-based provider registration (checklist 6.6a, deliberate deferral — their implementations had to stay standing through Phase 2 for the tree to keep compiling). · `MTM_Waitlist.Startup/Services/StartupLogService.cs`, `MTM_Waitlist.Startup/Services/StartupLogForwarder.cs`, `MTM_Waitlist.Core/Contracts/Services/IStartupLogService.cs`, `MTM_Waitlist.Core/Contracts/Services/IStartupLogForwarder.cs`, `MTM_Waitlist.Core/Models/StartupLoggingOptions.cs`
-- [ ] **T134** [P] [US5] Delete the test that exists only for the deleted log path (checklist 6.6b). · `MTM_Waitlist.Tests/Services/StartupLogServiceTests.cs`
-- [ ] **T135** [P] [US5] Rewrite the retired static-log and activation tests so they no longer require `IStartupLogService`, recording what replaces each assertion (checklist 2.5b, deferred to here because the contracts they name survive until this phase). · `MTM_Waitlist.Tests/**`
+- [x] **T133** [US5] Delete the deferred file-based logging path: the log service, the log forwarder, their two contracts and the logging options, and remove the file-based provider registration (checklist 6.6a, deliberate deferral — their implementations had to stay standing through Phase 2 for the tree to keep compiling). · `MTM_Waitlist.Startup/Services/StartupLogService.cs`, `MTM_Waitlist.Startup/Services/StartupLogForwarder.cs`, `MTM_Waitlist.Core/Contracts/Services/IStartupLogService.cs`, `MTM_Waitlist.Core/Contracts/Services/IStartupLogForwarder.cs`, `MTM_Waitlist.Core/Models/StartupLoggingOptions.cs`
+- [x] **T134** [P] [US5] Delete the test that exists only for the deleted log path (checklist 6.6b). · `MTM_Waitlist.Tests/Services/StartupLogServiceTests.cs`
+- [x] **T135** [P] [US5] Rewrite the retired static-log and activation tests so they no longer require `IStartupLogService`, recording what replaces each assertion (checklist 2.5b, deferred to here because the contracts they name survive until this phase). · `MTM_Waitlist.Tests/**`
 
 **⟶ Wait for Wave 2 to finish, then:**
-- [ ] **T136** [US5] Register the panel view model in the host. · `MTM_Waitlist.Settings/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
+- [x] **T136** [US5] Register the panel view model in the host. · `MTM_Waitlist.Settings/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
 
 **Checkpoint**: the seam and the provider write every diagnostic to the store with its severity, module, machine,
 person, error kind and message; the panel reads and filters them newest first in bounded queries; and no local
@@ -434,44 +434,44 @@ log file is produced. The panel becomes reachable inside Settings in Phase 8.
 `MTM_Waitlist.Tests/Module_Core/Permissions/RoleRestrictionInventoryTests.cs`.
 
 ### Tests
-- [ ] **T137** [P] [US6] Test the ignored-locations editor: it is read-only for every role but `IT Department` and `Developer`, the write is refused where the action happens, and the session-length setting refuses an unauthorised change with a stated reason (checklist 7.3d, 7.3e, FR-024, FR-029, SC-012). · `MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs`
-- [ ] **T138** [P] [US6] Test that theme, waitlist order, alerts, seen-requests and the parts-without-pictures choice are held against the person in the store and are already there on another computer (FR-023, SC-008). · `MTM_Waitlist.Tests/Services/ScopedPreferenceTests.cs`
-- [ ] **T139** [P] [US6] Test the role-restriction inventory: every setting restricted to particular roles today is still restricted to the same roles, one setting at a time (FR-030, SC-012). For the ignored-locations list, SC-012 pins the read restriction — `permission.settings.ignored_locations`, whose grants do not change — and the narrowed write to `IT Department` and `Developer` through the new edit key is a named, deliberate exception (research D10). · `MTM_Waitlist.Tests/Module_Core/Permissions/RoleRestrictionInventoryTests.cs`
+- [x] **T137** [P] [US6] Test the ignored-locations editor: it is read-only for every role but `IT Department` and `Developer`, the write is refused where the action happens, and the session-length setting refuses an unauthorised change with a stated reason (checklist 7.3d, 7.3e, FR-024, FR-029, SC-012). · `MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs`
+- [x] **T138** [P] [US6] Test that theme, waitlist order, alerts, seen-requests and the parts-without-pictures choice are held against the person in the store and are already there on another computer (FR-023, SC-008). · `MTM_Waitlist.Tests/Services/ScopedPreferenceTests.cs`
+- [x] **T139** [P] [US6] Test the role-restriction inventory: every setting restricted to particular roles today is still restricted to the same roles, one setting at a time (FR-030, SC-012). For the ignored-locations list, SC-012 pins the read restriction — `permission.settings.ignored_locations`, whose grants do not change — and the narrowed write to `IT Department` and `Developer` through the new edit key is a named, deliberate exception (research D10). · `MTM_Waitlist.Tests/Module_Core/Permissions/RoleRestrictionInventoryTests.cs`
 
 ### Implementation
 
 **Wave 1 — independent (different files):**
-- [ ] **T140** [P] [US6] Replace the settings read and write in the theme selector with the scoped store setting (checklist 5.1a, plan D9, FR-023). · `MTM_Waitlist.Core/Services/ThemeSelectorService.cs`
-- [ ] **T141** [P] [US6] Replace the settings read and write in the waitlist sort preference with the scoped store setting (checklist 5.1b, FR-023). · `MTM_Waitlist.Core/Services/WaitlistSortPreferenceService.cs`
-- [ ] **T142** [P] [US6] Replace the settings read in the ignored-locations service with the plant-scope store setting (checklist 5.1c, FR-024). · `MTM_Waitlist.Core/Services/IgnoredLocationsService.cs`
-- [ ] **T143** [P] [US6] Replace the settings read and write in the new-request alert service with the scoped store setting (checklist 5.1d, FR-023). · `MTM_Waitlist.Core/Services/NewRequestAlertService.cs`
-- [ ] **T144** [P] [US6] Replace the settings read and write in the message-seen store with the scoped store setting (checklist 5.1e, FR-023). · `MTM_Waitlist.Waitlist.View/Services/LocalWaitlistMessageSeenStore.cs`
-- [ ] **T145** [P] [US6] Replace the settings read and write in the dunnage image-search view model with the scoped store setting (checklist 5.1g, FR-023). · `MTM_Waitlist.Setup/ViewModels/SetupDunnageImageSearchDialogViewModel.cs`
+- [x] **T140** [P] [US6] Replace the settings read and write in the theme selector with the scoped store setting (checklist 5.1a, plan D9, FR-023). · `MTM_Waitlist.Core/Services/ThemeSelectorService.cs`
+- [x] **T141** [P] [US6] Replace the settings read and write in the waitlist sort preference with the scoped store setting (checklist 5.1b, FR-023). · `MTM_Waitlist.Core/Services/WaitlistSortPreferenceService.cs`
+- [x] **T142** [P] [US6] Replace the settings read in the ignored-locations service with the plant-scope store setting (checklist 5.1c, FR-024). · `MTM_Waitlist.Core/Services/IgnoredLocationsService.cs`
+- [x] **T143** [P] [US6] Replace the settings read and write in the new-request alert service with the scoped store setting (checklist 5.1d, FR-023). · `MTM_Waitlist.Core/Services/NewRequestAlertService.cs`
+- [x] **T144** [P] [US6] Replace the settings read and write in the message-seen store with the scoped store setting (checklist 5.1e, FR-023). · `MTM_Waitlist.Waitlist.View/Services/LocalWaitlistMessageSeenStore.cs`
+- [x] **T145** [P] [US6] Replace the settings read and write in the dunnage image-search view model with the scoped store setting (checklist 5.1g, FR-023). · `MTM_Waitlist.Setup/ViewModels/SetupDunnageImageSearchDialogViewModel.cs`
 
 **⟶ Wait for Wave 1 to finish, then:**
-- [ ] **T146** [US6] Delete the duplicate ignored-locations read and write in the settings view model, call the service instead, and make the editor read-only for every role but `IT Department` and `Developer`, enforcing the edit key where the write happens (checklist 5.1f, 7.3c, 7.3d, FR-024). · `MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs`, `Module_Settings/Views/SettingsPage.xaml`
+- [x] **T146** [US6] Delete the duplicate ignored-locations read and write in the settings view model, call the service instead, and make the editor read-only for every role but `IT Department` and `Developer`, enforcing the edit key where the write happens (checklist 5.1f, 7.3c, 7.3d, FR-024). · `MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs`, `Module_Settings/Views/SettingsPage.xaml`
 
 **⟶ Wait for Wave 2 to finish, then:**
-- [ ] **T147** [US6] Add the session-length setting to the settings panel, changeable only by `IT Department` or `Developer`, enforced where the change happens (checklist 7.3e, plan D17, FR-029). · `MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs`, `Module_Settings/Views/SettingsPage.xaml`
+- [x] **T147** [US6] Add the session-length setting to the settings panel, changeable only by `IT Department` or `Developer`, enforced where the change happens (checklist 7.3e, plan D17, FR-029). · `MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs`, `Module_Settings/Views/SettingsPage.xaml`
 
 **⟶ Wait for Wave 3 to finish, then:**
-- [ ] **T148** [US6] Host the developer log panel from Phase 7 inside Settings (the Phase 7 hand-off). · `Module_Settings/Views/SettingsPage.xaml`, `MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs`
-- [ ] **T149** [P] [US6] Inventory every setting that is role-restricted today and confirm each keeps the same restriction (checklist 7.3f, FR-030), recording for the ignored-locations list that its unchanged restriction is the read key and that the narrowed write is the deliberate exception from research D10 (SC-012). · `MTM_Waitlist.Tests/Module_Core/Permissions/RoleRestrictionInventoryTests.cs`
+- [x] **T148** [US6] Host the developer log panel from Phase 7 inside Settings (the Phase 7 hand-off). · `Module_Settings/Views/SettingsPage.xaml`, `MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs`
+- [x] **T149** [P] [US6] Inventory every setting that is role-restricted today and confirm each keeps the same restriction (checklist 7.3f, FR-030), recording for the ignored-locations list that its unchanged restriction is the read key and that the narrowed write is the deliberate exception from research D10 (SC-012). · `MTM_Waitlist.Tests/Module_Core/Permissions/RoleRestrictionInventoryTests.cs`
 
 **⟶ Wait for Wave 4 to finish, then — delete the local mechanism (checklist 5.2):**
-- [ ] **T150** Delete the local settings service and its contract, including the test-only corruption helper (checklist 5.2a). · `MTM_Waitlist.Core/Contracts/Services/ILocalSettingsService.cs`, `MTM_Waitlist.Settings/Services/LocalSettingsService.cs`
-- [ ] **T151** [P] [US6] Delete the file service and its DI registration, since the local settings service was its only consumer (checklist 5.2b). · `MTM_Waitlist.Core/Contracts/Services/IFileService.cs`
-- [ ] **T152** [P] [US6] Delete the local settings options model and its configuration binding, and with it the two tests that construct the type — `LocalSettingsOptions_Defaults` and `LocalSettingsOptions_AcceptsConfiguredValues` (checklist 5.2c; `specs/010-startup-rebuild/local-state-test-migration.md` §4 item 5). · `MTM_Waitlist.Core/Models/LocalSettingsOptions.cs`, `MTM_Waitlist.Tests/Core/Models/StartupOptionsModelsTests.cs`, `MTM_Waitlist.Tests/Models/StartupModelsTests.cs`
-- [ ] **T153** [P] [US6] Delete the already-dead settings storage extensions (checklist 5.2d). · `MTM_Waitlist.Core/Helpers/SettingsStorageExtensions.cs`
-- [ ] **T154** [P] [US6] Confirm the packaging-mode helper call sites and the image cache paths are untouched, since packaging mode and the image cache both stay (checklist 5.2e). · `MTM_Waitlist.Shared/`
+- [x] **T150** Delete the local settings service and its contract, including the test-only corruption helper (checklist 5.2a). · `MTM_Waitlist.Core/Contracts/Services/ILocalSettingsService.cs`, `MTM_Waitlist.Settings/Services/LocalSettingsService.cs`
+- [x] **T151** [P] [US6] Delete the file service and its DI registration, since the local settings service was its only consumer (checklist 5.2b). · `MTM_Waitlist.Core/Contracts/Services/IFileService.cs`
+- [x] **T152** [P] [US6] Delete the local settings options model and its configuration binding, and with it the two tests that construct the type — `LocalSettingsOptions_Defaults` and `LocalSettingsOptions_AcceptsConfiguredValues` (checklist 5.2c; `specs/010-startup-rebuild/local-state-test-migration.md` §4 item 5). · `MTM_Waitlist.Core/Models/LocalSettingsOptions.cs`, `MTM_Waitlist.Tests/Core/Models/StartupOptionsModelsTests.cs`, `MTM_Waitlist.Tests/Models/StartupModelsTests.cs`
+- [x] **T153** [P] [US6] Delete the already-dead settings storage extensions (checklist 5.2d). · `MTM_Waitlist.Core/Helpers/SettingsStorageExtensions.cs`
+- [x] **T154** [P] [US6] Confirm the packaging-mode helper call sites and the image cache paths are untouched, since packaging mode and the image cache both stay (checklist 5.2e). · `MTM_Waitlist.Shared/`
 
 **⟶ Wait for Wave 5 to finish, then:**
-- [ ] **T155** [P] [US6] Move the shared folder and keys folder paths, and the dunnage root folder, into the machine configuration captured by machine setup, and re-point the resolver that reads them (checklist 5.3b, 5.3c, FR-025). · `MTM_Waitlist.Settings/Models/ImageStorageOptions.cs`, `MTM_Waitlist.Settings/Services/ImageStorageConfigurationResolver.cs`
-- [ ] **T156** [P] [US6] Reduce `appsettings.json` to the connection strings plus the reviewed `MockServiceClient` exception, deleting the startup, local-settings and logging sections and confirming `ModuleSharedOptions` and `ModuleCoreSettingsOptions` before either is deleted (checklist 2.2e, 5.3a, 5.3d, 5.3e, 6.6c, plan D24, FR-025). · `appsettings.json`
-- [ ] **T157** [P] [US6] Delete the test that exists only for the local-file mechanism, and replace the local settings double with the store seam in the files listed in `specs/010-startup-rebuild/local-state-test-migration.md` §2 — ten doubles across eleven kept files, five replaced and five deleted outright, four of them already dead — keeping every existing assertion and removing the one test method that asserts local persistence, `AddAndRemove_PersistToLocalSettings` (checklist 5.4a, 5.4e). · `MTM_Waitlist.Tests/Services/LocalSettingsServiceTests.cs`, `MTM_Waitlist.Tests/**`
+- [x] **T155** [P] [US6] Move the shared folder and keys folder paths, and the dunnage root folder, into the machine configuration captured by machine setup, and re-point the resolver that reads them (checklist 5.3b, 5.3c, FR-025). · `MTM_Waitlist.Settings/Models/ImageStorageOptions.cs`, `MTM_Waitlist.Settings/Services/ImageStorageConfigurationResolver.cs`
+- [x] **T156** [P] [US6] Reduce `appsettings.json` to the connection strings plus the reviewed `MockServiceClient` exception, deleting the startup, local-settings and logging sections and confirming `ModuleSharedOptions` and `ModuleCoreSettingsOptions` before either is deleted (checklist 2.2e, 5.3a, 5.3d, 5.3e, 6.6c, plan D24, FR-025). · `appsettings.json`
+- [x] **T157** [P] [US6] Delete the test that exists only for the local-file mechanism, and replace the local settings double with the store seam in the files listed in `specs/010-startup-rebuild/local-state-test-migration.md` §2 — ten doubles across eleven kept files, five replaced and five deleted outright, four of them already dead — keeping every existing assertion and removing the one test method that asserts local persistence, `AddAndRemove_PersistToLocalSettings` (checklist 5.4a, 5.4e). · `MTM_Waitlist.Tests/Services/LocalSettingsServiceTests.cs`, `MTM_Waitlist.Tests/**`
 
 **⟶ Wait for Wave 6 to finish, then:**
-- [ ] **T158** [US6] Confirm no test in the suite still references a local settings type or key, and that the solution builds with no reference left to a deleted settings type (checklist 5.4f, 5.2f). · `MTM_Waitlist.Tests/**`
+- [x] **T158** [US6] Confirm no test in the suite still references a local settings type or key, and that the solution builds with no reference left to a deleted settings type (checklist 5.4f, 5.2f). · `MTM_Waitlist.Tests/**`
 
 **Checkpoint**: a person's preferences follow them to another computer, the plant-wide locations list is readable
 by everyone and changeable only by `IT Department` and `Developer`, the session length is theirs to change and
@@ -488,36 +488,36 @@ local settings type.
 `README.md`, `CHANGELOG.md`.
 
 ### Tests
-- [ ] **T159** [P] Expand S13 from its group summary into the plain list of the cases the three read-only sweeps found, and record the twenty-three cases in `spec.md`'s Edge Cases section as part of the same catalogue, then walk that list and write a test for each case that still applies, one test per case — the four spec cases T171 to T174 already own are covered by those tasks and are not written twice (checklist 9.1a, FR-031, SC-013). The list does not exist yet, so it is recorded here before anything is walked (checklist 9.1a, FR-031, SC-013). · `STARTUP-REBUILD-BRIEF.md`, `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
-- [ ] **T160** [P] Confirm the suite holds no disabled, skipped or commented-out startup test — a skipped case is a case dropped silently, which FR-031 forbids (checklist 9.1c, brief S16, FR-031, SC-013). · `MTM_Waitlist.Tests/**`
+- [x] **T159** [P] Expand S13 from its group summary into the plain list of the cases the three read-only sweeps found, and record the twenty-three cases in `spec.md`'s Edge Cases section as part of the same catalogue, then walk that list and write a test for each case that still applies, one test per case — the four spec cases T171 to T174 already own are covered by those tasks and are not written twice (checklist 9.1a, FR-031, SC-013). The list does not exist yet, so it is recorded here before anything is walked (checklist 9.1a, FR-031, SC-013). · `STARTUP-REBUILD-BRIEF.md`, `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
+- [x] **T160** [P] Confirm the suite holds no disabled, skipped or commented-out startup test — a skipped case is a case dropped silently, which FR-031 forbids (checklist 9.1c, brief S16, FR-031, SC-013). · `MTM_Waitlist.Tests/**`
 
 ### Implementation
 
 **Wave 1 — independent (different files):**
-- [ ] **T161** [P] Run against a fresh store and prove the machine-setup gate appears and cannot be bypassed (checklist 9.2a, SC-004). · `specs/010-startup-rebuild/acceptance.md`
-- [ ] **T162** [P] Write the embed guide for the new module with an `applyTo`, covering the entry point, the host seam, the contracts it needs and their registration order, how to add a step, how to add a log entry and how to add a machine-configuration field, plus the invariants a later change must not break (checklist 10.1a–10.1d). · `.github/instructions/startup-rebuild.instructions.md`
-- [ ] **T163** [P] Re-adopt a living spec for the new startup surface, retire both old capabilities' leftovers — the `startup` and `startup-diagnostics` rows in `living-specs.yml` and in `capabilities/DRIFT.md`'s two-capability table, whose matched files are gone — and confirm the registry matches the tree (checklist 10.2a, 10.2b; the deferred Phase 2 registry edit). · `capabilities/startup-launch/spec.md`, `living-specs.yml`, `capabilities/DRIFT.md`
-- [ ] **T164** [P] Record the rebuild in the changelog in the repo's end-user format (checklist 10.3a). · `CHANGELOG.md`
-- [ ] **T165** [P] Update the README module list and remove every reference to the retired splash and sign-in surfaces (checklist 2.5f, 10.3b). · `README.md`
-- [ ] **T166** [P] Correct the UI-automation instructions so they describe the new gate and the store-backed log panel instead of the retired splash, sign-in and log-directory path (checklist 2.5e, 6.6c, 10.3c). · `.github/instructions/winui3-ui-automation.instructions.md`
+- [x] **T161** [P] Run against a fresh store and prove the machine-setup gate appears and cannot be bypassed (checklist 9.2a, SC-004). · `specs/010-startup-rebuild/acceptance.md`
+- [x] **T162** [P] Write the embed guide for the new module with an `applyTo`, covering the entry point, the host seam, the contracts it needs and their registration order, how to add a step, how to add a log entry and how to add a machine-configuration field, plus the invariants a later change must not break (checklist 10.1a–10.1d). · `.github/instructions/startup-rebuild.instructions.md`
+- [x] **T163** [P] Re-adopt a living spec for the new startup surface, retire both old capabilities' leftovers — the `startup` and `startup-diagnostics` rows in `living-specs.yml` and in `capabilities/DRIFT.md`'s two-capability table, whose matched files are gone — and confirm the registry matches the tree (checklist 10.2a, 10.2b; the deferred Phase 2 registry edit). · `capabilities/startup-launch/spec.md`, `living-specs.yml`, `capabilities/DRIFT.md`
+- [x] **T164** [P] Record the rebuild in the changelog in the repo's end-user format (checklist 10.3a). · `CHANGELOG.md`
+- [x] **T165** [P] Update the README module list and remove every reference to the retired splash and sign-in surfaces (checklist 2.5f, 10.3b). · `README.md`
+- [x] **T166** [P] Correct the UI-automation instructions so they describe the new gate and the store-backed log panel instead of the retired splash, sign-in and log-directory path (checklist 2.5e, 6.6c, 10.3c). · `.github/instructions/winui3-ui-automation.instructions.md`
 
 **⟶ Wait for Wave 1 to finish, then — the four spec edge cases no other task covers, sequential (same file):**
-- [ ] **T171** [US3] Test the case where a temporary credential is reset while the person is signing in with the old one, so an in-flight sign-in meets the reset rather than it being assumed absent (spec.md Edge Cases; T159's catalogue; FR-031, SC-013). · `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
-- [ ] **T172** [US3] Test that a credential reset issued while the person is signed in elsewhere does not end the session already running, matching the rule that no procedure clears sessions by person for a reset (spec.md Edge Cases; FR-011; contracts/sql-contracts.md §1). · `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
-- [ ] **T173** [US3] Test that an account still holding the legacy temporary value signs in and has that value recognised exactly as it is today (spec.md Edge Cases; FR-012, FR-013). · `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
-- [ ] **T174** [US3] Test that a sign-out whose restart fails still ends the session and tells the person to open the application again, rather than leaving a half-signed-out state (spec.md Edge Cases; FR-008, FR-011, SC-001). · `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
+- [x] **T171** [US3] Test the case where a temporary credential is reset while the person is signing in with the old one, so an in-flight sign-in meets the reset rather than it being assumed absent (spec.md Edge Cases; T159's catalogue; FR-031, SC-013). · `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
+- [x] **T172** [US3] Test that a credential reset issued while the person is signed in elsewhere does not end the session already running, matching the rule that no procedure clears sessions by person for a reset (spec.md Edge Cases; FR-011; contracts/sql-contracts.md §1). · `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
+- [x] **T173** [US3] Test that an account still holding the legacy temporary value signs in and has that value recognised exactly as it is today (spec.md Edge Cases; FR-012, FR-013). · `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
+- [x] **T174** [US3] Test that a sign-out whose restart fails still ends the session and tells the person to open the application again, rather than leaving a half-signed-out state (spec.md Edge Cases; FR-008, FR-011, SC-001). · `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
 
 **⟶ Wait for Wave 2 to finish, then:**
-- [ ] **T167** Record in S13 the reason for every case that no longer applies, beside the case itself, rather than leaving it untested and unexplained (checklist 9.1b, FR-031, SC-013). · `STARTUP-REBUILD-BRIEF.md`
+- [x] **T167** Record in S13 the reason for every case that no longer applies, beside the case itself, rather than leaving it untested and unexplained (checklist 9.1b, FR-031, SC-013). · `STARTUP-REBUILD-BRIEF.md`
 
 **⟶ Wait for Wave 3 to finish, then:**
 - [ ] **T168** Run with the store unreachable and prove the diagnosis is shown and nothing is persisted anywhere; then run against a slow store and a stalled share and prove neither holds the splash past its bound; compare the closing result with the Phase 1 baseline and account for every difference, including the exclusions recorded in T167 (checklist 9.2b–9.2d, SC-001, SC-002). · `specs/010-startup-rebuild/acceptance.md`
 
 **⟶ Wait for Wave 4 to finish, then:**
-- [ ] **T169** Run the retired-symbol audit one final time and confirm nothing came back (checklist 10.3d, FR-028, SC-009). · `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`
+- [x] **T169** Run the retired-symbol audit one final time and confirm nothing came back (checklist 10.3d, FR-028, SC-009). · `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`
 
 **⟶ Wait for Wave 5 to finish, then:**
-- [ ] **T170** Validate against the Success Criteria with the single suite run: stop any stale `MTM_Waitlist`, XAML-compiler or MSBuild process, set `MSBUILDDISABLENODEREUSE=1`, build `MTM_Waitlist.sln` for x64 Debug with `/m:1 /nodeReuse:false` at zero warnings and zero errors, then run the suite (checklist 3.2c, FR-001–FR-038, SC-001–SC-017). · `MTM_Waitlist.sln`, `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
+- [x] **T170** Validate against the Success Criteria with the single suite run: stop any stale `MTM_Waitlist`, XAML-compiler or MSBuild process, set `MSBUILDDISABLENODEREUSE=1`, build `MTM_Waitlist.sln` for x64 Debug with `/m:1 /nodeReuse:false` at zero warnings and zero errors, then run the suite (checklist 3.2c, FR-001–FR-038, SC-001–SC-017). · `MTM_Waitlist.sln`, `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
 
 **Checkpoint**: every applicable edge case has a test, the live runs pass, the difference against the baseline is
 explained line by line, the embed guide exists, the registry matches the tree and the audit is clean. The rebuild
@@ -540,22 +540,22 @@ requirements they satisfy are FR-032 to FR-037 and SC-014 to SC-016, and the con
 `MTM_Waitlist.Tests/Module_Startup/Services/DiagnosticContextTests.cs`.
 
 ### Tests
-- [ ] **T180** [P] Test the capture: the chain carries every exception with its depth and index, an aggregate contributes all of its independent failures, an over-long chain is truncated with its marker rather than silently, a member that throws on read is replaced instead of losing the entry, and a failing recorder raises no second diagnostic (FR-032, FR-037). · `MTM_Waitlist.Tests/Module_Startup/Services/ExceptionCaptureTests.cs`
-- [ ] **T181** [P] Test the fingerprint: the same fault raised twice produces the same value, a different fault or module produces a different one, the message's variable parts are normalized out, and an entry raised without an exception carries none (FR-033, SC-014). · `MTM_Waitlist.Tests/Module_Startup/Services/ExceptionFingerprintTests.cs`
-- [ ] **T182** [P] Test the gathered context: the runtime, view and store objects are built by the seam and not by the caller, a store fault carries the provider's code and a statement fingerprint containing no parameter values, and nothing on the never-write list reaches any of them (FR-034 to FR-036, SC-015, SC-016). · `MTM_Waitlist.Tests/Module_Startup/Services/DiagnosticContextTests.cs`
+- [x] **T180** [P] Test the capture: the chain carries every exception with its depth and index, an aggregate contributes all of its independent failures, an over-long chain is truncated with its marker rather than silently, a member that throws on read is replaced instead of losing the entry, and a failing recorder raises no second diagnostic (FR-032, FR-037). · `MTM_Waitlist.Tests/Module_Startup/Services/ExceptionCaptureTests.cs`
+- [x] **T181** [P] Test the fingerprint: the same fault raised twice produces the same value, a different fault or module produces a different one, the message's variable parts are normalized out, and an entry raised without an exception carries none (FR-033, SC-014). · `MTM_Waitlist.Tests/Module_Startup/Services/ExceptionFingerprintTests.cs`
+- [x] **T182** [P] Test the gathered context: the runtime, view and store objects are built by the seam and not by the caller, a store fault carries the provider's code and a statement fingerprint containing no parameter values, and nothing on the never-write list reaches any of them (FR-034 to FR-036, SC-015, SC-016). · `MTM_Waitlist.Tests/Module_Startup/Services/DiagnosticContextTests.cs`
 
 ### Implementation
 
 **Wave 1 — independent (different files):**
-- [ ] **T175** [P] Serialize the exception chain into `exception_detail`: one node per exception carrying its level, index, type, message, stack, source, HRESULT, help link, target site and allowlisted data, with `ToString()` stored once as `full`, capped at a node boundary with an explicit truncation marker, and defensive against a member that throws on read (plan D25, FR-032). · `MTM_Waitlist.Logging/ExceptionDetailSerializer.cs`
-- [ ] **T177** [P] Build the context the seam gathers: the `runtime` object, the `ui` object from whatever the caller could name, and the `database` object read from the provider's own exception, with the statement recorded as a value-free fingerprint (plan D27, FR-034, FR-035, FR-036). · `MTM_Waitlist.Logging/DiagnosticContext.cs`
+- [x] **T175** [P] Serialize the exception chain into `exception_detail`: one node per exception carrying its level, index, type, message, stack, source, HRESULT, help link, target site and allowlisted data, with `ToString()` stored once as `full`, capped at a node boundary with an explicit truncation marker, and defensive against a member that throws on read (plan D25, FR-032). · `MTM_Waitlist.Logging/ExceptionDetailSerializer.cs`
+- [x] **T177** [P] Build the context the seam gathers: the `runtime` object, the `ui` object from whatever the caller could name, and the `database` object read from the provider's own exception, with the statement recorded as a value-free fingerprint (plan D27, FR-034, FR-035, FR-036). · `MTM_Waitlist.Logging/DiagnosticContext.cs`
 
 **⟶ Wait for Wave 1 to finish, then (each extends a file Wave 1 created):**
-- [ ] **T176** Derive `error_fingerprint` from the fault's type, module, action and a normalized message shape, and carry it on the entry so the write procedure can store it (plan D26, FR-033). · `MTM_Waitlist.Logging/ExceptionDetailSerializer.cs`
-- [ ] **T178** Redact before anything is written: parameter names and their count may be recorded, values and credentials may not, and a provider message is cut at the first `=` that follows a parameter name (FR-036; `contracts/logging-contract.md` §6). · `MTM_Waitlist.Logging/DiagnosticContext.cs`
+- [x] **T176** Derive `error_fingerprint` from the fault's type, module, action and a normalized message shape, and carry it on the entry so the write procedure can store it (plan D26, FR-033). · `MTM_Waitlist.Logging/ExceptionDetailSerializer.cs`
+- [x] **T178** Redact before anything is written: parameter names and their count may be recorded, values and credentials may not, and a provider message is cut at the first `=` that follows a parameter name (FR-036; `contracts/logging-contract.md` §6). · `MTM_Waitlist.Logging/DiagnosticContext.cs`
 
 **⟶ Wait for Wave 2 and T065 to finish, then:**
-- [ ] **T179** Absorb the writer's own secondary failures — the two clauses T065 does not carry: no local substitute record, and no added wait for the caller whose fault is being recorded (plan D27, FR-037). · `MTM_Waitlist.Logging/StoreLogWriter.cs`
+- [x] **T179** Absorb the writer's own secondary failures — the two clauses T065 does not carry: no local substitute record, and no added wait for the caller whose fault is being recorded (plan D27, FR-037). · `MTM_Waitlist.Logging/StoreLogWriter.cs`
 
 **Checkpoint**: a diagnostic carries the fault whole, groups with its own repeats, describes the machine and the
 action it happened under, and is dropped rather than recorded anywhere else when the store refuses it.
@@ -572,8 +572,8 @@ SC-017.
 **Files**: `MTM_Waitlist.Logging/LogExportFormatter.cs`,
 `MTM_Waitlist.Tests/Module_Startup/Services/LogExportFormatterTests.cs`.
 
-- [ ] **T183** [P] Format the panel's copy: the entries' columns in the order the panel shows them, the exception chain and payload exactly as stored, the chain link included, an entry separator, a header naming the filter the copy came from, and a stated ceiling cut with an explicit marker rather than silently — the ceiling's value is recorded in `contracts/logging-contract.md` §7 by this task, because no artifact states it yet (plan D29, FR-038). · `MTM_Waitlist.Logging/LogExportFormatter.cs`
-- [ ] **T184** [P] Test the copy: it carries the chain, the runtime context, the store diagnostics and the chain link for the entries it was given, it names the filter it came from, it is cut with a marker at the ceiling, it holds nothing the store is forbidden to hold, and a refused clipboard is reported rather than raised (FR-038, SC-017). · `MTM_Waitlist.Tests/Module_Startup/Services/LogExportFormatterTests.cs`
+- [x] **T183** [P] Format the panel's copy: the entries' columns in the order the panel shows them, the exception chain and payload exactly as stored, the chain link included, an entry separator, a header naming the filter the copy came from, and a stated ceiling cut with an explicit marker rather than silently — the ceiling's value is recorded in `contracts/logging-contract.md` §7 by this task, because no artifact states it yet (plan D29, FR-038). · `MTM_Waitlist.Logging/LogExportFormatter.cs`
+- [x] **T184** [P] Test the copy: it carries the chain, the runtime context, the store diagnostics and the chain link for the entries it was given, it names the filter it came from, it is cut with a marker at the ceiling, it holds nothing the store is forbidden to hold, and a refused clipboard is reported rather than raised (FR-038, SC-017). · `MTM_Waitlist.Tests/Module_Startup/Services/LogExportFormatterTests.cs`
 
 **Checkpoint**: a developer can copy one entry, or the view they are looking at, as text and paste it to someone
 who has no access to the store, and doing so writes nothing to the machine.
@@ -598,14 +598,14 @@ standing until these tasks land. They are numbered last so that the identifiers 
 `MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs`,
 `MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs`, `research.md`.
 
-- [ ] **T185** [US3] Re-point the shell's sign-out off `ISignOutService` and `SignOutResult` before US3's registration pass deletes them: `ShellViewModel`
+- [x] **T185** [US3] Re-point the shell's sign-out off `ISignOutService` and `SignOutResult` before US3's registration pass deletes them: `ShellViewModel`
   injects `ISignOutService` and exposes `Task<SignOutResult> SignOutAsync`, and `ShellPage.xaml.cs` uses
   `SignOutResult` and calls `MTM_Waitlist.Module_Startup.Services.SignOutService.ResolveRestartFailedMessage()`
   at line 207 — the production file outside the startup module that names `MTM_Waitlist.Module_Startup.Services`, which
   T005's assertion covers; T188 owns the test-side reference. Move it onto the rebuilt session service, keep the refusal message it produces, and re-point
   `ShellViewModelTests`, which asserts that a sign-out goes through the service rather than merely clearing the
   displayed name (FR-011, SC-001). · `ViewModels/ShellViewModel.cs`, `Module_Core/Views/ShellPage.xaml.cs`, `MTM_Waitlist.Tests/Module_Core/ViewModels/ShellViewModelTests.cs`
-- [ ] **T186** [US3] Provide the process-restart path `IAppProcessRestarter` carried, so a sign-out still ends the
+- [x] **T186** [US3] Provide the process-restart path `IAppProcessRestarter` carried, so a sign-out still ends the
   session and restarts, and so a restart that fails is reported rather than leaving a half-signed-out state
   (FR-011; spec.md Edge Cases; the case T174 tests). · `MTM_Waitlist.Startup/Services/`, `ViewModels/ShellViewModel.cs`
 - [x] **T187** Rebuild the computer-management capability inside `MTM_Waitlist.Settings` before T015 empties the project its implementation lives in, and delete `IComputerRegistryService` with it (research D30). The Settings "Computers" panel keeps listing, adding, editing and deactivating registry rows: its service is recreated at `MTM_Waitlist.Settings/Services/ComputerRegistryService.cs` over the rebuilt machine contracts — this machine's record comes from `IMachineFacts` (T038), and the fleet's list, upsert, update and delete keep the `sp_core_computers_registry_*` procedures behind that seam — and `ComputerManagementViewModel` and `ComputerEditDialogViewModel` stop injecting the deleted interface. `FakeComputerRegistryService` in the kept `SettingsViewModelTests.cs` is re-pointed at the new seam or deleted with the interface; `ComputerManagementViewModel`'s `StartupState` injection is T040's to remove (FR-022). · `MTM_Waitlist.Settings/Services/ComputerRegistryService.cs`, `MTM_Waitlist.Settings/ViewModels/ComputerManagementViewModel.cs`, `MTM_Waitlist.Settings/ViewModels/ComputerEditDialogViewModel.cs`, `MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs`, `MTM_Waitlist.Core/Contracts/Services/IComputerRegistryService.cs`
@@ -719,7 +719,7 @@ constraint that produced it, and nothing above this heading was changed.
 - [x] **T193** Record the destructive approval for the phase 2.4 and 5.6 deletions in the plan's Complexity
   Tracking, which is where the plan states the approval is recorded before each deletion set runs, rather than
   only in the companion ledger per Constitution: Security & Secrets, `plan.md` → Complexity Tracking (partial).
-- [ ] **T194** Record coverage entries for FR-032 to FR-038 and for all seventeen success criteria, so the
+- [x] **T194** Record coverage entries for FR-032 to FR-038 and for all seventeen success criteria, so the
   requirement record traces the work that already exists under the two addenda and so SC-013's demand that
   every acceptance case be covered or retired can be read from the record per SC-013 (partial).
 - [x] **T195** Add the stored procedure that returns every role a person holds and read it in
@@ -732,3 +732,112 @@ constraint that produced it, and nothing above this heading was changed.
   lives in `MTM_Waitlist.Core` because the logging module already references that library, so the logging
   module would be a circular reference, and the contract's count of standalone `ILogger` call sites must be
   reconciled with the number that actually exists (partial).
+
+---
+
+## Phase 11: The shared locations belong to the plant
+
+**Added 2026-09-28**, from the owner's answers to five questions. Three things prompted it. The three folder
+fields on the machine-setup screen made every computer a second owner of a plant-wide answer, and a plant-wide
+answer with several owners drifts. The save judged its own success from MySQL's affected-row count, and a
+multi-row `INSERT ... ON DUPLICATE KEY UPDATE` reports zero for a row whose values did not change — so a save
+that wrote all three rows correctly was refused with "the store did not keep all three picture sources" and
+offered "Save again" forever. And a computer whose share is down had nothing to fall back to, even though the
+application already keeps a local cache of what it has read.
+
+The folders move to the settings the storage-paths panel already writes, a share outage falls back to the copies
+held locally and says so, and the shared key file is retired along with remember-me rather than cached.
+
+**Files**: `MTM_Waitlist.Core/Models/MachineConfigurationState.cs`, `MachineConfigurationDraft.cs`,
+`MachineConfigurationSourceKinds.cs`, `MTM_Waitlist.Startup/Services/MachineConfigurationService.cs`,
+`SaveMachineConfigurationStep.cs`, `MachineReadinessStep.cs`, `Module_Startup/Views/MachineSetupWindow.xaml`,
+`MTM_Waitlist.Startup/ViewModels/MachineSetupViewModel.cs`,
+`MTM_Waitlist.Settings/Services/ImageStorageConfigurationResolver.cs`,
+`MTM_Waitlist.Shared/Helpers/AppStoragePaths.cs`, `MTM_Waitlist.Shared/Helpers/ImageCachePaths.cs`,
+`MTM_Waitlist.Startup/Services/RememberedSignInService.cs`,
+`Database/StoredProcedures/sp_config_images_locations_computer_sources_set/`, `Database/Seeds/`,
+`Database/Bootstrap/update_table_descriptions.sql`, `.github/instructions/startup-rebuild.instructions.md`.
+
+- [ ] **T197** Stop a computer requiring any folder to be configured: drop the picture sources from
+  `MachineConfigurationDraft` and `MachineConfigurationState`, stop `SaveAsync` writing or requiring them, and
+  delete the affected-row-count check that refuses a save it actually made (FR-041, SC-018).
+- [ ] **T198** Retire the per-computer picture sources in the database: delete
+  `sp_config_images_locations_computer_sources_set` with the rollback that drops it, remove the block from
+  `AllSPs.sql`, and add a seed that deactivates the `scope = 'computer'` rows in `config_images_locations`, so a
+  computer set up before this change reads from the plant-wide settings afterwards (FR-040, SC-021).
+- [ ] **T199** Take the three folder fields, their Choose-folder buttons and the picture-source half of the save
+  off the machine-setup screen, leaving the computer's name and its note (FR-040, SC-018).
+- [ ] **T200** Resolve a picture under the local cache folder when the configured shared folder cannot be
+  reached, and report a picture that has neither a copy nor a reachable share as missing rather than drawing a
+  stand-in (FR-042, FR-044).
+- [ ] **T201** State on the launch surface that the copies held on this computer are the ones being used when
+  the shared folder cannot be reached, so a picture that is a day old is never presented as a current one
+  (FR-042, SC-019).
+- **T202 — retired 2026-09-28**: it asked for the keys the launch reads to be held in the local cache folder.
+  The owner first kept that copy as a fallback for an unreachable share, then, told that remember-me is the only
+  thing that ever opens the key, said to remove it. Nothing reads, copies or keeps a key file, so the task has
+  no work in it. It is kept here as the record of what was withdrawn, and T219 carries the removal (FR-025,
+  FR-043).
+- [ ] **T203** Write the FR-025 amendment into the module's instructions: nothing except the picture copy is kept
+  on a computer, and no key file is read, copied or kept, so a later change cannot reintroduce one by assumption
+  (FR-025, FR-043).
+- [ ] **T204** Test each of the above: a computer is configured by its name alone; a save that writes nothing
+  new is not reported as a failure; an unreachable share resolves to the local cache and says so; a picture with
+  neither copy nor share is missing rather than a stand-in; and nothing reads, copies or keeps a key file
+  (FR-040–FR-044, SC-018–SC-021).
+
+---
+
+## Phase 12: The decisions taken on the remaining concerns
+
+**Added 2026-09-28.** The 63 concerns recorded across the implement runs were worked through. Thirty-six were
+already resolved, superseded or accepted and have been removed from the record. The remaining 27 were put to
+the owner as questions and every one is answered; the answers are in `spec.md` under `Clarifications`. Three of
+them changed requirements rather than confirming them: remember-me is withdrawn in favour of a previous-users
+list (FR-014), the launch window states the work under way on one line instead of accumulating a history
+(FR-039), and the launch window and the setup surfaces gained layout requirements (FR-045, FR-046).
+
+- [ ] **T205** Update the permission parity test to the widened role list the seed grants, so it stops failing
+  whenever the store is online.
+- [ ] **T206** Add the read that returns a person's stored credential — paired `create.sql` and `rollback.sql`,
+  registered in `AllSPs.sql`, described and asserted in the validator — because machine setup cannot sign
+  anyone in on a real machine without it.
+- [ ] **T207** Make the quiet machine-configuration repair verify which rows actually changed before it reports
+  success, so a store outage is not mistaken for a repaired setting.
+- [ ] **T208** Seed the session length under the key the launch reads and correct
+  `Database/Validation/settings_schema/validate.sql` to check that key, so the seeded row stops being dead.
+- [ ] **T209** Restore the retired-symbol guard's pattern for the old recovery service, so reintroducing that
+  name fails the build again.
+- [ ] **T210** Re-take T033's removal proof against the shipped launch, which now reads the store.
+- [ ] **T211** Bring the launch's step catalogue and the implemented steps level, so the completed count is
+  never partial.
+- [ ] **T212** Run the live schema validator without `-ApplySeeds` and record what it reports.
+- [ ] **T213** Fix and run the live integration test file that still names the replaced startup types.
+- [ ] **T214** Clear the shared strings file's older naming findings, so a future change touching that file does
+  not fail the changed-file check on problems it did not create.
+- [ ] **T215** Remove the inert `StartupLoggingOptions` section from `appsettings.json`.
+- [ ] **T216** Hand the launch back to the main window on the interface thread rather than a background one.
+- [ ] **T217** Delete the seed folder that is named for work centres but contains workstations.
+- [ ] **T218** Run the installer so the corrected bootstrap script and the aggregate seeds reach the store,
+  which is what applies the two installer fixes and the added plant-scope rows.
+- [ ] **T219** Withdraw remember-me and add the previous-users section: a modal on the sign-in screen showing
+  the last six people who signed in as cards, where choosing a card fills in the user name and the password is
+  still required, backed by a store read (FR-014). The shared key file goes with it — the reader that opened it
+  is the code being withdrawn, so the file, its provider and its local copy are all removed (FR-025, FR-043).
+- [ ] **T220** Open the launch window centred on the screen (FR-045).
+- [ ] **T221** Replace the launch's list of performed steps with a single line showing only the work under way,
+  with no history (FR-039, US1).
+- [ ] **T222** Rework the administrator sign-in that precedes machine setup, and the machine setup screen
+  itself, using cards, padding and margins (FR-046).
+- [ ] **T223** Rewrite the blocked-state window's wording to match the surfaces that have already been rewritten.
+- [ ] **T224** Drive the window-behaviour cases against a running application instead of reading the window's
+  code — the abort routes out of setup, the reset preview, the close route and the saved window size.
+- [ ] **T225** Prove the close route and the reset preview end to end against a reachable store.
+- [ ] **T226** Prove the theme in a real window rather than by reading a seeded store.
+- [ ] **T227** Recover the sweeps' full 111-case breakdown, and review it with the owner before it is accepted.
+- [ ] **T228** After Phase 11 lands, run T161 and T168 by hand: the machine-setup gate against a fresh store,
+  and the store unreachable with a slow store and a stalled share, then the comparison with the Phase 1
+  baseline.
+- [ ] **T229** Record the machine-with-no-readable-hardware-address case as environment-gated, with the reason,
+  so it is not mistaken for coverage.
+

@@ -54,6 +54,9 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     private static readonly string[] s_permissionKeys =
     [
         PermissionKeys.SettingsIgnoredLocations,
+        PermissionKeys.SettingsIgnoredLocationsEdit,
+        PermissionKeys.SettingsSessionLength,
+        PermissionKeys.SettingsLogPanel,
         PermissionKeys.SettingsHotWorkCenters,
         PermissionKeys.SettingsPartPictures,
         PermissionKeys.SettingsStoragePaths,
@@ -80,6 +83,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         nameof(IsHotWorkCentersPanelVisible),
         nameof(IsDunnageTypeVisibilityPanelVisible),
         nameof(IsIgnoredLocationsPanelVisible),
+        nameof(IsSessionLengthPanelVisible),
+        nameof(IsDeveloperLogPanelVisible),
         nameof(IsCacheRefreshPanelVisible),
         nameof(IsAboutPanelVisible),
         nameof(IsComputersPanelVisible),
@@ -94,7 +99,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     ];
 
     private readonly IThemeSelectorService _themeSelectorService;
-    private readonly ILocalSettingsService _localSettingsService;
+    private readonly IIgnoredLocationsService _ignoredLocationsService;
+    private readonly IScopedPreferenceStore _preferences;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IDunnageTypeVisibilityCatalogService _dunnageTypeVisibilityCatalogService;
     private readonly INewRequestAlertService _newRequestAlertService;
@@ -393,12 +399,68 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     public bool CanManageDunnageTypeVisibility => CanManageHotWorkCenters;
 
-    /// <summary>Whether the signed-in person may change the ignored locations.</summary>
+    /// <summary>
+    /// Whether the signed-in person may see the locations to hide. This is
+    /// <c>permission.settings.ignored_locations</c>, whose grants are deliberately unchanged (research D10).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanReadIgnoredLocations
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// Whether the signed-in person may change the locations to hide. This is the separate
+    /// <c>permission.settings.ignored_locations_edit</c> key, which is the deliberate narrowing: FR-024 admits
+    /// two roles to the write while FR-030 keeps the existing read restriction exactly as it was.
+    /// </summary>
     [ObservableProperty]
     public partial bool CanManageIgnoredLocations
     {
         get; set;
     }
+
+    /// <summary>
+    /// Whether the signed-in person may change how long a session lasts, from
+    /// <c>permission.settings.session_length</c> (FR-029). The panel refuses the write on the same answer, so the
+    /// gate is enforced where the change happens rather than only where the control is drawn.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanManageSessionLength
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// Whether the signed-in person may open the developer log panel, from <c>permission.settings.log_panel</c>.
+    /// This only keeps the panel out of the tree; the panel's own view model is what enforces the read and the
+    /// copy (US5).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanOpenDeveloperLogPanel
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// How long a sign-in lasts, in minutes, for the whole plant.
+    /// </summary>
+    /// <remarks>
+    /// Held as a double because the control that edits it is a number box, and because a value typed into one
+    /// arrives as a fractional number. It is rounded and clamped before it is stored.
+    /// </remarks>
+    [ObservableProperty]
+    public partial double SessionLengthMinutes
+    {
+        get; set;
+    } = ScopedPreferenceKeys.DefaultSessionLengthMinutes;
+
+    /// <summary>What the session-length panel has to say: a refusal, a confirmation, or a fault.</summary>
+    [ObservableProperty]
+    public partial string SessionLengthStatusMessage
+    {
+        get; set;
+    } = string.Empty;
 
     /// <summary>
     /// Whether this operator may ask the on-host service to rebuild the cache now (T160).
@@ -583,13 +645,57 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         string.Join(" ", VisibleDunnageTypes.Select(item => item.Name)),
         string.Join(" ", HiddenDunnageTypes.Select(item => item.Name)));
 
-    public bool IsIgnoredLocationsPanelVisible => MatchesSearch(
+    /// <summary>
+    /// The locations-to-hide panel. Reading it is open to a person holding
+    /// <c>permission.settings.ignored_locations</c>, whose grants are unchanged (SC-012); whether the controls
+    /// inside it accept a change is a separate answer, from the edit key.
+    /// </summary>
+    public bool IsIgnoredLocationsPanelVisible => CanReadIgnoredLocations && MatchesSearch(
         "ignored",
         "inventory location",
         "location",
         "infor visual",
         "quantity in house",
         string.Join(" ", IgnoredLocations));
+
+    /// <summary>
+    /// The session-length panel. Offered only to a person who may change the length, and the write itself is
+    /// refused on the same answer (FR-029).
+    /// </summary>
+    public bool IsSessionLengthPanelVisible => CanManageSessionLength && MatchesSearch(
+        "session",
+        "session length",
+        "sign in",
+        "timeout",
+        "sign out",
+        "how long");
+
+    /// <summary>
+    /// The developer log panel. Kept out of the tree for a person who may not open it, and the panel's own view
+    /// model refuses the read and the copy on the same key (US5, SC-005).
+    /// </summary>
+    public bool IsDeveloperLogPanelVisible => CanOpenDeveloperLogPanel && MatchesSearch(
+        "log",
+        "logs",
+        "diagnostics",
+        "fault",
+        "error",
+        "exception");
+
+    /// <summary>What the session-length box is for, in the reader's language.</summary>
+    public string SessionLengthTitle => "Settings_SessionLength_Title.Text".GetLocalized();
+
+    /// <summary>What changing the length does, and when it takes effect.</summary>
+    public string SessionLengthDescription => "Settings_SessionLength_Description.Text".GetLocalized();
+
+    /// <summary>The label on the minutes box.</summary>
+    public string SessionLengthLabel => "Settings_SessionLength_Label.Text".GetLocalized();
+
+    /// <summary>The panel's save action.</summary>
+    public string SessionLengthSaveLabel => "Settings_SessionLength_Save.Text".GetLocalized();
+
+    /// <summary>The developer log panel's heading, shown only to a person who may open it.</summary>
+    public string DeveloperLogPanelTitle => "Settings_LogPanel_Title.Text".GetLocalized();
 
     public bool IsAboutPanelVisible => MatchesSearch("about", "version", "privacy", VersionDescription, "mtm waitlist");
 
@@ -698,7 +804,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "display name",
         string.Join(" ", ComputerManagement.Computers.Select(record => record.GetDisplayLabel())));
 
-    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsPictureCachePanelVisible || IsPartPicturesEntryVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
+    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsPictureCachePanelVisible || IsPartPicturesEntryVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsSessionLengthPanelVisible || IsDeveloperLogPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
@@ -712,7 +818,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     public SettingsViewModel(
         IThemeSelectorService themeSelectorService,
-        ILocalSettingsService localSettingsService,
+        IIgnoredLocationsService ignoredLocationsService,
+        IScopedPreferenceStore preferences,
         IWorkCenterCatalogService workCenterCatalogService,
         IDunnageTypeVisibilityCatalogService dunnageTypeVisibilityCatalogService,
         INewRequestAlertService newRequestAlertService,
@@ -729,7 +836,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         AppLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
-        _localSettingsService = localSettingsService;
+        _ignoredLocationsService = ignoredLocationsService;
+        _preferences = preferences;
         _workCenterCatalogService = workCenterCatalogService;
         _dunnageTypeVisibilityCatalogService = dunnageTypeVisibilityCatalogService;
         _newRequestAlertService = newRequestAlertService;
@@ -762,7 +870,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _enlargePicturesInitializing = false;
 
         _ = UrgencyAllotments.LoadAsync();
-        InitializeIgnoredLocations();
+        _ = InitializeIgnoredLocationsAsync();
+        _ = InitializeSessionLengthAsync();
         _ = InitializeStoragePathsAsync();
         _ = InitializePictureCacheAsync();
 
@@ -833,7 +942,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 .HasPermissionsAsync(s_permissionKeys, cancellationToken)
                 .ConfigureAwait(true);
 
-            CanManageIgnoredLocations = answers[PermissionKeys.SettingsIgnoredLocations];
+            CanReadIgnoredLocations = answers[PermissionKeys.SettingsIgnoredLocations];
+            CanManageIgnoredLocations = answers[PermissionKeys.SettingsIgnoredLocationsEdit];
+            CanManageSessionLength = answers[PermissionKeys.SettingsSessionLength];
+            CanOpenDeveloperLogPanel = answers[PermissionKeys.SettingsLogPanel];
             CanManageHotWorkCenters = answers[PermissionKeys.SettingsHotWorkCenters];
             CanManageImageLocationSettings = answers[PermissionKeys.SettingsPartPictures];
             CanManageStoragePaths = answers[PermissionKeys.SettingsStoragePaths];
@@ -1283,16 +1395,29 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         return true;
     }
 
-    private void InitializeIgnoredLocations()
+    /// <summary>
+    /// Seeds the editor from the plant-wide list the service reads, so this screen and every filter that hides a
+    /// location agree by construction rather than by two reads of one key happening to match.
+    /// </summary>
+    /// <remarks>
+    /// The duplicate read and write this screen used to keep are gone with the local settings mechanism (T146).
+    /// The service is the one reader of the stored list, and the one writer of it.
+    /// </remarks>
+    private async Task InitializeIgnoredLocationsAsync()
     {
-        var stored = _localSettingsService.ReadSettingAsync<List<string>?>(IgnoredLocationDefaults.SettingKey).GetAwaiter().GetResult();
-        var seed = stored is { Count: > 0 }
-            ? stored
-            : IgnoredLocationDefaults.Locations;
+        try
+        {
+            var stored = await _ignoredLocationsService.GetIgnoredLocationsAsync().ConfigureAwait(true);
+            ReplaceCollectionValues(IgnoredLocations, stored);
+            IgnoredLocationsStatusMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("SettingsIgnoredLocations", ex, "The ignored-locations list could not be read; the shipped defaults are shown.");
+            ReplaceCollectionValues(IgnoredLocations, IgnoredLocationDefaults.Locations);
+        }
 
-        ReplaceCollectionValues(IgnoredLocations, seed);
-        IgnoredLocationsStatusMessage = string.Empty;
-        AppLog.Info("SettingsIgnoredLocations", $"InitializeIgnoredLocations completed. StoredCount={(stored is null ? 0 : stored.Count)}, ActiveCount={IgnoredLocations.Count}.");
+        RefreshSearchVisibility();
     }
 
     [RelayCommand]
@@ -1300,6 +1425,9 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         if (!CanManageIgnoredLocations)
         {
+            // Refused where the write would happen rather than only where the control is drawn, and refused with a
+            // reason the reader can act on (FR-024, FR-029).
+            IgnoredLocationsStatusMessage = "Settings_IgnoredLocations_EditRefused.Text".GetLocalized();
             return;
         }
 
@@ -1331,6 +1459,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         if (!CanManageIgnoredLocations)
         {
+            IgnoredLocationsStatusMessage = "Settings_IgnoredLocations_EditRefused.Text".GetLocalized();
             return;
         }
 
@@ -1350,17 +1479,110 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         await SaveIgnoredLocationsAsync().ConfigureAwait(true);
     }
 
+    /// <summary>
+    /// Stores the plant-wide list through the service, which is where the edit entitlement is enforced.
+    /// </summary>
+    /// <remarks>
+    /// A refusal is a permission answer rather than a fault, so it is stated in words and is not thrown. A fault is
+    /// still reported, because a list that did not save is something the reader needs to know about.
+    /// </remarks>
     private async Task SaveIgnoredLocationsAsync()
     {
         try
         {
-            await _localSettingsService.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, IgnoredLocations.ToList()).ConfigureAwait(true);
+            var saved = await _ignoredLocationsService
+                .SaveIgnoredLocationsAsync(IgnoredLocations.ToList())
+                .ConfigureAwait(true);
+
+            if (!saved)
+            {
+                AppLog.Info("SettingsIgnoredLocations", "The list was not saved because this person may not change the plant-wide list.");
+                IgnoredLocationsStatusMessage = "Settings_IgnoredLocations_EditRefused.Text".GetLocalized();
+                return;
+            }
+
+            IgnoredLocationsStatusMessage = string.Empty;
             AppLog.Info("SettingsIgnoredLocations", $"SaveIgnoredLocationsAsync saved {IgnoredLocations.Count} location(s).");
         }
         catch (Exception ex)
         {
             AppLog.Error("SettingsIgnoredLocations", ex, "SaveIgnoredLocationsAsync failed.");
             IgnoredLocationsStatusMessage = $"Unable to save ignored locations: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Reads the session length the launch will apply, so the panel opens on the value in force rather than on the
+    /// shipped default (FR-029).
+    /// </summary>
+    private async Task InitializeSessionLengthAsync()
+    {
+        if (!CanManageSessionLength)
+        {
+            return;
+        }
+
+        try
+        {
+            var stored = await _preferences
+                .ReadNumberAsync(ScopedPreferenceKeys.SessionLengthMinutes, PreferenceScope.Plant)
+                .ConfigureAwait(true);
+
+            SessionLengthMinutes = stored is > 0 ? stored.Value : ScopedPreferenceKeys.DefaultSessionLengthMinutes;
+            SessionLengthStatusMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("SettingsSessionLength", ex, "The session length could not be read; the shipped default is shown.");
+            SessionLengthMinutes = ScopedPreferenceKeys.DefaultSessionLengthMinutes;
+        }
+
+        RefreshSearchVisibility();
+    }
+
+    /// <summary>
+    /// Stores the session length for the whole plant, and refuses an unauthorised change where the write happens.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The gate is read here rather than inferred from whether the control was drawn, so a caller that reaches the
+    /// command without going through the panel is still refused (FR-029).
+    /// </para>
+    /// <para>
+    /// The value is clamped to the declared floor and ceiling before it is stored. A length below the floor would
+    /// sign everybody out mid-shift, and the store refuses a non-positive length as well, so neither half of the
+    /// pair is the only guard.
+    /// </para>
+    /// </remarks>
+    [RelayCommand]
+    private async Task SaveSessionLengthAsync()
+    {
+        if (!CanManageSessionLength)
+        {
+            SessionLengthStatusMessage = "Settings_SessionLength_EditRefused.Text".GetLocalized();
+            return;
+        }
+
+        var requested = (int)Math.Round(SessionLengthMinutes, MidpointRounding.AwayFromZero);
+        var clamped = Math.Clamp(
+            requested,
+            ScopedPreferenceKeys.MinimumSessionLengthMinutes,
+            ScopedPreferenceKeys.MaximumSessionLengthMinutes);
+
+        try
+        {
+            await _preferences
+                .WriteNumberAsync(ScopedPreferenceKeys.SessionLengthMinutes, PreferenceScope.Plant, clamped)
+                .ConfigureAwait(true);
+
+            SessionLengthMinutes = clamped;
+            SessionLengthStatusMessage = "Settings_SessionLength_Saved.Text".GetLocalized();
+            AppLog.Info("SettingsSessionLength", $"The session length was stored as {clamped} minute(s).");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("SettingsSessionLength", ex, "The session length could not be stored.");
+            SessionLengthStatusMessage = "Settings_SessionLength_SaveFailed.Text".GetLocalized();
         }
     }
 

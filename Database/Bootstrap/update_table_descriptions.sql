@@ -176,22 +176,12 @@ MODIFY COLUMN role_id BIGINT NOT NULL COMMENT 'Foreign key to auth_roles_catalog
 MODIFY COLUMN assigned_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the role was assigned.',
 MODIFY COLUMN assigned_by_user_id BIGINT NULL COMMENT 'User who assigned the role.';
 
-ALTER TABLE auth_sessions_tokens COMMENT = 'Session token hash metadata and lifecycle state.';
+-- auth_sessions_tokens is deliberately absent here. The table was retired by feature 010 (task T060,
+-- superseded by user_active_sessions) and its ALTER statements were removed when the table went: a MODIFY
+-- against a table that no longer exists stops this script on the very first run after the deletion, which is
+-- what happened on 2026-09-27 and left every description below it unapplied. The object itself is recorded in
+-- the retired-objects section at the foot of this file, which is where a description for it now belongs.
 
-ALTER TABLE auth_sessions_tokens
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for session record.',
-MODIFY COLUMN user_id BIGINT NOT NULL COMMENT 'Foreign key to core_users_profiles.id.',
-MODIFY COLUMN computer_id BIGINT NULL COMMENT 'Optional foreign key to core_computers_registry.id.',
-MODIFY COLUMN token_hash CHAR(64) NOT NULL COMMENT 'Hashed session token value.',
-MODIFY COLUMN token_salt VARBINARY(32) NOT NULL COMMENT 'Salt used for token hashing.',
-MODIFY COLUMN token_version SMALLINT NOT NULL DEFAULT 1 COMMENT 'Token schema/hash version.',
-MODIFY COLUMN issued_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the token was issued.',
-MODIFY COLUMN expires_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the token expires.',
-MODIFY COLUMN revoked_utc DATETIME NULL COMMENT 'UTC timestamp when the token was revoked.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the token is currently active.',
-MODIFY COLUMN source_label VARCHAR(32) NOT NULL COMMENT 'Token source label such as startup or login.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.';
 
 ALTER TABLE config_settings_values COMMENT = 'Current effective configuration setting values by scope.';
 
@@ -646,6 +636,46 @@ DEALLOCATE PREPARE stmt;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
+-- sp_auth_user_credential_get - feature 010-startup-rebuild (task T110)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the read is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_auth_user_credential_get/create.sql, with its rollback beside
+--     it, and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it reads: one active account's identity and role in force in `core_users_profiles`, joined to
+--     `auth_roles_assignments` and `auth_roles_catalog` exactly as `sp_auth_user_row_get` reads them, plus the
+--     four columns that read deliberately leaves out: `password_hash`, `password_salt`,
+--     `require_password_change` and `temporary_credential_failed_attempts`. It owns no data and drops cleanly.
+--   Why it exists: the retired `sp_auth_credentials_check` (T020) was the only read that returned credential
+--     material, so the rebuilt credential check and the machine-setup gate had nothing to call and both failed
+--     closed. This is that read, restored under a name that says what it returns, shared by both callers so the
+--     two cannot drift into different questions. `require_password_change` and the attempt count travel with the
+--     identity because the five-attempt limit applies to temporary credentials alone (FR-012, SC-007).
+
+-- ============================================================
+-- sp_auth_user_password_set - feature 010-startup-rebuild (task T116)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the write is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_auth_user_password_set/create.sql, with its rollback beside it,
+--     and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it writes: three columns of one `core_users_profiles` row — `password_hash`, `password_salt`,
+--     `require_password_change` set to 0 — plus `temporary_credential_failed_attempts` set to 0. It touches no
+--     other row, no other table and no session, and it writes only while it runs, so its rollback cannot lose
+--     data.
+--   Why it exists: FR-013 requires a person still on a temporary credential to set a new password before
+--     anything else. The retired `sp_auth_user_password_update` (T020) was the only write of that column pair
+--     that an account could make for itself, and nothing that survives replaces it:
+--     `sp_user_management_update` deliberately leaves credentials alone, and `sp_user_management_reset_password`
+--     issues an administrator's one-time PIN and would set `require_password_change` back to 1 rather than clear
+--     it. Clearing that flag is what takes the account out of the temporary state the five-attempt limit is
+--     judged against (FR-012).
+
+-- ============================================================
 -- sp_auth_user_roles_get - feature 010-startup-rebuild (task T195)
 -- ============================================================
 -- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
@@ -790,3 +820,27 @@ SET FOREIGN_KEY_CHECKS = 1;
 --     Retained, not retired: sp_config_images_locations_paths_move with its rollback, which the hand-run move
 --     (tools/Move-PartPictureLayout.ps1) still uses, and Database/Validation/part_pictures_schema/validate.sql,
 --     which still asserts that pair exists.
+--   The development seed's credential was repaired, and seed application was taken out of the validator's
+--     default path.
+--     `Database/Seeds/seed_dev_masked_baseline` wrote the retired four-character marker `'0000'` into
+--     `password_hash` with a null `password_salt`, and `PasswordSecretHasher.Verify` refuses a null salt before
+--     it derives anything, so no comparison could confirm any of the ten seeded accounts: nothing could sign in
+--     on a fresh install, at the machine-setup gate or at the sign-in screen, and nothing in the build said so.
+--     Both files were changed together, because the aggregate is what the installer runs: the seed artifact and
+--     its mirror block in `Database/Seeds/AllSeeds.sql`. Each account now carries `UNHEX(<16-byte salt>)` and the
+--     base64 digest of the same development credential, produced by `PasswordSecretHasher.Hash` under its shipped
+--     parameters (PBKDF2/SHA-256, 100000 iterations, a 32-byte hash). Every seeded account shares that value on
+--     purpose: it is a development placeholder rather than a secret, and it belongs to no real person. Roles,
+--     identifiers, `is_active` and `require_password_change = 1` are unchanged, so the credential is still a
+--     temporary one and the person is asked to choose a real password at first sign-in.
+--     Guarded by MTM_Waitlist.Tests/Module_Core/Services/DevelopmentSeedCredentialTests.cs, which reads this seed
+--     file and confirms every row with the application's own comparison.
+--     The reason this is recorded here and not only in the seed: `.github/scripts/validate-database-schema.ps1`
+--     applied every seed file whenever the schema validated, and this seed truncates and rewrites
+--     `core_users_profiles`, `auth_roles_catalog`, `auth_roles_assignments`, `config_settings_values` and
+--     `core_computers_registry`. A validation run therefore rewrote the accounts of whatever store its
+--     connection strings named, which in CI are secrets pointing at a real one. Seed application now happens
+--     only when the run is given `-ApplySeeds`, so checking a schema no longer changes a store's data.
+--     Correction to an earlier note in this block: the semicolon in the comment that used to sit here was NOT
+--     what made the validator fail. Its statement splitter masks comments and quoted literals before looking for
+--     delimiters, so that semicolon was already harmless. Removing it is a tidy-up, not a fix.

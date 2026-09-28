@@ -5,6 +5,8 @@ description: Companion tasks — user-story phased task list
 
 <!-- Extension: companion -->
 <!-- Config: .specify/extensions/companion/ -->
+
+
 ## User Input
 
 ```text

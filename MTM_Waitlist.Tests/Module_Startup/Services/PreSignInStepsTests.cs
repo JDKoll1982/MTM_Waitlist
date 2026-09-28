@@ -7,6 +7,7 @@ using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Startup.Services;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Startup.Services;
 
@@ -174,33 +175,33 @@ public sealed class PreSignInStepsTests
     [TestMethod]
     public async Task ReadHardwareIdentityStep_RunAsync_ReportsThisComputersOwnName()
     {
-        // Arrange
+        // Arrange: the step reads the machine from its context, so the machine the case is about can be stated
+        // rather than borrowed from whichever host the suite happens to run on.
         var step = new ReadHardwareIdentityStep(new LaunchStepCatalog());
+        var machine = new FakeMachineFacts { Hostname = "shop-floor-4", MacAddress = "aa-bb-cc-dd-ee-ff", HardwareIdentityReadable = true };
 
         // Act
-        var outcome = await step.RunAsync(Context(new LaunchActivityFeed()), CancellationToken.None);
+        var outcome = await step.RunAsync(Context(new LaunchActivityFeed(), machine), CancellationToken.None);
 
         // Assert: the name the step reports is the machine's own, read from the machine rather than from the store.
-        StringAssert.Contains(outcome.Diagnosis!, Environment.MachineName.Trim());
+        Assert.AreEqual(LaunchStepStatus.Succeeded, outcome.Status);
+        StringAssert.Contains(outcome.Diagnosis!, "shop-floor-4");
     }
 
     [TestMethod]
     public async Task ReadHardwareIdentityStep_RunAsync_WhenTheAddressCouldNotBeRead_ReportsTheWorkLeftUndone()
     {
-        // Arrange
+        // Arrange: a machine that presents no usable hardware address, which is the branch this case is about.
         var step = new ReadHardwareIdentityStep(new LaunchStepCatalog());
+        var machine = new FakeMachineFacts { Hostname = "shop-floor-4", MacAddress = null, HardwareIdentityReadable = false };
 
         // Act
-        var outcome = await step.RunAsync(Context(new LaunchActivityFeed()), CancellationToken.None);
-
-        if (new MachineFactsService(new StubMySqlHelperServer()).HardwareIdentityReadable)
-        {
-            Assert.Inconclusive("This machine presents a hardware address, so the unreadable branch cannot be exercised here.");
-        }
+        var outcome = await step.RunAsync(Context(new LaunchActivityFeed(), machine), CancellationToken.None);
 
         // Assert: a fact that could not be read is not a failed check, so the machine is admitted and the launch
         // carries on (FR-015).
         Assert.AreEqual(LaunchStepStatus.Skipped, outcome.Status);
+        StringAssert.Contains(outcome.Diagnosis!, "by name alone");
     }
 
     [TestMethod]
@@ -447,7 +448,11 @@ public sealed class PreSignInStepsTests
 
     /// <summary>What a step is handed: no person before sign-in, this machine's facts, and the feed.</summary>
     private static LaunchStepContext Context(ILaunchActivityFeed feed)
-        => new(null, new MachineFactsService(new StubMySqlHelperServer()), feed);
+        => Context(feed, new MachineFactsService(new StubMySqlHelperServer()));
+
+    /// <summary>The same, over a machine a case states rather than over the one the suite happens to run on.</summary>
+    private static LaunchStepContext Context(ILaunchActivityFeed feed, IMachineFacts machine)
+        => new(null, machine, feed);
 
     /// <summary>A machine that holds its name, its description and all three of its picture sources.</summary>
     private static MachineConfigurationState Configured() => new(

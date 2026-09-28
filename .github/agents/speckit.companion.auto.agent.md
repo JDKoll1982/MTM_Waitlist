@@ -5,6 +5,8 @@ description: Companion auto — run the whole pipeline hands-off (specify → pl
 
 <!-- Extension: companion -->
 <!-- Config: .specify/extensions/companion/ -->
+
+
 ## User Input
 
 ```text

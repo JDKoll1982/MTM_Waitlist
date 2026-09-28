@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*"
+applyTo: "**/*.{xaml,cs,ps1,resw}"
 ---
 
 # WinUI 3 UI Automation for Runtime Verification
@@ -60,8 +60,9 @@ Start-Process $exe
   `%LOCALAPPDATA%\MTM_Waitlist\Logs\Startup\startup_daily_<yyyy_MM_dd>.jsonl`, with the directory overridable
   through `StartupLoggingOptions.HostedVmLogDirectory`, and `StartupLogForwarder` wrote
   `startup_forwarded_<yyyy_MM_dd>.jsonl` to the centralized destination. The startup rebuild deleted
-  `StartupLogService`, `IStartupLogService` and the options binding it read; nothing constructs the remaining
-  `StartupLogForwarder` and `StartupLoggingOptions` types, which a later task (T133) owns. A
+  `StartupLogService` and `IStartupLogService`, and the logging phase deleted the rest of the path:
+  `StartupLogForwarder`, `IStartupLogForwarder` and `StartupLoggingOptions`. Nothing constructs or configures
+  any of them any more, and the retired-symbol guard forbids all four names. A
   `startup_daily_*.jsonl` or `startup_forwarded_*.jsonl` found on a machine is therefore a leftover from before
   the rebuild, and its newest timestamp says nothing about the build under test — read `ops_startup_logs` (or the
   developer log panel) instead. The `X:` mapped drive and the `LocalSettings.json` redirect this section used to
@@ -81,19 +82,28 @@ Start-Process $exe
   With only the first set, the app still showed *"Could not validate startup session from the
   database"*; with both set it reached the **Sign in** window. That is the difference between testing
   navigation and testing nothing but the failure dialog.
-- **Reaching the shell needs no sign-in (corrected 2026-09-20).** This bullet previously said the
-  opposite — that a full navigation test needs credentials for a valid account. It does not: with
-  **both** connection overrides set against a reachable store, the built app **auto-signs-in as the
-  configured developer account** and lands directly on the shell, so steps 3 and 5 are exercisable
-  with no credentials at all. Verified 2026-09-20 by driving the running app: the signed-in badge read
-  `johnk`, the shell header read `Waitlist for "Expo Drive"`, the live store supplied 21 real requests
-  across work centers `100-03`, `100-05`, `100-06`, `100-07`, `100-08`, `100-11`, `100-12`, `100-14`,
-  `100-15`, `100-16`, the cached-data bar correctly reported Infor Visual unreachable, and the
-  `Accept request` / `Cancel request` / `Complete request` / `Give back` buttons rendered.
-- **What still needs a signed-in *session* rather than the shell.** A test that depends on a
-  *specific* account's first-use state — a forced password change on the masked `'0000'` credentials,
-  for instance — still cannot be driven headlessly. The distinction matters: "the shell is reachable"
-  is not "any account's flow is reachable".
+- **Reaching the shell now needs a configured machine and a real sign-in (corrected 2026-09-27, feature 010).**
+  The bullet here used to say the opposite — that both connection overrides let the app *auto-sign-in as the
+  configured developer account* and land on the shell. **That is no longer true and the mechanism is gone.**
+  Roles come from the store only and the `appsettings.json` developer allow-list is retired, so nothing signs
+  anybody in locally. A driven run reaches the shell only after this computer's configuration is present in
+  `core_computers_registry` and its three picture sources in `config_images_locations`, and after somebody signs
+  in with a credential the store accepts. Either seed both before the run, or drive the two surfaces below.
+- **Two surfaces stand between launch and the shell, and both must be driven in order.**
+  1. **Machine setup** (`MachineSetupWindow`) when this computer has no configuration. It asks for a display
+     name, a description and the shared folder, keys folder and dunnage root. It is unlocked by a sign-in holding
+     `IT Department` or `Developer` authority, and that sign-in authorises configuration only — it never opens
+     the shell. Closing, cancelling, Escape, Alt+F4 or declining the sign-in all end the process, stating the
+     reason first, so a driven run that aborts here leaves no window behind.
+  2. **Sign-in** (`SignInWindow`) once the configuration is present. An account on a temporary credential is
+     allowed five attempts and is then asked to set a new password before it can carry on.
+- **A launch that stops shows the reason on the launch surface.** `BlockedStateWindow` names the cause, offers
+  Retry and, only where a reset could remove the cause, Restore Defaults. A store outage offers no reset, so a
+  driven run against an unreachable store should expect Retry and Close and nothing else.
+- **Diagnostics live in the store, not in a log directory.** The panel is `DeveloperLogPanelView`, hosted inside
+  Settings and gated on `permission.settings.log_panel` (Developer alone). There is no log folder to open and no
+  local log file to read: entries go to `ops_startup_logs`, and the panel's copy puts the entry on the clipboard
+  instead of writing a file. A driven run that needs a diagnostic should read the panel, not a directory.
 
 ## 2. Connect to the window
 
@@ -119,8 +129,8 @@ $windows | ForEach-Object { "$($_.Current.ControlType.ProgrammaticName) | '$($_.
 ```
 
 Never locate the MTM_Waitlist window by title. The title is **not stable**: `MainWindow` is a
-`WinUIEx.WindowEx`, and on 2026-09-11 the splash window reported the framework default
-`WinUI Desktop` while the sign-in window reported `Sign in`. A title lookup is therefore not merely
+`WinUIEx.WindowEx`, and several windows exist across a launch — the launch surface, machine setup, sign-in and
+the blocked state — each of which states its own title. A title lookup is therefore not merely
 wrong for this app, it is wrong for *some windows and states and not others* — which is worse,
 because it works until it does not. Use the process id (`FromHandle($p.MainWindowHandle)`) or
 enumerate the process's top-level windows as above.
@@ -284,43 +294,13 @@ measuring, and launch fresh before concluding that a sizing change did or did no
 - Window regressions such as a window that shows before it is activated, or a page that resizes the
   main window and silently un-maximizes it.
 
-## Verification status (2026-09-11 and 2026-09-20, current Debug build)
+## Verification status
 
-The recipes above were exercised against the built app
-(`bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe`) on `MTMFG-161` — the table
-below on **2026-09-11**, and the pre-shell windows only; the second table, further down, on
-**2026-09-20**, when the app was driven all the way into the shell:
-
-| Claim | Result |
-|---|---|
-| Executable path | **correct** — file present and current |
-| `Start-Process` returns immediately and console output is not captured | **correct** |
-| `MainWindowHandle` resolves once a window exists | **correct** |
-| Window lookup by process id | **correct** — 1 top-level window found |
-| Never locate by window title | **confirmed, and worse than documented** — splash reported `WinUI Desktop`, sign-in reported `Sign in` |
-| Text dump identifies the page | **correct** — returned the failure dialog, then the sign-in text |
-| Buttons appear in the text dump | **incorrect as written** — they are `ControlType.Button`; corrected above |
-| `GetWindowPlacement` / `GetWindowRect` recipe | **correct** — returned `showCmd=1`, `760x460` (splash), `820x760` (sign-in) |
-| `showCmd` 1/2/3 = normal/minimized/maximized | **consistent** (`1` on both windows) |
-| Startup log staleness check | **superseded** — the file-based log path this row was recorded against has since been retired with the startup rebuild, so `startup_daily_*.jsonl` and `startup_forwarded_*.jsonl` are leftovers and their timestamps say nothing about the current build. The row is kept as the record of what was measured on those two dates; read `ops_startup_logs` instead |
-| Close recipe leaves no orphan | **correct** — 0 instances afterwards |
-| `Add-Type` fails on a duplicate type | **did not reproduce** — see the note in step 4; the real hazard here is the opposite (types do not survive between commands) |
-
-**Not verified — as of 2026-09-11.** Step 5 (navigation with `SelectionItemPattern`) and the shell header text of step 3.
-Both need the app past the **Sign in** gate, and no valid account credential was used for that test
-run, so the shell was never reached.
-
-**Both are now verified (2026-09-20), and the blocker was not a credential at all.** With both
-connection overrides set against the local `mtm_waitlist`, the app auto-signed-in and reached the
-shell, so the two open items were walked on the current Debug build:
-
-| Claim | Result (2026-09-20) |
-|---|---|
-| Step 3 — the text dump identifies the shell page | **correct** — `Waitlist for "Expo Drive"`, the `johnk` badge, the nav labels and 21 request cards, with no `Sign in` window anywhere in the run |
-| Step 5 — `NavigationViewItem` → `ControlType.ListItem` + `SelectionItemPattern` | **correct** — the nav item reported `ControlType.ListItem`, `Select()` succeeded, and the header changed to `Work Center Setup — Select Work Station` with the wizard's steps 1–7 rendered |
-| `showCmd` on a maximized window | **consistent** — `3`, with `GetWindowRect` `3456x1408` and a `760x500` restore rectangle |
-| Reaching the shell needs credentials | **incorrect as written** — it needs no sign-in; corrected in step 1 |
-| The recipe needs no app change to work | **correct** — the run used the shipped artifact unchanged |
+The measurement log for every recipe above — what was exercised, on which machine, and what it
+returned on 2026-09-11 and 2026-09-20 — is kept in
+[`records/ui-automation-verification.md`](records/ui-automation-verification.md). Read it before
+trusting or changing a recipe: it is where the two long-open items and their resolution are
+recorded, and it names the rows that were superseded by the startup rebuild.
 
 ## Relationship to XamlMcp
 

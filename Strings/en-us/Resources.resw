@@ -491,7 +491,34 @@
     <value>Ignored Infor Visual Locations</value>
   </data>
   <data name="Settings_IgnoredLocations_Description.Text" xml:space="preserve">
-    <value>Locations omitted from inventory lists and totals (for example WC, NCM, V-WC, NCM-VITS, SHIP). Editing is limited to roles above Material Handler.</value>
+    <value>Locations omitted from inventory lists and totals (for example WC, NCM, V-WC, NCM-VITS, SHIP). Everyone can read the list; changing it is limited to the IT team.</value>
+  </data>
+  <data name="Settings_IgnoredLocations_EditRefused.Text" xml:space="preserve">
+    <value>The plant-wide list of ignored locations can only be changed by an account authorised to edit it. Nothing was saved.</value>
+  </data>
+  <data name="Settings_SessionLength_Title.Text" xml:space="preserve">
+    <value>How long a sign-in lasts</value>
+  </data>
+  <data name="Settings_SessionLength_Description.Text" xml:space="preserve">
+    <value>How long a person stays signed in on one computer, in minutes. A change applies to the next sign-in rather than to a session already running. Changing it is limited to the IT team.</value>
+  </data>
+  <data name="Settings_SessionLength_Label.Text" xml:space="preserve">
+    <value>Session length (minutes)</value>
+  </data>
+  <data name="Settings_SessionLength_Save.Text" xml:space="preserve">
+    <value>Save session length</value>
+  </data>
+  <data name="Settings_SessionLength_Saved.Text" xml:space="preserve">
+    <value>The session length was saved, and applies to the next sign-in.</value>
+  </data>
+  <data name="Settings_SessionLength_SaveFailed.Text" xml:space="preserve">
+    <value>The session length could not be saved, so the previous value is still in force.</value>
+  </data>
+  <data name="Settings_SessionLength_EditRefused.Text" xml:space="preserve">
+    <value>The session length can only be changed by an account authorised to change it. Nothing was saved.</value>
+  </data>
+  <data name="Settings_LogPanel_Title.Text" xml:space="preserve">
+    <value>Application log</value>
   </data>
   <data name="Settings_IgnoredLocations_AddPlaceholder.PlaceholderText" xml:space="preserve">
     <value>Add location code (for example WC)</value>
@@ -1011,8 +1038,245 @@
   <data name="Startup_Placeholder.Close" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="Startup_Launch.Title" xml:space="preserve">
+    <value>MTM Waitlist</value>
+  </data>
+  <data name="Startup_Launch.ProgressCaption" xml:space="preserve">
+    <value>Step {0} of {1}</value>
+  </data>
+  <data name="Startup_Launch.DetailsHeader" xml:space="preserve">
+    <value>What the application is doing</value>
+  </data>
+  <data name="Startup_Launch.CloseAction" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Startup_Launch.EndedByWindowClose" xml:space="preserve">
+    <value>The startup window was closed, so the application is ending. Open it again to start it up.</value>
+  </data>
+  <data name="Startup_Launch.EndedByCloseButton" xml:space="preserve">
+    <value>Startup was stopped from the startup screen, so the application is ending. Open it again to start it up.</value>
+  </data>
+  <data name="Startup_SignIn.Heading" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="Startup_SignIn.Subtitle" xml:space="preserve">
+    <value>Sign in to carry on. Your session and this computer are checked against the store.</value>
+  </data>
+  <data name="Startup_SignIn.NameLabel" xml:space="preserve">
+    <value>User name</value>
+  </data>
+  <data name="Startup_SignIn.CredentialLabel" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Startup_SignIn.RememberMeLabel" xml:space="preserve">
+    <value>Remember me on this computer</value>
+  </data>
+  <data name="Startup_SignIn.SignInAction" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="Startup_SignIn.RememberedAction" xml:space="preserve">
+    <value>Use the sign-in this computer remembers</value>
+  </data>
+  <data name="Startup_SignIn.HintNameRequired" xml:space="preserve">
+    <value>Type your user name.</value>
+  </data>
+  <data name="Startup_SignIn.HintCredentialRequired" xml:space="preserve">
+    <value>Now type your password.</value>
+  </data>
+  <data name="Startup_SignIn.RefusedSignInRequired" xml:space="preserve">
+    <value>Type your user name and your password.</value>
+  </data>
+  <data name="Startup_SignIn.RefusedCredential" xml:space="preserve">
+    <value>That user name and password do not match an account. Check both and try again.</value>
+  </data>
+  <data name="Startup_SignIn.RefusedAttemptsExhausted" xml:space="preserve">
+    <value>This account's temporary password has been refused five times, so it is refused until a new password is set. Ask an administrator to issue a new temporary password.</value>
+  </data>
+  <data name="Startup_SignIn.RefusedStoreUnreadable" xml:space="preserve">
+    <value>The store could not be reached, so the sign-in could not be confirmed. Try again shortly.</value>
+  </data>
+  <data name="Startup_SignIn.RememberedUnavailable" xml:space="preserve">
+    <value>This computer has not remembered an account it can sign in with. Type your user name and password.</value>
+  </data>
+  <data name="Startup_PasswordChange.Heading" xml:space="preserve">
+    <value>Choose a new password</value>
+  </data>
+  <data name="Startup_PasswordChange.Explanation" xml:space="preserve">
+    <value>You signed in with a temporary password, so choose a password of your own before anything else.</value>
+  </data>
+  <data name="Startup_PasswordChange.PasswordLabel" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="Startup_PasswordChange.ConfirmationLabel" xml:space="preserve">
+    <value>Type the new password again</value>
+  </data>
+  <data name="Startup_PasswordChange.SubmitAction" xml:space="preserve">
+    <value>Set the new password</value>
+  </data>
+  <data name="Startup_PasswordChange.PasswordRequired" xml:space="preserve">
+    <value>Type the new password before setting it.</value>
+  </data>
+  <data name="Startup_PasswordChange.PasswordTooShort" xml:space="preserve">
+    <value>The new password must be at least eight characters.</value>
+  </data>
+  <data name="Startup_PasswordChange.ConfirmationMismatch" xml:space="preserve">
+    <value>The two passwords are not the same. Type them again.</value>
+  </data>
+  <data name="Startup_MachineSetup.Title" xml:space="preserve">
+    <value>Set up this computer</value>
+  </data>
+  <data name="Startup_MachineSetup.Subtitle" xml:space="preserve">
+    <value>This computer has not been set up yet. A Developer or an Admin has to give it a name and tell it where its shared pictures are kept.</value>
+  </data>
+  <data name="Startup_MachineSetup.SignInHeading" xml:space="preserve">
+    <value>Sign in to set this computer up</value>
+  </data>
+  <data name="Startup_MachineSetup.SignInNameLabel" xml:space="preserve">
+    <value>Developer / Admin user name</value>
+  </data>
+  <data name="Startup_MachineSetup.SignInNameHint" xml:space="preserve">
+    <value>The user name of a Developer or Admin account</value>
+  </data>
+  <data name="Startup_MachineSetup.CredentialLabel" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Startup_MachineSetup.CredentialHint" xml:space="preserve">
+    <value>That account's password</value>
+  </data>
+  <data name="Startup_MachineSetup.SignInAction" xml:space="preserve">
+    <value>Sign in and unlock setup</value>
+  </data>
+  <data name="Startup_MachineSetup.IdentityHeading" xml:space="preserve">
+    <value>Name this computer</value>
+  </data>
+  <data name="Startup_MachineSetup.DisplayNameLabel" xml:space="preserve">
+    <value>What this computer should be called</value>
+  </data>
+  <data name="Startup_MachineSetup.DescriptionLabel" xml:space="preserve">
+    <value>Where this computer is (optional)</value>
+  </data>
+  <data name="Startup_MachineSetup.SharedFolderLabel" xml:space="preserve">
+    <value>Shared pictures folder</value>
+  </data>
+  <data name="Startup_MachineSetup.KeysFolderLabel" xml:space="preserve">
+    <value>Shared keys folder</value>
+  </data>
+  <data name="Startup_MachineSetup.DunnageRootLabel" xml:space="preserve">
+    <value>Dunnage pictures folder</value>
+  </data>
+  <data name="Startup_MachineSetup.DunnageRootHint" xml:space="preserve">
+    <value>Where this computer's dunnage pictures are kept</value>
+  </data>
+  <data name="Startup_MachineSetup.BrowseAction" xml:space="preserve">
+    <value>Choose folder</value>
+  </data>
+  <data name="Startup_MachineSetup.SaveAction" xml:space="preserve">
+    <value>Save this computer</value>
+  </data>
+  <data name="Startup_MachineSetup.CancelAction" xml:space="preserve">
+    <value>Close setup</value>
+  </data>
+  <data name="Startup_MachineSetup.DismissAction" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Startup_MachineSetup.NotAuthorized" xml:space="preserve">
+    <value>Sign in with a Developer or Admin account to set this computer up.</value>
+  </data>
+  <data name="Startup_MachineSetup.RefusedSignInRequired" xml:space="preserve">
+    <value>Type a Developer or Admin user name and password before unlocking setup.</value>
+  </data>
+  <data name="Startup_MachineSetup.RefusedCredential" xml:space="preserve">
+    <value>That user name and password do not match an account. Check both and try again.</value>
+  </data>
+  <data name="Startup_MachineSetup.RefusedNotPermitted" xml:space="preserve">
+    <value>That account is not allowed to set up computers. Use an account with Developer or IT Department authority.</value>
+  </data>
+  <data name="Startup_MachineSetup.RefusedStoreUnreadable" xml:space="preserve">
+    <value>The store could not confirm this sign-in, so setup stays locked. Try again once the store answers.</value>
+  </data>
+  <data name="Startup_MachineSetup.SaveNameRequired" xml:space="preserve">
+    <value>This computer needs a name people will recognise.</value>
+  </data>
+  <data name="Startup_MachineSetup.SaveNameInUse" xml:space="preserve">
+    <value>Another computer already holds that name. Give this one a different name.</value>
+  </data>
+  <data name="Startup_MachineSetup.SaveSourcesIncomplete" xml:space="preserve">
+    <value>All three folders are needed: the shared pictures folder, the shared keys folder and the dunnage pictures folder.</value>
+  </data>
+  <data name="Startup_MachineSetup.SaveSourcesNotWritten" xml:space="preserve">
+    <value>The store did not keep all three picture sources, so this computer is not set up. Save again.</value>
+  </data>
+  <data name="Startup_MachineSetup.SaveRefused" xml:space="preserve">
+    <value>The store refused this computer's configuration.</value>
+  </data>
+  <data name="Startup_MachineSetup.AbortWindowClosed" xml:space="preserve">
+    <value>This computer's setup was closed before it was finished, so the application is closing. Open it again to set this computer up.</value>
+  </data>
+  <data name="Startup_MachineSetup.AbortEscape" xml:space="preserve">
+    <value>This computer's setup was abandoned with Escape before it was finished, so the application is closing. Open it again to set this computer up.</value>
+  </data>
+  <data name="Startup_MachineSetup.AbortAltF4" xml:space="preserve">
+    <value>This computer's setup was closed with the window keys before it was finished, so the application is closing. Open it again to set this computer up.</value>
+  </data>
+  <data name="Startup_MachineSetup.AbortCancelControl" xml:space="preserve">
+    <value>This computer's setup was closed from its own control before it was finished, so the application is closing. Open it again to set this computer up.</value>
+  </data>
+  <data name="Startup_MachineSetup.AbortSignInDeclined" xml:space="preserve">
+    <value>Nobody with IT Department or Developer authority signed in to set this computer up, so the application is closing. Open it again to set this computer up.</value>
+  </data>
+  <data name="Startup_BlockedState.Heading" xml:space="preserve">
+    <value>The launch stopped</value>
+  </data>
+  <data name="Startup_BlockedState.Subtitle" xml:space="preserve">
+    <value>The launch could not carry on. What stopped it is stated below, together with the actions that could remove it.</value>
+  </data>
+  <data name="Startup_BlockedState.DiagnosisLabel" xml:space="preserve">
+    <value>What stopped the launch</value>
+  </data>
+  <data name="Startup_BlockedState.RetryAction" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="Startup_BlockedState.RestoreDefaultsAction" xml:space="preserve">
+    <value>Restore defaults</value>
+  </data>
+  <data name="Startup_BlockedState.CloseAction" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Startup_BlockedState.CloseReason" xml:space="preserve">
+    <value>The launch was stopped and the window was closed, so the application is closing. Open it again to try the launch once more.</value>
+  </data>
+  <data name="Startup_BlockedState.ResetPreviewTitle" xml:space="preserve">
+    <value>Restore this computer's defaults</value>
+  </data>
+  <data name="Startup_BlockedState.ResetPreviewConfirm" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Startup_BlockedState.ResetPreviewCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Startup_BlockedState.ResetRefused" xml:space="preserve">
+    <value>The store refused to restore this computer's defaults, so nothing was changed. Try again, or close and ask someone to look at this computer's configuration.</value>
+  </data>
+  <data name="Startup_BlockedState.ResetFailed" xml:space="preserve">
+    <value>The store could not be reached to restore this computer's defaults, so nothing was changed. Try again shortly.</value>
+  </data>
+  <data name="Startup_BlockedState.PartDisplayName" xml:space="preserve">
+    <value>what this computer is called</value>
+  </data>
+  <data name="Startup_BlockedState.PartDescription" xml:space="preserve">
+    <value>the note about where it is</value>
+  </data>
+  <data name="Startup_BlockedState.PartPictureSources" xml:space="preserve">
+    <value>where its pictures come from</value>
+  </data>
+  <data name="Startup_BlockedState.PartScopedPreference" xml:space="preserve">
+    <value>a setting this computer could not read</value>
+  </data>
   <data name="Shell_SignOut.RestartFailed" xml:space="preserve">
     <value>You have been signed out, but the application could not restart. Close it and open it again to sign in.</value>
+  </data>
+  <data name="Shell_SignOut.SessionNotEnded" xml:space="preserve">
+    <value>The application could not end your session, so you are still signed in. Try signing out again.</value>
   </data>
   <data name="Shell_SignOut.Close" xml:space="preserve">
     <value>Close</value>
@@ -1798,5 +2062,65 @@
   </data>
   <data name="PartPictureCard_NoPicture.Text" xml:space="preserve">
     <value>No picture</value>
+  </data>
+  <data name="Settings_LogPanel_Heading" xml:space="preserve">
+    <value>Application log</value>
+  </data>
+  <data name="Settings_LogPanel_Description" xml:space="preserve">
+    <value>Everything the application recorded, newest first. Narrow it by severity, machine, person, module or error kind. The list is always bounded by a time window and a page size.</value>
+  </data>
+  <data name="Settings_LogPanel_Severity.Label" xml:space="preserve">
+    <value>Severity</value>
+  </data>
+  <data name="Settings_LogPanel_Machine.Label" xml:space="preserve">
+    <value>Machine</value>
+  </data>
+  <data name="Settings_LogPanel_Person.Label" xml:space="preserve">
+    <value>Person</value>
+  </data>
+  <data name="Settings_LogPanel_Module.Label" xml:space="preserve">
+    <value>Module</value>
+  </data>
+  <data name="Settings_LogPanel_ErrorType.Label" xml:space="preserve">
+    <value>Error kind</value>
+  </data>
+  <data name="Settings_LogPanel_Window.Label" xml:space="preserve">
+    <value>Window (days)</value>
+  </data>
+  <data name="Settings_LogPanel_PageSize.Label" xml:space="preserve">
+    <value>Entries per page</value>
+  </data>
+  <data name="Settings_LogPanel_Group.Label" xml:space="preserve">
+    <value>Group repeated faults</value>
+  </data>
+  <data name="Settings_LogPanel_Apply.Label" xml:space="preserve">
+    <value>Show entries</value>
+  </data>
+  <data name="Settings_LogPanel_Copy_List.Label" xml:space="preserve">
+    <value>Copy the list</value>
+  </data>
+  <data name="Settings_LogPanel_Copy_Entry_Button.Content" xml:space="preserve">
+    <value>Copy this entry</value>
+  </data>
+  <data name="Settings_LogPanel_Retry.Label" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="Settings_LogPanel_Nothing.Text" xml:space="preserve">
+    <value>No entries match this filter.</value>
+  </data>
+  <data name="Settings_LogPanel_NotPermitted.Text" xml:space="preserve">
+    <value>The application log is available to the Developer role.</value>
+  </data>
+  <data name="Settings_LogPanel_Unavailable.Text" xml:space="preserve">
+    <value>The log store could not be read, so nothing is listed.</value>
+  </data>
+  <data name="Settings_LogPanel_Copied_Entry.Text" xml:space="preserve">
+    <value>The entry is on the clipboard.</value>
+  </data>
+  <data name="Settings_LogPanel_Copied_List.Text" xml:space="preserve">
+    <value>The listed entries are on the clipboard.</value>
+  </data>
+  <data name="Settings_LogPanel_Copy_Refused.Text" xml:space="preserve">
+    <value>The clipboard refused the copy. Nothing was written to this machine.</value>
   </data>
 </root>

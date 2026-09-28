@@ -436,6 +436,76 @@ session precedence, local-file repair, and Restore-Defaults-offers (now always o
 Cases that are **new** under these decisions: every abort route out of machine configuration ends the process
 (S10.1), and the pipeline — not the screen — refuses to continue without configuration.
 
+### S13.1 The walkable catalogue
+
+**Added 2026-09-27 (task T159).** The section above is the sweep's summary and stays as the record of how the
+cases were found. This is the list a reader walks, and `spec.md`'s Edge Cases section holds the same twenty-three
+cases in the same order. Each carries the group it came from and its disposition.
+
+**The sweep's original 111-item breakdown is not recovered in this file.** It was produced by three read-only
+sweeps whose output was never committed, so what is enumerated here is the twenty-three cases the specification
+records rather than the eleven-per-group originals. The group counts above remain the summary of what the sweeps
+found; they are not a claim that every one of the 111 is individually listed. That is a gap in this record, and it
+is stated rather than papered over.
+
+| # | Case | Group | Disposition |
+|---|---|---|---|
+| 1 | The store cannot be reached at launch | 2 | Covered: `LaunchEdgeCaseTests.TheStoreCannotBeReachedAtLaunch_StopsWithItsOwnStatementAndOffersNoReset` |
+| 2 | The share holding pictures cannot be reached | 8 | Covered: `PictureCacheStepTests` |
+| 3 | A machine's configuration is deleted while running, so setup returns | 1 | Covered: `LaunchEdgeCaseTests.AConfigurationWithdrawnWhileTheApplicationRuns_ReturnsSetupAtTheNextCheck` |
+| 4 | The machine's display name is already in use | 5 | Covered: `MachineSetupViewModelTests` |
+| 5 | A remembered sign-in that cannot be read falls back to the form | 4 | Covered: `RememberedSignInServiceTests` |
+| 6 | A temporary-credential reset meets a sign-in already under way | 4 | Covered: `LaunchEdgeCaseTests.ATemporaryCredentialResetWhileThePersonSignsIn_TheOldValueMeetsTheReset` |
+| 7 | The launch window is closed while a launch is running | 6 | Covered: `LaunchEdgeCaseTests.TheLaunchWindowIsClosedWhileALaunchIsRunning_LeavesNoStepReadingAsFailed` |
+| 8 | The machine has no readable hardware address | 5 | Covered: `ReadHardwareIdentityStep_RunAsync_WhenTheAddressCouldNotBeRead_ReportsTheWorkLeftUndone` and `MachineGateServiceTests` |
+| 9 | A sign-out whose restart fails | 11 | Covered: `LaunchEdgeCaseTests.ASignOutWhoseRestartFails_EndsTheSessionAndTellsThePersonToOpenTheApplicationAgain` |
+| 10 | Two copies launched on one computer | 6 | Covered: `LaunchPipelineRetryTests.RunAsync_WhenASecondEntryArrivesWhileOneIsRunning_StartsNothing` |
+| 11 | The store answers in seconds rather than milliseconds | 2 | Covered: `LaunchStepRunnerTests.RunAsync_WhenTheStepPassesItsStatedMaximum_ReportsFailedRatherThanWaitingOnIt` and the pipeline's bounded routing read |
+| 12 | The picture copy takes longer than the launch allows | 8 | Covered: `PictureCacheStepTests` |
+| 13 | A person signs out at a shared computer, leaving nothing behind | 11 | Covered: `LaunchSessionServiceTests` |
+| 14 | Somebody without the two roles tries to change the session length | 7 | Covered: `SettingsViewModelTests` |
+| 15 | The launch window's saved size cannot be applied | 6 | **Read-verified only.** The window still opens and the launch carries on; a sizing failure is not a launch failure. Nothing in the suite constructs a `WindowEx`, so this case is asserted by reading the window's code-behind rather than by a run |
+| 16 | An account still holding the legacy temporary value signs in | 4 | Covered: `LaunchEdgeCaseTests.AnAccountStillHoldingTheLegacyTemporaryValue_SignsInAndIsAskedToReplaceIt` |
+| 17 | A credential reset issued while the person is signed in elsewhere | 4 | Covered: `LaunchEdgeCaseTests.ACredentialResetIssuedElsewhere_EndsNoSessionAlreadyRunning` |
+| 18 | A fault carries more detail than the store's ceiling | 9 | Covered: `ExceptionCaptureTests.Serialize_WhenTheChainIsLongerThanTheNodeCeiling_IsTruncatedWithItsMarker` |
+| 19 | A fault happens while the application is already recording one | 9 | Covered: `ExceptionCaptureTests.FlushAsync_WhenTheStoreRefusesEveryWrite_AbsorbsItAndRaisesNoSecondDiagnostic` |
+| 20 | An aggregate fault holds several independent failures | 9 | Covered: `ExceptionCaptureTests.Serialize_WhenTheFaultIsAnAggregate_ContributesEveryIndependentFailure` |
+| 21 | A fault's message contains a credential, a token or a parameter value | 9 | Covered: `ExceptionFingerprintTests.RedactMessage_WhenAParameterCarriesAValue_CutsAtTheEqualsAndNamesTheParameter` and `DiagnosticContextTests.Build_WhenAStructuredPropertyNamesASecret_DropsTheValue` |
+| 22 | The store refuses the write | 9 | Covered: `DiagnosticContextTests` and `ExceptionCaptureTests` |
+| 23 | The clipboard refuses a copy | 9 | Covered: `LogExportFormatterTests` |
+
+### S13.2 Cases that no longer apply
+
+**Added 2026-09-27 (task T167).** Five cases the sweeps found stopped applying, and each is recorded here rather
+than left untested and unexplained:
+
+| Case the sweeps found | Why it no longer applies |
+|---|---|
+| The developer allow-list override admits a named person as a developer | Roles come from the store only (FR-022, D16). The `appsettings.json` allow-list is retired, so there is no local override to test. A person needing developer access needs it in the store, and the development seed grants it to `JKoll` and `JohnK` |
+| The prompt that offers to open the log folder | Logging is written to the store now, and the file-based path is deleted (T133). There is no log folder to offer |
+| A locally saved session takes precedence over the store's | A session lives in `user_active_sessions` and is judged on the store's clock (FR-010). Nothing local holds one, so precedence between two sources cannot arise |
+| A local settings file that cannot be read is repaired | The local settings mechanism is deleted (FR-025, US6). There is no local file to repair, and its tests were deleted with it rather than migrated |
+| Restore Defaults is offered on every stop | It is offered only where a reset could remove the cause (FR-017). A store outage offers no reset, so the old always-offered behaviour is gone, and `BlockedStateRemediesTests` proves the replacement |
+
+Two cases are **new** rather than changed, and both are covered: every abort route out of machine configuration
+ends the process (`LaunchEdgeCaseTests`, `MachineSetupNoBypassTests`), and the pipeline rather than the screen
+refuses to continue without configuration (`LaunchPipelineRetryTests.RunAsync_WhenTheMachineIsUnconfigured_EndsAtMachineSetup`).
+
+### S13.3 Cases whose branch depends on the host
+
+Eight further cases the sweeps found turn on a property of the machine the suite runs on rather than on anything
+the code decides: this host's own hardware address, and the store's live rows. They are not dropped, and they are
+not silent: each stands down with a stated message while its precondition is absent, and the run reports them as
+skipped rather than passed. Where a case could be made deterministic without changing production code it was, and
+the two hardware-identity cases now state the machine they are about (`PreSignInStepsTests`).
+
+What remains host-dependent is `MachineFactsService`'s own read of the running machine — four cases in
+`MachineFactsServiceTests` and three in `PreSignInStepsTests` that construct it — plus the opt-in live-store
+integration cases across `Module_Settings`, `Module_Setup` and `Module_Mock_Service`. Those read the machine or a
+database the suite does not have, and driving them would mean either a second implementation of the read or a
+fixture the repository does not keep.
+
+
 ## S14. Constraints and non-goals
 
 - No self-service password reset; no reset offered on the sign-in screen.

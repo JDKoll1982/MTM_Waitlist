@@ -129,44 +129,4 @@ public sealed class SetupPersistenceServiceTests
             CancellationToken cancellationToken = default)
             => Task.FromResult(0);
     }
-
-    private sealed class InMemoryLocalSettingsService : ILocalSettingsService
-    {
-        private readonly Dictionary<string, object> _settings;
-
-        public InMemoryLocalSettingsService(Dictionary<string, object> settings)
-        {
-            _settings = settings;
-        }
-
-        public Task<T?> ReadSettingAsync<T>(string key)
-        {
-            if (_settings.TryGetValue(key, out var value))
-            {
-                return Task.FromResult((T?)value);
-            }
-
-            return Task.FromResult(default(T));
-        }
-
-        public Task SaveSettingAsync<T>(string key, T value)
-        {
-            _settings[key] = value!;
-            return Task.CompletedTask;
-        }
-
-        public Task ResetSettingAsync(string key, CancellationToken cancellationToken = default)
-        {
-            _settings.Remove(key);
-            return Task.CompletedTask;
-        }
-
-        public Task ResetAsync()
-        {
-            _settings.Clear();
-            return Task.CompletedTask;
-        }
-
-        public Task CorruptForTestAsync() => Task.CompletedTask;
-    }
 }

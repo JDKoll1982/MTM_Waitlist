@@ -269,6 +269,34 @@ FROM (
                         AND routine_type = 'PROCEDURE'
                 ), 'present', 'missing'
             )
+        UNION ALL
+        -- The credential read restored by feature 010-startup-rebuild (T110). Both the sign-in credential check
+        -- and the machine-setup gate fail closed without it, so a store that is missing it must say so rather
+        -- than let each refusal look like a refused credential.
+        SELECT 'missing_routine', 'sp_auth_user_credential_get', 'procedure exists', IF(
+                EXISTS (
+                    SELECT 1
+                    FROM information_schema.routines
+                    WHERE
+                        routine_schema = DATABASE()
+                        AND routine_name = 'sp_auth_user_credential_get'
+                        AND routine_type = 'PROCEDURE'
+                ), 'present', 'missing'
+            )
+        UNION ALL
+        -- The self-service password write added by feature 010-startup-rebuild (T116). Without it the forced
+        -- password change has nothing to write through, so a store that lacks it must report an issue rather
+        -- than let the step fail as though the store were unavailable.
+        SELECT 'missing_routine', 'sp_auth_user_password_set', 'procedure exists', IF(
+                EXISTS (
+                    SELECT 1
+                    FROM information_schema.routines
+                    WHERE
+                        routine_schema = DATABASE()
+                        AND routine_name = 'sp_auth_user_password_set'
+                        AND routine_type = 'PROCEDURE'
+                ), 'present', 'missing'
+            )
     ) validation_results
 WHERE
     actual_value = 'missing';

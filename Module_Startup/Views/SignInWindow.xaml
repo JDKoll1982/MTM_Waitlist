@@ -1,0 +1,141 @@
+<windowex:WindowEx
+    x:Class="MTM_Waitlist.Module_Startup.Views.SignInWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:windowex="using:WinUIEx"
+    Title="MTM Waitlist"
+    MinWidth="480"
+    MinHeight="420"
+    mc:Ignorable="d">
+
+    <!--
+        Three rows, and the message is its own row rather than something laid over the form: a refusal never
+        covers the fields the person is working in (FR-005's rule, applied here). The hint sits above the action
+        so what is still missing is stated before the person presses anything.
+    -->
+    <Grid
+        x:Name="RootGrid"
+        Padding="32"
+        AutomationProperties.AutomationId="SignInWindow_Root"
+        AutomationProperties.Name="Sign in"
+        RowSpacing="16">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock
+                AutomationProperties.AutomationId="SignInWindow_Heading"
+                Style="{ThemeResource TitleTextBlockStyle}"
+                Text="{x:Bind ViewModel.HeadingText}" />
+            <TextBlock
+                AutomationProperties.AutomationId="SignInWindow_Subtitle"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind ViewModel.SubtitleText}"
+                TextWrapping="Wrap" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16">
+
+                <!-- The sign-in form. It is offered until a temporary credential has been accepted. -->
+                <StackPanel
+                    AutomationProperties.AutomationId="SignInWindow_SignInPanel"
+                    Spacing="8"
+                    Visibility="{x:Bind ViewModel.ShowSignInForm, Mode=OneWay}">
+                    <TextBox
+                        x:Name="SignInNameBox"
+                        AutomationProperties.AutomationId="SignInWindow_SignInName"
+                        Header="{x:Bind ViewModel.SignInNameLabelText}"
+                        Text="{x:Bind ViewModel.SignInName, Mode=TwoWay}" />
+                    <PasswordBox
+                        x:Name="CredentialBox"
+                        AutomationProperties.AutomationId="SignInWindow_Credential"
+                        Header="{x:Bind ViewModel.CredentialLabelText}" />
+                    <CheckBox
+                        AutomationProperties.AutomationId="SignInWindow_RememberMe"
+                        Content="{x:Bind ViewModel.RememberMeLabelText}"
+                        IsChecked="{x:Bind ViewModel.RememberMe, Mode=TwoWay}" />
+                    <TextBlock
+                        AutomationProperties.AutomationId="SignInWindow_Hint"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.Hint, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+                    <Button
+                        x:Name="SignInButton"
+                        AutomationProperties.AutomationId="SignInWindow_SignInButton"
+                        Click="OnSignInClick"
+                        Content="{x:Bind ViewModel.SignInActionText}"
+                        IsEnabled="{x:Bind ViewModel.CanSignIn, Mode=OneWay}"
+                        Style="{StaticResource AccentButtonStyle}" />
+                    <Button
+                        x:Name="RememberedSignInButton"
+                        AutomationProperties.AutomationId="SignInWindow_RememberedButton"
+                        Click="OnUseRememberedSignInClick"
+                        Content="{x:Bind ViewModel.RememberedActionText}"
+                        IsEnabled="{x:Bind ViewModel.CanUseRememberedSignIn, Mode=OneWay}" />
+                </StackPanel>
+
+                <!-- The forced password change. It appears only once a temporary credential has been accepted (FR-013). -->
+                <StackPanel
+                    AutomationProperties.AutomationId="SignInWindow_PasswordPanel"
+                    Spacing="8"
+                    Visibility="{x:Bind ViewModel.IsPasswordChangeRequired, Mode=OneWay}">
+                    <TextBlock
+                        AutomationProperties.AutomationId="SignInWindow_PasswordHeading"
+                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind PasswordChange.HeadingText}" />
+                    <TextBlock
+                        AutomationProperties.AutomationId="SignInWindow_PasswordExplanation"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind PasswordChange.ExplanationText}"
+                        TextWrapping="Wrap" />
+                    <PasswordBox
+                        x:Name="NewPasswordBox"
+                        AutomationProperties.AutomationId="SignInWindow_NewPassword"
+                        Header="{x:Bind PasswordChange.PasswordLabelText}" />
+                    <PasswordBox
+                        x:Name="ConfirmPasswordBox"
+                        AutomationProperties.AutomationId="SignInWindow_ConfirmPassword"
+                        Header="{x:Bind PasswordChange.ConfirmationLabelText}" />
+                    <Button
+                        x:Name="SubmitPasswordButton"
+                        AutomationProperties.AutomationId="SignInWindow_SubmitPasswordButton"
+                        Click="OnSubmitPasswordClick"
+                        Content="{x:Bind PasswordChange.SubmitActionText}"
+                        IsEnabled="{x:Bind PasswordChange.CanSubmit, Mode=OneWay}"
+                        Style="{StaticResource AccentButtonStyle}" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                x:Name="MessageStrip"
+                AutomationProperties.AutomationId="SignInWindow_Message"
+                Grid.Column="0"
+                Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+                CornerRadius="4"
+                Padding="12"
+                Visibility="{x:Bind ViewModel.HasMessage, Mode=OneWay}">
+                <TextBlock Text="{x:Bind ViewModel.Message, Mode=OneWay}" TextWrapping="Wrap" />
+            </Border>
+
+            <ProgressRing
+                AutomationProperties.AutomationId="SignInWindow_Busy"
+                Grid.Column="1"
+                IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
+                Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+        </Grid>
+    </Grid>
+</windowex:WindowEx>

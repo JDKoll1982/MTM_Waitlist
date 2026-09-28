@@ -1,20 +1,19 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.1.2 → 1.2.0 (MINOR — one principle ADDED; no principle removed, redefined, or weakened).
-Last amended: 2026-09-14.
-Added: Principle VII (Readable, End-User-Facing Delivery).
-Propagated to: `.github/instructions/response-format.instructions.md` (new — the working detail),
-`.github/copilot-instructions.md` (whose "Output code blocks directly / raw information density"
-invariant directly contradicted the new principle and was reconciled), and
-`.github/instructions/spec-kit.instructions.md`. The Companion pipeline's command sources under
-`.specify/extensions/companion/commands/*.md` and the generated agents under
-`.github/agents/speckit.companion.*.agent.md` carry the same wording as a `communication` part.
-Templates: `.specify/templates/*` need no change — verified 2026-09-14 that no template enumerates the
-principles (only `constitution-template.md` placeholders and `plan-template.md`'s "[Gates determined
-based on constitution file]" line), so append-only numbering leaves Principles I–VI and every
-cross-reference to them intact (e.g. `mcp-doc-research.instructions.md` cites Principle IV).
-specs/001-module-mock-visual-fallback/plan.md still cites v1.0.0 (tracked as T137).
+Version change: 1.2.0 → 1.2.1 (PATCH — expression only; no principle added, removed, redefined, or
+weakened, and no new obligation introduced).
+Last amended: 2026-09-27.
+Modified: Principles III, IV, V and VII compressed to their normative core by removing wording that
+restated `.github/instructions/database-schema-rules.instructions.md`,
+`.github/instructions/mcp-doc-research.instructions.md`,
+`.github/instructions/winui3-api-rules.instructions.md`,
+`.github/instructions/csharp-xaml-naming-rules.instructions.md` and
+`.github/instructions/response-format.instructions.md`; every normative clause and every `Rationale:`
+paragraph was retained, verified by an unchanged per-section count of normative keywords (51 before,
+51 after).
+Propagated: `.github/instructions/spec-kit.instructions.md` — its stale constitution citation
+(v1.1.1 / 2026-09-10) now cites v1.2.1 / 2026-09-27.
 Full amendment history and rationale: `.specify/memory/constitution-history.md`.
 -->
 
@@ -50,39 +49,38 @@ is not trusted and cannot be operated on a production floor.
 
 ### III. Stored-Procedure-First Database Discipline
 
-All database artifacts MUST follow the repo schema rules: canonical naming conventions, one artifact
-per folder with paired `create.sql` / `rollback.sql`, and the hand-maintained master lists
-(`AllTables.sql`, `AllSPs.sql`, `AllSeeds.sql`) plus `update_table_descriptions.sql` kept in sync.
-Every data operation MUST go through a stored procedure; inline or hard-coded SQL statement text MUST
-NOT remain in application code. Schema, seed, and stored-procedure changes MUST be authored per the
-rules and validated against a live database before being declared complete.
+All database artifacts MUST follow the repo schema rules
+(`.github/instructions/database-schema-rules.instructions.md`) — canonical naming, one artifact per
+folder with paired `create.sql` / `rollback.sql`, and the hand-maintained master lists (`AllTables.sql`,
+`AllSPs.sql`, `AllSeeds.sql`) plus `update_table_descriptions.sql` kept in sync. Every data operation
+MUST go through a stored procedure; inline or hard-coded SQL statement text MUST NOT remain in
+application code. Schema, seed, and stored-procedure changes MUST be authored per the rules and
+validated against a live database before being declared complete.
 
 Rationale: centralized, reviewable, versioned data access prevents drift across callers and keeps the
 schema discoverable; ad-hoc inline SQL bypasses both.
 
 ### IV. MCP-First, Grounded Decisions (NON-NEGOTIABLE)
 
-Before writing or changing code, decisions MUST be grounded in authoritative sources using the
-available MCP servers: Serena for indexed repository exploration, Context7 for library/framework
-documentation, and Microsoft Learn for Windows / WinUI / Windows App SDK guidance.
+Before writing or changing code, decisions MUST be grounded in authoritative sources: Serena for
+indexed repository exploration, Context7 for library/framework documentation, and Microsoft Learn for
+Windows / WinUI / Windows App SDK guidance.
 
-Whenever the agent is unsure about anything code-related, or does not know how to implement
-something, consulting Context7 and Microsoft Learn is NON-NEGOTIABLE: documentation MUST be preferred
-over model memory, model memory alone MUST NOT be treated as grounds for a code decision, and
-substituting recall — or deferring the question to the user — MUST NOT replace a documentation lookup.
-This applies at minimum to: API names, signatures, and syntax; configuration and setup; version
-migration and breaking-change behavior; library-specific debugging; CLI and tool usage; and official
-platform guidance.
+When the agent is unsure about anything code-related, consulting Context7 and Microsoft Learn is
+NON-NEGOTIABLE: documentation MUST be preferred over model memory, model memory alone MUST NOT be
+treated as grounds for a code decision, and substituting recall — or deferring the question to the
+user — MUST NOT replace a documentation lookup. This applies at minimum to API names and signatures,
+configuration, version migration, library-specific debugging, CLI usage, and platform guidance.
 
-Serena self-healing is mandatory. When Serena fails such that its location or installation cannot be
-discerned, the agent MUST NOT abandon the lookup: it MUST inspect Serena's configuration, account for
-the user-profile folder changing between environments (`jkoll` at work, `johnk` at home), update the
-configuration, and retry. If the retry still fails, the agent MUST report the config path inspected,
-the change attempted, and the observed error rather than falling back to ungrounded guesswork. The
-configuration-file locations, the profile-path procedure, and the repo-specific focus list are defined
-in `.github/instructions/mcp-doc-research.instructions.md`.
+Serena self-healing is mandatory: when Serena's location or installation cannot be discerned, the agent
+MUST NOT abandon the lookup — it MUST inspect and repair the configuration and retry — and if the retry
+still fails the agent MUST report the config path inspected, the change attempted, and the observed
+error rather than falling back to ungrounded guesswork.
 
 Workarounds that deviate from documented guidance MUST be recorded as such.
+
+Config-file locations, the profile-path procedure, and the repo-specific focus list are in
+`.github/instructions/mcp-doc-research.instructions.md`.
 
 Rationale: platform and library surfaces evolve, and this repo already carries profile-rooted Serena
 config paths that break when the machine's user profile changes; grounding decisions in retrieved
@@ -96,11 +94,12 @@ MVVM patterns (CommunityToolkit.Mvvm source generators, `INavigationAware`), and
 through the existing shell/navigation services rather than parallel stacks. MSIX-only APIs MUST be
 guarded with `RuntimeHelper.IsMSIX`. User-facing strings MUST be localized (`.resw` + `GetLocalized`
 with a fallback), and any new converter/resource MUST be registered in `App.xaml` in the same change.
-Layouts MUST be fluid and accessible: no hardcoded pixel boundaries for layout-critical containers
-(use `Auto`/star sizing with `Min*`/`Max*` bounds), ThemeResource-backed text styles, `MaxWidth` +
-`TextTrimming` for headers, scrolling/wrapping for overflow, and `AdaptiveTrigger` states for
-interactive overlays paired with matching content padding. Generated artifacts (`obj/`, `*.g.cs`,
-`*.g.i.cs`) MUST NOT be edited.
+Layouts MUST be fluid and accessible: `Auto`/star sizing with `Min*`/`Max*` bounds rather than hardcoded
+pixel boundaries, ThemeResource-backed text styles, `MaxWidth` + `TextTrimming` for headers,
+scrolling/wrapping for overflow, and `AdaptiveTrigger` states for interactive overlays paired with
+matching content padding. Generated artifacts (`obj/`, `*.g.cs`, `*.g.i.cs`) MUST NOT be edited. The
+naming and API detail lives in `.github/instructions/winui3-api-rules.instructions.md` and
+`.github/instructions/csharp-xaml-naming-rules.instructions.md`.
 
 Rationale: Windows App SDK requires modern namespaces; hardcoded sizing and unregistered resources are
 the dominant sources of XAML build failures and scaling/accessibility defects in this codebase.
@@ -130,8 +129,7 @@ task list and never by narrating each command as it is run.
 Code fences MUST be safe to render: a fence starts at **column 0**, a fence indented by four or more
 spaces (or placed inside a list item) is an *indented code block* whose backticks render literally and
 which garbles everything after it, and content that itself contains a fence MUST be wrapped in a
-**longer** run of backticks than the inner one (GitHub Flavored Markdown spec, "Indented Code Block
-(4 Spaces)").
+**longer** run of backticks than the inner one.
 
 Anything the person must do **after** the session — approving a step, running a command, reinstalling
 the database, restarting the application, supplying a credential — MUST be the **last** section of the
@@ -197,4 +195,4 @@ ticked; unjustified violations block completion.
 Runtime development guidance remains in the repo instruction files, which MUST stay consistent with
 this constitution.
 
-**Version**: 1.2.0 | **Ratified**: 2026-09-09 | **Last Amended**: 2026-09-14
+**Version**: 1.2.1 | **Ratified**: 2026-09-09 | **Last Amended**: 2026-09-27

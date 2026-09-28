@@ -245,8 +245,12 @@ The text is exactly what the store holds for those entries — the columns in th
 and the payload as they were stored, the chain link included — with an entry separator and a header naming the
 filter the copy came from. The formatter re-formats nothing and redacts nothing beyond what §6 already forbade the
 store to hold, because the copy has to be the evidence rather than a summary of it. When the text would exceed the
-stated ceiling it is cut with an explicit marker, never silently. **The ceiling's value is not yet fixed** — T183
-records it here as it writes the formatter, so the cut is verifiable against a number rather than a phrase.
+stated ceiling it is cut with an explicit marker, never silently. **The ceiling is 1048576 characters** (1 048 576,
+one megabyte of text), recorded here by T183 as it wrote the formatter, so the cut is verifiable against a number
+rather than a phrase. `<c>LogExportFormatter.CeilingCharacters</c>` is that number, and the marker names it. The
+cut is taken back to the previous line end and never splits a surrogate pair, so what remains is whole lines of
+valid text. The ceiling is high enough that a page of ordinary entries is never cut; it exists for the
+pathological entry, so a single fault with an enormous stack and payload cannot make a copy unbounded.
 
 Rules for the clipboard call itself:
 

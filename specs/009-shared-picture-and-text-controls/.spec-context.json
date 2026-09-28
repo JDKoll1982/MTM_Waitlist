@@ -1,0 +1,18 @@
+{
+  "workflow": "companion",
+  "specName": "009-shared-picture-and-text-controls",
+  "branch": "009-shared-picture-and-text-controls",
+  "selectedAt": "2026-09-27T16:22:56.051Z",
+  "currentStep": "specify",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "user",
+      "at": "2026-09-27T16:23:15.602Z"
+    }
+  ],
+  "telemetryInstanceId": "b07ae0e6-c95f-4de6-b717-4f3779e8b7d4"
+}

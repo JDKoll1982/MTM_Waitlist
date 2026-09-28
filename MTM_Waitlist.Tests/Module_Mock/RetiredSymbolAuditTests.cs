@@ -72,12 +72,21 @@ public sealed class RetiredSymbolAuditTests
         // is exactly what FR-014 forbids, so the wording must not come back in code, markup or a resource string.
         ("retired part-picture stand-in wording", new Regex(@"until part pictures exist", RegexOptions.Compiled | RegexOptions.IgnoreCase)),
 
-        // ── feature 010-startup-rebuild (T001): the retired startup surface ──
+        // ── feature 010-startup-rebuild (T001, re-pinned by US1/T094): the retired startup surface ──
         // Name-shaped on purpose. The rebuilt startup pipeline lives in MTM_Waitlist.Startup's own Services and
-        // ViewModels namespaces, its views live in Module_Startup/Views, and the rebuilt types use new names, so a
-        // namespace-shaped or folder-shaped pattern would forbid the replacement along with the removal. Only the
-        // removed type and member names are forbidden; a design note, a defect record or a database comment that
-        // names the retirement is the record of the removal and stays legal.
+        // ViewModels namespaces, its views live in Module_Startup/Views, and most of the rebuilt types use new
+        // names, so a namespace-shaped or folder-shaped pattern would forbid the replacement along with the
+        // removal. Only the removed type and member names are forbidden; a design note, a defect record or a
+        // database comment that names the retirement is the record of the removal and stays legal.
+        //
+        // SplashViewModel, SplashWindow and SplashPage are deliberately NOT in this list. US1 rebuilds that
+        // surface in place under the same three names, so what the removal deleted was the old splash's behaviour
+        // rather than its name. StartupRecoveryService is absent for the same reason: US4 rebuilds it in place as
+        // the reset policy and the silent repair (T123), so the name is live again. What stays forbidden is
+        // everything the rebuild did not reuse: the old sign-in pair, the shared SplashView control, the App
+        // window-handoff statics, and the retired services, contracts and models — including
+        // IStartupRecoveryService, the contract the rebuilt policy deliberately does not put back, because a
+        // reset is driven through IMachineConfigurationService.ResetToDefaultsAsync instead.
         ("retired activation contract", new Regex(@"\bIActivationService\b", RegexOptions.Compiled)),
         ("retired activation-handler contract", new Regex(@"\bIActivationHandler\b", RegexOptions.Compiled)),
         ("retired app-lifecycle contract", new Regex(@"\bIAppLifecycleService\b", RegexOptions.Compiled)),
@@ -97,7 +106,6 @@ public sealed class RetiredSymbolAuditTests
         ("retired sign-in session keys", new Regex(@"\bSignInSessionKeys\b", RegexOptions.Compiled)),
         ("retired startup coordinator", new Regex(@"\bStartupCoordinator\b", RegexOptions.Compiled)),
         ("retired startup module service", new Regex(@"\bStartupModuleService\b", RegexOptions.Compiled)),
-        ("retired startup recovery service", new Regex(@"\bStartupRecoveryService\b", RegexOptions.Compiled)),
         ("retired startup registration service", new Regex(@"\bStartupRegistrationService\b", RegexOptions.Compiled)),
         // Backtick-guarded for the same reason and just as narrowly: the nine procedure artifacts T020 deletes
         // name this class inside backtick-quoted provenance comments, and those files are still in the tree until
@@ -106,7 +114,6 @@ public sealed class RetiredSymbolAuditTests
         ("retired startup shell-state service", new Regex(@"\bStartupShellStateService\b", RegexOptions.Compiled)),
         ("retired startup window service", new Regex(@"\bStartupWindowService\b", RegexOptions.Compiled)),
         ("retired sign-in view model", new Regex(@"\bLoginViewModel\b", RegexOptions.Compiled)),
-        ("retired splash view model", new Regex(@"\bSplashViewModel\b", RegexOptions.Compiled)),
         ("retired credential-check result model", new Regex(@"\bStartupCredentialCheckResult\b", RegexOptions.Compiled)),
         ("retired startup database options", new Regex(@"\bStartupDatabaseOptions\b", RegexOptions.Compiled)),
         ("retired startup development options", new Regex(@"\bStartupDevelopmentOptions\b", RegexOptions.Compiled)),
@@ -118,8 +125,6 @@ public sealed class RetiredSymbolAuditTests
         ("retired startup window options", new Regex(@"\bStartupWindowOptions\b", RegexOptions.Compiled)),
         ("retired sign-in window", new Regex(@"\bLoginWindow\b", RegexOptions.Compiled)),
         ("retired sign-in page", new Regex(@"\bLoginPage\b", RegexOptions.Compiled)),
-        ("retired splash window", new Regex(@"\bSplashWindow\b", RegexOptions.Compiled)),
-        ("retired splash page", new Regex(@"\bSplashPage\b", RegexOptions.Compiled)),
         ("retired splash view", new Regex(@"\bSplashView\b", RegexOptions.Compiled)),
         ("retired splash handoff member", new Regex(@"\bShowSplashWindow\b", RegexOptions.Compiled)),
         ("retired sign-in handoff member", new Regex(@"\bShowLoginWindowAndCloseSplash\b", RegexOptions.Compiled)),
@@ -130,11 +135,14 @@ public sealed class RetiredSymbolAuditTests
         // static handler is forbidden, and it is forbidden by shape rather than by name alone.
         ("retired static main-window closed handler", new Regex(@"\bstatic\s+void\s+MainWindow_Closed\b", RegexOptions.Compiled)),
 
-        // The file-based logging seam the rebuilt store-backed seam replaced. Both names are still forbidden
-        // even though T133 deletes the forwarder, its contract and the options model separately: a log service
-        // that quietly came back would satisfy neither the store-backed contract nor the no-local-log-file rule.
+        // The file-based logging path the rebuilt store-backed seam replaced. All four names are forbidden: the
+        // log service and its contract were deleted by the logging unit, and T133 deleted the forwarder, its
+        // contract and the options model it read. A name that quietly came back would satisfy neither the
+        // store-backed contract nor the no-local-log-file rule, and the forwarder is the half that wrote a file.
         ("retired startup log-service contract", new Regex(@"\bIStartupLogService\b", RegexOptions.Compiled)),
         ("retired startup log service", new Regex(@"\bStartupLogService\b", RegexOptions.Compiled)),
+        ("retired startup log forwarder contract", new Regex(@"\bIStartupLogForwarder\b", RegexOptions.Compiled)),
+        ("retired startup log forwarder", new Regex(@"\bStartupLogForwarder\b", RegexOptions.Compiled)),
 
         // The debug-only static logger T069 deleted in the same change as those two, and the omission this
         // pattern closes: a guard that names two of three removed logging types is inconsistent with its own
@@ -167,19 +175,19 @@ public sealed class RetiredSymbolAuditTests
         $"{Path.DirectorySeparatorChar}tools{Path.DirectorySeparatorChar}tooltip-inventory{Path.DirectorySeparatorChar}",
     ];
 
-    /// <summary>The startup view files the feature 010 removal deleted, as repository-relative paths.</summary>
+    /// <summary>
+    /// The startup view files the feature 010 removal deleted, as repository-relative paths. The rebuilt splash
+    /// pair is deliberately absent: US1 recreates <c>SplashWindow</c> and <c>SplashPage</c> in place, so their
+    /// paths are live again and listing them here would fail the build on the replacement.
+    /// </summary>
     private static readonly string[] s_removedStartupViewFiles =
     [
         "Module_Startup/Views/LoginPage.xaml",
         "Module_Startup/Views/LoginPage.xaml.cs",
         "Module_Startup/Views/LoginWindow.xaml",
         "Module_Startup/Views/LoginWindow.xaml.cs",
-        "Module_Startup/Views/SplashPage.xaml",
-        "Module_Startup/Views/SplashPage.xaml.cs",
         "Module_Startup/Views/SplashView.xaml",
         "Module_Startup/Views/SplashView.xaml.cs",
-        "Module_Startup/Views/SplashWindow.xaml",
-        "Module_Startup/Views/SplashWindow.xaml.cs",
     ];
 
     /// <summary>
@@ -196,13 +204,18 @@ public sealed class RetiredSymbolAuditTests
         "IStartupSessionRepository", "IStartupShellStateService", "IStartupWindowService",
         "ActivationService", "ActivationHandler", "AppNotificationActivationHandler",
         "DefaultActivationHandler", "AppLifecycleService", "ComputerGateService", "SignInSessionKeys",
-        "StartupCoordinator", "StartupModuleService", "StartupRecoveryService", "StartupRegistrationService",
+        "StartupCoordinator", "StartupModuleService", "StartupRegistrationService",
         "StartupSessionRepository", "StartupShellStateService", "StartupWindowService",
-        "LoginViewModel", "SplashViewModel",
+        "LoginViewModel",
         "StartupCredentialCheckResult", "StartupDatabaseOptions", "StartupDevelopmentOptions",
         "StartupPasswordResetRequirement", "StartupRegistrationRequest", "StartupResult",
         "StartupSessionSnapshot", "StartupWindowOptions", "StartupLogService",
-        "LoginWindow", "LoginPage", "SplashWindow", "SplashPage", "SplashView",
+        "StartupLogForwarder",
+        // SplashWindow, SplashPage and SplashViewModel are absent on purpose: US1 rebuilds that surface in place
+        // under the same names. SplashView, the shared control the old pair drew through, is genuinely gone.
+        // StartupRecoveryService is absent for the same reason: US4 rebuilds it in place as the reset policy
+        // and the silent repair (T123).
+        "LoginWindow", "LoginPage", "SplashView",
     ];
 
     /// <summary>
@@ -218,6 +231,7 @@ public sealed class RetiredSymbolAuditTests
         "StartupPasswordResetRequirement", "StartupRegistrationRequest",
         "StartupDevelopmentOptions", "StartupWindowOptions", "StartupDatabaseOptions",
         "StartupState", "IStartupLogService",
+        "IStartupLogForwarder",
     ];
 
     /// <summary>
@@ -428,13 +442,11 @@ public sealed class RetiredSymbolAuditTests
         ["retired sign-in session keys"] = "SessionToken = SignInSessionKeys.SessionToken;",
         ["retired startup coordinator"] = "public sealed class StartupCoordinator : IStartupCoordinator",
         ["retired startup module service"] = "public sealed class StartupModuleService",
-        ["retired startup recovery service"] = "public sealed class StartupRecoveryService : IStartupRecoveryService",
         ["retired startup registration service"] = "public sealed class StartupRegistrationService",
         ["retired startup session repository"] = "public sealed class StartupSessionRepository : IStartupSessionRepository",
         ["retired startup shell-state service"] = "public sealed class StartupShellStateService",
         ["retired startup window service"] = "public sealed class StartupWindowService : IStartupWindowService",
         ["retired sign-in view model"] = "public partial class LoginViewModel : ObservableRecipient",
-        ["retired splash view model"] = "public partial class SplashViewModel : ObservableRecipient",
         ["retired credential-check result model"] = "public sealed record StartupCredentialCheckResult",
         ["retired startup database options"] = "public sealed class StartupDatabaseOptions",
         ["retired startup development options"] = "public sealed class StartupDevelopmentOptions",
@@ -446,8 +458,6 @@ public sealed class RetiredSymbolAuditTests
         ["retired startup window options"] = "public sealed class StartupWindowOptions",
         ["retired sign-in window"] = "public sealed partial class LoginWindow : WindowEx",
         ["retired sign-in page"] = "public sealed partial class LoginPage : Page",
-        ["retired splash window"] = "public sealed partial class SplashWindow : WindowEx",
-        ["retired splash page"] = "public sealed partial class SplashPage : Page",
         ["retired splash view"] = "public sealed partial class SplashView : UserControl",
         ["retired splash handoff member"] = "App.ShowSplashWindow();",
         ["retired sign-in handoff member"] = "App.ShowLoginWindowAndCloseSplash();",
@@ -457,6 +467,8 @@ public sealed class RetiredSymbolAuditTests
         ["retired static main-window closed handler"] = "private static void MainWindow_Closed(object sender, WindowEventArgs args)",
         ["retired startup log-service contract"] = "public interface IStartupLogService { };",
         ["retired startup log service"] = "public sealed class StartupLogService : BackgroundService, IStartupLogService",
+        ["retired startup log forwarder contract"] = "public interface IStartupLogForwarder { }",
+        ["retired startup log forwarder"] = "public sealed class StartupLogForwarder : IStartupLogForwarder",
         ["retired debug-only static logger"] = "StartupDebugLog.Info(\"Startup\", \"Launching MTM Waitlist\");",
     };
 
@@ -675,12 +687,13 @@ public sealed class RetiredSymbolAuditTests
     }
 
     /// <summary>
-    /// T005. The rebuilt view set is asserted positively rather than by absence: the module's view folder holds
-    /// the placeholder window pair, and the placeholder is the one window a launch shows until the rebuilt
-    /// pipeline lands.
+    /// T005, re-pinned by US1 (T094), by US2 (T098), by US3 (T114) and again by US4 (T124). The rebuilt view set
+    /// is asserted positively rather than by absence: the module's view folder holds the surfaces the pipeline
+    /// shows, and the placeholder is gone along with the markup that pinned it. The next phase to add a surface
+    /// re-pins this list again, which is the point of asserting the set rather than each file in isolation.
     /// </summary>
     [TestMethod]
-    public void RebuiltStartupViewSet_IsThePlaceholderPair()
+    public void RebuiltStartupViewSet_IsTheLaunchSurface()
     {
         var repositoryRoot = RepositoryPatternScan.FindRepositoryRoot();
         var viewFolder = Path.Combine(repositoryRoot, "Module_Startup", "Views");
@@ -695,25 +708,50 @@ public sealed class RetiredSymbolAuditTests
             .ToArray();
 
         CollectionAssert.AreEqual(
-            new[] { "StartupPlaceholderWindow.xaml" },
+            new[]
+            {
+                "BlockedStateWindow.xaml",
+                "MachineSetupWindow.xaml",
+                "SignInWindow.xaml",
+                "SplashPage.xaml",
+                "SplashWindow.xaml",
+            },
             markupFiles,
-            "The rebuilt startup view set is the placeholder window pair.");
+            "The rebuilt startup view set is what a launch shows: the window it runs in, the page drawing it, the "
+                + "setup window an unconfigured computer stops at, the sign-in window a launch ends at when "
+                + "nobody is signed in yet, and the blocked-state window a stopped launch states its cause on.");
 
-        var markupPath = Path.Combine(viewFolder, "StartupPlaceholderWindow.xaml");
-        Assert.IsTrue(File.Exists(markupPath), "The rebuilt placeholder markup is missing.");
+        foreach (var markup in markupFiles)
+        {
+            var codeBehind = Path.Combine(viewFolder, $"{markup}.cs");
 
-        var codeBehindPath = Path.Combine(viewFolder, "StartupPlaceholderWindow.xaml.cs");
-        Assert.IsTrue(File.Exists(codeBehindPath), "The rebuilt placeholder code-behind is missing.");
-
-        StringAssert.Contains(
-            File.ReadAllText(markupPath),
-            "x:Class=\"MTM_Waitlist.Module_Startup.Views.StartupPlaceholderWindow\"",
-            "The rebuilt placeholder markup must declare the placeholder window type.");
+            Assert.IsTrue(File.Exists(codeBehind), $"'{markup}' has no code-behind, so it can never be activated.");
+        }
 
         StringAssert.Contains(
-            File.ReadAllText(codeBehindPath),
-            "StartupPlaceholder_CloseButton",
-            "The rebuilt placeholder must keep the stable automation id the launch checks address the close button by.");
+            File.ReadAllText(Path.Combine(viewFolder, "SplashWindow.xaml")),
+            "x:Class=\"MTM_Waitlist.Module_Startup.Views.SplashWindow\"",
+            "The rebuilt launch window markup must declare the launch window type.");
+
+        StringAssert.Contains(
+            File.ReadAllText(Path.Combine(viewFolder, "SplashPage.xaml")),
+            "x:Class=\"MTM_Waitlist.Module_Startup.Views.SplashPage\"",
+            "The rebuilt launch surface markup must declare the page a person watches the launch on.");
+
+        StringAssert.Contains(
+            File.ReadAllText(Path.Combine(viewFolder, "MachineSetupWindow.xaml")),
+            "x:Class=\"MTM_Waitlist.Module_Startup.Views.MachineSetupWindow\"",
+            "The setup markup must declare the window an unconfigured computer is set up on.");
+
+        StringAssert.Contains(
+            File.ReadAllText(Path.Combine(viewFolder, "SignInWindow.xaml")),
+            "x:Class=\"MTM_Waitlist.Module_Startup.Views.SignInWindow\"",
+            "The sign-in markup must declare the window a launch ends at when nobody is signed in yet.");
+
+        StringAssert.Contains(
+            File.ReadAllText(Path.Combine(viewFolder, "BlockedStateWindow.xaml")),
+            "x:Class=\"MTM_Waitlist.Module_Startup.Views.BlockedStateWindow\"",
+            "The blocked-state markup must declare the window a stopped launch states its cause on.");
     }
 
     /// <summary>Builds the declaration-shaped pattern set for an inventory of removed type names.</summary>

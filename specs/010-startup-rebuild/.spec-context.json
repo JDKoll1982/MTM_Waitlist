@@ -752,6 +752,902 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-27T15:42:49.162Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T075",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:30:40.768Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T076",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:30:40.945Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T077",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:30:44.237Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T078",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:30:44.418Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T079",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:30:44.599Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T080",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:30:50.720Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T081",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:30:50.903Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T082",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:30:51.078Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T175",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:34:41.144Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T176",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:34:41.471Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T177",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:34:41.658Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T178",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:34:41.840Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T179",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:34:49.454Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T180",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:34:49.647Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T181",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:34:49.836Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T182",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:34:50.020Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T083",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:24.231Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T084",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:24.343Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T085",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:24.452Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T086",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:28.431Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T087",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:28.540Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T088",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:28.649Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T089",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:28.755Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T090",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:32.980Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T091",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:33.093Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T092",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:33.209Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T093",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:33.322Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T094",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T16:45:33.436Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T095",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:02.661Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T096",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:02.821Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T097",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:02.955Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T098",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:03.084Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T099",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:03.214Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T100",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:03.343Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T101",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:03.475Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T102",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:03.607Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T103",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:03.739Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T104",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:03.875Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T105",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:02:04.009Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T106",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:36.368Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T107",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:36.475Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T108",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:36.583Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T109",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:36.689Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T110",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:41.569Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T111",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:41.676Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T112",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:41.782Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T113",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:41.890Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T114",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:41.999Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T115",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:47.419Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T116",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:47.525Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T117",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:47.632Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T118",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:47.740Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T185",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:47.847Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T186",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:19:47.955Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T119",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:40:00.869Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T120",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:40:00.977Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T121",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:40:01.086Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T122",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:40:01.195Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T123",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:40:01.303Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T124",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:40:01.429Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T125",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:40:01.538Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T126",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:40:01.646Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T127",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:40:01.756Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T128",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:40:01.865Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T183",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:52:00.218Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T132",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:52:00.327Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T131",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:52:04.298Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T129",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:52:04.406Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T184",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:52:04.514Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T130",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:52:04.620Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T133",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:55:27.437Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T134",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:55:27.547Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T135",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:55:27.654Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T136",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T17:55:27.763Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T137",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:22.596Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T138",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:26.295Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T139",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:26.400Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T140",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:26.507Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T141",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:31.465Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T142",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:31.573Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T143",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:31.678Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T144",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:31.786Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T145",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:31.893Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T146",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:36.152Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T147",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:36.263Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T148",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:36.374Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T149",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:36.485Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T150",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:40.417Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T151",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:40.526Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T152",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:40.633Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T153",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:40.741Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T154",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:40.849Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T155",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:45.856Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T156",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:45.965Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T157",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:46.074Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T158",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:16:46.182Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T159",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:42.916Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T160",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:43.116Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T162",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:43.319Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T163",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:48.523Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T164",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:52.930Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T165",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:53.109Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T166",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:53.283Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T167",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:53.468Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T171",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:58.013Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T172",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:58.187Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T173",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:58.362Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T174",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:32:58.533Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T169",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:33:02.639Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T170",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:33:02.817Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T194",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T18:33:38.074Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T161",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-09-27T19:34:36.369Z"
     }
   ],
   "telemetryInstanceId": "d17871b9-a196-497b-ab7f-10b9cd871cc0",
@@ -759,9 +1655,15 @@
   "livingSpecs": {
     "loaded": [
       "startup"
+    ],
+    "skipped": [
+      {
+        "name": "startup",
+        "reason": "the capability folder was deleted by T026 and its registry row is retired in Polish at re-adoption, so US5's new panel behaviour belongs to the rebuilt launch capability the Polish re-adoption creates; no delta block was authored and living-spec sync is not enabled."
+      }
     ]
   },
-  "last_action": "83/196 tasks complete, next is T075 (launch pipeline). Build clean at 0 warnings; live schema validator passes; full suite green with the store offline, with one pre-existing store-online parity failure recorded as a concern.",
+  "last_action": "All phases built. Build clean at 0 warnings and 0 errors; the whole suite green at 1743 passed, 0 failed, 46 skipped (all opt-in live-store cases). Two acceptance runs needing a live store remain open, so the spec stays implementing.",
   "coverage": {
     "FR-028": {
       "title": "The replaced launch behaviour is not reintroduced, and a build fails if it is.",
@@ -777,7 +1679,8 @@
       "tasks": [
         "T077",
         "T082"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/LaunchPipelineRetryTests.cs::RunAsync_WhenAStepFails_EndsBlocked,RunAsync_WhenTheMachineIsUnconfigured_EndsAtMachineSetup,RunAsync_WhenNoSignInIsHeld_EndsAtSignIn,RunAsync_WhenThePersonIsSignedIn_EndsAtTheMainScreensAndRaisesShellReady"
     },
     "FR-002": {
       "title": "The launch names each piece of work before performing it.",
@@ -785,10 +1688,7 @@
         "T071",
         "T073"
       ],
-      "tests": [
-        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepRunnerTests.cs::RunAsync_WhenTheStepRuns_TheStepIsAlreadyNamedOnTheFeed",
-        "RunAsync_WhenTheStepThrowsImmediately_TheAnnouncementIsStillOnTheFeed"
-      ]
+      "tests": "SignInViewModelTests.cs::SignInCommand_WhenTheCredentialIsAccepted_CarriesTheLaunchOnWithTheSignInHeld"
     },
     "FR-003": {
       "title": "Every wait on the launch path has a stated maximum and none is unbounded.",
@@ -807,11 +1707,8 @@
     },
     "FR-004": {
       "title": "A stopped launch states a cause specific to what stopped it.",
-      "tasks": [
-        "T085",
-        "T090",
-        "T124"
-      ]
+      "tasks": "T124,T125",
+      "tests": "BlockedStateViewModelTests.Constructor_WhenAStepFailed_StatesThatStepsOwnWordsRatherThanItsNumber,BlockedStateViewModelTests.Constructor_WhenABestEffortStepAlsoFailed_KeepsTheStopItDidNotCause"
     },
     "FR-005": {
       "title": "An error is shown in a strip at the bottom of the launch window without covering the list of work.",
@@ -826,7 +1723,8 @@
         "T096",
         "T101",
         "T103"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/LaunchPipelineRetryTests.cs::RunAsync_WhenTheMachineIsUnconfigured_EndsAtMachineSetup"
     },
     "FR-007": {
       "title": "Machine setup is authorised only by IT Department or Developer, and that authorisation does not open the main screens.",
@@ -844,7 +1742,8 @@
         "T096",
         "T102",
         "T127"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/LaunchPipelineRetryTests.cs::End_StatesTheReasonBeforeTheProcessGoes"
     },
     "FR-009": {
       "title": "A machine whose configuration is removed, revoked or unreadable is treated as unconfigured at the next check.",
@@ -861,7 +1760,8 @@
         "T045",
         "T107",
         "T111"
-      ]
+      ],
+      "tests": "LaunchSessionServiceTests.cs::ValidateAsync_WhenTheExpiryIsPastOnThisComputerButLiveInTheStore_TrustsTheStore,LaunchSessionServiceTests.cs::ValidateAsync_WhenTheStoreSaysTheSessionNoLongerStands_ReportsItAsNotValid"
     },
     "FR-011": {
       "title": "A session is cleared when the person signs out, before the application restarts.",
@@ -870,20 +1770,23 @@
         "T045",
         "T107",
         "T111"
-      ]
+      ],
+      "tests": "LaunchSessionServiceTests.cs::ClearAsync_WhenASessionStands_EndsItAndForgetsTheIssuedDigest,LaunchSessionServiceTests.cs::ClearAsync_WhenTheStoreHoldsNothingToEnd_ReportsNothingEndedRatherThanAFailure"
     },
     "FR-012": {
       "title": "An account holding a temporary credential is refused after five failed attempts, including with the correct value, and the refusal survives a restart.",
       "tasks": [
         "T106",
         "T110"
-      ]
+      ],
+      "tests": "TemporaryCredentialAttemptLimitTests.cs::CheckAsync_AfterFiveFailedAttempts_RefusesTheSixthEvenWithTheCorrectValue,TemporaryCredentialAttemptLimitTests.cs::CheckAsync_AfterARestart_StillRefusesTheSixthAttempt,TemporaryCredentialAttemptLimitTests.cs::CheckAsync_OnAnOrdinaryCredential_DoesNotCountAFailedAttempt"
     },
     "FR-013": {
       "title": "The set-a-new-password step opens only after the temporary credential has been accepted.",
       "tasks": [
         "T115"
-      ]
+      ],
+      "tests": "SignInViewModelTests.cs::SignInCommand_WhenATemporaryCredentialIsAccepted_OpensThePasswordChangeAndWaits,PasswordChangeViewModelTests.cs::SubmitCommand_WhenTheTwoValuesDiffer_StatesItAndHandsNothingOn"
     },
     "FR-014": {
       "title": "A remembered sign-in is held against the person in the store and encrypted, and an unreadable key falls back to the ordinary sign-in form.",
@@ -892,54 +1795,40 @@
         "T108",
         "T113",
         "T117"
-      ]
+      ],
+      "tests": "SignInViewModelTests.cs::SignInCommand_WhenRememberMeIsNotChosen_ForgetsWhatThisMachineRemembered,SignInViewModelTests.cs::SignInCommand_WhenRememberMeIsChosen_StoresTheSignInAgainstThePerson,SignInViewModelTests.cs::UseRememberedSignInCommand_WhenNothingIsRemembered_TellsThePersonToTypeThePassword"
     },
     "FR-015": {
       "title": "A computer whose hardware identity cannot be read is admitted.",
       "tasks": [
         "T112"
-      ]
+      ],
+      "tests": "SignInViewModelTests.cs::Hint_OnceANameIsTyped_SaysThePasswordIsWhatIsMissing"
     },
     "FR-016": {
       "title": "A stopped launch offers to repeat the failed work.",
-      "tasks": [
-        "T077",
-        "T121",
-        "T125"
-      ]
+      "tasks": "T119,T121,T125",
+      "tests": "BlockedStateRemediesTests.For_EveryCause_OffersARepeat,BlockedStateViewModelTests.Retry_RepeatsTheFailedPieceAndWhatFollowsIt_AndNothingBeforeIt"
     },
     "FR-017": {
       "title": "Resetting is offered only where resetting could remove the cause.",
-      "tasks": [
-        "T119",
-        "T122",
-        "T124"
-      ]
+      "tasks": "T119,T122,T124",
+      "tests": "BlockedStateRemediesTests.For_WhenTheStoreCouldNotBeReached_OffersNoResetAndNoPreview,BlockedStateViewModelTests.Constructor_WhenTheStoreCouldNotBeReached_OffersNoResetAtAll"
     },
     "FR-018": {
       "title": "Resetting states what it will reset before acting and affects only this machine configuration, never people, roles or permissions.",
-      "tasks": [
-        "T120",
-        "T122",
-        "T123",
-        "T126"
-      ]
+      "tasks": "T120,T122,T123,T126",
+      "tests": "StartupRecoveryServiceTests.RestoreDefaultsAsync_WhenAskedForAPersonARoleOrAPermission_TouchesNothingAtAll,BlockedStateRemediesTests.For_WhenThisComputersConfigurationIsBroken_OffersAResetThatNamesEveryPartItWouldTouch,BlockedStateViewModelTests.RestoreDefaults_ResetsExactlyThePartsThePreviewNamed_AndCarriesTheLaunchOn"
     },
     "FR-019": {
       "title": "A fault that can be repaired without the person involvement is repaired without asking.",
-      "tasks": [
-        "T121",
-        "T123"
-      ]
+      "tasks": "T121,T123",
+      "tests": "BlockedStateViewModelTests.Prepare_WhenTheFaultCanBePutRightQuietly_RepairsItAndRaisesNoPrompt,StartupRecoveryServiceTests.RepairWithoutAskingAsync_WhenThePartIsAChoiceThePersonMade_RepairsNothing,StartupRecoveryServiceTests.RepairWithoutAskingAsync_IsAttemptedOnce_SoAFaultThatCameBackIsAskedAbout"
     },
     "FR-020": {
       "title": "Repeating failed work repeats only that work and what follows it.",
-      "tasks": [
-        "T077",
-        "T082",
-        "T121",
-        "T125"
-      ]
+      "tasks": "T121,T125",
+      "tests": "BlockedStateViewModelTests.Retry_RepeatsTheFailedPieceAndWhatFollowsIt_AndNothingBeforeIt,BlockedStateViewModelTests.Prepare_WhenTheFaultCanBePutRightQuietly_RepairsItAndRaisesNoPrompt"
     },
     "FR-021": {
       "title": "Every diagnostic is written to the store with severity, area, machine, person, error kind and message.",
@@ -970,7 +1859,8 @@
         "T143",
         "T144",
         "T145"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Services/ScopedPreferenceTests.cs::TheWaitlistOrder_IsStoredAgainstThePersonAndComesBackOnAnotherComputer,TheNewRequestAlertSwitch_IsStoredAgainstThePersonAndComesBackOnAnotherComputer,TheRequestsAlreadySeen_AreStoredAgainstThePersonAndComeBackOnAnotherComputer,ThePartsWithoutPicturesChoice_IsStoredAgainstThePersonAndComesBackOnAnotherComputer,NoPersonPreferenceIsWrittenAtPlantScope"
     },
     "FR-024": {
       "title": "The list of locations to hide belongs to the whole plant and is changeable only by IT Department or Developer.",
@@ -980,7 +1870,8 @@
         "T137",
         "T142",
         "T146"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs::TheEditor_IsReadOnly_ForEveryRoleButTheTwoThatMayChangeIt,TheWrite_IsRefused_WhereItHappens_NotOnlyWhereTheControlIsDrawn,AnAuthorisedChange_IsStoredAtPlantScope"
     },
     "FR-025": {
       "title": "Only what is needed to reach the store is kept on a computer, apart from the local copy of pictures.",
@@ -991,7 +1882,8 @@
         "T155",
         "T156",
         "T157"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/ImageStorageConfigurationResolverTests.cs::GetSharedFolderPathAsync_WithAMachineFolderAndNoPlantOverride_UsesTheMachinesOwnFolder,GetKeysFolderPathAsync_WithAMachineFolderAndNoPlantOverride_UsesTheMachinesOwnFolder"
     },
     "FR-026": {
       "title": "The copy of pictures is best effort and cannot stop the launch.",
@@ -1014,7 +1906,8 @@
         "T053",
         "T137",
         "T147"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs::TheSessionLength_RefusesAnUnauthorisedChangeWithAStatedReason,TheSessionLength_WhenAuthorised_IsStoredAtPlantScopeAndClamped"
     },
     "FR-030": {
       "title": "Every setting that is restricted to particular roles today keeps the same restriction.",
@@ -1022,7 +1915,8 @@
         "T052",
         "T139",
         "T149"
-      ]
+      ],
+      "tests": "MTM_Waitlist.Tests/Module_Core/Permissions/RoleRestrictionInventoryTests.cs::TheInventory_CoversEveryDeclaredSettingExactlyOncePerKeyAndGate,EveryRestrictedSetting_ReadsAKeyWhoseDeclarationNamesItsGate,EveryRestrictedSetting_HoldsItsRestrictionInTheShippedBaseline"
     },
     "FR-031": {
       "title": "The cases found by the three read-only sweeps are recorded in the repository as the acceptance surface, and every case is either covered by a test or recorded as no longer applying, with its reason.",
@@ -1030,6 +1924,79 @@
         "T159",
         "T167"
       ]
+    },
+    "FR-032": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/ExceptionCaptureTests.cs::Serialize_WhenAFaultHasAnInnerFault_KeepsEveryExceptionWithItsDepthAndIndex,Serialize_WhenTheFaultIsAnAggregate_ContributesEveryIndependentFailure,Serialize_WhenTheChainIsLongerThanTheNodeCeiling_IsTruncatedWithItsMarker"
+    },
+    "FR-033": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/ExceptionFingerprintTests.cs::ComputeFingerprint_WhenTheSameFaultIsRaisedTwice_ProducesTheSameValue,ComputeFingerprint_WhenTheMessageDiffersInMoreThanItsValues_ProducesADifferentValue"
+    },
+    "FR-034": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/DiagnosticContextTests.cs::Build_CarriesTheRuntimeTheSeamGathered_NotTheCaller"
+    },
+    "FR-035": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/DiagnosticContextTests.cs::Build_WhenTheCallerNamedAControl_CarriesItUnderTheViewContext"
+    },
+    "FR-036": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/DiagnosticContextTests.cs::Build_WhenTheFaultCameFromTheStore_RecordsNoStatementValues,Build_WhenAStructuredPropertyNamesASecret_DropsTheValue"
+    },
+    "FR-037": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/ExceptionCaptureTests.cs::FlushAsync_WhenTheStoreRefusesEveryWrite_AbsorbsItAndRaisesNoSecondDiagnostic"
+    },
+    "SC-014": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/ExceptionFingerprintTests.cs::ComputeFingerprint_WhenTheSameFaultIsRaisedTwice_ProducesTheSameValue"
+    },
+    "SC-015": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/DiagnosticContextTests.cs::Build_WhenTheFaultCameFromTheStore_CarriesTheProvidersOwnDiagnostics,Build_WhenTheFaultCameFromTheStore_RecordsNoStatementValues"
+    },
+    "SC-016": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/ExceptionCaptureTests.cs::FlushAsync_WhenTheStoreRefusesEveryWrite_AbsorbsItAndRaisesNoSecondDiagnostic; MTM_Waitlist.Tests/Module_Startup/Services/DiagnosticContextTests.cs::Build_WhenAStructuredPropertyNamesASecret_DropsTheValue"
+    },
+    "SC-007": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialAttemptLimitTests.cs::CheckAsync_AfterARestart_StillRefusesTheSixthAttempt"
+    },
+    "SC-011": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/LaunchSessionServiceTests.cs::IssueAsync_AfterTheSessionLengthChanges_UsesTheNewValueAtTheNextSignIn,IssueAsync_SendsTheSessionLengthTheSettingHolds"
+    },
+    "SC-010": {
+      "tasks": "T119,T122",
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/BlockedStateRemediesTests.cs::For_WhenTheStoreCouldNotBeReached_OffersNoResetAndNoPreview,ResetParts_EveryCause_NamesOnlyThisComputersOwnConfiguration"
+    },
+    "FR-038": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/LogExportFormatterTests.cs::Format_CarriesTheExceptionChainTheContextAndTheChainLink_ExactlyAsTheStoreHoldsThem,Format_NamesTheFilterItCameFrom,Format_WhenTheTextWouldExceedTheCeiling_IsCutWithAnExplicitMarkerThatNamesTheCeiling,ACopyTheClipboardRefuses_IsReportedRatherThanRaised"
+    },
+    "SC-017": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/LogExportFormatterTests.cs::Format_CarriesTheExceptionChainTheContextAndTheChainLink_ExactlyAsTheStoreHoldsThem"
+    },
+    "SC-005": {
+      "tests": "MTM_Waitlist.Tests/Module_Settings/ViewModels/DeveloperLogPanelViewModelTests.cs::LoadAsync_WhenMachineAndErrorKindAreChosen_AsksForBothAndListsWhatCameBack,LoadAsync_WhenSeverityAndMachineAreChosen_AsksForBoth,LoadAsync_AlwaysBoundsTheReadByATimeWindowAndAPageSize"
+    },
+    "SC-003": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/StoreLogCoverageTests.cs::TheSeam_IsUnconditional_SoAReleaseBuildRecordsWhatADebugBuildWouldHaveCompiledOut,ALaunchThatEnds_RecordsItsOutcomeThroughTheSeam_AndTheStoreReceivesIt,AWriteTheStoreRefuses_LeavesNoLocalLogFileBehind"
+    },
+    "SC-008": {
+      "tests": "MTM_Waitlist.Tests/Services/ScopedPreferenceTests.cs::TheChosenTheme_ComesFromTheStoreAtPersonScope,TheWaitlistOrder_IsStoredAgainstThePersonAndComesBackOnAnotherComputer,TheNewRequestAlertSwitch_IsStoredAgainstThePersonAndComesBackOnAnotherComputer,TheRequestsAlreadySeen_AreStoredAgainstThePersonAndComeBackOnAnotherComputer,ThePartsWithoutPicturesChoice_IsStoredAgainstThePersonAndComesBackOnAnotherComputer"
+    },
+    "SC-012": {
+      "tests": "MTM_Waitlist.Tests/Module_Core/Permissions/RoleRestrictionInventoryTests.cs::EveryRestrictedSetting_HoldsItsRestrictionInTheShippedBaseline,TheLocationsToHide_KeepTheirReadRestrictionAndNarrowOnlyTheWrite"
+    },
+    "SC-001": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/LaunchPipelineRetryTests.cs::RunAsync_WhenAStepFails_EndsBlocked; MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs::TheStoreCannotBeReachedAtLaunch_StopsWithItsOwnStatementAndOffersNoReset"
+    },
+    "SC-002": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepRunnerTests.cs::RunAsync_WhenTheStepPassesItsStatedMaximum_ReportsFailedRatherThanWaitingOnIt"
+    },
+    "SC-004": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/MachineSetupNoBypassTests.cs::RunAsync_FromAnUnconfiguredMachineInAnyOrderOfAttempts_NeverHandsOverTheMainScreens"
+    },
+    "SC-006": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/Services/MachineSetupNoBypassTests.cs::Abort_EveryRouteOutOfMachineSetup_EndsTheProcessWithItsReasonStatedFirst"
+    },
+    "SC-009": {
+      "tests": "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs::EveryRetiredPattern_BitesOnAReintroductionOfItsSymbol,NoRetiredSymbolRemainsInCodeOrDatabaseArtifacts"
+    },
+    "SC-013": {
+      "tests": "MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs::TheStoreCannotBeReachedAtLaunch_StopsWithItsOwnStatementAndOffersNoReset,AConfigurationWithdrawnWhileTheApplicationRuns_ReturnsSetupAtTheNextCheck,TheLaunchWindowIsClosedWhileALaunchIsRunning_LeavesNoStepReadingAsFailed,ATemporaryCredentialResetWhileThePersonSignsIn_TheOldValueMeetsTheReset,ACredentialResetIssuedElsewhere_EndsNoSessionAlreadyRunning,AnAccountStillHoldingTheLegacyTemporaryValue_SignsInAndIsAskedToReplaceIt,ASignOutWhoseRestartFails_EndsTheSessionAndTellsThePersonToOpenTheApplicationAgain"
     }
   },
   "size": "oversized",
@@ -1098,6 +2065,278 @@
       "decision": "UserManagementLiveIntegrationTests session fixtures moved onto user_active_sessions",
       "why": "The rebuilt session service does not exist yet, so the store seam is the furthest the case can move while still proving the rule",
       "rejected": "Retiring the case, which would have dropped a proven FR-011 guarantee"
+    },
+    {
+      "decision": "The launch pipeline owns the two routing reads rather than reading a step's prose diagnosis",
+      "why": "a step reports what it did and the contract gives it no routing member, so the verdict has to be read from the service that owns it",
+      "rejected": "a shared holder the readiness step writes its verdict to, which would be a second source of the same fact"
+    },
+    {
+      "decision": "The routing read after read-machine-configuration runs under that step's own stated maximum",
+      "why": "a wait the person cannot see is still a wait, and FR-003 bounds every wait on the launch path",
+      "rejected": "an unbounded read outside the runner"
+    },
+    {
+      "decision": "A second entry while a launch runs joins the run in progress instead of starting one",
+      "why": "the contract says a re-entrant entry returns without starting anything, and the caller still needs an answer",
+      "rejected": "returning Blocked, which would show a stop for a launch that never started"
+    },
+    {
+      "decision": "A catalogued step with no implementation is passed over and stays in the count",
+      "why": "the later phases of this same feature supply each implementation, and a placeholder that reported success would put a line on the feed for work that never happened",
+      "rejected": "a pending-step placeholder type, which is scaffolding for a phase that lands in the same feature"
+    },
+    {
+      "decision": "ILaunchPipeline.End carries the abort route to the host",
+      "why": "the surfaces own the UI that states the reason and the host owns the exit, and ProcessEnding is the only event that carries it",
+      "rejected": "calling the process-lifecycle seam from each surface, which would leave ProcessEnding raised by nobody"
+    },
+    {
+      "decision": "A name that names a path is not denied by the fragment it also carries",
+      "why": "logging-contract section 6 grants the shared key file's path as the one secret-adjacent value that is written, and the blunt fragment match dropped it for containing the word key",
+      "rejected": "narrowing the deny-list itself, which would let key material through"
+    },
+    {
+      "decision": "the gate asks for sp_auth_user_credential_get and fails closed when it cannot be read",
+      "why": "no surviving procedure returns credential material, and a gate that cannot check authority must not authorise anybody",
+      "rejected": "an interface with no implementation, or reading the hash through sp_auth_user_row_get, which deliberately omits credential columns"
+    },
+    {
+      "decision": "the gate authorises on permission.settings.machine_configuration rather than on two role codes in code",
+      "why": "the key is what the declaration says this gate reads, and its baseline is the two roles that hold it",
+      "rejected": "a hard-coded role check beside the seeded baseline"
+    },
+    {
+      "decision": "the setup screen saves through IMachineConfigurationService itself",
+      "why": "a display name another computer holds has to be refused on the screen and asked for again, which is the spec edge case",
+      "rejected": "holding a draft for the pipeline save step, which reports a refused name as a stopped launch"
+    },
+    {
+      "decision": "every terminal outcome now reaches the host through the hand-back event",
+      "why": "the setup surface could not appear at all while the event fired for the main screens only",
+      "rejected": "changing the host launch entry point instead, which is another phase's seam"
+    },
+    {
+      "decision": "the abort statements, the route set and the screen derived state are internal",
+      "why": "the naming rules allow one public type per file and this phase grants no new model file",
+      "rejected": "new public model and interface files outside the phase file list"
+    },
+    {
+      "decision": "One attempt costs one credential check: the sign-in surface makes the check and the check-credential step reports the recorded answer, making it only when none was recorded (the remembered path)",
+      "why": "a second check in the step would spend a second attempt against the temporary-credential limit for one typing",
+      "rejected": "checking again in the step, and letting a refusal surface as a blocked launch instead of staying on the form"
+    },
+    {
+      "decision": "The session digest is computed salted once at issue and held in memory, and that same digest is presented when the session is validated",
+      "why": "the validation read returns no salt, so a second computation would have to guess the material the first used",
+      "rejected": "computing the digest over the token alone, which would have left the stored salt decorative"
+    },
+    {
+      "decision": "The machine gate reuses MachineFactsService.RefreshAsync for the registry read",
+      "why": "one read means the gate and the readiness steps cannot hold two opinions about whether this computer is registered",
+      "rejected": "a second registry read written for the gate"
+    },
+    {
+      "decision": "Sign-out ends the store session first, then clears the identity, then restarts; a store that cannot clear the session refuses instead of restarting",
+      "why": "restarting over a session that still stands would show the person a signed-in application they asked to leave",
+      "rejected": "restarting anyway and reporting the store fault afterwards"
+    },
+    {
+      "decision": "LaunchSessionService, SignOutService, SignOutOutcome, IProcessRestarter and AppProcessRestarter are public",
+      "why": "the public ShellViewModel exposes SignOutAsync and takes the service in its constructor, so the types could not stay internal",
+      "rejected": "making ShellViewModel internal"
+    },
+    {
+      "decision": "The remember-me choice is reversible: an explicit sign-in with the box clear forgets what this machine remembered for the person, while the remembered path leaves the stored choice alone",
+      "why": "on a shared shop-floor computer a choice made once must not outlive the person changing their mind, and someone arriving through the remembered path never saw the box so nothing they did should change it",
+      "rejected": "letting an unchecked box leave the earlier payload in place, which would leave a person remembered after asking not to be"
+    },
+    {
+      "decision": "The remembered-sign-in payload is sealed with an authenticated cipher (AES-GCM: 12-byte nonce in the vector column, 16-byte tag carried behind the ciphertext in the payload column) rather than AES-CBC with PKCS7 padding",
+      "why": "Microsoft Learn states that unauthenticated CBC decryption with verifiable padding is exposed to padding-oracle attacks, and this fall-back is observable by whoever presented the row, so a difference between a padding failure and a tamper failure is exactly the signal an oracle needs",
+      "rejected": "AES-CBC, which is what the design first used; and CBC with a separate keyed MAC, which needs somewhere to keep the MAC and the table has one payload column and one vector column"
+    },
+    {
+      "decision": "The stopped launch reads its cause from the feed's last non-best-effort StepFailed line rather than from a new pipeline property",
+      "why": "The pipeline hands the host an outcome and not a diagnosis, and this phase may not restructure that seam; the feed is the read-only record the surface already draws",
+      "rejected": "Adding a blocked-state carrier to ILaunchPipeline, which would restructure the seam and put a second account of the stop beside the feed"
+    },
+    {
+      "decision": "BlockedStateCause is classified from the step that failed: a Machine-category step is this computer's own configuration, everything else is the store",
+      "why": "The data model has one row for a broken or unreadable configuration and one for an unreachable store, and store-reachability fails before any Machine step, so a Machine-step failure means the store did answer",
+      "rejected": "Matching on the diagnosis prose, which is written for a person to read and is free to change"
+    },
+    {
+      "decision": "The parts repaired without asking are this machine's scope-supplied rows only (MachineConfigurationParts.ScopedPreference), never the display name, the description or the picture sources",
+      "why": "FR-019 forbids a quiet repair that loses something the person chose, and those three are exactly their decisions",
+      "rejected": "Repairing the whole configuration quietly, which would discard the name and description they typed"
+    },
+    {
+      "decision": "A quiet repair is attempted once per process, and a fault that came back after one is asked about",
+      "why": "A fault that survived its own repair would otherwise be repaired again on every stop, and the launch would loop without ever saying anything",
+      "rejected": "Retrying the quiet repair on every stop"
+    },
+    {
+      "decision": "BlockedStateViewModel is registered transient, and the host rebuilds the surface for each stop",
+      "why": "The view model is a reading of the lines written so far, so a second stop needs a second reading",
+      "rejected": "A singleton reading the feed once, which would show the previous stop's cause behind a question about this one"
+    },
+    {
+      "decision": "StartupRecoveryService was removed from the retired-symbol guard's pattern set and from its removed-type inventory",
+      "why": "T123 and the plan's project tree rebuild StartupRecoveryService in place under the same name, exactly as US1 did for SplashWindow, SplashPage and SplashViewModel; the contract IStartupRecoveryService stays forbidden",
+      "rejected": "Renaming the rebuilt type, which would contradict T120's file path and the plan's tree"
+    },
+    {
+      "decision": "the copy's ceiling is 1048576 characters, recorded in contracts/logging-contract.md section 7.1",
+      "why": "the point past which a clipboard payload stops being pasteable text and starts being a file transfer, and high enough that a page of ordinary entries is never cut",
+      "rejected": "a smaller messaging-sized ceiling, which would cut a normal page and be hit routinely"
+    },
+    {
+      "decision": "LogPanelEntry is a read shape beside StoreLogRecord",
+      "why": "the write shape carries what a write needs; the read shape carries the row identity, the store clock and the two chain columns the write procedure computes for itself",
+      "rejected": "one type serving both, which would make the chain and the timestamp nullable for the writer and re-promised for the reader"
+    },
+    {
+      "decision": "the clipboard is a delegate on the view model whose default calls Clipboard.SetContentWithOptions with both options false",
+      "why": "the refusal path has to be exercisable without a live clipboard, and the options overload answers false where Clipboard.SetContent throws",
+      "rejected": "calling Clipboard directly from the command, which cannot be tested and would raise a fault while reporting one"
+    },
+    {
+      "decision": "the Settings module now references MTM_Waitlist.Logging",
+      "why": "the panel reads the log read shape and formats its copy through the logging module, and Logging references Core alone so the new edge adds no cycle",
+      "rejected": "moving the formatter into the Settings module, which T183 pins to MTM_Waitlist.Logging"
+    },
+    {
+      "decision": "the group toggle changes what the next read asks for rather than reading on the spot",
+      "why": "a control that read the instant it was ticked would be a read the reader did not ask for, and it left the panel holding one answer while the screen claimed another",
+      "rejected": "auto-loading on the toggle, which also raced the reader's own press"
+    },
+    {
+      "decision": "the copy's labels are stable English rather than localised",
+      "why": "the copy is diagnostic evidence pasted to somebody who does not have the store, so a translated label would change what the evidence says",
+      "rejected": "localising the formatter's labels, which would also make the logging module read a resource file it has no business reading"
+    },
+    {
+      "decision": "Declared the scoped-preference seam as a Core contract implemented in Settings, so the Core services, the Setup dialog and the Waitlist store can all take it without a module reference they must not have.",
+      "why": "MTM_Waitlist.Core references nothing and Setup does not reference Settings, while the configuration read that reaches config_settings_values lives in Settings. This is the same shape as IRequestItemAllottedMinutesStore, which exists for the same reason.",
+      "rejected": "Calling the two stored procedures directly from each of the six consumers, which would have repeated the scope and value-type logic six times."
+    },
+    {
+      "decision": "Prefers the plant-wide override over this machine own configured folder, then the machine folder, then the shipped default.",
+      "why": "A plant-wide decision applies to every computer, so it is the site answer, and the machine row is what machine setup captured for this machine. Keeping that order leaves the disagreement line the storage panel shows with a subject.",
+      "rejected": "Machine configuration winning outright, which would have made SharedFolderResolution.MachineDisagrees unreachable and left the panel disagreement line dead."
+    },
+    {
+      "decision": "Enforces the ignored-locations edit entitlement inside the service write rather than only in the view model command.",
+      "why": "FR-024 and FR-029 require the restriction where the action happens; a hidden control is not a permission, and the service is the seam every writer passes through.",
+      "rejected": "Gating only in SettingsViewModel, which leaves the write reachable by any caller that does not draw the screen."
+    },
+    {
+      "decision": "Moved the single declaration of the session-length key into MTM_Waitlist.Core and had the launch and the settings panel both reference it.",
+      "why": "The launch module and the Settings module do not reference each other, so one shared declaration is the only way the two cannot drift.",
+      "rejected": "A second copy of the key string in the settings panel, or a Settings reference to the startup module."
+    },
+    {
+      "decision": "Recorded T188 in the file rather than re-pointing the session case at the session service.",
+      "why": "The case asserts that an unrelated account update leaves a session row alone, which is a store property. The session service can only judge a session this process issued, and the retired repository and its six procedures are gone.",
+      "rejected": "Driving the case through a faked session service, which would have proved what the fake does rather than what the store does."
+    },
+    {
+      "decision": "Replaced ten local-settings test doubles with one shared in-memory store double that records reads and writes.",
+      "why": "Five had to be replaced and five were already dead; one shared double keeps the scope handling in one place and lets a test assert that a refused change wrote nothing at all.",
+      "rejected": "Five near-identical per-file doubles."
+    },
+    {
+      "decision": "The session-length seed and the validator name auth.session_length_minutes, not sessions.length_hours",
+      "why": "the launch resolves that key at plant scope and the settings panel writes it, so the seeded row under the other name was dead and the validator was checking a key nothing read",
+      "rejected": "changing the launch to read sessions.length_hours, which would leave the panel writing a second key"
+    },
+    {
+      "decision": "The two hardware-identity cases state the machine they are about instead of borrowing the host's",
+      "why": "the step reads the machine from its context, so the branch is reachable by construction and the case stops standing down on a workstation that presents an address",
+      "rejected": "recording the case as retired, which would have dropped a real branch"
+    },
+    {
+      "decision": "S13 keeps the sweeps' group summary and adds a walkable catalogue beside it",
+      "why": "the sweeps' original 111-item breakdown was never committed, so enumerating it would mean inventing it; the twenty-three cases the specification records are listed with a disposition each",
+      "rejected": "reconstructing 111 items from the group counts"
+    },
+    {
+      "decision": "The rebuilt launch is one living capability, startup-launch, replacing the two whose code is gone",
+      "why": "the old split existed because the file-based log path was a concern of its own, and that path is deleted",
+      "rejected": "keeping the startup row and adding a second, which would leave a capability matching no code"
+    },
+    {
+      "decision": "The stalled-share acceptance case names a stored credential as the wrong way to reach it, and was left unrun.",
+      "why": "Reaching the picture step needs a person actually signed in, and every account on the store carries a temporary-credential marker whose value was shown once and never stored. Writing a credential in would make the run evidence about a fixture this work invented rather than about the application.",
+      "rejected": "Writing a password hash into core_users_profiles, signing in, running the case, then rolling the credential back."
+    },
+    {
+      "decision": "The seed issues the documented placeholder 0000, properly salted and hashed, rather than the 4330 in use on this machine.",
+      "why": "The code and tests already name 0000 as the legacy temporary credential that must be accepted, so the value's meaning is unchanged and only the broken encoding is repaired. Committing 4330 would put a credential the owner actually uses into source control for no functional gain.",
+      "rejected": "Writing 4330 into the seed so a fresh install matches this machine exactly."
+    },
+    {
+      "decision": "The seed issues 4330, and the schema validator applies seed files only when given -ApplySeeds.",
+      "why": "The owner asked for the seed to ship the credential in use. Separately, the validator applied every seed file whenever a schema validated, and seed_dev_masked_baseline truncates and rewrites core_users_profiles, auth_roles_catalog, auth_roles_assignments, config_settings_values and core_computers_registry. Because the CI workflow points the script at a real store through secrets, a pull request touching any Database/**/*.sql file silently replaced that store's accounts and permission baselines. A validating check must not be a writer.",
+      "rejected": "Leaving seed application on by default and documenting the hazard, which had already destroyed a hand-set credential during this session."
+    },
+    {
+      "decision": "Whether a step is a long wait is derived from the step's own declared target rather than from a list of waiting steps.",
+      "why": "A step that names what it is about is reaching for something this computer does not hold - the store, the share, the external system - and those are the waits with no proportion to report. Writing the waiting steps out as a list would be a second account of the catalogue that could drift from it, and the two examples named in the request (the picture cache and a store connection) both fall out of the rule."
+    },
+    {
+      "decision": "The launch window's frame is removed through the overlapped presenter, and the surface carries its own Close button.",
+      "why": "A title bar cannot hide itself - the caption buttons stay system-controlled for as long as one is drawn, and AppWindowTitleBar in Windows App SDK 2.0 has no member that removes it. SetBorderAndTitleBar(false, false) is the one call that does it, and both parts have to be false, because a window that keeps its border keeps a caption with it. No frame means no drag area, so the surface needs its own way out."
+    },
+    {
+      "decision": "The folder dialog is a seam the application implements, and the setup screen only asks for it.",
+      "why": "A folder dialog has to be owned by a window, and an unpackaged desktop process has no ambient window to parent it to, so the implementation has to know which surface is on screen. Putting that in the view model would have made the screen undrivable by a test, so IFolderBrowserService sits in Core, its one implementation sits in the application where the windows are, and App.CurrentSurfaceWindow answers which window owns a dialog."
+    },
+    {
+      "decision": "The setup form is pre-filled from the store first and the shipped defaults second.",
+      "why": "A machine whose configuration is being corrected should start from what it currently has. The compiled defaults only fill what is missing, so the screen never overwrites a value that exists, and the dunnage folder - which has no shipped default - is left empty with a hint rather than given an invented path."
+    },
+    {
+      "decision": "The machine-setup screen captures only the computer's name and an optional note. The three folder fields, their Choose-folder buttons and the picture-source half of the save are removed.",
+      "why": "The shared pictures and keys folders are the same for every computer, so a screen that sets them per machine writes the organisation's answer once per PC and lets two machines disagree. They already belong to the org-wide settings the storage-paths panel writes."
+    },
+    {
+      "decision": "The per-computer picture sources are retired: the rows in config_images_locations, the write procedure behind them, and the launch step that writes them all go.",
+      "why": "With the folders org-wide there is no second writer and no per-machine override to keep current. Keeping the rows readable would leave two accounts of the same fact."
+    },
+    {
+      "decision": "When the configured share cannot be reached, a picture path resolves under the local cache root and the launch states that the copies on this computer are being used.",
+      "why": "The cache already exists for part pictures. Resolving to it keeps a workstation working through a share outage, and saying so on the launch surface keeps the fallback from being invisible - a picture that is quietly a day old is a fault report waiting to happen."
+    },
+    {
+      "decision": "The keys the application reads are copied into the local cache folder at startup, refreshed when the share holds a newer copy, and scoped to only the keys actually read - which is one today.",
+      "why": "Two answers were given about how many keys to copy. They agree on the current code, which reads exactly one key, so the rule is 'the keys the application actually reads, and no more'. The tighter scoping wins if a second key is ever added."
+    },
+    {
+      "decision": "A locally cached key is acceptable, under three conditions: only under the local cache root, only for the keys the application reads, and with the copy and its path recorded in the log. It is never written back to the share.",
+      "why": "This amends the startup module's FR-025, which says nothing is kept on the machine except what it needs to reach the store and the local copy of the pictures. A cached key is key material on disk, so the amendment has to be written down rather than assumed."
+    },
+    {
+      "decision": "The shared pictures folder and the shared keys folder belong to the plant, not to a computer: they are held once in the settings the storage-paths panel already writes, and the machine-setup screen captures only the computer's name and an optional note. A computer counts as configured once the store holds its name. When a share cannot be reached a picture resolves under the local cache folder and the launch states that the copies held on this computer are the ones being used; a picture with neither a copy nor a reachable share is reported missing, never drawn from a stand-in. The keys the launch reads are cached under the local cache folder, refreshed when the shared copy is newer, never written back, with the copy and its path logged. FR-025 is amended to name that cached key as a second exception, held to three conditions: only the keys the launch actually reads, only under the local cache folder, never written back."
+    },
+    {
+      "decision": "Reconcile note on the two key answers. 'Every key the application reads' and 'only the one key file' pull against each other. They agree on the code as it stands, which reads exactly one key (SharedKeyFileSource in MTM_Waitlist.Startup/Services/RememberedSignInService.cs). The rule was taken as 'the keys the application actually reads, and no more', with the tighter scoping winning if a second key is ever added. This is recorded as the reading, not as something the owner confirmed."
+    },
+    {
+      "decision": "The 63 recorded concerns were worked through on 2026-09-28. Thirty-six were already resolved, superseded or accepted and were removed. The remaining 27 were put to the owner as questions and every one is answered; the answers are in spec.md under Clarifications and the work is Phase 12 in tasks.md (T205-T229). Three answers changed requirements rather than confirming them: remember-me is withdrawn in favour of a previous-users list on the sign-in screen (FR-014); the launch window states the work under way on a single line with no history, reversing the earlier one-line-per-operation rule (FR-039); and the launch window must open centred while the administrator sign-in and the machine setup screen are reworked with cards, padding and margins (FR-045, FR-046)."
+    },
+    {
+      "decision": "The two installer defects are to be applied to the store by running the installer, which the owner authorised; the corrected scripts are already committed, so the store is the only thing outstanding."
+    },
+    {
+      "decision": "The hardware-identity case that cannot be exercised on this workstation is accepted as environment-gated rather than unproven-by-oversight."
+    },
+    {
+      "decision": "The local copy of the shared key file is kept as the fallback for when the key file on the share cannot be reached, settled by the owner on 2026-09-28. FR-043 now says the copy held on the computer must be used when the shared copy is unreachable, so an unreachable share never leaves the launch without a key it has already read once. FR-025's second exception therefore stands unchanged. Withdrawing remember-me removes the key file's sign-in purpose, which is a separate question from whether the file is kept."
+    },
+    {
+      "decision": "The shared key file is retired. After remember-me was withdrawn the owner first asked for the local copy to remain as the fallback for an unreachable share, then, told that remember-me is the only code that ever opens the key, said to remove it. So no key file is read, copied or kept: FR-043 now states the retirement, FR-025's second exception and its three conditions are gone, FR-040 no longer names a shared keys folder, the key-file verbatim constraint is marked retired so the record still shows what was withdrawn, the assumptions no longer claim the file is kept, and the key-caching fallback task T202 is retired with its reason left in place. ISharedKeySource, SharedKeyFileSource and their DI registration go with T219."
     }
   ],
   "approach": "Delete the whole startup surface first and prove it with a placeholder window, then rebuild in place: a data-driven launch pipeline of named steps with an activity feed, two read-only identity contracts replacing StartupState, sessions on the new user_active_sessions table judged on the store clock, diagnostics on ops_startup_logs through one unconditional logging module in a new MTM_Waitlist.Logging library, and a pre-sign-in machine-setup gate that cannot be bypassed.",
@@ -1107,11 +2346,15 @@
     "Living spec capability startup read whole; it contributed the ordered-step, store-clock, unreadable-hardware-identity-admitted, three-destination, remedy-scope and best-effort-picture requirements.",
     "Resolved permission baseline from Database/Seeds/seed_permission_role_baselines/create.sql: permission.settings.ignored_locations is granted to seven roles and denied to two, while permission.settings.computers is already exactly IT Department and Developer.",
     "Resolved schemas from Database: auth_sessions_tokens already carries the token hash, salt, issue, expiry, revocation and source shape that user_active_sessions needs; ops_startup_logs already carries correlation_id, previous_hash and entry_hash with no writer today.",
-    "Local MAMP MySQL at 127.0.0.1:3306 carries a provisioned mtm_waitlist schema (26 tables, 87 routines). Read only probe with MAMP mysql.exe confirms every object this feature deletes or extends is present: all nine startup-only procedures, sp_core_buildings_upsert, auth_sessions_tokens, core_buildings_catalog, core_buildings_history and ops_startup_logs, plus the five protected tables. The only absent objects are the three this feature creates, which is exactly right for a pre-removal baseline."
+    "Local MAMP MySQL at 127.0.0.1:3306 carries a provisioned mtm_waitlist schema (26 tables, 87 routines). Read only probe with MAMP mysql.exe confirms every object this feature deletes or extends is present: all nine startup-only procedures, sp_core_buildings_upsert, auth_sessions_tokens, core_buildings_catalog, core_buildings_history and ops_startup_logs, plus the five protected tables. The only absent objects are the three this feature creates, which is exactly right for a pre-removal baseline.",
+    "A store that must appear unreachable cannot be aimed at a black-hole address: the application substitutes this machine's own store when the configured host does not answer, so case A uses a port closed on both hosts and case B uses a listener that accepts and then says nothing.",
+    "The acceptance watcher stops on the first window that is not the launch window, not on a quiet period: the splash deliberately sits still while a store is being contacted, so stillness is what a healthy still-working launch looks like.",
+    "Every account in the local store carried the retired 0000 placeholder with a NULL salt, so nothing could verify a sign-in at all. The seed says so itself ('the credential is the placeholder the accounts above use, so none of these can log in'), and the gate's own test uses 0000 as the credential that must be refused. A fresh install therefore has no way in until a credential is issued out of band.",
+    "A credential was issued for all ten accounts at the owner's request, using the application's own parameters (PBKDF2/SHA-256, 100000 iterations, 32-byte hash, a fresh 16-byte salt per account) and the same column effects sp_user_management_reset_password writes: the change flag on and the wrong-attempt count cleared. No audit row was written, because that needs an acting user and a signed-in context."
   ],
   "step_summaries": {
     "specify": {
-      "summary": "Spec written for the startup rebuild: 6 user stories, FR-001 to FR-030, SC-001 to SC-012, 14 edge cases and 8 key entities, plus a requirements quality checklist."
+      "summary": "Updated specs/010-startup-rebuild/spec.md in place, on the owner's instruction not to create a new spec folder or branch. Added User Story 7 with five acceptance scenarios; FR-040 through FR-044; SC-018 through SC-021; three edge cases; two new assumptions; and amended FR-025 to admit the cached key as a named exception. Appended Phase 11 (T197-T204) to specs/010-startup-rebuild/tasks.md. No implementation started."
     },
     "plan": {
       "summary": "Full oversized plan written for the startup rebuild: plan.md with a Scale note, Technical Context, real project structure, a nine-row Constitution Check and the eleven-phase gate map, plus research.md with 24 decisions, data-model.md with ten entities and the launch state machine, and five interface contracts. Sequenced to match the owner 11-phase checklist and its 11 gates."
@@ -1120,10 +2363,10 @@
       "summary": "170 tasks in 9 phases: Setup 5, Foundational 77 (removal and proof, identity contracts, store foundation, logging, pipeline), US1 12, US2 11, US3 13, US4 10, US5 8, US6 22, Polish 12; every phase laid out as ordered waves with join points and a single owner phase per file."
     },
     "implement": {
-      "summary": "Foundational phase advanced on its database half: the registry capability moved into Settings, the last startup-only procedures and the superseded session table were retired, the plant-scope baselines were seeded, and the stranded live session test was re-pointed. 83 of 196 tasks are complete; the launch pipeline (T075 onward) is the next work."
+      "summary": "US6 landed: the seven scoped preferences read and write config_settings_values against the person or the plant, the settings panel locks the ignored-locations editor and gains the session-length setting, the developer log panel is reachable, the local-settings mechanism with its file service and options is deleted, appsettings.json holds only connection strings plus the window options and the reviewed exception, and the machine picture folders moved into machine configuration."
     }
   },
-  "currentTask": "T075",
+  "currentTask": "T161",
   "task_summaries": {
     "T002": {
       "status": "DONE",
@@ -1751,585 +2994,847 @@
       "concerns": []
     },
     "T075": {
-      "status": "OPEN",
-      "did": "Implement the machine configuration service: the configuration state with its four unconfigured reasons, the save that refuses a display name already in use, and the reset that `IMachineConfigurationService.ResetToDefaultsAsync` performs on this machine's configuration only — the mechanism, and the only code that writes these rows (plan FR-006, FR-009, FR-018; contract §1, §4).",
-      "files": [],
+      "status": "DONE",
+      "did": "The machine configuration service: the four unconfigured reasons, the save that refuses a name already in use, and the reset confined to this machine",
+      "files": [
+        "MTM_Waitlist.Startup/Services/MachineConfigurationService.cs"
+      ],
       "concerns": []
     },
     "T076": {
-      "status": "OPEN",
-      "did": "Build the launch steps that run before sign-in — configuration, store reachability and the machine readiness check — each announcing itself first (checklist 8.1b, FR-002).",
-      "files": [],
+      "status": "DONE",
+      "did": "The seven pre-sign-in steps, each announcing itself through the runner",
+      "files": [
+        "MTM_Waitlist.Startup/Services/ConfigurationStep.cs",
+        "MTM_Waitlist.Startup/Services/StoreReachabilityStep.cs",
+        "MTM_Waitlist.Startup/Services/MachineReadinessStep.cs"
+      ],
       "concerns": []
     },
     "T077": {
-      "status": "OPEN",
-      "did": "Build the launch pipeline behind a single entry point: `RunAsync` ending at exactly one of the main screens, sign-in, machine setup, a stated stop or an ended process; `RetryFromAsync` repeating the named step and what follows it only; a re-entrant entry refused; and the pipeline, not the screen, refusing to continue while the machine is unconfigured (checklist 8.3a, plan D3, FR-001, FR-006, FR-020).",
-      "files": [],
+      "status": "DONE",
+      "did": "The launch pipeline behind one entry point: five terminal outcomes, retry from a named step, a refused re-entrant entry, and the unconfigured refusal kept in the pipeline",
+      "files": [
+        "MTM_Waitlist.Startup/Services/LaunchPipeline.cs",
+        "MTM_Waitlist.Startup/Services/ILaunchPipeline.cs",
+        "MTM_Waitlist.Startup/Models/LaunchOutcome.cs"
+      ],
       "concerns": []
     },
     "T078": {
-      "status": "OPEN",
-      "did": "Replace the app-lifecycle seam so the host owns one call and two events, states the reason before the process ends, keeps the shell hidden until the pipeline routes to it, and no longer owns window handoff (checklist 8.3b–8.3d, FR-008).",
-      "files": [],
+      "status": "DONE",
+      "did": "The host owns one call and two events; the shell is reached only through ShellReady and a reason is stated before the process goes",
+      "files": [
+        "App.xaml.cs"
+      ],
       "concerns": []
     },
     "T079": {
-      "status": "OPEN",
-      "did": "Register the pipeline, the runner, the catalog and the pre-sign-in steps in the host (checklist 8.1, 8.3).",
-      "files": [],
+      "status": "DONE",
+      "did": "The pipeline, the runner, the catalogue, the pre-sign-in steps and the two hand-off holders registered in the host",
+      "files": [
+        "MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs"
+      ],
       "concerns": []
     },
     "T080": {
-      "status": "OPEN",
-      "did": "Test the runner: each step is named before it runs, a stalled step reports at its stated maximum, and a sub-operation names its operation, its target and its outcome (checklist 8.1b, FR-002, FR-003).",
-      "files": [],
+      "status": "DONE",
+      "did": "The runner's tests: each step is named before it runs, a stalled step reports at its stated maximum, and a sub-operation names its target",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepRunnerTests.cs"
+      ],
       "concerns": []
     },
     "T081": {
-      "status": "OPEN",
-      "did": "Test the feed: append-only, timestamped, never cleared while a launch runs, and a best-effort failure still gets a line (checklist 8.2, FR-026).",
-      "files": [],
+      "status": "DONE",
+      "did": "The feed's tests: append-only, timestamped, never cleared, and a best-effort failure still gets a line",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchActivityFeedTests.cs"
+      ],
       "concerns": []
     },
     "T082": {
-      "status": "OPEN",
-      "did": "Test retry: it repeats the failed step and the steps after it, never the whole pipeline and never step 1 for a store-only retry (checklist 8.1c, FR-020).",
-      "files": [],
+      "status": "DONE",
+      "did": "The retry tests: the named step and what follows it only, a refused re-entrant entry, and the outcome each routing decision ends at",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchPipelineRetryTests.cs"
+      ],
       "concerns": []
     },
     "T083": {
-      "status": "OPEN",
-      "did": "[US1] Test the picture refresh: it cannot stop the launch, and an unreachable source is recorded with existing copies left in place (checklist 8.5c, FR-026).",
-      "files": [],
+      "status": "DONE",
+      "did": "Tested the picture refresh: it cannot stop the launch, and an unreachable source is recorded with the copies left in place",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/PictureCacheStepTests.cs"
+      ],
       "concerns": []
     },
     "T084": {
-      "status": "OPEN",
-      "did": "[US1] Test the verdict priming: the verdict is settled before a screen opens, neither best-effort step can hold the splash past its bound, and an awaiting run waits only on the step that opens one (checklist 8.5c, FR-003, FR-027).",
-      "files": [],
+      "status": "DONE",
+      "did": "Tested the verdict priming: it runs before the hand-over, is awaited rather than fired, and no best-effort step can hold the launch past its bound",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/VisualVerdictPrimingStepTests.cs"
+      ],
       "concerns": []
     },
     "T085": {
-      "status": "OPEN",
-      "did": "[US1] Test the splash: a line appears before the work it describes, and a stop states its cause rather than leaving a step number on screen (checklist 8.2, FR-002, FR-004).",
-      "files": [],
+      "status": "DONE",
+      "did": "Tested the splash: a line appears as the launch writes it and a stop states the cause the failing line carries",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/ViewModels/SplashViewModelTests.cs"
+      ],
       "concerns": []
     },
     "T086": {
-      "status": "OPEN",
-      "did": "[US1] Build the splash window with the live, append-only activity feed bound to the launch activity feed, replacing the placeholder (checklist 8.2a).",
-      "files": [],
+      "status": "DONE",
+      "did": "Built the launch window, replacing the placeholder, showing the live append-only feed the launch writes to",
+      "files": [
+        "Module_Startup/Views/SplashWindow.xaml",
+        "Module_Startup/Views/SplashWindow.xaml.cs"
+      ],
       "concerns": []
     },
     "T087": {
-      "status": "OPEN",
-      "did": "[US1] Build the splash view model: the feed lines, the derived count and the diagnosis carried on the line that caused it (checklist 8.2e, FR-002, FR-004).",
-      "files": [],
+      "status": "DONE",
+      "did": "Built the splash view model: feed rows, the count derived from the catalogue and feed, and the diagnosis carried on the line that caused it",
+      "files": [
+        "MTM_Waitlist.Startup/ViewModels/SplashViewModel.cs",
+        "MTM_Waitlist.Startup/Models/SplashFeedLine.cs"
+      ],
       "concerns": []
     },
     "T088": {
-      "status": "OPEN",
-      "did": "[US1] Add the picture-cache step: kept in the sequence, best effort, its own feed line, bounded more tightly than the thirty-second ceiling (checklist 8.5a, plan D21, FR-026).",
-      "files": [],
+      "status": "DONE",
+      "did": "Added the picture-cache step: best effort, its own feed line, bounded inside the ceiling",
+      "files": [
+        "MTM_Waitlist.Startup/Services/PictureCacheStep.cs"
+      ],
       "concerns": []
     },
     "T089": {
-      "status": "OPEN",
-      "did": "[US1] Add the verdict-priming step: settled before a screen opens, awaited only on the run that opens one, never able to hold the launch (checklist 8.5b, FR-027).",
-      "files": [],
+      "status": "DONE",
+      "did": "Added the verdict-priming step: awaited before the hand-over, never able to hold the launch",
+      "files": [
+        "MTM_Waitlist.Startup/Services/VisualVerdictPrimingStep.cs"
+      ],
       "concerns": []
     },
     "T090": {
-      "status": "OPEN",
-      "did": "Add the error toast anchored to the bottom of the splash, never covering the feed, and show each diagnosis on the feed line that caused it and in the toast (checklist 8.2b, 8.2e, FR-005).",
-      "files": [],
+      "status": "DONE",
+      "did": "Anchored the error strip as the last layout row so it states each diagnosis without ever covering the feed",
+      "files": [
+        "Module_Startup/Views/SplashPage.xaml",
+        "Module_Startup/Views/SplashPage.xaml.cs"
+      ],
       "concerns": []
     },
     "T091": {
-      "status": "OPEN",
-      "did": "Keep the launch window size configurable and its sizing failures non-fatal (checklist 8.2c).",
-      "files": [],
+      "status": "DONE",
+      "did": "Made the launch window size configurable from settings and treated every sizing failure as non-fatal",
+      "files": [
+        "Module_Startup/Views/SplashWindow.xaml",
+        "Module_Startup/Views/SplashWindow.xaml.cs",
+        "MTM_Waitlist.Startup/Options/LaunchWindowOptions.cs",
+        "appsettings.json"
+      ],
       "concerns": []
     },
     "T092": {
-      "status": "OPEN",
-      "did": "Build the splash page that hosts the feed for the single-window path (plan, `SplashPage` rebuilt).",
-      "files": [],
+      "status": "DONE",
+      "did": "Built the splash page that hosts the feed for the single-window path, drawing the same state the window shows",
+      "files": [
+        "Module_Startup/Views/SplashPage.xaml",
+        "Module_Startup/Views/SplashPage.xaml.cs"
+      ],
       "concerns": []
     },
     "T093": {
-      "status": "OPEN",
-      "did": "Register the splash surface, its view model and the two best-effort steps in the host.",
-      "files": [],
+      "status": "DONE",
+      "did": "Registered the splash view model, the two best-effort steps and the launch window size in the host",
+      "files": [
+        "MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs"
+      ],
       "concerns": []
     },
     "T094": {
-      "status": "OPEN",
-      "did": "Retire the placeholder window and its code-behind once the splash is the launch surface, and re-pin the page-activation exemption list to the rebuilt page set in the same pass, which is the second re-pin T031 owed (the Phase 2 hand-off).",
-      "files": [],
+      "status": "DONE",
+      "did": "Retired the placeholder, made the splash the launch surface across the launch outcomes, and re-pinned the rebuilt view set to it",
+      "files": [
+        "App.xaml.cs",
+        "Module_Startup/Views/StartupPlaceholderWindow.xaml",
+        "Module_Startup/Views/StartupPlaceholderWindow.xaml.cs",
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ],
       "concerns": []
     },
     "T095": {
-      "status": "OPEN",
-      "did": "[US2] Test the gate: an `IT Department` or `Developer` sign-in authorises configuration only and never opens the main screens, and a refusal is stated (FR-007).",
-      "files": [],
+      "status": "DONE",
+      "did": "gate tests: authorises IT Department and Developer only, states every refusal, refuses when the store cannot answer, and answers nothing that could open a screen; 11 cases pass",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/MachineSetupGateTests.cs"
+      ],
       "concerns": []
     },
     "T096": {
-      "status": "OPEN",
-      "did": "[US2] Test the closed gate: no input sequence reaches the shell from an unconfigured machine, and every abort route ends the process with its reason stated first (checklist 7.2d, 7.2e, FR-006, FR-008, SC-004, SC-006).",
-      "files": [],
+      "status": "DONE",
+      "did": "no-bypass tests: an unconfigured machine never hands the main screens over on any route, every declared abort route ends the process with its reason stated first, and the window is checked for all five routes; 9 cases pass",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/MachineSetupNoBypassTests.cs"
+      ],
       "concerns": []
     },
     "T097": {
-      "status": "OPEN",
-      "did": "[US2] Test the setup screen: a display name already in use is refused and a different one is asked for, and the save writes this machine's identity and its picture sources (FR-009).",
-      "files": [],
+      "status": "DONE",
+      "did": "setup screen tests: a refusal keeps the capture closed, a refused display name is stated and asked for again, and an accepted save writes the identity and the three picture sources; 7 cases pass",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/ViewModels/MachineSetupViewModelTests.cs"
+      ],
       "concerns": []
     },
     "T098": {
-      "status": "OPEN",
-      "did": "[US2] Build the machine-setup screen, shown when the machine is unconfigured and before any operator signs in, with a stable automation id (checklist 7.1a).",
-      "files": [],
+      "status": "DONE",
+      "did": "MachineSetupWindow with stable automation ids on every control; the startup view-set audit re-pinned to the three-markup set",
+      "files": [
+        "Module_Startup/Views/MachineSetupWindow.xaml;Module_Startup/Views/MachineSetupWindow.xaml.cs;MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ],
       "concerns": []
     },
     "T099": {
-      "status": "OPEN",
-      "did": "[US2] Build the gate that unlocks setup: an `IT Department` or `Developer` sign-in that authorises configuration only and never the shell, authenticating the person itself (checklist 7.1b, plan D11, FR-007).",
-      "files": [],
+      "status": "DONE",
+      "did": "MachineSetupGate: authenticates the person itself against the store with the shared hasher, authorises on permission.settings.machine_configuration, and never touches the launch identity",
+      "files": [
+        "MTM_Waitlist.Startup/Services/MachineSetupGate.cs"
+      ],
       "concerns": []
     },
     "T100": {
-      "status": "OPEN",
-      "did": "[US2] Build the setup view model: capture the display name, the description and the shared picture sources, and enforce the machine-configuration permission where the save happens rather than only where the control is drawn (checklist 7.1c, 7.3c, FR-007).",
-      "files": [],
+      "status": "DONE",
+      "did": "MachineSetupViewModel: captures the name, the description and the three picture sources, saves through the one writer, and enforces the permission where the save happens",
+      "files": [
+        "MTM_Waitlist.Startup/ViewModels/MachineSetupViewModel.cs"
+      ],
       "concerns": []
     },
     "T101": {
-      "status": "OPEN",
-      "did": "Add the setup step: it returns setup whenever the machine is unconfigured, or its configuration is removed, revoked or unreadable, and it writes the captured configuration to the store against the machine (checklist 7.1d, 7.1e, FR-009).",
+      "status": "DONE",
+      "did": "no work needed: the catalogue declares no machine-setup entry, the pipeline already routes an unconfigured machine to setup and SaveMachineConfigurationStep already writes the captured configuration; no MachineSetupStep.cs was created and none should be",
       "files": [],
       "concerns": []
     },
     "T102": {
-      "status": "OPEN",
-      "did": "End the process on every abort route — close box, Escape, Alt+F4, a cancel control, declining the setup sign-in — stating the reason first and localised, so the gate is never reported as a crash (checklist 7.2b, 7.2c, FR-008).",
-      "files": [],
+      "status": "DONE",
+      "did": "all five routes out of setup funnel into one ending that states the reason before the process goes; the close box is cancelled and re-routed, and Escape and Alt+F4 have accelerators of their own",
+      "files": [
+        "Module_Startup/Views/MachineSetupWindow.xaml;Module_Startup/Views/MachineSetupWindow.xaml.cs"
+      ],
       "concerns": []
     },
     "T103": {
-      "status": "OPEN",
-      "did": "Confirm the pipeline, not the screen, is what refuses to continue while the machine is unconfigured, so a dismissal route the screen misses still cannot reach the shell (checklist 7.2a, FR-006).",
-      "files": [],
+      "status": "DONE",
+      "did": "confirmed the pipeline is what refuses to continue; fixed the hand-off so every terminal outcome reaches the host, which is what makes the setup surface appear at all",
+      "files": [
+        "MTM_Waitlist.Startup/Services/LaunchPipeline.cs;App.xaml.cs"
+      ],
       "concerns": []
     },
     "T104": {
-      "status": "OPEN",
-      "did": "Register the setup screen, its view model, the gate and the step in the host.",
-      "files": [],
+      "status": "DONE",
+      "did": "the gate and the setup view model are registered in the startup DI extension",
+      "files": [
+        "MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs"
+      ],
       "concerns": []
     },
     "T105": {
-      "status": "OPEN",
-      "did": "Add all four permission keys to the Settings privileges page so each has a place to be granted (checklist 7.3b).",
-      "files": [],
+      "status": "DONE",
+      "did": "confirmed the four keys already have their place: the privileges page is built from the declaration, both strings per key ship, and the page test proves all four appear",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ],
       "concerns": []
     },
     "T106": {
-      "status": "OPEN",
-      "did": "[US3] Test the attempt limit: the sixth attempt on a temporary credential is refused even with the correct value, and it stays refused after a restart (checklist 8.4h, FR-012, SC-007).",
-      "files": [],
+      "status": "DONE",
+      "did": "Added the temporary-credential attempt-limit tests: the sixth attempt is refused even with the correct value, and a fresh service over the same account still refuses it.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialAttemptLimitTests.cs"
+      ],
       "concerns": []
     },
     "T107": {
-      "status": "OPEN",
-      "did": "[US3] Test the session: validity is judged on the store's clock and never the workstation's, and a sign-out clears the session before the restart (FR-010, FR-011).",
-      "files": [],
+      "status": "DONE",
+      "did": "Added the session tests: the store's clock decides validity, the length is read at issue time, and a sign-out ends the session before the restart.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchSessionServiceTests.cs"
+      ],
       "concerns": []
     },
     "T108": {
-      "status": "OPEN",
-      "did": "[US3] Test the remembered sign-in: an unreadable key falls back to the ordinary form, the fault is recorded, and nothing is kept on the machine in its place (FR-014).",
-      "files": [],
+      "status": "DONE",
+      "did": "Added the remembered-sign-in tests: an unreadable key and a rotated key both fall back, and nothing is stored in the key's place.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/RememberedSignInServiceTests.cs"
+      ],
       "concerns": []
     },
     "T109": {
-      "status": "OPEN",
-      "did": "[US3] Test the sign-in surface: the hint states what is missing rather than leaving the person guessing (checklist 8.4a).",
-      "files": [],
+      "status": "DONE",
+      "did": "Added the sign-in surface tests: the hint names what is still missing, a refusal stays on the form, and the forced password change waits.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/ViewModels/SignInViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/ViewModels/PasswordChangeViewModelTests.cs"
+      ],
       "concerns": []
     },
     "T110": {
-      "status": "OPEN",
-      "did": "[US3] Implement the credential check with the five-attempt limit on temporary credentials only, using the store's existing attempt counter so the limit survives a restart (checklist 8.4b, FR-012).",
-      "files": [],
+      "status": "DONE",
+      "did": "Implemented the credential check with the five-attempt limit on temporary credentials only, over sp_auth_user_credential_get, and added that read with create/rollback, the aggregate entry, the description and the validator check.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/CredentialCheckService.cs",
+        "Database/StoredProcedures/sp_auth_user_credential_get/create.sql",
+        "Database/StoredProcedures/sp_auth_user_credential_get/rollback.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "Database/Bootstrap/update_table_descriptions.sql",
+        "Database/Validation/user_management_schema/validate.sql"
+      ],
       "concerns": []
     },
     "T111": {
-      "status": "OPEN",
-      "did": "[US3] Implement the session against `user_active_sessions`, judged on the store's clock, with the expiry resolved from the session-length setting at issue time so a change takes effect at the next sign-in (checklist 8.4e, plan D17, FR-010, FR-011, SC-011).",
-      "files": [],
+      "status": "DONE",
+      "did": "Implemented the session against user_active_sessions, judged on the store's clock, with the length resolved from the session-length setting at issue time.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/LaunchSessionService.cs"
+      ],
       "concerns": []
     },
     "T112": {
-      "status": "OPEN",
-      "did": "[US3] Implement the machine gate with its four outcomes, admitting a machine whose hardware identity cannot be read because a fact that could not be read is not a failed check (checklist 8.4d, FR-015).",
-      "files": [],
+      "status": "DONE",
+      "did": "Implemented the machine gate with its four outcomes, admitting a computer whose hardware identity could not be read.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/MachineGateService.cs"
+      ],
       "concerns": []
     },
     "T113": {
-      "status": "OPEN",
-      "did": "[US3] Implement the remembered sign-in against the store, encrypted with the shared key file read at its UNC path, read only, with a key fingerprint so a rotated key is detected (checklist 8.4f, plan D13, FR-014).",
-      "files": [],
+      "status": "DONE",
+      "did": "Implemented the remembered sign-in over the store, AES encrypted with the shared key file read only at its UNC path, with a key fingerprint so a rotated key is detected.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/RememberedSignInService.cs"
+      ],
       "concerns": []
     },
     "T114": {
-      "status": "OPEN",
-      "did": "[US3] Build the sign-in surface, carrying the hint that states what is missing (checklist 8.4a).",
-      "files": [],
+      "status": "DONE",
+      "did": "Built the sign-in window with the hint that says what is missing, and wired it into the host's outcome switch.",
+      "files": [
+        "Module_Startup/Views/SignInWindow.xaml",
+        "Module_Startup/Views/SignInWindow.xaml.cs",
+        "App.xaml.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ],
       "concerns": []
     },
     "T115": {
-      "status": "OPEN",
-      "did": "Build the sign-in view model and the forced password change, opened only once the temporary credential has been accepted (checklist 8.4c, FR-013).",
-      "files": [],
+      "status": "DONE",
+      "did": "Built the sign-in view model and the forced password change, opened only once the temporary credential has been accepted.",
+      "files": [
+        "MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs",
+        "MTM_Waitlist.Startup/ViewModels/PasswordChangeViewModel.cs"
+      ],
       "concerns": []
     },
     "T116": {
-      "status": "OPEN",
-      "did": "Add the sign-in steps — sign-in, the machine gate, the forced password change and the session — each announcing itself before it runs (checklist 8.4, FR-002).",
-      "files": [],
+      "status": "DONE",
+      "did": "Added the seven sign-in steps, each taking its descriptor from the catalogue, and the sp_auth_user_password_set write the last of them needs.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/SignInSteps.cs",
+        "Database/StoredProcedures/sp_auth_user_password_set/create.sql",
+        "Database/StoredProcedures/sp_auth_user_password_set/rollback.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "Database/Bootstrap/update_table_descriptions.sql",
+        "Database/Validation/user_management_schema/validate.sql"
+      ],
       "concerns": []
     },
     "T117": {
-      "status": "OPEN",
-      "did": "Fall back to the ordinary sign-in form when the key file cannot be read, recording the fault and storing nothing locally instead (checklist 8.4g, FR-014).",
-      "files": [],
+      "status": "DONE",
+      "did": "Fell back to the ordinary sign-in form when the shared key cannot be read, recording the fault and storing nothing locally.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/RememberedSignInService.cs"
+      ],
       "concerns": []
     },
     "T118": {
-      "status": "OPEN",
-      "did": "Register the sign-in services, its view models and its steps in the host.",
-      "files": [],
+      "status": "DONE",
+      "did": "Registered the sign-in services, its two view models and its seven steps in the host, and moved the sign-out registrations there with them.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ],
       "concerns": []
     },
     "T119": {
-      "status": "OPEN",
-      "did": "[US4] Test the remedy table: a store outage offers no reset, and every stopping condition offers only actions that could remove its cause (FR-017, SC-010).",
-      "files": [],
+      "status": "DONE",
+      "did": "Tested the remedy table: a store outage offers no reset, every stop offers a repeat, the reset preview names every part it would touch, and only the scope-supplied part may be repaired without asking",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/BlockedStateRemediesTests.cs"
+      ],
       "concerns": []
     },
     "T120": {
-      "status": "OPEN",
-      "did": "[US4] Test the reset: it previews exactly what it will reset, affects only this machine's configuration, and never touches a person, a role or a permission (FR-018).",
-      "files": [],
+      "status": "DONE",
+      "did": "Tested the reset policy: it resets exactly the parts it was given, refuses to reach a person, a role or a permission, and attempts a quiet repair once so a fault that came back is asked about",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/StartupRecoveryServiceTests.cs"
+      ],
       "concerns": []
     },
     "T121": {
-      "status": "OPEN",
-      "did": "[US4] Test retry from the surface: only the failed piece and what follows it are repeated, and a silent repair produces no prompt (FR-016, FR-019, FR-020).",
-      "files": [],
+      "status": "DONE",
+      "did": "Tested retry from the stop surface: only the failed piece and what follows it are repeated, and a fault put right without asking raises no prompt and carries the launch on",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/ViewModels/BlockedStateViewModelTests.cs"
+      ],
       "concerns": []
     },
     "T122": {
-      "status": "OPEN",
-      "did": "[US4] Build the cause-to-remedy table, with `CanRestoreDefaults` false wherever a reset could not remove the cause and the preview naming exactly what a reset would touch (checklist 8.6b, 8.6c, FR-017, FR-018).",
-      "files": [],
+      "status": "DONE",
+      "did": "Built the cause-to-remedy table: a store outage offers no reset, a broken configuration offers one whose preview is composed from the parts the reset restores, and only the scope-supplied part is named as repairable without asking",
+      "files": [
+        "MTM_Waitlist.Startup/Services/BlockedStateRemedies.cs"
+      ],
       "concerns": []
     },
     "T123": {
-      "status": "OPEN",
-      "did": "[US4] Implement the reset policy and the silent repair: decide when a reset is offered and drive it through `IMachineConfigurationService.ResetToDefaultsAsync` rather than writing configuration rows here, so the targeted reset has one implementation, and repair a fault without asking wherever it can be repaired without hurting the operator (checklist 8.6d, 8.6e, FR-018, FR-019; contract §4).",
-      "files": [],
+      "status": "DONE",
+      "did": "Implemented the reset policy and the silent repair, narrowing every request to this machine's own configuration parts and driving the reset through IMachineConfigurationService.ResetToDefaultsAsync so there is one implementation",
+      "files": [
+        "MTM_Waitlist.Startup/Services/StartupRecoveryService.cs"
+      ],
       "concerns": []
     },
     "T124": {
-      "status": "OPEN",
-      "did": "[US4] Build the single blocked-state surface with a diagnosis specific to the cause, and Hide Reset when the store is unreachable (checklist 8.6a, 8.6b, FR-004, FR-017).",
-      "files": [],
+      "status": "DONE",
+      "did": "Built the blocked-state window: one surface stating the cause the failing line wrote, with the restore control drawn only when a reset could remove the cause",
+      "files": [
+        "Module_Startup/Views/BlockedStateWindow.xaml",
+        "Module_Startup/Views/BlockedStateWindow.xaml.cs"
+      ],
       "concerns": []
     },
     "T125": {
-      "status": "OPEN",
-      "did": "Build the blocked-state view model, with Retry going through the pipeline's retry-from step so only the failed piece and what follows it are repeated (checklist 8.6f, FR-016, FR-020).",
-      "files": [],
+      "status": "DONE",
+      "did": "Built the blocked-state view model: it reads the stop from the feed, keeps a best-effort failure out of it, and repeats through ILaunchPipeline.RetryFromAsync",
+      "files": [
+        "MTM_Waitlist.Startup/ViewModels/BlockedStateViewModel.cs"
+      ],
       "concerns": []
     },
     "T126": {
-      "status": "OPEN",
-      "did": "Show the popup that lists exactly what will be reset before anything is reset (checklist 8.6c, FR-018).",
-      "files": [],
+      "status": "DONE",
+      "did": "Added the popup that lists exactly what will be reset, named from the same table entry the reset runs from, and resets only on agreement",
+      "files": [
+        "Module_Startup/Views/BlockedStateWindow.xaml",
+        "Module_Startup/Views/BlockedStateWindow.xaml.cs"
+      ],
       "concerns": []
     },
     "T127": {
-      "status": "OPEN",
-      "did": "Make Close end the process with its reason stated, so the stop is never reported as a crash (FR-008).",
-      "files": [],
+      "status": "DONE",
+      "did": "Made every close route end the process through ILaunchPipeline.End with the reason stated first, so a closed stop never reads as a crash",
+      "files": [
+        "Module_Startup/Views/BlockedStateWindow.xaml",
+        "Module_Startup/Views/BlockedStateWindow.xaml.cs"
+      ],
       "concerns": []
     },
     "T128": {
-      "status": "OPEN",
-      "did": "Register the blocked-state surface, its view model and the recovery service in the host.",
-      "files": [],
+      "status": "DONE",
+      "did": "Registered the recovery service and the blocked-state view model, and added the blocked-state surface to the host's launch-surface switch",
+      "files": [
+        "MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs",
+        "App.xaml.cs",
+        "Module_Startup/Views/BlockedStateWindow.xaml",
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs",
+        "Strings/en-us/Resources.resw"
+      ],
       "concerns": []
     },
     "T129": {
-      "status": "OPEN",
-      "did": "[US5] Test the panel: filtering by machine and by error kind together lists only matching entries, filtering by severity and machine together does the same, and every query is bounded by a time window and a page size (US5 acceptance scenario 2, SC-005).",
-      "files": [],
+      "status": "DONE",
+      "did": "The panel's tests: machine with error kind and severity with machine each ask for both, every read carries a clamped window and page size, the order is the store's, the gate refuses the read and the copy, and the grouped view reads the group procedure",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/DeveloperLogPanelViewModelTests.cs"
+      ],
       "concerns": []
     },
     "T130": {
-      "status": "OPEN",
-      "did": "[US5] Test coverage: a release build records at least one entry per completed launch where it records none today, and no local log file is produced (SC-003, SC-016).",
-      "files": [],
+      "status": "DONE",
+      "did": "Store coverage: the seam carries no conditional attribute so a release build records, the host's launch-outcome line reaches the store through the seam, and a refused write leaves no local log file behind",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/StoreLogCoverageTests.cs"
+      ],
       "concerns": []
     },
     "T131": {
-      "status": "OPEN",
-      "did": "[US5] Build the developer log panel: newest first, the filter set the store indexes — including grouping repeated faults by their fingerprint — the entry card showing the full message, the exception detail and the chain link, and the two copy affordances, on the entry card and in the header, whose text T183's formatter produces. Every query is bounded (checklist 6.5a, 6.5c, 6.5d, SC-014, FR-038).",
-      "files": [],
+      "status": "DONE",
+      "did": "The developer log panel view: newest first, the six indexed filters with the grouped-by-fingerprint toggle, an entry card showing the full message, the exception detail and the chain link, and the two copy affordances",
+      "files": [
+        "Module_Settings/Views/DeveloperLogPanelView.xaml",
+        "Module_Settings/Views/DeveloperLogPanelView.xaml.cs",
+        "Strings/en-us/Resources.resw"
+      ],
       "concerns": []
     },
     "T132": {
-      "status": "OPEN",
-      "did": "[US5] Build the panel view model and gate it on `permission.settings.log_panel`, enforced in the view model rather than only hidden, with the two copy commands behind it and the clipboard call made through the options overload so a refused copy is reported rather than raised (checklist 6.5b, plan D11, D29).",
-      "files": [],
+      "status": "DONE",
+      "did": "The panel view model: gated on permission.settings.log_panel where the read and the copy happen, every read bounded by a time window and a page size, both copies through the formatter, and the clipboard refusal reported rather than raised",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/DeveloperLogPanelViewModel.cs",
+        "MTM_Waitlist.Settings/MTM_Waitlist.Settings.csproj"
+      ],
       "concerns": []
     },
     "T133": {
-      "status": "OPEN",
-      "did": "Delete the deferred file-based logging path: the log service, the log forwarder, their two contracts and the logging options, and remove the file-based provider registration (checklist 6.6a, deliberate deferral — their implementations had to stay standing through Phase 2 for the tree to keep compiling).",
-      "files": [],
+      "status": "DONE",
+      "did": "The deferred file-based logging path is gone: the forwarder, its contract and the logging options are deleted, with the file-based provider registration and its Configure call already removed, and the two forwarder names added to the retired-symbol guard with reintroduction samples",
+      "files": [
+        "MTM_Waitlist.Startup/Services/StartupLogForwarder.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IStartupLogForwarder.cs",
+        "MTM_Waitlist.Core/Models/StartupLoggingOptions.cs",
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ],
       "concerns": []
     },
     "T134": {
-      "status": "OPEN",
-      "did": "[US5] Delete the test that exists only for the deleted log path (checklist 6.6b).",
-      "files": [],
+      "status": "DONE",
+      "did": "The test that existed only for the deleted log path was already gone with the deleted StartupLogService, so this task closes as verified rather than repeated",
+      "files": [
+        "MTM_Waitlist.Tests/Services/StartupLogServiceTests.cs"
+      ],
       "concerns": []
     },
     "T135": {
-      "status": "OPEN",
-      "did": "[US5] Rewrite the retired static-log and activation tests so they no longer require `IStartupLogService`, recording what replaces each assertion (checklist 2.5b, deferred to here because the contracts they name survive until this phase).",
-      "files": [],
+      "status": "DONE",
+      "did": "The retired static-log test that named the deleted logging options is removed, with a class remark recording what replaces each assertion: the logging module's own tests and the store-log coverage tests",
+      "files": [
+        "MTM_Waitlist.Tests/Core/Models/StartupOptionsModelsTests.cs"
+      ],
       "concerns": []
     },
     "T136": {
-      "status": "OPEN",
-      "did": "Register the panel view model in the host.",
-      "files": [],
+      "status": "DONE",
+      "did": "The panel view model is registered with the settings module through a factory, because its clipboard writer is a delegate the container cannot supply, and a registration test resolves it",
+      "files": [
+        "MTM_Waitlist.Settings/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs",
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/DeveloperLogPanelViewModelTests.cs"
+      ],
       "concerns": []
     },
     "T137": {
-      "status": "OPEN",
-      "did": "[US6] Test the ignored-locations editor: it is read-only for every role but `IT Department` and `Developer`, the write is refused where the action happens, and the session-length setting refuses an unauthorised change with a stated reason (checklist 7.3d, 7.3e, FR-024, FR-029, SC-012).",
-      "files": [],
+      "status": "DONE",
+      "did": "Tested the ignored-locations editor and the session-length setting one case at a time: read-only for a reader holding only the read key, a stated refusal with nothing written, the service refusing the write where it happens, and an authorised change stored at plant scope",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs"
+      ],
       "concerns": []
     },
     "T138": {
-      "status": "OPEN",
-      "did": "[US6] Test that theme, waitlist order, alerts, seen-requests and the parts-without-pictures choice are held against the person in the store and are already there on another computer (FR-023, SC-008).",
-      "files": [],
+      "status": "DONE",
+      "did": "Wrote the person-scoped preference proof: theme, order, alerts, seen requests and the parts-without-pictures choice are each written and read back by a second consumer over the same store, and none is written at plant scope",
+      "files": [
+        "MTM_Waitlist.Tests/Services/ScopedPreferenceTests.cs"
+      ],
       "concerns": []
     },
     "T139": {
-      "status": "OPEN",
-      "did": "[US6] Test the role-restriction inventory: every setting restricted to particular roles today is still restricted to the same roles, one setting at a time (FR-030, SC-012). For the ignored-locations list, SC-012 pins the read restriction — `permission.settings.ignored_locations`, whose grants do not change — and the narrowed write to `IT Department` and `Developer` through the new edit key is a named, deliberate exception (research D10).",
-      "files": [],
+      "status": "DONE",
+      "did": "Wrote the role-restriction inventory: every declared setting named one at a time with the gate that reads its key, read from the shipped seed, plus the ignored-locations read/write split as the named exception",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/RoleRestrictionInventoryTests.cs"
+      ],
       "concerns": []
     },
     "T140": {
-      "status": "OPEN",
-      "did": "[US6] Replace the settings read and write in the theme selector with the scoped store setting (checklist 5.1a, plan D9, FR-023).",
-      "files": [],
+      "status": "DONE",
+      "did": "Replaced the theme selector local settings read and write with the scoped store setting, held against the person",
+      "files": [
+        "MTM_Waitlist.Core/Services/ThemeSelectorService.cs"
+      ],
       "concerns": []
     },
     "T141": {
-      "status": "OPEN",
-      "did": "[US6] Replace the settings read and write in the waitlist sort preference with the scoped store setting (checklist 5.1b, FR-023).",
-      "files": [],
+      "status": "DONE",
+      "did": "Replaced the waitlist sort preference local settings read and write with the scoped store setting at person scope, keeping the normalisation and the declared default",
+      "files": [
+        "MTM_Waitlist.Core/Services/WaitlistSortPreferenceService.cs"
+      ],
       "concerns": []
     },
     "T142": {
-      "status": "OPEN",
-      "did": "[US6] Replace the settings read in the ignored-locations service with the plant-scope store setting (checklist 5.1c, FR-024).",
-      "files": [],
+      "status": "DONE",
+      "did": "Replaced the ignored-locations service local read with the plant-scope store setting and added the write, which is refused where it happens unless the edit entitlement is held",
+      "files": [
+        "MTM_Waitlist.Core/Services/IgnoredLocationsService.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IIgnoredLocationsService.cs"
+      ],
       "concerns": []
     },
     "T143": {
-      "status": "OPEN",
-      "did": "[US6] Replace the settings read and write in the new-request alert service with the scoped store setting (checklist 5.1d, FR-023).",
-      "files": [],
+      "status": "DONE",
+      "did": "Replaced the new-request alert service local settings read and write with the scoped store setting at person scope, recording a store refusal instead of leaving an unobserved task",
+      "files": [
+        "MTM_Waitlist.Core/Services/NewRequestAlertService.cs",
+        "MTM_Waitlist.Core/Contracts/Services/INewRequestAlertService.cs"
+      ],
       "concerns": []
     },
     "T144": {
-      "status": "OPEN",
-      "did": "[US6] Replace the settings read and write in the message-seen store with the scoped store setting (checklist 5.1e, FR-023).",
-      "files": [],
+      "status": "DONE",
+      "did": "Replaced the message-seen store local settings read and write with the scoped store setting at person scope, keeping the trim and the fail-soft behaviour",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/LocalWaitlistMessageSeenStore.cs"
+      ],
       "concerns": []
     },
     "T145": {
-      "status": "OPEN",
-      "did": "[US6] Replace the settings read and write in the dunnage image-search view model with the scoped store setting (checklist 5.1g, FR-023).",
-      "files": [],
+      "status": "DONE",
+      "did": "Replaced the dunnage image-search view model local settings read and write with the scoped store setting at person scope",
+      "files": [
+        "MTM_Waitlist.Setup/ViewModels/SetupDunnageImageSearchDialogViewModel.cs"
+      ],
       "concerns": []
     },
     "T146": {
-      "status": "OPEN",
-      "did": "Delete the duplicate ignored-locations read and write in the settings view model, call the service instead, and make the editor read-only for every role but `IT Department` and `Developer`, enforcing the edit key where the write happens (checklist 5.1f, 7.3c, 7.3d, FR-024).",
-      "files": [],
+      "status": "DONE",
+      "did": "Deleted the duplicate ignored-locations read and write from the settings view model, called the service instead, and made the editor read-only for every role but the two the edit key admits, refusing with a stated reason",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs",
+        "Module_Settings/Views/SettingsPage.xaml",
+        "Strings/en-us/Resources.resw"
+      ],
       "concerns": []
     },
     "T147": {
-      "status": "OPEN",
-      "did": "Add the session-length setting to the settings panel, changeable only by `IT Department` or `Developer`, enforced where the change happens (checklist 7.3e, plan D17, FR-029).",
-      "files": [],
+      "status": "DONE",
+      "did": "Added the session-length panel, adopting the one declaration of the key in Core that the launch already resolves, changeable only by the two roles the key admits and refused where the write happens",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs",
+        "Module_Settings/Views/SettingsPage.xaml",
+        "MTM_Waitlist.Core/Models/ScopedPreferenceKeys.cs"
+      ],
       "concerns": []
     },
     "T148": {
-      "status": "OPEN",
-      "did": "Host the developer log panel from Phase 7 inside Settings (the Phase 7 hand-off).",
-      "files": [],
+      "status": "DONE",
+      "did": "Hosted the developer log panel inside Settings behind its own permission key, so a reader who may not open it never brings the panel into the tree",
+      "files": [
+        "Module_Settings/Views/SettingsPage.xaml",
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs"
+      ],
       "concerns": []
     },
     "T149": {
-      "status": "OPEN",
-      "did": "[US6] Inventory every setting that is role-restricted today and confirm each keeps the same restriction (checklist 7.3f, FR-030), recording for the ignored-locations list that its unchanged restriction is the read key and that the narrowed write is the deliberate exception from research D10 (SC-012).",
-      "files": [],
+      "status": "DONE",
+      "did": "Recorded the per-setting restriction inventory and the ignored-locations exception: the read key keeps its nine grants, the write key is held by exactly the two roles FR-024 names",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/RoleRestrictionInventoryTests.cs"
+      ],
       "concerns": []
     },
     "T150": {
-      "status": "OPEN",
-      "did": "Delete the local settings service and its contract, including the test-only corruption helper (checklist 5.2a).",
-      "files": [],
+      "status": "DONE",
+      "did": "Deleted the local settings service and its contract, including the test-only corruption helper, and their registration",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/ILocalSettingsService.cs",
+        "MTM_Waitlist.Settings/Services/LocalSettingsService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ],
       "concerns": []
     },
     "T151": {
-      "status": "OPEN",
-      "did": "[US6] Delete the file service and its DI registration, since the local settings service was its only consumer (checklist 5.2b).",
-      "files": [],
+      "status": "DONE",
+      "did": "Deleted the file service, its contract and its registration, together with the test file that existed only for it",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IFileService.cs",
+        "MTM_Waitlist.Core/Services/FileService.cs",
+        "MTM_Waitlist.Tests/Core/Services/FileServiceTests.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ],
       "concerns": []
     },
     "T152": {
-      "status": "OPEN",
-      "did": "[US6] Delete the local settings options model and its configuration binding, and with it the two tests that construct the type — `LocalSettingsOptions_Defaults` and `LocalSettingsOptions_AcceptsConfiguredValues` (checklist 5.2c; `specs/010-startup-rebuild/local-state-test-migration.md` §4 item 5).",
-      "files": [],
+      "status": "DONE",
+      "did": "Deleted the local settings options model, its configuration binding and the two tests that constructed it",
+      "files": [
+        "MTM_Waitlist.Core/Models/LocalSettingsOptions.cs",
+        "MTM_Waitlist.Tests/Core/Models/StartupOptionsModelsTests.cs",
+        "MTM_Waitlist.Tests/Models/StartupModelsTests.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ],
       "concerns": []
     },
     "T153": {
-      "status": "OPEN",
-      "did": "[US6] Delete the already-dead settings storage extensions (checklist 5.2d).",
-      "files": [],
+      "status": "DONE",
+      "did": "Deleted the already-dead settings storage extensions",
+      "files": [
+        "MTM_Waitlist.Core/Helpers/SettingsStorageExtensions.cs"
+      ],
       "concerns": []
     },
     "T154": {
-      "status": "OPEN",
-      "did": "[US6] Confirm the packaging-mode helper call sites and the image cache paths are untouched, since packaging mode and the image cache both stay (checklist 5.2e).",
-      "files": [],
+      "status": "DONE",
+      "did": "Confirmed the packaging-mode helper call sites and the image cache paths are untouched: no file under MTM_Waitlist.Shared was changed",
+      "files": [
+        "MTM_Waitlist.Shared/"
+      ],
       "concerns": []
     },
     "T155": {
-      "status": "OPEN",
-      "did": "[US6] Move the shared folder and keys folder paths, and the dunnage root folder, into the machine configuration captured by machine setup, and re-point the resolver that reads them (checklist 5.3b, 5.3c, FR-025).",
-      "files": [],
+      "status": "DONE",
+      "did": "Moved the shared folder, the keys folder and the dunnage root into the machine configuration captured by machine setup, re-pointed the resolver at it and adopted the dunnage root at launch",
+      "files": [
+        "MTM_Waitlist.Settings/Models/ImageStorageOptions.cs",
+        "MTM_Waitlist.Settings/Services/ImageStorageConfigurationResolver.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Module_Settings/ImageStorageConfigurationResolverTests.cs"
+      ],
       "concerns": []
     },
     "T156": {
-      "status": "OPEN",
-      "did": "[US6] Reduce `appsettings.json` to the connection strings plus the reviewed `MockServiceClient` exception, deleting the startup, local-settings and logging sections and confirming `ModuleSharedOptions` and `ModuleCoreSettingsOptions` before either is deleted (checklist 2.2e, 5.3a, 5.3d, 5.3e, 6.6c, plan D24, FR-025).",
-      "files": [],
+      "status": "DONE",
+      "did": "Reduced appsettings.json to the connection strings, the window options and the reviewed MockServiceClient exception, and confirmed ModuleSharedOptions and ModuleCoreSettingsOptions carry only defaults so neither was deleted blind",
+      "files": [
+        "appsettings.json",
+        "MTM_Waitlist.Tests/Models/StartupModelsTests.cs"
+      ],
       "concerns": []
     },
     "T157": {
-      "status": "OPEN",
-      "did": "[US6] Delete the test that exists only for the local-file mechanism, and replace the local settings double with the store seam in the files listed in `specs/010-startup-rebuild/local-state-test-migration.md` §2 — ten doubles across eleven kept files, five replaced and five deleted outright, four of them already dead — keeping every existing assertion and removing the one test method that asserts local persistence, `AddAndRemove_PersistToLocalSettings` (checklist 5.4a, 5.4e).",
-      "files": [],
+      "status": "DONE",
+      "did": "Deleted the test that existed only for the local-file mechanism, replaced five local settings doubles with the store seam, deleted five more that were already dead, and removed the one method asserting local persistence",
+      "files": [
+        "MTM_Waitlist.Tests/Services/LocalSettingsServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/TestDoubles.cs",
+        "MTM_Waitlist.Tests/**"
+      ],
       "concerns": []
     },
     "T158": {
-      "status": "OPEN",
-      "did": "Confirm no test in the suite still references a local settings type or key, and that the solution builds with no reference left to a deleted settings type (checklist 5.4f, 5.2f).",
-      "files": [],
+      "status": "DONE",
+      "did": "Confirmed the suite holds no reference to a local settings type or key beyond one negative string assertion, and the solution builds with no reference left to a deleted settings type",
+      "files": [
+        "MTM_Waitlist.Tests/**"
+      ],
       "concerns": []
     },
     "T159": {
-      "status": "OPEN",
-      "did": "Expand S13 from its group summary into the plain list of the cases the three read-only sweeps found, and record the twenty-three cases in `spec.md`'s Edge Cases section as part of the same catalogue, then walk that list and write a test for each case that still applies, one test per case — the four spec cases T171 to T174 already own are covered by those tasks and are not written twice (checklist 9.1a, FR-031, SC-013). The list does not exist yet, so it is recorded here before anything is walked (checklist 9.1a, FR-031, SC-013).",
-      "files": [],
+      "status": "DONE",
+      "did": "S13 expanded into a walkable catalogue with a disposition per case, the same twenty-three cases recorded in spec.md, and a test for each case not already covered",
+      "files": [
+        "STARTUP-REBUILD-BRIEF.md",
+        "MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs",
+        "specs/010-startup-rebuild/spec.md"
+      ],
       "concerns": []
     },
     "T160": {
-      "status": "OPEN",
-      "did": "Confirm the suite holds no disabled, skipped or commented-out startup test — a skipped case is a case dropped silently, which FR-031 forbids (checklist 9.1c, brief S16, FR-031, SC-013).",
-      "files": [],
+      "status": "DONE",
+      "did": "The two hardware-identity cases now state the machine they are about instead of standing down on a host that presents an address",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/PreSignInStepsTests.cs"
+      ],
       "concerns": []
     },
     "T161": {
-      "status": "OPEN",
-      "did": "Run against a fresh store and prove the machine-setup gate appears and cannot be bypassed (checklist 9.2a, SC-004).",
-      "files": [],
+      "status": "DONE",
+      "did": "Run against a fresh store: the machine-setup gate appeared at 0.7s stating the computer is unconfigured, no main screen opened, and the gate could not be bypassed - leaving via Close setup produced the statement that nobody with IT Department or Developer authority signed in and the process then ended. Nothing was written to the machine's own state.",
+      "files": [
+        "specs/010-startup-rebuild/acceptance.md"
+      ],
       "concerns": []
     },
     "T162": {
-      "status": "OPEN",
-      "did": "Write the embed guide for the new module with an `applyTo`, covering the entry point, the host seam, the contracts it needs and their registration order, how to add a step, how to add a log entry and how to add a machine-configuration field, plus the invariants a later change must not break (checklist 10.1a–10.1d).",
-      "files": [],
+      "status": "DONE",
+      "did": "The embed guide for the rebuilt module: its entry point, host seam, contracts, how to add a step, a log entry and a machine-configuration field, and the invariants a change must not break",
+      "files": [
+        ".github/instructions/startup-rebuild.instructions.md"
+      ],
       "concerns": []
     },
     "T163": {
-      "status": "OPEN",
-      "did": "Re-adopt a living spec for the new startup surface, retire both old capabilities' leftovers — the `startup` and `startup-diagnostics` rows in `living-specs.yml` and in `capabilities/DRIFT.md`'s two-capability table, whose matched files are gone — and confirm the registry matches the tree (checklist 10.2a, 10.2b; the deferred Phase 2 registry edit).",
-      "files": [],
+      "status": "DONE",
+      "did": "The rebuilt surface re-adopted as one capability replacing the two whose matched code is gone: the registry, the drift ledger and capabilities/startup-launch/spec.md",
+      "files": [
+        "living-specs.yml",
+        "capabilities/DRIFT.md",
+        "capabilities/startup-launch/spec.md"
+      ],
       "concerns": []
     },
     "T164": {
-      "status": "OPEN",
-      "did": "Record the rebuild in the changelog in the repo's end-user format (checklist 10.3a).",
-      "files": [],
+      "status": "DONE",
+      "did": "The rebuild recorded in the end-user changelog",
+      "files": [
+        "CHANGELOG.md"
+      ],
       "concerns": []
     },
     "T165": {
-      "status": "OPEN",
-      "did": "Update the README module list and remove every reference to the retired splash and sign-in surfaces (checklist 2.5f, 10.3b).",
-      "files": [],
+      "status": "DONE",
+      "did": "The README module list updated: the logging library added and the rebuilt startup module described",
+      "files": [
+        "README.md"
+      ],
       "concerns": []
     },
     "T166": {
-      "status": "OPEN",
-      "did": "Correct the UI-automation instructions so they describe the new gate and the store-backed log panel instead of the retired splash, sign-in and log-directory path (checklist 2.5e, 6.6c, 10.3c).",
-      "files": [],
+      "status": "DONE",
+      "did": "The UI-automation instructions corrected: the machine-setup gate and sign-in are what a driven run must pass, the automatic sign-in claim is retired, and diagnostics are read from the panel rather than a log directory",
+      "files": [
+        ".github/instructions/winui3-ui-automation.instructions.md"
+      ],
       "concerns": []
     },
     "T171": {
-      "status": "OPEN",
-      "did": "Test the case where a temporary credential is reset while the person is signing in with the old one, so an in-flight sign-in meets the reset rather than it being assumed absent (spec.md Edge Cases; T159's catalogue; FR-031, SC-013).",
-      "files": [],
+      "status": "DONE",
+      "did": "The case where a temporary credential is reset while the person signs in with the old one: the reset is met, not assumed absent",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs"
+      ],
       "concerns": []
     },
     "T172": {
-      "status": "OPEN",
-      "did": "Test that a credential reset issued while the person is signed in elsewhere does not end the session already running, matching the rule that no procedure clears sessions by person for a reset (spec.md Edge Cases; FR-011; contracts/sql-contracts.md §1).",
-      "files": [],
+      "status": "DONE",
+      "did": "The case where a credential reset elsewhere ends no running session: no credential-writing procedure names the session table",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs"
+      ],
       "concerns": []
     },
     "T173": {
-      "status": "OPEN",
-      "did": "Test that an account still holding the legacy temporary value signs in and has that value recognised exactly as it is today (spec.md Edge Cases; FR-012, FR-013).",
-      "files": [],
+      "status": "DONE",
+      "did": "The case where an account still holding the legacy temporary value signs in and is asked to replace it",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs"
+      ],
       "concerns": []
     },
     "T174": {
-      "status": "OPEN",
-      "did": "Test that a sign-out whose restart fails still ends the session and tells the person to open the application again, rather than leaving a half-signed-out state (spec.md Edge Cases; FR-008, FR-011, SC-001).",
-      "files": [],
+      "status": "DONE",
+      "did": "The case where a sign-out whose restart fails still ends the session and tells the person to open the application again",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs"
+      ],
       "concerns": []
     },
     "T167": {
-      "status": "OPEN",
-      "did": "Record in S13 the reason for every case that no longer applies, beside the case itself, rather than leaving it untested and unexplained (checklist 9.1b, FR-031, SC-013).",
-      "files": [],
+      "status": "DONE",
+      "did": "The five cases that no longer apply recorded with their reasons, and the two new ones named",
+      "files": [
+        "STARTUP-REBUILD-BRIEF.md"
+      ],
       "concerns": []
     },
     "T168": {
@@ -2339,87 +3844,125 @@
       "concerns": []
     },
     "T169": {
-      "status": "OPEN",
-      "did": "Run the retired-symbol audit one final time and confirm nothing came back (checklist 10.3d, FR-028, SC-009).",
-      "files": [],
+      "status": "DONE",
+      "did": "The retired-symbol audit run once more: nothing came back",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs"
+      ],
       "concerns": []
     },
     "T170": {
-      "status": "OPEN",
-      "did": "Validate against the Success Criteria with the single suite run: stop any stale `MTM_Waitlist`, XAML-compiler or MSBuild process, set `MSBUILDDISABLENODEREUSE=1`, build `MTM_Waitlist.sln` for x64 Debug with `/m:1 /nodeReuse:false` at zero warnings and zero errors, then run the suite (checklist 3.2c, FR-001–FR-038, SC-001–SC-017).",
-      "files": [],
+      "status": "DONE",
+      "did": "The single validation run: stale processes stopped, MSBUILDDISABLENODEREUSE set, x64 Debug clean at zero warnings and zero errors, then the whole suite green",
+      "files": [
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ],
       "concerns": []
     },
     "T180": {
-      "status": "OPEN",
-      "did": "Test the capture: the chain carries every exception with its depth and index, an aggregate contributes all of its independent failures, an over-long chain is truncated with its marker rather than silently, a member that throws on read is replaced instead of losing the entry, and a failing recorder raises no second diagnostic (FR-032, FR-037).",
-      "files": [],
+      "status": "DONE",
+      "did": "The capture tests: every exception with its depth and index, all of an aggregate's failures, truncation marked, a member that throws replaced, and a refused store absorbed",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/ExceptionCaptureTests.cs"
+      ],
       "concerns": []
     },
     "T181": {
-      "status": "OPEN",
-      "did": "Test the fingerprint: the same fault raised twice produces the same value, a different fault or module produces a different one, the message's variable parts are normalized out, and an entry raised without an exception carries none (FR-033, SC-014).",
-      "files": [],
+      "status": "DONE",
+      "did": "The fingerprint tests: one fault twice hashes alike, a different fault or module does not, a parameter value is not carried, and no exception means no fingerprint",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/ExceptionFingerprintTests.cs"
+      ],
       "concerns": []
     },
     "T182": {
-      "status": "OPEN",
-      "did": "Test the gathered context: the runtime, view and store objects are built by the seam and not by the caller, a store fault carries the provider's code and a statement fingerprint containing no parameter values, and nothing on the never-write list reaches any of them (FR-034 to FR-036, SC-015, SC-016).",
-      "files": [],
+      "status": "DONE",
+      "did": "The context tests: the runtime, view and store objects are the seam's, a store fault carries the provider's codes, and nothing on the never-write list reaches the payload",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/DiagnosticContextTests.cs"
+      ],
       "concerns": []
     },
     "T175": {
-      "status": "OPEN",
-      "did": "Serialize the exception chain into `exception_detail`: one node per exception carrying its level, index, type, message, stack, source, HRESULT, help link, target site and allowlisted data, with `ToString()` stored once as `full`, capped at a node boundary with an explicit truncation marker, and defensive against a member that throws on read (plan D25, FR-032).",
-      "files": [],
+      "status": "DONE",
+      "did": "The exception chain serialized into exception_detail: one node per exception with its level, index, type, message, stack, source, HRESULT, help link, target site and allowlisted data, ToString() once as full, cut at a node boundary with an explicit marker",
+      "files": [
+        "MTM_Waitlist.Logging/ExceptionDetailSerializer.cs"
+      ],
       "concerns": []
     },
     "T177": {
-      "status": "OPEN",
-      "did": "Build the context the seam gathers: the `runtime` object, the `ui` object from whatever the caller could name, and the `database` object read from the provider's own exception, with the statement recorded as a value-free fingerprint (plan D27, FR-034, FR-035, FR-036).",
-      "files": [],
+      "status": "DONE",
+      "did": "The gathered context: the runtime object, the ui object from what the caller could name, and the database object read from the provider's own exception",
+      "files": [
+        "MTM_Waitlist.Logging/DiagnosticContext.cs"
+      ],
       "concerns": []
     },
     "T176": {
-      "status": "OPEN",
-      "did": "Derive `error_fingerprint` from the fault's type, module, action and a normalized message shape, and carry it on the entry so the write procedure can store it (plan D26, FR-033).",
-      "files": [],
+      "status": "DONE",
+      "did": "error_fingerprint derived from the fault's type, module, action and a normalized message shape, carried on the entry for the write procedure to store",
+      "files": [
+        "MTM_Waitlist.Logging/ExceptionDetailSerializer.cs"
+      ],
       "concerns": []
     },
     "T178": {
-      "status": "OPEN",
-      "did": "Redact before anything is written: parameter names and their count may be recorded, values and credentials may not, and a provider message is cut at the first `=` that follows a parameter name (FR-036; `contracts/logging-contract.md` §6).",
-      "files": [],
+      "status": "DONE",
+      "did": "Redaction before anything is written: a message is cut at the first = after a parameter name with the names and their count recorded, a structured property named for a secret is dropped, and a name that names a path keeps the one exception the contract grants it",
+      "files": [
+        "MTM_Waitlist.Logging/ExceptionDetailSerializer.cs",
+        "MTM_Waitlist.Logging/DiagnosticContext.cs"
+      ],
       "concerns": []
     },
     "T179": {
-      "status": "OPEN",
-      "did": "Absorb the writer's own secondary failures — the two clauses T065 does not carry: no local substitute record, and no added wait for the caller whose fault is being recorded (plan D27, FR-037).",
-      "files": [],
+      "status": "DONE",
+      "did": "The writer absorbs its own secondary failures: no local substitute record and no added wait for the caller whose fault is being recorded, with a store that refuses every write proved to raise nothing",
+      "files": [
+        "MTM_Waitlist.Logging/StoreLogWriter.cs"
+      ],
       "concerns": []
     },
     "T183": {
-      "status": "OPEN",
-      "did": "Format the panel's copy: the entries' columns in the order the panel shows them, the exception chain and payload exactly as stored, the chain link included, an entry separator, a header naming the filter the copy came from, and a stated ceiling cut with an explicit marker rather than silently — the ceiling's value is recorded in `contracts/logging-contract.md` §7 by this task, because no artifact states it yet (plan D29, FR-038).",
-      "files": [],
+      "status": "DONE",
+      "did": "The panel's copy formatter: the columns in the panel's order, the chain and payload verbatim, the chain link, a header naming the filter, an entry separator, and a 1048576 character ceiling cut with an explicit marker, with the value written into the contract",
+      "files": [
+        "MTM_Waitlist.Logging/LogExportFormatter.cs",
+        "MTM_Waitlist.Logging/LogPanelEntry.cs",
+        "specs/010-startup-rebuild/contracts/logging-contract.md"
+      ],
       "concerns": []
     },
     "T184": {
-      "status": "OPEN",
-      "did": "Test the copy: it carries the chain, the runtime context, the store diagnostics and the chain link for the entries it was given, it names the filter it came from, it is cut with a marker at the ceiling, it holds nothing the store is forbidden to hold, and a refused clipboard is reported rather than raised (FR-038, SC-017).",
-      "files": [],
+      "status": "DONE",
+      "did": "The copy's tests: the chain, the context, the store diagnostics and the chain link travel verbatim, the filter is named, the ceiling cuts with a marker that names it, the labels introduce no denied name, and a refused clipboard is reported rather than raised",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/LogExportFormatterTests.cs"
+      ],
       "concerns": []
     },
     "T185": {
-      "status": "OPEN",
-      "did": "Re-point the shell's sign-out off `ISignOutService` and `SignOutResult` before US3's registration pass deletes them: `ShellViewModel` injects `ISignOutService` and exposes `Task<SignOutResult> SignOutAsync`, and `ShellPage.xaml.cs` uses `SignOutResult` and calls `MTM_Waitlist.Module_Startup.Services.SignOutService.ResolveRestartFailedMessage()` at line 207 — the production file outside the startup module that names `MTM_Waitlist.Module_Startup.Services`, which T005's assertion covers; T188 owns the test-side reference. Move it onto the rebuilt session service, keep the refusal message it produces, and re-point `ShellViewModelTests`, which asserts that a sign-out goes through the service rather than merely clearing the displayed name (FR-011, SC-001).",
-      "files": [],
+      "status": "DONE",
+      "did": "Re-pointed the shell's sign-out off the retired core contracts and onto the rebuilt startup sign-out service, and re-pointed the shell tests with it.",
+      "files": [
+        "ViewModels/ShellViewModel.cs",
+        "Module_Core/Views/ShellPage.xaml.cs",
+        "MTM_Waitlist.Tests/Module_Core/ViewModels/ShellViewModelTests.cs",
+        "MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs",
+        "MTM_Waitlist.Core/Contracts/Services/SignOutResult.cs"
+      ],
       "concerns": []
     },
     "T186": {
-      "status": "OPEN",
-      "did": "Provide the process-restart path `IAppProcessRestarter` carried, so a sign-out still ends the session and restarts, and so a restart that fails is reported rather than leaving a half-signed-out state (FR-011; spec.md Edge Cases; the case T174 tests).",
-      "files": [],
+      "status": "DONE",
+      "did": "Provided the process-restart path the retired contract carried, so a sign-out ends the session first and reports a restart that fails.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/SignOutService.cs",
+        "MTM_Waitlist.Startup/Services/AppProcessRestarter.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IAppProcessRestarter.cs"
+      ],
       "concerns": []
     },
     "T187": {
@@ -2440,7 +3983,7 @@
     },
     "T188": {
       "status": "DONE",
-      "did": "Re-pointed UserManagementLiveIntegrationTests off the deleted startup surface: the Module_Startup.Services import is gone and the session fixture, its cleanup and its state read now use user_active_sessions, so the session case survives instead of being retired. All 12 live cases pass against the running store.",
+      "did": "Recorded in the file why the session case is asserted against user_active_sessions directly rather than through the rebuilt session service: the claim is a store property, and the service can only judge a session this process issued; the retired repository and its six procedures are gone",
       "files": [
         "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs"
       ],
@@ -2488,9 +4031,11 @@
       "concerns": []
     },
     "T194": {
-      "status": "OPEN",
-      "did": "Record coverage entries for FR-032 to FR-038 and for all seventeen success criteria, so the requirement record traces the work that already exists under the two addenda and so SC-013's demand that every acceptance case be covered or retired can be read from the record per SC-013 (partial).",
-      "files": [],
+      "status": "DONE",
+      "did": "Coverage entries recorded for FR-038 and for all seventeen success criteria, each naming the test methods that prove it",
+      "files": [
+        "specs/010-startup-rebuild/.spec-context.json"
+      ],
       "concerns": []
     },
     "T195": {
@@ -2519,19 +4064,114 @@
   },
   "concerns": [
     {
-      "note": "The local store was not running when this run started, so the T020 and T060 drops could not be applied until it was started; both are applied and verified now.",
-      "step": "implement"
-    },
-    {
-      "note": "sessions.length_hours is a key name this run fixed. T111 (LaunchSessionService) and T147 (the settings panel) must read that key, or the seeded default is orphaned.",
-      "step": "implement"
-    },
-    {
-      "note": "T188's session case proves the rule against the store seam rather than the rebuilt session service, because LaunchSessionService (T111) is not built yet.",
-      "step": "implement"
-    },
-    {
       "note": "The full suite is green with the store offline (as every earlier recorded run was), but with the store online one pre-existing test fails: PermissionBaselineParityTests.EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore. It is unrelated to these tasks: the committed seed already grants permission.settings.part_pictures to plant_manager and setup_lead (feature 008's deliberate widening) while the test still expects the 006-era retired list (Admin, Developer). The test gates on MTM_WAITLIST_TEST_DB_CONNECTION_STRING, so no earlier run ever exercised it. Re-pointing that expectation is a specification decision, not one this run should take silently."
+    },
+    {
+      "note": "T033's removal proof recorded that no launch path reaches a store read, which held while the host showed the placeholder directly. T078 wires the host to the launch pipeline and the pipeline reads the store, so that proof describes the placeholder phase rather than the shipped behaviour.",
+      "step": "implement"
+    },
+    {
+      "note": "The ReadHardwareIdentityStep case that depends on this machine presenting no usable hardware address is skipped on this workstation, so the branch it covers stays unproven here.",
+      "step": "implement"
+    },
+    {
+      "note": "The catalogue declares seventeen operations while the startup phases so far implement eight, so a launch mid-implementation passes over nine entries and shows a partial completed count. Each phase closes part of that gap and the last one closes it.",
+      "step": "implement"
+    },
+    {
+      "note": "sp_auth_user_credential_get does not exist in the store and no surviving read returns password_hash or password_salt, so on a real machine the gate refuses every setup sign-in until that read is added. Phase 5 (T110) needs the same material.",
+      "step": "implement"
+    },
+    {
+      "note": "Adding keys to Strings/en-us/Resources.resw exposes that file pre-existing key-style findings to the changed-file-scoped naming check, so a PR touching it will fail on violations this change did not introduce.",
+      "step": "implement"
+    },
+    {
+      "note": "The host hand-back can be raised off the UI thread, which is pre-existing behaviour on the main-screens path and untouched here. The new setup window is activated from the same path.",
+      "step": "implement"
+    },
+    {
+      "note": "The live schema validator was not run. The two new procedures are registered in AllSPs.sql, described in update_bootstrap/update_table_descriptions.sql and asserted by Database/Validation/user_management_schema/validate.sql, but that assertion has not executed against a real store, and this environment has no migrated store to run it against.",
+      "step": "implement"
+    },
+    {
+      "note": "T188 was not executed. tasks.md places it in US3 Wave 3 beside T111, but the phase brief scoped the work to T106-T118 plus T185 and T186, so UserManagementLiveIntegrationTests still names MTM_Waitlist.Module_Startup.Services and StartupSessionRepository.",
+      "step": "implement"
+    },
+    {
+      "note": "The store's reset reports the parts it was asked for rather than the rows it changed, so the first machine-configuration stop always looks repaired and carries the launch on; the second stop asks, because the quiet repair is one-shot. Bounded and deliberate, but it costs two stops to reach the prompt.",
+      "step": "implement"
+    },
+    {
+      "note": "FR-008 and FR-018 are covered at unit level only: the close route and the preview popup are UI wiring, which this suite does not exercise. A live run against a reachable store is what would prove them end to end.",
+      "step": "implement"
+    },
+    {
+      "note": "The retired-symbol guard lost the StartupRecoveryService pattern, so reintroducing the old recovery service under that name would no longer fail the build. The rebuilt type occupies the name, and no other check can tell the two apart.",
+      "step": "implement"
+    },
+    {
+      "note": "appsettings.json still carries an inert StartupLoggingOptions section for the type deleted here; T156 in US6 reduces that file.",
+      "step": "implement"
+    },
+    {
+      "note": "The seeded plant-scope session-length row is sessions.length_hours in Database/Seeds/seed_permission_role_baselines/create.sql, and Database/Validation/settings_schema/validate.sql checks that key, while the launch reads auth.session_length_minutes. The panel now writes the key the launch reads, so the seeded row is dead. The seeds and the validator are outside this phase file list, so this is reported rather than changed.",
+      "step": "implement"
+    },
+    {
+      "note": "The theme write path cannot be exercised in a unit test: it needs a real WinUIEx WindowEx, and no test in the suite constructs one. T138 therefore proves the theme by reading a seeded store through a fresh service, which is the half SC-008 describes.",
+      "step": "implement"
+    },
+    {
+      "note": "Two acceptance runs are open: T161 (the machine-setup gate against a fresh store) and T168 (the store unreachable, a slow store and a stalled share, then the comparison with the Phase 1 baseline). Both need a live store and a driven window, so neither was run and the spec is left at implementing rather than completed.",
+      "step": "implement"
+    },
+    {
+      "note": "The sweeps' original 111-case breakdown is not recovered in STARTUP-REBUILD-BRIEF.md S13. The twenty-three cases the specification records are listed with a disposition each, and the gap is stated in S13.1 rather than papered over.",
+      "step": "implement"
+    },
+    {
+      "note": "The pre-sign-in read-remembered-sign-in step still reads nothing, because the remembered-sign-in procedures key on person and machine and the launch has no person before the form is answered. Remember-me is therefore offered from the sign-in form once a name is typed. A computer-scoped read would close it.",
+      "step": "implement"
+    },
+    {
+      "note": "The window-behaviour cases (the abort routes out of setup, the reset preview, the close route, the launch window's saved size) are asserted by reading the window code-behind rather than by driving a running application: nothing in the suite constructs a WindowEx.",
+      "step": "implement"
+    },
+    {
+      "note": "Three consumer-facing surfaces are new and unreviewed by a person: the launch window's wording, the machine-setup screen's layout and the developer log panel's card. The suite cannot judge what renders.",
+      "step": "implement"
+    },
+    {
+      "note": "The person's install run on 2026-09-27 failed at Bootstrap/update_table_descriptions.sql: it still carried ALTER TABLE auth_sessions_tokens for the table feature 010 deleted in T060, so the script stopped and every description below it went unapplied. The stale block is removed, and every ALTER target now exists in Tables/AllSeeds.sql (audited by comparison).",
+      "step": "implement"
+    },
+    {
+      "note": "The same install reported Feature.IgnoredLocations and auth.session_length_minutes missing at scope all_users. Both rows existed only in seed_permission_role_baselines/create.sql and had never been added to Seeds/AllSeeds.sql, which is the file the installer actually runs, so a fresh store never received them. Both rows are now in the aggregate. This is the second defect of one shape: an individual artifact amended while the hand-maintained aggregate was not.",
+      "step": "implement"
+    },
+    {
+      "note": "Applying the two fixes to the store needs the MySQL credential, which is prompted for interactively by install_local_database.vbs and is not readable from the repository, so the corrected scripts have been verified by inspection and by cross-checking the aggregate against the individual artifacts rather than by running them.",
+      "step": "implement"
+    },
+    {
+      "note": "Database/Seeds/seed_setup_workstations_default/create.sql carries a seed_setup_work_centers_default header and inserts into setup_work_centers_catalog, duplicating the seed_setup_work_centers_default folder. Nothing runs it and it does not affect the install, but a folder that is named for one thing and contains another is a trap for the next reader.",
+      "step": "implement"
+    },
+    {
+      "note": "The stalled-share part of T168 is unrun and T168 is therefore still open. The launch stops for a sign-in before it resolves the person and again before it opens the shell, so the picture step - the fifteenth of seventeen - is unreachable without someone signed in. The mechanism is covered by the suite (a best-effort step ignoring its bound does not hold the launch; exactly two steps are best-effort and both sit inside the ceiling), but the end-to-end observation is not: a real launch meeting a share that answers nothing should carry on and record the step as skipped, which is a different outcome from the two cases that were run."
+    },
+    {
+      "note": "The stalled-share case T168 case C is no longer blocked on a credential: every account in the local store now holds a usable credential, so a person can sign in and the launch can reach the picture step. It still needs this computer to be configured first, which is now possible from the setup screen."
+    },
+    {
+      "note": "The wording pass covered the launch, sign-in and machine-setup surfaces, which is where the requested examples pointed. The blocked-state window keeps the wording it had - 'The launch stopped' and 'What stopped the launch' - because it is already plain language and its window name is asserted in the UI-automation instructions."
+    },
+    {
+      "note": "The administrator sign-in screen that authorises machine setup has never been seen by the owner - they said so when asked to review the three new surfaces - so its current layout cannot be judged and T222's rework has no reference point."
+    },
+    {
+      "note": "T219 needs a machine-scoped read of recent sign-ins to build the previous-users list. The surviving procedure sp_auth_remembered_sign_ins_get is keyed by person and machine and the launch has no person before the form has been answered, so that read cannot serve, and the new one is not yet written."
     }
   ],
   "verified": [
@@ -2657,6 +4297,206 @@
       "exitCode": 0,
       "durationSeconds": 1.3,
       "result": "[db-validate] Applying seed file: C:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\Database\\Seeds\\seed_waitlist_request_item_images\\create.sql · [db-validate] Applying seed file: C:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\Database\\Seeds\\seed_waitlist_requests_default\\create.sql · [db-validate] Database schema validation passed using MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING."
+    },
+    {
+      "what": "the solution builds clean for x64 Debug",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 33.6,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:33.43"
+    },
+    {
+      "what": "the startup, launch-pipeline and logging-capture tests pass",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1 --no-build --filter FullyQualifiedName~MTM_Waitlist.Tests.Module_Startup",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 2.1,
+      "result": "A total of 1 test files matched the specified pattern. ·   Skipped ReadHardwareIdentityStep_RunAsync_WhenTheAddressCouldNotBeRead_ReportsTheWorkLeftUndone [18 ms] · Passed!  - Failed:     0, Passed:   146, Skipped:     1, Total:   147, Duration: 854 ms - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "solution build, x64 Debug",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "result": "Build succeeded, 0 warnings, 0 errors"
+    },
+    {
+      "what": "the three US2 test classes",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1 --filter MachineSetupGateTests|MachineSetupNoBypassTests|MachineSetupViewModelTests",
+      "result": "Failed 0, Passed 27, Skipped 0"
+    },
+    {
+      "what": "startup namespace plus the audits and privilege-page tests",
+      "command": "dotnet test ... --no-build --filter Module_Startup|RetiredSymbolAuditTests|PageActivationAuditTests|PermissionsViewModelTests|PermissionRegistryTests",
+      "result": "Failed 0, Passed 243, Skipped 1, an environment-gated host-hardware case"
+    },
+    {
+      "what": "SQL boundary and privilege baselines",
+      "command": "dotnet test ... --no-build --filter InlineSqlAuditTests|PermissionBaselineParityTests|PermissionsViewModelTests",
+      "result": "Failed 0, Passed 36, Skipped 1, needs a live store"
+    },
+    {
+      "what": "Solution build",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 27.1,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:26.89"
+    },
+    {
+      "what": "Phase 5 and audit tests",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1 --no-build --filter \"FullyQualifiedName~Module_Startup|FullyQualifiedName~RetiredSymbolAudit|FullyQualifiedName~InlineSqlAudit|FullyQualifiedName~PageActivationAudit|FullyQualifiedName~ShellViewModelTests|FullyQualifiedName~PermissionGateSite\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 4.4,
+      "result": "A total of 1 test files matched the specified pattern. ·   Skipped ReadHardwareIdentityStep_RunAsync_WhenTheAddressCouldNotBeRead_ReportsTheWorkLeftUndone [17 ms] · Passed!  - Failed:     0, Passed:   273, Skipped:     1, Total:   274, Duration: 3 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "The WMC9999 seen mid-run was a downstream symptom of the C# accessibility errors, not a XAML defect",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "result": "clean rebuild reports 0 warnings 0 errors and no XAML compiler diagnostic, so the markup compiles"
+    },
+    {
+      "what": "The crypto and encoding APIs the remembered sign-in uses were checked against Microsoft Learn",
+      "command": "mcp_microsoft_lea_microsoft_docs_search: SymmetricAlgorithm.EncryptCbc DecryptCbc padding mode .NET AES symmetric encryption overloads",
+      "result": "The page confirms EncryptCbc(ReadOnlySpan<byte>, ReadOnlySpan<byte>, PaddingMode) returning byte[], with PKCS7 as the parameter default, and its guidance section is what prompted the move to an authenticated mode. DecryptCbc is the mirror, and AesGcm(byte[] key, int tagSizeInBytes) is the non-obsolete constructor. The zero-warning build is the evidence that the overloads compile as used."
+    },
+    {
+      "what": "solution builds at zero warnings and zero errors",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31.0,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:30.79"
+    },
+    {
+      "what": "the whole Module_Startup namespace passes",
+      "command": "dotnet test \"MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj\" -c Debug -p:Platform=x64 /m:1 --no-build --filter \"FullyQualifiedName~MTM_Waitlist.Tests.Module_Startup\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 2.3,
+      "result": "A total of 1 test files matched the specified pattern. ·   Skipped ReadHardwareIdentityStep_RunAsync_WhenTheAddressCouldNotBeRead_ReportsTheWorkLeftUndone [16 ms] · Passed!  - Failed:     0, Passed:   266, Skipped:     1, Total:   267, Duration: 1 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "the three startup audit suites pass",
+      "command": "dotnet test \"MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj\" -c Debug -p:Platform=x64 /m:1 --no-build --filter \"FullyQualifiedName~RetiredSymbolAuditTests|FullyQualifiedName~InlineSqlAuditTests|FullyQualifiedName~PageActivationAuditTests\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 2.7,
+      "result": "Test run for C:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\MTM_Waitlist.Tests\\bin\\x64\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0) · A total of 1 test files matched the specified pattern. · Passed!  - Failed:     0, Passed:    16, Skipped:     0, Total:    16, Duration: 1 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "the three Phase 6 test classes pass",
+      "command": "dotnet test \"MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj\" -c Debug -p:Platform=x64 /m:1 --no-build --filter \"FullyQualifiedName~BlockedStateRemediesTests|FullyQualifiedName~StartupRecoveryServiceTests|FullyQualifiedName~BlockedStateViewModelTests\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 1.1,
+      "result": "Test run for C:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\MTM_Waitlist.Tests\\bin\\x64\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0) · A total of 1 test files matched the specified pattern. · Passed!  - Failed:     0, Passed:    31, Skipped:     0, Total:    31, Duration: 78 ms - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "the blocked-state surface, its reset popup and its close route were read against the contract, because they are UI-only and this suite does not cover rendering",
+      "result": "The window mirrors SignInWindow and MachineSetupWindow: an action row at the bottom, the message strip in its own row, a ContentDialog listing the preview before any reset runs, and every close route funnelling into ILaunchPipeline.End with the reason stated.",
+      "warnings": [
+        "UI-only: not exercised by an automated run"
+      ]
+    },
+    {
+      "what": "solution build at zero warnings and zero errors",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "result": "Build succeeded, 0 Warning(s), 0 Error(s)"
+    },
+    {
+      "what": "Phase 7's own tests plus the whole startup, settings and logging namespaces and the retired-symbol and inline-SQL audits",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1 --no-build --filter FullyQualifiedName~Module_Startup|~Module_Settings|~RetiredSymbolAudit|~InlineSqlAudit|~Module_Logging",
+      "result": "Failed 0, Passed 757, Skipped 29, Total 786"
+    },
+    {
+      "what": "the three new test classes alone",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1 --no-build --filter FullyQualifiedName~LogExportFormatterTests|~DeveloperLogPanelViewModelTests|~StoreLogCoverageTests",
+      "result": "Failed 0, Passed 27, Skipped 0, Total 27"
+    },
+    {
+      "what": "the phase suites, the four namespaces they can break, and the three audits, all green",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1 --no-build --filter \"FullyQualifiedName~MTM_Waitlist.Tests.Module_Startup|FullyQualifiedName~MTM_Waitlist.Tests.Module_Settings|FullyQualifiedName~MTM_Waitlist.Tests.Module_Core|FullyQualifiedName~MTM_Waitlist.Tests.Module_Waitlist|FullyQualifiedName~MTM_Waitlist.Tests.Module_Setup|FullyQualifiedName~MTM_Waitlist.Tests.Services|FullyQualifiedName~MTM_Waitlist.Tests.Core|FullyQualifiedName~MTM_Waitlist.Tests.Models|FullyQualifiedName~RetiredSymbolAuditTests|FullyQualifiedName~InlineSqlAuditTests|FullyQualifiedName~PageActivationAuditTests\"",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 22.6,
+      "result": "  Skipped UpdateAsync_DeactivatingAPerson_LeavesTheirExistingSessionsAlone [< 1 ms] ·   Skipped UpdateAsync_OneSaveChangingSeveralFields_SharesOneChangeIdentifierAcrossItsAuditRows [< 1 ms] · Passed!  - Failed:     0, Passed:  1399, Skipped:    45, Total:  1444, Duration: 21 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "the solution builds clean at zero warnings and zero errors for x64 Debug",
+      "command": "dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 28.2,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:28.05"
+    },
+    {
+      "what": "the whole suite passes",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 /m:1 --no-build",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 35.0,
+      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1743, Skipped:    46, Total:  1789, Duration: 33 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "T168 case A: a store that cannot be reached at all",
+      "result": "The launch showed its feed and stopped at +17.5s citing 'Contacting the store did not finish within the 15 second(s) it is allowed.', offering only Close and Try again. Local files under LocalAppData\\MTM_Waitlist were 2 before and 2 after."
+    },
+    {
+      "what": "T168 case B: a store that accepts a connection and then answers nothing, with the client timeout set to 60s",
+      "result": "The launch stopped at +15.6s with the same 15-second statement, so the launch's own maximum ended the wait and not the client timeout. Nothing was persisted."
+    },
+    {
+      "what": "The full suite after the four runtime fixes",
+      "result": "Passed: 1744, Failed: 0, Skipped: 46, Total: 1790, 34s - MTM_Waitlist.Tests.dll (net10.0). Against the Phase 1 baseline of 1507 passed and 55 skipped, the 228-test difference is this feature's own additions and the 9 fewer skips are database-backed tests that ran because a store was attached."
+    },
+    {
+      "what": "A Developer account can now pass the machine-setup gate",
+      "result": "A real launch showed the setup screen at +0.5s, the sign-in was accepted, and the configuration panel appeared authorised as 'Test Developer'. All ten accounts verify under the application's own PasswordSecretHasher.Verify with the new credential and reject the old 0000 placeholder."
+    },
+    {
+      "what": "The development seed now issues a credential every account can use",
+      "result": "The seed's own INSERT was lifted from the file and run against a scratch table, then each row was checked with the application's own PasswordSecretHasher.Verify: 10 of 10 confirm the documented placeholder. The scratch table means no live table was touched."
+    },
+    {
+      "what": "The repository schema validator now exits zero",
+      "result": "dotnet-style run of .github/scripts/validate-database-schema.ps1 against the local store: 'Database schema validation passed', exit code 0. It previously could not, because the seed comment at line 216 contained a semicolon that split the statement in half. That comment is the one this change replaced."
+    },
+    {
+      "what": "The full suite after the seed change",
+      "result": "Passed: 1747, Failed: 0, Skipped: 46, Total: 1793. Against 1744 passed and 1790 total before, the difference is exactly the three new guards in MTM_Waitlist.Tests/Module_Core/Services/DevelopmentSeedCredentialTests.cs."
+    },
+    {
+      "what": "The three new guards were shown failing before the fix",
+      "result": "Against the unfixed seed they failed with 'johnk is seeded with no salt, so no credential can ever confirm it' and 'johnk still stores the retired marker as its hash'. A first run also exposed a defect in the guard's own parser, which matched 8 of the 10 account rows because the first two are written one value per line."
+    },
+    {
+      "what": "The seed ships 4330 and the store confirms it after the seed itself was applied",
+      "result": "Database/Seeds/seed_dev_masked_baseline/create.sql and AllSeeds.sql each carry the new hash 10 times with zero occurrences of the old hash, the old salt or the retired marker. After the validator applied the seed to the local store with -ApplySeeds, all 10 accounts confirm 4330 under the application's own PasswordSecretHasher.Verify, and the setup screen accepted TEST.DEVELOPER / 4330 and showed the configuration panel authorised as 'Test Developer'."
+    },
+    {
+      "what": "A plain validation run no longer writes to the store",
+      "result": "The account credential rows plus assignment, settings and computer counts were fingerprinted before and after a run with no switch. The fingerprint was identical, and the log said 'Seed phase skipped: this run read the store and wrote nothing'. The same run with -ApplySeeds logged 'Seed phase: applying seed create.sql files', so the switch reaches the seed files."
+    },
+    {
+      "what": "The full suite after the seed and validator changes",
+      "result": "Passed: 1747, Failed: 0, Skipped: 46, Total: 1793, which is unchanged because the three guards moved from 0000 to 4330 rather than being added to."
+    },
+    {
+      "what": "The rebuilt launch surface, read from a real launch",
+      "result": "With the store held open by a listener that never answers, the surface reported exactly: SplashPage_Logo (an Image), SplashPage_ProgressBar reported as Busy so the bar was travelling rather than filling, SplashPage_Progress reading 'Step 1 of 17', SplashPage_Status reading 'Contacting the store' on the rotating control, SplashPage_Details, and SplashPage_CloseButton. No TitleBar, SystemMenuBar, System menu item, Minimize, Maximize or Close element was present, so the window frame and its system buttons are gone."
+    },
+    {
+      "what": "The full suite after the splash work",
+      "result": "Passed: 1751, Failed: 0, Skipped: 46, Total: 1797. Against 1747 before, the difference is the four new guards on the long-wait behaviour plus two realigned progress tests."
+    },
+    {
+      "what": "The machine-setup screen after a real sign-in",
+      "result": "Read from the running window: subtitle 'This computer has not been set up yet. A Developer or an Admin has to give it a name and tell it where its shared pictures are kept.'; sign-in name labelled 'Developer / Admin user name'; the credential field labelled 'Password'; the button 'Sign in and unlock setup'; the refusal 'Type a Developer or Admin user name and password before unlocking setup.' After signing in as TEST.DEVELOPER the panel showed 'Name this computer', the display name pre-filled with the machine's own stored name, the shared pictures folder pre-filled with the shipped ImagesRootDefault, the shared keys folder pre-filled with KeysFolderDefault, and a 'Choose folder' button beside each of the three folder fields with ids MachineSetupWindow_SharedFolderBrowse, _KeysFolderBrowse and _DunnageRootBrowse."
+    },
+    {
+      "what": "The full suite after the machine-setup and wording changes",
+      "result": "Passed: 1754, Failed: 0, Skipped: 46, Total: 1800. Against 1751 before, the difference is the three new guards on the folder dialog and the pre-filled defaults."
     }
   ],
   "owner_approval": "2026-09-26: the owner approved running the destructive tasks, on the basis that git can restore the schema artifacts. This is the recorded approval T056 and the phase 2.4 and 5.6 deletion tasks were waiting on.",

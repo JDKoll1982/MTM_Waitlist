@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
+using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Shared.Helpers;
 
@@ -8,14 +10,15 @@ namespace MTM_Waitlist.Module_Settings.Services;
 
 /// <summary>
 /// Implementation of IImageStorageConfigurationResolver.
-/// Resolves image storage configuration with support for database overrides.
-/// Uses a cache with invalidation support for performance.
+/// Resolves image storage configuration: the machine's own configured folders first, then the plant-wide
+/// override, then this build's shipped default. Cached with invalidation support for performance.
 /// </summary>
 public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurationResolver
 {
     private readonly ILogger<ImageStorageConfigurationResolver> _logger;
     private readonly IOptions<ImageStorageOptions> _appsettingsOptions;
     private readonly IConfigSettingsValueService _configService;
+    private readonly IMachineConfigurationService? _machineConfiguration;
     
     // Cache for resolved values with TTL
     private readonly ConcurrentDictionary<string, CachedValue<object>> _cache;
@@ -25,17 +28,24 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
     /// Initializes a new ImageStorageConfigurationResolver.
     /// </summary>
     /// <param name="logger">Logger for diagnostics</param>
-    /// <param name="appsettingsOptions">Configuration options from appsettings.json</param>
-    /// <param name="configService">Service for reading database configuration values</param>
-    /// <exception cref="ArgumentNullException">If any parameter is null</exception>
+    /// <param name="appsettingsOptions">The shipped defaults, used only when neither the machine nor the plant names a folder</param>
+    /// <param name="configService">Service for reading plant-wide configuration values</param>
+    /// <param name="machineConfiguration">
+    /// This machine's own configuration, where the shared folder, the keys folder and the dunnage root now live
+    /// (T155, FR-025). Optional so a host that has no machine configuration read, such as a test or the cache
+    /// service, still resolves the plant-wide value and the shipped default.
+    /// </param>
+    /// <exception cref="ArgumentNullException">If a required parameter is null</exception>
     public ImageStorageConfigurationResolver(
         ILogger<ImageStorageConfigurationResolver> logger,
         IOptions<ImageStorageOptions> appsettingsOptions,
-        IConfigSettingsValueService configService)
+        IConfigSettingsValueService configService,
+        IMachineConfigurationService? machineConfiguration = null)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _appsettingsOptions = appsettingsOptions ?? throw new ArgumentNullException(nameof(appsettingsOptions));
         _configService = configService ?? throw new ArgumentNullException(nameof(configService));
+        _machineConfiguration = machineConfiguration;
         _cache = new ConcurrentDictionary<string, CachedValue<object>>();
     }
 
@@ -53,7 +63,8 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
                 return (string)cached.Value;
             }
 
-            // Try database override
+            // The plant-wide override, which is an IT-level decision that applies to every computer and therefore
+            // outranks one machine's own configuration.
             var dbValue = await _configService.GetSettingValueAsync(
                 ConfigSettingKeys.ImageStorageSharedFolderPath, "all_users");
             
@@ -65,11 +76,21 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
                 return dbValue.SettingValue;
             }
 
-            // Fall back to appsettings
+            // This machine's own configured folder, which is what machine setup captured (T155, FR-025).
+            var machineValue = await ReadMachineFolderAsync(MachineConfigurationSourceKinds.SharedFolder).ConfigureAwait(false);
+
+            if (!string.IsNullOrWhiteSpace(machineValue))
+            {
+                _logger.LogInformation("Using this machine's configured shared folder path: {Path}", machineValue);
+                CacheValue(cacheKey, machineValue, "machine-configuration");
+                return machineValue;
+            }
+
+            // Fall back to this build's shipped default, which is what a machine that names no folder is left with.
             var appsettingsValue = _appsettingsOptions.Value.SharedFolderPath;
-            _logger.LogInformation("Using appsettings.json default for shared folder path: {Path}",
+            _logger.LogInformation("Using the shipped default for shared folder path: {Path}",
                                  appsettingsValue);
-            CacheValue(cacheKey, appsettingsValue, "appsettings");
+            CacheValue(cacheKey, appsettingsValue, "default");
             return appsettingsValue;
         }
         catch (Exception ex)
@@ -104,10 +125,19 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
                 return dbValue.SettingValue;
             }
 
+            var machineValue = await ReadMachineFolderAsync(MachineConfigurationSourceKinds.KeysFolder).ConfigureAwait(false);
+
+            if (!string.IsNullOrWhiteSpace(machineValue))
+            {
+                _logger.LogInformation("Using this machine's configured key-files folder path: {Path}", machineValue);
+                CacheValue(cacheKey, machineValue, "machine-configuration");
+                return machineValue;
+            }
+
             var appsettingsValue = _appsettingsOptions.Value.KeysFolderPath;
-            _logger.LogInformation("Using appsettings.json default for key-files folder path: {Path}",
+            _logger.LogInformation("Using the shipped default for key-files folder path: {Path}",
                                  appsettingsValue);
-            CacheValue(cacheKey, appsettingsValue, "appsettings");
+            CacheValue(cacheKey, appsettingsValue, "default");
             return appsettingsValue;
         }
         catch (Exception ex)
@@ -316,13 +346,49 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
     /// <inheritdoc />
     public async Task<SharedFolderResolution> GetSharedFolderResolutionAsync()
     {
-        // The path first, and through the ordinary cascade: the store wins over this machine's own settings file
-        // (OQ-3), so the folder reported here is the folder every computer reads.
+        // The path first, and through the ordinary cascade: the plant-wide override wins, then this machine's own
+        // configured folder, then the shipped default, so the folder reported here is the folder every computer
+        // reads (FR-009, OQ-3).
         var folderPath = await GetSharedFolderPathAsync().ConfigureAwait(false);
+        var machineFolderPath = await ReadMachineFolderAsync(MachineConfigurationSourceKinds.SharedFolder).ConfigureAwait(false);
 
         return new SharedFolderResolution(
             folderPath,
-            _appsettingsOptions.Value.SharedFolderPath?.Trim() ?? string.Empty);
+            machineFolderPath?.Trim() ?? string.Empty);
+    }
+
+    /// <summary>
+    /// The folder this machine holds for one picture source, or <c>null</c> when it holds none or there is no
+    /// machine-configuration read to ask.
+    /// </summary>
+    /// <remarks>
+    /// A store that cannot answer is answered with null rather than raising, so the caller falls through to the
+    /// plant-wide override and then to the shipped default. A machine that cannot read its own configuration
+    /// still resolves a folder, because a screen that shows pictures should not break over a preference.
+    /// </remarks>
+    private async Task<string?> ReadMachineFolderAsync(string sourceKind)
+    {
+        if (_machineConfiguration is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var state = await _machineConfiguration
+                .GetStateAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            var source = state.PictureSources.FirstOrDefault(
+                candidate => string.Equals(candidate.Kind, sourceKind, StringComparison.Ordinal));
+
+            return string.IsNullOrWhiteSpace(source?.Path) ? null : source.Path.Trim();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "This machine's picture sources could not be read; the plant-wide value was used instead.");
+            return null;
+        }
     }
 
     /// <inheritdoc />

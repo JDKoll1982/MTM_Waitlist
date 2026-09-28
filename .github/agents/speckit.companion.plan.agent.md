@@ -5,6 +5,8 @@ description: Companion plan — implementation plan with research & design artif
 
 <!-- Extension: companion -->
 <!-- Config: .specify/extensions/companion/ -->
+
+
 ## User Input
 
 ```text

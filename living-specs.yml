@@ -1,22 +1,20 @@
 enabled: true
 exempt: ["*.config.*", "*.test.*", "**/migrations/**"]
 # --------------------------------------------------------------------------------------------
-# THE REGISTRY IS NOT THE REPOSITORY. Two capabilities are declared below; everything else in
-# the tree has NO living spec, so drift across it is invisible by construction -- and a green
+# THE REGISTRY IS NOT THE REPOSITORY. One capability is declared below; everything else in the
+# tree has NO living spec, so drift across it is invisible by construction -- and a green
 # `drift.py` run means "the registry is complete with respect to itself", not "the repo is in
 # sync". Unwatched today: MTM_Waitlist.Waitlist.View/**, Module_Waitlist/**, MTM_Waitlist.Core/**,
 # MTM_Waitlist.Setup/**, Module_Setup/**, Database/**, Strings/**, Views/**, ViewModels/**.
 # Adopting an area is opt-in via /speckit.companion.living-adopt.
 # The standing record -- what is watched, what was found, and this blind spot -- is
 # `capabilities/DRIFT.md`. Read it before trusting a green run.
+#
+# 2026-09-27 (feature 010, task T163): the two capabilities this file used to declare, `startup`
+# and `startup-diagnostics`, were retired with the code they matched. The rebuilt surface is one
+# capability, `startup-launch`, and it is the whole of both areas the old pair split between them:
+# the old split existed because the file-based log path was its own concern, and that path is gone.
 # --------------------------------------------------------------------------------------------
 capabilities:
-  - name: startup
+  - name: startup-launch
     match: ["MTM_Waitlist.Startup/**", "Module_Startup/**"]
-    # The diagnostics leaf owns these two files. The resolver scores a capability by the
-    # directory depth of its glob's literal prefix, so a filename glob inside a whole-area
-    # glob can never outscore its parent — without this exclude the leaf is decorative and
-    # every StartupLog* change folds into `startup`.
-    exclude: ["MTM_Waitlist.Startup/Services/StartupLog*.cs"]
-  - name: startup-diagnostics
-    match: ["MTM_Waitlist.Startup/Services/StartupLog*.cs"]
