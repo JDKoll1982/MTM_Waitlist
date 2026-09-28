@@ -81,12 +81,14 @@ public sealed class RetiredSymbolAuditTests
         //
         // SplashViewModel, SplashWindow and SplashPage are deliberately NOT in this list. US1 rebuilds that
         // surface in place under the same three names, so what the removal deleted was the old splash's behaviour
-        // rather than its name. StartupRecoveryService is absent for the same reason: US4 rebuilds it in place as
-        // the reset policy and the silent repair (T123), so the name is live again. What stays forbidden is
-        // everything the rebuild did not reuse: the old sign-in pair, the shared SplashView control, the App
-        // window-handoff statics, and the retired services, contracts and models — including
-        // IStartupRecoveryService, the contract the rebuilt policy deliberately does not put back, because a
-        // reset is driven through IMachineConfigurationService.ResetToDefaultsAsync instead.
+        // rather than its name. StartupRecoveryService's type name is absent for the same reason: US4 rebuilds it
+        // in place as the reset policy and the silent repair (T123), so the name is live again. What is forbidden
+        // for it is its old members instead — the single-setting repair and the corrupt-and-restart path, two
+        // patterns further down (T209) — because that is what a reintroduction of the old behaviour would carry.
+        // What stays forbidden by name is everything the rebuild did not reuse: the old sign-in pair, the shared
+        // SplashView control, the App window-handoff statics, and the retired services, contracts and models —
+        // including IStartupRecoveryService, the contract the rebuilt policy deliberately does not put back,
+        // because a reset is driven through IMachineConfigurationService.ResetToDefaultsAsync instead.
         ("retired activation contract", new Regex(@"\bIActivationService\b", RegexOptions.Compiled)),
         ("retired activation-handler contract", new Regex(@"\bIActivationHandler\b", RegexOptions.Compiled)),
         ("retired app-lifecycle contract", new Regex(@"\bIAppLifecycleService\b", RegexOptions.Compiled)),
@@ -154,6 +156,12 @@ public sealed class RetiredSymbolAuditTests
         // ServiceLog.cs` and `MTM_Waitlist.Tests/Module_Mock_Service/ServiceLogTests.cs`); a reappearance of
         // either fails here too, since the scan matches raw text rather than resolved symbols.
         ("retired debug-only static logger", new Regex(@"\bStartupDebugLog\b", RegexOptions.Compiled)),
+
+        // The old recovery service is rebuilt in place under the same name (T123), so its type name cannot be
+        // forbidden without failing on its replacement. What the removal deleted is that service's own two
+        // members — the repair of a single named setting, and the corrupt-then-restart path — and a
+        // reintroduction of the old behaviour would arrive carrying one of them (T209).
+        ("retired recovery-service member", new Regex(@"\b(CorruptAndRestartAsync|ResetSettingAsync)\b", RegexOptions.Compiled)),
     ];
 
     /// <summary>File extensions this audit treats as code or database artifacts.</summary>
@@ -214,7 +222,8 @@ public sealed class RetiredSymbolAuditTests
         // SplashWindow, SplashPage and SplashViewModel are absent on purpose: US1 rebuilds that surface in place
         // under the same names. SplashView, the shared control the old pair drew through, is genuinely gone.
         // StartupRecoveryService is absent for the same reason: US4 rebuilds it in place as the reset policy
-        // and the silent repair (T123).
+        // and the silent repair (T123), so the type name cannot be forbidden; its old members are forbidden in the
+        // pattern list instead (T209).
         "LoginWindow", "LoginPage", "SplashView",
     ];
 
@@ -470,6 +479,7 @@ public sealed class RetiredSymbolAuditTests
         ["retired startup log forwarder contract"] = "public interface IStartupLogForwarder { }",
         ["retired startup log forwarder"] = "public sealed class StartupLogForwarder : IStartupLogForwarder",
         ["retired debug-only static logger"] = "StartupDebugLog.Info(\"Startup\", \"Launching MTM Waitlist\");",
+        ["retired recovery-service member"] = "await recovery.CorruptAndRestartAsync();",
     };
 
     /// <summary>

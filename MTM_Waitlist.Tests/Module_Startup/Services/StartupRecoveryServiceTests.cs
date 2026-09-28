@@ -165,6 +165,24 @@ public sealed class StartupRecoveryServiceTests
         Assert.AreEqual(0, result.Reset.Count);
     }
 
+    [TestMethod]
+    public async Task RepairWithoutAskingAsync_WhenTheResetRestoredNoRow_AnswersThatNothingWasRepaired()
+    {
+        // A store that took the write and changed no row leaves the fault where it was, so the person must be
+        // asked about it rather than the launch carrying on as though it had been put right (FR-019, T207).
+        var configuration = new RecordingConfigurationService(
+            _ => new MachineConfigurationResetResult(true, [], null));
+        var recovery = new StartupRecoveryService(configuration);
+
+        var result = await recovery.RepairWithoutAskingAsync(
+            [MachineConfigurationParts.ScopedPreference],
+            CancellationToken.None);
+
+        Assert.IsTrue(result.Succeeded, "changing nothing is an answer, not a fault of the launch");
+        Assert.AreEqual(0, result.Reset.Count, "nothing may be reported as repaired when no row changed");
+        Assert.AreEqual(1, configuration.ResetRequests.Count, "the store is still asked, once");
+    }
+
     /// <summary>This computer's configuration, recording what it was asked to reset.</summary>
     private sealed class RecordingConfigurationService(
         Func<IReadOnlyList<string>, MachineConfigurationResetResult>? reset = null) : IMachineConfigurationService

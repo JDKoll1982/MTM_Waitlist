@@ -13,7 +13,10 @@
 -- Four columns were added for the developer panel, and each answers a question the previous shape could not:
 --
 --   * `module` names the part of the application an entry came from, so the panel can filter to one module
---     instead of reading every entry. It is also where an `ILogger` category name lands.
+--     instead of reading every entry. It is also where an `ILogger` category name lands, which is why it is
+--     128 characters and not 64: a category is a namespace-qualified type name, the longest one in this tree is
+--     77 characters, and at 64 the store refused every entry from it with "Data too long for column 'p_module'"
+--     (found by hand on 2026-09-28).
 --   * `error_type` names the fault's type, which is what a reader searches by when they know what broke.
 --   * `exception_detail` holds the serialized exception chain as a JSON array, one node per exception,
 --     outermost first (contracts/logging-contract.md section 1.1). It is one column and not a child table on
@@ -52,7 +55,7 @@ CREATE TABLE IF NOT EXISTS ops_startup_logs (
     actor_id VARCHAR(128) NULL,
     host_id VARCHAR(128) NULL,
     mac_address VARCHAR(64) NULL,
-    module VARCHAR(64) NULL COMMENT 'The part of the application the entry came from; an ILogger category name lands here',
+    module VARCHAR(128) NULL COMMENT 'The part of the application the entry came from; an ILogger category name lands here, and a category is a namespace-qualified type name',
     error_type VARCHAR(128) NULL COMMENT 'The fault type, when there was a fault',
     exception_detail MEDIUMTEXT NULL COMMENT 'The serialized exception chain, one JSON node per exception, outermost first',
     error_fingerprint CHAR(64) NULL COMMENT 'SHA-256 of the fault shape, so the same fault groups together across machines; NULL without an exception',

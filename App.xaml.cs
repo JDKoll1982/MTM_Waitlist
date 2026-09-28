@@ -20,10 +20,17 @@ public partial class App : Application
 {
     private static Microsoft.UI.Dispatching.DispatcherQueue? _uiDispatcher;
     private static WindowEx? _mainWindow;
+    private static FrameworkElement? _shellContent;
     private static SplashWindow? _launchWindow;
     private static SignInWindow? _signInWindow;
     private static MachineSetupWindow? _setupWindow;
     private static BlockedStateWindow? _blockedStateWindow;
+
+    /// <summary>How many faults this process has written down, so a fault inside a loop cannot fill the disk.</summary>
+    private static int s_recordedFaults;
+
+    /// <summary>The most fault records one process writes, which is far more than any single fault needs.</summary>
+    private const int MaximumRecordedFaults = 25;
 
     public IHost Host
     {
@@ -191,6 +198,8 @@ public partial class App : Application
         switch (outcome)
         {
             case LaunchOutcome.MainScreens:
+                ShowShellContent();
+                MaximizeMainWindow();
                 MainWindow.Activate();
                 CloseLaunchWindow();
                 CloseSignInWindow();
@@ -238,6 +247,66 @@ public partial class App : Application
                 CloseSignInWindow();
                 ShowLaunchWindow();
                 break;
+        }
+    }
+
+    /// <summary>
+    /// Puts the shell into the main window, once, the first time a launch reaches the main screens.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>The window declares no content of its own, so this is the only thing that can fill it.</b>
+    /// <c>MainWindow.xaml</c> is a window and nothing else, and the shell is built here rather than in the host's
+    /// constructor so it does not exist until the launch routes to it (FR-008). The one page is kept because the
+    /// provider creates a new one per call: a second call would build a second shell and lose the person's place
+    /// in the first.
+    /// </para>
+    /// <para>
+    /// <b>Without this the main screens are a blank window.</b> Nothing else assigned the content, so a launch
+    /// that ended at <see cref="LaunchOutcome.MainScreens"/> activated a window with nothing in it and no page
+    /// ever asked the store for anything — which is what the store's log showed on 2026-09-28, and what the
+    /// person saw.
+    /// </para>
+    /// </remarks>
+    private static void ShowShellContent()
+    {
+        if (_shellContent is not null)
+        {
+            return;
+        }
+
+        _shellContent = App.GetService<IShellContentProvider>().CreateShellContent();
+        MainWindow.Content = _shellContent;
+    }
+
+    /// <summary>
+    /// Opens the main window maximized, which is the size the shell is designed for.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Maximized before the window is activated, so it never appears small first.</b> The overlapped
+    /// presenter's state is what the system reads while it is showing the window, so setting it here is what makes
+    /// the window arrive maximized instead of resizing in front of the person a moment later.
+    /// </para>
+    /// <para>
+    /// <b>A window that cannot be maximized is still a window that can show the shell.</b> A failure is recorded
+    /// and the hand-over carries on with the window at the size it opened at, which is the fallback the launch
+    /// contract asks for when it says a window that cannot be maximized falls back to the configured main size and
+    /// the transition still completes. Nothing here is allowed to throw, for that reason.
+    /// </para>
+    /// </remarks>
+    private static void MaximizeMainWindow()
+    {
+        try
+        {
+            MainWindow.Maximize();
+        }
+        catch (Exception exception)
+        {
+            AppLog.Error(
+                "App",
+                exception,
+                "The main window could not be maximized, so it is keeping the size it opened at.");
         }
     }
 
@@ -441,15 +510,69 @@ public partial class App : Application
         }
     }
 
+    /// <summary>
+    /// Records a fault that is about to end the process, and does not swallow it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>The fault is not handled.</b> This handler records it and returns, so the process goes on to end exactly
+    /// as it would have. Marking it handled would leave the person looking at a screen the application can no
+    /// longer draw, which is worse than a stop that says what happened.
+    /// </para>
+    /// <para>
+    /// <b>The record has to outlive the process, and the store log cannot.</b> Every line written to the store
+    /// goes through a queue that another thread flushes, so a fault that ends the process takes the account of
+    /// itself with it. On 2026-09-28 the application died as the main screens loaded (fault bucket
+    /// 1839341221626038306, a stowed <c>InvalidOperationException</c> reported as 0x80131509) and the store held
+    /// nothing but successful lines, which is what made the cause impossible to read. This is the record that
+    /// survives the process, so the next one can be read.
+    /// </para>
+    /// </remarks>
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
         if (e.Exception is not null)
         {
             AppLog.Error("UnhandledException", e.Exception, $"Unhandled exception message: {e.Message}");
+        }
+        else
+        {
+            AppLog.Info("UnhandledException", $"Unhandled exception message: {e.Message}");
+        }
+
+        RecordFault("Unhandled", e.Exception is null ? e.Message : e.Exception.ToString());
+    }
+
+    /// <summary>Writes a fault to a file that outlives the process that recorded it.</summary>
+    /// <param name="where">Which handler recorded it, so a first-chance line is not mistaken for the fatal one.</param>
+    /// <param name="detail">The fault in full, including its stack.</param>
+    /// <remarks>
+    /// Best-effort: a fault that cannot be written down must not become a second fault on top of the one being
+    /// recorded, so nothing here is allowed to throw. The files accumulate under the application's own local
+    /// folder rather than being overwritten, because the fault before the last one is often the interesting one.
+    /// </remarks>
+    private static void RecordFault(string where, string detail)
+    {
+        if (Interlocked.Increment(ref s_recordedFaults) > MaximumRecordedFaults)
+        {
             return;
         }
 
-        AppLog.Info("UnhandledException", $"Unhandled exception message: {e.Message}");
+        try
+        {
+            var folder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "MTM_Waitlist",
+                "faults");
+            Directory.CreateDirectory(folder);
+            var file = Path.Combine(folder, $"fault-{DateTime.Now:yyyyMMdd-HHmmss-fff}.txt");
+            File.WriteAllText(
+                file,
+                $"{DateTimeOffset.Now:O} {where}{Environment.NewLine}{detail}{Environment.NewLine}");
+        }
+        catch (Exception)
+        {
+            // Writing the record is best-effort, and a failure here is deliberately not reported anywhere.
+        }
     }
 
     private static void CurrentDomain_FirstChanceException(object? sender, FirstChanceExceptionEventArgs e)
@@ -470,6 +593,19 @@ public partial class App : Application
             if (stack.Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase))
             {
                 AppLog.Error("FirstChance", nullReferenceException, "First-chance NullReferenceException in MTM_Waitlist stack.");
+            }
+        }
+
+        // An InvalidOperationException out of the dispatcher reaches the fault record as a stowed fault with no
+        // account of itself, because a fault that ends the process takes the store log's unsent lines with it.
+        // Recording it while it is still first-chance is what keeps the message and the stack readable afterwards.
+        if (e.Exception is InvalidOperationException invalidOperationException)
+        {
+            var stack = invalidOperationException.StackTrace ?? string.Empty;
+            if (stack.Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase))
+            {
+                AppLog.Error("FirstChance", invalidOperationException, "First-chance InvalidOperationException in MTM_Waitlist stack.");
+                RecordFault("FirstChance", invalidOperationException.ToString());
             }
         }
 

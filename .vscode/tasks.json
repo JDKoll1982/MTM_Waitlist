@@ -102,6 +102,63 @@
 				"$msCompile"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Probe startup logs",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"& 'C:\\Program Files\\dotnet\\dotnet.exe' test 'MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj' -c Debug -p:Platform=x64 --filter 'FullyQualifiedName~TempLogProbeTests' *> .specify\\lp4.txt; Write-Output 'probe done'"
+			]
+		},
+		{
+			"label": "Run startup log probe",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"tools\\run-probe.cmd"
+			]
+		},
+		{
+			"label": "Dump app crash events",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"tools\\dump-crashes.cmd"
+			]
+		},
+		{
+			"label": "Dump WER reports",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"tools\\dump-wer.cmd"
+			]
+		},
+		{
+			"label": "Record verification runs",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"tools\\record-verify.cmd"
+			]
+		},
+		{
+			"label": "Remove recorder script",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"del /q tools\\record-verify.cmd"
+			]
 		}
 	]
 }

@@ -14,12 +14,12 @@
 --   IN  p_actor_id           VARCHAR(128)  NULL when nobody was acting
 --   IN  p_host_id            VARCHAR(128)  NULL when the machine could not be named
 --   IN  p_mac_address        VARCHAR(64)
---   IN  p_module             VARCHAR(64)
+--   IN  p_module             VARCHAR(128) the part of the application the entry came from; an ILogger category name lands here
 --   IN  p_error_type         VARCHAR(128)
 --   IN  p_message            TEXT
 --   IN  p_exception_detail   MEDIUMTEXT   the serialized exception chain; NULL when there was no exception
 --   IN  p_error_fingerprint  CHAR(64)     NULL for an entry raised without an exception
---   IN  p_payload_json       TEXT
+--   IN  p_payload_json       MEDIUMTEXT   the entry's structured payload, matching the column it is written to
 --   OUT the affected-row count, through the non-query seam. This is a write and returns no result set.
 --
 -- The chain is written here and nowhere else. The application never computes a hash and never supplies one
@@ -70,12 +70,12 @@ CREATE PROCEDURE sp_ops_startup_logs_insert(
     IN p_actor_id VARCHAR(128),
     IN p_host_id VARCHAR(128),
     IN p_mac_address VARCHAR(64),
-    IN p_module VARCHAR(64),
+    IN p_module VARCHAR(128),
     IN p_error_type VARCHAR(128),
     IN p_message TEXT,
     IN p_exception_detail MEDIUMTEXT,
     IN p_error_fingerprint CHAR(64),
-    IN p_payload_json TEXT
+    IN p_payload_json MEDIUMTEXT
 )
 BEGIN
     DECLARE v_previous_hash CHAR(64) DEFAULT NULL;

@@ -39,8 +39,31 @@ public sealed partial class SplashWindow : WindowEx
 
         ApplyConfiguredSize();
         ApplyChrome();
+        CentreOnScreen();
 
         Closed += OnLaunchWindowClosed;
+    }
+
+    /// <summary>
+    /// Puts the launch surface in the middle of the display it opened on (FR-045).
+    /// </summary>
+    /// <remarks>
+    /// A window that cannot be centred is still a window that can show a launch, so a failure here is recorded and
+    /// the launch carries on, exactly as a sizing failure is.
+    /// </remarks>
+    private void CentreOnScreen()
+    {
+        try
+        {
+            this.CenterOnScreen();
+        }
+        catch (Exception exception)
+        {
+            AppLog.Error(
+                "StartupLaunch",
+                exception,
+                "The launch window could not be centred, so it opened where the system put it.");
+        }
     }
 
     /// <summary>

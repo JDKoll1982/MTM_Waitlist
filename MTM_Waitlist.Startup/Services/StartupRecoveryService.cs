@@ -119,8 +119,9 @@ public sealed class StartupRecoveryService
     /// </returns>
     /// <remarks>
     /// The attempt is bounded by the launch's own ceiling, because a repair the person never asked for must not be
-    /// the reason their launch window sits still. A bound reached, a store that refused the write and a part this
-    /// service may not touch without asking all answer the same way: nothing was repaired.
+    /// the reason their launch window sits still. A bound reached, a store that refused the write, a part this
+    /// service may not touch without asking, and a reset that reports no part it actually restored all answer the
+    /// same way: nothing was repaired.
     /// </remarks>
     public async Task<MachineConfigurationResetResult> RepairWithoutAskingAsync(
         IReadOnlyList<string> whatIsBroken,
@@ -142,7 +143,13 @@ public sealed class StartupRecoveryService
 
         try
         {
-            return await _configuration.ResetToDefaultsAsync(parts, bound.Token).ConfigureAwait(false);
+            var outcome = await _configuration.ResetToDefaultsAsync(parts, bound.Token).ConfigureAwait(false);
+
+            // The reset names the parts it actually restored, so a run that names none is not a repair: a store
+            // that took the write and changed no row, or one that never got the write, leaves the fault exactly
+            // where it was. Answering success there would hide the first stop behind a setting that was never
+            // restored, which is the whole of what the person's next move depends on (FR-019, T207).
+            return outcome.Reset.Count == 0 ? s_nothingRepaired : outcome;
         }
         catch (Exception exception) when (exception is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
         {

@@ -9,14 +9,14 @@ using MTM_Waitlist.Module_Startup.ViewModels;
 namespace MTM_Waitlist.Module_Startup.Views;
 
 /// <summary>
-/// The launch surface: it draws the launch's own feed, the count it has reached, and the cause of a stop in a
-/// strip along the bottom (`contracts/launch-step-contract.md` §3, §4; FR-002, FR-004, FR-005).
+/// The launch surface: it states the work under way, the count it has reached, and the cause of a stop in a
+/// strip along the bottom (`contracts/launch-step-contract.md` §3, §4; FR-002, FR-004, FR-005, FR-039).
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>The strip is a row of the layout rather than something laid over the feed.</b> The feed takes the star row
-/// and the strip its own automatic row beneath it, so the two never share any pixels and a message cannot cover
-/// the lines the person is reading. That is the whole of FR-005.
+/// <b>The strip is a row of the layout rather than something laid over the line above it.</b> The line under way
+/// takes its own row and the strip its own automatic row beneath it, so the two never share any pixels and a
+/// message cannot cover what the person is reading. That is the whole of FR-005.
 /// </para>
 /// <para>
 /// <b>The page owns the thread affinity; the view model stays a plain object.</b> A launch step's continuation
@@ -46,7 +46,6 @@ public sealed partial class SplashPage : Page
 
         InitializeComponent();
 
-        FeedList.ItemsSource = ViewModel.Lines;
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
         Unloaded += OnUnloaded;
 

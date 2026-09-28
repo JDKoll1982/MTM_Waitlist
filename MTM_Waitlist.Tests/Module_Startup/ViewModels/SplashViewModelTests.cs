@@ -20,24 +20,26 @@ namespace MTM_Waitlist.Tests.Module_Startup.ViewModels;
 public sealed class SplashViewModelTests
 {
     [TestMethod]
-    public void Lines_BeforeTheSurfaceAppeared_AreAllDrawnOnceItDoes()
+    public void EntryAppended_BeforeTheSurfaceAppeared_LeavesTheWorkUnderWayOnItsSingleLine()
     {
         // Arrange: a launch that is already under way when the window appears has lines the window never saw.
         var feed = new LaunchActivityFeed();
         feed.Append(Line("read-local-settings", LaunchFeedEntryKind.StepStarted, "Reading this computer's saved settings", null, null));
         feed.Append(Line("read-local-settings", LaunchFeedEntryKind.StepCompleted, "This computer's saved settings name the store it reaches.", null, true));
+        feed.Append(Line("store-reachability", LaunchFeedEntryKind.StepStarted, "Contacting the store", "the store", null));
 
         // Act
         var viewModel = new SplashViewModel(new LaunchStepCatalog(), feed);
 
-        // Assert: nothing is missed and nothing is drawn twice.
-        Assert.AreEqual(2, viewModel.Lines.Count);
-        Assert.AreEqual("Reading this computer's saved settings", viewModel.Lines[0].Text);
-        Assert.AreEqual("This computer's saved settings name the store it reaches.", viewModel.Lines[1].Text);
+        // Assert: the surface catches up to the work under way rather than replaying what has already finished.
+        Assert.AreEqual("Contacting the store", viewModel.CurrentStep);
+        Assert.IsTrue(
+            viewModel.IsWaitingOnSomethingRemote,
+            "the step under way is reaching for the store, so the line says so (FR-039)");
     }
 
     [TestMethod]
-    public void EntryAppended_PutsTheLineOnScreenBeforeTheWorkItDescribesHasFinished()
+    public void EntryAppended_PutsTheWorkUnderWayOnTheLineBeforeItHasFinished()
     {
         // Arrange: the line a step's own announcement produces, with nothing after it yet. This is the shape a
         // stalled launch leaves behind, and it is the case the surface exists for (US1 scenario 1).
@@ -47,10 +49,11 @@ public sealed class SplashViewModelTests
         // Act
         feed.Append(Line("store-reachability", LaunchFeedEntryKind.StepStarted, "Contacting the store", "the store", null));
 
-        // Assert: the row is there while the step is still running, so a stall has a name attached to it.
-        Assert.AreEqual(1, viewModel.Lines.Count);
-        Assert.AreEqual("Contacting the store", viewModel.Lines[0].Text);
-        Assert.AreEqual("the store", viewModel.Lines[0].Target, "the row lost the target that makes the line identifiable");
+        // Assert: the line is there while the step is still running, so a stall has a name attached to it.
+        Assert.AreEqual("Contacting the store", viewModel.CurrentStep);
+        Assert.IsTrue(
+            viewModel.IsWaitingOnSomethingRemote,
+            "the step named the store, so the bar shows movement rather than a proportion");
     }
 
     [TestMethod]
@@ -225,9 +228,9 @@ public sealed class SplashViewModelTests
         feed.Append(Line("read-local-settings", LaunchFeedEntryKind.StepStarted, "Reading this computer's saved settings", null, null));
         feed.Append(Line("read-local-settings", LaunchFeedEntryKind.StepCompleted, "Read.", null, true));
 
-        // Assert: every line went through the marshaller rather than straight onto the list.
+        // Assert: every line went through the marshaller rather than straight onto the surface.
         Assert.AreEqual(2, marshalled.Count, "a line was applied without being handed to the surface's thread");
-        Assert.AreEqual(2, viewModel.Lines.Count);
+        Assert.AreEqual("Reading this computer's saved settings", viewModel.CurrentStep);
     }
 
     /// <summary>One feed line, the way the runner writes it.</summary>

@@ -2929,7 +2929,7 @@ DELIMITER ;
 --   IN  p_level             VARCHAR(16)   NULL for any severity
 --   IN  p_host_id           VARCHAR(128)  NULL for any machine
 --   IN  p_actor_id          VARCHAR(128)  NULL for any person
---   IN  p_module            VARCHAR(64)   NULL for any module
+--   IN  p_module            VARCHAR(128)  NULL for any module
 --   IN  p_error_type        VARCHAR(128)  NULL for any fault type
 --   IN  p_error_fingerprint CHAR(64)      NULL for any fingerprint
 --   IN  p_from_utc          DATETIME      NULL for the start of the default window
@@ -2962,7 +2962,7 @@ CREATE PROCEDURE sp_ops_startup_logs_filter(
     IN p_level VARCHAR(16),
     IN p_host_id VARCHAR(128),
     IN p_actor_id VARCHAR(128),
-    IN p_module VARCHAR(64),
+    IN p_module VARCHAR(128),
     IN p_error_type VARCHAR(128),
     IN p_error_fingerprint CHAR(64),
     IN p_from_utc DATETIME,
@@ -3040,7 +3040,7 @@ DELIMITER ;
 --   IN  p_level       VARCHAR(16)   NULL for any severity
 --   IN  p_host_id     VARCHAR(128)  NULL for any machine
 --   IN  p_actor_id    VARCHAR(128)  NULL for any person
---   IN  p_module      VARCHAR(64)   NULL for any module
+--   IN  p_module      VARCHAR(128)  NULL for any module
 --   IN  p_error_type  VARCHAR(128)  NULL for any fault type
 --   IN  p_from_utc    DATETIME      NULL for the start of the default window
 --   IN  p_to_utc      DATETIME      NULL for now
@@ -3072,7 +3072,7 @@ CREATE PROCEDURE sp_ops_startup_logs_fingerprint_groups_get(
     IN p_level VARCHAR(16),
     IN p_host_id VARCHAR(128),
     IN p_actor_id VARCHAR(128),
-    IN p_module VARCHAR(64),
+    IN p_module VARCHAR(128),
     IN p_error_type VARCHAR(128),
     IN p_from_utc DATETIME,
     IN p_to_utc DATETIME,
@@ -3137,7 +3137,7 @@ DELIMITER ;
 --   IN  p_actor_id           VARCHAR(128)  NULL when nobody was acting
 --   IN  p_host_id            VARCHAR(128)  NULL when the machine could not be named
 --   IN  p_mac_address        VARCHAR(64)
---   IN  p_module             VARCHAR(64)
+--   IN  p_module             VARCHAR(128)
 --   IN  p_error_type         VARCHAR(128)
 --   IN  p_message            TEXT
 --   IN  p_exception_detail   MEDIUMTEXT   the serialized exception chain; NULL when there was no exception
@@ -3193,12 +3193,12 @@ CREATE PROCEDURE sp_ops_startup_logs_insert(
     IN p_actor_id VARCHAR(128),
     IN p_host_id VARCHAR(128),
     IN p_mac_address VARCHAR(64),
-    IN p_module VARCHAR(64),
+    IN p_module VARCHAR(128),
     IN p_error_type VARCHAR(128),
     IN p_message TEXT,
     IN p_exception_detail MEDIUMTEXT,
     IN p_error_fingerprint CHAR(64),
-    IN p_payload_json TEXT
+    IN p_payload_json MEDIUMTEXT
 )
 BEGIN
     DECLARE v_previous_hash CHAR(64) DEFAULT NULL;

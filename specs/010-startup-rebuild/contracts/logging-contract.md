@@ -181,7 +181,11 @@ Rules:
 
 - Registered in the generic host in one place.
 - `categoryName` becomes the entry's `Module`, so the panel's module filter works for both surfaces without
-  either surface supplying it.
+  either surface supplying it. A category is a namespace-qualified type name, so it is bounded to the column's
+  own width before the entry is built: `StoreLoggerProvider.MaximumModuleLength` is 128, the table's `module`
+  column is `VARCHAR(128)`, and a category that still does not fit keeps its tail behind a leading ellipsis
+  rather than losing the entry. Both were 64 until 2026-09-28, when a 70-character category in the tree meant
+  every entry from it was refused by the store and nothing was recorded.
 - The structured properties `ILogger` already carries go into `payload_json` rather than being flattened into
   the message.
 - The file-based provider is removed in the same phase, so no local log file is produced afterwards.

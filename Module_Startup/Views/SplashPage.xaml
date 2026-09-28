@@ -5,27 +5,25 @@
     xmlns:controls="using:MTM_Waitlist.Module_Shared.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:MTM_Waitlist.Module_Startup.Models"
     mc:Ignorable="d">
 
     <!--
-        A splash screen reads top to bottom: the mark, then how far along the launch is, then what it is doing at
-        this moment, then anything the person may act on.
+        A splash screen reads top to bottom: the mark, then how far along the launch is, then the one line stating
+        the work under way, then anything the person may act on.
 
         Row 1 is the logo. Row 2 is the progress bar and the count beneath it, and the bar turns into a travelling
         one while the step under way is reaching for something outside this computer — a store, a share, the
         external system — because those are the waits with no proportion to report and a bar that sits still
-        through one looks like a frozen application. Row 3 is the status line, which rotates rather than flickering
-        as each step takes over. Row 4 holds the launch's own lines, folded away: a person who wants to know what
-        the launch did can open it, and the surface still reads as a splash until they do. Row 5 is a stated stop,
-        and Row 6 is the button bar.
+        through one looks like a frozen application. Row 3 is the single status line, which rotates rather than
+        flickering as each step takes over; it states the work under way and nothing that has already finished,
+        because the surface shows a launch rather than a history of one (FR-039). Row 4 is a stated stop, and Row 5
+        is the button bar.
 
-        The error strip is its own row rather than something laid over the lines above it, so a stated cause never
+        The error strip is its own row rather than something laid over the line above it, so a stated cause never
         covers what a person is reading (FR-005).
     -->
     <Grid Padding="32,28" RowSpacing="16">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -69,50 +67,12 @@
             Text="{x:Bind ViewModel.CurrentStep, Mode=OneWay}"
             TextAlignment="Center" />
 
-        <Expander
-            x:Name="Details"
-            AutomationProperties.AutomationId="SplashPage_Details"
-            Grid.Row="3"
-            Header="{x:Bind ViewModel.DetailsHeaderText}"
-            HorizontalAlignment="Stretch"
-            HorizontalContentAlignment="Stretch">
-            <ListView
-                x:Name="FeedList"
-                AutomationProperties.AutomationId="SplashPage_FeedList"
-                MaxHeight="220"
-                SelectionMode="None">
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="models:SplashFeedLine">
-                        <Grid ColumnSpacing="12" Padding="0,3">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock
-                                Grid.Column="0"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Style="{ThemeResource CaptionTextBlockStyle}"
-                                Text="{x:Bind TimeText}" />
-                            <StackPanel Grid.Column="1">
-                                <TextBlock Text="{x:Bind Text}" TextWrapping="Wrap" />
-                                <TextBlock
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind Target}"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Expander>
-
         <Border
             x:Name="ErrorStrip"
             AutomationProperties.AutomationId="SplashPage_ErrorStrip"
             Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
             CornerRadius="4"
-            Grid.Row="4"
+            Grid.Row="3"
             Padding="12,8"
             Visibility="Collapsed">
             <TextBlock
@@ -126,7 +86,7 @@
             the surface that a person can see, and it ends the process exactly as closing the window does.
         -->
         <StackPanel
-            Grid.Row="5"
+            Grid.Row="4"
             HorizontalAlignment="Right"
             Orientation="Horizontal"
             Spacing="8">

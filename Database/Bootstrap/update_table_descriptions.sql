@@ -241,7 +241,7 @@ MODIFY COLUMN actor_kind VARCHAR(32) NULL COMMENT 'Actor type for event source.'
 MODIFY COLUMN actor_id VARCHAR(128) NULL COMMENT 'Actor identifier value.',
 MODIFY COLUMN host_id VARCHAR(128) NULL COMMENT 'Host/computer identifier captured for event.',
 MODIFY COLUMN mac_address VARCHAR(64) NULL COMMENT 'MAC address captured for event.',
-MODIFY COLUMN module VARCHAR(64) NULL COMMENT 'The part of the application the entry came from; an ILogger category name lands here.',
+MODIFY COLUMN module VARCHAR(128) NULL COMMENT 'The part of the application the entry came from; an ILogger category name lands here, and a category is a namespace-qualified type name.',
 MODIFY COLUMN error_type VARCHAR(128) NULL COMMENT 'The fault type, when there was a fault.',
 MODIFY COLUMN exception_detail MEDIUMTEXT NULL COMMENT 'The serialized exception chain, one JSON node per exception, outermost first.',
 MODIFY COLUMN error_fingerprint CHAR(64) NULL COMMENT 'SHA-256 of the fault shape, so the same fault groups together across machines; NULL without an exception.',

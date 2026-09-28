@@ -36,7 +36,9 @@ namespace MTM_Waitlist.Tests.Module_Settings.Services;
 /// <para>
 /// <b>The fixture is this class's own.</b> Every account is written under <c>ZZ.USERMGMT.&lt;run&gt;.</c> and
 /// removed in <c>TestCleanupAsync</c>, so the pass never depends on the shape of the shipped roster and never
-/// leaves a row behind.
+/// leaves a row behind. Because a session's machine key is a foreign key, the class owns one machine row under
+/// the same prefix as well: a store whose computer registry happens to be empty would otherwise take no session
+/// at all, and the case would report a missing fixture as a missing behaviour.
 /// </para>
 /// <para>
 /// Environment-gated on <c>MTM_WAITLIST_TEST_DB_CONNECTION_STRING</c>: without a live <c>mtm_waitlist</c> every
@@ -52,6 +54,11 @@ public sealed class UserManagementLiveIntegrationTests
 
     /// <summary>Prefix for every account this class writes, so a run's rows are recognisable and removable.</summary>
     private const string OwnedSignInPrefix = "ZZ.USERMGMT.";
+
+    /// <summary>
+    /// Prefix for the one machine row this class writes, for the same reason and under the same recognisable form.
+    /// </summary>
+    private const string OwnedComputerPrefix = "ZZ.USERMGMT.";
 
     /// <summary>One rung above the other, so "outranks" means something in the store.</summary>
     private const string HighRoleCode = "developer";
@@ -80,6 +87,8 @@ public sealed class UserManagementLiveIntegrationTests
     private string _lowSignInName = string.Empty;
 
     private string _peerSignInName = string.Empty;
+
+    private string _ownedComputerName = string.Empty;
 
     private IUserManagementService? _actingHigh;
 
@@ -111,6 +120,7 @@ public sealed class UserManagementLiveIntegrationTests
         _highSignInName = $"{OwnedSignInPrefix}{_runId}.HIGH";
         _lowSignInName = $"{OwnedSignInPrefix}{_runId}.LOW";
         _peerSignInName = $"{OwnedSignInPrefix}{_runId}.PEER";
+        _ownedComputerName = $"{OwnedComputerPrefix}{_runId}";
 
         await DeleteOwnedRowsAsync().ConfigureAwait(false);
 
@@ -561,17 +571,26 @@ public sealed class UserManagementLiveIntegrationTests
 
     private async Task InsertSessionAsync(long userId)
     {
+        // The session case is the one case here that needs this feature's own session table, so it is where the
+        // store's migration state is stated rather than left to surface as a missing fixture (T213).
+        await AssertStoreHasThisFeaturesTablesAsync().ConfigureAwait(false);
+
+        // The machine the session belongs to is this class's own row, because the table's machine key is a
+        // foreign key rather than a free value: a store whose computer registry is empty would otherwise take no
+        // session at all, and this case would report a missing fixture as a missing behaviour.
+        var computerId = await EnsureOwnedComputerAsync().ConfigureAwait(false);
+
         // The rebuilt session store holds one row per person per machine, so the fixture's running session is
         // written through the same upsert shape the sign-in path uses rather than as a second row that a real
         // sign-in could never produce.
         await _helper!.ExecuteSqlNonQueryAsync(
             "INSERT INTO user_active_sessions (public_id, user_id, computer_id, token_hash, token_salt, issued_utc, expires_utc, revoked_utc, is_active, source_label, created_utc) "
-                + "SELECT UUID(), @p_user_id, c.id, @p_token_hash, @p_token_salt, UTC_TIMESTAMP(), @p_expires_utc, NULL, 1, 'sign_in', UTC_TIMESTAMP() "
-                + "FROM core_computers_registry c ORDER BY c.id ASC LIMIT 1 "
+                + "VALUES (UUID(), @p_user_id, @p_computer_id, @p_token_hash, @p_token_salt, UTC_TIMESTAMP(), @p_expires_utc, NULL, 1, 'sign_in', UTC_TIMESTAMP()) "
                 + "ON DUPLICATE KEY UPDATE token_hash = VALUES(token_hash), token_salt = VALUES(token_salt), issued_utc = VALUES(issued_utc), expires_utc = VALUES(expires_utc), revoked_utc = NULL, is_active = 1;",
             new Dictionary<string, object?>
             {
                 ["p_user_id"] = userId,
+                ["p_computer_id"] = computerId,
                 ["p_token_hash"] = Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant(),
                 ["p_token_salt"] = new byte[32],
                 ["p_expires_utc"] = DateTime.UtcNow.AddHours(4),
@@ -579,15 +598,76 @@ public sealed class UserManagementLiveIntegrationTests
             MySqlDatabaseTarget.MtmWaitlist).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// The machine row this class's session fixture needs, created once per run and removed with everything else.
+    /// </summary>
+    /// <returns>The store's own identifier for the row.</returns>
+    private async Task<long> EnsureOwnedComputerAsync()
+    {
+        var existing = await ScalarAsync(
+            "SELECT COALESCE(MIN(id), 0) FROM core_computers_registry WHERE computer_name = @p_name;",
+            new Dictionary<string, object?> { ["p_name"] = _ownedComputerName }).ConfigureAwait(false);
+
+        if (long.TryParse(existing, NumberStyles.Integer, CultureInfo.InvariantCulture, out var found) && found > 0)
+        {
+            return found;
+        }
+
+        await _helper!.ExecuteSqlNonQueryAsync(
+            "INSERT INTO core_computers_registry (public_id, computer_name, hostname_normalized, mac_address_normalized, display_name, description, is_registered, created_utc, updated_utc) "
+                + "VALUES (UUID(), @p_name, @p_name, @p_mac, @p_display, NULL, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());",
+            new Dictionary<string, object?>
+            {
+                ["p_name"] = _ownedComputerName,
+                ["p_mac"] = _ownedComputerName,
+                ["p_display"] = _ownedComputerName,
+            },
+            MySqlDatabaseTarget.MtmWaitlist).ConfigureAwait(false);
+
+        var created = await ScalarAsync(
+            "SELECT COALESCE(MIN(id), 0) FROM core_computers_registry WHERE computer_name = @p_name;",
+            new Dictionary<string, object?> { ["p_name"] = _ownedComputerName }).ConfigureAwait(false);
+
+        Assert.IsTrue(
+            long.TryParse(created, NumberStyles.Integer, CultureInfo.InvariantCulture, out var computerId) && computerId > 0,
+            $"The fixture's own machine row must be in the store, and it is not: {created}.");
+
+        return computerId;
+    }
+
+    /// <summary>
+    /// Refuses the pass when the store has not had this feature's session table applied, naming the migration
+    /// rather than leaving a case below to report a missing fixture.
+    /// </summary>
+    private async Task AssertStoreHasThisFeaturesTablesAsync()
+    {
+        var present = await ScalarAsync(
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'user_active_sessions';",
+            new Dictionary<string, object?>()).ConfigureAwait(false);
+
+        Assert.AreEqual(
+            "1",
+            present,
+            "This store has no user_active_sessions table, so it has not had 010-startup-rebuild's database work "
+                + "applied (Database/Tables/34_user_active_sessions). Every case in this file reads or writes that "
+                + "table, so without it the pass would report a fixture fault that is really a migration that has "
+                + "not run.");
+    }
+
     private async Task DeleteOwnedRowsAsync()
     {
-        var parameters = new Dictionary<string, object?> { ["p_prefix"] = $"{OwnedSignInPrefix}%" };
+        var parameters = new Dictionary<string, object?>
+        {
+            ["p_prefix"] = $"{OwnedSignInPrefix}%",
+            ["p_computer_prefix"] = $"{OwnedComputerPrefix}%",
+        };
 
         await _helper!.ExecuteSqlNonQueryAsync(
             "DELETE FROM auth_user_management_audit WHERE target_user_id IN (SELECT id FROM core_users_profiles WHERE username_normalized LIKE @p_prefix);"
                 + " DELETE FROM user_active_sessions WHERE user_id IN (SELECT id FROM core_users_profiles WHERE username_normalized LIKE @p_prefix);"
                 + " DELETE ra FROM auth_roles_assignments ra INNER JOIN core_users_profiles u ON u.id = ra.user_id WHERE u.username_normalized LIKE @p_prefix;"
-                + " DELETE FROM core_users_profiles WHERE username_normalized LIKE @p_prefix;",
+                + " DELETE FROM core_users_profiles WHERE username_normalized LIKE @p_prefix;"
+                + " DELETE FROM core_computers_registry WHERE computer_name LIKE @p_computer_prefix;",
             parameters,
             MySqlDatabaseTarget.MtmWaitlist).ConfigureAwait(false);
     }

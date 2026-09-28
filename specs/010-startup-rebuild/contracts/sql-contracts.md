@@ -142,7 +142,7 @@ never have been written by the upsert).
 Existing folder `Database/Tables/10_ops_startup_logs/`. `create.sql` is amended, not replaced, and
 `rollback.sql` is extended for the new columns and indexes. Registered in `AllTables.sql`.
 
-Added columns: `module VARCHAR(64) NULL`, `error_type VARCHAR(128) NULL`, `exception_detail MEDIUMTEXT NULL`,
+Added columns: `module VARCHAR(128) NULL`, `error_type VARCHAR(128) NULL`, `exception_detail MEDIUMTEXT NULL`,
 `error_fingerprint CHAR(64) NULL` (the fingerprint from `contracts/logging-contract.md` §1.2).
 
 Added indexes for the panel's filter set: `(level, created_utc)`, `(host_id, created_utc)`,

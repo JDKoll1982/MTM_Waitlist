@@ -37,6 +37,7 @@ public sealed partial class ShellPage : Page
         ViewModel.RefreshUserInfo();
         SyncMyRequestsVisibility();
         ApplyNavigationItemSizing();
+        OpenTheFirstPage();
 
         if (AppTitleBar is null || AppTitleBarText is null)
         {
@@ -57,6 +58,36 @@ public sealed partial class ShellPage : Page
         KeyboardAccelerators.Add(BuildKeyboardAccelerator(VirtualKey.GoBack));
 
         Unloaded += ShellPage_Unloaded;
+    }
+
+    /// <summary>
+    /// Opens the shell's first page when the shell appears, which is the waitlist.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Nothing selects a navigation item on the shell's behalf.</b> A <c>NavigationView</c> starts with no
+    /// item selected and this page navigates only when somebody invokes one, so without this the frame stays
+    /// empty: the launch reaches the main screens and the person is shown a window with nothing in it.
+    /// </para>
+    /// <para>
+    /// <b>The first menu item is the waitlist on purpose.</b> It is the screen the application exists for, and
+    /// the order of the items in the markup is what decides this rather than a page named here a second time.
+    /// The guard leaves a shell that is already showing something alone, so a shell that is loaded twice does
+    /// not throw away the page the person is on.
+    /// </para>
+    /// </remarks>
+    private void OpenTheFirstPage()
+    {
+        if (NavigationFrame.Content is not null
+            || NavigationViewControl.MenuItems.Count == 0
+            || NavigationViewControl.MenuItems[0] is not NavigationViewItem first
+            || NavigationHelper.GetNavigateTo(first) is not { Length: > 0 } firstPageKey)
+        {
+            return;
+        }
+
+        NavigationViewControl.SelectedItem = first;
+        ViewModel.NavigationService.NavigateTo(firstPageKey);
     }
 
     /// <summary>

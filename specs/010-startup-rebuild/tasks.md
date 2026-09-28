@@ -869,18 +869,18 @@ them changed requirements rather than confirming them: remember-me is withdrawn 
 list (FR-014), the launch window states the work under way on one line instead of accumulating a history
 (FR-039), and the launch window and the setup surfaces gained layout requirements (FR-045, FR-046).
 
-- [ ] **T205** Update the permission parity test to the widened role list the seed grants, so it stops failing
+- [x] **T205** Update the permission parity test to the widened role list the seed grants, so it stops failing
   whenever the store is online.
 - [x] **T206** Closed 2026-09-28 without a code change: `sp_auth_user_credential_get` already exists in a
   freshly installed store, and its definition touches both `password_hash` and `password_salt`, so machine
   setup can read a stored credential. The concern that said the read was missing is stale; the store built by
   the installer is the evidence.
-- [ ] **T207** Make the quiet machine-configuration repair verify which rows actually changed before it reports
+- [x] **T207** Make the quiet machine-configuration repair verify which rows actually changed before it reports
   success, so a store outage is not mistaken for a repaired setting.
 - [x] **T208** Closed 2026-09-28: the store built by the installer holds `auth.session_length_minutes`, which
   is the key the launch reads, and `Validation\settings_schema\validate.sql` passed against it during the same
   install. The seeded row is no longer dead.
-- [ ] **T209** Restore the retired-symbol guard's pattern for the old recovery service, so reintroducing that
+- [x] **T209** Restore the retired-symbol guard's pattern for the old recovery service, so reintroducing that
   name fails the build again.
 - [ ] **T210** Re-take T033's removal proof against the shipped launch, which now reads the store.
 - [ ] **T211** Bring the launch's step catalogue and the implemented steps level, so the completed count is
@@ -888,12 +888,12 @@ list (FR-014), the launch window states the work under way on one line instead o
 - [x] **T212** Closed 2026-09-28: the installer ran every `Validation\*\validate.sql` file against the store
   it had just built — startup, settings, user management, user sessions and remembered sign-ins — and exited 0.
   That is the same live validation the standalone wrapper performs, reached through the installer instead.
-- [ ] **T213** Fix and run the live integration test file that still names the replaced startup types.
+- [x] **T213** Fix and run the live integration test file that still names the replaced startup types.
 - [ ] **T214** Clear the shared strings file's older naming findings, so a future change touching that file does
   not fail the changed-file check on problems it did not create.
-- [ ] **T215** Remove the inert `StartupLoggingOptions` section from `appsettings.json`.
-- [ ] **T216** Hand the launch back to the main window on the interface thread rather than a background one.
-- [ ] **T217** Delete the seed folder that is named for work centres but contains workstations.
+- [x] **T215** Remove the inert `StartupLoggingOptions` section from `appsettings.json`.
+- [x] **T216** Hand the launch back to the main window on the interface thread rather than a background one.
+- [x] **T217** Delete the seed folder that is named for work centres but contains workstations.
 - [x] **T218** Done 2026-09-28. The installer ran against localhost — the shared server at 172.16.1.104 was
   confirmed unreachable first, so nothing was pushed to it — and exited 0. Twenty scripts ran in order,
   including `Bootstrap\update_table_descriptions.sql`, which is the one that used to stop the install and
@@ -905,8 +905,8 @@ list (FR-014), the launch window states the work under way on one line instead o
   the last six people who signed in as cards, where choosing a card fills in the user name and the password is
   still required, backed by a store read (FR-014). The shared key file goes with it — the reader that opened it
   is the code being withdrawn, so the file, its provider and its local copy are all removed (FR-025, FR-043).
-- [ ] **T220** Open the launch window centred on the screen (FR-045).
-- [ ] **T221** Replace the launch's list of performed steps with a single line showing only the work under way,
+- [x] **T220** Open the launch window centred on the screen (FR-045).
+- [x] **T221** Replace the launch's list of performed steps with a single line showing only the work under way,
   with no history (FR-039, US1).
 - [ ] **T222** Rework the administrator sign-in that precedes machine setup, and the machine setup screen
   itself, using cards, padding and margins (FR-046).

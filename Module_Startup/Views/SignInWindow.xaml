@@ -6,6 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:windowex="using:WinUIEx"
     Title="MTM Waitlist"
+    Width="560"
+    Height="560"
     MinWidth="480"
     MinHeight="420"
     mc:Ignorable="d">
@@ -14,6 +16,17 @@
         Three rows, and the message is its own row rather than something laid over the form: a refusal never
         covers the fields the person is working in (FR-005's rule, applied here). The hint sits above the action
         so what is still missing is stated before the person presses anything.
+
+        The window is 560 by 560 rather than the system default it used to open at. It declares no size of its
+        own before this and therefore filled the screen, which left a two-field form stranded across a
+        full-width window with its heading and its text a screen apart (found by hand on 2026-09-28). At 560 the
+        form is a form, and the height still holds the forced password change, which is the taller of the two
+        panels, with the message strip under it. It stays resizable: this is the size it opens at, not a limit.
+
+        Each panel states its own refusal beside its own fields. The strip in the third row carries the sign-in's
+        own answer, and the password panel carries its own, because the two are answers to different things: a
+        refusal to accept a password has to appear next to the two boxes that were refused, or the press reads as
+        having done nothing at all.
     -->
     <Grid
         x:Name="RootGrid"
@@ -103,6 +116,13 @@
                         x:Name="ConfirmPasswordBox"
                         AutomationProperties.AutomationId="SignInWindow_ConfirmPassword"
                         Header="{x:Bind PasswordChange.ConfirmationLabelText}" />
+                    <TextBlock
+                        x:Name="PasswordMessageText"
+                        AutomationProperties.AutomationId="SignInWindow_PasswordMessage"
+                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                        Text="{x:Bind PasswordChange.Message, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind PasswordChange.HasMessage, Mode=OneWay}" />
                     <Button
                         x:Name="SubmitPasswordButton"
                         AutomationProperties.AutomationId="SignInWindow_SubmitPasswordButton"

@@ -256,7 +256,7 @@ CREATE TABLE IF NOT EXISTS ops_startup_logs (
     actor_id VARCHAR(128) NULL,
     host_id VARCHAR(128) NULL,
     mac_address VARCHAR(64) NULL,
-    module VARCHAR(64) NULL COMMENT 'The part of the application the entry came from; an ILogger category name lands here',
+    module VARCHAR(128) NULL COMMENT 'The part of the application the entry came from; an ILogger category name lands here, and a category is a namespace-qualified type name',
     error_type VARCHAR(128) NULL COMMENT 'The fault type, when there was a fault',
     exception_detail MEDIUMTEXT NULL COMMENT 'The serialized exception chain, one JSON node per exception, outermost first',
     error_fingerprint CHAR(64) NULL COMMENT 'SHA-256 of the fault shape, so the same fault groups together across machines; NULL without an exception',

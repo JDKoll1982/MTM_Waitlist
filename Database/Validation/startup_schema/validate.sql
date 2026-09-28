@@ -612,7 +612,7 @@ FROM (
         -- index under the right name over the wrong column would pass an existence-only check and still leave
         -- the panel doing a table scan, which is the failure worth catching.
         UNION ALL
-        SELECT 'missing_column', 'ops_startup_logs.module', 'VARCHAR(64) NULL', 'missing'
+        SELECT 'missing_column', 'ops_startup_logs.module', 'VARCHAR(128) NULL', 'missing'
         WHERE
             NOT EXISTS (
                 SELECT 1
@@ -622,7 +622,7 @@ FROM (
                     AND table_name = 'ops_startup_logs'
                     AND column_name = 'module'
                     AND data_type = 'varchar'
-                    AND character_maximum_length = 64
+                    AND character_maximum_length = 128
                     AND is_nullable = 'YES'
             )
         UNION ALL

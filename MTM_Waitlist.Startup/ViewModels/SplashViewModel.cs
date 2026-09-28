@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using MTM_Waitlist.Module_Core.Helpers;
@@ -9,15 +7,15 @@ using MTM_Waitlist.Module_Startup.Services;
 namespace MTM_Waitlist.Module_Startup.ViewModels;
 
 /// <summary>
-/// The launch window's state: the lines the launch has written, how far it has got, and the cause of the stop
-/// (`contracts/launch-step-contract.md` §3, §4; FR-002, FR-004, FR-026).
+/// The launch window's state: the step under way, how far the launch has got, and the cause of the stop
+/// (`contracts/launch-step-contract.md` §3, §4; FR-002, FR-004, FR-026, FR-039).
 /// </summary>
 /// <remarks>
 /// <para>
 /// <b>It reads the feed; it never writes to it.</b> Lines arrive through <see cref="ILaunchActivityFeed.EntryAppended"/>
-/// in the order the launch wrote them, and the view model copies each one into a row the surface can draw. That
-/// is what keeps the list on screen and the launch's own record one sequence rather than two accounts of the
-/// same launch.
+/// in the order the launch wrote them, and each one moves the surface on: the step under way takes the single
+/// line, and the count asks the catalogue how many steps have ended. Nothing is accumulated for display, because
+/// the surface states the work under way rather than a history of the launch (FR-039).
 /// </para>
 /// <para>
 /// <b>The count is derived, never stored.</b> The progress text asks the catalogue how many steps it holds and
@@ -75,10 +73,7 @@ public sealed partial class SplashViewModel : ObservableObject
     /// </summary>
     public Action<Action> UiThreadMarshaller { get; set; } = static work => work();
 
-    /// <summary>The lines the launch has written, oldest first, in the shape the surface draws them.</summary>
-    public ObservableCollection<SplashFeedLine> Lines { get; } = [];
-
-    /// <summary>How far the launch has got, derived from the sequence and the lines rather than tracked.</summary>
+    /// <summary>The step the launch is on, named before its work begins, which is the one line the surface shows.</summary>
     [ObservableProperty]
     public partial string ProgressText { get; set; }
 
@@ -128,9 +123,6 @@ public sealed partial class SplashViewModel : ObservableObject
     /// <summary>The surface's own name, which is what the mark at the top of it stands for.</summary>
     public string TitleText => "Startup_Launch.Title".GetLocalized();
 
-    /// <summary>The heading over the launch's own lines, which are folded away until somebody opens them.</summary>
-    public string DetailsHeaderText => "Startup_Launch.DetailsHeader".GetLocalized();
-
     /// <summary>The one control in the button bar, which is the surface's only visible way out.</summary>
     public string CloseActionText => "Startup_Launch.CloseAction".GetLocalized();
 
@@ -143,8 +135,6 @@ public sealed partial class SplashViewModel : ObservableObject
     private void Apply(LaunchFeedEntry entry)
     {
         var line = SplashFeedLine.From(entry);
-
-        Lines.Add(line);
 
         var finished = _catalog.CompletedCount(_feed);
         ProgressValue = finished;

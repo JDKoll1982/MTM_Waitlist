@@ -15,7 +15,8 @@ namespace MTM_Waitlist.Module_Logging;
 /// </para>
 /// <para>
 /// <b>The category name becomes the module.</b> A call site's category is the type that logged, so the panel's
-/// module filter works for both surfaces without either surface supplying the module.
+/// module filter works for both surfaces without either surface supplying the module. A category can be longer
+/// than the column that holds it, so what is handed on is bounded — see <see cref="MaximumModuleLength"/>.
 /// </para>
 /// <para>
 /// <b>This provider serves this application's own host only.</b> The separate on-host service that refreshes the
@@ -28,6 +29,29 @@ namespace MTM_Waitlist.Module_Logging;
 /// </remarks>
 public sealed class StoreLoggerProvider : ILoggerProvider
 {
+    /// <summary>
+    /// The longest module this provider hands the store, which is the log table's own <c>module</c> width.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>A category really can be longer than the column, and this bound is here because one was.</b> A category
+    /// is a namespace-qualified type name and the longest in this tree is 77 characters. The column held 64, so
+    /// on 2026-09-28 every entry from <c>ImageStorageConfigurationResolver</c> was refused by the store with
+    /// "Data too long for column 'p_module'" and none of them was recorded at all.
+    /// </para>
+    /// <para>
+    /// <b>The bound keeps the tail rather than the head, and marks the cut.</b> The leaf type name is what a
+    /// reader filters by and the namespace prefix is what they can do without, so a category that does not fit is
+    /// cut from the front and prefixed with an ellipsis rather than losing its most informative end.
+    /// </para>
+    /// <para>
+    /// <b>It is bounded here rather than at the writer.</b> The module is part of the entry, and the entry's
+    /// <c>error_fingerprint</c> is computed over it: a value shortened on its way to the store would leave a row
+    /// whose fingerprint could not be recomputed from the row itself, which is what a fingerprint is for.
+    /// </para>
+    /// </remarks>
+    public const int MaximumModuleLength = 128;
+
     private readonly LogService _logService;
 
     /// <summary>
@@ -63,9 +87,19 @@ public sealed class StoreLoggerProvider : ILoggerProvider
 
         internal StoreLogger(string categoryName, LogService logService)
         {
-            _module = string.IsNullOrWhiteSpace(categoryName) ? "Application" : categoryName;
+            _module = Bounded(string.IsNullOrWhiteSpace(categoryName) ? "Application" : categoryName);
             _logService = logService;
         }
+
+        /// <summary>
+        /// Cuts a module to what the store holds, keeping its tail and saying that the front was left off.
+        /// </summary>
+        /// <param name="module">The category name, which is never already blank.</param>
+        /// <returns>The module itself when it fits, otherwise its tail behind an ellipsis.</returns>
+        private static string Bounded(string module)
+            => module.Length <= MaximumModuleLength
+                ? module
+                : "…" + module[^(MaximumModuleLength - 1)..];
 
         /// <inheritdoc />
         /// <remarks>

@@ -42,7 +42,15 @@ namespace MTM_Waitlist.Tests.Module_Settings.Services;
 /// <c>permission.admin.reset_password</c>, <c>permission.admin.permissions</c>, and the four
 /// 010-startup-rebuild keys <c>machine_configuration</c>, <c>ignored_locations_edit</c>, <c>log_panel</c> and
 /// <c>session_length</c>), so they are asserted against their stated sets rather than against a retired list.
-/// This is what makes SC-001 evaluable for them.
+/// This is what makes SC-001 evaluable for them, and it is asserted against the shipped seed for all seven.
+/// </para>
+/// <para>
+/// <b>The live half asserts all seven, and the four new keys are the reason it is worth running.</b> The three
+/// account-administration keys predate this feature, so a person's live answer for them has always been part of
+/// the ship-day claim. The four keys this feature adds are the ones a store can genuinely be missing: a store
+/// that has not had this feature's seed applied holds no row for them at all, and a live answer of "false" for a
+/// key the seed grants is exactly the difference this comparison exists to report. That makes the four a
+/// migration check as well as a parity check, which is the honest thing for them to be.
 /// </para>
 /// <para>
 /// <b>The per-person side is deliberately absent.</b> The ship-day claim that somebody relying on their role
@@ -110,15 +118,14 @@ public sealed class PermissionBaselineParityTests
     ];
 
     /// <summary>
-    /// The keys with no predecessor list, and the roles their baselines are stated to ship to.
+    /// The keys with no predecessor list that the store already carried, and the roles their baselines are
+    /// stated to ship to.
     /// </summary>
     /// <remarks>
-    /// Three of them replace no retired list because the three account-administration keys were new when the
-    /// declaration was written. The other four were added later by 010-startup-rebuild (T053) for the privileged
-    /// surfaces the rebuilt launch introduces, so no retired list written earlier could describe them either. Both
-    /// groups are asserted against their stated sets rather than against a list — that is what makes SC-001
-    /// evaluable for them — and every one of the nine roles is checked, so a role the key is stated not to ship to
-    /// fails here if it is granted it.
+    /// These three replace no retired list because they were new when the declaration was written. They are
+    /// asserted against their stated sets rather than against a list — that is what makes SC-001 evaluable for
+    /// them — and every one of the nine roles is checked, so a role the key is stated not to ship to fails here if
+    /// it is granted it.
     /// </remarks>
     private static readonly Dictionary<string, string[]> StatedSetsWithNoPredecessor = new(StringComparer.Ordinal)
     {
@@ -128,6 +135,20 @@ public sealed class PermissionBaselineParityTests
             ["production_lead", "setup_lead", "material_handler_lead", "plant_manager", "it_department", "developer"],
         [PermissionKeys.AdminPermissions] =
             ["it_department", "plant_manager", "developer"],
+    };
+
+    /// <summary>
+    /// The four keys 010-startup-rebuild adds (T053), and the roles their baselines are stated to ship to.
+    /// </summary>
+    /// <remarks>
+    /// No retired list written earlier could describe them, so they are asserted against their stated sets — which
+    /// is what makes SC-001 evaluable for them — and every one of the nine roles is checked, so a role they are
+    /// stated not to ship to fails here if they are granted it. They are asserted against the shipped seed and
+    /// against a live store alike, because a store that has not had this feature's seed applied is the case their
+    /// live half exists to report.
+    /// </remarks>
+    private static readonly Dictionary<string, string[]> StatedSetsIntroducedByThisFeature = new(StringComparer.Ordinal)
+    {
         [PermissionKeys.SettingsMachineConfiguration] =
             ["it_department", "developer"],
         [PermissionKeys.SettingsIgnoredLocationsEdit] =
@@ -241,7 +262,7 @@ public sealed class PermissionBaselineParityTests
     {
         var baselines = ReadShippedBaselines();
 
-        foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor)
+        foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor.Concat(StatedSetsIntroducedByThisFeature))
         {
             var expectedTrue = new HashSet<string>(statedRoles, StringComparer.Ordinal);
 
@@ -417,9 +438,17 @@ public sealed class PermissionBaselineParityTests
 
             foreach (var (key, retiredList) in ReplacedLists)
             {
+                // The same widening the shipped-data test applies, and for the same reason: the retired list is
+                // the record of what the application did before, so a key a later feature deliberately widened
+                // is expected to hold its added roles here too. Without this the live half fails on ship day
+                // for the widened key while the shipped-data half passes.
+                var widened = WidenedAfterShipDay.TryGetValue(key, out var widenedRoles)
+                    ? widenedRoles
+                    : [];
+
                 var expected = roleCode == StatedRoleCode
                     ? MaterialHandlerLeadGranted.Contains(key)
-                    : ExpectedHolders(key, retiredList).Contains(roleCode);
+                    : ExpectedHolders(key, retiredList).Contains(roleCode) || widened.Contains(roleCode);
 
                 Assert.AreEqual(
                     expected,
@@ -429,7 +458,9 @@ public sealed class PermissionBaselineParityTests
                         + $"{(expected ? "true" : "false")} today (list: {string.Join(", ", retiredList)}).");
             }
 
-            foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor)
+            // Every key with no predecessor, both the three the store has always carried and the four this feature
+            // adds, so a store missing one of the four is reported here rather than passing quietly.
+            foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor.Concat(StatedSetsIntroducedByThisFeature))
             {
                 Assert.AreEqual(
                     statedRoles.Contains(roleCode, StringComparer.Ordinal),
