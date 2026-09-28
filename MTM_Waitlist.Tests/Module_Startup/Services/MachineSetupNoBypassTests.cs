@@ -57,7 +57,7 @@ public sealed class MachineSetupNoBypassTests
     public async Task RunAsync_WhenTheMachinesConfigurationCannotBeRead_StopsWithoutHandingOverTheMainScreens()
     {
         var run = new LaunchRun().WithConfiguration(
-            new MachineConfigurationState(false, null, null, [], MachineConfigurationReasons.Unreadable));
+            new MachineConfigurationState(false, null, null, MachineConfigurationReasons.Unreadable));
         var handed = new List<LaunchOutcome>();
         run.Pipeline.ShellReady += (_, outcome) => handed.Add(outcome);
 
@@ -103,11 +103,11 @@ public sealed class MachineSetupNoBypassTests
             new LaunchRun().Unconfigured(),
             new LaunchRun().Unconfigured().With(ReachabilityStepId, Failed()),
             new LaunchRun().WithConfiguration(
-                new MachineConfigurationState(false, null, null, [], MachineConfigurationReasons.Removed)),
+                new MachineConfigurationState(false, null, null, MachineConfigurationReasons.Removed)),
             new LaunchRun().WithConfiguration(
-                new MachineConfigurationState(false, null, null, [], MachineConfigurationReasons.Revoked)),
+                new MachineConfigurationState(false, null, null, MachineConfigurationReasons.Revoked)),
             new LaunchRun().WithConfiguration(
-                new MachineConfigurationState(false, null, null, [], MachineConfigurationReasons.Unreadable)),
+                new MachineConfigurationState(false, null, null, MachineConfigurationReasons.Unreadable)),
         };
 
         foreach (var run in attempts)
@@ -252,7 +252,7 @@ public sealed class MachineSetupNoBypassTests
 
         /// <summary>States that this computer has no configuration at all.</summary>
         public LaunchRun Unconfigured() => WithConfiguration(
-            new MachineConfigurationState(false, null, null, [], MachineConfigurationReasons.NeverConfigured));
+            new MachineConfigurationState(false, null, null, MachineConfigurationReasons.NeverConfigured));
 
         /// <summary>States what this computer's configuration read answers, and answers for the entry with the step that really does it.</summary>
         /// <remarks>
@@ -285,11 +285,6 @@ public sealed class MachineSetupNoBypassTests
             true,
             "Test workstation",
             "a machine the test owns",
-            [
-                new PictureSource(MachineConfigurationSourceKinds.SharedFolder, @"\\share\pictures"),
-                new PictureSource(MachineConfigurationSourceKinds.KeysFolder, @"\\share\keys"),
-                new PictureSource(MachineConfigurationSourceKinds.DunnageRoot, @"\\share\dunnage"),
-            ],
             null);
 
         public Task<MachineConfigurationState> GetStateAsync(CancellationToken cancellationToken) => Task.FromResult(State);

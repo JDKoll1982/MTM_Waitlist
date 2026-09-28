@@ -251,25 +251,18 @@ public static partial class ServiceRegistrationExtensions
 
         // The local picture cache, mirroring both trees the application reads. The waitlist root is a setting, so
         // the factory resolves it when a run starts rather than when the container is built; the Dunnage cache
-        // folder is the receiving application's own when this machine already has one, and ours when it does not.
+        // folder is the shipped default, which is the receiving application's own root.
         services.AddSingleton<MTM_Waitlist.Module_Shared.Services.IImageCacheSyncService>(provider =>
             new MTM_Waitlist.Module_Shared.Services.ImageCacheSyncService(async cancellationToken =>
             {
                 var storageConfiguration = provider
                     .GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageStorageConfigurationResolver>();
 
-                // The dunnage root is this machine's own, captured by machine setup, and it is adopted here
-                // before anything resolves a dunnage path (T155, FR-025). A machine that names no root keeps the
-                // shipped default rather than resolving nothing.
-                var machineConfiguration = provider
-                    .GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IMachineConfigurationService>();
-
-                var machineState = await machineConfiguration.GetStateAsync(cancellationToken).ConfigureAwait(false);
-
+                // The dunnage root is a plant-wide setting like the picture folder, adopted before anything
+                // resolves a dunnage path, so the folder the copy is written into and the folder the screens look
+                // in are the same one (FR-040).
                 DunnageImagePathResolver.ConfigureRootFolder(
-                    machineState.PictureSources
-                        .FirstOrDefault(source => source.Kind == MTM_Waitlist.Module_Core.Models.MachineConfigurationSourceKinds.DunnageRoot)
-                        ?.Path);
+                    await storageConfiguration.GetDunnageRootPathAsync().ConfigureAwait(false));
 
                 // Adopted before anything reads a cached path, so the folder the copy is written into and the
                 // folder the screens look in are the same one.

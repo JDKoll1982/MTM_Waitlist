@@ -8,12 +8,10 @@ namespace MTM_Waitlist.Module_Core.Models;
 /// is refused by the save rather than written.
 /// </param>
 /// <param name="Description">A short note about the machine. May be blank.</param>
-/// <param name="PictureSources">
-/// The machine's three picture sources. All three are required — the shared picture folder, the keys folder and
-/// the dunnage root — because a machine holding two of them is configured wrongly rather than half-configured,
-/// and a save that omits one is refused instead of written.
-/// </param>
+/// <remarks>
+/// Identity and nothing else: where this machine's pictures come from is held once for the whole plant and
+/// changed from the settings panel, so no computer captures a folder and there is none to write here (FR-040).
+/// </remarks>
 public sealed record MachineConfigurationDraft(
     string DisplayName,
-    string Description,
-    IReadOnlyList<PictureSource> PictureSources);
+    string Description);

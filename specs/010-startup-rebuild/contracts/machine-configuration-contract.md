@@ -25,17 +25,11 @@ public sealed record MachineConfigurationState(
     bool IsConfigured,
     string? DisplayName,
     string? Description,
-    IReadOnlyList<PictureSource> PictureSources,
     string? UnconfiguredReason);
 
 public sealed record MachineConfigurationDraft(
     string DisplayName,
-    string Description,
-    IReadOnlyList<PictureSource> PictureSources);
-
-public sealed record PictureSource(
-    string Kind,
-    string Path);
+    string Description);
 ```
 
 `UnconfiguredReason` distinguishes the four ways a machine can be unconfigured, because the diagnosis has to be
@@ -48,11 +42,14 @@ Rules drawn from requirements:
 - **FR-009**: removed, revoked and unreadable all resolve to unconfigured at the next check. Losing
   configuration never degrades into running without it.
 - **There is no record destination to capture.** Records live only in the store, so machine configuration
-  carries the machine's identity and its picture sources and nothing else (FR-025, brief decision 23). This is
+  carries the machine's identity and nothing else (FR-025, brief decision 23). This is
   the second reason the old log-folder prompt disappears: not only did logging move, a folder was never the
   destination in the first place.
 - `SaveAsync` refuses a display name already in use, and the screen asks for a different one.
-- Picture sources are machine configuration. They were `appsettings.json` values before this work.
+- **Where the pictures come from is not this machine's.** The shared pictures folder is held once for the whole
+  plant and changed from the settings panel, so no computer captures one and the draft and the state carry no
+  picture source at all (FR-040, FR-041). The per-computer rows an older store holds were withdrawn when the
+  three `sp_config_images_locations_computer_sources_*` procedures were retired.
 
 ## 2. The setup gate
 
@@ -108,7 +105,7 @@ as a crash. The message is localised: an unlocalised hard close is reported as i
 
 | May reset | Must never touch |
 |---|---|
-| This machine's configuration rows: display name, description, picture sources | Any person, role or permission |
+| This machine's configuration rows: display name and description | Any person, role or permission |
 | A broken scoped preference row for this machine's scope | Another machine's configuration |
 | | Any session |
 | | Any log entry |

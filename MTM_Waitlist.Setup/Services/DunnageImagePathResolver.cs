@@ -17,16 +17,14 @@ public static class DunnageImagePathResolver
     private const string EnvironmentVariable = "MTM_DUNNAGE_IMAGE_ROOT";
 
     /// <summary>
-    /// Default shared root for Dunnage images. Matches the MTM Receiving Application's
-    /// configured <c>Dunnage.Application.DefaultImageLocation</c> and the waitlist
-    /// <c>DunnageImageOptions:RootFolder</c> appsettings value.
+    /// Default shared root for Dunnage images, which is the root a plant that names no other is left with.
     /// </summary>
     /// <remarks>
-    /// Written as the share's own name rather than as the <c>X:</c> drive letter that reaches it on this site
-    /// (<c>X:</c> is <c>\\mtmanu-fs01\Expo Drive</c>): a drive letter is only meaningful on a machine that has the
-    /// mapping, and this root has to be readable from every workstation.
+    /// The value itself lives in <see cref="AppStoragePaths.DunnageRootDefault"/>, so the shipped default, the
+    /// plant-wide setting and the settings panel's box all name one path. What is in force is read from that
+    /// setting rather than from this computer's own configuration (FR-040).
     /// </remarks>
-    public const string DefaultRootFolder = @"\\mtmanu-fs01\Expo Drive\Software Development\Live Applications\Shared\Images\Dunnage";
+    public const string DefaultRootFolder = AppStoragePaths.DunnageRootDefault;
 
     private static string? _configuredRootFolder;
 

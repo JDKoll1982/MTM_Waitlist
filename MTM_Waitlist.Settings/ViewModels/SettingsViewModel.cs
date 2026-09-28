@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Reflection;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -290,6 +289,16 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     } = string.Empty;
 
     /// <summary>
+    /// What the dunnage root box holds, which is the root the dunnage pictures are read from for every computer
+    /// (FR-040).
+    /// </summary>
+    [ObservableProperty]
+    public partial string DunnageRootInput
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>
     /// How many days a replaced picture is kept before it is cleaned up (FR-037).
     /// </summary>
     /// <remarks>
@@ -315,22 +324,6 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         get; set;
     }
-
-    /// <summary>
-    /// One line naming this computer's own configured picture folder when that is not the folder every computer
-    /// reads, and empty when the two agree.
-    /// </summary>
-    /// <remarks>
-    /// The store is the truth (OQ-3, settled by this feature): a computer whose settings file still carries the old
-    /// path must be told so in one sentence rather than left to wonder why a picture is not where it expected
-    /// (FR-010). Reporting it beats silently following the file, which is what would make two computers disagree
-    /// about where one recorded picture lives.
-    /// </remarks>
-    [ObservableProperty]
-    public partial string StoragePathsDisagreementMessage
-    {
-        get; set;
-    } = string.Empty;
 
     public ObservableCollection<ComputerOption> AvailableWorkstations { get; } = new();
 
@@ -730,6 +723,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// <summary>The label on the key-folder box.</summary>
     public string StoragePathsKeysFolderLabel => "Settings_StoragePaths_KeysFolder.Label".GetLocalized();
 
+    public string StoragePathsDunnageRootLabel => "Settings_StoragePaths_DunnageRoot.Label".GetLocalized();
+
     /// <summary>The label on the retention-period box.</summary>
     public string StoragePathsArchiveKeepDaysLabel => "Settings_StoragePaths_ArchiveKeepDays.Label".GetLocalized();
 
@@ -738,19 +733,6 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     /// <summary>The line saying that what is shown is what every computer reads.</summary>
     public string StoragePathsStoreIsTruthText => "Settings_StoragePaths_StoreIsTruth.Text".GetLocalized();
-
-    /// <summary>
-    /// Whether the disagreement line has anything to say.
-    /// </summary>
-    /// <remarks>
-    /// Collapsed rather than empty, so a machine that agrees with the store is not shown a blank line that reads
-    /// as a message that failed to load.
-    /// </remarks>
-    public Visibility StoragePathsDisagreementVisibility =>
-        string.IsNullOrEmpty(StoragePathsDisagreementMessage) ? Visibility.Collapsed : Visibility.Visible;
-
-    partial void OnStoragePathsDisagreementMessageChanged(string value) =>
-        OnPropertyChanged(nameof(StoragePathsDisagreementVisibility));
 
     /// <summary>
     /// The panel holding the two storage folders and the period a replaced picture is kept (FR-016, FR-037).
@@ -1781,11 +1763,13 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 .ConfigureAwait(true);
             KeysFolderInput = KeysFolderPath;
 
+            DunnageRootInput = await _imageStorageConfigurationResolver
+                .GetDunnageRootPathAsync()
+                .ConfigureAwait(true);
+
             ArchiveKeepDaysInput = await _imageStorageConfigurationResolver
                 .GetArchiveKeepDaysAsync()
                 .ConfigureAwait(true);
-
-            await ReportStoragePathDisagreementAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -1802,52 +1786,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
-    /// Names this machine's own configured picture folder when it is not the folder every computer reads.
+    /// Stores the picture folder, the key folder, the dunnage root and the retention period for every computer.
     /// </summary>
     /// <remarks>
-    /// The store wins (OQ-3), so a machine still carrying the old path in its settings file is working from the
-    /// store's answer while appearing to be configured otherwise. Saying so in one line is what stops that reading
-    /// as a picture that is simply not there. Which folder is the truth, and whether this machine's file disagrees
-    /// with it, is the resolver's answer rather than a comparison kept here, so the rule has one home (FR-010).
-    /// </remarks>
-    private async Task ReportStoragePathDisagreementAsync()
-    {
-        if (_imageStorageConfigurationResolver is null)
-        {
-            return;
-        }
-
-        try
-        {
-            var resolution = await _imageStorageConfigurationResolver
-                .GetSharedFolderResolutionAsync()
-                .ConfigureAwait(true);
-
-            StoragePathsDisagreementMessage = resolution.MachineDisagrees
-                ? string.Format(
-                    CultureInfo.CurrentCulture,
-                    "Settings_StoragePaths_Disagreement.Text".GetLocalized(),
-                    resolution.MachineFolderPath)
-                : string.Empty;
-        }
-        catch (Exception ex)
-        {
-            // A folder that cannot be resolved is already reported by the read above; the panel must not fail on
-            // the line that explains it.
-            StoragePathsDisagreementMessage = string.Empty;
-            AppLog.Error(
-                "SettingsStoragePaths",
-                ex,
-                "The storage folder's disagreement with this machine's own configuration could not be worked out.");
-        }
-    }
-
-    /// <summary>
-    /// Stores the picture folder, the key folder and the retention period for every computer.
-    /// </summary>
-    /// <remarks>
-    /// One button for the three, because they are one subject and one screen: three buttons over three boxes on one
-    /// panel is three chances to leave the panel half saved. The period is refused when it is not a positive whole
+    /// One button for the four, because they are one subject and one screen: four buttons over four boxes on one
+    /// panel is four chances to leave the panel half saved. The period is refused when it is not a positive whole
     /// number of days rather than stored as a figure the cleanup would read as zero.
     /// </remarks>
     [RelayCommand]
@@ -1860,9 +1803,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
         var pictureFolder = PictureFolderInput?.Trim() ?? string.Empty;
         var keysFolder = KeysFolderInput?.Trim() ?? string.Empty;
+        var dunnageRoot = DunnageRootInput?.Trim() ?? string.Empty;
         var keepDays = (int)Math.Round(ArchiveKeepDaysInput, MidpointRounding.AwayFromZero);
 
-        if (pictureFolder.Length == 0 || keysFolder.Length == 0)
+        if (pictureFolder.Length == 0 || keysFolder.Length == 0 || dunnageRoot.Length == 0)
         {
             StoragePathsStatusMessage = "Settings_StoragePaths_FolderNeeded.Text".GetLocalized();
             return;
@@ -1891,6 +1835,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 boolean: null).ConfigureAwait(true);
 
             await SaveAppWideSettingAsync(
+                ConfigSettingKeys.DunnageRootPath,
+                "text",
+                dunnageRoot,
+                boolean: null).ConfigureAwait(true);
+
+            await SaveAppWideSettingAsync(
                 ConfigSettingKeys.ImageStorageArchiveKeepDays,
                 "int",
                 text: null,
@@ -1899,7 +1849,6 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
             PictureFolderPath = pictureFolder;
             KeysFolderPath = keysFolder;
-            await ReportStoragePathDisagreementAsync().ConfigureAwait(true);
             StoragePathsStatusMessage = "Settings_StoragePaths_Saved.Text".GetLocalized();
         }
         catch (Exception ex)

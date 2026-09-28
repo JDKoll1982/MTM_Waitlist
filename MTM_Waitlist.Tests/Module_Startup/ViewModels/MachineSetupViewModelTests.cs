@@ -3,7 +3,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
-using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.Module_Startup.ViewModels;
 
@@ -11,8 +10,9 @@ namespace MTM_Waitlist.Tests.Module_Startup.ViewModels;
 
 /// <summary>
 /// The machine-setup screen's state (`contracts/machine-configuration-contract.md` sections 1 and 2; FR-007,
-/// FR-009, FR-018): a refused sign-in is stated and keeps the capture closed, a refused display name is stated and
-/// asks for a different one, and an accepted save writes this computer's identity and its picture sources.
+/// FR-009, FR-018, FR-040): a refused sign-in is stated and keeps the capture closed, a refused display name is
+/// stated and asks for a different one, and an accepted save writes this computer's name and its note, which is
+/// everything the screen asks for.
 /// </summary>
 /// <remarks>
 /// The gate and the configuration service are hand-written doubles, so what is pinned is the screen's own
@@ -61,6 +61,28 @@ public sealed class MachineSetupViewModelTests
     }
 
     [TestMethod]
+    public async Task SignInAsync_WhenTheMachineAlreadyHoldsANameAndNote_FillsThemInForCorrection()
+    {
+        // A machine whose configuration is being corrected starts from what it already holds rather than from a
+        // blank form, so nobody retypes a name the store is holding for them.
+        var configuration = new StubConfigurationService
+        {
+            State = new MachineConfigurationState(
+                false,
+                "MTMFG-161",
+                "the shop floor",
+                MachineConfigurationReasons.Removed),
+        };
+
+        var viewModel = Build(configuration: configuration);
+
+        await viewModel.SignInCommand.ExecuteAsync(new MachineSetupCredentials("JKoll", "8391"));
+
+        Assert.AreEqual("MTMFG-161", viewModel.DisplayName);
+        Assert.AreEqual("the shop floor", viewModel.Description);
+    }
+
+    [TestMethod]
     public async Task SaveAsync_WhenNobodyHasSignedIn_RefusesAndWritesNothing()
     {
         var configuration = new StubConfigurationService();
@@ -94,7 +116,7 @@ public sealed class MachineSetupViewModelTests
     }
 
     [TestMethod]
-    public async Task SaveAsync_WhenTheStoreAcceptsIt_WritesThisComputersIdentityAndItsThreePictureSources()
+    public async Task SaveAsync_WhenTheStoreAcceptsIt_WritesThisComputersIdentityAndItsNote()
     {
         var configuration = new StubConfigurationService();
         var viewModel = Build(configuration: configuration);
@@ -105,27 +127,12 @@ public sealed class MachineSetupViewModelTests
 
         viewModel.DisplayName = "  MTMFG-161  ";
         viewModel.Description = "  the shop floor  ";
-        viewModel.SharedFolderPath = @"\\share\pictures";
-        viewModel.KeysFolderPath = @"\\share\keys";
-        viewModel.DunnageRootPath = @"\\share\dunnage";
 
         await viewModel.SaveCommand.ExecuteAsync(null);
 
         Assert.IsNotNull(configuration.Saved, "the screen saves through the one writer of these rows");
         Assert.AreEqual("MTMFG-161", configuration.Saved!.DisplayName, "the name is written trimmed");
-        Assert.AreEqual("the shop floor", configuration.Saved.Description);
-
-        CollectionAssert.AreEqual(
-            new[]
-            {
-                MachineConfigurationSourceKinds.SharedFolder,
-                MachineConfigurationSourceKinds.KeysFolder,
-                MachineConfigurationSourceKinds.DunnageRoot,
-            },
-            configuration.Saved.PictureSources.Select(source => source.Kind).ToArray(),
-            "all three picture sources are captured, in the order the store needs them");
-
-        Assert.AreEqual(@"\\share\dunnage", configuration.Saved.PictureSources[2].Path);
+        Assert.AreEqual("the shop floor", configuration.Saved.Description, "the note is written trimmed");
         Assert.AreEqual(1, savedCues, "an accepted save carries the launch on exactly once");
         Assert.IsNull(viewModel.Message);
     }
@@ -146,74 +153,10 @@ public sealed class MachineSetupViewModelTests
     /// <summary>The screen under test, over the doubles the case states.</summary>
     private static MachineSetupViewModel Build(
         StubGate? gate = null,
-        StubConfigurationService? configuration = null,
-        StubFolderBrowser? folderBrowser = null)
+        StubConfigurationService? configuration = null)
         => new(
             gate ?? new StubGate(null),
-            configuration ?? new StubConfigurationService(),
-            folderBrowser ?? new StubFolderBrowser());
-
-    [TestMethod]
-    public async Task BrowseSharedFolderCommand_WhenAFolderIsChosen_PutsItOnTheField()
-    {
-        // Arrange
-        var browser = new StubFolderBrowser { Chosen = @"\\server\share\Pictures" };
-        var viewModel = Build(folderBrowser: browser);
-
-        await viewModel.SignInCommand.ExecuteAsync(new MachineSetupCredentials("JKoll", "8391"));
-
-        // Act
-        await viewModel.BrowseSharedFolderCommand.ExecuteAsync(null);
-
-        // Assert
-        Assert.AreEqual(@"\\server\share\Pictures", viewModel.SharedFolderPath);
-        Assert.AreEqual(
-            "Startup_MachineSetup.BrowseAction".GetLocalized(),
-            viewModel.BrowseActionText,
-            "the button says what it does rather than carrying its own key");
-    }
-
-    [TestMethod]
-    public async Task BrowseSharedFolderCommand_WhenTheDialogIsClosed_LeavesTheFieldAlone()
-    {
-        // Arrange: a dialog that answers nothing is somebody changing their mind, not a reason to lose a path.
-        var browser = new StubFolderBrowser { Chosen = null };
-        var viewModel = Build(folderBrowser: browser);
-
-        await viewModel.SignInCommand.ExecuteAsync(new MachineSetupCredentials("JKoll", "8391"));
-        viewModel.SharedFolderPath = @"\\already\typed";
-
-        // Act
-        await viewModel.BrowseSharedFolderCommand.ExecuteAsync(null);
-
-        // Assert
-        Assert.AreEqual(@"\\already\typed", viewModel.SharedFolderPath);
-    }
-
-    [TestMethod]
-    public async Task SignInCommand_WhenAuthorised_FillsTheFoldersFromTheShippedDefaults()
-    {
-        // Arrange: a computer the store has no picture sources for, which is the case setup exists for.
-        var viewModel = Build();
-
-        // Act
-        await viewModel.SignInCommand.ExecuteAsync(new MachineSetupCredentials("JKoll", "8391"));
-
-        // Assert: the suggested locations are on the screen rather than only in the documentation.
-        Assert.AreEqual(AppStoragePaths.ImagesRootDefault, viewModel.SharedFolderPath);
-        Assert.AreEqual(AppStoragePaths.KeysFolderDefault, viewModel.KeysFolderPath);
-        Assert.AreEqual(AppStoragePaths.ImagesRootDefault, viewModel.SharedFolderHintText);
-    }
-
-    /// <summary>The folder dialog, answering what the case states.</summary>
-    private sealed class StubFolderBrowser : IFolderBrowserService
-    {
-        /// <summary>What the dialog answers, or <c>null</c> for a person who closed it.</summary>
-        public string? Chosen { get; init; }
-
-        public Task<string?> PickFolderAsync(string? startingFolder, CancellationToken cancellationToken)
-            => Task.FromResult(Chosen);
-    }
+            configuration ?? new StubConfigurationService());
 
     /// <summary>The gate, answering what the case states and recording what it was asked.</summary>
     private sealed class StubGate : IMachineSetupGate
@@ -243,13 +186,15 @@ public sealed class MachineSetupViewModelTests
 
         public MachineConfigurationSaveResult SaveResult { get; init; } = new(true, null, 4L);
 
+        /// <summary>What the store already holds for this computer, which the screen fills its form from.</summary>
+        public MachineConfigurationState State { get; init; } = new(
+            false,
+            null,
+            null,
+            MachineConfigurationReasons.NeverConfigured);
+
         public Task<MachineConfigurationState> GetStateAsync(CancellationToken cancellationToken)
-            => Task.FromResult(new MachineConfigurationState(
-                false,
-                null,
-                null,
-                [],
-                MachineConfigurationReasons.NeverConfigured));
+            => Task.FromResult(State);
 
         public Task<MachineConfigurationSaveResult> SaveAsync(
             MachineConfigurationDraft draft,

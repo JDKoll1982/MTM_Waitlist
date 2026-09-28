@@ -454,30 +454,20 @@ public sealed class PreSignInStepsTests
     private static LaunchStepContext Context(ILaunchActivityFeed feed, IMachineFacts machine)
         => new(null, machine, feed);
 
-    /// <summary>A machine that holds its name, its description and all three of its picture sources.</summary>
+    /// <summary>A machine that holds its name and its note.</summary>
     private static MachineConfigurationState Configured() => new(
         true,
         "Shop floor station",
         "a machine the test owns",
-        [
-            new PictureSource(MachineConfigurationSourceKinds.SharedFolder, @"\\share\pictures"),
-            new PictureSource(MachineConfigurationSourceKinds.KeysFolder, @"\\share\keys"),
-            new PictureSource(MachineConfigurationSourceKinds.DunnageRoot, @"\\share\dunnage"),
-        ],
         null);
 
     /// <summary>A machine that is not configured, carrying the reason it is not.</summary>
-    private static MachineConfigurationState Unconfigured(string reason) => new(false, null, null, [], reason);
+    private static MachineConfigurationState Unconfigured(string reason) => new(false, null, null, reason);
 
     /// <summary>What the setup surface captured, ready to be written.</summary>
     private static MachineConfigurationDraft Draft(string displayName) => new(
         displayName,
-        "a machine the test owns",
-        [
-            new PictureSource(MachineConfigurationSourceKinds.SharedFolder, @"\\share\pictures"),
-            new PictureSource(MachineConfigurationSourceKinds.KeysFolder, @"\\share\keys"),
-            new PictureSource(MachineConfigurationSourceKinds.DunnageRoot, @"\\share\dunnage"),
-        ]);
+        "a machine the test owns");
 
     /// <summary>One registry row as the lookup returns it, in the column names the mapping reads.</summary>
     private static Dictionary<string, object?> RegistryRow(string computerName, string? macAddress) => new()

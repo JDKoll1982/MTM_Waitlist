@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Tests.Module_Settings;
 
@@ -68,6 +69,74 @@ public sealed class ImageLocationServiceCascadeTests
             overridePath,
             resolved,
             "An Item's own override is keyed by the Item code the request is stored with.");
+    }
+
+    /// <summary>
+    /// SC-019: with the shared folder unreachable, a picture is read from the copy this computer holds rather than
+    /// shrugged off onto the application's no-picture asset, which is what keeps a screen drawing while the share
+    /// is away (FR-042).
+    /// </summary>
+    [TestMethod]
+    public async Task ResolveRequestItemImagePathAsync_WithTheShareUnreachable_UsesTheCopyHeldOnThisComputer()
+    {
+        var cacheRoot = Path.Combine(Path.GetTempPath(), "mtm-image-tests", Guid.NewGuid().ToString("N"));
+        var cachedCopy = Path.Combine(cacheRoot, "waitlist", "Waitlist", "request_item", "pickup-coil.png");
+
+        Directory.CreateDirectory(Path.GetDirectoryName(cachedCopy)!);
+        File.WriteAllText(cachedCopy, "image");
+
+        ImageCachePaths.SetCacheRoot(cacheRoot);
+
+        try
+        {
+            // The row names a picture the shared folder does not hold, because the share cannot be reached. The
+            // path is relative, which is how the application records one.
+            _overrides.AddOverride("request_item", "pickup-coil", "Waitlist/request_item/pickup-coil.png");
+
+            var resolved = await _service.ResolveRequestItemImagePathAsync("pickup-coil");
+
+            Assert.AreEqual(
+                cachedCopy,
+                resolved,
+                "the copy held on this computer is the one read when the shared folder cannot be reached (FR-042)");
+        }
+        finally
+        {
+            ImageCachePaths.SetCacheRoot(null);
+
+            if (Directory.Exists(cacheRoot))
+            {
+                Directory.Delete(cacheRoot, recursive: true);
+            }
+        }
+    }
+
+    /// <summary>
+    /// FR-044: a picture that is on neither the shared folder nor this computer is reported as missing rather than
+    /// stood in for by another picture. What answers is the application's own no-picture state, which says there is
+    /// no picture, and asking for it is an answer rather than a failure — so nothing about a missing picture can
+    /// stop a launch.
+    /// </summary>
+    [TestMethod]
+    public async Task ResolveRequestItemImagePathAsync_WithNeitherTheShareNorACopy_AnswersTheNoPictureState()
+    {
+        ImageCachePaths.SetCacheRoot(Path.Combine(Path.GetTempPath(), "mtm-image-tests", Guid.NewGuid().ToString("N")));
+
+        try
+        {
+            _overrides.AddOverride("request_item", "pickup-coil", "Waitlist/request_item/never-copied.png");
+
+            var resolved = await _service.ResolveRequestItemImagePathAsync("pickup-coil");
+
+            Assert.AreEqual(
+                ImageLocationDefaults.RequestItemDefaultPath,
+                resolved,
+                "the application's own no-picture state answers for a picture that is nowhere (FR-044)");
+        }
+        finally
+        {
+            ImageCachePaths.SetCacheRoot(null);
+        }
     }
 
     /// <summary>

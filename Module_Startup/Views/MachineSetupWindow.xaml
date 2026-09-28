@@ -100,63 +100,6 @@
                         AutomationProperties.AutomationId="MachineSetupWindow_Description"
                         Header="{x:Bind ViewModel.DescriptionLabelText}"
                         Text="{x:Bind ViewModel.Description, Mode=TwoWay}" />
-                    <Grid ColumnSpacing="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBox
-                            x:Name="SharedFolderBox"
-                            AutomationProperties.AutomationId="MachineSetupWindow_SharedFolder"
-                            Header="{x:Bind ViewModel.SharedFolderLabelText}"
-                            PlaceholderText="{x:Bind ViewModel.SharedFolderHintText}"
-                            Text="{x:Bind ViewModel.SharedFolderPath, Mode=TwoWay}" />
-                        <Button
-                            AutomationProperties.AutomationId="MachineSetupWindow_SharedFolderBrowse"
-                            AutomationProperties.Name="{x:Bind ViewModel.BrowseActionText}"
-                            Command="{x:Bind ViewModel.BrowseSharedFolderCommand}"
-                            Content="{x:Bind ViewModel.BrowseActionText}"
-                            Grid.Column="1"
-                            VerticalAlignment="Bottom" />
-                    </Grid>
-                    <Grid ColumnSpacing="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBox
-                            x:Name="KeysFolderBox"
-                            AutomationProperties.AutomationId="MachineSetupWindow_KeysFolder"
-                            Header="{x:Bind ViewModel.KeysFolderLabelText}"
-                            PlaceholderText="{x:Bind ViewModel.KeysFolderHintText}"
-                            Text="{x:Bind ViewModel.KeysFolderPath, Mode=TwoWay}" />
-                        <Button
-                            AutomationProperties.AutomationId="MachineSetupWindow_KeysFolderBrowse"
-                            AutomationProperties.Name="{x:Bind ViewModel.BrowseActionText}"
-                            Command="{x:Bind ViewModel.BrowseKeysFolderCommand}"
-                            Content="{x:Bind ViewModel.BrowseActionText}"
-                            Grid.Column="1"
-                            VerticalAlignment="Bottom" />
-                    </Grid>
-                    <Grid ColumnSpacing="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBox
-                            x:Name="DunnageRootBox"
-                            AutomationProperties.AutomationId="MachineSetupWindow_DunnageRoot"
-                            Header="{x:Bind ViewModel.DunnageRootLabelText}"
-                            PlaceholderText="{x:Bind ViewModel.DunnageRootHintText}"
-                            Text="{x:Bind ViewModel.DunnageRootPath, Mode=TwoWay}" />
-                        <Button
-                            AutomationProperties.AutomationId="MachineSetupWindow_DunnageRootBrowse"
-                            AutomationProperties.Name="{x:Bind ViewModel.BrowseActionText}"
-                            Command="{x:Bind ViewModel.BrowseDunnageRootCommand}"
-                            Content="{x:Bind ViewModel.BrowseActionText}"
-                            Grid.Column="1"
-                            VerticalAlignment="Bottom" />
-                    </Grid>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

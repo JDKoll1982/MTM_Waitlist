@@ -22,20 +22,15 @@ public static class MachineConfigurationRefusals
     public const string DisplayNameInUse = "display_name_in_use";
 
     /// <summary>
-    /// The draft does not carry all three picture sources, or one of them is blank. All three are required, so
-    /// this is refused as an incomplete save rather than written as two of three.
-    /// </summary>
-    public const string PictureSourcesIncomplete = "picture_sources_incomplete";
-
-    /// <summary>
-    /// The store accepted the display name and the description but did not write all three picture-source rows,
-    /// so the machine is not configured and nothing else is reported as saved.
-    /// </summary>
-    public const string PictureSourcesNotWritten = "picture_sources_not_written";
-
-    /// <summary>
     /// A reset of the display name was refused because the default name it would restore is already held by
     /// another machine. Nothing was reset, so the caller can report what is holding the restore up.
     /// </summary>
     public const string DefaultDisplayNameInUse = "default_display_name_in_use";
+
+    /// <summary>
+    /// The store was asked to save the machine but does not hold what was asked for when the row is read back,
+    /// so the save is reported as not made rather than as made. Success is read back rather than inferred from
+    /// a changed-row count, because the store reports zero for a write that changes nothing.
+    /// </summary>
+    public const string ConfigurationNotWritten = "configuration_not_written";
 }

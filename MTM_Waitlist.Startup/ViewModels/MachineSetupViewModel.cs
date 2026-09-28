@@ -4,21 +4,22 @@ using CommunityToolkit.Mvvm.Input;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
-using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Startup.Services;
-
-// The shared helpers carry the shipped folder defaults, and they hold their own PictureSource beside the core
-// one. The core type is the one this screen captures, so it is named explicitly rather than by namespace.
-using PictureSource = MTM_Waitlist.Module_Core.Models.PictureSource;
 
 namespace MTM_Waitlist.Module_Startup.ViewModels;
 
 /// <summary>
-/// The machine-setup screen's state: it unlocks on an authorised sign-in, captures what this computer is called and
-/// where its pictures come from, and saves that through the one service that writes it
-/// (`contracts/machine-configuration-contract.md` sections 1 and 2; FR-007, FR-009, FR-018).
+/// The machine-setup screen's state: it unlocks on an authorised sign-in, captures what this computer is called —
+/// its name and its note — and saves that through the one service that writes it
+/// (`contracts/machine-configuration-contract.md` sections 1 and 2; FR-007, FR-009, FR-018, FR-040).
 /// </summary>
 /// <remarks>
+/// <para>
+/// <b>This screen asks for the computer's name and its note, and for nothing else</b> (FR-040, FR-041). Where
+/// pictures come from is held once for the plant and changed from the settings panel, so nothing here captures a
+/// folder and the draft this screen saves carries no picture source. A machine counts as configured once the
+/// store holds its record and its name, which is why a save that changed nothing is still a save that succeeded.
+/// </para>
 /// <para>
 /// <b>One writer, and this screen never writes rows itself.</b> The draft it captures goes to
 /// <see cref="IMachineConfigurationService"/>, which is the only code that touches this computer's configuration
@@ -45,23 +46,19 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
 {
     private readonly IMachineSetupGate _gate;
     private readonly IMachineConfigurationService _configuration;
-    private readonly IFolderBrowserService _folderBrowser;
 
     /// <summary>The authorisation this screen's save is allowed by, or <c>null</c> before anybody signs in.</summary>
     private MachineSetupAuthorization? _authorization;
 
-    /// <summary>Creates the setup screen's state over the gate that unlocks it, the service that writes it, and the folder dialog its three path fields offer.</summary>
+    /// <summary>Creates the setup screen's state over the gate that unlocks it and the service that writes it.</summary>
     /// <param name="gate">The gate that authenticates an authorised person and authorises configuration only.</param>
     /// <param name="configuration">The one writer of this computer's configuration rows.</param>
-    /// <param name="folderBrowser">The folder dialog, which is a surface concern this screen only asks for.</param>
     public MachineSetupViewModel(
         IMachineSetupGate gate,
-        IMachineConfigurationService configuration,
-        IFolderBrowserService folderBrowser)
+        IMachineConfigurationService configuration)
     {
         _gate = gate ?? throw new ArgumentNullException(nameof(gate));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        _folderBrowser = folderBrowser ?? throw new ArgumentNullException(nameof(folderBrowser));
     }
 
     /// <summary>
@@ -81,18 +78,6 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     /// <summary>A short note about this computer. It may be blank.</summary>
     [ObservableProperty]
     public partial string Description { get; set; } = string.Empty;
-
-    /// <summary>The shared root this computer's pictures sit under.</summary>
-    [ObservableProperty]
-    public partial string SharedFolderPath { get; set; } = string.Empty;
-
-    /// <summary>The folder this computer reads shared key material from.</summary>
-    [ObservableProperty]
-    public partial string KeysFolderPath { get; set; } = string.Empty;
-
-    /// <summary>The root this computer's dunnage pictures sit under.</summary>
-    [ObservableProperty]
-    public partial string DunnageRootPath { get; set; } = string.Empty;
 
     /// <summary>
     /// Whether the gate has authorised a person to configure this computer. It is what offers the capture form,
@@ -150,27 +135,6 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     public string DisplayNameLabelText => "Startup_MachineSetup.DisplayNameLabel".GetLocalized();
 
     public string DescriptionLabelText => "Startup_MachineSetup.DescriptionLabel".GetLocalized();
-
-    public string SharedFolderLabelText => "Startup_MachineSetup.SharedFolderLabel".GetLocalized();
-
-    public string KeysFolderLabelText => "Startup_MachineSetup.KeysFolderLabel".GetLocalized();
-
-    public string DunnageRootLabelText => "Startup_MachineSetup.DunnageRootLabel".GetLocalized();
-
-    /// <summary>
-    /// What each path field says while it is empty. It is the shipped default for the two locations that have
-    /// one, so the answer a person would otherwise have to go and look up is on the screen in front of them.
-    /// </summary>
-    public string SharedFolderHintText => AppStoragePaths.ImagesRootDefault;
-
-    /// <inheritdoc cref="SharedFolderHintText" />
-    public string KeysFolderHintText => AppStoragePaths.KeysFolderDefault;
-
-    /// <inheritdoc cref="SharedFolderHintText" />
-    public string DunnageRootHintText => "Startup_MachineSetup.DunnageRootHint".GetLocalized();
-
-    /// <summary>What the button beside each path field says, which is what it does.</summary>
-    public string BrowseActionText => "Startup_MachineSetup.BrowseAction".GetLocalized();
 
     /// <summary>What the sign-in name field says while it is empty, so what belongs in it is never in doubt.</summary>
     public string SignInNameHintText => "Startup_MachineSetup.SignInNameHint".GetLocalized();
@@ -242,10 +206,9 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
 
             if (_authorization.IsAuthorized)
             {
-                // The form is filled in before it is shown, from what the store already holds for this computer
-                // and from the shipped defaults for anything it does not. A person correcting one folder should
-                // not have to type the other two, and a suggested value that is visible is one they can judge.
-                await FillSuggestedConfigurationAsync().ConfigureAwait(true);
+                // The form is filled in before it is shown, from what the store already holds for this computer:
+                // a name being corrected should start from the one it has rather than from a blank field.
+                await FillSuggestedIdentityAsync().ConfigureAwait(true);
             }
         }
         finally
@@ -257,15 +220,14 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Fills the capture form from what the store already holds for this computer, falling back to the shipped
-    /// defaults for the folders the store has no source for.
+    /// Fills the capture form from what the store already holds for this computer.
     /// </summary>
     /// <remarks>
-    /// The store is the first answer for every field, because a machine whose configuration is being corrected
-    /// should start from what it currently has rather than from what the application would pick. The shipped
-    /// defaults fill in only what is missing, so the screen never invents a value over one that exists.
+    /// The store is the first answer for both fields, because a machine whose configuration is being corrected
+    /// should start from what it currently has rather than from what the application would pick. Nothing is
+    /// invented over a value that exists, and a field the store holds nothing for is left for the person to type.
     /// </remarks>
-    private async Task FillSuggestedConfigurationAsync()
+    private async Task FillSuggestedIdentityAsync()
     {
         try
         {
@@ -273,10 +235,6 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
 
             DisplayName = FirstNonBlank(state.DisplayName, DisplayName);
             Description = FirstNonBlank(state.Description, Description);
-
-            SharedFolderPath = FirstNonBlank(SourcePath(state, MachineConfigurationSourceKinds.SharedFolder), SharedFolderPath, AppStoragePaths.ImagesRootDefault);
-            KeysFolderPath = FirstNonBlank(SourcePath(state, MachineConfigurationSourceKinds.KeysFolder), KeysFolderPath, AppStoragePaths.KeysFolderDefault);
-            DunnageRootPath = FirstNonBlank(SourcePath(state, MachineConfigurationSourceKinds.DunnageRoot), DunnageRootPath);
         }
         catch (Exception exception)
         {
@@ -286,50 +244,12 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
         }
     }
 
-    /// <summary>
-    /// Opens the folder dialog for one path field and keeps what was chosen.
-    /// </summary>
-    /// <param name="current">What the field holds now, which is where the dialog opens.</param>
-    /// <param name="assign">How the chosen folder is put back on the field it belongs to.</param>
-    /// <remarks>
-    /// A closed dialog answers nothing and the field is left exactly as it was. Clearing a field because somebody
-    /// looked at a dialog and changed their mind would throw away a path they had already typed.
-    /// </remarks>
-    private async Task BrowseForFolderAsync(string current, Action<string> assign)
-    {
-        var chosen = await _folderBrowser.PickFolderAsync(current, CancellationToken.None).ConfigureAwait(true);
-
-        if (!string.IsNullOrWhiteSpace(chosen))
-        {
-            assign(chosen);
-        }
-    }
-
-    /// <summary>Finds one of this computer's stored picture sources by the kind it is stored under.</summary>
-    private static string SourcePath(MachineConfigurationState state, string kind)
-        => state.PictureSources
-            .FirstOrDefault(source => string.Equals(source.Kind, kind, StringComparison.OrdinalIgnoreCase))
-            ?.Path ?? string.Empty;
-
     /// <summary>The first of the given values that holds anything, so a field is never blanked by a blank answer.</summary>
     private static string FirstNonBlank(params string?[] candidates)
         => candidates.FirstOrDefault(candidate => !string.IsNullOrWhiteSpace(candidate))?.Trim() ?? string.Empty;
 
-    /// <summary>Opens the folder dialog for the shared pictures folder.</summary>
-    [RelayCommand]
-    private Task BrowseSharedFolderAsync() => BrowseForFolderAsync(SharedFolderPath, chosen => SharedFolderPath = chosen);
-
-    /// <summary>Opens the folder dialog for the shared keys folder.</summary>
-    [RelayCommand]
-    private Task BrowseKeysFolderAsync() => BrowseForFolderAsync(KeysFolderPath, chosen => KeysFolderPath = chosen);
-
-    /// <summary>Opens the folder dialog for the dunnage pictures folder.</summary>
-    [RelayCommand]
-    private Task BrowseDunnageRootAsync() => BrowseForFolderAsync(DunnageRootPath, chosen => DunnageRootPath = chosen);
-
     /// <summary>
-    /// Saves what this computer is called and where its pictures come from, and refuses unless somebody was
-    /// authorised to do it.
+    /// Saves what this computer is called, and refuses unless somebody was authorised to do it.
     /// </summary>
     /// <remarks>
     /// The authorisation is checked here rather than only where the capture form is drawn, so an unauthorised
@@ -372,15 +292,16 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
         }
     }
 
-    /// <summary>The draft the store is written with: this computer's identity and its three picture sources.</summary>
+    /// <summary>
+    /// The draft the store is written with: this computer's identity, which is all this screen captures.
+    /// </summary>
+    /// <remarks>
+    /// There is no folder here because there is none to capture: where pictures come from is held once for the
+    /// plant and changed from the settings panel (FR-040), and the draft carries no picture source at all.
+    /// </remarks>
     private MachineConfigurationDraft BuildDraft() => new(
         DisplayName?.Trim() ?? string.Empty,
-        Description?.Trim() ?? string.Empty,
-        [
-            new PictureSource(MachineConfigurationSourceKinds.SharedFolder, SharedFolderPath?.Trim() ?? string.Empty),
-            new PictureSource(MachineConfigurationSourceKinds.KeysFolder, KeysFolderPath?.Trim() ?? string.Empty),
-            new PictureSource(MachineConfigurationSourceKinds.DunnageRoot, DunnageRootPath?.Trim() ?? string.Empty),
-        ]);
+        Description?.Trim() ?? string.Empty);
 
     /// <summary>Why the sign-in was refused, in the reader's own words (FR-007).</summary>
     private static string DescribeRefusal(string? refusalReason) => refusalReason switch
@@ -396,8 +317,6 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     {
         MachineConfigurationRefusals.DisplayNameRequired => "Startup_MachineSetup.SaveNameRequired".GetLocalized(),
         MachineConfigurationRefusals.DisplayNameInUse => "Startup_MachineSetup.SaveNameInUse".GetLocalized(),
-        MachineConfigurationRefusals.PictureSourcesIncomplete => "Startup_MachineSetup.SaveSourcesIncomplete".GetLocalized(),
-        MachineConfigurationRefusals.PictureSourcesNotWritten => "Startup_MachineSetup.SaveSourcesNotWritten".GetLocalized(),
         _ => "Startup_MachineSetup.SaveRefused".GetLocalized(),
     };
 }

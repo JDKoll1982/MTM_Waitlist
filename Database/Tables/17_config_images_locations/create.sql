@@ -37,13 +37,14 @@
 --
 -- `computer_id` carries the same machine as a foreign key, so the row is joinable and a machine's rows cannot
 -- outlive the machine: the key deletes with it, which is why a decommissioned computer leaves no picture-source
--- rows behind. The two representations agree because there is one writer,
--- `sp_config_images_locations_computer_sources_set`; that procedure composes both from one parameter, and no
--- other procedure writes a `computer` scope row.
+-- rows behind.
 --
--- The three folder values are machine configuration and are read by that machine's launch, not by everyone's:
--- `sp_config_images_locations_computer_sources_get` reads one machine's three rows, which is the only reader
--- that does not have to care that other machines share the `computer` scope.
+-- Nothing writes a `computer` scope row any more. The three folder values used to be machine configuration, read
+-- by that machine's own launch; they are held once for the whole plant instead, in the storage settings the
+-- settings panel writes, so no computer captures a folder of its own (FR-040). The writer and both readers of the
+-- `computer` scope were retired by task T198, and the rows an older store holds are withdrawn by
+-- `Database/Seeds/seed_retire_computer_scope_picture_sources`. The scope value and the column stay: a store that
+-- already holds rows keeps them, and the history keeps reading what was there.
 
 USE mtm_waitlist;
 

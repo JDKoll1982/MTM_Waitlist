@@ -643,7 +643,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
     /// <summary>Both storage folders and the retention period are stored for every computer in one action.</summary>
     [TestMethod]
-    public void SavingTheStorageFoldersStoresAllThreeValuesForEveryUser()
+    public void SavingTheStorageFoldersStoresAllFourValuesForEveryUser()
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
@@ -654,12 +654,17 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
         viewModel.PictureFolderInput = @"\\share\pictures";
         viewModel.KeysFolderInput = @"\\share\keys";
+        viewModel.DunnageRootInput = @"\\share\dunnage";
         viewModel.ArchiveKeepDaysInput = 90;
         viewModel.SaveStoragePathsCommand.Execute(null);
 
         var saved = configuration.SavedValues.ToDictionary(value => value.SettingKey, StringComparer.Ordinal);
         Assert.AreEqual(@"\\share\pictures", saved[ConfigSettingKeys.ImageStorageSharedFolderPath].SettingValue);
         Assert.AreEqual(@"\\share\keys", saved[ConfigSettingKeys.KeysFolderPath].SettingValue);
+        Assert.AreEqual(
+            @"\\share\dunnage",
+            saved[ConfigSettingKeys.DunnageRootPath].SettingValue,
+            "the dunnage root is held once for the plant, like the picture folder beside it (FR-040)");
         Assert.AreEqual(90L, saved[ConfigSettingKeys.ImageStorageArchiveKeepDays].SettingValueInt);
         Assert.IsTrue(
             saved.Values.All(value => value.ScopeType == "all_users" && value.ScopeKey == "all_users"),

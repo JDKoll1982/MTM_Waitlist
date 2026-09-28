@@ -268,6 +268,14 @@ arrive with the reporting panel — and `sp_config_images_locations_computer_sou
 configuration's picture sources. **These must not be read as deletions; deleting them would destroy this feature's own
 work.**
 
+> **Superseded 2026-09-28 (T198).** The second half of that sentence no longer holds for the machine configuration's
+> picture sources. Their consumers were built and then withdrawn inside this same feature: the setup screen stopped
+> capturing a folder (T199), the service stopped writing them (T197) and stopped reading them (T230), and FR-040 moved
+> the answer to the plant. All three computer-scope procedures — `_get`, `_set` and the `_all_get` read T075 added —
+> were therefore retired by T198: their `create.sql` is gone, their rollback is the drop that remains, and the rows a
+> store already holds are withdrawn by `Database/Seeds/seed_retire_computer_scope_picture_sources`. The three
+> `sp_ops_startup_logs_*` procedures above are unaffected and are still waiting for the reporting panel.
+
 **One is pre-existing and genuinely unreferenced:** `sp_waitlist_request_get`, which appears only in its own folder and
 in `AllSPs.sql`. No task names it and nothing calls it.
 

@@ -2033,6 +2033,9 @@
   <data name="Settings_StoragePaths_KeysFolder.Label" xml:space="preserve">
     <value>Key folder</value>
   </data>
+  <data name="Settings_StoragePaths_DunnageRoot.Label" xml:space="preserve">
+    <value>Dunnage picture root</value>
+  </data>
   <data name="Settings_StoragePaths_ArchiveKeepDays.Label" xml:space="preserve">
     <value>Keep a replaced picture for (days)</value>
   </data>

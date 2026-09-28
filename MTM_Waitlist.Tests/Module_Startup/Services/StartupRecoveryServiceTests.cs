@@ -35,7 +35,6 @@ public sealed class StartupRecoveryServiceTests
         {
             MachineConfigurationParts.DisplayName,
             MachineConfigurationParts.Description,
-            MachineConfigurationParts.PictureSources,
         };
 
         var result = await recovery.RestoreDefaultsAsync(agreed, CancellationToken.None);
@@ -117,7 +116,6 @@ public sealed class StartupRecoveryServiceTests
             [
                 MachineConfigurationParts.DisplayName,
                 MachineConfigurationParts.Description,
-                MachineConfigurationParts.PictureSources,
             ],
             CancellationToken.None);
 

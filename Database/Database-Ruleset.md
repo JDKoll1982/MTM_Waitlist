@@ -107,7 +107,7 @@ added or changed inside it.
   folder its part number's prefix decides — `MMC`, `MMF`, `FGT` — with `Categorized Parts` as the catch-all for a
   number no prefix recognises, and the file is named after the part. What makes a recorded value portable is that it
   is stored **relative** to the root, not that these folders are configurable: a value is read against whichever
-  root the machine is configured with, so a picture recorded under a drive letter resolves under a UNC path.
+  root the plant is configured with, so a picture recorded under a drive letter resolves under a UNC path.
 - **The three kinds inside the application's own collection have their own folders**, named for their scopes
   verbatim. That is what settles the case-only collision between the item `other` and the category `Other`: neither
   name is changed, and neither can resolve to the other's file (FR-038).

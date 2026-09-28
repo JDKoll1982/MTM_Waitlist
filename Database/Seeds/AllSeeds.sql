@@ -2247,3 +2247,23 @@ VALUES
     ('a0000000-0017-4000-8000-000000000017','f0000000-0015-4000-8000-000000000015','Pending','Canceled','Canceled','6229','John Koll','Requester canceled own request.',UTC_TIMESTAMP() - INTERVAL 110 MINUTE),
     ('a0000000-0018-4000-8000-000000000018','f0000000-0016-4000-8000-000000000016',NULL,'Pending','Created','5000','Other User','Coil request created.',UTC_TIMESTAMP() - INTERVAL 5 HOUR),
     ('a0000000-0019-4000-8000-000000000019','f0000000-0016-4000-8000-000000000016','Pending','Canceled','Canceled','5000','Other User','Duplicate - canceled by requester.',UTC_TIMESTAMP() - INTERVAL 280 MINUTE);
+
+-- ---------------------------------------------------------------------------
+-- Seed: seed_retire_computer_scope_picture_sources
+-- ---------------------------------------------------------------------------
+-- Feature: 010-startup-rebuild (task T198)
+--
+-- Withdraws every `computer` scope row in `config_images_locations`, so a computer set up before this change
+-- reads its pictures from the plant-wide setting afterwards (FR-040, SC-021). The three per-computer sources
+-- were written by `sp_config_images_locations_computer_sources_set`, which this task retires; what an existing
+-- computer still holds is three rows of its own, and withdrawing them is what leaves the plant-wide answer as the
+-- only one in force. It withdraws rather than deletes, so the change history keeps reading what was there and a
+-- store that needs one row back can reactivate it by its public id.
+--
+-- It depends on nothing but the procedures being installed, which happens before every seed, and no other seed
+-- reads or writes a `computer` scope row, so its position here is free.
+-- ---------------------------------------------------------------------------
+
+USE mtm_waitlist;
+
+CALL sp_config_images_locations_deactivate_for_scope('computer', NULL);

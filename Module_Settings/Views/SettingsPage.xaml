@@ -262,6 +262,14 @@
                                 Text="{x:Bind ViewModel.KeysFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </wct:SettingsCard>
 
+                        <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsDunnageRootLabel}">
+                            <TextBox
+                                AutomationProperties.AutomationId="SettingsPage_StoragePaths_DunnageRootBox"
+                                AutomationProperties.Name="{x:Bind ViewModel.StoragePathsDunnageRootLabel}"
+                                MinWidth="420"
+                                Text="{x:Bind ViewModel.DunnageRootInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </wct:SettingsCard>
+
                         <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsArchiveKeepDaysLabel}">
                             <NumberBox
                                 AutomationProperties.AutomationId="SettingsPage_StoragePaths_KeepDaysBox"
@@ -295,12 +303,6 @@
                                     MaxWidth="680"
                                     Text="{x:Bind ViewModel.StoragePathsStoreIsTruthText}"
                                     TextWrapping="Wrap" />
-
-                                <TextBlock
-                                    MaxWidth="680"
-                                    Text="{x:Bind ViewModel.StoragePathsDisagreementMessage, Mode=OneWay}"
-                                    TextWrapping="Wrap"
-                                    Visibility="{x:Bind ViewModel.StoragePathsDisagreementVisibility, Mode=OneWay}" />
 
                                 <TextBlock
                                     MaxWidth="680"

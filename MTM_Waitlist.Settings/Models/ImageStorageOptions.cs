@@ -5,15 +5,14 @@ using MTM_Waitlist.Module_Shared.Helpers;
 /// <summary>
 /// Configuration options for image storage locations and shared network folder settings.
 /// 
-/// The shared folder and the keys folder are this machine's own configuration, captured by machine setup and
-/// read from the machine's configuration rows (T155, FR-025). The values here are the shipped defaults, used only
-/// when neither this machine nor the plant names a folder, so a build carries a sane starting point without
-/// carrying any machine's or person's state.
+/// The shared pictures folder, the keys folder and the dunnage root are the plant's own configuration, changed
+/// from the settings panel and held once for every computer (FR-040). No computer captures a folder of its own.
+/// The values here are the shipped defaults, used when the plant names no folder, so a build carries a sane
+/// starting point without carrying any machine's or person's state.
 /// 
 /// Every path is resolved through the same cascade:
-/// 1. This machine's own configured folder, from its configuration rows
-/// 2. The plant-wide override in config_settings_values, when one exists
-/// 3. The shipped default on this class, when neither of the above names a folder
+/// 1. The plant-wide override in config_settings_values, when one exists
+/// 2. The shipped default on this class, when the plant names no folder
 /// </summary>
 public sealed class ImageStorageOptions
 {
@@ -25,19 +24,27 @@ public sealed class ImageStorageOptions
     /// <summary>
     /// The root every configured picture is copied into, one folder per scope beneath it.
     /// Default: \\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist Application\Images
-    /// The folder in force is the one this machine was configured with at setup, so the same picture is read from
-    /// every computer rather than only from the one that mapped the drive. What is written here is the fallback a
-    /// machine that names no folder is left with.
+    /// The folder in force is the plant-wide setting, so the same picture is read from every computer rather than
+    /// only from the one that mapped the drive. What is written here is the fallback a plant that names no folder
+    /// is left with.
     /// </summary>
     public string SharedFolderPath { get; init; } = AppStoragePaths.ImagesRootDefault;
 
     /// <summary>
     /// The folder holding the key files, one per key, named "{keyname}.txt".
     /// Default: \\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\Keys - DO NOT EDIT FILES\MTM Waitlist Application
-    /// Configured with the other folders at machine setup, and this is the fallback.
+    /// A plant-wide setting like the picture folder, and this is the fallback.
     /// Nothing reads these files yet. See <see cref="AppStoragePaths.KeysFolderDefault"/>.
     /// </summary>
     public string KeysFolderPath { get; init; } = AppStoragePaths.KeysFolderDefault;
+
+    /// <summary>
+    /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.
+    /// Default: \\mtmanu-fs01\Expo Drive\Software Development\Live Applications\Shared\Images\Dunnage
+    /// A plant-wide setting like the picture folder, and this is the fallback. See
+    /// <see cref="AppStoragePaths.DunnageRootDefault"/>.
+    /// </summary>
+    public string DunnageRootPath { get; init; } = AppStoragePaths.DunnageRootDefault;
 
     /// <summary>
     /// The folder on this computer that every picture is mirrored into at startup.

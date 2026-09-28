@@ -222,7 +222,6 @@ public sealed class LaunchPipelineRetryTests
                 false,
                 null,
                 null,
-                [],
                 MachineConfigurationReasons.NeverConfigured);
 
             return this;
@@ -257,16 +256,11 @@ public sealed class LaunchPipelineRetryTests
     /// <summary>This machine's configuration, answered from what the test stated.</summary>
     private sealed class StubMachineConfigurationService : IMachineConfigurationService
     {
-        /// <summary>A machine that holds its name and all three of its picture sources.</summary>
+        /// <summary>A machine that holds its name and its note.</summary>
         public MachineConfigurationState State { get; set; } = new(
             true,
             "Test workstation",
             "a machine the test owns",
-            [
-                new PictureSource(MachineConfigurationSourceKinds.SharedFolder, @"\\share\pictures"),
-                new PictureSource(MachineConfigurationSourceKinds.KeysFolder, @"\\share\keys"),
-                new PictureSource(MachineConfigurationSourceKinds.DunnageRoot, @"\\share\dunnage"),
-            ],
             null);
 
         public Task<MachineConfigurationState> GetStateAsync(CancellationToken cancellationToken)

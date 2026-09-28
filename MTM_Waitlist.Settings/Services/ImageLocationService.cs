@@ -560,6 +560,25 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
                 return PreferCachedCopy(root, resolved);
             }
 
+            // The shared folder cannot be reached, or it does not hold this picture. What this computer has
+            // already copied is the picture then, which is what keeps a screen drawing while the share is away
+            // (FR-042, SC-019). The copy is looked for under the same relative path the row records, so it is this
+            // picture's copy rather than a neighbour's.
+            var copyHeldHere = ImageCachePaths.TryGetCachedCopy(
+                root,
+                Path.Combine(ImageCachePaths.LocalCacheRoot, ImageCachePaths.WaitlistFolderName),
+                normalized);
+
+            if (copyHeldHere is not null)
+            {
+                _logger.LogInformation(
+                    "The shared picture folder could not be read for {Scope}:{ScopeItemId}; the copy held on this computer is the one being used. Path={Path}",
+                    scope,
+                    scopeItemId,
+                    copyHeldHere);
+                return copyHeldHere;
+            }
+
             // The picture root is not where this path points, but the application folder may still hold it: the
             // scope defaults are packaged assets rather than files on the share.
             if (DoesPathExist(normalized))
@@ -567,8 +586,12 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
                 return normalized;
             }
 
+            // Neither this computer nor the shared folder holds it, so it is reported as missing rather than stood
+            // in for by another picture: what answers here is the application's own no-picture state, which says
+            // there is no picture rather than pretending to be this one (FR-044). Nothing throws and nothing
+            // stops, because a missing picture is one tile rather than a failed screen.
             _logger.LogWarning(
-                "Resolved image path does not exist for {Scope}:{ScopeItemId}; using default asset. Path={Path}, Root={Root}",
+                "No picture is held for {Scope}:{ScopeItemId}, on the shared folder or on this computer, so it is reported as missing. Path={Path}, Root={Root}",
                 scope,
                 scopeItemId,
                 normalized,

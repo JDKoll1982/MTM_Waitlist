@@ -87,20 +87,27 @@ groups repeated faults. The seam is **unconditional** — no `[Conditional]`, no
 build has to record.
 
 Never write a credential, a token, a salt, the remembered-sign-in payload, key material or a connection string.
-The shared key file's **path** is the one secret-adjacent value that may be written, deliberately, so a support
-reader can see which key a decryption failure used. `contracts/logging-contract.md` §6 is the authoritative list,
-and `ExceptionDetailSerializer.IsNeverWritten` is the check that enforces it.
+There is no exception for a key file's path any more: the shared key file is retired, because nothing reads a key
+(FR-043), so there is no path to record and a later change must not reintroduce an allowance for one.
+`contracts/logging-contract.md` §6 is the authoritative list, and `ExceptionDetailSerializer.IsNeverWritten` is
+the check that enforces it.
 
 ## Adding a machine-configuration field
 
-`IMachineConfigurationService` is the **only** writer of this machine's display name, its description and its
-three picture sources, and `MachineConfigurationService` is its only implementation.
+`IMachineConfigurationService` is the **only** writer of this machine's display name and its description, and
+`MachineConfigurationService` is its only implementation. Where pictures come from is not this machine's
+configuration: the shared pictures folder is held once for the whole plant and changed from the settings panel
+(FR-040).
 
 - For a field on the machine's own registry row, extend `MachineConfigurationDraft` and the service's save and
   read, over the `sp_core_computers_registry_*` procedures. Do not write the row from a screen.
-- For a further picture source, the three kinds are in `MachineConfigurationSourceKinds` and are written as one
-  act through `sp_config_images_locations_computer_sources_set`. Add the kind to that set, to the machine-setup
-  screen and to the save's completeness check together, or a machine will be reported unconfigured.
+- The machine-setup screen asks for this computer's name and its note, and for nothing else (FR-040, SC-018), and
+  the draft it saves carries no picture source. A machine is configured once the store holds its record and its
+  name, so never add a field a machine must fill in before it can be used (FR-041).
+- Nothing reads or writes a folder of this machine's own any more. The storage resolver's cascade is the
+  plant-wide setting and then the shipped default, `MachineConfigurationSourceKinds` and `PictureSource` name
+  only the rows that are being retired, and the dunnage root is the shipped default. Do not add a folder to
+  this screen, and do not give the service a folder to read.
 - A reset is offered only where it could remove the cause and always previews what it will touch.
   `ResetToDefaultsAsync` takes the parts to reset, so a caller cannot reset more than it named.
 
@@ -119,8 +126,11 @@ they follow the person to another computer. Nothing but what is needed to reach 
   `rollback.sql` (constitution III). `InlineSqlAuditTests` fails the build otherwise.
 - **The replaced launch behaviour must not come back.** `RetiredSymbolAuditTests` fails the build if it does, and
   it asserts the rebuilt view set positively rather than only by absence.
-- **Nothing is kept on the machine** except what it needs to reach the store and the local copy of the pictures
-  (FR-025).
+- **Nothing is kept on the machine except the picture copy** (FR-025, FR-043). What a computer keeps is what it
+  needs to reach the store and the local copy of the pictures, and nothing else: no key file is read, copied or
+  kept, no log file is written locally, and no folder of its own is captured. A change that would keep anything
+  else on a computer, or that would assume a key file exists to read, is not a change this module can take — a
+  person's preferences belong to the store, and where pictures come from is held once for the plant (FR-040).
 
 ## Where the pieces are
 

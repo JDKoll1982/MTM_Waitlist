@@ -77,6 +77,9 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
 
     public string KeysFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "key-files");
 
+    /// <summary>The root the dunnage pictures are read from for every computer (FR-040).</summary>
+    public string DunnageRootPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "dunnage");
+
     public string CacheFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "cache");
 
     public bool CacheEnabled { get; set; } = true;
@@ -87,14 +90,13 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
 
     public int ArchiveKeepDays { get; set; } = 30;
 
-    /// <summary>This machine's own configured folder, named when it differs from the folder every computer reads.</summary>
-    public string MachineSharedFolderPath { get; set; } = string.Empty;
-
     public bool RequireSquareAspectRatio { get; set; } = true;
 
     public Task<string> GetSharedFolderPathAsync() => Task.FromResult(SharedFolderPath);
 
     public Task<string> GetKeysFolderPathAsync() => Task.FromResult(KeysFolderPath);
+
+    public Task<string> GetDunnageRootPathAsync() => Task.FromResult(DunnageRootPath);
 
     public Task<string> GetImageCacheFolderPathAsync() => Task.FromResult(CacheFolderPath);
 
@@ -105,9 +107,6 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public Task<bool> GetEnableArchiveVersioningAsync() => Task.FromResult(EnableArchiveVersioning);
 
     public Task<int> GetArchiveKeepDaysAsync() => Task.FromResult(ArchiveKeepDays);
-
-    public Task<SharedFolderResolution> GetSharedFolderResolutionAsync() =>
-        Task.FromResult(new SharedFolderResolution(SharedFolderPath, MachineSharedFolderPath));
 
     public Task<ImageStorageOptions> GetEffectiveConfigurationAsync() => Task.FromResult(new ImageStorageOptions
     {

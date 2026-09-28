@@ -116,7 +116,6 @@ public sealed class BlockedStateRemediesTests
             MachineConfigurationParts.Configuration,
             MachineConfigurationParts.DisplayName,
             MachineConfigurationParts.Description,
-            MachineConfigurationParts.PictureSources,
             MachineConfigurationParts.ScopedPreference,
         };
 
@@ -136,8 +135,8 @@ public sealed class BlockedStateRemediesTests
     public void SilentRepairParts_AreThePartsTheScopeSupplies_AndNeverAChoiceThePersonMade()
     {
         // FR-019: a fault put right without asking may not throw away anything the person decided. The display
-        // name, the description and the picture sources are their decisions, so none of them may be repaired
-        // quietly; the one part the scope supplies is what may be.
+        // name and the description are their decisions, so neither may be repaired quietly; the one part the
+        // scope supplies is what may be.
         var silent = BlockedStateRemedies.SilentRepairPartsFor(BlockedStateCause.MachineConfigurationBroken);
 
         CollectionAssert.AreEqual(
@@ -147,7 +146,6 @@ public sealed class BlockedStateRemediesTests
 
         CollectionAssert.DoesNotContain(silent.ToArray(), MachineConfigurationParts.DisplayName);
         CollectionAssert.DoesNotContain(silent.ToArray(), MachineConfigurationParts.Description);
-        CollectionAssert.DoesNotContain(silent.ToArray(), MachineConfigurationParts.PictureSources);
     }
 
     [TestMethod]
@@ -195,7 +193,6 @@ public sealed class BlockedStateRemediesTests
             "Startup_BlockedState.ResetFailed",
             "Startup_BlockedState.PartDisplayName",
             "Startup_BlockedState.PartDescription",
-            "Startup_BlockedState.PartPictureSources",
             "Startup_BlockedState.PartScopedPreference",
         };
 

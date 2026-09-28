@@ -691,19 +691,14 @@ SET FOREIGN_KEY_CHECKS = 1;
 --     is the person's whole set rather than the one role the logon read happens to return.
 
 -- ============================================================
--- sp_config_images_locations_computer_sources_all_get - feature 010-startup-rebuild (task T075)
+-- sp_config_images_locations_computer_sources_all_get - retired by task T198 (FR-040)
 -- ============================================================
--- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
--- attach: the read is described where a procedure is described, in its own artifact and in the aggregate's
--- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
--- artifact under Database/.
---   Owning artifact: Database/StoredProcedures/sp_config_images_locations_computer_sources_all_get/create.sql,
---     with its rollback beside it, and its body registered in Database/StoredProcedures/AllSPs.sql.
---   What it reads: one machine's picture-source rows in `config_images_locations` at `computer` scope, withdrawn
---     ones included, where the existing `..._computer_sources_get` read filters to live rows only.
---   Why it exists: the readiness check has to tell "this machine was never given its folders" apart from "its
---     folders were removed", because the two are different unconfigured reasons and the remedy offered differs
---     (FR-004, FR-009). Only a read that returns the withdrawn rows can tell them apart.
+-- Withdrawn, so it no longer carries a description of what it does. Its create.sql is gone — no artifact in this
+-- tree creates it any more — its body was removed from Database/StoredProcedures/AllSPs.sql, and the rollback
+-- beside the folder is the drop that remains. Its only caller was the machine-configuration service's
+-- picture-source read, which T230 removed with the per-computer folders themselves, so the question it existed to
+-- answer ("never given its folders" apart from "its folders were removed") is no longer one the application asks.
+-- The withdrawal is listed with the other two computer-source artifacts in the retired-objects section below.
 
 -- ============================================================
 -- sp_core_computers_registry_display_name_get - feature 010-startup-rebuild (task T075)
@@ -820,6 +815,26 @@ SET FOREIGN_KEY_CHECKS = 1;
 --     Retained, not retired: sp_config_images_locations_paths_move with its rollback, which the hand-run move
 --     (tools/Move-PartPictureLayout.ps1) still uses, and Database/Validation/part_pictures_schema/validate.sql,
 --     which still asserts that pair exists.
+--   T198 then retired the three per-computer picture-source procedures, because the feature withdrew their owner:
+--     where a machine's pictures come from became a plant-wide answer, so no computer captures a folder of its own
+--     (FR-040, FR-041). Their folders are kept and their create.sql files are gone — the matching rollback is the
+--     drop a DBA promotes — and their bodies were removed from Database/StoredProcedures/AllSPs.sql in the same
+--     change:
+--     Stored procedures (drop via Database/StoredProcedures/<name>/rollback.sql):
+--       sp_config_images_locations_computer_sources_all_get (T075; its only caller was the machine-configuration
+--         service's picture-source read, which T230 removed),
+--       sp_config_images_locations_computer_sources_get (T051; the machine-setup screen stopped capturing folders
+--         in T199 and the service stopped reading them in T230),
+--       sp_config_images_locations_computer_sources_set (T051; the only writer of a `computer` scope row, which
+--         T197 stopped the save writing and T199 took off the screen)
+--     Seed: Database/Seeds/seed_retire_computer_scope_picture_sources is added rather than retired. It withdraws
+--       the `computer` scope rows an existing store holds, so a computer set up before this change reads from the
+--       plant-wide setting afterwards (SC-021), and its mirror block is in Database/Seeds/AllSeeds.sql.
+--     Why they go now rather than earlier: the removal proof recorded `_get` and `_set` as consumerless but
+--       deliberately kept, because the consumers were unbuilt. Those consumers were then built and withdrawn by
+--       FR-040 inside the same feature, so the reason to keep them expired with the requirement.
+--     Not retired: `config_images_locations` itself, its `computer` scope value and its `computer_id` column. A
+--       store that already holds rows keeps them, withdrawn, and the table's own rollback is what removes them.
 --   The development seed's credential was repaired, and seed application was taken out of the validator's
 --     default path.
 --     `Database/Seeds/seed_dev_masked_baseline` wrote the retired four-character marker `'0000'` into

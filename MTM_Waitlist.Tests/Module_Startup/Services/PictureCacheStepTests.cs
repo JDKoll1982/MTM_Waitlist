@@ -61,9 +61,14 @@ public sealed class PictureCacheStepTests
         var outcome = await step.RunAsync(Context(), CancellationToken.None);
 
         // Assert: the failure is stated with the source named, so the line on the feed says which share was
-        // unreachable rather than only that something went wrong (FR-004, FR-026).
+        // unreachable rather than only that something went wrong (FR-004, FR-026), and it says which pictures are
+        // being drawn, so a copy that is a day old never reads as a current one (FR-042, SC-019).
         Assert.AreEqual(LaunchStepStatus.Failed, outcome.Status);
         StringAssert.Contains(outcome.Diagnosis!, "the Dunnage share");
+        StringAssert.Contains(
+            outcome.Diagnosis!,
+            "the copies held on this computer are the ones being used",
+            "the line has to say which pictures are being drawn, not only that the share could not be read");
     }
 
     [TestMethod]

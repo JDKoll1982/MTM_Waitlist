@@ -17,8 +17,8 @@ namespace MTM_Waitlist.Tests.Module_Startup.Services;
 /// <para>
 /// What is pinned here is the seam rather than the store: which procedure is called, against which database,
 /// with which values, and what each answer means. The store's own behaviour — the unique key on the display
-/// name, the withdrawal flag on a picture source, the foreign keys a reset must not cross — is the tables' and
-/// is asserted where it lives.
+/// name, the foreign keys a reset must not cross — is the tables' and is asserted where it lives. Where pictures
+/// come from is not this machine's to hold, so no per-computer folder is read or written here (FR-040).
 /// </para>
 /// <para>
 /// The machine's identity is stubbed rather than read from the host, so every case here runs the same way on a
@@ -52,11 +52,10 @@ public sealed class MachineConfigurationServiceTests
 
         Assert.IsFalse(state.IsConfigured);
         Assert.AreEqual(MachineConfigurationReasons.NeverConfigured, state.UnconfiguredReason);
-        Assert.AreEqual(0, state.PictureSources.Count);
         Assert.IsNull(state.DisplayName);
 
-        // The machine is resolved by the name it presents, against the operational store. The source read is
-        // not made at all: with no row there is no machine to ask about.
+        // The machine is resolved by the name it presents, against the operational store, and no per-computer
+        // folder is read: where pictures come from is held once for the plant (FR-040).
         Assert.AreEqual(1, stub.CallCount(LookupProcedure));
         Assert.AreEqual(MySqlDatabaseTarget.MtmWaitlist, stub.Last(LookupProcedure).Target);
         Assert.AreEqual(Hostname, stub.Last(LookupProcedure).Parameters["p_name"]);
@@ -64,55 +63,29 @@ public sealed class MachineConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetStateAsync_WhenARegisteredMachineHasNeverBeenGivenFolders_ReportsNeverConfigured()
+    public async Task GetStateAsync_WhenTheStoreHoldsTheRowAndTheName_IsConfigured()
     {
-        // A machine can be known to the registry — that is the fleet list — long before machine setup has run
-        // on it. No picture-source rows at all is that state, and it is not a configuration that was removed.
+        // A machine is configured by its record and its name, so nothing else has to be captured before it can
+        // be used: where its pictures come from is held once for the plant (FR-040, FR-041).
         var stub = new StubMySqlHelperServer().Returns(LookupProcedure, RegistryRow());
 
         var state = await CreateService(stub).GetStateAsync(CancellationToken.None);
 
-        Assert.IsFalse(state.IsConfigured);
-        Assert.AreEqual(MachineConfigurationReasons.NeverConfigured, state.UnconfiguredReason);
-        Assert.AreEqual(1, stub.CallCount(SourcesProcedure));
-        Assert.AreEqual(ComputerId, stub.Last(SourcesProcedure).Parameters["p_computer_id"]);
-    }
-
-    [TestMethod]
-    public async Task GetStateAsync_WhenAPictureSourceHasBeenWithdrawn_ReportsConfigurationRemoved()
-    {
-        // Rows exist and one of them is no longer live, so this machine was configured and part of its
-        // configuration is gone. Only a read that returns the withdrawn row can tell this from never configured.
-        var stub = new StubMySqlHelperServer()
-            .Returns(LookupProcedure, RegistryRow())
-            .Returns(
-                SourcesProcedure,
-                SourceRow(MachineConfigurationSourceKinds.SharedFolder),
-                SourceRow(MachineConfigurationSourceKinds.KeysFolder),
-                SourceRow(MachineConfigurationSourceKinds.DunnageRoot, isActive: 0L));
-
-        var state = await CreateService(stub).GetStateAsync(CancellationToken.None);
-
-        Assert.IsFalse(state.IsConfigured);
-        Assert.AreEqual(MachineConfigurationReasons.Removed, state.UnconfiguredReason);
-
-        // What the machine reads from now is the two live sources, in kind order; the withdrawn one is not
-        // offered back to the setup screen.
-        CollectionAssert.AreEqual(
-            new[] { MachineConfigurationSourceKinds.KeysFolder, MachineConfigurationSourceKinds.SharedFolder },
-            state.PictureSources.Select(source => source.Kind).ToArray());
+        Assert.IsTrue(state.IsConfigured);
+        Assert.IsNull(state.UnconfiguredReason);
+        Assert.AreEqual("Shop floor station", state.DisplayName);
+        Assert.AreEqual("a row the test owns", state.Description);
+        Assert.AreEqual(
+            0,
+            stub.CallCount(SourcesProcedure),
+            "no folder of this machine's own is read: folders are held once for the plant (FR-040)");
     }
 
     [TestMethod]
     public async Task GetStateAsync_WhenTheMachinesDisplayNameHasBeenCleared_ReportsConfigurationRemoved()
     {
         var stub = new StubMySqlHelperServer()
-            .Returns(LookupProcedure, RegistryRow(displayName: "   "))
-            .Returns(
-                SourcesProcedure,
-                SourceRow(MachineConfigurationSourceKinds.SharedFolder),
-                SourceRow(MachineConfigurationSourceKinds.KeysFolder),
-                SourceRow(MachineConfigurationSourceKinds.DunnageRoot));
+            .Returns(LookupProcedure, RegistryRow(displayName: "   "));
 
         var state = await CreateService(stub).GetStateAsync(CancellationToken.None);
 
@@ -126,15 +99,10 @@ public sealed class MachineConfigurationServiceTests
     [TestMethod]
     public async Task GetStateAsync_WhenTheMachineIsRetired_ReportsConfigurationRevoked()
     {
-        // The row is retired, so the folders it still holds are beside the point: revoked is decided by the
-        // registry row alone, before the sources are read into the answer.
+        // The row is retired, and revoked is decided by the registry row alone: nothing else the row holds is
+        // consulted.
         var stub = new StubMySqlHelperServer()
-            .Returns(LookupProcedure, RegistryRow(isRegistered: 0L))
-            .Returns(
-                SourcesProcedure,
-                SourceRow(MachineConfigurationSourceKinds.SharedFolder),
-                SourceRow(MachineConfigurationSourceKinds.KeysFolder),
-                SourceRow(MachineConfigurationSourceKinds.DunnageRoot));
+            .Returns(LookupProcedure, RegistryRow(isRegistered: 0L));
 
         var state = await CreateService(stub).GetStateAsync(CancellationToken.None);
 
@@ -154,50 +122,6 @@ public sealed class MachineConfigurationServiceTests
 
         Assert.IsFalse(state.IsConfigured);
         Assert.AreEqual(MachineConfigurationReasons.Unreadable, state.UnconfiguredReason);
-        Assert.AreEqual(0, state.PictureSources.Count);
-    }
-
-    [TestMethod]
-    public async Task GetStateAsync_WhenTheSourceReadFails_ReportsConfigurationUnreadable()
-    {
-        var stub = new StubMySqlHelperServer()
-            .Returns(LookupProcedure, RegistryRow())
-            .Fails(SourcesProcedure, new InvalidOperationException("store went away mid-read"));
-
-        var state = await CreateService(stub).GetStateAsync(CancellationToken.None);
-
-        Assert.IsFalse(state.IsConfigured);
-        Assert.AreEqual(MachineConfigurationReasons.Unreadable, state.UnconfiguredReason);
-    }
-
-    [TestMethod]
-    public async Task GetStateAsync_WhenEverySourceAndANameAreHeld_IsConfigured()
-    {
-        var stub = new StubMySqlHelperServer()
-            .Returns(LookupProcedure, RegistryRow())
-            .Returns(
-                SourcesProcedure,
-                SourceRow(MachineConfigurationSourceKinds.DunnageRoot),
-                SourceRow(MachineConfigurationSourceKinds.SharedFolder),
-                SourceRow(MachineConfigurationSourceKinds.KeysFolder));
-
-        var state = await CreateService(stub).GetStateAsync(CancellationToken.None);
-
-        Assert.IsTrue(state.IsConfigured);
-        Assert.IsNull(state.UnconfiguredReason);
-        Assert.AreEqual("Shop floor station", state.DisplayName);
-        Assert.AreEqual("a row the test owns", state.Description);
-
-        // The store orders live rows first and then by kind, and the answer keeps the kind order so a consumer
-        // does not depend on the order the engine happened to return.
-        CollectionAssert.AreEqual(
-            new[]
-            {
-                MachineConfigurationSourceKinds.DunnageRoot,
-                MachineConfigurationSourceKinds.KeysFolder,
-                MachineConfigurationSourceKinds.SharedFolder,
-            },
-            state.PictureSources.Select(source => source.Kind).ToArray());
     }
 
     [TestMethod]
@@ -206,12 +130,7 @@ public sealed class MachineConfigurationServiceTests
         // The driver surfaces a TINYINT(1) column as a bool, and reading it as a number would throw rather than
         // answer, so the registered flag is pinned in that form too.
         var stub = new StubMySqlHelperServer()
-            .Returns(LookupProcedure, RegistryRow(isRegistered: true))
-            .Returns(
-                SourcesProcedure,
-                SourceRow(MachineConfigurationSourceKinds.SharedFolder),
-                SourceRow(MachineConfigurationSourceKinds.KeysFolder),
-                SourceRow(MachineConfigurationSourceKinds.DunnageRoot));
+            .Returns(LookupProcedure, RegistryRow(isRegistered: true));
 
         var state = await CreateService(stub).GetStateAsync(CancellationToken.None);
 
@@ -246,14 +165,17 @@ public sealed class MachineConfigurationServiceTests
     public async Task SaveAsync_WhenTheDisplayNameIsThisMachinesOwn_WritesTheConfiguration()
     {
         var stub = new StubMySqlHelperServer()
+            // One answer per read: the read that asks whether this machine exists, the read-back inside the
+            // write, and the read-back that decides whether the save landed.
             .Returns(LookupProcedure, RegistryRow())
+            .Queue(LookupProcedure, RegistryRow())
+            .Queue(LookupProcedure, RegistryRow())
             .Returns(HolderProcedure, RegistryRow())
-            .Affects(UpdateProcedure, 1)
-            .Affects(WriteSourcesProcedure, 6);
+            .Affects(UpdateProcedure, 1);
 
         var result = await CreateService(stub).SaveAsync(Draft(), CancellationToken.None);
 
-        Assert.IsTrue(result.Succeeded);
+        Assert.IsTrue(result.Succeeded, $"refused with '{result.RefusalReason}'");
         Assert.IsNull(result.RefusalReason);
         Assert.AreEqual(ComputerId, result.ComputerId);
 
@@ -266,31 +188,29 @@ public sealed class MachineConfigurationServiceTests
         // Completing setup registers the machine, including one that had been retired.
         Assert.AreEqual(1, update.Parameters["p_is_registered"]);
 
-        var sources = stub.Last(WriteSourcesProcedure);
-        Assert.AreEqual(ComputerId, sources.Parameters["p_computer_id"]);
-        Assert.AreEqual(@"C:\pictures", sources.Parameters["p_shared_folder_path"]);
-        Assert.AreEqual(@"C:\keys", sources.Parameters["p_keys_folder_path"]);
-        Assert.AreEqual(@"C:\dunnage", sources.Parameters["p_dunnage_root_path"]);
-        Assert.AreEqual(MySqlDatabaseTarget.MtmWaitlist, sources.Target);
+        // The folders are no longer written per machine: they are held once for the plant (FR-040).
+        Assert.AreEqual(0, stub.CallCount(WriteSourcesProcedure));
     }
 
     [TestMethod]
-    public async Task SaveAsync_WhenTheMachineHasNoRowYet_RegistersItBeforeWritingItsSources()
+    public async Task SaveAsync_WhenTheMachineHasNoRowYet_RegistersIt()
     {
+        var draftName = "Brand new station";
         var stub = new StubMySqlHelperServer()
-            // The first read is the "does this machine exist yet" read; the second is the read-back after the
-            // register, because an upsert reports affected rows and returns no row to take an id from.
+            // The first read is the "does this machine exist yet" read; the second is the read-back inside the
+            // register, which is needed because an upsert reports affected rows and returns no row to take an id
+            // from; the third is the read-back that decides whether the save landed.
             .Returns(LookupProcedure, [])
             .Returns(HolderProcedure, [])
-            .Affects(RegisterProcedure, 1)
-            .Affects(WriteSourcesProcedure, 3);
+            .Affects(RegisterProcedure, 1);
 
         var service = CreateService(stub);
 
-        // The row appears once it has been registered, which is what the second read finds.
-        stub.Queue(LookupProcedure, RegistryRow());
+        // The row appears once it has been registered, which is what the later reads find.
+        stub.Queue(LookupProcedure, RegistryRow(displayName: draftName));
+        stub.Queue(LookupProcedure, RegistryRow(displayName: draftName));
 
-        var result = await service.SaveAsync(Draft("Brand new station"), CancellationToken.None);
+        var result = await service.SaveAsync(Draft(draftName), CancellationToken.None);
 
         Assert.IsTrue(result.Succeeded);
         Assert.AreEqual(ComputerId, result.ComputerId);
@@ -299,55 +219,10 @@ public sealed class MachineConfigurationServiceTests
         Assert.AreEqual(Hostname, register.Parameters["p_computer_name"]);
         Assert.AreEqual(Hostname, register.Parameters["p_hostname_normalized"]);
         Assert.AreEqual(MacAddress, register.Parameters["p_mac_address_normalized"]);
-        Assert.AreEqual("Brand new station", register.Parameters["p_display_name"]);
+        Assert.AreEqual(draftName, register.Parameters["p_display_name"]);
 
         Assert.AreEqual(0, stub.CallCount(UpdateProcedure));
-        Assert.AreEqual(ComputerId, stub.Last(WriteSourcesProcedure).Parameters["p_computer_id"]);
-    }
-
-    [TestMethod]
-    public async Task SaveAsync_WhenTheDraftOmitsASourceKind_IsRefusedBeforeAnyStoreCall()
-    {
-        var stub = new StubMySqlHelperServer();
-
-        var incomplete = new MachineConfigurationDraft(
-            "Shop floor station",
-            "a description the test owns",
-            [
-                new PictureSource(MachineConfigurationSourceKinds.SharedFolder, @"C:\pictures"),
-                new PictureSource(MachineConfigurationSourceKinds.KeysFolder, @"C:\keys"),
-            ]);
-
-        var result = await CreateService(stub).SaveAsync(incomplete, CancellationToken.None);
-
-        // All three sources are required by the shape the setup screen collects, so a draft missing one is
-        // refused as an incomplete save rather than written as two of three.
-        Assert.IsFalse(result.Succeeded);
-        Assert.AreEqual(MachineConfigurationRefusals.PictureSourcesIncomplete, result.RefusalReason);
-        Assert.AreEqual(0, stub.TotalCallCount);
-    }
-
-    [TestMethod]
-    public async Task SaveAsync_WhenASourceIsNamedTwice_IsRefusedBeforeAnyStoreCall()
-    {
-        var stub = new StubMySqlHelperServer();
-
-        var duplicated = new MachineConfigurationDraft(
-            "Shop floor station",
-            "a description the test owns",
-            [
-                new PictureSource(MachineConfigurationSourceKinds.SharedFolder, @"C:\pictures"),
-                new PictureSource(MachineConfigurationSourceKinds.SharedFolder, @"C:\other"),
-                new PictureSource(MachineConfigurationSourceKinds.KeysFolder, @"C:\keys"),
-                new PictureSource(MachineConfigurationSourceKinds.DunnageRoot, @"C:\dunnage"),
-            ]);
-
-        var result = await CreateService(stub).SaveAsync(duplicated, CancellationToken.None);
-
-        // A draft naming one kind twice cannot be read as meaning either of them, so the last one does not win.
-        Assert.IsFalse(result.Succeeded);
-        Assert.AreEqual(MachineConfigurationRefusals.PictureSourcesIncomplete, result.RefusalReason);
-        Assert.AreEqual(0, stub.TotalCallCount);
+        Assert.AreEqual(0, stub.CallCount(WriteSourcesProcedure));
     }
 
     [TestMethod]
@@ -363,20 +238,42 @@ public sealed class MachineConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task SaveAsync_WhenTheSourceRowsAreNotAllWritten_ReportsTheFailureWithTheMachine()
+    public async Task SaveAsync_WhenTheRowDoesNotReadBackAsSaved_ReportsTheFailureWithTheMachine()
     {
-        // Two of three rows written is the machine configured wrongly rather than half-configured, so it is
-        // reported as a failure and the identity write is not claimed as a configuration.
+        // The store reports zero changed rows for a write that sets a column to the value it already holds, so
+        // success is read back rather than counted. A row that does not come back holding the name that was
+        // asked for is reported as a failed save, and the machine is still named so the caller can say which.
         var stub = new StubMySqlHelperServer()
             .Returns(LookupProcedure, RegistryRow())
+            .Queue(LookupProcedure, RegistryRow(displayName: "Something else entirely"))
+            .Queue(LookupProcedure, RegistryRow(displayName: "Something else entirely"))
             .Returns(HolderProcedure, RegistryRow())
-            .Affects(UpdateProcedure, 1)
-            .Affects(WriteSourcesProcedure, 2);
+            .Affects(UpdateProcedure, 1);
 
         var result = await CreateService(stub).SaveAsync(Draft(), CancellationToken.None);
 
         Assert.IsFalse(result.Succeeded);
-        Assert.AreEqual(MachineConfigurationRefusals.PictureSourcesNotWritten, result.RefusalReason);
+        Assert.AreEqual(MachineConfigurationRefusals.ConfigurationNotWritten, result.RefusalReason);
+        Assert.AreEqual(ComputerId, result.ComputerId);
+    }
+
+    [TestMethod]
+    public async Task SaveAsync_WhenTheRowWasAlreadyAsAskedFor_IsStillReportedAsSaved()
+    {
+        // The case that used to be refused wrongly: the write changes nothing because the machine already holds
+        // exactly what was asked for, so the store reports no changed rows. Reading the row back is what tells
+        // this apart from a write that did not happen.
+        var stub = new StubMySqlHelperServer()
+            .Returns(LookupProcedure, RegistryRow())
+            .Queue(LookupProcedure, RegistryRow())
+            .Queue(LookupProcedure, RegistryRow())
+            .Returns(HolderProcedure, RegistryRow())
+            .Affects(UpdateProcedure, 0);
+
+        var result = await CreateService(stub).SaveAsync(Draft(), CancellationToken.None);
+
+        Assert.IsTrue(result.Succeeded, $"refused with '{result.RefusalReason}'");
+        Assert.IsNull(result.RefusalReason);
         Assert.AreEqual(ComputerId, result.ComputerId);
     }
 
@@ -439,7 +336,7 @@ public sealed class MachineConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task ResetToDefaultsAsync_WithTheConfigurationPart_NamesAllThreePartsBacked()
+    public async Task ResetToDefaultsAsync_WithTheConfigurationPart_NamesBothPartsBacked()
     {
         var stub = new StubMySqlHelperServer().Returns(LookupProcedure, RegistryRow());
 
@@ -447,22 +344,24 @@ public sealed class MachineConfigurationServiceTests
             [MachineConfigurationParts.Configuration],
             CancellationToken.None);
 
-        // The shorthand names the three, and the result says what was restored rather than echoing the word the
+        // The shorthand names the two, and the result says what was restored rather than echoing the word the
         // caller used, so the screen can report exactly what happened.
         CollectionAssert.AreEqual(
             new[]
             {
                 MachineConfigurationParts.DisplayName,
                 MachineConfigurationParts.Description,
-                MachineConfigurationParts.PictureSources,
             },
             result.Reset.ToArray());
 
         var reset = stub.Last(ResetProcedure);
         Assert.AreEqual(1, reset.Parameters["p_reset_display_name"]);
         Assert.AreEqual(1, reset.Parameters["p_reset_description"]);
-        Assert.AreEqual(1, reset.Parameters["p_reset_picture_sources"]);
         Assert.AreEqual(0, reset.Parameters["p_reset_scoped_preferences"]);
+        Assert.AreEqual(
+            0,
+            reset.Parameters["p_reset_picture_sources"],
+            "the flag is permanently zero: a machine has no picture source of its own to restore (FR-040)");
     }
 
     [TestMethod]
@@ -534,12 +433,7 @@ public sealed class MachineConfigurationServiceTests
 
     private static MachineConfigurationDraft Draft(string displayName = "Shop floor station") => new(
         displayName,
-        "a description the test owns",
-        [
-            new PictureSource(MachineConfigurationSourceKinds.SharedFolder, @"C:\pictures"),
-            new PictureSource(MachineConfigurationSourceKinds.KeysFolder, @"C:\keys"),
-            new PictureSource(MachineConfigurationSourceKinds.DunnageRoot, @"C:\dunnage"),
-        ]);
+        "a description the test owns");
 
     /// <summary>One registry row in the column names the mapping reads.</summary>
     private static Dictionary<string, object?> RegistryRow(
@@ -556,14 +450,6 @@ public sealed class MachineConfigurationServiceTests
         ["description"] = description,
         ["mac_address_normalized"] = macAddress,
         ["is_registered"] = isRegistered ?? 1L,
-    };
-
-    /// <summary>One picture-source row, live unless the test says otherwise.</summary>
-    private static Dictionary<string, object?> SourceRow(string kind, object? isActive = null) => new()
-    {
-        ["source_kind"] = kind,
-        ["image_path"] = $@"C:\{kind}",
-        ["is_active"] = isActive ?? 1L,
     };
 
     /// <summary>

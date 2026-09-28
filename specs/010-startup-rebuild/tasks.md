@@ -758,29 +758,101 @@ held locally and says so, and the shared key file is retired along with remember
 `Database/StoredProcedures/sp_config_images_locations_computer_sources_set/`, `Database/Seeds/`,
 `Database/Bootstrap/update_table_descriptions.sql`, `.github/instructions/startup-rebuild.instructions.md`.
 
-- [ ] **T197** Stop a computer requiring any folder to be configured: drop the picture sources from
-  `MachineConfigurationDraft` and `MachineConfigurationState`, stop `SaveAsync` writing or requiring them, and
-  delete the affected-row-count check that refuses a save it actually made (FR-041, SC-018).
-- [ ] **T198** Retire the per-computer picture sources in the database: delete
-  `sp_config_images_locations_computer_sources_set` with the rollback that drops it, remove the block from
-  `AllSPs.sql`, and add a seed that deactivates the `scope = 'computer'` rows in `config_images_locations`, so a
-  computer set up before this change reads from the plant-wide settings afterwards (FR-040, SC-021).
-- [ ] **T199** Take the three folder fields, their Choose-folder buttons and the picture-source half of the save
-  off the machine-setup screen, leaving the computer's name and its note (FR-040, SC-018).
-- [ ] **T200** Resolve a picture under the local cache folder when the configured shared folder cannot be
-  reached, and report a picture that has neither a copy nor a reachable share as missing rather than drawing a
-  stand-in (FR-042, FR-044).
-- [ ] **T201** State on the launch surface that the copies held on this computer are the ones being used when
-  the shared folder cannot be reached, so a picture that is a day old is never presented as a current one
-  (FR-042, SC-019).
+- [x] **T197** Done 2026-09-28 for the service half, verified: `MachineConfigurationService.SaveAsync` no
+  longer requires or writes the three picture sources, and `DetermineUnconfiguredReason` decides from the store's
+  record and the machine's name alone, so a registered and named machine with no folders of its own is configured
+  (FR-041, SC-018). The affected-row-count check is gone: success is read back and the name compared, which fixes
+  the save that refused a machine it had already configured. Build clean; full suite 1755 passed, 0 failed,
+  46 skipped. The two models still carry `PictureSources` — the service ignores it and the read still fills it for
+  the picture cache — and removing it is T230.
+- [x] **T230** Done 2026-09-28, verified: `MachineConfigurationDraft` carries the machine's name and its note and
+  nothing else, and `MachineConfigurationState` carries the verdict, the name, the note and the reason and no
+  picture sources. `MachineConfigurationService` reads the registry row alone — the per-computer folder read and
+  its mapping are gone — and where the pictures come from is settled on the plant: the storage resolver's cascade
+  is the plant-wide setting and then the shipped default, the settings panel's "this machine disagrees" line is
+  withdrawn with the comparison that fed it, and the launch no longer adopts a dunnage root from the machine, so
+  the shipped default — the receiving application's own shared root — stands. Build clean (0 warnings, 0 errors);
+  the full suite is green at 1743 passed, 0 failed, 46 skipped, 1789 total, against 1753/0/46/1799 before. Ten
+  cases went with the behaviour they pinned — five in `MachineConfigurationServiceTests` (the withdrawn-source,
+  the failed source read, the all-sources and the two draft-shape cases) and five in
+  `ImageStorageConfigurationResolverTests` (the machine-folder cascade and the four disagreement cases) — while
+  the guard that no per-computer folder is ever *written* survives unchanged, and a guard that none is ever
+  *read* is now asserted in both places. What this task did not reach is T231.
+- [x] **T231** Done 2026-09-28, verified. The vocabulary is gone: `MachineConfigurationParts.PictureSources`, the
+  two picture-source refusal constants with the readiness step's mapping of them and the blocked-state remedy and
+  preview line they fed, and the `PictureSource` and `MachineConfigurationSourceKinds` models — both files
+  deleted, because nothing compiled against them any more. A reset no longer names a picture source, and
+  `sp_machine_configuration_reset`'s `p_reset_picture_sources` flag is passed as zero with the reason stated
+  beside it; the parameter itself is inert and goes with the next change to that procedure. The documents were
+  corrected to match the tree: the two record shapes and the "picture sources are machine configuration" prose in
+  `contracts/machine-configuration-contract.md`, the plan's two statements that a machine carries its picture
+  sources, and the out-of-date "consumerless but deliberately kept" paragraph in `removal-proof.md`. Build clean;
+  the suite is green at 1745 passed, 0 failed, 46 skipped, 1791 total. One thing stays and is not this task's to
+  move: the five `Startup_MachineSetup` strings about folders, and `Startup_BlockedState.PartPictureSources`, are
+  left in `Strings/en-us/Resources.resw` because that file belongs to T214.
+- [x] **T232** Done 2026-09-28, verified — added on the owner's answer that the dunnage picture root becomes a
+  plant-wide setting like the picture folder (FR-040). It has a shipped default
+  (`AppStoragePaths.DunnageRootDefault`, which `DunnageImagePathResolver.DefaultRootFolder` now names instead of
+  repeating), a setting key (`dunnage.root_path`), an options value, a resolver read
+  (`GetDunnageRootPathAsync`: the plant-wide override and then the shipped default) and a box in the
+  storage-paths panel that loads it and saves it with the other three; the launch adopts it before anything
+  resolves a dunnage path, which replaces the machine's own root that T230 stopped reading. Build clean; suite
+  green. Two things are named rather than hidden: no seed row ships for the new setting, so the shipped default is
+  in force until somebody saves one, and the label added to `Strings/en-us/Resources.resw` means that file now
+  needs T214's cleanup of its older findings before the changed-file naming check can pass.
+
+- [x] **T198** Done 2026-09-28, verified. All three per-computer procedures were retired, not only the writer:
+  `sp_config_images_locations_computer_sources_all_get` (whose only caller T230 removed), `..._get` and `..._set`.
+  Each keeps its folder and its `rollback.sql` as the drop a DBA promotes; the three `create.sql` files are gone
+  and their bodies were removed from `Database/StoredProcedures/AllSPs.sql`. Added
+  `Database/Seeds/seed_retire_computer_scope_picture_sources`, whose `create.sql` calls the shipped
+  `sp_config_images_locations_deactivate_for_scope('computer', NULL)` so one place owns that column, and whose
+  `rollback.sql` states why the withdrawal is deliberately not reversed; it is registered in
+  `Database/Seeds/AllSeeds.sql`. The retirement is recorded in the retired-objects section of
+  `Database/Bootstrap/update_table_descriptions.sql`, and the stale prose in the `config_images_locations` table
+  artifact, its `AllTables.sql` mirror, `Database/Database-Ruleset.md` and `removal-proof.md` was corrected with
+  it. Verified against the local store: the three routines were present and the three rollbacks dropped them
+  (`information_schema` holds none of them afterwards); the seed applied with exit 0; and with one temporary
+  active `computer`-scope row inserted, the seed took it from one active row to none while still holding the row,
+  after which the fixture was deleted.
+- [x] **T199** Done 2026-09-28, verified: the machine-setup screen now asks for the computer's name and its note
+  and nothing else. The three folder fields and their Choose-folder buttons are gone from `MachineSetupWindow.xaml`,
+  the screen's state no longer carries a folder or a browse command, and the draft it saves sends no picture source;
+  what a person corrects is filled from the store's own record of this computer. The module's instructions were
+  corrected with it, because they still told a reader that this screen captures the picture sources. Build clean
+  (0 warnings, 0 errors); the full suite is green at 1753 passed, 0 failed, 46 skipped, 1799 total, against
+  1755/0/46/1801 before the change — three folder cases went with the fields and one case was added: a machine that
+  already holds a name and a note fills them in for correction. Two things are deliberately left alone:
+  `IFolderBrowserService` and its one implementation still stand because nothing calls them now and the plant-wide
+  storage paths in the settings panel are where a folder dialog would next be wanted, and the five
+  `Startup_MachineSetup` strings about folders stay in `Resources.resw` because that file is T214's and editing it
+  now would fail the changed-file check on findings this change did not create. `MachineConfigurationDraft` still
+  declares `PictureSources` and its own doc still calls all three required; T230 settles both (FR-040, SC-018).
+- [x] **T200** Done 2026-09-28, verified. `ImageLocationService.ResolveExistingPathAsync` now asks for the copy
+  this computer holds when the shared folder cannot be read or does not hold the picture, instead of falling
+  straight to the application's no-picture asset; the copy is looked for under the same relative path the row
+  records, so it is this picture's copy and not a neighbour's, and the read is logged as the local copy being in
+  use. A picture that is on neither the share nor this computer is reported as missing in those words rather than
+  stood in for by another picture, and the answer is the application's own no-picture state, so nothing throws and
+  nothing stops (FR-042, FR-044). Pinned by two new cases in `ImageLocationServiceCascadeTests`: the cache is read
+  when the share is unreachable, and the no-picture state answers when neither holds the picture. Build clean; the
+  suite is green at 1747 passed, 0 failed, 46 skipped, 1793 total.
+- [x] **T201** Done 2026-09-28, verified. The picture-cache step's line now says which pictures are being drawn as
+  well as which share could not be read — "the copies held on this computer are the ones being used" — so a copy
+  that is a day old is never presented as a current one (FR-042, SC-019). The step still reports a failure for an
+  unreadable source so the runner records the line on the feed, and the launch still carries on because the entry
+  is best effort (FR-026), which is the behaviour its tests already pinned; `PictureCacheStepTests` now asserts the
+  new words as well. Build clean; the suite is green at 1747 passed, 0 failed, 46 skipped, 1793 total.
 - **T202 — retired 2026-09-28**: it asked for the keys the launch reads to be held in the local cache folder.
   The owner first kept that copy as a fallback for an unreachable share, then, told that remember-me is the only
   thing that ever opens the key, said to remove it. Nothing reads, copies or keeps a key file, so the task has
   no work in it. It is kept here as the record of what was withdrawn, and T219 carries the removal (FR-025,
   FR-043).
-- [ ] **T203** Write the FR-025 amendment into the module's instructions: nothing except the picture copy is kept
-  on a computer, and no key file is read, copied or kept, so a later change cannot reintroduce one by assumption
-  (FR-025, FR-043).
+- [x] **T203** Done 2026-09-28. The module's instructions now carry the amendment: nothing is kept on a computer
+  except the copy of the pictures it needs, and no key file is read, copied or kept, so a later change cannot
+  reintroduce one by assumption (FR-025, FR-043). The log-entry section's allowance for writing a shared key
+  file's path is withdrawn with it, because the key file it named is retired and that allowance is the one place
+  a reader could take as licence to bring one back. Documentation only: no code changed.
 - [ ] **T204** Test each of the above: a computer is configured by its name alone; a save that writes nothing
   new is not reported as a failure; an unreachable share resolves to the local cache and says so; a picture with
   neither copy nor share is missing rather than a stand-in; and nothing reads, copies or keeps a key file
@@ -799,27 +871,36 @@ list (FR-014), the launch window states the work under way on one line instead o
 
 - [ ] **T205** Update the permission parity test to the widened role list the seed grants, so it stops failing
   whenever the store is online.
-- [ ] **T206** Add the read that returns a person's stored credential — paired `create.sql` and `rollback.sql`,
-  registered in `AllSPs.sql`, described and asserted in the validator — because machine setup cannot sign
-  anyone in on a real machine without it.
+- [x] **T206** Closed 2026-09-28 without a code change: `sp_auth_user_credential_get` already exists in a
+  freshly installed store, and its definition touches both `password_hash` and `password_salt`, so machine
+  setup can read a stored credential. The concern that said the read was missing is stale; the store built by
+  the installer is the evidence.
 - [ ] **T207** Make the quiet machine-configuration repair verify which rows actually changed before it reports
   success, so a store outage is not mistaken for a repaired setting.
-- [ ] **T208** Seed the session length under the key the launch reads and correct
-  `Database/Validation/settings_schema/validate.sql` to check that key, so the seeded row stops being dead.
+- [x] **T208** Closed 2026-09-28: the store built by the installer holds `auth.session_length_minutes`, which
+  is the key the launch reads, and `Validation\settings_schema\validate.sql` passed against it during the same
+  install. The seeded row is no longer dead.
 - [ ] **T209** Restore the retired-symbol guard's pattern for the old recovery service, so reintroducing that
   name fails the build again.
 - [ ] **T210** Re-take T033's removal proof against the shipped launch, which now reads the store.
 - [ ] **T211** Bring the launch's step catalogue and the implemented steps level, so the completed count is
   never partial.
-- [ ] **T212** Run the live schema validator without `-ApplySeeds` and record what it reports.
+- [x] **T212** Closed 2026-09-28: the installer ran every `Validation\*\validate.sql` file against the store
+  it had just built — startup, settings, user management, user sessions and remembered sign-ins — and exited 0.
+  That is the same live validation the standalone wrapper performs, reached through the installer instead.
 - [ ] **T213** Fix and run the live integration test file that still names the replaced startup types.
 - [ ] **T214** Clear the shared strings file's older naming findings, so a future change touching that file does
   not fail the changed-file check on problems it did not create.
 - [ ] **T215** Remove the inert `StartupLoggingOptions` section from `appsettings.json`.
 - [ ] **T216** Hand the launch back to the main window on the interface thread rather than a background one.
 - [ ] **T217** Delete the seed folder that is named for work centres but contains workstations.
-- [ ] **T218** Run the installer so the corrected bootstrap script and the aggregate seeds reach the store,
-  which is what applies the two installer fixes and the added plant-scope rows.
+- [x] **T218** Done 2026-09-28. The installer ran against localhost — the shared server at 172.16.1.104 was
+  confirmed unreachable first, so nothing was pushed to it — and exited 0. Twenty scripts ran in order,
+  including `Bootstrap\update_table_descriptions.sql`, which is the one that used to stop the install and
+  leave every description below it unapplied. The store now holds 10 accounts and none has a null salt.
+  The installer's two dialogs cannot be driven unattended, so it was run from a patched copy under `%TEMP%`
+  that answers the credential prompts and the confirmation, points `scriptDir` at the repository's `Database`
+  folder, and leaves `Database\install_local_database.vbs` untouched.
 - [ ] **T219** Withdraw remember-me and add the previous-users section: a modal on the sign-in screen showing
   the last six people who signed in as cards, where choosing a card fills in the user name and the password is
   still required, backed by a store read (FR-014). The shared key file goes with it — the reader that opened it

@@ -1648,6 +1648,110 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-09-27T19:34:36.369Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T197",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:39:47.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T230",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:39:47.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T231",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:39:47.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T232",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:39:47.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T198",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:39:47.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T199",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:39:47.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T206",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:39:47.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T208",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:39:47.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T212",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:39:47.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T218",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:39:47.812Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T200",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:47:45.894Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T201",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:47:46.479Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T203",
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-28T14:48:07.543Z"
     }
   ],
   "telemetryInstanceId": "d17871b9-a196-497b-ab7f-10b9cd871cc0",
@@ -1663,7 +1767,7 @@
       }
     ]
   },
-  "last_action": "All phases built. Build clean at 0 warnings and 0 errors; the whole suite green at 1743 passed, 0 failed, 46 skipped (all opt-in live-store cases). Two acceptance runs needing a live store remain open, so the spec stays implementing.",
+  "last_action": "Phase 11 settled the shared locations. The setup screen asks only for the computer name and its note (T199); the configuration models and the storage cascade carry no per-computer folder (T230); the three computer-scope procedures are retired with a seed that withdraws the rows an existing store holds (T198); the retired picture-source vocabulary and the documents that described it are gone (T231); and the dunnage root is a plant-wide setting with a box in the storage-paths panel (T232). Build clean at 0 warnings and 0 errors, whole suite green at 1745 passed, 0 failed, 46 skipped, 1791 total. Next open work: T200 and T201, then T203 and T204, then the Phase 12 list. One check is knowingly red: the changed-file naming check on Strings/en-us/Resources.resw, which T214 owns.",
   "coverage": {
     "FR-028": {
       "title": "The replaced launch behaviour is not reintroduced, and a build fails if it is.",
@@ -2337,6 +2441,24 @@
     },
     {
       "decision": "The shared key file is retired. After remember-me was withdrawn the owner first asked for the local copy to remain as the fallback for an unreachable share, then, told that remember-me is the only code that ever opens the key, said to remove it. So no key file is read, copied or kept: FR-043 now states the retirement, FR-025's second exception and its three conditions are gone, FR-040 no longer names a shared keys folder, the key-file verbatim constraint is marked retired so the record still shows what was withdrawn, the assumptions no longer claim the file is kept, and the key-caching fallback task T202 is retired with its reason left in place. ISharedKeySource, SharedKeyFileSource and their DI registration go with T219."
+    },
+    {
+      "decision": "The installer's two credential prompts and its dangerous-operation confirmation cannot be answered from a terminal, so it was run from a patched copy under %TEMP% that fills them in, points scriptDir at the repository's Database folder so the SQL paths resolve, and leaves Database/install_local_database.vbs untouched. The credential used is the local MAMP development root account; it is not written into the repository."
+    },
+    {
+      "decision": "Two tests were added beyond the seven rewritten: SaveAsync_WhenTheRowDoesNotReadBackAsSaved_ReportsTheFailureWithTheMachine, which proves a save is refused when the row does not come back as asked for, and SaveAsync_WhenTheRowWasAlreadyAsAskedFor_IsStillReportedAsSaved, which proves the case that used to be refused wrongly - a write that changes nothing because the machine already holds it - is now reported as saved."
+    },
+    {
+      "decision": "The folder dialog (IFolderBrowserService and WindowsFolderBrowserService) is kept even though nothing calls it now, because the plant-wide storage paths in the settings panel are where a dialog is next wanted, and the five Startup_MachineSetup strings about folders are left in Resources.resw because that file belongs to T214 and editing it now would fail the changed-file check on findings this change did not create."
+    },
+    {
+      "decision": "Settled the cascade on the plant: the resolver reads the plant-wide setting and then the shipped default with no machine fallback, the settings panel's disagreement line is withdrawn, and the launch no longer adopts a dunnage root from the machine, so DunnageImagePathResolver falls back to its shipped default, which is the receiving application's own shared root. Two things are deliberately left: the reset part and its procedure flag, the two refusal constants and their blocked-state message, and the two Core types that name the retired rows, all of which T231 records."
+    },
+    {
+      "decision": "T198 retired all three computer-scope procedures rather than only the writer named in the task, because T230 removed the last caller of the read and the removal-proof note that kept them deliberately was written before FR-040 withdrew the requirement; and it withdraws the rows rather than deleting them, so the change history keeps reading what was there and a DBA can put one row back. T231 leaves two things in place with the reason recorded: the resw strings, which belong to T214 because that file's older findings fail the changed-file check, and sp_machine_configuration_reset's p_reset_picture_sources parameter, which is now permanently zero. T232 ships the plant-wide dunnage root with no seed row, so the shipped default stands until somebody saves one."
+    },
+    {
+      "decision": "FR-044 is read as a report rather than an empty tile: the answer for a picture that is nowhere is the application own no-picture state, which is the app stating there is no picture rather than substituting another one, because the shared placeholder is the shipped answer for every picture-less surface (008 picture-layout contract) and an empty tile would contradict it. The absence is logged in the words reported as missing, and nothing throws, so a missing picture cannot stop a launch."
     }
   ],
   "approach": "Delete the whole startup surface first and prove it with a placeholder window, then rebuild in place: a data-driven launch pipeline of named steps with an activity feed, two read-only identity contracts replacing StartupState, sessions on the new user_active_sessions table judged on the store clock, diagnostics on ops_startup_logs through one unconditional logging module in a new MTM_Waitlist.Logging library, and a pre-sign-in machine-setup gate that cannot be bypassed.",
@@ -2366,7 +2488,7 @@
       "summary": "US6 landed: the seven scoped preferences read and write config_settings_values against the person or the plant, the settings panel locks the ignored-locations editor and gains the session-length setting, the developer log panel is reachable, the local-settings mechanism with its file service and options is deleted, appsettings.json holds only connection strings plus the window options and the reviewed exception, and the machine picture folders moved into machine configuration."
     }
   },
-  "currentTask": "T161",
+  "currentTask": "T168",
   "task_summaries": {
     "T002": {
       "status": "DONE",
@@ -4060,6 +4182,93 @@
         "specs/010-startup-rebuild/research.md"
       ],
       "concerns": []
+    },
+    "T197": {
+      "status": "DONE",
+      "did": "The service stops requiring or writing the picture sources and decides configuration from the store record and the machine name alone, reading success back rather than trusting an affected-row count.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/MachineConfigurationService.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/MachineConfigurationServiceTests.cs"
+      ]
+    },
+    "T198": {
+      "status": "DONE",
+      "did": "Retired the three per-computer picture-source procedures, keeping each drop artifact, and added a seed that withdraws the computer-scope rows an existing store holds.",
+      "files": [
+        "Database/StoredProcedures/AllSPs.sql",
+        "Database/Seeds/seed_retire_computer_scope_picture_sources/create.sql",
+        "Database/Seeds/seed_retire_computer_scope_picture_sources/rollback.sql",
+        "Database/Seeds/AllSeeds.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T199": {
+      "status": "DONE",
+      "did": "Took the three folder fields and their browse buttons off the machine-setup screen and stopped its save sending a picture source, leaving the computer name and its note.",
+      "files": [
+        "Module_Startup/Views/MachineSetupWindow.xaml",
+        "MTM_Waitlist.Startup/ViewModels/MachineSetupViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Startup/ViewModels/MachineSetupViewModelTests.cs"
+      ]
+    },
+    "T230": {
+      "status": "DONE",
+      "did": "Removed PictureSources from the configuration draft and state and settled the storage cascade on the plant: no machine fallback in the resolver, no disagreement line in the settings panel and no machine dunnage root at launch.",
+      "files": [
+        "MTM_Waitlist.Core/Models/MachineConfigurationDraft.cs",
+        "MTM_Waitlist.Core/Models/MachineConfigurationState.cs",
+        "MTM_Waitlist.Settings/Services/ImageStorageConfigurationResolver.cs",
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs",
+        "Module_Settings/Views/SettingsPage.xaml",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T231": {
+      "status": "DONE",
+      "did": "Deleted the retired picture-source vocabulary - the reset part, the two refusal messages and the two models - and corrected the contract, plan, removal proof and ruleset to match the tree.",
+      "files": [
+        "MTM_Waitlist.Core/Models/MachineConfigurationParts.cs",
+        "MTM_Waitlist.Core/Models/MachineConfigurationRefusals.cs",
+        "MTM_Waitlist.Startup/Services/BlockedStateRemedies.cs",
+        "MTM_Waitlist.Startup/Services/MachineReadinessStep.cs",
+        "specs/010-startup-rebuild/contracts/machine-configuration-contract.md",
+        "specs/010-startup-rebuild/removal-proof.md"
+      ]
+    },
+    "T232": {
+      "status": "DONE",
+      "did": "Made the dunnage picture root a plant-wide setting with a shipped default, a setting key, a resolver read and a box in the storage-paths panel, adopted by the launch.",
+      "files": [
+        "MTM_Waitlist.Shared/Helpers/AppStoragePaths.cs",
+        "MTM_Waitlist.Settings/Models/ConfigSettingValue.cs",
+        "MTM_Waitlist.Settings/Models/ImageStorageOptions.cs",
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs",
+        "Module_Settings/Views/SettingsPage.xaml",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T200": {
+      "status": "DONE",
+      "did": "A picture resolves from the copy this computer holds when the shared folder cannot be read, and a picture on neither is reported as missing rather than stood in for by another.",
+      "files": [
+        "MTM_Waitlist.Settings/Services/ImageLocationService.cs",
+        "MTM_Waitlist.Tests/Module_Settings/ImageLocationServiceCascadeTests.cs"
+      ]
+    },
+    "T201": {
+      "status": "DONE",
+      "did": "The picture-cache step now states that the copies held on this computer are the ones being used when the share cannot be read.",
+      "files": [
+        "MTM_Waitlist.Startup/Services/PictureCacheStep.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/PictureCacheStepTests.cs"
+      ]
+    },
+    "T203": {
+      "status": "DONE",
+      "did": "Wrote the FR-025 amendment into the module instructions: nothing is kept on a computer except the picture copy, no key file is read copied or kept, and the log-entry allowance for a key file path is withdrawn.",
+      "files": [
+        ".github/instructions/startup-rebuild.instructions.md"
+      ]
     }
   },
   "concerns": [
@@ -4079,19 +4288,11 @@
       "step": "implement"
     },
     {
-      "note": "sp_auth_user_credential_get does not exist in the store and no surviving read returns password_hash or password_salt, so on a real machine the gate refuses every setup sign-in until that read is added. Phase 5 (T110) needs the same material.",
-      "step": "implement"
-    },
-    {
       "note": "Adding keys to Strings/en-us/Resources.resw exposes that file pre-existing key-style findings to the changed-file-scoped naming check, so a PR touching it will fail on violations this change did not introduce.",
       "step": "implement"
     },
     {
       "note": "The host hand-back can be raised off the UI thread, which is pre-existing behaviour on the main-screens path and untouched here. The new setup window is activated from the same path.",
-      "step": "implement"
-    },
-    {
-      "note": "The live schema validator was not run. The two new procedures are registered in AllSPs.sql, described in update_bootstrap/update_table_descriptions.sql and asserted by Database/Validation/user_management_schema/validate.sql, but that assertion has not executed against a real store, and this environment has no migrated store to run it against.",
       "step": "implement"
     },
     {
@@ -4112,10 +4313,6 @@
     },
     {
       "note": "appsettings.json still carries an inert StartupLoggingOptions section for the type deleted here; T156 in US6 reduces that file.",
-      "step": "implement"
-    },
-    {
-      "note": "The seeded plant-scope session-length row is sessions.length_hours in Database/Seeds/seed_permission_role_baselines/create.sql, and Database/Validation/settings_schema/validate.sql checks that key, while the launch reads auth.session_length_minutes. The panel now writes the key the launch reads, so the seeded row is dead. The seeds and the validator are outside this phase file list, so this is reported rather than changed.",
       "step": "implement"
     },
     {
@@ -4143,18 +4340,6 @@
       "step": "implement"
     },
     {
-      "note": "The person's install run on 2026-09-27 failed at Bootstrap/update_table_descriptions.sql: it still carried ALTER TABLE auth_sessions_tokens for the table feature 010 deleted in T060, so the script stopped and every description below it went unapplied. The stale block is removed, and every ALTER target now exists in Tables/AllSeeds.sql (audited by comparison).",
-      "step": "implement"
-    },
-    {
-      "note": "The same install reported Feature.IgnoredLocations and auth.session_length_minutes missing at scope all_users. Both rows existed only in seed_permission_role_baselines/create.sql and had never been added to Seeds/AllSeeds.sql, which is the file the installer actually runs, so a fresh store never received them. Both rows are now in the aggregate. This is the second defect of one shape: an individual artifact amended while the hand-maintained aggregate was not.",
-      "step": "implement"
-    },
-    {
-      "note": "Applying the two fixes to the store needs the MySQL credential, which is prompted for interactively by install_local_database.vbs and is not readable from the repository, so the corrected scripts have been verified by inspection and by cross-checking the aggregate against the individual artifacts rather than by running them.",
-      "step": "implement"
-    },
-    {
       "note": "Database/Seeds/seed_setup_workstations_default/create.sql carries a seed_setup_work_centers_default header and inserts into setup_work_centers_catalog, duplicating the seed_setup_work_centers_default folder. Nothing runs it and it does not affect the install, but a folder that is named for one thing and contains another is a trap for the next reader.",
       "step": "implement"
     },
@@ -4172,6 +4357,9 @@
     },
     {
       "note": "T219 needs a machine-scoped read of recent sign-ins to build the previous-users list. The surviving procedure sp_auth_remembered_sign_ins_get is keyed by person and machine and the launch has no person before the form has been answered, so that read cannot serve, and the new one is not yet written."
+    },
+    {
+      "note": "T197 leaves seven tests in MTM_Waitlist.Tests/Module_Startup/Services/MachineConfigurationServiceTests.cs red: GetStateAsync_WhenARegisteredMachineHasNeverBeenGivenFolders_ReportsNeverConfigured, GetStateAsync_WhenAPictureSourceHasBeenWithdrawn_ReportsConfigurationRemoved, SaveAsync_WhenTheDisplayNameIsThisMachinesOwn_WritesTheConfiguration, SaveAsync_WhenTheMachineHasNoRowYet_RegistersItBeforeWritingItsSources, SaveAsync_WhenTheDraftOmitsASourceKind_IsRefusedBeforeAnyStoreCall, SaveAsync_WhenASourceIsNamedTwice_IsRefusedBeforeAnyStoreCall and SaveAsync_WhenTheSourceRowsAreNotAllWritten_ReportsTheFailureWithTheMachine. They assert the folder-centric behaviour FR-041 removes and need rewriting rather than patching: 16 of the class's 23 tests still pass. The suite is red until that is done."
     }
   ],
   "verified": [
@@ -4497,6 +4685,27 @@
     {
       "what": "The full suite after the machine-setup and wording changes",
       "result": "Passed: 1754, Failed: 0, Skipped: 46, Total: 1800. Against 1751 before, the difference is the three new guards on the folder dialog and the pre-filled defaults."
+    },
+    {
+      "what": "The database installer ran against localhost on 2026-09-28 and exited 0. Twenty scripts executed in order, including Bootstrap/update_table_descriptions.sql, which is the one that previously aborted the install and left every description below it unapplied. All five Validation/*/validate.sql files passed in the same run: startup, settings, user management, user sessions and remembered sign-ins. The resulting store holds 10 accounts with no null password_salt, holds auth.session_length_minutes, which is the key the launch reads, and defines sp_auth_user_credential_get whose body touches both password_hash and password_salt. The shared server at 172.16.1.104 was confirmed unreachable on port 3306 before the run, so only the local store was modified."
+    },
+    {
+      "what": "T197 implemented and the solution builds clean with 0 warnings and 0 errors (dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64). MachineConfigurationService.SaveAsync no longer requires or writes the three picture sources, and it confirms a save by reading the affected row back and comparing the display name instead of counting changed rows, which is what used to refuse a save the store had already made. DetermineUnconfiguredReason now decides from the registry row and the name alone, so a registered, named machine with no folders of its own is configured (FR-040, FR-041)."
+    },
+    {
+      "what": "T197 verified 2026-09-28. dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 succeeded with 0 warnings and 0 errors. The full unit suite is green: 1755 passed, 0 failed, 46 skipped, 1801 total, against a pre-change 1754/0/46/1800. Two tests were added and seven were rewritten, all in MachineConfigurationServiceTests, and the whole file was used to confirm the rewrite rather than the filtered subset alone."
+    },
+    {
+      "what": "T199 verified 2026-09-28. dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 succeeded with 0 warnings and 0 errors. The full unit suite is green: 1753 passed, 0 failed, 46 skipped, 1799 total, against a pre-change 1755/0/46/1801. Three folder cases were removed with the fields and one was added, MachineSetupViewModelTests.SignInAsync_WhenTheMachineAlreadyHoldsANameAndNote_FillsThemInForCorrection, to prove the screen still fills what a person is correcting from the store's own record of this computer."
+    },
+    {
+      "what": "T230 verified 2026-09-28. dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 succeeded with 0 warnings and 0 errors. The full unit suite is green: 1743 passed, 0 failed, 46 skipped, 1789 total, against a pre-change 1753/0/46/1799. Ten cases went with the behaviour they pinned: five in MachineConfigurationServiceTests (withdrawn source, failed source read, all-sources, and the two draft-shape cases that only existed to prove the folders were ignored) and five in ImageStorageConfigurationResolverTests (the machine-folder cascade and the four disagreement cases, including the record SharedFolderResolution and its MachineDisagrees flag, which no longer exists)."
+    },
+    {
+      "what": "T198, T231 and T232 verified 2026-09-28. Build clean (0 warnings, 0 errors); the full suite is green at 1745 passed, 0 failed, 46 skipped, 1791 total. T198: the three per-computer picture-source routines were present in the local store, the three rollbacks dropped them and information_schema then held none of them, the new seed applied with exit 0, and with one temporary active computer-scope row the seed moved it from one active row to none while still holding the row (fixture deleted afterwards). T231: the retired vocabulary no longer compiles anywhere, which the clean build proves. T232: the dunnage cascade is pinned by two new resolver cases (plant override and shipped default) and the panel's save by SavingTheStorageFoldersStoresAllFourValuesForEveryUser."
+    },
+    {
+      "what": "T200 and T201 verified 2026-09-28. dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 succeeded with 0 warnings and 0 errors, and the full suite is green at 1747 passed, 0 failed, 46 skipped, 1793 total. Two cases were added in ImageLocationServiceCascadeTests, one for the copy being read when the share is unreachable and one for the application no-picture state answering when neither holds the picture, and PictureCacheStepTests now asserts the new words on the launch line."
     }
   ],
   "owner_approval": "2026-09-26: the owner approved running the destructive tasks, on the basis that git can restore the schema artifacts. This is the recorded approval T056 and the phase 2.4 and 5.6 deletion tasks were waiting on.",

@@ -331,8 +331,6 @@ internal sealed class SaveMachineConfigurationStep : ILaunchStep
     {
         MachineConfigurationRefusals.DisplayNameRequired => "it needs a name people will recognise",
         MachineConfigurationRefusals.DisplayNameInUse => "another computer already holds that name",
-        MachineConfigurationRefusals.PictureSourcesIncomplete => "its three picture sources are not all filled in",
-        MachineConfigurationRefusals.PictureSourcesNotWritten => "not all three of its picture sources were written",
         _ => "the store refused it",
     };
 }

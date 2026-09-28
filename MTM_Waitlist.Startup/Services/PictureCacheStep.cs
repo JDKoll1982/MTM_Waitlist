@@ -67,12 +67,13 @@ public sealed class PictureCacheStep : ILaunchStep
 
         if (result.SourcesSkipped.Count > 0)
         {
-            // A source that could not be read is the one thing worth saying out loud here. It is reported as a
-            // failure so the runner records it on the feed, and the launch carries on because the entry is best
-            // effort (FR-026).
+            // The line names which share could not be read and which pictures are being drawn, because a picture
+            // that is a day old must never read as a current one (FR-042, SC-019). It is reported as a failure so
+            // the runner records it on the feed, and the launch carries on because the entry is best effort
+            // (FR-026).
             return new LaunchStepOutcome(
                 LaunchStepStatus.Failed,
-                $"The picture share could not be read, so the copies already on this computer were left as they are: {string.Join(", ", result.SourcesSkipped)}.",
+                $"The picture share could not be read, so the copies held on this computer are the ones being used: {string.Join(", ", result.SourcesSkipped)}.",
                 LaunchRemedySet.RetryOnly);
         }
 

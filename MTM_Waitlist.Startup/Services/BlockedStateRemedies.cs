@@ -94,14 +94,14 @@ public static class BlockedStateRemedies
     /// The parts a reset of this computer's configuration restores, which is what the person is asked about.
     /// </summary>
     /// <remarks>
-    /// The display name, the description and the picture sources are all things a person typed or chose for this
-    /// computer, so a reset that touches one of them is a question rather than a courtesy (FR-018).
+    /// The display name and the description are both things a person typed for this computer, so a reset that
+    /// touches one of them is a question rather than a courtesy (FR-018). Where its pictures come from is not
+    /// among them: that is held once for the plant and no computer captures a folder (FR-040).
     /// </remarks>
     private static readonly string[] s_configurationParts =
     [
         MachineConfigurationParts.DisplayName,
         MachineConfigurationParts.Description,
-        MachineConfigurationParts.PictureSources,
     ];
 
     /// <summary>
@@ -179,7 +179,6 @@ public static class BlockedStateRemedies
     {
         MachineConfigurationParts.DisplayName => "Startup_BlockedState.PartDisplayName".GetLocalized(),
         MachineConfigurationParts.Description => "Startup_BlockedState.PartDescription".GetLocalized(),
-        MachineConfigurationParts.PictureSources => "Startup_BlockedState.PartPictureSources".GetLocalized(),
         MachineConfigurationParts.ScopedPreference => "Startup_BlockedState.PartScopedPreference".GetLocalized(),
         null or "" => string.Empty,
         _ => part.Trim(),

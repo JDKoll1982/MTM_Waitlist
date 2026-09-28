@@ -342,7 +342,6 @@ public sealed class LaunchEdgeCaseTests
                 false,
                 null,
                 null,
-                [],
                 MachineConfigurationReasons.Removed);
 
             return this;
@@ -365,11 +364,6 @@ public sealed class LaunchEdgeCaseTests
             true,
             "Test workstation",
             "a machine the test owns",
-            [
-                new PictureSource(MachineConfigurationSourceKinds.SharedFolder, @"\\share\pictures"),
-                new PictureSource(MachineConfigurationSourceKinds.KeysFolder, @"\\share\keys"),
-                new PictureSource(MachineConfigurationSourceKinds.DunnageRoot, @"\\share\dunnage"),
-            ],
             null);
 
         public Task<MachineConfigurationState> GetStateAsync(CancellationToken cancellationToken)

@@ -59,7 +59,6 @@ public sealed class StartupRecoveryService
         MachineConfigurationParts.Configuration,
         MachineConfigurationParts.DisplayName,
         MachineConfigurationParts.Description,
-        MachineConfigurationParts.PictureSources,
         MachineConfigurationParts.ScopedPreference,
     ];
 
