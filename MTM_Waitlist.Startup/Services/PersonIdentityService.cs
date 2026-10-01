@@ -44,6 +44,17 @@ public sealed class PersonIdentityService : IPersonIdentity
     private readonly IMySqlHelperServer _mySqlHelperServer;
     private readonly HashSet<string> _heldRoleCodes = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Guards <see cref="_heldRoleCodes"/>, which the launch thread rewrites while other threads read it.
+    /// </summary>
+    /// <remarks>
+    /// A <see cref="HashSet{T}"/> enumerator throws <c>InvalidOperationException</c> the moment the set changes
+    /// under it, and this set is answered to the shell, the permission checks and the tooltips from whichever
+    /// thread asks. The set is therefore written and copied under one lock, so a reader is never handed a
+    /// half-rewritten answer and never enumerates a set that a resolve is changing beneath it.
+    /// </remarks>
+    private readonly object _rolesGate = new();
+
     private long _userId;
     private string _signInName = string.Empty;
     private string _displayName = string.Empty;
@@ -71,7 +82,19 @@ public sealed class PersonIdentityService : IPersonIdentity
     public string CurrentRoleCode => _currentRoleCode;
 
     /// <inheritdoc />
-    public IReadOnlyList<string> HeldRoleCodes => [.. _heldRoleCodes];
+    public IReadOnlyList<string> HeldRoleCodes
+    {
+        get
+        {
+            // Copied under the lock a resolve writes with. Handing out the live set would let a reader enumerate
+            // it while the launch rewrites it, and a HashSet enumerator throws the moment the set changes under
+            // it — the fault that ends this process as a stowed exception with no stack of its own.
+            lock (_rolesGate)
+            {
+                return [.. _heldRoleCodes];
+            }
+        }
+    }
 
     /// <inheritdoc />
     public bool IsSignedIn => _userId > 0;
@@ -81,7 +104,10 @@ public sealed class PersonIdentityService : IPersonIdentity
     {
         var normalized = NormalizeRoleCode(roleCode);
 
-        return normalized.Length > 0 && _heldRoleCodes.Contains(normalized);
+        lock (_rolesGate)
+        {
+            return normalized.Length > 0 && _heldRoleCodes.Contains(normalized);
+        }
     }
 
     /// <summary>
@@ -183,23 +209,26 @@ public sealed class PersonIdentityService : IPersonIdentity
         _employeeNumber = string.IsNullOrWhiteSpace(employeeNumber) ? null : employeeNumber.Trim();
         _currentRoleCode = currentRoleCode?.Trim() ?? string.Empty;
 
-        _heldRoleCodes.Clear();
-
-        foreach (var roleCode in heldRoleCodes ?? Array.Empty<string>())
+        lock (_rolesGate)
         {
-            var normalized = NormalizeRoleCode(roleCode);
-            if (normalized.Length > 0)
+            _heldRoleCodes.Clear();
+
+            foreach (var roleCode in heldRoleCodes ?? Array.Empty<string>())
             {
-                _heldRoleCodes.Add(normalized);
+                var normalized = NormalizeRoleCode(roleCode);
+                if (normalized.Length > 0)
+                {
+                    _heldRoleCodes.Add(normalized);
+                }
             }
-        }
 
-        // The role in force is always held, even when the caller passed no set at all: a person is never
-        // answered as not holding the role the store put them in.
-        var current = NormalizeRoleCode(_currentRoleCode);
-        if (current.Length > 0)
-        {
-            _heldRoleCodes.Add(current);
+            // The role in force is always held, even when the caller passed no set at all: a person is never
+            // answered as not holding the role the store put them in.
+            var current = NormalizeRoleCode(_currentRoleCode);
+            if (current.Length > 0)
+            {
+                _heldRoleCodes.Add(current);
+            }
         }
     }
 
@@ -214,7 +243,11 @@ public sealed class PersonIdentityService : IPersonIdentity
         _displayName = string.Empty;
         _employeeNumber = null;
         _currentRoleCode = string.Empty;
-        _heldRoleCodes.Clear();
+
+        lock (_rolesGate)
+        {
+            _heldRoleCodes.Clear();
+        }
     }
 
     /// <summary>

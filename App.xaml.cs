@@ -676,13 +676,25 @@ public partial class App : Application
         // An InvalidOperationException out of the dispatcher reaches the fault record as a stowed fault with no
         // account of itself, because a fault that ends the process takes the store log's unsent lines with it.
         // Recording it while it is still first-chance is what keeps the message and the stack readable afterwards.
+        //
+        // <b>The exception's own StackTrace is empty here, so the live stack is the one that names the throw
+        // site.</b> The runtime raises this event as the exception leaves the throw, before the exception has
+        // captured a stack trace, so <c>e.Exception.StackTrace</c> and <c>ToString()</c> carry the type and the
+        // message and nothing else — which is why the crashes of 2026-09-28 and 2026-10-01 left no usable record
+        // even though this hook was installed. <see cref="Environment.StackTrace"/> is read here instead: it is
+        // the stack the throw is standing on, so the record names the method and the line that threw.
         if (e.Exception is InvalidOperationException invalidOperationException)
         {
-            var stack = invalidOperationException.StackTrace ?? string.Empty;
-            if (stack.Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase))
+            var liveStack = Environment.StackTrace;
+
+            if (liveStack.Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase)
+                || (invalidOperationException.StackTrace ?? string.Empty).Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase))
             {
                 AppLog.Error("FirstChance", invalidOperationException, "First-chance InvalidOperationException in MTM_Waitlist stack.");
-                RecordFault("FirstChance", invalidOperationException.ToString());
+                RecordFault(
+                    "FirstChance",
+                    $"{invalidOperationException}{Environment.NewLine}"
+                    + $"--- the stack the throw was standing on ---{Environment.NewLine}{liveStack}");
             }
         }
 

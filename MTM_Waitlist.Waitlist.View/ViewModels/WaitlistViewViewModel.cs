@@ -1186,6 +1186,22 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     public void UpdateSearchSuggestions(string? query)
     {
+        // The suggestion list is the search box's ItemsSource, so it may only be changed on the thread that owns
+        // that box. This is called from the load's own continuation as well as from the box: every await in the
+        // load resumes off the UI thread, so an unmarshalled change would rewrite a bound collection from a pool
+        // thread — and the box, or the list it is bound to, is enumerating it at that moment. That is the fault
+        // that ends the process as a stowed exception with no account of itself, so the change is handed to the
+        // UI thread instead. A headless host (a unit test) has no queue and applies it where it is.
+        if (_dispatcherQueue is DispatcherQueue dispatcher && !dispatcher.HasThreadAccess)
+        {
+            if (!dispatcher.TryEnqueue(() => UpdateSearchSuggestions(query)))
+            {
+                AppLog.Info("Waitlist", "The search suggestions were not refreshed because the UI queue is not accepting work.");
+            }
+
+            return;
+        }
+
         SearchQuery = query?.Trim() ?? string.Empty;
         SearchSuggestions.Clear();
 
