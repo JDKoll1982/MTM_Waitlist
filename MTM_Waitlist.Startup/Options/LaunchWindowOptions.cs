@@ -7,14 +7,15 @@ namespace MTM_Waitlist.Module_Startup.Options;
 /// <remarks>
 /// <para>
 /// <b>Every value has a usable default.</b> A missing section, a missing key or a number too small to draw the
-/// feed leaves the defaults here in force rather than leaving the window unsized, because a launch window that
+/// surface leaves the defaults here in force rather than leaving the window unsized, because a launch window that
 /// cannot be sized is still a window that can show a launch, and a sizing failure must never become a launch
 /// failure.
 /// </para>
 /// <para>
-/// <b>The shape suits a list, not a dialog.</b> The launch writes one line per operation it performs, so the
-/// window is deliberately wider and taller than a message box: a narrow one would clip the very lines the
-/// surface exists to show.
+/// <b>The default is the smallest the surface reads at.</b> What the window holds is the mark, the progress bar
+/// with its count, the one line stating the work under way, the strip a stopped launch states its cause in and the
+/// button bar, so the default is the shape those need rather than a dialog's shape. A workstation that wants a
+/// larger launch surface states the two figures here.
 /// </para>
 /// </remarks>
 public sealed class LaunchWindowOptions
@@ -34,11 +35,11 @@ public sealed class LaunchWindowOptions
     /// </summary>
     public const int MinimumUsableHeight = 240;
 
-    /// <summary>The width in device-independent pixels. The default is the shape the feed is designed for.</summary>
-    public int Width { get; set; } = 760;
+    /// <summary>The width in device-independent pixels. The default is the smallest the surface reads at.</summary>
+    public int Width { get; set; } = 460;
 
-    /// <summary>The height in device-independent pixels. The default is the shape the feed is designed for.</summary>
-    public int Height { get; set; } = 460;
+    /// <summary>The height in device-independent pixels. The default is the smallest the surface reads at.</summary>
+    public int Height { get; set; } = 420;
 
     /// <summary>
     /// Whether both stated dimensions are large enough to draw the feed around.

@@ -320,7 +320,8 @@ public sealed class LaunchEdgeCaseTests
             new FakeMachineFacts { Hostname = "test-workstation" },
             new PersonIdentityService(new NullStore()),
             _configuration,
-            new PendingSignIn());
+            new PendingSignIn(),
+            new FailingRestarter());
 
         /// <summary>Adds a step that answers with one outcome.</summary>
         public LaunchRun With(string stepId, LaunchStepOutcome answer) => With(stepId, () => Task.FromResult(answer));

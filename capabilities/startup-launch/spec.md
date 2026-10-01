@@ -88,6 +88,16 @@ credential is allowed five attempts and is then required to set a new password.
 - **WHEN** five attempts against a temporary credential have failed
 - **THEN** a sixth attempt is refused even with the correct value, and a restarted application refuses it too
 
+#### Scenario: A saved new PIN is followed by the application starting again on it
+- **WHEN** a person on a temporary credential has chosen a new PIN and the store has accepted it
+- **THEN** the launch ends with that reason stated, a replacement application is started, and the person signs in
+  with the PIN they chose
+
+#### Scenario: A replacement that could not be started leaves the person where they are
+- **WHEN** the application cannot be started again after a new PIN has been saved
+- **THEN** the running application carries on to the main screens rather than ending, and the new PIN is still the
+  one in the store
+
 #### Scenario: An unreadable key file falls back to the ordinary form
 - **WHEN** what is needed to honour a remembered sign-in cannot be read
 - **THEN** the ordinary sign-in form is offered, the fault is recorded, and nothing is kept on the machine in its

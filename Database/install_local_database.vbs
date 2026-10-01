@@ -131,7 +131,7 @@ End If
 Dim mysqlPath
 mysqlPath = ResolveMysqlPath(shell)
 If mysqlPath = "" Then
-    mysqlPath = InputBox("mysql.exe was not found in PATH or common install folders." & vbCrLf & _
+    mysqlPath = InputBox("mysql.exe was not found in PATH, a MySQL Server install or a MAMP installation." & vbCrLf & _
         "Enter the full path to mysql.exe:", "Locate mysql.exe", "")
 End If
 
@@ -339,7 +339,40 @@ Function ResolveMysqlPath(shellObj)
         End If
     Next
 
+    ' MAMP ships a MySQL client of its own under its install root, which is what a workstation that runs its
+    ' own database has instead of a MySQL Server install. The roots are searched rather than one path being
+    ' assumed, because MAMP can be installed anywhere and the client beside its server is the one that server
+    ' is reached with.
+    Dim mampCandidates
+    mampCandidates = MampRoots(shellObj)
+
+    Dim root
+    Dim mampClient
+    For Each root In mampCandidates
+        mampClient = fso.BuildPath(root, "bin\mysql\bin\mysql.exe")
+        If fso.FileExists(mampClient) Then
+            ResolveMysqlPath = mampClient
+            Exit Function
+        End If
+    Next
+
     ResolveMysqlPath = ""
+End Function
+
+' The roots a MAMP installation is looked for under, the usual one first. A root whose environment variable
+' cannot be resolved keeps the variable name in the path, which no file answers to, so it is simply not found
+' rather than being a case of its own.
+' The caller must not name its own copy of this list the same as this function: VBScript does not tell names
+' apart by case, so a variable called mampRoots would shadow this and the call would fail.
+Function MampRoots(shellObj)
+    Dim roots
+    roots = Array( _
+        "C:\MAMP", _
+        shellObj.ExpandEnvironmentStrings("%ProgramFiles%\MAMP"), _
+        shellObj.ExpandEnvironmentStrings("%ProgramFiles(x86)%\MAMP"), _
+        shellObj.ExpandEnvironmentStrings("%USERPROFILE%\MAMP") _
+    )
+    MampRoots = roots
 End Function
 
 ' ----------------------------------------------------------------------------

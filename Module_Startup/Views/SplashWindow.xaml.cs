@@ -51,20 +51,7 @@ public sealed partial class SplashWindow : WindowEx
     /// A window that cannot be centred is still a window that can show a launch, so a failure here is recorded and
     /// the launch carries on, exactly as a sizing failure is.
     /// </remarks>
-    private void CentreOnScreen()
-    {
-        try
-        {
-            this.CenterOnScreen();
-        }
-        catch (Exception exception)
-        {
-            AppLog.Error(
-                "StartupLaunch",
-                exception,
-                "The launch window could not be centred, so it opened where the system put it.");
-        }
-    }
+    private void CentreOnScreen() => WindowStartupPlacement.CentreOnScreen(this, "StartupLaunch");
 
     /// <summary>
     /// Takes the system frame off the launch surface, so it reads as a splash rather than as a small window.

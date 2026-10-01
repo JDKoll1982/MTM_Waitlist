@@ -6,10 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:windowex="using:WinUIEx"
     Title="MTM Waitlist"
-    Width="560"
-    Height="560"
-    MinWidth="480"
-    MinHeight="420"
+    Width="460"
+    Height="500"
+    MinWidth="420"
+    MinHeight="440"
     mc:Ignorable="d">
 
     <!--
@@ -17,11 +17,12 @@
         covers the fields the person is working in (FR-005's rule, applied here). The hint sits above the action
         so what is still missing is stated before the person presses anything.
 
-        The window is 560 by 560 rather than the system default it used to open at. It declares no size of its
+        The window is 460 by 500 rather than the system default it used to open at. It declares no size of its
         own before this and therefore filled the screen, which left a two-field form stranded across a
-        full-width window with its heading and its text a screen apart (found by hand on 2026-09-28). At 560 the
-        form is a form, and the height still holds the forced password change, which is the taller of the two
-        panels, with the message strip under it. It stays resizable: this is the size it opens at, not a limit.
+        full-width window with its heading and its text a screen apart (found by hand on 2026-09-28). The size is
+        now the smallest the form reads at: the two fields, their own hint, the action itself and the strip that
+        answers it are held at once, and 500 holds the forced password change, which is the taller of the two
+        panels, without a scrollbar. It stays resizable: this is the size it opens at, not a limit.
 
         Each panel states its own refusal beside its own fields. The strip in the third row carries the sign-in's
         own answer, and the password panel carries its own, because the two are answers to different things: a

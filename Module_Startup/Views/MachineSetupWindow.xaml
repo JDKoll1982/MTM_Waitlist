@@ -5,11 +5,18 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:windowex="using:WinUIEx"
-    MinWidth="560"
-    MinHeight="620"
+    Width="520"
+    Height="560"
+    MinWidth="480"
+    MinHeight="500"
     mc:Ignorable="d">
 
     <!--
+        The size is the smallest this surface reads at rather than a dialog's default, and it opens there. The
+        heading, the fields, the message strip and the action row are held at once; the middle is a scroll area
+        because the unlock panel and the naming panel are both long, and a smaller window scrolls them rather than
+        clipping them. The action row is a fixed row, so the route out of setup is always on screen.
+
         Four rows, and the message is its own row rather than something laid over the form: a refusal or a stated
         reason for the ending never covers the fields the person is working in (FR-005's rule, applied here).
         The route out of setup that is not completion is a control in the action row, and every other route the

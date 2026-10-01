@@ -209,6 +209,12 @@ public sealed class MachineSetupNoBypassTests
     /// <summary>The outcome a step answers with, in the shape a failing step answers with.</summary>
     private static LaunchStepOutcome Failed() => new(LaunchStepStatus.Failed, "the store did not answer", LaunchRemedySet.RetryOnly);
 
+    /// <summary>A relaunch that never happens, because nothing in this file replaces a temporary PIN.</summary>
+    private sealed class NoRestart : IProcessRestarter
+    {
+        public bool Restart() => false;
+    }
+
     /// <summary>
     /// One launch, over recording doubles: which steps exist, what each answers, and what this computer's
     /// configuration says.
@@ -238,7 +244,8 @@ public sealed class MachineSetupNoBypassTests
             Machine,
             Person,
             _configuration,
-            PendingSignIn);
+            PendingSignIn,
+            new NoRestart());
 
         /// <summary>Adds a step that answers with one outcome.</summary>
         public LaunchRun With(string stepId, LaunchStepOutcome answer)

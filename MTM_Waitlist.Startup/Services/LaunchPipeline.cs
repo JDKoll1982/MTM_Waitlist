@@ -1,4 +1,5 @@
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Startup.Models;
 
@@ -29,6 +30,14 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// a retry after machine setup resumes at the save (FR-020).
 /// </para>
 /// <para>
+/// <b>A new PIN is where this process stops and the application starts again.</b> The step that writes the new
+/// credential leaves this process holding an identity that was accepted on the credential it has just replaced,
+/// so the launch does not carry on over it: a replacement instance is started and this launch ends, which puts
+/// the person back at the sign-in form with the PIN they chose now the one in use (FR-013, FR-008). This is the
+/// same rule the sign-out and the stopped launch's repeat follow, and for the same reason — the work that
+/// follows belongs to a process that was started on what the store now holds.
+/// </para>
+/// <para>
 /// <b>One machine, one launch.</b> A second entry while a sequence is running starts nothing and answers the run
 /// already under way, so a re-entrant navigation cannot put two pipelines against one machine.
 /// </para>
@@ -46,6 +55,12 @@ internal sealed class LaunchPipeline : ILaunchPipeline
     /// <summary>The step that hands the launch over, which the launch itself performs.</summary>
     private const string ShellStepId = "shell";
 
+    /// <summary>The step that replaces a temporary credential, after which this process starts again (FR-013).</summary>
+    private const string SetNewPasswordStepId = "set-new-password";
+
+    /// <summary>The area this launch's own lines are recorded under.</summary>
+    private const string LogModule = "Launch";
+
     /// <summary>The step whose verdict decides whether this machine is configured (FR-006).</summary>
     private const string MachineReadinessStepId = "read-machine-configuration";
 
@@ -56,6 +71,7 @@ internal sealed class LaunchPipeline : ILaunchPipeline
     private readonly PersonIdentityService _person;
     private readonly IMachineConfigurationService _configuration;
     private readonly IPendingSignIn _pendingSignIn;
+    private readonly IProcessRestarter _restarter;
     private readonly Dictionary<string, ILaunchStep> _steps;
     private readonly object _gate = new();
 
@@ -70,6 +86,10 @@ internal sealed class LaunchPipeline : ILaunchPipeline
     /// <param name="person">The one writer of who is signed in (FR-022).</param>
     /// <param name="configuration">This machine's configuration, read for the routing decision (FR-006).</param>
     /// <param name="pendingSignIn">What the launch holds to present, read for the routing decision (FR-014).</param>
+    /// <param name="restarter">
+    /// The restart seam, used once: after a new credential has been written, so a launch that replaced a
+    /// temporary PIN ends here and the application comes back on the new one (FR-013).
+    /// </param>
     public LaunchPipeline(
         LaunchStepCatalog catalog,
         LaunchStepRunner runner,
@@ -78,7 +98,8 @@ internal sealed class LaunchPipeline : ILaunchPipeline
         IMachineFacts machine,
         PersonIdentityService person,
         IMachineConfigurationService configuration,
-        IPendingSignIn pendingSignIn)
+        IPendingSignIn pendingSignIn,
+        IProcessRestarter restarter)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(runner);
@@ -88,6 +109,7 @@ internal sealed class LaunchPipeline : ILaunchPipeline
         ArgumentNullException.ThrowIfNull(person);
         ArgumentNullException.ThrowIfNull(configuration);
         ArgumentNullException.ThrowIfNull(pendingSignIn);
+        ArgumentNullException.ThrowIfNull(restarter);
 
         _catalog = catalog;
         _runner = runner;
@@ -96,6 +118,7 @@ internal sealed class LaunchPipeline : ILaunchPipeline
         _person = person;
         _configuration = configuration;
         _pendingSignIn = pendingSignIn;
+        _restarter = restarter;
 
         _steps = new Dictionary<string, ILaunchStep>(StringComparer.Ordinal);
 
@@ -230,6 +253,17 @@ internal sealed class LaunchPipeline : ILaunchPipeline
                 return HandOver(LaunchOutcome.Blocked);
             }
 
+            // A new PIN replaces the credential this process signed in with, and the identity this process holds
+            // was accepted on the credential that has just been replaced. So this launch does not carry on over
+            // it: the application is started again and the person signs in with the PIN they chose (FR-013). The
+            // reason goes through the ending route, which is what states it before the process goes (FR-008).
+            if (string.Equals(descriptor.Id, SetNewPasswordStepId, StringComparison.Ordinal)
+                && outcome.Status is LaunchStepStatus.Succeeded
+                && StartAgainAfterTheNewPin())
+            {
+                return End("The new PIN has been set, so the application is starting again on it.");
+            }
+
             if (string.Equals(descriptor.Id, MachineReadinessStepId, StringComparison.Ordinal))
             {
                 var state = await ReadConfigurationStateAsync(descriptor, cancellationToken).ConfigureAwait(false);
@@ -275,6 +309,54 @@ internal sealed class LaunchPipeline : ILaunchPipeline
         ShellReady?.Invoke(this, outcome);
 
         return outcome;
+    }
+
+    /// <summary>
+    /// Starts a fresh copy of the application after a new PIN has been written, and answers whether one is on
+    /// its way.
+    /// </summary>
+    /// <returns>Whether a replacement instance was started, which is what lets this process go.</returns>
+    /// <remarks>
+    /// <b>A restart that did not happen leaves the person where they are.</b> The rule the sign-out and the
+    /// stopped launch's repeat both follow: nothing is taken away until its replacement exists. A relaunch that
+    /// could not be started is recorded and <c>false</c> is answered, so the launch carries on to the main
+    /// screens and the person is left with a working application on the PIN they just chose rather than with no
+    /// application at all. The credential is in the store either way, so what is lost is the convenience of the
+    /// restart, not the new PIN.
+    /// </remarks>
+    private bool StartAgainAfterTheNewPin()
+    {
+        bool started;
+
+        try
+        {
+            started = _restarter.Restart();
+        }
+        catch (Exception exception)
+        {
+            AppLog.Error(
+                LogModule,
+                exception,
+                "The application could not be started again after the new PIN was set, so this launch is carrying on.");
+
+            return false;
+        }
+
+        if (!started)
+        {
+            AppLog.Error(
+                LogModule,
+                new InvalidOperationException("The application could not be started again."),
+                "The application could not be started again after the new PIN was set, so this launch is carrying on.");
+
+            return false;
+        }
+
+        AppLog.Info(
+            LogModule,
+            "The new PIN has been set, so the application is starting again on it and this launch is ending.");
+
+        return true;
     }
 
     /// <summary>

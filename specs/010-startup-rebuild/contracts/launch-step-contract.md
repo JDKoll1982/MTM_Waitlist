@@ -218,6 +218,10 @@ Rules:
 - A second entry into the launch surface while a sequence is running returns without starting anything, so a
   re-entrant navigation cannot run two pipelines against one machine.
 - The pipeline, not the screen, refuses to continue while the machine is unconfigured (FR-006, S10.1).
+- A launch that has just written a new PIN does not carry on over the credential it signed in on: the pipeline
+  starts a replacement instance and ends the launch, so the person comes back to the sign-in form with the PIN
+  they chose now the one in use (FR-013). A relaunch that could not be started leaves the running application in
+  place — the sign-out's own rule, that nothing goes until its replacement exists — rather than ending it.
 - `ProcessEnding` carries the reason, and the reason is stated before the process goes, so an abort does not
   read as a crash (FR-008).
 

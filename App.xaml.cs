@@ -29,6 +29,9 @@ public partial class App : Application
     /// <summary>How many faults this process has written down, so a fault inside a loop cannot fill the disk.</summary>
     private static int s_recordedFaults;
 
+    /// <summary>Whether the process has already been asked to end, so an ending is asked for and performed once.</summary>
+    private static int s_exitRequested;
+
     /// <summary>The most fault records one process writes, which is far more than any single fault needs.</summary>
     private const int MaximumRecordedFaults = 25;
 
@@ -66,24 +69,61 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Ends the process from whatever thread the caller is on.
+    /// Ends the process from whatever thread the caller is on, once the store has received the reason.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// <c>Application.Exit()</c> must run on the UI thread. Signing out reaches this after an await that
     /// deliberately does not return to the UI thread, so calling <c>Exit()</c> directly left the signed-in
     /// window open beside the replacement instance the sign-out had already launched.
+    /// </para>
+    /// <para>
+    /// <b>Until 2026-10-01 the reason the process was going never reached the store.</b> A log entry returns as
+    /// soon as it is queued and <c>Exit()</c> takes the queue with it, so an ending that was asked for one line
+    /// after the reason was stated left the store holding everything except that line. That is what both runs of
+    /// that day look like: a launch that stops mid-step, this process's connections dropped a moment later, and
+    /// no account anywhere of who ended it or why — which is indistinguishable from the silent stop FR-004 and
+    /// FR-008 forbid. The ending therefore states itself durably and waits, within the log seam's own bound, for
+    /// that statement to land before the process goes.
+    /// </para>
     /// </remarks>
     public static void ExitApplication()
     {
-        var dispatcher = _uiDispatcher;
-
-        if (dispatcher is null || dispatcher.HasThreadAccess)
+        // Asked once. A second request is a route that has already been answered, and ending twice would take a
+        // second pass through the flush for nothing.
+        if (Interlocked.Exchange(ref s_exitRequested, 1) == 1)
         {
-            Current.Exit();
             return;
         }
 
-        _ = dispatcher.TryEnqueue(() => Current.Exit());
+        AppLog.Info(
+            "App",
+            "The process is ending: the lines already raised, including the reason, are being written to the store first.");
+
+        _ = LeaveAsync();
+    }
+
+    /// <summary>
+    /// Waits, within the log seam's own bound, for the lines already raised to reach the store, and then ends the
+    /// process.
+    /// </summary>
+    private static async Task LeaveAsync()
+    {
+        try
+        {
+            if ((Current as App)?.Host.Services.GetService<ILogService>() is { } log)
+            {
+                await log.FlushAsync(CancellationToken.None).ConfigureAwait(false);
+            }
+        }
+        catch (Exception exception)
+        {
+            // A store that will not take the reason is not a reason to stay: the process was asked to end, so it
+            // ends, with the failure recorded the only way left to record it.
+            AppLog.Error("App", exception, "The lines raised before the process ended could not be written to the store.");
+        }
+
+        RunOnUiThread(() => Current.Exit());
     }
 
     public App()
@@ -138,6 +178,15 @@ public partial class App : Application
 
         UnhandledException += App_UnhandledException;
         AppLog.Info("App", "UnhandledException handler registered.");
+
+        // A fault on a thread that is not the interface thread never reaches UnhandledException, and it ends the
+        // process just the same. On 2026-10-01 a sign-in that changed a temporary credential reached the main
+        // screens and the process went half a second later: the store held its last successful line, the store
+        // host recorded the pooled connections being dropped, and there was no fault record anywhere, because
+        // this route had none. It gets the same record as the interface thread's, since that record is the only
+        // one that outlives the process it describes.
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        AppLog.Info("App", "Background-thread fault handler registered.");
 
     #if DEBUG
         AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
@@ -540,6 +589,34 @@ public partial class App : Application
         }
 
         RecordFault("Unhandled", e.Exception is null ? e.Message : e.Exception.ToString());
+    }
+
+    /// <summary>
+    /// Records a fault raised on a thread that is not the interface thread, which is about to end the process.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>This is the route a launch dies on without a word.</b> Every fault raised on the interface thread reaches
+    /// <see cref="App_UnhandledException"/>; a fault raised anywhere else — a hosted service, a task the launch
+    /// does not await, a store callback — ends the process through this one instead, and the store log cannot
+    /// account for it because the queue is flushed by a thread that is going away with it. The record written here
+    /// is the only account of that death, so it is written before the process goes.
+    /// </para>
+    /// <para>
+    /// The fault is not handled, and it cannot be: the process is already ending. Nothing is swallowed here either,
+    /// so the runtime still reports what it reported before this handler existed.
+    /// </para>
+    /// </remarks>
+    private static void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
+    {
+        var fault = e.ExceptionObject?.ToString() ?? "<the runtime supplied no exception object>";
+
+        AppLog.Error(
+            "UnhandledException",
+            e.ExceptionObject as Exception,
+            $"A fault on a thread that is not the interface thread is ending the process. Terminating={e.IsTerminating}.");
+
+        RecordFault("Unhandled (background thread)", $"Terminating={e.IsTerminating}{Environment.NewLine}{fault}");
     }
 
     /// <summary>Writes a fault to a file that outlives the process that recorded it.</summary>

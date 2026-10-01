@@ -45,6 +45,10 @@ public sealed partial class SignInWindow : WindowEx
 
         Title = ViewModel.HeadingText;
 
+        // The surface opens in the middle of the display it is on, so a person looking at either screen finds it
+        // where they are looking.
+        WindowStartupPlacement.CentreOnScreen(this, "SignIn");
+
         ViewModel.SignInAccepted += OnAccepted;
         PasswordChange.PasswordChosen += OnAccepted;
 

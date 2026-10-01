@@ -47,6 +47,10 @@ public sealed partial class BlockedStateWindow : WindowEx
 
         Title = ViewModel.HeadingText;
 
+        // The surface opens in the middle of the display it is on, so a person looking at either screen finds it
+        // where they are looking.
+        WindowStartupPlacement.CentreOnScreen(this, "BlockedState");
+
         // The close box and Alt+F4 raise this one, and it funnels into the same stated ending the surface's own
         // close control reaches, so no route out leaves the person without a reason (FR-008).
         AppWindow.Closing += OnWindowClosing;

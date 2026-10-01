@@ -11,6 +11,10 @@
         A splash screen reads top to bottom: the mark, then how far along the launch is, then the one line stating
         the work under way, then anything the person may act on.
 
+        The whole stack is centred on the window rather than anchored to its top: the surface is watched for a
+        handful of seconds while a launch runs, and a short stack pinned to the top of an otherwise empty window
+        reads as a window that is still loading rather than as a launch under way.
+
         Row 1 is the logo. Row 2 is the progress bar and the count beneath it, and the bar turns into a travelling
         one while the step under way is reaching for something outside this computer — a store, a share, the
         external system — because those are the waits with no proportion to report and a bar that sits still
@@ -22,7 +26,7 @@
         The error strip is its own row rather than something laid over the line above it, so a stated cause never
         covers what a person is reading (FR-005).
     -->
-    <Grid Padding="32,28" RowSpacing="16">
+    <Grid Padding="32,28" RowSpacing="16" VerticalAlignment="Center">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />

@@ -26,6 +26,7 @@ public sealed class LaunchPipelineRetryTests
     private const string ReachabilityStepId = "store-reachability";
     private const string ReadinessStepId = "read-machine-configuration";
     private const string SignInStepId = "resolve-person";
+    private const string NewPinStepId = "set-new-password";
 
     [TestMethod]
     public async Task RunAsync_WhenAStepFails_EndsBlocked() 
@@ -157,6 +158,46 @@ public sealed class LaunchPipelineRetryTests
         Assert.AreEqual("The person closed this computer's setup.", stated);
     }
 
+    [TestMethod]
+    public async Task RunAsync_WhenTheNewPinHasBeenSet_StartsTheApplicationAgainAndEndsTheLaunch()
+    {
+        // Arrange: the machine is configured, the person is signed in, and the step that replaces a temporary
+        // credential reports that the store took the PIN the person chose.
+        var run = new LaunchRun().With(ReadinessStepId, Succeeded()).With(NewPinStepId, Succeeded()).SignedIn();
+        string? stated = null;
+        run.Pipeline.ProcessEnding += (_, reason) => stated = reason;
+
+        // Act
+        var outcome = await run.Pipeline.RunAsync(CancellationToken.None);
+
+        // Assert: the launch does not carry on over the credential it signed in on, so the application is
+        // started again and this instance states why it is going (FR-013, FR-008).
+        Assert.AreEqual(LaunchOutcome.Ended, outcome);
+        Assert.AreEqual(1, run.Restarter.Restarts, "the new PIN is only the one in use once the application is started again");
+        StringAssert.Contains(stated ?? string.Empty, "new PIN");
+    }
+
+    [TestMethod]
+    public async Task RunAsync_WhenTheApplicationCouldNotBeStartedAgain_CarriesOnToTheMainScreens()
+    {
+        // Arrange: the relaunch cannot happen, so nothing may be taken away from the person.
+        var run = new LaunchRun().With(ReadinessStepId, Succeeded()).With(NewPinStepId, Succeeded()).SignedIn();
+        run.Restarter.Starts = () => false;
+
+        LaunchOutcome? handed = null;
+        run.Pipeline.ShellReady += (_, outcome) => handed = outcome;
+
+        // Act
+        var outcome = await run.Pipeline.RunAsync(CancellationToken.None);
+
+        // Assert: the person keeps the application they are already in, on the PIN they just set — the rule the
+        // sign-out follows for a relaunch that could not be performed, which is that nothing goes until its
+        // replacement exists.
+        Assert.AreEqual(LaunchOutcome.MainScreens, outcome);
+        Assert.AreEqual(LaunchOutcome.MainScreens, handed);
+        Assert.AreEqual(1, run.Restarter.Restarts);
+    }
+
     /// <summary>The outcome a step answers with, in the shapes a test needs.</summary>
     private static LaunchStepOutcome Succeeded() => new(LaunchStepStatus.Succeeded, null, LaunchRemedySet.None);
 
@@ -184,6 +225,9 @@ public sealed class LaunchPipelineRetryTests
 
         public PendingSignIn PendingSignIn { get; } = new();
 
+        /// <summary>How a replacement instance is started, which a test may refuse before the launch runs.</summary>
+        public RecordingProcessRestarter Restarter { get; } = new();
+
         /// <summary>
         /// The launch under test. Built on first use rather than in the constructor, because the pipeline takes
         /// the steps it will walk once and a step added afterwards would never be seen.
@@ -196,7 +240,8 @@ public sealed class LaunchPipelineRetryTests
             Machine,
             Person,
             _configuration,
-            PendingSignIn);
+            PendingSignIn,
+            Restarter);
 
         /// <summary>The step ids that ran, in the order they ran.</summary>
         public List<string> Ran { get; } = [];
@@ -234,6 +279,23 @@ public sealed class LaunchPipelineRetryTests
             PendingSignIn.Hold("JKoll", "a-secret-the-test-owns");
 
             return this;
+        }
+    }
+
+    /// <summary>How a replacement instance is started, recording every attempt and answering what it was told to.</summary>
+    private sealed class RecordingProcessRestarter : IProcessRestarter
+    {
+        /// <summary>What a relaunch attempt does, which a test states before the launch runs.</summary>
+        public Func<bool> Starts { get; set; } = () => true;
+
+        /// <summary>How many times a replacement instance was asked for.</summary>
+        public int Restarts { get; private set; }
+
+        public bool Restart()
+        {
+            Restarts++;
+
+            return Starts();
         }
     }
 

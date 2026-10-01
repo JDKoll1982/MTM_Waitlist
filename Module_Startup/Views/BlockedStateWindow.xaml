@@ -5,11 +5,18 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:windowex="using:WinUIEx"
-    MinWidth="520"
-    MinHeight="420"
+    Width="480"
+    Height="420"
+    MinWidth="440"
+    MinHeight="380"
     mc:Ignorable="d">
 
     <!--
+        The size is the smallest this surface reads at rather than a dialog's default, and it opens there: the
+        heading, the cause the launch wrote, the message strip and the action row are all held at once, and the
+        restore preview is the only content that can grow past it. A wider window would put three short buttons
+        and a two-sentence diagnosis across a screen's worth of empty space.
+
         Four rows, and the cause is its own row rather than something laid over anything else: the person reads
         what stopped the launch and then chooses from the actions beneath it, which never cover the words that
         explain them (FR-005's rule, applied here). The restore control is drawn only when a reset could remove

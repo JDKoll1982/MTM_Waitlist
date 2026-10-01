@@ -62,6 +62,10 @@ public sealed partial class MachineSetupWindow : WindowEx
 
         Title = ViewModel.TitleText;
 
+        // The surface opens in the middle of the display it is on, so a person looking at either screen finds it
+        // where they are looking.
+        WindowStartupPlacement.CentreOnScreen(this, "MachineSetup");
+
         // The close box and Alt+F4 raise this one. Alt+F4 also has an accelerator of its own, so a route that
         // arrives here is the window's own close affordance and says so.
         AppWindow.Closing += OnWindowClosing;
