@@ -1066,7 +1066,7 @@
     <value>User name</value>
   </data>
   <data name="Startup_SignIn.CredentialLabel" xml:space="preserve">
-    <value>Password</value>
+    <value>PIN</value>
   </data>
   <data name="Startup_SignIn.RememberMeLabel" xml:space="preserve">
     <value>Remember me on this computer</value>
@@ -1081,46 +1081,46 @@
     <value>Type your user name.</value>
   </data>
   <data name="Startup_SignIn.HintCredentialRequired" xml:space="preserve">
-    <value>Now type your password.</value>
+    <value>Now type your PIN.</value>
   </data>
   <data name="Startup_SignIn.RefusedSignInRequired" xml:space="preserve">
-    <value>Type your user name and your password.</value>
+    <value>Type your user name and your PIN.</value>
   </data>
   <data name="Startup_SignIn.RefusedCredential" xml:space="preserve">
-    <value>That user name and password do not match an account. Check both and try again.</value>
+    <value>That user name and PIN do not match an account. Check both and try again.</value>
   </data>
   <data name="Startup_SignIn.RefusedAttemptsExhausted" xml:space="preserve">
-    <value>This account's temporary password has been refused five times, so it is refused until a new password is set. Ask an administrator to issue a new temporary password.</value>
+    <value>This account's temporary PIN has been refused five times, so it is refused until a new PIN is set. Ask an administrator to issue a new temporary PIN.</value>
   </data>
   <data name="Startup_SignIn.RefusedStoreUnreadable" xml:space="preserve">
     <value>The store could not be reached, so the sign-in could not be confirmed. Try again shortly.</value>
   </data>
   <data name="Startup_SignIn.RememberedUnavailable" xml:space="preserve">
-    <value>This computer has not remembered an account it can sign in with. Type your user name and password.</value>
+    <value>This computer has not remembered an account it can sign in with. Type your user name and PIN.</value>
   </data>
   <data name="Startup_PasswordChange.Heading" xml:space="preserve">
-    <value>Choose a new password</value>
+    <value>Choose a new PIN</value>
   </data>
   <data name="Startup_PasswordChange.Explanation" xml:space="preserve">
-    <value>You signed in with a temporary password, so choose a password of your own before anything else.</value>
+    <value>You signed in with a temporary PIN, so choose a PIN of your own before anything else.</value>
   </data>
   <data name="Startup_PasswordChange.PasswordLabel" xml:space="preserve">
-    <value>New password</value>
+    <value>New PIN</value>
   </data>
   <data name="Startup_PasswordChange.ConfirmationLabel" xml:space="preserve">
-    <value>Type the new password again</value>
+    <value>Type the new PIN again</value>
   </data>
   <data name="Startup_PasswordChange.SubmitAction" xml:space="preserve">
-    <value>Set the new password</value>
+    <value>Set the new PIN</value>
   </data>
   <data name="Startup_PasswordChange.PasswordRequired" xml:space="preserve">
-    <value>Type the new password before setting it.</value>
+    <value>Type the new PIN before setting it.</value>
   </data>
   <data name="Startup_PasswordChange.PasswordTooShort" xml:space="preserve">
-    <value>The new password must be at least eight characters.</value>
+    <value>The new PIN must be at least four characters.</value>
   </data>
   <data name="Startup_PasswordChange.ConfirmationMismatch" xml:space="preserve">
-    <value>The two passwords are not the same. Type them again.</value>
+    <value>The two PINs are not the same. Type them again.</value>
   </data>
   <data name="Startup_MachineSetup.Title" xml:space="preserve">
     <value>Set up this computer</value>
@@ -1138,10 +1138,10 @@
     <value>The user name of a Developer or Admin account</value>
   </data>
   <data name="Startup_MachineSetup.CredentialLabel" xml:space="preserve">
-    <value>Password</value>
+    <value>PIN</value>
   </data>
   <data name="Startup_MachineSetup.CredentialHint" xml:space="preserve">
-    <value>That account's password</value>
+    <value>That account's PIN</value>
   </data>
   <data name="Startup_MachineSetup.SignInAction" xml:space="preserve">
     <value>Sign in and unlock setup</value>
@@ -1183,10 +1183,10 @@
     <value>Sign in with a Developer or Admin account to set this computer up.</value>
   </data>
   <data name="Startup_MachineSetup.RefusedSignInRequired" xml:space="preserve">
-    <value>Type a Developer or Admin user name and password before unlocking setup.</value>
+    <value>Type a Developer or Admin user name and PIN before unlocking setup.</value>
   </data>
   <data name="Startup_MachineSetup.RefusedCredential" xml:space="preserve">
-    <value>That user name and password do not match an account. Check both and try again.</value>
+    <value>That user name and PIN do not match an account. Check both and try again.</value>
   </data>
   <data name="Startup_MachineSetup.RefusedNotPermitted" xml:space="preserve">
     <value>That account is not allowed to set up computers. Use an account with Developer or IT Department authority.</value>
@@ -1439,10 +1439,10 @@
     <value>Open the user list, and create, correct or switch off a person.</value>
   </data>
   <data name="Permission_admin_reset_password.Label" xml:space="preserve">
-    <value>Reset a password</value>
+    <value>Reset a PIN</value>
   </data>
   <data name="Permission_admin_reset_password.Gates" xml:space="preserve">
-    <value>Issue a new temporary password for a person.</value>
+    <value>Issue a new temporary PIN for a person.</value>
   </data>
   <data name="Permission_admin_permissions.Label" xml:space="preserve">
     <value>Manage permissions</value>
@@ -1596,7 +1596,7 @@
     <value>Saved.</value>
   </data>
   <data name="UserManagement_Outcome.CredentialIssued" xml:space="preserve">
-    <value>Saved. Hand the sign-in details over now: this credential is shown once.</value>
+    <value>Saved. Hand the sign-in details over now: this PIN is shown once.</value>
   </data>
   <data name="UserManagement_Outcome.InvalidInput" xml:space="preserve">
     <value>Check the details you entered and try again.</value>
@@ -1697,7 +1697,7 @@
     <value>Discard changes</value>
   </data>
   <data name="EditUser_ResetPassword.Label" xml:space="preserve">
-    <value>Reset password</value>
+    <value>Reset PIN</value>
   </data>
   <data name="EditUser_Deactivate.Label" xml:space="preserve">
     <value>Deactivate</value>
@@ -1727,17 +1727,17 @@
     <value>This is the account you are signed in as, so its sign-in name cannot be changed.</value>
   </data>
   <data name="EditUser_SelfReset.Unavailable" xml:space="preserve">
-    <value>This is the account you are signed in as, so its password cannot be reset here. Use the sign-in screen to change your own password.</value>
+    <value>This is the account you are signed in as, so its PIN cannot be reset here. Use the sign-in screen to change your own PIN.</value>
   </data>
   <data name="EditUser_ResetConfirmation.Text" xml:space="preserve">
-    <value>A new temporary password will be issued and shown once. The person must change it at their next sign-in.</value>
+    <value>A new temporary PIN will be issued and shown once. The person must change it at their next sign-in.</value>
   </data>
   <data name="EditUser_Back.Label" xml:space="preserve">
     <value>Back to the user list</value>
   </data>
   <!-- The one-time PIN window. -->
   <data name="PinReveal_Title.Title" xml:space="preserve">
-    <value>One-time password</value>
+    <value>One-time PIN</value>
   </data>
   <data name="PinReveal_Person.Label" xml:space="preserve">
     <value>For</value>
@@ -1746,7 +1746,7 @@
     <value>Sign-in name</value>
   </data>
   <data name="PinReveal_Credential.Label" xml:space="preserve">
-    <value>Temporary password</value>
+    <value>Temporary PIN</value>
   </data>
   <data name="PinReveal_IssuedAt.Label" xml:space="preserve">
     <value>Issued</value>
@@ -1755,22 +1755,22 @@
     <value>Issued by</value>
   </data>
   <data name="PinReveal_Instruction.Text" xml:space="preserve">
-    <value>Hand this over to the person now and do not keep a copy. They must set their own password at first sign-in.</value>
+    <value>Hand this over to the person now and do not keep a copy. They must set their own PIN at first sign-in.</value>
   </data>
   <data name="PinReveal_SecondReset.Text" xml:space="preserve">
-    <value>A second reset replaces this password, and this one stops working.</value>
+    <value>A second reset replaces this PIN, and this one stops working.</value>
   </data>
   <data name="PinReveal_Print.Label" xml:space="preserve">
     <value>Print</value>
   </data>
   <data name="PinReveal_PrintFailed.Text" xml:space="preserve">
-    <value>Printing did not start. The password is still shown, so you can write it down.</value>
+    <value>Printing did not start. The PIN is still shown, so you can write it down.</value>
   </data>
   <data name="PinReveal_Close.Label" xml:space="preserve">
     <value>Close</value>
   </data>
   <data name="PinReveal_MustCloseDeliberately.Text" xml:space="preserve">
-    <value>Close this window only when you have handed the password over.</value>
+    <value>Close this window only when you have handed the PIN over.</value>
   </data>
   <!-- The permissions page and the who-holds-this view. -->
   <data name="Permissions_Title.Title" xml:space="preserve">

@@ -345,7 +345,7 @@ internal sealed class CheckCredentialStep : ILaunchStep
             return new LaunchStepOutcome(
                 LaunchStepStatus.Succeeded,
                 check.RequiresNewPassword
-                    ? "The credential was accepted, and the account is still on a temporary credential so a new password is needed."
+                    ? "The credential was accepted, and the account is still on a temporary credential so a new PIN is needed."
                     : "The credential was accepted against the store.",
                 LaunchRemedySet.None);
         }
@@ -358,7 +358,7 @@ internal sealed class CheckCredentialStep : ILaunchStep
                     "No sign-in name or no credential was given, so nothing could be confirmed.",
                 CredentialCheckRefusals.AttemptsExhausted =>
                     $"This account's temporary credential has already been refused {CredentialCheckService.MaximumTemporaryCredentialAttempts} times, "
-                    + "so it is refused until a new password is set.",
+                    + "so it is refused until a new PIN is set.",
                 CredentialCheckRefusals.StoreUnreadable =>
                     "The store could not be asked, so the credential was not confirmed.",
                 _ => "The sign-in name and the credential were not a pair the store holds.",
@@ -568,11 +568,11 @@ internal sealed class CheckTemporaryCredentialStep : ILaunchStep
         return Task.FromResult(_outcome.RequiresNewPassword
             ? new LaunchStepOutcome(
                 LaunchStepStatus.Succeeded,
-                "The account is still on a temporary credential, so a new password must be set before anything else (FR-013).",
+                "The account is still on a temporary credential, so a new PIN must be set before anything else (FR-013).",
                 LaunchRemedySet.None)
             : new LaunchStepOutcome(
                 LaunchStepStatus.Succeeded,
-                "The account is on an ordinary credential, so no new password is needed.",
+                "The account is on an ordinary credential, so no new PIN is needed.",
                 LaunchRemedySet.None));
     }
 }
@@ -634,7 +634,7 @@ internal sealed class SetNewPasswordStep : ILaunchStep
         {
             return Task.FromResult(new LaunchStepOutcome(
                 LaunchStepStatus.Failed,
-                "No accepted sign-in is held, so no password could be set.",
+                "No accepted sign-in is held, so no PIN could be set.",
                 LaunchRemedySet.RetryOnly));
         }
 
@@ -642,7 +642,7 @@ internal sealed class SetNewPasswordStep : ILaunchStep
         {
             return Task.FromResult(new LaunchStepOutcome(
                 LaunchStepStatus.Skipped,
-                "The account is not on a temporary credential and no new password was chosen, so there is nothing to set.",
+                "The account is not on a temporary credential and no new PIN was chosen, so there is nothing to set.",
                 LaunchRemedySet.None));
         }
 
@@ -654,12 +654,12 @@ internal sealed class SetNewPasswordStep : ILaunchStep
             // something to guess at. Reported as a failed step so the stop names this line (FR-004, FR-013).
             return Task.FromResult(new LaunchStepOutcome(
                 LaunchStepStatus.Failed,
-                "A new password is required for this account and none has been chosen yet.",
+                "A new PIN is required for this account and none has been chosen yet.",
                 LaunchRemedySet.RetryOnly));
         }
 
         return LaunchStepSupport.RunGuardedAsync(
-            "The new password could not be set",
+            "The new PIN could not be set",
             async token =>
             {
                 var salt = PasswordSecretHasher.NewSalt();
@@ -696,13 +696,13 @@ internal sealed class SetNewPasswordStep : ILaunchStep
                     // they had replaced it.
                     return new LaunchStepOutcome(
                         LaunchStepStatus.Failed,
-                        "The store accepted no password change for this account, so it is still on the temporary credential.",
+                        "The store accepted no PIN change for this account, so it is still on the temporary credential.",
                         LaunchRemedySet.RetryOnly);
                 }
 
                 return new LaunchStepOutcome(
                     LaunchStepStatus.Succeeded,
-                    "The new password has been set, and the account is no longer on a temporary credential.",
+                    "The new PIN has been set, and the account is no longer on a temporary credential.",
                     LaunchRemedySet.None);
             },
             cancellationToken);

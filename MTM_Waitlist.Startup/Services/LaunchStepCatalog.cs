@@ -153,7 +153,7 @@ public sealed class LaunchStepCatalog
             "the store"),
         new(
             "check-temporary-credential",
-            "Checking whether a new password is needed",
+            "Checking whether a new PIN is needed",
             "Checks whether the account is still on a temporary credential.",
             LaunchStepCategory.Session,
             TimeSpan.FromSeconds(15),
@@ -161,7 +161,7 @@ public sealed class LaunchStepCatalog
             "the store"),
         new(
             "set-new-password",
-            "Setting a new password",
+            "Setting a new PIN",
             "Replaces a temporary credential before the person carries on.",
             LaunchStepCategory.Session,
             Ceiling,

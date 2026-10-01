@@ -116,7 +116,7 @@ internal sealed class ReadRememberedSignInStep : ILaunchStep
         // without asking (FR-014).
         return Task.FromResult(new LaunchStepOutcome(
             LaunchStepStatus.Skipped,
-            "No remembered sign-in is read yet, so the sign-in form will ask for the name and the password.",
+            "No remembered sign-in is read yet, so the sign-in form will ask for the name and the PIN.",
             LaunchRemedySet.None));
     }
 }

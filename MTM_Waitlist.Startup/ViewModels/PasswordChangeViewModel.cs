@@ -30,10 +30,15 @@ namespace MTM_Waitlist.Module_Startup.ViewModels;
 internal sealed partial class PasswordChangeViewModel : ObservableObject
 {
     /// <summary>
-    /// How few characters a new password may have before this screen refuses it. It is a floor rather than a
-    /// policy: the store's own rules, if there are any, are the store's.
+    /// How few characters a new PIN may have before this screen refuses it. It is a floor rather than a policy:
+    /// the store's own rules, if there are any, are the store's.
     /// </summary>
-    internal const int MinimumPasswordLength = 8;
+    /// <remarks>
+    /// <b>Four, and deliberately no ceiling.</b> What is chosen here is a shop-floor PIN, so the floor is the
+    /// shortest value a person can be asked to remember rather than a password policy, and there is no upper
+    /// bound: a person who chooses something longer than a PIN is not refused for it.
+    /// </remarks>
+    internal const int MinimumPasswordLength = 4;
 
     private readonly ISignInOutcome _outcome;
 

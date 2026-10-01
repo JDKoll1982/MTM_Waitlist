@@ -52,8 +52,8 @@ public static class UserManagementMessages
     /// <summary>The shipped sentence for a completed write.</summary>
     public const string Succeeded = "Saved.";
 
-    /// <summary>The shipped sentence for a create or a reset that issued a credential.</summary>
-    public const string CredentialIssued = "Saved. Hand the sign-in details over now: this credential is shown once.";
+    /// <summary>The shipped sentence for a create or a reset that issued a PIN.</summary>
+    public const string CredentialIssued = "Saved. Hand the sign-in details over now: this PIN is shown once.";
 
     /// <summary>The shipped sentence for fields that break a rule.</summary>
     public const string InvalidInput = "Check the details you entered and try again.";
