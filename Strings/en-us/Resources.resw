@@ -1260,6 +1260,9 @@
   <data name="Startup_BlockedState.ResetFailed" xml:space="preserve">
     <value>The store could not be reached to restore this computer's defaults, so nothing was changed. Try again shortly.</value>
   </data>
+  <data name="Startup_BlockedState.RestartFailed" xml:space="preserve">
+    <value>The application could not be started again, so it is still stopped. Try again, or close it and open it again.</value>
+  </data>
   <data name="Startup_BlockedState.PartDisplayName" xml:space="preserve">
     <value>what this computer is called</value>
   </data>

@@ -94,9 +94,9 @@ public sealed partial class BlockedStateWindow : WindowEx
         Activate();
     }
 
-    /// <summary>Repeats the failed piece and the steps after it, and nothing before it (FR-016, FR-020).</summary>
-    private async void OnRetryClick(object sender, RoutedEventArgs e)
-        => await ViewModel.RetryCommand.ExecuteAsync(null);
+    /// <summary>Starts the application again, which is how the failed work is repeated (FR-016).</summary>
+    private void OnRetryClick(object sender, RoutedEventArgs e)
+        => ViewModel.RetryCommand.Execute(null);
 
     /// <summary>
     /// Shows exactly what a reset will touch and resets only if the person agrees to that list (FR-018).

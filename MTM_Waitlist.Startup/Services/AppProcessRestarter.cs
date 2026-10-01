@@ -10,9 +10,10 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// </summary>
 /// <remarks>
 /// <para>
-/// It exists so the relaunch is a seam: signing out has to relaunch the process, and a process that relaunches
-/// itself cannot be observed by a test that is running inside it. The one production implementation starts the
-/// executable through <see cref="Environment.ProcessPath"/>, including the <c>dotnet</c>-hosted case.
+/// It exists so the relaunch is a seam: signing out has to relaunch the process, and a stopped launch repeats its
+/// failed work by starting the application again rather than by resuming a half-run sequence. A process that
+/// relaunches itself cannot be observed by a test that is running inside it, so the one production implementation
+/// starts the executable through <see cref="Environment.ProcessPath"/>, including the <c>dotnet</c>-hosted case.
 /// </para>
 /// <para>
 /// It replaces <c>IAppProcessRestarter</c>, which lived in the core contracts beside the retired sign-out
@@ -47,7 +48,7 @@ public sealed class AppProcessRestarter : IProcessRestarter
             AppLog.Error(
                 "AppProcessRestarter",
                 new InvalidOperationException("The current process path is unavailable."),
-                "Signing out could not relaunch the application: the current process path is unavailable.");
+                "The application could not be started again: the current process path is unavailable.");
             return false;
         }
 
@@ -64,7 +65,7 @@ public sealed class AppProcessRestarter : IProcessRestarter
                 AppLog.Error(
                     "AppProcessRestarter",
                     new InvalidOperationException("The application assembly path is unavailable."),
-                    "Signing out could not relaunch the application: the application assembly path is unavailable.");
+                    "The application could not be started again: the application assembly path is unavailable.");
                 return false;
             }
 

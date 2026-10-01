@@ -9,14 +9,14 @@ using MTM_Waitlist.Module_Startup.ViewModels;
 namespace MTM_Waitlist.Tests.Module_Startup.ViewModels;
 
 /// <summary>
-/// The stopped launch's state (`contracts/launch-step-contract.md` §4, §5; FR-004, FR-016, FR-017, FR-019,
-/// FR-020): the cause is the failing line's own words, a repeat repeats only the failed piece and what follows
-/// it, and a fault that can be put right without asking reaches no prompt at all.
+/// The stopped launch's state (`contracts/launch-step-contract.md` §4, §5; FR-004, FR-016, FR-017, FR-019): the
+/// cause is the failing line's own words, repeating the failed work starts the application again rather than
+/// resuming a half-run sequence, and a fault that can be put right without asking reaches no prompt at all.
 /// </summary>
 /// <remarks>
-/// The feed is the real one, because the state's whole contract is that it reads what the launch wrote. A repeat
-/// is asserted against a recording launch rather than against the real pipeline: the state's job is to name the
-/// step to resume at, and the pipeline's own tests already prove that naming it repeats it and nothing before it.
+/// The feed is the real one, because the state's whole contract is that it reads what the launch wrote. The
+/// repeat is asserted against a recording restarter: the state's job is to start a replacement instance, and the
+/// pipeline's own tests already prove what a launch does when it runs again.
 /// </remarks>
 [TestClass]
 public sealed class BlockedStateViewModelTests
@@ -95,43 +95,65 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public async Task Retry_RepeatsTheFailedPieceAndWhatFollowsIt_AndNothingBeforeIt()
+    public void Retry_StartsTheApplicationAgain_AndDoesNotResumeTheStoppedLaunch()
     {
-        // FR-020: a retry resumes at the step that failed, so the steps before it are not run again.
+        // FR-016: the failed work is repeated by starting the launch again, which is one pass from its first
+        // step, rather than by resuming a half-run sequence at a step id.
         var feed = FeedWith(Failed(ReadRecordStepId, "This computer's record could not be read.", "the store"));
-        var viewModel = CreateViewModel(feed, out var launch, out _);
+        var viewModel = CreateViewModel(feed, out var restarter, out _);
 
-        await viewModel.RetryCommand.ExecuteAsync(null);
+        viewModel.RetryCommand.Execute(null);
 
-        CollectionAssert.AreEqual(
-            new[] { ReadRecordStepId },
-            launch.Retried.ToArray(),
-            "only the failed piece and what follows it may be repeated (FR-020)");
-        Assert.AreNotEqual(
-            new LaunchStepCatalog().Steps[0].Id,
-            launch.Retried[0],
-            "a store-only retry must never repeat the first step (FR-020)");
+        Assert.AreEqual(1, restarter.Restarts, "the repeat starts a replacement instance");
+        Assert.IsFalse(viewModel.HasMessage, "a replacement instance that started has nothing to report");
     }
 
     [TestMethod]
-    public async Task Prepare_WhenTheStopIsNotRepairableQuietly_AsksThePersonAndCarriesNothingOn()
+    public void Retry_WhenTheApplicationCouldNotBeStartedAgain_SaysSoAndLeavesTheSurfaceOpen()
     {
         var feed = FeedWith(Failed(StoreStepId, StoreDiagnosis, "the store"));
-        var viewModel = CreateViewModel(feed, out var launch, out var configuration);
+        var viewModel = CreateViewModel(feed, out var restarter, out _, start: () => false);
+
+        viewModel.RetryCommand.Execute(null);
+
+        Assert.AreEqual(1, restarter.Restarts);
+        Assert.IsTrue(viewModel.HasMessage, "a repeat that did nothing has to tell the person");
+    }
+
+    [TestMethod]
+    public void Retry_WhenStartingAgainThrew_SaysSoRatherThanEscapingFromTheCommand()
+    {
+        var feed = FeedWith(Failed(StoreStepId, StoreDiagnosis, "the store"));
+        var viewModel = CreateViewModel(
+            feed,
+            out _,
+            out _,
+            start: () => throw new InvalidOperationException("The current process path is unavailable."));
+
+        viewModel.RetryCommand.Execute(null);
+
+        Assert.IsTrue(viewModel.HasMessage, "a fault while starting again is reported, not raised at the button");
+    }
+
+    [TestMethod]
+    public async Task Prepare_WhenTheStopIsNotRepairableQuietly_AsksThePersonAndStartsNothing()
+    {
+        var feed = FeedWith(Failed(StoreStepId, StoreDiagnosis, "the store"));
+        var viewModel = CreateViewModel(feed, out var restarter, out var configuration);
 
         var needsPerson = await viewModel.PrepareAsync(CancellationToken.None);
 
         Assert.IsTrue(needsPerson, "a store outage is the person's to decide about");
-        Assert.AreEqual(0, launch.Retried.Count, "nothing may be carried on behind a prompt that was raised");
+        Assert.AreEqual(0, restarter.Restarts, "nothing may be started behind a prompt that was raised");
         Assert.AreEqual(0, configuration.ResetRequests.Count, "a store outage has nothing this computer can repair");
     }
 
     [TestMethod]
     public async Task Prepare_WhenTheFaultCanBePutRightQuietly_RepairsItAndRaisesNoPrompt()
     {
-        // FR-019, US4 scenario 3: the fault is repaired, the launch carries on, and no question is asked.
+        // FR-019, US4 scenario 3: the fault is repaired, the application starts again, and no question is asked.
         var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
-        var viewModel = CreateViewModel(feed, out var launch, out var configuration);
+        var viewModel = CreateViewModel(feed, out var restarter, out var configuration);
 
         var needsPerson = await viewModel.PrepareAsync(CancellationToken.None);
 
@@ -140,10 +162,10 @@ public sealed class BlockedStateViewModelTests
             configuration.ResetRequests.Single().ToArray(),
             MachineConfigurationParts.ScopedPreference,
             "only the part the scope supplies may be repaired without asking (FR-019)");
-        CollectionAssert.AreEqual(
-            new[] { SaveConfigurationStepId },
-            launch.Retried.ToArray(),
-            "the launch carries on from the step that failed (FR-020)");
+        Assert.AreEqual(
+            1,
+            restarter.Restarts,
+            "the launch that carries the repaired fault on is a new one, not a resumed one");
     }
 
     [TestMethod]
@@ -152,22 +174,35 @@ public sealed class BlockedStateViewModelTests
         var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
         var viewModel = CreateViewModel(
             feed,
-            out var launch,
+            out var restarter,
             out _,
             _ => new MachineConfigurationResetResult(true, [], null));
 
         var needsPerson = await viewModel.PrepareAsync(CancellationToken.None);
 
         Assert.IsTrue(needsPerson, "a fault that was not put right is the person's to decide about");
-        Assert.AreEqual(0, launch.Retried.Count);
+        Assert.AreEqual(0, restarter.Restarts);
     }
 
     [TestMethod]
-    public async Task RestoreDefaults_ResetsExactlyThePartsThePreviewNamed_AndCarriesTheLaunchOn()
+    public async Task Prepare_WhenTheQuietRepairWorkedButTheApplicationCouldNotStartAgain_AsksThePerson()
     {
-        // FR-018: what the person agreed to is what is reset, and then the failed piece is repeated.
         var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
-        var viewModel = CreateViewModel(feed, out var launch, out var configuration);
+        var viewModel = CreateViewModel(feed, out var restarter, out _, start: () => false);
+
+        var needsPerson = await viewModel.PrepareAsync(CancellationToken.None);
+
+        Assert.IsTrue(needsPerson, "a repair that could not be followed by a restart leaves the surface to the person");
+        Assert.AreEqual(1, restarter.Restarts);
+        Assert.IsTrue(viewModel.HasMessage);
+    }
+
+    [TestMethod]
+    public async Task RestoreDefaults_ResetsExactlyThePartsThePreviewNamed_AndStartsTheApplicationAgain()
+    {
+        // FR-018: what the person agreed to is what is reset, and the launch then runs once more.
+        var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
+        var viewModel = CreateViewModel(feed, out var restarter, out var configuration);
 
         await viewModel.RestoreDefaultsCommand.ExecuteAsync(null);
 
@@ -175,7 +210,7 @@ public sealed class BlockedStateViewModelTests
             viewModel.ResetParts.ToArray(),
             configuration.ResetRequests.Single().ToArray(),
             "the reset must touch exactly what the preview named");
-        CollectionAssert.AreEqual(new[] { SaveConfigurationStepId }, launch.Retried.ToArray());
+        Assert.AreEqual(1, restarter.Restarts, "the launch that follows a reset is a new one");
         Assert.IsFalse(viewModel.HasMessage, "a reset that happened has nothing to report");
     }
 
@@ -185,35 +220,37 @@ public sealed class BlockedStateViewModelTests
         var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
         var viewModel = CreateViewModel(
             feed,
-            out var launch,
+            out var restarter,
             out _,
             _ => new MachineConfigurationResetResult(false, [], MachineConfigurationRefusals.DefaultDisplayNameInUse));
 
         await viewModel.RestoreDefaultsCommand.ExecuteAsync(null);
 
         Assert.IsTrue(viewModel.HasMessage, "the person has to be told the reset did not happen");
-        Assert.AreEqual(0, launch.Retried.Count, "the launch must not carry on with a configuration that was not restored");
+        Assert.AreEqual(0, restarter.Restarts, "nothing may start again over a configuration that was not restored");
     }
 
-    /// <summary>Builds the state over a feed, a recording launch and a recording configuration service.</summary>
+    /// <summary>Builds the state over a feed, a recording restarter and a recording configuration service.</summary>
     /// <param name="feed">The lines the launch wrote.</param>
-    /// <param name="launch">The recording launch the state will name a step to.</param>
+    /// <param name="restarter">How a replacement instance is asked for, and what it answers.</param>
     /// <param name="configuration">The recording configuration service the policy will drive.</param>
     /// <param name="reset">What the store answers a reset with, or <c>null</c> to answer that it happened.</param>
+    /// <param name="start">What starting a replacement instance answers, or <c>null</c> to answer that it started.</param>
     private static BlockedStateViewModel CreateViewModel(
         ILaunchActivityFeed feed,
-        out RecordingLaunchPipeline launch,
+        out RecordingProcessRestarter restarter,
         out RecordingConfigurationService configuration,
-        Func<IReadOnlyList<string>, MachineConfigurationResetResult>? reset = null)
+        Func<IReadOnlyList<string>, MachineConfigurationResetResult>? reset = null,
+        Func<bool>? start = null)
     {
-        launch = new RecordingLaunchPipeline();
+        restarter = new RecordingProcessRestarter(start);
         configuration = new RecordingConfigurationService(reset);
 
         return new BlockedStateViewModel(
             new LaunchStepCatalog(),
             feed,
-            launch,
-            new StartupRecoveryService(configuration));
+            new StartupRecoveryService(configuration),
+            restarter);
     }
 
     /// <summary>A feed holding the given lines, in the order they were written.</summary>
@@ -233,44 +270,19 @@ public sealed class BlockedStateViewModelTests
     private static LaunchFeedEntry Failed(string stepId, string text, string? target)
         => new(DateTimeOffset.UtcNow, stepId, LaunchFeedEntryKind.StepFailed, text, target, false);
 
-    /// <summary>The launch, answering that it ended where it was and recording the step a retry was named.</summary>
-    private sealed class RecordingLaunchPipeline : ILaunchPipeline
+    /// <summary>How a replacement instance is started, recording every attempt and answering what it was told to.</summary>
+    private sealed class RecordingProcessRestarter(Func<bool>? start = null) : IProcessRestarter
     {
-        /// <summary>Every step a repeat was named for, in the order it was named.</summary>
-        public List<string> Retried { get; } = [];
+        private readonly Func<bool> _start = start ?? (() => true);
 
-        /// <summary>Every reason an ending was declared with.</summary>
-        public List<string> Ended { get; } = [];
+        /// <summary>How many times a replacement instance was asked for.</summary>
+        public int Restarts { get; private set; }
 
-        // The state never listens for either of these, so they are declared without a field: an unused event
-        // field would be a warning, and a warning is a build failure in this repository.
-        public event EventHandler<LaunchOutcome>? ShellReady
+        public bool Restart()
         {
-            add { }
-            remove { }
-        }
+            Restarts++;
 
-        public event EventHandler<string>? ProcessEnding
-        {
-            add { }
-            remove { }
-        }
-
-        public Task<LaunchOutcome> RunAsync(CancellationToken cancellationToken)
-            => Task.FromResult(LaunchOutcome.Blocked);
-
-        public Task<LaunchOutcome> RetryFromAsync(string failedStepId, CancellationToken cancellationToken)
-        {
-            Retried.Add(failedStepId);
-
-            return Task.FromResult(LaunchOutcome.Blocked);
-        }
-
-        public LaunchOutcome End(string reason)
-        {
-            Ended.Add(reason);
-
-            return LaunchOutcome.Ended;
+            return _start();
         }
     }
 

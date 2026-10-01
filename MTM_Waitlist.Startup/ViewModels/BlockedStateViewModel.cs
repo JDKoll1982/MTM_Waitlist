@@ -10,9 +10,16 @@ namespace MTM_Waitlist.Module_Startup.ViewModels;
 
 /// <summary>
 /// A stopped launch's state: what stopped it, what may be done about it, and what a reset would touch before
-/// anything is reset (`contracts/launch-step-contract.md` §4, §5; FR-004, FR-016, FR-017, FR-018, FR-019, FR-020).
+/// anything is reset (`contracts/launch-step-contract.md` §4, §5; FR-004, FR-016, FR-017, FR-018, FR-019).
 /// </summary>
 /// <remarks>
+/// <para>
+/// <b>Repeating the failed work means starting the application again.</b> A launch is one pass, and this state
+/// never resumes a stopped one: the surface's repeat starts a replacement instance, which runs the launch from
+/// its first step and finds the fault either put right or still there. Carrying a half-run sequence on from a
+/// step id was the thing that left a stop that could be repeated and never recovered, so the repeat is a restart
+/// (FR-016).
+/// </para>
 /// <para>
 /// <b>The cause is the failing line the launch already wrote.</b> The pipeline hands the host an outcome and not a
 /// reason, so this state reads the feed for the last line a step failed on and takes that line's own words as the
@@ -42,29 +49,29 @@ namespace MTM_Waitlist.Module_Startup.ViewModels;
 internal sealed partial class BlockedStateViewModel : ObservableObject
 {
     private readonly LaunchStepCatalog _catalog;
-    private readonly ILaunchPipeline _pipeline;
     private readonly StartupRecoveryService _recovery;
+    private readonly IProcessRestarter _restarter;
 
-    /// <summary>Creates the stopped launch's state over the lines it wrote, the sequence, the launch and the policy.</summary>
+    /// <summary>Creates the stopped launch's state over the lines it wrote, the sequence, the policy and the restarter.</summary>
     /// <param name="catalog">The sequence, which is how a failing line is resolved to the step that wrote it.</param>
     /// <param name="feed">The lines the launch wrote, which is where the cause comes from.</param>
-    /// <param name="pipeline">The launch, which is what a repeat and a carried-on launch go through.</param>
     /// <param name="recovery">The policy that decides what a reset may touch and what is repaired without asking.</param>
+    /// <param name="restarter">How a replacement instance is started, which is how this surface repeats the work.</param>
     /// <exception cref="ArgumentNullException">Any argument is <c>null</c>.</exception>
     public BlockedStateViewModel(
         LaunchStepCatalog catalog,
         ILaunchActivityFeed feed,
-        ILaunchPipeline pipeline,
-        StartupRecoveryService recovery)
+        StartupRecoveryService recovery,
+        IProcessRestarter restarter)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(feed);
-        ArgumentNullException.ThrowIfNull(pipeline);
         ArgumentNullException.ThrowIfNull(recovery);
+        ArgumentNullException.ThrowIfNull(restarter);
 
         _catalog = catalog;
-        _pipeline = pipeline;
         _recovery = recovery;
+        _restarter = restarter;
 
         var stop = FindStop(feed);
 
@@ -76,7 +83,8 @@ internal sealed partial class BlockedStateViewModel : ObservableObject
         SilentRepairParts = BlockedStateRemedies.SilentRepairPartsFor(Cause);
     }
 
-    /// <summary>The catalogue entry the repeat resumes at, or <c>null</c> when the feed named no failure (FR-020).</summary>
+    /// <summary>The catalogue entry that failed, or <c>null</c> when the feed named no failure.</summary>
+    /// <remarks>It names the failing line for the diagnosis and for the log; the repeat no longer resumes at it.</remarks>
     internal string? FailedStepId { get; }
 
     /// <summary>What stopped the launch, in the failing step's own words (FR-004).</summary>
@@ -105,7 +113,7 @@ internal sealed partial class BlockedStateViewModel : ObservableObject
     /// <summary>Whether there is anything for the surface to say beyond the diagnosis.</summary>
     public bool HasMessage => !string.IsNullOrWhiteSpace(Message);
 
-    /// <summary>Whether the failed piece and what follows it may be repeated, which is every stop (FR-016).</summary>
+    /// <summary>Whether the failed work may be repeated, which is every stop: one restart costs nothing (FR-016).</summary>
     public bool CanRetry => Remedies.CanRetry;
 
     /// <summary>Whether a reset could remove this cause, which is what makes the restore control visible (FR-017).</summary>
@@ -123,7 +131,7 @@ internal sealed partial class BlockedStateViewModel : ObservableObject
     /// <summary>The label over the cause.</summary>
     public string DiagnosisLabelText => "Startup_BlockedState.DiagnosisLabel".GetLocalized();
 
-    /// <summary>The action that repeats the failed piece and what follows it (FR-016, FR-020).</summary>
+    /// <summary>The action that starts the application again, which is how the failed work is repeated (FR-016).</summary>
     public string RetryActionText => "Startup_BlockedState.RetryAction".GetLocalized();
 
     /// <summary>The action that restores this computer's defaults once the person has seen what it will touch (FR-018).</summary>
@@ -154,15 +162,16 @@ internal sealed partial class BlockedStateViewModel : ObservableObject
     /// <summary>
     /// Offers the fault to the repair policy and answers whether the person is needed at all (FR-019).
     /// </summary>
-    /// <param name="cancellationToken">Cancels the repair and the launch it carries on.</param>
+    /// <param name="cancellationToken">Cancels the repair.</param>
     /// <returns>
-    /// <c>true</c> when the surface has to be shown, because the fault is one only a person can decide about or
-    /// because the repair changed nothing. <c>false</c> when the fault was put right without asking, in which case
-    /// the launch has already been carried on from the step that failed.
+    /// <c>true</c> when the surface has to be shown, because the fault is one only a person can decide about, or
+    /// because the repair changed nothing, or because the replacement instance could not be started. <c>false</c>
+    /// when the fault was put right without asking, in which case the application is already starting again.
     /// </returns>
     /// <remarks>
     /// This runs before the window is shown, so a fault repaired without asking produces no prompt at all rather
-    /// than a surface that appears and takes itself away again.
+    /// than a surface that appears and takes itself away again. The launch that starts now is a second pass over
+    /// the same sequence, which is what carries the repaired fault on (FR-019).
     /// </remarks>
     internal async Task<bool> PrepareAsync(CancellationToken cancellationToken)
     {
@@ -182,35 +191,56 @@ internal sealed partial class BlockedStateViewModel : ObservableObject
             return true;
         }
 
-        await CarryOnAsync(cancellationToken).ConfigureAwait(true);
+        return !StartAgain();
+    }
+
+    /// <summary>
+    /// Starts the application again and ends this one, which is how this surface repeats the failed work
+    /// (FR-016).
+    /// </summary>
+    /// <remarks>
+    /// A replacement instance that could not be started is reported rather than swallowed: the person is looking
+    /// at a surface, and a surface whose only action does nothing is worse than one that says it could not. The
+    /// ending goes through the same lifecycle seam signing out uses, so the process that leaves is one that knows
+    /// it is being replaced.
+    /// </remarks>
+    [RelayCommand]
+    private void Retry()
+    {
+        Message = null;
+
+        _ = StartAgain();
+    }
+
+    /// <summary>Starts a replacement instance, and answers whether it was started.</summary>
+    /// <returns>
+    /// <c>true</c> when a replacement instance started, in which case this process is already on its way out.
+    /// <c>false</c> when it could not, in which case <see cref="Message"/> says so.
+    /// </returns>
+    private bool StartAgain()
+    {
+        try
+        {
+            if (_restarter.Restart())
+            {
+                AppLifecycleHost.ExitApplication();
+
+                return true;
+            }
+        }
+        catch (Exception exception)
+        {
+            AppLog.Error("BlockedState", exception, "The application could not be started again.");
+        }
+
+        Message = "Startup_BlockedState.RestartFailed".GetLocalized();
 
         return false;
     }
 
-    /// <summary>Repeats the failed piece and the steps after it, and nothing before it (FR-016, FR-020).</summary>
-    [RelayCommand]
-    private async Task RetryAsync()
-    {
-        if (IsBusy)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        Message = null;
-
-        try
-        {
-            await CarryOnAsync(CancellationToken.None).ConfigureAwait(true);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
     /// <summary>
-    /// Restores the parts the person agreed to and carries the launch on from the step that failed.
+    /// Restores the parts the person agreed to, and then starts the application again so the launch runs once
+    /// more against the configuration that was just restored (FR-018).
     /// </summary>
     /// <remarks>
     /// The reset goes through the policy, which narrows it to this computer's own configuration before the one
@@ -237,7 +267,7 @@ internal sealed partial class BlockedStateViewModel : ObservableObject
                 return;
             }
 
-            await CarryOnAsync(CancellationToken.None).ConfigureAwait(true);
+            _ = StartAgain();
         }
         catch (Exception exception)
         {
@@ -251,16 +281,6 @@ internal sealed partial class BlockedStateViewModel : ObservableObject
             IsBusy = false;
         }
     }
-
-    /// <summary>
-    /// Carries the launch on from the step that failed, which is the one way out of this surface that is not an
-    /// ending (FR-016, FR-020).
-    /// </summary>
-    /// <param name="cancellationToken">Cancels the repeated sequence.</param>
-    private Task CarryOnAsync(CancellationToken cancellationToken)
-        => FailedStepId is { } failedStepId
-            ? _pipeline.RetryFromAsync(failedStepId, cancellationToken)
-            : Task.CompletedTask;
 
     /// <summary>
     /// The stop the feed last states: the failing line's step and its own words, or an empty answer when the feed
