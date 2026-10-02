@@ -43,8 +43,19 @@
         is the width the Windows app-settings guidance recommends for readability on wide displays.
         Sections are stacked top to bottom (never a row grid), so a panel can no longer be clamped on to
         the last row and silently stack on top of its neighbour.
+
+        Sideways scrolling is off, and that is deliberate rather than cosmetic: this page is one column of a
+        fixed maximum width, so there is nothing here to scroll sideways to. It is also the safe default.
+        A scroll viewer that is allowed to scroll sideways measures what it holds with an unbounded width,
+        and a row inside this page that sizes itself to its text then reports its full text width instead of
+        wrapping. That is the shape of the layout cycle this page used to end on (2026-10-02), and it was the
+        developer log panel's outcome, not this viewer, that supplied the long line. See the note against the
+        panel's host below.
     -->
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
+        VerticalScrollBarVisibility="Auto">
         <Grid
             x:Name="ContentArea"
             MaxWidth="1080"
@@ -878,19 +889,36 @@
                 </wct:SettingsExpander>
 
                 <!-- The developer log panel from Phase 7 (US5, SC-005). Kept out of the tree for a person who
-                     may not open it; the panel's own view model is what enforces the read and the copy. -->
+                     may not open it; the panel's own view model is what enforces the read and the copy.
+
+                     The panel is hosted in a vertically-aligned SettingsCard, and that is load bearing rather
+                     than cosmetic. A SettingsCard lays its content out to the RIGHT of its header by default
+                     (ContentAlignment="Right"), and that layout sizes the content column to the content, which
+                     measures it with an unbounded width. Given unbounded width the panel's entries stop
+                     wrapping: each one reports the full width of its exception text - thousands of pixels for a
+                     stored exception chain - the entry grows to match, the list is re-measured against the wider
+                     entry, and the two never settle. The layout engine gives up with a LayoutCycleException and
+                     the process ends (observed 2026-10-02, with the trace naming a Measure(infx220) and a
+                     Measure(infx160) presenter holding a 6733-pixel-wide TextBlock). Vertically-aligned content
+                     is given the card's own width instead, which is what the panel's wrapping text needs. -->
                 <wct:SettingsExpander
                     AutomationProperties.AutomationId="SettingsPage_DeveloperLogExpander"
                     x:Name="DeveloperLogExpander"
                     x:Load="{x:Bind ViewModel.IsDeveloperLogPanelVisible, Mode=OneWay}"
                     Header="{x:Bind ViewModel.DeveloperLogPanelTitle}"
                     HorizontalAlignment="Stretch"
-                    IsExpanded="False">
+                    IsExpanded="True">
                     <wct:SettingsExpander.HeaderIcon>
                         <FontIcon Glyph="&#xE9D9;" />
                     </wct:SettingsExpander.HeaderIcon>
 
-                    <views:DeveloperLogPanelView x:Name="DeveloperLogPanel" />
+                    <wct:SettingsExpander.Items>
+                        <wct:SettingsCard
+                            ContentAlignment="Vertical"
+                            HorizontalContentAlignment="Stretch">
+                            <views:DeveloperLogPanelView x:Name="DeveloperLogPanel" />
+                        </wct:SettingsCard>
+                    </wct:SettingsExpander.Items>
                 </wct:SettingsExpander>
 
                 <!-- New request alerts -->

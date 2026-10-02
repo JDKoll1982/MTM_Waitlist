@@ -127,6 +127,221 @@ public sealed class SettingsPageMarkupTests
         StringAssert.Contains(markup, "ViewModel.ShowDunnageTypeCommand", "Showing a type is still the hidden list's action.");
     }
 
+    /// <summary>
+    /// The developer log panel holds wrapping text and a scrolling list, so it may only be placed where it is
+    /// given a bounded width to wrap into.
+    /// </summary>
+    /// <remarks>
+    /// Observed 2026-10-02: opening the Settings page ended the process with a
+    /// <c>Microsoft.UI.Xaml.LayoutCycleException</c>, and the debug trace named a <c>Measure(infx220)</c> and a
+    /// <c>Measure(infx160)</c> <c>ScrollContentPresenter</c> holding a 6733-pixel-wide <c>TextBlock</c> — the
+    /// panel's two max-height viewers, each laid out as a single line. The panel was the
+    /// <c>SettingsExpander</c>'s own content, and a card's content slot aligns to the right by default, which
+    /// sizes that column to the content and so measures it with an unbounded width. Hosting the panel in a
+    /// vertically-aligned <c>SettingsCard</c> gives it the card's own width instead.
+    /// </remarks>
+    [TestMethod]
+    public void TheDeveloperLogPanel_IsHostedWhereItsWrappingTextGetsABoundedWidth()
+    {
+        var panel = XDocument.Parse(PageMarkup())
+            .Descendants()
+            .SingleOrDefault(element => element.Name.LocalName == "DeveloperLogPanelView");
+
+        Assert.IsNotNull(panel, "The settings page no longer hosts the developer log panel.");
+
+        var host = panel.Parent;
+        Assert.IsNotNull(host, "The developer log panel has no host element.");
+
+        Assert.AreEqual(
+            "SettingsCard",
+            host!.Name.LocalName,
+            "The panel must be hosted in a card that gives it a width of its own. An expander's own content "
+                + "slot, and a card's right-aligned content slot, both measure what they hold with an unbounded "
+                + "width, and the panel's wrapping entry text then asks to be thousands of pixels wide.");
+
+        Assert.AreEqual(
+            "Vertical",
+            host.Attribute("ContentAlignment")?.Value,
+            "The hosting card must align its content vertically (the card's own documented pairing with "
+                + "HorizontalContentAlignment=Stretch), because that is what hands the panel the card's width.");
+    }
+
+    /// <summary>
+    /// The panel puts no scroll viewer of its own anywhere, so nothing it draws is ever measured against a
+    /// viewport.
+    /// </summary>
+    /// <remarks>
+    /// This is the shape of the redesign that followed the 2026-10-02 crash. Each entry used to keep its long
+    /// exception chain and payload in two bounded, individually scrolling boxes; each of those was measured as
+    /// <c>Measure(infx220)</c> and <c>Measure(infx160)</c> and laid its wrapping TextBlock out as a single
+    /// 6733-pixel line, which is what ended the process. The detail now lives in an <c>Expander</c> whose content
+    /// wraps and makes the entry taller, and the list itself does the scrolling.
+    /// </remarks>
+    [TestMethod]
+    public void TheDeveloperLogPanel_PutsNoScrollerInsideAnEntry()
+    {
+        var document = XDocument.Load(PanelPath());
+
+        var viewers = document.Descendants().Where(element => element.Name.LocalName == "ScrollViewer").ToList();
+
+        Assert.AreEqual(
+            0,
+            viewers.Count,
+            "The panel must hold no scroll viewer of its own: a viewport measures what it holds with an unbounded "
+                + "width, and the entry text it holds then asks to be thousands of pixels wide.");
+
+        Assert.IsTrue(
+            document.Descendants().Any(element => element.Name.LocalName == "Expander"),
+            "The detail that needs a boundary is offered in an Expander, whose content wraps and grows downwards.");
+    }
+
+    /// <summary>
+    /// Both of the panel's lists are bounded in height, never scroll sideways, and stretch their entries, so an
+    /// entry is always measured against the list's own width.
+    /// </summary>
+    [TestMethod]
+    public void TheDeveloperLogPanel_ListsAreBoundedAndNeverScrollSideways()
+    {
+        var document = XDocument.Load(PanelPath());
+
+        foreach (var id in new[] { "DeveloperLogPanelView_Entries", "DeveloperLogPanelView_Groups" })
+        {
+            var list = document.Descendants().SingleOrDefault(element =>
+                element.Attribute("AutomationProperties.AutomationId")?.Value == id);
+
+            Assert.IsNotNull(list, $"The panel's '{id}' list was not found.");
+
+            Assert.AreEqual(
+                "Disabled",
+                list!.Attribute("ScrollViewer.HorizontalScrollMode")?.Value,
+                $"'{id}' must switch horizontal scrolling off: the scroll mode is what permits the unbounded "
+                    + "measure, and it is Enabled by default.");
+
+            Assert.IsNotNull(
+                list.Attribute("MaxHeight"),
+                $"'{id}' must bound its own height, so that it scrolls itself rather than asking the page for an "
+                    + "unbounded height and realizing every entry it holds.");
+
+            var containerStyle = list.Elements().SingleOrDefault(element => element.Name.LocalName == "ListView.ItemContainerStyle");
+            Assert.IsNotNull(containerStyle, $"'{id}' must carry the item container style that stretches its entries.");
+            Assert.IsTrue(
+                containerStyle!.Descendants().Any(element =>
+                    element.Name.LocalName == "Setter" && element.Attribute("Value")?.Value == "Stretch"),
+                $"Each entry of '{id}' is stretched to the list's own width, so the entry wraps inside it.");
+        }
+    }
+
+    /// <summary>
+    /// Every text block in the panel whose text comes out of the store wraps, so none of them can ask its host for
+    /// the width of its own content.
+    /// </summary>
+    /// <remarks>
+    /// A short, fixed, shipped label may sit at its natural width. A value read out of the log store may not: a
+    /// stored exception chain runs to thousands of pixels when it is not allowed to wrap.
+    /// </remarks>
+    [TestMethod]
+    public void TheDeveloperLogPanel_WrapsEveryBoundTextBlock()
+    {
+        var document = XDocument.Load(PanelPath());
+
+        var unwrapped = document
+            .Descendants()
+            .Where(element => element.Name.LocalName == "TextBlock")
+            .Where(element =>
+            {
+                var text = element.Attribute("Text")?.Value;
+                return text is not null
+                    && (text.Contains("{x:Bind", StringComparison.Ordinal) || text.Contains("{Binding", StringComparison.Ordinal));
+            })
+            .Where(element => element.Attribute("TextWrapping")?.Value != "Wrap")
+            .Select(element => element.Attribute("Text")?.Value ?? string.Empty)
+            .ToList();
+
+        Assert.AreEqual(
+            0,
+            unwrapped.Count,
+            "These text blocks take their text from the store without wrapping, so each one asks its host for the "
+                + "width of its own content:" + Environment.NewLine + string.Join(Environment.NewLine, unwrapped));
+    }
+
+    /// <summary>The path to the developer log panel's markup.</summary>
+    private static string PanelPath()
+    {
+        var path = Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Module_Settings",
+            "Views",
+            "DeveloperLogPanelView.xaml");
+
+        Assert.IsTrue(File.Exists(path), $"The log panel markup was not found at '{path}'.");
+
+        return path;
+    }
+
+    /// <summary>
+    /// A settings card that holds content able to grow sideways must align that content vertically.
+    /// </summary>
+    /// <remarks>
+    /// This is the shape that ended the process on 2026-10-02 (see the developer-log-panel test above): a
+    /// right-aligned content slot measures what it holds with an unbounded width, so a list hands that width on
+    /// to its entries, and a wrapping text block with no maximum of its own lays itself out as a single very
+    /// long line. Either way the card grows to match it and the layout engine gives up. A control hosted from
+    /// another file is not followed here - the panel case is pinned by its own test - so this scan covers what
+    /// is written inline.
+    /// </remarks>
+    [TestMethod]
+    public void SettingsCardsHoldingContentThatCanGrow_AlignItVertically()
+    {
+        string[] scrollingControls = ["ListView", "GridView", "ItemsControl", "ItemsRepeater", "ScrollViewer"];
+        var violations = new List<string>();
+
+        foreach (var file in RepositoryPatternScan.EnumerateScannedFiles(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            new RepositoryScanScope { Extensions = [".xaml"] }))
+        {
+            var document = XDocument.Load(file);
+            var relativePath = Path.GetRelativePath(RepositoryPatternScan.FindRepositoryRoot(), file);
+
+            foreach (var card in document.Descendants().Where(element =>
+                element.Name.LocalName is "SettingsCard" or "SettingsExpander"))
+            {
+                if (card.Attribute("ContentAlignment")?.Value == "Vertical")
+                {
+                    continue;
+                }
+
+                foreach (var content in card.Elements().Where(element => !element.Name.LocalName.Contains('.')))
+                {
+                    var growth = content
+                        .DescendantsAndSelf()
+                        .Select(element => element.Name.LocalName)
+                        .FirstOrDefault(name => scrollingControls.Contains(name, StringComparer.Ordinal))
+                        ?? content
+                            .Descendants()
+                            .FirstOrDefault(element =>
+                                element.Name.LocalName == "TextBlock"
+                                && element.Attribute("TextWrapping")?.Value == "Wrap"
+                                && element.Attribute("MaxWidth") is null)
+                            ?.Name.LocalName;
+
+                    if (growth is not null)
+                    {
+                        violations.Add($"{relativePath}: <{card.Name.LocalName}> holds <{content.Name.LocalName}> containing <{growth}>");
+                    }
+                }
+            }
+        }
+
+        Assert.AreEqual(
+            0,
+            violations.Count,
+            "A card that holds a list, a scroll viewer, or wrapping text with no maximum width, must align that "
+                + "content vertically: right alignment measures it with an unbounded width, which is what a "
+                + "wrapping entry then grows into until the layout engine gives up:"
+                + Environment.NewLine
+                + string.Join(Environment.NewLine, violations));
+    }
+
     private static string PageMarkup()
     {
         var path = Path.Combine(

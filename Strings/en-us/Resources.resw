@@ -2129,4 +2129,25 @@
   <data name="Settings_LogPanel_Copy_Refused.Text" xml:space="preserve">
     <value>The clipboard refused the copy. Nothing was written to this machine.</value>
   </data>
+  <data name="Settings_LogPanel_Grouped.Text" xml:space="preserve">
+    <value>Repeated faults</value>
+  </data>
+  <data name="Settings_LogPanel_Details.Text" xml:space="preserve">
+    <value>Chain and payload</value>
+  </data>
+  <data name="Settings_LogPanel_EntryErrorKind.Text" xml:space="preserve">
+    <value>Error kind</value>
+  </data>
+  <data name="Settings_LogPanel_EntryFingerprint.Text" xml:space="preserve">
+    <value>Fingerprint</value>
+  </data>
+  <data name="Settings_LogPanel_EntryChain.Text" xml:space="preserve">
+    <value>Chain link</value>
+  </data>
+  <data name="Settings_LogPanel_EntryException.Text" xml:space="preserve">
+    <value>Exception</value>
+  </data>
+  <data name="Settings_LogPanel_EntryPayload.Text" xml:space="preserve">
+    <value>Payload</value>
+  </data>
 </root>
