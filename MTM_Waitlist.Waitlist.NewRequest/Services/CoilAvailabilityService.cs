@@ -63,7 +63,7 @@ public sealed class CoilAvailabilityService : ICoilAvailabilityService
         var normalizedWorkCenter = workCenter?.Trim() ?? string.Empty;
         if (normalizedWorkCenter.Length == 0)
         {
-            StartupDebugLog.Info("NewRequestJobType", "No work center supplied; the active job cannot be resolved.");
+            AppLog.Info("NewRequestJobType", "No work center supplied; the active job cannot be resolved.");
             return NoCoil();
         }
 
@@ -80,14 +80,14 @@ public sealed class CoilAvailabilityService : ICoilAvailabilityService
 
         if (row is null)
         {
-            StartupDebugLog.Info("NewRequestJobType", $"No saved active job for work center '{normalizedWorkCenter}'; no coil to report.");
+            AppLog.Info("NewRequestJobType", $"No saved active job for work center '{normalizedWorkCenter}'; no coil to report.");
             return NoCoil();
         }
 
         var coil = ReadCoilParts(ReadString(row, "subordinate_parts_json")).FirstOrDefault();
         if (coil is null)
         {
-            StartupDebugLog.Info("NewRequestJobType", $"Active job on work center '{normalizedWorkCenter}' has no coil part.");
+            AppLog.Info("NewRequestJobType", $"Active job on work center '{normalizedWorkCenter}' has no coil part.");
             return NoCoil();
         }
 
@@ -96,7 +96,7 @@ public sealed class CoilAvailabilityService : ICoilAvailabilityService
             .ConfigureAwait(false);
 
         var quantityOnHand = coil.OnHandQuantity.ToString("0.##", CultureInfo.InvariantCulture);
-        StartupDebugLog.Info(
+        AppLog.Info(
             "NewRequestJobType",
             $"Active job on work center '{normalizedWorkCenter}' carries coil '{coil.PartNumber}' with {quantityOnHand} on hand.");
 

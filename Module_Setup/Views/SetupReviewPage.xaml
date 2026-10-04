@@ -93,7 +93,11 @@
                                                         </Border>
                                                         <StackPanel Grid.Column="1">
                                                             <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind PartNumber}" />
-                                                            <TextBlock Text="{x:Bind Description}" TextWrapping="WrapWholeWords" />
+                                                            <!-- The description is drawn by the one-line scrolling control
+                                                                 (009 B1/B2): this row has fixed columns, so a long
+                                                                 description scrolls its own line instead of wrapping into
+                                                                 the rows below it. -->
+                                                            <sharedControls:AutoScrollTextView Text="{x:Bind Description}" />
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="2">
                                                             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Location" />
@@ -129,7 +133,15 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <FontIcon Grid.Column="0" Glyph="{x:Bind IconGlyph}" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" TextWrapping="WrapWholeWords" />
+                                        <!-- The assignment's name is drawn by the one-line scrolling control (009
+                                             B1/B2); its strong-body size is set here because the control draws its
+                                             own text and cannot inherit a TextBlock style. -->
+                                        <sharedControls:AutoScrollTextView
+                                            Grid.Column="1"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                            Text="{x:Bind DisplayName}" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

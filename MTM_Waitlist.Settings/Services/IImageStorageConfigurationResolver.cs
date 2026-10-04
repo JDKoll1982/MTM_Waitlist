@@ -33,6 +33,17 @@ public interface IImageStorageConfigurationResolver
     Task<string> GetKeysFolderPathAsync();
 
     /// <summary>
+    /// Gets the effective dunnage-picture root, which is held once for the plant like the picture folder.
+    /// Resolution order:
+    /// 1. Database override from config_settings_values (if set and not null)
+    /// 2. appsettings.json ImageStorage.DunnageRootPath
+    /// 3. Hard-coded default from <c>AppStoragePaths.DunnageRootDefault</c>
+    /// </summary>
+    /// <returns>The effective dunnage-picture root</returns>
+    /// <exception cref="InvalidOperationException">If configuration cannot be resolved</exception>
+    Task<string> GetDunnageRootPathAsync();
+
+    /// <summary>
     /// Gets the effective local picture cache folder with database override support.
     /// Resolution order:
     /// 1. Database override from config_settings_values (if set and not null)
@@ -82,17 +93,6 @@ public interface IImageStorageConfigurationResolver
     /// </summary>
     /// <returns>The number of days to retain archived files</returns>
     Task<int> GetArchiveKeepDaysAsync();
-
-    /// <summary>
-    /// Gets the folder every computer reads for its pictures, together with the folder this machine's own
-    /// configuration names, so a screen can say which is the truth and name the other in one line.
-    /// </summary>
-    /// <returns>
-    /// The resolved folder, which is the store's value whenever the store holds one, and this machine's own
-    /// configured folder beside it (FR-009, FR-010).
-    /// </returns>
-    /// <exception cref="InvalidOperationException">If the folder cannot be resolved at all.</exception>
-    Task<SharedFolderResolution> GetSharedFolderResolutionAsync();
 
     /// <summary>
     /// Gets the complete effective ImageStorageOptions with all database overrides applied.

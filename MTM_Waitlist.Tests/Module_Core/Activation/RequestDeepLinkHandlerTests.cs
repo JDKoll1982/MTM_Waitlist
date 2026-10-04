@@ -2,7 +2,6 @@ using System.Text.RegularExpressions;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Activation;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
@@ -20,7 +19,7 @@ namespace MTM_Waitlist.Tests.Module_Core.Activation;
 public sealed class RequestDeepLinkHandlerTests
 {
     [TestCleanup]
-    public void RestoreStartupLog() => StartupDebugLog.Configure(null);
+    public void RestoreAppLogSink() => AppLog.Configure(null);
 
     [TestMethod]
     public void MappedArgument_OpensTheRequestDetailAndShowsNothing()
@@ -48,8 +47,8 @@ public sealed class RequestDeepLinkHandlerTests
     [TestMethod]
     public void UnmappedArgument_ShowsNothingRecordsTheArgumentAndComesForward()
     {
-        var log = new RecordingStartupLogService();
-        StartupDebugLog.Configure(log);
+        var log = new RecordingAppLogSink();
+        AppLog.Configure(log);
 
         var navigation = new WaitlistTestNavigationService();
         var window = new RecordingDeepLinkWindow();
@@ -86,18 +85,17 @@ public sealed class RequestDeepLinkHandlerTests
     }
 
     /// <summary>
-    /// The load-bearing half of G4 #10: no dialog is reachable from either activation path. Asserted against the
+    /// The load-bearing half of G4 #10: no dialog is reachable from any activation path. Asserted against the
     /// source because a dialog needs a UI thread to appear, and because the check must see a dialog *re-added*
-    /// to any of the three files.
+    /// to either file.
     /// </summary>
     [TestMethod]
-    public void NeitherActivationPathCanPresentADialogOrADeveloperMarker()
+    public void NoActivationPath_CanPresentADialogOrADeveloperMarker()
     {
         (string RelativePath, string Description)[] activationPaths =
         [
             ("MTM_Waitlist.Core/Services/AppNotificationService.cs", "the while-running path"),
-            ("MTM_Waitlist.Core/Activation/AppNotificationActivationHandler.cs", "the cold-start path"),
-            ("MTM_Waitlist.Core/Activation/RequestDeepLinkHandler.cs", "the shared handler"),
+            ("MTM_Waitlist.Core/Services/RequestDeepLinkHandler.cs", "the shared handler"),
         ];
 
         (string Description, string Pattern)[] forbidden =
@@ -140,22 +138,22 @@ public sealed class RequestDeepLinkHandlerTests
         public void BringToFront() => BringToFrontCount++;
     }
 
-    /// <summary>Captures the diagnostics the handler writes.</summary>
-    private sealed class RecordingStartupLogService : IStartupLogService
+    /// <summary>Captures what the facade forwards to the seam.</summary>
+    private sealed class RecordingAppLogSink : IAppLogSink
     {
         public List<string> Messages { get; } = [];
 
         public List<string> Areas { get; } = [];
 
-        public void Info(string area, string message)
+        public void Info(string module, string message, string? target = null)
         {
-            Areas.Add(area);
+            Areas.Add(module);
             Messages.Add(message);
         }
 
-        public void Error(string area, Exception? exception, string message)
+        public void Error(string module, string message, Exception? exception = null)
         {
-            Areas.Add(area);
+            Areas.Add(module);
             Messages.Add(message);
         }
     }

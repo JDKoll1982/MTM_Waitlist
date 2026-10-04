@@ -8,29 +8,56 @@
     mc:Ignorable="d">
 
     <!--
-        One line of text that stays readable when it does not fit: it scrolls across its own field, and stops when
-        the system has animations switched off — then it is truncated with an ellipsis instead of moving.
+        One line of text that stays readable when it does not fit: it slides across its own field as a ring, and
+        stops when the system has animations switched off — then it is truncated with an ellipsis instead of moving.
 
-        The viewport clips the line, and the line itself is given its full width while scrolling, so the whole
-        value is laid out and the part that is off the edge is hidden rather than cut out of the text. Text is
-        bound to the control's own properties so a caller can keep using the font and colour it already had.
+        The viewport clips the track. The track carries two copies of the value, one behind the other with the gap
+        that separates them, and is slid left by exactly one copy plus that gap: as a pass ends, the second copy
+        stands where the first one started, so the next pass begins on a picture identical to the frame that just
+        left and there is no jump to see. Each copy is laid out at its own full width, so every character is drawn
+        rather than cut out of the text, and nothing is re-laid out while the track is moving.
+
+        Text is bound to the control's own properties so a caller can keep using the font and colour it already had.
     -->
     <Grid x:Name="Viewport" SizeChanged="OnViewportSizeChanged">
         <Grid.Clip>
             <RectangleGeometry x:Name="ViewportClip" />
         </Grid.Clip>
-        <TextBlock
-            x:Name="Line"
-            HorizontalAlignment="Stretch"
-            MaxLines="1"
-            TextTrimming="CharacterEllipsis"
-            TextWrapping="NoWrap"
-            FontFamily="{Binding FontFamily, ElementName=Root}"
-            FontSize="{Binding FontSize, ElementName=Root}"
-            FontStyle="{Binding FontStyle, ElementName=Root}"
-            FontWeight="{Binding FontWeight, ElementName=Root}"
-            Foreground="{Binding Foreground, ElementName=Root}"
-            Text="{Binding Text, ElementName=Root}"
-            TextAlignment="{Binding TextAlignment, ElementName=Root}" />
+        <StackPanel
+            x:Name="Track"
+            HorizontalAlignment="Left"
+            Orientation="Horizontal"
+            Spacing="{Binding Gap, ElementName=Root}">
+            <TextBlock
+                x:Name="Line"
+                MaxLines="1"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap"
+                FontFamily="{Binding FontFamily, ElementName=Root}"
+                FontSize="{Binding FontSize, ElementName=Root}"
+                FontStyle="{Binding FontStyle, ElementName=Root}"
+                FontWeight="{Binding FontWeight, ElementName=Root}"
+                Foreground="{Binding Foreground, ElementName=Root}"
+                Text="{Binding Text, ElementName=Root}"
+                TextAlignment="{Binding TextAlignment, ElementName=Root}" />
+            <!--
+                The value a second time, one gap behind the first. It is drawn only while the track moves: standing
+                still it would be a duplicate the reader could see past the end of the value, and it is the reason
+                the end of a pass cannot be told apart from the beginning of the next one.
+            -->
+            <TextBlock
+                x:Name="Echo"
+                MaxLines="1"
+                TextTrimming="None"
+                TextWrapping="NoWrap"
+                Visibility="Collapsed"
+                FontFamily="{Binding FontFamily, ElementName=Root}"
+                FontSize="{Binding FontSize, ElementName=Root}"
+                FontStyle="{Binding FontStyle, ElementName=Root}"
+                FontWeight="{Binding FontWeight, ElementName=Root}"
+                Foreground="{Binding Foreground, ElementName=Root}"
+                Text="{Binding Text, ElementName=Root}"
+                TextAlignment="{Binding TextAlignment, ElementName=Root}" />
+        </StackPanel>
     </Grid>
 </UserControl>

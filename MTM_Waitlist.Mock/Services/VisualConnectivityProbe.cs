@@ -87,7 +87,7 @@ public sealed class VisualConnectivityProbe : IVisualConnectivityProbe
             // not reachable right now, which is exactly what the detector records. The elapsed time is logged
             // because an unreachable source is otherwise silent here, and that silence is what made the
             // original stall hard to attribute.
-            StartupDebugLog.Info(
+            AppLog.Info(
                 "VisualProbe",
                 $"Infor Visual did not answer within {stopwatch.ElapsedMilliseconds} ms. {exception.GetType().Name}: {exception.Message}");
             return false;

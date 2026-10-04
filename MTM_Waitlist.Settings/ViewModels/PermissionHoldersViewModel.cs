@@ -179,7 +179,7 @@ public partial class PermissionHoldersViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "PermissionHolders",
                 ex,
                 "The holders could not be read, so the view shows its unavailable state rather than an empty answer.");

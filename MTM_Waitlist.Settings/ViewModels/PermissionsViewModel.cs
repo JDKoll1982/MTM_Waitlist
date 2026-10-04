@@ -51,7 +51,7 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
     private readonly IUserManagementService _userManagementService;
     private readonly IRoleCatalogService _roleCatalogService;
     private readonly INavigationService _navigationService;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
     /// <summary>The person whose last save can be undone, or zero when there is nothing to undo.</summary>
     private long _undoUserId;
@@ -62,14 +62,14 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
         IUserManagementService userManagementService,
         IRoleCatalogService roleCatalogService,
         INavigationService navigationService,
-        StartupState startupState)
+        IPersonIdentity personIdentity)
     {
         _permissionAdministrationService = permissionAdministrationService ?? throw new ArgumentNullException(nameof(permissionAdministrationService));
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _userManagementService = userManagementService ?? throw new ArgumentNullException(nameof(userManagementService));
         _roleCatalogService = roleCatalogService ?? throw new ArgumentNullException(nameof(roleCatalogService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
+        _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
     }
 
     /// <summary>The work the page's arrival started.</summary>
@@ -352,7 +352,7 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
         {
             // The store is a sentence on the screen here too. The service maps its own refusals, but the read that
             // follows a save can still fail, and this command must not take the page down with it.
-            StartupDebugLog.Error("Permissions", ex, "The save did not reach the store; nothing is recorded as saved.");
+            AppLog.Error("Permissions", ex, "The save did not reach the store; nothing is recorded as saved.");
             MessageText = UnavailableText;
         }
         finally
@@ -389,7 +389,7 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Permissions", ex, "The undo did not reach the store; nothing was reversed.");
+            AppLog.Error("Permissions", ex, "The undo did not reach the store; nothing was reversed.");
             MessageText = UnavailableText;
         }
         finally
@@ -429,7 +429,7 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
         {
             // The reader answered the moved-value prompt; a store that cannot be reached at that moment is reported
             // here rather than faulting out of the command.
-            StartupDebugLog.Error("Permissions", ex, "The restore did not reach the store; the value is unchanged.");
+            AppLog.Error("Permissions", ex, "The restore did not reach the store; the value is unchanged.");
             MessageText = UnavailableText;
         }
         finally
@@ -479,7 +479,7 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "Permissions",
                 ex,
                 "The people could not be read, so the page shows its unavailable state rather than an empty matrix (FR-096).");
@@ -513,7 +513,7 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "Permissions",
                 ex,
                 "A person's permissions could not be read, so the page shows its unavailable state rather than a matrix missing a row.");
@@ -525,7 +525,7 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
         }
 
         var readerRole = catalogue.FirstOrDefault(
-            entry => string.Equals(entry.RoleCode, _startupState.CurrentRoleCode, StringComparison.OrdinalIgnoreCase));
+            entry => string.Equals(entry.RoleCode, _personIdentity.CurrentRoleCode, StringComparison.OrdinalIgnoreCase));
 
         Replace(people, readings, catalogue, readerRole);
     }
@@ -658,7 +658,7 @@ public partial class PermissionsViewModel : ObservableRecipient, INavigationAwar
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "Permissions",
                 ex,
                 "The person's permissions could not be read back after the save; the save landed and the screen still shows what was asked for.");

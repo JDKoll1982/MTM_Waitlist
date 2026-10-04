@@ -49,7 +49,7 @@ public sealed class DunnageTypeVisibilityCatalogService : IDunnageTypeVisibility
             })
             .ToArray();
 
-        StartupDebugLog.Info("SettingsDunnageVisibility", $"GetCatalogAsync completed. VisibleCount={visible.Length}, HiddenCount={hidden.Length}.");
+        AppLog.Info("SettingsDunnageVisibility", $"GetCatalogAsync completed. VisibleCount={visible.Length}, HiddenCount={hidden.Length}.");
 
         return new DunnageTypeVisibilityCatalogResult
         {
@@ -81,7 +81,7 @@ public sealed class DunnageTypeVisibilityCatalogService : IDunnageTypeVisibility
 
     public async Task<string?> SaveVisibleDunnageTypesAsync(IReadOnlyCollection<string> visibleDunnageTypeIds, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SettingsDunnageVisibility", $"SaveVisibleDunnageTypesAsync started. RequestedVisibleCount={visibleDunnageTypeIds.Count}.");
+        AppLog.Info("SettingsDunnageVisibility", $"SaveVisibleDunnageTypesAsync started. RequestedVisibleCount={visibleDunnageTypeIds.Count}.");
         var visibleSet = visibleDunnageTypeIds
             .Where(id => !string.IsNullOrWhiteSpace(id))
             .Select(id => id.Trim())
@@ -115,12 +115,12 @@ public sealed class DunnageTypeVisibilityCatalogService : IDunnageTypeVisibility
                     cancellationToken).ConfigureAwait(false);
             }
 
-            StartupDebugLog.Info("SettingsDunnageVisibility", $"SaveVisibleDunnageTypesAsync completed. PersistedRowCount={allTypes.Count}, VisibleCount={visibleSet.Count}.");
+            AppLog.Info("SettingsDunnageVisibility", $"SaveVisibleDunnageTypesAsync completed. PersistedRowCount={allTypes.Count}, VisibleCount={visibleSet.Count}.");
             return null;
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsDunnageVisibility", ex, "SaveVisibleDunnageTypesAsync failed.");
+            AppLog.Error("SettingsDunnageVisibility", ex, "SaveVisibleDunnageTypesAsync failed.");
             return $"Unable to save dunnage type visibility: {ex.Message}";
         }
     }

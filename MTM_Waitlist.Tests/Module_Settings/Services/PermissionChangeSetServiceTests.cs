@@ -5,6 +5,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Settings.Services;
 
@@ -59,16 +60,16 @@ public sealed class PermissionChangeSetServiceTests
         }
 
         _helper = new MySqlHelperServer(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString! }));
 
         await DeleteFixturesAsync().ConfigureAwait(false);
 
         _actorUserId = await CreateFixtureAsync(ActorSignInName, "Zed Actor", ActorRoleCode).ConfigureAwait(false);
         _targetUserId = await CreateFixtureAsync(TargetSignInName, "Tess Target", TargetRoleCode).ConfigureAwait(false);
 
-        var state = new StartupState { UserId = _actorUserId, Username = ActorSignInName, CurrentRoleCode = ActorRoleCode };
+        var state = new FakePersonIdentity { UserId = _actorUserId, SignInName = ActorSignInName, CurrentRoleCode = ActorRoleCode };
         _service = new PermissionAdministrationService(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString }),
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString }),
             new RecordingPermissionService(),
             state);
     }

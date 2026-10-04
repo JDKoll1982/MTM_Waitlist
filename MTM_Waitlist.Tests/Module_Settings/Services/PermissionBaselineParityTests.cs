@@ -38,9 +38,19 @@ namespace MTM_Waitlist.Tests.Module_Settings.Services;
 /// asserted against that stated set. Nobody holds the role on ship day.
 /// </para>
 /// <para>
-/// <b>Three keys have no predecessor at all</b> (<c>permission.admin.users</c>,
-/// <c>permission.admin.reset_password</c> and <c>permission.admin.permissions</c>), so they are asserted against
-/// their stated sets rather than against a retired list. This is what makes SC-001 evaluable for them.
+/// <b>Seven keys have no predecessor at all</b> (<c>permission.admin.users</c>,
+/// <c>permission.admin.reset_password</c>, <c>permission.admin.permissions</c>, and the four
+/// 010-startup-rebuild keys <c>machine_configuration</c>, <c>ignored_locations_edit</c>, <c>log_panel</c> and
+/// <c>session_length</c>), so they are asserted against their stated sets rather than against a retired list.
+/// This is what makes SC-001 evaluable for them, and it is asserted against the shipped seed for all seven.
+/// </para>
+/// <para>
+/// <b>The live half asserts all seven, and the four new keys are the reason it is worth running.</b> The three
+/// account-administration keys predate this feature, so a person's live answer for them has always been part of
+/// the ship-day claim. The four keys this feature adds are the ones a store can genuinely be missing: a store
+/// that has not had this feature's seed applied holds no row for them at all, and a live answer of "false" for a
+/// key the seed grants is exactly the difference this comparison exists to report. That makes the four a
+/// migration check as well as a parity check, which is the honest thing for them to be.
 /// </para>
 /// <para>
 /// <b>The per-person side is deliberately absent.</b> The ship-day claim that somebody relying on their role
@@ -107,7 +117,16 @@ public sealed class PermissionBaselineParityTests
         (PermissionKeys.SetupWorkCenters, RetiredRoleListFixture.SetupWorkCenterManageRoles),
     ];
 
-    /// <summary>The keys with no predecessor list, and the roles their baselines are stated to ship to.</summary>
+    /// <summary>
+    /// The keys with no predecessor list that the store already carried, and the roles their baselines are
+    /// stated to ship to.
+    /// </summary>
+    /// <remarks>
+    /// These three replace no retired list because they were new when the declaration was written. They are
+    /// asserted against their stated sets rather than against a list — that is what makes SC-001 evaluable for
+    /// them — and every one of the nine roles is checked, so a role the key is stated not to ship to fails here if
+    /// it is granted it.
+    /// </remarks>
     private static readonly Dictionary<string, string[]> StatedSetsWithNoPredecessor = new(StringComparer.Ordinal)
     {
         [PermissionKeys.AdminUsers] =
@@ -116,6 +135,30 @@ public sealed class PermissionBaselineParityTests
             ["production_lead", "setup_lead", "material_handler_lead", "plant_manager", "it_department", "developer"],
         [PermissionKeys.AdminPermissions] =
             ["it_department", "plant_manager", "developer"],
+    };
+
+    /// <summary>
+    /// The four keys 010-startup-rebuild adds (T053), and the roles their baselines are stated to ship to.
+    /// </summary>
+    /// <remarks>
+    /// No retired list written earlier could describe them, so they are asserted against their stated sets — which
+    /// is what makes SC-001 evaluable for them — and every one of the nine roles is checked, so a role they are
+    /// stated not to ship to fails here if they are granted it. They are asserted against the shipped seed and
+    /// against a live store alike, because a store that has not had this feature's seed applied is the case their
+    /// live half exists to report.
+    /// </remarks>
+    private static readonly Dictionary<string, string[]> StatedSetsIntroducedByThisFeature = new(StringComparer.Ordinal)
+    {
+        [PermissionKeys.SettingsMachineConfiguration] =
+            ["it_department", "developer"],
+        [PermissionKeys.SettingsIgnoredLocationsEdit] =
+            ["it_department", "developer"],
+        [PermissionKeys.SettingsSessionLength] =
+            ["it_department", "developer"],
+        // Developer alone: the panel exists to read one machine's history (US5, SC-005), so IT Department is
+        // deliberately not on this one even though it holds the other three.
+        [PermissionKeys.SettingsLogPanel] =
+            ["developer"],
     };
 
     /// <summary>
@@ -215,11 +258,11 @@ public sealed class PermissionBaselineParityTests
     }
 
     [TestMethod]
-    public void TheShippedBaselines_GiveTheThreeKeysWithNoPredecessorTheirStatedSets()
+    public void TheShippedBaselines_GiveTheKeysWithNoPredecessorTheirStatedSets()
     {
         var baselines = ReadShippedBaselines();
 
-        foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor)
+        foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor.Concat(StatedSetsIntroducedByThisFeature))
         {
             var expectedTrue = new HashSet<string>(statedRoles, StringComparer.Ordinal);
 
@@ -347,7 +390,7 @@ public sealed class PermissionBaselineParityTests
         }
 
         var helper = new MySqlHelperServer(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString! }));
 
         // Nothing is stored for anybody in particular, which is what makes this a comparison of what each
         // person's role gives them rather than of rows somebody wrote (SC-004).
@@ -395,9 +438,17 @@ public sealed class PermissionBaselineParityTests
 
             foreach (var (key, retiredList) in ReplacedLists)
             {
+                // The same widening the shipped-data test applies, and for the same reason: the retired list is
+                // the record of what the application did before, so a key a later feature deliberately widened
+                // is expected to hold its added roles here too. Without this the live half fails on ship day
+                // for the widened key while the shipped-data half passes.
+                var widened = WidenedAfterShipDay.TryGetValue(key, out var widenedRoles)
+                    ? widenedRoles
+                    : [];
+
                 var expected = roleCode == StatedRoleCode
                     ? MaterialHandlerLeadGranted.Contains(key)
-                    : ExpectedHolders(key, retiredList).Contains(roleCode);
+                    : ExpectedHolders(key, retiredList).Contains(roleCode) || widened.Contains(roleCode);
 
                 Assert.AreEqual(
                     expected,
@@ -407,7 +458,9 @@ public sealed class PermissionBaselineParityTests
                         + $"{(expected ? "true" : "false")} today (list: {string.Join(", ", retiredList)}).");
             }
 
-            foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor)
+            // Every key with no predecessor, both the three the store has always carried and the four this feature
+            // adds, so a store missing one of the four is reported here rather than passing quietly.
+            foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor.Concat(StatedSetsIntroducedByThisFeature))
             {
                 Assert.AreEqual(
                     statedRoles.Contains(roleCode, StringComparer.Ordinal),

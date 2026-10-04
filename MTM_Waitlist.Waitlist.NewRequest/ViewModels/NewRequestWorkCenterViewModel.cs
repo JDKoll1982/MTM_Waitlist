@@ -30,10 +30,11 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
     private readonly IBuildingSelectionService _buildingSelectionService;
 
     /// <summary>
-    /// The signed-in person's own identity, carried from startup. The step attributes the request to them and to
-    /// nobody else: a literal here is what attributed every request in the store to one man (FR-046).
+    /// The signed-in person's own identity, read from the launch pipeline's resolved person. The step attributes
+    /// the request to them and to nobody else: a literal here is what attributed every request in the store to
+    /// one man (FR-046).
     /// </summary>
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
     /// <summary>
     /// The account records, read by the identifier the session carries. The directory is the authority on whether
@@ -155,14 +156,14 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         IWorkCenterCatalogService workCenterCatalogService,
         INewRequestFlowService flowService,
         IBuildingSelectionService buildingSelectionService,
-        StartupState startupState,
+        IPersonIdentity personIdentity,
         IEmployeeDirectoryService employeeDirectoryService)
     {
         _navigationService = navigationService;
         _workCenterCatalogService = workCenterCatalogService;
         _flowService = flowService;
         _buildingSelectionService = buildingSelectionService;
-        _startupState = startupState;
+        _personIdentity = personIdentity;
         _employeeDirectoryService = employeeDirectoryService;
     }
 
@@ -222,11 +223,11 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
             ApplyFilter();
             UpdateWorkCenterSectionsVisibility();
 
-            StartupDebugLog.Info("NewRequestWorkCenter", $"Catalog loaded. Workstation='{catalog.ComputerName}', HotCount={catalog.HotWorkCenters.Count}, OtherCount={catalog.OtherWorkCenters.Count}, ActiveJobCount={_activeJobWorkCenters.Count}.");
+            AppLog.Info("NewRequestWorkCenter", $"Catalog loaded. Workstation='{catalog.ComputerName}', HotCount={catalog.HotWorkCenters.Count}, OtherCount={catalog.OtherWorkCenters.Count}, ActiveJobCount={_activeJobWorkCenters.Count}.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("NewRequestWorkCenter", ex, "Failed to load the work center catalog.");
+            AppLog.Error("NewRequestWorkCenter", ex, "Failed to load the work center catalog.");
             WorkstationName = string.Empty;
             HotWorkCenters.Clear();
             OtherWorkCenters.Clear();
@@ -344,7 +345,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         var normalizedWorkCenter = workCenterItem.WorkCenterName.Trim();
         if (!_activeJobWorkCenters.Contains(normalizedWorkCenter))
         {
-            StartupDebugLog.Info("NewRequestWorkCenter", $"Blocked workstation selection for '{normalizedWorkCenter}' because no active setup job exists.");
+            AppLog.Info("NewRequestWorkCenter", $"Blocked workstation selection for '{normalizedWorkCenter}' because no active setup job exists.");
             IsNoActiveJobWarningVisible = true;
             IsVerificationWarningVisible = false;
             return;
@@ -354,15 +355,16 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         try
         {
             // No ConfigureAwait(false): the continuation sets bindable state, which is UI-thread-only.
+            var employeeNumber = _personIdentity.EmployeeNumber ?? string.Empty;
             var storedEmployee = await _employeeDirectoryService
-                .FindByEmployeeIdentifierAsync(_startupState.EmployeeNumber)
+                .FindByEmployeeIdentifierAsync(employeeNumber)
                 .ConfigureAwait(true);
 
-            verification = NewRequestFlowRules.VerifyEmployeeIdentity(_startupState.EmployeeNumber, storedEmployee);
+            verification = NewRequestFlowRules.VerifyEmployeeIdentity(employeeNumber, storedEmployee);
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("NewRequestWorkCenter", ex, "The employee lookup failed; the request was not started.");
+            AppLog.Error("NewRequestWorkCenter", ex, "The employee lookup failed; the request was not started.");
             IsNoActiveJobWarningVisible = false;
             IsVerificationWarningVisible = true;
             VerificationMessage = "The employee records could not be read, so this request could not be attributed. Try again.";
@@ -374,7 +376,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
             IsNoActiveJobWarningVisible = false;
             IsVerificationWarningVisible = true;
             VerificationMessage = verification.Message;
-            StartupDebugLog.Info("NewRequestWorkCenter", $"Employee verification blocked the request. Message='{verification.Message}'.");
+            AppLog.Info("NewRequestWorkCenter", $"Employee verification blocked the request. Message='{verification.Message}'.");
             return;
         }
 
@@ -382,7 +384,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         _state.RequesterEmployeeNumber = verification.EmployeeNumber;
         _state.RequesterEmployeeName = verification.EmployeeName;
 
-        StartupDebugLog.Info("NewRequestWorkCenter", $"Selected workstation '{normalizedWorkCenter}' for employee '{verification.EmployeeNumber}'.");
+        AppLog.Info("NewRequestWorkCenter", $"Selected workstation '{normalizedWorkCenter}' for employee '{verification.EmployeeNumber}'.");
         _navigationService.NavigateTo(typeof(NewRequestJobTypeViewModel).FullName!, _state);
     }
 

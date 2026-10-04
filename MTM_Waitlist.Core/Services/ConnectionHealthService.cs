@@ -57,7 +57,7 @@ public sealed class ConnectionHealthService : IConnectionHealthService
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Info("ConnectionHealth", $"Health probe failed for '{source}'. {ex.GetType().Name}: {ex.Message}");
+            AppLog.Info("ConnectionHealth", $"Health probe failed for '{source}'. {ex.GetType().Name}: {ex.Message}");
             reason = ClassifyException(ex);
         }
 
@@ -69,7 +69,7 @@ public sealed class ConnectionHealthService : IConnectionHealthService
             Reason = reason,
         };
         SetLastKnown(state);
-        StartupDebugLog.Info("ConnectionHealth", $"Health check for '{source}' = {state.Status}.");
+        AppLog.Info("ConnectionHealth", $"Health check for '{source}' = {state.Status}.");
         return state;
     }
 

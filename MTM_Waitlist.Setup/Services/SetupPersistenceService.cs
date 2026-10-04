@@ -49,10 +49,10 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
 
     public async Task<SetupSaveResult> SaveAsync(SetupSaveRequest request, bool forceReplace = false, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupPersistence", $"SaveAsync started. ForceReplace={forceReplace}, WorkCenter='{request.WorkCenter}', WO='{request.WorkOrder}', Part='{request.PartNumber}', Sequence='{request.SequenceNumber}'.");
+        AppLog.Info("SetupPersistence", $"SaveAsync started. ForceReplace={forceReplace}, WorkCenter='{request.WorkCenter}', WO='{request.WorkOrder}', Part='{request.PartNumber}', Sequence='{request.SequenceNumber}'.");
         if (await _activeJobCoordinatorService.HasActiveJobAsync(request.WorkCenter, cancellationToken).ConfigureAwait(false) && !forceReplace)
         {
-            StartupDebugLog.Info("SetupPersistence", $"Active job exists for WorkCenter='{request.WorkCenter}'. Replacement confirmation required.");
+            AppLog.Info("SetupPersistence", $"Active job exists for WorkCenter='{request.WorkCenter}'. Replacement confirmation required.");
             return new SetupSaveResult
             {
                 Success = false,
@@ -66,7 +66,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
         // updates" defect (FR-001, SC-001).
         var result = await SaveBackendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupPersistence", $"SaveAsync completed. Success={result.Success}, RequiresReplacementConfirmation={result.RequiresReplacementConfirmation}, Message='{result.Message}'.");
+        AppLog.Info("SetupPersistence", $"SaveAsync completed. Success={result.Success}, RequiresReplacementConfirmation={result.RequiresReplacementConfirmation}, Message='{result.Message}'.");
         return result;
     }
 
@@ -130,12 +130,12 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
 
     public async Task<string?> LoadSavedScrapTypeAsync(string workOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeAsync started. WO='{workOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
+        AppLog.Info("SetupPersistence", $"LoadSavedScrapTypeAsync started. WO='{workOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
         if (string.IsNullOrWhiteSpace(workOrder)
             || string.IsNullOrWhiteSpace(partNumber)
             || string.IsNullOrWhiteSpace(sequenceNumber))
         {
-            StartupDebugLog.Info("SetupPersistence", "LoadSavedScrapTypeAsync skipped due to missing required key(s).");
+            AppLog.Info("SetupPersistence", "LoadSavedScrapTypeAsync skipped due to missing required key(s).");
             return null;
         }
 
@@ -147,11 +147,11 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
 
         if (!string.IsNullOrWhiteSpace(exactPairScrapType))
         {
-            StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeAsync matched exact WO+Part+Sequence history entry. ScrapType='{exactPairScrapType}'.");
+            AppLog.Info("SetupPersistence", $"LoadSavedScrapTypeAsync matched exact WO+Part+Sequence history entry. ScrapType='{exactPairScrapType}'.");
             return exactPairScrapType;
         }
 
-        StartupDebugLog.Info("SetupPersistence", "LoadSavedScrapTypeAsync found no exact WO+Part+Sequence history scrap type.");
+        AppLog.Info("SetupPersistence", "LoadSavedScrapTypeAsync found no exact WO+Part+Sequence history scrap type.");
         return null;
     }
 
@@ -161,7 +161,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
         string sequenceNumber,
         CancellationToken cancellationToken)
     {
-        StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeInternalAsync started. Source=setup_part_sequence_custom_data, Scope=Part+Sequence, Part='{partNumber}', Sequence='{sequenceNumber}'.");
+        AppLog.Info("SetupPersistence", $"LoadSavedScrapTypeInternalAsync started. Source=setup_part_sequence_custom_data, Scope=Part+Sequence, Part='{partNumber}', Sequence='{sequenceNumber}'.");
                 var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
                         "sp_setup_job_history_scrap_type_get",
             new Dictionary<string, object?>
@@ -173,7 +173,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeInternalAsync query completed. Source=setup_part_sequence_custom_data, RowCount={rows.Count}.");
+        AppLog.Info("SetupPersistence", $"LoadSavedScrapTypeInternalAsync query completed. Source=setup_part_sequence_custom_data, RowCount={rows.Count}.");
 
         if (rows.Count == 0)
         {
@@ -182,30 +182,30 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
 
         if (!rows[0].TryGetValue("selected_scrap_type", out var scrapValue) || scrapValue is null)
         {
-            StartupDebugLog.Info("SetupPersistence", "LoadSavedScrapTypeInternalAsync found row but selected_scrap_type was null/missing.");
+            AppLog.Info("SetupPersistence", "LoadSavedScrapTypeInternalAsync found row but selected_scrap_type was null/missing.");
             return null;
         }
 
         var selectedScrapType = Convert.ToString(scrapValue)?.Trim();
         if (string.IsNullOrWhiteSpace(selectedScrapType))
         {
-            StartupDebugLog.Info("SetupPersistence", "LoadSavedScrapTypeInternalAsync found row but selected_scrap_type was empty.");
+            AppLog.Info("SetupPersistence", "LoadSavedScrapTypeInternalAsync found row but selected_scrap_type was empty.");
             return null;
         }
 
-        StartupDebugLog.Info("SetupPersistence", $"LoadSavedScrapTypeInternalAsync resolved selected_scrap_type='{selectedScrapType}'.");
+        AppLog.Info("SetupPersistence", $"LoadSavedScrapTypeInternalAsync resolved selected_scrap_type='{selectedScrapType}'.");
         return selectedScrapType;
     }
 
     private async Task<SetupSaveResult> SaveBackendAsync(SetupSaveRequest request, CancellationToken cancellationToken)
     {
-        StartupDebugLog.Info("SetupPersistence", "SaveBackendAsync started. Loading waitlist SQL script and executing stored procedure.");
+        AppLog.Info("SetupPersistence", "SaveBackendAsync started. Loading waitlist SQL script and executing stored procedure.");
         var distinctRequestScrapValues = request.SubordinateParts
             .Select(part => part.SelectedScrapType?.Trim())
             .Where(value => !string.IsNullOrWhiteSpace(value))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
-        StartupDebugLog.Info("SetupPersistence", $"SaveBackendAsync scrap payload snapshot. RequestSelectedScrapType='{request.SelectedScrapType}', SubordinatePartCount={request.SubordinateParts.Count}, DistinctSubordinateScrapCount={distinctRequestScrapValues.Length}, DistinctSubordinateScrapValues='{string.Join(" | ", distinctRequestScrapValues)}'.");
+        AppLog.Info("SetupPersistence", $"SaveBackendAsync scrap payload snapshot. RequestSelectedScrapType='{request.SelectedScrapType}', SubordinatePartCount={request.SubordinateParts.Count}, DistinctSubordinateScrapCount={distinctRequestScrapValues.Length}, DistinctSubordinateScrapValues='{string.Join(" | ", distinctRequestScrapValues)}'.");
         _ = await SetupWaitlistMySqlScriptStore.LoadAsync("create.sql", cancellationToken).ConfigureAwait(false);
 
         var parameters = new Dictionary<string, object?>
@@ -220,7 +220,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             ["p_selected_dunnage_parts_json"] = JsonSerializer.Serialize(request.SelectedDunnageParts),
             ["p_saved_by_user_id"] = null,
         };
-        StartupDebugLog.Info("SetupPersistence", $"SaveBackendAsync procedure parameters assembled. SubordinateJsonLength={Convert.ToString(parameters["p_subordinate_parts_json"])?.Length ?? 0}, SelectedDunnageJsonLength={Convert.ToString(parameters["p_selected_dunnage_parts_json"])?.Length ?? 0}." );
+        AppLog.Info("SetupPersistence", $"SaveBackendAsync procedure parameters assembled. SubordinateJsonLength={Convert.ToString(parameters["p_subordinate_parts_json"])?.Length ?? 0}, SelectedDunnageJsonLength={Convert.ToString(parameters["p_selected_dunnage_parts_json"])?.Length ?? 0}." );
 
         var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
             "sp_setup_save_setup",
@@ -228,11 +228,11 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupPersistence", $"sp_setup_save_setup completed. AffectedRows={affectedRows}.");
+        AppLog.Info("SetupPersistence", $"sp_setup_save_setup completed. AffectedRows={affectedRows}.");
 
         if (affectedRows <= 0)
         {
-            StartupDebugLog.Info("SetupPersistence", "SaveBackendAsync failed because stored procedure did not persist any row.");
+            AppLog.Info("SetupPersistence", "SaveBackendAsync failed because stored procedure did not persist any row.");
             return new SetupSaveResult
             {
                 Success = false,
@@ -256,7 +256,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupPersistence", $"sp_setup_part_sequence_custom_data_upsert completed. AffectedRows={customDataRows}.");
+        AppLog.Info("SetupPersistence", $"sp_setup_part_sequence_custom_data_upsert completed. AffectedRows={customDataRows}.");
 
         var historyRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
             "sp_setup_job_history_insert_for_pair",
@@ -271,7 +271,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupPersistence", $"setup_job_history insert completed. AffectedRows={historyRows}.");
+        AppLog.Info("SetupPersistence", $"setup_job_history insert completed. AffectedRows={historyRows}.");
 
         if (historyRows <= 0)
         {
@@ -292,10 +292,10 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
-        StartupDebugLog.Info("SetupPersistence", $"sp_setup_work_centers_touch completed. WorkCenter='{request.WorkCenter}', AffectedRows={touchRows}.");
+        AppLog.Info("SetupPersistence", $"sp_setup_work_centers_touch completed. WorkCenter='{request.WorkCenter}', AffectedRows={touchRows}.");
 
         await _activeJobCoordinatorService.RegisterActiveJobAsync(request, cancellationToken).ConfigureAwait(false);
-        StartupDebugLog.Info("SetupPersistence", "Active job coordinator registration completed.");
+        AppLog.Info("SetupPersistence", "Active job coordinator registration completed.");
 
         return new SetupSaveResult
         {

@@ -4,9 +4,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:MTM_Waitlist.Module_Startup.Views"
     xmlns:windowex="using:WinUIEx"
-    MinWidth="460"
+    Title="MTM Waitlist"
+    MinWidth="420"
     MinHeight="320"
     mc:Ignorable="d">
-    <Grid />
+
+    <!--
+        The whole surface is the page, so the window and the single-window path draw the same feed from the same
+        state. The window itself adds only the sizing and the rule about what closing it means.
+    -->
+    <views:SplashPage />
 </windowex:WindowEx>

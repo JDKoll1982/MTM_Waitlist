@@ -2,14 +2,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using MTM_Waitlist.Module_Settings.Models;
-using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Settings.Services;
 
 /// <summary>
 /// Implementation of IImageStorageConfigurationResolver.
-/// Resolves image storage configuration with support for database overrides.
-/// Uses a cache with invalidation support for performance.
+/// Resolves image storage configuration: the plant-wide override first, then this build's shipped default. Where
+/// pictures come from is held once for the whole plant rather than per computer (FR-040).
 /// </summary>
 public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurationResolver
 {
@@ -25,9 +24,9 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
     /// Initializes a new ImageStorageConfigurationResolver.
     /// </summary>
     /// <param name="logger">Logger for diagnostics</param>
-    /// <param name="appsettingsOptions">Configuration options from appsettings.json</param>
-    /// <param name="configService">Service for reading database configuration values</param>
-    /// <exception cref="ArgumentNullException">If any parameter is null</exception>
+    /// <param name="appsettingsOptions">The shipped defaults, used when the plant names no folder</param>
+    /// <param name="configService">Service for reading plant-wide configuration values</param>
+    /// <exception cref="ArgumentNullException">If a required parameter is null</exception>
     public ImageStorageConfigurationResolver(
         ILogger<ImageStorageConfigurationResolver> logger,
         IOptions<ImageStorageOptions> appsettingsOptions,
@@ -53,7 +52,7 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
                 return (string)cached.Value;
             }
 
-            // Try database override
+            // The plant-wide override, which is an IT-level decision that applies to every computer (FR-040).
             var dbValue = await _configService.GetSettingValueAsync(
                 ConfigSettingKeys.ImageStorageSharedFolderPath, "all_users");
             
@@ -65,11 +64,11 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
                 return dbValue.SettingValue;
             }
 
-            // Fall back to appsettings
+            // Fall back to this build's shipped default, which is what a plant that names no folder is left with.
             var appsettingsValue = _appsettingsOptions.Value.SharedFolderPath;
-            _logger.LogInformation("Using appsettings.json default for shared folder path: {Path}",
+            _logger.LogInformation("Using the shipped default for shared folder path: {Path}",
                                  appsettingsValue);
-            CacheValue(cacheKey, appsettingsValue, "appsettings");
+            CacheValue(cacheKey, appsettingsValue, "default");
             return appsettingsValue;
         }
         catch (Exception ex)
@@ -105,9 +104,9 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
             }
 
             var appsettingsValue = _appsettingsOptions.Value.KeysFolderPath;
-            _logger.LogInformation("Using appsettings.json default for key-files folder path: {Path}",
+            _logger.LogInformation("Using the shipped default for key-files folder path: {Path}",
                                  appsettingsValue);
-            CacheValue(cacheKey, appsettingsValue, "appsettings");
+            CacheValue(cacheKey, appsettingsValue, "default");
             return appsettingsValue;
         }
         catch (Exception ex)
@@ -115,6 +114,44 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
             _logger.LogError(ex, "Failed to resolve the key-files folder configuration");
             throw new InvalidOperationException(
                 "Failed to resolve the key-files folder configuration", ex);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<string> GetDunnageRootPathAsync()
+    {
+        try
+        {
+            var cacheKey = ConfigSettingKeys.DunnageRootPath;
+
+            if (_cache.TryGetValue(cacheKey, out var cached) && cached.IsValid())
+            {
+                _logger.LogDebug("Using cached dunnage root: {Source}", cached.Source);
+                return (string)cached.Value;
+            }
+
+            // The plant-wide override, which is an IT-level decision that applies to every computer (FR-040).
+            var dbValue = await _configService.GetSettingValueAsync(
+                ConfigSettingKeys.DunnageRootPath, "all_users");
+
+            if (dbValue != null && !string.IsNullOrWhiteSpace(dbValue.SettingValue))
+            {
+                _logger.LogInformation("Using database override for the dunnage root: {Path}",
+                                     dbValue.SettingValue);
+                CacheValue(cacheKey, dbValue.SettingValue, "database");
+                return dbValue.SettingValue;
+            }
+
+            var appsettingsValue = _appsettingsOptions.Value.DunnageRootPath;
+            _logger.LogInformation("Using the shipped default for the dunnage root: {Path}", appsettingsValue);
+            CacheValue(cacheKey, appsettingsValue, "default");
+            return appsettingsValue;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to resolve the dunnage root configuration");
+            throw new InvalidOperationException(
+                "Failed to resolve the dunnage root configuration", ex);
         }
     }
 
@@ -314,18 +351,6 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
     }
 
     /// <inheritdoc />
-    public async Task<SharedFolderResolution> GetSharedFolderResolutionAsync()
-    {
-        // The path first, and through the ordinary cascade: the store wins over this machine's own settings file
-        // (OQ-3), so the folder reported here is the folder every computer reads.
-        var folderPath = await GetSharedFolderPathAsync().ConfigureAwait(false);
-
-        return new SharedFolderResolution(
-            folderPath,
-            _appsettingsOptions.Value.SharedFolderPath?.Trim() ?? string.Empty);
-    }
-
-    /// <inheritdoc />
     public async Task<ImageStorageOptions> GetEffectiveConfigurationAsync()
     {
         _logger.LogInformation("Resolving effective image storage configuration with database overrides");
@@ -400,37 +425,6 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
         public bool IsValid() =>
             DateTime.UtcNow - CachedAtUtc < CacheTtl;
     }
-}
-
-/// <summary>
-/// Which folder holds the pictures for every computer, and which folder this machine's own settings file names.
-/// </summary>
-/// <param name="FolderPath">
-/// The folder every computer reads, resolved through the ordinary cascade, so the store's value when there is one.
-/// This is the truth: a recorded picture is stored relative to it and resolves under it (FR-009, FR-010).
-/// </param>
-/// <param name="MachineFolderPath">The folder this machine's own configuration carries, as it was written.</param>
-/// <remarks>
-/// The two are reported together because the interesting case is the one where they differ: a machine still
-/// carrying the old path in its settings file works from the store's answer while appearing to be configured
-/// otherwise, and that has to be said in one line rather than left to look like a picture that is simply not there
-/// (OQ-3: the store is the truth).
-/// </remarks>
-public sealed record SharedFolderResolution(string FolderPath, string MachineFolderPath)
-{
-    /// <summary>
-    /// Whether this machine's own configuration names a folder other than the one every computer reads.
-    /// </summary>
-    /// <remarks>
-    /// Compared after unifying separators and without regard to case, because the same share is written both ways
-    /// across this application's files and a difference in spelling is not a difference in folder.
-    /// </remarks>
-    public bool MachineDisagrees =>
-        MachineFolderPath.Length > 0
-        && string.Equals(
-            AppStoragePaths.NormalizeSeparators(MachineFolderPath),
-            AppStoragePaths.NormalizeSeparators(FolderPath),
-            StringComparison.OrdinalIgnoreCase) is false;
 }
 
 /// <summary>

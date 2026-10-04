@@ -9,6 +9,7 @@ using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 
@@ -367,11 +368,11 @@ public sealed class NewRequestWorkCenterViewModelTests
         RecordingNavigationService navigationService,
         IEmployeeDirectoryService? employeeDirectory = null)
     {
-        var startupState = new StartupState
+        var person = new FakePersonIdentity
         {
-            Username = "test.setup.lead",
+            SignInName = "test.setup.lead",
             EmployeeNumber = SignedInEmployeeNumber,
-            EmployeeName = SignedInEmployeeName,
+            DisplayName = SignedInEmployeeName,
         };
 
         return new NewRequestWorkCenterViewModel(
@@ -379,7 +380,7 @@ public sealed class NewRequestWorkCenterViewModelTests
             catalogService,
             new FakeNewRequestFlowService(),
             buildingService,
-            startupState,
+            person,
             employeeDirectory ?? new StubEmployeeDirectoryService(new EmployeeIdentity
             {
                 EmployeeNumber = SignedInEmployeeNumber,

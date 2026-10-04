@@ -18,7 +18,7 @@ external reads are cached).
 - **MSTest 3.7.0** (`MSTest.TestAdapter` + `MSTest.TestFramework`) on `Microsoft.NET.Test.Sdk` 17.13.0
 - `coverlet.collector` 6.0.2 for coverage collection — opt-in, not part of the gate
 - **No mocking library.** No Moq, NSubstitute, FakeItEasy or AutoFixture anywhere in the suite. Fakes are
-  hand-written: purpose-built no-op services (`NoOpAppLifecycleService.cs`, `NoOpSetupDialogService.cs`) and small
+  hand-written: purpose-built no-op services (`NoOpSetupDialogService.cs`) and small
   recording stubs declared in the test class that needs them
 - The app project declares `InternalsVisibleTo("MTM_Waitlist.Tests")`, so tests reach `internal` seams directly
 - The project is **deliberately nested inside the repository** so it stays under version control and on the CI

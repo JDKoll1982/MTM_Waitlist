@@ -1,7 +1,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Tests.Module_Settings;
 
 namespace MTM_Waitlist.Tests.Core.Services;
 
@@ -11,7 +13,7 @@ public sealed class IgnoredLocationsServiceTests
     [TestMethod]
     public async Task GetIgnoredLocationsAsync_WhenUnset_ReturnsDefaults()
     {
-        var service = new IgnoredLocationsService(new InMemorySettings());
+        var service = new IgnoredLocationsService(new InMemoryScopedPreferenceStore(), new AlwaysPermittingPermissionService());
 
         var result = await service.GetIgnoredLocationsAsync();
 
@@ -21,9 +23,9 @@ public sealed class IgnoredLocationsServiceTests
     [TestMethod]
     public async Task GetIgnoredLocationsAsync_ReturnsStoredAndNormalized()
     {
-        var settings = new InMemorySettings();
-        settings.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, new List<string> { "wc", "SHIP ", "scrap-1", "wc" }).GetAwaiter().GetResult();
-        var service = new IgnoredLocationsService(settings);
+        var preferences = new InMemoryScopedPreferenceStore();
+        preferences.SeedText(IgnoredLocationDefaults.SettingKey, PreferenceScope.Plant, "wc,SHIP ,scrap-1,wc");
+        var service = new IgnoredLocationsService(preferences, new AlwaysPermittingPermissionService());
 
         var result = await service.GetIgnoredLocationsAsync();
 
@@ -33,7 +35,7 @@ public sealed class IgnoredLocationsServiceTests
     [TestMethod]
     public async Task IsLocationIgnoredAsync_IsCaseInsensitiveAgainstDefaults()
     {
-        var service = new IgnoredLocationsService(new InMemorySettings());
+        var service = new IgnoredLocationsService(new InMemoryScopedPreferenceStore(), new AlwaysPermittingPermissionService());
 
         Assert.IsTrue(await service.IsLocationIgnoredAsync("wc"));
         Assert.IsTrue(await service.IsLocationIgnoredAsync("NCM"));
@@ -45,46 +47,31 @@ public sealed class IgnoredLocationsServiceTests
     [TestMethod]
     public async Task IsLocationIgnoredAsync_HonorsStoredSet()
     {
-        var settings = new InMemorySettings();
-        settings.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, new List<string> { "SCRAP-1" }).GetAwaiter().GetResult();
-        var service = new IgnoredLocationsService(settings);
+        var preferences = new InMemoryScopedPreferenceStore();
+        preferences.SeedText(IgnoredLocationDefaults.SettingKey, PreferenceScope.Plant, "SCRAP-1");
+        var service = new IgnoredLocationsService(preferences, new AlwaysPermittingPermissionService());
 
         Assert.IsTrue(await service.IsLocationIgnoredAsync("scrap-1"));
         Assert.IsFalse(await service.IsLocationIgnoredAsync("WC"), "Defaults no longer apply when a stored set exists.");
     }
 
-    private sealed class InMemorySettings : ILocalSettingsService
+    /// <summary>
+    /// Holds every permission asked of it, which is what the four read cases need: reading the list is open to
+    /// everybody and the gate only matters to the write.
+    /// </summary>
+    private sealed class AlwaysPermittingPermissionService : IPermissionService
     {
-        private readonly Dictionary<string, object> _values = new(StringComparer.Ordinal);
+        public Task<bool> HasPermissionAsync(string permissionKey, CancellationToken cancellationToken = default) =>
+            Task.FromResult(true);
 
-        public Task<T?> ReadSettingAsync<T>(string key)
+        public Task<IReadOnlyDictionary<string, bool>> HasPermissionsAsync(
+            IEnumerable<string> permissionKeys,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyDictionary<string, bool>>(
+                permissionKeys.ToDictionary(key => key, _ => true, StringComparer.Ordinal));
+
+        public void Invalidate()
         {
-            if (_values.TryGetValue(key, out var value) && value is T typed)
-            {
-                return Task.FromResult<T?>(typed);
-            }
-
-            return Task.FromResult(default(T));
         }
-
-        public Task SaveSettingAsync<T>(string key, T value)
-        {
-            _values[key] = value!;
-            return Task.CompletedTask;
-        }
-
-        public Task ResetSettingAsync(string key, CancellationToken cancellationToken = default)
-        {
-            _values.Remove(key);
-            return Task.CompletedTask;
-        }
-
-        public Task ResetAsync()
-        {
-            _values.Clear();
-            return Task.CompletedTask;
-        }
-
-        public Task CorruptForTestAsync() => Task.CompletedTask;
     }
 }

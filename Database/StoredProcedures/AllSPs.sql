@@ -1,159 +1,158 @@
--- Stored Procedure: sp_auth_computer_registered_get
+-- Stored Procedure: sp_auth_remembered_sign_ins_clear
 -- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T093)
+-- Feature: 010-startup-rebuild (task T046)
 --
--- Purpose: answer "is this machine a registered workstation?" for the logon screen. Replaces the inline
---          `SELECT COUNT(1) ...` in `StartupSessionRepository.ReadComputerRegisteredAsync` (FR-015).
+-- Purpose: forget the remembered sign-in for a person on this machine.
 --
 -- Contract:
---   IN  p_hostname_normalized       VARCHAR(255)   column width from core_computers_registry
---   IN  p_mac_address_normalized    VARCHAR(64)
+--   IN  p_user_id      BIGINT
+--   IN  p_computer_id  BIGINT
+--   OUT the affected-row count, through the non-query seam. 0 means there was nothing remembered to forget,
+--       which is a success, not a failure.
 --
---   OUT one row / one column: the number of matching registered rows (0 when there is none). The caller reads it
---       as a scalar and treats "greater than zero" as registered — the same shape the statement returned.
+-- The row is kept and its payload is destroyed. `is_active = 0` alone would be enough for every reader in this
+-- repository, but leaving the ciphertext behind would leave a value nobody intends to decrypt sitting in the
+-- store, and an IV left behind with no payload is a pair that can only confuse. Both byte columns are set to
+-- empty and the fingerprint to empty with them, so a cleared row is indistinguishable from one that never
+-- held a payload.
 --
--- Both columns must match: a machine that presents a different MAC than the one it registered with is not the
--- registered machine. `is_registered = 1` is part of the test, so a retired machine answers "no" without being
--- deleted from the registry (which would lose its history).
--- ============================================================
+-- This is the one place a stored byte column is written empty rather than with a value: an empty ciphertext is
+-- not a ciphertext, and the read procedure's `is_active = 1` filter means it can never be returned.
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_auth_computer_registered_get;
+DROP PROCEDURE IF EXISTS sp_auth_remembered_sign_ins_clear;
 
-CREATE PROCEDURE sp_auth_computer_registered_get(
-    IN p_hostname_normalized VARCHAR(255),
-    IN p_mac_address_normalized VARCHAR(64)
+CREATE PROCEDURE sp_auth_remembered_sign_ins_clear(
+    IN p_user_id BIGINT,
+    IN p_computer_id BIGINT
 )
-SELECT COUNT(1) AS registered_count
-FROM core_computers_registry
-WHERE hostname_normalized = p_hostname_normalized
-  AND mac_address_normalized = p_mac_address_normalized
-  AND is_registered = 1;
+UPDATE auth_remembered_sign_ins
+SET
+    payload_ciphertext = CAST('' AS BINARY),
+    payload_iv = CAST('' AS BINARY),
+    key_fingerprint = '',
+    is_active = 0,
+    updated_utc = fn_server_utc_now()
+WHERE
+    user_id = p_user_id
+    AND computer_id = p_computer_id
+    AND is_active = 1;
 
--- Stored Procedure: sp_auth_credentials_check
+-- Stored Procedure: sp_auth_remembered_sign_ins_get
 -- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T093); extended by
---          006-user-management-and-permissions (task T008)
+-- Feature: 010-startup-rebuild (task T046)
 --
--- Purpose: fetch the credential material for one active user, so the caller can verify a supplied password.
---          Replaces the inline SELECT in `StartupSessionRepository.CheckCredentialsAsync` (FR-015).
+-- Purpose: hand the caller the payload it stored for a person on this machine, so it can try to decrypt it.
 --
 -- Contract:
---   IN  p_username  VARCHAR(128)   the *normalized* (UPPER-case) username; column width from
---                                  core_users_profiles.username_normalized
+--   IN  p_user_id      BIGINT
+--   IN  p_computer_id  BIGINT
+--   OUT zero or one row: payload_ciphertext, payload_iv, key_fingerprint, updated_utc
 --
---   OUT zero or one row:
---     id, role_code, role_name, password_hash, password_salt, require_password_change, display_name,
---     employee_identifier, temporary_credential_failed_attempts
+-- No row means nothing was ever remembered for this pair, or what was remembered has been cleared, and the
+-- caller shows the ordinary sign-in form. An inactive row is never returned: clearing blanks the payload, so a
+-- reader that could see one would be reading a row that decrypts to nothing.
 --
--- Sign-in-name contract (corrected by T008): a sign-in name is stored and compared in UPPER case, so the
--- caller normalises to upper case before calling. The comment here previously said lower case; that was true
--- before this feature and is not any more (FR-002).
---
--- Semantics preserved exactly from the statement this replaces:
---   * `is_active = 1` only — a deactivated account cannot authenticate.
---   * the role comes from a LEFT JOIN, so a user with no assignment still returns a row with an empty role
---     rather than being treated as unknown;
---   * `ORDER BY ra.assigned_utc DESC LIMIT 1` — the newest assignment wins when a user holds several;
---   * `COALESCE(..., '')` on role/display name/employee id, so the caller never sees NULL for them.
---
--- Added by this feature, and read by ordinal, so the calling code's ordinals moved in the same change:
---   * `role_code` — the identity a gate compares. `role_name` is presentation and is never compared for
---     access (FR-054, FR-105).
---   * `temporary_credential_failed_attempts` — the wrong-attempt count against a temporary credential. It is
---     held with the account so it survives a restart (FR-037) and does not expire with time (FR-038).
---
--- The caller normalizes the username before calling (it applies `Trim().ToUpperInvariant()`); the procedure
--- does not repeat that, so a caller that passes a mixed-case name is not silently rescued into matching. That
--- asymmetry with `sp_auth_user_row_get` is pre-existing caller behaviour and was deliberately preserved.
--- ============================================================
+-- The store does not and cannot tell whether the payload is still decryptable. `key_fingerprint` is returned so
+-- the caller can answer that itself, which is what lets a rotated key fall back to the sign-in form instead of
+-- raising (FR-014).
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_auth_credentials_check;
+DROP PROCEDURE IF EXISTS sp_auth_remembered_sign_ins_get;
 
-CREATE PROCEDURE sp_auth_credentials_check(
-    IN p_username VARCHAR(128)
+CREATE PROCEDURE sp_auth_remembered_sign_ins_get(
+    IN p_user_id BIGINT,
+    IN p_computer_id BIGINT
 )
-SELECT u.id,
-       COALESCE(r.role_code, '') AS role_code,
-       COALESCE(r.role_name, '') AS role_name,
-       u.password_hash,
-       u.password_salt,
-       u.require_password_change,
-       COALESCE(u.display_name, '') AS display_name,
-       COALESCE(u.employee_identifier, '') AS employee_identifier,
-       u.temporary_credential_failed_attempts
-FROM core_users_profiles u
-LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
-LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
-WHERE u.username_normalized = p_username
-  AND u.is_active = 1
-ORDER BY ra.assigned_utc DESC
+SELECT
+    r.payload_ciphertext,
+    r.payload_iv,
+    r.key_fingerprint,
+    r.updated_utc
+FROM
+    auth_remembered_sign_ins r
+WHERE
+    r.user_id = p_user_id
+    AND r.computer_id = p_computer_id
+    AND r.is_active = 1
 LIMIT 1;
 
--- ============================================================
--- Stored Procedure: sp_auth_password_reset_required_get
+-- Stored Procedure: sp_auth_remembered_sign_ins_upsert
 -- Engine: MySQL 5.7
--- Purpose: Report whether one account still holds its temporary default password, so the application
---          can put the operator straight onto the "set a new password" surface at startup, BEFORE the
---          sign-in form is ever shown.
+-- Feature: 010-startup-rebuild (task T046)
+--
+-- Purpose: store or replace the remembered sign-in for a person on this machine (FR-014).
 --
 -- Contract:
---   IN  p_username  VARCHAR(128)   the username as the caller holds it, matched against
---                                  `username_normalized` exactly as `sp_auth_user_row_get` does
+--   IN  p_public_id          CHAR(36)      generated by the caller, which reads the row back by it
+--   IN  p_user_id            BIGINT
+--   IN  p_computer_id        BIGINT
+--   IN  p_payload_ciphertext VARBINARY(512) the encrypted payload; opaque here
+--   IN  p_payload_iv         VARBINARY(16)  the initialisation vector it was produced with
+--   IN  p_key_fingerprint    CHAR(64)       identifies the key that encrypted it
+--   OUT the affected-row count, through the non-query seam. This is a write and returns no result set.
 --
---   OUT zero or one row:
---       user_id, role_code, role_name, display_name, employee_identifier, password_reset_required
+-- One row per person per machine, as the table's key requires: re-remembering replaces the payload, the vector
+-- and the fingerprint in place and reactivates a row that had been cleared. `created_utc` is left alone on the
+-- replace path for the same reason the session writer leaves it alone — it records the first time, not the
+-- most recent.
 --
--- `password_reset_required` is 1 when either of the two signals the sign-in read already honours is
--- present: the stored password is the temporary marker (`'0000'`, or an empty/absent hash — see
--- `IsTemporaryDefaultPassword` in `StartupSessionRepository`), or the row's `require_password_change`
--- flag is set. A user who has set a real password has the flag cleared by
--- `sp_auth_user_password_update`, so this answers "has this account ever been signed in with?".
---
--- The verdict is deliberately NOT widened by this feature. Those two signals stay the whole rule (task T008),
--- which is what makes the legacy `0000` marker keep working and what makes FR-031 true.
---
--- `role_code` is the identity a gate compares; `role_name` is presentation and is never compared for access
--- (FR-054, FR-105).
---
--- Sign-in-name contract (corrected by T008): a sign-in name is stored and compared in UPPER case (FR-002), so
--- the caller normalises to upper case before calling.
---
--- No credential material is returned — only the 0/1 verdict — so the read is safe to call before any
--- authentication has happened. The row is the same one `sp_auth_user_row_get` returns, so the caller
--- gets the identity it needs to complete the reset without a second lookup.
---
--- Returns zero rows for an unknown or inactive user, which the caller treats as "no prompt".
--- ============================================================
+-- Nothing here validates the ciphertext, and nothing can: the store has no key and no plaintext. Its only
+-- obligations are to keep the three parts together and to keep them out of every log and every error message.
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_auth_password_reset_required_get;
+DROP PROCEDURE IF EXISTS sp_auth_remembered_sign_ins_upsert;
 
-CREATE PROCEDURE sp_auth_password_reset_required_get(
-    IN p_username VARCHAR(128)
+DELIMITER $$
+
+CREATE PROCEDURE sp_auth_remembered_sign_ins_upsert(
+    IN p_public_id CHAR(36),
+    IN p_user_id BIGINT,
+    IN p_computer_id BIGINT,
+    IN p_payload_ciphertext VARBINARY(512),
+    IN p_payload_iv VARBINARY(16),
+    IN p_key_fingerprint CHAR(64)
 )
-SELECT u.id AS user_id,
-       COALESCE(r.role_code, '') AS role_code,
-       COALESCE(r.role_name, '') AS role_name,
-       COALESCE(u.display_name, '') AS display_name,
-       COALESCE(u.employee_identifier, '') AS employee_identifier,
-       CASE
-           WHEN u.require_password_change = 1 THEN 1
-           WHEN COALESCE(u.password_hash, '') = '' THEN 1
-           WHEN u.password_hash = '0000' THEN 1
-           ELSE 0
-       END AS password_reset_required
-FROM core_users_profiles u
-LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
-LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
-WHERE u.username_normalized = p_username
-  AND u.is_active = 1
-ORDER BY ra.assigned_utc DESC
-LIMIT 1;
+BEGIN
+    DECLARE v_now_utc DATETIME;
+
+    SET v_now_utc = fn_server_utc_now();
+
+    INSERT INTO auth_remembered_sign_ins (
+        public_id,
+        user_id,
+        computer_id,
+        payload_ciphertext,
+        payload_iv,
+        key_fingerprint,
+        is_active,
+        created_utc,
+        updated_utc
+    )
+    VALUES (
+        TRIM(p_public_id),
+        p_user_id,
+        p_computer_id,
+        p_payload_ciphertext,
+        p_payload_iv,
+        LOWER(TRIM(p_key_fingerprint)),
+        1,
+        v_now_utc,
+        v_now_utc
+    )
+    ON DUPLICATE KEY UPDATE
+        public_id = VALUES(public_id),
+        payload_ciphertext = VALUES(payload_ciphertext),
+        payload_iv = VALUES(payload_iv),
+        key_fingerprint = VALUES(key_fingerprint),
+        is_active = 1,
+        updated_utc = v_now_utc;
+END$$
+
+DELIMITER ;
 
 -- Stored Procedure: sp_auth_roles_list
 -- Engine: MySQL 5.7
@@ -191,39 +190,6 @@ SELECT r.id AS role_id,
 FROM auth_roles_catalog r
 WHERE r.role_code <> 'admin'
 ORDER BY r.role_rank DESC, r.role_code ASC;
-
--- Stored Procedure: sp_auth_session_expiry_get
--- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T093)
---
--- Purpose: report the expiry of a user's current database session, if one exists. Replaces the inline SELECT in
---          `StartupSessionRepository.ReadSessionExpiryUtcAsync` (FR-015).
---
--- Contract:
---   IN  p_user_id  BIGINT
---   OUT zero or one row / one column: `expires_utc` of the newest live session, or no row when the user has none
---       (which the caller reads as "no database session" rather than as an error).
---
--- "Live" means exactly what the statement this replaces meant: `is_active = 1` and `revoked_utc IS NULL`. A
--- revoked or deactivated token must not be reported as a valid session, so neither predicate is dropped.
--- `ORDER BY expires_utc DESC LIMIT 1` keeps the caller's reading: the session that lasts longest wins when more
--- than one is live.
--- ============================================================
-
-USE mtm_waitlist;
-
-DROP PROCEDURE IF EXISTS sp_auth_session_expiry_get;
-
-CREATE PROCEDURE sp_auth_session_expiry_get(
-    IN p_user_id BIGINT
-)
-SELECT expires_utc
-FROM auth_sessions_tokens
-WHERE user_id = p_user_id
-  AND is_active = 1
-  AND revoked_utc IS NULL
-ORDER BY expires_utc DESC
-LIMIT 1;
 
 -- Stored Procedure: sp_auth_temporary_credential_attempt_record
 -- Engine: MySQL 5.7
@@ -279,42 +245,404 @@ END$$
 
 DELIMITER ;
 
--- Stored Procedure: sp_auth_user_password_update
+-- Stored Procedure: sp_auth_user_active_sessions_clear
 -- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T093)
+-- Feature: 010-startup-rebuild (task T045)
 --
--- Purpose: store a new password hash/salt for one active user and clear the forced-change flag. Replaces the
---          inline UPDATE in `StartupSessionRepository.UpdatePasswordAsync` (FR-015).
+-- Purpose: end the session for a person on this machine before the application restarts.
 --
 -- Contract:
---   IN  p_user_id        BIGINT
---   IN  p_password_hash  VARCHAR(128)     hex-encoded PBKDF2 hash (column width from core_users_profiles)
---   IN  p_password_salt  VARBINARY(32)    the per-user salt
+--   IN  p_user_id      BIGINT
+--   IN  p_computer_id  BIGINT
+--   OUT the affected-row count, through the non-query seam.
 --
---   OUT no result set. The affected-row count reaches the caller from the client (MySqlConnector's non-query
---       return value); 0 means the user was unknown or no longer active, which the caller reports as failure.
+-- The row is cleared in place and never deleted: `revoked_utc` is stamped from the store clock and `is_active`
+-- goes to 0, so the row survives as the record that the session existed and when it ended. That is also why
+-- this procedure is safe to run twice — the second run matches nothing, because the row it would match is no
+-- longer active, and reports 0.
 --
--- Semantics preserved exactly: the `is_active = 1` guard stays, `require_password_change` is cleared to 0 because
--- the change has just happened, and `updated_utc` is stamped from the server clock. The salt is regenerated by
--- the caller per change; the procedure never invents one, so an unset salt cannot slip through.
+-- The token digest is deliberately left in place. Blanking it would erase the evidence of which token was
+-- cleared, and the row is already unusable: every reader requires `is_active = 1` and a null `revoked_utc`.
+--
+-- There is deliberately no "clear every session for a person" member. A password reset must not end an
+-- existing session (S14), so no procedure here clears by person alone.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_active_sessions_clear;
+
+CREATE PROCEDURE sp_auth_user_active_sessions_clear(
+    IN p_user_id BIGINT,
+    IN p_computer_id BIGINT
+)
+UPDATE user_active_sessions
+SET
+    revoked_utc = fn_server_utc_now(),
+    is_active = 0
+WHERE
+    user_id = p_user_id
+    AND computer_id = p_computer_id
+    AND is_active = 1;
+
+-- Stored Procedure: sp_auth_user_active_sessions_get
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T045)
+--
+-- Purpose: validate a presented token against the one session stored for a person on a machine, and report it.
+--
+-- Contract:
+--   IN  p_user_id      BIGINT
+--   IN  p_computer_id  BIGINT
+--   IN  p_token_hash   CHAR(64)  the caller's SHA-256 hex digest
+--   OUT zero or one row: public_id, issued_utc, expires_utc, source_label, is_valid
+--
+-- No row means nothing has ever been stored for this pair and the answer is "not signed in". A row with
+-- `is_valid = 0` means a session exists and must not be honoured: it has been cleared, or it has expired.
+-- The two are distinct answers on purpose, because a caller that cannot tell them apart cannot report why the
+-- person was asked to sign in again.
+--
+-- The comparison is made by the store: `fn_server_utc_now() < expires_utc` is evaluated here, against the
+-- store's clock, exactly as the ruleset requires. Feeding the workstation's time into this decision is the one
+-- thing the requirement names and forbids.
+--
+-- A digest that does not match returns no row rather than an invalid row, so a wrong token cannot be used to
+-- learn that a session exists for the pair.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_active_sessions_get;
+
+CREATE PROCEDURE sp_auth_user_active_sessions_get(
+    IN p_user_id BIGINT,
+    IN p_computer_id BIGINT,
+    IN p_token_hash CHAR(64)
+)
+SELECT
+    s.public_id,
+    s.issued_utc,
+    s.expires_utc,
+    s.source_label,
+    CASE
+        WHEN s.is_active = 1
+            AND s.revoked_utc IS NULL
+            AND fn_server_utc_now() < s.expires_utc THEN 1
+        ELSE 0
+    END AS is_valid
+FROM
+    user_active_sessions s
+WHERE
+    s.user_id = p_user_id
+    AND s.computer_id = p_computer_id
+    AND s.token_hash = LOWER(TRIM(p_token_hash))
+LIMIT 1;
+
+-- Stored Procedure: sp_auth_user_active_sessions_list
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T045)
+--
+-- Purpose: the support read. Every live session, newest first, optionally narrowed to one person or one machine.
+--
+-- Contract:
+--   IN  p_user_id      BIGINT  NULL for every person
+--   IN  p_computer_id  BIGINT  NULL for every machine
+--   OUT one row per live session: public_id, user_id, display_name, computer_id, computer_name, issued_utc,
+--       expires_utc, source_label
+--
+-- "Live" has one definition, and it is the same one the validating reader uses: active, not revoked, and not
+-- yet expired by the store's clock. Writing the predicate out here rather than reusing a view keeps the two
+-- readers comparable by reading, which matters when the question being answered is why somebody was or was not
+-- asked to sign in.
+--
+-- The person's display name and the machine's name are joined in because the caller is a person reading a list,
+-- and an identifier it cannot recognise is not an answer. Both joins are inner joins against NOT NULL foreign
+-- keys, so a row can never be silently dropped by the read.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_active_sessions_list;
+
+CREATE PROCEDURE sp_auth_user_active_sessions_list(
+    IN p_user_id BIGINT,
+    IN p_computer_id BIGINT
+)
+SELECT
+    s.public_id,
+    s.user_id,
+    u.display_name,
+    s.computer_id,
+    c.computer_name,
+    s.issued_utc,
+    s.expires_utc,
+    s.source_label
+FROM
+    user_active_sessions s
+    INNER JOIN core_users_profiles u ON u.id = s.user_id
+    INNER JOIN core_computers_registry c ON c.id = s.computer_id
+WHERE
+    (p_user_id IS NULL OR s.user_id = p_user_id)
+    AND (p_computer_id IS NULL OR s.computer_id = p_computer_id)
+    AND s.is_active = 1
+    AND s.revoked_utc IS NULL
+    AND fn_server_utc_now() < s.expires_utc
+ORDER BY
+    s.issued_utc DESC,
+    s.id DESC;
+
+-- Stored Procedure: sp_auth_user_active_sessions_upsert
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T045)
+--
+-- Purpose: write or replace the one active session for a person on this machine (FR-010).
+--
+-- Contract:
+--   IN  p_public_id               CHAR(36)     generated by the caller, which reads the row back by it
+--   IN  p_user_id                 BIGINT
+--   IN  p_computer_id             BIGINT
+--   IN  p_token_hash              CHAR(64)     the caller's SHA-256 hex digest; the token itself never arrives
+--   IN  p_token_salt              VARBINARY(32) the salt that digest was computed with
+--   IN  p_session_length_minutes  INT          read from the session-length setting at sign-in time
+--   IN  p_source_label            VARCHAR(32)  the caller's vocabulary for where the session came from
+--   OUT the affected-row count, through the non-query seam. This is a write and returns no result set, so the
+--       caller that needs `expires_utc` reads it back through sp_auth_user_active_sessions_get. MySQL reports
+--       1 for an insert and 2 for a replace, so the caller treats "less than 1" as the failure, exactly as the
+--       other writes in this repository do.
+--
+-- `expires_utc` is computed here rather than supplied, because "now" has to be the store's clock: the
+-- workstation's clock is never consulted for session validity (ruleset, "Session and Security"). Both
+-- `issued_utc` and `expires_utc` come from that one reading of `fn_server_utc_now()`, so a session can never be
+-- issued after it expires.
+--
+-- The replace path is what makes "one active row per person per machine" true rather than merely intended: a
+-- second sign-in on the same machine repoints the existing row at the new digest and clears the revocation in
+-- the same statement, so there is no instant at which the machine holds two sessions for one person.
+--
+-- A session length that is missing or not positive is refused as `mtm_session_length_invalid` rather than
+-- silently becoming "never expires", because a session with no lifetime is the one outcome the requirement
+-- does not allow.
 -- ============================================================
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_auth_user_password_update;
+DROP PROCEDURE IF EXISTS sp_auth_user_active_sessions_upsert;
 
-CREATE PROCEDURE sp_auth_user_password_update(
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_auth_user_active_sessions_upsert(
+    IN p_public_id CHAR(36),
+    IN p_user_id BIGINT,
+    IN p_computer_id BIGINT,
+    IN p_token_hash CHAR(64),
+    IN p_token_salt VARBINARY(32),
+    IN p_session_length_minutes INT,
+    IN p_source_label VARCHAR(32)
+)
+BEGIN
+    DECLARE v_now_utc DATETIME;
+    DECLARE v_expires_utc DATETIME;
+
+    IF p_session_length_minutes IS NULL OR p_session_length_minutes <= 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'mtm_session_length_invalid';
+    END IF;
+
+    SET v_now_utc = fn_server_utc_now();
+    SET v_expires_utc = DATE_ADD(v_now_utc, INTERVAL p_session_length_minutes MINUTE);
+
+    INSERT INTO user_active_sessions (
+        public_id,
+        user_id,
+        computer_id,
+        token_hash,
+        token_salt,
+        issued_utc,
+        expires_utc,
+        revoked_utc,
+        is_active,
+        source_label,
+        created_utc
+    )
+    VALUES (
+        TRIM(p_public_id),
+        p_user_id,
+        p_computer_id,
+        LOWER(TRIM(p_token_hash)),
+        p_token_salt,
+        v_now_utc,
+        v_expires_utc,
+        NULL,
+        1,
+        TRIM(p_source_label),
+        v_now_utc
+    )
+    ON DUPLICATE KEY UPDATE
+        public_id = VALUES(public_id),
+        token_hash = VALUES(token_hash),
+        token_salt = VALUES(token_salt),
+        issued_utc = VALUES(issued_utc),
+        expires_utc = VALUES(expires_utc),
+        revoked_utc = NULL,
+        is_active = 1,
+        source_label = VALUES(source_label);
+    -- `created_utc` is deliberately absent from the update list: it records when this person first signed in on
+    -- this machine, and a later sign-in is not that moment.
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_auth_user_credential_get
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T110)
+--
+-- Purpose: return one account's identity and the material that confirms its credential, keyed on the
+--          upper-normalised sign-in name, so a caller can check a credential without a second read of the
+--          same row.
+--
+-- Contract:
+--   IN  p_username  VARCHAR(128)  the sign-in name as the caller holds it, stored upper case
+--
+--   OUT zero or one row: id, role_code, display_name, employee_identifier, password_hash, password_salt,
+--       require_password_change, temporary_credential_failed_attempts
+--
+-- Why this exists: `sp_auth_credentials_check` was retired with the rest of the startup-only procedures
+-- (T020), and nothing that survives returns a credential column. `sp_auth_user_row_get` deliberately omits
+-- them, so an identity read never pulls a hash into memory. Two callers need the credential material, and
+-- they are asking the same question, so they share one read instead of each inventing one: the sign-in
+-- path's credential check, and the machine-setup gate that authenticates the person who configures a
+-- computer.
+--
+-- It mirrors `sp_auth_user_row_get` on purpose, with the same join, the same active-row filter and the same
+-- `ORDER BY ra.assigned_utc DESC LIMIT 1`, so the two reads cannot disagree about which row is the person or
+-- which role is in force. What it adds is the four columns that read leaves out.
+--
+-- Two credential-state columns travel with the identity because one attempt must cost one read.
+-- `require_password_change` is what makes an account "still on a temporary credential" rather than "on an
+-- ordinary one", and the five-attempt limit applies to the temporary state alone (FR-012).
+-- `temporary_credential_failed_attempts` is the count that limit is judged against, held with the account so
+-- it survives closing and reopening the application (FR-012, SC-007).
+--
+-- `role_code` is the identity a gate compares and `role_name` is presentation, so only the code is returned.
+--
+-- The read owns no data and writes nothing. It never returns the plaintext of anything: `password_hash` is a
+-- PBKDF2 digest and `password_salt` is the salt it was computed with, which is all a comparison needs.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_credential_get;
+
+CREATE PROCEDURE sp_auth_user_credential_get(
+    IN p_username VARCHAR(128)
+)
+SELECT u.id,
+       COALESCE(r.role_code, '') AS role_code,
+       COALESCE(u.display_name, '') AS display_name,
+       COALESCE(u.employee_identifier, '') AS employee_identifier,
+       COALESCE(u.password_hash, '') AS password_hash,
+       u.password_salt,
+       u.require_password_change,
+       u.temporary_credential_failed_attempts
+FROM core_users_profiles u
+LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id
+LEFT JOIN auth_roles_catalog r ON r.id = ra.role_id
+WHERE u.username_normalized = p_username
+  AND u.is_active = 1
+ORDER BY ra.assigned_utc DESC
+LIMIT 1;
+
+-- Stored Procedure: sp_auth_user_password_set
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T116)
+--
+-- Purpose: replace one account's password with a new one it has just chosen, and leave the temporary state it
+--          was in, in one act.
+--
+-- Contract:
+--   IN  p_user_id       BIGINT
+--   IN  p_password_hash VARCHAR(128)  the salted hash of the new password, computed by the caller
+--   IN  p_password_salt VARBINARY(32) the salt that hash was computed with
+--
+--   OUT the affected-row count, through the non-query seam. 0 means no such account, which is reported rather
+--       than treated as a silent success.
+--
+-- Why this exists: FR-013 requires a person still on a temporary credential to set a new password before
+-- anything else, and `sp_auth_user_password_update` was retired with the rest of the startup-only procedures
+-- (T020). Nothing that survives writes this column pair for the account itself: `sp_user_management_update`
+-- deliberately leaves credentials alone, and `sp_user_management_reset_password` issues a fresh one-time PIN
+-- for an administrator to hand over, which is a different act and would set `require_password_change` back to 1
+-- rather than clearing it.
+--
+-- What it writes, and nothing else:
+--   * `password_hash` and `password_salt`, which together are the whole of the credential;
+--   * `require_password_change = 0`, because the person has just replaced the credential the flag stood for.
+--     This is what takes the account out of the temporary state the five-attempt limit applies to (FR-012);
+--   * `temporary_credential_failed_attempts = 0`, because the count is judged against a state the account has
+--     just left, and carrying it forward would refuse a fresh password on a later sign-in.
+--
+-- It deliberately does not touch `is_active`, `display_name`, the role assignment or any session: a person
+-- changing their own password does not change who they are, whether they may sign in, or where they are already
+-- signed in. It writes no audit row, because the account has no actor to name and the store's audit table is the
+-- user-management screen's record of what an administrator did to somebody else.
+--
+-- The plaintext never arrives. The caller computes the hash and the salt and passes those, so nothing
+-- recoverable is ever sent to, held by, or logged by the store.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_password_set;
+
+CREATE PROCEDURE sp_auth_user_password_set(
     IN p_user_id BIGINT,
     IN p_password_hash VARCHAR(128),
     IN p_password_salt VARBINARY(32)
 )
 UPDATE core_users_profiles
-SET password_hash = p_password_hash,
+SET
+    password_hash = TRIM(p_password_hash),
     password_salt = p_password_salt,
     require_password_change = 0,
-    updated_utc = UTC_TIMESTAMP()
-WHERE id = p_user_id
-  AND is_active = 1;
+    temporary_credential_failed_attempts = 0
+WHERE
+    id = p_user_id
+    AND is_active = 1;
+
+-- Stored Procedure: sp_auth_user_roles_get
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T195)
+--
+-- Purpose: return every role a named person holds, one row per assignment, so the identity contract's
+--          `HeldRoleCodes` is the person's whole set rather than the single role `sp_auth_user_row_get` puts in
+--          force. Closes the held-roles gap disclosed in the concerns log.
+--
+-- Contract:
+--   IN  p_username  VARCHAR(128)   the sign-in name as the caller holds it, upper-normalised in the store
+--
+--   OUT zero or more rows, ordered by the assignment moment descending then code ascending:
+--     role_code, role_name, role_rank, assigned_utc
+--
+-- It is read-only: a read returns rows and takes no OUT parameter. It owns no data, so a reversal cannot lose a
+-- row. An inner join on the assignments is deliberate: a person with no assignment holds no role, so the honest
+-- answer to that is zero rows rather than a row with a blank code. The retired `admin` code is deliberately not
+-- filtered, because `HeldRoleCodes` is defined as "every assignment for the person".
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_auth_user_roles_get;
+
+CREATE PROCEDURE sp_auth_user_roles_get(
+    IN p_username VARCHAR(128)
+)
+SELECT COALESCE(r.role_code, '') AS role_code,
+       COALESCE(r.role_name, '') AS role_name,
+       COALESCE(r.role_rank, 0) AS role_rank,
+       ra.assigned_utc AS assigned_utc
+FROM core_users_profiles u
+JOIN auth_roles_assignments ra ON ra.user_id = u.id
+JOIN auth_roles_catalog r ON r.id = ra.role_id
+WHERE u.username_normalized = p_username
+  AND u.is_active = 1
+ORDER BY ra.assigned_utc DESC, r.role_code ASC;
 
 -- Stored Procedure: sp_auth_user_row_get
 -- Engine: MySQL 5.7
@@ -2130,43 +2458,6 @@ WHERE setting_key = p_setting_key
   AND scope_key = p_scope_key
 LIMIT 1;
 
--- Create procedure: sp_core_buildings_upsert
--- Engine: MySQL 5.7
-
-USE mtm_waitlist;
-
-DROP PROCEDURE IF EXISTS sp_core_buildings_upsert;
-
-CREATE PROCEDURE sp_core_buildings_upsert(
-    IN p_building_code VARCHAR(64),
-    IN p_building_name VARCHAR(128),
-    IN p_is_active TINYINT,
-    IN p_updated_by_user_id BIGINT
-)
-INSERT INTO core_buildings_catalog (
-    public_id,
-    building_code,
-    building_name,
-    is_active,
-    created_utc,
-    updated_utc,
-    updated_by_user_id
-)
-SELECT
-    UUID(),
-    TRIM(p_building_code),
-    TRIM(p_building_name),
-    p_is_active,
-    UTC_TIMESTAMP(),
-    UTC_TIMESTAMP(),
-    p_updated_by_user_id
-FROM dual
-ON DUPLICATE KEY UPDATE
-    building_name = VALUES(building_name),
-    is_active = VALUES(is_active),
-    updated_utc = UTC_TIMESTAMP(),
-    updated_by_user_id = VALUES(updated_by_user_id);
-
 -- Stored Procedure: sp_core_computers_registry_delete
 -- Engine: MySQL 5.7
 -- Feature: 001-module-mock-visual-fallback (task T092)
@@ -2193,6 +2484,47 @@ CREATE PROCEDURE sp_core_computers_registry_delete(
 )
 DELETE FROM core_computers_registry
 WHERE id = p_id;
+
+-- Stored Procedure: sp_core_computers_registry_display_name_get
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T075)
+--
+-- Purpose: answer which machine already holds a display name, so a save can ask for a different one instead of
+--          colliding on the store's unique key, and a reset can refuse before it writes anything.
+--
+-- Contract:
+--   IN  p_display_name  VARCHAR(128)   the name being claimed (column width from core_computers_registry)
+--   OUT zero or one row: id, computer_name, display_name, is_registered
+--
+-- At most one row can be returned, and that is a fact about the schema rather than about this read:
+-- `uq_core_computers_registry_display_name` makes the column unique, so the `LIMIT 1` is there to keep the answer
+-- unambiguous rather than to break a tie.
+--
+-- The read is deliberately keyed on the name and not on the machine. A caller asking "is this name free" knows
+-- the name it wants but may not yet have a row at all — a first save creates one — and comparing against the
+-- machine it thinks it is would answer the wrong question: the interesting case is precisely the name belonging
+-- to a *different* machine, which is what a machine-scoped comparison would miss.
+--
+-- `id` is returned so the caller can tell "the name is mine already" (rewriting the same name onto the same
+-- machine, which is not a collision) from "the name is somebody else's" (a refusal).
+--
+-- This is a read and returns a result set. It owns no data, so its rollback drops nothing but the routine.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computers_registry_display_name_get;
+
+CREATE PROCEDURE sp_core_computers_registry_display_name_get(
+    IN p_display_name VARCHAR(128)
+)
+SELECT
+    id,
+    computer_name,
+    display_name,
+    is_registered
+FROM core_computers_registry
+WHERE display_name = p_display_name
+LIMIT 1;
 
 -- Stored Procedure: sp_core_computers_registry_get_all
 -- Engine: MySQL 5.7
@@ -2223,39 +2555,6 @@ SELECT
     is_registered
 FROM core_computers_registry
 ORDER BY display_name ASC, computer_name ASC;
-
--- Stored Procedure: sp_core_computers_registry_lookup_by_mac_get
--- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T092)
---
--- Purpose: find the most recently updated registry row for a MAC address, whatever name it currently holds.
---          Replaces the inline SELECT in ComputerRegistryService.LookupComputerByMacAsync (FR-015).
---
--- Contract:
---   IN  p_mac_address_normalized  VARCHAR(64)
---   OUT zero or one row: id, computer_name, display_name, description, mac_address_normalized, is_registered
---       (newest updated_utc first — the same tie-break the inline statement used, so a machine that was
---        renamed resolves to its current row rather than an older one)
--- ============================================================
-
-USE mtm_waitlist;
-
-DROP PROCEDURE IF EXISTS sp_core_computers_registry_lookup_by_mac_get;
-
-CREATE PROCEDURE sp_core_computers_registry_lookup_by_mac_get(
-    IN p_mac_address_normalized VARCHAR(64)
-)
-SELECT
-    id,
-    computer_name,
-    display_name,
-    description,
-    mac_address_normalized,
-    is_registered
-FROM core_computers_registry
-WHERE mac_address_normalized = p_mac_address_normalized
-ORDER BY updated_utc DESC
-LIMIT 1;
 
 -- Stored Procedure: sp_core_computers_registry_lookup_by_name_get
 -- Engine: MySQL 5.7
@@ -2304,42 +2603,6 @@ FROM core_computers_registry
 WHERE computer_name = p_name
    OR hostname_normalized = p_name
 ORDER BY CASE WHEN computer_name = p_name THEN 0 ELSE 1 END
-LIMIT 1;
-
--- Stored Procedure: sp_core_computers_registry_lookup_by_name_mac_get
--- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T092)
---
--- Purpose: find the registry row for one exact (computer_name, mac_address_normalized) pair — the identity a
---          logon presents. Replaces the inline SELECT in ComputerRegistryService.LookupComputerAsync (FR-015).
---
--- Contract:
---   IN  p_computer_name           VARCHAR(128)  column width from core_computers_registry
---   IN  p_mac_address_normalized  VARCHAR(64)
---   OUT zero or one row: id, computer_name, display_name, description, mac_address_normalized, is_registered
---
--- No TRIM here: the caller already trims both values, so adding it would only hide a caller that stopped
--- doing so. The predicate is otherwise byte-for-byte the statement this replaces.
--- ============================================================
-
-USE mtm_waitlist;
-
-DROP PROCEDURE IF EXISTS sp_core_computers_registry_lookup_by_name_mac_get;
-
-CREATE PROCEDURE sp_core_computers_registry_lookup_by_name_mac_get(
-    IN p_computer_name VARCHAR(128),
-    IN p_mac_address_normalized VARCHAR(64)
-)
-SELECT
-    id,
-    computer_name,
-    display_name,
-    description,
-    mac_address_normalized,
-    is_registered
-FROM core_computers_registry
-WHERE computer_name = p_computer_name
-  AND mac_address_normalized = p_mac_address_normalized
 LIMIT 1;
 
 -- Stored Procedure: sp_core_computers_registry_registered_get
@@ -2417,47 +2680,6 @@ SET computer_name = p_computer_name,
     is_registered = p_is_registered,
     updated_utc = UTC_TIMESTAMP()
 WHERE id = p_id;
-
--- Stored Procedure: sp_core_computers_registry_update_by_mac
--- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T092)
---
--- Purpose: follow a machine that was renamed — update the newest row for a MAC address. Replaces the inline
---          UPDATE in ComputerRegistryService.UpdateComputerByMacAsync (FR-015).
---
--- Contract:
---   IN  p_mac_address_normalized   VARCHAR(64)
---   IN  p_computer_name            VARCHAR(128)
---   IN  p_hostname_normalized      VARCHAR(255)
---   IN  p_display_name             VARCHAR(128)
---   IN  p_description              VARCHAR(255)   NULL when the caller has no description
---
--- `ORDER BY id DESC LIMIT 1` is kept deliberately: a MAC can legitimately have more than one row (renames,
--- reimages), and the caller's intent is to move the newest one. `mac_address_normalized` and `is_registered`
--- are not touched — the statement this replaces did not touch them either, and rewriting the MAC here would
--- break the identity the row is being found by.
--- ============================================================
-
-USE mtm_waitlist;
-
-DROP PROCEDURE IF EXISTS sp_core_computers_registry_update_by_mac;
-
-CREATE PROCEDURE sp_core_computers_registry_update_by_mac(
-    IN p_mac_address_normalized VARCHAR(64),
-    IN p_computer_name VARCHAR(128),
-    IN p_hostname_normalized VARCHAR(255),
-    IN p_display_name VARCHAR(128),
-    IN p_description VARCHAR(255)
-)
-UPDATE core_computers_registry
-SET computer_name = p_computer_name,
-    hostname_normalized = p_hostname_normalized,
-    display_name = p_display_name,
-    description = p_description,
-    updated_utc = UTC_TIMESTAMP()
-WHERE mac_address_normalized = p_mac_address_normalized
-ORDER BY id DESC
-LIMIT 1;
 
 -- Stored Procedure: sp_core_computers_registry_upsert
 -- Engine: MySQL 5.7
@@ -2563,28 +2785,613 @@ WHERE u.employee_identifier IS NOT NULL
 ORDER BY u.is_active DESC, u.id ASC
 LIMIT 1;
 
--- Stored Procedure: sp_server_utc_now_get
+-- Stored Procedure: sp_machine_configuration_reset
 -- Engine: MySQL 5.7
--- Feature: 001-module-mock-visual-fallback (task T093)
+-- Feature: 010-startup-rebuild (task T075)
 --
--- Purpose: the database server's UTC clock, so session validity is judged against the server rather than the
---          client. Replaces the inline `SELECT fn_server_utc_now();` in
---          `StartupSessionRepository.ReadServerTimeUtcAsync` (FR-015, and the schema ruleset's session rule that
---          "session validity must be comparable to DB server UTC").
+-- Purpose: restore this machine's configuration to its defaults, and only the parts it is told are broken
+--          (FR-018, FR-019; contracts/machine-configuration-contract.md section 4).
 --
 -- Contract:
---   OUT one row / one column: the server's UTC timestamp, from the existing `fn_server_utc_now()` function.
+--   IN  p_computer_id             BIGINT        the machine, from `core_computers_registry.id`
+--   IN  p_actor_user_id           BIGINT        the person driving the reset; NULL when there is none
+--   IN  p_default_display_name    VARCHAR(128)  the name a reset display name is restored to
+--   IN  p_reset_display_name      TINYINT       1 to restore the display name, 0 to leave it
+--   IN  p_reset_description       TINYINT       1 to clear the description, 0 to leave it
+--   IN  p_reset_picture_sources   TINYINT       1 to withdraw this machine's picture sources, 0 to leave them
+--   IN  p_reset_scoped_preferences TINYINT      1 to remove this machine's scoped preference rows, 0 to leave them
+--   OUT the affected-row count, through the non-query seam. A reset that matched nothing is a successful no-op,
+--       exactly like the other writes in this repository.
 --
--- The function itself is unchanged and still the single implementation of "now" — this only gives the application
--- a procedure-shaped way to ask for it, so no statement text has to live in C#.
--- ============================================================
+-- One procedure rather than three, and why
+-- ----------------------------------------
+-- A reset spans three tables — `core_computers_registry` for the identity half, `config_images_locations` for the
+-- picture sources, and `config_settings_values` for the machine's scoped preferences — and a reset that stopped
+-- half way would leave a machine in a state none of the three can express on its own: a name with no folders, or
+-- folders with no name, which the readiness check would have to call "removed" when nobody removed anything. So
+-- the three writes are one transaction behind one call, and this procedure is the single writer of a machine's
+-- configuration reset. Its name is descriptive rather than table-prefixed for that reason: there is no one table
+-- it belongs to. (The repository's procedure names are lower snake_case and within the 64-character limit; no
+-- banned term appears in this one.)
+--
+-- What it may never touch, enforced by the WHERE clauses and not by convention
+-- -------------------------------------------------------------------------
+-- Every statement below is filtered to `p_computer_id`:
+--   * `core_computers_registry` by `id`, so no other machine's name or description can be reached;
+--   * `config_images_locations` by `computer_id` (and `scope = 'computer'`, so a future scope carrying a machine
+--     id cannot be caught), so no other machine's folders are withdrawn;
+--   * `config_settings_values` by `computer_id`, so no other machine's preference — and no person-scoped or
+--     role-scoped row, which carry a NULL `computer_id` — is removed.
+-- Nothing here reads or writes a person, a role, a permission, a session or a log entry. In particular it does
+-- not delete the registry row itself: that row is also referenced by `user_active_sessions` and
+-- `auth_remembered_sign_ins` through foreign keys that would refuse the delete, and clearing either of those is
+-- explicitly outside what a reset may do (section 4, "must never touch … any session").
+--
+-- Why the display name is restored rather than emptied
+-- ---------------------------------------------------
+-- `core_computers_registry.display_name` is NOT NULL and carries `uq_core_computers_registry_display_name`, so it
+-- cannot be emptied: a second machine restored the same way would collide on that key and the reset would fail.
+-- The default this procedure restores is therefore the machine's own name, which is what it is known by before
+-- anybody gives it a friendlier one and what machine setup pre-fills. The caller checks the default is free
+-- before calling here (sp_core_computers_registry_display_name_get), so a taken default is a clean refusal in the
+-- application rather than a duplicate-key error raised out of a write.
+--
+-- Why picture sources are withdrawn rather than deleted
+-- ----------------------------------------------------
+-- `is_active = 0` is this table's own word for a withdrawn override, and it is what keeps the three rows from
+-- being re-inserted as duplicates: `uq_config_images_locations_scope_item` spans (scope, item id) regardless of
+-- `is_active`, so a machine that is set up again has its three rows replaced in place and reactivated by
+-- sp_config_images_locations_computer_sources_set. The withdrawn rows are also what make the readiness check
+-- answer "configuration removed" rather than "never configured" for this machine (FR-009), which is the honest
+-- report of what a reset just did.
+--
+-- Why the scoped-preference delete is safe
+-- ----------------------------------------
+-- `config_settings_history.config_setting_id` references `config_settings_values.id`, and the foreign key has no
+-- ON DELETE rule, so a value row named by a history row cannot be removed. The only writer of that history table
+-- is sp_config_permissions_user_set, and it writes `scope_type = 'user'` rows with a NULL `computer_id`. A row
+-- scoped to a machine therefore cannot be named by a history row, and this delete cannot silently destroy an
+-- audit record. If that ever changed, the foreign key would refuse the delete loudly here rather than the record
+-- being lost — which is the safe direction for that to fail in.
 
 USE mtm_waitlist;
 
-DROP PROCEDURE IF EXISTS sp_server_utc_now_get;
+DROP PROCEDURE IF EXISTS sp_machine_configuration_reset;
 
-CREATE PROCEDURE sp_server_utc_now_get()
-SELECT fn_server_utc_now() AS server_utc_now;
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_machine_configuration_reset(
+    IN p_computer_id BIGINT,
+    IN p_actor_user_id BIGINT,
+    IN p_default_display_name VARCHAR(128),
+    IN p_reset_display_name TINYINT,
+    IN p_reset_description TINYINT,
+    IN p_reset_picture_sources TINYINT,
+    IN p_reset_scoped_preferences TINYINT
+)
+BEGIN
+    DECLARE v_now_utc DATETIME;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    SET v_now_utc = fn_server_utc_now();
+
+    START TRANSACTION;
+
+    IF p_reset_picture_sources = 1 THEN
+        UPDATE config_images_locations
+        SET is_active = 0,
+            updated_by_user_id = p_actor_user_id,
+            updated_utc = v_now_utc
+        WHERE scope = 'computer'
+          AND computer_id = p_computer_id
+          AND is_active = 1;
+    END IF;
+
+    IF p_reset_display_name = 1 OR p_reset_description = 1 THEN
+        UPDATE core_computers_registry
+        SET display_name = CASE
+                WHEN p_reset_display_name = 1 THEN p_default_display_name
+                ELSE display_name
+            END,
+            description = CASE
+                WHEN p_reset_description = 1 THEN NULL
+                ELSE description
+            END,
+            updated_utc = v_now_utc
+        WHERE id = p_computer_id;
+    END IF;
+
+    IF p_reset_scoped_preferences = 1 THEN
+        DELETE FROM config_settings_values
+        WHERE computer_id = p_computer_id;
+    END IF;
+
+    COMMIT;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_ops_startup_logs_filter
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T049)
+--
+-- Purpose: the developer panel's reader. One page of entries, newest first, narrowed by whichever filters the
+--          reader set.
+--
+-- Contract:
+--   IN  p_level             VARCHAR(16)   NULL for any severity
+--   IN  p_host_id           VARCHAR(128)  NULL for any machine
+--   IN  p_actor_id          VARCHAR(128)  NULL for any person
+--   IN  p_module            VARCHAR(128)  NULL for any module
+--   IN  p_error_type        VARCHAR(128)  NULL for any fault type
+--   IN  p_error_fingerprint CHAR(64)      NULL for any fingerprint
+--   IN  p_from_utc          DATETIME      NULL for the start of the default window
+--   IN  p_to_utc            DATETIME      NULL for now
+--   IN  p_page_size         INT           NULL or not positive for the default page
+--   IN  p_offset            INT           NULL or negative for the first page
+--   OUT one row per entry, newest first: id, public_id, correlation_id, created_utc, level, event_action,
+--       outcome, actor_kind, actor_id, host_id, mac_address, module, error_type, message, exception_detail,
+--       error_fingerprint, previous_hash, entry_hash, payload_json
+--
+-- Both bounds are always in force. A reader that supplies neither window bound is not asking for "everything" —
+-- an unbounded read of a store that only grows is the freeze this procedure exists to prevent — it is asking
+-- for the default window, which is the last 30 days ending now. A page size is likewise clamped: at most 1000
+-- rows, because the panel draws a table and not a report.
+--
+-- Filters are equality on the six panel controls and nothing else, which is why each of the six has an index
+-- leading with its own column (task T047). No filter is guessed from the others: a filter the reader did not set
+-- is `NULL`, and NULL means "any", distinctly from a value that happens to be the empty string.
+--
+-- The chain link is returned with each row. The panel shows it and a support reader can verify it, which is the
+-- only way the chain is ever checked — nothing enforces it at write time beyond this procedure's own discipline.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_ops_startup_logs_filter;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_ops_startup_logs_filter(
+    IN p_level VARCHAR(16),
+    IN p_host_id VARCHAR(128),
+    IN p_actor_id VARCHAR(128),
+    IN p_module VARCHAR(128),
+    IN p_error_type VARCHAR(128),
+    IN p_error_fingerprint CHAR(64),
+    IN p_from_utc DATETIME,
+    IN p_to_utc DATETIME,
+    IN p_page_size INT,
+    IN p_offset INT
+)
+BEGIN
+    DECLARE v_page_size INT DEFAULT 200;
+    DECLARE v_offset INT DEFAULT 0;
+    DECLARE v_to_utc DATETIME;
+    DECLARE v_from_utc DATETIME;
+
+    SET v_page_size = CASE
+        WHEN p_page_size IS NULL OR p_page_size <= 0 THEN 200
+        WHEN p_page_size > 1000 THEN 1000
+        ELSE p_page_size
+    END;
+
+    SET v_offset = CASE
+        WHEN p_offset IS NULL OR p_offset < 0 THEN 0
+        ELSE p_offset
+    END;
+
+    SET v_to_utc = COALESCE(p_to_utc, fn_server_utc_now());
+    SET v_from_utc = COALESCE(p_from_utc, DATE_SUB(v_to_utc, INTERVAL 30 DAY));
+
+    SELECT
+        l.id,
+        l.public_id,
+        l.correlation_id,
+        l.created_utc,
+        l.level,
+        l.event_action,
+        l.outcome,
+        l.actor_kind,
+        l.actor_id,
+        l.host_id,
+        l.mac_address,
+        l.module,
+        l.error_type,
+        l.message,
+        l.exception_detail,
+        l.error_fingerprint,
+        l.previous_hash,
+        l.entry_hash,
+        l.payload_json
+    FROM
+        ops_startup_logs l
+    WHERE
+        l.created_utc >= v_from_utc
+        AND l.created_utc <= v_to_utc
+        AND (p_level IS NULL OR l.level = LOWER(TRIM(p_level)))
+        AND (p_host_id IS NULL OR l.host_id = TRIM(p_host_id))
+        AND (p_actor_id IS NULL OR l.actor_id = TRIM(p_actor_id))
+        AND (p_module IS NULL OR l.module = TRIM(p_module))
+        AND (p_error_type IS NULL OR l.error_type = TRIM(p_error_type))
+        AND (p_error_fingerprint IS NULL OR l.error_fingerprint = LOWER(TRIM(p_error_fingerprint)))
+    ORDER BY
+        l.created_utc DESC,
+        l.id DESC
+    LIMIT v_page_size OFFSET v_offset;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_ops_startup_logs_fingerprint_groups_get
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T049)
+--
+-- Purpose: the panel's grouped view. One row per distinct fault, most frequent first, so a reader sees which
+--          fault is actually happening rather than a page of its occurrences.
+--
+-- Contract:
+--   IN  p_level       VARCHAR(16)   NULL for any severity
+--   IN  p_host_id     VARCHAR(128)  NULL for any machine
+--   IN  p_actor_id    VARCHAR(128)  NULL for any person
+--   IN  p_module      VARCHAR(128)  NULL for any module
+--   IN  p_error_type  VARCHAR(128)  NULL for any fault type
+--   IN  p_from_utc    DATETIME      NULL for the start of the default window
+--   IN  p_to_utc      DATETIME      NULL for now
+--   IN  p_max_groups  INT           NULL or not positive for the default group limit
+--   OUT one row per distinct fingerprint: error_fingerprint, occurrences, first_seen_utc, last_seen_utc,
+--       error_type, module, sample_message
+--
+-- Grouping is by `error_fingerprint` alone, and that is the whole point of the column: the same fault raised on
+-- two machines, in two runs, with two different part numbers in its message, hashes the same (FR-033, SC-014),
+-- so this view counts one fault and not two. An entry with no fingerprint is an entry with no exception, so it
+-- is excluded rather than gathered into a NULL group — a group labelled "no fault" would sit at the top of the
+-- list on any busy store and say nothing.
+--
+-- `error_type`, `module` and the sample message are values from the group rather than keys. They are read with
+-- ANY_VALUE because a group is defined by its fingerprint and any member is as representative as another; the
+-- window and the filters are the same ones the flat reader takes, so a reader can move between the two views
+-- without the numbers changing under them.
+--
+-- The group limit is clamped like the page size is in the flat reader, for the same reason: the panel draws a
+-- list, and a grouped read of a long-running store is still a read of a long-running store.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_ops_startup_logs_fingerprint_groups_get;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_ops_startup_logs_fingerprint_groups_get(
+    IN p_level VARCHAR(16),
+    IN p_host_id VARCHAR(128),
+    IN p_actor_id VARCHAR(128),
+    IN p_module VARCHAR(128),
+    IN p_error_type VARCHAR(128),
+    IN p_from_utc DATETIME,
+    IN p_to_utc DATETIME,
+    IN p_max_groups INT
+)
+BEGIN
+    DECLARE v_max_groups INT DEFAULT 100;
+    DECLARE v_to_utc DATETIME;
+    DECLARE v_from_utc DATETIME;
+
+    SET v_max_groups = CASE
+        WHEN p_max_groups IS NULL OR p_max_groups <= 0 THEN 100
+        WHEN p_max_groups > 500 THEN 500
+        ELSE p_max_groups
+    END;
+
+    SET v_to_utc = COALESCE(p_to_utc, fn_server_utc_now());
+    SET v_from_utc = COALESCE(p_from_utc, DATE_SUB(v_to_utc, INTERVAL 30 DAY));
+
+    SELECT
+        l.error_fingerprint,
+        COUNT(*) AS occurrences,
+        MIN(l.created_utc) AS first_seen_utc,
+        MAX(l.created_utc) AS last_seen_utc,
+        ANY_VALUE(l.error_type) AS error_type,
+        ANY_VALUE(l.module) AS module,
+        ANY_VALUE(l.message) AS sample_message
+    FROM
+        ops_startup_logs l
+    WHERE
+        l.error_fingerprint IS NOT NULL
+        AND l.created_utc >= v_from_utc
+        AND l.created_utc <= v_to_utc
+        AND (p_level IS NULL OR l.level = LOWER(TRIM(p_level)))
+        AND (p_host_id IS NULL OR l.host_id = TRIM(p_host_id))
+        AND (p_actor_id IS NULL OR l.actor_id = TRIM(p_actor_id))
+        AND (p_module IS NULL OR l.module = TRIM(p_module))
+        AND (p_error_type IS NULL OR l.error_type = TRIM(p_error_type))
+    GROUP BY
+        l.error_fingerprint
+    ORDER BY
+        occurrences DESC,
+        last_seen_utc DESC
+    LIMIT v_max_groups;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_ops_startup_logs_insert
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T048, plan D26)
+--
+-- Purpose: the single writer for the log store. Every entry, from every caller, arrives here.
+--
+-- Contract:
+--   IN  p_public_id          CHAR(36)
+--   IN  p_correlation_id     CHAR(36)
+--   IN  p_level              VARCHAR(16)   Debug, Info, Warning, Error or Critical
+--   IN  p_event_action       VARCHAR(128)  the operation under way; NOT NULL in the table, so the caller names one
+--   IN  p_outcome            VARCHAR(32)   Success, Failure, Blocked or Retried
+--   IN  p_actor_kind         VARCHAR(32)   NULL when nobody was acting
+--   IN  p_actor_id           VARCHAR(128)  NULL when nobody was acting
+--   IN  p_host_id            VARCHAR(128)  NULL when the machine could not be named
+--   IN  p_mac_address        VARCHAR(64)
+--   IN  p_module             VARCHAR(128)
+--   IN  p_error_type         VARCHAR(128)
+--   IN  p_message            TEXT
+--   IN  p_exception_detail   MEDIUMTEXT   the serialized exception chain; NULL when there was no exception
+--   IN  p_error_fingerprint  CHAR(64)     NULL for an entry raised without an exception
+--   IN  p_payload_json       TEXT
+--   OUT the affected-row count, through the non-query seam. This is a write and returns no result set.
+--
+-- The chain is written here and nowhere else. The application never computes a hash and never supplies one
+-- (contracts/logging-contract.md section 3), so there is exactly one implementation of the link and it cannot
+-- disagree with itself.
+--
+-- ============================================================
+-- How the chain survives concurrent writers
+-- ============================================================
+-- Two things have to hold at once: the entry hash has to be computed over the previous entry's hash, and two
+-- writers must never read the same "previous" and both insert against it. The body does both:
+--
+--   1. It takes a named lock before it reads anything, so a second writer waits rather than reading a
+--      predecessor that is about to change. A row lock cannot do this job on its own: on an empty table there
+--      is no row to lock, and two writers each reading "no predecessor" would each write genesis and fork the
+--      chain from the first entry onwards.
+--   2. It does the read, the hash and the insert inside one transaction, so the row it linked to cannot change
+--      under it, and the entry and its link commit together or not at all.
+--
+-- The lock is a mutex, not a correctness crutch: it exists because the read and the write must be one act. A
+-- writer that cannot take it within the timeout is refused with `mtm_log_chain_busy` rather than being allowed
+-- to guess a predecessor — the seam absorbs that refusal and drops the entry (FR-037), so a store under
+-- contention loses an entry instead of corrupting the chain.
+--
+-- The hash covers the entry's own fields and the link to its predecessor, joined with a unit separator so that
+-- two different field layouts cannot produce the same input. A NULL predecessor is the first entry's link and is
+-- hashed as an empty string, which is why a stored NULL and an empty predecessor hash identically — the row is
+-- still self-describing, and the first entry is the only one that can have no predecessor.
+--
+-- `created_utc` is read from the store clock once and used both in the hash and in the row, so the hash a
+-- reader recomputes from the row always matches the one stored.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_ops_startup_logs_insert;
+
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_ops_startup_logs_insert(
+    IN p_public_id CHAR(36),
+    IN p_correlation_id CHAR(36),
+    IN p_level VARCHAR(16),
+    IN p_event_action VARCHAR(128),
+    IN p_outcome VARCHAR(32),
+    IN p_actor_kind VARCHAR(32),
+    IN p_actor_id VARCHAR(128),
+    IN p_host_id VARCHAR(128),
+    IN p_mac_address VARCHAR(64),
+    IN p_module VARCHAR(128),
+    IN p_error_type VARCHAR(128),
+    IN p_message TEXT,
+    IN p_exception_detail MEDIUMTEXT,
+    IN p_error_fingerprint CHAR(64),
+    IN p_payload_json MEDIUMTEXT
+)
+BEGIN
+    DECLARE v_previous_hash CHAR(64) DEFAULT NULL;
+    DECLARE v_entry_hash CHAR(64) DEFAULT NULL;
+    DECLARE v_created_utc DATETIME;
+    DECLARE v_lock_acquired TINYINT DEFAULT 0;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        IF v_lock_acquired = 1 THEN
+            DO RELEASE_LOCK('mtm_waitlist.ops_startup_logs.chain');
+        END IF;
+        RESIGNAL;
+    END;
+
+    SET v_lock_acquired = GET_LOCK('mtm_waitlist.ops_startup_logs.chain', 10);
+
+    IF v_lock_acquired <> 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'mtm_log_chain_busy';
+    END IF;
+
+    START TRANSACTION;
+
+    SET v_created_utc = fn_server_utc_now();
+
+    SELECT
+        l.entry_hash
+    INTO v_previous_hash
+    FROM
+        ops_startup_logs l
+    ORDER BY
+        l.id DESC
+    LIMIT 1;
+
+    SET v_entry_hash = SHA2(
+        CONCAT_WS(
+            CHAR(31),
+            COALESCE(v_previous_hash, ''),
+            TRIM(p_public_id),
+            LOWER(TRIM(p_correlation_id)),
+            v_created_utc,
+            LOWER(TRIM(p_level)),
+            TRIM(p_event_action),
+            TRIM(p_outcome),
+            COALESCE(TRIM(p_actor_kind), ''),
+            COALESCE(TRIM(p_actor_id), ''),
+            COALESCE(TRIM(p_host_id), ''),
+            COALESCE(LOWER(TRIM(p_mac_address)), ''),
+            COALESCE(TRIM(p_module), ''),
+            COALESCE(TRIM(p_error_type), ''),
+            TRIM(p_message),
+            COALESCE(p_exception_detail, ''),
+            COALESCE(LOWER(TRIM(p_error_fingerprint)), ''),
+            COALESCE(p_payload_json, '')
+        ),
+        256
+    );
+
+    INSERT INTO ops_startup_logs (
+        public_id,
+        correlation_id,
+        created_utc,
+        level,
+        event_action,
+        outcome,
+        actor_kind,
+        actor_id,
+        host_id,
+        mac_address,
+        module,
+        error_type,
+        exception_detail,
+        error_fingerprint,
+        message,
+        payload_json,
+        previous_hash,
+        entry_hash
+    )
+    VALUES (
+        TRIM(p_public_id),
+        LOWER(TRIM(p_correlation_id)),
+        v_created_utc,
+        LOWER(TRIM(p_level)),
+        TRIM(p_event_action),
+        TRIM(p_outcome),
+        NULLIF(TRIM(p_actor_kind), ''),
+        NULLIF(TRIM(p_actor_id), ''),
+        NULLIF(TRIM(p_host_id), ''),
+        NULLIF(LOWER(TRIM(p_mac_address)), ''),
+        NULLIF(TRIM(p_module), ''),
+        NULLIF(TRIM(p_error_type), ''),
+        NULLIF(p_exception_detail, ''),
+        NULLIF(LOWER(TRIM(p_error_fingerprint)), ''),
+        TRIM(p_message),
+        NULLIF(p_payload_json, ''),
+        v_previous_hash,
+        v_entry_hash
+    );
+
+    COMMIT;
+
+    IF v_lock_acquired = 1 THEN
+        DO RELEASE_LOCK('mtm_waitlist.ops_startup_logs.chain');
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_ops_startup_logs_purge
+-- Engine: MySQL 5.7
+-- Feature: 010-startup-rebuild (task T049, SC-014)
+--
+-- Purpose: keep the log store to its retention, bounded by age and by size, removing the oldest entries first.
+--
+-- Contract:
+--   IN  p_max_age_days  INT  NULL for no age bound; otherwise entries older than this many days go
+--   IN  p_max_rows      INT  NULL for no size bound; otherwise only the newest this many entries stay
+--   OUT the affected-row count, through the non-query seam — every entry this call removed, both bounds
+--       together, because a caller that has to add two numbers to know what happened will not.
+--
+-- Two bounds, one statement. They are combined with OR into a single DELETE on purpose: MySQL reports the
+-- affected-row count of the last statement the procedure executed, so a body that deleted by age, then by size,
+-- and then returned would report only the second count — and a body ending in COMMIT reports zero, which is why
+-- nothing here is wrapped in a transaction. One statement is also the honest description of the rule: an entry
+-- goes if it is too old, or if it is beyond the size bound counting back from the newest.
+--
+-- "Oldest first" is a property of the bounds rather than an ORDER BY, and it holds for both:
+--   * the age bound removes a prefix of the store, because `created_utc` moves forward with `id`;
+--   * the size bound keeps the newest `p_max_rows` by `id` and removes everything below them.
+-- So the store is trimmed from its far end in both cases, and the entries that survive are always the most
+-- recent ones.
+--
+-- A bound of NULL means "no bound on this axis", and a size of 0 means "keep nothing". Both are deliberate and
+-- different: a caller that omits the size has not asked for the store to be emptied.
+--
+-- The size bound is expressed as a derived table rather than a direct subquery on the same table, because
+-- MySQL refuses a DELETE whose WHERE reads the table being deleted from. The derived table is materialised
+-- first, so the set of rows to keep is decided before any row is removed and the delete cannot chase its own
+-- tail.
+--
+-- Retention is bounded by age and by size rather than by a setting read here: the caller supplies the numbers,
+-- so the same procedure serves the shipped default and an operator who has changed the setting (ruleset,
+-- "Retention windows are dynamic settings values").
+--
+-- Removing the oldest entries truncates the hash chain at its start; it does not break any surviving link. A
+-- reader verifying the chain from the oldest surviving entry onwards still finds every link intact, which is
+-- the most a retention policy can preserve.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_ops_startup_logs_purge;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_ops_startup_logs_purge(
+    IN p_max_age_days INT,
+    IN p_max_rows INT
+)
+BEGIN
+    DECLARE v_has_age_bound TINYINT DEFAULT 0;
+    DECLARE v_has_size_bound TINYINT DEFAULT 0;
+    DECLARE v_cutoff_utc DATETIME DEFAULT NULL;
+    DECLARE v_keep_rows INT DEFAULT 0;
+
+    IF p_max_age_days IS NOT NULL AND p_max_age_days > 0 THEN
+        SET v_has_age_bound = 1;
+        SET v_cutoff_utc = DATE_SUB(fn_server_utc_now(), INTERVAL p_max_age_days DAY);
+    END IF;
+
+    IF p_max_rows IS NOT NULL AND p_max_rows >= 0 THEN
+        SET v_has_size_bound = 1;
+        SET v_keep_rows = p_max_rows;
+    END IF;
+
+    DELETE FROM ops_startup_logs
+    WHERE
+        (v_has_age_bound = 1 AND created_utc < v_cutoff_utc)
+        OR (
+            v_has_size_bound = 1
+            AND id NOT IN (
+                SELECT keep_rows.id
+                FROM (
+                    SELECT l.id
+                    FROM ops_startup_logs l
+                    ORDER BY l.id DESC
+                    LIMIT v_keep_rows
+                ) AS keep_rows
+            )
+        );
+END$$
+
+DELIMITER ;
 
 -- Stored Procedure: sp_setup_active_job_dunnage_assignments_get
 -- Engine: MySQL 5.7

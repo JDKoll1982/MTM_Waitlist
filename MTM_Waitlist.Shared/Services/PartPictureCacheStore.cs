@@ -82,7 +82,7 @@ public sealed class PartPictureCacheStore : IPartPictureCacheStore
         {
             // Recorded rather than thrown: the picture source is a share, a share goes away, and a screen that
             // cannot copy a picture still has to open (FR-031).
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "PartPictureCache",
                 ex,
                 $"The picture for '{relativePathBelowCollection}' could not be copied into the local cache; this computer keeps the copy it already has, if any.");

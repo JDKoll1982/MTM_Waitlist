@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Media;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -16,26 +17,19 @@ namespace MTM_Waitlist.Module_Core.Views;
 // TODO: Update NavigationViewItem titles and icons in ShellPage.xaml.
 public sealed partial class ShellPage : Page
 {
-    private readonly IStartupShellStateService _startupShellStateService;
-
     public ShellViewModel ViewModel
     {
         get;
     }
 
-    public ShellPage(
-        ShellViewModel viewModel,
-        IStartupShellStateService startupShellStateService)
+    public ShellPage(ShellViewModel viewModel)
     {
         ViewModel = viewModel;
-        _startupShellStateService = startupShellStateService;
         InitializeComponent();
 
         ViewModel.NavigationService.Frame = NavigationFrame;
         ViewModel.NavigationViewService.Initialize(NavigationViewControl);
         NavigationFrame.Navigated += NavigationFrame_Navigated;
-        _startupShellStateService.StateChanged += OnStartupShellStateChanged;
-        ApplyStartupShellState();
     }
 
     private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -43,10 +37,11 @@ public sealed partial class ShellPage : Page
         ViewModel.RefreshUserInfo();
         SyncMyRequestsVisibility();
         ApplyNavigationItemSizing();
+        OpenTheFirstPage();
 
         if (AppTitleBar is null || AppTitleBarText is null)
         {
-            StartupDebugLog.Info("ShellPage", "Title bar elements were unavailable on load.");
+            AppLog.Info("ShellPage", "Title bar elements were unavailable on load.");
             return;
         }
 
@@ -66,6 +61,36 @@ public sealed partial class ShellPage : Page
     }
 
     /// <summary>
+    /// Opens the shell's first page when the shell appears, which is the waitlist.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Nothing selects a navigation item on the shell's behalf.</b> A <c>NavigationView</c> starts with no
+    /// item selected and this page navigates only when somebody invokes one, so without this the frame stays
+    /// empty: the launch reaches the main screens and the person is shown a window with nothing in it.
+    /// </para>
+    /// <para>
+    /// <b>The first menu item is the waitlist on purpose.</b> It is the screen the application exists for, and
+    /// the order of the items in the markup is what decides this rather than a page named here a second time.
+    /// The guard leaves a shell that is already showing something alone, so a shell that is loaded twice does
+    /// not throw away the page the person is on.
+    /// </para>
+    /// </remarks>
+    private void OpenTheFirstPage()
+    {
+        if (NavigationFrame.Content is not null
+            || NavigationViewControl.MenuItems.Count == 0
+            || NavigationViewControl.MenuItems[0] is not NavigationViewItem first
+            || NavigationHelper.GetNavigateTo(first) is not { Length: > 0 } firstPageKey)
+        {
+            return;
+        }
+
+        NavigationViewControl.SelectedItem = first;
+        ViewModel.NavigationService.NavigateTo(firstPageKey);
+    }
+
+    /// <summary>
     /// Gives the control's own Settings entry the same label size as the items this page declares.
     /// </summary>
     /// <remarks>
@@ -82,24 +107,9 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    private void OnStartupShellStateChanged(object? sender, EventArgs e)
-    {
-        _ = DispatcherQueue.TryEnqueue(() =>
-        {
-            ApplyStartupShellState();
-        });
-    }
-
-    private void ApplyStartupShellState()
-    {
-        NavigationViewControl.IsPaneVisible = _startupShellStateService.IsNavigationVisible;
-        NavigationViewControl.IsSettingsVisible = _startupShellStateService.IsNavigationVisible;
-    }
-
     private void ShellPage_Unloaded(object sender, RoutedEventArgs e)
     {
         NavigationFrame.Navigated -= NavigationFrame_Navigated;
-        _startupShellStateService.StateChanged -= OnStartupShellStateChanged;
         Unloaded -= ShellPage_Unloaded;
     }
 
@@ -189,22 +199,22 @@ public sealed partial class ShellPage : Page
     }
 
     /// <summary>
-    /// Signs out from the badge (FR-033, FR-034). The view model hands the work to the sign-out service, which
-    /// clears the remembered credential and the local session, launches a replacement instance and exits this
-    /// one — so a successful sign-out never comes back here. A relaunch that could not be performed is
-    /// reported in plain language rather than leaving the person apparently signed in (FR-026).
+    /// Signs out from the badge (FR-011). The view model hands the work to the sign-out service, which ends the
+    /// session in the store and this process's identity, launches a replacement instance and exits this one — so
+    /// a successful sign-out never comes back here. A session that could not be ended, or a relaunch that could
+    /// not be performed, is reported in plain language rather than leaving the person apparently signed in.
     /// </summary>
     private async void SignOutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        SignOutResult result;
+        SignOutOutcome result;
         try
         {
             result = await ViewModel.SignOutAsync();
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("ShellPage", ex, "Signing out failed before the application could be relaunched.");
-            result = SignOutResult.Refused(MTM_Waitlist.Module_Startup.Services.SignOutService.ResolveRestartFailedMessage());
+            AppLog.Error("ShellPage", ex, "Signing out failed before the application could be relaunched.");
+            result = SignOutOutcome.Refused(SignOutService.ResolveRestartFailedMessage());
         }
 
         if (result.Succeeded)

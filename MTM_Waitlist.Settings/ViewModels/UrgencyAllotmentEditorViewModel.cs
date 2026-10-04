@@ -107,7 +107,7 @@ public partial class UrgencyAllotmentEditorViewModel : ObservableObject
             }
             catch (Exception ex)
             {
-                StartupDebugLog.Error("UrgencyAllotments", ex, "Failed to read the configured and observed minutes per Item.");
+                AppLog.Error("UrgencyAllotments", ex, "Failed to read the configured and observed minutes per Item.");
                 StatusMessage = ResolveStatus(
                     "Settings_UrgencyAllotments.LoadFailed",
                     "The minutes could not be read from the store, so nothing is shown. Retry once the store is reachable.");
@@ -153,11 +153,11 @@ public partial class UrgencyAllotmentEditorViewModel : ObservableObject
         {
             var minutes = (int)Math.Round(row.Minutes);
             await _urgencySettingsService.SetMaxAllottedAsync(row.ItemCode, minutes).ConfigureAwait(true);
-            StartupDebugLog.Info("UrgencyAllotments", $"Saved the allotted minutes for item '{row.ItemCode}' = {minutes} min.");
+            AppLog.Info("UrgencyAllotments", $"Saved the allotted minutes for item '{row.ItemCode}' = {minutes} min.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("UrgencyAllotments", ex, $"Failed to save the allotted minutes for item '{row.ItemCode}'.");
+            AppLog.Error("UrgencyAllotments", ex, $"Failed to save the allotted minutes for item '{row.ItemCode}'.");
             StatusMessage = string.Format(
                 System.Globalization.CultureInfo.CurrentCulture,
                 ResolveStatus("Settings_UrgencyAllotments.SaveFailed", "Unable to save '{0}': {1}"),

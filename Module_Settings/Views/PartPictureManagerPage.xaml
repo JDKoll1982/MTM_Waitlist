@@ -191,12 +191,19 @@
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="vm:PartPictureChangeDisplay">
                             <StackPanel Margin="0,0,0,8" Spacing="2">
-                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Title}" TextWrapping="Wrap" />
-                                <TextBlock
+                                <!-- Both lines are drawn by the one-line scrolling control (009 B1/B2): this history
+                                    row scrolls a long title or detail instead of growing the row. The sizes are set
+                                    here because the control draws its own text and cannot inherit a TextBlock
+                                    style. -->
+                                <sharedControls:AutoScrollTextView
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                    Text="{x:Bind Title}" />
+                                <sharedControls:AutoScrollTextView
+                                    FontSize="12"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind Detail}"
-                                    TextWrapping="Wrap" />
+                                    Text="{x:Bind Detail}" />
                             </StackPanel>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -269,12 +276,15 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock Grid.Column="0" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind PartNumber}" />
-                                <TextBlock
+                                <!-- The path is drawn by the one-line scrolling control (009 B1/B2): it sits in a *
+                                    column beside two fixed ones, so a long path scrolls its own line instead of
+                                    wrapping into the next row. The caption's size and colour are set here because
+                                    the control draws its own text and cannot inherit a TextBlock style. -->
+                                <sharedControls:AutoScrollTextView
                                     Grid.Column="1"
+                                    FontSize="12"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind RelativePath}"
-                                    TextWrapping="Wrap" />
+                                    Text="{x:Bind RelativePath}" />
                                 <TextBlock Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind SystemName}" />
                             </Grid>
                         </DataTemplate>

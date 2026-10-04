@@ -34,12 +34,27 @@ public sealed class UrgencySettingsServiceTests
         CollectionAssert.Contains((System.Collections.ICollection)store.ItemsRead, Item);
     }
 
+    /// <summary>
+    /// The allotment is read through the Item-keyed store seam, and nothing about this service reads a
+    /// per-Windows-user local settings store: that mechanism is deleted outright rather than left unused (§D4).
+    /// </summary>
     [TestMethod]
-    public void TheService_NoLongerTakesThePerWindowsUserLocalSettingsStore()
+    public void TheService_NoLongerTakesAPerWindowsUserLocalSettingsStore()
     {
-        Assert.IsNull(
-            typeof(UrgencySettingsService).GetConstructor([typeof(ILocalSettingsService)]),
-            "The allotment is no longer written to a per-subtype local-settings key in %LOCALAPPDATA% (§D4).");
+        var parameterTypeNames = typeof(UrgencySettingsService)
+            .GetConstructors()
+            .SelectMany(constructor => constructor.GetParameters())
+            .Select(parameter => parameter.ParameterType.Name)
+            .ToArray();
+
+        CollectionAssert.DoesNotContain(
+            parameterTypeNames,
+            "ILocalSettingsService",
+            "The per-subtype local-settings key in %LOCALAPPDATA% is gone with the mechanism that held it (§D4).");
+        CollectionAssert.Contains(
+            parameterTypeNames,
+            nameof(IRequestItemAllottedMinutesStore),
+            "The configured figure is read through the store seam instead.");
     }
 
     [TestMethod]

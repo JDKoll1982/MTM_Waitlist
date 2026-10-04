@@ -4,23 +4,21 @@ namespace MTM_Waitlist.Module_Core.Services;
 
 /// <inheritdoc cref="IWaitlistSortPreferenceService"/>
 /// <remarks>
-/// One scalar string key through <see cref="ILocalSettingsService"/> — the shape
-/// <see cref="UrgencySettingsService"/> already uses, so it works in both the MSIX and the unpackaged branch, and
-/// the small-store pattern <c>LocalWaitlistMessageSeenStore</c> establishes elsewhere. Deliberately not a table
-/// and not the database: the constitution keeps the stores for operational data, and no requirement asks for a
-/// per-user column (§D7).
+/// One text value in the store, held against the person, so the order a viewer chose is already there on the next
+/// computer they sign in at (FR-023, SC-008). The normalisation and the declared default are unchanged; only where
+/// the value lives has moved.
 /// </remarks>
 public sealed class WaitlistSortPreferenceService : IWaitlistSortPreferenceService
 {
-    /// <summary>The local-settings key the viewer's chosen order is stored under.</summary>
+    /// <summary>The scoped-preference key the viewer's chosen order is stored under.</summary>
     public const string SettingsKey = "Waitlist.SortOrder";
 
-    private readonly ILocalSettingsService _localSettingsService;
+    private readonly IScopedPreferenceStore _preferences;
 
-    public WaitlistSortPreferenceService(ILocalSettingsService localSettingsService)
+    public WaitlistSortPreferenceService(IScopedPreferenceStore preferences)
     {
-        ArgumentNullException.ThrowIfNull(localSettingsService);
-        _localSettingsService = localSettingsService;
+        ArgumentNullException.ThrowIfNull(preferences);
+        _preferences = preferences;
     }
 
     /// <inheritdoc />
@@ -28,8 +26,8 @@ public sealed class WaitlistSortPreferenceService : IWaitlistSortPreferenceServi
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var stored = await _localSettingsService
-            .ReadSettingAsync<string>(SettingsKey)
+        var stored = await _preferences
+            .ReadTextAsync(SettingsKey, PreferenceScope.Person, cancellationToken)
             .ConfigureAwait(false);
 
         return WaitlistSortOrder.Normalize(stored);
@@ -41,8 +39,8 @@ public sealed class WaitlistSortPreferenceService : IWaitlistSortPreferenceServi
         cancellationToken.ThrowIfCancellationRequested();
 
         // Normalized on the way in as well as on the way out, so a corrupt or stale value is never stored.
-        await _localSettingsService
-            .SaveSettingAsync(SettingsKey, WaitlistSortOrder.Normalize(sortOrder))
+        await _preferences
+            .WriteTextAsync(SettingsKey, PreferenceScope.Person, WaitlistSortOrder.Normalize(sortOrder), cancellationToken)
             .ConfigureAwait(false);
     }
 }

@@ -15,6 +15,7 @@ using MTM_Waitlist.Module_Settings.Views;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.Views;
 using MTM_Waitlist.Module_Shared.Models;
+using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Views;
 
@@ -26,9 +27,9 @@ public partial class ShellViewModel : ObservableRecipient
 {
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly IWaitlistSortPreferenceService _sortPreferenceService;
-    private readonly ISignOutService _signOutService;
+    private readonly SignOutService _signOutService;
     private readonly SetupWorkflowState _setupWorkflowState;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
     private Type? _currentPageType;
     private bool _isWaitlistPageActive;
 
@@ -193,7 +194,7 @@ public partial class ShellViewModel : ObservableRecipient
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("ShellViewModel", ex, $"The sort order '{sortOrder}' could not be remembered; the list is still ordered by it.");
+            AppLog.Error("ShellViewModel", ex, $"The sort order '{sortOrder}' could not be remembered; the list is still ordered by it.");
         }
     }
 
@@ -297,15 +298,15 @@ public partial class ShellViewModel : ObservableRecipient
         INavigationViewService navigationViewService,
         IBuildingSelectionService buildingSelectionService,
         SetupWorkflowState setupWorkflowState,
-        StartupState startupState,
+        IPersonIdentity personIdentity,
         IWaitlistSortPreferenceService sortPreferenceService,
-        ISignOutService signOutService)
+        SignOutService signOutService)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(navigationViewService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
         ArgumentNullException.ThrowIfNull(setupWorkflowState);
-        ArgumentNullException.ThrowIfNull(startupState);
+        ArgumentNullException.ThrowIfNull(personIdentity);
         ArgumentNullException.ThrowIfNull(sortPreferenceService);
         ArgumentNullException.ThrowIfNull(signOutService);
 
@@ -317,7 +318,7 @@ public partial class ShellViewModel : ObservableRecipient
         _signOutService = signOutService;
         _setupWorkflowState = setupWorkflowState;
         _setupWorkflowState.PropertyChanged += OnSetupWorkflowStateChanged;
-        _startupState = startupState;
+        _personIdentity = personIdentity;
         SelectedBuilding = _buildingSelectionService.SelectedBuilding;
         RefreshBuildingCards();
         HeaderText = "MTM Waitlist";
@@ -325,17 +326,16 @@ public partial class ShellViewModel : ObservableRecipient
     }
 
     /// <summary>
-    /// Signs out from the badge (FR-033, FR-034): the service clears the remembered credential and the local
-    /// session, relaunches the application and exits this process, so the person lands back at the sign-in
-    /// screen. The badge's displayed name is deliberately <b>not</b> touched here — blanking it while the
-    /// session persists is exactly what FR-034 rules out, and it is the service, not this method, that ends
-    /// the session.
+    /// Signs out from the badge (FR-011): the service ends the session in the store, ends this process's identity,
+    /// relaunches the application and exits this process, so the person lands back at the sign-in screen. The
+    /// badge's displayed name is deliberately <b>not</b> touched here — blanking it while the session persists is
+    /// exactly what FR-011 rules out, and it is the service, not this method, that ends the session.
     /// </summary>
     /// <returns>
-    /// The outcome, so the view can tell the person when the relaunch could not be performed rather than
-    /// leaving them apparently signed in (FR-026).
+    /// The outcome, so the view can tell the person when the session could not be ended or the relaunch could
+    /// not be performed, rather than leaving them apparently signed in (FR-011).
     /// </returns>
-    public Task<SignOutResult> SignOutAsync(CancellationToken cancellationToken = default)
+    public Task<SignOutOutcome> SignOutAsync(CancellationToken cancellationToken = default)
     {
         // The replacement instance is started by the service; when it succeeds this process is on its way out.
         return _signOutService.SignOutAsync(cancellationToken);
@@ -343,11 +343,11 @@ public partial class ShellViewModel : ObservableRecipient
 
     public void RefreshUserInfo()
     {
-        CurrentUserDisplayName = string.IsNullOrWhiteSpace(_startupState.Username)
+        CurrentUserDisplayName = string.IsNullOrWhiteSpace(_personIdentity.SignInName)
             ? "Not signed in"
-            : _startupState.Username;
-        CurrentUserRole = _startupState.CurrentRole;
-        var userPresentation = GetUserPresentation(_startupState.CurrentRole);
+            : _personIdentity.SignInName;
+        CurrentUserRole = _personIdentity.CurrentRoleCode;
+        var userPresentation = GetUserPresentation(_personIdentity.CurrentRoleCode);
         CurrentUserIconGlyph = userPresentation.Glyph;
         CurrentUserBadgeBrush = CreateUserBadgeBrush(userPresentation.ColorHex);
     }
@@ -399,7 +399,7 @@ public partial class ShellViewModel : ObservableRecipient
 
         if (e.SourcePageType == typeof(SettingsPage))
         {
-            StartupDebugLog.Info("ShellViewModel", "Settings page navigated to.");
+            AppLog.Info("ShellViewModel", "Settings page navigated to.");
             Selected = NavigationViewService.SettingsItem;
             HeaderText = "Settings";
             HideHeaderProgress();

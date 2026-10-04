@@ -86,7 +86,7 @@ public partial class SetupPartSelectionViewModel : ObservableRecipient, INavigat
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SetupPartSelection",
                 ex,
                 $"Resolving the picture for part '{partNumber}' failed; the entry will draw the no-image placeholder.");

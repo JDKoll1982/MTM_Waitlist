@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <Grid Style="{StaticResource SetupPageGridStyle}">
@@ -26,7 +27,10 @@
                 <DataTemplate x:DataType="models:SetupSequenceResult">
                     <StackPanel AutomationProperties.Name="{x:Bind SequenceNumber}" Padding="14" Spacing="6">
                         <TextBlock Style="{ThemeResource BodyLargeTextBlockStyle}" Text="{x:Bind SequenceNumber}" />
-                        <TextBlock Text="{x:Bind Description}" />
+                        <!-- The description is drawn by the one-line scrolling control (009 B1/B2): the list row has
+                             no wrapping and no trimming, so a long description was simply cut off with no way to
+                             read it. -->
+                        <sharedControls:AutoScrollTextView Text="{x:Bind Description}" />
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>

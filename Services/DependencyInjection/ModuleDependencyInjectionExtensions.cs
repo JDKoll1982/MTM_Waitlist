@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services.DependencyInjection;
+using MTM_Waitlist.Module_Logging.Services.DependencyInjection;
 using MTM_Waitlist.Module_Reporting.Services.DependencyInjection;
 using MTM_Waitlist.Module_Setup.Services.DependencyInjection;
 using MTM_Waitlist.Module_Settings.Services.DependencyInjection;
@@ -17,13 +18,14 @@ public static class ModuleDependencyInjectionExtensions
     {
         services.Configure<ModuleCoreSettingsOptions>(configuration.GetSection(nameof(ModuleCoreSettingsOptions)));
         services.AddCoreModuleServices(configuration);
+        services.AddStartupModuleServices(configuration);
         services.AddSharedModuleServices(configuration);
         services.AddSetupModuleServices(configuration);
         services.AddWaitlistViewServices(configuration);
         services.AddWaitlistNewRequestServices(configuration);
         services.AddWaitlistControlsServices(configuration);
         services.AddSettingsModuleServices(configuration);
-        services.AddStartupModuleServices(configuration);
+        services.AddLoggingModuleServices(configuration);
         services.AddReportingModuleServices(configuration);
         return services;
     }

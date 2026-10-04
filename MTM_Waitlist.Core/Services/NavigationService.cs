@@ -92,13 +92,13 @@ public class NavigationService : INavigationService
     {
         if (string.IsNullOrWhiteSpace(pageKey))
         {
-            StartupDebugLog.Error("NavigationService", new InvalidOperationException("NavigateTo called with null or empty pageKey."), "NavigateTo called with null or empty pageKey.");
+            AppLog.Error("NavigationService", new InvalidOperationException("NavigateTo called with null or empty pageKey."), "NavigateTo called with null or empty pageKey.");
             return false;
         }
         
         if (_frame == null)
         {
-            StartupDebugLog.Error("NavigationService", new InvalidOperationException("Navigation frame is not initialized. Ensure ShellPage has set NavigationService.Frame."), "Navigation frame is not initialized. Ensure ShellPage has set NavigationService.Frame.");
+            AppLog.Error("NavigationService", new InvalidOperationException("Navigation frame is not initialized. Ensure ShellPage has set NavigationService.Frame."), "Navigation frame is not initialized. Ensure ShellPage has set NavigationService.Frame.");
             return false;
         }
         
@@ -126,7 +126,7 @@ public class NavigationService : INavigationService
         }
 
         // Frame already shows the correct page - return success
-        StartupDebugLog.Info("NavigationService", $"Frame already showing {pageType?.Name}; no navigation needed.");
+        AppLog.Info("NavigationService", $"Frame already showing {pageType?.Name}; no navigation needed.");
         return true;
     }
 
@@ -149,7 +149,7 @@ public class NavigationService : INavigationService
                 catch (Exception ex)
                 {
                     var targetPage = frame.Content?.GetType().FullName ?? "<unknown-page>";
-                    StartupDebugLog.Error("NavigationService", ex, $"OnNavigatedTo failed for page '{targetPage}'.");
+                    AppLog.Error("NavigationService", ex, $"OnNavigatedTo failed for page '{targetPage}'.");
                     throw;
                 }
             }

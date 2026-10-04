@@ -176,47 +176,12 @@ MODIFY COLUMN role_id BIGINT NOT NULL COMMENT 'Foreign key to auth_roles_catalog
 MODIFY COLUMN assigned_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the role was assigned.',
 MODIFY COLUMN assigned_by_user_id BIGINT NULL COMMENT 'User who assigned the role.';
 
-ALTER TABLE auth_sessions_tokens COMMENT = 'Session token hash metadata and lifecycle state.';
+-- auth_sessions_tokens is deliberately absent here. The table was retired by feature 010 (task T060,
+-- superseded by user_active_sessions) and its ALTER statements were removed when the table went: a MODIFY
+-- against a table that no longer exists stops this script on the very first run after the deletion, which is
+-- what happened on 2026-09-27 and left every description below it unapplied. The object itself is recorded in
+-- the retired-objects section at the foot of this file, which is where a description for it now belongs.
 
-ALTER TABLE auth_sessions_tokens
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for session record.',
-MODIFY COLUMN user_id BIGINT NOT NULL COMMENT 'Foreign key to core_users_profiles.id.',
-MODIFY COLUMN computer_id BIGINT NULL COMMENT 'Optional foreign key to core_computers_registry.id.',
-MODIFY COLUMN token_hash CHAR(64) NOT NULL COMMENT 'Hashed session token value.',
-MODIFY COLUMN token_salt VARBINARY(32) NOT NULL COMMENT 'Salt used for token hashing.',
-MODIFY COLUMN token_version SMALLINT NOT NULL DEFAULT 1 COMMENT 'Token schema/hash version.',
-MODIFY COLUMN issued_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the token was issued.',
-MODIFY COLUMN expires_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the token expires.',
-MODIFY COLUMN revoked_utc DATETIME NULL COMMENT 'UTC timestamp when the token was revoked.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the token is currently active.',
-MODIFY COLUMN source_label VARCHAR(32) NOT NULL COMMENT 'Token source label such as startup or login.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.';
-
-ALTER TABLE core_buildings_catalog COMMENT = 'Active building and facility catalog.';
-
-ALTER TABLE core_buildings_catalog
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for building record.',
-MODIFY COLUMN building_code VARCHAR(64) NOT NULL COMMENT 'Unique building code.',
-MODIFY COLUMN building_name VARCHAR(128) NOT NULL COMMENT 'Display name for building/facility.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the building is active.',
-MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
-MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.',
-MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the building record.';
-
-ALTER TABLE core_buildings_history COMMENT = 'Audit history for building catalog changes.';
-
-ALTER TABLE core_buildings_history
-MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
-MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for history record.',
-MODIFY COLUMN building_id BIGINT NOT NULL COMMENT 'Foreign key to core_buildings_catalog.id.',
-MODIFY COLUMN building_code VARCHAR(64) NOT NULL COMMENT 'Building code at time of change.',
-MODIFY COLUMN building_name VARCHAR(128) NOT NULL COMMENT 'Building name at time of change.',
-MODIFY COLUMN is_active TINYINT(1) NOT NULL COMMENT 'Active state snapshot at time of change.',
-MODIFY COLUMN change_action VARCHAR(16) NOT NULL COMMENT 'Change action such as insert, update, or deactivate.',
-MODIFY COLUMN changed_by_user_id BIGINT NULL COMMENT 'User who performed the change.',
-MODIFY COLUMN changed_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the change occurred.';
 
 ALTER TABLE config_settings_values COMMENT = 'Current effective configuration setting values by scope.';
 
@@ -276,6 +241,10 @@ MODIFY COLUMN actor_kind VARCHAR(32) NULL COMMENT 'Actor type for event source.'
 MODIFY COLUMN actor_id VARCHAR(128) NULL COMMENT 'Actor identifier value.',
 MODIFY COLUMN host_id VARCHAR(128) NULL COMMENT 'Host/computer identifier captured for event.',
 MODIFY COLUMN mac_address VARCHAR(64) NULL COMMENT 'MAC address captured for event.',
+MODIFY COLUMN module VARCHAR(128) NULL COMMENT 'The part of the application the entry came from; an ILogger category name lands here, and a category is a namespace-qualified type name.',
+MODIFY COLUMN error_type VARCHAR(128) NULL COMMENT 'The fault type, when there was a fault.',
+MODIFY COLUMN exception_detail MEDIUMTEXT NULL COMMENT 'The serialized exception chain, one JSON node per exception, outermost first.',
+MODIFY COLUMN error_fingerprint CHAR(64) NULL COMMENT 'SHA-256 of the fault shape, so the same fault groups together across machines; NULL without an exception.',
 MODIFY COLUMN message TEXT NOT NULL COMMENT 'Primary log message text.',
 MODIFY COLUMN payload_json MEDIUMTEXT NULL COMMENT 'Optional structured payload as JSON text.',
 MODIFY COLUMN previous_hash CHAR(64) NULL COMMENT 'Previous entry hash for chain validation.',
@@ -445,13 +414,14 @@ MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the 
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was last updated.';
 
-ALTER TABLE config_images_locations COMMENT = 'Image path overrides for request items, their Category families, and work centers. Enables role-based customization of visual assets via cascade resolution pattern.';
+ALTER TABLE config_images_locations COMMENT = 'Image location overrides for request items, their Category families, work centers, parts and machines. Enables role-based customization of visual assets via cascade resolution pattern.';
 
 ALTER TABLE config_images_locations
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for image location override row.',
-MODIFY COLUMN scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_item, request_category, work_center, visual_part, or wip_part.',
-MODIFY COLUMN scope_item_id VARCHAR(190) NOT NULL COMMENT 'Identifier within scope: the Item or Category code, or the numeric work center id.',
+MODIFY COLUMN scope VARCHAR(16) NOT NULL COMMENT 'Scope type: request_item, request_category, work_center, visual_part, wip_part, or computer.',
+MODIFY COLUMN scope_item_id VARCHAR(190) NOT NULL COMMENT 'Identifier within scope: the Item or Category code, the numeric work center id, the part number, or <computer_id>:<source_kind> at computer scope.',
+MODIFY COLUMN computer_id BIGINT NULL COMMENT 'At computer scope, the machine the row belongs to; NULL for the five picture scopes.',
 MODIFY COLUMN image_path VARCHAR(500) NOT NULL COMMENT 'File system path to the image file copied to the shared network folder.',
 MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Soft-delete flag; inactive rows are ignored during path resolution cascades.',
 MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the image override.',
@@ -600,6 +570,170 @@ EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
 -- ============================================================
+-- user_active_sessions - feature 010-startup-rebuild (task T044)
+-- ============================================================
+-- New table. The owning artifact is Database/Tables/34_user_active_sessions/create.sql; the guarded statement
+-- below carries the same shape so a store that ALREADY EXISTS gains the table when this maintenance file is run,
+-- which is the only path that reaches such a store. FOREIGN_KEY_CHECKS is off for the creation because the table
+-- carries two foreign keys, and the order in which the referenced tables were created is not this file's to
+-- assume.
+SET FOREIGN_KEY_CHECKS = 0;
+
+SET
+    @has_user_active_sessions_table := (
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'user_active_sessions'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_user_active_sessions_table = 0,
+        'CREATE TABLE user_active_sessions (id BIGINT NOT NULL AUTO_INCREMENT COMMENT ''Surrogate primary key.'', public_id CHAR(36) NOT NULL COMMENT ''Public UUID for external references.'', user_id BIGINT NOT NULL COMMENT ''The person the session belongs to.'', computer_id BIGINT NOT NULL COMMENT ''The machine the session was issued on.'', token_hash CHAR(64) NOT NULL COMMENT ''SHA-256 hex digest of the issued token; never the token itself'', token_salt VARBINARY(32) NOT NULL COMMENT ''Salt the digest was computed with; present whenever a digest is'', issued_utc DATETIME NOT NULL COMMENT ''When the token was issued, from the store clock'', expires_utc DATETIME NOT NULL COMMENT ''When the token stops being valid, from the store clock'', revoked_utc DATETIME NULL COMMENT ''When the session was cleared; NULL while it has not been'', is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT ''Soft state: 0 once cleared, so the row survives as evidence'', source_label VARCHAR(32) NOT NULL COMMENT ''Caller vocabulary for where the session came from'', created_utc DATETIME NOT NULL COMMENT ''When this row was first written; unchanged by a later sign-in'', PRIMARY KEY (id), UNIQUE KEY uq_user_active_sessions_public_id (public_id), UNIQUE KEY uq_user_active_sessions_user_computer (user_id, computer_id) COMMENT ''One active row per person per machine'', KEY idx_user_active_sessions_is_active_expires_utc (is_active, expires_utc), KEY idx_user_active_sessions_computer_id (computer_id), CONSTRAINT fk_user_active_sessions_core_users_profiles_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id), CONSTRAINT fk_user_active_sessions_core_computers_registry_computer_id FOREIGN KEY (computer_id) REFERENCES core_computers_registry (id)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = ''The one active session for a person on a machine: a salted token digest, its lifetime and its machine key.''',
+        'SELECT ''user_active_sessions already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- auth_remembered_sign_ins - feature 010-startup-rebuild (task T046, plan D12)
+-- ============================================================
+-- New table. The owning artifact is Database/Tables/35_auth_remembered_sign_ins/create.sql; the guarded statement
+-- below carries the same shape so a store that ALREADY EXISTS gains the table when this maintenance file is run.
+-- FOREIGN_KEY_CHECKS is off for the same reason as above: the table carries two foreign keys.
+SET FOREIGN_KEY_CHECKS = 0;
+
+SET
+    @has_auth_remembered_sign_ins_table := (
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'auth_remembered_sign_ins'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_auth_remembered_sign_ins_table = 0,
+        'CREATE TABLE auth_remembered_sign_ins (id BIGINT NOT NULL AUTO_INCREMENT COMMENT ''Surrogate primary key.'', public_id CHAR(36) NOT NULL COMMENT ''Public UUID for external references.'', user_id BIGINT NOT NULL COMMENT ''The person the remembered sign-in belongs to.'', computer_id BIGINT NOT NULL COMMENT ''The machine the remembered sign-in was made on.'', payload_ciphertext VARBINARY(512) NOT NULL COMMENT ''The encrypted remembered payload; opaque to the store'', payload_iv VARBINARY(16) NOT NULL COMMENT ''The initialisation vector the ciphertext was produced with'', key_fingerprint CHAR(64) NOT NULL COMMENT ''Identifies the key that encrypted the payload, so a rotated key is detected rather than raised'', is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT ''Soft state: 0 once cleared, and a cleared row is never read'', created_utc DATETIME NOT NULL COMMENT ''When this person first used this machine to remember a sign-in'', updated_utc DATETIME NOT NULL COMMENT ''When the payload was last written or cleared'', PRIMARY KEY (id), UNIQUE KEY uq_auth_remembered_sign_ins_public_id (public_id), UNIQUE KEY uq_auth_remembered_sign_ins_user_computer (user_id, computer_id) COMMENT ''One remembered sign-in per person per machine'', CONSTRAINT fk_auth_remembered_sign_ins_core_users_profiles_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id), CONSTRAINT fk_auth_remembered_sign_ins_core_computers_registry_computer_id FOREIGN KEY (computer_id) REFERENCES core_computers_registry (id)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = ''An encrypted remembered sign-in per person and machine, with the initialisation vector and the fingerprint of the key that produced it.''',
+        'SELECT ''auth_remembered_sign_ins already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- sp_auth_user_credential_get - feature 010-startup-rebuild (task T110)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the read is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_auth_user_credential_get/create.sql, with its rollback beside
+--     it, and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it reads: one active account's identity and role in force in `core_users_profiles`, joined to
+--     `auth_roles_assignments` and `auth_roles_catalog` exactly as `sp_auth_user_row_get` reads them, plus the
+--     four columns that read deliberately leaves out: `password_hash`, `password_salt`,
+--     `require_password_change` and `temporary_credential_failed_attempts`. It owns no data and drops cleanly.
+--   Why it exists: the retired `sp_auth_credentials_check` (T020) was the only read that returned credential
+--     material, so the rebuilt credential check and the machine-setup gate had nothing to call and both failed
+--     closed. This is that read, restored under a name that says what it returns, shared by both callers so the
+--     two cannot drift into different questions. `require_password_change` and the attempt count travel with the
+--     identity because the five-attempt limit applies to temporary credentials alone (FR-012, SC-007).
+
+-- ============================================================
+-- sp_auth_user_password_set - feature 010-startup-rebuild (task T116)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the write is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_auth_user_password_set/create.sql, with its rollback beside it,
+--     and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it writes: three columns of one `core_users_profiles` row — `password_hash`, `password_salt`,
+--     `require_password_change` set to 0 — plus `temporary_credential_failed_attempts` set to 0. It touches no
+--     other row, no other table and no session, and it writes only while it runs, so its rollback cannot lose
+--     data.
+--   Why it exists: FR-013 requires a person still on a temporary credential to set a new password before
+--     anything else. The retired `sp_auth_user_password_update` (T020) was the only write of that column pair
+--     that an account could make for itself, and nothing that survives replaces it:
+--     `sp_user_management_update` deliberately leaves credentials alone, and `sp_user_management_reset_password`
+--     issues an administrator's one-time PIN and would set `require_password_change` back to 1 rather than clear
+--     it. Clearing that flag is what takes the account out of the temporary state the five-attempt limit is
+--     judged against (FR-012).
+
+-- ============================================================
+-- sp_auth_user_roles_get - feature 010-startup-rebuild (task T195)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the read is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_auth_user_roles_get/create.sql, with its rollback beside it,
+--     and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it reads: the existing auth_roles_assignments joined to auth_roles_catalog for one active person, one
+--     row per assignment. It owns no data and it drops cleanly.
+--   Why it exists: it closes the held-roles gap on the identity contract. sp_auth_user_row_get resolves the
+--     person and the single role in force; this read returns every assignment, so IPersonIdentity.HeldRoleCodes
+--     is the person's whole set rather than the one role the logon read happens to return.
+
+-- ============================================================
+-- sp_config_images_locations_computer_sources_all_get - retired by task T198 (FR-040)
+-- ============================================================
+-- Withdrawn, so it no longer carries a description of what it does. Its create.sql is gone — no artifact in this
+-- tree creates it any more — its body was removed from Database/StoredProcedures/AllSPs.sql, and the rollback
+-- beside the folder is the drop that remains. Its only caller was the machine-configuration service's
+-- picture-source read, which T230 removed with the per-computer folders themselves, so the question it existed to
+-- answer ("never given its folders" apart from "its folders were removed") is no longer one the application asks.
+-- The withdrawal is listed with the other two computer-source artifacts in the retired-objects section below.
+
+-- ============================================================
+-- sp_core_computers_registry_display_name_get - feature 010-startup-rebuild (task T075)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the read is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_core_computers_registry_display_name_get/create.sql, with its
+--     rollback beside it, and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it reads: the one row `uq_core_computers_registry_display_name` allows to hold a given display name.
+--   Why it exists: a machine save must ask for a different display name when another machine already holds the
+--     one it was given (the contract's edge case), and the same read lets a reset refuse before it writes when
+--     the default name it would restore is taken. Both are answers the screen acts on rather than exceptions.
+
+-- ============================================================
+-- sp_machine_configuration_reset - feature 010-startup-rebuild (task T075)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the write is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_machine_configuration_reset/create.sql, with its rollback
+--     beside it, and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it writes: this machine's own configuration and nothing else — its display name and description in
+--     `core_computers_registry`, its picture sources in `config_images_locations` (withdrawn, not deleted), and
+--     its scoped preference rows in `config_settings_values`. All three writes are one transaction behind one
+--     call, because a half-finished reset leaves a machine in a state none of the three tables can express.
+--   Why it exists: FR-018 requires a targeted restore of exactly the parts named as broken, on this machine
+--     only, with a single implementation that the recovery step drives rather than re-implementing. It never
+--     touches a person, a role, a permission, another machine, a session or a log entry, and it deliberately
+--     does not delete the registry row: that row is referenced by `user_active_sessions` and
+--     `auth_remembered_sign_ins`, and neither may be cleared by a machine-configuration reset.
+
+-- ============================================================
 -- Retired objects - feature 001-module-mock-visual-fallback (FR-014)
 -- ============================================================
 -- The database-backed demo/sample family was retired in full. These objects are no longer created
@@ -626,3 +760,102 @@ DEALLOCATE PREPARE stmt;
 --   Seed: seed_waitlist_request_catalog (artifact removed with the tables it populated), together with the
 --     dead Database/Seeds/seed_waitlist_requests_default/migrate_subtypes.sql whose request_type / subtype
 --     columns stopped existing when waitlist_requests_queue was re-keyed.
+
+-- ============================================================
+-- Retired objects - feature 010-startup-rebuild (tasks T020, T023, T061)
+-- ============================================================
+-- The old startup surface was removed and is being rebuilt, so the procedures only that surface used are no
+-- longer created by an artifact in this tree and no longer carry descriptions here. The matching rollback
+-- artifacts remain as the drop statements, so a DBA can promote the removal, and each procedure's body was
+-- removed from Database/StoredProcedures/AllSPs.sql in the same change:
+--   Stored procedures (drop via Database/StoredProcedures/<name>/rollback.sql):
+--     sp_server_utc_now_get (the wrapper only; `fn_server_utc_now` is retained),
+--     sp_auth_credentials_check, sp_auth_user_password_update, sp_auth_computer_registered_get,
+--     sp_auth_session_expiry_get, sp_auth_password_reset_required_get
+--   Validation: Database/Validation/startup_schema/validate.sql was reworked rather than deleted (T021). It
+--     keeps the checks that cover shared tables and the retained `fn_server_utc_now`; the checks that covered
+--     the retired session table (auth_sessions_tokens) were removed with the surface that used it.
+--   Not retired, and deliberately so (T022): sp_core_computers_registry_lookup_by_name_mac_get,
+--     sp_core_computers_registry_lookup_by_mac_get and sp_core_computers_registry_update_by_mac. They were
+--     listed with the startup-only set, but a surviving artifact still names each of them — the rebuilt
+--     machine-facts contract reads a machine by its (name, hardware address) pair, and the retained computer
+--     registry service still calls all three — so removing them here would leave live code calling a
+--     procedure no install creates. They retire with that service instead (T187).
+--   Retained, unchanged: `fn_server_utc_now`. The rebuilt session, remembered sign-in, log and
+--     picture-source procedures all compare against the store's own clock through it, so it stays the single
+--     implementation of "now" (S8.1).
+--   T061 then retired three more objects that the dead-weight audit (T056) found orphaned of application code.
+--     They were not reached only by the old startup surface; their only consumers were the development seed and
+--     this feature's own settings validator, and both were edited in the same change (T062), so nothing writes
+--     or asserts them any more. Their rollback artifacts remain as the drop statements:
+--     Tables (drop via Database/Tables/<name>/rollback.sql):
+--       core_buildings_catalog, core_buildings_history
+--     Stored procedures (drop via Database/StoredProcedures/<name>/rollback.sql):
+--       sp_core_buildings_upsert
+--     Seed: Database/Seeds/seed_dev_masked_baseline no longer truncates or inserts into core_buildings_catalog,
+--       and its mirror block in Database/Seeds/AllSeeds.sql was removed with it.
+--     Validation: Database/Validation/settings_schema/validate.sql no longer asserts the three objects exist. It
+--       was reworked rather than deleted, keeping its checks on config_settings_values, config_settings_history,
+--       fn_config_settings_scope_rank, sp_config_settings_get_effective, sp_config_settings_upsert and
+--       vw_config_settings_scope_catalog.
+--   The picture-layout seed was then retired with the helper only it deployed: the seed folder
+--     Database/Seeds/seed_picture_layout_move (create and rollback removed together, so no artifact creates it and
+--     none reverses it), its block removed from Database/Seeds/AllSeeds.sql, and its helper procedure
+--     sp_seed_picture_layout_move dropped from the store rather than left behind — the seed created it and neither
+--     the seed nor its rollback ever dropped it, so the drop is the store side of the retirement.
+--     Why it goes: the application defaults out on first use, so the migration is not needed to reach a working
+--     default. A scope with no row resolves to the application's own no-image path
+--     (MTM_Waitlist.Settings/Models/ImageLocationDefaults.cs), and the only writers of config_images_locations
+--     rows are the picture screen (sp_config_images_locations_insert) and
+--     sp_config_images_locations_computer_sources_set — no seed inserts a row — so the move only ever rewrote rows
+--     an operator or the computer-sources write had already put there.
+--     Why nothing breaks: a store with no rows resolves to the default, and a row whose file is absent falls back
+--     to the default asset (ImageLocationService.ResolveExistingPathAsync), so removing the seed falls back to the
+--     application's own defaults rather than to nothing.
+--     Retained, not retired: sp_config_images_locations_paths_move with its rollback, which the hand-run move
+--     (tools/Move-PartPictureLayout.ps1) still uses, and Database/Validation/part_pictures_schema/validate.sql,
+--     which still asserts that pair exists.
+--   T198 then retired the three per-computer picture-source procedures, because the feature withdrew their owner:
+--     where a machine's pictures come from became a plant-wide answer, so no computer captures a folder of its own
+--     (FR-040, FR-041). Their folders are kept and their create.sql files are gone — the matching rollback is the
+--     drop a DBA promotes — and their bodies were removed from Database/StoredProcedures/AllSPs.sql in the same
+--     change:
+--     Stored procedures (drop via Database/StoredProcedures/<name>/rollback.sql):
+--       sp_config_images_locations_computer_sources_all_get (T075; its only caller was the machine-configuration
+--         service's picture-source read, which T230 removed),
+--       sp_config_images_locations_computer_sources_get (T051; the machine-setup screen stopped capturing folders
+--         in T199 and the service stopped reading them in T230),
+--       sp_config_images_locations_computer_sources_set (T051; the only writer of a `computer` scope row, which
+--         T197 stopped the save writing and T199 took off the screen)
+--     Seed: Database/Seeds/seed_retire_computer_scope_picture_sources is added rather than retired. It withdraws
+--       the `computer` scope rows an existing store holds, so a computer set up before this change reads from the
+--       plant-wide setting afterwards (SC-021), and its mirror block is in Database/Seeds/AllSeeds.sql.
+--     Why they go now rather than earlier: the removal proof recorded `_get` and `_set` as consumerless but
+--       deliberately kept, because the consumers were unbuilt. Those consumers were then built and withdrawn by
+--       FR-040 inside the same feature, so the reason to keep them expired with the requirement.
+--     Not retired: `config_images_locations` itself, its `computer` scope value and its `computer_id` column. A
+--       store that already holds rows keeps them, withdrawn, and the table's own rollback is what removes them.
+--   The development seed's credential was repaired, and seed application was taken out of the validator's
+--     default path.
+--     `Database/Seeds/seed_dev_masked_baseline` wrote the retired four-character marker `'0000'` into
+--     `password_hash` with a null `password_salt`, and `PasswordSecretHasher.Verify` refuses a null salt before
+--     it derives anything, so no comparison could confirm any of the ten seeded accounts: nothing could sign in
+--     on a fresh install, at the machine-setup gate or at the sign-in screen, and nothing in the build said so.
+--     Both files were changed together, because the aggregate is what the installer runs: the seed artifact and
+--     its mirror block in `Database/Seeds/AllSeeds.sql`. Each account now carries `UNHEX(<16-byte salt>)` and the
+--     base64 digest of the same development credential, produced by `PasswordSecretHasher.Hash` under its shipped
+--     parameters (PBKDF2/SHA-256, 100000 iterations, a 32-byte hash). Every seeded account shares that value on
+--     purpose: it is a development placeholder rather than a secret, and it belongs to no real person. Roles,
+--     identifiers, `is_active` and `require_password_change = 1` are unchanged, so the credential is still a
+--     temporary one and the person is asked to choose a real password at first sign-in.
+--     Guarded by MTM_Waitlist.Tests/Module_Core/Services/DevelopmentSeedCredentialTests.cs, which reads this seed
+--     file and confirms every row with the application's own comparison.
+--     The reason this is recorded here and not only in the seed: `.github/scripts/validate-database-schema.ps1`
+--     applied every seed file whenever the schema validated, and this seed truncates and rewrites
+--     `core_users_profiles`, `auth_roles_catalog`, `auth_roles_assignments`, `config_settings_values` and
+--     `core_computers_registry`. A validation run therefore rewrote the accounts of whatever store its
+--     connection strings named, which in CI are secrets pointing at a real one. Seed application now happens
+--     only when the run is given `-ApplySeeds`, so checking a schema no longer changes a store's data.
+--     Correction to an earlier note in this block: the semicolon in the comment that used to sit here was NOT
+--     what made the validator fail. Its statement splitter masks comments and quoted literals before looking for
+--     delimiters, so that semicolon was already harmless. Removing it is a tidy-up, not a fix.

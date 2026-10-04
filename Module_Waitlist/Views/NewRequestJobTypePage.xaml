@@ -78,18 +78,24 @@
                                             Source="{Binding ImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                                             Stretch="Uniform" />
                                     </Border>
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
+                                    <!-- The job type's name and caption are drawn by the one-line scrolling control
+                                         (009 B1/B2): this card is a fixed 150 square, so a long name scrolls
+                                         instead of wrapping and pushing the card out of shape. Both sizes are
+                                         set here because the control draws its own text and cannot inherit a
+                                         TextBlock style. -->
+                                    <sharedControls:AutoScrollTextView
+                                        HorizontalAlignment="Stretch"
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                         TextAlignment="Center"
-                                        Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                        Text="{Binding Name}"
-                                        TextWrapping="WrapWholeWords" />
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
+                                        Text="{Binding Name}" />
+                                    <sharedControls:AutoScrollTextView
+                                        HorizontalAlignment="Stretch"
+                                        FontSize="13"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                         TextAlignment="Center"
-                                        Style="{StaticResource RequestDialogCaptionStyle}"
-                                        Text="{Binding Summary}"
-                                        TextWrapping="WrapWholeWords" />
+                                        Text="{Binding Summary}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>

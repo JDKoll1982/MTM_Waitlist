@@ -30,10 +30,10 @@ public sealed partial class PermissionsPage : Page
 
     public PermissionsPage()
     {
-        StartupDebugLog.Info("PermissionsPage", "Constructor started.");
+        AppLog.Info("PermissionsPage", "Constructor started.");
         ViewModel = App.GetService<PermissionsViewModel>();
         InitializeComponent();
-        StartupDebugLog.Info("PermissionsPage", "Constructor completed.");
+        AppLog.Info("PermissionsPage", "Constructor completed.");
     }
 
     private void OnBackClick(object sender, RoutedEventArgs e) => ViewModel.GoBackCommand.Execute(null);

@@ -36,12 +36,12 @@ public sealed class UserManagementService : IUserManagementService
     private const int TemporaryCredentialDigits = 4;
 
     private readonly IUserManagementRepository _repository;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
-    public UserManagementService(IUserManagementRepository repository, StartupState startupState)
+    public UserManagementService(IUserManagementRepository repository, IPersonIdentity personIdentity)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
+        _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
     }
 
     /// <inheritdoc />
@@ -75,7 +75,7 @@ public sealed class UserManagementService : IUserManagementService
                 normalized.DisplayName,
                 normalized.EmployeeIdentifier,
                 normalized.RoleCode,
-                _startupState.UserId,
+                _personIdentity.UserId,
                 hash,
                 salt,
                 NewChangeGroupId(),
@@ -106,7 +106,7 @@ public sealed class UserManagementService : IUserManagementService
                 normalized.EmployeeIdentifier,
                 normalized.RoleCode,
                 edit.IsActive,
-                _startupState.UserId,
+                _personIdentity.UserId,
                 NewChangeGroupId(),
                 cancellationToken)
             .ConfigureAwait(false);
@@ -122,7 +122,7 @@ public sealed class UserManagementService : IUserManagementService
         var result = await _repository
             .ResetPasswordAsync(
                 userId,
-                _startupState.UserId,
+                _personIdentity.UserId,
                 hash,
                 salt,
                 NewChangeGroupId(),

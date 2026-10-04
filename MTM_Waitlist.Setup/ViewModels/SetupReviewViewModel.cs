@@ -129,7 +129,7 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SetupReview",
                 ex,
                 $"Resolving the picture for part '{partNumber}' failed; the row will draw the no-image placeholder.");
@@ -221,7 +221,7 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
         }
         catch (COMException ex)
         {
-            StartupDebugLog.Error("SetupReviewVm", ex, "NavigateTo completion threw COMException. Retrying on dispatcher queue.");
+            AppLog.Error("SetupReviewVm", ex, "NavigateTo completion threw COMException. Retrying on dispatcher queue.");
 
             var dispatcherQueue = _appWindowProvider.MainWindow.DispatcherQueue;
             if (dispatcherQueue is not null)

@@ -68,7 +68,7 @@ public static class PermissionRegistry
         IReadOnlyList<string> GateSites);
 
     /// <summary>
-    /// The fourteen permissions, one per gated action, each spelled as the specification pins it.
+    /// The nineteen permissions, one per gated action, each spelled as the specification pins it.
     /// </summary>
     /// <remarks>
     /// The fallback column is a deliberate choice rather than a copy of any role's baseline: an unreachable store
@@ -147,6 +147,34 @@ public static class PermissionRegistry
             PermissionKeys.SettingsStoragePaths,
             LabelResourceKey(PermissionKeys.SettingsStoragePaths),
             GatesResourceKey(PermissionKeys.SettingsStoragePaths),
+            Area.Settings,
+            Fallback: false,
+            new[] { "SettingsViewModel" }),
+        new Entry(
+            PermissionKeys.SettingsMachineConfiguration,
+            LabelResourceKey(PermissionKeys.SettingsMachineConfiguration),
+            GatesResourceKey(PermissionKeys.SettingsMachineConfiguration),
+            Area.Settings,
+            Fallback: false,
+            new[] { "MachineSetupGate" }),
+        new Entry(
+            PermissionKeys.SettingsIgnoredLocationsEdit,
+            LabelResourceKey(PermissionKeys.SettingsIgnoredLocationsEdit),
+            GatesResourceKey(PermissionKeys.SettingsIgnoredLocationsEdit),
+            Area.Settings,
+            Fallback: false,
+            new[] { "SettingsViewModel" }),
+        new Entry(
+            PermissionKeys.SettingsLogPanel,
+            LabelResourceKey(PermissionKeys.SettingsLogPanel),
+            GatesResourceKey(PermissionKeys.SettingsLogPanel),
+            Area.Settings,
+            Fallback: false,
+            new[] { "DeveloperLogPanelViewModel" }),
+        new Entry(
+            PermissionKeys.SettingsSessionLength,
+            LabelResourceKey(PermissionKeys.SettingsSessionLength),
+            GatesResourceKey(PermissionKeys.SettingsSessionLength),
             Area.Settings,
             Fallback: false,
             new[] { "SettingsViewModel" }),

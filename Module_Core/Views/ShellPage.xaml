@@ -11,6 +11,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
     xmlns:mock="using:MTM_Waitlist.Module_Mock.Views"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     xmlns:selectors="using:MTM_Waitlist.Module_Core.Selectors"
     xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     x:Name="RootPage"
@@ -426,7 +427,7 @@
                                 Background="Transparent"
                                 BorderThickness="0"
                                 shared:TooltipBehavior.ResourceKey="Shell_CurrentUser_Tooltip"
-                                shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs|MTM_Waitlist.Startup/Services/SignOutService.cs|MTM_Waitlist.Startup/Services/SignInSessionKeys.cs|MTM_Waitlist.Startup/Services/AppProcessRestarter.cs|Strings/en-us/Resources.resw|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
+                                shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|ViewModels/ShellViewModel.cs|MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs|MTM_Waitlist.Startup/Services/SignOutService.cs|MTM_Waitlist.Startup/Services/AppProcessRestarter.cs|Strings/en-us/Resources.resw|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
                                 shared:TooltipBehavior.FallbackText="View the current signed-in user, or sign out.">
                                 <Button.Flyout>
                                     <MenuFlyout Placement="BottomEdgeAlignedRight">
@@ -450,13 +451,16 @@
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center" />
                                     </Border>
-                                    <TextBlock
+                                    <!-- The signed-in name is drawn by the one-line scrolling control (009 B1/B2):
+                                         the box stays 220 px wide and a long name scrolls through it rather than
+                                         being cut off with an ellipsis. Body size and colour are set here because
+                                         the control draws its own text and cannot inherit a TextBlock style. -->
+                                    <sharedControls:AutoScrollTextView
                                         VerticalAlignment="Center"
                                         MaxWidth="220"
-                                        Style="{ThemeResource BodyTextBlockStyle}"
-                                        Text="{Binding CurrentUserDisplayName}"
-                                        TextTrimming="CharacterEllipsis"
-                                        TextWrapping="NoWrap" />
+                                        FontSize="14"
+                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                        Text="{Binding CurrentUserDisplayName}" />
                                 </StackPanel>
                             </Button>
                         </Grid>
@@ -612,7 +616,7 @@
                                         Background="Transparent"
                                         BorderThickness="0"
                                         shared:TooltipBehavior.ResourceKey="Shell_CurrentUser_Tooltip"
-                                        shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|ViewModels/ShellViewModel.cs|Module_Startup/Models/StartupState.cs|MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs|MTM_Waitlist.Startup/Services/SignOutService.cs|MTM_Waitlist.Startup/Services/SignInSessionKeys.cs|MTM_Waitlist.Startup/Services/AppProcessRestarter.cs|Strings/en-us/Resources.resw|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
+                                        shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/Views/ShellPage.xaml.cs|ViewModels/ShellViewModel.cs|MTM_Waitlist.Core/Contracts/Services/ISignOutService.cs|MTM_Waitlist.Startup/Services/SignOutService.cs|MTM_Waitlist.Startup/Services/AppProcessRestarter.cs|Strings/en-us/Resources.resw|Module_Core/Helpers/ResourceExtensions.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs"
                                         shared:TooltipBehavior.FallbackText="View the current signed-in user, or sign out.">
                                         <Button.Flyout>
                                             <MenuFlyout Placement="BottomEdgeAlignedRight">
@@ -636,13 +640,15 @@
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center" />
                                             </Border>
-                                            <TextBlock
+                                            <!-- The signed-in name is drawn by the one-line scrolling control (009
+                                                 B1/B2) here too, so the flyout and the header cannot disagree about
+                                                 how a long name is shown. -->
+                                            <sharedControls:AutoScrollTextView
                                                 VerticalAlignment="Center"
                                                 MaxWidth="220"
-                                                Style="{ThemeResource BodyTextBlockStyle}"
-                                                Text="{Binding CurrentUserDisplayName}"
-                                                TextTrimming="CharacterEllipsis"
-                                                TextWrapping="NoWrap" />
+                                                FontSize="14"
+                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                Text="{Binding CurrentUserDisplayName}" />
                                         </StackPanel>
                                     </Button>
                                 </Grid>

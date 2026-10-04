@@ -41,6 +41,19 @@ public static class AppStoragePaths
     public const string KeysFolderDefault =
         @"\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\Keys - DO NOT EDIT FILES\MTM Waitlist Application";
 
+    /// <summary>
+    /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.
+    /// </summary>
+    /// <remarks>
+    /// The same share the MTM Receiving Application writes under its
+    /// <c>Dunnage.Application.DefaultImageLocation</c> setting, written as the share's own name rather than as the
+    /// <c>X:</c> drive letter that reaches it on this site: a drive letter is only meaningful on a machine that
+    /// has the mapping, and this root has to be readable from every workstation. Like the picture root, it is a
+    /// plant-wide setting rather than something one computer captures (FR-040).
+    /// </remarks>
+    public const string DunnageRootDefault =
+        @"\\mtmanu-fs01\Expo Drive\Software Development\Live Applications\Shared\Images\Dunnage";
+
     /// <summary>The sub-folder beside the pictures that a replaced picture is archived into.</summary>
     public const string ArchiveFolderName = "Archive";
 

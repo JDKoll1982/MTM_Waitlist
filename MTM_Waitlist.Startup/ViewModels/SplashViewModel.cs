@@ -1,353 +1,197 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 
-using MTM_Waitlist.Module_Core.Contracts.Services;
-using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
-using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Startup.Services;
 
 namespace MTM_Waitlist.Module_Startup.ViewModels;
 
-public partial class SplashViewModel : ObservableRecipient, INavigationAware
+/// <summary>
+/// The launch window's state: the step under way, how far the launch has got, and the cause of the stop
+/// (`contracts/launch-step-contract.md` §3, §4; FR-002, FR-004, FR-026, FR-039).
+/// </summary>
+/// <remarks>
+/// <para>
+/// <b>It reads the feed; it never writes to it.</b> Lines arrive through <see cref="ILaunchActivityFeed.EntryAppended"/>
+/// in the order the launch wrote them, and each one moves the surface on: the step under way takes the single
+/// line, and the count asks the catalogue how many steps have ended. Nothing is accumulated for display, because
+/// the surface states the work under way rather than a history of the launch (FR-039).
+/// </para>
+/// <para>
+/// <b>The count is derived, never stored.</b> The progress text asks the catalogue how many steps it holds and
+/// asks the feed how many of them have ended, so the figure cannot disagree with the lines beside it and a
+/// catalogue that gains a step cannot leave a stale "of 17" behind (FR-002, FR-003).
+/// </para>
+/// <para>
+/// <b>A stop keeps the cause it first stated.</b> The failing line carries the step's own plain-language
+/// diagnosis, so the strip at the bottom of the window repeats the cause rather than showing a step number
+/// (FR-004). Once a cause has been stated a later line cannot replace it, because the reason the person is
+/// reading must not change under them while they act on it.
+/// </para>
+/// <para>
+/// <b>Lines arrive on whichever thread the launch is on.</b> A launch step awaits work that does not return to
+/// the surface's thread, so every change is handed through <see cref="UiThreadMarshaller"/>, which the surface
+/// sets to its own dispatcher. A test leaves it alone, and the change is applied where it happens.
+/// </para>
+/// </remarks>
+public sealed partial class SplashViewModel : ObservableObject
 {
-    private const string LoggingDestinationRequiredPrefix = "Centralized logging destination is required.";
-    private const string LoggingDestinationMissingPrefix = "Centralized logging destination is not configured.";
-    private const string DatabaseFailurePrefix = "Could not validate startup session from the database.";
+    private readonly LaunchStepCatalog _catalog;
+    private readonly ILaunchActivityFeed _feed;
 
-    private readonly IStartupCoordinator _startupCoordinator;
-    private readonly IStartupRecoveryService _startupRecoveryService;
-    private readonly ILocalSettingsService _localSettingsService;
-    private readonly INavigationService _navigationService;
-    private readonly IStartupShellStateService _startupShellStateService;
-    private readonly IAppLifecycleService _lifecycle;
-    private readonly StartupState _startupState;
-    private readonly IVisualVerdictPrimer? _verdictPrimer;
-    private bool _startupStarted;
-    private string _statusText = "Starting application...";
-    private bool _isBusy = true;
-    private bool _showActions;
-    private bool _showResetToDefaultsAction = true;
-    private bool _lastBlockedWasDatabaseFailure;
-    private bool _isDatabaseFailure;
+    /// <summary>
+    /// The step whose work waits on something outside this computer and is therefore still in flight, or
+    /// <c>null</c> when the step under way has nothing to wait for.
+    /// </summary>
+    private string? _waitingStepId;
 
-    public string StatusText
+    /// <summary>Creates the launch window's state over the sequence and the lines the launch writes.</summary>
+    /// <param name="catalog">The sequence the launch walks, which is where the total comes from.</param>
+    /// <param name="feed">The lines the launch writes, which is where the rows come from.</param>
+    /// <exception cref="ArgumentNullException">Either argument is <c>null</c>.</exception>
+    public SplashViewModel(LaunchStepCatalog catalog, ILaunchActivityFeed feed)
     {
-        get => _statusText;
-        set => SetProperty(ref _statusText, value);
-    }
+        ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(feed);
 
-    public bool IsBusy
-    {
-        get => _isBusy;
-        set => SetProperty(ref _isBusy, value);
-    }
+        _catalog = catalog;
+        _feed = feed;
 
-    public bool ShowActions
-    {
-        get => _showActions;
-        set => SetProperty(ref _showActions, value);
-    }
-
-    public bool ShowResetToDefaultsAction
-    {
-        get => _showResetToDefaultsAction;
-        set => SetProperty(ref _showResetToDefaultsAction, value);
-    }
-
-    public bool IsDatabaseFailure
-    {
-        get => _isDatabaseFailure;
-        set => SetProperty(ref _isDatabaseFailure, value);
-    }
-
-    public Func<Task<string?>>? LoggingDestinationPromptRequestedAsync { get; set; }
-
-    /// <param name="verdictPrimer">
-    /// Settles the Infor Visual reachability verdict while the splash is showing. Optional: a host with no
-    /// Visual read fallback simply has nothing to prime, and the application behaves as it did before.
-    /// </param>
-    public SplashViewModel(
-        IStartupCoordinator startupCoordinator,
-        IStartupRecoveryService startupRecoveryService,
-        ILocalSettingsService localSettingsService,
-        INavigationService navigationService,
-        IStartupShellStateService startupShellStateService,
-        IAppLifecycleService lifecycle,
-        StartupState startupState,
-        IVisualVerdictPrimer? verdictPrimer = null)
-    {
-        ArgumentNullException.ThrowIfNull(startupCoordinator);
-        ArgumentNullException.ThrowIfNull(startupRecoveryService);
-        ArgumentNullException.ThrowIfNull(localSettingsService);
-        ArgumentNullException.ThrowIfNull(navigationService);
-        ArgumentNullException.ThrowIfNull(startupShellStateService);
-        ArgumentNullException.ThrowIfNull(startupState);
-
-        _startupCoordinator = startupCoordinator;
-        _startupRecoveryService = startupRecoveryService;
-        _localSettingsService = localSettingsService;
-        _navigationService = navigationService;
-        _startupShellStateService = startupShellStateService;
-        _lifecycle = lifecycle;
-        _startupState = startupState;
-        _verdictPrimer = verdictPrimer;
-
-        StatusText = _startupState.StatusText;
-        IsBusy = _startupState.IsBusy;
-    }
-
-    public async Task StartAsync()
-    {
-        StartupDebugLog.Info("SplashViewModel", "StartAsync invoked.");
-
-        if (_startupStarted)
+        // A launch that is already under way when the surface appears has lines the surface never saw, so the
+        // feed is read once before the subscription starts and nothing is drawn twice.
+        foreach (var entry in _feed.Entries)
         {
-            StartupDebugLog.Info("SplashViewModel", "Startup already started; StartAsync exits.");
-            return;
+            Apply(entry);
         }
 
-        _startupStarted = true;
-        await RunStartupAsync();
-    }
-
-    public async void OnNavigatedTo(object parameter)
-    {
-        await StartAsync();
-    }
-
-    public void OnNavigatedFrom()
-    {
-    }
-
-    [RelayCommand]
-    private async Task RetryAsync()
-    {
-        StartupDebugLog.Info("SplashViewModel", "Retry command invoked.");
-        IsBusy = true;
-        ShowActions = false;
-        ShowResetToDefaultsAction = true;
-        StatusText = _lastBlockedWasDatabaseFailure
-            ? "Retrying database connection checks..."
-            : "Trying to repair one damaged setting...";
-        UpdateState();
-        await RunStartupAsync(_lastBlockedWasDatabaseFailure);
-    }
-
-    [RelayCommand]
-    private async Task ResetToDefaultsAsync()
-    {
-        StartupDebugLog.Info("SplashViewModel", "ResetToDefaults command invoked.");
-        IsBusy = true;
-        ShowActions = false;
-        StatusText = "Resetting all local settings...";
-        UpdateState();
-
-        try
-        {
-            await _startupRecoveryService.ResetToDefaultsAsync();
-            StartupDebugLog.Info("SplashViewModel", "Local settings reset completed.");
-            await RunStartupAsync();
-        }
-        catch (Exception ex)
-        {
-            StartupDebugLog.Error("SplashViewModel", ex, "ResetToDefaults failed.");
-            IsBusy = false;
-            ShowActions = true;
-            StatusText = "Settings could not be reset. Try again or reset all local settings.";
-            UpdateState();
-        }
-    }
-
-    [RelayCommand]
-    private void Exit()
-    {
-        _lifecycle.Exit();
+        _feed.EntryAppended += OnEntryAppended;
     }
 
     /// <summary>
-    /// Settles the Infor Visual reachability verdict, when a primer is installed.
+    /// Sends a change to the thread that owns the surface. A launch step's continuation does not return to it, so
+    /// a surface sets this to its dispatcher; a test leaves it alone and the change is applied where it happens.
+    /// </summary>
+    public Action<Action> UiThreadMarshaller { get; set; } = static work => work();
+
+    /// <summary>The step the launch is on, named before its work begins, which is the one line the surface shows.</summary>
+    [ObservableProperty]
+    public partial string ProgressText { get; set; }
+
+    /// <summary>
+    /// The step the launch is on, named before its work begins, which is the line the surface shows under the
+    /// progress bar. It is the step's own name rather than a step number, so a stall has something to attribute
+    /// itself to (FR-002).
+    /// </summary>
+    [ObservableProperty]
+    public partial string CurrentStep { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Whether the step under way is reaching for something this computer does not hold — the store, a share, the
+    /// external system — so the surface shows movement rather than a proportion.
     /// </summary>
     /// <remarks>
-    /// Started alongside the rest of startup rather than after it, so establishing the verdict has almost no
-    /// effect on how long the splash is up. It is awaited before the shell activates either way, which is the
-    /// point: the main window must never open while the application is still deciding whether Infor Visual can
-    /// be reached, because every read taken in that window would pay for the answer. Never throws — a
-    /// reachability question may not be able to block startup.
+    /// <b>Derived from the catalogue, never listed here.</b> A step declares what it is about, and a step that
+    /// names a target is one that waits on something outside this machine and can therefore stall without any
+    /// progress to report. A step that names nothing is reading this computer and finishes at once. Writing the
+    /// waiting steps out as a list would be a second account of the catalogue that could drift from it, so the
+    /// target the step already declares is what decides this.
     /// </remarks>
-    private async Task PrimeReachabilityVerdictAsync()
-    {
-        if (_verdictPrimer is null)
-        {
-            return;
-        }
+    [ObservableProperty]
+    public partial bool IsWaitingOnSomethingRemote { get; set; }
 
-        try
+    /// <summary>How many steps have finished, which is the progress bar's position.</summary>
+    [ObservableProperty]
+    public partial double ProgressValue { get; set; }
+
+    /// <summary>How many steps there are, which is the progress bar's length.</summary>
+    [ObservableProperty]
+    public partial double ProgressMaximum { get; set; } = 1;
+
+    /// <summary>Whether the progress bar has anything to show yet, which it does once a step has been named.</summary>
+    public bool HasProgress => ProgressMaximum > 0;
+
+    /// <summary>
+    /// The cause of the stop in plain language, or <c>null</c> while nothing has stopped the launch. It is the
+    /// failing line's own text, so the strip repeats what the line says rather than summarising it (FR-004).
+    /// </summary>
+    [ObservableProperty]
+    public partial string? Diagnosis { get; set; }
+
+    /// <summary>The row that stopped the launch, or <c>null</c> when nothing has stopped it.</summary>
+    public SplashFeedLine? DiagnosedLine { get; private set; }
+
+    /// <summary>The surface's own name, which is what the mark at the top of it stands for.</summary>
+    public string TitleText => "Startup_Launch.Title".GetLocalized();
+
+    /// <summary>The one control in the button bar, which is the surface's only visible way out.</summary>
+    public string CloseActionText => "Startup_Launch.CloseAction".GetLocalized();
+
+    /// <summary>Copies one line the launch wrote into the surface's list, on the surface's own thread.</summary>
+    private void OnEntryAppended(object? sender, LaunchFeedEntry entry)
+        => UiThreadMarshaller(() => Apply(entry));
+
+    /// <summary>Adds the row and refreshes everything the surface reads from it.</summary>
+    /// <param name="entry">The line the launch wrote.</param>
+    private void Apply(LaunchFeedEntry entry)
+    {
+        var line = SplashFeedLine.From(entry);
+
+        var finished = _catalog.CompletedCount(_feed);
+        ProgressValue = finished;
+        ProgressMaximum = Math.Max(1, _catalog.TotalCount);
+        ProgressText = string.Format(
+            System.Globalization.CultureInfo.CurrentCulture,
+            "Startup_Launch.ProgressCaption".GetLocalized(),
+            finished,
+            _catalog.TotalCount);
+
+        ApplyStepState(entry);
+
+        // A step that failed, and a line whose outcome is false, are both a statement that something went wrong.
+        // The first one is kept: a best-effort step that failed later must not replace the cause of a real stop,
+        // and the reason the person is reading must not change under them while they act on it (FR-004, FR-026).
+        var wentWrong = entry.Kind is LaunchFeedEntryKind.StepFailed || entry.Succeeded is false;
+
+        if (Diagnosis is null && wentWrong)
         {
-            await _verdictPrimer.PrimeAsync().ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            StartupDebugLog.Error(
-                "SplashViewModel",
-                ex,
-                "Priming the Infor Visual reachability verdict failed; startup continues and the probe loop settles it as before.");
+            DiagnosedLine = line;
+            Diagnosis = entry.Text;
         }
     }
 
-    private async Task RunStartupAsync(bool retryDatabasePhaseOnly = false)
+    /// <summary>
+    /// Moves the status line to the step that just started, and decides whether that step is one the surface
+    /// should show movement for rather than a proportion.
+    /// </summary>
+    /// <param name="entry">The line the launch wrote.</param>
+    /// <remarks>
+    /// The flag is cleared when the step that raised it ends, so a bar left sweeping after its step has finished
+    /// cannot be read as a step that is still running. Only the step that is actually in flight can clear it, so a
+    /// completion line for an earlier step cannot end a later one's wait.
+    /// </remarks>
+    private void ApplyStepState(LaunchFeedEntry entry)
     {
-        StartupDebugLog.Info("SplashViewModel", "RunStartupAsync entered.");
-        _startupShellStateService.EnterSplashMode();
-        IsBusy = true;
-        ShowActions = false;
-        ShowResetToDefaultsAction = true;
-        _lastBlockedWasDatabaseFailure = false;
-        IsDatabaseFailure = false;
-        StatusText = "Running startup checks...";
-        UpdateState();
-
-        StartupResult result;
-        Task verdictPriming;
-        try
+        switch (entry.Kind)
         {
-            var progress = new Progress<string>(message =>
-            {
-                StatusText = message;
-                UpdateState();
-            });
+            case LaunchFeedEntryKind.StepStarted:
+                CurrentStep = entry.Text;
+                _waitingStepId = entry.Target is null ? null : entry.StepId;
+                IsWaitingOnSomethingRemote = _waitingStepId is not null;
+                break;
 
-            // Settle the verdict while the rest of startup runs, and await both before the shell activates, so
-            // the first read of the session is never the thing that discovers Infor Visual is unreachable.
-            verdictPriming = PrimeReachabilityVerdictAsync();
-
-            result = await _startupCoordinator.RunAsync(progress, default, retryDatabasePhaseOnly);
-        }
-        catch (Exception ex)
-        {
-            StartupDebugLog.Error("SplashViewModel", ex, "Startup coordinator threw an exception.");
-            throw;
-        }
-
-        StartupDebugLog.Info(
-            "SplashViewModel",
-            $"Startup result received. Success={result.IsSuccess}, Blocked={result.IsBlocked}, Route={result.RouteTarget}, Status={result.StatusMessage}");
-
-        // The outcome is reported *before* the reachability verdict settles. The verdict is awaited only so the
-        // shell cannot open while the application is still deciding whether to attempt Infor Visual, and a
-        // blocked run opens no shell at all. Waiting first left the operator reading whichever step label was
-        // last reported, with the spinner still turning and no buttons to press, which reads as a hang on that
-        // step rather than as the diagnosis startup actually produced (seen on 2026-09-24: a workstation whose
-        // centralized logging destination was not configured appeared to stall on "Step 3 of 5").
-        StatusText = string.IsNullOrWhiteSpace(result.StatusMessage)
-            ? "Startup completed."
-            : result.StatusMessage;
-
-        if (IsLoggingDestinationPromptRequired(result))
-        {
-            StatusText = "Before we continue, choose where startup logs should be saved.";
-        }
-
-        IsBusy = false;
-        UpdateState();
-
-        if (result.IsSuccess && !result.IsBlocked && !string.IsNullOrWhiteSpace(result.RouteTarget))
-        {
-            // The verdict is awaited only here. It exists to keep the shell from opening while the application
-            // is still deciding whether to attempt Infor Visual, and a blocked run opens nothing at all — so
-            // making a blocked run wait for an answer it will never use is what left the splash looking frozen
-            // on whichever step label was last reported. The primer never throws, so leaving it unawaited on the
-            // blocked path cannot produce an unobserved fault.
-            await verdictPriming;
-
-            StartupDebugLog.Info("SplashViewModel", "Startup succeeded; transitioning to main mode.");
-            try
-            {
-                if (string.Equals(result.RouteTarget, typeof(LoginViewModel).FullName, StringComparison.Ordinal))
+            case LaunchFeedEntryKind.StepCompleted:
+            case LaunchFeedEntryKind.StepFailed:
+                if (string.Equals(entry.StepId, _waitingStepId, StringComparison.Ordinal))
                 {
-                    _lifecycle.ShowLoginWindowAndCloseSplash();
-                    return;
+                    _waitingStepId = null;
+                    IsWaitingOnSomethingRemote = false;
                 }
 
-                await _startupShellStateService.EnterMainModeAsync();
-                _navigationService.NavigateTo(result.RouteTarget, null, true);
-                _lifecycle.ShowMainWindowAndCloseSplash();
-                return;
-            }
-            catch (Exception ex)
-            {
-                StartupDebugLog.Error("SplashViewModel", ex, "Transition to main mode failed.");
-                throw;
-            }
+                break;
+
+            default:
+                // A line about the work inside a step does not change which step the launch is on.
+                break;
         }
-
-        StartupDebugLog.Info("SplashViewModel", "Startup blocked; showing splash actions.");
-
-        _lastBlockedWasDatabaseFailure = IsDatabaseFailureResult(result);
-        IsDatabaseFailure = _lastBlockedWasDatabaseFailure;
-        ShowResetToDefaultsAction = !_lastBlockedWasDatabaseFailure;
-
-        if (_startupState.IsDeveloper && IsLoggingDestinationPromptRequired(result))
-        {
-            var destination = await PromptForLoggingDestinationAsync();
-            if (!string.IsNullOrWhiteSpace(destination))
-            {
-                var selectedDestination = destination.Trim();
-                await _localSettingsService.SaveSettingAsync(StartupLoggingOptions.CentralizedDestinationSettingKey, selectedDestination);
-                await _localSettingsService.SaveSettingAsync(StartupLoggingOptions.HostedVmLogDirectorySettingKey, selectedDestination);
-                StartupDebugLog.Info("SplashViewModel", "Startup logging destinations saved from startup prompt.");
-                await RunStartupAsync();
-                return;
-            }
-
-            StatusText = "Startup stopped because centralized logging destination setup was canceled.";
-            StatusText = "Setup was canceled. Choose Try again to continue or Exit to close the app.";
-            ShowActions = true;
-            IsDatabaseFailure = false;
-            UpdateState();
-            return;
-        }
-
-        ShowActions = true;
-    }
-
-    private static bool IsLoggingDestinationPromptRequired(StartupResult result)
-    {
-        return result.IsBlocked
-            && !string.IsNullOrWhiteSpace(result.StatusMessage)
-            && (result.StatusMessage.StartsWith(LoggingDestinationRequiredPrefix, StringComparison.Ordinal)
-                || result.StatusMessage.StartsWith(LoggingDestinationMissingPrefix, StringComparison.Ordinal));
-    }
-
-    private static bool IsDatabaseFailureResult(StartupResult result)
-    {
-        return result.IsBlocked
-            && !string.IsNullOrWhiteSpace(result.StatusMessage)
-            && result.StatusMessage.StartsWith(DatabaseFailurePrefix, StringComparison.Ordinal);
-    }
-
-    private async Task<string?> PromptForLoggingDestinationAsync()
-    {
-        var promptHandler = LoggingDestinationPromptRequestedAsync;
-        if (promptHandler is null)
-        {
-            return null;
-        }
-
-        try
-        {
-            return await promptHandler();
-        }
-        catch (Exception ex)
-        {
-            StartupDebugLog.Error("SplashViewModel", ex, "Centralized logging destination prompt failed.");
-            return null;
-        }
-    }
-
-    private void UpdateState()
-    {
-        _startupState.IsBusy = IsBusy;
-        _startupState.StatusText = StatusText;
-        _startupState.LastUpdatedUtc = DateTimeOffset.UtcNow;
     }
 }

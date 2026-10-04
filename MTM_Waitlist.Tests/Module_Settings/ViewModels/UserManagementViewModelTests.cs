@@ -6,6 +6,7 @@ using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Models.UserManagement;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Settings.ViewModels;
 
@@ -378,7 +379,7 @@ public sealed class UserManagementViewModelTests
             permissions ?? PermissionStub.Holding("permission.admin.users"),
             stored ?? new FakeConfigSettingsValueService(),
             navigation ?? new RecordingNavigationService(),
-            new StartupState { UserId = SignedInUserId, Username = "JSMITH" });
+            new FakePersonIdentity { UserId = SignedInUserId, SignInName = "JSMITH" });
 
     /// <summary>
     /// A roster read that answers from a fixed list, and can be told to fail so the unavailable state is reachable.

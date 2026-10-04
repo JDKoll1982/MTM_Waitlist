@@ -19,14 +19,14 @@ public sealed partial class SetupDunnageTypePage : Page
     {
         try
         {
-            StartupDebugLog.Info("SetupDunnageTypePage", "Page constructor started.");
+            AppLog.Info("SetupDunnageTypePage", "Page constructor started.");
             ViewModel = App.GetService<SetupDunnageTypeViewModel>();
             InitializeComponent();
-            StartupDebugLog.Info("SetupDunnageTypePage", "Page constructor completed.");
+            AppLog.Info("SetupDunnageTypePage", "Page constructor completed.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SetupDunnageTypePage", ex, "Page constructor failed.");
+            AppLog.Error("SetupDunnageTypePage", ex, "Page constructor failed.");
             throw;
         }
     }
@@ -52,7 +52,7 @@ public sealed partial class SetupDunnageTypePage : Page
 
     private async void OnAddScrapTypeClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        StartupDebugLog.Info("SetupDunnageTypePage", "OnAddScrapTypeClick started. Opening add-scrap dialog.");
+        AppLog.Info("SetupDunnageTypePage", "OnAddScrapTypeClick started. Opening add-scrap dialog.");
         var scrapTypeInput = new TextBox
         {
             PlaceholderText = LocalizeOrDefault("Setup_DunnagePair.ScrapType.DialogPlaceholder", "Enter scrap type"),
@@ -70,15 +70,15 @@ public sealed partial class SetupDunnageTypePage : Page
         };
 
         var result = await dialog.ShowAsync();
-        StartupDebugLog.Info("SetupDunnageTypePage", $"Add-scrap dialog completed. Result='{result}', Input='{scrapTypeInput.Text}'.");
+        AppLog.Info("SetupDunnageTypePage", $"Add-scrap dialog completed. Result='{result}', Input='{scrapTypeInput.Text}'.");
         if (result == ContentDialogResult.Primary)
         {
             ViewModel.AddScrapType(scrapTypeInput.Text);
-            StartupDebugLog.Info("SetupDunnageTypePage", "Primary action selected. ViewModel.AddScrapType invoked.");
+            AppLog.Info("SetupDunnageTypePage", "Primary action selected. ViewModel.AddScrapType invoked.");
         }
         else
         {
-            StartupDebugLog.Info("SetupDunnageTypePage", "Add-scrap dialog canceled/closed without adding a value.");
+            AppLog.Info("SetupDunnageTypePage", "Add-scrap dialog canceled/closed without adding a value.");
         }
     }
 

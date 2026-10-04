@@ -37,23 +37,23 @@ public sealed class InforVisualSqlQueryService
         IReadOnlyDictionary<string, object?> parameters,
         CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("WaitlistInventory.Sql", $"ExecuteQueueAsync started. Script='{scriptName}', ParamCount={parameters.Count}.");
+        AppLog.Info("WaitlistInventory.Sql", $"ExecuteQueueAsync started. Script='{scriptName}', ParamCount={parameters.Count}.");
         var script = await WaitlistInforVisualSqlScriptStore.LoadAsync(scriptName, cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(script))
         {
-            StartupDebugLog.Info("WaitlistInventory.Sql", $"Script load returned empty content for '{scriptName}'.");
+            AppLog.Info("WaitlistInventory.Sql", $"Script load returned empty content for '{scriptName}'.");
             return Array.Empty<Dictionary<string, object?>>();
         }
 
         var connectionString = ResolveConnectionString();
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            StartupDebugLog.Info("WaitlistInventory.Sql", $"Connection string resolved empty for script '{scriptName}'.");
+            AppLog.Info("WaitlistInventory.Sql", $"Connection string resolved empty for script '{scriptName}'.");
             return Array.Empty<Dictionary<string, object?>>();
         }
 
         var parameterSummary = string.Join(", ", parameters.Select(entry => $"{entry.Key}='{Convert.ToString(entry.Value) ?? string.Empty}'"));
-        StartupDebugLog.Info("WaitlistInventory.Sql", $"Executing script '{scriptName}' with parameters: {parameterSummary}.");
+        AppLog.Info("WaitlistInventory.Sql", $"Executing script '{scriptName}' with parameters: {parameterSummary}.");
 
         try
         {
@@ -88,13 +88,13 @@ public sealed class InforVisualSqlQueryService
                 rows.Add(row);
             }
 
-            StartupDebugLog.Info("WaitlistInventory.Sql", $"Script '{scriptName}' executed successfully. RowCount={rows.Count}.");
+            AppLog.Info("WaitlistInventory.Sql", $"Script '{scriptName}' executed successfully. RowCount={rows.Count}.");
 
             return rows;
         }
         catch (SqlException sqlException)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "WaitlistInventory.Sql",
                 sqlException,
                 $"SQL error executing '{scriptName}'. Number={sqlException.Number}, State={sqlException.State}, Line={sqlException.LineNumber}.");
@@ -102,7 +102,7 @@ public sealed class InforVisualSqlQueryService
         }
         catch (COMException comException)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "WaitlistInventory.Sql",
                 comException,
                 $"COM error executing '{scriptName}'. HResult=0x{comException.HResult:X8}.");
@@ -110,7 +110,7 @@ public sealed class InforVisualSqlQueryService
         }
         catch (Exception exception)
         {
-            StartupDebugLog.Error("WaitlistInventory.Sql", exception, $"Unhandled error executing '{scriptName}'.");
+            AppLog.Error("WaitlistInventory.Sql", exception, $"Unhandled error executing '{scriptName}'.");
             return Array.Empty<Dictionary<string, object?>>();
         }
     }

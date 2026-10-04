@@ -7,6 +7,7 @@ using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
+using MTM_Waitlist.Tests.Fixtures;
 using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
@@ -411,11 +412,11 @@ public sealed class WaitlistViewDetailActionTests
             imageLocationService: null,
             requestService: service,
             inventoryService: null,
-            startupState: new StartupState
+            personIdentity: new FakePersonIdentity
             {
                 EmployeeNumber = RequesterEmployeeNumber,
-                EmployeeName = "Morgan Reyes",
-                CurrentRole = HandlerRole,
+                DisplayName = "Morgan Reyes",
+                CurrentRoleCode = HandlerRole,
             },
             dispatcherQueue: null,
             messageSeenStore: seenStore);
@@ -456,11 +457,11 @@ public sealed class WaitlistViewDetailActionTests
             imageLocationService: null,
             requestService: service,
             inventoryService: null,
-            startupState: new StartupState
+            personIdentity: new FakePersonIdentity
             {
                 EmployeeNumber = RequesterEmployeeNumber,
-                EmployeeName = "Morgan Reyes",
-                CurrentRole = role,
+                DisplayName = "Morgan Reyes",
+                CurrentRoleCode = role,
             },
             dispatcherQueue: null,
             messageSeenStore: new RecordingMessageSeenStore());

@@ -39,7 +39,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
         }
 
         _helper = new MySqlHelperServer(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString! }));
         _readService = new ImageOverrideReadService(_helper, NullLogger<ImageOverrideReadService>.Instance);
 
         _imageLocationService = new ImageLocationService(

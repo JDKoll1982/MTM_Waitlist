@@ -95,14 +95,14 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
         {
             if (State.SelectedScrapType == value)
             {
-                StartupDebugLog.Info("SetupDunnageTypeVm", $"SelectedScrapType setter skipped because value is unchanged. Value='{value}'.");
+                AppLog.Info("SetupDunnageTypeVm", $"SelectedScrapType setter skipped because value is unchanged. Value='{value}'.");
                 return;
             }
 
             var previous = State.SelectedScrapType;
             State.SelectedScrapType = value;
             State.HasUnsavedChanges = true;
-            StartupDebugLog.Info("SetupDunnageTypeVm", $"SelectedScrapType changed. Previous='{previous}', New='{State.SelectedScrapType}', HasUnsavedChanges={State.HasUnsavedChanges}.");
+            AppLog.Info("SetupDunnageTypeVm", $"SelectedScrapType changed. Previous='{previous}', New='{State.SelectedScrapType}', HasUnsavedChanges={State.HasUnsavedChanges}.");
             OnPropertyChanged(nameof(SelectedScrapType));
             OnPropertyChanged(nameof(HasScrapDecision));
             OnPropertyChanged(nameof(IsScrapSelectionMissing));
@@ -134,12 +134,12 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
     {
         try
         {
-            StartupDebugLog.Info("SetupDunnageTypeVm", "OnNavigatedTo started.");
+            AppLog.Info("SetupDunnageTypeVm", "OnNavigatedTo started.");
             var requiredPlaceholder = State.ScrapTypes.FirstOrDefault() ?? string.Empty;
             var currentSetting = string.IsNullOrWhiteSpace(State.SelectedScrapType)
                 ? requiredPlaceholder
                 : State.SelectedScrapType;
-            StartupDebugLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo scrap bootstrap. Placeholder='{requiredPlaceholder}', CurrentSetting='{currentSetting}', ScrapTypeCount={State.ScrapTypes.Count}, ScrapTypes='{string.Join(" | ", State.ScrapTypes)}'.");
+            AppLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo scrap bootstrap. Placeholder='{requiredPlaceholder}', CurrentSetting='{currentSetting}', ScrapTypeCount={State.ScrapTypes.Count}, ScrapTypes='{string.Join(" | ", State.ScrapTypes)}'.");
 
             // Preserve whatever the workflow already selected (a saved value or an
             // explicit choice). The "Scrap Type Required" placeholder is excluded
@@ -148,7 +148,7 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
             State.SelectedScrapType = string.Equals(currentSetting, RequiredScrapPlaceholder, StringComparison.OrdinalIgnoreCase)
                 ? string.Empty
                 : currentSetting;
-            StartupDebugLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo final scrap selection applied. SelectedScrapType='{State.SelectedScrapType}'.");
+            AppLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo final scrap selection applied. SelectedScrapType='{State.SelectedScrapType}'.");
 
             StatusMessage = State.StatusMessage;
 
@@ -171,11 +171,11 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
             OnPropertyChanged(nameof(ScrapSelectionNotificationVisibility));
             OnPropertyChanged(nameof(CanContinue));
             OnPropertyChanged(nameof(SelectedScrapType));
-            StartupDebugLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo completed. AvailableTypeCount={State.DunnageTypes.Count}, PairAssignments={State.SelectedDunnageParts.Count}.");
+            AppLog.Info("SetupDunnageTypeVm", $"OnNavigatedTo completed. AvailableTypeCount={State.DunnageTypes.Count}, PairAssignments={State.SelectedDunnageParts.Count}.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SetupDunnageTypeVm", ex, "OnNavigatedTo failed.");
+            AppLog.Error("SetupDunnageTypeVm", ex, "OnNavigatedTo failed.");
             throw;
         }
     }
@@ -254,11 +254,11 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
 
     public void AddScrapType(string? scrapType)
     {
-        StartupDebugLog.Info("SetupDunnageTypeVm", $"AddScrapType invoked. RawInput='{scrapType}'.");
+        AppLog.Info("SetupDunnageTypeVm", $"AddScrapType invoked. RawInput='{scrapType}'.");
         var normalized = scrapType?.Trim();
         if (string.IsNullOrWhiteSpace(normalized))
         {
-            StartupDebugLog.Info("SetupDunnageTypeVm", "AddScrapType ignored because input was empty after normalization.");
+            AppLog.Info("SetupDunnageTypeVm", "AddScrapType ignored because input was empty after normalization.");
             return;
         }
 
@@ -266,16 +266,16 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
         if (!State.ScrapTypes.Any(existing => string.Equals(existing, normalized, StringComparison.OrdinalIgnoreCase)))
         {
             State.ScrapTypes.Add(normalized);
-            StartupDebugLog.Info("SetupDunnageTypeVm", $"AddScrapType appended new scrap type. Value='{normalized}'.");
+            AppLog.Info("SetupDunnageTypeVm", $"AddScrapType appended new scrap type. Value='{normalized}'.");
         }
         else
         {
-            StartupDebugLog.Info("SetupDunnageTypeVm", $"AddScrapType found existing value and did not append. Value='{normalized}'.");
+            AppLog.Info("SetupDunnageTypeVm", $"AddScrapType found existing value and did not append. Value='{normalized}'.");
         }
 
         SelectedScrapType = normalized;
         State.HasUnsavedChanges = true;
-        StartupDebugLog.Info("SetupDunnageTypeVm", $"AddScrapType completed. AddedNewValue={!existed}, FinalSelectedScrapType='{SelectedScrapType}', ScrapTypeCount={State.ScrapTypes.Count}, ScrapTypes='{string.Join(" | ", State.ScrapTypes)}'.");
+        AppLog.Info("SetupDunnageTypeVm", $"AddScrapType completed. AddedNewValue={!existed}, FinalSelectedScrapType='{SelectedScrapType}', ScrapTypeCount={State.ScrapTypes.Count}, ScrapTypes='{string.Join(" | ", State.ScrapTypes)}'.");
         OnPropertyChanged(nameof(ScrapTypes));
         OnPropertyChanged(nameof(DisplayScrapTypes));
     }

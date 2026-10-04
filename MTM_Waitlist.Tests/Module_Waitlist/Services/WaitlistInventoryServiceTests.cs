@@ -5,6 +5,7 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Mock.Models;
 using MTM_Waitlist.Tests.Module_Mock;
+using MTM_Waitlist.Tests.Module_Settings;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 
@@ -19,9 +20,9 @@ public sealed class WaitlistInventoryServiceTests
     [TestMethod]
     public async Task GetInventoryLocationRowsAsync_FiltersQtyZeroAndIgnoredLocations()
     {
-        var settings = new InMemorySettings();
-        settings.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, new List<string> { "SHIP" }).GetAwaiter().GetResult();
-        var service = CreateService(settings);
+        var preferences = new InMemoryScopedPreferenceStore();
+        preferences.SeedText(IgnoredLocationDefaults.SettingKey, PreferenceScope.Plant, "SHIP");
+        var service = CreateService(preferences);
 
         var rows = await service.GetInventoryLocationRowsAsync("MMC0001000");
 
@@ -35,7 +36,7 @@ public sealed class WaitlistInventoryServiceTests
     {
         var fallback = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
             Array.Empty<VisualInventoryLocationRow>());
-        var service = CreateService(new InMemorySettings(), fallback);
+        var service = CreateService(new InMemoryScopedPreferenceStore(), fallback);
 
         var rows = await service.GetInventoryLocationRowsAsync("   ");
 
@@ -49,7 +50,7 @@ public sealed class WaitlistInventoryServiceTests
         // A failed Visual read surfaces from the fallback; the service must degrade rather than crash.
         var fallback = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
             _ => throw new VisualReadFailedException("inventory_locations", "Unreachable with no cache configured."));
-        var service = CreateService(new InMemorySettings(), fallback);
+        var service = CreateService(new InMemoryScopedPreferenceStore(), fallback);
 
         var rows = await service.GetInventoryLocationRowsAsync("MMC0001000");
 
@@ -82,20 +83,20 @@ public sealed class WaitlistInventoryServiceTests
         Assert.AreEqual(0m, mapped.OnHandQuantity);
     }
 
-    private static WaitlistInventoryService CreateService(InMemorySettings settings)
-        => CreateService(settings, CreateRowSet());
+    private static WaitlistInventoryService CreateService(InMemoryScopedPreferenceStore preferences)
+        => CreateService(preferences, CreateRowSet());
 
     private static WaitlistInventoryService CreateService(
-        InMemorySettings settings,
+        InMemoryScopedPreferenceStore preferences,
         IReadOnlyList<VisualInventoryLocationRow> rows)
         => CreateService(
-            settings,
+            preferences,
             new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(rows));
 
     private static WaitlistInventoryService CreateService(
-        InMemorySettings settings,
+        InMemoryScopedPreferenceStore preferences,
         FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow> fallback)
-        => new(new IgnoredLocationsService(settings), fallback);
+        => new(new IgnoredLocationsService(preferences, new AlwaysPermittingPermissionService()), fallback);
 
     /// <summary>
     /// A row set exercising both filter rules: an ignored location (SHIP) and a zero-quantity location
@@ -109,38 +110,23 @@ public sealed class WaitlistInventoryServiceTests
         new VisualInventoryLocationRow { PartNumber = "MMC0001000", Location = "V-B2-10", OnHandQuantity = 0m },
     ];
 
-    private sealed class InMemorySettings : ILocalSettingsService
+    /// <summary>
+    /// Holds every permission asked of it, which is what these read cases need: reading the ignored-locations list
+    /// is open to everybody and only the write is gated (FR-024).
+    /// </summary>
+    private sealed class AlwaysPermittingPermissionService : IPermissionService
     {
-        private readonly Dictionary<string, object> _values = new(StringComparer.Ordinal);
+        public Task<bool> HasPermissionAsync(string permissionKey, CancellationToken cancellationToken = default) =>
+            Task.FromResult(true);
 
-        public Task<T?> ReadSettingAsync<T>(string key)
+        public Task<IReadOnlyDictionary<string, bool>> HasPermissionsAsync(
+            IEnumerable<string> permissionKeys,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyDictionary<string, bool>>(
+                permissionKeys.ToDictionary(key => key, _ => true, StringComparer.Ordinal));
+
+        public void Invalidate()
         {
-            if (_values.TryGetValue(key, out var value) && value is T typed)
-            {
-                return Task.FromResult<T?>(typed);
-            }
-
-            return Task.FromResult(default(T));
         }
-
-        public Task SaveSettingAsync<T>(string key, T value)
-        {
-            _values[key] = value!;
-            return Task.CompletedTask;
-        }
-
-        public Task ResetSettingAsync(string key, CancellationToken cancellationToken = default)
-        {
-            _values.Remove(key);
-            return Task.CompletedTask;
-        }
-
-        public Task ResetAsync()
-        {
-            _values.Clear();
-            return Task.CompletedTask;
-        }
-
-        public Task CorruptForTestAsync() => Task.CompletedTask;
     }
 }

@@ -20,9 +20,10 @@ namespace MTM_Waitlist.Tests.Module_Core.Permissions;
 public sealed class PermissionRegistryTests
 {
     /// <summary>
-    /// The fifteen keys, spelled exactly as the specification's Verbatim Constraints section pins them. Spelled
-    /// out here on purpose: a test that read the list from the declaration could not catch a key the declaration
-    /// misspells.
+    /// The nineteen keys, spelled exactly as they are pinned. The first fifteen are pinned by the
+    /// specification's Verbatim Constraints section; the last four were added by 010-startup-rebuild and are pinned
+    /// by the machine-configuration contract's section 5 and plan D11. Spelled out here on purpose: a test that
+    /// read the list from the declaration could not catch a key the declaration misspells.
     /// </summary>
     private static readonly string[] PinnedKeys =
     {
@@ -36,6 +37,10 @@ public sealed class PermissionRegistryTests
         "permission.settings.defect_types",
         "permission.settings.computers",
         "permission.settings.storage_paths",
+        "permission.settings.machine_configuration",
+        "permission.settings.ignored_locations_edit",
+        "permission.settings.log_panel",
+        "permission.settings.session_length",
         "permission.setup.dunnage_quick_add",
         "permission.setup.work_centers",
         "permission.admin.users",

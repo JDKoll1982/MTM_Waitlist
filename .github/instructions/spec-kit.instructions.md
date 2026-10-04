@@ -51,7 +51,7 @@ Run the core sequence in order; `specify` must precede `plan`, which must preced
   "running scripts is disabled on this system" before any logic runs.
 - `tasks.md` is an **executable checklist**: mark `- [x]` only when the work is implemented and verified —
   mirror the `.github/skills/checklist-execution` rule (never tick unverified tasks).
-- The project constitution (`.specify/memory/constitution.md`) is **ratified at v1.1.1 (last amended 2026-09-10)**
+- The project constitution (`.specify/memory/constitution.md`) is **ratified at v1.2.1 (last amended 2026-09-27)**
   and governs this repo. Amend it only via `/speckit.constitution`, which must propagate to dependent
   artifacts and emit a Sync Impact Report.
 - Do **not** duplicate existing repo checklists: `WeekendProject/PromptFiles/*` and

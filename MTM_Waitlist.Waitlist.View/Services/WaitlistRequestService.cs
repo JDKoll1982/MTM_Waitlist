@@ -49,7 +49,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         // The app's own store is always read live: there is no mock/demo short-circuit (FR-001, SC-002).
         if (_mySqlHelperServer is null)
         {
-            StartupDebugLog.Info("WaitlistRequest", "RefreshFromDatabaseAsync skipped: no MySQL helper is configured.");
+            AppLog.Info("WaitlistRequest", "RefreshFromDatabaseAsync skipped: no MySQL helper is configured.");
             return 0;
         }
 
@@ -81,7 +81,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             _requests[request.Id] = request;
         }
 
-        StartupDebugLog.Info("WaitlistRequest", $"RefreshFromDatabaseAsync loaded {loaded.Count} open request(s) from DB. Building='{building ?? "all"}'.");
+        AppLog.Info("WaitlistRequest", $"RefreshFromDatabaseAsync loaded {loaded.Count} open request(s) from DB. Building='{building ?? "all"}'.");
         return loaded.Count;
     }
 
@@ -232,7 +232,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         {
             // A history that cannot be read is reported by leaving the in-memory trail in place. Replacing it
             // with the empty set would render a failed read as "this request has no history".
-            StartupDebugLog.Error("WaitlistRequest", ex, $"Reading the audit trail for request '{requestId}' failed; keeping what this session already holds.");
+            AppLog.Error("WaitlistRequest", ex, $"Reading the audit trail for request '{requestId}' failed; keeping what this session already holds.");
             return GetAuditTrail(requestId);
         }
 
@@ -276,7 +276,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         var ordered = merged.OrderBy(entry => entry.OccurredUtc).ToArray();
         _auditTrail[requestId] = ordered.ToList();
-        StartupDebugLog.Info("WaitlistRequest", $"Audit trail loaded for request '{requestId}'. Entries={ordered.Length}.");
+        AppLog.Info("WaitlistRequest", $"Audit trail loaded for request '{requestId}'. Entries={ordered.Length}.");
         return ordered;
     }
 
@@ -373,7 +373,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         };
 
         _requests[requestId] = updated;
-        StartupDebugLog.Info(
+        AppLog.Info(
             "WaitlistRequest",
             $"Request '{requestId}' transitioned from '{existing.Status}' to '{nextStatus}'. AcceptedUtc='{updated.AcceptedUtc}', CompletedUtc='{updated.CompletedUtc}'.");
         await RecordAuditAsync(requestId, existing.Status, nextStatus, nextStatus, canceledByEmployeeNumber, null, cancellationReason, cancellationToken);
@@ -399,7 +399,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
-            StartupDebugLog.Info("WaitlistRequest", $"Status transition '{nextStatus}' persisted to DB for request '{requestId}'. RowsAffected={rowsAffected}.");
+            AppLog.Info("WaitlistRequest", $"Status transition '{nextStatus}' persisted to DB for request '{requestId}'. RowsAffected={rowsAffected}.");
         }
 
         RequestsChanged?.Invoke(this, EventArgs.Empty);
@@ -417,14 +417,14 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         if (!_requests.TryGetValue(requestId, out var existing))
         {
-            StartupDebugLog.Info("WaitlistRequest", $"Cancel-own skipped: request '{requestId}' not found.");
+            AppLog.Info("WaitlistRequest", $"Cancel-own skipped: request '{requestId}' not found.");
             return WaitlistRequestCancelResult.NotFound();
         }
 
         var normalizedRequester = (requesterEmployeeNumber ?? string.Empty).Trim();
         if (!string.Equals(normalizedRequester, existing.RequesterEmployeeNumber, StringComparison.OrdinalIgnoreCase))
         {
-            StartupDebugLog.Info(
+            AppLog.Info(
                 "WaitlistRequest",
                 $"Cancel-own denied: requester '{normalizedRequester}' is not the creator of request '{requestId}' (creator '{existing.RequesterEmployeeNumber}').");
             return WaitlistRequestCancelResult.NotOwnedByRequester();
@@ -432,7 +432,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         if (!string.Equals(existing.Status, "Pending", StringComparison.OrdinalIgnoreCase))
         {
-            StartupDebugLog.Info(
+            AppLog.Info(
                 "WaitlistRequest",
                 $"Cancel-own denied: request '{requestId}' is in state '{existing.Status}', not Waiting (Pending).");
             return WaitlistRequestCancelResult.NotInCancelableState();
@@ -445,7 +445,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         }
 
         _requests.TryGetValue(requestId, out var cancelled);
-        StartupDebugLog.Info("WaitlistRequest", $"Requester '{normalizedRequester}' cancelled their own request '{requestId}'. Reason='{(reason ?? "null")}'.");
+        AppLog.Info("WaitlistRequest", $"Requester '{normalizedRequester}' cancelled their own request '{requestId}'. Reason='{(reason ?? "null")}'.");
         return cancelled is null ? WaitlistRequestCancelResult.Failed() : WaitlistRequestCancelResult.Success(cancelled);
     }
 
@@ -466,7 +466,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         if (!_requests.TryGetValue(requestId, out var existing))
         {
-            StartupDebugLog.Info("WaitlistRequest", $"Update note skipped: request '{requestId}' not found.");
+            AppLog.Info("WaitlistRequest", $"Update note skipped: request '{requestId}' not found.");
             return null;
         }
 
@@ -512,7 +512,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         };
 
         _requests[requestId] = updated;
-        StartupDebugLog.Info("WaitlistRequest", $"Note updated for request '{requestId}'. Status='{updated.Status}'.");
+        AppLog.Info("WaitlistRequest", $"Note updated for request '{requestId}'. Status='{updated.Status}'.");
 
         // Persist the note through the status-update path (status unchanged).
         if (_mySqlHelperServer is not null)
@@ -536,7 +536,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             }
             catch (Exception ex)
             {
-                StartupDebugLog.Error("WaitlistRequest", ex, $"Failed to persist note for request '{requestId}'.");
+                AppLog.Error("WaitlistRequest", ex, $"Failed to persist note for request '{requestId}'.");
             }
         }
 
@@ -613,7 +613,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             return null;
         }
 
-        StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' accepted by handler '{handler}'. Status 'Pending' -> 'Accepted'.");
+        AppLog.Info("WaitlistRequest", $"Request '{requestId}' accepted by handler '{handler}'. Status 'Pending' -> 'Accepted'.");
         return updated;
     }
 
@@ -671,7 +671,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             return null;
         }
 
-        StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' completed by handler '{handler}'. Status 'Accepted' -> 'Completed'.");
+        AppLog.Info("WaitlistRequest", $"Request '{requestId}' completed by handler '{handler}'. Status 'Accepted' -> 'Completed'.");
         return updated;
     }
 
@@ -731,7 +731,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             return null;
         }
 
-        StartupDebugLog.Info("WaitlistRequest", $"Request '{requestId}' released by handler '{handler}'. Status 'Accepted' -> 'Pending' (not a cancellation).");
+        AppLog.Info("WaitlistRequest", $"Request '{requestId}' released by handler '{handler}'. Status 'Accepted' -> 'Pending' (not a cancellation).");
         return updated;
     }
 
@@ -775,7 +775,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
             if (rowsAffected <= 0)
             {
-                StartupDebugLog.Info(
+                AppLog.Info(
                     "WaitlistRequest",
                     $"Handler action '{eventType}' for request '{requestId}' did not take: the row is no longer '{fromStatus}'. RowsAffected={rowsAffected}.");
                 return false;
@@ -841,7 +841,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         if (duplicate is not null && !allowDuplicate)
         {
-            StartupDebugLog.Info("WaitlistRequest", $"Duplicate request detected. Building='{draft.Building}', WorkCenter='{draft.WorkCenter}', Category='{draft.Category}', Item='{resolvedItem}'.");
+            AppLog.Info("WaitlistRequest", $"Duplicate request detected. Building='{draft.Building}', WorkCenter='{draft.WorkCenter}', Category='{draft.Category}', Item='{resolvedItem}'.");
             return WaitlistRequestSubmitResult.DuplicateWarning(duplicate);
         }
 
@@ -859,7 +859,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             }
             catch (Exception ex)
             {
-                StartupDebugLog.Error("WaitlistRequest", ex, "Failed to derive the urgency deadline for a new request.");
+                AppLog.Error("WaitlistRequest", ex, "Failed to derive the urgency deadline for a new request.");
             }
         }
 
@@ -913,7 +913,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
             if (affectedRows <= 0)
             {
-                StartupDebugLog.Error(
+                AppLog.Error(
                     "WaitlistRequest",
                     new InvalidOperationException("Production waitlist persistence failed. No rows were affected by stored procedure 'sp_waitlist_request_insert'."),
                     $"Production waitlist persistence failed for request '{request.Id}'. No rows were affected by stored procedure 'sp_waitlist_request_insert'.");
@@ -924,7 +924,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         _requests[request.Id] = request;
         await RecordAuditAsync(request.Id, null, null, "Created", request.RequesterEmployeeNumber, request.RequesterEmployeeName, request.InputValue, cancellationToken);
         RequestsChanged?.Invoke(this, EventArgs.Empty);
-        StartupDebugLog.Info("WaitlistRequest", $"Request stored in session and production route acknowledged. Id='{request.Id}', Building='{request.Building}', WorkCenter='{request.WorkCenter}', Category='{request.Category}', Item='{request.Item}', ActiveJobId='{request.ActiveSetupJobId}', Requester='{request.RequesterEmployeeNumber}'.");
+        AppLog.Info("WaitlistRequest", $"Request stored in session and production route acknowledged. Id='{request.Id}', Building='{request.Building}', WorkCenter='{request.WorkCenter}', Category='{request.Category}', Item='{request.Item}', ActiveJobId='{request.ActiveSetupJobId}', Requester='{request.RequesterEmployeeNumber}'.");
         await NotifyRequestCreatedAsync(request).ConfigureAwait(false);
         return WaitlistRequestSubmitResult.Success(request);
     }
@@ -978,7 +978,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);
-            StartupDebugLog.Info("WaitlistRequest", $"Audit entry persisted for request '{requestId}'. EventType='{entry.EventType}', From='{(entry.FromStatus ?? "null")}', To='{(entry.ToStatus ?? "null")}'.");
+            AppLog.Info("WaitlistRequest", $"Audit entry persisted for request '{requestId}'. EventType='{entry.EventType}', From='{(entry.FromStatus ?? "null")}', To='{(entry.ToStatus ?? "null")}'.");
         }
 
         return entry;
@@ -1005,7 +1005,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         catch (Exception ex)
         {
             // A toast failure must never break a successful request submission.
-            StartupDebugLog.Error("WaitlistRequest", ex, "Failed to raise the new-request alert.");
+            AppLog.Error("WaitlistRequest", ex, "Failed to raise the new-request alert.");
         }
     }
 }

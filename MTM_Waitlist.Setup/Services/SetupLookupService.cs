@@ -54,7 +54,7 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
     /// <inheritdoc />
     public async Task<SetupLookupResult> LookupWorkOrderAsync(string normalizedWorkOrder, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupLookup", $"LookupWorkOrderAsync started. NormalizedWorkOrder='{normalizedWorkOrder}'.");
+        AppLog.Info("SetupLookup", $"LookupWorkOrderAsync started. NormalizedWorkOrder='{normalizedWorkOrder}'.");
         try
         {
             var rows = await _workOrderLookupFallback
@@ -77,7 +77,7 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SetupLookup", ex, $"LookupWorkOrderAsync failed for '{normalizedWorkOrder}'.");
+            AppLog.Error("SetupLookup", ex, $"LookupWorkOrderAsync failed for '{normalizedWorkOrder}'.");
             return new SetupLookupResult
             {
                 Success = false,
@@ -90,7 +90,7 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
     /// <inheritdoc />
     public async Task<IReadOnlyList<SetupSequenceResult>> GetSequencesAsync(string normalizedWorkOrder, string partNumber, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupLookup", $"GetSequencesAsync started. WO='{normalizedWorkOrder}', Part='{partNumber}'.");
+        AppLog.Info("SetupLookup", $"GetSequencesAsync started. WO='{normalizedWorkOrder}', Part='{partNumber}'.");
         try
         {
             var rows = await _operationSequencesFallback
@@ -108,7 +108,7 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SetupLookup", ex, $"GetSequencesAsync failed. WO='{normalizedWorkOrder}', Part='{partNumber}'.");
+            AppLog.Error("SetupLookup", ex, $"GetSequencesAsync failed. WO='{normalizedWorkOrder}', Part='{partNumber}'.");
             return Array.Empty<SetupSequenceResult>();
         }
     }
@@ -116,7 +116,7 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
     /// <inheritdoc />
     public async Task<IReadOnlyList<SetupSubordinatePart>> GetSubordinatePartsAsync(string normalizedWorkOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupLookup", $"GetSubordinatePartsAsync started. WO='{normalizedWorkOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
+        AppLog.Info("SetupLookup", $"GetSubordinatePartsAsync started. WO='{normalizedWorkOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
         try
         {
             var rows = await _subordinatePartsFallback
@@ -145,7 +145,7 @@ public sealed class SetupLookupService : IInforVisualLookupService, ISubordinate
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SetupLookup", ex, $"GetSubordinatePartsAsync failed. WO='{normalizedWorkOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
+            AppLog.Error("SetupLookup", ex, $"GetSubordinatePartsAsync failed. WO='{normalizedWorkOrder}', Part='{partNumber}', Sequence='{sequenceNumber}'.");
             return Array.Empty<SetupSubordinatePart>();
         }
     }

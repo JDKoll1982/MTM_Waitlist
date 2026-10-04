@@ -79,7 +79,7 @@ public sealed class StoreAvailabilityTracker : IStoreAvailabilityTracker
 
         if (isChange)
         {
-            StartupDebugLog.Info(
+            AppLog.Info(
                 nameof(StoreAvailabilityTracker),
                 $"Store '{availability.StoreName}' is now {availability.Status}.");
         }

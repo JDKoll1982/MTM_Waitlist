@@ -138,7 +138,7 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
                 "This job has no die saved on it, so there is no die to ask about. Go back and choose a different item.");
         }
 
-        StartupDebugLog.Info(
+        AppLog.Info(
             "NewRequestDie",
             $"Die step for work center '{state.WorkCenter}' bound {Options.Count} card(s) for item '{state.Item?.Id}'.");
     }
@@ -161,7 +161,7 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "NewRequestDie",
                 ex,
                 $"Resolving the picture for die '{partNumber}' failed; the card will draw the no-image placeholder.");
@@ -230,7 +230,7 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
         state.SelectedDies = chosen;
         state.InputValue = chosen[0].Label;
 
-        StartupDebugLog.Info(
+        AppLog.Info(
             "NewRequestDie",
             $"Die step for work center '{state.WorkCenter}' captured {chosen.Length} die(s): {string.Join(", ", chosen.Select(die => die.Label))}.");
         _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);

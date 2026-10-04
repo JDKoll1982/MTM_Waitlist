@@ -63,20 +63,20 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
     private const string WaitlistConnectionStringEnvironmentVariable = "MTM_WAITLIST_DB_CONNECTION_STRING";
     private const int DefaultCommandTimeoutSeconds = 15;
 
-    private readonly StartupDatabaseOptions _startupDatabaseOptions;
+    private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;
     private readonly IPermissionService _permissionService;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
     public PermissionAdministrationService(
-        IOptions<StartupDatabaseOptions> startupDatabaseOptions,
+        IOptions<WaitlistDatabaseOptions> waitlistDatabaseOptions,
         IPermissionService permissionService,
-        StartupState startupState)
+        IPersonIdentity personIdentity)
     {
-        ArgumentNullException.ThrowIfNull(startupDatabaseOptions);
+        ArgumentNullException.ThrowIfNull(waitlistDatabaseOptions);
 
-        _startupDatabaseOptions = startupDatabaseOptions.Value;
+        _waitlistDatabaseOptions = waitlistDatabaseOptions.Value;
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
+        _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
     }
 
     /// <inheritdoc />
@@ -99,7 +99,7 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "Permissions",
                 ex,
                 "The stored permission rows could not be read; the page shows its unavailable state rather than an answer it does not have.");
@@ -185,7 +185,7 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
                     new Dictionary<string, object?>
                     {
                         ["p_user_id"] = userId,
-                        ["p_actor_user_id"] = _startupState.UserId,
+                        ["p_actor_user_id"] = _personIdentity.UserId,
                         ["p_changes_json"] = payload,
                     },
                     cancellationToken)
@@ -202,7 +202,7 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Permissions", ex, "The change set did not reach the store; nothing was written.");
+            AppLog.Error("Permissions", ex, "The change set did not reach the store; nothing was written.");
             return PermissionChangeResult.Failed(
                 PermissionChangeOutcomeKind.StoreUnavailable,
                 PermissionAdministrationMessages.StoreUnavailableKey,
@@ -237,7 +237,7 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("Permissions", ex, "The recorded history could not be read; nothing was reversed.");
+            AppLog.Error("Permissions", ex, "The recorded history could not be read; nothing was reversed.");
             return PermissionChangeResult.Failed(
                 PermissionChangeOutcomeKind.StoreUnavailable,
                 PermissionAdministrationMessages.StoreUnavailableKey,
@@ -468,7 +468,7 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
 
         var builder = new MySqlConnectionStringBuilder(connectionString)
         {
-            ConnectionTimeout = (uint)Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds),
+            ConnectionTimeout = (uint)Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds),
         };
 
         // Resolved through the same host fallback every other reader uses: the configured host is the shared
@@ -501,8 +501,9 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
     }
 
     /// <summary>
-    /// The store this service reads and writes. The environment variable wins, then the variable the startup options
-    /// name, then the configured string, so a test can point every store at a live server without editing appsettings.
+    /// The store this service reads and writes. The environment variable wins, then the variable the waitlist
+    /// database options name, then the configured string, so a test can point every store at a live server without
+    /// editing appsettings.
     /// </summary>
     private string? ResolveConnectionString()
     {
@@ -512,7 +513,7 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
             return fromEnvironment;
         }
 
-        var configuredName = _startupDatabaseOptions.ConnectionStringEnvironmentVariable;
+        var configuredName = _waitlistDatabaseOptions.ConnectionStringEnvironmentVariable;
         if (!string.IsNullOrWhiteSpace(configuredName))
         {
             var fromConfiguredName = Environment.GetEnvironmentVariable(configuredName);
@@ -522,9 +523,9 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
             }
         }
 
-        return string.IsNullOrWhiteSpace(_startupDatabaseOptions.ConnectionString)
+        return string.IsNullOrWhiteSpace(_waitlistDatabaseOptions.ConnectionString)
             ? null
-            : _startupDatabaseOptions.ConnectionString;
+            : _waitlistDatabaseOptions.ConnectionString;
     }
 
     private static string ReadString(IReadOnlyDictionary<string, object?> row, string columnName) =>

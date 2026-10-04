@@ -33,7 +33,7 @@ public sealed class NewRequestFlowService : INewRequestFlowService
         try
         {
             var availability = await _availabilityProvider.GetAvailabilityAsync(normalized, cancellationToken).ConfigureAwait(false);
-            StartupDebugLog.Info(
+            AppLog.Info(
                 "WaitlistNewRequest",
                 $"Availability for work center '{normalized}': ActiveJob={availability.HasActiveJob}, Coil={availability.HasCoil}, Flatstock={availability.HasFlatstock}, Die={availability.HasDie}, Component={availability.HasComponent}, Dunnage={availability.HasDunnage}, ScrapDecision={availability.HasScrapDecision}.");
             return availability;
@@ -42,7 +42,7 @@ public sealed class NewRequestFlowService : INewRequestFlowService
         {
             // A snapshot that cannot be read is reported as "no parts", which keeps the job-independent Items
             // offerable rather than opening an empty step (FR-002).
-            StartupDebugLog.Error("WaitlistNewRequest", ex, $"Reading the availability snapshot for work center '{normalized}' failed. Offering the job-independent Items only.");
+            AppLog.Error("WaitlistNewRequest", ex, $"Reading the availability snapshot for work center '{normalized}' failed. Offering the job-independent Items only.");
             return RequestJobPartAvailability.None;
         }
     }
@@ -82,7 +82,7 @@ public sealed class NewRequestFlowService : INewRequestFlowService
             }
             catch (Exception ex)
             {
-                StartupDebugLog.Error(
+                AppLog.Error(
                     "WaitlistNewRequest",
                     ex,
                     "Image location service initialization failed while resolving New Request images.");

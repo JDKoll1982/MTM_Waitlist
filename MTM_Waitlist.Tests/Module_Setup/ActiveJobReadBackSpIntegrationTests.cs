@@ -38,7 +38,7 @@ public sealed class ActiveJobReadBackSpIntegrationTests
         }
 
         _helper = new MySqlHelperServer(
-            Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString! }));
+            Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString! }));
 
         _testWorkCenter = $"IT-WC-{Guid.NewGuid():N}";
         _testPartId = $"IT-COIL-{Guid.NewGuid():N}";

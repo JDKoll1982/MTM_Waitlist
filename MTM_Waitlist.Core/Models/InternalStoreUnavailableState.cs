@@ -83,7 +83,7 @@ public sealed partial class InternalStoreUnavailableState : ObservableObject, ID
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Info(
+            AppLog.Info(
                 nameof(InternalStoreUnavailableState),
                 $"No UI queue is reachable from this thread ({ex.GetType().Name}), so store state is applied inline.");
             return null;
@@ -140,7 +140,7 @@ public sealed partial class InternalStoreUnavailableState : ObservableObject, ID
         {
             // A retry that fails again is already recorded by the seam; the screen must not crash on top of a
             // store problem it is in the middle of reporting.
-            StartupDebugLog.Error(nameof(InternalStoreUnavailableState), ex, $"Manual retry failed for store '{StoreName}'.");
+            AppLog.Error(nameof(InternalStoreUnavailableState), ex, $"Manual retry failed for store '{StoreName}'.");
         }
         finally
         {
@@ -168,7 +168,7 @@ public sealed partial class InternalStoreUnavailableState : ObservableObject, ID
         {
             if (!dispatcher.TryEnqueue(() => Apply(availability)))
             {
-                StartupDebugLog.Info(
+                AppLog.Info(
                     nameof(InternalStoreUnavailableState),
                     $"The '{availability.StoreName}' store state was not shown because the UI queue is not accepting work.");
             }

@@ -1,5 +1,10 @@
--- Validate current startup schema against the expected MTM_Waitlist baseline
+-- Validate the shared MTM_Waitlist schema baseline that survives the startup rebuild
 -- Engine: MySQL 5.7
+--
+-- Reworked by task T021 of specs/010-startup-rebuild: it keeps the checks that cover shared tables and the
+-- retained `fn_server_utc_now`, and the per-object checks for the retired startup session table were removed
+-- with the surface that used them. The log-store column and index checks stay, because `ops_startup_logs` is
+-- repurposed as the rebuilt application's log store rather than retired.
 
 USE mtm_waitlist;
 
@@ -48,16 +53,6 @@ FROM (
                 WHERE
                     table_schema = DATABASE()
                     AND table_name = 'core_computers_registry'
-            )
-        UNION ALL
-        SELECT 'missing_table', 'auth_sessions_tokens', 'table exists', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.tables
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
             )
         UNION ALL
         SELECT 'missing_table', 'config_settings_values', 'table exists', 'missing'
@@ -435,150 +430,6 @@ FROM (
                     AND is_nullable = 'NO'
             )
         UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.user_id', 'BIGINT NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'user_id'
-                    AND data_type = 'bigint'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.computer_id', 'BIGINT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'computer_id'
-                    AND data_type = 'bigint'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.token_hash', 'CHAR(64) NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'token_hash'
-                    AND data_type = 'char'
-                    AND character_maximum_length = 64
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.token_salt', 'VARBINARY(32) NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'token_salt'
-                    AND data_type = 'varbinary'
-                    AND character_maximum_length = 32
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.token_version', 'SMALLINT NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'token_version'
-                    AND data_type = 'smallint'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.issued_utc', 'DATETIME NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'issued_utc'
-                    AND data_type = 'datetime'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.expires_utc', 'DATETIME NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'expires_utc'
-                    AND data_type = 'datetime'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.revoked_utc', 'DATETIME NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'revoked_utc'
-                    AND data_type = 'datetime'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.is_active', 'TINYINT(1) NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'is_active'
-                    AND data_type = 'tinyint'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.source_label', 'VARCHAR(32) NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'source_label'
-                    AND data_type = 'varchar'
-                    AND character_maximum_length = 32
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
-        SELECT 'missing_column', 'auth_sessions_tokens.created_utc', 'DATETIME NOT NULL', 'missing'
-        WHERE
-            NOT EXISTS (
-                SELECT 1
-                FROM information_schema.columns
-                WHERE
-                    table_schema = DATABASE()
-                    AND table_name = 'auth_sessions_tokens'
-                    AND column_name = 'created_utc'
-                    AND data_type = 'datetime'
-                    AND is_nullable = 'NO'
-            )
-        UNION ALL
         SELECT 'missing_column', 'config_settings_values.setting_key', 'VARCHAR(190) NOT NULL', 'missing'
         WHERE
             NOT EXISTS (
@@ -755,5 +606,150 @@ FROM (
                     AND data_type = 'char'
                     AND character_maximum_length = 64
                     AND is_nullable = 'NO'
+            )
+        -- 010-startup-rebuild (tasks T047 and T050): the four columns the developer panel reads and writes, and
+        -- the six indexes it filters on. Each is checked by name and by the columns the panel's query uses: an
+        -- index under the right name over the wrong column would pass an existence-only check and still leave
+        -- the panel doing a table scan, which is the failure worth catching.
+        UNION ALL
+        SELECT 'missing_column', 'ops_startup_logs.module', 'VARCHAR(128) NULL', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND column_name = 'module'
+                    AND data_type = 'varchar'
+                    AND character_maximum_length = 128
+                    AND is_nullable = 'YES'
+            )
+        UNION ALL
+        SELECT 'missing_column', 'ops_startup_logs.error_type', 'VARCHAR(128) NULL', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND column_name = 'error_type'
+                    AND data_type = 'varchar'
+                    AND character_maximum_length = 128
+                    AND is_nullable = 'YES'
+            )
+        UNION ALL
+        SELECT 'missing_column', 'ops_startup_logs.exception_detail', 'MEDIUMTEXT NULL', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND column_name = 'exception_detail'
+                    AND data_type = 'mediumtext'
+                    AND is_nullable = 'YES'
+            )
+        UNION ALL
+        SELECT 'missing_column', 'ops_startup_logs.error_fingerprint', 'CHAR(64) NULL', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND column_name = 'error_fingerprint'
+                    AND data_type = 'char'
+                    AND character_maximum_length = 64
+                    AND is_nullable = 'YES'
+            )
+        UNION ALL
+        SELECT 'missing_index', 'idx_ops_startup_logs_level_created_utc', 'index over (level, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_level_created_utc'
+                    AND column_name IN ('level', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
+        UNION ALL
+        SELECT 'missing_index', 'idx_ops_startup_logs_host_id_created_utc', 'index over (host_id, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_host_id_created_utc'
+                    AND column_name IN ('host_id', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
+        UNION ALL
+        SELECT 'missing_index', 'idx_ops_startup_logs_module_created_utc', 'index over (module, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_module_created_utc'
+                    AND column_name IN ('module', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
+        UNION ALL
+        SELECT 'missing_index', 'idx_ops_startup_logs_actor_id_created_utc', 'index over (actor_id, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_actor_id_created_utc'
+                    AND column_name IN ('actor_id', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
+        UNION ALL
+        SELECT 'missing_index', 'idx_ops_startup_logs_error_type_created_utc', 'index over (error_type, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_error_type_created_utc'
+                    AND column_name IN ('error_type', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
+            )
+        UNION ALL
+        SELECT
+            'missing_index', 'idx_ops_startup_logs_error_fingerprint_created_utc',
+            'index over (error_fingerprint, created_utc)', 'missing'
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM information_schema.statistics
+                WHERE
+                    table_schema = DATABASE()
+                    AND table_name = 'ops_startup_logs'
+                    AND index_name = 'idx_ops_startup_logs_error_fingerprint_created_utc'
+                    AND column_name IN ('error_fingerprint', 'created_utc')
+                GROUP BY index_name
+                HAVING COUNT(DISTINCT column_name) = 2
             )
     ) AS validation_issues;

@@ -126,3 +126,58 @@ Templates & dependent artifacts:
 
 Follow-up TODOs:
   • T137 — align `plan.md` with the current constitution version.
+
+## 1.2.0 → 1.2.1 (2026-09-27) — PATCH
+
+Bump rationale: PATCH — no principle was added, removed, redefined, or weakened, and no new obligation
+was introduced. This is an expression-only compression produced by a `/speckit.optimize.run` audit: the
+constitution both restated in full and explicitly deferred to the repo instruction files that already
+carry the same detail, so only the restatement was removed. Every normative clause (`MUST`, `MUST NOT`)
+and every `Rationale:` paragraph survived — verified by an unchanged per-section count of normative
+keywords (51 before, 51 after) and by seven `Rationale:` paragraphs before and after.
+
+Applied:
+  • Principle III — the schema-rule detail now cites
+    `.github/instructions/database-schema-rules.instructions.md` inline. The master-list filenames
+    (`AllTables.sql`, `AllSPs.sql`, `AllSeeds.sql`) and `update_table_descriptions.sql` were **retained**
+    in the text rather than replaced by a bare reference, because the audit's premise that those
+    filenames are enumerated in `database-schema-rules.instructions.md` is not accurate: that file names
+    only `Bootstrap/update_table_descriptions.sql` and the per-artifact layout. Dropping the enumeration
+    would have lost the specificity the "lists stay in sync" obligation depends on.
+  • Principle IV — the enumerated "applies at minimum to" list and the step-by-step Serena self-healing
+    narration were compressed. The NON-NEGOTIABLE Context7 / Microsoft Learn rule, the model-memory
+    prohibition, the mandatory self-healing requirement with its report-the-config-path obligation, the
+    deviating-workaround-recording rule, and the pointer to
+    `.github/instructions/mcp-doc-research.instructions.md` all remain.
+  • Principle V — the API/naming detail was folded behind pointers to
+    `.github/instructions/winui3-api-rules.instructions.md` and
+    `.github/instructions/csharp-xaml-naming-rules.instructions.md` (added; the principle carried none).
+    Every normative rule (Microsoft.UI.Xaml namespaces, MVVM / `INavigationAware`, shell navigation,
+    `RuntimeHelper.IsMSIX`, localization, `App.xaml` registration, fluid/accessible layout, no editing of
+    generated artifacts) remains.
+  • Principle VII — the GFM citation and the restatement of the fence rule were compressed; the column-0
+    requirement and the longer-backtick-run requirement remain normative, as does the pointer to
+    `.github/instructions/response-format.instructions.md`.
+  • Sync Impact Report — the HTML comment at the top of the constitution now carries only this
+    amendment's report. The 1.1.2 → 1.2.0 narrative it previously held is preserved above in this file
+    and was not re-derived.
+
+Propagated:
+  ✅ `.github/instructions/spec-kit.instructions.md` — its constitution citation was stale at
+     v1.1.1 / 2026-09-10 while the file itself was v1.2.0 / 2026-09-14; it now cites v1.2.1 / 2026-09-27.
+     This is the propagation half of the amendment, required by the Governance section ("the repo
+     instruction files ... MUST stay consistent with this constitution").
+
+Templates & dependent artifacts:
+  ✅ .specify/templates/*                — unaffected by a PATCH expression change (still verified to
+     enumerate no principle)
+  ⚠ specs/001-module-mock-visual-fallback/plan.md — still cites v1.0.0 and evaluates gates against six
+     principles (tracked as T137; unchanged by this amendment)
+
+Not done in this amendment (recorded so it is not assumed):
+  • The Companion pipeline (`specify → plan → tasks → implement`) was **not** added to Principle I or to
+    the Workflow section; that is a separate, substantive amendment the owner has not approved in this
+    pass.
+
+Follow-up TODOs:
+  • T137 — align `plan.md` with the current constitution version.

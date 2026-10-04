@@ -29,14 +29,14 @@ public sealed class NewRequestAlertNotifier : INewRequestAlertNotifier
             .ConfigureAwait(false);
         if (!shouldNotify)
         {
-            StartupDebugLog.Info("NewRequestAlert", "Skipping new-request toast: toggle off or app not packaged.");
+            AppLog.Info("NewRequestAlert", "Skipping new-request toast: toggle off or app not packaged.");
             return false;
         }
 
         var arguments = WaitlistRequestLink.Build(requestId);
         var payload = BuildToastXml(title, body, arguments);
         var shown = _notifications.Show(payload);
-        StartupDebugLog.Info("NewRequestAlert", $"New-request toast {(shown ? "shown" : "not shown")}. RequestId='{requestId:D}', Title='{title}'.");
+        AppLog.Info("NewRequestAlert", $"New-request toast {(shown ? "shown" : "not shown")}. RequestId='{requestId:D}', Title='{title}'.");
         return shown;
     }
 

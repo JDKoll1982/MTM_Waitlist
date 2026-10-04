@@ -3,9 +3,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 
-using MTM_Waitlist.Activation;
 using MTM_Waitlist.Services;
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
@@ -15,8 +15,6 @@ using MTM_Waitlist.Module_Setup.Services;
 using MTM_Waitlist.Module_Setup.ViewModels;
 using MTM_Waitlist.Module_Setup.Views;
 using MTM_Waitlist.Module_Core.Models;
-using MTM_Waitlist.Module_Startup.ViewModels;
-using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Views;
 using MTM_Waitlist.Module_Waitlist.Services;
@@ -40,46 +38,25 @@ public static partial class ServiceRegistrationExtensions
 
     public static IServiceCollection AddAppServices(this IServiceCollection services, HostBuilderContext context)
     {
-        // Default activation handler
-        services.AddTransient<ActivationHandler<LaunchActivatedEventArgs>, DefaultActivationHandler>();
-
-        // Other activation handlers
-        services.AddTransient<IActivationHandler, AppNotificationActivationHandler>();
-
         // Services
         services.AddSingleton<IAppNotificationService, AppNotificationService>();
         services.AddSingleton<IAppWindowProvider, AppWindowProvider>();
         services.AddSingleton<IDeepLinkWindow, AppWindowDeepLinkWindow>();
         services.AddSingleton<RequestDeepLinkHandler>();
         services.AddSingleton<IShellContentProvider, ShellContentProvider>();
-        services.AddSingleton<IAppLifecycleService, AppLifecycleService>();
         services.AddSingleton<ISetupDialogService, SetupDialogService>();
         // The New Request dunnage step's substitute picker reuses the Setup dunnage image-search dialog, so the
         // bridge lives here where both sides are visible (FR-049).
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.IDunnageSubstitutePicker, DunnageSubstitutePicker>();
         services.AddSingleton<IWaitlistRequestActionPrompt, WaitlistRequestActionPrompt>();
         services.AddSingleton<IWorkCenterImageService, MTM_Waitlist.Module_Settings.Services.ImageLocationService>();
-        services.AddSingleton<ILocalSettingsService, MTM_Waitlist.Module_Settings.Services.LocalSettingsService>();
+        // The folder dialog is a surface concern - it has to be owned by the window on screen - so its one
+        // implementation lives here rather than in the startup module, which stays free of windows.
+        services.AddSingleton<IFolderBrowserService, WindowsFolderBrowserService>();
         services.AddSingleton<IIgnoredLocationsService, MTM_Waitlist.Module_Core.Services.IgnoredLocationsService>();
-        services.AddSingleton<IStartupRecoveryService, MTM_Waitlist.Module_Startup.Services.StartupRecoveryService>();
-        services.AddSingleton<IAppProcessRestarter, MTM_Waitlist.Module_Startup.Services.AppProcessRestarter>();
-        services.AddSingleton<ISignOutService, MTM_Waitlist.Module_Startup.Services.SignOutService>();
-        services.AddSingleton<IStartupRegistrationService, MTM_Waitlist.Module_Startup.Services.StartupRegistrationService>();
-        services.AddSingleton<IStartupSessionRepository, MTM_Waitlist.Module_Startup.Services.StartupSessionRepository>();
-        services.AddSingleton<IComputerRegistryService, MTM_Waitlist.Module_Startup.Services.ComputerRegistryService>();
-        services.AddSingleton<IComputerGateService, MTM_Waitlist.Module_Startup.Services.ComputerGateService>();
-        services.AddSingleton<IStartupWindowService, MTM_Waitlist.Module_Startup.Services.StartupWindowService>();
-        services.AddSingleton<IStartupLogForwarder, MTM_Waitlist.Module_Startup.Services.StartupLogForwarder>();
-        services.AddSingleton<MTM_Waitlist.Module_Startup.Services.StartupLogService>();
-        services.AddSingleton<IStartupLogService>(provider => provider.GetRequiredService<MTM_Waitlist.Module_Startup.Services.StartupLogService>());
-        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<MTM_Waitlist.Module_Startup.Services.StartupLogService>());
         services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
         services.AddSingleton<IBuildingSelectionService, BuildingSelectionService>();
-        services.AddSingleton<IStartupShellStateService, MTM_Waitlist.Module_Startup.Services.StartupShellStateService>();
-        services.AddSingleton<IStartupCoordinator, MTM_Waitlist.Module_Startup.Services.StartupCoordinator>();
-        services.AddSingleton<MTM_Waitlist.Module_Core.Models.StartupState>();
         services.AddTransient<INavigationViewService, NavigationViewService>();
-        services.AddSingleton<IActivationService, ActivationService>();
         services.AddSingleton<PageService>();
         services.AddSingleton<IPageService>(sp =>
         {
@@ -161,19 +138,14 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<IUrgencySettingsService, MTM_Waitlist.Module_Core.Services.UrgencySettingsService>();
         services.AddSingleton<IUrgencyDeadlineService, MTM_Waitlist.Module_Core.Services.UrgencyDeadlineService>();
 
-        // The list's order is a per-viewer display preference remembered through the existing local settings,
-        // not a new store (§D7, FR-011).
+        // The list's order is the viewer's own preference, held against them in the store so it follows them to
+        // another computer rather than staying on the machine it was set on (FR-023, SC-008).
         services.AddSingleton<IWaitlistSortPreferenceService, MTM_Waitlist.Module_Core.Services.WaitlistSortPreferenceService>();
-        services.AddSingleton<IFileService, FileService>();
         services.AddSingleton<IReportPrintService, ReportPrintService>();
 
         // Views and view models
-        services.AddTransient<SplashViewModel>();
-        services.AddTransient<LoginViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<UrgencyAllotmentEditorViewModel>();
-        services.AddTransient<LoginWindow>();
-        services.AddTransient<LoginPage>();
         services.AddTransient<SettingsPage>();
         services.AddTransient<SetupWorkOrderViewModel>();
         services.AddTransient<SetupWorkCenterViewModel>();
@@ -197,7 +169,7 @@ public static partial class ServiceRegistrationExtensions
             imageLocationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>(),
             requestService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
             inventoryService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistInventoryService>(),
-            startupState: provider.GetRequiredService<MTM_Waitlist.Module_Core.Models.StartupState>(),
+            personIdentity: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPersonIdentity>(),
             dispatcherQueue: DispatcherQueue.GetForCurrentThread(),
             messageSeenStore: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore>(),
             itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>(),
@@ -233,7 +205,7 @@ public static partial class ServiceRegistrationExtensions
             waitlistRequestService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestService>(),
             imageLocationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageLocationService>(),
             dispatcherQueue: DispatcherQueue.GetForCurrentThread(),
-            startupState: provider.GetRequiredService<MTM_Waitlist.Module_Core.Models.StartupState>(),
+            personIdentity: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPersonIdentity>(),
             storeAvailabilityTracker: provider.GetRequiredService<IStoreAvailabilityTracker>(),
             actionPrompt: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.IWaitlistRequestActionPrompt>(),
             urgencyDeadlineService: provider.GetRequiredService<IUrgencyDeadlineService>(),
@@ -265,25 +237,32 @@ public static partial class ServiceRegistrationExtensions
         RegisterPartPictureCache(services);
 
         // Configuration
-        services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
-        services.Configure<StartupDatabaseOptions>(context.Configuration.GetSection(nameof(StartupDatabaseOptions)));
+        services.Configure<WaitlistDatabaseOptions>(context.Configuration.GetSection(nameof(WaitlistDatabaseOptions)));
         services.Configure<ReceivingDatabaseOptions>(context.Configuration.GetSection(nameof(ReceivingDatabaseOptions)));
-        services.Configure<StartupDevelopmentOptions>(context.Configuration.GetSection(nameof(StartupDevelopmentOptions)));
-        services.Configure<StartupLoggingOptions>(context.Configuration.GetSection(nameof(StartupLoggingOptions)));
-        services.Configure<StartupWindowOptions>(context.Configuration.GetSection(nameof(StartupWindowOptions)));
+
+        // The file-based logging path's registration is gone: the seam and the store-backed ILogger provider are
+        // registered by the logging module (AddLoggingModuleServices), and nothing writes a local log file any
+        // more (FR-025). The retired options' binding went with it, so nothing reads a file destination.
 
         // Dunnage images (Setup) resolve against the shared Dunnage image root (the same
-        // root the MTM Receiving Application writes via "Dunnage.Application.DefaultImageLocation").
-        DunnageImagePathResolver.ConfigureRootFolder(context.Configuration["DunnageImageOptions:RootFolder"]);
+        // root the MTM Receiving Application writes via "Dunnage.Application.DefaultImageLocation"). The root is
+        // this machine's own configuration and is adopted at launch, below, rather than from appsettings: the
+        // folders a machine reads now live in its configuration rows (T155, FR-025).
 
         // The local picture cache, mirroring both trees the application reads. The waitlist root is a setting, so
         // the factory resolves it when a run starts rather than when the container is built; the Dunnage cache
-        // folder is the receiving application's own when this machine already has one, and ours when it does not.
+        // folder is the shipped default, which is the receiving application's own root.
         services.AddSingleton<MTM_Waitlist.Module_Shared.Services.IImageCacheSyncService>(provider =>
             new MTM_Waitlist.Module_Shared.Services.ImageCacheSyncService(async cancellationToken =>
             {
                 var storageConfiguration = provider
                     .GetRequiredService<MTM_Waitlist.Module_Settings.Services.IImageStorageConfigurationResolver>();
+
+                // The dunnage root is a plant-wide setting like the picture folder, adopted before anything
+                // resolves a dunnage path, so the folder the copy is written into and the folder the screens look
+                // in are the same one (FR-040).
+                DunnageImagePathResolver.ConfigureRootFolder(
+                    await storageConfiguration.GetDunnageRootPathAsync().ConfigureAwait(false));
 
                 // Adopted before anything reads a cached path, so the folder the copy is written into and the
                 // folder the screens look in are the same one.
@@ -337,7 +316,7 @@ public static partial class ServiceRegistrationExtensions
                     // One source skipped and one kept, rather than both lost: the Dunnage tree is still mirrored
                     // from its own setting, and the waitlist pictures are read from the share for this run. The
                     // service has already logged why it could not initialize.
-                    MTM_Waitlist.Module_Core.Helpers.StartupDebugLog.Info(
+                    AppLog.Info(
                         "ImageCache",
                         "The waitlist picture source is skipped for this run because the image locations could not be initialized; those pictures are read from the share.");
                 }

@@ -4,42 +4,29 @@ using MTM_Waitlist.Module_Core.Models;
 
 namespace MTM_Waitlist.Tests.Core.Models;
 
+/// <summary>
+/// The option models the launch and the database read still carry: their defaults, which are the values a host
+/// with no configuration runs on.
+/// </summary>
+/// <remarks>
+/// <para>
+/// <b>What this file no longer asserts, and what replaced it.</b> It held a
+/// <c>StartupLoggingOptions_Defaults</c> case for the file-based logging path's options, whose defaults named a
+/// local log directory, a retention window and a forwarded copy's destination. Those options, the log service
+/// that read them and the forwarder that wrote a file were all deleted, so there is no default left to assert:
+/// the destination is the store, and it is chosen by the store-backed seam rather than configured. What a reader
+/// once learned from this case is now proved by <c>MTM_Waitlist.Tests/Module_Logging</c>, which pins the seam and
+/// its provider, and by <c>StoreLogCoverageTests</c>, which pins that a launch records an entry through that seam
+/// and that no local log file appears.
+/// </para>
+/// </remarks>
 [TestClass]
 public sealed class StartupOptionsModelsTests
 {
     [TestMethod]
-    public void StartupRegistrationRequest_Defaults()
+    public void WaitlistDatabaseOptions_Defaults()
     {
-        var request = new StartupRegistrationRequest();
-
-        Assert.AreEqual(string.Empty, request.Username);
-        Assert.AreEqual(string.Empty, request.HostnameNormalized);
-        Assert.AreEqual(string.Empty, request.MacAddressNormalized);
-        Assert.AreEqual(default, request.RequestedUtc);
-    }
-
-    [TestMethod]
-    public void StartupRegistrationRequest_CanBeInitialized()
-    {
-        var now = DateTimeOffset.UtcNow;
-        var request = new StartupRegistrationRequest
-        {
-            Username = "johnk",
-            HostnameNormalized = "JOHNSPC",
-            MacAddressNormalized = "AA:BB",
-            RequestedUtc = now
-        };
-
-        Assert.AreEqual("johnk", request.Username);
-        Assert.AreEqual("JOHNSPC", request.HostnameNormalized);
-        Assert.AreEqual("AA:BB", request.MacAddressNormalized);
-        Assert.AreEqual(now, request.RequestedUtc);
-    }
-
-    [TestMethod]
-    public void StartupDatabaseOptions_Defaults()
-    {
-        var options = new StartupDatabaseOptions();
+        var options = new WaitlistDatabaseOptions();
 
         Assert.AreEqual("MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING", options.ConnectionStringEnvironmentVariable);
         Assert.AreEqual(string.Empty, options.ConnectionString);
@@ -49,84 +36,11 @@ public sealed class StartupOptionsModelsTests
     }
 
     [TestMethod]
-    public void StartupLoggingOptions_Defaults()
-    {
-        var options = new StartupLoggingOptions();
-
-        Assert.AreEqual("Startup.Logging.CentralizedDestination", StartupLoggingOptions.CentralizedDestinationSettingKey);
-        Assert.AreEqual("Startup.Logging.HostedVmLogDirectory", StartupLoggingOptions.HostedVmLogDirectorySettingKey);
-        Assert.AreEqual("MTM_Waitlist/Logs/Startup", options.HostedVmLogDirectory);
-        Assert.AreEqual(string.Empty, options.CentralizedDestination);
-        Assert.AreEqual(14, options.RetentionDays);
-        Assert.AreEqual(250, options.MaxDirectorySizeMb);
-        Assert.AreEqual(4096, options.ChannelCapacity);
-        Assert.AreEqual(2, options.ForwardRetryCount);
-    }
-
-    [TestMethod]
-    public void StartupDevelopmentOptions_Defaults()
-    {
-        var options = new StartupDevelopmentOptions();
-
-        Assert.IsNotNull(options.DefaultDeveloperUsernames);
-        Assert.AreEqual(0, options.DefaultDeveloperUsernames.Count);
-    }
-
-    [TestMethod]
-    public void StartupWindowOptions_Defaults()
-    {
-        var options = new StartupWindowOptions();
-
-        Assert.AreEqual(920, options.SplashWidth);
-        Assert.AreEqual(620, options.SplashHeight);
-        Assert.AreEqual(1600, options.MainWidth);
-        Assert.AreEqual(980, options.MainHeight);
-        Assert.IsTrue(options.CenterOnModeSwitch);
-        Assert.AreEqual(120, options.MainTransitionDelayMilliseconds);
-    }
-
-    [TestMethod]
     public void ModuleCoreSettingsOptions_Defaults()
     {
         var options = new ModuleCoreSettingsOptions();
 
         Assert.AreEqual(30, options.DefaultRefreshIntervalSeconds);
         Assert.IsTrue(options.EnableModuleDiagnostics);
-    }
-
-    [TestMethod]
-    public void LocalSettingsOptions_Defaults()
-    {
-        var options = new LocalSettingsOptions();
-
-        Assert.IsNull(options.ApplicationDataFolder);
-        Assert.IsNull(options.LocalSettingsFile);
-    }
-
-    [TestMethod]
-    public void StartupCredentialCheckResult_Failed()
-    {
-        var result = StartupCredentialCheckResult.Failed();
-
-        Assert.IsFalse(result.IsAuthenticated);
-        Assert.IsFalse(result.RequiresPasswordChange);
-        Assert.AreEqual(0, result.UserId);
-        Assert.AreEqual(string.Empty, result.CurrentRole);
-        Assert.AreEqual(string.Empty, result.CurrentRoleCode);
-        Assert.IsFalse(result.HoldsTemporaryCredential);
-        Assert.AreEqual(0, result.TemporaryCredentialFailedAttempts);
-        Assert.IsFalse(result.TemporaryCredentialAttemptLimitReached);
-    }
-
-    [TestMethod]
-    public void StartupCredentialCheckResult_Success()
-    {
-        var result = StartupCredentialCheckResult.Success(42, "Developer", requiresPasswordChange: true, currentRoleCode: "developer");
-
-        Assert.IsTrue(result.IsAuthenticated);
-        Assert.IsTrue(result.RequiresPasswordChange);
-        Assert.AreEqual(42, result.UserId);
-        Assert.AreEqual("Developer", result.CurrentRole);
-        Assert.AreEqual("developer", result.CurrentRoleCode);
     }
 }

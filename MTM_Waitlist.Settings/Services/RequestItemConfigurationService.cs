@@ -251,7 +251,7 @@ public sealed class RequestItemConfigurationService : IRequestItemConfigurationS
     /// </summary>
     private static RequestItemConfiguration Unusable(string item, string problem)
     {
-        StartupDebugLog.Error(
+        AppLog.Error(
             "RequestItemConfiguration",
             new FormatException($"The configuration row for '{item}' cannot be used: {problem}."),
             $"The configuration row for '{item}' cannot be used, so the item is reported unavailable rather than half-configured (FR-026).");

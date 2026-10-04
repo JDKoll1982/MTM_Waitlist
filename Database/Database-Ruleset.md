@@ -107,17 +107,17 @@ added or changed inside it.
   folder its part number's prefix decides — `MMC`, `MMF`, `FGT` — with `Categorized Parts` as the catch-all for a
   number no prefix recognises, and the file is named after the part. What makes a recorded value portable is that it
   is stored **relative** to the root, not that these folders are configurable: a value is read against whichever
-  root the machine is configured with, so a picture recorded under a drive letter resolves under a UNC path.
+  root the plant is configured with, so a picture recorded under a drive letter resolves under a UNC path.
 - **The three kinds inside the application's own collection have their own folders**, named for their scopes
   verbatim. That is what settles the case-only collision between the item `other` and the category `Other`: neither
   name is changed, and neither can resolve to the other's file (FR-038).
-- **The move of everything already stored** is `Seeds/seed_picture_layout_move` with
-  `sp_config_images_locations_paths_move`, which rewrites each recorded path and reports through affected rows, with
-  its own paired `rollback.sql`; the files themselves are moved by `tools/Move-PartPictureLayout.ps1`. It is
-  run-once, and it is safe to interrupt: `AppStoragePaths.ToCurrentLayout` reads a value in either layout, so a
-  picture resolves in the gap between the files moving and the rows moving. `AllTables.sql`, `AllSPs.sql` and
-  `AllSeeds.sql` are regenerated in the same change, and the schema is proved by
-  `Database/Validation/part_pictures_schema/validate.sql`.
+- **The move of everything already stored** is `sp_config_images_locations_paths_move`, which rewrites each
+  recorded path and reports through affected rows, with its own paired `rollback.sql`; the files themselves are
+  moved by `tools/Move-PartPictureLayout.ps1`. **The seed that used to pair the row move is retired**
+  (`Seeds/seed_picture_layout_move`, removed with its block in `AllSeeds.sql`): the application defaults out on
+  first use, so no migration is needed to reach a working default, and a row whose file is absent already falls
+  back to the application's own no-image path. `AllTables.sql`, `AllSPs.sql` and `AllSeeds.sql` are regenerated in
+  the same change, and the schema is proved by `Database/Validation/part_pictures_schema/validate.sql`.
 - **A replaced picture is kept, then cleaned up.** The storage service copies the picture it replaces into an
   `Archive` folder beside it, and the startup cache step removes an archived file once
   `image_storage.archive_keep_days` days have passed. The period is a stored setting owned by the storage screen and
@@ -160,6 +160,22 @@ truncated artifact, and it must not be "tidied" away:
 - A rollback-only folder creates nothing, so it is **not** a duplicate of any create artifact and is outside the
   duplicate-object check `validate-database-schema.ps1` performs over `create.sql` files.
 - The same convention applies to retired procedures under `Database/StoredProcedures/`.
+
+### Review note — validation never writes seed data (approved 2026-09-27)
+
+`.github/scripts/validate-database-schema.ps1` used to apply every `Database/Seeds/**/create.sql` file whenever
+validation passed, and again after a failed repair attempt. That made a read-only check into a writer:
+`seed_dev_masked_baseline` truncates and rewrites `core_users_profiles`, `auth_roles_catalog`,
+`auth_roles_assignments`, `config_settings_values` and `core_computers_registry`. Because the script points at
+whatever store its connection strings name — and in `.github/workflows/database-schema-validation.yml` those are
+secrets pointing at a real store — a pull request touching any `Database/**/*.sql` file silently replaced that
+store's accounts, their credentials and the permission baselines. A credential set by hand survived only until the
+next validation run.
+
+- Seed application is now opt-in: pass **`-ApplySeeds`** to populate a store. Validation on its own writes nothing.
+- The same switch gates the seed step of the install path, so a repair run no longer populates either.
+- A schema that validates needs no seed data to be judged, so nothing is lost by the default. A store that is
+  installed and wants data is the case the switch exists for.
 
 ### Review note — the `mtm_mock` mirror schema lives only under `Database/Mock/`
 

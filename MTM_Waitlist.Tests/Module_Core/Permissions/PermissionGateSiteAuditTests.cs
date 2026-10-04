@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Tests.Module_Mock;
@@ -18,8 +18,10 @@ namespace MTM_Waitlist.Tests.Module_Core.Permissions;
 /// <para>
 /// <b>Every one of the thirteen sites the specification's Context section counts is enumerated here</b>: the
 /// twelve retired role lists — the eleven that became named permissions, plus the badge map, which is re-keyed to
-/// role codes and deliberately does <i>not</i> become a permission — and <c>StartupState.IsDeveloper</c>, the
-/// thirteenth, which used to compare a display name and is the one a hand count of twelve missed.
+/// role codes and deliberately does <i>not</i> become a permission — and the developer check, the thirteenth,
+/// which used to compare a display name and is the one a hand count of twelve missed. Since 010-startup-rebuild
+/// the developer check lives on <see cref="IPersonIdentity.Holds"/> rather than on a mutable launch-state
+/// object, so the site is pinned to the contract that now carries it.
 /// </para>
 /// <para>
 /// <b>What makes this an audit rather than a restatement.</b> The role display names it looks for are read from
@@ -56,7 +58,7 @@ public sealed class PermissionGateSiteAuditTests
         new("Dunnage Quick Add", "MTM_Waitlist.Setup/Services/DunnageWorkflowService.cs", "DunnageWorkflowService", PermissionKeys.SetupDunnageQuickAdd),
         new("Work-centre setup", "MTM_Waitlist.Setup/ViewModels/SetupWorkCenterViewModel.cs", "SetupWorkCenterViewModel", PermissionKeys.SetupWorkCenters),
         new("The badge map", "MTM_Waitlist.Core/Permissions/RoleBadgeCatalog.cs", "RoleBadgeCatalog", PermissionKey: null),
-        new("The developer check", "MTM_Waitlist.Core/Models/StartupState.cs", "StartupState", PermissionKey: null),
+        new("The developer check", "MTM_Waitlist.Core/Contracts/Services/IPersonIdentity.cs", "IPersonIdentity", PermissionKey: null),
     ];
 
     /// <summary>
@@ -211,7 +213,7 @@ public sealed class PermissionGateSiteAuditTests
     public void TheTwoSitesThatAreNotPermissions_DoNotBecomeOne()
     {
         var badge = ReadProductionFile("MTM_Waitlist.Core/Permissions/RoleBadgeCatalog.cs");
-        var developerCheck = ReadProductionFile("MTM_Waitlist.Core/Models/StartupState.cs");
+        var developerCheck = ReadProductionFile("MTM_Waitlist.Core/Contracts/Services/IPersonIdentity.cs");
 
         Assert.IsFalse(
             badge.Contains("PermissionKeys.", StringComparison.Ordinal),
@@ -220,23 +222,27 @@ public sealed class PermissionGateSiteAuditTests
             badge.Contains("RoleCode", StringComparison.Ordinal),
             "The badge map is keyed on the role code, which is what makes a rename a presentation change.");
 
-        Assert.IsTrue(
-            developerCheck.Contains(nameof(StartupState.CurrentRoleCode), StringComparison.Ordinal),
-            "The developer check is the thirteenth site and must read the role code.");
+        Assert.IsFalse(
+            developerCheck.Contains("PermissionKeys.", StringComparison.Ordinal),
+            "The developer check is not a permission and must not be answered from the declaration (FR-058).");
 
-        // The display-name property stays, because the screens that show text still use it. What must not stay is
-        // the check reading it, so the assertion is over the check's own body rather than over the whole file.
-        var developerCheckBody = Regex.Match(developerCheck, @"IsDeveloper\s*=>[^;]+;").Value;
+        // The developer check is the thirteenth site, and it is answered from the role codes the store put the
+        // person in. The display-name property is gone with the retired object; what must not come back is a check
+        // that reads a display name, so the assertion is over the one member that decides rather than the file.
+        var developerCheckBody = Regex.Match(developerCheck, @"bool\s+Holds\s*\([^)]*\)\s*;").Value;
 
         Assert.IsFalse(
             string.IsNullOrWhiteSpace(developerCheckBody),
-            "StartupState.IsDeveloper is one of the thirteen sites; it moved, so update this audit rather than deleting it.");
+            "The developer check is one of the thirteen sites; it moved, so update this audit rather than deleting it.");
         Assert.IsTrue(
-            developerCheckBody.Contains(nameof(StartupState.CurrentRoleCode), StringComparison.Ordinal),
+            developerCheckBody.Contains("roleCode", StringComparison.Ordinal),
             "The developer check must read the role code.");
+        Assert.IsTrue(
+            developerCheck.Contains(nameof(IPersonIdentity.HeldRoleCodes), StringComparison.Ordinal),
+            "The developer check is answered from the roles the person holds, so the set must be part of the contract.");
         Assert.IsFalse(
-            Regex.IsMatch(developerCheckBody, @"CurrentRole\b(?!Code)"),
-            "The developer check must not read the display name, which is presentation (FR-054).");
+            Regex.IsMatch(developerCheck, @"CurrentRole\b(?!Code)"),
+            "The contract must not carry a role display name, which is presentation (FR-054).");
     }
 
     [TestMethod]

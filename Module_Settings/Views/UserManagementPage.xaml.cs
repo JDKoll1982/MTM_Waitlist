@@ -25,10 +25,10 @@ public sealed partial class UserManagementPage : Page
 
     public UserManagementPage()
     {
-        StartupDebugLog.Info("UserManagementPage", "Constructor started.");
+        AppLog.Info("UserManagementPage", "Constructor started.");
         ViewModel = App.GetService<UserManagementViewModel>();
         InitializeComponent();
-        StartupDebugLog.Info("UserManagementPage", "Constructor completed.");
+        AppLog.Info("UserManagementPage", "Constructor completed.");
     }
 
     /// <summary>Back returns to the Settings screen this page was opened from.</summary>

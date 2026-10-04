@@ -30,24 +30,24 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
     private const string ComputerLookupByNameProcedure = "sp_core_computers_registry_lookup_by_name_get";
 
     private readonly MySqlHelperServer _mySqlHelperServer;
-    private readonly StartupState _startupState;
-    private readonly StartupDatabaseOptions _startupDatabaseOptions;
+    private readonly IMachineFacts _machineFacts;
+    private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;
 
     public WorkCenterCatalogService(
         MySqlHelperServer mySqlHelperServer,
-        StartupState startupState,
-        IOptions<StartupDatabaseOptions> startupDatabaseOptions)
+        IMachineFacts machineFacts,
+        IOptions<WaitlistDatabaseOptions> waitlistDatabaseOptions)
     {
         _mySqlHelperServer = mySqlHelperServer;
-        _startupState = startupState;
-        _startupDatabaseOptions = startupDatabaseOptions?.Value ?? new StartupDatabaseOptions();
+        _machineFacts = machineFacts;
+        _waitlistDatabaseOptions = waitlistDatabaseOptions?.Value ?? new WaitlistDatabaseOptions();
     }
 
     public string GetCurrentComputerName()
     {
-        if (!string.IsNullOrWhiteSpace(_startupState.HostnameNormalized))
+        if (!string.IsNullOrWhiteSpace(_machineFacts.Hostname))
         {
-            return _startupState.HostnameNormalized;
+            return _machineFacts.Hostname;
         }
 
         return Environment.MachineName;
@@ -94,7 +94,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
             ? await ResolveCurrentComputerNameAsync(cancellationToken).ConfigureAwait(false)
             : workstationName.Trim();
 
-        StartupDebugLog.Info("WorkCenterCatalog", $"GetCatalogAsync started. Workstation='{normalizedWorkstationName}'.");
+        AppLog.Info("WorkCenterCatalog", $"GetCatalogAsync started. Workstation='{normalizedWorkstationName}'.");
 
         var availableRows = await GetAvailableWorkCenterRowsAsync(cancellationToken).ConfigureAwait(false);
         var allWorkCenters = availableRows
@@ -187,7 +187,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
             WorkCenterDetails = workCenterDetails,
         };
 
-        StartupDebugLog.Info("WorkCenterCatalog", $"GetCatalogAsync completed. Workstation='{normalizedWorkstationName}', HotCount={hotWorkCenters.Count}, OtherCount={otherWorkCenters.Count}, ActiveJobCount={activeJobWorkCenters.Count}.");
+        AppLog.Info("WorkCenterCatalog", $"GetCatalogAsync completed. Workstation='{normalizedWorkstationName}', HotCount={hotWorkCenters.Count}, OtherCount={otherWorkCenters.Count}, ActiveJobCount={activeJobWorkCenters.Count}.");
         return result;
     }
 
@@ -199,7 +199,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
             ? await ResolveCurrentComputerNameAsync(cancellationToken).ConfigureAwait(false)
             : workstationName.Trim();
 
-        StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync started. Workstation='{normalizedWorkstationName}', RequestedCount={hotWorkCenters.Count}.");
+        AppLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync started. Workstation='{normalizedWorkstationName}', RequestedCount={hotWorkCenters.Count}.");
 
         var workstationRows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
             ComputerLookupByNameProcedure,
@@ -213,7 +213,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         var workstationId = GetInt64(workstationRows.FirstOrDefault(), "id");
         if (workstationId <= 0)
         {
-            StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. Workstation '{normalizedWorkstationName}' was not found.");
+            AppLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. Workstation '{normalizedWorkstationName}' was not found.");
             return "Unable to save Local workcenters: workstation not found.";
         }
 
@@ -256,7 +256,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         var connectionString = ResolveConnectionString();
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. No database connection was available for workstation '{normalizedWorkstationName}'.");
+            AppLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. No database connection was available for workstation '{normalizedWorkstationName}'.");
             return "Unable to save Local workcenters: database connection is not configured.";
         }
 
@@ -264,7 +264,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         {
             var builder = new MySqlConnectionStringBuilder(connectionString)
             {
-                ConnectionTimeout = (uint)Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds),
+                ConnectionTimeout = (uint)Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds),
                 Database = "mtm_waitlist",
             };
 
@@ -281,7 +281,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
                 CommandType = System.Data.CommandType.StoredProcedure,
             })
             {
-                deleteCommand.CommandTimeout = Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds);
+                deleteCommand.CommandTimeout = Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds);
                 deleteCommand.Parameters.AddWithValue("@p_computer_id", workstationId);
                 _ = await deleteCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -293,7 +293,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
                     CommandType = System.Data.CommandType.StoredProcedure,
                 };
 
-                upsertCommand.CommandTimeout = Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds);
+                upsertCommand.CommandTimeout = Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds);
                 upsertCommand.Parameters.AddWithValue("@p_computer_id", workstationId);
                 upsertCommand.Parameters.AddWithValue("@p_work_center_id", item.WorkCenterId);
                 upsertCommand.Parameters.AddWithValue("@p_sort_rank", item.SortRank);
@@ -303,12 +303,12 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
             }
 
             await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-            StartupDebugLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync completed. Workstation='{normalizedWorkstationName}', PersistedCount={resolvedHotWorkCenters.Length}.");
+            AppLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync completed. Workstation='{normalizedWorkstationName}', PersistedCount={resolvedHotWorkCenters.Length}.");
             return null;
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("WorkCenterCatalog", ex, $"SaveHotWorkCentersAsync failed. Workstation='{normalizedWorkstationName}', RequestedCount={orderedHotWorkCenters.Length}.");
+            AppLog.Error("WorkCenterCatalog", ex, $"SaveHotWorkCentersAsync failed. Workstation='{normalizedWorkstationName}', RequestedCount={orderedHotWorkCenters.Length}.");
             return $"Unable to save Local workcenters: {ex.Message}";
         }
     }
@@ -411,7 +411,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
 
         var fallbackConnectionString = Environment.GetEnvironmentVariable("MTM_WAITLIST_DB_CONNECTION_STRING")?.Trim()
             ?? Environment.GetEnvironmentVariable("MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING")?.Trim()
-            ?? _startupDatabaseOptions.ConnectionString?.Trim();
+            ?? _waitlistDatabaseOptions.ConnectionString?.Trim();
 
         var resolvedConnectionString = string.IsNullOrWhiteSpace(environmentConnectionString)
             ? fallbackConnectionString

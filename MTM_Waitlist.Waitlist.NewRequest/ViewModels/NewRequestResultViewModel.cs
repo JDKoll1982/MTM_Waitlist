@@ -164,7 +164,7 @@ public partial class NewRequestResultViewModel : ObservableRecipient, INavigatio
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("NewRequestResult", ex, "Request resubmission threw an unexpected exception.");
+            AppLog.Error("NewRequestResult", ex, "Request resubmission threw an unexpected exception.");
             ApplyPhase(NewRequestResultPhase.Failure, "The request could not be submitted. Please try again.");
         }
         finally

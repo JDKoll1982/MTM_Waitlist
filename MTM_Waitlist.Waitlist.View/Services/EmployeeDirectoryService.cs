@@ -46,7 +46,7 @@ public sealed class EmployeeDirectoryService : IEmployeeDirectoryService
 
         if (rows.Count == 0)
         {
-            StartupDebugLog.Info("EmployeeDirectory", $"No account carries the employee identifier '{normalized}'.");
+            AppLog.Info("EmployeeDirectory", $"No account carries the employee identifier '{normalized}'.");
             return null;
         }
 
@@ -57,7 +57,7 @@ public sealed class EmployeeDirectoryService : IEmployeeDirectoryService
         // the fact that a row came back (FR-046).
         if (!string.Equals(storedIdentifier, normalized, StringComparison.OrdinalIgnoreCase))
         {
-            StartupDebugLog.Info(
+            AppLog.Info(
                 "EmployeeDirectory",
                 $"The lookup for '{normalized}' answered with an account carrying '{storedIdentifier}'; the identifiers disagree, so no identity is returned.");
             return null;
@@ -70,7 +70,7 @@ public sealed class EmployeeDirectoryService : IEmployeeDirectoryService
             IsActive = ReadBool(row, "is_active"),
         };
 
-        StartupDebugLog.Info(
+        AppLog.Info(
             "EmployeeDirectory",
             $"Resolved employee '{identity.EmployeeNumber}' as '{identity.DisplayName}' (active={identity.IsActive}).");
 

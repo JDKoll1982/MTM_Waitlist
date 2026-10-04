@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     xmlns:views="using:MTM_Waitlist.Module_Settings.Views"
     mc:Ignorable="d">
 
@@ -139,10 +140,14 @@
 
                                         <StackPanel Grid.Column="0" Spacing="2">
                                             <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind DisplayName}" />
-                                            <TextBlock
-                                                Style="{ThemeResource CaptionTextBlockStyle}"
-                                                Text="{x:Bind PendingText, Mode=OneWay}"
-                                                TextWrapping="Wrap" />
+                                            <!-- What is unsaved is drawn by the one-line scrolling control (009 B1/B2), so
+                                                 a long list of pending changes scrolls its own line instead of wrapping.
+                                                 The caption's size is set here because the control draws its own text and
+                                                 cannot inherit a TextBlock style. -->
+                                            <sharedControls:AutoScrollTextView
+                                                FontSize="12"
+                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                Text="{x:Bind PendingText, Mode=OneWay}" />
                                         </StackPanel>
 
                                         <Button
@@ -183,13 +188,19 @@
                                     <StackPanel>
                                         <!-- The heading row: the area's name, then its permissions across the top. -->
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock
+                                            <!-- The area's name is drawn by the one-line scrolling control (009 B1/B2):
+                                                 the person column is a fixed width, so a long area name scrolls
+                                                 instead of wrapping. The strong-body size and weight are set here
+                                                 because the control draws its own text and cannot inherit a TextBlock
+                                                 style. -->
+                                            <sharedControls:AutoScrollTextView
                                                 Width="{StaticResource PermissionPersonColumnWidth}"
                                                 Margin="0,0,4,8"
                                                 VerticalAlignment="Bottom"
-                                                Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                                Text="{x:Bind AreaHeadingText}"
-                                                TextWrapping="Wrap" />
+                                                FontSize="14"
+                                                FontWeight="SemiBold"
+                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                Text="{x:Bind AreaHeadingText}" />
 
                                             <ItemsControl AutomationProperties.AutomationId="PermissionsPage_Columns" ItemsSource="{x:Bind Columns}">
                                                 <ItemsControl.ItemsPanel>
@@ -201,15 +212,21 @@
                                                     <DataTemplate x:DataType="models:PermissionColumn">
                                                         <!-- The permission's own words, and what it gates beneath them. -->
                                                         <StackPanel Width="{StaticResource PermissionCellWidth}" Margin="4,0" Spacing="2">
-                                                            <TextBlock
-                                                                Style="{ThemeResource BodyStrongTextBlockStyle}"
-                                                                Text="{x:Bind LabelText}"
-                                                                TextWrapping="Wrap" />
-                                                            <TextBlock
+                                                            <!-- The permission's own words and what it gates are drawn by
+                                                                 the one-line scrolling control (009 B1/B2): a cell is a
+                                                                 fixed width, so a long label scrolls instead of wrapping
+                                                                 the whole matrix taller. Both sizes are set here because
+                                                                 the control draws its own text and cannot inherit a
+                                                                 TextBlock style. -->
+                                                            <sharedControls:AutoScrollTextView
+                                                                FontSize="14"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                                Text="{x:Bind LabelText}" />
+                                                            <sharedControls:AutoScrollTextView
+                                                                FontSize="12"
                                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                Style="{ThemeResource CaptionTextBlockStyle}"
-                                                                Text="{x:Bind GatesText}"
-                                                                TextWrapping="Wrap" />
+                                                                Text="{x:Bind GatesText}" />
                                                         </StackPanel>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
@@ -234,26 +251,25 @@
                                                                 Content="{x:Bind Person.DisplayName}"
                                                                 Tag="{x:Bind Person}" />
                                                             <!-- The sign-in name, because a name is not an identity: two accounts can share one. -->
-                                                            <TextBlock
+                                                            <sharedControls:AutoScrollTextView
+                                                                FontSize="12"
                                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                Style="{ThemeResource CaptionTextBlockStyle}"
-                                                                Text="{x:Bind Person.SignInName}"
-                                                                TextWrapping="Wrap" />
-                                                            <TextBlock
-                                                                Style="{ThemeResource CaptionTextBlockStyle}"
-                                                                Text="{x:Bind Person.RoleText}"
-                                                                TextWrapping="Wrap" />
+                                                                Text="{x:Bind Person.SignInName}" />
+                                                            <sharedControls:AutoScrollTextView
+                                                                FontSize="12"
+                                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                                Text="{x:Bind Person.RoleText}" />
                                                             <!-- How much of theirs is unsaved, in the reader's words. -->
-                                                            <TextBlock
-                                                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                                            <sharedControls:AutoScrollTextView
+                                                                FontSize="12"
+                                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                                                 Text="{x:Bind Person.PendingText, Mode=OneWay}"
-                                                                TextWrapping="Wrap"
                                                                 Visibility="{x:Bind Person.HasPendingChanges, Mode=OneWay}" />
                                                             <!-- Why the whole row is locked, in words rather than by absence. -->
-                                                            <TextBlock
-                                                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                                            <sharedControls:AutoScrollTextView
+                                                                FontSize="12"
+                                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                                                 Text="{x:Bind Person.LockReasonText}"
-                                                                TextWrapping="Wrap"
                                                                 Visibility="{x:Bind Person.IsLockedShape}" />
                                                         </StackPanel>
 

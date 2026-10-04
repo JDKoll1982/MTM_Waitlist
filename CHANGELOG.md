@@ -10,6 +10,48 @@
 
 ---
 
+## 2026-09-27 — starting the application is now watchable, and a stopped start says why
+
+**What changed:** the way the application starts up has been rebuilt from the ground up. Instead of a splash
+screen that sat there, you now see **what the application is doing, line by line, while it does it**: reading this
+computer's settings, contacting the store, checking this computer, working out who is signed in, and getting the
+first screen ready. If the start cannot finish, the window says which of those it stopped on and why, in plain
+words rather than a step number.
+
+A computer that has never run the application is now **set up deliberately** before anyone can use it: somebody
+holding `IT Department` or `Developer` authority signs in, names the machine, points it at the shared picture
+sources, and saves. Until then the main screens cannot be reached by any route, and abandoning setup closes the
+application and says why.
+
+**Why it matters:** a start that stopped used to be indistinguishable from a start that was slow, so a fault
+reported from the floor arrived as "it hangs" and nobody could say where. Every fault in this rebuild is also
+**recorded in the store** now, including in released builds, which previously recorded nothing at all.
+
+**What to expect:**
+
+- **A watchable start.** Every individual thing the application does appears as its own line as it happens, and
+  no wait is ever without a limit: thirty seconds is the longest anything may take, and the two optional pieces
+  (refreshing the local picture copies, checking whether the external system answers) are shorter still and can
+  never hold the start up.
+- **A stopped start states its cause and offers only what could help.** Trying again repeats just the piece that
+  failed and what follows it. **Restoring defaults** is offered only where it could remove the cause, and it lists
+  exactly what it will reset before it does anything. A store outage never offers it.
+- **A new computer is set up before anyone signs in**, and cannot be skipped: every way out of setup ends the
+  application.
+- **Signing in identifies both the person and the machine.** A session is judged by the store's clock, not the
+  computer's. An account still on a temporary credential is allowed five attempts and is then asked to set a new
+  password before it can carry on, and that refusal survives closing and reopening the application.
+- **Your choices follow you, not the computer.** The theme, the order of the waitlist, whether new-request alerts
+  are on, which requests you have already seen and whether parts without pictures are listed are now held against
+  **you** in the store, so they are already there when you sign in on another computer. The list of locations to
+  hide belongs to the whole plant: everyone can read it, and only `IT Department` and `Developer` can change it.
+  The only thing left on a computer is what it needs to reach the store, plus its copy of the pictures.
+- **Diagnostics are in the store, and a developer can read them.** Settings now carries a log panel, for
+  `Developer` alone, where entries can be filtered by machine, error kind, severity, module and time, repeated
+  faults are grouped, and an entry can be copied whole to share with somebody who has no access to the store.
+
+---
+
 ## 2026-09-24 — the New Request wizard asks, then confirms: one review step instead of two
 
 **What changed:** the wizard no longer shows a separate **Preview** step before **Confirm**. After the last

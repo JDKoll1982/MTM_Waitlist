@@ -24,10 +24,6 @@ WHERE
         )
     );
 
-DELETE FROM core_buildings_catalog
-WHERE
-    building_code IN ('expo_drive', 'vits_drive');
-
 DELETE FROM core_computers_registry
 WHERE
     computer_name = 'johnspc';

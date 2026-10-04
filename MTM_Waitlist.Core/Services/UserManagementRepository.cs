@@ -48,12 +48,12 @@ public sealed class UserManagementRepository : IUserManagementRepository
     private const string TargetOutranksActorToken = "mtm_target_outranks_actor";
     private const string RoleUnknownToken = "mtm_role_unknown";
 
-    private readonly StartupDatabaseOptions _startupDatabaseOptions;
+    private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;
 
-    public UserManagementRepository(IOptions<StartupDatabaseOptions> startupDatabaseOptions)
+    public UserManagementRepository(IOptions<WaitlistDatabaseOptions> waitlistDatabaseOptions)
     {
-        ArgumentNullException.ThrowIfNull(startupDatabaseOptions);
-        _startupDatabaseOptions = startupDatabaseOptions.Value;
+        ArgumentNullException.ThrowIfNull(waitlistDatabaseOptions);
+        _waitlistDatabaseOptions = waitlistDatabaseOptions.Value;
     }
 
     /// <inheritdoc />
@@ -403,7 +403,7 @@ public sealed class UserManagementRepository : IUserManagementRepository
             return fromEnvironment;
         }
 
-        var configuredName = _startupDatabaseOptions.ConnectionStringEnvironmentVariable;
+        var configuredName = _waitlistDatabaseOptions.ConnectionStringEnvironmentVariable;
         if (!string.IsNullOrWhiteSpace(configuredName))
         {
             var fromConfiguredName = Environment.GetEnvironmentVariable(configuredName);
@@ -413,16 +413,16 @@ public sealed class UserManagementRepository : IUserManagementRepository
             }
         }
 
-        return string.IsNullOrWhiteSpace(_startupDatabaseOptions.ConnectionString)
+        return string.IsNullOrWhiteSpace(_waitlistDatabaseOptions.ConnectionString)
             ? null
-            : _startupDatabaseOptions.ConnectionString;
+            : _waitlistDatabaseOptions.ConnectionString;
     }
 
     private string BuildTimeoutConnectionString(string connectionString)
     {
         var builder = new MySqlConnectionStringBuilder(connectionString)
         {
-            ConnectionTimeout = (uint)Math.Max(1, _startupDatabaseOptions.ConnectionTimeoutSeconds),
+            ConnectionTimeout = (uint)Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds),
         };
 
         // The configured host is the shared plant server, which a workstation off the plant network cannot

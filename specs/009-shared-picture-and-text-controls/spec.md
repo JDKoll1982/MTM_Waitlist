@@ -46,7 +46,9 @@ Both are fixed the same way: one control that owns the rule, used everywhere the
 **B. One-line text that scrolls when it does not fit**
 
 - **B1** A shared control draws text on exactly one line.
-- **B2** When the text fits, it is drawn still. When it does not fit, it scrolls across its own field and repeats.
+- **B2** When the text fits, it is drawn still. When it does not fit, it slides across its own field as a **ring** —
+  the value follows itself after a gap, so the pass repeats without a jump — and repeats for as long as the line is
+  on screen.
 - **B3** If the system has animations turned off, the text is truncated with an ellipsis instead of moving — the user
   who asked for less motion gets less motion, and still sees a readable single line.
 - **B4** The scrolling must cost nothing when it is not happening: no timers, no UI-thread per-frame work, and the
@@ -68,6 +70,8 @@ Both are fixed the same way: one control that owns the rule, used everywhere the
 | D10 | Light dismiss is **off** on the enlarged view's popup | A light-dismiss popup also closes when the application loses focus, so a reader who alt-tabbed away came back to a view that had closed itself (found by driving the running app, 2026-09-24). The backdrop covers the page, so there is nothing outside it to click |
 | D11 | The enlarging gesture is read from the picture's **nearest host**, not declared per surface | One rule for every surface, and the rule cannot be forgotten: the two ways a click can already be spent are a `ButtonBase` around the picture and a list that raises `ItemClick` or selects on a click. The walk stops at the **first** list the picture sits in, so a card list that does not act on a click (the Settings dunnage lists, whose action is their own Hide/Show buttons) keeps the click even though the page around it is built from expanders and lists too. The shared card template is used both by a clickable list (the building flyout) and by one that is not (Settings), so a per-surface declaration would put the wrong gesture on one of them — and the wrong gesture looks identical on screen until somebody clicks |
 | D12 | The Shift modifier comes from the pointer event (`PointerRoutedEventArgs.KeyModifiers`) | Reading the keyboard's current state at handling time did not see the Shift of the very click being handled, so the gesture never fired — found in the running app on 2026-09-24, and the reason the modifier is taken from the event |
+| D13 | The scroll is a **ring**: the value is drawn twice on one track, the second copy a `Gap` (48 px default) behind the first, and the track slides exactly one copy plus that gap, for ever | One copy slides the value past and then snaps back to its first character, so the loop jerks and the last characters are only half in view at the turn. Two copies make the frame that ends a pass identical to the frame that began it, and the gap stops the end of the value reading as the start of a longer word (both asked for by the reader, 2026-09-26). Both copies are given their own measured width and are never trimmed, so nothing is re-laid out and nothing is cut out of the text while the track moves |
+| D14 | **Group 1 of `SCROLLING-TEXT-CANDIDATES.md` is converted to the control**, except rows 50 and 51 | The control existed for exactly these surfaces — a fixed card, tile, column or list row where a value either wrapped the surface out of shape or was cut off with no way to read it — so 49 of the 51 strong candidates now draw through it. Where a row carried a named `TextBlock` style the size, weight and colour are set on the control (it draws its own line and cannot inherit a `TextBlock` style); where the parent was a horizontal `StackPanel` or a fixed `Auto` column the line was given a bounded width so it can scroll at all (the roster's role cell, the shell header's 220 px box). Rows 50 and 51 are **left wrapping**: they are the two the inventory flagged "review first", and `WaitlistDetailTemplateField.ValueTextWrapping` documents that a declared `text` field is prose and wraps (FR-013) — scrolling prose would contradict a stated rule rather than restore a lost one |
 
 ## Files
 
@@ -109,6 +113,8 @@ Both are fixed the same way: one control that owns the rule, used everywhere the
 | The default is on, per person, and cannot break a picture (A4, A5, D6, D7) | `PictureEnlargePreferenceTests` — 6 cases: default on when nothing is stored; a stored answer wins; an unreachable store keeps the default; a write lands at `user:<id>` with the person's id and the `bool` type; a refused write still applies for the session; a read is still owed once somebody signs in |
 | The previous markup tests still hold | The 12 tests that looked for a bare `Image` now look for the control and pass unchanged in intent (FR-018/FR-019 checks) |
 | **The scroll and the enlarged view, in the running app** | **Verified 2026-09-24** on the built `Debug` app: opened Settings → Operations → *Dunnage Type Visibility*, captured the window twice 1.3 s apart, and compared pixels inside each card title. `Cardboard Sheets / Slip Sheets` (the long one) changed **81 of 220** sampled pixels — it is moving. `Corrugated Boxes`, `Foam / Molded Inserts` and `Gaylords / Bulk Bins` changed **0** — they fit, so they stay still, which is requirement B2's other half. The app was closed afterwards; no process was left running. |
+| **The converted group-1 surfaces (B1, B2, D14)** | 49 of the inventory's 51 strong candidates were converted. `ScrollingTextConversionsMarkupTests` names every converted file and binding and fails in both directions — a value that stops being drawn by the control, and a value that goes back to a `TextBlock` — and was proved to bite in both directions (a binding renamed, and one line put back as a `TextBlock`) before it was kept. Build clean, whole suite **1562 total, 0 failed, 55 skipped**. **Spot-checked in the running app (2026-09-26)**: the Work Center Setup screen drew all five values of every work-centre card, one line each, with the cards still even and nothing clipped; the shell header still drew the signed-in name. **Not driven on screen**: the New Request wizard's five choice/component/die/item/job-type steps, the Setup part and operation lists and the review rows, the part-picture manager, the permission and roster screens, the image-override editor, and the shell flyout — those rest on the markup guard and the build |
+| **The ring, in the running app (B2, D13)** | **Driven 2026-09-26** on the built `Debug` app, one check per line: the dunnage card *Cardboard Sheets / Slip Sheets* was captured 16 times at 500 ms intervals and every frame was read back with Windows OCR. Each consecutive frame differed by 3 884–3 930 sampled pixels of the ~6 000 sampled — even movement the whole way round, with no oversized jump at the turn, which is what a snap back to the first character would show as. The frames read `Cardboard Sheets /` → `oard Sheets / Slip S` → `Rs / Slip Sheets` → `ets \\| Cardboa` → `Cardboard Shet`, so the head, the tail **and** the gap before the copy that follows were all on screen. The app was closed afterwards; no process was left running. |
 | **The gesture, and the new enlarged view, in the running app (A2, A7)** | **Driven 2026-09-24** on the built `Debug` app through UI Automation and real mouse/keyboard input, one check per line, all passing: a plain click on a waitlist card's picture opened the request and left the enlarged view closed; a plain click on the request page's own picture (nothing claims that click) still opened the enlarged view; the X in the top-right corner closed it; **Shift+click on a waitlist card's picture opened the enlarged view and left the page on the waitlist**; `Esc` closed it; a plain click on a building card's picture in the shell's facility flyout **chose the building** (`Expo Drive` → `Vits Drive`) with the enlarged view closed; **Shift+click on the same card's picture opened the enlarged view and left the chosen building unchanged**; a click on the backdrop closed it; and **a plain click on a Settings dunnage card's picture still opened the enlarged view**, which is the case a first version of the rule got wrong (defect 6). Measured while open: a backdrop of `744×491` at `0,0` in a `744×492` client area — it fills the page — with the X `40×40` at 16 px from the top-right corner. |
 | **The work-centre photo cards draw through the control (A3)** | Both cards were converted; a screen capture of *Work Center Setup* shows the photo drawn inside its frame by the control, and the same page's cards still choose the work centre on a plain click. The picture keeps the card's rounded frame but is not itself clipped to that radius — the same look every converted picture in the app already has (`PartPictureCardTemplate`'s picture sits square inside a rounded frame too). |
 
@@ -149,6 +155,11 @@ None of these could be caught by the test suite, which is why the running app wa
    nothing — the same symptom the feature exists to prevent, one layer further out. **Found by driving the app**: a
    Shift+click at one point opened the view and a plain click at the same point did not. **Fix:** the walk stops at
    the first list the picture sits in, and that list alone decides. D11.
+7. **The scroll slid the value past and snapped back, so it never read as a whole (reported by the reader,
+   2026-09-26).** One copy of the value was slid from its first character to its last and then returned to the
+   start, so the head left the field before the tail arrived and the turn was a visible jerk. **Fix:** the ring of
+   D13 — the value is drawn twice on one track, a gap apart, and the track slides one whole cycle without trimming
+   either copy.
 
 ## Deliberate omissions (review these first)
 
@@ -167,13 +178,16 @@ None of these could be caught by the test suite, which is why the running app wa
 4. **The scroll is an animation, so it is stopped when the system reports animations off.** The fallback is a
    single truncated line, not a frozen marquee.
 5. **No test covers the scrolling motion itself** — it is a composition animation on a rendered element, and the
-   suite does not render. What is guarded is the markup contract (`MaxLines`, `NoWrap`, the clip), the fact that the
-   card uses the control, and — from this session — the observed behaviour in the app.
+   suite does not render. What is guarded is the markup contract (`MaxLines`, `NoWrap`, the clip, the two copies on
+   their track and the gap between them, and the source of the animation), the fact that the card uses the control,
+   and — from this session — the observed behaviour in the app.
 6. **The gesture rule is asserted as code, not exercised as behaviour, by the suite.** The ancestor walk needs a
    visual tree, so the suite checks that the rule is present (the press handler, `ButtonBase`, `IsItemClickEnabled`,
    `VirtualKeyModifiers.Shift`) and the behaviour was driven in the running app instead — including the case the
    rule exists to protect: a clickable list's plain click, and a non-clickable list's plain click, both landing
    where they should.
-7. **The other wrapping text is inventoried, not converted.** `SCROLLING-TEXT-CANDIDATES.md` in the repository root
-   lists 51 data-bound elements that can reach a second row (plus the possible and not-candidate sets) with file,
-   line and automation name, for a decision on what else should scroll.
+7. **The other wrapping text is inventoried, and group 1 of it is now converted (D14).** `SCROLLING-TEXT-CANDIDATES.md`
+   in the repository root lists 51 data-bound elements that could reach a second row (plus a "possible" and a
+   "not-candidate" set) with file, line and automation name. 49 of the 51 are drawn by the control now; the two
+   the list flagged "review first" — the waitlist detail page's two values — are left wrapping, because the field
+   model documents a declared `text` field as prose that wraps (FR-013). The "possible" set is untouched.

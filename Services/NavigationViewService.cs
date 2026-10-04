@@ -73,7 +73,7 @@ public class NavigationViewService : INavigationViewService
 
             if (args.IsSettingsInvoked)
             {
-                StartupDebugLog.Info("NavigationViewService", "Settings item invoked.");
+                AppLog.Info("NavigationViewService", "Settings item invoked.");
                 pageKey = typeof(SettingsViewModel).FullName!;
             }
             else
@@ -81,14 +81,14 @@ public class NavigationViewService : INavigationViewService
                 var selectedItem = args.InvokedItemContainer as NavigationViewItem;
                 if (selectedItem?.GetValue(NavigationHelper.NavigateToProperty) is not string resolvedPageKey || string.IsNullOrWhiteSpace(resolvedPageKey))
                 {
-                    StartupDebugLog.Info("NavigationViewService", "Item invoked without a valid navigation key.");
+                    AppLog.Info("NavigationViewService", "Item invoked without a valid navigation key.");
                     return;
                 }
 
                 pageKey = resolvedPageKey;
             }
 
-            StartupDebugLog.Info("NavigationViewService", $"Navigation requested. PageKey='{pageKey}'.");
+            AppLog.Info("NavigationViewService", $"Navigation requested. PageKey='{pageKey}'.");
 
             if (!await CanLeaveSetupAsync(sender, pageKey).ConfigureAwait(true))
             {
@@ -100,7 +100,7 @@ public class NavigationViewService : INavigationViewService
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("NavigationViewService", ex, "NavigationView item invocation failed.");
+            AppLog.Error("NavigationViewService", ex, "NavigationView item invocation failed.");
         }
     }
 

@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <!--
@@ -259,40 +260,42 @@
                             Content="{x:Bind DisplayName}"
                             ToolTipService.ToolTip="{x:Bind DisplayName}" />
 
-                        <!-- Fact 2: the sign-in name. -->
-                        <TextBlock
+                        <!-- Fact 2: the sign-in name. Drawn by the one-line scrolling control (009 B1/B2) rather
+                             than cut off with an ellipsis, so the value can be read in full; the tooltip still
+                             holds it in one piece. -->
+                        <sharedControls:AutoScrollTextView
                             Grid.Column="1"
                             VerticalAlignment="Center"
                             Text="{x:Bind UsernameNormalized}"
-                            TextTrimming="CharacterEllipsis"
-                            TextWrapping="NoWrap"
                             ToolTipService.ToolTip="{x:Bind UsernameNormalized}" />
 
                         <!-- Fact 3: the employee number. -->
-                        <TextBlock
+                        <sharedControls:AutoScrollTextView
                             Grid.Column="2"
                             VerticalAlignment="Center"
                             Text="{x:Bind EmployeeIdentifier}"
-                            TextTrimming="CharacterEllipsis"
-                            TextWrapping="NoWrap"
                             ToolTipService.ToolTip="{x:Bind EmployeeIdentifier}" />
 
                         <!-- Fact 4: the role, carried by the glyph and colour the one badge lookup holds for it. -->
-                        <StackPanel
+                        <Grid
                             Grid.Column="3"
-                            VerticalAlignment="Center"
-                            Orientation="Horizontal"
-                            Spacing="6">
+                            VerticalAlignment="Center">
                             <FontIcon
+                                HorizontalAlignment="Left"
                                 FontSize="14"
                                 Foreground="{x:Bind RoleColorHex, Converter={StaticResource HexColorToBrushConverter}}"
                                 Glyph="{x:Bind RoleGlyph}" />
-                            <TextBlock
+                            <!-- The role is drawn by the one-line scrolling control (009 B1/B2). This was a
+                                horizontal StackPanel, which measures its children with unlimited width: the line
+                                could not be trimmed there and a long role simply ran past its column. One cell
+                                with the glyph at its left and the line indented clear of it gives the line a
+                                bounded width, so it scrolls instead of overflowing. The cell carries no column
+                                definitions of its own, so the table still declares exactly the five facts. -->
+                            <sharedControls:AutoScrollTextView
+                                Margin="22,0,0,0"
                                 Text="{x:Bind RoleText}"
-                                TextTrimming="CharacterEllipsis"
-                                TextWrapping="NoWrap"
                                 ToolTipService.ToolTip="{x:Bind RoleText}" />
-                        </StackPanel>
+                        </Grid>
 
                         <!--
                             Fact 5: whether the account is active, as a pill that states the condition either

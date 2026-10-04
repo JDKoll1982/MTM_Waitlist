@@ -12,15 +12,19 @@ namespace MTM_Waitlist.Module_Core.Services;
 /// <para>
 /// The application ships configured for the shared plant host. A workstation that is off the plant network
 /// cannot reach it, and then every read fails with a connect timeout even though the same databases are
-/// present locally. The rule is: use the configured server when it answers; otherwise use the local server
-/// when <i>that</i> answers; otherwise leave the connection string alone, so the caller's own failure path
-/// reports the outage rather than this helper inventing an outcome.
+/// present locally. The rule is, in the order the two hosts are tried: use the configured server when it
+/// answers; otherwise use the local server when <i>that</i> answers; otherwise leave the connection string
+/// alone, so the caller's own failure path reports the outage rather than this helper inventing an outcome.
 /// </para>
 /// <para>
 /// The check is a TCP connect rather than a login — it answers "is something listening?" in about a second,
-/// against the fifteen a failed MySQL login costs — and the verdict is cached for a short window so a burst
-/// of operations in the same startup does not repeat the probe. Nothing is cached beyond that window, so a
-/// workstation that rejoins the plant network starts using the configured server again on its own.
+/// against the fifteen a failed MySQL login costs — and a decision <i>that a host answered</i> is cached for a
+/// short window so a burst of operations in the same startup does not repeat the probe. A decision where
+/// <b>nothing</b> answered is deliberately not cached: that is an outage rather than a verdict, and remembering
+/// one would keep every later operation pointed at a host that was silent a moment ago. Not remembering it is
+/// what makes a surface's own retry work — the local server a person switches on after the stop is picked up by
+/// the very next attempt instead of waiting for the window to lapse. A workstation that rejoins the plant
+/// network returns to the configured server on its own for the same reason.
 /// </para>
 /// </remarks>
 public static class MySqlHostFallback
@@ -53,9 +57,17 @@ public static class MySqlHostFallback
             return verdict.Resolved;
         }
 
-        var resolved = Apply(connectionString, IsReachable);
-        s_verdicts[connectionString] = (resolved ?? connectionString, now);
-        return resolved;
+        var decision = Decide(connectionString, IsReachable);
+
+        // Only a decision that a host answered is remembered. An outage is not a verdict (see the type's
+        // remarks): remembering one would leave the next attempt — including a surface's retry, after the
+        // person has switched the local server on — pointed at the host that did not answer.
+        if (ShouldRemember(decision))
+        {
+            s_verdicts[connectionString] = (decision.Resolved ?? connectionString, now);
+        }
+
+        return decision.Resolved;
     }
 
     /// <summary>
@@ -65,10 +77,30 @@ public static class MySqlHostFallback
     /// <param name="connectionString">The connection string to consider.</param>
     /// <param name="isReachable">Reports whether a server is listening on the given host and port.</param>
     internal static string? Apply(string? connectionString, Func<string, uint, bool> isReachable)
+        => Decide(connectionString, isReachable).Resolved;
+
+    /// <summary>
+    /// Whether a decision is worth remembering, which is exactly when a host answered it.
+    /// </summary>
+    /// <param name="decision">The decision to judge.</param>
+    /// <returns>
+    /// <c>true</c> when the configured host or this machine answered; <c>false</c> when neither did, because a
+    /// decision describing an outage has to be made again by the next attempt.
+    /// </returns>
+    internal static bool ShouldRemember(HostDecision decision) => decision.AnyHostAnswered;
+
+    /// <summary>
+    /// Works out which host to use, in the order the rule states: the configured host first, then this machine,
+    /// and then no substitution at all.
+    /// </summary>
+    /// <param name="connectionString">The connection string to consider.</param>
+    /// <param name="isReachable">Reports whether a server is listening on the given host and port.</param>
+    /// <returns>The connection string to use, and whether any host answered.</returns>
+    internal static HostDecision Decide(string? connectionString, Func<string, uint, bool> isReachable)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            return connectionString;
+            return new HostDecision(connectionString, AnyHostAnswered: false);
         }
 
         MySqlConnectionStringBuilder builder;
@@ -79,7 +111,7 @@ public static class MySqlHostFallback
         catch (ArgumentException)
         {
             // A malformed connection string is the caller's to report, exactly as before this helper existed.
-            return connectionString;
+            return new HostDecision(connectionString, AnyHostAnswered: false);
         }
 
         var configuredHost = builder.Server;
@@ -89,18 +121,38 @@ public static class MySqlHostFallback
             || configuredHost.Contains('/', StringComparison.Ordinal))
         {
             // Nothing to substitute: the string already targets this machine, or it targets a pipe/socket
-            // path that "localhost" could not replace.
-            return connectionString;
+            // path that "localhost" could not replace. Nothing is probed, so nothing is remembered either.
+            return new HostDecision(connectionString, AnyHostAnswered: false);
         }
 
-        if (isReachable(configuredHost, builder.Port) || !isReachable(LocalHostName, builder.Port))
+        if (isReachable(configuredHost, builder.Port))
         {
-            return connectionString;
+            // The configured host answered, which is the first host the rule tries and the answer while it
+            // works.
+            return new HostDecision(connectionString, AnyHostAnswered: true);
+        }
+
+        if (!isReachable(LocalHostName, builder.Port))
+        {
+            // Neither host answered, so the string is left alone and the caller's own failure path reports the
+            // outage against the host the application is configured for. Nothing is remembered: the next
+            // attempt checks again rather than inheriting this outage.
+            return new HostDecision(connectionString, AnyHostAnswered: false);
         }
 
         builder.Server = LocalHostName;
-        return builder.ConnectionString;
+        return new HostDecision(builder.ConnectionString, AnyHostAnswered: true);
     }
+
+    /// <summary>
+    /// A host decision: the connection string to use, and whether any host answered the reachability check.
+    /// </summary>
+    /// <param name="Resolved">The connection string to use.</param>
+    /// <param name="AnyHostAnswered">
+    /// Whether the configured host or this machine answered. <c>false</c> describes an outage rather than a
+    /// host, and a decision like that is never remembered.
+    /// </param>
+    internal readonly record struct HostDecision(string? Resolved, bool AnyHostAnswered);
 
     private static bool IsLocalHostName(string host)
     {

@@ -9,8 +9,7 @@ task line in that checklist. Nothing here is implemented yet; the removal checkl
 
 The entire startup surface is deleted and rebuilt from scratch: the `MTM_Waitlist.Startup` project, the
 `Module_Startup` views, the launch orchestration in `App.xaml.cs`, the activation surface, the startup
-contracts, models and options in `MTM_Waitlist.Core`, startup logging, the startup tests, the
-`capabilities/startup` living spec and its registry entry, and the docs that describe the old splash.
+contracts, models and options in `MTM_Waitlist.Core`, startup logging, the startup tests.
 
 The old logic is replaced first by a **placeholder window** so the removal is provable: if the app can no
 longer reach the shell, the old logic is gone. Only then is the new module built.
@@ -26,7 +25,7 @@ longer reach the shell, the old logic is gone. Only then is the new module built
 | 5 | Steps become data with a derived count, and the splash shows **everything the process is doing**. |
 | 6 | Errors surface as a **toast anchored to the bottom of the splash window**. |
 | 7 | The session moves into the store. **Only connection strings may remain local, plus one reviewed exception: `MockServiceClient` (S11.5.4).** |
-| 8 | The logging destination stays a **hard gate**, satisfied by a new **machine configuration** step. |
+| 8 | Machine configuration stays a **hard gate**, satisfied by a new machine-setup step. **Amended 2026-09-25: there is no logging destination to configure, because records live only in the store (S10).** |
 | 9 | Machine configuration is reachable **before any operator sign-in**, unlocked by an IT Department or Developer sign-in. **It cannot be bypassed: the only outcomes are a configured machine that continues, or the process ending (S10.1).** |
 | 10 | All logging goes to the **database**; logging becomes its own module with a **developer log panel**. |
 | 11 | One blocked-state surface; **Restore Defaults states exactly what it will reset and resets only what is broken**. |
@@ -39,6 +38,10 @@ longer reach the shell, the old logic is gone. Only then is the new module built
 | 18 | The encryption key is read from a pre-existing shared key file, addressed by its UNC path (S8.3). |
 | 19 | The session lives in a new **`user_active_sessions`** table. |
 | 20 | Every deployed table, procedure, function and view is audited for dead weight; dead SQL files are deleted. |
+| 21 | How long a session lasts is a setting, changeable from the settings panel by IT Department or Developer only. |
+| 22 | Every setting that is role-restricted today keeps the same restriction after the rebuild. |
+| 23 | Machine configuration carries no destination for records, because records live only in the store. |
+| 24 | The development seed grants `Developer` to `JKoll` and `JohnK`, so each of the two seeded machines has a developer who can sign in. |
 
 ## S3. What is being removed
 
@@ -55,18 +58,16 @@ longer reach the shell, the old logic is gone. Only then is the new module built
   `SignOutResult`, `IAppProcessRestarter`, `IStartupWindowService`, `IStartupShellStateService`,
   `IStartupLogService`, `IStartupLogForwarder`, and the four `Startup*Options` models.
 - `Services/AppLifecycleService.cs` and the `IAppLifecycleService` seam it implements.
-- `StartupDebugLog` — see S9 for its 491 call sites.
+- `StartupDebugLog` — see S9 for its 489 call sites.
 - All startup tests, including `SplashViewModelTests`, `LoginViewModelTests`, `StartupCoordinatorTests`,
   `StartupLogServiceTests`, `StartupRecoveryServiceTests`, `ComputerGateServiceTests`,
   `ComputerRegistryServiceTests`, `TemporaryCredentialLimitTests`, `StartupArchiveCleanupTests`,
   `SignOutServiceTests`, `StartupModelsTests`, `StartupOptionsModelsTests`, `StartupDebugLogTests`, and
   `NoOpAppLifecycleService`.
-- `capabilities/startup/**`, the `startup` entry in `living-specs.yml`, and the `startup` row in
-  `capabilities/DRIFT.md`.
 - `STARTUP-FLOW.md`, `STARTUP-FLOW.html`, `STARTUP-FLOW.pdf`; the splash/sign-in steps in
   `.github/instructions/winui3-ui-automation.instructions.md`; the startup mentions in
   `.github/instructions/test-conventions.instructions.md`; the module list in `README.md`.
-- The eight `Shell_SignOut.*` / `Startup_SignIn.*` resource keys and the fourteen `Startup_*` tooltip keys
+- The eight `Shell_SignOut.*` / `Startup_SignIn.*` resource keys and the fifteen `Startup_*` tooltip keys
   (in **both** `TooltipResources.resw` and `TooltipResources.developer.resw`).
 
 ### S3.2 Shared artifacts that must survive untouched
@@ -78,8 +79,9 @@ longer reach the shell, the old logic is gone. Only then is the new module built
 **Seeds and aggregates**: `seed_dev_masked_baseline`, `seed_username_upper_normalization`,
 `seed_role_admin_to_it_department`, `AllSeeds.sql`, `update_table_descriptions.sql`, `AllTables.sql`,
 `AllSPs.sql`, `AllFunct.sql`.
-**Core services**: `MySqlHostFallback`, `ILocalSettingsService`, `IFileService`, `MySqlHelperServer`,
-`fn_server_utc_now`.
+**Core services**: `MySqlHostFallback`, `MySqlHelperServer`, `fn_server_utc_now`.
+`ILocalSettingsService` and `IFileService` stood in this list in the original audit and are **not** protected:
+the local-state removal deletes both with the mechanism they serve (see S11.5.1 and their own rows below).
 
 ### S3.3 Startup-only database artifacts (removable in isolation)
 `sp_server_utc_now_get`, `sp_auth_credentials_check`, `sp_auth_user_password_update`,
@@ -139,7 +141,8 @@ body; it is rewritten against the new contracts.
   token stored as a **salted hash**, an expiry, an issued time, and the machine key.
 - Session validity is judged on the **store's clock** (`fn_server_utc_now`), never the workstation's.
 - The app writes the row when sign-in completes (only after the machine gate passes) and clears it on sign-out.
-- The eight-hour lifetime is retained unless the user says otherwise.
+- The eight-hour lifetime is the default, not a fixed value: it is changeable from the settings panel by
+  IT Department or Developer only (S2 row 21).
 
 ### S8.2 Remember-me
 - Stored in the store against the person, never in a local file.
@@ -240,8 +243,10 @@ in Phase 2.
   sign-in**.
 - It is unlocked by an **IT Department or Developer** sign-in, which authorises configuration only and does
   not open the shell.
-- It captures what the old local settings held and the destination needs: the machine's display name and
-  description, the shared picture sources, and the logging destination.
+- It captures the machine's display name and description and the shared picture sources. **There is no record
+  destination to capture**, because records live only in the store (S2 row 23). The old prompt for a log folder
+  therefore disappears for a second reason: not just because logging moved, but because a folder was never the
+  destination in the first place.
 - The privilege surface must be updated in the same change: new permission keys in the permission catalogue,
   the Settings privileges page, the role baselines, and the seeds. The user expects the Settings page to
   break without this work.
@@ -309,7 +314,7 @@ connection strings may remain local, so everything below is in scope.
 
 **No new storage is needed for these seven.** The scoped settings store already exists: `config_settings_values`
 with `fn_config_settings_scope_rank`, reached through `IConfigSettingsValueService` and
-`sp_config_settings_values_get` / `sp_config_settings_values_upsert`. `PictureEnlargePreference` already uses it
+`sp_config_settings_values_get` for reads and `sp_config_settings_upsert` for writes. `PictureEnlargePreference` already uses it
 and is the pattern to copy. The work is one substitution per item, plus a stored-procedure call at runtime
 rather than a file read.
 
@@ -430,6 +435,76 @@ session precedence, local-file repair, and Restore-Defaults-offers (now always o
 
 Cases that are **new** under these decisions: every abort route out of machine configuration ends the process
 (S10.1), and the pipeline — not the screen — refuses to continue without configuration.
+
+### S13.1 The walkable catalogue
+
+**Added 2026-09-27 (task T159).** The section above is the sweep's summary and stays as the record of how the
+cases were found. This is the list a reader walks, and `spec.md`'s Edge Cases section holds the same twenty-three
+cases in the same order. Each carries the group it came from and its disposition.
+
+**The sweep's original 111-item breakdown is not recovered in this file.** It was produced by three read-only
+sweeps whose output was never committed, so what is enumerated here is the twenty-three cases the specification
+records rather than the eleven-per-group originals. The group counts above remain the summary of what the sweeps
+found; they are not a claim that every one of the 111 is individually listed. That is a gap in this record, and it
+is stated rather than papered over.
+
+| # | Case | Group | Disposition |
+|---|---|---|---|
+| 1 | The store cannot be reached at launch | 2 | Covered: `LaunchEdgeCaseTests.TheStoreCannotBeReachedAtLaunch_StopsWithItsOwnStatementAndOffersNoReset` |
+| 2 | The share holding pictures cannot be reached | 8 | Covered: `PictureCacheStepTests` |
+| 3 | A machine's configuration is deleted while running, so setup returns | 1 | Covered: `LaunchEdgeCaseTests.AConfigurationWithdrawnWhileTheApplicationRuns_ReturnsSetupAtTheNextCheck` |
+| 4 | The machine's display name is already in use | 5 | Covered: `MachineSetupViewModelTests` |
+| 5 | A remembered sign-in that cannot be read falls back to the form | 4 | Covered: `RememberedSignInServiceTests` |
+| 6 | A temporary-credential reset meets a sign-in already under way | 4 | Covered: `LaunchEdgeCaseTests.ATemporaryCredentialResetWhileThePersonSignsIn_TheOldValueMeetsTheReset` |
+| 7 | The launch window is closed while a launch is running | 6 | Covered: `LaunchEdgeCaseTests.TheLaunchWindowIsClosedWhileALaunchIsRunning_LeavesNoStepReadingAsFailed` |
+| 8 | The machine has no readable hardware address | 5 | Covered: `ReadHardwareIdentityStep_RunAsync_WhenTheAddressCouldNotBeRead_ReportsTheWorkLeftUndone` and `MachineGateServiceTests` |
+| 9 | A sign-out whose restart fails | 11 | Covered: `LaunchEdgeCaseTests.ASignOutWhoseRestartFails_EndsTheSessionAndTellsThePersonToOpenTheApplicationAgain` |
+| 10 | Two copies launched on one computer | 6 | Covered: `LaunchPipelineRetryTests.RunAsync_WhenASecondEntryArrivesWhileOneIsRunning_StartsNothing` |
+| 11 | The store answers in seconds rather than milliseconds | 2 | Covered: `LaunchStepRunnerTests.RunAsync_WhenTheStepPassesItsStatedMaximum_ReportsFailedRatherThanWaitingOnIt` and the pipeline's bounded routing read |
+| 12 | The picture copy takes longer than the launch allows | 8 | Covered: `PictureCacheStepTests` |
+| 13 | A person signs out at a shared computer, leaving nothing behind | 11 | Covered: `LaunchSessionServiceTests` |
+| 14 | Somebody without the two roles tries to change the session length | 7 | Covered: `SettingsViewModelTests` |
+| 15 | The launch window's saved size cannot be applied | 6 | **Read-verified only.** The window still opens and the launch carries on; a sizing failure is not a launch failure. Nothing in the suite constructs a `WindowEx`, so this case is asserted by reading the window's code-behind rather than by a run |
+| 16 | An account still holding the legacy temporary value signs in | 4 | Covered: `LaunchEdgeCaseTests.AnAccountStillHoldingTheLegacyTemporaryValue_SignsInAndIsAskedToReplaceIt` |
+| 17 | A credential reset issued while the person is signed in elsewhere | 4 | Covered: `LaunchEdgeCaseTests.ACredentialResetIssuedElsewhere_EndsNoSessionAlreadyRunning` |
+| 18 | A fault carries more detail than the store's ceiling | 9 | Covered: `ExceptionCaptureTests.Serialize_WhenTheChainIsLongerThanTheNodeCeiling_IsTruncatedWithItsMarker` |
+| 19 | A fault happens while the application is already recording one | 9 | Covered: `ExceptionCaptureTests.FlushAsync_WhenTheStoreRefusesEveryWrite_AbsorbsItAndRaisesNoSecondDiagnostic` |
+| 20 | An aggregate fault holds several independent failures | 9 | Covered: `ExceptionCaptureTests.Serialize_WhenTheFaultIsAnAggregate_ContributesEveryIndependentFailure` |
+| 21 | A fault's message contains a credential, a token or a parameter value | 9 | Covered: `ExceptionFingerprintTests.RedactMessage_WhenAParameterCarriesAValue_CutsAtTheEqualsAndNamesTheParameter` and `DiagnosticContextTests.Build_WhenAStructuredPropertyNamesASecret_DropsTheValue` |
+| 22 | The store refuses the write | 9 | Covered: `DiagnosticContextTests` and `ExceptionCaptureTests` |
+| 23 | The clipboard refuses a copy | 9 | Covered: `LogExportFormatterTests` |
+
+### S13.2 Cases that no longer apply
+
+**Added 2026-09-27 (task T167).** Five cases the sweeps found stopped applying, and each is recorded here rather
+than left untested and unexplained:
+
+| Case the sweeps found | Why it no longer applies |
+|---|---|
+| The developer allow-list override admits a named person as a developer | Roles come from the store only (FR-022, D16). The `appsettings.json` allow-list is retired, so there is no local override to test. A person needing developer access needs it in the store, and the development seed grants it to `JKoll` and `JohnK` |
+| The prompt that offers to open the log folder | Logging is written to the store now, and the file-based path is deleted (T133). There is no log folder to offer |
+| A locally saved session takes precedence over the store's | A session lives in `user_active_sessions` and is judged on the store's clock (FR-010). Nothing local holds one, so precedence between two sources cannot arise |
+| A local settings file that cannot be read is repaired | The local settings mechanism is deleted (FR-025, US6). There is no local file to repair, and its tests were deleted with it rather than migrated |
+| Restore Defaults is offered on every stop | It is offered only where a reset could remove the cause (FR-017). A store outage offers no reset, so the old always-offered behaviour is gone, and `BlockedStateRemediesTests` proves the replacement |
+
+Two cases are **new** rather than changed, and both are covered: every abort route out of machine configuration
+ends the process (`LaunchEdgeCaseTests`, `MachineSetupNoBypassTests`), and the pipeline rather than the screen
+refuses to continue without configuration (`LaunchPipelineRetryTests.RunAsync_WhenTheMachineIsUnconfigured_EndsAtMachineSetup`).
+
+### S13.3 Cases whose branch depends on the host
+
+Eight further cases the sweeps found turn on a property of the machine the suite runs on rather than on anything
+the code decides: this host's own hardware address, and the store's live rows. They are not dropped, and they are
+not silent: each stands down with a stated message while its precondition is absent, and the run reports them as
+skipped rather than passed. Where a case could be made deterministic without changing production code it was, and
+the two hardware-identity cases now state the machine they are about (`PreSignInStepsTests`).
+
+What remains host-dependent is `MachineFactsService`'s own read of the running machine — four cases in
+`MachineFactsServiceTests` and three in `PreSignInStepsTests` that construct it — plus the opt-in live-store
+integration cases across `Module_Settings`, `Module_Setup` and `Module_Mock_Service`. Those read the machine or a
+database the suite does not have, and driving them would mean either a second implementation of the read or a
+fixture the repository does not keep.
+
 
 ## S14. Constraints and non-goals
 

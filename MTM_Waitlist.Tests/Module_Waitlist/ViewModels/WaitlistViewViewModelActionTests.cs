@@ -9,6 +9,7 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
+using MTM_Waitlist.Tests.Fixtures;
 using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
@@ -708,14 +709,14 @@ public sealed class WaitlistViewViewModelActionTests
         requestService,
         imageLocationService: null,
         dispatcherQueue: null,
-        startupState: new StartupState
+        personIdentity: new FakePersonIdentity
         {
             EmployeeNumber = employeeNumber,
-            EmployeeName = "Morgan Reyes",
+            DisplayName = "Morgan Reyes",
 
             // Presentation only: nothing in the screen compares this any more. The permission service below is
             // what decides, which is what FR-054 requires and what this parameter now stands for.
-            CurrentRole = role,
+            CurrentRoleCode = role,
         },
         storeAvailabilityTracker: null,
         actionPrompt: prompt ?? new NoOpWaitlistRequestActionPrompt(),

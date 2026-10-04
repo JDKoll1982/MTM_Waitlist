@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Reflection;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -54,6 +53,9 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     private static readonly string[] s_permissionKeys =
     [
         PermissionKeys.SettingsIgnoredLocations,
+        PermissionKeys.SettingsIgnoredLocationsEdit,
+        PermissionKeys.SettingsSessionLength,
+        PermissionKeys.SettingsLogPanel,
         PermissionKeys.SettingsHotWorkCenters,
         PermissionKeys.SettingsPartPictures,
         PermissionKeys.SettingsStoragePaths,
@@ -80,6 +82,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         nameof(IsHotWorkCentersPanelVisible),
         nameof(IsDunnageTypeVisibilityPanelVisible),
         nameof(IsIgnoredLocationsPanelVisible),
+        nameof(IsSessionLengthPanelVisible),
+        nameof(IsDeveloperLogPanelVisible),
         nameof(IsCacheRefreshPanelVisible),
         nameof(IsAboutPanelVisible),
         nameof(IsComputersPanelVisible),
@@ -94,13 +98,14 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     ];
 
     private readonly IThemeSelectorService _themeSelectorService;
-    private readonly ILocalSettingsService _localSettingsService;
+    private readonly IIgnoredLocationsService _ignoredLocationsService;
+    private readonly IScopedPreferenceStore _preferences;
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IDunnageTypeVisibilityCatalogService _dunnageTypeVisibilityCatalogService;
     private readonly INewRequestAlertService _newRequestAlertService;
     private readonly IPermissionService _permissionService;
     private readonly INavigationService _navigationService;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
     private readonly IMockServiceRefreshClient _mockServiceRefreshClient;
     private readonly IImageStorageConfigurationResolver? _imageStorageConfigurationResolver;
     private readonly IConfigSettingsValueService? _configSettingsValueService;
@@ -284,6 +289,16 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     } = string.Empty;
 
     /// <summary>
+    /// What the dunnage root box holds, which is the root the dunnage pictures are read from for every computer
+    /// (FR-040).
+    /// </summary>
+    [ObservableProperty]
+    public partial string DunnageRootInput
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>
     /// How many days a replaced picture is kept before it is cleaned up (FR-037).
     /// </summary>
     /// <remarks>
@@ -309,22 +324,6 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         get; set;
     }
-
-    /// <summary>
-    /// One line naming this computer's own configured picture folder when that is not the folder every computer
-    /// reads, and empty when the two agree.
-    /// </summary>
-    /// <remarks>
-    /// The store is the truth (OQ-3, settled by this feature): a computer whose settings file still carries the old
-    /// path must be told so in one sentence rather than left to wonder why a picture is not where it expected
-    /// (FR-010). Reporting it beats silently following the file, which is what would make two computers disagree
-    /// about where one recorded picture lives.
-    /// </remarks>
-    [ObservableProperty]
-    public partial string StoragePathsDisagreementMessage
-    {
-        get; set;
-    } = string.Empty;
 
     public ObservableCollection<ComputerOption> AvailableWorkstations { get; } = new();
 
@@ -393,12 +392,68 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     public bool CanManageDunnageTypeVisibility => CanManageHotWorkCenters;
 
-    /// <summary>Whether the signed-in person may change the ignored locations.</summary>
+    /// <summary>
+    /// Whether the signed-in person may see the locations to hide. This is
+    /// <c>permission.settings.ignored_locations</c>, whose grants are deliberately unchanged (research D10).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanReadIgnoredLocations
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// Whether the signed-in person may change the locations to hide. This is the separate
+    /// <c>permission.settings.ignored_locations_edit</c> key, which is the deliberate narrowing: FR-024 admits
+    /// two roles to the write while FR-030 keeps the existing read restriction exactly as it was.
+    /// </summary>
     [ObservableProperty]
     public partial bool CanManageIgnoredLocations
     {
         get; set;
     }
+
+    /// <summary>
+    /// Whether the signed-in person may change how long a session lasts, from
+    /// <c>permission.settings.session_length</c> (FR-029). The panel refuses the write on the same answer, so the
+    /// gate is enforced where the change happens rather than only where the control is drawn.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanManageSessionLength
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// Whether the signed-in person may open the developer log panel, from <c>permission.settings.log_panel</c>.
+    /// This only keeps the panel out of the tree; the panel's own view model is what enforces the read and the
+    /// copy (US5).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanOpenDeveloperLogPanel
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// How long a sign-in lasts, in minutes, for the whole plant.
+    /// </summary>
+    /// <remarks>
+    /// Held as a double because the control that edits it is a number box, and because a value typed into one
+    /// arrives as a fractional number. It is rounded and clamped before it is stored.
+    /// </remarks>
+    [ObservableProperty]
+    public partial double SessionLengthMinutes
+    {
+        get; set;
+    } = ScopedPreferenceKeys.DefaultSessionLengthMinutes;
+
+    /// <summary>What the session-length panel has to say: a refusal, a confirmation, or a fault.</summary>
+    [ObservableProperty]
+    public partial string SessionLengthStatusMessage
+    {
+        get; set;
+    } = string.Empty;
 
     /// <summary>
     /// Whether this operator may ask the on-host service to rebuild the cache now (T160).
@@ -583,13 +638,57 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         string.Join(" ", VisibleDunnageTypes.Select(item => item.Name)),
         string.Join(" ", HiddenDunnageTypes.Select(item => item.Name)));
 
-    public bool IsIgnoredLocationsPanelVisible => MatchesSearch(
+    /// <summary>
+    /// The locations-to-hide panel. Reading it is open to a person holding
+    /// <c>permission.settings.ignored_locations</c>, whose grants are unchanged (SC-012); whether the controls
+    /// inside it accept a change is a separate answer, from the edit key.
+    /// </summary>
+    public bool IsIgnoredLocationsPanelVisible => CanReadIgnoredLocations && MatchesSearch(
         "ignored",
         "inventory location",
         "location",
         "infor visual",
         "quantity in house",
         string.Join(" ", IgnoredLocations));
+
+    /// <summary>
+    /// The session-length panel. Offered only to a person who may change the length, and the write itself is
+    /// refused on the same answer (FR-029).
+    /// </summary>
+    public bool IsSessionLengthPanelVisible => CanManageSessionLength && MatchesSearch(
+        "session",
+        "session length",
+        "sign in",
+        "timeout",
+        "sign out",
+        "how long");
+
+    /// <summary>
+    /// The developer log panel. Kept out of the tree for a person who may not open it, and the panel's own view
+    /// model refuses the read and the copy on the same key (US5, SC-005).
+    /// </summary>
+    public bool IsDeveloperLogPanelVisible => CanOpenDeveloperLogPanel && MatchesSearch(
+        "log",
+        "logs",
+        "diagnostics",
+        "fault",
+        "error",
+        "exception");
+
+    /// <summary>What the session-length box is for, in the reader's language.</summary>
+    public string SessionLengthTitle => "Settings_SessionLength_Title.Text".GetLocalized();
+
+    /// <summary>What changing the length does, and when it takes effect.</summary>
+    public string SessionLengthDescription => "Settings_SessionLength_Description.Text".GetLocalized();
+
+    /// <summary>The label on the minutes box.</summary>
+    public string SessionLengthLabel => "Settings_SessionLength_Label.Text".GetLocalized();
+
+    /// <summary>The panel's save action.</summary>
+    public string SessionLengthSaveLabel => "Settings_SessionLength_Save.Text".GetLocalized();
+
+    /// <summary>The developer log panel's heading, shown only to a person who may open it.</summary>
+    public string DeveloperLogPanelTitle => "Settings_LogPanel_Title.Text".GetLocalized();
 
     public bool IsAboutPanelVisible => MatchesSearch("about", "version", "privacy", VersionDescription, "mtm waitlist");
 
@@ -624,6 +723,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// <summary>The label on the key-folder box.</summary>
     public string StoragePathsKeysFolderLabel => "Settings_StoragePaths_KeysFolder.Label".GetLocalized();
 
+    public string StoragePathsDunnageRootLabel => "Settings_StoragePaths_DunnageRoot.Label".GetLocalized();
+
     /// <summary>The label on the retention-period box.</summary>
     public string StoragePathsArchiveKeepDaysLabel => "Settings_StoragePaths_ArchiveKeepDays.Label".GetLocalized();
 
@@ -632,19 +733,6 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     /// <summary>The line saying that what is shown is what every computer reads.</summary>
     public string StoragePathsStoreIsTruthText => "Settings_StoragePaths_StoreIsTruth.Text".GetLocalized();
-
-    /// <summary>
-    /// Whether the disagreement line has anything to say.
-    /// </summary>
-    /// <remarks>
-    /// Collapsed rather than empty, so a machine that agrees with the store is not shown a blank line that reads
-    /// as a message that failed to load.
-    /// </remarks>
-    public Visibility StoragePathsDisagreementVisibility =>
-        string.IsNullOrEmpty(StoragePathsDisagreementMessage) ? Visibility.Collapsed : Visibility.Visible;
-
-    partial void OnStoragePathsDisagreementMessageChanged(string value) =>
-        OnPropertyChanged(nameof(StoragePathsDisagreementVisibility));
 
     /// <summary>
     /// The panel holding the two storage folders and the period a replaced picture is kept (FR-016, FR-037).
@@ -698,7 +786,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "display name",
         string.Join(" ", ComputerManagement.Computers.Select(record => record.GetDisplayLabel())));
 
-    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsPictureCachePanelVisible || IsPartPicturesEntryVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
+    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsPictureCachePanelVisible || IsPartPicturesEntryVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsSessionLengthPanelVisible || IsDeveloperLogPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
@@ -712,13 +800,14 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     public SettingsViewModel(
         IThemeSelectorService themeSelectorService,
-        ILocalSettingsService localSettingsService,
+        IIgnoredLocationsService ignoredLocationsService,
+        IScopedPreferenceStore preferences,
         IWorkCenterCatalogService workCenterCatalogService,
         IDunnageTypeVisibilityCatalogService dunnageTypeVisibilityCatalogService,
         INewRequestAlertService newRequestAlertService,
         IPermissionService permissionService,
         INavigationService navigationService,
-        StartupState startupState,
+        IPersonIdentity personIdentity,
         ComputerManagementViewModel computerManagement,
         UrgencyAllotmentEditorViewModel urgencyAllotments,
         IMockServiceRefreshClient mockServiceRefreshClient,
@@ -727,15 +816,16 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         IImageCacheSyncService? imageCacheSyncService = null,
         IPictureEnlargePreference? pictureEnlargePreference = null)
     {
-        StartupDebugLog.Info("SettingsViewModel", "Constructor started.");
+        AppLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
-        _localSettingsService = localSettingsService;
+        _ignoredLocationsService = ignoredLocationsService;
+        _preferences = preferences;
         _workCenterCatalogService = workCenterCatalogService;
         _dunnageTypeVisibilityCatalogService = dunnageTypeVisibilityCatalogService;
         _newRequestAlertService = newRequestAlertService;
         _permissionService = permissionService;
         _navigationService = navigationService;
-        _startupState = startupState;
+        _personIdentity = personIdentity;
         _mockServiceRefreshClient = mockServiceRefreshClient;
 
         // Optional so that a host without a picture cache still opens this screen: with none registered the
@@ -762,7 +852,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _enlargePicturesInitializing = false;
 
         _ = UrgencyAllotments.LoadAsync();
-        InitializeIgnoredLocations();
+        _ = InitializeIgnoredLocationsAsync();
+        _ = InitializeSessionLengthAsync();
         _ = InitializeStoragePathsAsync();
         _ = InitializePictureCacheAsync();
 
@@ -779,7 +870,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _ = InitializeHotWorkCentersAsync();
         _ = InitializeDunnageTypeVisibilityAsync();
         RefreshSearchVisibility();
-        StartupDebugLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}'.");
+        AppLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}'.");
     }
 
     /// <summary>
@@ -833,7 +924,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 .HasPermissionsAsync(s_permissionKeys, cancellationToken)
                 .ConfigureAwait(true);
 
-            CanManageIgnoredLocations = answers[PermissionKeys.SettingsIgnoredLocations];
+            CanReadIgnoredLocations = answers[PermissionKeys.SettingsIgnoredLocations];
+            CanManageIgnoredLocations = answers[PermissionKeys.SettingsIgnoredLocationsEdit];
+            CanManageSessionLength = answers[PermissionKeys.SettingsSessionLength];
+            CanOpenDeveloperLogPanel = answers[PermissionKeys.SettingsLogPanel];
             CanManageHotWorkCenters = answers[PermissionKeys.SettingsHotWorkCenters];
             CanManageImageLocationSettings = answers[PermissionKeys.SettingsPartPictures];
             CanManageStoragePaths = answers[PermissionKeys.SettingsStoragePaths];
@@ -848,7 +942,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SettingsPermissions",
                 ex,
                 "The Settings screen's permission answers could not be read; every gated control stays hidden rather than being offered on a guess.");
@@ -862,7 +956,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     // whenever the ElementTheme property is modified, updating our custom XAML text field.
     partial void OnElementThemeChanged(ElementTheme value)
     {
-        StartupDebugLog.Info("SettingsViewModel", $"Theme changed to '{value}'.");
+        AppLog.Info("SettingsViewModel", $"Theme changed to '{value}'.");
         OnPropertyChanged(nameof(SelectedThemeText));
         RefreshSearchVisibility();
     }
@@ -878,18 +972,18 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         {
             // The installation cannot deliver a notification, so there is no preference to record. The
             // toggle is disabled for this reason; this guard keeps that structural rather than cosmetic.
-            StartupDebugLog.Info("SettingsViewModel", "NewRequestAlertsEnabled was asked for on an installation that cannot deliver a notification; nothing was stored.");
+            AppLog.Info("SettingsViewModel", "NewRequestAlertsEnabled was asked for on an installation that cannot deliver a notification; nothing was stored.");
             return;
         }
 
-        StartupDebugLog.Info("SettingsViewModel", $"NewRequestAlertsEnabled changed to {value}.");
+        AppLog.Info("SettingsViewModel", $"NewRequestAlertsEnabled changed to {value}.");
         _ = _newRequestAlertService.SetEnabledAsync(value);
         RefreshSearchVisibility();
     }
 
     partial void OnSearchQueryChanged(string value)
     {
-        StartupDebugLog.Info("SettingsViewModel", $"SearchQuery changed to '{value}'.");
+        AppLog.Info("SettingsViewModel", $"SearchQuery changed to '{value}'.");
         RefreshSearchVisibility();
     }
 
@@ -904,13 +998,13 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        StartupDebugLog.Info("SettingsViewModel", $"EnlargePicturesOnClick changed to {value}.");
+        AppLog.Info("SettingsViewModel", $"EnlargePicturesOnClick changed to {value}.");
         _ = _pictureEnlargePreference?.SetEnabledAsync(value);
     }
 
     partial void OnSelectedWorkstationChanged(string value)
     {
-        StartupDebugLog.Info("SettingsViewModel", $"SelectedWorkstation changed to '{value}'.");
+        AppLog.Info("SettingsViewModel", $"SelectedWorkstation changed to '{value}'.");
         if (string.IsNullOrWhiteSpace(value))
         {
             return;
@@ -933,10 +1027,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
 
         var normalizedWorkCenter = workCenter.Trim();
-        StartupDebugLog.Info("SettingsHotWorkCenters", $"AddHotWorkCenterAsync started. WorkCenter='{normalizedWorkCenter}', Workstation='{SelectedWorkstation}'.");
+        AppLog.Info("SettingsHotWorkCenters", $"AddHotWorkCenterAsync started. WorkCenter='{normalizedWorkCenter}', Workstation='{SelectedWorkstation}'.");
         if (HotWorkCenters.Any(value => string.Equals(value, normalizedWorkCenter, StringComparison.OrdinalIgnoreCase)))
         {
-            StartupDebugLog.Info("SettingsHotWorkCenters", $"AddHotWorkCenterAsync skipped because '{normalizedWorkCenter}' is already pinned.");
+            AppLog.Info("SettingsHotWorkCenters", $"AddHotWorkCenterAsync skipped because '{normalizedWorkCenter}' is already pinned.");
             return;
         }
 
@@ -966,7 +1060,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
 
         var normalizedWorkCenter = workCenter.Trim();
-        StartupDebugLog.Info("SettingsHotWorkCenters", $"RemoveHotWorkCenterAsync started. WorkCenter='{normalizedWorkCenter}', Workstation='{SelectedWorkstation}'.");
+        AppLog.Info("SettingsHotWorkCenters", $"RemoveHotWorkCenterAsync started. WorkCenter='{normalizedWorkCenter}', Workstation='{SelectedWorkstation}'.");
         var updatedHot = HotWorkCenters
             .Where(value => !string.Equals(value, normalizedWorkCenter, StringComparison.OrdinalIgnoreCase))
             .ToArray();
@@ -1004,7 +1098,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        StartupDebugLog.Info("SettingsDunnageVisibility", $"ShowDunnageTypeAsync started. DunnageTypeId='{normalizedId}'.");
+        AppLog.Info("SettingsDunnageVisibility", $"ShowDunnageTypeAsync started. DunnageTypeId='{normalizedId}'.");
 
         var nextHidden = HiddenDunnageTypes.Where(item => !string.Equals(item.Id, normalizedId, StringComparison.OrdinalIgnoreCase)).ToArray();
         var nextVisible = VisibleDunnageTypes.Concat(new[] { selectedOption }).ToArray();
@@ -1036,7 +1130,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        StartupDebugLog.Info("SettingsDunnageVisibility", $"HideDunnageTypeAsync started. DunnageTypeId='{normalizedId}'.");
+        AppLog.Info("SettingsDunnageVisibility", $"HideDunnageTypeAsync started. DunnageTypeId='{normalizedId}'.");
 
         var nextVisible = VisibleDunnageTypes.Where(item => !string.Equals(item.Id, normalizedId, StringComparison.OrdinalIgnoreCase)).ToArray();
         var nextHidden = HiddenDunnageTypes.Concat(new[] { selectedOption }).ToArray();
@@ -1050,7 +1144,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     private async Task InitializeHotWorkCentersAsync()
     {
-        StartupDebugLog.Info("SettingsViewModel", "InitializeHotWorkCentersAsync started.");
+        AppLog.Info("SettingsViewModel", "InitializeHotWorkCentersAsync started.");
         IsHotWorkCentersBusy = true;
         try
         {
@@ -1079,7 +1173,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
             RefreshSearchVisibility();
 
-            StartupDebugLog.Info("SettingsViewModel", $"InitializeHotWorkCentersAsync completed. Workstation='{SelectedWorkstation}', AvailableCount={AvailableWorkstations.Count}.");
+            AppLog.Info("SettingsViewModel", $"InitializeHotWorkCentersAsync completed. Workstation='{SelectedWorkstation}', AvailableCount={AvailableWorkstations.Count}.");
         }
         finally
         {
@@ -1089,7 +1183,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     private async Task LoadCatalogForWorkstationAsync(string workstationName)
     {
-        StartupDebugLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync started. Workstation='{workstationName}'.");
+        AppLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync started. Workstation='{workstationName}'.");
         IsHotWorkCentersBusy = true;
         try
         {
@@ -1098,11 +1192,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             ReplaceCollectionValues(OtherWorkCenters, catalog.OtherWorkCenters);
             HotWorkCentersStatusMessage = string.Empty;
             RefreshSearchVisibility();
-            StartupDebugLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync completed. Workstation='{workstationName}', HotCount={HotWorkCenters.Count}, OtherCount={OtherWorkCenters.Count}.");
+            AppLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync completed. Workstation='{workstationName}', HotCount={HotWorkCenters.Count}, OtherCount={OtherWorkCenters.Count}.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsViewModel", ex, $"LoadCatalogForWorkstationAsync failed. Workstation='{workstationName}'.");
+            AppLog.Error("SettingsViewModel", ex, $"LoadCatalogForWorkstationAsync failed. Workstation='{workstationName}'.");
             HotWorkCentersStatusMessage = $"Unable to load work centers: {ex.Message}";
         }
         finally
@@ -1115,7 +1209,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         try
         {
-            StartupDebugLog.Info("SettingsHotWorkCenters", $"SaveCurrentHotWorkCentersAsync started. Workstation='{SelectedWorkstation}', Count={HotWorkCenters.Count}.");
+            AppLog.Info("SettingsHotWorkCenters", $"SaveCurrentHotWorkCentersAsync started. Workstation='{SelectedWorkstation}', Count={HotWorkCenters.Count}.");
             var saveMessage = await _workCenterCatalogService
                 .SaveHotWorkCentersAsync(SelectedWorkstation, HotWorkCenters.ToArray())
                 .ConfigureAwait(true);
@@ -1124,18 +1218,18 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 ? "Local workcenters saved."
                 : saveMessage;
 
-            StartupDebugLog.Info("SettingsHotWorkCenters", $"SaveCurrentHotWorkCentersAsync completed. Workstation='{SelectedWorkstation}', Message='{HotWorkCentersStatusMessage}'.");
+            AppLog.Info("SettingsHotWorkCenters", $"SaveCurrentHotWorkCentersAsync completed. Workstation='{SelectedWorkstation}', Message='{HotWorkCentersStatusMessage}'.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsHotWorkCenters", ex, $"SaveCurrentHotWorkCentersAsync failed. Workstation='{SelectedWorkstation}', Count={HotWorkCenters.Count}.");
+            AppLog.Error("SettingsHotWorkCenters", ex, $"SaveCurrentHotWorkCentersAsync failed. Workstation='{SelectedWorkstation}', Count={HotWorkCenters.Count}.");
             HotWorkCentersStatusMessage = $"Unable to save Local workcenters: {ex.Message}";
         }
     }
 
     private async Task InitializeDunnageTypeVisibilityAsync()
     {
-        StartupDebugLog.Info("SettingsDunnageVisibility", "InitializeDunnageTypeVisibilityAsync started.");
+        AppLog.Info("SettingsDunnageVisibility", "InitializeDunnageTypeVisibilityAsync started.");
         IsDunnageTypeVisibilityBusy = true;
         try
         {
@@ -1144,11 +1238,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             ReplaceDunnageTypeValues(HiddenDunnageTypes, catalog.HiddenDunnageTypes);
             DunnageTypeVisibilityStatusMessage = string.Empty;
             RefreshSearchVisibility();
-            StartupDebugLog.Info("SettingsDunnageVisibility", $"InitializeDunnageTypeVisibilityAsync completed. VisibleCount={VisibleDunnageTypes.Count}, HiddenCount={HiddenDunnageTypes.Count}.");
+            AppLog.Info("SettingsDunnageVisibility", $"InitializeDunnageTypeVisibilityAsync completed. VisibleCount={VisibleDunnageTypes.Count}, HiddenCount={HiddenDunnageTypes.Count}.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsDunnageVisibility", ex, "InitializeDunnageTypeVisibilityAsync failed.");
+            AppLog.Error("SettingsDunnageVisibility", ex, "InitializeDunnageTypeVisibilityAsync failed.");
             DunnageTypeVisibilityStatusMessage = $"Unable to load dunnage visibility: {ex.Message}";
         }
         finally
@@ -1170,11 +1264,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 ? "Dunnage visibility saved."
                 : saveMessage;
 
-            StartupDebugLog.Info("SettingsDunnageVisibility", $"SaveCurrentDunnageTypeVisibilityAsync completed. VisibleCount={VisibleDunnageTypes.Count}, HiddenCount={HiddenDunnageTypes.Count}, Message='{DunnageTypeVisibilityStatusMessage}'.");
+            AppLog.Info("SettingsDunnageVisibility", $"SaveCurrentDunnageTypeVisibilityAsync completed. VisibleCount={VisibleDunnageTypes.Count}, HiddenCount={HiddenDunnageTypes.Count}, Message='{DunnageTypeVisibilityStatusMessage}'.");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsDunnageVisibility", ex, "SaveCurrentDunnageTypeVisibilityAsync failed.");
+            AppLog.Error("SettingsDunnageVisibility", ex, "SaveCurrentDunnageTypeVisibilityAsync failed.");
             DunnageTypeVisibilityStatusMessage = $"Unable to save dunnage visibility: {ex.Message}";
         }
         finally
@@ -1283,16 +1377,29 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         return true;
     }
 
-    private void InitializeIgnoredLocations()
+    /// <summary>
+    /// Seeds the editor from the plant-wide list the service reads, so this screen and every filter that hides a
+    /// location agree by construction rather than by two reads of one key happening to match.
+    /// </summary>
+    /// <remarks>
+    /// The duplicate read and write this screen used to keep are gone with the local settings mechanism (T146).
+    /// The service is the one reader of the stored list, and the one writer of it.
+    /// </remarks>
+    private async Task InitializeIgnoredLocationsAsync()
     {
-        var stored = _localSettingsService.ReadSettingAsync<List<string>?>(IgnoredLocationDefaults.SettingKey).GetAwaiter().GetResult();
-        var seed = stored is { Count: > 0 }
-            ? stored
-            : IgnoredLocationDefaults.Locations;
+        try
+        {
+            var stored = await _ignoredLocationsService.GetIgnoredLocationsAsync().ConfigureAwait(true);
+            ReplaceCollectionValues(IgnoredLocations, stored);
+            IgnoredLocationsStatusMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("SettingsIgnoredLocations", ex, "The ignored-locations list could not be read; the shipped defaults are shown.");
+            ReplaceCollectionValues(IgnoredLocations, IgnoredLocationDefaults.Locations);
+        }
 
-        ReplaceCollectionValues(IgnoredLocations, seed);
-        IgnoredLocationsStatusMessage = string.Empty;
-        StartupDebugLog.Info("SettingsIgnoredLocations", $"InitializeIgnoredLocations completed. StoredCount={(stored is null ? 0 : stored.Count)}, ActiveCount={IgnoredLocations.Count}.");
+        RefreshSearchVisibility();
     }
 
     [RelayCommand]
@@ -1300,6 +1407,9 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         if (!CanManageIgnoredLocations)
         {
+            // Refused where the write would happen rather than only where the control is drawn, and refused with a
+            // reason the reader can act on (FR-024, FR-029).
+            IgnoredLocationsStatusMessage = "Settings_IgnoredLocations_EditRefused.Text".GetLocalized();
             return;
         }
 
@@ -1317,7 +1427,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        StartupDebugLog.Info("SettingsIgnoredLocations", $"AddIgnoredLocationAsync adding '{code}'.");
+        AppLog.Info("SettingsIgnoredLocations", $"AddIgnoredLocationAsync adding '{code}'.");
         IgnoredLocations.Add(code);
         SortCollection(IgnoredLocations);
         IgnoredLocationInput = string.Empty;
@@ -1331,6 +1441,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         if (!CanManageIgnoredLocations)
         {
+            IgnoredLocationsStatusMessage = "Settings_IgnoredLocations_EditRefused.Text".GetLocalized();
             return;
         }
 
@@ -1346,21 +1457,114 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         ReplaceCollectionValues(IgnoredLocations, updated);
         IgnoredLocationsStatusMessage = string.Empty;
         RefreshSearchVisibility();
-        StartupDebugLog.Info("SettingsIgnoredLocations", $"RemoveIgnoredLocationAsync removed '{code}'. Remaining={IgnoredLocations.Count}.");
+        AppLog.Info("SettingsIgnoredLocations", $"RemoveIgnoredLocationAsync removed '{code}'. Remaining={IgnoredLocations.Count}.");
         await SaveIgnoredLocationsAsync().ConfigureAwait(true);
     }
 
+    /// <summary>
+    /// Stores the plant-wide list through the service, which is where the edit entitlement is enforced.
+    /// </summary>
+    /// <remarks>
+    /// A refusal is a permission answer rather than a fault, so it is stated in words and is not thrown. A fault is
+    /// still reported, because a list that did not save is something the reader needs to know about.
+    /// </remarks>
     private async Task SaveIgnoredLocationsAsync()
     {
         try
         {
-            await _localSettingsService.SaveSettingAsync(IgnoredLocationDefaults.SettingKey, IgnoredLocations.ToList()).ConfigureAwait(true);
-            StartupDebugLog.Info("SettingsIgnoredLocations", $"SaveIgnoredLocationsAsync saved {IgnoredLocations.Count} location(s).");
+            var saved = await _ignoredLocationsService
+                .SaveIgnoredLocationsAsync(IgnoredLocations.ToList())
+                .ConfigureAwait(true);
+
+            if (!saved)
+            {
+                AppLog.Info("SettingsIgnoredLocations", "The list was not saved because this person may not change the plant-wide list.");
+                IgnoredLocationsStatusMessage = "Settings_IgnoredLocations_EditRefused.Text".GetLocalized();
+                return;
+            }
+
+            IgnoredLocationsStatusMessage = string.Empty;
+            AppLog.Info("SettingsIgnoredLocations", $"SaveIgnoredLocationsAsync saved {IgnoredLocations.Count} location(s).");
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("SettingsIgnoredLocations", ex, "SaveIgnoredLocationsAsync failed.");
+            AppLog.Error("SettingsIgnoredLocations", ex, "SaveIgnoredLocationsAsync failed.");
             IgnoredLocationsStatusMessage = $"Unable to save ignored locations: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Reads the session length the launch will apply, so the panel opens on the value in force rather than on the
+    /// shipped default (FR-029).
+    /// </summary>
+    private async Task InitializeSessionLengthAsync()
+    {
+        if (!CanManageSessionLength)
+        {
+            return;
+        }
+
+        try
+        {
+            var stored = await _preferences
+                .ReadNumberAsync(ScopedPreferenceKeys.SessionLengthMinutes, PreferenceScope.Plant)
+                .ConfigureAwait(true);
+
+            SessionLengthMinutes = stored is > 0 ? stored.Value : ScopedPreferenceKeys.DefaultSessionLengthMinutes;
+            SessionLengthStatusMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("SettingsSessionLength", ex, "The session length could not be read; the shipped default is shown.");
+            SessionLengthMinutes = ScopedPreferenceKeys.DefaultSessionLengthMinutes;
+        }
+
+        RefreshSearchVisibility();
+    }
+
+    /// <summary>
+    /// Stores the session length for the whole plant, and refuses an unauthorised change where the write happens.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The gate is read here rather than inferred from whether the control was drawn, so a caller that reaches the
+    /// command without going through the panel is still refused (FR-029).
+    /// </para>
+    /// <para>
+    /// The value is clamped to the declared floor and ceiling before it is stored. A length below the floor would
+    /// sign everybody out mid-shift, and the store refuses a non-positive length as well, so neither half of the
+    /// pair is the only guard.
+    /// </para>
+    /// </remarks>
+    [RelayCommand]
+    private async Task SaveSessionLengthAsync()
+    {
+        if (!CanManageSessionLength)
+        {
+            SessionLengthStatusMessage = "Settings_SessionLength_EditRefused.Text".GetLocalized();
+            return;
+        }
+
+        var requested = (int)Math.Round(SessionLengthMinutes, MidpointRounding.AwayFromZero);
+        var clamped = Math.Clamp(
+            requested,
+            ScopedPreferenceKeys.MinimumSessionLengthMinutes,
+            ScopedPreferenceKeys.MaximumSessionLengthMinutes);
+
+        try
+        {
+            await _preferences
+                .WriteNumberAsync(ScopedPreferenceKeys.SessionLengthMinutes, PreferenceScope.Plant, clamped)
+                .ConfigureAwait(true);
+
+            SessionLengthMinutes = clamped;
+            SessionLengthStatusMessage = "Settings_SessionLength_Saved.Text".GetLocalized();
+            AppLog.Info("SettingsSessionLength", $"The session length was stored as {clamped} minute(s).");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("SettingsSessionLength", ex, "The session length could not be stored.");
+            SessionLengthStatusMessage = "Settings_SessionLength_SaveFailed.Text".GetLocalized();
         }
     }
 
@@ -1408,7 +1612,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SettingsPictureCache",
                 ex,
                 "The picture cache's settings could not be read; the shipped defaults are shown and the store will be asked again next visit.");
@@ -1454,7 +1658,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         catch (Exception ex)
         {
             PictureCacheStatusMessage = "Unable to save that change.";
-            StartupDebugLog.Error("SettingsPictureCache", ex, "The picture cache toggle could not be stored.");
+            AppLog.Error("SettingsPictureCache", ex, "The picture cache toggle could not be stored.");
         }
     }
 
@@ -1489,7 +1693,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         catch (Exception ex)
         {
             PictureCacheStatusMessage = "Unable to save that folder.";
-            StartupDebugLog.Error("SettingsPictureCache", ex, "The picture cache folder could not be stored.");
+            AppLog.Error("SettingsPictureCache", ex, "The picture cache folder could not be stored.");
         }
     }
 
@@ -1523,7 +1727,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         catch (Exception ex)
         {
             PictureCacheStatusMessage = "Unable to copy the pictures.";
-            StartupDebugLog.Error("SettingsPictureCache", ex, "The picture copy requested from the Settings screen failed.");
+            AppLog.Error("SettingsPictureCache", ex, "The picture copy requested from the Settings screen failed.");
         }
         finally
         {
@@ -1559,16 +1763,18 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 .ConfigureAwait(true);
             KeysFolderInput = KeysFolderPath;
 
+            DunnageRootInput = await _imageStorageConfigurationResolver
+                .GetDunnageRootPathAsync()
+                .ConfigureAwait(true);
+
             ArchiveKeepDaysInput = await _imageStorageConfigurationResolver
                 .GetArchiveKeepDaysAsync()
                 .ConfigureAwait(true);
-
-            await ReportStoragePathDisagreementAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
         {
             StoragePathsStatusMessage = "Settings_StoragePaths_Unavailable.Text".GetLocalized();
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SettingsStoragePaths",
                 ex,
                 "The storage folders could not be read; the boxes are left empty and the store is asked again next visit.");
@@ -1580,52 +1786,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
-    /// Names this machine's own configured picture folder when it is not the folder every computer reads.
+    /// Stores the picture folder, the key folder, the dunnage root and the retention period for every computer.
     /// </summary>
     /// <remarks>
-    /// The store wins (OQ-3), so a machine still carrying the old path in its settings file is working from the
-    /// store's answer while appearing to be configured otherwise. Saying so in one line is what stops that reading
-    /// as a picture that is simply not there. Which folder is the truth, and whether this machine's file disagrees
-    /// with it, is the resolver's answer rather than a comparison kept here, so the rule has one home (FR-010).
-    /// </remarks>
-    private async Task ReportStoragePathDisagreementAsync()
-    {
-        if (_imageStorageConfigurationResolver is null)
-        {
-            return;
-        }
-
-        try
-        {
-            var resolution = await _imageStorageConfigurationResolver
-                .GetSharedFolderResolutionAsync()
-                .ConfigureAwait(true);
-
-            StoragePathsDisagreementMessage = resolution.MachineDisagrees
-                ? string.Format(
-                    CultureInfo.CurrentCulture,
-                    "Settings_StoragePaths_Disagreement.Text".GetLocalized(),
-                    resolution.MachineFolderPath)
-                : string.Empty;
-        }
-        catch (Exception ex)
-        {
-            // A folder that cannot be resolved is already reported by the read above; the panel must not fail on
-            // the line that explains it.
-            StoragePathsDisagreementMessage = string.Empty;
-            StartupDebugLog.Error(
-                "SettingsStoragePaths",
-                ex,
-                "The storage folder's disagreement with this machine's own configuration could not be worked out.");
-        }
-    }
-
-    /// <summary>
-    /// Stores the picture folder, the key folder and the retention period for every computer.
-    /// </summary>
-    /// <remarks>
-    /// One button for the three, because they are one subject and one screen: three buttons over three boxes on one
-    /// panel is three chances to leave the panel half saved. The period is refused when it is not a positive whole
+    /// One button for the four, because they are one subject and one screen: four buttons over four boxes on one
+    /// panel is four chances to leave the panel half saved. The period is refused when it is not a positive whole
     /// number of days rather than stored as a figure the cleanup would read as zero.
     /// </remarks>
     [RelayCommand]
@@ -1638,9 +1803,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
         var pictureFolder = PictureFolderInput?.Trim() ?? string.Empty;
         var keysFolder = KeysFolderInput?.Trim() ?? string.Empty;
+        var dunnageRoot = DunnageRootInput?.Trim() ?? string.Empty;
         var keepDays = (int)Math.Round(ArchiveKeepDaysInput, MidpointRounding.AwayFromZero);
 
-        if (pictureFolder.Length == 0 || keysFolder.Length == 0)
+        if (pictureFolder.Length == 0 || keysFolder.Length == 0 || dunnageRoot.Length == 0)
         {
             StoragePathsStatusMessage = "Settings_StoragePaths_FolderNeeded.Text".GetLocalized();
             return;
@@ -1669,6 +1835,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 boolean: null).ConfigureAwait(true);
 
             await SaveAppWideSettingAsync(
+                ConfigSettingKeys.DunnageRootPath,
+                "text",
+                dunnageRoot,
+                boolean: null).ConfigureAwait(true);
+
+            await SaveAppWideSettingAsync(
                 ConfigSettingKeys.ImageStorageArchiveKeepDays,
                 "int",
                 text: null,
@@ -1677,13 +1849,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
             PictureFolderPath = pictureFolder;
             KeysFolderPath = keysFolder;
-            await ReportStoragePathDisagreementAsync().ConfigureAwait(true);
             StoragePathsStatusMessage = "Settings_StoragePaths_Saved.Text".GetLocalized();
         }
         catch (Exception ex)
         {
             StoragePathsStatusMessage = "Settings_StoragePaths_SaveFailed.Text".GetLocalized();
-            StartupDebugLog.Error("SettingsStoragePaths", ex, "A storage setting could not be stored.");
+            AppLog.Error("SettingsStoragePaths", ex, "A storage setting could not be stored.");
         }
         finally
         {
@@ -1727,7 +1898,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 SettingValueInt = integer,
                 ValueType = valueType,
             },
-            _startupState.UserId > 0 ? _startupState.UserId : null).ConfigureAwait(true);
+            _personIdentity.UserId > 0 ? _personIdentity.UserId : null).ConfigureAwait(true);
 
         _imageStorageConfigurationResolver?.InvalidateCache();
     }
@@ -1745,7 +1916,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
         try
         {
-            StartupDebugLog.Info("SettingsCacheRefresh", "RequestCacheRefreshAsync started.");
+            AppLog.Info("SettingsCacheRefresh", "RequestCacheRefreshAsync started.");
 
             var result = await _mockServiceRefreshClient.RequestRefreshAsync(null).ConfigureAwait(true);
 
@@ -1753,7 +1924,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             {
                 CacheRefreshStatusMessage = result.Message
                     ?? "The cache refresh service did not accept the request.";
-                StartupDebugLog.Info("SettingsCacheRefresh", $"Request not completed: {CacheRefreshStatusMessage}");
+                AppLog.Info("SettingsCacheRefresh", $"Request not completed: {CacheRefreshStatusMessage}");
                 return;
             }
 
@@ -1770,12 +1941,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                     + string.Join("; ", notRefreshed)
                     + ".";
 
-            StartupDebugLog.Info("SettingsCacheRefresh", $"Request completed. {CacheRefreshStatusMessage}");
+            AppLog.Info("SettingsCacheRefresh", $"Request completed. {CacheRefreshStatusMessage}");
         }
         catch (Exception ex)
         {
             CacheRefreshStatusMessage = $"Unable to request a cache refresh: {ex.Message}";
-            StartupDebugLog.Error("SettingsCacheRefresh", ex, "RequestCacheRefreshAsync failed.");
+            AppLog.Error("SettingsCacheRefresh", ex, "RequestCacheRefreshAsync failed.");
         }
         finally
         {

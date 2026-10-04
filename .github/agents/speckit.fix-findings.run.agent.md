@@ -26,7 +26,12 @@ Run the check-prerequisites script from repo root to determine feature paths:
 result=$(.specify/extensions/fix-findings/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks)
 
 # PowerShell
-$result = .specify/extensions/fix-findings/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+
+```powershell
+$result = .\.specify\scripts\powershell\check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+```
+
+
 ```
 
 Parse JSON output to get `FEATURE_DIR` and `AVAILABLE_DOCS`. Derive absolute paths:

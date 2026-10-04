@@ -265,8 +265,8 @@ VALUES (
         'johnk',
         'John',
         'Koll',
-        '0000',
-        NULL,
+        'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=',
+        UNHEX('C3B851513BAF5951482CEC1D8D585EBF'),
         1,
         'John Koll',
         '6229',
@@ -279,8 +279,8 @@ VALUES (
         'jkoll',
         'John',
         'Koll',
-        '0000',
-        NULL,
+        'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=',
+        UNHEX('C3B851513BAF5951482CEC1D8D585EBF'),
         1,
         'John Koll',
         '6229',
@@ -289,18 +289,26 @@ VALUES (
         UTC_TIMESTAMP()
     ),
     -- One masked account per user type (T157), so every service-operator authorization branch can be
-    -- exercised against a real store instead of only the tests' stub resolver. The credential is the
-    -- placeholder the accounts above use, so none of these can log in; the operator-role lookup the
+    -- exercised against a real store instead of only the tests' stub resolver. The operator-role lookup the
     -- service performs needs identity and role only (`sp_auth_user_row_get`).
-    (UUID(), 'test.admin', 'Test', 'Admin', '0000', NULL, 1, 'Test Admin', '9001', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.developer', 'Test', 'Developer', '0000', NULL, 1, 'Test Developer', '9002', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.plant.manager', 'Test', 'Plant Manager', '0000', NULL, 1, 'Test Plant Manager', '9003', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.setup.lead', 'Test', 'Setup Lead', '0000', NULL, 1, 'Test Setup Lead', '9004', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.production.lead', 'Test', 'Production Lead', '0000', NULL, 1, 'Test Production Lead', '9005', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    --
+    -- The credential is a development placeholder, salted and hashed the way PasswordSecretHasher.Hash does it,
+    -- so a fresh install can be signed into. It used to be written as the bare four-character marker with a null
+    -- salt, and PasswordSecretHasher.Verify refuses a null salt, so no comparison could ever confirm it and
+    -- every seeded account was unable to sign in anywhere. The flag below still makes it a temporary credential,
+    -- so the person is asked to choose a real password at the first sign-in.
+    --
+    -- Every seeded account deliberately shares this value, and it is visible in source control. It is a
+    -- development placeholder rather than a secret, and it belongs to no real person.
+    (UUID(), 'test.admin', 'Test', 'Admin', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Admin', '9001', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.developer', 'Test', 'Developer', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Developer', '9002', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.plant.manager', 'Test', 'Plant Manager', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Plant Manager', '9003', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.setup.lead', 'Test', 'Setup Lead', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Setup Lead', '9004', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.production.lead', 'Test', 'Production Lead', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Production Lead', '9005', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
     -- Deliberately NOT approved operator roles: these are the accounts that prove the refusal branch.
-    (UUID(), 'test.setup', 'Test', 'Setup', '0000', NULL, 1, 'Test Setup', '9006', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.production', 'Test', 'Production', '0000', NULL, 1, 'Test Production', '9007', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-    (UUID(), 'test.material.handler', 'Test', 'Material Handler', '0000', NULL, 1, 'Test Material Handler', '9008', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP())
+    (UUID(), 'test.setup', 'Test', 'Setup', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Setup', '9006', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.production', 'Test', 'Production', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Production', '9007', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
+    (UUID(), 'test.material.handler', 'Test', 'Material Handler', 'CxrKO1xEmsC1VtDhgp2Envsig5vQ8ZErO8J1g7B7q2o=', UNHEX('C3B851513BAF5951482CEC1D8D585EBF'), 1, 'Test Material Handler', '9008', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP())
 ON DUPLICATE KEY UPDATE
     first_name = VALUES(first_name),
     last_name = VALUES(last_name),
@@ -353,41 +361,6 @@ WHERE
 ON DUPLICATE KEY UPDATE
     assigned_utc = VALUES(assigned_utc),
     assigned_by_user_id = VALUES(assigned_by_user_id);
-
-TRUNCATE TABLE core_buildings_catalog;
-
-INSERT INTO
-    core_buildings_catalog (
-        public_id,
-        building_code,
-        building_name,
-        is_active,
-        created_utc,
-        updated_utc,
-        updated_by_user_id
-    )
-VALUES (
-        UUID(),
-        'expo_drive',
-        'Expo Drive',
-        1,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP(),
-        NULL
-    ),
-    (
-        UUID(),
-        'vits_drive',
-        'Vits Drive',
-        1,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP(),
-        NULL
-    )
-ON DUPLICATE KEY UPDATE
-    building_name = VALUES(building_name),
-    is_active = VALUES(is_active),
-    updated_utc = VALUES(updated_utc);
 
 TRUNCATE TABLE core_computers_registry;
 
@@ -461,6 +434,12 @@ SET FOREIGN_KEY_CHECKS = 1;
 --       Material Handler Lead, Plant Manager, IT Department and Developer (decisions 3 and 8 together).
 --     * `permission.admin.permissions` ships to IT Department, Plant Manager and Developer only, and is fixed
 --       rather than editable (decision 9).
+--
+--   Four keys were added later by 010-startup-rebuild (T053) for the privileged surfaces the rebuilt launch
+--   introduces, and they are stated too, because no retired list could describe a key that did not exist when the
+--   lists were written: `permission.settings.machine_configuration`, `permission.settings.ignored_locations_edit`
+--   and `permission.settings.session_length` ship to IT Department and Developer, and
+--   `permission.settings.log_panel` to Developer alone. Their nine rows each are at the end of this file.
 --
 --   `material_handler_lead` appears in none of the retired lists, so its whole row is stated: the worker level,
 --   plus handling requests and the service cache refresh, and nothing else. It is deliberately NOT granted the
@@ -675,99 +654,182 @@ ON DUPLICATE KEY UPDATE
     value_type = VALUES(value_type),
     updated_utc = VALUES(updated_utc);
 
--- Seed: seed_picture_layout_move
--- Engine: MySQL 5.7
--- Feature: 008-part-pictures (task T021)
+-- ---------------------------------------------------------------------------
+-- 010-startup-rebuild (task T053) — the four keys the new privileged surfaces read
 --
--- Purpose: rewrite every recorded picture path the application has already stored from the pre-move layout to the
---          one the share now uses (FR-036). The picture root does not change; what changes is where each picture
---          sits inside it, so a value that named `request_item\pickup-coil.png` now names
---          `Waitlist/request_item/pickup-coil.png`.
+--   Four surfaces the rebuilt launch adds had no key of their own, so each gets one here, role-explicitly: every
+--   one of the nine catalogue roles carries a row for every one of the four keys, which is what makes a role
+--   without a key a decision recorded in this file rather than an absence a reader has to infer.
 --
--- What moves, and why exactly these three
---   The application's own collection gained one folder level in front of it, so its three kinds each gain the
---   `Waitlist` collection. The two part collections are new and have nothing already stored to move. Every pair is
---   the same token in and the same token out with the collection folder in front, which is what keeps the move an
---   insertion rather than a rename.
+--     permission.settings.machine_configuration   IT Department and Developer 1, every other role 0   (FR-007)
+--     permission.settings.ignored_locations_edit  IT Department and Developer 1, every other role 0   (FR-024)
+--     permission.settings.session_length          IT Department and Developer 1, every other role 0   (FR-029)
+--     permission.settings.log_panel               Developer 1 alone, every other role 0                (US5, SC-005)
 --
--- Re-running
---   Each move is idempotent: after it, no value begins with the old prefix, so a second run rewrites nothing and
---   reports zero. Running this file twice is therefore safe and is the expected way to resume an interrupted
---   promotion.
+--   `permission.settings.ignored_locations` is deliberately NOT among them and its nine rows above are unchanged.
+--   Reading the plant-wide list stays with the roles that already held it, which is what keeps FR-030 true; the
+--   new `_edit` key carries FR-024's two-role requirement for writing it instead (research D10). `machine_
+--   configuration` is likewise not a reuse of `permission.settings.computers`, although the two have the same
+--   role set: machine setup admits a computer to the fleet before anyone signs in, so the two blast radii are not
+--   the same and a later loosening of one must not open the other (research D11).
 --
--- What it reports rather than skips
---   The pairs are known and finite, so a stored value that matches none of them is not silently left behind: the
---   report at the end names every active value that begins with no collection folder, is not a rooted path and
---   names no drive. Those are the rows a person has to look at, and FR-036's "none left unresolvable" is answered
---   by that list rather than by a guess.
+--   Written as its own statements rather than woven into the nine role blocks above, for the same reason
+--   `permission.settings.storage_paths` is: what each role inherited from the retired lists stays unedited and
+--   this addition is reviewable on its own.
+-- ---------------------------------------------------------------------------
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:it_department', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:plant_manager', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:production_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:setup_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:material_handler_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.machine_configuration', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:it_department', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:plant_manager', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:production_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:setup_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:material_handler_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.ignored_locations_edit', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:it_department', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:plant_manager', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:production_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:setup_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:material_handler_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.log_panel', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.session_length', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:it_department', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:plant_manager', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:production_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:setup_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:material_handler_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.session_length', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+-- The two plant-scoped preference rows this seed owns (010-startup-rebuild T053, T054).
 --
--- The picture change record
---   A layout move is not a picture change, so the whole move runs with `@mtm_picture_layout_move` set, which is the
---   flag the AFTER UPDATE trigger checks before it writes a history row. Without it this one reviewed step would
---   write a change row per stored picture, each naming an actor who never touched it.
+-- They are here rather than only in `seed_permission_role_baselines/create.sql` because THIS file is what the
+-- installer runs: `AllSeeds.sql` is the hand-maintained aggregate, and a row that exists only in the individual
+-- seed is a row a fresh store never receives. That is exactly what happened on 2026-09-27: the validator
+-- reported `Feature.IgnoredLocations` and `auth.session_length_minutes` missing at scope all_users after an
+-- install that had run successfully, because the aggregate had never carried them.
 --
--- Ordering
---   This folder sorts after the table and procedure folders, and it needs `sp_config_images_locations_paths_move`
---   to exist, which the procedure folder creates.
--- ============================================================
+-- The plant's list of locations to hide (FR-024). The value is the normalized, uppercase, comma-separated form
+-- `IgnoredLocationsService` returns, so the store holds the same shape the code compares against rather than a
+-- second shape that has to be parsed back.
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'Feature.IgnoredLocations', 'all_users', 'all_users', 'WC,NCM,V-WC,NCM-VITS,SHIP', 'text', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value = VALUES(setting_value),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
 
-USE mtm_waitlist;
-
-SET NAMES utf8mb4;
-
-DROP PROCEDURE IF EXISTS sp_seed_picture_layout_move;
-
-DELIMITER $$
-
-CREATE PROCEDURE sp_seed_picture_layout_move()
-BEGIN
-    DECLARE v_request_items INT DEFAULT 0;
-    DECLARE v_request_categories INT DEFAULT 0;
-    DECLARE v_work_centers INT DEFAULT 0;
-
-    -- Set for the whole move and cleared before this procedure returns, so nothing else on this connection is
-    -- affected. A layout move is not a picture change, so the change record stays silent (FR-027).
-    SET @mtm_picture_layout_move = 1;
-
-    CALL sp_config_images_locations_paths_move('request_item', 'Waitlist/request_item');
-    SET v_request_items = ROW_COUNT();
-
-    CALL sp_config_images_locations_paths_move('request_category', 'Waitlist/request_category');
-    SET v_request_categories = ROW_COUNT();
-
-    CALL sp_config_images_locations_paths_move('work_center', 'Waitlist/work_center');
-    SET v_work_centers = ROW_COUNT();
-
-    SET @mtm_picture_layout_move = NULL;
-
-    SELECT
-        v_request_items AS request_item_paths_moved,
-        v_request_categories AS request_category_paths_moved,
-        v_work_centers AS work_center_paths_moved;
-END$$
-
-DELIMITER ;
-
-CALL sp_seed_picture_layout_move();
-
--- The rows a person has to look at: an active value that begins with no collection folder, is not a UNC path and
--- names no drive. An empty result set is the answer FR-036 wants.
-SELECT
-    i.scope,
-    i.scope_item_id,
-    i.image_path AS unrecognised_path
-FROM
-    config_images_locations i
-WHERE
-    i.is_active = 1
-    AND i.image_path NOT LIKE 'Waitlist%'
-    AND i.image_path NOT LIKE 'Visual%'
-    AND i.image_path NOT LIKE 'WIP%'
-    AND LEFT(i.image_path, 2) <> '\\\\'
-    AND LOCATE(':', i.image_path) = 0
-ORDER BY
-    i.scope,
-    i.scope_item_id;
+-- The session length (FR-029, research D17): eight hours, held against the plant and read when a session row is
+-- written. Minutes, because that is the unit the launch resolves and the settings panel writes
+-- (`ScopedPreferenceKeys.SessionLengthMinutes`).
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_int,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'auth.session_length_minutes', 'all_users', 'all_users', 480, 'int', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_int = VALUES(setting_value_int),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
 
 -- Seed: seed_role_admin_to_it_department
 -- Engine: MySQL 5.7
@@ -1101,306 +1163,6 @@ VALUES
      NULL, NULL,
      JSON_ARRAY(),
      NULL, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
-
--- Seed: seed_setup_work_centers_default
--- Engine: MySQL 5.7
--- Source: live Visual SHOP_RESOURCE work center list
-
-USE mtm_waitlist;
-
-SET FOREIGN_KEY_CHECKS = 0;
-
-TRUNCATE TABLE setup_work_centers_catalog;
-
-INSERT IGNORE INTO
-    setup_work_centers_catalog (
-        public_id,
-        work_center_name,
-        building,
-        is_active,
-        sort_rank,
-        created_by_user_id,
-        updated_by_user_id,
-        created_utc,
-        updated_utc
-    )
-VALUES (
-        UUID(),
-        '100-03',
-        'Expo Drive',
-        1,
-        10,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-06',
-        'Expo Drive',
-        1,
-        20,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-07',
-        'Expo Drive',
-        1,
-        30,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-08',
-        'Expo Drive',
-        1,
-        40,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-09',
-        'Expo Drive',
-        1,
-        50,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-12',
-        'Expo Drive',
-        1,
-        60,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-13',
-        'Expo Drive',
-        1,
-        70,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-14',
-        'Expo Drive',
-        1,
-        80,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-15',
-        'Expo Drive',
-        1,
-        90,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-16',
-        'Expo Drive',
-        1,
-        100,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-17',
-        'Expo Drive',
-        1,
-        110,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-18',
-        'Expo Drive',
-        1,
-        120,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-19',
-        'Expo Drive',
-        1,
-        130,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-20',
-        'Expo Drive',
-        1,
-        140,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-21',
-        'Expo Drive',
-        1,
-        150,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-22',
-        'Expo Drive',
-        1,
-        160,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-23',
-        'Expo Drive',
-        1,
-        170,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-24',
-        'Expo Drive',
-        1,
-        180,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-25',
-        'Expo Drive',
-        1,
-        190,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-28',
-        'Expo Drive',
-        1,
-        200,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-1807',
-        'Expo Drive',
-        1,
-        210,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        '100-1806',
-        'Expo Drive',
-        1,
-        220,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'V100-33',
-        'Vits Drive',
-        1,
-        230,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'V100-34',
-        'Vits Drive',
-        1,
-        240,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'V100-35',
-        'Vits Drive',
-        1,
-        250,
-        NULL,
-        NULL,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    );
-
-SET FOREIGN_KEY_CHECKS = 1;
 
 -- Seed: seed_setup_work_centers_default
 -- Engine: MySQL 5.7
@@ -2185,3 +1947,23 @@ VALUES
     ('a0000000-0017-4000-8000-000000000017','f0000000-0015-4000-8000-000000000015','Pending','Canceled','Canceled','6229','John Koll','Requester canceled own request.',UTC_TIMESTAMP() - INTERVAL 110 MINUTE),
     ('a0000000-0018-4000-8000-000000000018','f0000000-0016-4000-8000-000000000016',NULL,'Pending','Created','5000','Other User','Coil request created.',UTC_TIMESTAMP() - INTERVAL 5 HOUR),
     ('a0000000-0019-4000-8000-000000000019','f0000000-0016-4000-8000-000000000016','Pending','Canceled','Canceled','5000','Other User','Duplicate - canceled by requester.',UTC_TIMESTAMP() - INTERVAL 280 MINUTE);
+
+-- ---------------------------------------------------------------------------
+-- Seed: seed_retire_computer_scope_picture_sources
+-- ---------------------------------------------------------------------------
+-- Feature: 010-startup-rebuild (task T198)
+--
+-- Withdraws every `computer` scope row in `config_images_locations`, so a computer set up before this change
+-- reads its pictures from the plant-wide setting afterwards (FR-040, SC-021). The three per-computer sources
+-- were written by `sp_config_images_locations_computer_sources_set`, which this task retires; what an existing
+-- computer still holds is three rows of its own, and withdrawing them is what leaves the plant-wide answer as the
+-- only one in force. It withdraws rather than deletes, so the change history keeps reading what was there and a
+-- store that needs one row back can reactivate it by its public id.
+--
+-- It depends on nothing but the procedures being installed, which happens before every seed, and no other seed
+-- reads or writes a `computer` scope row, so its position here is free.
+-- ---------------------------------------------------------------------------
+
+USE mtm_waitlist;
+
+CALL sp_config_images_locations_deactivate_for_scope('computer', NULL);

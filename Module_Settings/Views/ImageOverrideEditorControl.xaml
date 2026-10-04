@@ -146,12 +146,14 @@
                                                             </Grid.ColumnDefinitions>
 
                                                             <!-- Display label (e.g., request type name) -->
-                                                            <TextBlock
+                                                            <!-- The row's label is drawn by the one-line scrolling control
+                                                                 (009 B1/B2): it sits in a fixed 180 px column beside
+                                                                 the preview, so a long name scrolls rather than wrapping
+                                                                 the row taller. -->
+                                                            <sharedControls:AutoScrollTextView
                                                                 Grid.Column="0"
                                                                 VerticalAlignment="Center"
-                                                                IsTextSelectionEnabled="False"
-                                                                Text="{x:Bind DisplayName}"
-                                                                TextWrapping="Wrap" />
+                                                                Text="{x:Bind DisplayName}" />
 
                                                             <!-- 48x48 preview of the effective image -->
                                                             <Border
@@ -217,12 +219,18 @@
                                                                 Tag="{x:Bind}" />
                                                         </Grid>
 
-                                                        <!-- Warning shown when the custom image file is missing -->
-                                                        <TextBlock
+                                                        <!-- The warning shown when the custom image file is missing. It
+                                                             is drawn by the one-line scrolling control (009 B1/B2) so
+                                                             it never wraps the row taller; because a warning is read
+                                                             rather than glanced at, the tooltip holds the whole message
+                                                             in one piece. The caption's size is set here because the
+                                                             control draws its own text and cannot inherit a TextBlock
+                                                             style. -->
+                                                        <sharedControls:AutoScrollTextView
+                                                            FontSize="12"
                                                             Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                                                            Style="{ThemeResource CaptionTextBlockStyle}"
                                                             Text="{x:Bind WarningMessage, Mode=OneWay}"
-                                                            TextWrapping="Wrap"
+                                                            ToolTipService.ToolTip="{x:Bind WarningMessage, Mode=OneWay}"
                                                             Visibility="{x:Bind HasWarning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                                                     </StackPanel>
                                                 </Border>

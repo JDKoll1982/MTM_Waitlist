@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Settings.Services;
 
 namespace MTM_Waitlist.Module_Settings.ViewModels;
 
@@ -14,14 +15,14 @@ namespace MTM_Waitlist.Module_Settings.ViewModels;
 public sealed partial class ComputerManagementViewModel : ObservableRecipient
 {
     private readonly IComputerRegistryService _computerRegistryService;
-    private readonly StartupState _startupState;
+    private readonly IMachineFacts _machineFacts;
 
     public ComputerManagementViewModel(
         IComputerRegistryService computerRegistryService,
-        StartupState startupState)
+        IMachineFacts machineFacts)
     {
         _computerRegistryService = computerRegistryService;
-        _startupState = startupState;
+        _machineFacts = machineFacts;
     }
 
     /// <summary>
@@ -132,9 +133,9 @@ public sealed partial class ComputerManagementViewModel : ObservableRecipient
 
     private string ResolveCurrentComputerName()
     {
-        if (!string.IsNullOrWhiteSpace(_startupState.HostnameNormalized))
+        if (!string.IsNullOrWhiteSpace(_machineFacts.Hostname))
         {
-            return _startupState.HostnameNormalized.Trim();
+            return _machineFacts.Hostname.Trim();
         }
 
         return Environment.MachineName.Trim();

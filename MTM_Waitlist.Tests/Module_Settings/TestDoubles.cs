@@ -77,6 +77,9 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
 
     public string KeysFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "key-files");
 
+    /// <summary>The root the dunnage pictures are read from for every computer (FR-040).</summary>
+    public string DunnageRootPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "dunnage");
+
     public string CacheFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "cache");
 
     public bool CacheEnabled { get; set; } = true;
@@ -87,14 +90,13 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
 
     public int ArchiveKeepDays { get; set; } = 30;
 
-    /// <summary>This machine's own configured folder, named when it differs from the folder every computer reads.</summary>
-    public string MachineSharedFolderPath { get; set; } = string.Empty;
-
     public bool RequireSquareAspectRatio { get; set; } = true;
 
     public Task<string> GetSharedFolderPathAsync() => Task.FromResult(SharedFolderPath);
 
     public Task<string> GetKeysFolderPathAsync() => Task.FromResult(KeysFolderPath);
+
+    public Task<string> GetDunnageRootPathAsync() => Task.FromResult(DunnageRootPath);
 
     public Task<string> GetImageCacheFolderPathAsync() => Task.FromResult(CacheFolderPath);
 
@@ -105,9 +107,6 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public Task<bool> GetEnableArchiveVersioningAsync() => Task.FromResult(EnableArchiveVersioning);
 
     public Task<int> GetArchiveKeepDaysAsync() => Task.FromResult(ArchiveKeepDays);
-
-    public Task<SharedFolderResolution> GetSharedFolderResolutionAsync() =>
-        Task.FromResult(new SharedFolderResolution(SharedFolderPath, MachineSharedFolderPath));
 
     public Task<ImageStorageOptions> GetEffectiveConfigurationAsync() => Task.FromResult(new ImageStorageOptions
     {
@@ -186,17 +185,81 @@ internal sealed class FakeWorkCenterCatalogService : IWorkCenterCatalogService
         Task.FromResult<string?>(null);
 }
 
-internal sealed class FakeLocalSettingsService : ILocalSettingsService
+/// <summary>
+/// The store seam the migrated tests use in place of the deleted local-settings file: a value is held in memory
+/// under the scope and key the store would hold it under, and every write is recorded so a test can assert that a
+/// refused change wrote nothing at all (T157).
+/// </summary>
+/// <remarks>
+/// The real store keys a person's value to the signed-in account and a plant value to <c>all_users</c>. This double
+/// keeps the two apart the same way, so a test that writes a person's preference cannot accidentally satisfy a
+/// plant-scoped read.
+/// </remarks>
+internal sealed class InMemoryScopedPreferenceStore : IScopedPreferenceStore
 {
-    public Task<T?> ReadSettingAsync<T>(string key) => Task.FromResult<T?>(default);
+    private readonly Dictionary<(PreferenceScope Scope, string Key), string?> _text = new();
+    private readonly Dictionary<(PreferenceScope Scope, string Key), bool> _flags = new();
+    private readonly Dictionary<(PreferenceScope Scope, string Key), int> _numbers = new();
 
-    public Task SaveSettingAsync<T>(string key, T value) => Task.CompletedTask;
+    /// <summary>Every write this double was asked to make, in order, so a refusal can be told from a save.</summary>
+    public List<(string Key, PreferenceScope Scope)> Writes { get; } = new();
 
-    public Task ResetSettingAsync(string key, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    /// <summary>Every read this double was asked for, in order, so the scope a caller chose can be asserted.</summary>
+    public List<(string Key, PreferenceScope Scope)> Reads { get; } = new();
 
-    public Task ResetAsync() => Task.CompletedTask;
+    public void SeedText(string key, PreferenceScope scope, string? value) => _text[(scope, key)] = value;
 
-    public Task CorruptForTestAsync() => Task.CompletedTask;
+    public void SeedFlag(string key, PreferenceScope scope, bool value) => _flags[(scope, key)] = value;
+
+    public void SeedNumber(string key, PreferenceScope scope, int value) => _numbers[(scope, key)] = value;
+
+    public string? TextFor(string key, PreferenceScope scope) =>
+        _text.TryGetValue((scope, key), out var value) ? value : null;
+
+    public bool? FlagFor(string key, PreferenceScope scope) =>
+        _flags.TryGetValue((scope, key), out var value) ? value : null;
+
+    public int? NumberFor(string key, PreferenceScope scope) =>
+        _numbers.TryGetValue((scope, key), out var value) ? value : null;
+
+    public Task<string?> ReadTextAsync(string settingKey, PreferenceScope scope, CancellationToken cancellationToken = default)
+    {
+        Reads.Add((settingKey, scope));
+        return Task.FromResult(TextFor(settingKey, scope));
+    }
+
+    public Task<bool?> ReadFlagAsync(string settingKey, PreferenceScope scope, CancellationToken cancellationToken = default)
+    {
+        Reads.Add((settingKey, scope));
+        return Task.FromResult(FlagFor(settingKey, scope));
+    }
+
+    public Task<int?> ReadNumberAsync(string settingKey, PreferenceScope scope, CancellationToken cancellationToken = default)
+    {
+        Reads.Add((settingKey, scope));
+        return Task.FromResult(NumberFor(settingKey, scope));
+    }
+
+    public Task WriteTextAsync(string settingKey, PreferenceScope scope, string? value, CancellationToken cancellationToken = default)
+    {
+        _text[(scope, settingKey)] = value;
+        Writes.Add((settingKey, scope));
+        return Task.CompletedTask;
+    }
+
+    public Task WriteFlagAsync(string settingKey, PreferenceScope scope, bool value, CancellationToken cancellationToken = default)
+    {
+        _flags[(scope, settingKey)] = value;
+        Writes.Add((settingKey, scope));
+        return Task.CompletedTask;
+    }
+
+    public Task WriteNumberAsync(string settingKey, PreferenceScope scope, int value, CancellationToken cancellationToken = default)
+    {
+        _numbers[(scope, settingKey)] = value;
+        Writes.Add((settingKey, scope));
+        return Task.CompletedTask;
+    }
 }
 
 internal static class TestDoubles

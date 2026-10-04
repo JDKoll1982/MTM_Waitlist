@@ -154,12 +154,12 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
                 UnavailableMessage = RequestItemConfigurationSet.ResolveNoItemsMessage();
             }
 
-            StartupDebugLog.Info("NewRequestItem", $"Item step for category '{category}' on work center '{state.WorkCenter}' bound {Items.Count} item(s).");
+            AppLog.Info("NewRequestItem", $"Item step for category '{category}' on work center '{state.WorkCenter}' bound {Items.Count} item(s).");
         }
         catch (Exception ex)
         {
             // A read that failed is not an empty Category: the step says so rather than rendering nothing.
-            StartupDebugLog.Error("NewRequestItem", ex, "Failed to load the Item step.");
+            AppLog.Error("NewRequestItem", ex, "Failed to load the Item step.");
             Items.Clear();
             IsUnavailableVisible = true;
             UnavailableMessage = RequestItemConfigurationSet.ResolveUnavailableMessage();
@@ -194,7 +194,7 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
                 ? RequestItemConfigurationSet.ResolveUnavailableMessage()
                 : option.Summary;
             IsUnavailableVisible = true;
-            StartupDebugLog.Info("NewRequestItem", $"Item '{option.Item.Id}' has no usable configuration row; the flow was stopped instead of continuing.");
+            AppLog.Info("NewRequestItem", $"Item '{option.Item.Id}' has no usable configuration row; the flow was stopped instead of continuing.");
             return;
         }
 

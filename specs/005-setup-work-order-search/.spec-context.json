@@ -3,7 +3,7 @@
   "specName": "setup work order search",
   "branch": "005-setup-work-order-search",
   "currentStep": "plan",
-  "status": "planned",
+  "status": "completed",
   "history": [
     {
       "step": "specify",
@@ -53,6 +53,13 @@
       "kind": "complete",
       "by": "user",
       "at": "2026-09-20T17:55:53.030Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-09-27T16:23:33.945Z"
     }
   ],
   "unattended": true,

@@ -22,6 +22,10 @@
     <ProjectReference Include="..\MTM_Waitlist.Core\MTM_Waitlist.Core.csproj" />
     <ProjectReference Include="..\MTM_Waitlist.Shared\MTM_Waitlist.Shared.csproj" />
     <ProjectReference Include="..\MTM_Waitlist.Mock\MTM_Waitlist.Mock.csproj" />
+    <!-- The developer log panel reads the log store's read shape and formats its copy through the logging
+         module, so this module has to see it. Logging references Core alone, above, so the edge adds no cycle:
+         the logging module cannot see this one. -->
+    <ProjectReference Include="..\MTM_Waitlist.Logging\MTM_Waitlist.Logging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

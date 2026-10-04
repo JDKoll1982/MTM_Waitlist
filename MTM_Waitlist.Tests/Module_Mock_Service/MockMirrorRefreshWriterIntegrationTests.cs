@@ -79,7 +79,7 @@ public sealed class MockMirrorRefreshWriterIntegrationTests
             Assert.Inconclusive($"{ConnectionStringVariable} is not set; skipping the live mtm_mock integration test.");
         }
 
-        var options = Options.Create(new StartupDatabaseOptions { ConnectionString = connectionString });
+        var options = Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString });
 
         // The writer must address mtm_mock, but the waitlist connection string names mtm_waitlist. Override
         // the database exactly as MySqlHelperServer does for MySqlDatabaseTarget.MtmMock; without it the

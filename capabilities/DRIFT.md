@@ -28,12 +28,17 @@ Keep it current rather than re-deriving these facts.
 
 > **`✓ All N checked capabilities in sync` is not evidence of coverage.**
 
-The registry (`living-specs.yml` at the repo root) declares exactly **two** capabilities:
+The registry (`living-specs.yml` at the repo root) declares exactly **one** capability:
 
 | Capability | Matches |
 | --- | --- |
-| `startup` | `MTM_Waitlist.Startup/**`, `Module_Startup/**` (excluding `MTM_Waitlist.Startup/Services/StartupLog*.cs`) |
-| `startup-diagnostics` | `MTM_Waitlist.Startup/Services/StartupLog*.cs` |
+| `startup-launch` | `MTM_Waitlist.Startup/**`, `Module_Startup/**` |
+
+**It declared two until 2026-09-27.** Feature 010 retired `startup` and `startup-diagnostics` with the code they
+matched: the file-based log path `startup-diagnostics` watched was deleted, and the rebuilt launch surface is one
+capability rather than two, so the split that existed for one file-level concern no longer describes anything.
+`register-capability.py --replaces` performed the swap in one write, which is why the `exclude` that the old split
+needed is gone with it.
 
 Everything else has **no living spec**, so drift across it is invisible *by construction*:
 
@@ -55,8 +60,10 @@ The resolver scores a capability by the **directory depth of its glob's literal 
 filename glob inside a whole-area glob can never outscore its parent — the leaf is decorative and every
 change folds into the parent. Fix: give the parent an `exclude` for that same glob. `matches()` checks
 `exclude` first, so the child then owns those files uncontested (its score is still 1, but it is the only
-match). This is exactly why `startup` carries its `exclude`. A leaf over a real **subdirectory** does not
-need this; the bug is specific to file-level globs.
+match). **No capability needs this today**: the two-capability split that the old `startup` carried its `exclude`
+for was retired on 2026-09-27, and `startup-launch` is one whole-area glob. Keep the hazard in mind when the
+logging module is adopted, because that adoption puts a leaf beside a whole-area capability again. A leaf over a
+real **subdirectory** does not need this; the bug is specific to file-level globs.
 
 ## Coverage links are worth machine-validating
 

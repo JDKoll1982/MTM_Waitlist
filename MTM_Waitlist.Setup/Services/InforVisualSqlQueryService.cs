@@ -25,23 +25,23 @@ public sealed class InforVisualSqlQueryService
         IReadOnlyDictionary<string, object?> parameters,
         CancellationToken cancellationToken = default)
     {
-        StartupDebugLog.Info("SetupLookup.Sql", $"ExecuteQueueAsync started. Script='{scriptName}', ParamCount={parameters.Count}.");
+        AppLog.Info("SetupLookup.Sql", $"ExecuteQueueAsync started. Script='{scriptName}', ParamCount={parameters.Count}.");
         var script = await SetupSqlScriptStore.LoadAsync(scriptName, cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(script))
         {
-            StartupDebugLog.Info("SetupLookup.Sql", $"Script load returned empty content for '{scriptName}'.");
+            AppLog.Info("SetupLookup.Sql", $"Script load returned empty content for '{scriptName}'.");
             return Array.Empty<Dictionary<string, object?>>();
         }
 
         var connectionString = ResolveConnectionString();
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            StartupDebugLog.Info("SetupLookup.Sql", $"Connection string resolved empty for script '{scriptName}'.");
+            AppLog.Info("SetupLookup.Sql", $"Connection string resolved empty for script '{scriptName}'.");
             return Array.Empty<Dictionary<string, object?>>();
         }
 
         var parameterSummary = string.Join(", ", parameters.Select(entry => $"{entry.Key}='{Convert.ToString(entry.Value) ?? string.Empty}'"));
-        StartupDebugLog.Info("SetupLookup.Sql", $"Executing script '{scriptName}' with parameters: {parameterSummary}.");
+        AppLog.Info("SetupLookup.Sql", $"Executing script '{scriptName}' with parameters: {parameterSummary}.");
 
         try
         {
@@ -76,13 +76,13 @@ public sealed class InforVisualSqlQueryService
                 rows.Add(row);
             }
 
-            StartupDebugLog.Info("SetupLookup.Sql", $"Script '{scriptName}' executed successfully. RowCount={rows.Count}.");
+            AppLog.Info("SetupLookup.Sql", $"Script '{scriptName}' executed successfully. RowCount={rows.Count}.");
 
             return rows;
         }
         catch (SqlException sqlException)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SetupLookup.Sql",
                 sqlException,
                 $"SQL error executing '{scriptName}'. Number={sqlException.Number}, State={sqlException.State}, Line={sqlException.LineNumber}.");
@@ -90,7 +90,7 @@ public sealed class InforVisualSqlQueryService
         }
         catch (COMException comException)
         {
-            StartupDebugLog.Error(
+            AppLog.Error(
                 "SetupLookup.Sql",
                 comException,
                 $"COM error executing '{scriptName}'. HResult=0x{comException.HResult:X8}.");
@@ -98,7 +98,7 @@ public sealed class InforVisualSqlQueryService
         }
         catch (Exception exception)
         {
-            StartupDebugLog.Error("SetupLookup.Sql", exception, $"Unhandled error executing '{scriptName}'.");
+            AppLog.Error("SetupLookup.Sql", exception, $"Unhandled error executing '{scriptName}'.");
             return Array.Empty<Dictionary<string, object?>>();
         }
     }

@@ -93,28 +93,29 @@
                             Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                             CornerRadius="0,12,12,0">
                             <StackPanel Padding="12" VerticalAlignment="Center">
-                                <TextBlock
+                                <!-- The card's five values are drawn by the one-line scrolling control (009 B1/B2): a
+                                     work-centre name or a job summary that runs long scrolls across its own line
+                                     instead of wrapping and pushing the card taller. -->
+                                <sharedControls:AutoScrollTextView
                                     FontSize="20"
                                     FontWeight="SemiBold"
-                                    Text="{x:Bind Name}"
-                                    TextWrapping="WrapWholeWords" />
-                                <TextBlock
+                                    Text="{x:Bind Name}" />
+                                <sharedControls:AutoScrollTextView
                                     Margin="0,2,0,8"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind Building}"
-                                    TextWrapping="WrapWholeWords" />
+                                    Text="{x:Bind Building}" />
                                 <Border Height="1" Margin="0,0,0,8" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
                                 <TextBlock Text="Current Job" Style="{StaticResource SetupFieldLabelStyle}" />
-                                <TextBlock Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind CurrentJobSummary}" TextWrapping="WrapWholeWords" />
+                                <sharedControls:AutoScrollTextView Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind CurrentJobSummary}" />
                                 <Border Height="1" Margin="0,0,0,6" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
                                 <TextBlock Text="Part Number" Style="{StaticResource SetupFieldLabelStyle}" />
-                                <TextBlock Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind CurrentPartSummary}" TextWrapping="WrapWholeWords" />
+                                <sharedControls:AutoScrollTextView Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind CurrentPartSummary}" />
                                 <Border Height="1" Margin="0,0,0,6" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
                                 <TextBlock Text="Last Updated" Style="{StaticResource SetupFieldLabelStyle}" />
-                                <TextBlock Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind LastUpdatedDisplay}" TextWrapping="WrapWholeWords" />
+                                <sharedControls:AutoScrollTextView Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind LastUpdatedDisplay}" />
                                 <Border Height="1" Margin="0,0,0,8" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
                                 <Button Margin="0,4,0,0" Content="View History" HorizontalAlignment="Left" />

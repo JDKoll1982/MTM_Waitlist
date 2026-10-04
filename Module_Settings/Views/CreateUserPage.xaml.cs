@@ -19,10 +19,10 @@ public sealed partial class CreateUserPage : Page
 
     public CreateUserPage()
     {
-        StartupDebugLog.Info("CreateUserPage", "Constructor started.");
+        AppLog.Info("CreateUserPage", "Constructor started.");
         ViewModel = App.GetService<CreateUserViewModel>();
         InitializeComponent();
-        StartupDebugLog.Info("CreateUserPage", "Constructor completed.");
+        AppLog.Info("CreateUserPage", "Constructor completed.");
     }
 
     /// <summary>

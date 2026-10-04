@@ -45,20 +45,20 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
     private readonly IRoleCatalogService _roleCatalogService;
     private readonly IPermissionService _permissionService;
     private readonly INavigationService _navigationService;
-    private readonly StartupState _startupState;
+    private readonly IPersonIdentity _personIdentity;
 
     public EditUserViewModel(
         IUserManagementService userManagementService,
         IRoleCatalogService roleCatalogService,
         IPermissionService permissionService,
         INavigationService navigationService,
-        StartupState startupState)
+        IPersonIdentity personIdentity)
     {
         _userManagementService = userManagementService ?? throw new ArgumentNullException(nameof(userManagementService));
         _roleCatalogService = roleCatalogService ?? throw new ArgumentNullException(nameof(roleCatalogService));
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
-        _startupState = startupState ?? throw new ArgumentNullException(nameof(startupState));
+        _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
     }
 
     /// <summary>The work the page's arrival started.</summary>
@@ -165,7 +165,7 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
     public bool IsReadOnly => IsLoaded && !IsEditable;
 
     /// <summary>Whether this is the account the reader is signed in as.</summary>
-    public bool IsSelfAccount => Person is not null && Person.UserId == _startupState.UserId;
+    public bool IsSelfAccount => Person is not null && Person.UserId == _personIdentity.UserId;
 
     /// <summary>Deactivating one's own account is unavailable, with its reason (FR-023).</summary>
     public bool IsSelfDeactivateUnavailable => IsSelfAccount && IsAccountActive;
@@ -343,7 +343,7 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
 
         var catalogue = await _roleCatalogService.GetRolesAsync(cancellationToken).ConfigureAwait(true);
         var readerRole = catalogue.FirstOrDefault(
-            entry => string.Equals(entry.RoleCode, _startupState.CurrentRoleCode, StringComparison.OrdinalIgnoreCase));
+            entry => string.Equals(entry.RoleCode, _personIdentity.CurrentRoleCode, StringComparison.OrdinalIgnoreCase));
         var personRole = catalogue.FirstOrDefault(
             entry => string.Equals(entry.RoleCode, Person.RoleCode, StringComparison.OrdinalIgnoreCase));
 
@@ -392,7 +392,7 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("EditUser", ex, "The save did not reach the store; the reader's work is kept.");
+            AppLog.Error("EditUser", ex, "The save did not reach the store; the reader's work is kept.");
             MessageText = UnavailableMessage();
         }
         finally
@@ -482,11 +482,11 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
                 Person.DisplayName,
                 Person.UsernameNormalized,
                 DateTimeOffset.UtcNow,
-                _startupState.EmployeeName);
+                _personIdentity.DisplayName);
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("EditUser", ex, "The reset did not reach the store; nothing was issued.");
+            AppLog.Error("EditUser", ex, "The reset did not reach the store; nothing was issued.");
             MessageText = UnavailableMessage();
         }
         finally
@@ -574,7 +574,7 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            StartupDebugLog.Error("EditUser", ex, "The change of state did not reach the store; the reader's work is kept.");
+            AppLog.Error("EditUser", ex, "The change of state did not reach the store; the reader's work is kept.");
             MessageText = UnavailableMessage();
         }
         finally
@@ -604,7 +604,7 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
         RoleOptions.Clear();
 
         var readerRole = catalogue.FirstOrDefault(
-            entry => string.Equals(entry.RoleCode, _startupState.CurrentRoleCode, StringComparison.OrdinalIgnoreCase));
+            entry => string.Equals(entry.RoleCode, _personIdentity.CurrentRoleCode, StringComparison.OrdinalIgnoreCase));
 
         if (readerRole is null)
         {

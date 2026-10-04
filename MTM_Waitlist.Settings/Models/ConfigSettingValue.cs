@@ -124,6 +124,18 @@ public static class ConfigSettingKeys
     public const string KeysFolderPath = "keys.folder_path";
 
     /// <summary>
+    /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.
+    /// Setting Key: "dunnage.root_path"
+    /// Value Type: "text" (string path)
+    /// Scope: "all_users" (global setting)
+    /// Description: IT-configured path to the shared folder the dunnage pictures are read from. It is held once
+    ///             for the whole plant so no computer captures a folder of its own (FR-040). When set, overrides
+    ///             the value from appsettings.json.
+    /// Default: \\mtmanu-fs01\Expo Drive\Software Development\Live Applications\Shared\Images\Dunnage
+    /// </summary>
+    public const string DunnageRootPath = "dunnage.root_path";
+
+    /// <summary>
     /// Image storage maximum file size override.
     /// Setting Key: "image_storage.max_file_size_bytes"
     /// Value Type: "int" (long - bytes)

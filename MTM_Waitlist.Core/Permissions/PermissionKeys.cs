@@ -1,8 +1,9 @@
 namespace MTM_Waitlist.Module_Core.Permissions;
 
 /// <summary>
-/// The fourteen permission keys, one per gated action, spelled exactly as the specification's Verbatim
-/// Constraints section pins them (FR-045, FR-046).
+/// The nineteen permission keys, one per gated action. The fifteen originals are spelled exactly as the
+/// specification's Verbatim Constraints section pins them (FR-045, FR-046); the four added by 010-startup-rebuild
+/// are pinned by the machine-configuration contract's section 5 and plan D11.
 /// </summary>
 /// <remarks>
 /// This is the one canonical source for those spellings. Nothing else in the application restates the literals:
@@ -46,6 +47,24 @@ public static class PermissionKeys
     /// </summary>
     public const string SettingsStoragePaths = "permission.settings.storage_paths";
 
+    /// <summary>
+    /// Opening machine setup and saving its configuration, before anyone signs in. Deliberately not
+    /// <see cref="SettingsComputers"/>: the two surfaces have different blast radii (plan D11).
+    /// </summary>
+    public const string SettingsMachineConfiguration = "permission.settings.machine_configuration";
+
+    /// <summary>
+    /// Changing the plant-wide list of locations to hide. Reading stays on
+    /// <see cref="SettingsIgnoredLocations"/>, whose grants are deliberately unchanged (research D10).
+    /// </summary>
+    public const string SettingsIgnoredLocationsEdit = "permission.settings.ignored_locations_edit";
+
+    /// <summary>The developer log panel in Settings.</summary>
+    public const string SettingsLogPanel = "permission.settings.log_panel";
+
+    /// <summary>Changing how long a session lasts.</summary>
+    public const string SettingsSessionLength = "permission.settings.session_length";
+
     /// <summary>Quick Add dunnage definitions.</summary>
     public const string SetupDunnageQuickAdd = "permission.setup.dunnage_quick_add";
 
@@ -76,6 +95,10 @@ public static class PermissionKeys
         SettingsDefectTypes,
         SettingsComputers,
         SettingsStoragePaths,
+        SettingsMachineConfiguration,
+        SettingsIgnoredLocationsEdit,
+        SettingsLogPanel,
+        SettingsSessionLength,
         SetupDunnageQuickAdd,
         SetupWorkCenters,
         AdminUsers,
