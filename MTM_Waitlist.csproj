@@ -32,6 +32,11 @@
     <Content Include="Database\InforVisual\Queues\Module_Waitlist\**\*.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <!-- Shape 6 (`employee_by_number`) is read by the identifier stage, so its script must ship beside the
+         app or the live read fails as "script not found" and set-up reports the plant system as unreachable. -->
+    <Content Include="Database\InforVisual\Queues\Module_Startup\**\*.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Database\MTMReceivingApp\Queues\Module_Setup\**\*.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

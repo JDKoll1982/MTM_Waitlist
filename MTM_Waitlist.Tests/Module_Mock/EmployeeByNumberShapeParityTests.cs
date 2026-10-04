@@ -67,10 +67,11 @@ public sealed class EmployeeByNumberShapeParityTests
             "the mirror projects the agreed names, so a caller cannot tell which answered (FR-032)");
     }
 
+    // There is deliberately no `..._result_prev` artifact: the `_prev` name is transient inside
+    // sp_visual_employee_by_number_refresh's single rename, exactly as it is for the other five shapes.
     [TestMethod]
     [DataRow("Database/Mock/Tables/visual_employee_by_number_result")]
     [DataRow("Database/Mock/Tables/visual_employee_by_number_result_stage")]
-    [DataRow("Database/Mock/Tables/visual_employee_by_number_result_prev")]
     [DataRow("Database/Mock/StoredProcedures/sp_visual_employee_by_number_get")]
     [DataRow("Database/Mock/StoredProcedures/sp_visual_employee_by_number_refresh")]
     public void EveryArtifactTheShapeNeeds_ShipsItsCreateAndItsRollback(string relativeFolder)

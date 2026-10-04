@@ -7,22 +7,26 @@
 
 ## 2. Signature
 
+The shipped `create.sql` is authoritative; this is its signature as the caller invokes it.
+
 | Parameter | Type | Meaning |
 |---|---|---|
-| `p_employee_identifier` | `VARCHAR(128)` | the employee number the plant system confirmed |
+| `p_username` | `VARCHAR(128)` | the sign-in name, stored upper case. The caller passes the employee number the plant system confirmed |
 | `p_first_name` | `VARCHAR(128)` | the confirmed first name |
 | `p_last_name` | `VARCHAR(128)` | the confirmed last name |
-| `p_display_name` | `VARCHAR(128)` | the name shown for the account |
-| `p_user_name` | `VARCHAR(128)` | the sign-in name the account is created with |
-| `p_password_hash` | `VARBINARY(256)` | the chosen PIN's hash, produced by the application |
-| `p_password_salt` | `VARBINARY(256)` | the salt for that hash |
-| `p_is_temporary` | `TINYINT` | always 0 from this path |
+| `p_employee_identifier` | `VARCHAR(128)` | the employee number the plant system confirmed |
+| `p_password_hash` | `VARCHAR(128)` | the chosen PIN's hash, produced by the application |
+| `p_password_salt` | `VARBINARY(32)` | the salt for that hash |
+
+There is no rank or temporary-credential parameter: the rank is read inside the procedure from
+`auth_roles_catalog`, and the account is written with `require_password_change = 0` so it never enters the
+temporary-credential state.
 
 ## 3. Behaviour
 
-- Inserts the profile row with the employee identifier, the name and the active flag.
-- Inserts the credential with the supplied hash and salt and a non-temporary flag, so the account never enters
-  the temporary-credential state.
+- Inserts the profile row with the employee identifier, the name and the active flag, carrying the credential
+  columns (`password_hash`, `password_salt`, `require_password_change = 0`) on that same row, which is where
+  every credential read in this schema looks.
 - Assigns the lowest rank, read inside the procedure from the store's own rank list by that list's ordering.
   No rank name is passed in and none is named in application code.
 - Is one transaction: a failure anywhere leaves no profile, no credential and no rank.

@@ -25,7 +25,9 @@
 
 - `Database/Mock/Tables/visual_employee_by_number_result/`
 - `Database/Mock/Tables/visual_employee_by_number_result_stage/`
-- `Database/Mock/Tables/visual_employee_by_number_result_prev/`
+  (No `..._result_prev/` artifact: that name is transient inside the refresh procedure's single three-name
+  rename, exactly as it is for the other five shapes. A `_prev` table that exists before a refresh makes the
+  swap fail with "table already exists", so shipping one as an artifact makes the shape unrefreshable.)
 - `Database/Mock/StoredProcedures/sp_visual_employee_by_number_get/`
 - `Database/Mock/StoredProcedures/sp_visual_employee_by_number_refresh/`
 - Aggregates regenerated: `Database/Mock/AllTables.sql`, `Database/Mock/AllSPs.sql`,

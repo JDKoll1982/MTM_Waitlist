@@ -477,7 +477,7 @@ Write-Host '--- 1. host disposition ---' -ForegroundColor Cyan
 
 $appSettingsPath = Join-Path $repoRoot 'appsettings.json'
 $appSettings = Get-Content $appSettingsPath -Raw | ConvertFrom-Json
-$mysqlConnectionString = $appSettings.StartupDatabaseOptions.ConnectionString
+$mysqlConnectionString = $appSettings.WaitlistDatabaseOptions.ConnectionString
 $mysqlHost = ([regex]::Match($mysqlConnectionString, 'Server=([^;]+)')).Groups[1].Value
 $mysqlPortMatch = [regex]::Match($mysqlConnectionString, 'Port=([0-9]+)')
 $mysqlPort = if ($mysqlPortMatch.Success) { [int]$mysqlPortMatch.Groups[1].Value } else { 3306 }
@@ -733,21 +733,29 @@ else {
     Add-Result 'file count matches source' 'FAIL' "source $($sourceFiles.Count) vs target $($targetFiles.Count)"
 }
 
+# Every queued read script the publish output ships must reach the install folder. The list is read from the
+# output rather than written out here, because a written list has to be extended for every shape and the sixth
+# shape (employee_by_number, under its own Module_Startup folder) was left out of it: the deployment validated
+# and the service then had no script for that read. A folder that ships nothing is reported rather than passing
+# quietly.
+$queuesPath = Join-Path $SourcePath 'Database\InforVisual\Queues'
+$queuedReadScripts = @(
+    Get-ChildItem $queuesPath -Recurse -File -Filter '*.sql' -ErrorAction SilentlyContinue |
+        ForEach-Object { $_.FullName.Substring($SourcePath.Length).TrimStart('\') }
+)
+
 $required = @(
     $serviceExeName,
     $controlScriptName,
     'assets\mock-service.ico',
     $statusIconRelativePath,
-    'Database\InforVisual\Queues\Module_Mock\Populations\work_order_lookup_population.sql',
-    'Database\InforVisual\Queues\Module_Mock\Populations\operation_sequences_population.sql',
-    'Database\InforVisual\Queues\Module_Mock\Populations\subordinate_parts_population.sql',
-    'Database\InforVisual\Queues\Module_Mock\Populations\inventory_locations_population.sql',
-    'Database\InforVisual\Queues\Module_Mock\Populations\disposition_input_population.sql',
-    'Database\InforVisual\Queues\Module_Setup\Queries\LookupWorkOrder.sql',
-    'Database\InforVisual\Queues\Module_Waitlist\Queries\GetDispositionInput.sql',
     'Database\Mock.Service\Restore',
     'Microsoft.WindowsAppRuntime.dll'
-)
+) + $queuedReadScripts
+
+if ($queuedReadScripts.Count -eq 0) {
+    Add-Result 'queued read scripts in the publish output' 'FAIL' "no read scripts under $queuesPath - re-run with -Publish"
+}
 $missing = @($required | Where-Object { -not (Test-Path (Join-Path $TargetPath $_)) })
 if ($missing.Count -eq 0) {
     Add-Result 'required content present' 'PASS' "$($required.Count) required paths (scripts, tray icon, restore artifacts)"
@@ -794,7 +802,7 @@ else {
     # Values are derived from appsettings.json so this script is not a second source of truth, and
     # the Visual login falls back to the value that file already carries.
     $config = Get-Content $appSettingsPath -Raw | ConvertFrom-Json
-    $waitlistCs = $config.StartupDatabaseOptions.ConnectionString.Replace('User ID', 'User Id')
+    $waitlistCs = $config.WaitlistDatabaseOptions.ConnectionString.Replace('User ID', 'User Id')
     if ($waitlistCs -notmatch 'AllowPublicKeyRetrieval') { $waitlistCs = "$waitlistCs AllowPublicKeyRetrieval=True;" }
 
     $desired = [ordered]@{

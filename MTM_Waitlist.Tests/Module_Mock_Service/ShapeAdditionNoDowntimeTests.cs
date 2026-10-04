@@ -129,6 +129,39 @@ public sealed class ShapeAdditionNoDowntimeTests
                 + string.Join(Environment.NewLine, missing));
     }
 
+    /// <summary>
+    /// The mirror's tables are exactly each shape's live table and its stage twin — nothing else.
+    /// </summary>
+    /// <remarks>
+    /// <b>The `_prev` name is transient and must never be created as an artifact.</b> Every refresh procedure
+    /// swaps three names in one statement (result -> prev, stage -> result, prev -> stage), so a table that
+    /// exists under the `_prev` name before a refresh makes the swap fail with "table already exists" and that
+    /// shape can never refresh again. Feature 011 shipped a `create.sql` for the sixth shape's `_prev` twin, so
+    /// a host bootstrapped from <c>AllTables.sql</c> refreshed the first five shapes and failed the sixth
+    /// forever — the failure the identifier-only sign-in would have shown as an unreachable plant system.
+    /// </remarks>
+    [TestMethod]
+    public void TheMirrorSchema_HoldsExactlyTheCatalogDerivedTablesAndNothingElse()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+
+        var expected = VisualReadShapeCatalog.Create()
+            .SelectMany(shape => new[] { shape.MirrorTableName, shape.StageTableName })
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToArray();
+
+        var onDisk = Directory
+            .EnumerateDirectories(Path.Combine(repositoryRoot, "Database", "Mock", "Tables"))
+            .Select(directory => Path.GetFileName(directory))
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToArray();
+
+        CollectionAssert.AreEqual(
+            expected,
+            onDisk,
+            "The shipped tables must be exactly one live table and one stage twin per catalog shape.");
+    }
+
     [TestMethod]
     public void EveryShippedShape_HasAnInAppFallbackRegistered()
     {

@@ -212,13 +212,53 @@ public static class DiagnosticContext
                 return type.Assembly.GetName().Version?.ToString();
             }
 
-            var property = type.GetProperty(memberName, BindingFlags.Public | BindingFlags.Instance);
+            var property = MostDerivedProperty(type, memberName);
             return property?.GetValue(exception)?.ToString();
         }
         catch (Exception)
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// Finds the property of that name, choosing the most-derived declaration when a type declares one that
+    /// hides a base type's member of the same name.
+    /// </summary>
+    /// <param name="type">The exception's own type.</param>
+    /// <param name="memberName">The member the caller means, such as <c>ErrorCode</c>.</param>
+    /// <returns>The property to read, or null when the type has none of that name.</returns>
+    /// <remarks>
+    /// Asking for the name outright throws <see cref="AmbiguousMatchException"/> in exactly this shape:
+    /// <c>MySqlException.ErrorCode</c> hides <c>DbException.ErrorCode</c> with a different type, so a store fault
+    /// never carried an error code — the read threw and was swallowed — and the exception surfaced in the
+    /// debugger's first-chance stream on every MySQL failure. The most-derived declaration is what a reader of
+    /// the derived type means, so it is selected explicitly.
+    /// </remarks>
+    private static PropertyInfo? MostDerivedProperty(Type type, string memberName)
+    {
+        PropertyInfo? found = null;
+
+        foreach (var candidate in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (!string.Equals(candidate.Name, memberName, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var declaring = candidate.DeclaringType;
+            if (declaring is null)
+            {
+                continue;
+            }
+
+            if (found?.DeclaringType is not { } foundDeclaring || foundDeclaring.IsAssignableFrom(declaring))
+            {
+                found = candidate;
+            }
+        }
+
+        return found;
     }
 
     private static bool Blank(string? value) => string.IsNullOrWhiteSpace(value);

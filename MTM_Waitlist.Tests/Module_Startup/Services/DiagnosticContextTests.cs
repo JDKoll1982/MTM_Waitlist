@@ -137,6 +137,22 @@ public sealed class DiagnosticContextTests
         StringAssert.Contains(json, "MTM_AUTH_USER_SECRET_KEY.txt");
     }
 
+    [TestMethod]
+    public void Build_WhenTheProviderHidesABaseMemberOfTheSameName_CarriesTheDerivedOne()
+    {
+        // Arrange: MySqlConnector's own shape — MySqlException.ErrorCode hides DbException.ErrorCode with a
+        // different type, which makes asking for the name outright throw AmbiguousMatchException. The read is
+        // swallowed, so before this was handled a store fault carried no error code at all, and the exception
+        // appeared in the debugger's first-chance stream on every MySQL failure.
+        var fault = new HidingProviderException();
+
+        // Act
+        var database = JsonNode.Parse(DiagnosticContext.Build(Entry(), fault, null, "mtm_waitlist", "sp_core_account_setup_create", ProcessStarted))!["database"]!;
+
+        // Assert: the derived declaration is what the caller means.
+        Assert.AreEqual("1062", database["errorCode"]!.GetValue<string>(), "the provider's own error code was not carried");
+    }
+
     /// <summary>An entry as a call site describes one: the severity, the module, the message and the action.</summary>
     private static LogEntry Entry(string? target = null)
         => new(
@@ -162,5 +178,22 @@ public sealed class DiagnosticContextTests
         public string? SqlState { get; init; }
 
         public int Number { get; init; }
+    }
+
+    /// <summary>The base of a provider exception whose derived type hides its error code, as MySqlConnector does.</summary>
+    private abstract class HidingProviderBaseException : Exception
+    {
+        protected HidingProviderBaseException()
+            : base("PROCEDURE mtm_waitlist.sp_core_account_setup_create does not exist")
+        {
+        }
+
+        public int ErrorCode => -1;
+    }
+
+    /// <summary>An error code that hides the base declaration with a different type, which reflection cannot choose between.</summary>
+    private sealed class HidingProviderException : HidingProviderBaseException
+    {
+        public new string ErrorCode => "1062";
     }
 }
